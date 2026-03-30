@@ -132,7 +132,7 @@ const ProfileDropdown = () => {
       <div className="border-t border-[#F0F0F0]" />
 
       <div className="flex flex-col gap-1">
-        <button disabled className={menuItemDisabledClass}>
+        {/* <button disabled className={menuItemDisabledClass}>
           <User />
           <span className="text-sm">{t.header.profile}</span>
         </button>
@@ -140,7 +140,7 @@ const ProfileDropdown = () => {
         <button disabled className={menuItemDisabledClass}>
           <Settings />
           <span className="text-sm">{t.header.settings}</span>
-        </button>
+        </button> */}
 
         <button onClick={handleLogout} className={menuItemClass}>
           <LogOut />

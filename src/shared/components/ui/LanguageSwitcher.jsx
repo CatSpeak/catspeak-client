@@ -7,7 +7,7 @@ import colors from "@/shared/utils/colors"
 
 const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt (Quốc Ngữ)" },
-  { key: "viNom", label: "Tiếng Việt (Nôm)", disabled: true },
+  // { key: "viNom", label: "Tiếng Việt (Nôm)", disabled: true },
   { key: "zh", label: "中文" },
   { key: "en", label: "English" },
 ]

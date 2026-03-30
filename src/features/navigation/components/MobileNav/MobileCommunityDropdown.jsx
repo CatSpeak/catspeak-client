@@ -110,18 +110,21 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
         }`}
       >
         <div className="flex flex-col gap-1 mt-1">
-          {LANGUAGE_CONFIG.map((config) => (
-            <MobileLanguageItem
-              key={config.code}
-              {...config}
-              label={
-                t.header?.countries?.[config.labelKey] || config.fallbackLabel
-              }
-              soonLabel={t.header?.soon || "Soon"}
-              isActive={currentCommunity === config.code}
-              onSelect={() => handleCommunitySelect(config.code)}
-            />
-          ))}
+          {LANGUAGE_CONFIG.map((config) => {
+            if (config.code === "vi") return null;
+            return (
+              <MobileLanguageItem
+                key={config.code}
+                {...config}
+                label={
+                  t.header?.countries?.[config.labelKey] || config.fallbackLabel
+                }
+                soonLabel={t.header?.soon || "Soon"}
+                isActive={currentCommunity === config.code}
+                onSelect={() => handleCommunitySelect(config.code)}
+              />
+            )
+          })}
         </div>
       </div>
     </div>

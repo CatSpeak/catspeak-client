@@ -20,6 +20,7 @@ export default {
     schoolLife: "学校生活",
     whatILike: "我喜欢什么",
     doYouLikeReading: "你喜欢读书吗？",
+    aboutLove: "爱情的事情",
   },
   heroCarousel: {
     comingSoonTitle: "即将推出",

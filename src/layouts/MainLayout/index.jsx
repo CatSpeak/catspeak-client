@@ -65,10 +65,18 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
   } = theme.useToken()
 
   return (
-    <AuthModalContext.Provider value={{ openAuthModal, closeAuthModal, redirectAfterLogin: authModal.redirectAfterLogin }}>
+    <AuthModalContext.Provider
+      value={{
+        openAuthModal,
+        closeAuthModal,
+        redirectAfterLogin: authModal.redirectAfterLogin,
+      }}
+    >
       <Layout className="flex justify-center bg-white">
         {/* Header full width */}
-        {showHeader && <HeaderBar onGetStarted={() => openAuthModal("login")} />}
+        {showHeader && (
+          <HeaderBar onGetStarted={() => openAuthModal("login")} />
+        )}
 
         <Content className="w-full flex justify-center">
           <Outlet />

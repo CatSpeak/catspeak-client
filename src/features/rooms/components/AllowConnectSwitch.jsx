@@ -19,6 +19,7 @@ const AllowConnectSwitch = () => {
 
   return (
     <>
+      {/* 
       <div className="flex items-center gap-2 px-2 text-[#990011] font-medium">
         <Switch checked={allowConnect} onChange={handleSwitchChange} />
         {t.rooms?.welcome?.allowConnect}
@@ -28,6 +29,7 @@ const AllowConnectSwitch = () => {
         open={isDevModalOpen}
         onCancel={() => setIsDevModalOpen(false)}
       />
+      */}
     </>
   )
 }

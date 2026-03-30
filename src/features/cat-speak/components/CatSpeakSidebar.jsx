@@ -40,8 +40,8 @@ const CatSpeakSidebar = () => {
 
   const menuItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
-    { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
-    { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
+    // { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
+    // { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
   ]
 
@@ -103,8 +103,8 @@ const CatSpeakSidebar = () => {
         ))}
       </div>
 
+      {/* 
       <div className="my-6 h-px w-full bg-gray-100" />
-
       <div className="flex flex-col space-y-1">
         {bottomItems.map((item) => (
           <MenuItem
@@ -115,6 +115,7 @@ const CatSpeakSidebar = () => {
           />
         ))}
       </div>
+      */}
     </div>
   )
 

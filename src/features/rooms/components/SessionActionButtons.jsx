@@ -48,6 +48,8 @@ const SessionActionButtons = ({
 
           const label = labelKey ? t.rooms.sessionActions[labelKey] : b.label
 
+          if (isAI) return null
+
           return (
             <motion.div
               key={b.id}

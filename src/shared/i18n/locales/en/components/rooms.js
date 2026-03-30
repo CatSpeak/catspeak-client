@@ -21,6 +21,7 @@ export default {
     schoolLife: "School life",
     whatILike: "What I like!",
     doYouLikeReading: "Do you like reading books?",
+    aboutLove: "About love",
   },
   heroCarousel: {
     comingSoonTitle: "Coming Soon",

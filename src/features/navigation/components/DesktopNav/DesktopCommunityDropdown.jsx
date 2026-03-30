@@ -127,19 +127,22 @@ const DesktopCommunityDropdown = ({ navKey }) => {
                   className="rounded-lg shadow-lg bg-white overflow-hidden"
                 >
                   <div className="flex flex-col whitespace-nowrap">
-                    {LANGUAGE_CONFIG.map((config) => (
-                      <LanguageMenuItem
-                        key={config.code}
-                        {...config}
-                        isActive={currentCommunity === config.code}
-                        label={
-                          t.header?.countries?.[config.labelKey] ||
-                          config.fallbackLabel
-                        }
-                        soonLabel={t.header?.soon || "Soon"}
-                        onSelect={() => handleCommunitySelect(config.code)}
-                      />
-                    ))}
+                    {LANGUAGE_CONFIG.map((config) => {
+                      if (config.code === "vi") return null
+                      return (
+                        <LanguageMenuItem
+                          key={config.code}
+                          {...config}
+                          isActive={currentCommunity === config.code}
+                          label={
+                            t.header?.countries?.[config.labelKey] ||
+                            config.fallbackLabel
+                          }
+                          soonLabel={t.header?.soon || "Soon"}
+                          onSelect={() => handleCommunitySelect(config.code)}
+                        />
+                      )
+                    })}
                   </div>
                 </FluentAnimation>
               </div>

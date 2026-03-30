@@ -32,9 +32,9 @@ const ConversationListHeader = ({ onClose, isLoading }) => {
           ✕
         </button>
       </div>
-      <div className="px-4 pb-3">
+      {/* <div className="px-4 pb-3">
         <TextInput icon={FiSearch} placeholder={t.messages.search} />
-      </div>
+      </div> */}
     </div>
   )
 }

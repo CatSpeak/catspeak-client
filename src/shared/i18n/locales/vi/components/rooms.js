@@ -22,6 +22,7 @@ export default {
     schoolLife: "Cuộc sống ở trường",
     whatILike: "Điều tôi thích!",
     doYouLikeReading: "Bạn có thích đọc sách?",
+    aboutLove: "Chuyện về tình yêu",
   },
   heroCarousel: {
     comingSoonTitle: "Sắp ra mắt",

@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react"
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useMeeting, usePubSub } from "@videosdk.live/react-sdk"
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
@@ -178,10 +185,7 @@ export const VideoCallContent = ({
   if (!isConnected) {
     return (
       <VideoCallLoading
-        message={
-          t.rooms.videoCall.provider.connecting ??
-          "Connecting..."
-        }
+        message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
       />
     )
   }

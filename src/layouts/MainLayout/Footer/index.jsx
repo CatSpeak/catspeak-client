@@ -90,7 +90,7 @@ const Footer = () => {
             <div className="flex flex-col justify-between w-full lg:col-span-11 gap-8 lg:gap-4">
               <div className="w-full flex flex-col lg:flex-row justify-around gap-8 lg:gap-1 px-0 lg:px-8 text-white pt-4 lg:pt-10">
                 <CommunitySection languages={languages} />
-                <ContactSection />
+                {/* <ContactSection /> */}
               </div>
 
               {/* Bottom policy links and copyright */}

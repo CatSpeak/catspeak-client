@@ -19,6 +19,8 @@ const RoomsTabs = ({ tab, setTab }) => {
   return (
     <div className="flex gap-8 overflow-x-auto border-b border-gray-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {tabs.map((tItem) => {
+        if (tItem.value !== "communicate") return null
+
         const isSelected = tab === tItem.value
         const isDisabled = tItem.value !== "communicate"
         // const isDisabled = false

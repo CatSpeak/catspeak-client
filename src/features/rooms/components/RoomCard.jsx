@@ -114,12 +114,12 @@ const RoomCard = ({ room }) => {
               })}
           </div>
 
-          <div
+          {/* <div
             className="absolute right-2 top-2 z-20 flex h-10 w-10 flex-col items-center justify-center transition-all duration-300"
             onClick={handleBookmarkClick}
           >
             <Bookmark className="drop-shadow-md transition-all duration-200 text-white hover:text-gray-200" />
-          </div>
+          </div> */}
         </div>
 
         {/* Content Section */}

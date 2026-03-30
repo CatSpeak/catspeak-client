@@ -19,7 +19,6 @@ import {
 } from "@/features/rooms"
 import { WorkshopCarousel } from "@/features/workshops"
 
-
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { PageNotFound } from "@/shared/pages"
 import { AnimatePresence } from "framer-motion"
@@ -43,10 +42,14 @@ const RoomsPage = () => {
   // Map language code to language name for queue preferences
   const getLanguageName = (langCode) => {
     switch (langCode) {
-      case "zh": return "Chinese"
-      case "vi": return "Vietnamese"
-      case "en": return "English"
-      default: return "English"
+      case "zh":
+        return "Chinese"
+      case "vi":
+        return "Vietnamese"
+      case "en":
+        return "English"
+      default:
+        return "English"
     }
   }
 
@@ -225,7 +228,6 @@ const RoomsPage = () => {
           open={isCreateRoomModalOpen}
           onCancel={() => setCreateRoomModalOpen(false)}
         />
-
       </FluentAnimation>
     </AnimatePresence>
   )

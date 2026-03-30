@@ -96,6 +96,7 @@ const NotificationWidget = () => {
     document.body,
   )
 
+  return null;
   return (
     <div className="relative flex items-center" ref={dropdownRef}>
       <button

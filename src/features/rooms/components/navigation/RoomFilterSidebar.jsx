@@ -16,14 +16,14 @@ const RoomFilterSidebar = () => {
   return (
     <aside className="rounded-xl bg-white shadow-sm overflow-hidden border border-[#C6C6C6]">
       {/* Search Header */}
-      <div className="border-b border-[#C6C6C6] p-5">
+      {/* <div className="border-b border-[#C6C6C6] p-5">
         <SearchInput
           value={searchValue}
           onChange={setSearchValue}
           onSearch={handleSearch}
           placeholder={filtersText.searchPlaceholder}
         />
-      </div>
+      </div> */}
 
       {/* Filters Content */}
       <div className="overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5">
