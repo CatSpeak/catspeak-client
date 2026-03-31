@@ -41,8 +41,9 @@ const RoomCard = ({ room }) => {
       return
     }
 
-    // If authenticated, open room in the same page
-    navigate(`/room/${room.roomId}`)
+    // If authenticated, navigate to the unified meet page
+    const communityLang = localStorage.getItem("communityLanguage") || "en"
+    navigate(`/${communityLang}/meet/${room.roomId}`)
   }
 
   // Date and time formatting using locale-aware utilities

@@ -9,7 +9,7 @@ import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
 import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom"
 import QueuePage from "@/features/queue/pages/QueuePage"
 import RoomsPage from "@/features/rooms/pages/RoomsPage"
-import RoomDetailPage from "@/features/rooms/pages/RoomDetailPage"
+
 
 // Cat Speak Feature Pages
 import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
@@ -148,22 +148,7 @@ const routesConfig = [
       },
     ],
   },
-  {
-    // Wrap with MainLayout so AuthModalContext is available for AuthGuard's login-and-redirect flow
-    path: "/room",
-    element: <MainLayout showHeader={false} showFooter={false} />,
-    children: [
-      {
-        path: ":id",
-        element: (
-          <AuthGuard>
-            <RoomDetailPage />
-          </AuthGuard>
-        ),
-      },
-      { path: "*", element: <PageNotFound /> },
-    ],
-  },
+
 
   {
     path: "/policy",

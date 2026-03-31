@@ -10,7 +10,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import useRoomCarousel from "@/features/rooms/hooks/useRoomCarousel"
 import useResponsiveItemsPerPage from "@/features/rooms/hooks/useResponsiveItemsPerPage"
 
-const PAGE_SIZE = 6
+const PAGE_SIZE = 8
 
 const CategoryRoomSection = ({
   categoryKey,
@@ -91,14 +91,7 @@ const CategoryRoomSection = ({
     )
   }
 
-  if (!isLoading && rooms.length === 0) {
-    return (
-      <div className="flex flex-col gap-2">
-        {renderHeader()}
-        <EmptyRoomState message={t.rooms.filters.noRoomsFoundCategory} />
-      </div>
-    )
-  }
+  if (!isLoading && rooms.length === 0) return null
 
   // ── Mobile (≤425px): touch scroll, no buttons ──────────────────────────────
   if (isMobile) {

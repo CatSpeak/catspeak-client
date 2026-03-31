@@ -1,6 +1,6 @@
 import { MicOff, VideoOff, MonitorUp } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import useAudioLevel from "../../hooks/useAudioLevel"
+import useAudioLevel from "../hooks/useAudioLevel"
 import { useEffect, useRef, useMemo, useCallback } from "react"
 import { useParticipant } from "@videosdk.live/react-sdk"
 
@@ -43,8 +43,15 @@ const attachGestureListener = () => {
 }
 
 const VideoTile = ({ participantId }) => {
-  const { displayName, webcamStream, micStream, webcamOn, micOn, screenShareOn, isLocal } =
-    useParticipant(participantId)
+  const {
+    displayName,
+    webcamStream,
+    micStream,
+    webcamOn,
+    micOn,
+    screenShareOn,
+    isLocal,
+  } = useParticipant(participantId)
 
   const videoTrack = webcamStream?.track ?? null
   const audioTrack = micStream?.track ?? null
@@ -120,7 +127,9 @@ const VideoTile = ({ participantId }) => {
       if (!el || el.paused === false) return
       try {
         await el.play()
-        console.log(`${tag} [<video> play()] ▶️ play() call succeeded — browser is now playing media`)
+        console.log(
+          `${tag} [<video> play()] ▶️ play() call succeeded — browser is now playing media`,
+        )
         pendingVideoElements.delete(el)
       } catch (err) {
         if (err.name === "NotAllowedError") {
@@ -132,7 +141,9 @@ const VideoTile = ({ participantId }) => {
           pendingVideoElements.add(el)
           attachGestureListener()
         } else {
-          console.error(`${tag} [<video> play() failed] ❌ unexpected error: ${err.name} — ${err.message}`)
+          console.error(
+            `${tag} [<video> play() failed] ❌ unexpected error: ${err.name} — ${err.message}`,
+          )
         }
       }
     },

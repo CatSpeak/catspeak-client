@@ -105,7 +105,8 @@ const CreateRoomModal = ({ open, onCancel }) => {
       handleCancel()
 
       if (roomId) {
-        navigate(`/room/${roomId}`)
+        const communityLang = lang || localStorage.getItem("communityLanguage") || "en"
+        navigate(`/${communityLang}/meet/${roomId}`)
       }
     } catch (err) {
       console.error("Failed to create room:", err)

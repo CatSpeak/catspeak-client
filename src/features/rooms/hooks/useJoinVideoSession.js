@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { toast } from "react-hot-toast"
-import { useNavigate, useSearchParams } from "react-router-dom"
 import {
   useGetActiveVideoSessionsQuery,
   useJoinVideoSessionMutation,
@@ -9,8 +8,6 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 export const useJoinVideoSession = ({ roomId, isAuthenticated = true }) => {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const { t } = useLanguage()
 
   const {
@@ -30,11 +27,16 @@ export const useJoinVideoSession = ({ roomId, isAuthenticated = true }) => {
     (s) => s.roomId === parseInt(roomId),
   )
 
+  /**
+   * Joins or creates a video session for the room.
+   * Returns the sessionId on success, or null on failure.
+   * Does NOT navigate — the caller manages state transitions.
+   */
   const handleJoin = async ({ isRoomFull, micOn, cameraOn }) => {
     try {
       if (isRoomFull) {
         toast.error(t.rooms.waitingScreen.roomFull)
-        return
+        return null
       }
 
       let sessionId
@@ -74,32 +76,16 @@ export const useJoinVideoSession = ({ roomId, isAuthenticated = true }) => {
           } else {
             console.error("Failed to create or join session:", err)
             toast.error(t.rooms.waitingScreen.createSessionError)
-            return
+            return null
           }
         }
       }
 
-      // Preserve language param
-      const search = searchParams.toString()
-      const searchStr = search ? `?${search}` : ""
-
-      const communityLang = localStorage.getItem("communityLanguage") || "en"
-
-      navigate(
-        {
-          pathname: `/${communityLang}/meet/${sessionId}`,
-          search: searchStr,
-        },
-        {
-          state: {
-            micEnabled: micOn,
-            webcamEnabled: cameraOn,
-          },
-        },
-      )
+      return { sessionId, micOn, cameraOn }
     } catch (err) {
       console.error("Failed to process join:", err)
       toast.error(t.rooms.waitingScreen.joinError)
+      return null
     }
   }
 

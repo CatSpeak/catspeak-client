@@ -15,7 +15,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { getCommunityPath } from "@/shared/utils/navigation"
 import { useLeaveVideoSessionMutation } from "@/store/api/videoSessionsApi"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
-import VideoCallLoading from "../../../features/video-call/components/VideoCallLoading"
+import VideoCallLoading from "../components/VideoCallLoading"
 
 const VideoCallContext = createContext()
 
@@ -38,7 +38,10 @@ export const VideoCallContent = ({
   sdkToken,
   room,
 }) => {
-  const { id, lang } = useParams()
+  const { lang } = useParams()
+  // session.sessionId is the actual session identifier for API calls.
+  // The URL :id is now roomId, not sessionId.
+  const sessionId = session?.sessionId
   const navigate = useNavigate()
   const location = useLocation()
   const { t, language } = useLanguage()
@@ -53,13 +56,13 @@ export const VideoCallContent = ({
   const hasLeftRef = useRef(false)
 
   const leaveSessionOnUnload = useCallback(() => {
-    if (!id || hasLeftRef.current) return
+    if (!sessionId || hasLeftRef.current) return
     hasLeftRef.current = true
 
     // Use fetch with keepalive for reliable delivery during page unload
     // (sendBeacon only supports POST, but the leave API requires DELETE)
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api"
-    const url = `${baseUrl}/video-sessions/${id}/participants`
+    const url = `${baseUrl}/video-sessions/${sessionId}/participants`
     const token = localStorage.getItem("token")
 
     fetch(url, {
@@ -70,7 +73,7 @@ export const VideoCallContent = ({
       },
       keepalive: true,
     }).catch(() => {})
-  }, [id])
+  }, [sessionId])
 
   // Register beforeunload / pagehide to leave session when tab/window closes
   useEffect(() => {
@@ -138,9 +141,9 @@ export const VideoCallContent = ({
 
   const handleLeaveSession = async () => {
     hasLeftRef.current = true // prevent unload handler from double-firing
-    if (id) {
+    if (sessionId) {
       try {
-        await leaveSession(id).unwrap()
+        await leaveSession(sessionId).unwrap()
       } catch (error) {
         console.error("Failed to leave session:", error)
       }
@@ -191,7 +194,7 @@ export const VideoCallContent = ({
   }
 
   const value = {
-    id,
+    id: sessionId,
     navigate,
     location,
     micOn,
