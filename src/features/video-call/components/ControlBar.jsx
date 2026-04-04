@@ -16,7 +16,7 @@ const VideoCallControlBar = ({ unreadMessages }) => {
   const {
     micOn,
     cameraOn,
-    screenShareOn,
+    isLocalScreenShare,
     showChat,
     setShowChat,
     showParticipants,
@@ -63,12 +63,12 @@ const VideoCallControlBar = ({ unreadMessages }) => {
       {/* Screen Share Toggle */}
       <button
         onClick={handleToggleScreenShare}
-        title={screenShareOn ? "Stop sharing" : "Share screen"}
+        title={isLocalScreenShare ? "Stop sharing" : "Share screen"}
         className={`${buttonBaseClass} ${
-          screenShareOn ? activeWarningClass : inactiveClass
+          isLocalScreenShare ? activeWarningClass : inactiveClass
         }`}
       >
-        {screenShareOn ? <MonitorOff /> : <MonitorUp />}
+        {isLocalScreenShare ? <MonitorOff /> : <MonitorUp />}
       </button>
 
       {/* Participants Toggle */}
@@ -100,7 +100,7 @@ const VideoCallControlBar = ({ unreadMessages }) => {
           <MessageSquare />
         </button>
         {unreadMessages > 0 && (
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm animate-bounce">
+          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm">
             {unreadMessages > 9 ? "9+" : unreadMessages}
           </div>
         )}

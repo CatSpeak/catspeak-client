@@ -7,7 +7,7 @@ import { MonitorUp } from "lucide-react"
  *
  * @param {{ trackRef: import('@livekit/components-react').TrackReferenceOrPlaceholder, presenterDisplayName: string, isLocal: boolean }} props
  */
-const ScreenShareTile = ({ trackRef, presenterDisplayName, isLocal }) => {
+const ScreenShareTile = ({ trackRef, presenterDisplayName, isLocal, onClick }) => {
   const videoRef = useRef(null)
 
   // Attach/detach the screen share track
@@ -29,7 +29,10 @@ const ScreenShareTile = ({ trackRef, presenterDisplayName, isLocal }) => {
     : `${presenterDisplayName}'s screen`
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border border-[#C6C6C6] bg-neutral-900 shadow-sm">
+    <div 
+      onClick={onClick}
+      className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border border-[#C6C6C6] bg-neutral-900 shadow-sm ${onClick ? "cursor-pointer" : ""}`}
+    >
       <video
         autoPlay
         playsInline

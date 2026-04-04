@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import { createPortal } from "react-dom"
 import { NavLink, useParams } from "react-router-dom"
 import { AnimatePresence } from "framer-motion"
@@ -6,6 +6,7 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
 import SidebarCommunityDropdown from "@/layouts/MainLayout/SidebarCommunityDropdown"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 import {
   X,
   Users,
@@ -20,21 +21,7 @@ const MobileDrawer = ({ open, onClose }) => {
   const { lang } = useParams()
   const currentLang = lang || localStorage.getItem("communityLanguage") || "zh"
 
-  useEffect(() => {
-    if (open) {
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth
-      document.body.style.paddingRight = `${scrollbarWidth}px`
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.paddingRight = "0px"
-      document.body.style.overflow = "auto"
-    }
-    return () => {
-      document.body.style.paddingRight = "0px"
-      document.body.style.overflow = "auto"
-    }
-  }, [open])
+  useScrollLock(open)
 
   // Active style helper — matches MainSidebar
   const getLinkClasses = ({ isActive }) =>

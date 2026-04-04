@@ -112,6 +112,7 @@ export const VideoCallContent = ({
   const {
     screenShareOn,
     screenShareTrackRef,
+    screenShareTracks,
     presenterId: screenSharePresenterId,
     isLocalScreenShare,
     toggleScreenShare,
@@ -222,6 +223,7 @@ export const VideoCallContent = ({
     // Screen share
     screenShareOn,
     screenShareTrackRef,
+    screenShareTracks,
     screenSharePresenterId,
     isLocalScreenShare,
     presenterDisplayName,

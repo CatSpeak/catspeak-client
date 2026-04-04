@@ -8,6 +8,8 @@ export default {
     range: "{{start}}-{{end}} 共 {{total}}",
   },
   nav: {
+    home: "首页",
+    rooms: "房间",
     community: "社区",
     catSpeak: "猫语",
     cart: "课程",

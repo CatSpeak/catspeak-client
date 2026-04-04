@@ -8,6 +8,8 @@ export default {
     range: "{{start}}-{{end}} of {{total}}",
   },
   nav: {
+    home: "Home",
+    rooms: "Rooms",
     community: "Community",
     catSpeak: "Cat Speak",
     cart: "Courses",

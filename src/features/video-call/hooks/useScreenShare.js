@@ -19,13 +19,13 @@ export const useScreenShare = () => {
   // Get all screen share tracks across all participants
   const screenShareTracks = useTracks([Track.Source.ScreenShare])
 
-  // Find the first active screen share
+  // Find the first active screen share (legacy support)
   const screenShareTrackRef =
     screenShareTracks.length > 0 ? screenShareTracks[0] : null
 
   const presenter = screenShareTrackRef?.participant ?? null
-  const isLocalScreenShare = presenter?.isLocal ?? false
-  const screenShareOn = !!screenShareTrackRef
+  const isLocalScreenShare = isScreenShareEnabled
+  const screenShareOn = screenShareTracks.length > 0
 
   const toggleScreenShare = useCallback(async () => {
     await room.localParticipant.setScreenShareEnabled(!isScreenShareEnabled)
@@ -33,7 +33,8 @@ export const useScreenShare = () => {
 
   return {
     screenShareOn,
-    screenShareTrackRef,
+    screenShareTrackRef, // Keep for backward compatibility/quick access
+    screenShareTracks,   // Expose all tracks
     presenterId: presenter?.identity ?? null,
     isLocalScreenShare,
     toggleScreenShare,

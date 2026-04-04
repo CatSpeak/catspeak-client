@@ -1,6 +1,7 @@
 import React from "react"
 import { Navigate } from "react-router-dom"
 import { ChevronRight } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import HeaderLogo from "@/shared/components/Header/HeaderLogo"
 
 import {
@@ -83,9 +84,7 @@ const VideoCallRoomContent = () => {
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="text-sm font-semibold text-gray-900 md:text-base">
-                {translatedName}
-              </div>
+              <div className="text-base font-semibold">{translatedName}</div>
               {room?.requiredLevel && (
                 <span className="rounded-full bg-[#990011] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                   {room.requiredLevel}
@@ -105,7 +104,7 @@ const VideoCallRoomContent = () => {
                   )
                 })}
             </div>
-            <div className="hidden text-sm text-[#7A7574] md:block">
+            <div className="hidden text-sm text-[#60600] md:block">
               {formatDate(new Date())}
             </div>
           </div>
@@ -127,68 +126,89 @@ const VideoCallRoomContent = () => {
         </div>
 
         {/* Desktop Side Panel */}
-        {isSidePanelOpen && (
-          <div className="hidden w-80 flex-col border-l border-[#C6C6C6] bg-white md:flex">
-            {showParticipants && <ParticipantList />}
-            {showChat && !showParticipants && (
-              <ChatBox
-                messages={messages}
-                currentUser={user}
-                onSendMessage={handleSendMessage}
-                isConnected={isConnected}
-                className="h-full w-full"
-              />
-            )}
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {isSidePanelOpen && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 320, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="hidden flex-col border-l border-[#C6C6C6] bg-white md:flex overflow-hidden relative"
+              style={{ width: 320 }}
+            >
+              <div className="w-80 h-full flex flex-col shrink-0">
+                {showParticipants && <ParticipantList />}
+                {showChat && !showParticipants && (
+                  <ChatBox
+                    messages={messages}
+                    currentUser={user}
+                    onSendMessage={handleSendMessage}
+                    isConnected={isConnected}
+                    className="h-full w-full"
+                  />
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mobile Overlay Side Panel */}
-        {isSidePanelOpen && (
-          <div className="md:hidden">
-            <div
-              className="fixed inset-0 z-30 flex bg-black/40"
-              onClick={() => {
-                setShowChat(false)
-                setShowParticipants(false)
-              }}
-            >
-              <div
-                className="ml-auto flex h-full w-full max-w-sm flex-col bg-white shadow-xl"
-                onClick={(e) => e.stopPropagation()}
+        <AnimatePresence initial={false}>
+          {isSidePanelOpen && (
+            <div className="md:hidden">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-30 flex bg-black/40"
+                onClick={() => {
+                  setShowChat(false)
+                  setShowParticipants(false)
+                }}
               >
-                <button
-                  type="button"
-                  className="text-black flex w-full items-center gap-2 border-b border-[#C6C6C6] px-4 py-3 text-left hover:bg-gray-50"
-                  onClick={() => {
-                    setShowChat(false)
-                    setShowParticipants(false)
-                  }}
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "tween", duration: 0.2 }}
+                  className="ml-auto flex h-full w-full max-w-sm flex-col bg-white shadow-xl"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
-                    <ChevronRight className="rotate-180" />
-                  </span>
-                  <div className="text-base font-semibold">
-                    {sidePanelTitle}
-                  </div>
-                </button>
+                  <button
+                    type="button"
+                    className="text-black flex w-full items-center gap-2 border-b border-[#C6C6C6] px-4 py-3 text-left hover:bg-gray-50"
+                    onClick={() => {
+                      setShowChat(false)
+                      setShowParticipants(false)
+                    }}
+                  >
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
+                      <ChevronRight className="rotate-180" />
+                    </span>
+                    <div className="text-base font-semibold">
+                      {sidePanelTitle}
+                    </div>
+                  </button>
 
-                <div className="flex-1 overflow-y-auto">
-                  {showParticipants && <ParticipantList hideTitle />}
-                  {showChat && !showParticipants && (
-                    <ChatBox
-                      messages={messages}
-                      currentUser={user}
-                      onSendMessage={handleSendMessage}
-                      isConnected={isConnected}
-                      className="h-full w-full"
-                      hideTitle
-                    />
-                  )}
-                </div>
-              </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {showParticipants && <ParticipantList hideTitle />}
+                    {showChat && !showParticipants && (
+                      <ChatBox
+                        messages={messages}
+                        currentUser={user}
+                        onSendMessage={handleSendMessage}
+                        isConnected={isConnected}
+                        className="h-full w-full"
+                        hideTitle
+                      />
+                    )}
+                  </div>
+                </motion.div>
+              </motion.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
 
       <VideoCallControlBar unreadMessages={unreadMessages} />

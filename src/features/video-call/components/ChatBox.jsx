@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
 import { Send } from "lucide-react"
+import { motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { colors } from "@/shared/utils/colors"
 import { formatTime } from "@/shared/utils/dateFormatter"
@@ -14,13 +15,16 @@ const ChatBox = ({
   hideTitle,
 }) => {
   const [message, setMessage] = useState("")
-  const scrollRef = useRef(null)
+  const scrollContainerRef = useRef(null)
   const sendingRef = useRef(false)
   const { t } = useLanguage()
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop =
+        scrollContainerRef.current.scrollHeight
+    }
   }, [messages])
 
   const handleSend = useCallback(() => {
@@ -63,53 +67,64 @@ const ChatBox = ({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-[#C6C6C6] scrollbar-track-transparent">
+      <div
+        ref={scrollContainerRef}
+        className="flex flex-1 flex-col overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-[#C6C6C6] scrollbar-track-transparent"
+      >
         {messages.length === 0 ? (
-          <p className="text-sm text-center text-[#7A7574] mt-10 m-0">
-            {t.rooms.chatBox.empty}
-          </p>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-sm text-center text-[#7A7574] m-0">
+              {t.rooms.chatBox.empty}
+            </p>
+          </div>
         ) : (
-          messages.map((msg, index) => {
-            // LiveKit useChat message format:
-            // { id, timestamp, message, from?: Participant }
-            const isMe = msg.from?.isLocal ?? false
-            const senderName = isMe
-              ? t.rooms.chatBox.you
-              : msg.from?.name || msg.from?.identity || `User`
+          <>
+            <div className="flex-1" />
+            <div className="space-y-2">
+              {messages.map((msg, index) => {
+                // LiveKit useChat message format:
+                // { id, timestamp, message, from?: Participant }
+                const isMe = msg.from?.isLocal ?? false
+                const senderName = isMe
+                  ? t.rooms.chatBox.you
+                  : msg.from?.name || msg.from?.identity || `User`
 
-            return (
-              <div
-                key={msg.id || `msg-${index}`}
-                className={`flex flex-col ${
-                  isMe ? "items-end" : "items-start"
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold text-[#7A7574]">
-                    {senderName}
-                  </span>
-                  <span className="text-[10px] text-[#7A7574]">
-                    {formatTime(msg.timestamp)}
-                  </span>
-                </div>
-                <div
-                  className={`px-3 py-2 rounded-2xl max-w-[85%] break-words shadow-sm ${
-                    isMe
-                      ? "text-white"
-                      : "bg-gray-100 text-[#7A7574] border border-[#C6C6C6]"
-                  }`}
-                  style={
-                    isMe ? { backgroundColor: colors.red[700] } : undefined
-                  }
-                >
-                  <p className="text-sm m-0">{msg.message}</p>
-                </div>
-              </div>
-            )
-          })
+                return (
+                  <motion.div
+                    key={msg.id || `msg-${index}`}
+                    initial={{ opacity: 0, x: isMe ? 20 : -20, scale: 0.95 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
+                    className={`flex flex-col ${
+                      isMe ? "items-end" : "items-start"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1 mb-1 max-w-full">
+                      <span
+                        className="text-xs font-bold truncate shrink"
+                        title={senderName}
+                      >
+                        {senderName}
+                      </span>
+                      <span className="text-xs text-[#606060] shrink-0">
+                        {formatTime(msg.timestamp)}
+                      </span>
+                    </div>
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${
+                        isMe
+                          ? "bg-[#990011] text-white"
+                          : "bg-[#F0F0F0] text-black"
+                      }`}
+                    >
+                      <p className="m-0">{msg.message}</p>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </>
         )}
-        {/* Auto-scroll anchor */}
-        <div ref={scrollRef} />
       </div>
 
       <form

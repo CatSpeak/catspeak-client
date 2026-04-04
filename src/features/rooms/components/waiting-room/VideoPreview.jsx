@@ -13,35 +13,37 @@ const VideoPreview = ({
 }) => {
   const { t } = useLanguage()
   return (
-    <div className="relative mb-6 h-[300px] w-full max-w-full overflow-hidden rounded-xl border border-[#C6C6C6] bg-white sm:h-[350px] sm:w-[90%] md:h-[400px] md:w-[700px]">
-      {/* Video Preview */}
-      {localStream && (
-        <video
-          ref={(video) => {
-            if (video) {
-              video.srcObject = localStream
-              if (micOn) video.muted = true // Mute local preview to prevent echo
-            }
-          }}
-          autoPlay
-          playsInline
-          muted // Always mute local video preview purely for UI
-          className={`h-full w-full object-cover -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
-        />
-      )}
-
-      {!cameraOn && (
-        <div className="flex h-full w-full items-center justify-center">
-          <Avatar
-            size={64}
-            name={user?.username}
-            className="md:!w-24 md:!h-24"
+    <div className="relative w-full max-w-3xl flex flex-col items-center">
+      <div className="mb-3 relative w-full aspect-video overflow-hidden rounded-xl border border-[#e5e5e5] bg-white">
+        {/* Video Preview */}
+        {localStream && (
+          <video
+            ref={(video) => {
+              if (video) {
+                video.srcObject = localStream
+                if (micOn) video.muted = true // Mute local preview to prevent echo
+              }
+            }}
+            autoPlay
+            playsInline
+            muted // Always mute local video preview purely for UI
+            className={`h-full w-full object-cover -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
           />
-        </div>
-      )}
+        )}
+
+        {!cameraOn && (
+          <div className="flex h-full w-full items-center justify-center">
+            <Avatar
+              size={64}
+              name={user?.username}
+              className="md:!w-24 md:!h-24"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Controls Overlay */}
-      <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-4">
+      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-6 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0">
         <button
           onClick={onToggleMic}
           className={`border border-[#C6C6C6] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${

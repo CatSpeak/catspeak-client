@@ -9,7 +9,7 @@ import { Track } from "livekit-client"
  *
  * @param {{ participant: import('livekit-client').Participant }} props
  */
-const VideoTile = ({ participant }) => {
+const VideoTile = ({ participant, onClick }) => {
   const isSpeaking = useIsSpeaking(participant)
 
   const displayName = participant.name || participant.identity || "?"
@@ -63,11 +63,12 @@ const VideoTile = ({ participant }) => {
 
   return (
     <div
-      className={`relative h-full w-full min-h-[150px] overflow-hidden rounded-lg bg-white border border-solid transition-[border-color,box-shadow] duration-200 ease-in-out ${
+      onClick={onClick}
+      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-lg bg-white border border-solid transition-[border-color,box-shadow] duration-200 ease-in-out [container-type:inline-size] ${
         isSpeaking
           ? "border-green-600 shadow-[0_0_15px_rgba(46,125,50,0.4)]"
           : "border-[#C6C6C6] shadow-sm"
-      }`}
+      } ${onClick ? "cursor-pointer" : ""}`}
     >
       {/* Video element for camera track */}
       <video
@@ -82,7 +83,12 @@ const VideoTile = ({ participant }) => {
 
       {/* Hidden audio element for remote audio */}
       {!isLocal && (
-        <audio ref={audioRef} autoPlay playsInline style={{ display: "none" }} />
+        <audio
+          ref={audioRef}
+          autoPlay
+          playsInline
+          style={{ display: "none" }}
+        />
       )}
 
       {/* Avatar fallback when no video */}
@@ -92,30 +98,23 @@ const VideoTile = ({ participant }) => {
             size={64}
             name={displayName || "?"}
             speaking={isSpeaking}
-            className="sm:!w-20 sm:!h-20 md:!w-24 md:!h-24"
+            className="!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)]"
           />
         </div>
       )}
 
-      {/* Name + speaking indicator */}
-      <div className="absolute bottom-5 left-5 flex max-w-[70%] items-center gap-2">
-        <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-black">
+      {/* Name */}
+      <div className="absolute bottom-3 left-3 flex max-w-[90%] items-center gap-2">
+        <div className="min-w-0 truncate font-medium text-black text-sm">
           {displayName} {isLocal && "(You)"}
         </div>
-        {isSpeaking && (
-          <div className="flex h-3 items-end gap-[2px]">
-            <div className="h-2 w-[3px] animate-[pulse_1s_ease-in-out_infinite] rounded-full bg-green-600" />
-            <div className="h-3 w-[3px] animate-[pulse_1s_ease-in-out_infinite] rounded-full bg-green-600 delay-100" />
-            <div className="h-[6px] w-[3px] animate-[pulse_1s_ease-in-out_infinite] rounded-full bg-green-600 delay-200" />
-          </div>
-        )}
       </div>
 
-      {/* Mic / cam off icons */}
-      <div className="absolute bottom-5 right-5 flex items-center gap-4">
-        {screenShareOn && <MonitorUp className="text-yellow-500" />}
-        {!micOn && <MicOff className="text-[#7A7574]" />}
-        {!webcamOn && <VideoOff className="text-[#7A7574]" />}
+      {/* Mic / cam / screenshare status icons */}
+      <div className="absolute top-3 right-3 flex items-center gap-3 drop-shadow-md">
+        {screenShareOn && <MonitorUp size={20} className="text-yellow-500" />}
+        {!micOn && <MicOff size={20} />}
+        {!webcamOn && <VideoOff size={20} />}
       </div>
     </div>
   )

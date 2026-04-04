@@ -27,11 +27,10 @@ const WaitingScreen = ({
   const { t } = useLanguage()
   const communityLanguage = localStorage.getItem("communityLanguage") || "en"
   const effectiveParticipantCount = participantCount ?? participants.length
-
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center relative bg-gray-50 p-4 md:p-0">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center relative bg-gray-50 p-5">
       {/* Back Button */}
-      <div className="absolute top-4 left-4 md:top-8 md:left-8 z-10">
+      <div className="text-sm absolute top-5 left-5 md:top-8 md:left-8 z-10">
         <BackButton
           onClick={() =>
             navigate({
@@ -52,7 +51,7 @@ const WaitingScreen = ({
 
         {/* Level & Topic Tags */}
         {(room?.requiredLevel || room?.topic) && (
-          <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {room?.requiredLevel && (
               <span className="rounded-full bg-[#990011] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                 {room.requiredLevel}
@@ -73,23 +72,25 @@ const WaitingScreen = ({
               })}
           </div>
         )}
+      </div>
 
+      {/* Participants + Video stacked and centered */}
+      <div className="flex w-full max-w-[960px] flex-col items-center justify-center gap-6 mb-6">
         <ParticipantsPreview
           participants={participants}
           participantCount={participantCount}
         />
+        <VideoPreview
+          user={user}
+          localStream={localStream}
+          micOn={micOn}
+          cameraOn={cameraOn}
+          onToggleMic={onToggleMic}
+          onToggleCam={onToggleCam}
+        />
       </div>
 
-      <VideoPreview
-        user={user}
-        localStream={localStream}
-        micOn={micOn}
-        cameraOn={cameraOn}
-        onToggleMic={onToggleMic}
-        onToggleCam={onToggleCam}
-      />
-
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-2">
         <PillButton
           onClick={onJoin}
           disabled={isFull}

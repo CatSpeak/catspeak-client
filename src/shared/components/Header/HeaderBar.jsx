@@ -18,7 +18,7 @@ const HeaderBar = ({ onGetStarted, hideDesktopNav }) => {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between w-full px-4 md:px-8 py-3 h-[72px]">
+      <div className="flex items-center justify-between w-full px-5 py-3 h-[72px]">
         {/* Left Section: Burger (Mobile) + Logo */}
         <div className="flex-1 flex justify-start items-center gap-2">
           <button

@@ -1,7 +1,8 @@
-import React, { useEffect } from "react"
+import React from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import { X } from "lucide-react"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 
 const Modal = ({
   open,
@@ -11,31 +12,7 @@ const Modal = ({
   title,
   showCloseButton = true,
 }) => {
-const ModalScrollLock = () => {
-  useEffect(() => {
-    const htmlEl = document.documentElement
-    const scrollbarWidth =
-      window.innerWidth - htmlEl.clientWidth
-
-    const originalStyle = window.getComputedStyle(document.body).overflow
-    const originalPaddingRight = window.getComputedStyle(document.body).paddingRight
-    const originalScrollbarGutter = window.getComputedStyle(htmlEl).scrollbarGutter
-
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `calc(${originalPaddingRight} + ${scrollbarWidth}px)`
-    }
-    document.body.style.overflow = "hidden"
-    htmlEl.style.scrollbarGutter = "auto"
-
-    return () => {
-      document.body.style.overflow = originalStyle
-      document.body.style.paddingRight = originalPaddingRight
-      htmlEl.style.scrollbarGutter = originalScrollbarGutter
-    }
-  }, [])
-
-  return null
-}
+  useScrollLock(open)
 
   // Modal visibility is handled by the "open" prop and AnimatePresence
 
@@ -44,7 +21,6 @@ const ModalScrollLock = () => {
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-[1300] flex items-center justify-center p-0 min-[426px]:p-4">
-          <ModalScrollLock />
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}

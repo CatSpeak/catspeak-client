@@ -1,23 +1,9 @@
-import React, { useEffect } from "react"
+import React from "react"
 import { X } from "lucide-react"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 
 const RoomsMobileDrawer = ({ isOpen, onClose, title, children }) => {
-  useEffect(() => {
-    if (isOpen) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-      }
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.paddingRight = ""
-      document.body.style.overflow = "unset"
-    }
-    return () => {
-      document.body.style.paddingRight = ""
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   return (
     <>

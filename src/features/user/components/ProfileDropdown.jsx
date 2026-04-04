@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { Settings, LogOut, Loader2, User, ArrowLeft } from "lucide-react"
@@ -72,24 +73,7 @@ const ProfileDropdown = () => {
   }, [isOpen, isMobile])
 
   // Lock body scroll when fullscreen on mobile
-  useEffect(() => {
-    if (isOpen && isMobile) {
-      const originalOverflow = document.body.style.overflow
-      const originalPaddingRight = document.body.style.paddingRight
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth
-
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-      }
-      document.body.style.overflow = "hidden"
-
-      return () => {
-        document.body.style.overflow = originalOverflow
-        document.body.style.paddingRight = originalPaddingRight
-      }
-    }
-  }, [isOpen, isMobile])
+  useScrollLock(isOpen && isMobile)
 
   const getInitials = (name) => {
     return name ? name.charAt(0).toUpperCase() : "U"

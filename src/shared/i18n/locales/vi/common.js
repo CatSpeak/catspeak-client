@@ -8,6 +8,8 @@ export default {
     range: "{{start}}-{{end}} trong số {{total}}",
   },
   nav: {
+    home: "Trang chủ",
+    rooms: "Phòng",
     community: "Cộng đồng",
     catSpeak: "Cat Speak",
     cart: "Khóa học",

@@ -9,16 +9,22 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
     return <p className="text-[#7A7574]">{t.rooms.waitingScreen.noOneHere}</p>
   }
 
-  // Cap at 5 for AvatarGroup display equivalent
-  const displayParticipants = participants.slice(0, 5)
-  const remainingCount = Math.max(0, count - displayParticipants.length)
+  const MAX_VISIBLE = 5
+  const visibleParticipants = participants.slice(0, MAX_VISIBLE)
+  const remainingCount =
+    participants.length > MAX_VISIBLE
+      ? participants.length - MAX_VISIBLE
+      : count > MAX_VISIBLE
+        ? count - MAX_VISIBLE
+        : 0
 
   return (
-    <div className="mt-2 flex flex-col items-center gap-1">
-      <div className="flex -space-x-3">
-        {displayParticipants.map((p) => (
+    <div className="flex w-full flex-col items-center">
+      {/* Participant List - Overlapping Avatars */}
+      <div className="mb-2 flex flex-row items-center justify-center">
+        {visibleParticipants.map((p, index) => (
           <img
-            key={p.participantId}
+            key={p.participantId || index}
             alt={p.username}
             src={
               p.avatarImageUrl ||
@@ -26,17 +32,22 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
                 p.username,
               )}&background=random`
             }
-            className="inline-block h-8 w-8 rounded-full border-2 border-white object-cover md:h-10 md:w-10 text-[12px] md:text-[14px]"
+            className={`h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm ${
+              index !== 0 ? "-ml-3" : ""
+            }`}
+            title={p.username}
           />
         ))}
         {remainingCount > 0 && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-medium text-gray-600 md:h-10 md:w-10">
+          <div className="z-10 -ml-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-semibold text-gray-600 shadow-sm">
             +{remainingCount}
           </div>
         )}
       </div>
-      <p className="text-sm text-gray-500">
-        <span className="font-semibold">{count}</span>{" "}
+
+      {/* Meta Text */}
+      <p className="text-sm text-[#606060]">
+        <span className="font-medium text-gray-900">{count}</span>{" "}
         {t.rooms.waitingScreen.isHere}
       </p>
     </div>

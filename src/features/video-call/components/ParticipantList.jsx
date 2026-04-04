@@ -13,13 +13,18 @@ const ParticipantItem = ({ participant }) => {
   const pl = t.rooms.videoCall.participantList
 
   const isLocal = participant.isLocal
-  const isMicOn = isLocal ? localMicOn : (participant.isMicrophoneEnabled ?? false)
-  const isCameraOn = isLocal ? localCameraOn : (participant.isCameraEnabled ?? false)
-  const name = participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
+  const isMicOn = isLocal
+    ? localMicOn
+    : (participant.isMicrophoneEnabled ?? false)
+  const isCameraOn = isLocal
+    ? localCameraOn
+    : (participant.isCameraEnabled ?? false)
+  const name =
+    participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
 
   return (
-    <div className="flex items-center justify-between pl-1.5 pr-2 py-1 rounded">
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between gap-3 pl-1.5 pr-2 py-1 rounded w-full">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         <Avatar size={40} name={name} />
         <div className="flex-1 min-w-0">
           <p className="text-black text-sm font-medium truncate m-0">
@@ -27,9 +32,17 @@ const ParticipantItem = ({ participant }) => {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        {isCameraOn ? <Video className="text-[#990011]" /> : <VideoOff />}
-        {isMicOn ? <Mic className="text-[#990011]" /> : <MicOff />}
+      <div className="flex items-center gap-4 shrink-0">
+        {isCameraOn ? (
+          <Video size={20} className="text-[#990011]" />
+        ) : (
+          <VideoOff size={20} />
+        )}
+        {isMicOn ? (
+          <Mic size={20} className="text-[#990011]" />
+        ) : (
+          <MicOff size={20} />
+        )}
       </div>
     </div>
   )
@@ -57,9 +70,7 @@ const ParticipantList = ({ hideTitle }) => {
         <ul className="flex flex-col">
           {participants.map((participant) => (
             <li key={participant.identity}>
-              <ParticipantItem
-                participant={participant}
-              />
+              <ParticipantItem participant={participant} />
             </li>
           ))}
         </ul>
