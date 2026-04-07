@@ -11,7 +11,7 @@ const MailHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
   const yearString = currentDate ? currentDate.format("YYYY") : "2026"
 
   return (
-    <div className="flex flex-col h-full w-full sm:w-[260px] shrink-0 font-['Inter']">
+    <div className="flex flex-col h-full w-full sm:w-[260px] shrink-0">
       <div className="flex flex-col gap-0.5">
         <h2 className="text-[38px] leading-[1.1] font-black text-black tracking-tight">
           {t.calendar?.calendar || "LỊCH"}

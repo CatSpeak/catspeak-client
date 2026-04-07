@@ -1,7 +1,6 @@
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { LiquidGlassButton } from "@/shared/components"
-import { Typography } from "@mui/material"
-import CheckIcon from "@mui/icons-material/Check"
+import { Check } from "lucide-react"
 import { colors } from "@/shared/utils/colors"
 import { AIImages, AIBubble } from "@/shared/assets/images/home"
 
@@ -30,16 +29,12 @@ const AISection = () => {
                 className="w-full h-auto object-contain drop-shadow-lg"
               />
               {/* Centered Text in Bubble */}
-              <Typography
-                variant="h6"
-                className="absolute inset-0 flex items-center justify-center font-bold text-white text-center p-4 leading-tight"
-                sx={{
-                  fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
-                  textShadow: "0px 2px 4px rgba(0,0,0,0.1)",
-                }}
+              <div
+                className="absolute inset-0 flex items-center justify-center font-bold text-white text-center p-4 leading-tight text-base sm:text-lg md:text-xl"
+                style={{ textShadow: "0px 2px 4px rgba(0,0,0,0.1)" }}
               >
                 {t.home.aiSection.greeting}
-              </Typography>
+              </div>
             </div>
           </div>
         </div>
@@ -49,12 +44,11 @@ const AISection = () => {
         <div className="order-2 flex flex-col justify-center space-y-4 sm:space-y-5 md:space-y-6">
           {/* Header */}
           <div className="relative inline-block pb-2">
-            <Typography
-              variant="caption"
-              className="uppercase tracking-wider text-gray-500 font-bold block"
+            <span
+              className="uppercase tracking-wider text-gray-500 font-bold block text-sm"
             >
               {t.home.aiSection.header}
-            </Typography>
+            </span>
             <div
               className="absolute bottom-0 left-0 h-0.5 bg-cath-red-800"
               style={{ width: "20%" }}
@@ -62,22 +56,11 @@ const AISection = () => {
           </div>
 
           {/* Main Heading */}
-          <Typography
-            variant="h4"
-            component="h2"
+          <h2
             className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 leading-tight"
-            sx={{
-              fontSize: {
-                xs: "1.5rem",
-                sm: "2rem",
-                md: "2.5rem",
-                lg: "3rem",
-              },
-              fontWeight: "bold",
-            }}
           >
             {t.home.aiSection.mainHeading}
-          </Typography>
+          </h2>
 
           {/* Description */}
           {/* <Typography
@@ -92,15 +75,13 @@ const AISection = () => {
             {t.home.aiSection.features.map((feature, index) => (
               <li key={index} className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-1">
-                  <CheckIcon sx={{ color: colors.red[800], fontSize: 20 }} />
+                  <Check color={colors.red[800]} size={20} />
                 </div>
-                <Typography
-                  variant="body1"
-                  component="span"
+                <span
                   className="text-lg md:text-xl text-gray-700 flex-1"
                 >
                   {feature}
-                </Typography>
+                </span>
               </li>
             ))}
           </ul>

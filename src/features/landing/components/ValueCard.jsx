@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material"
 import { ValueCardBg } from "@/shared/assets/images/home"
 
 const colorConfig = {
@@ -41,12 +40,11 @@ const ValueCard = ({
       <div className="relative z-10 w-full h-full p-6 flex flex-col gap-4">
         {/* Header: Title + Icon */}
         <div className="flex justify-between items-start w-full">
-          <Typography
-            variant="h6"
-            className="font-bold leading-tight text-cath-red-500 flex-1 pr-4"
+          <h4
+            className="font-bold leading-tight text-cath-red-500 flex-1 pr-4 text-lg"
           >
             {title}
-          </Typography>
+          </h4>
 
           <div className="relative h-14 w-14 flex-shrink-0 mr-6">
             {/* Layer 1: Bottom/Back (Top-Left) - Solid Gradient */}
@@ -64,9 +62,9 @@ const ValueCard = ({
         </div>
 
         {/* Description */}
-        <Typography variant="body2" className="text-gray-600 mt-auto">
+        <p className="text-gray-600 mt-auto text-sm">
           {description}
-        </Typography>
+        </p>
       </div>
     </div>
   )

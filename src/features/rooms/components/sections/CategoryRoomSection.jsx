@@ -138,7 +138,7 @@ const CategoryRoomSection = ({
     <div className="flex flex-col gap-2">
       {renderHeader(true)}
 
-      <div className="overflow-hidden py-10 -my-10 px-4 -mx-4">
+      <div className="w-full">
         <AnimatePresence mode="wait">
           <FluentAnimation
             key={currentPage}

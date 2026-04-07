@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
 import { FiUsers, FiCpu, FiMessageCircle } from "react-icons/fi"
 import { useRoomsPageLogic } from "@/features/rooms"
-import { Card } from "antd"
+
 
 const ResetPasswordPage = () => {
   const { state, actions } = useRoomsPageLogic()
@@ -80,23 +80,13 @@ const ResetPasswordPage = () => {
               transition={{ delay: idx * 0.1, duration: 0.5 }}
               className="h-full"
             >
-              <Card
-                hoverable={false}
+              <div
                 onClick={!card.disabled ? card.action : undefined}
-                className={`group h-full overflow-hidden rounded-[2rem] border-2 transition-colors duration-300 ${
+                className={`group flex h-full flex-col justify-between overflow-hidden rounded-[2rem] border-2 p-8 transition-colors duration-300 ${
                   card.disabled
-                    ? "cursor-not-allowed border-gray-100 opacity-60"
-                    : "cursor-pointer border-gray-200 hover:border-[#990011]"
+                    ? "cursor-not-allowed border-gray-100 opacity-60 bg-white"
+                    : "cursor-pointer border-gray-200 bg-white hover:border-[#990011]"
                 }`}
-                styles={{
-                  body: {
-                    padding: "2rem",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                  },
-                }}
               >
                 <div>
                   <div
@@ -129,7 +119,7 @@ const ResetPasswordPage = () => {
 
                 {!card.disabled && (
                   <div className="mt-8 flex w-full justify-end">
-                    <div className="rounded-full  p-2 transition-all duration-300 group-hover:bg-[#990011]/10 group-hover:translate-x-2">
+                    <div className="rounded-full overflow-hidden p-2 transition-all duration-300 group-hover:bg-[#990011]/10 group-hover:translate-x-2">
                       <svg
                         className="h-6 w-6 text-gray-400 transition-colors group-hover:text-[#990011]"
                         fill="none"
@@ -146,7 +136,7 @@ const ResetPasswordPage = () => {
                     </div>
                   </div>
                 )}
-              </Card>
+              </div>
             </motion.div>
           )
         })}

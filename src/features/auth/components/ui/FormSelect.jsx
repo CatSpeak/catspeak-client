@@ -1,42 +1,34 @@
-import { Form, Select, ConfigProvider } from "antd"
+import React from "react"
 import colors from "@/shared/utils/colors"
 
-const FormSelect = ({ name, label, placeholder, rules, options }) => {
+const FormSelect = ({ name, label, placeholder, rules, options, value, onChange }) => {
   return (
-    <ConfigProvider
-      theme={{
-        components: {
-          Select: {
-            controlHeight: 48,
-            borderRadius: 9999,
-            controlPaddingHorizontal: 16,
-            fontSize: 16,
-          },
-        },
-      }}
-    >
-      <Form.Item
+    <div className="flex flex-col gap-1 w-full text-left relative">
+      {label && (
+        <label htmlFor={name} className="text-sm font-semibold text-gray-700">
+          {label}
+        </label>
+      )}
+      <select
+        id={name}
         name={name}
-        label={
-          <span className="text-sm font-semibold text-gray-700">{label}</span>
-        }
-        rules={rules}
+        value={value}
+        onChange={onChange}
+        className="w-full appearance-none rounded-full border border-gray-300 bg-white px-4 py-3 text-base outline-none transition focus:border-[#72000d]"
+        style={{ color: value ? "inherit" : "#9ca3af" }}
       >
-        <Select
-          placeholder={placeholder}
-          popupMatchSelectWidth={false}
-          getPopupContainer={(trigger) => trigger.parentNode}
-          style={{
-            borderColor: colors.border,
-            borderRadius: "9999px",
-            fontSize: "16px",
-          }}
-          className="w-full text-base"
-          dropdownStyle={{ zIndex: 9999 }}
-          options={options}
-        />
-      </Form.Item>
-    </ConfigProvider>
+        {placeholder && (
+          <option value="" disabled hidden>
+            {placeholder}
+          </option>
+        )}
+        {options?.map((opt) => (
+          <option key={opt.value} value={opt.value} className="text-black">
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </div>
   )
 }
 

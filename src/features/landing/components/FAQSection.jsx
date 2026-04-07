@@ -1,13 +1,5 @@
 import { useState } from "react"
-import {
-  Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from "@mui/material"
-import AddIcon from "@mui/icons-material/Add"
-import RemoveIcon from "@mui/icons-material/Remove"
-import SearchIcon from "@mui/icons-material/Search"
+import { Plus, Minus, Search } from "lucide-react"
 import { FAQBackground, FAQDecorations } from "@/shared/assets/images/home"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 
@@ -61,41 +53,28 @@ const FAQSection = () => {
               <div className="flex-1 mb-6 md:mb-0">
                 {/* Corner Label with underline */}
                 <div className="relative inline-block mb-3">
-                  <Typography
-                    variant="caption"
-                    className="uppercase tracking-[0.15em] text-cath-yellow-400 font-bold"
-                    sx={{
-                      fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1rem" },
-                    }}
+                  <span
+                    className="uppercase tracking-[0.15em] text-cath-yellow-400 font-bold text-xs sm:text-sm md:text-base"
                   >
                     {t.faq.corner}
-                  </Typography>
+                  </span>
                   <div
                     className="absolute bottom-0 left-0 h-0.5 bg-cath-yellow-400"
                     style={{ width: "50%" }}
                   />
                 </div>
                 {/* Main Title */}
-                <Typography
-                  variant="h2"
+                <h2
                   className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight"
-                  sx={{
-                    fontSize: {
-                      xs: "1.5rem",
-                      sm: "1.875rem",
-                      md: "2.25rem",
-                      lg: "3rem",
-                    },
-                  }}
                 >
                   {t.faq.title}
-                </Typography>
+                </h2>
               </div>
 
               {/* Search Bar - Positioned to overlap */}
               <div className="md:absolute md:top-8 md:right-8 lg:top-12 lg:right-12 hidden">
                 <div className="relative border-2 border-cath-red-800 rounded-xl px-5 py-3.5 shadow-search flex items-center gap-3 min-w-[240px] md:min-w-[280px] transition-all hover:border-cath-red-900 hover:shadow-lg">
-                  <SearchIcon className="w-5 h-5 text-gray-300 flex-shrink-0" />
+                  <Search className="w-5 h-5 text-gray-300 flex-shrink-0" />
                   <input
                     type="text"
                     placeholder={t.faq.searchPlaceholder}
@@ -122,64 +101,37 @@ const FAQSection = () => {
                 const isExpanded = expandedQuestions.has(originalIndex)
 
                 return (
-                  <Accordion
+                  <div
                     key={originalIndex}
-                    expanded={isExpanded}
-                    onChange={() => toggleQuestion(originalIndex)}
-                    disableGutters
-                    elevation={0}
-                    className="border border-white"
-                    sx={{
-                      borderRadius: "24px !important",
-                      "&:before": { display: "none" }, // Remove default MUI Accordion divider
-                      transition: "all 0.3s ease-in-out",
-                      backgroundColor: "transparent",
-                      backdropFilter: "blur(8px)",
-                      borderColor: "white",
-                      marginBottom: "8px",
-                      padding: 4,
-                    }}
+                    className="border border-white rounded-[24px] bg-transparent backdrop-blur-[8px] mb-2 p-4 transition-all duration-300"
                   >
-                    <AccordionSummary
+                    <button
                       aria-controls={`panel${originalIndex}-content`}
                       id={`panel${originalIndex}-header`}
-                      sx={{
-                        padding: 0,
-                        minHeight: "unset",
-                        "& .MuiAccordionSummary-content": {
-                          margin: 0,
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        },
-                      }}
+                      onClick={() => toggleQuestion(originalIndex)}
+                      className="flex w-full items-center justify-between outline-none"
                     >
-                      <Typography
-                        variant="body1"
-                        component="span"
-                        className="flex-1 text-base md:text-lg font-bold leading-snug pr-4 transition-colors duration-200"
-                        sx={{ color: "#FFFFFF", fontSize: 18 }}
+                      <span
+                        className="flex-1 text-base md:text-lg font-bold leading-snug pr-4 transition-colors duration-200 text-white text-left break-words"
                       >
                         {item.question}
-                      </Typography>
+                      </span>
                       <div
                         className={`ml-2 flex-shrink-0 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full ${isExpanded ? "bg-white" : "bg-[#FFB400]"}`}
                       >
                         {isExpanded ? (
-                          <RemoveIcon className="w-5 h-5 text-black" />
+                          <Minus className="w-5 h-5 text-black" />
                         ) : (
-                          <AddIcon className="w-5 h-5 text-white" />
+                          <Plus className="w-5 h-5 text-white" />
                         )}
                       </div>
-                    </AccordionSummary>
+                    </button>
 
-                    <AccordionDetails
-                      sx={{ padding: 0, paddingTop: 4, paddingRight: 4 }}
+                    <div
+                      className={`pt-4 pr-4 transition-all overflow-hidden ${isExpanded ? "block" : "hidden"}`}
                     >
-                      <Typography
-                        variant="body1"
-                        className="text-sm md:text-base leading-relaxed"
-                        sx={{ color: "#FFFFFF" }}
-                        component="div"
+                      <div
+                        className="text-sm md:text-base leading-relaxed text-white text-left"
                       >
                         {item.answer.split("\n").map((line, idx) => (
                           <span key={idx}>
@@ -187,9 +139,9 @@ const FAQSection = () => {
                             {idx < item.answer.split("\n").length - 1 && <br />}
                           </span>
                         ))}
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
+                      </div>
+                    </div>
+                  </div>
                 )
               })}
             </div>

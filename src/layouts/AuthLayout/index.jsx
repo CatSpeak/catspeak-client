@@ -1,24 +1,10 @@
 import React from "react"
-import { ConfigProvider } from "antd"
 import { MainLogo } from "@/shared/assets/icons/logo"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
 
 const AuthLayout = ({ children, title, subtitle }) => {
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: "#f08d1d",
-          borderRadius: 8,
-          fontFamily: "Poppins, sans-serif",
-        },
-        components: {
-          Form: {
-            verticalLabelPadding: "0 0 4px",
-          },
-        },
-      }}
-    >
+    <>
       <div className="flex h-screen w-full bg-white font-sans overflow-hidden">
         {/* Left side - Branding (Hidden on mobile) */}
         <div className="hidden lg:flex w-1/2 flex-col items-center justify-center relative bg-gradient-to-br from-cath-red-900 via-cath-red-700 to-cath-orange-500 text-white p-12 h-full">
@@ -50,7 +36,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
           </div>
         </div>
       </div>
-    </ConfigProvider>
+    </>
   )
 }
 

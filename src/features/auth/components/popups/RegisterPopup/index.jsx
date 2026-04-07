@@ -54,7 +54,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
   return (
     <Modal open={open} onClose={onClose} className="sm:max-w-2xl">
       <form onSubmit={handleSubmit}>
-        <h2 className="mb-6 text-center text-3xl font-black text-[#8f0d15] font-['Inter']">
+        <h2 className="mb-6 text-center text-3xl font-black text-[#8f0d15]">
           {authText.registerTitle}
         </h2>
 

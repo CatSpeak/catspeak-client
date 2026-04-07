@@ -1,16 +1,12 @@
-import React from "react"
-import { Typography } from "antd"
 import { useLanguage } from "@/shared/context/LanguageContext"
-
-const { Title, Paragraph } = Typography
 
 const VideoPage = () => {
   const { t } = useLanguage()
 
   return (
-    <div className="rounded-2xl bg-white shadow-sm">
-      <Title level={2}>{t.catSpeak.video.title}</Title>
-      <Paragraph>{t.catSpeak.video.description}</Paragraph>
+    <div className="rounded-2xl bg-white shadow-sm p-6">
+      <h2 className="text-2xl font-bold mb-4">{t.catSpeak.video.title}</h2>
+      <p className="text-gray-700">{t.catSpeak.video.description}</p>
     </div>
   )
 }

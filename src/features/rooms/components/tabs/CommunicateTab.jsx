@@ -1,5 +1,5 @@
 import React from "react"
-import { Pagination } from "antd"
+
 import { useSearchParams } from "react-router-dom"
 import RoomCard from "../RoomCard"
 import CategoryRoomSection from "../sections/CategoryRoomSection"
@@ -97,14 +97,24 @@ const CommunicateTab = ({
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-center mt-2">
-                    <Pagination
-                      current={page}
-                      pageSize={1}
-                      total={totalPages}
-                      onChange={setPage}
-                      showSizeChanger={false}
-                    />
+                  <div className="mt-6 flex justify-center items-center gap-4 text-sm font-medium">
+                    <button
+                      disabled={page <= 1}
+                      onClick={() => setPage(page - 1)}
+                      className="px-4 py-2 border rounded-full disabled:opacity-50 hover:bg-gray-50 text-gray-700"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-gray-600">
+                      Page {page} of {totalPages || 1}
+                    </span>
+                    <button
+                      disabled={page >= totalPages}
+                      onClick={() => setPage(page + 1)}
+                      className="px-4 py-2 border rounded-full disabled:opacity-50 hover:bg-gray-50 text-gray-700"
+                    >
+                      Next
+                    </button>
                   </div>
                 </div>
               ) : (

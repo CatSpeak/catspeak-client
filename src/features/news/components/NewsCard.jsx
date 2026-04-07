@@ -11,7 +11,6 @@ import { useReactToPostMutation } from "@/store/api/postsApi"
 const IMAGE_BASE_URL = "https://api.catspeak.com.vn"
 
 const NewsCard = ({ news }) => {
-  console.log(news)
   const navigate = useNavigate()
   const { lang } = useParams()
   const currentLang = lang || "en"

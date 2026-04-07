@@ -14,8 +14,8 @@ const MainSidebar = () => {
   const getLinkClasses = ({ isActive }) =>
     `relative flex items-center gap-3 px-4 h-10 rounded-r-lg transition-colors mb-1 overflow-hidden ${
       isActive
-        ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
-        : "hover:bg-[#F2F2F2]"
+        ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] hover:text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
+        : "hover:bg-[#F2F2F2] hover:text-gray-900"
     }`
 
   return (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { useSearchParams, Link } from "react-router-dom"
-import { Spin, Result, Button } from "antd"
 import { useVerifyEmailMutation } from "@/features/auth"
+import { CheckCircle, XCircle, Loader2 } from "lucide-react"
 
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams()
@@ -38,47 +38,51 @@ const VerifyEmailPage = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl text-center">
         {status === "verifying" && (
-          <div className="text-center py-8">
-            <Spin size="large" />
-            <h2 className="mt-4 text-xl font-bold text-gray-800">
+          <div className="py-8 flex flex-col items-center justify-center gap-4">
+            <Loader2 className="h-10 w-10 animate-spin text-cath-red-600" />
+            <h2 className="text-xl font-bold text-gray-800">
               Verifying your email...
             </h2>
           </div>
         )}
 
         {status === "success" && (
-          <div className="py-4">
-            <Result
-              status="success"
-              title="Email Verified Successfully!"
-              subTitle="Thank you for verifying your email address. You can now use all features of Cat Speak."
-              extra={[
-                <Link to="/" key="login">
-                  <Button type="primary" shape="round" size="large">
-                    Go to Home
-                  </Button>
-                </Link>,
-              ]}
-            />
+          <div className="py-8 flex flex-col items-center justify-center gap-4">
+            <CheckCircle className="h-16 w-16 text-green-500" />
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Email Verified Successfully!
+              </h2>
+              <p className="text-gray-600">
+                Thank you for verifying your email address. You can now use all features of Cat Speak.
+              </p>
+            </div>
+            <Link to="/">
+              <button className="rounded-full bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700">
+                Go to Home
+              </button>
+            </Link>
           </div>
         )}
 
         {status === "error" && (
-          <div className="py-4">
-            <Result
-              status="error"
-              title="Verification Failed"
-              subTitle="The verification link is invalid or has expired."
-              extra={[
-                <Link to="/" key="home">
-                  <Button type="primary" shape="round" size="large">
-                    Back to Home
-                  </Button>
-                </Link>,
-              ]}
-            />
+          <div className="py-8 flex flex-col items-center justify-center gap-4">
+            <XCircle className="h-16 w-16 text-red-500" />
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Verification Failed
+              </h2>
+              <p className="text-gray-600">
+                The verification link is invalid or has expired.
+              </p>
+            </div>
+            <Link to="/">
+              <button className="rounded-full bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700">
+                Back to Home
+              </button>
+            </Link>
           </div>
         )}
       </div>

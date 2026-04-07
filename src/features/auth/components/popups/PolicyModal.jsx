@@ -1,28 +1,19 @@
-import { Dialog, DialogTitle, DialogContent, Box } from "@mui/material"
 import { FiX } from "react-icons/fi"
 import { getPolicyComponent } from "./policies"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PolicyModal = ({ open, onClose, title }) => {
   const { t } = useLanguage()
-  // Get the appropriate policy component based on title
   const PolicyComponent = getPolicyComponent(title)
 
+  if (!open) return null
+
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: "24px",
-          padding: 2,
-          maxHeight: "90vh",
-        },
-      }}
-    >
-      <Box component="div">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div 
+        className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-[24px] p-6 flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           aria-label="Close"
@@ -32,40 +23,11 @@ const PolicyModal = ({ open, onClose, title }) => {
           <FiX />
         </button>
 
-        <DialogTitle
-          sx={{
-            textAlign: "center",
-            color: "#8f0d15",
-            fontSize: "1.5rem",
-            fontWeight: 700,
-            fontFamily: "'Inter', sans-serif",
-            paddingBottom: 2,
-            paddingRight: 6,
-          }}
-        >
+        <h2 className="text-center text-[#8f0d15] text-2xl font-bold font-[var(--font-outfit)] pb-4 pr-6">
           {title}
-        </DialogTitle>
+        </h2>
 
-        <DialogContent
-          sx={{
-            maxHeight: "70vh",
-            overflowY: "auto",
-            "&::-webkit-scrollbar": {
-              width: "8px",
-            },
-            "&::-webkit-scrollbar-track": {
-              background: "#f1f1f1",
-              borderRadius: "10px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              background: "#8f0d15",
-              borderRadius: "10px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              background: "#6b0a10",
-            },
-          }}
-        >
+        <div className="max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
           {PolicyComponent ? (
             <PolicyComponent />
           ) : (
@@ -75,9 +37,9 @@ const PolicyModal = ({ open, onClose, title }) => {
               </p>
             </div>
           )}
-        </DialogContent>
-      </Box>
-    </Dialog>
+        </div>
+      </div>
+    </div>
   )
 }
 

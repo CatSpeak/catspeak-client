@@ -4,12 +4,8 @@ import {
   ValuesCircle,
   ValuesImage,
 } from "@/shared/assets/images/home"
-import { Typography } from "@mui/material"
+import { Play, Users, Network, MessageCircle } from "lucide-react"
 import ValueCard from "./ValueCard"
-import PlayArrowIcon from "@mui/icons-material/PlayArrow"
-import GroupsIcon from "@mui/icons-material/Groups"
-import HubIcon from "@mui/icons-material/Hub"
-import ChatIcon from "@mui/icons-material/Chat"
 
 const ValuesSection = () => {
   const { t } = useLanguage()
@@ -19,31 +15,12 @@ const ValuesSection = () => {
       <div className="mx-auto">
         {/* Header */}
         <div className="mb-8 sm:mb-10 md:mb-12 flex flex-col items-center justify-center space-y-2 sm:space-y-3 md:space-y-4">
-          <Typography
-            variant="subtitle1"
-            className="font-bold uppercase text-gray-500"
-            sx={{
-              fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1rem" },
-            }}
-          >
+          <h3 className="font-bold uppercase text-gray-500 text-xs sm:text-sm md:text-base">
             {t.home.whyChooseUs}
-          </Typography>
-          <Typography
-            variant="h3"
-            component="h2"
-            className="font-bold text-gray-900 text-center"
-            sx={{
-              fontSize: {
-                xs: "1.5rem",
-                sm: "1.875rem",
-                md: "2.25rem",
-                lg: "3rem",
-              },
-              fontWeight: "bold",
-            }}
-          >
+          </h3>
+          <h2 className="font-bold text-gray-900 text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl shadow-sm tracking-tight border-0 border-b border-transparent">
             {t.home.valuesTitle}
-          </Typography>
+          </h2>
         </div>
 
         {/* Main Content Area - Orange Background */}
@@ -82,7 +59,7 @@ const ValuesSection = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 w-full max-w-2xl">
                 {/* Card 1: Practice-first */}
                 <ValueCard
-                  icon={<PlayArrowIcon fontSize="large" />}
+                  icon={<Play size={32} />}
                   title={t.home.values.practice.title}
                   description={t.home.values.practice.description}
                   color="purple"
@@ -91,7 +68,7 @@ const ValuesSection = () => {
 
                 {/* Card 2: Community-driven */}
                 <ValueCard
-                  icon={<GroupsIcon fontSize="large" />}
+                  icon={<Users size={32} />}
                   title={t.home.values.community.title}
                   description={t.home.values.community.description}
                   color="blue"
@@ -100,7 +77,7 @@ const ValuesSection = () => {
 
                 {/* Card 3: Expand Networking */}
                 <ValueCard
-                  icon={<HubIcon fontSize="large" />}
+                  icon={<Network size={32} />}
                   title={t.home.values.networking.title}
                   description={t.home.values.networking.description}
                   color="orange"
@@ -109,7 +86,7 @@ const ValuesSection = () => {
 
                 {/* Card 4: Real-life communication */}
                 <ValueCard
-                  icon={<ChatIcon fontSize="large" />}
+                  icon={<MessageCircle size={32} />}
                   title={t.home.values.reallife.title}
                   description={t.home.values.reallife.description}
                   color="green"

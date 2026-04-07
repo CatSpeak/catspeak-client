@@ -6,6 +6,13 @@ import { User, GraduationCap, Building2, Settings } from "lucide-react"
 const ProfileSidebar = () => {
   const { t } = useLanguage()
 
+  const getLinkClasses = ({ isActive }) =>
+    `relative flex w-full items-center gap-3 px-4 h-10 rounded-r-lg transition-colors mb-1 overflow-hidden ${
+      isActive
+        ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] hover:text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
+        : "text-gray-800 hover:text-gray-900 hover:bg-[#F2F2F2]"
+    }`
+
   const menuItems = [
     {
       label: t.profile?.sidebar?.personalInfo,
@@ -18,42 +25,35 @@ const ProfileSidebar = () => {
       path: "/lecturer",
       end: false,
       icon: GraduationCap,
+      isHidden: true,
     },
     {
       label: t.profile?.sidebar?.organization,
       path: "/organization",
       end: false,
       icon: Building2,
+      isHidden: true,
     },
     {
       label: t.profile?.sidebar?.setting,
       path: "/setting",
       end: false,
       icon: Settings,
+      isHidden: true,
     },
-  ]
+  ].filter((item) => !item.isHidden)
 
   return (
-    <div className="flex flex-col space-y-1">
+    <div className="flex flex-col h-full text-gray-800">
       {menuItems.map((item) => (
         <NavLink
           key={item.path}
           to={item.path}
           end={item.end}
-          className={({ isActive }) =>
-            `flex w-full h-10 items-center gap-3 px-4 text-left text-sm transition-colors rounded-[5px] ${
-              isActive
-                ? "bg-[#F2F2F2] text-[#990011] hover:bg-[#E6E6E6] hover:text-[#990011]"
-                : "text-gray-700 hover:bg-[#F2F2F2] hover:text-gray-900"
-            }`
-          }
+          className={getLinkClasses}
         >
-          {({ isActive }) => (
-            <>
-              <item.icon className={isActive ? "text-[#990011]" : ""} />
-              <span>{item.label}</span>
-            </>
-          )}
+          <item.icon className="w-5 h-5" />
+          <span className="text-sm">{item.label}</span>
         </NavLink>
       ))}
     </div>

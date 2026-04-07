@@ -104,7 +104,7 @@ export default {
         search: "0 4px 12px rgba(0, 0, 0, 0.1)",
       },
       fontFamily: {
-        sans: ["Poppins", "sans-serif"],
+        sans: ["var(--font-outfit)"],
       },
     },
   },

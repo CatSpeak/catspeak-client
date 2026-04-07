@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
-import { Typography } from "@mui/material"
+
 import { PolicyModal } from "@/features/auth"
 
 const FooterBottom = () => {
@@ -28,26 +28,26 @@ const FooterBottom = () => {
             className="hover:text-yellow-400 transition"
             onClick={handleOpenPolicy(footerText.policies.privacy)}
           >
-            <Typography variant="caption" className="text-sm whitespace-nowrap">
+            <span className="text-sm whitespace-nowrap">
               {footerText.policies.privacy}
-            </Typography>
+            </span>
           </button>
           <button
             type="button"
             className="hover:text-yellow-400 transition"
             onClick={handleOpenPolicy(footerText.policies.terms)}
           >
-            <Typography variant="caption" className="text-sm whitespace-nowrap">
+            <span className="text-sm whitespace-nowrap">
               {footerText.policies.terms}
-            </Typography>
+            </span>
           </button>
         </div>
 
         {/* Center copyright */}
         <div className="text-gray-400 uppercase text-center flex-shrink-0 mx-4 order-3 lg:order-2">
-          <Typography variant="caption" className="text-xs">
+          <span className="text-xs">
             {footerText.copyright.replace("{year}", currentYear)}
-          </Typography>
+          </span>
         </div>
 
         {/* Right policies */}
@@ -57,18 +57,18 @@ const FooterBottom = () => {
             className="hover:text-yellow-400 transition"
             onClick={handleOpenPolicy(footerText.policies.payment)}
           >
-            <Typography variant="caption" className="text-sm whitespace-nowrap">
+            <span className="text-sm whitespace-nowrap">
               {footerText.policies.payment}
-            </Typography>
+            </span>
           </button>
           <button
             type="button"
             className="hover:text-yellow-400 transition"
             onClick={handleOpenPolicy(footerText.policies.copyright)}
           >
-            <Typography variant="caption" className="text-sm whitespace-nowrap">
+            <span className="text-sm whitespace-nowrap">
               {footerText.policies.copyright}
-            </Typography>
+            </span>
           </button>
         </div>
       </div>

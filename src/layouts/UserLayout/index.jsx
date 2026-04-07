@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { Layout, theme } from "antd"
+import { Layout } from "lucide-react" // if needed elsewhere, otherwise just removed
 import { Outlet, ScrollRestoration } from "react-router-dom"
 import HeaderBar from "../../shared/components/Header/HeaderBar"
 import Footer from "../../shared/components/Footer"
 import Auth from "@/features/auth/components"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 
-const { Content } = Layout
+
 
 const UserLayout = ({ showFooter = true }) => {
   const [authModal, setAuthModal] = useState({
@@ -29,9 +29,7 @@ const UserLayout = ({ showFooter = true }) => {
       redirectAfterLogin: null,
     }))
 
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken()
+
 
   return (
     <AuthModalContext.Provider
@@ -41,13 +39,13 @@ const UserLayout = ({ showFooter = true }) => {
         redirectAfterLogin: authModal.redirectAfterLogin,
       }}
     >
-      <Layout className="flex justify-center bg-white">
+      <div className="flex flex-col min-h-screen justify-center bg-white">
         {/* Header full width */}
         <HeaderBar onGetStarted={() => openAuthModal("login")} />
 
-        <Content className="w-full flex justify-center">
+        <main className="w-full flex-1 flex flex-col justify-center">
           <Outlet />
-        </Content>
+        </main>
 
         {/* Footer full width */}
         {showFooter && <Footer />}
@@ -60,7 +58,7 @@ const UserLayout = ({ showFooter = true }) => {
         />
 
         <ScrollRestoration />
-      </Layout>
+      </div>
     </AuthModalContext.Provider>
   )
 }

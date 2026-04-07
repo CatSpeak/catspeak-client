@@ -1,11 +1,10 @@
 import React from "react"
-import { Typography } from "@mui/material"
+
 import { Tower, Mountain, FooterBG } from "@/shared/assets/images/home/footer"
 import { IconLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 
-import Facebook from "@mui/icons-material/Facebook"
-import YouTube from "@mui/icons-material/YouTube"
+import { Facebook } from "lucide-react"
 import { SiZalo } from "react-icons/si"
 
 import CommunitySection from "./CommunitySection"
@@ -27,13 +26,11 @@ const Footer = () => {
     <footer className="relative overflow-hidden bg-white pt-24">
       {/* Title */}
       <div className="flex flex-col items-center justify-center gap-3">
-        <Typography
-          variant="h4"
-          component="div"
-          className="uppercase text-black font-black tracking-[0.2em] text-center"
+        <div
+          className="uppercase text-black font-black tracking-[0.2em] text-center text-4xl"
         >
           {footerText.title}
-        </Typography>
+        </div>
         <div className="h-1.5 w-24 bg-gradient-to-r from-cath-red-600 to-orange-400 rounded-full" />
       </div>
 
@@ -68,7 +65,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#910B09] shadow-lg transition-all duration-300 hover:bg-[#910B09] hover:text-white"
             >
-              <Facebook sx={{ fontSize: 32 }} />
+              <Facebook size={32} />
             </a>
 
             <a

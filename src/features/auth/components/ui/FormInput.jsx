@@ -1,23 +1,24 @@
-import { Form, Input } from "antd"
+import React from "react"
 import colors from "@/shared/utils/colors"
 
-const FormInput = ({ name, label, placeholder, rules, type = "text" }) => {
-  const InputComponent = type === "password" ? Input.Password : Input
-
+const FormInput = ({ name, label, placeholder, rules, type = "text", value, onChange }) => {
   return (
-    <Form.Item
-      name={name}
-      label={
-        <span className="text-sm font-semibold text-gray-700">{label}</span>
-      }
-      rules={rules}
-    >
-      <InputComponent
+    <div className="flex flex-col gap-1 w-full text-left">
+      {label && (
+        <label htmlFor={name} className="text-sm font-semibold text-gray-700">
+          {label}
+        </label>
+      )}
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
         placeholder={placeholder}
-        className="rounded-full px-4 py-3 text-base"
-        style={{ borderColor: colors.border }}
+        className="w-full rounded-full border border-gray-300 px-4 py-3 text-base outline-none transition focus:border-[#72000d]"
       />
-    </Form.Item>
+    </div>
   )
 }
 

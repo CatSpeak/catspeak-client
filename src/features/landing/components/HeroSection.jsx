@@ -2,7 +2,6 @@ import { HeroImage } from "@/shared/assets/images/home"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { LiquidGlassButton } from "@/shared/components"
 import { useAuth } from "@/features/auth"
-import { Typography } from "@mui/material"
 
 const HeroSection = ({ openAuthModal }) => {
   const { t } = useLanguage()
@@ -50,37 +49,12 @@ const HeroSection = ({ openAuthModal }) => {
           {/* Right Side - Text Content */}
           <div className="flex h-full">
             <div className="flex w-full flex-col justify-center gap-4 sm:gap-6 rounded-[20px] sm:rounded-[24px] border-2 border-white p-6 sm:p-8 lg:p-10 xl:p-12 backdrop-blur-sm">
-              <Typography
-                variant="h3"
-                component="h1"
-                className="font-black leading-tight text-[#f4ab1b]"
-                sx={{
-                  fontSize: {
-                    xs: "1.5rem",
-                    sm: "1.875rem",
-                    lg: "2.25rem",
-                    xl: "3rem",
-                  },
-                  fontWeight: "bold",
-                }}
-              >
+              <h1 className="font-bold text-[#f4ab1b] text-2xl sm:text-3xl lg:text-4xl xl:text-5xl">
                 {t.home.heroTitle}
-              </Typography>
-              <Typography
-                variant="body1"
-                component="p"
-                className="leading-relaxed text-white"
-                sx={{
-                  fontSize: {
-                    xs: "0.875rem",
-                    sm: "1rem",
-                    lg: "1.125rem",
-                    xl: "1.25rem",
-                  },
-                }}
-              >
+              </h1>
+              <p className="leading-relaxed text-white text-sm sm:text-base lg:text-lg xl:text-xl font-medium">
                 {t.home.heroSubtitle}
-              </Typography>
+              </p>
             </div>
           </div>
         </div>

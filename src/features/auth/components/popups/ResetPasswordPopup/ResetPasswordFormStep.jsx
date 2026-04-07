@@ -78,7 +78,7 @@ const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
 
   return (
     <div>
-      <h2 className="mb-1 text-center text-3xl font-black text-[#8f0d15] font-['Inter']">
+      <h2 className="mb-1 text-center text-3xl font-black text-[#8f0d15]">
         {authText.forgotStep3Title || "Reset Password"}
       </h2>
       <p className="mb-6 text-center text-sm text-[#7A7574]">
