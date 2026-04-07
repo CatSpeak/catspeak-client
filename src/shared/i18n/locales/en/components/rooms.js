@@ -228,6 +228,18 @@ export default {
       guest: "Guest",
       youSuffix: "(You)",
     },
+    webviewBlock: {
+      title: "Open in Browser",
+      genericApp: "This app",
+      description: "You're using {app}'s built-in browser, which doesn't support video calls properly.",
+      instruction: "How to join:",
+      copyLink: "Copy Link",
+      copied: "Copied!",
+      openInChrome: "Open in Chrome",
+      step1: "Copy the link above",
+      step2: "Open Chrome or Safari",
+      step3: "Paste the link and join the call",
+    },
   },
   roomFullModal: {
     title: "Room is full",

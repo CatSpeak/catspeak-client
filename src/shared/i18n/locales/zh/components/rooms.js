@@ -197,6 +197,18 @@ export default {
       guest: "访客",
       youSuffix: "（你）",
     },
+    webviewBlock: {
+      title: "请在浏览器中打开",
+      genericApp: "此应用",
+      description: "您正在使用 {app} 的内置浏览器，不支持正常的视频通话。",
+      instruction: "如何加入：",
+      copyLink: "复制链接",
+      copied: "已复制！",
+      openInChrome: "在 Chrome 中打开",
+      step1: "复制上方链接",
+      step2: "打开 Chrome 或 Safari",
+      step3: "粘贴链接并加入通话",
+    },
   },
   roomFullModal: {
     title: "房间已满",

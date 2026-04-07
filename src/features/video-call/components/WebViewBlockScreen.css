@@ -1,0 +1,174 @@
+.webview-block-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fdf6f0 0%, #fceee4 50%, #f9e0d0 100%);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.webview-block-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem 2rem;
+  background: white;
+  border-radius: 1.25rem;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+/* Icon circle */
+.webview-block-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.25rem;
+  background: #fff3e6;
+  border-radius: 50%;
+  color: #e67e22;
+}
+
+/* Title */
+.webview-block-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+/* Description */
+.webview-block-description {
+  margin: 0 0 1.5rem;
+  font-size: 0.9375rem;
+  color: #555;
+  line-height: 1.55;
+}
+
+/* URL box */
+.webview-block-url-box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.625rem;
+  overflow: hidden;
+}
+
+.webview-block-url-text {
+  font-size: 0.8125rem;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  user-select: all;
+}
+
+/* Copy button */
+.webview-block-copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  margin-bottom: 0.75rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: #990011;
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.webview-block-copy-btn:active {
+  transform: scale(0.97);
+}
+
+.webview-block-copy-btn.copied {
+  background: #27ae60;
+}
+
+/* Open in Chrome button */
+.webview-block-chrome-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 0.75rem;
+  border: 1.5px solid #990011;
+  border-radius: 0.75rem;
+  background: white;
+  color: #990011;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.webview-block-chrome-btn:active {
+  transform: scale(0.97);
+  background: #fdf6f0;
+}
+
+/* Steps section */
+.webview-block-steps {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #eee;
+}
+
+.webview-block-steps-heading {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.webview-block-steps-list {
+  margin: 0;
+  padding: 0 0 0 1.25rem;
+  text-align: left;
+}
+
+.webview-block-steps-list li {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.webview-block-steps-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .webview-block-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .webview-block-title {
+    font-size: 1.25rem;
+  }
+}

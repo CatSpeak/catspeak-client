@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react"
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
@@ -15,8 +15,10 @@ import {
 } from "@/features/rooms"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { enterCall, setPiP } from "@/store/slices/videoCallSlice"
+import { detectWebView } from "@/shared/utils/isWebView"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
+import WebViewBlockScreen from "../components/WebViewBlockScreen"
 import SessionErrorScreen from "../components/SessionErrorScreen"
 
 /**
@@ -63,6 +65,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { t, language } = useLanguage()
+
+  // ── WebView gate (must be before any conditional hooks) ──
+  const webview = useMemo(() => detectWebView(), [])
 
   // Detect if user arrived from queue match
   const fromQueue = location.state?.fromQueue === true
@@ -252,6 +257,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   // ========================================
   //  RENDER: Guards & phase-based rendering
   // ========================================
+
+  // WebView block — must come first
+  if (webview.isWebView) {
+    return <WebViewBlockScreen appName={webview.appName} />
+  }
 
   // Loading room data
   if (

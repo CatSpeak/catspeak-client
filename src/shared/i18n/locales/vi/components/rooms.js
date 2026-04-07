@@ -206,6 +206,18 @@ export default {
       guest: "Khách",
       youSuffix: "(Bạn)",
     },
+    webviewBlock: {
+      title: "Mở trong trình duyệt",
+      genericApp: "Ứng dụng này",
+      description: "Bạn đang dùng trình duyệt tích hợp của {app}, không hỗ trợ gọi video ổn định.",
+      instruction: "Cách tham gia:",
+      copyLink: "Sao chép liên kết",
+      copied: "Đã sao chép!",
+      openInChrome: "Mở bằng Chrome",
+      step1: "Sao chép liên kết ở trên",
+      step2: "Mở Chrome hoặc Safari",
+      step3: "Dán liên kết và tham gia cuộc gọi",
+    },
   },
   roomFullModal: {
     title: "Phòng đã đầy",
