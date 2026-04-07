@@ -6,7 +6,6 @@ import {
   useLocalParticipant,
   useChat,
   useConnectionState,
-  RoomAudioRenderer,
 } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
 
@@ -16,7 +15,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallCleanup } from "@/features/video-call/hooks/useCallCleanup"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
 import { useAudioDebug } from "@/features/video-call/hooks/useAudioDebug"
-import { useWebViewAudioFix } from "@/features/video-call/hooks/useWebViewAudioFix"
+import { useManualAudioRenderer } from "@/features/video-call/hooks/useManualAudioRenderer"
 import {
   getNavigate,
   getLocation,
@@ -64,8 +63,10 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   // ── Audio debug logging (remove after diagnosing audio issue) ──
   useAudioDebug()
 
-  // ── WebView audio fix (Zalo, Messenger, LINE, etc.) ──
-  useWebViewAudioFix()
+  // ── Custom audio renderer (replaces RoomAudioRenderer) ──
+  // Manages <audio> elements imperatively via the DOM instead of React
+  // rendering, which fixes audio in WebView browsers (Zalo, Messenger, etc.)
+  useManualAudioRenderer()
 
   const chatState = useChat()
   const chatMessages = chatState.chatMessages ?? []
@@ -162,7 +163,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
 
   return (
     <ContextProvider value={value}>
-      <RoomAudioRenderer />
+      {/* Audio is handled by useManualAudioRenderer (imperative DOM) */}
       {children}
     </ContextProvider>
   )
