@@ -21,8 +21,6 @@ const EventDetailModal = ({ event, onClose }) => {
   const ev = detail ? { ...event, ...detail, currentParticipants: detail.currentParticipants ?? event.currentParticipants } : event
   const headerColor = ev.color || "#B91264"
 
-  console.log(detail)
-
   if (isEditing) {
     return (
       <CreateEventModal editEvent={ev} onClose={() => setIsEditing(false)} />

@@ -42,4 +42,6 @@ export default {
     feedback: "Send Feedback",
     menu: "Menu",
   },
+  created: "Created",
+  expiresIn: "Expires in",
 }

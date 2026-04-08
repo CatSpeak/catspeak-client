@@ -21,8 +21,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   const isProcessing = isRegistering || isCancelling
 
-  console.log(event)
-
   const handleRegister = async () => {
     if (isRegistered) {
       try {

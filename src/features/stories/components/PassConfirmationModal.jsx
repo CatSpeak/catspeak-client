@@ -34,28 +34,51 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
 
   if (!story) return null
 
+  const createdAt = dayjs(story.createDate)
+  const expiresAt = dayjs(story.expiresAt)
+  const now = dayjs()
+  const timeRemaining = expiresAt.diff(now, "minute")
+  const hoursRemaining = Math.max(0, Math.floor(timeRemaining / 60))
+  const minutesRemaining = Math.max(0, timeRemaining % 60)
+
   return (
     <Modal open={open} onClose={handleClose}>
       <div className="space-y-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <Avatar
-              src={story.avatarImageUrl}
-              name={story.username || t.catSpeak?.anonymous || "Anonymous"}
-              size={40}
-            />
-            <div className="flex flex-col">
-              <span className="font-semibold">
-                {story.username || t.catSpeak?.anonymous || "Anonymous"}
-              </span>
-              <span className="text-sm text-[#606060]">
-                {story.languageCommunity} • {dayjs(story.createDate).fromNow()}
-              </span>
-            </div>
+        <div className="flex items-center gap-3">
+          <Avatar
+            src={story.avatarImageUrl}
+            name={story.username || t.catSpeak?.anonymous || "Anonymous"}
+            size={40}
+          />
+          <div className="flex flex-col">
+            <span className="font-semibold">
+              {story.username || t.catSpeak?.anonymous || "Anonymous"}
+            </span>
+          </div>
+        </div>
+
+        <div className="min-h-[40px] w-full break-words rounded-lg bg-[#F2F2F2] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap">
+          {story.storyContent}
+        </div>
+
+        <div className="space-y-4 text-sm">
+          <div>
+            <p className="text-[#7A7574]">{t.catSpeak?.created || "Created"}:</p>
+            <p>{createdAt.format("MMM D, YYYY h:mm A")}</p>
           </div>
 
-          <div className="w-full break-words rounded-lg bg-[#F2F2F2] px-3 py-2 whitespace-pre-wrap">
-            {story.storyContent}
+          <div>
+            <p className="text-[#7A7574]">
+              {t.catSpeak?.expiresIn || "Expires in"}:
+            </p>
+
+            <div className="flex items-center gap-2">
+              <p>
+                {hoursRemaining > 0 && `${hoursRemaining}h `}
+                {minutesRemaining}m
+              </p>
+              <p>{expiresAt.format("MMM D, YYYY h:mm A")}</p>
+            </div>
           </div>
         </div>
 

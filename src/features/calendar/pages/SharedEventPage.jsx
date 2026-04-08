@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import { useGetSharedEventQuery } from "@/store/api/eventsApi"
 import { IconLogo } from "@/shared/assets/icons/logo"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const formatTime = (isoString) => {
   if (!isoString) return ""
@@ -34,25 +35,29 @@ const formatDate = (isoString) => {
   })
 }
 
-const FREQUENCY_LABEL = {
-  DAILY: "Hàng ngày",
-  WEEKLY: "Hàng tuần",
-  MONTHLY: "Hàng tháng",
-  YEARLY: "Hàng năm",
-}
-
 const SharedEventPage = () => {
+  const { t } = useLanguage()
   const { token } = useParams()
   const { data, isLoading, isError } = useGetSharedEventQuery(token, {
     skip: !token,
   })
+
+  const getFrequencyLabel = (freq) => {
+    switch (freq) {
+      case "DAILY": return t.calendar?.recurrence?.daily || "Hàng ngày";
+      case "WEEKLY": return t.calendar?.recurrence?.weekly || "Hàng tuần";
+      case "MONTHLY": return t.calendar?.recurrence?.monthly || "Hàng tháng";
+      case "YEARLY": return t.calendar?.recurrence?.yearly || "Hàng năm";
+      default: return freq;
+    }
+  }
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
         <div className="flex flex-col items-center gap-4 text-slate-500">
           <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-          <p className="text-sm font-medium">Đang tải thông tin sự kiện…</p>
+          <p className="text-sm font-medium">{t.calendar?.shared?.loadingEventInfo || "Đang tải thông tin sự kiện…"}</p>
         </div>
       </div>
     )
@@ -68,17 +73,16 @@ const SharedEventPage = () => {
             strokeWidth={1.5}
           />
           <h1 className="text-xl font-bold text-gray-800 mb-2">
-            Liên kết không hợp lệ
+            {t.calendar?.shared?.invalidLink || "Liên kết không hợp lệ"}
           </h1>
           <p className="text-sm text-gray-500 mb-6">
-            Liên kết chia sẻ này đã hết hạn, đã đạt giới hạn lượt xem, hoặc
-            không tồn tại.
+            {t.calendar?.shared?.invalidLinkDesc || "Liên kết chia sẻ này đã hết hạn, đã đạt giới hạn lượt xem, hoặc không tồn tại."}
           </p>
           <Link
             to="/"
             className="inline-block bg-slate-800 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-slate-700 transition-colors"
           >
-            Về trang chủ
+            {t.calendar?.shared?.backToHome || "Về trang chủ"}
           </Link>
         </div>
       </div>
@@ -97,19 +101,19 @@ const SharedEventPage = () => {
             {shareLink.isValid ? (
               <span className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
                 <CheckCircle2 size={13} />
-                Liên kết hợp lệ
+                {t.calendar?.shared?.validLink || "Liên kết hợp lệ"}
                 {shareLink.remainingUses > 0 &&
-                  ` · Còn ${shareLink.remainingUses} lượt`}
+                  ` · ${(t.calendar?.shared?.remainingUses || "Còn {{count}} lượt").replace("{{count}}", shareLink.remainingUses)}`}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full">
                 <AlertTriangle size={13} />
-                Liên kết hết hạn
+                {t.calendar?.shared?.expiredLink || "Liên kết hết hạn"}
               </span>
             )}
             {shareLink.expiresAt && (
               <span className="text-xs text-slate-400">
-                Hết hạn: {formatDate(shareLink.expiresAt)}
+                {t.calendar?.shared?.expiresAt || "Hết hạn:"} {formatDate(shareLink.expiresAt)}
               </span>
             )}
           </div>
@@ -130,16 +134,16 @@ const SharedEventPage = () => {
             <div className="flex items-center gap-2 mb-3 relative z-10">
               {event.visibilityScope === "PUBLIC" ? (
                 <span className="flex items-center gap-1 text-[11px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">
-                  <Globe size={10} /> Công khai
+                  <Globe size={10} /> {t.calendar?.public || "Công khai"}
                 </span>
               ) : event.visibilityScope ? (
                 <span className="flex items-center gap-1 text-[11px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">
-                  <Lock size={10} /> Riêng tư
+                  <Lock size={10} /> {t.calendar?.private || "Riêng tư"}
                 </span>
               ) : null}
               {event.isRecurring && (
                 <span className="flex items-center gap-1 text-[11px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">
-                  <RefreshCw size={10} /> Lặp lại
+                  <RefreshCw size={10} /> {t.calendar?.recurring || "Lặp lại"}
                 </span>
               )}
             </div>
@@ -147,7 +151,7 @@ const SharedEventPage = () => {
             <h1 className="text-3xl font-black uppercase tracking-wide leading-tight mb-4 relative z-10">
               {event.title || (
                 <span className="opacity-60 italic text-xl">
-                  Không có tiêu đề
+                  {t.calendar?.noTitle || "Không có tiêu đề"}
                 </span>
               )}
             </h1>
@@ -158,7 +162,7 @@ const SharedEventPage = () => {
                 alt="Location"
                 className="w-5 h-5 object-cover"
               />
-              <span>{event.location || "Đại học FPT"}</span>
+              <span>{event.location || t.calendar?.locationDefault || "Đại học FPT"}</span>
             </div>
           </div>
 
@@ -192,14 +196,14 @@ const SharedEventPage = () => {
             {event.maxParticipants != null && (
               <div className="flex items-start gap-3">
                 <Users size={18} className="mt-0.5 text-slate-400 shrink-0" />
-                <span>Tối đa {event.maxParticipants} người tham gia</span>
+                <span>{(t.calendar?.shared?.maxParticipantsCount || "Tối đa {{count}} người tham gia").replace("{{count}}", event.maxParticipants)}</span>
               </div>
             )}
 
             {/* Description */}
             {event.description && (
               <div className="bg-gray-50 rounded-xl px-4 py-3">
-                <p className="font-semibold text-gray-900 mb-1">Mô tả</p>
+                <p className="font-semibold text-gray-900 mb-1">{t.calendar?.description || "Mô tả"}</p>
                 <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
                   {event.description}
                 </p>
@@ -210,7 +214,7 @@ const SharedEventPage = () => {
             {event.conditions && event.conditions.length > 0 && (
               <div>
                 <p className="font-semibold text-gray-900 mb-2">
-                  Điều kiện tham gia
+                  {t.calendar?.shared?.conditionsJoin || "Điều kiện tham gia"}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {event.conditions.map((c) => (
@@ -230,12 +234,11 @@ const SharedEventPage = () => {
             {/* Recurrence */}
             {event.isRecurring && event.recurrenceRule && (
               <div className="bg-gray-50 rounded-xl px-4 py-3">
-                <p className="font-semibold text-gray-900 mb-1">Lặp lại</p>
+                <p className="font-semibold text-gray-900 mb-1">{t.calendar?.recurring || "Lặp lại"}</p>
                 <p className="text-gray-600">
-                  {FREQUENCY_LABEL[event.recurrenceRule.frequency] ??
-                    event.recurrenceRule.frequency}
+                  {getFrequencyLabel(event.recurrenceRule.frequency)}
                   {event.recurrenceRule.interval > 1
-                    ? ` (mỗi ${event.recurrenceRule.interval} lần)`
+                    ? ` (${t.calendar?.every || "mỗi"} ${event.recurrenceRule.interval} ${t.calendar?.intervalUnit?.default || "lần"})`
                     : ""}
                 </p>
                 {event.recurrenceRule.recurrenceStartDate &&
@@ -261,7 +264,7 @@ const SharedEventPage = () => {
               className="block w-full text-center text-white font-bold py-3 rounded-xl text-base transition-all hover:opacity-90 active:scale-[.98]"
               style={{ backgroundColor: headerColor }}
             >
-              Xem thêm sự kiện trên CatSpeak
+              {t.calendar?.shared?.seeMoreEvents || "Xem thêm sự kiện trên CatSpeak"}
             </Link>
           </div>
         </div>

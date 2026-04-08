@@ -1,4 +1,4 @@
-import { AdminLayout, MainLayout, UserLayout, VideoCallLayout } from "@layouts"
+import { MainLayout, UserLayout, VideoCallLayout } from "@layouts"
 import { PageNotFound, ForbiddenPage } from "@/shared/pages"
 import { Outlet, useNavigate, useLocation } from "react-router-dom"
 import { useRegisterNavigate } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -34,7 +34,6 @@ import LecturerPage from "@/features/user/pages/LecturerPage"
 import OrganizationPage from "@/features/user/pages/OrganizationPage"
 import AccountSettingsPage from "@/features/user/pages/AccountSettingsPage"
 import SettingsPage from "@/features/settings/pages/SettingsPage"
-import { AdminPage } from "@/features/admin/pages/AdminPage"
 
 // Language routing components
 import LanguageLayout from "./LanguageLayout"
@@ -248,21 +247,7 @@ const routesConfig = [
       },
     ],
   },
-  {
-    path: "/admin",
-    element: (
-      <AuthGuard allowedRoles={["Admin"]}>
-        <AdminLayout />
-      </AuthGuard>
-    ),
-    children: [
-      {
-        index: true,
-        element: <AdminPage />,
-      },
-      { path: "*", element: <PageNotFound /> },
-    ],
-  },
+
   {
     path: "/queue",
     element: (

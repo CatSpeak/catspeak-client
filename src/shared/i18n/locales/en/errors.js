@@ -3,6 +3,14 @@ export default {
     noRoomFound: "No rooms found. Try different settings or create one!",
     genericJoinError: "Failed to join room. Please try again.",
   },
+  pageNotFound: {
+    title: "Page not found",
+    description: "The page you are looking for does not exist or has been moved. Please check the URL."
+  },
+  forbidden: {
+    title: "You do not have permission to access",
+    description: "Please log in with an authorized account or contact the administrator to request access. The system has recorded your request."
+  },
   serverDown: {
     title: "Server Unavailable",
     message:

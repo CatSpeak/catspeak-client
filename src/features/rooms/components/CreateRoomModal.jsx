@@ -90,14 +90,6 @@ const CreateRoomModal = ({ open, onCancel }) => {
     const topicsList = topics.length > 0 ? topics : ["Other"]
     topicsList.forEach((topic) => formData.append("Topics", topic))
 
-    console.log("[CreateRoomModal] CreateRoom payload:", {
-      Name: name || "",
-      RoomType: "Group",
-      LanguageType: selectedLanguage,
-      RequiredLevel: selectedLevel || "",
-      Topics: topicsList,
-    })
-
     try {
       const createResult = await createRoom(formData).unwrap()
 

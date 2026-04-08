@@ -13,20 +13,20 @@ const MailHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
   return (
     <div className="flex flex-col h-full w-full sm:w-[260px] shrink-0">
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-[38px] leading-[1.1] font-black text-black tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-black tracking-tight">
           {t.calendar?.calendar || "LỊCH"}
         </h2>
-        <h2 className="text-[38px] leading-[1.1] font-black text-black tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-black tracking-tight">
           {t.calendar?.offline || "OFFLINE"}
         </h2>
-        <h2 className="text-[38px] leading-[1.1] font-black text-black tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-black tracking-tight">
           {t.calendar?.meeting || "MEETING"}
         </h2>
-        <h2 className="text-[38px] leading-[1.1] font-black text-[#990011] tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-[#990011] tracking-tight">
           {t.calendar?.month || "THÁNG"} {monthString}
         </h2>
         <div className="flex items-center gap-3">
-          <h2 className="text-[38px] leading-[1.1] font-black text-[#990011] tracking-tight">
+          <h2 className="text-[38px] leading-[1.1] font-bold text-[#990011] tracking-tight">
             {yearString}
           </h2>
           <div className="flex items-center gap-1 mt-1">

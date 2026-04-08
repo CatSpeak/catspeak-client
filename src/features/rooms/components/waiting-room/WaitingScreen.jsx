@@ -28,22 +28,26 @@ const WaitingScreen = ({
   const communityLanguage = localStorage.getItem("communityLanguage") || "en"
   const effectiveParticipantCount = participantCount ?? participants.length
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center relative bg-gray-50 p-5">
-      {/* Back Button */}
-      <div className="text-sm absolute top-5 left-5 md:top-8 md:left-8 z-10">
-        <BackButton
-          onClick={() =>
-            navigate({
-              pathname: `/${communityLanguage}/community`,
-              search: searchParams.toString(),
-            })
-          }
-        >
-          {t.rooms.waitingScreen.backToCommunity}
-        </BackButton>
+    <div className="flex min-h-screen w-full flex-col bg-gray-50">
+      {/* Header */}
+      <div className="flex h-[72px] w-full items-center justify-start px-5">
+        <div className="text-sm">
+          <BackButton
+            onClick={() =>
+              navigate({
+                pathname: `/${communityLanguage}/community`,
+                search: searchParams.toString(),
+              })
+            }
+          >
+            {t.rooms.waitingScreen.backToCommunity}
+          </BackButton>
+        </div>
       </div>
 
-      <div className="mb-6 text-center">
+      {/* Main Content */}
+      <div className="flex flex-1 w-full flex-col items-center justify-center p-5">
+        <div className="mb-4 text-center">
         <h4 className="mb-2 font-semibold text-2xl md:text-4xl">
           {getTranslatedRoomName(session?.roomName, t) ||
             t.rooms.waitingScreen.readyToJoin}
@@ -75,7 +79,7 @@ const WaitingScreen = ({
       </div>
 
       {/* Participants + Video stacked and centered */}
-      <div className="flex w-full max-w-[960px] flex-col items-center justify-center gap-6 mb-6">
+      <div className="flex w-full max-w-[960px] flex-col items-center justify-center gap-4 mb-4">
         <ParticipantsPreview
           participants={participants}
           participantCount={participantCount}
@@ -110,6 +114,7 @@ const WaitingScreen = ({
           {t.rooms.waitingScreen.joinedAs}{" "}
           <span className="font-medium text-gray-900">{user?.username}</span>
         </p>
+      </div>
       </div>
     </div>
   )

@@ -58,4 +58,17 @@ export default {
   ticketPrice: "Ticket price",
   free: "Free",
   edit: "Edit",
+  shared: {
+    loadingEventInfo: "Loading event info...",
+    invalidLink: "Invalid link",
+    invalidLinkDesc: "This shared link has expired, reached its view limit, or does not exist.",
+    backToHome: "Back to home",
+    validLink: "Valid link",
+    remainingUses: "{{count}} uses left",
+    expiredLink: "Expired link",
+    expiresAt: "Expires at:",
+    maxParticipantsCount: "Max {{count}} participants",
+    conditionsJoin: "Join conditions",
+    seeMoreEvents: "See more events on CatSpeak",
+  }
 }

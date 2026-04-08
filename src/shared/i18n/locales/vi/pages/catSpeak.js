@@ -42,4 +42,6 @@ export default {
     feedback: "Gửi ý kiến phản hồi",
     menu: "Menu",
   },
+  created: "Đã tạo",
+  expiresIn: "Hết hạn trong",
 }

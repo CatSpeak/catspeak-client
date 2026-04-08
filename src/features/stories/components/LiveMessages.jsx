@@ -69,15 +69,24 @@ const LiveMessages = ({ languageCommunity }) => {
         onSend={handleSend}
         myCount={myCount}
         totalCount={totalCount}
-        variant={isEmpty ? "empty" : "default"}
       />
 
       {isLoading ? (
         <div className="flex-1 min-h-0"></div>
       ) : isEmpty ? (
-        <div className="relative my-6 flex-1 w-full max-w-full overflow-hidden rounded-3xl bg-white/60 px-2 py-8 text-center">
-          <div className="mt-4 text-[#7A7574] italic">
-            {t.catSpeak.mail.noStories}
+        <div className="relative my-6 flex w-full max-w-full flex-1 items-center justify-center overflow-hidden rounded-3xl bg-white/60 p-6">
+          <div className="flex max-w-sm flex-col items-center gap-4 rounded-2xl bg-white/50 p-8 text-center shadow-sm backdrop-blur-sm">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-3xl shadow-sm">
+              💬
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-medium text-[#404040]">
+                {t.catSpeak?.mail?.noStories}
+              </h3>
+              <p className="text-sm text-[#707070]">
+                {t.catSpeak?.mail?.placeholderEmpty}
+              </p>
+            </div>
           </div>
         </div>
       ) : (

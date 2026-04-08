@@ -10,7 +10,6 @@ const EventBlock = ({
   onClick,
   colWidth = 180,
 }) => {
-  console.log(event)
   const start = parseTime(event.startTime)
   const end = parseTime(event.endTime)
   // Minimum height of 70px to fit contents neatly

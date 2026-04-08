@@ -58,4 +58,17 @@ export default {
   ticketPrice: "Giá vé",
   free: "Miễn phí",
   edit: "Chỉnh sửa",
+  shared: {
+    loadingEventInfo: "Đang tải thông tin sự kiện…",
+    invalidLink: "Liên kết không hợp lệ",
+    invalidLinkDesc: "Liên kết chia sẻ này đã hết hạn, đã đạt giới hạn lượt xem, hoặc không tồn tại.",
+    backToHome: "Về trang chủ",
+    validLink: "Liên kết hợp lệ",
+    remainingUses: "Còn {{count}} lượt",
+    expiredLink: "Liên kết hết hạn",
+    expiresAt: "Hết hạn:",
+    maxParticipantsCount: "Tối đa {{count}} người tham gia",
+    conditionsJoin: "Điều kiện tham gia",
+    seeMoreEvents: "Xem thêm sự kiện trên CatSpeak",
+  }
 }
