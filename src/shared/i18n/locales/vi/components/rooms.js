@@ -24,6 +24,8 @@ export default {
     doYouLikeReading: "Bạn có thích đọc sách?",
     aboutLove: "Chuyện về tình yêu",
     genZChineseCulture: "Văn hóa Gen Z Trung Quốc",
+    famousPlaces: "Các điểm du lịch nổi tiếng",
+    yourCountryCulture: "Văn hóa đất nước",
   },
   heroCarousel: {
     comingSoonTitle: "Sắp ra mắt",

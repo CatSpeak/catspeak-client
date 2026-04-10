@@ -23,6 +23,8 @@ export default {
     doYouLikeReading: "Do you like reading books?",
     aboutLove: "About love",
     genZChineseCulture: "Gen Z Chinese Culture",
+    famousPlaces: "Famous Place",
+    yourCountryCulture: "Your country's culture",
   },
   heroCarousel: {
     comingSoonTitle: "Coming Soon",

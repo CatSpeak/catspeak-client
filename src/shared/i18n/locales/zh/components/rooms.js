@@ -22,6 +22,8 @@ export default {
     doYouLikeReading: "你喜欢读书吗？",
     aboutLove: "爱情的事情",
     genZChineseCulture: "Z世代中国文化",
+    famousPlaces: "著名旅游景点",
+    yourCountryCulture: "你国家的文化",
   },
   heroCarousel: {
     comingSoonTitle: "即将推出",

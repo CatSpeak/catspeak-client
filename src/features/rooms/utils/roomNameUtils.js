@@ -48,5 +48,19 @@ export const getTranslatedRoomName = (name, t) => {
     return t.rooms.specialNames.genZChineseCulture || name
   }
 
+  if (name === "著名旅游景点" || name === "Famous places" || name === "Famous Place") {
+    return t.rooms.specialNames.famousPlaces || name
+  }
+
+  if (
+    name === "你国家的文化" ||
+    name === "你的国家文化" ||
+    name === "你们国家的文化" ||
+    name === "Your Country's Culture" ||
+    name === "Your country's culture"
+  ) {
+    return t.rooms.specialNames.yourCountryCulture || name
+  }
+
   return name
 }
