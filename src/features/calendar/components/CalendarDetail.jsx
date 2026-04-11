@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from "@/store/slices/authSlice"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetEventsByDateQuery } from "@/store/api/eventsApi"
 import { processOverlappingEvents } from "../utils/EventUtils"
 import TimelineGrid from "./TimelineGrid"
@@ -13,7 +14,8 @@ const COL_WIDTH = 180 // minimum px width per overlapping event column
 
 const DEFAULT_COLOR = "#B91264"
 
-const MailCalendarDetail = ({ selectedDate, currentDate, onClose }) => {
+const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
+  const { t } = useLanguage()
   const scrollRef = useRef(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const currentUser = useSelector(selectCurrentUser)
@@ -43,6 +45,7 @@ const MailCalendarDetail = ({ selectedDate, currentDate, onClose }) => {
   // Map API events to the shape EventBlock expects
   const mappedEvents = useMemo(() => {
     if (!eventsByDateData?.events) return []
+
     return eventsByDateData.events.map((ev) => ({
       id: ev.occurrenceId ?? ev.eventId,
       eventId: ev.eventId,
@@ -50,6 +53,8 @@ const MailCalendarDetail = ({ selectedDate, currentDate, onClose }) => {
       title: ev.title,
       startTime: dayjs(ev.startTime).format("HH:mm"),
       endTime: dayjs(ev.endTime).format("HH:mm"),
+      originalStartTime: ev.startTime, // preserve full ISO for API calls
+      originalEndTime: ev.endTime, // preserve full ISO for API calls
       color: ev.color || DEFAULT_COLOR,
       isRegistered: ev.isRegistered,
       currentParticipants: ev.currentParticipants,
@@ -69,14 +74,14 @@ const MailCalendarDetail = ({ selectedDate, currentDate, onClose }) => {
 
   return (
     <div className="col-span-7 w-full h-full min-h-[400px] sm:min-h-[500px]">
-      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-[#E5E5E5] shadow-sm p-3 sm:p-6 w-full flex flex-col h-[500px] sm:h-[700px] transition-all">
+      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-[#E5E5E5] shadow-sm p-3 w-full flex flex-col h-[500px] sm:h-[700px] transition-all">
         {/* Calendar Day View Scroll Container */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto overflow-x-auto pr-2 bg-gray-50/30 rounded-xl relative border border-gray-100 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:rounded-[3px]"
+          className="flex-1 overflow-y-auto overflow-x-auto pr-2 bg-gray-50/30 rounded-xl relative [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:rounded-[3px]"
         >
           <div
-            className="relative mt-4"
+            className="relative mt-5"
             style={{
               height: `${24 * HOUR_HEIGHT}px`,
               minWidth: `${eventsCanvasWidth + 64}px`,
@@ -92,11 +97,11 @@ const MailCalendarDetail = ({ selectedDate, currentDate, onClose }) => {
             >
               {isLoading ? (
                 <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                  Loading events…
+                  {t.calendar?.loadingEvents || "Loading events…"}
                 </div>
               ) : positionedEvents.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-gray-300 text-sm select-none">
-                  No events for this day
+                  {t.calendar?.noEvents || "No events for this day"}
                 </div>
               ) : (
                 positionedEvents.map((event) => (
@@ -124,4 +129,4 @@ const MailCalendarDetail = ({ selectedDate, currentDate, onClose }) => {
   )
 }
 
-export default MailCalendarDetail
+export default CalendarDetail

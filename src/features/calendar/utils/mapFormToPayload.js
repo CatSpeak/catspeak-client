@@ -12,12 +12,12 @@ const RECURRENCE_MAP = {
 /** Maps Vietnamese visibility label → API visibilityScope string */
 const VISIBILITY_MAP = {
   "Công khai": "PUBLIC",
-  "Chỉ những người có link": "LINK",
-  "Chỉ người theo dõi": "FOLLOWERS",
+  "Chỉ những người có link": "SHARED_LINK_ONLY",
+  // "Cộng đồng": "COMMUNITY_ONLY",  // not yet supported by backend
 }
 
 /** Maps numeric weekday index (0=Mon) → API byWeekDay string */
-const WEEKDAY_CODES = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
 /**
  * @param {object} form – shape returned from useEventForm
@@ -74,8 +74,11 @@ export const mapFormToPayload = ({
         frequency === "WEEKLY"
           ? selectedDays.map((d) => WEEKDAY_CODES[d] ?? d)
           : [],
-      startTime: dayjs(startTime).format("HH:mm"),
-      endTime: dayjs(endTime).format("HH:mm"),
+      ...(frequency === "MONTHLY" && {
+        byMonthDay: [dayjs(startTime).date()],
+      }),
+      startTime: dayjs(startTime).format("HH:mm:ss"),
+      endTime: dayjs(endTime).format("HH:mm:ss"),
       recurrenceStartDate: dayjs(startTime).toISOString(),
       recurrenceEndDate: dayjs(recurrenceEndDate).toISOString(),
       timeZone: selectedTimezone?.id ?? "Asia/Bangkok",

@@ -116,11 +116,11 @@ const EventDateTimeSection = ({
           </div>
         </div>
 
-        {/* Timezone */}
         <div className="flex w-full md:w-auto mt-0 md:h-auto h-auto min-h-[86px]">
           <TimezoneDropdown
             value={selectedTimezone}
             onChange={onTimezoneChange}
+            activeColor={eventColor}
           />
         </div>
       </div>
@@ -130,6 +130,7 @@ const EventDateTimeSection = ({
         <RecurrenceDropdown
           value={recurrenceOption}
           onChange={onRecurrenceChange}
+          activeColor={eventColor}
         />
 
         {isRecurring && (
@@ -153,22 +154,17 @@ const EventDateTimeSection = ({
             )}
 
             {/* Recurrence end date */}
-            <div
-              className="flex items-center gap-2 border rounded-md px-3 h-[48px] shadow-sm bg-white hover:bg-gray-50 transition-colors cursor-pointer w-fit"
-              style={{ borderColor: colors.border }}
-            >
-              <span
-                className="text-base font-medium"
-                style={{ color: colors.textGray }}
-              >
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 mt-1">
+              <span className="text-base font-bold text-gray-900 w-[150px] shrink-0">
                 {cal.endsOn}
               </span>
-              <DatePicker
-                value={recurrenceEndDate}
-                onChange={onRecurrenceEndDateChange}
-                color={eventColor}
-                className="shrink-0 flex items-center h-full [&>button]:border-none [&>button]:shadow-none [&>button]:px-1 [&>button]:text-gray-800 [&>button]:font-medium [&>button]:bg-transparent hover:[&>button]:bg-transparent"
-              />
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full">
+                <DatePicker
+                  value={recurrenceEndDate}
+                  onChange={onRecurrenceEndDateChange}
+                  color={eventColor}
+                />
+              </div>
             </div>
           </div>
         )}

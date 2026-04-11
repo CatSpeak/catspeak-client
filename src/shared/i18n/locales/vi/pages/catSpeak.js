@@ -35,7 +35,7 @@ export default {
     discover: "Khám phá thế giới",
     video: "Video",
     mail: "Thư",
-    schedules: "Lịch trình",
+    calendar: "Lịch",
     settings: "Cài đặt",
     report: "Nhật ký báo cáo",
     help: "Trợ giúp",

@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 import dayjs from "dayjs"
-import MailHeadline from "../components/MailHeadline"
-import MailToolbar from "../components/MailToolbar"
-import MailCalendar from "../components/MailCalendar"
+import CalendarHeadline from "../components/CalendarHeadline"
+import CalendarToolBar from "../components/CalendarToolBar"
+import Calendar from "../components/Calendar"
 
-const SchedulesPage = () => {
+const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(dayjs())
 
   const handleNextMonth = () => setCurrentDate((prev) => prev.add(1, "month"))
@@ -15,7 +15,7 @@ const SchedulesPage = () => {
     <div className="w-full">
       <div className="flex flex-col lg:flex-row gap-5 w-full min-h-[480px]">
         <div className="flex items-center shrink-0 w-full lg:w-auto">
-          <MailHeadline
+          <CalendarHeadline
             currentDate={currentDate}
             onNextMonth={handleNextMonth}
             onPrevMonth={handlePrevMonth}
@@ -23,8 +23,8 @@ const SchedulesPage = () => {
         </div>
         <div className="flex flex-col justify-center w-full flex-1 min-w-0">
           <div className="flex flex-col">
-            <MailToolbar />
-            <MailCalendar currentDate={currentDate} />
+            <CalendarToolBar />
+            <Calendar currentDate={currentDate} />
           </div>
         </div>
       </div>
@@ -32,4 +32,4 @@ const SchedulesPage = () => {
   )
 }
 
-export default SchedulesPage
+export default CalendarPage

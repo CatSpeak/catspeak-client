@@ -4,7 +4,7 @@ import { Play } from "lucide-react"
 import CatIcon from "@/shared/assets/icons/logo/icon.svg"
 import RegisteredEvents from "./RegisteredEvents"
 
-const MailHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
+const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
   const { t } = useLanguage()
 
   const monthString = currentDate ? currentDate.format("M") : "1"
@@ -46,11 +46,11 @@ const MailHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
 
       <div className="flex flex-col">
         {/*
-        <h3 className="text-[32px] leading-[1.1] font-black text-[#990011] tracking-tight">
+        <h3 className="text-[32px] leading-[1.1] font-bold text-[#990011] tracking-tight">
           HCM, VN
         </h3>
         <div className="flex items-baseline gap-2 mt-2 mb-3">
-          <span className="text-[36px] leading-[1.1] font-black text-black">
+          <span className="text-[36px] leading-[1.1] font-bold text-black">
             400
           </span>
           <span className="text-[15px] font-semibold text-black uppercase tracking-wide">
@@ -77,4 +77,4 @@ const MailHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
   )
 }
 
-export default MailHeadline
+export default CalendarHeadline

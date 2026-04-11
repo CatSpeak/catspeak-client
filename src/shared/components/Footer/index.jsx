@@ -26,9 +26,7 @@ const Footer = () => {
     <footer className="relative overflow-hidden bg-white pt-24">
       {/* Title */}
       <div className="flex flex-col items-center justify-center gap-3">
-        <div
-          className="uppercase text-black font-black tracking-[0.2em] text-center text-4xl"
-        >
+        <div className="uppercase text-black font-bold tracking-[0.2em] text-center text-4xl">
           {footerText.title}
         </div>
         <div className="h-1.5 w-24 bg-gradient-to-r from-cath-red-600 to-orange-400 rounded-full" />

@@ -1,51 +1,56 @@
-import React, { useState } from "react"
-import HeaderDropdown from "./HeaderDropdown"
+import React from "react"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import { ChevronDown } from "lucide-react"
 import { COLORS } from "@/shared/constants/constants"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ColorDropdown = ({ value, onChange }) => {
-  const [selectedColor, setSelectedColor] = useState(value || "transparent")
+  const { t } = useLanguage()
+  const cal = t.calendar
+  const selectedColor = value || "transparent"
 
-  const handleSelect = (color, close) => {
-    setSelectedColor(color)
-    if (onChange) onChange(color)
-    close()
-  }
-
-  const triggerIcon = (
-    <div
-      className="w-[14px] h-[14px] rounded-full border-[1.5px] border-white"
-      style={{ backgroundColor: selectedColor }}
-    />
+  const trigger = (isOpen, selectedOption, toggle) => (
+    <button
+      onClick={toggle}
+      type="button"
+      className="flex items-center gap-2 border border-white rounded-full px-3 py-1.5 bg-white text-black hover:bg-gray-50 transition-colors"
+    >
+      <div
+        className="w-3 h-3 rounded-full border-[1.5px] border-white shadow-sm"
+        style={{ backgroundColor: selectedColor }}
+      />
+      <span className="text-sm font-medium">{cal.color}</span>
+      <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+    </button>
   )
 
+  const options = COLORS.map((color) => ({
+    value: color.value,
+    label: cal.colorsList?.[color.value] || color.name,
+    icon: (
+      <div
+        className={`w-5 h-5 rounded-full shrink-0 border border-gray-200 ${
+          selectedColor === color.value ? "ring-2 ring-offset-1 ring-gray-400" : ""
+        }`}
+        style={{ backgroundColor: color.value }}
+      />
+    ),
+  }))
+
   return (
-    <HeaderDropdown triggerIcon={triggerIcon} label="Màu">
-      {(close) => (
-        <div className="flex flex-col gap-3 p-3 w-fit min-w-[120px]">
-          {COLORS.map((color) => (
-            <button
-              key={color.value}
-              type="button"
-              onClick={() => handleSelect(color.value, close)}
-              className="flex items-center gap-3 hover:bg-gray-50 p-1 rounded-md transition-colors w-full text-left"
-              aria-label={`Select color ${color.name}`}
-            >
-              <div
-                className={`w-6 h-6 rounded-full shrink-0 border border-gray-200 ${
-                  selectedColor === color.value
-                    ? "ring-2 ring-offset-1 ring-gray-400"
-                    : ""
-                }`}
-                style={{ backgroundColor: color.value }}
-              />
-              <span className="text-sm text-gray-700 font-medium whitespace-nowrap">
-                {color.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-    </HeaderDropdown>
+    <Dropdown
+      options={options}
+      value={selectedColor}
+      onChange={(val) => {
+        if (onChange) onChange(val)
+      }}
+      trigger={trigger}
+      activeColor={selectedColor}
+      align="right"
+      maxHeightClass="max-h-none"
+      className="inline-block"
+      dropdownClassName="min-w-[120px]"
+    />
   )
 }
 

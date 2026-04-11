@@ -1,9 +1,11 @@
 import React from "react"
-import { colors } from "@/shared/utils/colors"
-
-const DAYS = ["M", "T", "W", "T", "F", "S", "S"]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const RecurrenceDays = ({ eventColor = "#B91264", value = [], onChange }) => {
+  const { t } = useLanguage()
+  const cal = t.calendar
+  const days = cal.weekDaysShort || ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+
   const toggleDay = (index) => {
     if (!onChange) return
 
@@ -16,27 +18,20 @@ const RecurrenceDays = ({ eventColor = "#B91264", value = [], onChange }) => {
 
   return (
     <div className="flex flex-wrap items-center gap-[6px]">
-      {DAYS.map((day, i) => {
+      {days.map((day, i) => {
         const isSelected = value.includes(i)
-        const style = isSelected
-          ? {
-              backgroundColor: eventColor,
-              borderColor: eventColor,
-              color: "white",
-            }
-          : {
-              backgroundColor: "white",
-              borderColor: colors.border,
-              color: colors.textGray,
-            }
 
         return (
           <button
             key={i}
             type="button"
             onClick={() => toggleDay(i)}
-            className="w-[48px] h-[48px] rounded-full text-base font-bold flex items-center justify-center border transition-colors duration-300"
-            style={style}
+            className={`w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center transition-colors duration-200 ${
+              isSelected
+                ? "text-white shadow-sm"
+                : "bg-[#F2F2F2] text-gray-600 hover:bg-[#D9D9D9] hover:text-gray-900 shadow-sm"
+            }`}
+            style={isSelected ? { backgroundColor: eventColor } : {}}
           >
             {day}
           </button>

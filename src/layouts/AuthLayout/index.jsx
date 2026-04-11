@@ -15,7 +15,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
               alt="Cat Speak Logo"
               className="w-48 mb-8 drop-shadow-2xl"
             />
-            <h1 className="text-5xl font-black mb-6 tracking-tight">
+            <h1 className="text-5xl font-bold mb-6 tracking-tight">
               {title || "Welcome"}
             </h1>
             <p className="text-lg opacity-90 max-w-md font-medium leading-relaxed">

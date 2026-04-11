@@ -12,11 +12,11 @@ const DEFAULT_TIMEZONE = {
   offset: "GMT +07:00",
 }
 
-const WEEKDAY_CODES = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 const INVERSE_VISIBILITY = {
   PUBLIC: "Công khai",
-  LINK: "Chỉ những người có link",
-  FOLLOWERS: "Chỉ người theo dõi",
+  SHARED_LINK_ONLY: "Chỉ những người có link",
+  // COMMUNITY_ONLY: "Cộng đồng",  // not yet supported by backend
 }
 const INVERSE_RECURRENCE = {
   DAILY: "Hàng ngày",
@@ -118,6 +118,7 @@ export const useEventForm = (onClose, editEvent) => {
       selectedTimezone,
       conditionsInput,
     })
+
     try {
       if (editEvent?.id || editEvent?.eventId) {
         await updateEvent({

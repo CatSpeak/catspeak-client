@@ -1,6 +1,10 @@
 import { colors } from "@/shared/utils/colors"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const RecurrenceIntervalRow = ({ intervalUnit, value, onChange }) => {
+  const { t } = useLanguage()
+  const cal = t.calendar
+
   return (
     <div
       className="flex items-center gap-3 border rounded-md px-4 h-[48px] shadow-sm bg-white"
@@ -10,7 +14,7 @@ const RecurrenceIntervalRow = ({ intervalUnit, value, onChange }) => {
         className="text-base font-medium shrink-0"
         style={{ color: colors.textGray }}
       >
-        Lặp lại mỗi
+        {cal.repeatEvery}
       </span>
       <input
         type="number"

@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Search, Plus } from "lucide-react"
-import FilterDropdown from "./ui/FilterDropdown"
+// import Dropdown from "@/shared/components/ui/Dropdown"
 import CreateEventModal from "./CreateEventModal"
 
 const FILTER_CONFIGS = [
@@ -30,7 +30,7 @@ const FILTER_CONFIGS = [
   },
 ]
 
-const MailToolbar = () => {
+const CalendarToolBar = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   return (
@@ -81,4 +81,4 @@ const MailToolbar = () => {
   )
 }
 
-export default MailToolbar
+export default CalendarToolBar

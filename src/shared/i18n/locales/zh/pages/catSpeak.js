@@ -31,7 +31,7 @@ export default {
     discover: "探索世界",
     video: "视频",
     mail: "信件",
-    schedules: "日程表",
+    calendar: "日程表",
     settings: "设置",
     report: "报告日志",
     help: "帮助",

@@ -70,7 +70,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <h2 className="text-center text-3xl font-black text-[#8f0d15] mb-6">
+        <h2 className="text-center text-3xl font-bold text-[#8f0d15] mb-6">
           {authText.loginTitle}
         </h2>
 

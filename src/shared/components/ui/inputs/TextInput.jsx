@@ -11,6 +11,7 @@ const TextInput = ({
   type = "text",
   variant = "round",
   icon: Icon,
+  color,
   className = "",
   containerClassName = "",
   showCount = false,
@@ -21,7 +22,7 @@ const TextInput = ({
 
   const iconPadding = Icon ? "!pl-10" : ""
 
-  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 hover:border-cath-red-700 placeholder-[var(--placeholder-color)] ${variantClasses} ${iconPadding} ${className}`
+  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] ${variantClasses} ${iconPadding} ${className}`
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
@@ -41,6 +42,7 @@ const TextInput = ({
           style={{
             "--border-color": colors.border,
             "--placeholder-color": colors.subtext,
+            "--focus-color": color || "var(--tw-colors-cath-red-700, #8e0000)",
           }}
           placeholder={placeholder}
           className={finalClassName}

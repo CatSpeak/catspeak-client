@@ -39,23 +39,29 @@ const EventBlock = ({
         <span className="font-bold text-base truncate">{event.title}</span>
       </div>
 
-      <div className="flex flex-col gap-1.5 text-sm font-medium pl-1 overflow-y-auto [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#990011] hover:[&::-webkit-scrollbar-thumb]:bg-[#7a000e] [&::-webkit-scrollbar-thumb]:rounded-[2px] pb-1 pr-1">
-        <div className="flex items-center gap-2">
-          <Clock size={12} className="shrink-0" />
-          <span className="truncate">
-            {event.startTime} - {event.endTime}
-          </span>
-        </div>
+      <div className="flex flex-col gap-1.5 text-sm font-medium pl-1 overflow-y-auto [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-transparent group-hover:[&::-webkit-scrollbar-thumb]:bg-[#990011] hover:[&::-webkit-scrollbar-thumb]:bg-[#7a000e] [&::-webkit-scrollbar-thumb]:rounded-[2px] pb-1 pr-1">
+        {event.startTime && event.endTime && (
+          <div className="flex items-center gap-2">
+            <Clock size={12} className="shrink-0" />
+            <span className="truncate">
+              {event.startTime} - {event.endTime}
+            </span>
+          </div>
+        )}
 
-        <div className="flex items-center gap-2">
-          <Calendar size={12} className="shrink-0" />
-          <span className="truncate">{ddMmYyyy}</span>
-        </div>
+        {ddMmYyyy && (
+          <div className="flex items-center gap-2">
+            <Calendar size={12} className="shrink-0" />
+            <span className="truncate">{ddMmYyyy}</span>
+          </div>
+        )}
 
-        <div className="flex items-center gap-2">
-          <MapPin size={12} className="shrink-0" />
-          <span className="truncate">{event.location}</span>
-        </div>
+        {event.location && (
+          <div className="flex items-center gap-2">
+            <MapPin size={12} className="shrink-0" />
+            <span className="truncate">{event.location}</span>
+          </div>
+        )}
       </div>
     </div>
   )

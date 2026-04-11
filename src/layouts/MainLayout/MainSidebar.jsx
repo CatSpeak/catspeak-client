@@ -50,12 +50,12 @@ const MainSidebar = () => {
         </NavLink>
 
         {/* <NavLink
-          to={`/${currentLang}/cat-speak/schedules`}
+          to={`/${currentLang}/cat-speak/calendar`}
           className={getLinkClasses}
         >
           <Calendar className="w-5 h-5" />
           <span className="text-sm">
-            {t.catSpeak?.sidebar?.schedules || "Schedules"}
+            {t.catSpeak?.sidebar?.calendar || "Calendar"}
           </span>
         </NavLink> */}
       </div>

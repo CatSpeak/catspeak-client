@@ -1,4 +1,5 @@
 import Modal from "@/shared/components/ui/Modal"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { useEventForm } from "../../hooks/useEventForm"
 import { X } from "lucide-react"
 import EventHeader from "./EventHeader"
@@ -8,6 +9,7 @@ import EventFooter from "./EventFooter"
 
 const CreateEventModal = ({ onClose, editEvent }) => {
   const form = useEventForm(onClose, editEvent)
+  const { t } = useLanguage()
 
   return (
     <Modal
@@ -31,8 +33,8 @@ const CreateEventModal = ({ onClose, editEvent }) => {
 
         <div className="shrink-0">
           <EventHeader
-            title={form.title}
-            onTitleChange={form.setTitle}
+            isEditing={!!editEvent}
+            t={t}
             eventColor={form.eventColor}
             onColorChange={form.setEventColor}
             visibility={form.visibility}
@@ -64,6 +66,8 @@ const CreateEventModal = ({ onClose, editEvent }) => {
               />
 
               <EventDetailsSection
+                title={form.title}
+                onTitleChange={form.setTitle}
                 eventColor={form.eventColor}
                 eventLocation={form.eventLocation}
                 onLocationChange={form.setEventLocation}

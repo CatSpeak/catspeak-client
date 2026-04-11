@@ -3,6 +3,8 @@ import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const EventDetailsSection = ({
+  title,
+  onTitleChange,
   eventColor,
   eventLocation,
   onLocationChange,
@@ -33,6 +35,23 @@ const EventDetailsSection = ({
 
   return (
     <div className="flex flex-col gap-3 mt-2">
+      {/* Title */}
+      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1">
+        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 max-[425px]:w-full">
+          {cal.eventName}
+        </div>
+        <div className="flex-1 flex items-center w-full">
+          <TextInput
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            placeholder={cal.eventNamePlaceholder}
+            variant="square"
+            color={eventColor}
+            containerClassName="w-full"
+          />
+        </div>
+      </div>
+
       {/* Location */}
       <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1">
         <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 max-[425px]:w-full">
@@ -44,6 +63,7 @@ const EventDetailsSection = ({
             onChange={(e) => onLocationChange(e.target.value)}
             placeholder={cal.locationPlaceholder}
             variant="square"
+            color={eventColor}
             containerClassName="w-full"
             className="pr-10"
           />
@@ -69,6 +89,7 @@ const EventDetailsSection = ({
             onChange={(e) => onDescriptionChange(e.target.value)}
             placeholder={cal.descriptionPlaceholder}
             variant="square"
+            color={eventColor}
             containerClassName="w-full"
           />
         </div>
@@ -85,6 +106,7 @@ const EventDetailsSection = ({
             value={maxParticipants}
             onChange={(e) => onMaxParticipantsChange(e.target.value)}
             variant="square"
+            color={eventColor}
             className="text-center !px-2"
             containerClassName="w-20"
           />
@@ -103,6 +125,7 @@ const EventDetailsSection = ({
             onChange={(e) => onConditionsChange(e.target.value)}
             placeholder={cal.conditionsPlaceholder}
             variant="square"
+            color={eventColor}
             containerClassName="w-full"
           />
           {conditionsInput.trim() && (

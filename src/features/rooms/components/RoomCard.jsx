@@ -92,7 +92,7 @@ const RoomCard = ({ room }) => {
         {/* Cover Image Section */}
         <div className="relative h-48 w-full overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
+            src={room.thumbnailUrl || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"}
             alt="Room Cover"
             className="h-full w-full object-cover transition-transform duration-500"
           />

@@ -1,69 +1,67 @@
-import React, { useState } from "react"
-import { Globe, Link, Users } from "lucide-react"
-import HeaderDropdown from "./HeaderDropdown"
-
-const OPTIONS = [
-  {
-    shortLabel: "Công khai",
-    label: "Công khai",
-    icon: <Globe size={16} />,
-  },
-  {
-    shortLabel: "Link",
-    label: "Chỉ những người có link",
-    icon: <Link size={16} />,
-  },
-  {
-    shortLabel: "Follower",
-    label: "Chỉ người theo dõi",
-    icon: <Users size={16} />,
-  },
-]
+import React from "react"
+import { Globe, Link, Users, ChevronDown } from "lucide-react"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const VisibilityDropdown = ({ value, onChange, color = "#B91264" }) => {
-  const [selected, setSelected] = useState(value || OPTIONS[0].label)
+  const { t } = useLanguage()
+  const cal = t.calendar
 
-  const handleSelect = (opt, close) => {
-    setSelected(opt.label)
-    if (onChange) onChange(opt.label)
-    close()
+  const OPTIONS = [
+    {
+      value: "Công khai",
+      shortLabel: cal.public,
+      label: cal.public,
+      icon: <Globe size={16} />,
+    },
+    {
+      value: "Link",
+      shortLabel: cal.linkOnly,
+      label: cal.linkOnly,
+      icon: <Link size={16} />,
+    },
+    // Uncomment when backend supports COMMUNITY_ONLY
+    // {
+    //   value: "Cộng đồng",
+    //   shortLabel: cal.community,
+    //   label: cal.community,
+    //   icon: <Users size={16} />,
+    // },
+  ]
+  const selectedOpt = OPTIONS.find((o) => o.label === value) || OPTIONS[0]
+
+  const trigger = (isOpen, selectedOption, toggle) => {
+    const icon = React.cloneElement(selectedOption ? selectedOption.icon : selectedOpt.icon, { size: 14 })
+    return (
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex items-center gap-2 border border-white rounded-full px-3 py-1.5 bg-white text-black hover:bg-gray-50 transition-colors"
+      >
+        <div style={{ color }}>{icon}</div>
+        <span className="text-sm font-medium">{selectedOption ? selectedOption.shortLabel : selectedOpt.shortLabel}</span>
+        <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+    )
   }
 
-  const selectedOpt = OPTIONS.find((o) => o.label === selected) || OPTIONS[0]
-
-  // Extract the icon component but set size to 14 for the trigger
-  const triggerIcon = React.cloneElement(selectedOpt.icon, { size: 14 })
+  const enhancedOptions = OPTIONS.map((opt) => ({
+    ...opt,
+    color,
+  }))
 
   return (
-    <HeaderDropdown triggerIcon={triggerIcon} label={selectedOpt.shortLabel}>
-      {(close) => (
-        <div className="flex flex-col py-1">
-          {OPTIONS.map((opt) => (
-            <button
-              key={opt.label}
-              type="button"
-              onClick={() => handleSelect(opt, close)}
-              className={`flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors w-full text-left whitespace-nowrap ${
-                selected === opt.label
-                  ? "bg-red-50/50 font-semibold"
-                  : "text-gray-700 font-medium"
-              }`}
-              style={selected === opt.label ? { color } : {}}
-            >
-              <div
-                className="shrink-0"
-                style={
-                  selected === opt.label ? { color } : { color: "#6B7280" }
-                }
-              >
-                {opt.icon}
-              </div>
-              <span>{opt.label}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </HeaderDropdown>
+    <Dropdown
+      options={enhancedOptions}
+      value={selectedOpt.value}
+      onChange={(val, opt) => {
+        if (onChange) onChange(opt.label)
+      }}
+      trigger={trigger}
+      align="right"
+      className="inline-block text-black"
+      dropdownClassName="min-w-[200px]"
+    />
   )
 }
 

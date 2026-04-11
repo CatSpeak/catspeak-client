@@ -112,14 +112,17 @@ export const eventsApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // DELETE /api/v1/registrations/{registrationId}
+    // DELETE /api/v1/Events/{eventId}/registration
     cancelRegistration: builder.mutation({
-      query: ({ registrationId, ...body }) => ({
-        url: `/v1/registrations/${registrationId}`,
+      query: ({ eventId, ...body }) => ({
+        url: `/v1/Events/${eventId}/registration`,
         method: "DELETE",
         body,
       }),
-      invalidatesTags: ["Events"],
+      invalidatesTags: (result, error, { eventId }) => [
+        { type: "Events", id: eventId },
+        "Events",
+      ],
     }),
   }),
 })

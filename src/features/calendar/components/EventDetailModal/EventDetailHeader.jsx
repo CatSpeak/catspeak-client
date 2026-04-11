@@ -1,5 +1,5 @@
 import React from "react"
-import { Globe, Lock, RefreshCw, X } from "lucide-react"
+import { Globe, Lock, RefreshCw, X, User } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const EventDetailHeader = ({ ev, headerColor, onClose }) => {
@@ -47,6 +47,14 @@ const EventDetailHeader = ({ ev, headerColor, onClose }) => {
         <span className="opacity-60 italic text-xl">{t.calendar?.noTitle || "Không có tiêu đề"}</span>
       )}
     </h2>
+
+    {/* Creator Name */}
+    {ev.creatorName && (
+      <div className="flex items-center gap-1.5 text-sm font-medium mt-2 text-white/90 relative z-10">
+        <User size={15} />
+        <span>{ev.creatorName}</span>
+      </div>
+    )}
   </div>
   )
 }

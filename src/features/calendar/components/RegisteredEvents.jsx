@@ -30,9 +30,10 @@ const RegisteredEvents = () => {
   return (
     <>
       <div className="flex flex-col">
-        <h3 className="text-[28px] leading-[1.1] font-black text-black tracking-tight uppercase">
+        <h3 className="text-[28px] leading-[1.1] font-bold text-black tracking-tight uppercase">
           {t.calendar?.registered || "Đã đăng kí"}
         </h3>
+
         <div
           className={`flex flex-col gap-2 mt-3 ${expanded ? "max-h-[180px] overflow-y-auto pr-1" : ""}`}
         >
@@ -40,7 +41,7 @@ const RegisteredEvents = () => {
             <div
               key={event.id}
               onClick={() => handleChipClick(event)}
-              className="flex items-center w-full gap-2 px-3 py-1.5 rounded text-white cursor-pointer transition-colors"
+              className="flex items-center w-full gap-2 px-3 py-1.5 min-h-10 rounded text-white cursor-pointer transition-colors"
               style={{ backgroundColor: event.color || "#990011" }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.filter = "brightness(0.85)"
@@ -76,7 +77,8 @@ const RegisteredEvents = () => {
             ) : (
               <>
                 <ChevronDown size={14} />
-                {t.calendar?.seeMore || "Xem thêm"} ({events.length - VISIBLE_CHIP_COUNT})
+                {t.calendar?.seeMore || "Xem thêm"} (
+                {events.length - VISIBLE_CHIP_COUNT})
               </>
             )}
           </button>

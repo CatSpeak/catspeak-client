@@ -2,7 +2,6 @@ import { motion } from "framer-motion"
 import { FiUsers, FiCpu, FiMessageCircle } from "react-icons/fi"
 import { useRoomsPageLogic } from "@/features/rooms"
 
-
 const ResetPasswordPage = () => {
   const { state, actions } = useRoomsPageLogic()
   const { isCreatingOneOnOne, isCreatingStudyGroup } = state
@@ -61,7 +60,7 @@ const ResetPasswordPage = () => {
         transition={{ duration: 0.6 }}
         className="relative z-10 mb-12 text-center"
       >
-        <h1 className="mb-4 text-4xl font-black tracking-tight text-gray-900 md:text-6xl">
+        <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 md:text-6xl">
           Start Speaking <span className="text-[#990011]">Now</span>
         </h1>
         <p className="text-lg text-gray-600 md:text-xl">

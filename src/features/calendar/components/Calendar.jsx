@@ -2,11 +2,11 @@ import React, { useState } from "react"
 import dayjs from "dayjs"
 import { colors } from "@/shared/utils/colors"
 import CatIcon from "@/shared/assets/icons/logo/icon.svg"
-import MailCalendarDetail from "./MailCalendarDetail"
+import CalendarDetail from "./CalendarDetail"
 import { motion } from "framer-motion"
 import { useGetEventCountsQuery } from "@/store/api/eventsApi"
 
-const MailCalendar = ({ currentDate = dayjs() }) => {
+const Calendar = ({ currentDate = dayjs() }) => {
   const [selectedDate, setSelectedDate] = useState(null)
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -15,11 +15,17 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
   // For a Mon-first grid, offset = (dayOfWeek + 6) % 7
   const startDay = (currentDate.startOf("month").day() + 6) % 7
   const daysInMonth = currentDate.daysInMonth()
+  const prevMonthDays = currentDate.subtract(1, "month").daysInMonth()
 
   const dates = Array.from({ length: 42 }, (_, i) => {
-    const day = i - startDay + 1
-    if (day < 1 || day > daysInMonth) return null
-    return day
+    const dayValue = i - startDay + 1
+    if (dayValue < 1) {
+      return { day: prevMonthDays + dayValue, isCurrentMonth: false, originalDate: null }
+    }
+    if (dayValue > daysInMonth) {
+      return { day: dayValue - daysInMonth, isCurrentMonth: false, originalDate: null }
+    }
+    return { day: dayValue, isCurrentMonth: true, originalDate: dayValue }
   })
 
   // Fetch event counts from the API for the current month
@@ -38,7 +44,9 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
     }, {})
   }, [eventCountsData])
 
-  const selectedIndex = dates.indexOf(selectedDate)
+  const selectedIndex = dates.findIndex(
+    (d) => d.isCurrentMonth && d.day === selectedDate
+  )
   const endOfRowIdx =
     selectedIndex !== -1 ? (Math.floor(selectedIndex / 7) + 1) * 7 - 1 : -1
 
@@ -62,10 +70,15 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
       </div>
 
       <div className="grid grid-cols-7 gap-x-1 sm:gap-x-2 gap-y-3 flex-1">
-        {dates.map((date, idx) => {
+        {dates.map((dateObj, idx) => {
+          const { day, isCurrentMonth, originalDate } = dateObj
+          const date = originalDate // integer or null
+
           const isToday =
-            date === dayjs().date() && currentDate.isSame(dayjs(), "month")
-          const eventCount = getEventCountForDate(date)
+            isCurrentMonth &&
+            day === dayjs().date() &&
+            currentDate.isSame(dayjs(), "month")
+          const eventCount = isCurrentMonth ? getEventCountForDate(day) : 0
 
           // Logic for gradient bars based on event count
           let numBars = 0
@@ -84,7 +97,7 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
           const renderExpandedDetail = () => {
             if (selectedDate !== null && idx === endOfRowIdx) {
               return (
-                <MailCalendarDetail
+                <CalendarDetail
                   key={`detail-${selectedDate}`}
                   selectedDate={selectedDate}
                   currentDate={currentDate}
@@ -95,10 +108,12 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
             return null
           }
 
-          if (!date) {
+          if (!isCurrentMonth) {
             return (
               <React.Fragment key={`empty-${idx}`}>
-                <div className="invisible min-h-[80px] sm:min-h-0 sm:aspect-[5/4]"></div>
+                <div className="relative flex flex-col rounded-lg sm:rounded-xl bg-gray-50/50 border border-[#E5E5E5] overflow-hidden min-h-[80px] sm:min-h-0 sm:aspect-[5/4] items-start justify-start p-1.5 sm:p-3">
+                  <span className="text-sm sm:text-base text-gray-400/60 font-medium">{day}</span>
+                </div>
                 {renderExpandedDetail()}
               </React.Fragment>
             )
@@ -121,7 +136,7 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
               >
                 {/* Top Row: Date and Event Count */}
                 <div className="flex items-start justify-between p-1.5 sm:p-3 z-10 text-sm sm:text-base">
-                  <span>{date}</span>
+                  <span className={`font-medium ${isToday ? "text-[#990011]" : "text-gray-900"}`}>{date}</span>
                   {eventCount > 0 && (
                     <span className="text-[#990011] font-bold text-xs sm:text-base">
                       {eventCount}
@@ -130,7 +145,7 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
                 </div>
 
                 {/* Gradient Event Bars Container */}
-                <div className="flex-1 flex flex-col justify-end w-full absolute inset-0 z-0">
+                <div className="flex-1 flex flex-col justify-end w-full absolute inset-0 z-0 pointer-events-none">
                   {[
                     { height: "25%", color: colors.red[900] },
                     { height: "40%", color: colors.red[800] },
@@ -170,4 +185,4 @@ const MailCalendar = ({ currentDate = dayjs() }) => {
   )
 }
 
-export default MailCalendar
+export default Calendar

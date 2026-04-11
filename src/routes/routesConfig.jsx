@@ -20,8 +20,7 @@ import DiscoverPage from "@/features/discover/DiscoverPage"
 import VideoPage from "@/features/video/VideoPage"
 import MailPage from "@/features/mail/pages/MailPage"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
-import SchedulesPage from "@/features/calendar/pages/SchedulesPage"
-
+import CalendarPage from "@/features/calendar/pages/CalendarPage"
 
 // Shared Pages
 import { ComingSoonPage } from "@/shared/pages"
@@ -62,217 +61,214 @@ const routesConfig = [
     // Root wrapper — registers navigate for global PiP provider
     element: <RootLayout />,
     children: [
-  // Main layout routes (no language prefix)
-  {
-    path: "/",
-    element: <MainLayout />,
-    children: [
+      // Main layout routes (no language prefix)
       {
-        index: true,
-        element: <RootRoute />,
-      },
-      {
-        path: "reset-password",
-        element: <ResetPasswordPage />,
-      },
-      {
-        path: "verify-email",
-        element: <VerifyEmailPage />,
-      },
-      { path: "*", element: <PageNotFound /> },
-    ],
-  },
-
-
-
-  // Language-prefixed community route
-  {
-    path: "/:lang/community",
-    element: <LanguageLayout />,
-    children: [
-      {
+        path: "/",
         element: <MainLayout />,
         children: [
           {
             index: true,
-            element: <RoomsPage />,
+            element: <RootRoute />,
+          },
+          {
+            path: "reset-password",
+            element: <ResetPasswordPage />,
+          },
+          {
+            path: "verify-email",
+            element: <VerifyEmailPage />,
           },
           { path: "*", element: <PageNotFound /> },
         ],
       },
-    ],
-  },
 
-  // Language-prefixed cat-speak routes
-  {
-    path: "/:lang/cat-speak",
-    element: <LanguageLayout />,
-    children: [
+      // Language-prefixed community route
       {
-        element: <MainLayout />,
+        path: "/:lang/community",
+        element: <LanguageLayout />,
         children: [
           {
-            element: <CatSpeakLayout />,
+            element: <MainLayout />,
             children: [
               {
                 index: true,
-                element: <Navigate to="news" replace />,
-              },
-              {
-                path: "news",
-                element: <NewsPage />,
-              },
-              {
-                path: "news/:id",
-                element: <NewsDetailPage />,
-              },
-              {
-                path: "discover",
-                element: <DiscoverPage />,
-              },
-              {
-                path: "video",
-                element: <VideoPage />,
-              },
-              {
-                path: "mail",
-                element: <MailPage />,
-              },
-              {
-                path: "schedules",
-                element: <SchedulesPage />,
+                element: <RoomsPage />,
               },
               { path: "*", element: <PageNotFound /> },
             ],
           },
         ],
       },
-    ],
-  },
 
-  // Language-prefixed video call route
-  {
-    path: "/:lang/meet",
-    element: <LanguageLayout />,
-    children: [
+      // Language-prefixed cat-speak routes
       {
-        element: <VideoCallLayout />,
+        path: "/:lang/cat-speak",
+        element: <LanguageLayout />,
         children: [
           {
-            path: ":id",
-            element: (
-              <AuthGuard>
-                <VideoCallRoom />
-              </AuthGuard>
-            ),
+            element: <MainLayout />,
+            children: [
+              {
+                element: <CatSpeakLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: <Navigate to="news" replace />,
+                  },
+                  {
+                    path: "news",
+                    element: <NewsPage />,
+                  },
+                  {
+                    path: "news/:id",
+                    element: <NewsDetailPage />,
+                  },
+                  {
+                    path: "discover",
+                    element: <DiscoverPage />,
+                  },
+                  {
+                    path: "video",
+                    element: <VideoPage />,
+                  },
+                  {
+                    path: "mail",
+                    element: <MailPage />,
+                  },
+                  {
+                    path: "calendar",
+                    element: <CalendarPage />,
+                  },
+                  { path: "*", element: <PageNotFound /> },
+                ],
+              },
+            ],
           },
-          { path: "*", element: <PageNotFound /> },
         ],
       },
-    ],
-  },
 
-
-  {
-    path: "/policy",
-    element: <PolicyPage />,
-  },
-  {
-    element: (
-      <AuthGuard>
-        <UserLayout />
-      </AuthGuard>
-    ),
-    children: [
+      // Language-prefixed video call route
       {
-        path: "app",
+        path: "/:lang/meet",
+        element: <LanguageLayout />,
+        children: [
+          {
+            element: <VideoCallLayout />,
+            children: [
+              {
+                path: ":id",
+                element: (
+                  <AuthGuard>
+                    <VideoCallRoom />
+                  </AuthGuard>
+                ),
+              },
+              { path: "*", element: <PageNotFound /> },
+            ],
+          },
+        ],
+      },
+
+      {
+        path: "/policy",
+        element: <PolicyPage />,
+      },
+      {
+        element: (
+          <AuthGuard>
+            <UserLayout />
+          </AuthGuard>
+        ),
+        children: [
+          {
+            path: "app",
+            children: [
+              {
+                index: true,
+                element: <UserDashboard />,
+              },
+              {
+                path: "setting",
+                element: <SettingsPage />,
+              },
+              { path: "*", element: <PageNotFound /> },
+            ],
+          },
+        ],
+      },
+      {
+        element: (
+          <AuthGuard>
+            <UserLayout showFooter={false} />
+          </AuthGuard>
+        ),
+        children: [
+          {
+            element: <ProfileLayout />,
+            children: [
+              {
+                path: "profile",
+                element: <PersonalInformationPage />,
+              },
+              {
+                path: "lecturer",
+                element: <LecturerPage />,
+              },
+              {
+                path: "organization",
+                element: <OrganizationPage />,
+              },
+              {
+                path: "setting",
+                element: <AccountSettingsPage />,
+              },
+              { path: "*", element: <PageNotFound /> },
+            ],
+          },
+        ],
+      },
+
+      {
+        path: "/queue",
+        element: (
+          <AuthGuard>
+            <QueuePage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "/cart",
+        element: <MainLayout />,
         children: [
           {
             index: true,
-            element: <UserDashboard />,
-          },
-          {
-            path: "setting",
-            element: <SettingsPage />,
+            element: <ComingSoonPage />,
           },
           { path: "*", element: <PageNotFound /> },
         ],
       },
-    ],
-  },
-  {
-    element: (
-      <AuthGuard>
-        <UserLayout showFooter={false} />
-      </AuthGuard>
-    ),
-    children: [
       {
-        element: <ProfileLayout />,
+        path: "/connect",
+        element: <MainLayout />,
         children: [
           {
-            path: "profile",
-            element: <PersonalInformationPage />,
+            index: true,
+            element: <ComingSoonPage />,
           },
-          {
-            path: "lecturer",
-            element: <LecturerPage />,
-          },
-          {
-            path: "organization",
-            element: <OrganizationPage />,
-          },
-          {
-            path: "setting",
-            element: <AccountSettingsPage />,
-          },
-          { path: "*", element: <PageNotFound /> },
         ],
       },
-    ],
-  },
-
-  {
-    path: "/queue",
-    element: (
-      <AuthGuard>
-        <QueuePage />
-      </AuthGuard>
-    ),
-  },
-  {
-    path: "/cart",
-    element: <MainLayout />,
-    children: [
       {
-        index: true,
-        element: <ComingSoonPage />,
+        path: "/events/shared/:token",
+        element: <SharedEventPage />,
       },
-      { path: "*", element: <PageNotFound /> },
-    ],
-  },
-  {
-    path: "/connect",
-    element: <MainLayout />,
-    children: [
       {
-        index: true,
-        element: <ComingSoonPage />,
+        path: "/403",
+        element: <ForbiddenPage />,
       },
-    ],
-  },
-  {
-    path: "/events/shared/:token",
-    element: <SharedEventPage />,
-  },
-  {
-    path: "/403",
-    element: <ForbiddenPage />,
-  },
-  {
-    path: "*",
-    element: <PageNotFound />,
-  },
+      {
+        path: "*",
+        element: <PageNotFound />,
+      },
     ], // end RootLayout children
   }, // end RootLayout wrapper
 ]
