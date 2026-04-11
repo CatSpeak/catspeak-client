@@ -73,7 +73,8 @@ export default {
     },
     seeMore: "Xem thêm",
     noRoomsFound: "Không tìm thấy phòng nào cho các danh mục này",
-    noRoomsFoundCategory: "Hiện tại chưa có phòng nào ở đây! Hãy khám phá các danh mục khác nhé.",
+    noRoomsFoundCategory:
+      "Hiện tại chưa có phòng nào ở đây! Hãy khám phá các danh mục khác nhé.",
     clear: "Xóa",
   },
   tabs: {
@@ -213,7 +214,8 @@ export default {
     webviewBlock: {
       title: "Mở trong trình duyệt",
       genericApp: "Ứng dụng này",
-      description: "Bạn đang dùng trình duyệt tích hợp của {app}, không hỗ trợ gọi video ổn định.",
+      description:
+        "Bạn đang dùng trình duyệt tích hợp của {app}, không hỗ trợ gọi video ổn định.",
       instruction: "Cách tham gia:",
       copyLink: "Sao chép liên kết",
       copied: "Đã sao chép!",
@@ -228,6 +230,17 @@ export default {
     message: "Phòng này đã đạt số lượng người tham gia tối đa.",
     subMessage: "Vui lòng chọn phòng khác hoặc thử lại sau.",
     close: "Đóng",
+  },
+  passwordScreen: {
+    title: "Phòng riêng tư",
+    description: "Phòng này là phòng riêng tư. Nhập mật khẩu để tham gia.",
+    label: "Mật khẩu",
+    placeholder: "Nhập mật khẩu phòng",
+    submit: "Tham gia",
+    verifying: "Đang xác minh...",
+    incorrectPassword: "Mật khẩu không đúng. Vui lòng thử lại.",
+    roomNotFound: "Không tìm thấy phòng.",
+    genericError: "Đã xảy ra lỗi. Vui lòng thử lại.",
   },
   participants: "người",
   noLimit: "Không giới hạn",

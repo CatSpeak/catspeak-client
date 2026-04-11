@@ -34,4 +34,5 @@ export {
   useGetRoomByIdQuery,
   useCreateRoomMutation,
   useDeleteRoomMutation,
+  useVerifyJoinRoomMutation,
 } from "@/store/api/roomsApi"

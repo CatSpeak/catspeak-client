@@ -1,7 +1,7 @@
 import React from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { Clock, Users, Link, Bookmark } from "lucide-react"
+import { Clock, Users, Link, Bookmark, Lock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
@@ -30,6 +30,8 @@ const RoomCard = ({ room }) => {
   const isRoomFull =
     room.maxParticipants !== null &&
     (room.currentParticipantCount || 0) >= room.maxParticipants
+
+  const isPrivate = room.privacy === "Private" && room.hasPassword
 
   const handleJoinRoom = (e) => {
     e.stopPropagation()
@@ -92,7 +94,10 @@ const RoomCard = ({ room }) => {
         {/* Cover Image Section */}
         <div className="relative h-48 w-full overflow-hidden">
           <img
-            src={room.thumbnailUrl || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"}
+            src={
+              room.thumbnailUrl ||
+              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
+            }
             alt="Room Cover"
             className="h-full w-full object-cover transition-transform duration-500"
           />
@@ -118,6 +123,13 @@ const RoomCard = ({ room }) => {
                 )
               })}
           </div>
+
+          {/* Private room lock badge */}
+          {isPrivate && (
+            <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
+              <Lock size={14} className="text-white" />
+            </div>
+          )}
 
           {/* <div
             className="absolute right-2 top-2 z-20 flex h-10 w-10 flex-col items-center justify-center transition-all duration-300"

@@ -220,6 +220,17 @@ export default {
     subMessage: "请选择其他房间或稍后再试。",
     close: "关闭",
   },
+  passwordScreen: {
+    title: "私密房间",
+    description: "这是一个私密房间，请输入密码以加入。",
+    label: "密码",
+    placeholder: "输入房间密码",
+    submit: "加入房间",
+    verifying: "正在验证...",
+    incorrectPassword: "密码不正确，请重试。",
+    roomNotFound: "未找到房间。",
+    genericError: "发生错误，请重试。",
+  },
   participants: "人",
   noLimit: "无限制",
 }

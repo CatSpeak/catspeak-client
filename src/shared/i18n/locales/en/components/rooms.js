@@ -72,7 +72,8 @@ export default {
     },
     seeMore: "See more",
     noRoomsFound: "No rooms found for these categories",
-    noRoomsFoundCategory: "No rooms here yet! Feel free to explore other categories.",
+    noRoomsFoundCategory:
+      "No rooms here yet! Feel free to explore other categories.",
     clear: "Clear",
   },
   tabs: {
@@ -235,7 +236,8 @@ export default {
     webviewBlock: {
       title: "Open in Browser",
       genericApp: "This app",
-      description: "You're using {app}'s built-in browser, which doesn't support video calls properly.",
+      description:
+        "You're using {app}'s built-in browser, which doesn't support video calls properly.",
       instruction: "How to join:",
       copyLink: "Copy Link",
       copied: "Copied!",
@@ -250,6 +252,17 @@ export default {
     message: "This room has reached the maximum number of participants.",
     subMessage: "Please choose another room or try again later.",
     close: "Close",
+  },
+  passwordScreen: {
+    title: "Private Room",
+    description: "This room is private. Enter the password to join.",
+    label: "Password",
+    placeholder: "Enter room password",
+    submit: "Join Room",
+    verifying: "Verifying...",
+    incorrectPassword: "Incorrect password. Please try again.",
+    roomNotFound: "Room not found.",
+    genericError: "Something went wrong. Please try again.",
   },
   participants: "participants",
   noLimit: "No limit",

@@ -79,6 +79,15 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Rooms"],
     }),
+
+    // Verify if user can join a room (password check for private rooms)
+    verifyJoinRoom: builder.mutation({
+      query: ({ roomId, password }) => ({
+        url: "/rooms/verify-join",
+        method: "POST",
+        body: { roomId, ...(password ? { password } : {}) },
+      }),
+    }),
   }),
 })
 
@@ -88,4 +97,5 @@ export const {
   useGetRoomByIdQuery,
   useCreateRoomMutation,
   useDeleteRoomMutation,
+  useVerifyJoinRoomMutation,
 } = roomsApi

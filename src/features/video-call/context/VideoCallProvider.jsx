@@ -13,6 +13,7 @@ import {
   useMediaPreview,
   useJoinVideoSession,
 } from "@/features/rooms"
+import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { enterCall, setPiP } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
@@ -20,12 +21,15 @@ import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import WebViewBlockScreen from "../components/WebViewBlockScreen"
 import SessionErrorScreen from "../components/SessionErrorScreen"
+import PasswordScreen from "../components/PasswordScreen"
 
 /**
  * Phases:
- *  - "waiting"  : Room loaded, showing WaitingScreen with media preview
- *  - "joining"  : User clicked "Join Now", creating/joining video session
- *  - "in-call"  : Session joined, delegated to GlobalVideoCallProvider
+ *  - "verifying"         : Checking if user has access to a private room
+ *  - "password-required" : Private room, no grant — user must enter password
+ *  - "waiting"           : Room loaded, showing WaitingScreen with media preview
+ *  - "joining"           : User clicked "Join Now", creating/joining video session
+ *  - "in-call"           : Session joined, delegated to GlobalVideoCallProvider
  */
 export const VideoCallProvider = ({ children }) => {
   const { id: roomId, lang } = useParams()
@@ -73,10 +77,15 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const fromQueue = location.state?.fromQueue === true
 
   // Phase state machine — skip waiting if from queue
-  const [phase, setPhase] = useState(fromQueue ? "joining" : "waiting")
+  const [phase, setPhase] = useState(fromQueue ? "joining" : "verifying")
   const [joinedSessionId, setJoinedSessionId] = useState(null)
   const [initMicOn, setInitMicOn] = useState(false)
   const [initCamOn, setInitCamOn] = useState(false)
+
+  // Password verification state
+  const [passwordError, setPasswordError] = useState("")
+  const [verifyJoinRoom, { isLoading: isVerifying }] =
+    useVerifyJoinRoomMutation()
 
   // --- User data ---
   const { data: userData, isLoading: isLoadingUser } = useGetProfileQuery()
@@ -90,7 +99,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     error: roomError,
   } = useGetRoomByIdQuery(roomId, {
     skip: isRoomQuerySkipped,
-    pollingInterval: phase === "waiting" ? 15000 : undefined,
   })
 
   // --- Media Preview (for waiting screen) ---
@@ -146,6 +154,69 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       localStream.getTracks().forEach((track) => track.stop())
     }
   }, [localStream])
+
+  // ── Privacy verification: run once when room data is available ──
+  const verifyTriggered = useRef(false)
+  useEffect(() => {
+    if (
+      verifyTriggered.current ||
+      !room ||
+      !user ||
+      isLoadingRoom ||
+      isLoadingUser ||
+      fromQueue // Queue-matched users skip password check
+    ) {
+      return
+    }
+
+    // Public rooms or rooms without a password — skip verification
+    if (room.privacy !== "Private" || !room.hasPassword) {
+      verifyTriggered.current = true
+      setPhase("waiting")
+      return
+    }
+
+    // Private room — silent check for existing grant
+    verifyTriggered.current = true
+    ;(async () => {
+      try {
+        const result = await verifyJoinRoom({ roomId: Number(roomId) }).unwrap()
+        if (result.authorized) {
+          setPhase("waiting")
+        }
+      } catch {
+        // 403 = no grant yet → show password screen
+        setPhase("password-required")
+      }
+    })()
+  }, [room, user, isLoadingRoom, isLoadingUser, fromQueue, roomId])
+
+  // ── Handle password submission from PasswordScreen ──
+  const handlePasswordSubmit = async (password) => {
+    setPasswordError("")
+    try {
+      const result = await verifyJoinRoom({
+        roomId: Number(roomId),
+        password,
+      }).unwrap()
+
+      if (result.authorized) {
+        setPhase("waiting")
+      }
+    } catch (err) {
+      const status = err?.status
+      const message = err?.data?.message || err?.data
+
+      if (status === 403) {
+        // If the backend says unauthorized, it means the password was incorrect.
+        setPasswordError(t.rooms.passwordScreen.incorrectPassword)
+      } else if (status === 404) {
+        setPasswordError(t.rooms.passwordScreen.roomNotFound)
+      } else {
+        setPasswordError(t.rooms.passwordScreen.genericError)
+      }
+    }
+  }
 
   // --- Handle "Join Now" click ---
   const handleJoinClick = async ({ skipRoomFullCheck = false } = {}) => {
@@ -278,6 +349,23 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   // Room not found
   if (roomError || !room) {
     return <RoomNotFoundScreen />
+  }
+
+  // ---- PHASE: VERIFYING (silent check for private room grant) ----
+  if (phase === "verifying") {
+    return <div className="h-screen w-full bg-gray-50"></div>
+  }
+
+  // ---- PHASE: PASSWORD REQUIRED ----
+  if (phase === "password-required") {
+    return (
+      <PasswordScreen
+        room={room}
+        error={passwordError}
+        isLoading={isVerifying}
+        onSubmit={handlePasswordSubmit}
+      />
+    )
   }
 
   // ---- PHASE: WAITING ----
