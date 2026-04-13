@@ -116,13 +116,13 @@ const CategoryRoomSection = ({
             ? Array.from({ length: 2 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="h-[300px] min-w-[85%] flex-shrink-0 animate-pulse rounded-2xl bg-gray-200 snap-center"
+                  className="h-[300px] w-[85%] flex-shrink-0 animate-pulse rounded-2xl bg-gray-200 snap-center"
                 />
               ))
             : rooms.map((room) => (
                 <div
                   key={room.roomId}
-                  className="min-w-[80%] flex-shrink-0 snap-center"
+                  className="w-[85%] flex-shrink-0 snap-center flex"
                 >
                   <RoomCard room={room} />
                 </div>

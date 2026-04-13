@@ -95,9 +95,7 @@ const RoomCard = ({ room }) => {
         {/* Cover Image Section */}
         <div className="relative aspect-video w-full shrink-0 overflow-hidden">
           <img
-            src={
-              room.thumbnailUrl || meetingFallbackImage
-            }
+            src={room.thumbnailUrl || meetingFallbackImage}
             alt="Room Cover"
             className="h-full w-full object-cover transition-transform duration-500"
           />
@@ -155,7 +153,7 @@ const RoomCard = ({ room }) => {
           <div className="mb-3 h-px w-full bg-gray-200" />
 
           {/* Footer Info */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+          <div className="mt-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
             {/* Participants */}
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-[#E5E5E5]">
