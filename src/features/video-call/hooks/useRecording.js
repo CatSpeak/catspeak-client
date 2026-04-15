@@ -9,9 +9,13 @@ import {
  * useRecording — manages recording state for a video call session.
  *
  * @param {number|null} sessionId - CatSpeak session ID from Redux callInfo
+ * @param {object|null} lkRoom   - LiveKit Room object from useRoomContext()
+ *                                  Used to get the actual room name (which may differ
+ *                                  from "cs-session-{sessionId}" in dev mode, where the
+ *                                  Vite plugin creates rooms named "room-{roomId}").
  * @returns recording state and toggle handler
  */
-export function useRecording(sessionId) {
+export function useRecording(sessionId, lkRoom = null) {
   const [isRecording, setIsRecording] = useState(false)
   const [isTogglingRecording, setIsTogglingRecording] = useState(false)
   const egressIdRef = useRef(null) // store egressId returned by start-recording
@@ -31,7 +35,11 @@ export function useRecording(sessionId) {
     try {
       if (!isRecording) {
         // ── START recording ────────────────────────────────────────────
-        const result = await startRecording(sessionId).unwrap()
+        // Pass actual LiveKit room name so backend can find the correct room.
+        // In dev mode the Vite plugin creates "room-{roomId}"; in production it's "cs-session-{sessionId}".
+        const roomName = lkRoom?.name ?? null
+
+        const result = await startRecording({ sessionId, roomName }).unwrap()
         egressIdRef.current = result.egressId
         setIsRecording(true)
         toast.success("Recording started", {
@@ -42,7 +50,6 @@ export function useRecording(sessionId) {
         // ── STOP recording ─────────────────────────────────────────────
         const egressId = egressIdRef.current
         if (!egressId) {
-          // Fallback: already stopped somehow
           setIsRecording(false)
           return
         }
@@ -64,7 +71,7 @@ export function useRecording(sessionId) {
     } finally {
       setIsTogglingRecording(false)
     }
-  }, [sessionId, isRecording, isTogglingRecording, startRecording, stopRecording])
+  }, [sessionId, lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording])
 
   return {
     isRecording,

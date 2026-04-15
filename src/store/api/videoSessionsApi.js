@@ -70,10 +70,10 @@ export const videoSessionsApi = baseApi.injectEndpoints({
 
     // ── Recording APIs ──────────────────────────────────────────────────
     startRecording: builder.mutation({
-      query: (sessionId) => ({
+      query: ({ sessionId, roomName }) => ({
         url: "/livekit/start-recording",
         method: "POST",
-        body: { sessionId },
+        body: { sessionId, roomName },
       }),
     }),
     stopRecording: builder.mutation({

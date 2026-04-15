@@ -59,7 +59,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
 
   const videoCallState = useVideoCall(t)
   const screenShareState = useScreenShare()
-  const recordingState = useRecording(sessionId ?? null)
+  const recordingState = useRecording(sessionId ?? null, lkRoom)
 
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
