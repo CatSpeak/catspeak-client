@@ -27,7 +27,7 @@ const VideoGrid = () => {
   if (spotlightItem && hasScreenShare) {
     // ─── Spotlight layout ───
     return (
-      <div className="flex h-full w-full flex-col gap-2 p-5 overflow-hidden">
+      <div className="flex h-full w-full flex-col p-5 overflow-hidden">
         {/* Main: spotlighted tile */}
         <div className="flex-1 min-h-0 min-w-0">
           {spotlightItem.type === "screen" ? (
@@ -59,69 +59,6 @@ const VideoGrid = () => {
               />
             </div>
           )}
-        </div>
-
-        {/* Bottom row: other tiles */}
-        <div
-          className={`
-            flex gap-2 overflow-x-auto overflow-y-hidden
-            h-28 shrink-0
-            ${scrollbarClasses}
-          `}
-        >
-          {screenShareTracks?.map((trackRef) => {
-            if (
-              spotlightItem.type === "screen" &&
-              spotlightItem.trackRef.publication?.trackSid ===
-                trackRef.publication?.trackSid
-            ) {
-              return null // already spotlighted
-            }
-            return (
-              <div
-                key={trackRef.publication?.trackSid}
-                className="shrink-0 h-full aspect-video rounded-lg overflow-hidden"
-              >
-                <ScreenShareTile
-                  trackRef={trackRef}
-                  presenterDisplayName={
-                    trackRef.participant?.name ||
-                    trackRef.participant?.identity ||
-                    "Unknown"
-                  }
-                  isLocal={trackRef.participant?.isLocal}
-                  onClick={
-                    hasScreenShare
-                      ? () => handleTileClick({ type: "screen", trackRef })
-                      : undefined
-                  }
-                />
-              </div>
-            )
-          })}
-          {participants.map((participant) => {
-            if (
-              spotlightItem.type === "video" &&
-              spotlightItem.participant.identity === participant.identity
-            ) {
-              return null // already spotlighted
-            }
-            return (
-              <div
-                key={participant.identity}
-                className="shrink-0 h-full aspect-video rounded-lg overflow-hidden"
-              >
-                <VideoTile
-                  participant={participant}
-                  onClick={
-                    hasScreenShare
-                      ? () => handleTileClick({ type: "video", participant })
-                      : undefined
-                  }
-                />
-              </div>
-            )
-          })}
         </div>
       </div>
     )
