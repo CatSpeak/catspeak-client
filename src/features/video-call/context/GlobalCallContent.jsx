@@ -57,6 +57,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   const connectionState = useConnectionState()
   const isConnected = connectionState === ConnectionState.Connected
 
+
   const videoCallState = useVideoCall(t)
   const screenShareState = useScreenShare()
   const recordingState = useRecording(lkRoom)

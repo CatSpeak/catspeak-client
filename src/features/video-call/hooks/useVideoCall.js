@@ -67,8 +67,8 @@ export const useVideoCall = (t) => {
     await room.localParticipant.setCameraEnabled(!isCameraEnabled)
   }, [room, isCameraEnabled])
 
-  const leaveMeeting = useCallback(() => {
-    room.disconnect()
+  const leaveMeeting = useCallback(async () => {
+    await room.disconnect()
   }, [room])
 
   return {

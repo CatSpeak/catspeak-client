@@ -25,6 +25,8 @@ const RecordingsPage = () => {
     refetch: refetchRecordings,
   } = useGetMyRecordingsQuery()
 
+  console.log("🚀 ~ RecordingsPage ~ recordings:", recordings)
+
   const { data: storage, isLoading: isLoadingStorage } = useGetStorageQuery()
 
   const [deleteRecording, { isLoading: isDeleting }] =
@@ -50,10 +52,16 @@ const RecordingsPage = () => {
   const handleDeleteConfirm = async (recordingId) => {
     try {
       await deleteRecording(recordingId).unwrap()
-      toast.success(t?.recordings?.actions?.deleteSuccess || "Recording deleted", { duration: 3000 })
+      toast.success(
+        t?.recordings?.actions?.deleteSuccess || "Recording deleted",
+        { duration: 3000 },
+      )
       setDeleteTarget(null)
     } catch (err) {
-      const msg = err?.data?.message || t?.recordings?.actions?.deleteFailed || "Failed to delete recording."
+      const msg =
+        err?.data?.message ||
+        t?.recordings?.actions?.deleteFailed ||
+        "Failed to delete recording."
       toast.error(msg)
       console.error("[Recordings] Delete error:", err)
     }
@@ -104,9 +112,12 @@ const RecordingsPage = () => {
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-sm text-gray-500">
-            {recordings.length === 1 
-              ? (t?.recordings?.list?.count_one || "1 recording") 
-              : (t?.recordings?.list?.count_other?.replace("{{count}}", recordings.length) || `${recordings.length} recordings`)}
+            {recordings.length === 1
+              ? t?.recordings?.list?.count_one || "1 recording"
+              : t?.recordings?.list?.count_other?.replace(
+                  "{{count}}",
+                  recordings.length,
+                ) || `${recordings.length} recordings`}
           </p>
           {recordings.map((rec) => (
             <RecordingCard
@@ -152,14 +163,17 @@ const EmptyState = ({ t }) => (
       {t?.recordings?.list?.emptyTitle || "No recordings yet"}
     </h2>
     <p className="mt-2 text-sm text-gray-500 max-w-sm">
-      {t?.recordings?.list?.emptyDescription || "When you record your calls, they will appear here."}
+      {t?.recordings?.list?.emptyDescription ||
+        "When you record your calls, they will appear here."}
     </p>
   </div>
 )
 
 const ErrorState = ({ onRetry, t }) => (
   <div className="flex flex-col items-center justify-center rounded-xl border border-red-100 bg-red-50 p-10 text-center">
-    <p className="text-sm text-red-600 mb-3">{t?.recordings?.list?.error || "Failed to load recordings."}</p>
+    <p className="text-sm text-red-600 mb-3">
+      {t?.recordings?.list?.error || "Failed to load recordings."}
+    </p>
     <button
       onClick={onRetry}
       className="flex items-center gap-1.5 rounded-lg bg-white border border-red-200 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
