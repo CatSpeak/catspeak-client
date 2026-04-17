@@ -29,6 +29,7 @@ import { ComingSoonPage } from "@/shared/pages"
 import UserDashboard from "@/features/user/pages/UserDashboard"
 import ProfileLayout from "@/features/user/layouts/ProfileLayout"
 import PersonalInformationPage from "@/features/user/pages/PersonalInformationPage"
+import RecordingsPage from "@/features/recordings/pages/RecordingsPage"
 import LecturerPage from "@/features/user/pages/LecturerPage"
 import OrganizationPage from "@/features/user/pages/OrganizationPage"
 import AccountSettingsPage from "@/features/user/pages/AccountSettingsPage"
@@ -209,6 +210,10 @@ const routesConfig = [
               {
                 path: "profile",
                 element: <PersonalInformationPage />,
+              },
+              {
+                path: "recordings",
+                element: <RecordingsPage />,
               },
               {
                 path: "lecturer",

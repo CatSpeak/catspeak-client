@@ -67,28 +67,6 @@ export const videoSessionsApi = baseApi.injectEndpoints({
           : null,
       }),
     }),
-
-    // ── Recording APIs ──────────────────────────────────────────────────
-    startRecording: builder.mutation({
-      query: ({ sessionId, roomName }) => ({
-        url: "/livekit/start-recording",
-        method: "POST",
-        body: { sessionId, roomName },
-      }),
-    }),
-    stopRecording: builder.mutation({
-      query: (egressId) => ({
-        url: "/livekit/stop-recording",
-        method: "POST",
-        body: { egressId },
-      }),
-    }),
-    getRecordingsBySession: builder.query({
-      query: (sessionId) => `/livekit/recordings/session/${sessionId}`,
-      providesTags: (result, error, sessionId) => [
-        { type: "Recordings", id: sessionId },
-      ],
-    }),
   }),
 })
 
@@ -100,7 +78,4 @@ export const {
   useLeaveVideoSessionMutation,
   useEndVideoSessionMutation,
   useGetLivekitTokenMutation,
-  useStartRecordingMutation,
-  useStopRecordingMutation,
-  useGetRecordingsBySessionQuery,
 } = videoSessionsApi

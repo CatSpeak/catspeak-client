@@ -34,20 +34,20 @@ const CatSpeakSidebar = () => {
   }, [location.pathname])
 
   const menuItems = [
-    { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
-    // { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
-    // { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
-    { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
-    // { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
+    { key: "news", label: t?.catSpeak?.sidebar?.news || "Cat Speak News", icon: LayoutDashboard },
+    // { key: "discover", label: t?.catSpeak?.sidebar?.discover || "Discover", icon: Globe },
+    // { key: "video", label: t?.catSpeak?.sidebar?.video || "Video", icon: Video },
+    { key: "mail", label: t?.catSpeak?.sidebar?.mail || "Mail", icon: Mail },
+    // { key: "calendar", label: t?.catSpeak?.sidebar?.calendar || "Calendar", icon: Calendar },
   ]
 
   const bottomItems = [
-    { key: "settings", label: t.catSpeak.sidebar.settings, icon: Settings },
-    { key: "report", label: t.catSpeak.sidebar.report, icon: Flag },
-    { key: "help", label: t.catSpeak.sidebar.help, icon: HelpCircle },
+    { key: "settings", label: t?.catSpeak?.sidebar?.settings || "Settings", icon: Settings },
+    { key: "report", label: t?.catSpeak?.sidebar?.report || "Report Log", icon: Flag },
+    { key: "help", label: t?.catSpeak?.sidebar?.help || "Help", icon: HelpCircle },
     {
       key: "feedback",
-      label: t.catSpeak.sidebar.feedback,
+      label: t?.catSpeak?.sidebar?.feedback || "Send Feedback",
       icon: MessageSquare,
     },
   ]

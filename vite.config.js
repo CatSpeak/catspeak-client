@@ -28,6 +28,12 @@ export default defineConfig(({ mode }) => {
           secure: true,
           ws: true,
         },
+        "/r2": {
+          target: "https://3bef3ed6d4d479f38c51000461eeaa0f.r2.cloudflarestorage.com",
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/r2/, ""),
+        },
       },
     },
     build: {

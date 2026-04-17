@@ -4,6 +4,7 @@ export default {
     lecturer: "Lecturer",
     organization: "Organization",
     setting: "Setting",
+    menu: "Profile Menu",
   },
   personalInfo: {
     title: "Personal Information",

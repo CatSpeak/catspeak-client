@@ -3,19 +3,19 @@ import { toast } from "react-hot-toast"
 import {
   useStartRecordingMutation,
   useStopRecordingMutation,
-} from "@/store/api/videoSessionsApi"
+} from "@/store/api/recordingsApi"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * useRecording — manages recording state for a video call session.
  *
- * @param {number|null} sessionId - CatSpeak session ID from Redux callInfo
- * @param {object|null} lkRoom   - LiveKit Room object from useRoomContext()
- *                                  Used to get the actual room name (which may differ
- *                                  from "cs-session-{sessionId}" in dev mode, where the
- *                                  Vite plugin creates rooms named "room-{roomId}").
+ * @param {object|null} lkRoom - LiveKit Room object from useRoomContext().
+ *                                The room name is sent to the backend so it
+ *                                can target the correct LiveKit Egress.
  * @returns recording state and toggle handler
  */
-export function useRecording(sessionId, lkRoom = null) {
+export function useRecording(lkRoom = null) {
+  const { t } = useLanguage()
   const [isRecording, setIsRecording] = useState(false)
   const [isTogglingRecording, setIsTogglingRecording] = useState(false)
   const egressIdRef = useRef(null) // store egressId returned by start-recording
@@ -24,8 +24,10 @@ export function useRecording(sessionId, lkRoom = null) {
   const [stopRecording] = useStopRecordingMutation()
 
   const handleToggleRecording = useCallback(async () => {
-    if (!sessionId) {
-      toast.error("No active session — cannot record.")
+    const roomName = lkRoom?.name ?? null
+
+    if (!roomName) {
+      toast.error("No active room — cannot record.")
       return
     }
 
@@ -35,43 +37,68 @@ export function useRecording(sessionId, lkRoom = null) {
     try {
       if (!isRecording) {
         // ── START recording ────────────────────────────────────────────
-        // Pass actual LiveKit room name so backend can find the correct room.
-        // In dev mode the Vite plugin creates "room-{roomId}"; in production it's "cs-session-{sessionId}".
-        const roomName = lkRoom?.name ?? null
+        console.log("[Recording Debug] Starting recording for room:", roomName)
+        const result = await startRecording({ roomName }).unwrap()
+        console.log("[Recording Debug] Start response:", JSON.stringify(result))
+        console.log("[Recording Debug] egressId received:", result.egressId)
 
-        const result = await startRecording({ sessionId, roomName }).unwrap()
+        if (!result.egressId) {
+          console.error("[Recording Debug] ⚠️ Backend returned no egressId! Full response:", result)
+          toast.error("Recording started but no egress ID received — stop may not work.")
+        }
+
         egressIdRef.current = result.egressId
         setIsRecording(true)
-        toast.success("Recording started", {
+        toast.success(t.recordings?.actions?.startSuccess || "Recording started", {
           icon: "🔴",
           duration: 3000,
         })
       } else {
         // ── STOP recording ─────────────────────────────────────────────
         const egressId = egressIdRef.current
+        console.log("[Recording Debug] Stopping recording. egressId:", egressId)
+
         if (!egressId) {
+          console.error("[Recording Debug] ⚠️ egressId is null — stop call will NOT be sent to backend!")
           setIsRecording(false)
           return
         }
-        await stopRecording(egressId).unwrap()
+
+        const result = await stopRecording(egressId).unwrap()
+        console.log("[Recording Debug] Stop response:", JSON.stringify(result))
         egressIdRef.current = null
         setIsRecording(false)
-        toast.success("Recording stopped — processing upload…", {
+        toast.success(t.recordings?.actions?.stopSuccess || "Recording stopped — processing upload…", {
           icon: "⏹️",
           duration: 4000,
         })
       }
     } catch (err) {
+      const status = err?.status
+
+      // ── 409 Conflict — storage quota exceeded ──────────────────────
+      if (status === 409) {
+        const quotaMsg =
+          err?.data?.message ||
+          t.recordings?.storage?.quotaExceeded || "Storage quota exceeded. Please delete some recordings to free up space."
+        toast.error(quotaMsg, {
+          icon: "⚠️",
+          duration: 6000,
+        })
+        console.warn("[Recording] Quota exceeded:", quotaMsg)
+        return
+      }
+
       const msg =
         err?.data?.message ||
         err?.data ||
-        (isRecording ? "Failed to stop recording." : "Failed to start recording.")
+        t.recordings?.list?.error || "Failed to process recording."
       toast.error(msg)
       console.error("[Recording] toggle error:", err)
     } finally {
       setIsTogglingRecording(false)
     }
-  }, [sessionId, lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording])
+  }, [lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording])
 
   return {
     isRecording,
