@@ -1,19 +1,19 @@
-import React from "react"
+import React, { useState, useRef, useEffect, useContext } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import {
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
-  conversationsApi,
 } from "@/store/api/conversationsApi"
-import useConversationSignalR from "../hooks/useConversationSignalR"
+import useMessageSignalR from "../hooks/useMessageSignalR"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 import {
   closeWidget,
   openWidget,
   setActiveConversation,
-  setView,
   toggleWidget,
+  setView,
 } from "@/store/slices/messageWidgetSlice"
 import { MessageCircle } from "lucide-react"
 import MessageModal from "./MessageModal"
@@ -25,33 +25,28 @@ import ConversationDetail from "./conversation-detail/ConversationDetail"
 const MessageWidget = () => {
   const dispatch = useDispatch()
   const { isAuthenticated } = useAuth()
-  const { openAuthModal } = React.useContext(AuthModalContext)
+  const { openAuthModal } = useContext(AuthModalContext)
   const { isOpen, activeConversationId, view } = useSelector(
     (state) => state.messageWidget,
   )
-  const [input, setInput] = React.useState("")
-  const widgetRef = React.useRef(null)
+  const [input, setInput] = useState("")
+  const [unreadCount, setUnreadCount] = useState(0)
+  const widgetRef = useRef(null)
+
+  // Clear unread count when widget opens
+  useEffect(() => {
+    if (isOpen) {
+      setUnreadCount(0)
+    }
+  }, [isOpen])
 
   // Handle click outside to close
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (widgetRef.current && !widgetRef.current.contains(event.target)) {
-        // Also check if click is inside the portal-rendered modal (mobile)
-        if (event.target.closest?.("[data-message-widget-portal]")) return
-        if (isOpen) {
-          dispatch(closeWidget())
-        }
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen, dispatch])
+  useClickOutside(widgetRef, () => {
+    dispatch(closeWidget())
+  }, {
+    enabled: isOpen,
+    ignoreSelector: "[data-message-widget-portal]"
+  })
 
   // Fetch conversations from API
   const {
@@ -75,78 +70,10 @@ const MessageWidget = () => {
   })
 
   // -- SignalR Integration --
-  const signalRHandlers = React.useMemo(
-    () => ({
-      NewMessage: (...args) => {
-        let conversationId, message
-        if (args.length >= 2) {
-          conversationId = args[0]
-          message = args[1]
-        } else {
-          // If only 1 arg, assume it's the message object and ID is inside
-          message = args[0]
-          conversationId = message?.conversationId
-        }
-
-        // Always force refetch of messages to guarantee consistency
-        if (conversationId) {
-          dispatch(
-            conversationsApi.util.invalidateTags([
-              { type: "Messages", id: conversationId },
-              "Conversations",
-            ]),
-          )
-        }
-
-        // Optimistically update the messages cache (if matches active conversation)
-        // Ensure strictly converted to numbers for comparison
-        if (
-          activeConversationId &&
-          conversationId &&
-          Number(conversationId) === Number(activeConversationId)
-        ) {
-          dispatch(
-            conversationsApi.util.updateQueryData(
-              "getConversationMessages",
-              activeConversationId,
-              (draft) => {
-                // Prevent duplicates
-                const exists = draft.find(
-                  (m) => m.messageId === message.messageId,
-                )
-                if (!exists) {
-                  // Ensure sender exists for MessageList safety
-                  const normalized = {
-                    ...message,
-                    sender: message.sender || { accountId: message.senderId },
-                  }
-                  draft.push(normalized)
-                }
-              },
-            ),
-          )
-        }
-
-        // Always invalidate conversations list to update snippets/unread counts
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      NewConversation: (data) => {
-        // Refresh conversation list
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      FriendStatusChange: (data) => {
-        // Refresh conversation list (to show online status)
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      ChatUpdated: (data) => {
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-    }),
-    [activeConversationId, dispatch],
-  )
-
-  const { sendMessage: sendSignalRMessage } =
-    useConversationSignalR(signalRHandlers)
+  const { sendSignalRMessage } = useMessageSignalR({
+    activeConversationId,
+    onUnreadCountIncrement: () => setUnreadCount((prev) => prev + 1)
+  })
 
   // Handle conversation selection
   const handleSelectConversation = (conv) => {
@@ -227,10 +154,15 @@ const MessageWidget = () => {
           }
           dispatch(toggleWidget())
         }}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
         aria-label="Tin nhắn"
       >
         <MessageCircle />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-white bg-red-500 text-[10px] text-white shadow-sm dark:border-gray-800">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </button>
     </div>
   )
