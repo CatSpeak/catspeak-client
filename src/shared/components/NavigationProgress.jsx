@@ -33,6 +33,15 @@ const NavigationProgress = () => {
       if (query?.endpointName === "getRooms" && query?.originalArgs?.page > 1) {
         return false
       }
+      
+      // Ignore real-time background syncing for messages so it doesn't interrupt UX
+      if (
+        query?.endpointName === "getConversations" ||
+        query?.endpointName === "getConversationMessages"
+      ) {
+        return false
+      }
+
       return true
     }).length
 
