@@ -89,6 +89,8 @@ const ChatBox = ({
                   ? t.rooms.chatBox.you
                   : msg.from?.name || msg.from?.identity || `User`
 
+                const isSystem = msg.from?.isSystem ?? false
+
                 return (
                   <motion.div
                     key={msg.id || `msg-${index}`}
@@ -114,7 +116,9 @@ const ChatBox = ({
                       className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${
                         isMe
                           ? "bg-[#990011] text-white"
-                          : "bg-[#F0F0F0] text-black"
+                          : isSystem 
+                            ? "bg-[#FFE0B2] text-black border border-[#FF9800]"
+                            : "bg-[#F0F0F0] text-black"
                       }`}
                     >
                       <p className="m-0">{msg.message}</p>

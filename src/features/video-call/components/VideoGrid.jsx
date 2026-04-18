@@ -5,7 +5,8 @@ import { useSpotlight } from "@/features/video-call/hooks/useSpotlight"
 
 /**
  * Renders a responsive grid of VideoTile and ScreenShareTile components.
- * Supports clicking any tile to elevate it into a Spotlight, moving others to a bottom scroll row.
+ * Supports clicking any tile to elevate it into a Spotlight, moving others
+ * to a sidebar (desktop) or bottom scroll row (mobile).
  */
 const VideoGrid = () => {
   const { participants: contextParticipants, screenShareTracks } =
@@ -18,18 +19,38 @@ const VideoGrid = () => {
     participants,
   )
 
-  const hasScreenShare = screenShareTracks && screenShareTracks.length > 0
-
   const gridClass = "min-[426px]:grid-cols-[repeat(auto-fit,minmax(260px,1fr))]"
   const scrollbarClasses =
     "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5"
 
-  if (spotlightItem && hasScreenShare) {
-    // ─── Spotlight layout ───
+  if (spotlightItem) {
+    // ─── Unified Spotlight layout ───
+    // Sidebar contains everything NOT currently spotlighted.
+    // When a screen share is spotlighted, all participants (including the
+    // screen sharer) still appear so they can see their own webcam tile.
+
+    const sidebarScreenShares = (screenShareTracks ?? []).filter((trackRef) => {
+      if (spotlightItem.type !== "screen") return true
+      return (
+        trackRef.publication?.trackSid !==
+        spotlightItem.trackRef.publication?.trackSid
+      )
+    })
+
+    const sidebarParticipants =
+      spotlightItem.type === "screen"
+        ? participants
+        : participants.filter(
+            (p) => p.identity !== spotlightItem.participant.identity,
+          )
+
+    const hasSidebarItems =
+      sidebarScreenShares.length > 0 || sidebarParticipants.length > 0
+
     return (
-      <div className="flex h-full w-full flex-col gap-2 p-5 overflow-hidden">
+      <div className="flex h-full w-full flex-col md:flex-row gap-3 p-4 overflow-hidden">
         {/* Main: spotlighted tile */}
-        <div className="flex-1 min-h-0 min-w-0">
+        <div className="flex-[3] md:flex-[4] min-h-0 min-w-0">
           {spotlightItem.type === "screen" ? (
             <div className="h-full w-full">
               <ScreenShareTile
@@ -40,47 +61,35 @@ const VideoGrid = () => {
                   "Unknown"
                 }
                 isLocal={spotlightItem.trackRef.participant?.isLocal}
-                onClick={
-                  hasScreenShare
-                    ? () => handleTileClick(spotlightItem)
-                    : undefined
-                }
+                onClick={() => handleTileClick(spotlightItem)}
               />
             </div>
           ) : (
             <div className="h-full w-full">
               <VideoTile
                 participant={spotlightItem.participant}
-                onClick={
-                  hasScreenShare
-                    ? () => handleTileClick(spotlightItem)
-                    : undefined
-                }
+                onClick={() => handleTileClick(spotlightItem)}
               />
             </div>
           )}
         </div>
 
-        {/* Bottom row: other tiles */}
-        <div
-          className={`
-            flex gap-2 overflow-x-auto overflow-y-hidden
-            h-28 shrink-0
-            ${scrollbarClasses}
-          `}
-        >
-          {screenShareTracks?.map((trackRef) => {
-            if (
-              spotlightItem.type === "screen" &&
-              spotlightItem.trackRef.publication?.trackSid ===
-                trackRef.publication?.trackSid
-            ) {
-              return null // already spotlighted
-            }
-            return (
+        {/* Sidebar: all other tiles
+            Mobile  → horizontal scroll row at the bottom (h-28)
+            Desktop → vertical scroll column on the right  */}
+        {hasSidebarItems && (
+          <div
+            className={`
+              flex flex-1 gap-2 min-h-0 min-w-0
+              flex-row overflow-x-auto
+              md:flex-col md:overflow-y-auto md:overflow-x-hidden
+              ${scrollbarClasses}
+            `}
+          >
+            {sidebarScreenShares.map((trackRef) => (
               <div
                 key={trackRef.publication?.trackSid}
-                className="shrink-0 h-full aspect-video rounded-lg overflow-hidden"
+                className="flex-1 basis-0 min-w-[160px] md:min-w-0 md:min-h-[160px] relative"
               >
                 <ScreenShareTile
                   trackRef={trackRef}
@@ -90,39 +99,25 @@ const VideoGrid = () => {
                     "Unknown"
                   }
                   isLocal={trackRef.participant?.isLocal}
-                  onClick={
-                    hasScreenShare
-                      ? () => handleTileClick({ type: "screen", trackRef })
-                      : undefined
-                  }
+                  onClick={() => handleTileClick({ type: "screen", trackRef })}
                 />
               </div>
-            )
-          })}
-          {participants.map((participant) => {
-            if (
-              spotlightItem.type === "video" &&
-              spotlightItem.participant.identity === participant.identity
-            ) {
-              return null // already spotlighted
-            }
-            return (
+            ))}
+            {sidebarParticipants.map((participant) => (
               <div
                 key={participant.identity}
-                className="shrink-0 h-full aspect-video rounded-lg overflow-hidden"
+                className="flex-1 basis-0 min-w-[160px] md:min-w-0 md:min-h-[160px] relative"
               >
                 <VideoTile
                   participant={participant}
-                  onClick={
-                    hasScreenShare
-                      ? () => handleTileClick({ type: "video", participant })
-                      : undefined
+                  onClick={() =>
+                    handleTileClick({ type: "video", participant })
                   }
                 />
               </div>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
@@ -133,7 +128,7 @@ const VideoGrid = () => {
       className={`
     flex flex-col min-[426px]:grid h-full w-full
     gap-4
-    p-5
+    p-4
     overflow-y-auto
     min-[426px]:place-content-center
     min-[426px]:auto-rows-fr
@@ -154,11 +149,7 @@ const VideoGrid = () => {
               "Unknown"
             }
             isLocal={trackRef.participant?.isLocal}
-            onClick={
-              hasScreenShare
-                ? () => handleTileClick({ type: "screen", trackRef })
-                : undefined
-            }
+            onClick={() => handleTileClick({ type: "screen", trackRef })}
           />
         </div>
       ))}
@@ -169,11 +160,7 @@ const VideoGrid = () => {
         >
           <VideoTile
             participant={participant}
-            onClick={
-              hasScreenShare
-                ? () => handleTileClick({ type: "video", participant })
-                : undefined
-            }
+            onClick={() => handleTileClick({ type: "video", participant })}
           />
         </div>
       ))}

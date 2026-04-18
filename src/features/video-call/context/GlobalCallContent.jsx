@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import {
   useRoomContext,
@@ -8,7 +8,7 @@ import {
   useConnectionState,
   RoomAudioRenderer,
 } from "@livekit/components-react"
-import { ConnectionState } from "livekit-client"
+import { ConnectionState, RoomEvent } from "livekit-client"
 
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
@@ -62,8 +62,73 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
   const chatState = useChat()
-  const chatMessages = chatState.chatMessages ?? []
+  const baseChatMessages = chatState.chatMessages ?? []
   const chatSend = chatState.send ?? (() => {})
+
+  const [systemMessages, setSystemMessages] = useState([])
+
+  useEffect(() => {
+    if (!lkRoom) {
+      console.warn("[LiveKit Debug] lkRoom is null, cannot attach DataReceived listener.");
+      return
+    }
+
+    console.log(`[LiveKit Debug] DataReceived listener actively attached to room: ${lkRoom.name || "Unknown"}`);
+
+    const handleData = (payload, participant, kind, topic) => {
+      const decoded = new TextDecoder().decode(payload)
+      console.log(`[LiveKit Debug] Packet Received! Topic:`, topic, `| Participant:`, participant?.identity, `| Content:`, decoded)
+
+      if (!participant) {
+        console.log("🚀 [BACKEND PAYLOAD RECEIVED] Topic:", topic);
+        console.log("Raw decoded:", decoded);
+        try {
+          const parsed = JSON.parse(decoded);
+          console.log("Parsed JSON:", parsed);
+        } catch (e) {
+          // Not a JSON payload, ignore
+        }
+      }
+
+      // We accept any packet without a source participant (likely server-sent API),
+      // OR specifically packets on 'lk-chat'/'system' topics.
+      if (!participant || topic === "lk-chat" || topic === "system") {
+        let messageText = decoded
+        let messageId = `sys-${Date.now()}-${Math.random()}`
+        let timestamp = Date.now()
+
+        try {
+          const json = JSON.parse(decoded)
+          // If it's a standard user chat message that `useChat` will naturally handle, ignore it here
+          if (participant && topic === "lk-chat") return 
+          
+          messageText = json.message || decoded
+          if (json.id) messageId = json.id
+          if (json.timestamp) timestamp = json.timestamp
+        } catch {
+          // string payload
+        }
+
+        const newSysMsg = {
+          id: messageId,
+          timestamp,
+          message: messageText,
+          from: { name: "System", isSystem: true }
+        }
+
+        setSystemMessages((prev) => [...prev, newSysMsg])
+      }
+    }
+
+    lkRoom.on(RoomEvent.DataReceived, handleData)
+    return () => {
+      lkRoom.off(RoomEvent.DataReceived, handleData)
+    }
+  }, [lkRoom])
+
+  const chatMessages = [...baseChatMessages, ...systemMessages].sort(
+    (a, b) => a.timestamp - b.timestamp
+  )
 
   // ── Action handlers ──
   const actions = useCallActions({
