@@ -15,6 +15,10 @@ import {
   toggleWidget,
   setView,
 } from "@/store/slices/messageWidgetSlice"
+import {
+  selectTotalUnread,
+  clearUnread,
+} from "@/store/slices/notificationSlice"
 import { MessageCircle } from "lucide-react"
 import MessageModal from "./MessageModal"
 import ConversationListHeader from "./headers/ConversationListHeader"
@@ -30,23 +34,20 @@ const MessageWidget = () => {
     (state) => state.messageWidget,
   )
   const [input, setInput] = useState("")
-  const [unreadCount, setUnreadCount] = useState(0)
+  const totalUnreadCount = useSelector(selectTotalUnread)
   const widgetRef = useRef(null)
 
-  // Clear unread count when widget opens
-  useEffect(() => {
-    if (isOpen) {
-      setUnreadCount(0)
-    }
-  }, [isOpen])
-
   // Handle click outside to close
-  useClickOutside(widgetRef, () => {
-    dispatch(closeWidget())
-  }, {
-    enabled: isOpen,
-    ignoreSelector: "[data-message-widget-portal]"
-  })
+  useClickOutside(
+    widgetRef,
+    () => {
+      dispatch(closeWidget())
+    },
+    {
+      enabled: isOpen,
+      ignoreSelector: "[data-message-widget-portal]",
+    },
+  )
 
   // Fetch conversations from API
   const {
@@ -72,12 +73,13 @@ const MessageWidget = () => {
   // -- SignalR Integration --
   const { sendSignalRMessage } = useMessageSignalR({
     activeConversationId,
-    onUnreadCountIncrement: () => setUnreadCount((prev) => prev + 1)
   })
 
   // Handle conversation selection
   const handleSelectConversation = (conv) => {
     dispatch(setActiveConversation(conv.conversationId))
+    // Clear unread badge for this conversation
+    dispatch(clearUnread(conv.conversationId))
   }
 
   // Handle back to list
@@ -158,9 +160,9 @@ const MessageWidget = () => {
         aria-label="Tin nhắn"
       >
         <MessageCircle />
-        {unreadCount > 0 && (
+        {totalUnreadCount > 0 && (
           <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-white bg-red-500 text-[10px] text-white shadow-sm dark:border-gray-800">
-            {unreadCount > 99 ? "99+" : unreadCount}
+            {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
           </span>
         )}
       </button>

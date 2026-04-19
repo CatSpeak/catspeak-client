@@ -1,5 +1,5 @@
 export default {
-  title: "TIN NHẮN",
+  title: "Tin nhắn",
   loading: "Đang tải...",
   error: "Lỗi tải dữ liệu",
   noMessages: "Chưa có tin nhắn",

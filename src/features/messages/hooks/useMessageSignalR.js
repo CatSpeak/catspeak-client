@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux"
 import { conversationsApi } from "@/store/api/conversationsApi"
 import useConversationSignalR from "./useConversationSignalR"
 
-export const useMessageSignalR = ({ activeConversationId, onUnreadCountIncrement }) => {
+export const useMessageSignalR = ({ activeConversationId }) => {
   const dispatch = useDispatch()
 
   const signalRHandlers = useMemo(
@@ -17,16 +17,6 @@ export const useMessageSignalR = ({ activeConversationId, onUnreadCountIncrement
           // If only 1 arg, assume it's the message object and ID is inside
           message = args[0]
           conversationId = message?.conversationId
-        }
-
-        // Always force refetch of messages to guarantee consistency
-        if (conversationId) {
-          dispatch(
-            conversationsApi.util.invalidateTags([
-              { type: "Messages", id: conversationId },
-              "Conversations",
-            ]),
-          )
         }
 
         // Optimistically update the messages cache (if matches active conversation)
@@ -56,29 +46,10 @@ export const useMessageSignalR = ({ activeConversationId, onUnreadCountIncrement
               },
             ),
           )
-        } else {
-          // Message belongs to another conversation or widget is closed
-          if (onUnreadCountIncrement) {
-             onUnreadCountIncrement()
-          }
         }
-
-        // Always invalidate conversations list to update snippets/unread counts
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      NewConversation: (data) => {
-        // Refresh conversation list
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      FriendStatusChange: (data) => {
-        // Refresh conversation list (to show online status)
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      ChatUpdated: (data) => {
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
       },
     }),
-    [activeConversationId, dispatch, onUnreadCountIncrement],
+    [activeConversationId, dispatch],
   )
 
   const { sendMessage } = useConversationSignalR(signalRHandlers)
