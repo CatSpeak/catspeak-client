@@ -122,6 +122,17 @@ const ChatBox = ({
                       }`}
                     >
                       <p className="m-0">{msg.message}</p>
+                      {msg.translatedMessage && (
+                        <p className={`m-0 mt-1 pt-1 text-xs border-t ${
+                          isMe 
+                            ? "border-white/20 text-white/90" 
+                            : isSystem 
+                              ? "border-[#FF9800]/20 text-black/70"
+                              : "border-black/10 text-black/70"
+                        }`}>
+                          {msg.translatedMessage}
+                        </p>
+                      )}
                     </div>
                   </motion.div>
                 )
