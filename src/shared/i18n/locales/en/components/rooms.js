@@ -217,6 +217,12 @@ export default {
       "Camera access denied. Please allow it in settings.",
   },
   videoCall: {
+    recording: {
+      stopTitle: "Stop recording",
+      stopDescription: "The recording will be saved in <strong>My Workspace</strong>.",
+      continueBtn: "Continue recording",
+      confirmBtn: "Confirm",
+    },
     provider: {
       connecting: "Getting your session ready...",
       failedToLoad: "Failed to load session",

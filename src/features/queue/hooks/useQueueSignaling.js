@@ -40,12 +40,12 @@ export const useQueueSignaling = (handlers = {}) => {
 
     const safeHandler =
       (name) =>
-      (...args) => {
-        const handler = handlersRef.current[name]
-        if (handler) {
-          handler(...args)
+        (...args) => {
+          const handler = handlersRef.current[name]
+          if (handler) {
+            handler(...args)
+          }
         }
-      }
 
     // Bind Hub Events
     const events = [
@@ -103,7 +103,7 @@ export const useQueueSignaling = (handlers = {}) => {
 
     return () => {
       // console.log("[QueueSignalR] Stopping connection...")
-      newConnection.stop().catch(() => {})
+      newConnection.stop().catch(() => { })
       setIsConnected(false)
       setConnectionId(null)
       connectionRef.current = null

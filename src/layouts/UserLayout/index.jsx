@@ -39,11 +39,11 @@ const UserLayout = ({ showFooter = true }) => {
         redirectAfterLogin: authModal.redirectAfterLogin,
       }}
     >
-      <div className="flex flex-col min-h-screen justify-center bg-white">
+      <div className="flex flex-col min-h-screen bg-white">
         {/* Header full width */}
         <HeaderBar onGetStarted={() => openAuthModal("login")} />
 
-        <main className="w-full flex-1 flex flex-col justify-center">
+        <main className="w-full flex-1 flex flex-col">
           <Outlet />
         </main>
 

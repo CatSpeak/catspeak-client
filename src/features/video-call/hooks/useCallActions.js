@@ -98,7 +98,7 @@ export const useCallActions = ({
         console.error("Failed to leave session:", error)
       }
     }
-    leaveMeetingFn()
+    await leaveMeetingFn()
     dispatch(leaveCallAction())
 
     // Navigate away if on the call page (not in PiP)

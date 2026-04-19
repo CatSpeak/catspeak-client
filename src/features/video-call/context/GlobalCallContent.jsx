@@ -12,6 +12,7 @@ import { ConnectionState, RoomEvent } from "livekit-client"
 
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
+import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallCleanup } from "@/features/video-call/hooks/useCallCleanup"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
@@ -58,6 +59,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
 
   const videoCallState = useVideoCall(t)
   const screenShareState = useScreenShare()
+  const recordingState = useRecording(lkRoom)
 
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
@@ -69,22 +71,33 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
 
   useEffect(() => {
     if (!lkRoom) {
-      console.warn("[LiveKit Debug] lkRoom is null, cannot attach DataReceived listener.");
+      console.warn(
+        "[LiveKit Debug] lkRoom is null, cannot attach DataReceived listener.",
+      )
       return
     }
 
-    console.log(`[LiveKit Debug] DataReceived listener actively attached to room: ${lkRoom.name || "Unknown"}`);
+    console.log(
+      `[LiveKit Debug] DataReceived listener actively attached to room: ${lkRoom.name || "Unknown"}`,
+    )
 
     const handleData = (payload, participant, kind, topic) => {
       const decoded = new TextDecoder().decode(payload)
-      console.log(`[LiveKit Debug] Packet Received! Topic:`, topic, `| Participant:`, participant?.identity, `| Content:`, decoded)
+      console.log(
+        `[LiveKit Debug] Packet Received! Topic:`,
+        topic,
+        `| Participant:`,
+        participant?.identity,
+        `| Content:`,
+        decoded,
+      )
 
       if (!participant) {
-        console.log("🚀 [BACKEND PAYLOAD RECEIVED] Topic:", topic);
-        console.log("Raw decoded:", decoded);
+        console.log("🚀 [BACKEND PAYLOAD RECEIVED] Topic:", topic)
+        console.log("Raw decoded:", decoded)
         try {
-          const parsed = JSON.parse(decoded);
-          console.log("Parsed JSON:", parsed);
+          const parsed = JSON.parse(decoded)
+          console.log("Parsed JSON:", parsed)
         } catch (e) {
           // Not a JSON payload, ignore
         }
@@ -102,7 +115,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
         try {
           const json = JSON.parse(decoded)
           // If it's a standard user chat message that `useChat` will naturally handle, ignore it here
-          if (participant && topic === "lk-chat") return 
+          if (participant && topic === "lk-chat") return
 
           isJson = true
           if (json.message !== undefined && json.message !== null) {
@@ -126,7 +139,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
           timestamp,
           message: messageText,
           translatedMessage,
-          from: { name: "System", isSystem: true }
+          from: { name: "System", isSystem: true },
         }
 
         setSystemMessages((prev) => [...prev, newSysMsg])
@@ -140,7 +153,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   }, [lkRoom])
 
   const chatMessages = [...baseChatMessages, ...systemMessages].sort(
-    (a, b) => a.timestamp - b.timestamp
+    (a, b) => a.timestamp - b.timestamp,
   )
 
   // ── Action handlers ──
@@ -230,6 +243,13 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
     isLocalScreenShare: screenShareState.isLocalScreenShare,
     presenterDisplayName: screenShareState.presenterDisplayName,
     handleToggleScreenShare: actions.handleToggleScreenShare,
+    // Recording
+    isRecording: recordingState.isRecording,
+    isTogglingRecording: recordingState.isTogglingRecording,
+    handleToggleRecording: recordingState.handleToggleRecording,
+    showStopModal: recordingState.showStopModal,
+    confirmStopRecording: recordingState.confirmStopRecording,
+    cancelStopRecording: recordingState.cancelStopRecording,
   }
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
@@ -37,7 +37,7 @@ const CategoryRoomSection = ({
     categories: [categoryKey],
   })
 
-  const currentRooms = responseData?.data ?? []
+  const currentRooms = useMemo(() => responseData?.data ?? [], [responseData])
   const additionalData = responseData?.additionalData || {}
   const totalCount = additionalData.totalCount || 0
   const totalPages = additionalData.totalPages || 1

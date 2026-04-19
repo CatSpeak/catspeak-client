@@ -9,10 +9,15 @@ import {
   Mic,
   MicOff,
   Phone,
+  Circle,
+  Loader2,
 } from "lucide-react"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import StopRecordingModal from "./StopRecordingModal"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const VideoCallControlBar = ({ unreadMessages }) => {
+  const { t } = useLanguage()
   const {
     micOn,
     cameraOn,
@@ -25,7 +30,15 @@ const VideoCallControlBar = ({ unreadMessages }) => {
     handleToggleCam,
     handleToggleScreenShare,
     handleLeaveSession,
+    // Recording
+    isRecording,
+    isTogglingRecording,
+    handleToggleRecording,
+    showStopModal,
+    confirmStopRecording,
+    cancelStopRecording,
   } = useVideoCallContext()
+
   // Common button styles
   const buttonBaseClass =
     "flex items-center justify-center rounded-full transition-colors shadow-sm w-12 h-12"
@@ -52,7 +65,7 @@ const VideoCallControlBar = ({ unreadMessages }) => {
 
       <button
         onClick={handleToggleCam}
-        title={cameraOn ? "Turn camera off" : "Turn camera on"}
+        title={cameraOn ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off" : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"}
         className={`${buttonBaseClass} ${
           cameraOn ? activeErrorClass : inactiveClass
         }`}
@@ -63,7 +76,7 @@ const VideoCallControlBar = ({ unreadMessages }) => {
       {/* Screen Share Toggle */}
       <button
         onClick={handleToggleScreenShare}
-        title={isLocalScreenShare ? "Stop sharing" : "Share screen"}
+        title={isLocalScreenShare ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing" : t.rooms?.videoCall?.controls?.shareOn || "Share screen"}
         className={`${buttonBaseClass} ${
           isLocalScreenShare ? activeWarningClass : inactiveClass
         }`}
@@ -71,13 +84,42 @@ const VideoCallControlBar = ({ unreadMessages }) => {
         {isLocalScreenShare ? <MonitorOff /> : <MonitorUp />}
       </button>
 
+      {/* ── Record Toggle ─────────────────────────────────────────────── */}
+      <div className="relative">
+        <button
+          onClick={handleToggleRecording}
+          disabled={isTogglingRecording}
+          title={isRecording ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording" : t.rooms?.videoCall?.controls?.recordOn || "Start recording"}
+          className={`${buttonBaseClass} relative overflow-hidden transition-all ${
+            isTogglingRecording
+              ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-gray-400"
+              : isRecording
+                ? "bg-red-600 text-white hover:bg-red-700"
+                : "bg-[#F2F2F2] text-gray-600 hover:bg-[#D9D9D9] hover:text-gray-900"
+          }`}
+        >
+          {isTogglingRecording ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Circle
+              className={`h-5 w-5 ${isRecording ? "fill-white" : "fill-none"}`}
+            />
+          )}
+        </button>
+
+        {/* Pulse ring — visible only when actively recording */}
+        {isRecording && !isTogglingRecording && (
+          <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
+        )}
+      </div>
+
       {/* Participants Toggle */}
       <button
         onClick={() => {
           setShowParticipants(!showParticipants)
           setShowChat(false)
         }}
-        title="Participants"
+        title={t.rooms?.videoCall?.controls?.participants || "Participants"}
         className={`${buttonBaseClass} ${
           showParticipants ? activeToggleClass : inactiveClass
         }`}
@@ -92,7 +134,7 @@ const VideoCallControlBar = ({ unreadMessages }) => {
             setShowChat(!showChat)
             setShowParticipants(false)
           }}
-          title="Chat"
+          title={t.rooms?.videoCall?.controls?.chat || "Chat"}
           className={`${buttonBaseClass} ${
             showChat ? activeToggleClass : inactiveClass
           }`}
@@ -108,11 +150,18 @@ const VideoCallControlBar = ({ unreadMessages }) => {
 
       <button
         onClick={handleLeaveSession}
-        title="Leave call"
+        title={t.rooms?.videoCall?.controls?.leave || "Leave call"}
         className={`${buttonBaseClass} bg-[#d40018] text-white hover:bg-[#e7001a]`}
       >
         <Phone className="rotate-[135deg]" />
       </button>
+
+      {/* Stop Recording Confirmation Modal */}
+      <StopRecordingModal
+        open={showStopModal}
+        onClose={cancelStopRecording}
+        onConfirm={confirmStopRecording}
+      />
     </div>
   )
 }

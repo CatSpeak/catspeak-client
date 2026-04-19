@@ -4,6 +4,7 @@ export default {
     lecturer: "Giảng viên",
     organization: "Tổ chức",
     setting: "Cài đặt",
+    menu: "Menu cá nhân",
   },
   personalInfo: {
     title: "Thông tin cá nhân",

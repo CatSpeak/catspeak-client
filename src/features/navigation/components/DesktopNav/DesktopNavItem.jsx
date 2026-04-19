@@ -18,6 +18,8 @@ const DesktopNavItem = ({ navKey, noActive }) => {
     href = "/cart"
   } else if (navKey === "connect") {
     href = "/connect"
+  } else if (navKey === "workspace") {
+    href = "/workspace"
   } else {
     // Default fallback
     href = "/"
@@ -40,7 +42,7 @@ const DesktopNavItem = ({ navKey, noActive }) => {
         }
       `}
     >
-      {t.nav[navKey]}
+      {t.nav?.[navKey] || (navKey === "workspace" ? "My Workspace" : navKey)}
     </NavLink>
   )
 }

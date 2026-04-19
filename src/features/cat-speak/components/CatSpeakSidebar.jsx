@@ -42,12 +42,24 @@ const CatSpeakSidebar = () => {
   ]
 
   const bottomItems = [
-    { key: "settings", label: t.catSpeak.sidebar.settings, icon: Settings },
-    { key: "report", label: t.catSpeak.sidebar.report, icon: Flag },
-    { key: "help", label: t.catSpeak.sidebar.help, icon: HelpCircle },
+    {
+      key: "settings",
+      label: t?.catSpeak?.sidebar?.settings || "Settings",
+      icon: Settings,
+    },
+    {
+      key: "report",
+      label: t?.catSpeak?.sidebar?.report || "Report Log",
+      icon: Flag,
+    },
+    {
+      key: "help",
+      label: t?.catSpeak?.sidebar?.help || "Help",
+      icon: HelpCircle,
+    },
     {
       key: "feedback",
-      label: t.catSpeak.sidebar.feedback,
+      label: t?.catSpeak?.sidebar?.feedback || "Send Feedback",
       icon: MessageSquare,
     },
   ]
