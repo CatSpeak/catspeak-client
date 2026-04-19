@@ -192,6 +192,12 @@ export default {
       "Quyền truy cập camera bị từ chối. Vui lòng cho phép trong cài đặt.",
   },
   videoCall: {
+    recording: {
+      stopTitle: "Dừng ghi hình",
+      stopDescription: "Bản ghi sẽ được lưu tại <strong>Nhà của bạn (My Workspace)</strong>.",
+      continueBtn: "Tiếp tục ghi",
+      confirmBtn: "Xác nhận",
+    },
     provider: {
       connecting: "Đang kết nối...",
       failedToLoad: "Không thể tải phiên",

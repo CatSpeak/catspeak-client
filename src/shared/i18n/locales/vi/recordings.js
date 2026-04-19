@@ -8,6 +8,11 @@ export default {
     limit_used: "trong số {{limit}} đã dùng",
     quotaExceeded: "Đã hết dung lượng — xoá bớt bản ghi để giải phóng không gian",
   },
+  errors: {
+    noRoom: "Không có phòng đang hoạt động — không thể ghi hình.",
+    noEgress: "Đã bắt đầu ghi hình nhưng không nhận được ID nguồn ra — việc dừng có thể không hoạt động.",
+    noMedia: "Vui lòng bật camera, micrô hoặc chia sẻ màn hình trước khi ghi hình.",
+  },
   list: {
     emptyTitle: "Chưa có bản ghi nào",
     emptyDescription: "Khi bạn ghi hình cuộc gọi, chúng sẽ xuất hiện ở đây.",
@@ -44,6 +49,7 @@ export default {
     startSuccess: "Đã bắt đầu ghi hình",
     stopSuccess: "Đã dừng ghi hình — đang tải lên…",
     deleteSuccess: "Đã xóa bản ghi",
-    deleteFailed: "Không thể xóa bản ghi."
+    deleteFailed: "Không thể xóa bản ghi.",
+    viewRecordings: "Xem bản ghi"
   }
 }

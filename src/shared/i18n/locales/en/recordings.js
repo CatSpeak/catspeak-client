@@ -8,6 +8,11 @@ export default {
     limit_used: "of {{limit}} used",
     quotaExceeded: "Storage full — delete recordings to free space",
   },
+  errors: {
+    noRoom: "No active room — cannot record.",
+    noEgress: "Recording started but no egress ID received — stop may not work.",
+    noMedia: "Please turn on your camera, microphone, or share your screen before recording.",
+  },
   list: {
     emptyTitle: "No recordings yet",
     emptyDescription: "When you record your calls, they will appear here.",
@@ -44,6 +49,7 @@ export default {
     startSuccess: "Recording started",
     stopSuccess: "Recording stopped — processing upload…",
     deleteSuccess: "Recording deleted",
-    deleteFailed: "Failed to delete recording."
+    deleteFailed: "Failed to delete recording.",
+    viewRecordings: "View Recordings"
   }
 }

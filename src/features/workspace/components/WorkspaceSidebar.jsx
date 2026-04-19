@@ -1,9 +1,9 @@
 import React from "react"
 import { NavLink } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { User, GraduationCap, Building2, Settings } from "lucide-react"
+import { Video } from "lucide-react"
 
-const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
+const WorkspaceSidebar = ({ onClose, variant = "vertical" }) => {
   const { t } = useLanguage()
 
   const isHorizontal = variant === "horizontal"
@@ -26,33 +26,12 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
 
   const menuItems = [
     {
-      label: t.profile?.sidebar?.personalInfo,
-      path: "/profile",
-      end: true,
-      icon: User,
-    },
-    {
-      label: t.profile?.sidebar?.lecturer,
-      path: "/lecturer",
+      label: t?.recordings?.title || "Recordings",
+      path: "/workspace/recordings",
       end: false,
-      icon: GraduationCap,
-      isHidden: true,
+      icon: Video,
     },
-    {
-      label: t.profile?.sidebar?.organization,
-      path: "/organization",
-      end: false,
-      icon: Building2,
-      isHidden: true,
-    },
-    {
-      label: t.profile?.sidebar?.setting,
-      path: "/setting",
-      end: false,
-      icon: Settings,
-      isHidden: true,
-    },
-  ].filter((item) => !item.isHidden)
+  ]
 
   return (
     <div
@@ -78,4 +57,4 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
   )
 }
 
-export default ProfileSidebar
+export default WorkspaceSidebar

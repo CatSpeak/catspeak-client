@@ -30,6 +30,7 @@ import UserDashboard from "@/features/user/pages/UserDashboard"
 import ProfileLayout from "@/features/user/layouts/ProfileLayout"
 import PersonalInformationPage from "@/features/user/pages/PersonalInformationPage"
 import RecordingsPage from "@/features/recordings/pages/RecordingsPage"
+import WorkspaceLayout from "@/features/workspace/layouts/WorkspaceLayout"
 import LecturerPage from "@/features/user/pages/LecturerPage"
 import OrganizationPage from "@/features/user/pages/OrganizationPage"
 import AccountSettingsPage from "@/features/user/pages/AccountSettingsPage"
@@ -197,6 +198,32 @@ const routesConfig = [
           },
         ],
       },
+      // Workspace routes
+      {
+        path: "/workspace",
+        element: (
+          <AuthGuard>
+            <UserLayout showFooter={false} />
+          </AuthGuard>
+        ),
+        children: [
+          {
+            element: <WorkspaceLayout />,
+            children: [
+              {
+                index: true,
+                element: <Navigate to="recordings" replace />,
+              },
+              {
+                path: "recordings",
+                element: <RecordingsPage />,
+              },
+              { path: "*", element: <PageNotFound /> },
+            ],
+          },
+        ],
+      },
+
       {
         element: (
           <AuthGuard>
@@ -210,10 +237,6 @@ const routesConfig = [
               {
                 path: "profile",
                 element: <PersonalInformationPage />,
-              },
-              {
-                path: "recordings",
-                element: <RecordingsPage />,
               },
               {
                 path: "lecturer",

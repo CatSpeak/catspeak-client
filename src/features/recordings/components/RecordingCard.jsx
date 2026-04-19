@@ -91,9 +91,18 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
 
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
+      
+      let extension = "mp4" // Fallback extension
+      try {
+        const match = new URL(fileUrl).pathname.match(/\.([a-z0-9]+)$/i)
+        if (match) extension = match[1]
+      } catch (e) {
+        console.warn("[Recording] Could not extract extension from fileUrl")
+      }
+
       const link = document.createElement("a")
       link.href = url
-      link.download = `recording-${meetingId || recordingId}-${new Date(createdAt).toISOString().slice(0, 10)}.webm`
+      link.download = `recording-${meetingId || recordingId}-${new Date(createdAt).toISOString().slice(0, 10)}.${extension}`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

@@ -8,6 +8,11 @@ export default {
     limit_used: "/ {{limit}} 已使用",
     quotaExceeded: "存储空间已满 — 请删除一些录音以释放空间",
   },
+  errors: {
+    noRoom: "没有活跃的房间 — 无法录制。",
+    noEgress: "录制已开始，但未收到出口 ID — 停止录制可能无法正常工作。",
+    noMedia: "请在录制前开启您的摄像头、麦克风或共享屏幕。",
+  },
   list: {
     emptyTitle: "暂无录音",
     emptyDescription: "当您录制通话时，它们将显示在这里。",
@@ -44,6 +49,7 @@ export default {
     startSuccess: "录音已开始",
     stopSuccess: "录音已停止 — 正在上传处理…",
     deleteSuccess: "录音已删除",
-    deleteFailed: "无法删除录音。"
+    deleteFailed: "无法删除录音。",
+    viewRecordings: "查看录音"
   }
 }
