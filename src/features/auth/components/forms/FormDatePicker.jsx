@@ -8,13 +8,9 @@ const FormDatePicker = ({
   helperText,
 }) => {
   const handleDateChange = (e) => {
-    const dateValue = e.target.value
-    const formattedDate = dateValue
-      ? dayjs(dateValue).format("YYYY-MM-DD")
-      : ""
     onChange({
       target: {
-        value: formattedDate,
+        value: e.target.value,
         type: "text",
       },
     })
