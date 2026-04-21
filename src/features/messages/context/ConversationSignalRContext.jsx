@@ -14,10 +14,10 @@ import { getRefreshPromise } from "@store/api/baseApi"
 const MAX_START_RETRIES = 3
 const RETRY_DELAY_MS = 3000
 
-/** Hub events the server may push to clients */
 const HUB_EVENTS = [
   "NewMessage",
   "NewConversation",
+  "ConversationCreated",
   "FriendStatusChange",
   "ChatUpdated",
 ]
@@ -59,6 +59,9 @@ export const ConversationSignalRProvider = ({ children }) => {
   }, [])
 
   const notifySubscribers = useCallback((eventName, ...args) => {
+    // Helpful console log to trace if SignalR events are actually arriving
+    console.debug(`[SignalR:Received] ${eventName}`, args)
+
     const callbacks = subscribersRef.current.get(eventName)
     if (callbacks) {
       callbacks.forEach((callback) => {
@@ -203,11 +206,28 @@ export const ConversationSignalRProvider = ({ children }) => {
     [invoke],
   )
 
+  const reconnect = useCallback(async () => {
+    if (connectionRef.current) {
+      try {
+        await connectionRef.current.stop()
+        setIsConnected(false)
+        setConnectionId(null)
+        await connectionRef.current.start()
+        setIsConnected(true)
+        setConnectionId(connectionRef.current.connectionId)
+        console.info("[ConversationSignalR] Force reconnected successfully")
+      } catch (err) {
+        console.error("[ConversationSignalR] Force reconnect failed:", err)
+      }
+    }
+  }, [])
+
   const value = {
     isConnected,
     connectionId,
     sendMessage,
     invoke,
+    reconnect,
     on,
     off,
   }

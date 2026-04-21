@@ -22,7 +22,7 @@ export const useConversationSignalR = (handlers = {}) => {
     )
   }
 
-  const { isConnected, connectionId, sendMessage, invoke, on, off } = context
+  const { isConnected, connectionId, sendMessage, invoke, reconnect, on, off } = context
 
   // Keep handlers fresh without re-subscribing
   const handlersRef = useRef(handlers)
@@ -34,6 +34,7 @@ export const useConversationSignalR = (handlers = {}) => {
     const events = [
       "NewMessage",
       "NewConversation",
+      "ConversationCreated",
       "FriendStatusChange",
       "ChatUpdated",
       "OnConnected",
@@ -66,6 +67,7 @@ export const useConversationSignalR = (handlers = {}) => {
     connectionId,
     sendMessage,
     invoke,
+    reconnect,
   }
 }
 

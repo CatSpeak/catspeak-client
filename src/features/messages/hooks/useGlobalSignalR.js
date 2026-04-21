@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useRef, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { conversationsApi } from "@/store/api/conversationsApi"
 import {
@@ -19,6 +19,11 @@ export const useGlobalSignalR = () => {
   )
   const isWidgetOpen = useSelector((state) => state.messageWidget.isOpen)
 
+  // Ref to hold invoke so the NewConversation handler can call JoinConversation
+  // without creating a circular dependency (invoke comes from useConversationSignalR
+  // which needs handlers, but handlers need invoke).
+  const invokeRef = useRef(null)
+
   const handlers = useMemo(
     () => ({
       NewMessage: (...args) => {
@@ -31,7 +36,6 @@ export const useGlobalSignalR = () => {
           conversationId = message?.conversationId
         }
 
-        // Invalidate conversation list to update order & snippets
         dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
 
         if (conversationId) {
@@ -42,19 +46,26 @@ export const useGlobalSignalR = () => {
           )
         }
 
-        // Only show toast + increment unread if user is NOT viewing that conversation
         const isViewingConversation =
           isWidgetOpen &&
           activeConversationId &&
           Number(conversationId) === Number(activeConversationId)
 
-        if (!isViewingConversation && conversationId) {
-          dispatch(incrementUnread(conversationId))
+        if (!isViewingConversation) {
+          if (conversationId) {
+             dispatch(incrementUnread(conversationId))
+          }
+          import("react-hot-toast").then(({ toast }) => {
+            const previewText = message?.messageContent || "New message received"
+            toast.success(previewText, { icon: "💬" })
+          })
         }
       },
 
       ChatUpdated: () => {
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+        setTimeout(() => {
+          dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+        }, 500)
       },
 
       FriendStatusChange: (data) => {
@@ -66,14 +77,56 @@ export const useGlobalSignalR = () => {
             }),
           )
         }
-        // Refresh conversation list to reflect status
         dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
       },
     }),
     [dispatch, activeConversationId, isWidgetOpen],
   )
 
-  useConversationSignalR(handlers)
+  // Define the helper here and assign it so we cover multiple possible event names 
+  // the backend developer might have used. Delay reconnects so the DB commits.
+  const handleNewConversationEvent = useMemo(() => (conversation) => {
+    setTimeout(() => {
+      dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+    }, 500)
+
+    const convId = typeof conversation === 'object' 
+      ? (conversation?.conversationId ?? conversation?.ConversationId) 
+      : conversation
+      
+    if (convId && invokeRef.current) {
+      invokeRef.current("JoinConversation", Number(convId)).catch((err) => {
+        console.warn(
+          "[GlobalSignalR] Failed to join conversation group, falling back to reconnect:",
+          err,
+        )
+        if (reconnectRef.current) {
+          setTimeout(() => reconnectRef.current(), 500)
+        }
+      })
+    } else if (reconnectRef.current) {
+      setTimeout(() => reconnectRef.current(), 500)
+    }
+
+    import("react-hot-toast").then(({ toast }) => {
+      toast.success("New conversation started!", { icon: "👋" })
+    })
+  }, [dispatch])
+
+  // Attach to handlers object
+  useEffect(() => {
+    handlers.NewConversation = handleNewConversationEvent
+    handlers.ConversationCreated = handleNewConversationEvent
+  }, [handlers, handleNewConversationEvent])
+
+  const { invoke, reconnect } = useConversationSignalR(handlers)
+
+  // Keep invokeRef and reconnectRef in sync
+  const reconnectRef = useRef(null)
+  useEffect(() => {
+    invokeRef.current = invoke
+    reconnectRef.current = reconnect
+  }, [invoke, reconnect])
 }
 
 export default useGlobalSignalR

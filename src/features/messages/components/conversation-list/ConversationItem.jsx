@@ -3,18 +3,23 @@ import { useSelector } from "react-redux"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { selectUnreadForConversation } from "@/store/slices/notificationSlice"
+import { useAuth } from "@/features/auth"
 
 const ConversationItem = ({ conversation, onClick }) => {
   const { t } = useLanguage()
+  const { user } = useAuth()
+  
   const username =
     conversation?.friend?.username || t.components.messages.unknownUser
   const avatarSrc = conversation?.friend?.avatar || null
 
-  const unreadCount = useSelector(
+  const unreadCountRedux = useSelector(
     selectUnreadForConversation(conversation?.conversationId),
   )
+  
+  const unreadCount = conversation?.unreadCount ?? unreadCountRedux
 
-  console.log(conversation)
+  const isYou = conversation?.lastMessageSenderId === user?.accountId
 
   return (
     <button
@@ -26,7 +31,14 @@ const ConversationItem = ({ conversation, onClick }) => {
         <div className="flex flex-col text-left">
           <span className="text-base">{username}</span>
           <span className="text-sm truncate max-w-[200px] text-[#606060]">
-            {conversation?.lastMessage || t.components.messages.noMessages}
+            {conversation?.lastMessage ? (
+              <>
+                {isYou && <span className="font-medium">You: </span>}
+                {conversation.lastMessage}
+              </>
+            ) : (
+              t.components.messages.noMessages
+            )}
           </span>
         </div>
       </div>

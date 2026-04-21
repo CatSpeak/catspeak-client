@@ -5,6 +5,8 @@ import AuthModalContext from "@/shared/context/AuthModalContext"
 import {
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
+  useSendMessageMutation,
+  conversationsApi,
 } from "@/store/api/conversationsApi"
 import useMessageSignalR from "../hooks/useMessageSignalR"
 import useClickOutside from "@/shared/hooks/useClickOutside"
@@ -34,7 +36,7 @@ const MessageWidget = () => {
     (state) => state.messageWidget,
   )
   const [input, setInput] = useState("")
-  const totalUnreadCount = useSelector(selectTotalUnread)
+  const totalUnreadCountRedux = useSelector(selectTotalUnread)
   const widgetRef = useRef(null)
 
   // Handle click outside to close
@@ -56,6 +58,13 @@ const MessageWidget = () => {
     isError,
   } = useGetConversationsQuery()
 
+  const totalUnreadCountServer = conversations.reduce(
+    (sum, c) => sum + (c.unreadCount || 0),
+    0,
+  )
+  // Use server total since it survives reload. Fallback to redux if empty (optional safety)
+  const totalUnreadCount = totalUnreadCountServer || totalUnreadCountRedux
+
   // Find active conversation object
   const selected = conversations.find(
     (c) => c.conversationId === activeConversationId,
@@ -75,11 +84,28 @@ const MessageWidget = () => {
     activeConversationId,
   })
 
+  const [sendMessageApi, { isLoading: isSending }] =
+    useSendMessageMutation()
+
   // Handle conversation selection
   const handleSelectConversation = (conv) => {
     dispatch(setActiveConversation(conv.conversationId))
     // Clear unread badge for this conversation
     dispatch(clearUnread(conv.conversationId))
+    dispatch(
+      conversationsApi.util.updateQueryData(
+        "getConversations",
+        undefined,
+        (draft) => {
+          const cachedConv = draft.find(
+            (c) => c.conversationId === conv.conversationId,
+          )
+          if (cachedConv) {
+            cachedConv.unreadCount = 0
+          }
+        },
+      ),
+    )
   }
 
   // Handle back to list
@@ -93,11 +119,13 @@ const MessageWidget = () => {
     if (!input.trim() || !activeConversationId) return
 
     try {
-      // Use SignalR to send
-      await sendSignalRMessage(activeConversationId, input, 0) // 0 = Text
+      await sendMessageApi({
+        conversationId: activeConversationId,
+        messageData: { messageContent: input, messageType: 0 },
+      }).unwrap()
       setInput("")
     } catch (error) {
-      console.error("Failed to send message via SignalR:", error)
+      console.error("Failed to send message:", error)
     }
   }
 
@@ -143,7 +171,7 @@ const MessageWidget = () => {
             onInputChange={(e) => setInput(e.target.value)}
             onSendMessage={handleSendMessage}
             onKeyPress={handleKeyPress}
-            isSending={false} // Removed mutation usage
+            isSending={isSending}
           />
         )}
       </MessageModal>
