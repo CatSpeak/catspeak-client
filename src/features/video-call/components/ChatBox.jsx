@@ -85,6 +85,7 @@ const ChatBox = ({
                 // LiveKit useChat message format:
                 // { id, timestamp, message, from?: Participant }
                 const isMe = msg.from?.isLocal ?? false
+                const isSystem = msg.isSystem || !msg.from
                 const senderName = isMe
                   ? t.rooms.chatBox.you
                   : msg.from?.name || msg.from?.identity || `User`
