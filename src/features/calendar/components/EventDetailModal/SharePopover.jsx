@@ -9,7 +9,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * Self-contained share button with a popover that shows the generated link
  * and a copy-to-clipboard action.
  */
-const SharePopover = ({ eventId }) => {
+const SharePopover = ({ eventId, occurrenceId }) => {
   const { t } = useLanguage()
   const {
     shareRef,
@@ -19,7 +19,7 @@ const SharePopover = ({ eventId }) => {
     isSharing,
     handleShare,
     handleCopy,
-  } = useEventShare(eventId)
+  } = useEventShare(eventId, occurrenceId)
 
   return (
     <div className="relative" ref={shareRef}>

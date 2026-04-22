@@ -1,6 +1,7 @@
 export default {
   location: "Location",
   locationDefault: "FPT University",
+  notAssigned: "Not assigned",
   public: "Public",
   private: "Private",
   recurring: "Recurring",

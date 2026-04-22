@@ -33,6 +33,12 @@ const NavigationProgress = () => {
       if (query?.endpointName === "getRooms" && query?.originalArgs?.page > 1) {
         return false
       }
+
+      // Ignore getEventsByDate so clicking a date in the calendar doesn't trigger global nprogress
+      if (query?.endpointName === "getEventsByDate") {
+        return false
+      }
+
       return true
     }).length
 

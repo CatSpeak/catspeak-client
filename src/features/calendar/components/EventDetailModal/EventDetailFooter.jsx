@@ -89,17 +89,14 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
       const isRecurring = event?.isRecurring
       const occurrenceId = event?.occurrenceId
 
-      const body =
-        isRecurring && !occurrenceId
-          ? {
-              eventId,
-              registrationType: "ENTIRE_SERIES",
-            }
-          : {
-              eventId,
-              occurrenceId,
-              registrationType: "SINGLE_OCCURRENCE",
-            }
+      let body = { eventId }
+      if (occurrenceId) {
+        body = { eventId, occurrenceId, registrationType: "SINGLE_OCCURRENCE" }
+      } else if (event?.isRecurring) {
+        body = { eventId, registrationType: "ENTIRE_SERIES" }
+      }
+
+      console.log("REGISTER PAYLOAD:", body)
 
       await registerForEvent(body).unwrap()
       setIsRegistered(true)
@@ -169,9 +166,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
                 </button>
               </>
             )}
-            <SharePopover
-              eventId={event?.occurrenceId ?? event?.id ?? eventId}
-            />
+            <SharePopover eventId={eventId} occurrenceId={event?.occurrenceId} />
           </div>
         )}
       </div>

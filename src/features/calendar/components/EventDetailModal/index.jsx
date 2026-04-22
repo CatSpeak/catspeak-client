@@ -1,7 +1,10 @@
 import React, { useState } from "react"
 import { X } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
-import { useGetEventByIdQuery } from "@/store/api/eventsApi"
+import {
+  useGetEventByIdQuery,
+  useGetEventOccurrenceByIdQuery,
+} from "@/store/api/eventsApi"
 import EventDetailHeader from "./EventDetailHeader"
 import EventDetailBody from "./EventDetailBody"
 import EventDetailFooter from "./EventDetailFooter"
@@ -13,23 +16,77 @@ const EventDetailModal = ({ event, onClose }) => {
   const { t } = useLanguage()
   const cal = t.calendar || {}
   const [editMode, setEditMode] = useState("none") // "none" | "choice" | "series" | "occurrence"
+  console.log(event)
   const eventId = event?.eventId ?? event?.id
+  const occurrenceId = event?.occurrenceId
 
-  const { data: detail, isLoading } = useGetEventByIdQuery(eventId, {
-    skip: !eventId,
-  })
+  const { data: occurrenceDetail, isLoading: isLoadingOccurrence } =
+    useGetEventOccurrenceByIdQuery(occurrenceId, {
+      skip: !occurrenceId,
+    })
+
+  // Prevent 404 GET errors if eventId is accidentally an occurrenceId (e.g. from an old shared link)
+  let actualEventId = eventId
+  if (occurrenceDetail?.eventId) {
+    actualEventId = occurrenceDetail.eventId
+  } else if (occurrenceId && eventId === occurrenceId) {
+    // Wait for occurrenceDetail to give us the real eventId
+    actualEventId = null
+  }
+
+  const { data: detail, isLoading: isLoadingEvent } = useGetEventByIdQuery(
+    actualEventId,
+    {
+      skip: !actualEventId,
+    },
+  )
+
+  const isLoading = isLoadingEvent || isLoadingOccurrence
 
   if (!event) return null
 
-  // Merge: prefer fully-loaded detail, fall back to the summary object
+  // Merge: prefer fully-loaded detail, fall back to the summary object, then override with occurrence specifics
   const ev = detail
     ? {
         ...event,
         ...detail,
+        ...occurrenceDetail,
+        location: occurrenceDetail?.location || detail?.location || event?.location || "",
+        participants:
+          occurrenceDetail?.participants ??
+          detail?.participants ??
+          event?.participants,
         currentParticipants:
-          detail.currentParticipants ?? event.currentParticipants,
+          occurrenceDetail?.participants?.length ??
+          occurrenceDetail?.currentParticipants ??
+          detail?.participants?.length ??
+          detail?.currentParticipants ??
+          event?.currentParticipants,
+        maxParticipants:
+          occurrenceDetail?.maxParticipants ??
+          detail?.maxParticipants ??
+          event?.maxParticipants,
+        isRegistered:
+          occurrenceDetail?.isRegistered ||
+          detail?.isRegistered ||
+          event?.isRegistered,
+        registrationId:
+          occurrenceDetail?.registrationId ||
+          detail?.registrationId ||
+          event?.registrationId,
       }
-    : event
+    : {
+        ...event,
+        ...occurrenceDetail,
+        location: occurrenceDetail?.location || event?.location || "",
+        participants: occurrenceDetail?.participants ?? event?.participants,
+        currentParticipants:
+          occurrenceDetail?.participants?.length ??
+          occurrenceDetail?.currentParticipants ??
+          event?.currentParticipants,
+        isRegistered: occurrenceDetail?.isRegistered || event?.isRegistered,
+        registrationId: occurrenceDetail?.registrationId || event?.registrationId,
+      }
   const headerColor = ev.color || "#B91264"
 
   if (editMode === "series") {
@@ -50,42 +107,48 @@ const EventDetailModal = ({ event, onClose }) => {
 
   if (editMode === "choice") {
     return (
-      <Modal open onClose={() => setEditMode("none")} showCloseButton={false} className="!max-w-[400px] w-full p-6 bg-white rounded-xl shadow-xl border overflow-visible">
+      <Modal
+        open
+        onClose={() => setEditMode("none")}
+        showCloseButton={false}
+        className="!max-w-[400px] w-full p-6 bg-white rounded-xl shadow-xl border overflow-visible"
+      >
         <div className="relative flex flex-col text-center">
-            {/* Floating close button */}
+          {/* Floating close button */}
+          <button
+            onClick={() => setEditMode("none")}
+            className="absolute -top-10 -right-10 bg-[#B81919] text-white p-2 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.3)] z-50 hover:bg-red-800 transition-colors border-[4px] border-white"
+          >
+            <X size={20} strokeWidth={4} />
+          </button>
+          <h3 className="text-xl font-bold mb-2 text-gray-800">
+            {cal.editRecurringEvent || "Chỉnh sửa sự kiện"}
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            {cal.editChoicePrompt ||
+              "Đây là sự kiện lặp lại. Bạn muốn sửa đổi điều gì?"}
+          </p>
+          <div className="flex flex-col gap-3">
             <button
-                onClick={() => setEditMode("none")}
-                className="absolute -top-10 -right-10 bg-[#B81919] text-white p-2 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.3)] z-50 hover:bg-red-800 transition-colors border-[4px] border-white"
+              onClick={() => setEditMode("occurrence")}
+              className="bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 font-semibold py-3 px-4 rounded-lg transition-colors border"
             >
-                <X size={20} strokeWidth={4} />
+              {cal.editThisOccurrence || "Chỉ buổi này"}
             </button>
-            <h3 className="text-xl font-bold mb-2 text-gray-800">
-                {cal.editRecurringEvent || "Chỉnh sửa sự kiện"}
-            </h3>
-            <p className="text-sm text-gray-600 mb-6">
-                {cal.editChoicePrompt || "Đây là sự kiện lặp lại. Bạn muốn sửa đổi điều gì?"}
-            </p>
-            <div className="flex flex-col gap-3">
-                <button
-                onClick={() => setEditMode("occurrence")}
-                className="bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 font-semibold py-3 px-4 rounded-lg transition-colors border"
-                >
-                {cal.editThisOccurrence || "Chỉ buổi này"}
-                </button>
-                <button
-                onClick={() => setEditMode("series")}
-                className="bg-[var(--cath-primary)] hover:bg-[#990011] text-white font-semibold py-3 px-4 rounded-lg transition-colors"
-                style={{ backgroundColor: headerColor }}
-                >
-                {cal.editEntireSeries || "Toàn bộ chuỗi sự kiện"}
-                </button>
-                <button
-                onClick={() => setEditMode("none")}
-                className="text-gray-500 hover:text-gray-700 font-medium py-2 mt-2"
-                >
-                {cal.cancel || "Hủy"}
-                </button>
-            </div>
+            <button
+              onClick={() => setEditMode("series")}
+              className="bg-[var(--cath-primary)] hover:bg-[#990011] text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+              style={{ backgroundColor: headerColor }}
+            >
+              {cal.editEntireSeries || "Toàn bộ chuỗi sự kiện"}
+            </button>
+            <button
+              onClick={() => setEditMode("none")}
+              className="text-gray-500 hover:text-gray-700 font-medium py-2 mt-2"
+            >
+              {cal.cancel || "Hủy"}
+            </button>
+          </div>
         </div>
       </Modal>
     )

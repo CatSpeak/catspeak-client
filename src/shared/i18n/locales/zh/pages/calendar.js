@@ -1,6 +1,7 @@
 export default {
   location: "地点",
   locationDefault: "FPT大学",
+  notAssigned: "未指定",
   public: "公开",
   private: "私密",
   recurring: "重复",

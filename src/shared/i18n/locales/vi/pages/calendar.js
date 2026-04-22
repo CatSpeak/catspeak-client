@@ -1,6 +1,7 @@
 export default {
   location: "Địa điểm",
   locationDefault: "Đại học FPT",
+  notAssigned: "Chưa xác định",
   public: "Công khai",
   private: "Riêng tư",
   recurring: "Lặp lại",

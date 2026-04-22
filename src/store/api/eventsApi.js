@@ -10,6 +10,14 @@ export const eventsApi = baseApi.injectEndpoints({
       ],
     }),
 
+    // GET /api/v1/Events/occurrences/{occurrenceId}
+    getEventOccurrenceById: builder.query({
+      query: (occurrenceId) => `/v1/Events/occurrences/${occurrenceId}`,
+      providesTags: (result, error, occurrenceId) => [
+        { type: "Events", id: `occurrence-${occurrenceId}` },
+      ],
+    }),
+
     // PUT /api/v1/Events/{eventId}
     updateEvent: builder.mutation({
       query: ({ eventId, ...data }) => ({
@@ -138,6 +146,7 @@ export const eventsApi = baseApi.injectEndpoints({
 
 export const {
   useGetEventByIdQuery,
+  useGetEventOccurrenceByIdQuery,
   useUpdateEventMutation,
   useDeleteEventMutation,
   useCreateEventMutation,
