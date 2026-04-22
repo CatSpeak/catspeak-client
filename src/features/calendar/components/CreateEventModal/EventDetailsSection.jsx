@@ -14,6 +14,7 @@ const EventDetailsSection = ({
   onMaxParticipantsChange,
   conditionsInput,
   onConditionsChange,
+  errors = {},
 }) => {
   const { t } = useLanguage()
   const cal = t.calendar
@@ -36,11 +37,11 @@ const EventDetailsSection = ({
   return (
     <div className="flex flex-col gap-3 mt-2">
       {/* Title */}
-      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 max-[425px]:w-full">
+      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.eventName}
         </div>
-        <div className="flex-1 flex items-center w-full">
+        <div className="flex-1 flex flex-col w-full">
           <TextInput
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
@@ -48,16 +49,17 @@ const EventDetailsSection = ({
             variant="square"
             color={eventColor}
             containerClassName="w-full"
+            error={errors.title}
           />
         </div>
       </div>
 
       {/* Location */}
-      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 max-[425px]:w-full">
+      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.location}
         </div>
-        <div className="flex-1 flex items-center w-full relative">
+        <div className="flex-1 flex flex-col w-full relative">
           <TextInput
             value={eventLocation}
             onChange={(e) => onLocationChange(e.target.value)}
@@ -66,11 +68,12 @@ const EventDetailsSection = ({
             color={eventColor}
             containerClassName="w-full"
             className="pr-10"
+            error={errors.eventLocation}
           />
           <button
             type="button"
             onClick={handleOpenMaps}
-            className="absolute right-3 text-gray-400 hover:text-[#B91264] transition-colors flex-shrink-0"
+            className="absolute right-3 top-2.5 text-gray-400 hover:text-[#B91264] transition-colors"
             title={cal.openMaps}
           >
             <MapPin size={20} />
@@ -79,11 +82,11 @@ const EventDetailsSection = ({
       </div>
 
       {/* Description */}
-      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 max-[425px]:w-full">
+      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.description}
         </div>
-        <div className="flex-1 flex items-center w-full">
+        <div className="flex-1 flex flex-col w-full">
           <TextInput
             value={description}
             onChange={(e) => onDescriptionChange(e.target.value)}
@@ -91,26 +94,30 @@ const EventDetailsSection = ({
             variant="square"
             color={eventColor}
             containerClassName="w-full"
+            error={errors.description}
           />
         </div>
       </div>
 
       {/* Max participants */}
-      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 mt-1 max-[425px]:w-full max-[425px]:mt-0">
+      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.maxParticipants}
         </div>
-        <div className="flex items-center w-full">
-          <TextInput
-            type="number"
-            value={maxParticipants}
-            onChange={(e) => onMaxParticipantsChange(e.target.value)}
-            variant="square"
-            color={eventColor}
-            className="text-center !px-2"
-            containerClassName="w-20"
-          />
-          <span className="text-[#606060] ml-3">{cal.guest}</span>
+        <div className="flex items-start w-full">
+          <div className="flex items-start flex-1">
+            <TextInput
+              type="number"
+              value={maxParticipants}
+              onChange={(e) => onMaxParticipantsChange(e.target.value)}
+              variant="square"
+              color={eventColor}
+              className="text-center !px-2"
+              containerClassName="w-32"
+              error={errors.maxParticipants}
+            />
+            <span className="text-[#606060] ml-3 mt-[10px]">{cal.guest}</span>
+          </div>
         </div>
       </div>
 

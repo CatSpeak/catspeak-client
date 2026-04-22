@@ -27,41 +27,75 @@ const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
     }
   }, [selectedDate])
 
-  if (selectedDate === null) return null
-
-  const displayDate = currentDate.date(selectedDate)
+  const displayDate = currentDate.date(selectedDate || 1)
   const formattedDate = displayDate.format("MMMM D, YYYY")
   const ddMmYyyy = displayDate.format("DD/MM/YYYY")
 
-  // Fetch events for the selected date from the API
-  const { data: eventsByDateData, isLoading } = useGetEventsByDateQuery(
+  const localStart = displayDate.startOf("day")
+  const localEnd = displayDate.endOf("day")
+
+  const utcDateA = localStart.toISOString()
+  const utcDateB = localEnd.toISOString()
+  const needsTwoQueries = utcDateA.split("T")[0] !== utcDateB.split("T")[0]
+
+  const { data: eventsDataA, isLoading: isLoadingA } = useGetEventsByDateQuery(
     {
-      date: displayDate.toISOString(),
-      ...(currentUser?.id ? { userId: currentUser.id } : {}),
+      date: utcDateA,
+      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
     },
     { skip: selectedDate === null },
   )
 
-  // Map API events to the shape EventBlock expects
-  const mappedEvents = useMemo(() => {
-    if (!eventsByDateData?.events) return []
+  const { data: eventsDataB, isLoading: isLoadingB } = useGetEventsByDateQuery(
+    {
+      date: utcDateB,
+      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
+    },
+    { skip: selectedDate === null || !needsTwoQueries },
+  )
 
-    return eventsByDateData.events.map((ev) => ({
-      id: ev.occurrenceId ?? ev.eventId,
-      eventId: ev.eventId,
-      occurrenceId: ev.occurrenceId,
-      title: ev.title,
-      startTime: dayjs(ev.startTime).format("HH:mm"),
-      endTime: dayjs(ev.endTime).format("HH:mm"),
-      originalStartTime: ev.startTime, // preserve full ISO for API calls
-      originalEndTime: ev.endTime, // preserve full ISO for API calls
-      color: ev.color || DEFAULT_COLOR,
-      isRegistered: ev.isRegistered,
-      currentParticipants: ev.currentParticipants,
-      maxParticipants: ev.maxParticipants,
-      location: ev.location || "",
-    }))
-  }, [eventsByDateData])
+  const isLoading = isLoadingA || isLoadingB
+
+  // Map API events to the shape EventBlock expects and filter by local date
+  const mappedEvents = useMemo(() => {
+    const allEvents = []
+    const seenIds = new Set()
+
+    const addEvents = (eventsArr) => {
+      if (!eventsArr) return
+      eventsArr.forEach((ev) => {
+        const id = ev.occurrenceId || ev.eventId
+        if (!seenIds.has(id)) {
+          // Keep only events where local start time is on the selected date
+          if (dayjs(ev.startTime).isSame(displayDate, "day")) {
+            seenIds.add(id)
+            allEvents.push({
+              id,
+              eventId: ev.eventId,
+              occurrenceId: ev.occurrenceId,
+              title: ev.title,
+              startTime: dayjs(ev.startTime).format("HH:mm"),
+              endTime: dayjs(ev.endTime).format("HH:mm"),
+              originalStartTime: ev.startTime, // preserve full ISO for API calls
+              originalEndTime: ev.endTime, // preserve full ISO for API calls
+              color: ev.color || DEFAULT_COLOR,
+              isRegistered: ev.isRegistered,
+              currentParticipants: ev.currentParticipants,
+              maxParticipants: ev.maxParticipants,
+              location: ev.location || "",
+            })
+          }
+        }
+      })
+    }
+
+    if (eventsDataA?.events) addEvents(eventsDataA.events)
+    if (eventsDataB?.events && needsTwoQueries) addEvents(eventsDataB.events)
+
+    return allEvents
+  }, [eventsDataA, eventsDataB, needsTwoQueries, displayDate])
+
+  if (selectedDate === null) return null
 
   const positionedEvents = processOverlappingEvents(mappedEvents)
 

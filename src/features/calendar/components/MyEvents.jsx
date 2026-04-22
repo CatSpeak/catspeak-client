@@ -1,37 +1,33 @@
 import React, { useState } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
-import { useGetRegisteredEventsQuery } from "@/store/api/eventsApi"
+import { useGetMyEventsQuery } from "@/store/api/eventsApi"
 import EventDetailModal from "./EventDetailModal/index"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const VISIBLE_CHIP_COUNT = 3
-const getEventTitle = (title, defaultTitle) => {
-  if (!title) return defaultTitle || "Sự kiện"
-  return title
-}
 
-const RegisteredEvents = () => {
+const MyEvents = () => {
   const { t } = useLanguage()
   const [expanded, setExpanded] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
-  const { data, isLoading } = useGetRegisteredEventsQuery()
-  const events = data?.occurrences ?? data?.events ?? []
+  const { data, isLoading } = useGetMyEventsQuery()
+  const events = data?.events ?? []
 
   const visibleEvents = expanded ? events : events.slice(0, VISIBLE_CHIP_COUNT)
   const hasMore = events.length > VISIBLE_CHIP_COUNT
 
   const handleChipClick = (event) => {
-    setSelectedEvent({ ...event, isRegistered: true })
+    setSelectedEvent({ ...event, isOwner: true })
   }
 
   if (isLoading || events.length === 0) return null
 
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col mt-5">
         <h3 className="text-[28px] leading-[1.1] font-bold text-black tracking-tight uppercase">
-          {t.calendar?.registered || "Đã đăng kí"}
+          {t.calendar?.myEvents}
         </h3>
 
         <div
@@ -42,7 +38,7 @@ const RegisteredEvents = () => {
               key={event.id}
               onClick={() => handleChipClick(event)}
               className="flex items-center w-full gap-2 px-3 py-1.5 min-h-10 rounded text-white cursor-pointer transition-colors"
-              style={{ backgroundColor: event.color || "#990011" }}
+              style={{ backgroundColor: event.color || "#4ECDC4" }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.filter = "brightness(0.85)"
               }}
@@ -58,15 +54,8 @@ const RegisteredEvents = () => {
                 }}
               />
               <span className="text-sm font-[600] uppercase tracking-wide truncate flex-1 min-w-0 text-left">
-                {getEventTitle(event.title, t.calendar?.event || "Sự kiện")}
+                {event.title || t.calendar?.event}
               </span>
-              
-              {/* Optional Participant Count */}
-              {(event.maxParticipants !== undefined && event.maxParticipants > 0) && (
-                <span className="text-xs font-semibold whitespace-nowrap opacity-90 pl-1">
-                  {event.currentParticipants ?? 0}/{event.maxParticipants}
-                </span>
-              )}
             </div>
           ))}
         </div>
@@ -79,12 +68,12 @@ const RegisteredEvents = () => {
             {expanded ? (
               <>
                 <ChevronUp size={14} />
-                {t.calendar?.collapse || "Thu gọn"}
+                {t.calendar?.collapse}
               </>
             ) : (
               <>
                 <ChevronDown size={14} />
-                {t.calendar?.seeMore || "Xem thêm"} (
+                {t.calendar?.seeMore} (
                 {events.length - VISIBLE_CHIP_COUNT})
               </>
             )}
@@ -103,4 +92,4 @@ const RegisteredEvents = () => {
   )
 }
 
-export default RegisteredEvents
+export default MyEvents

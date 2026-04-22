@@ -3,6 +3,7 @@ import { Trash2, Pencil, X } from "lucide-react"
 import SharePopover from "./SharePopover"
 import useEventDelete from "../../hooks/useEventDelete"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth/hooks/useAuth"
 import {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
@@ -10,8 +11,17 @@ import {
 import Modal from "@/shared/components/ui/Modal"
 
 const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
+  const { user, isAdmin } = useAuth()
   const { t } = useLanguage()
   const cal = t.calendar || {}
+
+  const isCreatorOrAdmin =
+    isAdmin ||
+    (user &&
+      event &&
+      (user.id === event.creatorId ||
+        user.username === event.creatorName ||
+        (user.fullName && user.fullName === event.creatorName)))
   const [isRegistered, setIsRegistered] = useState(event?.isRegistered ?? false)
   const [cancelMode, setCancelMode] = useState("none") // "none" | "choice"
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
@@ -79,17 +89,14 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
       const isRecurring = event?.isRecurring
       const occurrenceId = event?.occurrenceId
 
-      const body =
-        isRecurring && !occurrenceId
-          ? {
-              eventId,
-              registrationType: "ENTIRE_SERIES",
-            }
-          : {
-              eventId,
-              occurrenceId,
-              registrationType: "SINGLE_OCCURRENCE",
-            }
+      let body = { eventId }
+      if (occurrenceId) {
+        body = { eventId, occurrenceId, registrationType: "SINGLE_OCCURRENCE" }
+      } else if (event?.isRecurring) {
+        body = { eventId, registrationType: "ENTIRE_SERIES" }
+      }
+
+      console.log("REGISTER PAYLOAD:", body)
 
       await registerForEvent(body).unwrap()
       setIsRegistered(true)
@@ -143,19 +150,23 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <button
-              onClick={onEdit}
-              className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
-            >
-              <Pencil />
-            </button>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
-            >
-              <Trash2 />
-            </button>
-            <SharePopover eventId={eventId} />
+            {isCreatorOrAdmin && (
+              <>
+                <button
+                  onClick={onEdit}
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
+                >
+                  <Pencil />
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
+                >
+                  <Trash2 />
+                </button>
+              </>
+            )}
+            <SharePopover eventId={eventId} occurrenceId={event?.occurrenceId} />
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 export default {
   location: "Location",
   locationDefault: "FPT University",
+  notAssigned: "Not assigned",
   public: "Public",
   private: "Private",
   recurring: "Recurring",
@@ -48,6 +49,7 @@ export default {
   collapse: "Collapse",
   seeMore: "See more",
   event: "Event",
+  myEvents: "My Events",
   catSpeakEvent: "Cat Speak Event",
   calendar: "CALENDAR",
   offline: "OFFLINE",

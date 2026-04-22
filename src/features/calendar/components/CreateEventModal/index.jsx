@@ -67,16 +67,26 @@ const CreateEventModal = ({ onClose, editEvent }) => {
 
               <EventDetailsSection
                 title={form.title}
-                onTitleChange={form.setTitle}
+                onTitleChange={(val) => {
+                  form.setTitle(val)
+                  if (form.errors?.title) form.setErrors(prev => ({ ...prev, title: undefined }))
+                }}
                 eventColor={form.eventColor}
                 eventLocation={form.eventLocation}
-                onLocationChange={form.setEventLocation}
+                onLocationChange={(val) => {
+                  form.setEventLocation(val)
+                  if (form.errors?.eventLocation) form.setErrors(prev => ({ ...prev, eventLocation: undefined }))
+                }}
                 description={form.description}
                 onDescriptionChange={form.setDescription}
                 maxParticipants={form.maxParticipants}
-                onMaxParticipantsChange={form.setMaxParticipants}
+                onMaxParticipantsChange={(val) => {
+                  form.setMaxParticipants(val)
+                  if (form.errors?.maxParticipants) form.setErrors(prev => ({ ...prev, maxParticipants: undefined }))
+                }}
                 conditionsInput={form.conditionsInput}
                 onConditionsChange={form.setConditionsInput}
+                errors={form.errors}
               />
             </div>
           </div>

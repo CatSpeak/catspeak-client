@@ -33,12 +33,18 @@ const NavigationProgress = () => {
       if (query?.endpointName === "getRooms" && query?.originalArgs?.page > 1) {
         return false
       }
+<<<<<<< HEAD
       
       // Ignore real-time background syncing for messages so it doesn't interrupt UX
       if (
         query?.endpointName === "getConversations" ||
         query?.endpointName === "getConversationMessages"
       ) {
+=======
+
+      // Ignore getEventsByDate so clicking a date in the calendar doesn't trigger global nprogress
+      if (query?.endpointName === "getEventsByDate") {
+>>>>>>> bugfix/calendar
         return false
       }
 

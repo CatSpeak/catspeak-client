@@ -3,6 +3,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { Play } from "lucide-react"
 import CatIcon from "@/shared/assets/icons/logo/icon.svg"
 import RegisteredEvents from "./RegisteredEvents"
+import MyEvents from "./MyEvents"
 
 const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
   const { t } = useLanguage()
@@ -73,6 +74,7 @@ const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
       <div className="w-full h-[1px] bg-[#E5E5E5] my-5" />
 
       <RegisteredEvents />
+      <MyEvents />
     </div>
   )
 }

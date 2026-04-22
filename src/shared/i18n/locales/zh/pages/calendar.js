@@ -1,6 +1,7 @@
 export default {
   location: "地点",
   locationDefault: "FPT大学",
+  notAssigned: "未指定",
   public: "公开",
   private: "私密",
   recurring: "重复",
@@ -48,6 +49,7 @@ export default {
   collapse: "收起",
   seeMore: "查看更多",
   event: "活动",
+  myEvents: "我的活动",
   catSpeakEvent: "Cat Speak 活动",
   calendar: "日历",
   offline: "线下",

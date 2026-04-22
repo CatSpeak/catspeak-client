@@ -1,6 +1,7 @@
 export default {
   location: "Địa điểm",
   locationDefault: "Đại học FPT",
+  notAssigned: "Chưa xác định",
   public: "Công khai",
   private: "Riêng tư",
   recurring: "Lặp lại",
@@ -48,6 +49,7 @@ export default {
   collapse: "Thu gọn",
   seeMore: "Xem thêm",
   event: "Sự kiện",
+  myEvents: "Sự kiện của tôi",
   catSpeakEvent: "Sự kiện của Cat Speak",
   calendar: "LỊCH",
   offline: "OFFLINE",

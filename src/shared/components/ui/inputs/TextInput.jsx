@@ -16,6 +16,7 @@ const TextInput = ({
   className = "",
   containerClassName = "",
   showCount = false,
+  error,
   ...props
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -28,7 +29,9 @@ const TextInput = ({
   const iconPadding = Icon ? "!pl-10" : ""
   const passwordPadding = isPassword ? "!pr-10" : ""
 
-  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${className}`
+  const errorClass = error ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500" : ""
+
+  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${className}`
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
@@ -72,6 +75,7 @@ const TextInput = ({
           {String(value || "").length} / {props.maxLength}
         </span>
       )}
+      {error && <span className="text-xs text-red-500 px-1">{error}</span>}
     </div>
   )
 }

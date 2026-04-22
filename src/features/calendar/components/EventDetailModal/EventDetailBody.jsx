@@ -9,14 +9,14 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
     <div className="p-5 relative bg-white text-base overflow-y-auto max-h-[60vh]">
       {isLoading ? (
         <div className="flex items-center justify-center py-10 text-gray-400 text-sm">
-          {t.calendar?.loadingDetails || "Đang tải chi tiết…"}
+          {t.calendar?.loadingDetails || "Loading details..."}
         </div>
       ) : (
         <div className="flex flex-col gap-3 text-black">
           {/* Time */}
           <div className="flex items-baseline gap-2">
             <span className="font-bold min-w-max">
-              {t.calendar?.timeLabel || "Thời gian"}:
+              {t.calendar?.timeLabel || "Time"}:
             </span>
             <span className="text-[#60060]">
               {formatTime(ev.startTime)} – {formatTime(ev.endTime)} (GMT +07:00)
@@ -26,10 +26,10 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
           {/* Location */}
           <div className="flex items-baseline gap-2">
             <span className="font-bold min-w-max">
-              {t.calendar?.location || "Địa điểm"}:
+              {t.calendar?.location || "Location"}:
             </span>
             <span className="text-[#60060]">
-              {ev.location || (t.calendar?.locationDefault ?? "Đại học FPT")}
+              {ev.location || t.calendar?.notAssigned || "Not assigned"}
             </span>
           </div>
 
@@ -37,32 +37,21 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
           {ev.description && (
             <div className="flex items-baseline gap-2">
               <span className="font-bold min-w-max">
-                {t.calendar?.description || "Mô tả"}:
+                {t.calendar?.description || "Description"}:
               </span>
               <span className="text-[#60060]">{ev.description}</span>
             </div>
           )}
 
           {/* Participants */}
-          {(ev.currentParticipants !== undefined || ev.maxParticipants) && (
+          {(ev.currentParticipants != null || ev.maxParticipants != null) && (
             <div className="flex items-baseline gap-2">
-              {ev.currentParticipants !== undefined ? (
-                <>
-                  <span className="font-bold min-w-max">
-                    {t.calendar?.registeredCount || "Số lượng đã đăng kí"}:
-                  </span>
-                  <span className="text-[#60060]">
-                    {ev.currentParticipants}/{ev.maxParticipants ?? "∞"}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="font-bold min-w-max">
-                    {t.calendar?.maxParticipants || "Số lượng tối đa"}:
-                  </span>
-                  <span className="text-[#60060]">{ev.maxParticipants}</span>
-                </>
-              )}
+              <span className="font-bold min-w-max">
+                {t.calendar?.registeredCount || "Registered amount"}:
+              </span>
+              <span className="text-[#60060]">
+                {ev.currentParticipants ?? 0}/{ev.maxParticipants ?? "∞"}
+              </span>
             </div>
           )}
 
@@ -70,7 +59,7 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
           {ev.conditions && ev.conditions.length > 0 && (
             <div className="flex items-baseline gap-2">
               <span className="font-bold min-w-max">
-                {t.calendar?.conditions || "Điều kiện"}:
+                {t.calendar?.conditions || "Conditions"}:
               </span>
               <div className="flex flex-wrap gap-2">
                 {ev.conditions.map((c) => (
@@ -91,14 +80,14 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
           {ev.isRecurring && ev.recurrenceRule && (
             <div className="flex items-baseline gap-2">
               <span className="font-bold min-w-max">
-                {t.calendar?.repeatLabel || "Lặp lại"}:
+                {t.calendar?.repeatLabel || "Repeat"}:
               </span>
               <div className="text-[#60060] flex gap-1">
                 <span>
                   {FREQUENCY_LABEL[ev.recurrenceRule.frequency] ??
                     ev.recurrenceRule.frequency}
                   {ev.recurrenceRule.interval > 1
-                    ? ` (${t.calendar?.every || "mỗi"} ${ev.recurrenceRule.interval} ${t.calendar?.intervalUnit?.default || "lần"})`
+                    ? ` (${t.calendar?.every || "every"} ${ev.recurrenceRule.interval} ${t.calendar?.intervalUnit?.default || "time"})`
                     : ""}
                   {ev.recurrenceRule.recurrenceStartDate &&
                   ev.recurrenceRule.recurrenceEndDate

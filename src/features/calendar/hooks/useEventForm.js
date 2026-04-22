@@ -5,6 +5,7 @@ import {
   useUpdateEventMutation,
 } from "@/store/api/eventsApi"
 import { mapFormToPayload } from "../utils/mapFormToPayload"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const DEFAULT_TIMEZONE = {
   id: "Asia/Bangkok",
@@ -26,6 +27,7 @@ const INVERSE_RECURRENCE = {
 }
 
 export const useEventForm = (onClose, editEvent) => {
+  const { t } = useLanguage()
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation()
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation()
   const isLoading = isCreating || isUpdating
@@ -100,8 +102,24 @@ export const useEventForm = (onClose, editEvent) => {
     useState(initialRecurEndDate)
   const [selectedTimezone, setSelectedTimezone] = useState(initialTimezone)
 
+  const [errors, setErrors] = useState({})
+
   const handleSubmit = async (e) => {
     e?.preventDefault()
+
+    const newErrors = {}
+    if (!title.trim()) newErrors.title = t.validation.calendar.titleRequired
+    if (!eventLocation.trim()) newErrors.eventLocation = t.validation.calendar.locationRequired
+    if (!description.trim()) newErrors.description = t.validation.calendar.descriptionRequired
+    if (!maxParticipants || Number(maxParticipants) <= 0) {
+      newErrors.maxParticipants = t.validation.calendar.maxParticipantsRequired
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+    setErrors({})
     const payload = mapFormToPayload({
       title,
       description,
@@ -164,6 +182,8 @@ export const useEventForm = (onClose, editEvent) => {
     setSelectedTimezone,
     conditionsInput,
     setConditionsInput,
+    errors,
+    setErrors,
     // submission
     handleSubmit,
     isLoading,

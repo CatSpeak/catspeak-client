@@ -10,6 +10,7 @@ const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [searchParams, setSearchParams] = useSearchParams()
   const eventIdFromUrl = searchParams.get("eventId")
+  const occurrenceIdFromUrl = searchParams.get("occurrenceId")
 
   const handleNextMonth = () => setCurrentDate((prev) => prev.add(1, "month"))
   const handlePrevMonth = () =>
@@ -35,10 +36,14 @@ const CalendarPage = () => {
 
       {eventIdFromUrl && (
         <EventDetailModal
-          event={{ eventId: eventIdFromUrl }}
+          event={{ 
+            eventId: eventIdFromUrl, 
+            occurrenceId: occurrenceIdFromUrl || undefined 
+          }}
           onClose={() => {
             const newParams = new URLSearchParams(searchParams)
             newParams.delete("eventId")
+            newParams.delete("occurrenceId")
             setSearchParams(newParams, { replace: true })
           }}
         />
