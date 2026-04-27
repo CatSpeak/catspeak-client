@@ -32,11 +32,10 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
       icon: User,
     },
     {
-      label: t.profile?.sidebar?.lecturer,
-      path: "/lecturer",
+      label: t.profile?.sidebar?.instructor,
+      path: "/instructor",
       end: false,
       icon: GraduationCap,
-      isHidden: true,
     },
     {
       label: t.profile?.sidebar?.organization,
