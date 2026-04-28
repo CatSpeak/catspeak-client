@@ -6,6 +6,7 @@ import {
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
   useSendMessageMutation,
+  useMarkConversationAsReadMutation,
   conversationsApi,
 } from "@/store/api/conversationsApi"
 import useMessageSignalR from "../hooks/useMessageSignalR"
@@ -86,6 +87,7 @@ const MessageWidget = () => {
 
   const [sendMessageApi, { isLoading: isSending }] =
     useSendMessageMutation()
+  const [markConversationAsRead] = useMarkConversationAsReadMutation()
 
   // Clear unread logic
   const clearUnreadLogic = (convId) => {
@@ -103,6 +105,11 @@ const MessageWidget = () => {
           }
         },
       ),
+    )
+
+    // Notify server to mark as read
+    markConversationAsRead(convId).catch((err) =>
+      console.error("Failed to mark conversation as read:", err)
     )
   }
 

@@ -1,10 +1,13 @@
 import { useMemo } from "react"
 import { useDispatch } from "react-redux"
 import { conversationsApi } from "@/store/api/conversationsApi"
+import { useConversationSignalRContext } from "../context/ConversationSignalRContext"
 import useConversationSignalR from "./useConversationSignalR"
 
 export const useMessageSignalR = ({ activeConversationId }) => {
   const dispatch = useDispatch()
+  const context = useConversationSignalRContext()
+  const invoke = context?.invoke
 
   const signalRHandlers = useMemo(
     () => ({
@@ -48,8 +51,15 @@ export const useMessageSignalR = ({ activeConversationId }) => {
           )
         }
       },
+      NewConversation: (conversation) => {
+        if (invoke && conversation?.conversationId) {
+          invoke("JoinConversation", conversation.conversationId.toString()).catch(
+            (err) => console.error("Failed to join new conversation", err)
+          )
+        }
+      },
     }),
-    [activeConversationId, dispatch],
+    [activeConversationId, dispatch, invoke],
   )
 
   const { sendMessage } = useConversationSignalR(signalRHandlers)
