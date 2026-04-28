@@ -24,7 +24,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
       (user.id === event.creatorId ||
         user.username === event.creatorName ||
         (user.fullName && user.fullName === event.creatorName)))
-  const [isRegistered, setIsRegistered] = useState(event?.isRegistered ?? false)
+  const isRegistered = event?.isRegistered ?? false
   const [cancelMode, setCancelMode] = useState("none") // "none" | "choice"
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
     useEventDelete(eventId, onClose)
@@ -45,7 +45,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         registrationDate: event?.originalStartTime,
       }
       await cancelRegistration(body).unwrap()
-      setIsRegistered(false)
       setCancelMode("none")
     } catch (err) {
       console.error("Cancel occurrence registration failed:", err)
@@ -60,7 +59,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         cancellationReason: "User cancelled",
       }
       await cancelRegistration(body).unwrap()
-      setIsRegistered(false)
       setCancelMode("none")
     } catch (err) {
       console.error("Cancel all registrations failed:", err)
@@ -80,7 +78,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           eventId,
           cancellationReason: "User cancelled",
         }).unwrap()
-        setIsRegistered(false)
       } catch (err) {
         console.error("Cancel registration failed:", err)
       }
@@ -101,7 +98,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
       console.log("REGISTER PAYLOAD:", body)
 
       await registerForEvent(body).unwrap()
-      setIsRegistered(true)
     } catch (err) {
       console.error("Registration failed:", err)
     }

@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
-import { ChevronUp, ChevronDown, LayoutDashboard, Mail } from "lucide-react"
+import { ChevronUp, ChevronDown, LayoutDashboard, Mail, Calendar } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "../../hooks/useActiveLink"
 
@@ -19,6 +19,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
   const subItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
+    { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]
 
   const getActiveSubKey = () => {
@@ -71,7 +72,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
       {/* Collapse Container */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          open ? "max-h-[120px] opacity-100" : "max-h-0 opacity-0"
+          open ? "max-h-[160px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="flex flex-col gap-1 mt-1">

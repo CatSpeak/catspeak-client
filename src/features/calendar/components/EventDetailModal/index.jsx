@@ -81,13 +81,15 @@ const EventDetailModal = ({ event, onClose }) => {
           detail?.maxParticipants ??
           event?.maxParticipants,
         isRegistered:
-          occurrenceDetail?.isRegistered ||
-          detail?.isRegistered ||
+          occurrenceDetail?.isRegistered ??
+          detail?.isRegistered ??
           event?.isRegistered,
         registrationId:
-          occurrenceDetail?.registrationId ||
-          detail?.registrationId ||
-          event?.registrationId,
+          occurrenceDetail?.registrationId !== undefined
+            ? occurrenceDetail.registrationId
+            : detail?.registrationId !== undefined
+            ? detail.registrationId
+            : event?.registrationId,
       }
     : {
         ...event,
@@ -98,9 +100,11 @@ const EventDetailModal = ({ event, onClose }) => {
           occurrenceDetail?.participants?.length ??
           occurrenceDetail?.currentParticipants ??
           event?.currentParticipants,
-        isRegistered: occurrenceDetail?.isRegistered || event?.isRegistered,
+        isRegistered: occurrenceDetail?.isRegistered ?? event?.isRegistered,
         registrationId:
-          occurrenceDetail?.registrationId || event?.registrationId,
+          occurrenceDetail?.registrationId !== undefined
+            ? occurrenceDetail.registrationId
+            : event?.registrationId,
       }
   const headerColor = ev.color || "#B91264"
 

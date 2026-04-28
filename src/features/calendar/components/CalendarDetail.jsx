@@ -3,7 +3,7 @@ import { useSelector } from "react-redux"
 import { selectCurrentUser } from "@/store/slices/authSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetEventsByDateQuery } from "@/store/api/eventsApi"
-import { processOverlappingEvents } from "../utils/EventUtils"
+import { processOverlappingEvents, parseTime } from "../utils/EventUtils"
 import TimelineGrid from "./TimelineGrid"
 import EventBlock from "./EventBlock"
 import EventDetailModal from "./EventDetailModal/index"
@@ -17,14 +17,13 @@ const DEFAULT_COLOR = "#B91264"
 const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
   const { t } = useLanguage()
   const scrollRef = useRef(null)
+  const hasScrolledToEvent = useRef(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const currentUser = useSelector(selectCurrentUser)
 
   useEffect(() => {
-    // Scroll to 8 AM by default when opened
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 8 * HOUR_HEIGHT - 20
-    }
+    // Reset scroll state when selecting a new date
+    hasScrolledToEvent.current = false
   }, [selectedDate])
 
   const displayDate = currentDate.date(selectedDate || 1)
@@ -99,6 +98,42 @@ const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
   if (selectedDate === null) return null
 
   const positionedEvents = processOverlappingEvents(mappedEvents)
+
+  // Handle automatic scrolling to the most recent event once loaded
+  useEffect(() => {
+    if (!scrollRef.current || isLoading || hasScrolledToEvent.current) return
+
+    let targetTime = 8 // Default to 8 AM
+    if (positionedEvents.length > 0) {
+      const isToday = displayDate.isSame(dayjs(), "day")
+      if (isToday) {
+        const currentHour = dayjs().hour() + dayjs().minute() / 60
+        // Find the first event that hasn't ended yet, or started within the last hour
+        const upcoming = positionedEvents.find(
+          (e) =>
+            parseTime(e.endTime) >= currentHour ||
+            parseTime(e.startTime) >= currentHour - 1
+        )
+        if (upcoming) {
+          targetTime = parseTime(upcoming.startTime)
+        } else {
+          // All events are in the past today, scroll to the last one
+          targetTime = parseTime(
+            positionedEvents[positionedEvents.length - 1].startTime
+          )
+        }
+      } else {
+        // For other days, scroll to the first event
+        targetTime = parseTime(positionedEvents[0].startTime)
+      }
+    }
+
+    scrollRef.current.scrollTo({
+      top: Math.max(0, targetTime * HOUR_HEIGHT - 20),
+      behavior: "smooth",
+    })
+    hasScrolledToEvent.current = true
+  }, [positionedEvents, isLoading, displayDate])
 
   // Compute canvas width: at least 1 column, grow with max parallel cols
   const maxCols = positionedEvents.reduce(
