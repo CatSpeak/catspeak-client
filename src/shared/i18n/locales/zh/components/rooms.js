@@ -136,6 +136,7 @@ export default {
     you: "你",
     inputPlaceholder: "输入内容...",
     connectingPlaceholder: "正在连接...",
+    showSystemMessages: "显示 AI 系统消息",
   },
   sessionActions: {
     connect11: "1:1 连接",

@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
-import { Send } from "lucide-react"
+import { Send, Settings } from "lucide-react"
 import { motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { colors } from "@/shared/utils/colors"
 import { formatTime } from "@/shared/utils/dateFormatter"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
+import Switch from "@/shared/components/ui/inputs/Switch"
+import Popover from "@/shared/components/ui/Popover"
 
 const ChatBox = ({
   messages,
@@ -15,9 +17,16 @@ const ChatBox = ({
   hideTitle,
 }) => {
   const [message, setMessage] = useState("")
+  const [showSystemMsgs, setShowSystemMsgs] = useState(true)
   const scrollContainerRef = useRef(null)
   const sendingRef = useRef(false)
   const { t } = useLanguage()
+
+  const displayMessages = showSystemMsgs
+    ? messages
+    : messages.filter(
+        (msg) => !(msg.isSystem || !msg.from || msg.from?.isSystem),
+      )
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -25,7 +34,7 @@ const ChatBox = ({
       scrollContainerRef.current.scrollTop =
         scrollContainerRef.current.scrollHeight
     }
-  }, [messages])
+  }, [displayMessages])
 
   const handleSend = useCallback(() => {
     // Guard against rapid double-fires (mobile keyboards)
@@ -44,7 +53,6 @@ const ChatBox = ({
   }, [message, onSendMessage])
 
   const handleKeyDown = (e) => {
-    // Ignore Enter during IME composition (e.g. CJK input, some mobile keyboards)
     if (e.nativeEvent?.isComposing || e.keyCode === 229) return
     if (e.key === "Enter") {
       e.preventDefault()
@@ -57,13 +65,41 @@ const ChatBox = ({
     handleSend()
   }
 
+  const settingsPopover = (
+    <Popover
+      trigger={
+        <Settings 
+          size={18} 
+          className="text-[#7A7574] hover:text-black transition-colors" 
+        />
+      }
+      content={
+        <div className="w-64 bg-white rounded-xl shadow-lg border border-[#E5E5E5] p-4 flex items-center justify-between">
+          <span className="text-sm text-gray-700 font-medium">
+            {t.rooms.chatBox.showSystemMessages}
+          </span>
+          <Switch
+            checked={showSystemMsgs}
+            onChange={() => setShowSystemMsgs(!showSystemMsgs)}
+            colorClass="peer-checked:bg-green-500"
+          />
+        </div>
+      }
+    />
+  )
+
   return (
-    <div className={`flex h-full flex-col bg-white ${className}`}>
-      {!hideTitle && (
-        <div className="border-b border-[#C6C6C6] px-4 py-3">
+    <div className={`relative flex h-full flex-col bg-white ${className}`}>
+      {!hideTitle ? (
+        <div className="relative flex items-center justify-between border-b border-[#C6C6C6] px-4 py-3">
           <h3 className="text-black text-sm font-bold m-0">
             {t.rooms.chatBox.title}
           </h3>
+          {settingsPopover}
+        </div>
+      ) : (
+        <div className="absolute top-2 right-2 z-20 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-md p-1 shadow-sm border border-black/5">
+          {settingsPopover}
         </div>
       )}
 
@@ -71,7 +107,7 @@ const ChatBox = ({
         ref={scrollContainerRef}
         className="flex flex-1 flex-col overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-[#C6C6C6] scrollbar-track-transparent"
       >
-        {messages.length === 0 ? (
+        {displayMessages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-sm text-center text-[#7A7574] m-0">
               {t.rooms.chatBox.empty}
@@ -81,7 +117,7 @@ const ChatBox = ({
           <>
             <div className="flex-1" />
             <div className="space-y-2">
-              {messages.map((msg, index) => {
+              {displayMessages.map((msg, index) => {
                 // LiveKit useChat message format:
                 // { id, timestamp, message, from?: Participant }
                 const isMe = msg.from?.isLocal ?? false
@@ -95,7 +131,12 @@ const ChatBox = ({
                     key={msg.id || `msg-${index}`}
                     initial={{ opacity: 0, x: isMe ? 20 : -20, scale: 0.95 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
+                    transition={{
+                      duration: 0.3,
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                    }}
                     className={`flex flex-col ${
                       isMe ? "items-end" : "items-start"
                     }`}
@@ -120,13 +161,15 @@ const ChatBox = ({
                     >
                       <p className="m-0">{msg.message}</p>
                       {msg.translatedMessage && (
-                        <p className={`m-0 mt-1 pt-1 text-xs border-t ${
-                          isMe 
-                            ? "border-white/20 text-white/90" 
-                            : isSystem 
-                              ? "border-[#FF9800]/20 text-black/70"
-                              : "border-black/10 text-black/70"
-                        }`}>
+                        <p
+                          className={`m-0 mt-1 pt-1 text-xs border-t ${
+                            isMe
+                              ? "border-white/20 text-white/90"
+                              : isSystem
+                                ? "border-[#FF9800]/20 text-black/70"
+                                : "border-black/10 text-black/70"
+                          }`}
+                        >
                           {msg.translatedMessage}
                         </p>
                       )}

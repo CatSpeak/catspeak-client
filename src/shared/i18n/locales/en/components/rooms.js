@@ -164,6 +164,7 @@ export default {
     you: "You",
     inputPlaceholder: "Type Something...",
     connectingPlaceholder: "Connecting...",
+    showSystemMessages: "Show AI system messages",
   },
   sessionActions: {
     connect11: "1:1 Connect",

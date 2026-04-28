@@ -139,6 +139,7 @@ export default {
     you: "Bạn",
     inputPlaceholder: "Nhập gì đó...",
     connectingPlaceholder: "Đang kết nối...",
+    showSystemMessages: "Hiển thị tin nhắn AI hệ thống",
   },
   sessionActions: {
     connect11: "Kết nối 1:1",
