@@ -1,8 +1,13 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { RoomEvent } from "livekit-client"
 
-export const useSystemMessages = (lkRoom) => {
+export const useSystemMessages = (lkRoom, receiveSystemMessages = true) => {
   const [systemMessages, setSystemMessages] = useState([])
+  const receiveRef = useRef(receiveSystemMessages)
+
+  useEffect(() => {
+    receiveRef.current = receiveSystemMessages
+  }, [receiveSystemMessages])
 
   useEffect(() => {
     if (!lkRoom) {
@@ -77,7 +82,9 @@ export const useSystemMessages = (lkRoom) => {
           from: { name: "System", isSystem: true },
         }
 
-        setSystemMessages((prev) => [...prev, newSysMsg])
+        if (receiveRef.current) {
+          setSystemMessages((prev) => [...prev, newSysMsg])
+        }
       }
     }
 

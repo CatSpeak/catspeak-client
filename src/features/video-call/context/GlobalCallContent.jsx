@@ -68,7 +68,9 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   const baseChatMessages = chatState.chatMessages ?? []
   const chatSend = chatState.send ?? (() => {})
 
-  const systemMessages = useSystemMessages(lkRoom)
+  const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(true)
+
+  const systemMessages = useSystemMessages(lkRoom, receiveSystemMsgs)
 
   const chatMessages = [...baseChatMessages, ...systemMessages].sort(
     (a, b) => a.timestamp - b.timestamp,
@@ -145,6 +147,8 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
 
     // Chat
     messages: chatMessages,
+    receiveSystemMsgs,
+    setReceiveSystemMsgs,
 
     // Actions
     handleToggleMic: actions.handleToggleMic,

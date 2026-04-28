@@ -7,6 +7,7 @@ import { formatTime } from "@/shared/utils/dateFormatter"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import Popover from "@/shared/components/ui/Popover"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 const ChatBox = ({
   messages,
@@ -17,16 +18,10 @@ const ChatBox = ({
   hideTitle,
 }) => {
   const [message, setMessage] = useState("")
-  const [showSystemMsgs, setShowSystemMsgs] = useState(true)
   const scrollContainerRef = useRef(null)
   const sendingRef = useRef(false)
   const { t } = useLanguage()
-
-  const displayMessages = showSystemMsgs
-    ? messages
-    : messages.filter(
-        (msg) => !(msg.isSystem || !msg.from || msg.from?.isSystem),
-      )
+  const { receiveSystemMsgs, setReceiveSystemMsgs } = useGlobalVideoCall()
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -34,7 +29,7 @@ const ChatBox = ({
       scrollContainerRef.current.scrollTop =
         scrollContainerRef.current.scrollHeight
     }
-  }, [displayMessages])
+  }, [messages])
 
   const handleSend = useCallback(() => {
     // Guard against rapid double-fires (mobile keyboards)
@@ -79,8 +74,8 @@ const ChatBox = ({
             {t.rooms.chatBox.showSystemMessages}
           </span>
           <Switch
-            checked={showSystemMsgs}
-            onChange={() => setShowSystemMsgs(!showSystemMsgs)}
+            checked={receiveSystemMsgs}
+            onChange={() => setReceiveSystemMsgs(!receiveSystemMsgs)}
             colorClass="peer-checked:bg-green-500"
           />
         </div>
@@ -107,7 +102,7 @@ const ChatBox = ({
         ref={scrollContainerRef}
         className="flex flex-1 flex-col overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-[#C6C6C6] scrollbar-track-transparent"
       >
-        {displayMessages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-sm text-center text-[#7A7574] m-0">
               {t.rooms.chatBox.empty}
@@ -117,7 +112,7 @@ const ChatBox = ({
           <>
             <div className="flex-1" />
             <div className="space-y-2">
-              {displayMessages.map((msg, index) => {
+              {messages.map((msg, index) => {
                 // LiveKit useChat message format:
                 // { id, timestamp, message, from?: Participant }
                 const isMe = msg.from?.isLocal ?? false
