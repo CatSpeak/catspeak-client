@@ -103,37 +103,39 @@ const VideoCallControlBar = ({ unreadMessages }) => {
       </button>
 
       {/* ── Record Toggle ─────────────────────────────────────────────── */}
-      <div className="relative">
-        <button
-          onClick={handleToggleRecording}
-          disabled={isTogglingRecording}
-          title={
-            isRecording
-              ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
-              : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
-          }
-          className={`${buttonBaseClass} relative overflow-hidden transition-all ${
-            isTogglingRecording
-              ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-gray-400"
-              : isRecording
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-[#F2F2F2] text-gray-600 hover:bg-[#D9D9D9] hover:text-gray-900"
-          }`}
-        >
-          {isTogglingRecording ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <Circle
-              className={`h-5 w-5 ${isRecording ? "fill-white" : "fill-none"}`}
-            />
-          )}
-        </button>
+      {false && (
+        <div className="relative">
+          <button
+            onClick={handleToggleRecording}
+            disabled={isTogglingRecording}
+            title={
+              isRecording
+                ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
+                : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
+            }
+            className={`${buttonBaseClass} relative overflow-hidden transition-all ${
+              isTogglingRecording
+                ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-gray-400"
+                : isRecording
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-[#F2F2F2] text-gray-600 hover:bg-[#D9D9D9] hover:text-gray-900"
+            }`}
+          >
+            {isTogglingRecording ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Circle
+                className={`h-5 w-5 ${isRecording ? "fill-white" : "fill-none"}`}
+              />
+            )}
+          </button>
 
-        {/* Pulse ring — visible only when actively recording */}
-        {isRecording && !isTogglingRecording && (
-          <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
-        )}
-      </div>
+          {/* Pulse ring — visible only when actively recording */}
+          {isRecording && !isTogglingRecording && (
+            <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
+          )}
+        </div>
+      )}
 
       {/* Participants Toggle */}
       <button
@@ -213,11 +215,13 @@ const VideoCallControlBar = ({ unreadMessages }) => {
       </button>
 
       {/* Stop Recording Confirmation Modal */}
-      <StopRecordingModal
-        open={showStopModal}
-        onClose={cancelStopRecording}
-        onConfirm={confirmStopRecording}
-      />
+      {false && (
+        <StopRecordingModal
+          open={showStopModal}
+          onClose={cancelStopRecording}
+          onConfirm={confirmStopRecording}
+        />
+      )}
     </div>
   )
 }
