@@ -15,7 +15,7 @@ const ConversationList = ({
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex-1 space-y-2 overflow-y-auto overscroll-contain">
+      <div className="flex-1 overflow-y-auto overscroll-contain">
         {isLoading ? (
           <LoadingSpinner className="flex items-center justify-center py-4" />
         ) : isError ? (

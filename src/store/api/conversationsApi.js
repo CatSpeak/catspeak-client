@@ -38,6 +38,14 @@ export const conversationsApi = baseApi.injectEndpoints({
         { type: "Messages", id: conversationId },
       ],
     }),
+
+    // Mark a conversation as read
+    markConversationAsRead: builder.mutation({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/read`,
+        method: "PUT",
+      }),
+    }),
   }),
 })
 
@@ -47,4 +55,5 @@ export const {
   useCreateConversationMutation,
   useGetConversationMessagesQuery,
   useSendMessageMutation,
+  useMarkConversationAsReadMutation,
 } = conversationsApi

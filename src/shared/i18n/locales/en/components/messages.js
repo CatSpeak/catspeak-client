@@ -1,5 +1,5 @@
 export default {
-  title: "MESSAGES",
+  title: "Messages",
   loading: "Loading...",
   error: "Error loading data",
   noMessages: "No messages yet",

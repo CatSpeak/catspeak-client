@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast"
 import "@/styles/theme.css"
 
 import { ConversationSignalRProvider } from "@/features/messages/context/ConversationSignalRContext"
+import GlobalSignalRHandler from "@/features/messages/components/GlobalSignalRHandler"
 import ServerDownScreen from "@/shared/components/ServerDownScreen"
 import NavigationProgress from "@/shared/components/NavigationProgress"
 import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -18,6 +19,7 @@ function App() {
         <NavigationProgress />
         <ServerDownScreen />
         <ConversationSignalRProvider>
+          <GlobalSignalRHandler />
           <Toaster position="top-center" limit={1} />
           <AppRouter />
           <PiPWidget />

@@ -1,20 +1,27 @@
-import React from "react"
+import React, { useState, useRef, useEffect, useContext } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import {
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
+  useSendMessageMutation,
+  useMarkConversationAsReadMutation,
   conversationsApi,
 } from "@/store/api/conversationsApi"
-import useConversationSignalR from "../hooks/useConversationSignalR"
+import useMessageSignalR from "../hooks/useMessageSignalR"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 import {
   closeWidget,
   openWidget,
   setActiveConversation,
-  setView,
   toggleWidget,
+  setView,
 } from "@/store/slices/messageWidgetSlice"
+import {
+  selectTotalUnread,
+  clearUnread,
+} from "@/store/slices/notificationSlice"
 import { MessageCircle } from "lucide-react"
 import MessageModal from "./MessageModal"
 import ConversationListHeader from "./headers/ConversationListHeader"
@@ -25,33 +32,25 @@ import ConversationDetail from "./conversation-detail/ConversationDetail"
 const MessageWidget = () => {
   const dispatch = useDispatch()
   const { isAuthenticated } = useAuth()
-  const { openAuthModal } = React.useContext(AuthModalContext)
+  const { openAuthModal } = useContext(AuthModalContext)
   const { isOpen, activeConversationId, view } = useSelector(
     (state) => state.messageWidget,
   )
-  const [input, setInput] = React.useState("")
-  const widgetRef = React.useRef(null)
+  const [input, setInput] = useState("")
+  const totalUnreadCountRedux = useSelector(selectTotalUnread)
+  const widgetRef = useRef(null)
 
   // Handle click outside to close
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (widgetRef.current && !widgetRef.current.contains(event.target)) {
-        // Also check if click is inside the portal-rendered modal (mobile)
-        if (event.target.closest?.("[data-message-widget-portal]")) return
-        if (isOpen) {
-          dispatch(closeWidget())
-        }
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen, dispatch])
+  useClickOutside(
+    widgetRef,
+    () => {
+      dispatch(closeWidget())
+    },
+    {
+      enabled: isOpen,
+      ignoreSelector: "[data-message-widget-portal]",
+    },
+  )
 
   // Fetch conversations from API
   const {
@@ -59,6 +58,13 @@ const MessageWidget = () => {
     isLoading,
     isError,
   } = useGetConversationsQuery()
+
+  const totalUnreadCountServer = conversations.reduce(
+    (sum, c) => sum + (c.unreadCount || 0),
+    0,
+  )
+  // Use server total since it survives reload. Fallback to redux if empty (optional safety)
+  const totalUnreadCount = totalUnreadCountServer || totalUnreadCountRedux
 
   // Find active conversation object
   const selected = conversations.find(
@@ -75,83 +81,50 @@ const MessageWidget = () => {
   })
 
   // -- SignalR Integration --
-  const signalRHandlers = React.useMemo(
-    () => ({
-      NewMessage: (...args) => {
-        let conversationId, message
-        if (args.length >= 2) {
-          conversationId = args[0]
-          message = args[1]
-        } else {
-          // If only 1 arg, assume it's the message object and ID is inside
-          message = args[0]
-          conversationId = message?.conversationId
-        }
+  const { sendSignalRMessage } = useMessageSignalR({
+    activeConversationId,
+  })
 
-        // Always force refetch of messages to guarantee consistency
-        if (conversationId) {
-          dispatch(
-            conversationsApi.util.invalidateTags([
-              { type: "Messages", id: conversationId },
-              "Conversations",
-            ]),
+  const [sendMessageApi, { isLoading: isSending }] =
+    useSendMessageMutation()
+  const [markConversationAsRead] = useMarkConversationAsReadMutation()
+
+  // Clear unread logic
+  const clearUnreadLogic = (convId) => {
+    dispatch(clearUnread(convId))
+    dispatch(
+      conversationsApi.util.updateQueryData(
+        "getConversations",
+        undefined,
+        (draft) => {
+          const cachedConv = draft.find(
+            (c) => c.conversationId === convId,
           )
-        }
+          if (cachedConv) {
+            cachedConv.unreadCount = 0
+          }
+        },
+      ),
+    )
 
-        // Optimistically update the messages cache (if matches active conversation)
-        // Ensure strictly converted to numbers for comparison
-        if (
-          activeConversationId &&
-          conversationId &&
-          Number(conversationId) === Number(activeConversationId)
-        ) {
-          dispatch(
-            conversationsApi.util.updateQueryData(
-              "getConversationMessages",
-              activeConversationId,
-              (draft) => {
-                // Prevent duplicates
-                const exists = draft.find(
-                  (m) => m.messageId === message.messageId,
-                )
-                if (!exists) {
-                  // Ensure sender exists for MessageList safety
-                  const normalized = {
-                    ...message,
-                    sender: message.sender || { accountId: message.senderId },
-                  }
-                  draft.push(normalized)
-                }
-              },
-            ),
-          )
-        }
-
-        // Always invalidate conversations list to update snippets/unread counts
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      NewConversation: (data) => {
-        // Refresh conversation list
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      FriendStatusChange: (data) => {
-        // Refresh conversation list (to show online status)
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-      ChatUpdated: (data) => {
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
-    }),
-    [activeConversationId, dispatch],
-  )
-
-  const { sendMessage: sendSignalRMessage } =
-    useConversationSignalR(signalRHandlers)
+    // Notify server to mark as read
+    markConversationAsRead(convId).catch((err) =>
+      console.error("Failed to mark conversation as read:", err)
+    )
+  }
 
   // Handle conversation selection
   const handleSelectConversation = (conv) => {
     dispatch(setActiveConversation(conv.conversationId))
+    clearUnreadLogic(conv.conversationId)
   }
+
+  // Handle programmatically opened conversations
+  useEffect(() => {
+    if (activeConversationId) {
+      clearUnreadLogic(activeConversationId)
+    }
+  }, [activeConversationId])
 
   // Handle back to list
   const handleBackToList = () => {
@@ -164,11 +137,13 @@ const MessageWidget = () => {
     if (!input.trim() || !activeConversationId) return
 
     try {
-      // Use SignalR to send
-      await sendSignalRMessage(activeConversationId, input, 0) // 0 = Text
+      await sendMessageApi({
+        conversationId: activeConversationId,
+        messageData: { messageContent: input, messageType: 0 },
+      }).unwrap()
       setInput("")
     } catch (error) {
-      console.error("Failed to send message via SignalR:", error)
+      console.error("Failed to send message:", error)
     }
   }
 
@@ -214,7 +189,7 @@ const MessageWidget = () => {
             onInputChange={(e) => setInput(e.target.value)}
             onSendMessage={handleSendMessage}
             onKeyPress={handleKeyPress}
-            isSending={false} // Removed mutation usage
+            isSending={isSending}
           />
         )}
       </MessageModal>
@@ -227,10 +202,15 @@ const MessageWidget = () => {
           }
           dispatch(toggleWidget())
         }}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
         aria-label="Tin nhắn"
       >
         <MessageCircle />
+        {totalUnreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-white bg-red-500 text-[10px] text-white shadow-sm dark:border-gray-800">
+            {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+          </span>
+        )}
       </button>
     </div>
   )
