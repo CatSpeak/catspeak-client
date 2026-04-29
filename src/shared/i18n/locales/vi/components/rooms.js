@@ -169,6 +169,8 @@ export default {
     readyToJoin: "Sẵn sàng tham gia?",
     micOff: "Tắt mic",
     joinNow: "Tham gia ngay",
+    copyLink: "Sao chép liên kết",
+    linkCopied: "Đã sao chép!",
     joinedAs: "Tham gia với tên",
     noOneHere: "Chưa có ai ở đây cả.",
     isHere: "đang ở đây",
@@ -195,6 +197,10 @@ export default {
       "Quyền truy cập camera bị từ chối. Vui lòng cho phép trong cài đặt.",
   },
   videoCall: {
+    moreOptions: "Tùy chọn khác",
+    copyLink: "Sao chép liên kết phòng",
+    linkCopied: "Đã sao chép!",
+    leaveCall: "Rời phòng",
     provider: {
       connecting: "Đang kết nối...",
       failedToLoad: "Không thể tải phiên",

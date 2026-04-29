@@ -1,5 +1,7 @@
 import React from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { toast } from "react-hot-toast"
+import { Copy } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ParticipantsPreview from "./ParticipantsPreview"
 import VideoPreview from "./VideoPreview"
@@ -28,6 +30,12 @@ const WaitingScreen = ({
   const { t } = useLanguage()
   const { lang } = useParams()
   const effectiveParticipantCount = participantCount ?? participants.length
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href)
+    toast.success(t?.rooms?.waitingScreen?.linkCopied || "Link copied!")
+  }
+
   return (
     <FullscreenOverlayShell
       backgroundImageUrl={room?.thumbnailUrl || meetingFallbackImage}
@@ -79,16 +87,26 @@ const WaitingScreen = ({
         />
       </div>
 
-      <div className="flex flex-col items-center gap-2 w-full max-w-[320px]">
-        <PillButton
-          onClick={onJoin}
-          disabled={isFull}
-          aria-disabled={isFull}
-          title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
-          className="h-11 w-full"
-        >
-          {t.rooms.waitingScreen.joinNow}
-        </PillButton>
+      <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
+        <div className="flex w-full flex-col sm:flex-row gap-3">
+          <PillButton
+            onClick={handleCopyLink}
+            variant="secondary"
+            startIcon={<Copy className="h-4 w-4" />}
+            className="h-10 w-full sm:flex-1 shrink-0 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 text-gray-700"
+          >
+            {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
+          </PillButton>
+          <PillButton
+            onClick={onJoin}
+            disabled={isFull}
+            aria-disabled={isFull}
+            title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
+            className="h-10 w-full sm:flex-1 shrink-0"
+          >
+            {t.rooms.waitingScreen.joinNow}
+          </PillButton>
+        </div>
         {isFull && (
           <p className="text-sm text-red-600">
             {t.rooms.waitingScreen.roomFull} ({effectiveParticipantCount}/
