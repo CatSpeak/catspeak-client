@@ -192,7 +192,7 @@ export default {
     status: "STATUS",
     position: "POSITION",
     connected: "Connected",
-    connecting: "Connecting",
+    connectingStatus: "Connecting",
   },
   waitingScreen: {
     backToCommunity: "Back to Community",

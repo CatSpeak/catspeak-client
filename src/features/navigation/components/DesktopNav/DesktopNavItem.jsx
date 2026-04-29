@@ -4,9 +4,13 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "../../hooks/useActiveLink"
 
 const DesktopNavItem = ({ navKey, noActive }) => {
-  if (navKey === "cart" || navKey === "connect") return null
   const { t } = useLanguage()
   const { lang } = useParams()
+
+  // Active state check
+  const isActive = useActiveLink(navKey)
+
+  if (navKey === "cart" || navKey === "connect") return null
 
   // Determine href based on key
   let href
@@ -24,9 +28,6 @@ const DesktopNavItem = ({ navKey, noActive }) => {
     // Default fallback
     href = "/"
   }
-
-  // Active state check
-  const isActive = useActiveLink(navKey)
 
   return (
     <NavLink

@@ -38,7 +38,7 @@ const CatSpeakSidebar = () => {
     // { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
     // { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
-    { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
+    // { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]
 
   const bottomItems = [

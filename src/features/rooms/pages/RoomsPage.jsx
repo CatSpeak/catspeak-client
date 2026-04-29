@@ -36,18 +36,12 @@ const RoomsPage = () => {
   // Session logic (moved from HomePage)
   const { state, actions } = useRoomsPageLogic()
 
-  // Map language code to language type
   const langMap = {
     en: "English",
     zh: "Chinese",
     vi: "Vietnamese",
   }
   const languageType = lang ? [langMap[lang]] : undefined
-
-  // Force 404 for Vietnamese language
-  if (languageType?.includes("Vietnamese")) {
-    return <PageNotFound />
-  }
 
   const getLanguageName = (langCode) => {
     switch (langCode) {
@@ -113,6 +107,11 @@ const RoomsPage = () => {
   const rooms = responseData?.data ?? []
   const additionalData = responseData?.additionalData ?? {}
   const totalPages = additionalData.totalPages || 1
+
+  // Force 404 for Vietnamese language (after all hooks)
+  if (languageType?.includes("Vietnamese")) {
+    return <PageNotFound />
+  }
 
   return (
     <AnimatePresence mode="wait">

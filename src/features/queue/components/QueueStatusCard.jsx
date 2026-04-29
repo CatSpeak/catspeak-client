@@ -54,7 +54,7 @@ const QueueStatusCard = ({
               <span className="text-sm font-medium text-gray-900">
                 {isConnected
                   ? t.rooms.queue.connected
-                  : t.rooms.queue.connecting}
+                  : t.rooms.queue.connectingStatus}
               </span>
             </div>
           </div>

@@ -95,9 +95,10 @@ const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
     return allEvents
   }, [eventsDataA, eventsDataB, needsTwoQueries, displayDate])
 
-  if (selectedDate === null) return null
-
-  const positionedEvents = processOverlappingEvents(mappedEvents)
+  const positionedEvents = useMemo(
+    () => processOverlappingEvents(mappedEvents),
+    [mappedEvents],
+  )
 
   // Handle automatic scrolling to the most recent event once loaded
   useEffect(() => {
@@ -134,6 +135,8 @@ const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
     })
     hasScrolledToEvent.current = true
   }, [positionedEvents, isLoading, displayDate])
+
+  if (selectedDate === null) return null
 
   // Compute canvas width: at least 1 column, grow with max parallel cols
   const maxCols = positionedEvents.reduce(
