@@ -124,8 +124,62 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
       interaction.status === "loading"
   )
 
+  const flatAiMessages = aiInteractions.flatMap((interaction) => {
+    const msgs = []
+
+    // 1. The Prompt
+    msgs.push({
+      id: interaction.id + "-prompt",
+      timestamp: interaction.timestamp,
+      message: interaction.prompt,
+      topic: interaction.topic,
+      questioner: interaction.questioner,
+      from: interaction.from,
+    })
+
+    // 2. The Response (or Loading)
+    if (interaction.status === "loading") {
+      msgs.push({
+        id: interaction.id + "-response",
+        timestamp: interaction.timestamp + 1,
+        message: null,
+        status: "loading",
+        replyTo: {
+          message: interaction.prompt,
+          name: interaction.from?.name || "User",
+        },
+        topic: interaction.topic,
+        questioner: interaction.questioner,
+        from: { name: "Cat Speak", isSystem: false, isAi: true },
+      })
+    } else if (
+      interaction.status === "done" ||
+      interaction.status === "error"
+    ) {
+      msgs.push({
+        id: interaction.id + "-response",
+        timestamp: interaction.responseTimestamp || interaction.timestamp + 1,
+        message: interaction.response,
+        status: interaction.status,
+        replyTo: {
+          message: interaction.prompt,
+          name: interaction.from?.name || "User",
+        },
+        topic: interaction.topic,
+        questioner: interaction.questioner,
+        from: interaction.aiFrom || {
+          name: "Cat Speak",
+          isSystem: false,
+          isAi: true,
+        },
+      })
+    }
+
+    return msgs
+  })
+
   return {
-    aiMessages: aiInteractions,
+    aiMessages: flatAiMessages,
     addOptimisticAiMessage,
     updateAiInteraction,
     isCurrentUserPrompting,
