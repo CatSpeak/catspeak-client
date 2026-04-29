@@ -158,7 +158,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
     ) {
       msgs.push({
         id: interaction.id + "-response",
-        timestamp: interaction.responseTimestamp || interaction.timestamp + 1,
+        timestamp: interaction.timestamp + 1,
         message: interaction.response,
         status: interaction.status,
         replyTo: {

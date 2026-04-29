@@ -99,7 +99,6 @@ const MessageList = ({ messages, t, emptyText }) => {
                     isMe ? "items-end" : "items-start"
                   }`}
                 >
-
                   <div className="flex items-center gap-1 mb-1 max-w-full">
                     <span
                       className="text-xs font-bold truncate shrink flex items-center gap-1"
