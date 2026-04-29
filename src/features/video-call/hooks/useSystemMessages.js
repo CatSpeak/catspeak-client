@@ -84,7 +84,7 @@ export const useSystemMessages = (lkRoom, receiveSystemMessages = true) => {
           timestamp,
           message: messageText,
           translatedMessage,
-          from: { name: "System", isSystem: true },
+          from: { name: "Cat Speak gợi ý", isSystem: true },
         }
 
         if (receiveRef.current) {

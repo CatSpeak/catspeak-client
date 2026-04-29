@@ -1,12 +1,19 @@
-import React, { useState, useRef, useCallback, useEffect } from "react"
+import React, { useState, useRef, useCallback } from "react"
 import { Send } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { colors } from "@/shared/utils/colors"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
+import Switch from "@/shared/components/ui/inputs/Switch"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
-const ChatInput = ({ onSendMessage, isConnected, onAiMessageSent }) => {
+const ChatInput = ({
+  onSendMessage,
+  isConnected,
+  onAiMessageSent,
+  isAiInput,
+}) => {
   const [message, setMessage] = useState("")
+  const [isPrivateAi, setIsPrivateAi] = useState(false)
   const sendingRef = useRef(false)
   const { t } = useLanguage()
   const {
@@ -14,67 +21,28 @@ const ChatInput = ({ onSendMessage, isConnected, onAiMessageSent }) => {
     chatPublicAi,
     chatPrivateAi,
     currentUserId,
-    aiMessages,
     lkRoomName,
     localParticipant,
     aiPromptStatus,
     setAiPromptStatus,
   } = useGlobalVideoCall()
 
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [suggestions, setSuggestions] = useState([])
-  const [activeSuggestion, setActiveSuggestion] = useState(0)
-
-  // Autocomplete suggestions logic
-  useEffect(() => {
-    if (message.startsWith("@")) {
-      const query = message.toLowerCase()
-      const matches = ["@public-ai ", "@private-ai "].filter((s) =>
-        s.startsWith(query),
-      )
-      if (
-        matches.length > 0 &&
-        query !== "@public-ai " &&
-        query !== "@private-ai "
-      ) {
-        setSuggestions(matches)
-        setShowSuggestions(true)
-        setActiveSuggestion(0)
-      } else {
-        setShowSuggestions(false)
-      }
-    } else {
-      setShowSuggestions(false)
-    }
-  }, [message])
-
-  const handleSuggestionClick = (suggestion) => {
-    setMessage(suggestion)
-    setShowSuggestions(false)
-  }
-
   const handleSend = useCallback(async () => {
     if (sendingRef.current) return
-    const text = message.trim()
+    let text = message.trim()
     if (!text) return
 
     sendingRef.current = true
 
-    if (
-      text.startsWith("@public-ai ") ||
-      text.startsWith("@private-ai ") ||
-      text === "@public-ai" ||
-      text === "@private-ai"
-    ) {
+    if (isAiInput) {
       if (aiPromptStatus?.active) {
+        sendingRef.current = false
         return // Prevent prompting if already waiting for AI
       }
 
-      const isPublic = text.startsWith("@public-ai")
+      const isPublic = !isPrivateAi
       const cleanPrompt = text
-        .replace(isPublic ? "@public-ai" : "@private-ai", "")
-        .trim()
-      const formattedPrompt = `${isPublic ? "@public-ai" : "@private-ai"} ${cleanPrompt}`
+      const formattedPrompt = `${isPublic ? "@AIPublic" : "@AIPrivate"} ${cleanPrompt}`
 
       const roomName = lkRoomName || "General"
 
@@ -127,7 +95,6 @@ const ChatInput = ({ onSendMessage, isConnected, onAiMessageSent }) => {
         } else {
           await chatPrivateAi(payload).unwrap()
         }
-        // We do not set aiPromptStatus false here, we wait for the LiveKit message via useAiMessages
       } catch (error) {
         console.error("AI chat error", error)
         setAiPromptStatus({ active: false, name: "" })
@@ -136,12 +103,13 @@ const ChatInput = ({ onSendMessage, isConnected, onAiMessageSent }) => {
           timestamp: Date.now(),
           message: error?.data?.message || "All models are unavailable.",
           topic: isPublic ? "public-ai" : "private-ai",
-          from: { name: "System", isSystem: true, isAi: true },
+          from: { name: "Cat Speak", isSystem: true, isAi: true },
         })
       }
       return
     }
 
+    // Normal chat message
     onSendMessage(text)
     setMessage("")
 
@@ -161,39 +129,14 @@ const ChatInput = ({ onSendMessage, isConnected, onAiMessageSent }) => {
     lkRoomName,
     localParticipant,
     setAiPromptStatus,
+    isAiInput,
+    isPrivateAi,
   ])
 
   const handleKeyDown = (e) => {
     if (e.nativeEvent?.isComposing || e.keyCode === 229) return
 
-    if (showSuggestions) {
-      if (e.key === "Tab") {
-        e.preventDefault()
-        setMessage(suggestions[activeSuggestion])
-        setShowSuggestions(false)
-        return
-      }
-      if (e.key === "ArrowDown") {
-        e.preventDefault()
-        setActiveSuggestion((prev) => (prev + 1) % suggestions.length)
-        return
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault()
-        setActiveSuggestion(
-          (prev) => (prev - 1 + suggestions.length) % suggestions.length,
-        )
-        return
-      }
-    }
-
     if (e.key === "Enter") {
-      if (showSuggestions) {
-        e.preventDefault()
-        setMessage(suggestions[activeSuggestion])
-        setShowSuggestions(false)
-        return
-      }
       e.preventDefault()
       handleSend()
     }
@@ -205,28 +148,12 @@ const ChatInput = ({ onSendMessage, isConnected, onAiMessageSent }) => {
   }
 
   return (
-    <div className="flex flex-col relative shrink-0">
-      {showSuggestions && (
-        <div className="absolute bottom-full left-4 mb-2 flex flex-col gap-1 bg-white border border-[#E5E5E5] rounded-lg shadow-lg z-30 min-w-[150px] p-1">
-          {suggestions.map((suggestion, index) => (
-            <div
-              key={suggestion}
-              onClick={() => handleSuggestionClick(suggestion)}
-              className={`flex w-full items-center rounded-lg px-3 py-2 min-h-10 text-sm cursor-pointer transition-colors ${
-                index === activeSuggestion
-                  ? "bg-[#F6F6F6]"
-                  : "hover:bg-[#F6F6F6]"
-              }`}
-            >
-              {suggestion}
-            </div>
-          ))}
-        </div>
-      )}
-
+    <div className="flex flex-col relative shrink-0 bg-white">
       <form
         onSubmit={handleSubmit}
-        className="border-t border-[#E5E5E5] py-2 px-3 flex items-center gap-2 bg-white relative z-20"
+        className={`py-2 px-3 flex items-center gap-2 relative z-20 ${
+          !isAiInput ? "border-t border-[#E5E5E5]" : ""
+        }`}
       >
         <TextInput
           disabled={!isConnected}
@@ -235,12 +162,32 @@ const ChatInput = ({ onSendMessage, isConnected, onAiMessageSent }) => {
           onKeyDown={handleKeyDown}
           placeholder={
             isConnected
-              ? t.rooms?.chatBox?.inputPlaceholder ||
-                "Type a message or @public-ai / @private-ai..."
+              ? isAiInput
+                ? isPrivateAi
+                  ? t.rooms?.chatBox?.privateAiPlaceholder ||
+                    "Ask AI (Private mode)"
+                  : t.rooms?.chatBox?.publicAiPlaceholder ||
+                    "Ask AI (Public mode)"
+                : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
               : t.rooms?.chatBox?.connectingPlaceholder || "Connecting..."
           }
           containerClassName="flex-1 min-w-0"
           className="disabled:opacity-50"
+          leftContent={
+            isAiInput ? (
+              <div
+                title={isPrivateAi ? "Private AI Prompt" : "Public AI Prompt"}
+                className="flex items-center justify-center"
+              >
+                <Switch
+                  checked={isPrivateAi}
+                  onChange={() => setIsPrivateAi(!isPrivateAi)}
+                  colorClass="peer-checked:bg-green-500"
+                />
+              </div>
+            ) : undefined
+          }
+          leftContentWidthClass="!pl-[3.75rem]"
         />
         <button
           type="submit"

@@ -118,17 +118,28 @@ const ChatBox = ({
             <h3 className="text-sm">
               {t.rooms?.chatBox?.aiAssistant || "AI Assistant"}
             </h3>
+            <div onClick={(e) => e.stopPropagation()} className="ml-auto">
+              {settingsPopover}
+            </div>
           </button>
           {!isAiCollapsed && (
-            <MessageList
-              messages={aiMessages}
-              t={t}
-              emptyText={
-                t.rooms?.chatBox?.aiEmptyText ||
-                "Ask the AI by typing @public-ai or @private-ai in the chat."
-              }
-              aiPromptStatus={aiPromptStatus}
-            />
+            <>
+              <MessageList
+                messages={aiMessages}
+                t={t}
+                emptyText={
+                  t.rooms?.chatBox?.aiEmptyText ||
+                  "Ask the AI by typing @public-ai or @private-ai in the chat."
+                }
+                aiPromptStatus={aiPromptStatus}
+              />
+              <ChatInput
+                onSendMessage={onSendMessage}
+                isConnected={isConnected}
+                onAiMessageSent={() => setIsAiCollapsed(false)}
+                isAiInput={true}
+              />
+            </>
           )}
         </div>
 
@@ -157,25 +168,22 @@ const ChatBox = ({
             <h3 className="text-sm">
               {t.rooms?.chatBox?.title || "Room Chat"}
             </h3>
-            <div onClick={(e) => e.stopPropagation()} className="ml-auto">
-              {settingsPopover}
-            </div>
           </button>
           {!isChatCollapsed && (
-            <MessageList
-              messages={messages}
-              t={t}
-              emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
-            />
+            <>
+              <MessageList
+                messages={messages}
+                t={t}
+                emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
+              />
+              <ChatInput
+                onSendMessage={onSendMessage}
+                isConnected={isConnected}
+              />
+            </>
           )}
         </div>
       </div>
-
-      <ChatInput
-        onSendMessage={onSendMessage}
-        isConnected={isConnected}
-        onAiMessageSent={() => setIsAiCollapsed(false)}
-      />
     </div>
   )
 }

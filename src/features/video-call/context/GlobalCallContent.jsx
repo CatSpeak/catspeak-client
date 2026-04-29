@@ -99,7 +99,11 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   const [chatPublicAi] = useChatPublicAiMutation()
   const [chatPrivateAi] = useChatPrivateAiMutation()
 
-  const chatMessages = [...baseChatMessages, ...systemMessages].sort(
+  const chatMessages = [...baseChatMessages].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  )
+
+  const combinedAiMessages = [...aiMessages, ...systemMessages].sort(
     (a, b) => a.timestamp - b.timestamp,
   )
 
@@ -161,7 +165,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
 
     // Chat
     messages: chatMessages,
-    aiMessages,
+    aiMessages: combinedAiMessages,
     addOptimisticAiMessage,
     chatPublicAi,
     chatPrivateAi,

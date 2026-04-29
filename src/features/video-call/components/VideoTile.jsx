@@ -46,8 +46,8 @@ const VideoTile = ({ participant, onClick }) => {
   const screenShareOn = participant.isScreenShareEnabled
 
   const theme = useMemo(
-    () => getParticipantTheme(participant.identity, displayName),
-    [participant.identity, displayName],
+    () => getParticipantTheme(participant.identity),
+    [participant.identity],
   )
 
   // Get the camera track publication

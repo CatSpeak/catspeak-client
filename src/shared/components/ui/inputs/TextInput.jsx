@@ -17,6 +17,8 @@ const TextInput = ({
   containerClassName = "",
   showCount = false,
   error,
+  leftContent,
+  leftContentWidthClass = "pl-14",
   ...props
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -30,8 +32,9 @@ const TextInput = ({
   const passwordPadding = isPassword ? "!pr-10" : ""
 
   const errorClass = error ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500" : ""
+  const leftContentPadding = leftContent ? leftContentWidthClass : ""
 
-  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${className}`
+  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${className}`
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
@@ -41,7 +44,12 @@ const TextInput = ({
         </label>
       )}
       <div className="relative">
-        {Icon && (
+        {leftContent && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
+            {leftContent}
+          </div>
+        )}
+        {Icon && !leftContent && (
           <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7574]" />
         )}
         <input

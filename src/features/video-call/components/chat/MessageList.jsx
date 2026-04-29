@@ -30,9 +30,15 @@ const MessageList = ({ messages, t, emptyText, aiPromptStatus }) => {
               const isSystem =
                 msg.from?.isSystem || msg.isSystem || (!msg.from && !msg.topic)
               const isAi = msg.from?.isAi || false
-              const senderName = isMe
+              let senderName = isMe
                 ? t.rooms?.chatBox?.you || "You"
                 : msg.from?.name || msg.from?.identity || `User`
+
+              if (senderName === "System (AI Gợi ý)" || senderName === "System (AI Suggestion)" || senderName === "System" || senderName === "Cat Speak gợi ý") {
+                senderName = t.rooms?.chatBox?.systemName || "Cat Speak gợi ý"
+              } else if (senderName === "Public AI" || senderName === "Private AI") {
+                senderName = "Cat Speak"
+              }
 
               return (
                 <div
@@ -64,7 +70,17 @@ const MessageList = ({ messages, t, emptyText, aiPromptStatus }) => {
                     }`}
                   >
                     <p className="m-0 whitespace-pre-wrap">
-                      {msg.message.startsWith("@public-ai") ? (
+                      {msg.message.startsWith("@AIPublic") ? (
+                        <>
+                          <span className="font-bold">@AIPublic</span>
+                          {msg.message.slice(9)}
+                        </>
+                      ) : msg.message.startsWith("@AIPrivate") ? (
+                        <>
+                          <span className="font-bold">@AIPrivate</span>
+                          {msg.message.slice(10)}
+                        </>
+                      ) : msg.message.startsWith("@public-ai") ? (
                         <>
                           <span className="font-bold">@public-ai</span>
                           {msg.message.slice(10)}
@@ -105,7 +121,7 @@ const MessageList = ({ messages, t, emptyText, aiPromptStatus }) => {
               >
                 <div className="flex items-center gap-1 mb-1 max-w-full">
                   <span className="text-xs font-bold truncate shrink flex items-center gap-1">
-                    {t.rooms?.chatBox?.aiAssistant || "AI Assistant"}
+                    Cat Speak
                   </span>
                 </div>
                 <div className="max-w-[85%] rounded-2xl px-3 py-3 text-sm break-words bg-amber-50 text-amber-900">
