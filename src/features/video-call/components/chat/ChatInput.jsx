@@ -1,111 +1,47 @@
 import React, { useState, useRef, useCallback } from "react"
-import { Send } from "lucide-react"
+import { Send, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { colors } from "@/shared/utils/colors"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Switch from "@/shared/components/ui/inputs/Switch"
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 
 const ChatInput = ({
   onSendMessage,
   isConnected,
   onAiMessageSent,
   isAiInput,
+  replyTarget,
+  onCancelReply,
 }) => {
   const [message, setMessage] = useState("")
   const [isPrivateAi, setIsPrivateAi] = useState(false)
   const sendingRef = useRef(false)
   const { t } = useLanguage()
-  const {
-    addOptimisticAiMessage,
-    chatPublicAi,
-    chatPrivateAi,
-    currentUserId,
-    lkRoomName,
-    localParticipant,
-    isCurrentUserPrompting,
-    updateAiInteraction,
-  } = useGlobalVideoCall()
+  const { sendAiMessage, isBlocked: isAiBlocked } = useAiSend()
 
   const handleSend = useCallback(async () => {
     if (sendingRef.current) return
-    let text = message.trim()
+    const text = message.trim()
     if (!text) return
 
     sendingRef.current = true
 
     if (isAiInput) {
-      if (isCurrentUserPrompting) {
+      if (isAiBlocked) {
         sendingRef.current = false
-        return // Prevent prompting if already waiting for AI
+        return
       }
 
-      const isPublic = !isPrivateAi
-      const cleanPrompt = text
-      const formattedPrompt = `${isPublic ? "@AIPublic" : "@AIPrivate"} ${cleanPrompt}`
-
-      const roomName = lkRoomName || "General"
-
-      const interactionId = `ai-opt-${Date.now()}`
-
-      addOptimisticAiMessage({
-        id: interactionId,
-        type: "interaction",
-        timestamp: Date.now(),
-        prompt: formattedPrompt,
-        topic: isPublic ? "public-ai" : "private-ai",
-        questioner: currentUserId,
-        response: null,
-        status: "loading",
-        from: {
-          name: t?.rooms?.chatBox?.you || "You",
-          isLocal: true,
-          isAi: false,
-        },
-      })
-
-      // Broadcast the public prompt to everyone else so they see the prompt and loading state
-      if (isPublic && localParticipant) {
-        try {
-          const payload = JSON.stringify({
-            message: formattedPrompt,
-            questioner: currentUserId,
-          })
-          const encoded = new TextEncoder().encode(payload)
-          localParticipant.publishData(encoded, {
-            reliable: true,
-            topic: "public-ai-prompt",
-          })
-        } catch (e) {
-          console.warn("Failed to broadcast public AI prompt", e)
-        }
-      }
+      await sendAiMessage(text, { isPrivateAi, replyTarget })
 
       setMessage("")
+      if (onCancelReply) onCancelReply()
+      if (onAiMessageSent) onAiMessageSent()
+
       requestAnimationFrame(() => {
         sendingRef.current = false
       })
-
-      // Notify parent to open AI pane if collapsed
-      if (onAiMessageSent) onAiMessageSent()
-
-      try {
-        const payload = { roomName, message: cleanPrompt }
-        console.log("Sending AI payload:", payload)
-
-        if (isPublic) {
-          await chatPublicAi(payload).unwrap()
-        } else {
-          await chatPrivateAi(payload).unwrap()
-        }
-      } catch (error) {
-        console.error("AI chat error", error)
-        updateAiInteraction(interactionId, {
-          status: "error",
-          response: error?.data?.message || "All models are unavailable.",
-          aiFrom: { name: "Cat Speak", isSystem: true, isAi: true },
-        })
-      }
       return
     }
 
@@ -119,18 +55,13 @@ const ChatInput = ({
   }, [
     message,
     onSendMessage,
-    addOptimisticAiMessage,
-    chatPublicAi,
-    chatPrivateAi,
-    currentUserId,
-    t,
+    sendAiMessage,
+    isAiBlocked,
     onAiMessageSent,
-    isCurrentUserPrompting,
-    lkRoomName,
-    localParticipant,
-    updateAiInteraction,
+    onCancelReply,
     isAiInput,
     isPrivateAi,
+    replyTarget,
   ])
 
   const handleKeyDown = (e) => {
@@ -149,6 +80,27 @@ const ChatInput = ({
 
   return (
     <div className="flex flex-col relative shrink-0 bg-white">
+      {/* Reply preview banner */}
+      {isAiInput && replyTarget && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border-t border-amber-200 text-xs">
+          <div className="flex-1 min-w-0">
+            <span className="font-semibold text-amber-800">
+              {t.rooms?.chatBox?.replyingTo || "Replying to"}{" "}
+              {replyTarget.from?.name || "Cat Speak"}
+            </span>
+            <p className="m-0 truncate text-amber-700 opacity-80">
+              {replyTarget.message}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onCancelReply}
+            className="shrink-0 p-0.5 rounded hover:bg-amber-200/50 text-amber-600 hover:text-amber-800 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit}
         className={`py-2 px-3 flex items-center gap-2 relative z-20 ${

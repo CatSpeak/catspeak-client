@@ -1,20 +1,30 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { RoomEvent } from "livekit-client"
+import { useConversationThreads } from "./useConversationThreads"
+import { flattenAiInteractions } from "../utils/flattenAiInteractions"
 
+/**
+ * Orchestrates AI interactions: optimistic messages, LiveKit data handling,
+ * conversation threads, and flat message output for rendering.
+ */
 export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
   const [aiInteractions, setAiInteractions] = useState([])
-  const participantsRef = useRef(participants)
   const currentUserIdRef = useRef(currentUserId)
 
-  useEffect(() => {
-    participantsRef.current = participants
-  }, [participants])
+  // ── Sub-hooks ──
+  const {
+    startNewThread,
+    continueThread,
+    appendAssistantTurn,
+    getConversationThread,
+  } = useConversationThreads()
 
   useEffect(() => {
     currentUserIdRef.current = currentUserId
   }, [currentUserId])
 
-  // Allow the frontend to optimistically inject messages (e.g., user prompts)
+  // ── Interaction mutators ──
+
   const addOptimisticAiMessage = useCallback((msg) => {
     setAiInteractions((prev) => [...prev, msg])
   }, [])
@@ -24,6 +34,8 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
       prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
     )
   }, [])
+
+  // ── LiveKit data handler ──
 
   useEffect(() => {
     if (!lkRoom) return
@@ -35,8 +47,8 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
           const decoded = new TextDecoder().decode(payload)
           const json = JSON.parse(decoded)
           const questionerName = participant?.name || participant?.identity || "Someone"
-          
-          const promptInteraction = {
+
+          setAiInteractions(prev => [...prev, {
             id: `ai-prompt-${Date.now()}-${Math.random()}`,
             type: "interaction",
             timestamp: Date.now(),
@@ -45,10 +57,8 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
             questioner: json.questioner,
             response: null,
             status: "loading",
-            from: { name: questionerName, isLocal: false, isAi: false }
-          }
-          
-          setAiInteractions(prev => [...prev, promptInteraction])
+            from: { name: questionerName, isLocal: false, isAi: false },
+          }])
         } catch (e) {
           console.warn("[LiveKit Debug] Failed to parse public-ai-prompt payload:", e)
         }
@@ -72,7 +82,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
         setAiInteractions((prev) => {
           const newInteractions = [...prev]
           let found = false
-          // Find the last interaction for this questioner that is loading
+
           for (let i = newInteractions.length - 1; i >= 0; i--) {
             if (
               newInteractions[i].questioner === json.questioner &&
@@ -85,18 +95,19 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
                 responseTimestamp: json.timestamp || Date.now(),
                 aiFrom: { name: fromName, isSystem: false, isAi: true },
               }
+              // Append the assistant turn to the conversation thread
+              appendAssistantTurn(newInteractions[i].id, json.message)
               found = true
               break
             }
           }
 
           if (!found) {
-            // Fallback: create an interaction with just the response
             newInteractions.push({
               id: json.id || `ai-${Date.now()}-${Math.random()}`,
               type: "interaction",
               timestamp: json.timestamp || Date.now(),
-              prompt: "...", // Unknown
+              prompt: "...",
               topic: topic,
               questioner: json.questioner,
               response: json.message,
@@ -116,7 +127,9 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleData)
     }
-  }, [lkRoom])
+  }, [lkRoom, appendAssistantTurn])
+
+  // ── Derived state ──
 
   const isCurrentUserPrompting = aiInteractions.some(
     (interaction) =>
@@ -124,64 +137,15 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
       interaction.status === "loading"
   )
 
-  const flatAiMessages = aiInteractions.flatMap((interaction) => {
-    const msgs = []
-
-    // 1. The Prompt
-    msgs.push({
-      id: interaction.id + "-prompt",
-      timestamp: interaction.timestamp,
-      message: interaction.prompt,
-      topic: interaction.topic,
-      questioner: interaction.questioner,
-      from: interaction.from,
-    })
-
-    // 2. The Response (or Loading)
-    if (interaction.status === "loading") {
-      msgs.push({
-        id: interaction.id + "-response",
-        timestamp: interaction.timestamp + 1,
-        message: null,
-        status: "loading",
-        replyTo: {
-          message: interaction.prompt,
-          name: interaction.from?.name || "User",
-        },
-        topic: interaction.topic,
-        questioner: interaction.questioner,
-        from: { name: "Cat Speak", isSystem: false, isAi: true },
-      })
-    } else if (
-      interaction.status === "done" ||
-      interaction.status === "error"
-    ) {
-      msgs.push({
-        id: interaction.id + "-response",
-        timestamp: interaction.timestamp + 1,
-        message: interaction.response,
-        status: interaction.status,
-        replyTo: {
-          message: interaction.prompt,
-          name: interaction.from?.name || "User",
-        },
-        topic: interaction.topic,
-        questioner: interaction.questioner,
-        from: interaction.aiFrom || {
-          name: "Cat Speak",
-          isSystem: false,
-          isAi: true,
-        },
-      })
-    }
-
-    return msgs
-  })
+  const flatAiMessages = flattenAiInteractions(aiInteractions)
 
   return {
     aiMessages: flatAiMessages,
     addOptimisticAiMessage,
     updateAiInteraction,
     isCurrentUserPrompting,
+    startNewThread,
+    continueThread,
+    getConversationThread,
   }
 }

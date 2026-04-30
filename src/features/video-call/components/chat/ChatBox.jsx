@@ -33,6 +33,7 @@ const ChatBox = ({
   const [aiPaneHeight, setAiPaneHeight] = useState(50)
   const [isAiCollapsed, setIsAiCollapsed] = useState(false)
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
+  const [replyTarget, setReplyTarget] = useState(null)
 
   const handleDrag = useCallback((e) => {
     if (!containerRef.current) return
@@ -133,12 +134,15 @@ const ChatBox = ({
                   t.rooms?.chatBox?.aiEmptyText ||
                   "Ask the AI by typing @public-ai or @private-ai in the chat."
                 }
+                onReplyTo={(msg) => setReplyTarget(msg)}
               />
               <ChatInput
                 onSendMessage={onSendMessage}
                 isConnected={isConnected}
                 onAiMessageSent={() => setIsAiCollapsed(false)}
                 isAiInput={true}
+                replyTarget={replyTarget}
+                onCancelReply={() => setReplyTarget(null)}
               />
             </>
           )}

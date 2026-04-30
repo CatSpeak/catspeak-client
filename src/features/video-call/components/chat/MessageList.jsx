@@ -3,7 +3,7 @@ import { Bot, Reply } from "lucide-react"
 import { motion } from "framer-motion"
 import { formatTime } from "@/shared/utils/dateFormatter"
 
-const MessageList = ({ messages, t, emptyText }) => {
+const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
   const scrollRef = useRef(null)
   const prevMessagesLength = useRef(0)
 
@@ -193,6 +193,18 @@ const MessageList = ({ messages, t, emptyText }) => {
                       </p>
                     )}
                   </div>
+
+                  {/* Reply button for completed AI responses */}
+                  {isAi && msg.status === "done" && onReplyTo && (
+                    <button
+                      type="button"
+                      onClick={() => onReplyTo(msg)}
+                      className="flex items-center gap-1 mt-1 px-2 py-0.5 text-xs text-[#606060] hover:text-[#990011] transition-colors rounded hover:bg-[#F6F6F6]"
+                    >
+                      <Reply size={12} />
+                      <span>{t.rooms?.chatBox?.reply || "Reply"}</span>
+                    </button>
+                  )}
                 </div>
               )
             })}
