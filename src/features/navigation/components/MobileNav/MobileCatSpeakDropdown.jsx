@@ -19,7 +19,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
   const subItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
-    // { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
+    { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]
 
   const getActiveSubKey = () => {

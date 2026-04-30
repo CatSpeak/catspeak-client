@@ -17,7 +17,8 @@ const ChatBox = ({
   const { aiMessages = [] } = useGlobalVideoCall()
 
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
-  const [replyTarget, setReplyTarget] = useState(null)
+  const [aiReplyTarget, setAiReplyTarget] = useState(null)
+  const [roomReplyTarget, setRoomReplyTarget] = useState(null)
 
   const [isAiCollapsed, setIsAiCollapsed] = useState(false)
   const [aiSplit, setAiSplit] = useState(50) // percentage (0-100)
@@ -110,15 +111,15 @@ const ChatBox = ({
                   t.rooms?.chatBox?.aiEmptyText ||
                   "Ask the AI by typing @public-ai or @private-ai in the chat."
                 }
-                onReplyTo={(msg) => setReplyTarget(msg)}
+                onReplyTo={(msg) => setAiReplyTarget(msg)}
               />
               <ChatInput
                 onSendMessage={onSendMessage}
                 isConnected={isConnected}
                 onAiMessageSent={() => setIsAiCollapsed(false)}
                 isAiInput={true}
-                replyTarget={replyTarget}
-                onCancelReply={() => setReplyTarget(null)}
+                replyTarget={aiReplyTarget}
+                onCancelReply={() => setAiReplyTarget(null)}
               />
             </>
           )}
@@ -159,10 +160,13 @@ const ChatBox = ({
                 messages={messages}
                 t={t}
                 emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
+                onReplyTo={(msg) => setRoomReplyTarget(msg)}
               />
               <ChatInput
                 onSendMessage={onSendMessage}
                 isConnected={isConnected}
+                replyTarget={roomReplyTarget}
+                onCancelReply={() => setRoomReplyTarget(null)}
               />
             </>
           )}
