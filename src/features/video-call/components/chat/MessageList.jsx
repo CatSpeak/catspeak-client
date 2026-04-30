@@ -22,7 +22,7 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
   return (
     <div
       ref={scrollRef}
-      className="flex flex-1 flex-col overflow-y-auto p-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent hover:[&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5 bg-white h-full"
+      className="flex flex-1 flex-col overflow-y-auto p-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent hover:[&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5 bg-white min-h-0"
     >
       {messages.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
@@ -194,8 +194,8 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
                     )}
                   </div>
 
-                  {/* Reply button for completed AI responses */}
-                  {isAi && msg.status === "done" && onReplyTo && (
+                  {/* Reply button for completed AI responses (hidden for now) */}
+                  {false && isAi && msg.status === "done" && onReplyTo && (
                     <button
                       type="button"
                       onClick={() => onReplyTo(msg)}
