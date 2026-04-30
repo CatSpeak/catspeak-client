@@ -142,6 +142,8 @@ export default {
     publicAiPlaceholder: "公开提问",
     privateAiPlaceholder: "私密提问",
     systemName: "Cat Speak 提示",
+    systemMessages: "系统消息",
+    systemMessagesDesc: "显示自动系统消息",
     replyingTo: "回复",
     reply: "回复",
   },

@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect } from "react"
-import { ChevronDown, ChevronRight, GripHorizontal } from "lucide-react"
+import {
+  ChevronDown,
+  ChevronRight,
+  GripHorizontal,
+  Settings,
+} from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import Popover from "@/shared/components/ui/Popover"
+import Switch from "@/shared/components/ui/inputs/Switch"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
 
@@ -14,7 +21,11 @@ const ChatBox = ({
   hideTitle,
 }) => {
   const { t } = useLanguage()
-  const { aiMessages = [] } = useGlobalVideoCall()
+  const {
+    aiMessages = [],
+    receiveSystemMsgs,
+    setReceiveSystemMsgs,
+  } = useGlobalVideoCall()
 
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
   const [replyTarget, setReplyTarget] = useState(null)
@@ -32,7 +43,10 @@ const ChatBox = ({
       if (containerHeight <= 0) return
       const deltaY = e.clientY - dragRef.current.startY
       const deltaPct = (deltaY / containerHeight) * 100
-      const newSplit = Math.min(80, Math.max(20, dragRef.current.startSplit + deltaPct))
+      const newSplit = Math.min(
+        80,
+        Math.max(20, dragRef.current.startSplit + deltaPct),
+      )
       setAiSplit(newSplit)
     }
 
@@ -71,14 +85,38 @@ const ChatBox = ({
     ? { height: "40px", flexShrink: 0 }
     : { flex: `${100 - aiSplit} 0 0%`, minHeight: 0, overflow: "hidden" }
 
-  const settingsPopover = null
+  const settingsPopoverContent = (
+    <div className="bg-white rounded-lg shadow-lg border border-[#E5E5E5] p-3 w-max">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-sm whitespace-nowrap">
+          {t.rooms?.chatBox?.showSystemMessages ||
+            "Show Cat Speak suggestion messages"}
+        </span>
+        <Switch
+          checked={receiveSystemMsgs}
+          onChange={(e) => setReceiveSystemMsgs(e.target.checked)}
+          colorClass="peer-checked:bg-green-500"
+        />
+      </div>
+    </div>
+  )
+
+  const settingsPopover = (
+    <Popover
+      trigger={
+        <Settings
+          size={20}
+          className="text-gray-500 hover:text-gray-800 transition-colors"
+        />
+      }
+      content={settingsPopoverContent}
+      placement="bottom-right"
+    />
+  )
 
   return (
     <div className={`relative flex h-full flex-col bg-white ${className}`}>
-      <div
-        ref={containerRef}
-        className="flex-1 flex flex-col min-h-0 relative"
-      >
+      <div ref={containerRef} className="flex-1 flex flex-col min-h-0 relative">
         {/* AI Chat Pane */}
         <div
           className={`flex flex-col bg-white overflow-hidden ${!isAiCollapsed ? "border-b border-[#E5E5E5]" : ""}`}
@@ -135,8 +173,8 @@ const ChatBox = ({
         )}
 
         {/* Regular Chat Pane */}
-        <div 
-          className="flex flex-col bg-white overflow-hidden relative" 
+        <div
+          className="flex flex-col bg-white overflow-hidden relative"
           style={chatStyle}
         >
           <button

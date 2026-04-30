@@ -170,6 +170,8 @@ export default {
     publicAiPlaceholder: "Ask AI (Public)",
     privateAiPlaceholder: "Ask AI (Private)",
     systemName: "Cat Speak Suggestion",
+    systemMessages: "System Messages",
+    systemMessagesDesc: "Show automatic system messages",
     replyingTo: "Replying to",
     reply: "Reply",
   },

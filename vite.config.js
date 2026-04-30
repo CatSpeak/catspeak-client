@@ -19,18 +19,19 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
         "/hubs": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
           ws: true,
         },
         "/r2": {
-          target: "https://3bef3ed6d4d479f38c51000461eeaa0f.r2.cloudflarestorage.com",
+          target:
+            "https://3bef3ed6d4d479f38c51000461eeaa0f.r2.cloudflarestorage.com",
           changeOrigin: true,
           secure: true,
           rewrite: (path) => path.replace(/^\/r2/, ""),
