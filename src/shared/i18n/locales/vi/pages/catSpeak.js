@@ -44,4 +44,5 @@ export default {
   },
   created: "Đã tạo",
   expiresIn: "Hết hạn trong",
+  story: "Câu chuyện",
 }

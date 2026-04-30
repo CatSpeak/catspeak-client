@@ -38,4 +38,5 @@ export default {
     feedback: "发送反馈",
     menu: "菜单",
   },
+  story: "故事",
 }

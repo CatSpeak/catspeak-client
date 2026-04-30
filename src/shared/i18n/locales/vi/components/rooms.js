@@ -170,7 +170,7 @@ export default {
     status: "TRẠNG THÁI",
     position: "VỊ TRÍ",
     connected: "Đã kết nối",
-    connecting: "Đang kết nối",
+    connectingStatus: "Đang kết nối",
   },
   waitingScreen: {
     backToCommunity: "Quay lại Cộng đồng",

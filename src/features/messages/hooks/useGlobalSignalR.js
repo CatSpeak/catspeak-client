@@ -1,6 +1,6 @@
 import { useMemo, useRef, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { conversationsApi } from "@/store/api/conversationsApi"
+import { conversationsApi, useMarkConversationAsReadMutation } from "@/store/api/conversationsApi"
 import {
   incrementUnread,
   setFriendOnlineStatus,
@@ -18,6 +18,7 @@ export const useGlobalSignalR = () => {
     (state) => state.messageWidget.activeConversationId,
   )
   const isWidgetOpen = useSelector((state) => state.messageWidget.isOpen)
+  const [markConversationAsRead] = useMarkConversationAsReadMutation()
 
   // Ref to hold invoke so the NewConversation handler can call JoinConversation
   // without creating a circular dependency (invoke comes from useConversationSignalR
@@ -36,8 +37,6 @@ export const useGlobalSignalR = () => {
           conversationId = message?.conversationId
         }
 
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-
         if (conversationId) {
           dispatch(
             conversationsApi.util.invalidateTags([
@@ -52,6 +51,7 @@ export const useGlobalSignalR = () => {
           Number(conversationId) === Number(activeConversationId)
 
         if (!isViewingConversation) {
+          dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
           if (conversationId) {
              dispatch(incrementUnread(conversationId))
              
@@ -60,8 +60,38 @@ export const useGlobalSignalR = () => {
                invokeRef.current("JoinConversation", Number(conversationId)).catch(console.warn)
              }
           }
+        } else {
+          if (conversationId) {
+            // Optimistically clear the unread count in Redux to prevent flickering
+            dispatch(
+              conversationsApi.util.updateQueryData(
+                "getConversations",
+                undefined,
+                (draft) => {
+                  const cachedConv = draft.find(
+                    (c) => c.conversationId === Number(conversationId) || c.conversationId === String(conversationId)
+                  )
+                  if (cachedConv) {
+                    cachedConv.unreadCount = 0
+                  }
+                }
+              )
+            )
+            
+            // Mark as read on the backend
+            markConversationAsRead(conversationId)
+              .unwrap()
+              .then(() => {
+                dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+              })
+              .catch((err) => {
+                console.error("Failed to mark conversation as read:", err)
+                dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+              })
+          } else {
+            dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+          }
         }
-        
 
       },
 

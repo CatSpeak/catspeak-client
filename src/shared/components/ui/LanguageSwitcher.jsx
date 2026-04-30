@@ -66,9 +66,9 @@ const LanguageSwitcher = ({ className = "" }) => {
             <FluentAnimation
               direction="down"
               exit
-              className="rounded-lg shadow-lg bg-white overflow-hidden"
+              className="rounded-lg border border-[#E5E5E5] shadow-lg bg-white overflow-hidden"
             >
-              <div className="flex flex-col whitespace-nowrap">
+              <div className="flex flex-col gap-1 p-1 whitespace-nowrap">
                 {LANGUAGES.map(({ key, label, disabled }) => {
                   const isActive = language === key
 
@@ -77,15 +77,14 @@ const LanguageSwitcher = ({ className = "" }) => {
                       key={key}
                       disabled={disabled}
                       onClick={() => !disabled && handleLanguageSelect(key)}
-                      className={`w-full text-left px-4 h-10 text-sm transition-colors
+                      className={`w-full text-left px-3 py-2 min-h-10 text-sm rounded-md transition-colors
                         ${
                           disabled
                             ? "text-[#7A7574] cursor-default"
-                            : "hover:bg-[#E5E5E5]"
+                            : isActive
+                              ? "bg-[#F2F2F2] hover:bg-[#E6E6E6]"
+                              : "hover:bg-[#F2F2F2]"
                         }`}
-                      style={{
-                        backgroundColor: isActive ? "#E5E5E5" : undefined,
-                      }}
                     >
                       {label}
                     </button>

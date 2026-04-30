@@ -16,8 +16,17 @@ export const useScreenShare = () => {
   const room = useRoomContext()
   const { isScreenShareEnabled } = useLocalParticipant()
 
-  // Get all screen share tracks across all participants
-  const screenShareTracks = useTracks([Track.Source.ScreenShare])
+  // Subscribe to both video and audio screen share tracks.
+  // Audio tracks are handled automatically by <RoomAudioRenderer />.
+  const allScreenShareTracks = useTracks([
+    Track.Source.ScreenShare,
+    Track.Source.ScreenShareAudio,
+  ])
+
+  // Expose only video tracks for rendering ScreenShareTile components
+  const screenShareTracks = allScreenShareTracks.filter(
+    (t) => t.source === Track.Source.ScreenShare,
+  )
 
   // Find the first active screen share (legacy support)
   const screenShareTrackRef =
@@ -33,7 +42,10 @@ export const useScreenShare = () => {
     if (isTogglingScreenShare) return
     setIsTogglingScreenShare(true)
     try {
-      await room.localParticipant.setScreenShareEnabled(!isScreenShareEnabled)
+      await room.localParticipant.setScreenShareEnabled(
+        !isScreenShareEnabled,
+        { audio: true },
+      )
     } finally {
       setIsTogglingScreenShare(false)
     }

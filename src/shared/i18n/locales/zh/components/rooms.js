@@ -166,7 +166,7 @@ export default {
     status: "状态",
     position: "位置",
     connected: "已连接",
-    connecting: "连接中",
+    connectingStatus: "连接中",
   },
   waitingScreen: {
     backToCommunity: "返回社区",

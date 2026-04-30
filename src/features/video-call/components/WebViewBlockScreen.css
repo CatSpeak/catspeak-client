@@ -1,4 +1,5 @@
 .webview-block-screen {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7,6 +8,13 @@
   padding: 1.5rem;
   background: linear-gradient(135deg, #fdf6f0 0%, #fceee4 50%, #f9e0d0 100%);
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.webview-block-lang-switcher {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
 }
 
 .webview-block-card {

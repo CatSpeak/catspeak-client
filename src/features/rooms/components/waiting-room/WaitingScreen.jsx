@@ -27,7 +27,7 @@ const WaitingScreen = ({
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const participants = session?.participants ?? []
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { lang } = useParams()
   const effectiveParticipantCount = participantCount ?? participants.length
 

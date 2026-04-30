@@ -38,7 +38,7 @@ const CatSpeakSidebar = () => {
     // { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
     // { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
-    { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
+    // { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]
 
   const bottomItems = [
@@ -84,14 +84,14 @@ const CatSpeakSidebar = () => {
     return (
       <button
         onClick={onClick}
-        className={`flex w-full h-10 items-center gap-3 px-4 text-sm ${
+        className={`relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors overflow-hidden ${
           isActive
-            ? "bg-[#F2F2F2] text-[#990011] hover:bg-[#E6E6E6]"
-            : "hover:bg-[#F2F2F2]"
-        } rounded-[5px]`}
+            ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
+            : "font-normal text-black hover:bg-[#F2F2F2]"
+        }`}
       >
-        <Icon className={isActive ? "text-[#990011]" : ""} />
-        <span>{item.label}</span>
+        <Icon size={20} className="flex-shrink-0" />
+        <span className="truncate">{item.label}</span>
       </button>
     )
   }

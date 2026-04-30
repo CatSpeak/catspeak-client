@@ -1,14 +1,6 @@
-import React, { useState, useRef, useCallback } from "react"
-import {
-  Settings,
-  ChevronDown,
-  ChevronRight,
-  GripHorizontal,
-  Bot,
-} from "lucide-react"
+import React, { useState, useRef } from "react"
+import { ChevronDown, ChevronRight, GripHorizontal } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import Switch from "@/shared/components/ui/inputs/Switch"
-import Popover from "@/shared/components/ui/Popover"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
@@ -22,80 +14,53 @@ const ChatBox = ({
   hideTitle,
 }) => {
   const { t } = useLanguage()
-  const {
-    receiveSystemMsgs,
-    setReceiveSystemMsgs,
-    aiMessages,
-    isCurrentUserPrompting,
-  } = useGlobalVideoCall()
-
-  const containerRef = useRef(null)
-  const [aiPaneHeight, setAiPaneHeight] = useState(50)
-  const [isAiCollapsed, setIsAiCollapsed] = useState(false)
+  const { aiMessages = [] } = useGlobalVideoCall()
+  
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
   const [replyTarget, setReplyTarget] = useState(null)
+  
+  const [isAiCollapsed, setIsAiCollapsed] = useState(false)
+  const [aiHeight, setAiHeight] = useState(250)
+  const containerRef = useRef(null)
+  const dragRef = useRef({ isDragging: false, startY: 0, startHeight: 0 })
 
-  const handleDrag = useCallback((e) => {
-    if (!containerRef.current) return
-    const containerRect = containerRef.current.getBoundingClientRect()
-    let newHeightPercentage =
-      ((e.clientY - containerRect.top) / containerRect.height) * 100
-    newHeightPercentage = Math.max(20, Math.min(80, newHeightPercentage))
-    setAiPaneHeight(newHeightPercentage)
-  }, [])
+  const startDrag = (e) => {
+    e.preventDefault()
+    dragRef.current = {
+      isDragging: true,
+      startY: e.clientY,
+      startHeight: aiHeight,
+    }
+    document.addEventListener("mousemove", onDrag)
+    document.addEventListener("mouseup", stopDrag)
+  }
 
-  const startDrag = useCallback(
-    (e) => {
-      e.preventDefault()
-      const onMouseMove = (moveEvent) => handleDrag(moveEvent)
-      const onMouseUp = () => {
-        document.removeEventListener("mousemove", onMouseMove)
-        document.removeEventListener("mouseup", onMouseUp)
-        document.body.style.cursor = "default"
-      }
-      document.addEventListener("mousemove", onMouseMove)
-      document.addEventListener("mouseup", onMouseUp)
-      document.body.style.cursor = "row-resize"
-    },
-    [handleDrag],
-  )
+  const onDrag = (e) => {
+    if (!dragRef.current.isDragging) return
+    const deltaY = e.clientY - dragRef.current.startY
+    const newHeight = Math.max(100, dragRef.current.startHeight + deltaY)
+    if (containerRef.current) {
+      const containerHeight = containerRef.current.clientHeight
+      if (newHeight > containerHeight - 100) return
+    }
+    setAiHeight(newHeight)
+  }
 
-  const settingsPopover = (
-    <Popover
-      trigger={
-        <Settings
-          size={20}
-          className="text-[#606060] hover:text-black transition-colors"
-        />
-      }
-      content={
-        <div className="w-64 bg-white rounded-lg shadow-lg border border-[#E5E5E5] p-3 min-h-[40px] flex items-center justify-between gap-3">
-          <span className="text-sm leading-tight text-left flex-1">
-            {t.rooms?.chatBox?.showSystemMessages || "Show System Messages"}
-          </span>
-          <div className="shrink-0">
-            <Switch
-              checked={receiveSystemMsgs}
-              onChange={() => setReceiveSystemMsgs(!receiveSystemMsgs)}
-              colorClass="peer-checked:bg-green-500"
-            />
-          </div>
-        </div>
-      }
-    />
-  )
+  const stopDrag = () => {
+    dragRef.current.isDragging = false
+    document.removeEventListener("mousemove", onDrag)
+    document.removeEventListener("mouseup", stopDrag)
+  }
 
   const aiStyle = isAiCollapsed
     ? { height: "40px", flexShrink: 0 }
-    : isChatCollapsed
-      ? { flex: 1, minHeight: 0 }
-      : { height: `${aiPaneHeight}%`, minHeight: 0 }
+    : { height: `${aiHeight}px`, flexShrink: 0 }
 
   const chatStyle = isChatCollapsed
     ? { height: "40px", flexShrink: 0 }
-    : isAiCollapsed
-      ? { flex: 1, minHeight: 0 }
-      : { height: `${100 - aiPaneHeight}%`, minHeight: 0 }
+    : { flex: 1, minHeight: 0 }
+
+  const settingsPopover = null
 
   return (
     <div className={`relative flex h-full flex-col bg-white ${className}`}>
@@ -158,35 +123,37 @@ const ChatBox = ({
           </div>
         )}
 
-        {/* Regular Chat Pane */}
-        <div className="flex flex-col bg-white" style={chatStyle}>
-          <button
-            type="button"
-            onClick={() => setIsChatCollapsed(!isChatCollapsed)}
-            className="flex items-center gap-2 px-4 h-10 w-full hover:bg-[#F6F6F6] border-b border-[#E5E5E5] shrink-0 text-left"
-          >
-            {isChatCollapsed ? (
-              <ChevronRight size={20} />
-            ) : (
-              <ChevronDown size={20} />
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+          {/* Regular Chat Pane */}
+          <div className="flex flex-col bg-white h-full" style={chatStyle}>
+            <button
+              type="button"
+              onClick={() => setIsChatCollapsed(!isChatCollapsed)}
+              className="flex items-center gap-2 px-4 h-10 w-full hover:bg-[#F6F6F6] border-b border-[#E5E5E5] shrink-0 text-left"
+            >
+              {isChatCollapsed ? (
+                <ChevronRight size={20} />
+              ) : (
+                <ChevronDown size={20} />
+              )}
+              <h3 className="text-sm">
+                {t.rooms?.chatBox?.title || "Room Chat"}
+              </h3>
+            </button>
+            {!isChatCollapsed && (
+              <>
+                <MessageList
+                  messages={messages}
+                  t={t}
+                  emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
+                />
+                <ChatInput
+                  onSendMessage={onSendMessage}
+                  isConnected={isConnected}
+                />
+              </>
             )}
-            <h3 className="text-sm">
-              {t.rooms?.chatBox?.title || "Room Chat"}
-            </h3>
-          </button>
-          {!isChatCollapsed && (
-            <>
-              <MessageList
-                messages={messages}
-                t={t}
-                emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
-              />
-              <ChatInput
-                onSendMessage={onSendMessage}
-                isConnected={isConnected}
-              />
-            </>
-          )}
+          </div>
         </div>
       </div>
     </div>
