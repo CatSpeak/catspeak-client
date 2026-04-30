@@ -13,14 +13,13 @@ const LanguageMenuItem = ({
       if (disabled) e.preventDefault()
       else onSelect(code, label)
     }}
-    className={`flex w-full items-center gap-3 px-4 h-10 text-sm text-left transition-colors ${
+    className={`flex w-full items-center gap-3 px-3 py-2 min-h-10 text-sm text-left rounded-md transition-colors ${
       disabled
         ? "text-[#7A7574] cursor-default"
-        : "text-[#1C1A1A] hover:bg-[#E5E5E5]"
+        : isActive
+          ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#1C1A1A]"
+          : "hover:bg-[#F2F2F2] text-[#1C1A1A]"
     }`}
-    style={{
-      backgroundColor: isActive ? "#E5E5E5" : undefined,
-    }}
   >
     <div className="flex flex-shrink-0 items-center">
       <img

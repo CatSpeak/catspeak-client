@@ -82,8 +82,8 @@ const LanguageSwitcher = ({ className = "" }) => {
                           disabled
                             ? "text-[#7A7574] cursor-default"
                             : isActive
-                              ? "bg-[#F6F6F6]"
-                              : "hover:bg-[#F6F6F6]"
+                              ? "bg-[#F2F2F2] hover:bg-[#E6E6E6]"
+                              : "hover:bg-[#F2F2F2]"
                         }`}
                     >
                       {label}

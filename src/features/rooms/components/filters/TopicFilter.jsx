@@ -15,7 +15,7 @@ const TopicFilter = () => {
     <div className="w-full">
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between h-10 text-sm font-semibold text-gray-800 hover:text-[#990011] transition-colors duration-200 cursor-pointer select-none"
+        className="flex w-full items-center justify-between h-10 px-2 text-sm font-semibold text-gray-800 hover:text-[#990011] transition-colors duration-200 cursor-pointer select-none group"
       >
         <div className="flex items-center gap-2">
           <span>{t.rooms?.filters?.topicsHeading || "Topics"}</span>
