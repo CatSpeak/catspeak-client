@@ -9,6 +9,10 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Modal from "@/shared/components/ui/Modal"
 import { motion, AnimatePresence } from "framer-motion"
 import { TOPICS, LEVELS } from "../config/constants"
+import { useSelector, useDispatch } from "react-redux"
+import { useLeaveVideoSessionMutation } from "@/store/api/videoSessionsApi"
+import { leaveCall } from "@/store/slices/videoCallSlice"
+import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 
 const CreateRoomModal = ({ open, onCancel }) => {
   const { t } = useLanguage()
@@ -42,6 +46,14 @@ const CreateRoomModal = ({ open, onCancel }) => {
   const [name, setName] = useState("")
   const [topics, setTopics] = useState([])
 
+  const { isInCall, callInfo } = useSelector((s) => s.videoCall)
+  const dispatch = useDispatch()
+  const [leaveSessionMut] = useLeaveVideoSessionMutation()
+
+  const [showSwitchModal, setShowSwitchModal] = useState(false)
+  const [pendingAction, setPendingAction] = useState(null)
+  const [pendingEvent, setPendingEvent] = useState(null)
+
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
@@ -62,7 +74,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
     onCancel()
   }
 
-  const handleJoin = (e) => {
+  const proceedJoin = (e) => {
     if (e) e.preventDefault()
     if (!selectedLanguage) return
 
@@ -77,7 +89,20 @@ const CreateRoomModal = ({ open, onCancel }) => {
     navigate("/queue", { state: preferences })
   }
 
-  const handleCreate = async (e) => {
+  const handleJoin = (e) => {
+    if (e) e.preventDefault()
+    if (!selectedLanguage) return
+
+    if (isInCall && callInfo?.sessionId) {
+      setPendingAction("join")
+      setPendingEvent(e)
+      setShowSwitchModal(true)
+      return
+    }
+    proceedJoin(e)
+  }
+
+  const proceedCreate = async (e) => {
     if (e) e.preventDefault()
     if (!selectedLanguage) return
 
@@ -97,12 +122,53 @@ const CreateRoomModal = ({ open, onCancel }) => {
       handleCancel()
 
       if (roomId) {
-        const communityLang = lang || localStorage.getItem("communityLanguage") || "en"
+        const communityLang =
+          lang || localStorage.getItem("communityLanguage") || "en"
         navigate(`/${communityLang}/meet/${roomId}`)
       }
     } catch (err) {
       console.error("Failed to create room:", err)
     }
+  }
+
+  const handleCreate = async (e) => {
+    if (e) e.preventDefault()
+    if (!selectedLanguage) return
+
+    if (isInCall && callInfo?.sessionId) {
+      setPendingAction("create")
+      setPendingEvent(e)
+      setShowSwitchModal(true)
+      return
+    }
+    proceedCreate(e)
+  }
+
+  const handleConfirmSwitch = async () => {
+    setShowSwitchModal(false)
+    if (isInCall && callInfo?.sessionId) {
+      try {
+        await leaveSessionMut(callInfo.sessionId).unwrap()
+      } catch (err) {
+        console.error("Failed to leave session:", err)
+      }
+      dispatch(leaveCall())
+    }
+
+    if (pendingAction === "join") {
+      proceedJoin(pendingEvent)
+    } else if (pendingAction === "create") {
+      proceedCreate(pendingEvent)
+    }
+
+    setPendingAction(null)
+    setPendingEvent(null)
+  }
+
+  const handleCancelSwitch = () => {
+    setShowSwitchModal(false)
+    setPendingAction(null)
+    setPendingEvent(null)
   }
 
   const handleTopicChange = (event) => {
@@ -119,104 +185,111 @@ const CreateRoomModal = ({ open, onCancel }) => {
   }
 
   return (
-    <Modal
-      open={open}
-      onClose={handleCancel}
-      title={
-        mode === "create"
-          ? t.rooms.createRoom.title
-          : t.rooms?.joinRoom?.title || "Join Room"
-      }
-      className="max-w-sm min-[426px]:max-w-md max-[425px]:max-w-none max-[425px]:h-full max-[425px]:flex max-[425px]:flex-col"
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={mode}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="flex flex-col flex-1"
-        >
-          <div className="flex flex-col gap-5 max-h-[60vh] overflow-y-auto -mx-5 px-5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5 max-[425px]:max-h-none max-[425px]:flex-1">
-            {/* Room Name */}
-            {mode === "create" && (
-              <TextInput
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                label={t.rooms.createRoom.nameLabel}
-                placeholder={t.rooms.createRoom.namePlaceholder}
-                autoFocus
+    <>
+      <SwitchCallModal
+        open={showSwitchModal}
+        onCancel={handleCancelSwitch}
+        onConfirm={handleConfirmSwitch}
+      />
+      <Modal
+        open={open}
+        onClose={handleCancel}
+        title={
+          mode === "create"
+            ? t.rooms.createRoom.title
+            : t.rooms?.joinRoom?.title || "Join Room"
+        }
+        className="max-w-sm min-[426px]:max-w-md max-[425px]:max-w-none max-[425px]:h-full max-[425px]:flex max-[425px]:flex-col"
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col flex-1"
+          >
+            <div className="flex flex-col gap-5 max-h-[60vh] overflow-y-auto -mx-3 px-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5 max-[425px]:max-h-none max-[425px]:flex-1">
+              {/* Room Name */}
+              {mode === "create" && (
+                <TextInput
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  label={t.rooms.createRoom.nameLabel}
+                  placeholder={t.rooms.createRoom.namePlaceholder}
+                  autoFocus
+                />
+              )}
+
+              {/* Topics */}
+              <TopicSelect
+                value={topics}
+                onChange={handleTopicChange}
+                options={TOPICS}
+                t={t}
               />
-            )}
 
-            {/* Topics */}
-            <TopicSelect
-              value={topics}
-              onChange={handleTopicChange}
-              options={TOPICS}
-              t={t}
-            />
+              {/* Level Selection */}
+              <LevelSelector
+                selectedLevel={selectedLevel}
+                onSelect={setSelectedLevel}
+                levels={LEVELS[selectedLanguage]}
+                t={t}
+              />
+            </div>
 
-            {/* Level Selection */}
-            <LevelSelector
-              selectedLevel={selectedLevel}
-              onSelect={setSelectedLevel}
-              levels={LEVELS[selectedLanguage]}
-              t={t}
-            />
-          </div>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
-            {mode === "join" ? (
-              <>
-                <PillButton
-                  onClick={handleCancel}
-                  variant="secondary"
-                  className="h-10"
-                >
-                  {t.rooms.createRoom.cancel}
-                </PillButton>
-                <PillButton
-                  onClick={() => handleModeSwitch("create")}
-                  variant="outline"
-                  className="h-10"
-                >
-                  {t.rooms.createRoom.create}
-                </PillButton>
-                <PillButton
-                  onClick={handleJoin}
-                  className="h-10"
-                  disabled={!selectedLanguage || isLoading}
-                >
-                  {t.rooms.createRoom.join}
-                </PillButton>
-              </>
-            ) : (
-              <>
-                <PillButton
-                  onClick={() => handleModeSwitch("join")}
-                  variant="secondary"
-                  className="h-10"
-                >
-                  {t.back || "Back"}
-                </PillButton>
-                <PillButton
-                  onClick={handleCreate}
-                  className="h-10"
-                  loading={isCreating}
-                  loadingText={t.rooms.createRoom.creating}
-                  disabled={!selectedLanguage || isLoading || !name.trim()}
-                >
-                  {t.rooms.createRoom.create}
-                </PillButton>
-              </>
-            )}
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </Modal>
+            <div className="p-6 flex flex-wrap justify-end gap-2">
+              {mode === "join" ? (
+                <>
+                  <PillButton
+                    onClick={handleCancel}
+                    variant="secondary"
+                    className="h-10"
+                  >
+                    {t.rooms.createRoom.cancel}
+                  </PillButton>
+                  <PillButton
+                    onClick={() => handleModeSwitch("create")}
+                    variant="outline"
+                    className="h-10"
+                  >
+                    {t.rooms.createRoom.create}
+                  </PillButton>
+                  <PillButton
+                    onClick={handleJoin}
+                    className="h-10"
+                    disabled={!selectedLanguage || isLoading}
+                  >
+                    {t.rooms.createRoom.join}
+                  </PillButton>
+                </>
+              ) : (
+                <>
+                  <PillButton
+                    onClick={() => handleModeSwitch("join")}
+                    variant="secondary"
+                    className="h-10"
+                  >
+                    {t.back || "Back"}
+                  </PillButton>
+                  <PillButton
+                    onClick={handleCreate}
+                    className="h-10"
+                    loading={isCreating}
+                    loadingText={t.rooms.createRoom.creating}
+                    disabled={!selectedLanguage || isLoading || !name.trim()}
+                  >
+                    {t.rooms.createRoom.create}
+                  </PillButton>
+                </>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </Modal>
+    </>
   )
 }
 

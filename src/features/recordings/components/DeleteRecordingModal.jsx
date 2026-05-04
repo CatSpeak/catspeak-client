@@ -22,7 +22,7 @@ const DeleteRecordingModal = ({ open, onClose, recording, onConfirm, isDeleting,
       className="max-w-sm min-[426px]:max-w-md max-[425px]:max-w-none max-[425px]:h-full max-[425px]:flex max-[425px]:flex-col"
     >
       <div className="flex flex-col flex-1">
-        <div className="flex flex-col items-center justify-center flex-1 text-center gap-4 max-h-[60vh] overflow-y-auto -mx-5 px-5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5 max-[425px]:max-h-none">
+        <div className="flex flex-col items-center justify-center flex-1 text-center gap-4 max-h-[60vh] overflow-y-auto -mx-3 px-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5 max-[425px]:max-h-none">
           {/* Warning icon */}
           <div className="flex h-14 w-14 items-center justify-center shrink-0 rounded-full bg-red-50">
             <AlertTriangle className="h-7 w-7 text-red-500" />
@@ -51,7 +51,7 @@ const DeleteRecordingModal = ({ open, onClose, recording, onConfirm, isDeleting,
         </div>
 
         {/* Buttons */}
-        <div className="mt-8 flex flex-wrap justify-center gap-2">
+        <div className="mt-8 flex flex-wrap justify-center gap-2 pb-6">
           <PillButton
             onClick={onClose}
             disabled={isDeleting}

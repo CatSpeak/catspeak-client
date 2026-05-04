@@ -17,6 +17,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
       onClose={onClose}
       showCloseButton={false}
       className="p-0 !max-w-[900px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible max-[425px]:h-full"
+      bodyClassName="flex-1"
     >
       <form
         onSubmit={form.handleSubmit}

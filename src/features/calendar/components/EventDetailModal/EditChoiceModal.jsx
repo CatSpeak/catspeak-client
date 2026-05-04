@@ -15,6 +15,7 @@ const EditChoiceModal = ({ open, onClose, onSelect, headerColor }) => {
       onClose={onClose}
       showCloseButton={false}
       className="!max-w-[400px] w-full p-6 bg-white rounded-xl shadow-xl border overflow-visible"
+      bodyClassName="flex-1"
     >
       <div className="relative flex flex-col text-center">
         {/* Floating close button */}

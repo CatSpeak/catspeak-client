@@ -225,6 +225,10 @@ export default {
       failedToLoad: "无法加载会话",
       unknownError: "发生未知错误",
       retry: "重试",
+      switchTitle: "切换通话？",
+      switchMessage: "您已经在进行一个通话。您想离开当前通话并加入这个新通话吗？",
+      switchConfirm: "离开并继续",
+      switchCancel: "留在当前通话",
     },
     error: {
       micPermission:

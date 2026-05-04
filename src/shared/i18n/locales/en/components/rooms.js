@@ -257,6 +257,10 @@ export default {
       failedToLoad: "Failed to load session",
       unknownError: "Unknown error occurred",
       retry: "Retry",
+      switchTitle: "Switch Call?",
+      switchMessage: "You are already in an active call. Do you want to leave your current call and join this new one?",
+      switchConfirm: "Leave & Continue",
+      switchCancel: "Stay in Current Call",
     },
     error: {
       micPermission:

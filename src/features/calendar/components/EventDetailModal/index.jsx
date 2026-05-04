@@ -142,6 +142,7 @@ const EventDetailModal = ({ event, onClose }) => {
       onClose={onClose}
       showCloseButton={false}
       className="p-0 !max-w-[700px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible"
+      bodyClassName="flex-1"
     >
       <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-xl">
         {/* Floating close button */}

@@ -42,6 +42,7 @@ const OverrideOccurrenceModal = ({ event, occurrenceId, onClose }) => {
       onClose={onClose}
       showCloseButton={false}
       className="p-0 !max-w-[700px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible"
+      bodyClassName="flex-1"
     >
       <div className="relative flex flex-col w-full bg-white rounded-none min-[426px]:rounded-xl min-[426px]:max-h-[90vh] h-full">
         {/* Floating close button */}

@@ -88,7 +88,7 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 py-3">
           <PillButton variant="secondary" onClick={handlePass} className="h-10">
             {confirmPass
               ? t.catSpeak?.confirm || "Confirm Pass"

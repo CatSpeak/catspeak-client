@@ -68,7 +68,7 @@ const ResetPasswordPopup = ({ open, onClose, onSwitchMode }) => {
   )
 
   return (
-    <Modal open={open} onClose={onClose} title="">
+    <Modal open={open} onClose={onClose} title="" bodyClassName="px-3 pb-6 flex-1 overflow-y-auto">
       {currentStep === STEPS.SUCCESS && renderSuccess()}
 
       {currentStep === STEPS.REQUEST_OTP && (

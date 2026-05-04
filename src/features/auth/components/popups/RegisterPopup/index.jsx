@@ -53,13 +53,13 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
 
   return (
     <Modal open={open} onClose={onClose} className="sm:max-w-2xl">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="pb-6">
         <h2 className="mb-6 text-center text-3xl font-bold text-[#8f0d15]">
           {authText.registerTitle}
         </h2>
 
         {/* Scrollable content */}
-        <div className="max-h-[80vh] overflow-y-auto -mx-5 px-5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
+        <div className="max-h-[80vh] overflow-y-auto -mx-3 px-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
           <RegisterFormFields
             authText={authText}
             formData={formData}

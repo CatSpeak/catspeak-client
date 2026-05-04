@@ -24,6 +24,7 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
       onClose={onClose}
       showCloseButton={false}
       className="!max-w-[500px] w-full p-0 bg-white rounded-none min-[426px]:rounded-xl shadow-xl overflow-visible"
+      bodyClassName="flex-1"
     >
       <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-xl max-h-[80vh]">
         {/* Floating close button */}

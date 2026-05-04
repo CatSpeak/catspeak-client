@@ -35,6 +35,7 @@ const RecordingPlayer = ({ open, onClose, recording, t }) => {
       onClose={onClose}
       title={t?.recordings?.player?.title || "Recording"}
       className="p-5 max-w-3xl min-[426px]:max-w-3xl max-[425px]:max-w-none max-[425px]:h-full max-[425px]:flex max-[425px]:flex-col w-full p-0"
+      bodyClassName="flex-1"
     >
       <div className="flex flex-col flex-1 h-full">
         {/* Video player container */}

@@ -11,7 +11,7 @@ const StopRecordingModal = ({ open, onClose, onConfirm }) => {
       onClose={onClose}
       title={t.rooms?.videoCall?.recording?.stopTitle || "Dừng ghi hình"}
     >
-      <div className="flex flex-col gap-5 pt-2">
+      <div className="flex flex-col gap-5 pt-2 pb-6">
         <p className="text-gray-700">
           {t.rooms?.videoCall?.recording?.stopDescription ? (
             <span

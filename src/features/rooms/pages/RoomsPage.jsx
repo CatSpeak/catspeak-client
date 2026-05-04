@@ -21,11 +21,22 @@ import {
   FadeAnimation,
   FluentAnimation,
 } from "@/shared/components/ui/animations"
+import { useSelector, useDispatch } from "react-redux"
+import { useLeaveVideoSessionMutation } from "@/store/api/videoSessionsApi"
+import { leaveCall } from "@/store/slices/videoCallSlice"
+import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 
 const RoomsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
   const { t } = useLanguage()
+
+  const [showSwitchModal, setShowSwitchModal] = useState(false)
+  const [pendingAction, setPendingAction] = useState(null)
+  
+  const { isInCall, callInfo } = useSelector((s) => s.videoCall)
+  const dispatch = useDispatch()
+  const [leaveSessionMut] = useLeaveVideoSessionMutation()
 
   const [page, setPage] = useState(1)
   const [tab, setTab] = useState("communicate")
@@ -56,7 +67,7 @@ const RoomsPage = () => {
     }
   }
 
-  const handleCreateOneOnOne = () => {
+  const proceedCreateOneOnOne = () => {
     actions.handleCreateOneOnOneSession(() => {
       const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
       const preferences = {
@@ -68,10 +79,41 @@ const RoomsPage = () => {
     })
   }
 
+  const handleCreateOneOnOne = () => {
+    if (isInCall && callInfo?.sessionId) {
+      setPendingAction("1:1")
+      setShowSwitchModal(true)
+      return
+    }
+    proceedCreateOneOnOne()
+  }
+
   const handleCreateStudyGroup = () => {
     actions.handleCreateStudyGroupSession(() => {
       setCreateRoomModalOpen(true)
     })
+  }
+
+  const handleConfirmSwitch = async () => {
+    setShowSwitchModal(false)
+    if (isInCall && callInfo?.sessionId) {
+      try {
+        await leaveSessionMut(callInfo.sessionId).unwrap()
+      } catch (err) {
+        console.error("Failed to leave session:", err)
+      }
+      dispatch(leaveCall())
+    }
+    
+    if (pendingAction === "1:1") {
+      proceedCreateOneOnOne()
+    }
+    setPendingAction(null)
+  }
+
+  const handleCancelSwitch = () => {
+    setShowSwitchModal(false)
+    setPendingAction(null)
   }
 
   const requiredLevels = searchParams.getAll("requiredLevels")
@@ -113,13 +155,28 @@ const RoomsPage = () => {
     return <PageNotFound />
   }
 
+  const switchModal = (
+    <SwitchCallModal
+      open={showSwitchModal}
+      onCancel={handleCancelSwitch}
+      onConfirm={handleConfirmSwitch}
+    />
+  )
+
   return (
-    <AnimatePresence mode="wait">
-      <FluentAnimation
-        animationKey="rooms-page"
-        direction="up"
-        className="w-full"
-      >
+    <>
+      {switchModal}
+      <CreateRoomModal
+        open={isCreateRoomModalOpen}
+        onCancel={() => setCreateRoomModalOpen(false)}
+      />
+      <AnimatePresence mode="wait">
+        <FluentAnimation
+          key="rooms-page"
+          animationKey="rooms-page"
+          direction="up"
+          className="w-full"
+        >
         {/* ─── Hero Section: WelcomeSection + WorkshopCarousel ─── */}
         <div className="p-5 pb-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
@@ -191,13 +248,9 @@ const RoomsPage = () => {
             </div>
           </div>
         </div>
-
-        <CreateRoomModal
-          open={isCreateRoomModalOpen}
-          onCancel={() => setCreateRoomModalOpen(false)}
-        />
       </FluentAnimation>
     </AnimatePresence>
+    </>
   )
 }
 

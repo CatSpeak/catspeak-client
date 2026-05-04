@@ -235,6 +235,10 @@ export default {
       failedToLoad: "Không thể tải phiên",
       unknownError: "Đã xảy ra lỗi không xác định",
       retry: "Thử lại",
+      switchTitle: "Chuyển cuộc gọi?",
+      switchMessage: "Bạn đang trong một cuộc gọi khác. Bạn có muốn rời khỏi cuộc gọi hiện tại và tham gia cuộc gọi mới này không?",
+      switchConfirm: "Rời và tiếp tục",
+      switchCancel: "Ở lại cuộc gọi hiện tại",
     },
     error: {
       micPermission:
