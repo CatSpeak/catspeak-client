@@ -9,6 +9,8 @@ import {
 import ProfileHeader from "../components/ProfileHeader"
 import BasicInfoSection from "../components/BasicInfoSection"
 import AccountPrivacySection from "../components/AccountPrivacySection"
+import PageTitle from "@/shared/components/ui/PageTitle"
+import FluentCard from "@/shared/components/ui/FluentCard"
 
 const PersonalInformationPage = () => {
   const { user } = useAuth()
@@ -102,35 +104,35 @@ const PersonalInformationPage = () => {
   if (isLoading) return <div>Loading...</div>
 
   return (
-    <div className="flex flex-col gap-5">
-      <h1 className="text-xl font-bold text-red-900">
-        {t.profile?.personalInfo?.title}
-      </h1>
+    <div className="w-full flex flex-col gap-6">
+      <PageTitle>{t.profile?.personalInfo?.title}</PageTitle>
 
-      <ProfileHeader avatarImageUrl={formData.avatarImageUrl} username={formData.username} t={t} />
+      <FluentCard className="flex flex-col gap-6">
+        <ProfileHeader avatarImageUrl={formData.avatarImageUrl} username={formData.username} t={t} />
 
-      <BasicInfoSection
-        formData={formData}
-        editingField={editingField}
-        isUpdating={isUpdating}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
-        onSave={handleSave}
-        onChange={handleChange}
-        onCountryChange={handleCountryChange}
-        t={t}
-      />
+        <BasicInfoSection
+          formData={formData}
+          editingField={editingField}
+          isUpdating={isUpdating}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={handleSave}
+          onChange={handleChange}
+          onCountryChange={handleCountryChange}
+          t={t}
+        />
 
-      <AccountPrivacySection
-        formData={formData}
-        editingField={editingField}
-        isUpdating={isUpdating}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
-        onSave={handleSave}
-        onChange={handleChange}
-        t={t}
-      />
+        <AccountPrivacySection
+          formData={formData}
+          editingField={editingField}
+          isUpdating={isUpdating}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={handleSave}
+          onChange={handleChange}
+          t={t}
+        />
+      </FluentCard>
     </div>
   )
 }

@@ -55,6 +55,11 @@ const ProfileDropdown = () => {
     navigate("/profile")
   }
 
+  const handleSettingsClick = () => {
+    handleCloseMenu()
+    navigate("/setting")
+  }
+
   // Click outside to close (desktop only)
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -126,12 +131,10 @@ const ProfileDropdown = () => {
           <span>{t.header.profile}</span>
         </button>
 
-        {/*
-        <button disabled className={menuItemDisabledClass}>
+        <button onClick={handleSettingsClick} className={menuItemClass}>
           <Settings size={20} />
-          <span className="text-sm">{t.header.settings}</span>
-        </button> */}
-
+          <span>{t.header.settings || "Settings"}</span>
+        </button>
         <button onClick={handleLogout} className={menuItemClass}>
           <LogOut size={20} />
           <span>{t.header.logout}</span>

@@ -35,7 +35,7 @@ import {
  *
  * @param {{ children: React.ReactNode, ContextProvider: React.Provider }} props
  */
-const GlobalCallContent = ({ children, ContextProvider }) => {
+const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setReceiveSystemMsgs }) => {
   const { t, language } = useLanguage()
 
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
@@ -73,7 +73,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   const baseChatMessages = chatState.chatMessages ?? []
   const chatSend = chatState.send ?? (() => {})
 
-  const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(true)
+
 
   // ── Deduplicated participant list (local first) ──
   const seenIdentities = new Set()

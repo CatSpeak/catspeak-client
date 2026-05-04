@@ -5,6 +5,10 @@ export default {
   getStarted: "Get started",
   seeMore: "See more",
   back: "Back",
+  toggle: {
+    on: "On",
+    off: "Off",
+  },
   pagination: {
     range: "{{start}}-{{end}} of {{total}}",
   },

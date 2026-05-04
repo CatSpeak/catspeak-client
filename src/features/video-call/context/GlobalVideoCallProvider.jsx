@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react"
+import React, { createContext, useContext, useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
 
@@ -51,8 +51,8 @@ const IDLE_VALUE = {
   lkRoomName: null,
 }
 
-const IdleCallContent = ({ children }) => (
-  <GlobalVideoCallContext.Provider value={IDLE_VALUE}>
+const IdleCallContent = ({ children, receiveSystemMsgs, setReceiveSystemMsgs }) => (
+  <GlobalVideoCallContext.Provider value={{ ...IDLE_VALUE, receiveSystemMsgs, setReceiveSystemMsgs }}>
     {children}
   </GlobalVideoCallContext.Provider>
 )
@@ -64,8 +64,24 @@ export const GlobalVideoCallProvider = ({ children }) => {
     (s) => s.videoCall,
   )
 
+  const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(() => {
+    const saved = localStorage.getItem("receiveSystemMsgs")
+    return saved !== null ? JSON.parse(saved) : true
+  })
+
+  useEffect(() => {
+    localStorage.setItem("receiveSystemMsgs", JSON.stringify(receiveSystemMsgs))
+  }, [receiveSystemMsgs])
+
   if (!isInCall || !livekitToken) {
-    return <IdleCallContent>{children}</IdleCallContent>
+    return (
+      <IdleCallContent
+        receiveSystemMsgs={receiveSystemMsgs}
+        setReceiveSystemMsgs={setReceiveSystemMsgs}
+      >
+        {children}
+      </IdleCallContent>
+    )
   }
 
   return (
@@ -78,7 +94,11 @@ export const GlobalVideoCallProvider = ({ children }) => {
       className="contents"
       options={{ publishDefaults: { simulcast: true } }}
     >
-      <GlobalCallContent ContextProvider={GlobalVideoCallContext.Provider}>
+      <GlobalCallContent 
+        ContextProvider={GlobalVideoCallContext.Provider}
+        receiveSystemMsgs={receiveSystemMsgs}
+        setReceiveSystemMsgs={setReceiveSystemMsgs}
+      >
         {children}
       </GlobalCallContent>
     </LiveKitRoom>

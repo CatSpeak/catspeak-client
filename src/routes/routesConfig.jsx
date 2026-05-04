@@ -34,7 +34,6 @@ import WorkspaceLayout from "@/features/workspace/layouts/WorkspaceLayout"
 import InstructorPage from "@/features/user/pages/InstructorPage"
 import OrganizationPage from "@/features/user/pages/OrganizationPage"
 import AccountSettingsPage from "@/features/user/pages/AccountSettingsPage"
-import SettingsPage from "@/features/settings/pages/SettingsPage"
 
 // Language routing components
 import LanguageLayout from "./LanguageLayout"
@@ -188,10 +187,6 @@ const routesConfig = [
               {
                 index: true,
                 element: <UserDashboard />,
-              },
-              {
-                path: "setting",
-                element: <SettingsPage />,
               },
               { path: "*", element: <PageNotFound /> },
             ],

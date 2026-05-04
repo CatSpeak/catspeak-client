@@ -5,6 +5,10 @@ export default {
   getStarted: "Bắt đầu ngay",
   seeMore: "Xem thêm",
   back: "Quay lại",
+  toggle: {
+    on: "Bật",
+    off: "Tắt",
+  },
   pagination: {
     range: "{{start}}-{{end}} trong số {{total}}",
   },

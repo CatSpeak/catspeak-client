@@ -5,6 +5,10 @@ export default {
   getStarted: "开始使用",
   seeMore: "查看更多",
   back: "返回",
+  toggle: {
+    on: "开",
+    off: "关",
+  },
   pagination: {
     range: "{{start}}-{{end}} 共 {{total}}",
   },

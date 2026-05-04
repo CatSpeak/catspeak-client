@@ -49,7 +49,6 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
       path: "/setting",
       end: false,
       icon: Settings,
-      isHidden: true,
     },
   ].filter((item) => !item.isHidden)
 
