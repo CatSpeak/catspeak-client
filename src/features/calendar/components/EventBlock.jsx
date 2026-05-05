@@ -1,6 +1,7 @@
 import React from "react"
 import { Clock, Calendar, MapPin } from "lucide-react"
 import { parseTime } from "../utils/EventUtils"
+import { formatLocation } from "../utils/eventFormatters"
 import { IconLogo } from "@/shared/assets/icons/logo"
 
 const EventBlock = ({
@@ -56,10 +57,12 @@ const EventBlock = ({
           </div>
         )}
 
-        {event.location && (
+        {(event.location || event.cityName || event.countryName) && (
           <div className="flex items-center gap-2">
             <MapPin size={12} className="shrink-0" />
-            <span className="truncate">{event.location}</span>
+            <span className="truncate">
+              {formatLocation(event.location, event.cityName, event.countryName)}
+            </span>
           </div>
         )}
       </div>

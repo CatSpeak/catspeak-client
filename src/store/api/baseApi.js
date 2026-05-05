@@ -240,6 +240,7 @@ export const baseApi = createApi({
     "Recordings",
     "Storage",
     "InstructorProfile",
+    "Locations",
   ],
   endpoints: () => ({}),
 })

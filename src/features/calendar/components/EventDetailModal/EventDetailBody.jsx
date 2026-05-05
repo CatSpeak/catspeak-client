@@ -1,5 +1,5 @@
 import React from "react"
-import { formatTime, FREQUENCY_LABEL } from "../../utils/eventFormatters"
+import { formatTime, formatLocation, FREQUENCY_LABEL } from "../../utils/eventFormatters"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
@@ -18,14 +18,45 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
           </span>
         </div>
 
-        {/* Location */}
-        <div className="flex items-baseline gap-2">
-          <span className="font-bold min-w-max">
-            {t.calendar?.location || "Location"}:
-          </span>
-          <span className="text-[#60060]">
-            {ev.location || t.calendar?.notAssigned || "Not assigned"}
-          </span>
+        {/* Location / City / Country */}
+        <div className="flex flex-col gap-3">
+          {(!ev.location && !ev.cityName && !ev.countryName) ? (
+            <div className="flex items-baseline gap-2">
+              <span className="font-bold min-w-max">
+                {t.calendar?.location || "Location"}:
+              </span>
+              <span className="text-[#60060]">
+                {t.calendar?.notAssigned || "Not assigned"}
+              </span>
+            </div>
+          ) : (
+            <>
+              {ev.location && (
+                <div className="flex items-baseline gap-2">
+                  <span className="font-bold min-w-max">
+                    {t.calendar?.location || "Location"}:
+                  </span>
+                  <span className="text-[#60060]">{ev.location}</span>
+                </div>
+              )}
+              {ev.cityName && (
+                <div className="flex items-baseline gap-2">
+                  <span className="font-bold min-w-max">
+                    {t.calendar?.city || "City"}:
+                  </span>
+                  <span className="text-[#60060]">{ev.cityName}</span>
+                </div>
+              )}
+              {ev.countryName && (
+                <div className="flex items-baseline gap-2">
+                  <span className="font-bold min-w-max">
+                    {t.calendar?.country || "Country"}:
+                  </span>
+                  <span className="text-[#60060]">{ev.countryName}</span>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Description */}

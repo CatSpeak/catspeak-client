@@ -72,6 +72,17 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                   if (form.errors?.title) form.setErrors(prev => ({ ...prev, title: undefined }))
                 }}
                 eventColor={form.eventColor}
+                countryId={form.countryId}
+                onCountryIdChange={(val) => {
+                  form.setCountryId(val)
+                  form.setCityId(0) // reset city when country changes
+                  if (form.errors?.countryId) form.setErrors(prev => ({ ...prev, countryId: undefined }))
+                }}
+                cityId={form.cityId}
+                onCityIdChange={(val) => {
+                  form.setCityId(val)
+                  if (form.errors?.cityId) form.setErrors(prev => ({ ...prev, cityId: undefined }))
+                }}
                 eventLocation={form.eventLocation}
                 onLocationChange={(val) => {
                   form.setEventLocation(val)
