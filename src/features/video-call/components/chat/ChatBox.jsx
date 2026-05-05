@@ -82,11 +82,11 @@ const ChatBox = ({
 
   const aiStyle = isAiCollapsed
     ? { height: "40px", flexShrink: 0 }
-    : { flex: `${aiSplit} 0 0%`, minHeight: 0, overflow: "hidden" }
+    : { flex: `${aiSplit} 0 0%`, minHeight: 0 }
 
   const chatStyle = isChatCollapsed
     ? { height: "40px", flexShrink: 0 }
-    : { flex: `${100 - aiSplit} 0 0%`, minHeight: 0, overflow: "hidden" }
+    : { flex: `${100 - aiSplit} 0 0%`, minHeight: 0 }
 
   const settingsPopoverContent = (
     <div className="bg-white rounded-lg shadow-lg border border-[#E5E5E5] p-3 w-max">
@@ -122,7 +122,7 @@ const ChatBox = ({
       <div ref={containerRef} className="flex-1 flex flex-col min-h-0 relative">
         {/* AI Chat Pane */}
         <div
-          className={`flex flex-col bg-white overflow-hidden ${!isAiCollapsed ? "border-b border-[#E5E5E5]" : ""}`}
+          className={`flex flex-col bg-white relative z-20 ${!isAiCollapsed ? "border-b border-[#E5E5E5]" : ""}`}
           style={aiStyle}
         >
           <button
@@ -173,7 +173,7 @@ const ChatBox = ({
         {/* Draggable Divider */}
         {!isAiCollapsed && !isChatCollapsed && (
           <div
-            className="h-2 bg-[#F6F6F6] hover:bg-red-50 cursor-row-resize flex items-center justify-center shrink-0 transition-colors z-10"
+            className="relative z-10 h-2 bg-[#F6F6F6] hover:bg-red-50 cursor-row-resize flex items-center justify-center shrink-0 transition-colors"
             onMouseDown={startDrag}
           >
             <GripHorizontal size={14} className="text-[#606060]" />
@@ -182,7 +182,7 @@ const ChatBox = ({
 
         {/* Regular Chat Pane */}
         <div
-          className="flex flex-col bg-white overflow-hidden relative"
+          className="flex flex-col bg-white relative z-0"
           style={chatStyle}
         >
           <button
