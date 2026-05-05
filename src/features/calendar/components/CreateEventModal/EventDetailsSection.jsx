@@ -107,6 +107,7 @@ const EventDetailsSection = ({
                 activeColor={eventColor}
                 className="w-full"
                 triggerClassName={`border ${errors.countryId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                enableSearch
               />
               {errors.countryId && <span className="text-red-500 text-xs mt-1">{errors.countryId}</span>}
             </div>
@@ -121,6 +122,7 @@ const EventDetailsSection = ({
                 activeColor={eventColor}
                 className="w-full"
                 triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                enableSearch
               />
               {errors.cityId && <span className="text-red-500 text-xs mt-1">{errors.cityId}</span>}
             </div>
