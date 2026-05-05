@@ -44,6 +44,7 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
   // ── UI state ──
   const [showChat, setShowChat] = useState(false)
   const [showParticipants, setShowParticipants] = useState(false)
+  const [showVirtualBackground, setShowVirtualBackground] = useState(false)
 
   // ── Session cleanup (beforeunload / pagehide) ──
   const cleanupRefs = useCallCleanup(sessionId, isInCall)
@@ -162,6 +163,8 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
     setShowChat,
     showParticipants,
     setShowParticipants,
+    showVirtualBackground,
+    setShowVirtualBackground,
 
     // Chat
     messages: chatMessages,

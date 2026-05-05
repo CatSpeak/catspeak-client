@@ -223,6 +223,9 @@ export default {
       participants: "Người tham gia",
       chat: "Trò chuyện",
     },
+    backgroundsAndEffects: "Nền và hiệu ứng",
+    applyVisualEffects: "Áp dụng hiệu ứng hình ảnh",
+    cameraOffWarning: "Máy ảnh của bạn đang tắt. Việc chọn một hiệu ứng sẽ bật nó lên.",
     recording: {
       stopTitle: "Dừng ghi hình",
       stopDescription:
@@ -280,6 +283,16 @@ export default {
     incorrectPassword: "Mật khẩu không đúng. Vui lòng thử lại.",
     roomNotFound: "Không tìm thấy phòng.",
     genericError: "Đã xảy ra lỗi. Vui lòng thử lại.",
+  },
+  virtualBackground: {
+    title: "Phông nền",
+    none: "Không có",
+    upload: "Tải lên",
+    fileTooLarge: "Tệp quá lớn. Kích thước tối đa là 3MB.",
+    uploadSuccess: "Đã tải lên và áp dụng phông nền",
+    uploadFailed: "Không thể tải lên phông nền",
+    setFailed: "Không thể cài đặt phông nền ảo",
+    loading: "Đang tải...",
   },
   participants: "người",
   noLimit: "Không giới hạn",

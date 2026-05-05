@@ -48,6 +48,8 @@ const IDLE_VALUE = {
   setShowChat: () => {},
   showParticipants: false,
   setShowParticipants: () => {},
+  showVirtualBackground: false,
+  setShowVirtualBackground: () => {},
   lkRoomName: null,
 }
 

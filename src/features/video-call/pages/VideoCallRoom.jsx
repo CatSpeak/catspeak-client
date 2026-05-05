@@ -12,6 +12,7 @@ import {
   ControlBar as VideoCallControlBar,
   RoomHeader,
 } from "@/features/video-call"
+import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -21,11 +22,12 @@ import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
 const VideoCallRoomContent = () => {
   const { t } = useLanguage()
   const {
-    // Layout state
     showChat,
     setShowChat,
     showParticipants,
     setShowParticipants,
+    showVirtualBackground,
+    setShowVirtualBackground,
     // Auth guard
     user,
     location,
@@ -40,10 +42,12 @@ const VideoCallRoomContent = () => {
     enterPiP,
   } = useVideoCallContext()
 
-  const isSidePanelOpen = showChat || showParticipants
+  const isSidePanelOpen = showChat || showParticipants || showVirtualBackground
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
-    : t.rooms.chatBox.title
+    : showVirtualBackground
+      ? t.rooms?.videoCall?.applyVisualEffects || "Backgrounds and effects"
+      : t.rooms.chatBox.title
 
   // Unread message count
   const [unreadMessages, setUnreadMessages] = useState(0)
@@ -112,7 +116,8 @@ const VideoCallRoomContent = () => {
             >
               <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-lg shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
-                {showChat && !showParticipants && (
+                {showVirtualBackground && <VirtualBackgroundPicker />}
+                {showChat && !showParticipants && !showVirtualBackground && (
                   <ChatBox
                     messages={messages}
                     currentUser={user}
@@ -139,6 +144,7 @@ const VideoCallRoomContent = () => {
                 onClick={() => {
                   setShowChat(false)
                   setShowParticipants(false)
+                  setShowVirtualBackground(false)
                 }}
               >
                 <motion.div
@@ -155,6 +161,7 @@ const VideoCallRoomContent = () => {
                     onClick={() => {
                       setShowChat(false)
                       setShowParticipants(false)
+                      setShowVirtualBackground(false)
                     }}
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
@@ -167,7 +174,8 @@ const VideoCallRoomContent = () => {
 
                   <div className="flex-1 overflow-y-auto">
                     {showParticipants && <ParticipantList hideTitle />}
-                    {showChat && !showParticipants && (
+                    {showVirtualBackground && <VirtualBackgroundPicker />}
+                    {showChat && !showParticipants && !showVirtualBackground && (
                       <ChatBox
                         messages={messages}
                         currentUser={user}

@@ -1,5 +1,5 @@
 import React from "react"
-import { Mic, MicOff, Video, VideoOff } from "lucide-react"
+import { Mic, MicOff, Video, VideoOff, Image } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 
@@ -10,6 +10,7 @@ const VideoPreview = ({
   user,
   onToggleMic,
   onToggleCam,
+  onOpenBgModal,
 }) => {
   const { t } = useLanguage()
   return (
@@ -46,24 +47,32 @@ const VideoPreview = ({
       <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-6 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0">
         <button
           onClick={onToggleMic}
-          className={`border border-[#C6C6C6] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
             micOn
               ? "bg-[#990011] text-white hover:bg-[#7a000e]"
               : "bg-white text-[#990011/80] hover:bg-[#E5E5E5]"
           }`}
         >
-          {micOn ? <Mic /> : <MicOff />}
+          {micOn ? <Mic size={20} /> : <MicOff size={20} />}
         </button>
 
         <button
           onClick={onToggleCam}
-          className={`border border-[#C6C6C6] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
             cameraOn
               ? "bg-[#990011] text-white hover:bg-[#7a000e]"
               : "bg-white text-[#990011/80] hover:bg-[#E5E5E5]"
           }`}
         >
-          {cameraOn ? <Video /> : <VideoOff />}
+          {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
+        </button>
+
+        <button
+          onClick={onOpenBgModal}
+          title={t?.rooms?.waitingScreen?.changeBackground || "Change Background"}
+          className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
+        >
+          <Image size={20} />
         </button>
       </div>
     </div>

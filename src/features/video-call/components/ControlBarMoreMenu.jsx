@@ -6,6 +6,7 @@ import {
   Circle,
   Loader2,
   Copy,
+  Sparkles,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -24,6 +25,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     isRecording,
     isTogglingRecording,
     handleToggleRecording,
+    showVirtualBackground,
+    setShowVirtualBackground,
   } = useGlobalVideoCall()
 
   const handleCopyLink = () => {
@@ -66,6 +69,21 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   </button>
                 </div>
                 <div className="border-t border-[#E5E5E5]"></div>
+              </div>
+
+              <div className="p-1">
+                <button
+                  onClick={() => {
+                    setShowVirtualBackground(!showVirtualBackground)
+                    setShowChat(false)
+                    setShowParticipants(false)
+                    setShowMoreMenu(false)
+                  }}
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                >
+                  <Sparkles size={20} />
+                  {t?.rooms?.videoCall?.applyVisualEffects || "Apply visual effects"}
+                </button>
               </div>
 
               <div className="p-1">

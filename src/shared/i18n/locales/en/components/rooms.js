@@ -245,6 +245,9 @@ export default {
       participants: "Participants",
       chat: "Chat",
     },
+    backgroundsAndEffects: "Backgrounds and effects",
+    applyVisualEffects: "Apply visual effects",
+    cameraOffWarning: "Your camera is turned off. Selecting an effect will turn it on.",
     recording: {
       stopTitle: "Stop recording",
       stopDescription:
@@ -302,6 +305,16 @@ export default {
     incorrectPassword: "Incorrect password. Please try again.",
     roomNotFound: "Room not found.",
     genericError: "Something went wrong. Please try again.",
+  },
+  virtualBackground: {
+    title: "Backgrounds",
+    none: "None",
+    upload: "Upload",
+    fileTooLarge: "File is too large. Maximum size is 3MB.",
+    uploadSuccess: "Background uploaded and applied",
+    uploadFailed: "Failed to upload background",
+    setFailed: "Failed to set virtual background",
+    loading: "Loading...",
   },
   participants: "participants",
   noLimit: "No limit",

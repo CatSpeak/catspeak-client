@@ -37,7 +37,9 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative h-full w-full shadow-xl min-[426px]:h-auto min-[426px]:max-w-md ${
+            className={`relative h-full w-full shadow-xl min-[426px]:h-auto ${
+              /(^|\s)(min-\[[^\]]+\]:|md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(className) ? "" : "min-[426px]:max-w-md"
+            } ${
               /(^|\s)bg-/.test(className) ? "" : "bg-white"
             } ${/(^|\s)p[xytrbl]?-(0|[1-9]|\[)/.test(className) ? "" : "p-5"} ${
               /(^|\s)rounded/.test(className)
