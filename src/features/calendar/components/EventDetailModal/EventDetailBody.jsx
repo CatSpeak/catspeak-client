@@ -20,43 +20,60 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
 
         {/* Location / City / Country */}
         <div className="flex flex-col gap-3">
-          {(!ev.location && !ev.cityName && !ev.countryName) ? (
-            <div className="flex items-baseline gap-2">
-              <span className="font-bold min-w-max">
-                {t.calendar?.location || "Location"}:
-              </span>
-              <span className="text-[#60060]">
-                {t.calendar?.notAssigned || "Not assigned"}
-              </span>
-            </div>
-          ) : (
-            <>
-              {ev.location && (
+          {(() => {
+            const locationStr = ev.location?.trim() || ""
+            const cityStr = ev.cityName?.trim() || ""
+            const countryStr = ev.countryName?.trim() || ""
+
+            if (!locationStr && !cityStr && !countryStr) {
+              return (
                 <div className="flex items-baseline gap-2">
                   <span className="font-bold min-w-max">
                     {t.calendar?.location || "Location"}:
                   </span>
-                  <span className="text-[#60060]">{ev.location}</span>
-                </div>
-              )}
-              {ev.cityName && (
-                <div className="flex items-baseline gap-2">
-                  <span className="font-bold min-w-max">
-                    {t.calendar?.city || "City"}:
+                  <span className="text-[#60060]">
+                    {t.calendar?.notAssigned || "Not assigned"}
                   </span>
-                  <span className="text-[#60060]">{ev.cityName}</span>
                 </div>
-              )}
-              {ev.countryName && (
-                <div className="flex items-baseline gap-2">
-                  <span className="font-bold min-w-max">
-                    {t.calendar?.country || "Country"}:
-                  </span>
-                  <span className="text-[#60060]">{ev.countryName}</span>
-                </div>
-              )}
-            </>
-          )}
+              )
+            }
+
+            const queryParts = [locationStr, cityStr, countryStr].filter(Boolean)
+            const queryStr = queryParts.join(", ")
+
+            const isUrl =
+              /^https?:\/\//i.test(locationStr) ||
+              locationStr.includes("google.com/maps") ||
+              locationStr.includes("maps.app.goo.gl")
+
+            const mapUrl = isUrl
+              ? locationStr.startsWith("http")
+                ? locationStr
+                : `https://${locationStr}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
+
+            return (
+              <div className="flex items-start gap-2">
+                <span className="font-bold min-w-max">
+                  {t.calendar?.location || "Location"}:
+                </span>
+                <a
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col hover:opacity-80 transition-opacity"
+                  style={{ color: headerColor }}
+                >
+                  {locationStr && <span className="font-medium">{locationStr}</span>}
+                  {(cityStr || countryStr) && (
+                    <span className={`text-sm opacity-80 ${locationStr ? "mt-0.5" : ""}`}>
+                      {[cityStr, countryStr].filter(Boolean).join(", ")}
+                    </span>
+                  )}
+                </a>
+              </div>
+            )
+          })()}
         </div>
 
         {/* Description */}
