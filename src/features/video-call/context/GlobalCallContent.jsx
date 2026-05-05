@@ -138,22 +138,23 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
         // Skip local user's own prompts. (Note: AI responses have isLocal=false)
         if (msg.from?.isLocal) continue
 
-        const prevStatus = prevStatuses.get(msg.id)
-        if (prevStatus === undefined) {
+        const hasPrev = prevStatuses.has(msg.id)
+        
+        if (!hasPrev) {
           // It's a completely new message (e.g. system msg, or another user's prompt)
           // Exception: don't increment for "loading" placeholders immediately when the user prompts.
-          // Wait, if it's another user's prompt, we want a notification.
-          // If it's the loading placeholder for the local user, from.isLocal is false (it's from "Cat Speak").
-          // But we don't want a notification just for the 'loading' state.
           if (msg.status !== "loading") {
             newUnread++
           }
-        } else if (
-          prevStatus === "loading" &&
-          (msg.status === "done" || msg.status === "error")
-        ) {
-          // An AI message finished generating or errored
-          newUnread++
+        } else {
+          const prevStatus = prevStatuses.get(msg.id)
+          if (
+            prevStatus === "loading" &&
+            (msg.status === "done" || msg.status === "error")
+          ) {
+            // An AI message finished generating or errored
+            newUnread++
+          }
         }
       }
 
