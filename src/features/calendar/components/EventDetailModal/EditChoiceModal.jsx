@@ -25,31 +25,30 @@ const EditChoiceModal = ({ open, onClose, onSelect, headerColor }) => {
           <X size={20} strokeWidth={4} />
         </button>
         <h3 className="text-xl font-bold mb-2 text-gray-800">
-          {cal.editRecurringEvent || "Chỉnh sửa sự kiện"}
+          {cal.editRecurringEvent}
         </h3>
         <p className="text-sm text-gray-600 mb-6">
-          {cal.editChoicePrompt ||
-            "Đây là sự kiện lặp lại. Bạn muốn sửa đổi điều gì?"}
+          {cal.editChoicePrompt}
         </p>
         <div className="flex flex-col gap-3">
           <button
             onClick={() => onSelect("occurrence")}
-            className="bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 font-semibold py-3 px-4 rounded-lg transition-colors border"
+            className="bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 font-semibold h-10 px-4 rounded-lg transition-colors border"
           >
-            {cal.editThisOccurrence || "Chỉ buổi này"}
+            {cal.editThisOccurrence}
           </button>
           <button
             onClick={() => onSelect("series")}
-            className="bg-[var(--cath-primary)] hover:bg-[#990011] text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+            className="bg-[var(--cath-primary)] hover:bg-[#990011] text-white font-semibold h-10 px-4 rounded-lg transition-colors"
             style={{ backgroundColor: headerColor }}
           >
-            {cal.editEntireSeries || "Toàn bộ chuỗi sự kiện"}
+            {cal.editEntireSeries}
           </button>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 font-medium py-2 mt-2"
+            className="text-gray-500 hover:text-gray-700 font-medium h-10 mt-2"
           >
-            {cal.cancel || "Hủy"}
+            {cal.cancel}
           </button>
         </div>
       </div>
