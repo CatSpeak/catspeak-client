@@ -65,13 +65,14 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                     style={{ textAlign: "left" }}
                   >
                     <Users size={20} />
-                    {t.rooms?.videoCall?.controls?.participants || "Participants"}
+                    {t.rooms?.videoCall?.controls?.participants ||
+                      "Participants"}
                   </button>
                 </div>
                 <div className="border-t border-[#E5E5E5]"></div>
               </div>
 
-              <div className="p-1">
+              <div className="p-1 flex flex-col gap-1">
                 <button
                   onClick={() => {
                     setShowVirtualBackground(!showVirtualBackground)
@@ -82,11 +83,10 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                 >
                   <Sparkles size={20} />
-                  {t?.rooms?.videoCall?.applyVisualEffects || "Apply visual effects"}
+                  {t?.rooms?.videoCall?.applyVisualEffects ||
+                    "Apply visual effects"}
                 </button>
-              </div>
 
-              <div className="p-1">
                 <button
                   onClick={handleCopyLink}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"

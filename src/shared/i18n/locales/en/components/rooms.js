@@ -246,7 +246,7 @@ export default {
       chat: "Chat",
     },
     backgroundsAndEffects: "Backgrounds and effects",
-    applyVisualEffects: "Apply visual effects",
+    applyVisualEffects: "Change background",
     cameraOffWarning: "Your camera is turned off. Selecting an effect will turn it on.",
     recording: {
       stopTitle: "Stop recording",

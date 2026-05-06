@@ -214,7 +214,7 @@ export default {
       chat: "聊天",
     },
     backgroundsAndEffects: "背景和效果",
-    applyVisualEffects: "应用视觉效果",
+    applyVisualEffects: "更换背景",
     cameraOffWarning: "您的摄像头已关闭。选择效果将打开它。",
     recording: {
       stopTitle: "停止录制",
