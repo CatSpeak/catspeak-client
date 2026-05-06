@@ -145,8 +145,7 @@ const VideoCallControlBar = () => {
         )}
       </button>
 
-      {/* ── Record Toggle (hidden — backend not in production) ──────── */}
-      {/* <div className="relative hidden min-[769px]:block">
+      <div className="relative hidden min-[769px]:block">
         <button
           onClick={handleToggleRecording}
           disabled={isTogglingRecording}
@@ -177,7 +176,7 @@ const VideoCallControlBar = () => {
         {isRecording && !isTogglingRecording && (
           <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
         )}
-      </div> */}
+      </div>
 
       {/* Participants Toggle */}
       <button
@@ -244,9 +243,7 @@ const VideoCallControlBar = () => {
         />
       </button>
 
-      {/* Stop Recording Confirmation Modal
-           TODO: Replace `false` with `showStopModal` once recording backend is in production */}
-      {false && (
+      {showStopModal && (
         <StopRecordingModal
           open={showStopModal}
           onClose={cancelStopRecording}
