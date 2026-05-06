@@ -1,11 +1,16 @@
-import { MapPin } from "lucide-react"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
+import Dropdown from "@/shared/components/ui/Dropdown"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useGetCountriesQuery, useGetCitiesByCountryIdQuery } from "@/store/api/locationsApi"
 
 const EventDetailsSection = ({
   title,
   onTitleChange,
   eventColor,
+  countryId,
+  onCountryIdChange,
+  cityId,
+  onCityIdChange,
   eventLocation,
   onLocationChange,
   description,
@@ -19,6 +24,20 @@ const EventDetailsSection = ({
   const { t } = useLanguage()
   const cal = t.calendar
 
+  const { data: countries = [], isLoading: isCountriesLoading } = useGetCountriesQuery()
+  const { data: cities = [], isFetching: isCitiesFetching, error: citiesError } = useGetCitiesByCountryIdQuery(countryId, {
+    skip: !countryId,
+  })
+
+  const countryOptions = countries.map(c => ({ label: c.name, value: c.id }))
+  const cityOptions = cities.map(c => ({ label: c.name, value: c.id }))
+
+  let cityPlaceholder = cal.selectCityProvince
+  if (!countryId) cityPlaceholder = cal.selectCountryFirst
+  else if (isCitiesFetching) cityPlaceholder = cal.loadingLocations
+  else if (citiesError) cityPlaceholder = cal.errorLoadingCities
+  else if (cityOptions.length === 0) cityPlaceholder = cal.noCitiesFound
+
   const handleOpenMaps = () => {
     const loc = eventLocation.trim()
     if (!loc) return
@@ -26,11 +45,28 @@ const EventDetailsSection = ({
       /^https?:\/\//i.test(loc) ||
       loc.includes("google.com/maps") ||
       loc.includes("maps.app.goo.gl")
-    const url = isUrl
-      ? loc.startsWith("http")
-        ? loc
-        : `https://${loc}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`
+
+    if (isUrl) {
+      const url = loc.startsWith("http") ? loc : `https://${loc}`
+      window.open(url, "_blank", "noopener,noreferrer")
+      return
+    }
+
+    // Construct the query with location, city, and country
+    let queryParts = [loc]
+
+    if (cityId) {
+      const selectedCity = cities.find((c) => c.id === cityId)
+      if (selectedCity) queryParts.push(selectedCity.name)
+    }
+
+    if (countryId) {
+      const selectedCountry = countries.find((c) => c.id === countryId)
+      if (selectedCountry) queryParts.push(selectedCountry.name)
+    }
+
+    const queryStr = queryParts.join(", ")
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
     window.open(url, "_blank", "noopener,noreferrer")
   }
 
@@ -54,30 +90,65 @@ const EventDetailsSection = ({
         </div>
       </div>
 
-      {/* Location */}
+      {/* Location (Country, City, Address) */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
         <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.location}
         </div>
-        <div className="flex-1 flex flex-col w-full relative">
-          <TextInput
-            value={eventLocation}
-            onChange={(e) => onLocationChange(e.target.value)}
-            placeholder={cal.locationPlaceholder}
-            variant="square"
-            color={eventColor}
-            containerClassName="w-full"
-            className="pr-10"
-            error={errors.eventLocation}
-          />
-          <button
-            type="button"
-            onClick={handleOpenMaps}
-            className="absolute right-3 top-2.5 text-gray-400 hover:text-[#B91264] transition-colors"
-            title={cal.openMaps}
-          >
-            <MapPin size={20} />
-          </button>
+        <div className="flex-1 flex flex-col gap-3 w-full relative">
+          <div className="flex flex-col min-[426px]:flex-row items-start gap-3 w-full">
+            <div className="flex-1 flex flex-col w-full">
+              <Dropdown
+                options={countryOptions}
+                value={countryId}
+                onChange={(val) => onCountryIdChange(val)}
+                placeholder={isCountriesLoading ? cal.loadingLocations : cal.selectCountry}
+                disabled={isCountriesLoading}
+                activeColor={eventColor}
+                className="w-full"
+                triggerClassName={`border ${errors.countryId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                enableSearch
+              />
+              {errors.countryId && <span className="text-red-500 text-xs mt-1">{errors.countryId}</span>}
+            </div>
+
+            <div className="flex-1 flex flex-col w-full">
+              <Dropdown
+                options={cityOptions}
+                value={cityId}
+                onChange={(val) => onCityIdChange(val)}
+                placeholder={cityPlaceholder}
+                disabled={!countryId || isCitiesFetching || cityOptions.length === 0}
+                activeColor={eventColor}
+                className="w-full"
+                triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                enableSearch
+              />
+              {errors.cityId && <span className="text-red-500 text-xs mt-1">{errors.cityId}</span>}
+            </div>
+          </div>
+
+          <div className="flex flex-col w-full">
+            <TextInput
+              value={eventLocation}
+              onChange={(e) => onLocationChange(e.target.value)}
+              placeholder={cal.locationPlaceholder}
+              variant="square"
+              color={eventColor}
+              containerClassName="w-full"
+              error={errors.eventLocation}
+            />
+            {eventLocation.trim() && (
+              <button
+                type="button"
+                onClick={handleOpenMaps}
+                className="text-sm mt-1.5 self-start hover:opacity-80 transition-opacity font-medium"
+                style={{ color: eventColor }}
+              >
+                {cal.openMaps}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

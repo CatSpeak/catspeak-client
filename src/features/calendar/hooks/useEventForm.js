@@ -37,6 +37,8 @@ export const useEventForm = (onClose, editEvent) => {
   const initialDescription = editEvent?.description || ""
   const initialColor = editEvent?.color || "#B91264"
   const initialLocation = editEvent?.location || ""
+  const initialCountryId = editEvent?.countryId || 0
+  const initialCityId = editEvent?.cityId || 0
   const initialParticipants = editEvent?.maxParticipants || 50
   const initialVisibility =
     INVERSE_VISIBILITY[editEvent?.visibilityScope] || "Công khai"
@@ -85,6 +87,8 @@ export const useEventForm = (onClose, editEvent) => {
   const [description, setDescription] = useState(initialDescription)
   const [eventColor, setEventColor] = useState(initialColor)
   const [eventLocation, setEventLocation] = useState(initialLocation)
+  const [countryId, setCountryId] = useState(initialCountryId)
+  const [cityId, setCityId] = useState(initialCityId)
   const [maxParticipants, setMaxParticipants] = useState(initialParticipants)
   const [visibility, setVisibility] = useState(initialVisibility)
   const [conditionsInput, setConditionsInput] = useState(initialConditions)
@@ -109,6 +113,8 @@ export const useEventForm = (onClose, editEvent) => {
 
     const newErrors = {}
     if (!title.trim()) newErrors.title = t.validation.calendar.titleRequired
+    if (!countryId) newErrors.countryId = t.validation.calendar.countryRequired
+    if (!cityId) newErrors.cityId = t.validation.calendar.cityRequired
     if (!eventLocation.trim()) newErrors.eventLocation = t.validation.calendar.locationRequired
     if (!description.trim()) newErrors.description = t.validation.calendar.descriptionRequired
     if (!maxParticipants || Number(maxParticipants) <= 0) {
@@ -124,6 +130,8 @@ export const useEventForm = (onClose, editEvent) => {
       title,
       description,
       eventLocation,
+      countryId,
+      cityId,
       eventColor,
       maxParticipants,
       visibility,
@@ -162,6 +170,10 @@ export const useEventForm = (onClose, editEvent) => {
     setEventColor,
     eventLocation,
     setEventLocation,
+    countryId,
+    setCountryId,
+    cityId,
+    setCityId,
     maxParticipants,
     setMaxParticipants,
     visibility,

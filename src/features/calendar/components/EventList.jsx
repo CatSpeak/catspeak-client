@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import EventDetailModal from "./EventDetailModal/index"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { formatLocation } from "../utils/eventFormatters"
 
 const getEventTitle = (title, defaultTitle) => {
   if (!title) return defaultTitle || "Sự kiện"
@@ -66,9 +67,16 @@ const EventList = ({
                 }}
               /> */}
 
-              <span className="text-sm font-[600] uppercase tracking-wide truncate flex-1 min-w-0 text-left">
-                {getEventTitle(event.title, t.calendar?.event || "Sự kiện")}
-              </span>
+              <div className="flex flex-col flex-1 min-w-0 text-left">
+                <span className="text-sm font-[600] uppercase tracking-wide truncate">
+                  {getEventTitle(event.title, t.calendar?.event || "Sự kiện")}
+                </span>
+                {(event.location || event.cityName || event.countryName) && (
+                  <span className="text-xs opacity-90 truncate font-normal normal-case">
+                    {formatLocation(event.location, event.cityName, event.countryName)}
+                  </span>
+                )}
+              </div>
 
               {/* Optional Participant Count */}
               {event.maxParticipants !== undefined &&

@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import colors from "@/shared/utils/colors"
 
-const DatePicker = ({ value, onChange, color = "#B91264", className = "" }) => {
+const DatePicker = ({ value, onChange, color = "#B91264", className = "", disabled = false }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -95,8 +95,9 @@ const DatePicker = ({ value, onChange, color = "#B91264", className = "" }) => {
     <div ref={dropdownRef} className={`relative inline-block ${className}`}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="text-sm flex items-center justify-center border border-[#c6c6c6] rounded-md whitespace-nowrap text-center px-4 h-10 shadow-sm hover:bg-gray-50 transition-colors bg-white outline-none text-gray-800"
+        onClick={() => { if (!disabled) setIsOpen(!isOpen) }}
+        disabled={disabled}
+        className={`text-sm flex items-center justify-center border border-[#c6c6c6] rounded-md whitespace-nowrap text-center px-4 h-10 shadow-sm transition-colors bg-white outline-none text-gray-800 ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
       >
         <span>{formatVietnameseDate(date)}</span>
       </button>
