@@ -257,6 +257,11 @@ export default {
       you: "Bạn",
       guest: "Khách",
       youSuffix: "(Bạn)",
+      volume: "Âm lượng",
+      unmute: "Bật tiếng",
+      mute: "Tắt tiếng",
+      adjustVolume: "Điều chỉnh âm lượng",
+      options: "Tùy chọn",
     },
     webviewBlock: {
       title: "Mở trong trình duyệt",

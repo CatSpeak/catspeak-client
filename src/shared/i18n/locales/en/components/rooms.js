@@ -278,6 +278,11 @@ export default {
       you: "You",
       guest: "Guest",
       youSuffix: "(You)",
+      volume: "Volume",
+      unmute: "Unmute",
+      mute: "Mute",
+      adjustVolume: "Adjust volume",
+      options: "Options",
     },
     webviewBlock: {
       title: "Open in Browser",

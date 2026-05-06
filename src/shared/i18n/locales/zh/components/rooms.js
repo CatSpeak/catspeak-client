@@ -246,6 +246,11 @@ export default {
       you: "你",
       guest: "访客",
       youSuffix: "（你）",
+      volume: "音量",
+      unmute: "取消静音",
+      mute: "静音",
+      adjustVolume: "调整音量",
+      options: "选项",
     },
     webviewBlock: {
       title: "请在浏览器中打开",
