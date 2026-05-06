@@ -4,8 +4,11 @@ import {
   useLocalParticipant,
   useConnectionState,
 } from "@livekit/components-react"
-import { ConnectionState } from "livekit-client"
+import { ConnectionState, Track } from "livekit-client"
 import toast from "react-hot-toast"
+import { useGetProfileQuery } from "@/store/api/authApi"
+import { useEffect, useRef } from "react"
+import { BackgroundProcessor, supportsBackgroundProcessors } from "@livekit/track-processors"
 
 /**
  * Handles local mic/cam state + toggle actions using LiveKit.
@@ -22,6 +25,66 @@ export const useVideoCall = (t) => {
 
   const [isTogglingMic, setIsTogglingMic] = useState(false)
   const [isTogglingCam, setIsTogglingCam] = useState(false)
+
+  // -- Virtual Background Logic --
+  const { data: profile } = useGetProfileQuery()
+  const virtualBackgroundUrl = profile?.data?.virtualBackgroundUrl
+
+  // Parse LiveKit token metadata as a fallback for initial join
+  let initialBgUrl = null
+  try {
+    const meta = JSON.parse(room.localParticipant.metadata || "{}")
+    initialBgUrl = meta.virtualBackgroundUrl || meta.VirtualBackgroundUrl || meta.virtualbackgroundurl
+  } catch (e) {
+    // Ignore JSON parse errors
+  }
+
+  const activeBgUrl = virtualBackgroundUrl !== undefined ? virtualBackgroundUrl : initialBgUrl
+  const processorRef = useRef(null)
+  const processedTrackRef = useRef(null)
+
+  // 1. Initialize processor
+  if (!processorRef.current && supportsBackgroundProcessors()) {
+    processorRef.current = BackgroundProcessor({ mode: "disabled" })
+  }
+
+  // 2. Attach processor to track when camera is enabled
+  useEffect(() => {
+    if (!processorRef.current || !isCameraEnabled) return
+
+    const pub = room.localParticipant.getTrackPublication(Track.Source.Camera)
+    const track = pub?.track
+
+    if (track && processedTrackRef.current !== track) {
+      processedTrackRef.current = track
+      track.setProcessor(processorRef.current).catch((err) => {
+        console.error("Failed to attach processor to track:", err)
+      })
+    }
+  }, [isCameraEnabled, room.localParticipant])
+
+  // 3. Switch mode when active background URL changes
+  useEffect(() => {
+    const updateMode = async () => {
+      if (!processorRef.current) return
+
+      try {
+        if (activeBgUrl) {
+          await processorRef.current.switchTo({
+            mode: "virtual-background",
+            imagePath: activeBgUrl,
+          })
+        } else {
+          await processorRef.current.switchTo({ mode: "disabled" })
+        }
+      } catch (err) {
+        console.error("Failed to apply virtual background:", err)
+      }
+    }
+
+    updateMode()
+  }, [activeBgUrl])
+  // -----------------------------
 
   // Toggle mic — probes getUserMedia first to surface permission errors cleanly.
   const toggleAudio = useCallback(async () => {

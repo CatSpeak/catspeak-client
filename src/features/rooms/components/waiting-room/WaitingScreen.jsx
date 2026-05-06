@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { Copy } from "lucide-react"
@@ -9,6 +9,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import meetingFallbackImage from "@/shared/assets/images/LogoDefault.png"
 import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayShell"
 import { getCommunityPath } from "@/shared/utils/navigation"
+import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal"
 
 const WaitingScreen = ({
   session,
@@ -30,6 +31,7 @@ const WaitingScreen = ({
   const { t, language } = useLanguage()
   const { lang } = useParams()
   const effectiveParticipantCount = participantCount ?? participants.length
+  const [isBgModalOpen, setIsBgModalOpen] = useState(false)
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -84,6 +86,7 @@ const WaitingScreen = ({
           cameraOn={cameraOn}
           onToggleMic={onToggleMic}
           onToggleCam={onToggleCam}
+          onOpenBgModal={() => setIsBgModalOpen(true)}
         />
       </div>
 
@@ -118,6 +121,14 @@ const WaitingScreen = ({
           <span className="font-medium text-gray-900">{user?.username}</span>
         </p>
       </div>
+
+      <VirtualBackgroundModal
+        open={isBgModalOpen}
+        onClose={() => setIsBgModalOpen(false)}
+        localStream={localStream}
+        cameraOn={cameraOn}
+        onToggleCam={onToggleCam}
+      />
     </FullscreenOverlayShell>
   )
 }

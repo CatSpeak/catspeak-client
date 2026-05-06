@@ -47,6 +47,14 @@ const NavigationProgress = () => {
         return false
       }
 
+      // Ignore background refetches that shouldn't interrupt UX
+      if (
+        query?.endpointName === "getProfile" ||
+        query?.endpointName === "getSampleBackgrounds"
+      ) {
+        return false
+      }
+
       return true
     }).length
 

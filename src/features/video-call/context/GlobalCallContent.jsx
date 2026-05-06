@@ -35,7 +35,12 @@ import {
  *
  * @param {{ children: React.ReactNode, ContextProvider: React.Provider }} props
  */
-const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setReceiveSystemMsgs }) => {
+const GlobalCallContent = ({
+  children,
+  ContextProvider,
+  receiveSystemMsgs,
+  setReceiveSystemMsgs,
+}) => {
   const { t, language } = useLanguage()
 
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
@@ -48,6 +53,7 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
   const [isAiCollapsed, setIsAiCollapsed] = useState(false)
   const [unreadRoomChat, setUnreadRoomChat] = useState(0)
   const [unreadAiChat, setUnreadAiChat] = useState(0)
+  const [showVirtualBackground, setShowVirtualBackground] = useState(false)
 
   // ── Session cleanup (beforeunload / pagehide) ──
   const cleanupRefs = useCallCleanup(sessionId, isInCall)
@@ -77,8 +83,6 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
   const baseChatMessages = chatState.chatMessages ?? []
   const chatSend = chatState.send ?? (() => {})
 
-
-
   // ── Deduplicated participant list (local first) ──
   const seenIdentities = new Set()
   const participants = []
@@ -99,7 +103,15 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
 
   const systemMessages = useSystemMessages(lkRoom, receiveSystemMsgs)
 
-  const { aiMessages, addOptimisticAiMessage, updateAiInteraction, isCurrentUserPrompting, startNewThread, continueThread, getConversationThread } = useAiMessages(lkRoom, currentUserId, participants)
+  const {
+    aiMessages,
+    addOptimisticAiMessage,
+    updateAiInteraction,
+    isCurrentUserPrompting,
+    startNewThread,
+    continueThread,
+    getConversationThread,
+  } = useAiMessages(lkRoom, currentUserId, participants)
   const [chatPublicAi] = useChatPublicAiMutation()
   const [chatPrivateAi] = useChatPrivateAiMutation()
 
@@ -117,7 +129,11 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
     if (chatMessages.length > prevChatMessagesLength.current) {
       if (!showChat || isChatCollapsed) {
         let newUnread = 0
-        for (let i = prevChatMessagesLength.current; i < chatMessages.length; i++) {
+        for (
+          let i = prevChatMessagesLength.current;
+          i < chatMessages.length;
+          i++
+        ) {
           if (!chatMessages[i].from?.isLocal) newUnread++
         }
         setUnreadRoomChat((prev) => prev + newUnread)
@@ -128,18 +144,20 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
 
   const prevAiMessagesRef = React.useRef(combinedAiMessages)
   useEffect(() => {
-    if (combinedAiMessages === prevAiMessagesRef.current) return;
+    if (combinedAiMessages === prevAiMessagesRef.current) return
 
     if (!showChat || isAiCollapsed) {
       let newUnread = 0
-      const prevStatuses = new Map(prevAiMessagesRef.current.map((m) => [m.id, m.status]))
+      const prevStatuses = new Map(
+        prevAiMessagesRef.current.map((m) => [m.id, m.status]),
+      )
 
       for (const msg of combinedAiMessages) {
         // Skip local user's own prompts. (Note: AI responses have isLocal=false)
         if (msg.from?.isLocal) continue
 
         const hasPrev = prevStatuses.has(msg.id)
-        
+
         if (!hasPrev) {
           // It's a completely new message (e.g. system msg, or another user's prompt)
           // Exception: don't increment for "loading" placeholders immediately when the user prompts.
@@ -236,6 +254,8 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
     setUnreadRoomChat,
     unreadAiChat,
     setUnreadAiChat,
+    showVirtualBackground,
+    setShowVirtualBackground,
 
     // Chat
     messages: chatMessages,

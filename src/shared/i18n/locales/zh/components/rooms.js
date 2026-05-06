@@ -213,6 +213,9 @@ export default {
       participants: "参与者",
       chat: "聊天",
     },
+    backgroundsAndEffects: "背景和效果",
+    applyVisualEffects: "更换背景",
+    cameraOffWarning: "您的摄像头已关闭。选择效果将打开它。",
     recording: {
       stopTitle: "停止录制",
       stopDescription:
@@ -273,6 +276,16 @@ export default {
     incorrectPassword: "密码不正确，请重试。",
     roomNotFound: "未找到房间。",
     genericError: "发生错误，请重试。",
+  },
+  virtualBackground: {
+    title: "背景",
+    none: "无",
+    upload: "上传",
+    fileTooLarge: "文件太大。最大为 3MB。",
+    uploadSuccess: "背景已上传并应用",
+    uploadFailed: "上传背景失败",
+    setFailed: "设置虚拟背景失败",
+    loading: "加载中...",
   },
   participants: "人",
   noLimit: "无限制",

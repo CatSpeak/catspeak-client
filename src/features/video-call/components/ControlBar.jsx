@@ -31,6 +31,8 @@ const VideoCallControlBar = () => {
     setShowChat,
     showParticipants,
     setShowParticipants,
+    showVirtualBackground,
+    setShowVirtualBackground,
     handleToggleMic,
     handleToggleCam,
     handleToggleScreenShare,
@@ -182,6 +184,7 @@ const VideoCallControlBar = () => {
         onClick={() => {
           setShowParticipants(!showParticipants)
           setShowChat(false)
+          if (setShowVirtualBackground) setShowVirtualBackground(false)
         }}
         title={t.rooms?.videoCall?.controls?.participants || "Participants"}
         className={`${buttonBaseClass} hidden min-[426px]:flex ${
@@ -197,6 +200,7 @@ const VideoCallControlBar = () => {
           onClick={() => {
             setShowChat(!showChat)
             setShowParticipants(false)
+            if (setShowVirtualBackground) setShowVirtualBackground(false)
           }}
           title={t.rooms?.videoCall?.controls?.chat || "Chat"}
           className={`${buttonBaseClass} ${
