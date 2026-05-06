@@ -49,6 +49,14 @@ const IDLE_VALUE = {
   showParticipants: false,
   setShowParticipants: () => {},
   lkRoomName: null,
+  unreadRoomChat: 0,
+  unreadAiChat: 0,
+  isChatCollapsed: false,
+  isAiCollapsed: false,
+  setUnreadRoomChat: () => {},
+  setUnreadAiChat: () => {},
+  setIsChatCollapsed: () => {},
+  setIsAiCollapsed: () => {},
 }
 
 const IdleCallContent = ({ children, receiveSystemMsgs, setReceiveSystemMsgs }) => (

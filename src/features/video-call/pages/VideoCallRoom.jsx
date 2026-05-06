@@ -45,28 +45,6 @@ const VideoCallRoomContent = () => {
     ? t.rooms.videoCall.participantList.title
     : t.rooms.chatBox.title
 
-  // Unread message count
-  const [unreadMessages, setUnreadMessages] = useState(0)
-  const prevMessagesLength = useRef(messages.length)
-
-  useEffect(() => {
-    if (messages.length > prevMessagesLength.current) {
-      if (!showChat) {
-        let newUnread = 0
-        for (let i = prevMessagesLength.current; i < messages.length; i++) {
-          // LiveKit chat: msg.from?.isLocal identifies own messages
-          if (!messages[i].from?.isLocal) newUnread++
-        }
-        setUnreadMessages((prev) => prev + newUnread)
-      }
-    }
-    prevMessagesLength.current = messages.length
-  }, [messages, showChat])
-
-  useEffect(() => {
-    if (showChat) setUnreadMessages(0)
-  }, [showChat])
-
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
   // as soon as phase flips to "in-call", but LiveKit may still be
@@ -185,7 +163,7 @@ const VideoCallRoomContent = () => {
         </AnimatePresence>
       </div>
 
-      <VideoCallControlBar unreadMessages={unreadMessages} />
+      <VideoCallControlBar />
     </div>
   )
 }

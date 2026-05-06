@@ -44,6 +44,10 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
   // ── UI state ──
   const [showChat, setShowChat] = useState(false)
   const [showParticipants, setShowParticipants] = useState(false)
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false)
+  const [isAiCollapsed, setIsAiCollapsed] = useState(false)
+  const [unreadRoomChat, setUnreadRoomChat] = useState(0)
+  const [unreadAiChat, setUnreadAiChat] = useState(0)
 
   // ── Session cleanup (beforeunload / pagehide) ──
   const cleanupRefs = useCallCleanup(sessionId, isInCall)
@@ -107,6 +111,68 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
     (a, b) => a.timestamp - b.timestamp,
   )
 
+  // ── Unread Counts Tracking ──
+  const prevChatMessagesLength = React.useRef(chatMessages.length)
+  useEffect(() => {
+    if (chatMessages.length > prevChatMessagesLength.current) {
+      if (!showChat || isChatCollapsed) {
+        let newUnread = 0
+        for (let i = prevChatMessagesLength.current; i < chatMessages.length; i++) {
+          if (!chatMessages[i].from?.isLocal) newUnread++
+        }
+        setUnreadRoomChat((prev) => prev + newUnread)
+      }
+    }
+    prevChatMessagesLength.current = chatMessages.length
+  }, [chatMessages, showChat, isChatCollapsed])
+
+  const prevAiMessagesRef = React.useRef(combinedAiMessages)
+  useEffect(() => {
+    if (combinedAiMessages === prevAiMessagesRef.current) return;
+
+    if (!showChat || isAiCollapsed) {
+      let newUnread = 0
+      const prevStatuses = new Map(prevAiMessagesRef.current.map((m) => [m.id, m.status]))
+
+      for (const msg of combinedAiMessages) {
+        // Skip local user's own prompts. (Note: AI responses have isLocal=false)
+        if (msg.from?.isLocal) continue
+
+        const hasPrev = prevStatuses.has(msg.id)
+        
+        if (!hasPrev) {
+          // It's a completely new message (e.g. system msg, or another user's prompt)
+          // Exception: don't increment for "loading" placeholders immediately when the user prompts.
+          if (msg.status !== "loading") {
+            newUnread++
+          }
+        } else {
+          const prevStatus = prevStatuses.get(msg.id)
+          if (
+            prevStatus === "loading" &&
+            (msg.status === "done" || msg.status === "error")
+          ) {
+            // An AI message finished generating or errored
+            newUnread++
+          }
+        }
+      }
+
+      if (newUnread > 0) {
+        setUnreadAiChat((prev) => prev + newUnread)
+      }
+    }
+
+    prevAiMessagesRef.current = combinedAiMessages
+  }, [combinedAiMessages, showChat, isAiCollapsed])
+
+  useEffect(() => {
+    if (showChat) {
+      if (!isChatCollapsed) setUnreadRoomChat(0)
+      if (!isAiCollapsed) setUnreadAiChat(0)
+    }
+  }, [showChat, isChatCollapsed, isAiCollapsed])
+
   // ── Action handlers ──
   const actions = useCallActions({
     t,
@@ -162,6 +228,14 @@ const GlobalCallContent = ({ children, ContextProvider, receiveSystemMsgs, setRe
     setShowChat,
     showParticipants,
     setShowParticipants,
+    isChatCollapsed,
+    setIsChatCollapsed,
+    isAiCollapsed,
+    setIsAiCollapsed,
+    unreadRoomChat,
+    setUnreadRoomChat,
+    unreadAiChat,
+    setUnreadAiChat,
 
     // Chat
     messages: chatMessages,

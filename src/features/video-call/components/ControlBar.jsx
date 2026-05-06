@@ -18,7 +18,7 @@ import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const VideoCallControlBar = ({ unreadMessages }) => {
+const VideoCallControlBar = () => {
   const { t } = useLanguage()
   const {
     micOn,
@@ -42,7 +42,11 @@ const VideoCallControlBar = ({ unreadMessages }) => {
     showStopModal,
     confirmStopRecording,
     cancelStopRecording,
+    unreadRoomChat,
+    unreadAiChat,
   } = useVideoCallContext()
+
+  const unreadMessages = unreadRoomChat + unreadAiChat
 
   const [showMoreMenu, setShowMoreMenu] = React.useState(false)
 
