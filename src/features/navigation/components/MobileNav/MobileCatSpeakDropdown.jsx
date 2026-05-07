@@ -1,6 +1,12 @@
 import React, { useState } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
-import { ChevronUp, ChevronDown, LayoutDashboard, Mail, Calendar } from "lucide-react"
+import {
+  ChevronUp,
+  ChevronDown,
+  LayoutDashboard,
+  Mail,
+  Calendar,
+} from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "../../hooks/useActiveLink"
 
@@ -19,7 +25,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
   const subItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
-    { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
+    //{ key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]
 
   const getActiveSubKey = () => {
@@ -90,7 +96,10 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
                 }`}
               >
                 <div className="flex-shrink-0 min-w-[32px]">
-                  <Icon size={18} className={isItemActive ? "text-[#990011]" : ""} />
+                  <Icon
+                    size={18}
+                    className={isItemActive ? "text-[#990011]" : ""}
+                  />
                 </div>
                 <span className="flex-grow text-sm">{item.label}</span>
               </button>
