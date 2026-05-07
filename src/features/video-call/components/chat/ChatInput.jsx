@@ -81,7 +81,7 @@ const ChatInput = ({
   return (
     <div className="flex flex-col relative shrink-0 bg-white">
       {/* Reply preview banner */}
-      {isAiInput && replyTarget && (
+      {replyTarget && (
         <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border-t border-amber-200 text-xs">
           <div className="flex-1 min-w-0">
             <span className="font-semibold text-amber-800">

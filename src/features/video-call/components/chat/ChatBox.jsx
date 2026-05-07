@@ -33,7 +33,8 @@ const ChatBox = ({
     unreadAiChat,
   } = useGlobalVideoCall()
 
-  const [replyTarget, setReplyTarget] = useState(null)
+  const [aiReplyTarget, setAiReplyTarget] = useState(null)
+  const [roomReplyTarget, setRoomReplyTarget] = useState(null)
   const [aiSplit, setAiSplit] = useState(50) // percentage (0-100)
   const containerRef = useRef(null)
   const dragRef = useRef({ isDragging: false, startY: 0, startSplit: 0 })
@@ -156,15 +157,15 @@ const ChatBox = ({
                   t.rooms?.chatBox?.aiEmptyText ||
                   "Ask the AI by typing @public-ai or @private-ai in the chat."
                 }
-                onReplyTo={(msg) => setReplyTarget(msg)}
+                onReplyTo={(msg) => setAiReplyTarget(msg)}
               />
               <ChatInput
                 onSendMessage={onSendMessage}
                 isConnected={isConnected}
                 onAiMessageSent={() => setIsAiCollapsed(false)}
                 isAiInput={true}
-                replyTarget={replyTarget}
-                onCancelReply={() => setReplyTarget(null)}
+                replyTarget={aiReplyTarget}
+                onCancelReply={() => setAiReplyTarget(null)}
               />
             </>
           )}
@@ -181,10 +182,7 @@ const ChatBox = ({
         )}
 
         {/* Regular Chat Pane */}
-        <div
-          className="flex flex-col bg-white relative z-0"
-          style={chatStyle}
-        >
+        <div className="flex flex-col bg-white relative z-0" style={chatStyle}>
           <button
             type="button"
             onClick={() => setIsChatCollapsed(!isChatCollapsed)}
@@ -210,10 +208,13 @@ const ChatBox = ({
                 messages={messages}
                 t={t}
                 emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
+                onReplyTo={(msg) => setRoomReplyTarget(msg)}
               />
               <ChatInput
                 onSendMessage={onSendMessage}
                 isConnected={isConnected}
+                replyTarget={roomReplyTarget}
+                onCancelReply={() => setRoomReplyTarget(null)}
               />
             </>
           )}

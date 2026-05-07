@@ -57,6 +57,20 @@ export const recordingsApi = baseApi.injectEndpoints({
       query: () => "/livekit/storage",
       providesTags: ["Storage"],
     }),
+
+    // ── Google Drive API ────────────────────────────────────────────────
+    uploadRecordingToDrive: builder.mutation({
+      query: ({ recordingId, googleAccessToken }) => ({
+        url: `/livekit/my-recordings/${recordingId}/upload-drive`,
+        method: "POST",
+        body: { googleAccessToken },
+      }),
+      invalidatesTags: (result, error, { recordingId }) => [
+        { type: "Recordings", id: recordingId },
+        { type: "Recordings", id: "LIST" },
+        "Storage",
+      ],
+    }),
   }),
 })
 
@@ -67,4 +81,5 @@ export const {
   useGetMyRecordingByIdQuery,
   useDeleteRecordingMutation,
   useGetStorageQuery,
+  useUploadRecordingToDriveMutation,
 } = recordingsApi

@@ -145,6 +145,7 @@ const VideoCallControlBar = () => {
         )}
       </button>
 
+      {/* ── Record Toggle ──────── */}
       <div className="relative hidden min-[769px]:block">
         <button
           onClick={handleToggleRecording}
@@ -243,6 +244,7 @@ const VideoCallControlBar = () => {
         />
       </button>
 
+      {/* Stop Recording Confirmation Modal */}
       {showStopModal && (
         <StopRecordingModal
           open={showStopModal}

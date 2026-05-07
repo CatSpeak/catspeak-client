@@ -194,8 +194,8 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
                     )}
                   </div>
 
-                  {/* Reply button for completed AI responses (hidden for now) */}
-                  {false && isAi && msg.status === "done" && onReplyTo && (
+                  {/* Reply button */}
+                  {onReplyTo && (!isAi || msg.status === "done") && (
                     <button
                       type="button"
                       onClick={() => onReplyTo(msg)}

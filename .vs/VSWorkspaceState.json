@@ -1,11 +1,7 @@
 {
   "ExpandedNodes": [
     "",
-    "\\plugins",
-    "\\src\\features",
-    "\\src\\layouts",
-    "\\src\\shared"
+    "\\plugins"
   ],
-  "SelectedNode": "\\src",
   "PreviewInSolutionExplorer": false
 }
