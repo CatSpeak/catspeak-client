@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
-import { useGetProfileQuery } from "@/store/api/authApi"
+import { useGetCurrentBackgroundQuery } from "@/store/api/authApi"
 import { LocalVideoTrack } from "livekit-client"
 import { BackgroundProcessor, supportsBackgroundProcessors } from "@livekit/track-processors"
 
@@ -17,8 +17,8 @@ export const useMediaPreview = () => {
   const rawVideoTrackRef = useRef(null)
   const processorRef = useRef(null)
 
-  const { data: profile } = useGetProfileQuery()
-  const virtualBackgroundUrl = profile?.data?.virtualBackgroundUrl
+  const { data: bgData } = useGetCurrentBackgroundQuery()
+  const virtualBackgroundUrl = bgData?.data?.activeBackgroundUrl
 
   // Update background if it changes
   useEffect(() => {

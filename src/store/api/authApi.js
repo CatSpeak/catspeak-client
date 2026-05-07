@@ -98,11 +98,19 @@ export const authApi = baseApi.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    getCurrentBackground: builder.query({
+      query: () => ({
+        url: "/user-profile/backgrounds/current",
+        method: "GET",
+      }),
+      providesTags: ["Background"],
+    }),
     getSampleBackgrounds: builder.query({
       query: () => ({
         url: "/user-profile/backgrounds/samples",
         method: "GET",
       }),
+      providesTags: ["Background"],
     }),
     uploadCustomBackground: builder.mutation({
       query: (formData) => ({
@@ -110,6 +118,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
+      invalidatesTags: ["Background"],
     }),
     setActiveBackground: builder.mutation({
       query: (body) => ({
@@ -117,7 +126,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User", "Background"],
     }),
     verifyEmail: builder.mutation({
       query: (body) => ({
@@ -159,6 +168,8 @@ export const {
 
   useLogoutMutation,
   useGetProfileQuery,
+  useGetCurrentBackgroundQuery,
+  useLazyGetCurrentBackgroundQuery,
   useGetSampleBackgroundsQuery,
   useUploadCustomBackgroundMutation,
   useSetActiveBackgroundMutation,
