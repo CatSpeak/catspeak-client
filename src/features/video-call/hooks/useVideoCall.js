@@ -6,7 +6,7 @@ import {
 } from "@livekit/components-react"
 import { ConnectionState, Track } from "livekit-client"
 import toast from "react-hot-toast"
-import { useGetProfileQuery } from "@/store/api/authApi"
+import { useGetCurrentBackgroundQuery } from "@/store/api/authApi"
 import { useEffect, useRef } from "react"
 import { BackgroundProcessor, supportsBackgroundProcessors } from "@livekit/track-processors"
 
@@ -27,8 +27,8 @@ export const useVideoCall = (t) => {
   const [isTogglingCam, setIsTogglingCam] = useState(false)
 
   // -- Virtual Background Logic --
-  const { data: profile } = useGetProfileQuery()
-  const virtualBackgroundUrl = profile?.data?.virtualBackgroundUrl
+  const { data: bgData } = useGetCurrentBackgroundQuery()
+  const virtualBackgroundUrl = bgData?.data?.activeBackgroundUrl
 
   // Parse LiveKit token metadata as a fallback for initial join
   let initialBgUrl = null
