@@ -16,6 +16,11 @@ const TextInput = ({
   className = "",
   containerClassName = "",
   showCount = false,
+  error,
+  leftContent,
+  leftContentWidthClass = "pl-14",
+  rightContent,
+  rightContentWidthClass = "!pr-12",
   ...props
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -28,7 +33,11 @@ const TextInput = ({
   const iconPadding = Icon ? "!pl-10" : ""
   const passwordPadding = isPassword ? "!pr-10" : ""
 
-  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${className}`
+  const errorClass = error ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500" : ""
+  const leftContentPadding = leftContent ? leftContentWidthClass : ""
+  const rightContentPadding = rightContent ? rightContentWidthClass : ""
+
+  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${className}`
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
@@ -38,7 +47,12 @@ const TextInput = ({
         </label>
       )}
       <div className="relative">
-        {Icon && (
+        {leftContent && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
+            {leftContent}
+          </div>
+        )}
+        {Icon && !leftContent && (
           <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7574]" />
         )}
         <input
@@ -66,12 +80,18 @@ const TextInput = ({
             {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         )}
+        {rightContent && (
+          <div className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex items-center">
+            {rightContent}
+          </div>
+        )}
       </div>
       {showCount && props.maxLength && (
         <span className="self-start px-2 text-xs text-[#7A7574]">
           {String(value || "").length} / {props.maxLength}
         </span>
       )}
+      {error && <span className="text-xs text-red-500 px-1">{error}</span>}
     </div>
   )
 }

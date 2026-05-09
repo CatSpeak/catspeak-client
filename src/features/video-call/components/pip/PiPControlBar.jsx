@@ -34,7 +34,7 @@ const PiPControlBar = ({
         }}
         title={micOn ? "Mute" : "Unmute"}
       >
-        {micOn ? <Mic size={14} /> : <MicOff size={14} />}
+        {micOn ? <Mic size={20} /> : <MicOff size={20} />}
       </button>
 
       {/* Camera */}
@@ -46,7 +46,7 @@ const PiPControlBar = ({
         }}
         title={cameraOn ? "Camera off" : "Camera on"}
       >
-        {cameraOn ? <Video size={14} /> : <VideoOff size={14} />}
+        {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
       </button>
 
       {/* Chat (tap → return to call) */}
@@ -59,7 +59,7 @@ const PiPControlBar = ({
           }}
           title="Open chat"
         >
-          <MessageSquare size={14} />
+          <MessageSquare size={20} />
         </button>
         {unreadCount > 0 && (
           <span className="pip-chat-badge">
@@ -76,8 +76,8 @@ const PiPControlBar = ({
           onReturnToCall()
         }}
         title="Return to call"
-      >
-        <Maximize2 size={14} />
+        >
+        <Maximize2 size={20} />
       </button>
 
       {/* Leave */}
@@ -89,7 +89,7 @@ const PiPControlBar = ({
         }}
         title="Leave call"
       >
-        <Phone size={12} className="rotate-[135deg]" />
+        <Phone size={20} className="rotate-[135deg]" />
       </button>
     </div>
   )

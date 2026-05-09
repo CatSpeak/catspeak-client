@@ -38,6 +38,32 @@ export const conversationsApi = baseApi.injectEndpoints({
         { type: "Messages", id: conversationId },
       ],
     }),
+
+    // Send a message to public AI
+    chatPublicAi: builder.mutation({
+      query: (data) => ({
+        url: "/conversations/ai/public-ai",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Send a message to private AI
+    chatPrivateAi: builder.mutation({
+      query: (data) => ({
+        url: "/conversations/ai/private-ai",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Mark a conversation as read
+    markConversationAsRead: builder.mutation({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/read`,
+        method: "PUT",
+      }),
+    }),
   }),
 })
 
@@ -47,4 +73,7 @@ export const {
   useCreateConversationMutation,
   useGetConversationMessagesQuery,
   useSendMessageMutation,
+  useChatPublicAiMutation,
+  useChatPrivateAiMutation,
+  useMarkConversationAsReadMutation,
 } = conversationsApi

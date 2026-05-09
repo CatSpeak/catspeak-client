@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { Copy, Check, ExternalLink, AlertTriangle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { isAndroid } from "@/shared/utils/isWebView"
+import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
 import "./WebViewBlockScreen.css"
 
 /**
@@ -47,6 +48,9 @@ const WebViewBlockScreen = ({ appName }) => {
 
   return (
     <div className="webview-block-screen">
+      <div className="webview-block-lang-switcher">
+        <LanguageSwitcher />
+      </div>
       <div className="webview-block-card">
         {/* Icon */}
         <div className="webview-block-icon">

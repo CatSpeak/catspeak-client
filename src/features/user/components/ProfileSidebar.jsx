@@ -3,15 +3,26 @@ import { NavLink } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { User, GraduationCap, Building2, Settings } from "lucide-react"
 
-const ProfileSidebar = () => {
+const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
   const { t } = useLanguage()
 
-  const getLinkClasses = ({ isActive }) =>
-    `relative flex w-full items-center gap-3 px-4 h-10 rounded-r-lg transition-colors mb-1 overflow-hidden ${
+  const isHorizontal = variant === "horizontal"
+
+  const getLinkClasses = ({ isActive }) => {
+    if (isHorizontal) {
+      return `relative flex items-center justify-center gap-2 px-4 h-10 whitespace-nowrap transition-colors flex-1 min-w-fit text-sm ${
+        isActive
+          ? "font-medium text-[#990011] border-b-2 !border-b-[#990011]"
+          : "font-normal text-black hover:bg-gray-50 border-b-2 !border-b-transparent"
+      }`
+    }
+
+    return `relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors mb-1 overflow-hidden ${
       isActive
-        ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] hover:text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
-        : "text-gray-800 hover:text-gray-900 hover:bg-[#F2F2F2]"
+        ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
+        : "font-normal text-black hover:bg-[#F2F2F2]"
     }`
+  }
 
   const menuItems = [
     {
@@ -21,11 +32,10 @@ const ProfileSidebar = () => {
       icon: User,
     },
     {
-      label: t.profile?.sidebar?.lecturer,
-      path: "/lecturer",
+      label: t.profile?.sidebar?.instructor,
+      path: "/instructor",
       end: false,
       icon: GraduationCap,
-      isHidden: true,
     },
     {
       label: t.profile?.sidebar?.organization,
@@ -39,21 +49,27 @@ const ProfileSidebar = () => {
       path: "/setting",
       end: false,
       icon: Settings,
-      isHidden: true,
     },
   ].filter((item) => !item.isHidden)
 
   return (
-    <div className="flex flex-col h-full text-gray-800">
+    <div
+      className={
+        isHorizontal
+          ? "flex overflow-x-auto hide-scrollbar w-full divide-x divide-gray-100"
+          : "flex flex-col h-full text-gray-800"
+      }
+    >
       {menuItems.map((item) => (
         <NavLink
           key={item.path}
           to={item.path}
           end={item.end}
           className={getLinkClasses}
+          onClick={onClose}
         >
-          <item.icon className="w-5 h-5" />
-          <span className="text-sm">{item.label}</span>
+          <item.icon size={isHorizontal ? 16 : 20} className="flex-shrink-0" />
+          <span className="truncate">{item.label}</span>
         </NavLink>
       ))}
     </div>

@@ -11,6 +11,8 @@ const Modal = ({
   className = "",
   title,
   showCloseButton = true,
+  footer,
+  bodyClassName = "px-3 flex-1 overflow-y-auto",
 }) => {
   useScrollLock(open)
 
@@ -37,33 +39,44 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative h-full w-full shadow-xl min-[426px]:h-auto min-[426px]:max-w-md ${
-              /(^|\s)bg-/.test(className) ? "" : "bg-white"
-            } ${/(^|\s)p[xytrbl]?-(0|[1-9]|\[)/.test(className) ? "" : "p-5"} ${
+            className={`relative h-full w-full shadow-xl min-[426px]:h-auto ${
+              /(^|\s)(min-\[[^\]]+\]:|md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
+                className,
+              )
+                ? ""
+                : "min-[426px]:max-w-md"
+            } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
               /(^|\s)rounded/.test(className)
                 ? ""
-                : "rounded-none min-[426px]:rounded-2xl"
+                : "rounded-none min-[426px]:rounded-[8px] min-[426px]:border min-[426px]:border-[#E5e5e5]"
             } ${className}`}
             role="dialog"
             aria-modal="true"
           >
             {(title || showCloseButton) && (
-              <div
-                className={`mb-6 flex items-center gap-4 ${title ? "justify-between" : "justify-end"}`}
-              >
-                {title && <h2 className="text-2xl font-semibold">{title}</h2>}
+              <div className="flex items-center justify-between p-3">
+                {title ? (
+                  <h2 className="text-[20px] leading-[26px] font-semibold">
+                    {title}
+                  </h2>
+                ) : (
+                  <div />
+                )}
+
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    className="flex shrink-0 items-center justify-center h-10 w-10 hover:bg-[#E5E5E5] rounded-full transition-colors"
                   >
-                    <X size={24} />
+                    <X size={20} />
                   </button>
                 )}
               </div>
             )}
 
-            {children}
+            <div className={bodyClassName}>{children}</div>
+
+            {footer && <div className="p-6">{footer}</div>}
           </motion.div>
         </div>
       )}

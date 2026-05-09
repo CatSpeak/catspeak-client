@@ -1,8 +1,10 @@
 import { MicOff, VideoOff, MonitorUp } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { useEffect, useRef, useReducer } from "react"
+import { useEffect, useRef, useReducer, useMemo } from "react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { Track, ParticipantEvent } from "livekit-client"
+
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 
 /**
  * Renders a single participant's video tile using LiveKit.
@@ -43,6 +45,11 @@ const VideoTile = ({ participant, onClick }) => {
   const webcamOn = participant.isCameraEnabled
   const screenShareOn = participant.isScreenShareEnabled
 
+  const theme = useMemo(
+    () => getParticipantTheme(participant.identity),
+    [participant.identity],
+  )
+
   // Get the camera track publication
   const cameraPub = participant.getTrackPublication(Track.Source.Camera)
   const cameraTrack = cameraPub?.track
@@ -69,11 +76,14 @@ const VideoTile = ({ participant, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-lg bg-white border border-solid transition-[border-color,box-shadow] duration-200 ease-in-out [container-type:inline-size] ${
+      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-lg border-solid transition-all duration-200 ease-in-out [container-type:inline-size] ${
+        isVideoVisible ? "border-0" : "border-2"
+      } ${
         isSpeaking
-          ? "border-green-600 shadow-[0_0_15px_rgba(46,125,50,0.4)]"
-          : "border-[#C6C6C6] shadow-sm"
+          ? "border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
+          : "border-transparent shadow-sm"
       } ${onClick ? "cursor-pointer" : ""}`}
+      style={{ background: theme.bg }}
     >
       {/* Video element for camera track */}
       <video
@@ -92,8 +102,8 @@ const VideoTile = ({ participant, onClick }) => {
           <Avatar
             size={64}
             name={displayName || "?"}
-            speaking={isSpeaking}
-            className="!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)]"
+            speaking={false}
+            className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${theme.avatarClass}`}
           />
         </div>
       )}

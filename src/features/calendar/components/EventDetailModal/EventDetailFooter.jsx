@@ -3,16 +3,28 @@ import { Trash2, Pencil, X } from "lucide-react"
 import SharePopover from "./SharePopover"
 import useEventDelete from "../../hooks/useEventDelete"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth/hooks/useAuth"
 import {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
 } from "@/store/api/eventsApi"
 import Modal from "@/shared/components/ui/Modal"
+import ParticipantListModal from "./ParticipantListModal"
 
 const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
+  const { user, isAdmin } = useAuth()
   const { t } = useLanguage()
   const cal = t.calendar || {}
-  const [isRegistered, setIsRegistered] = useState(event?.isRegistered ?? false)
+  const [showParticipants, setShowParticipants] = useState(false)
+
+  const isCreatorOrAdmin =
+    isAdmin ||
+    (user &&
+      event &&
+      (user.id === event.creatorId ||
+        user.username === event.creatorName ||
+        (user.fullName && user.fullName === event.creatorName)))
+  const isRegistered = event?.isRegistered ?? false
   const [cancelMode, setCancelMode] = useState("none") // "none" | "choice"
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
     useEventDelete(eventId, onClose)
@@ -33,7 +45,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         registrationDate: event?.originalStartTime,
       }
       await cancelRegistration(body).unwrap()
-      setIsRegistered(false)
       setCancelMode("none")
     } catch (err) {
       console.error("Cancel occurrence registration failed:", err)
@@ -48,7 +59,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         cancellationReason: "User cancelled",
       }
       await cancelRegistration(body).unwrap()
-      setIsRegistered(false)
       setCancelMode("none")
     } catch (err) {
       console.error("Cancel all registrations failed:", err)
@@ -68,7 +78,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           eventId,
           cancellationReason: "User cancelled",
         }).unwrap()
-        setIsRegistered(false)
       } catch (err) {
         console.error("Cancel registration failed:", err)
       }
@@ -79,20 +88,16 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
       const isRecurring = event?.isRecurring
       const occurrenceId = event?.occurrenceId
 
-      const body =
-        isRecurring && !occurrenceId
-          ? {
-              eventId,
-              registrationType: "ENTIRE_SERIES",
-            }
-          : {
-              eventId,
-              occurrenceId,
-              registrationType: "SINGLE_OCCURRENCE",
-            }
+      let body = { eventId }
+      if (occurrenceId) {
+        body = { eventId, occurrenceId, registrationType: "SINGLE_OCCURRENCE" }
+      } else if (event?.isRecurring) {
+        body = { eventId, registrationType: "ENTIRE_SERIES" }
+      }
+
+      console.log("REGISTER PAYLOAD:", body)
 
       await registerForEvent(body).unwrap()
-      setIsRegistered(true)
     } catch (err) {
       console.error("Registration failed:", err)
     }
@@ -102,25 +107,33 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
     <>
       <div className="p-5 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-4 bg-white">
         {/* Register / Unregister */}
-        {!confirmDelete && (
-          <button
-            onClick={handleRegister}
-            disabled={isProcessing}
-            className={`flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg ${
-              isProcessing
-                ? "bg-gray-400 cursor-not-allowed"
+        {!confirmDelete &&
+          (isCreatorOrAdmin ? (
+            <button
+              onClick={() => setShowParticipants(true)}
+              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-[#990011]"
+            >
+              {cal.viewParticipants || "Xem danh sách người đăng ký"}
+            </button>
+          ) : (
+            <button
+              onClick={handleRegister}
+              disabled={isProcessing}
+              className={`flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg ${
+                isProcessing
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : isRegistered
+                    ? "bg-cath-red-700 hover:bg-cath-red-800"
+                    : "bg-[#06AA3B] hover:bg-green-700"
+              }`}
+            >
+              {isProcessing
+                ? cal.processing || "Đang xử lý..."
                 : isRegistered
-                  ? "bg-cath-red-700 hover:bg-cath-red-800"
-                  : "bg-[#06AA3B] hover:bg-green-700"
-            }`}
-          >
-            {isProcessing
-              ? cal.processing || "Đang xử lý..."
-              : isRegistered
-                ? cal.cancelRegistration || "Hủy đăng kí"
-                : cal.register || "Đăng kí"}
-          </button>
-        )}
+                  ? cal.cancelRegistration || "Hủy đăng kí"
+                  : cal.register || "Đăng kí"}
+            </button>
+          ))}
 
         {/* Delete confirm / action icons */}
         {confirmDelete ? (
@@ -143,19 +156,26 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <button
-              onClick={onEdit}
-              className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
-            >
-              <Pencil />
-            </button>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
-            >
-              <Trash2 />
-            </button>
-            <SharePopover eventId={eventId} />
+            {isCreatorOrAdmin && (
+              <>
+                <button
+                  onClick={onEdit}
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
+                >
+                  <Pencil />
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
+                >
+                  <Trash2 />
+                </button>
+              </>
+            )}
+            <SharePopover
+              eventId={eventId}
+              occurrenceId={event?.occurrenceId}
+            />
           </div>
         )}
       </div>
@@ -207,6 +227,15 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* Participant List Modal */}
+      {showParticipants && (
+        <ParticipantListModal
+          open={showParticipants}
+          onClose={() => setShowParticipants(false)}
+          occurrenceId={event?.occurrenceId}
+        />
       )}
     </>
   )

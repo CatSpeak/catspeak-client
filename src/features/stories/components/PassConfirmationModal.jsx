@@ -42,7 +42,11 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
   const minutesRemaining = Math.max(0, timeRemaining % 60)
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title={t.catSpeak?.story || "Story"}
+    >
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Avatar
@@ -63,7 +67,9 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
 
         <div className="space-y-4 text-sm">
           <div>
-            <p className="text-[#7A7574]">{t.catSpeak?.created || "Created"}:</p>
+            <p className="text-[#7A7574]">
+              {t.catSpeak?.created || "Created"}:
+            </p>
             <p>{createdAt.format("MMM D, YYYY h:mm A")}</p>
           </div>
 
@@ -82,7 +88,7 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 py-3">
           <PillButton variant="secondary" onClick={handlePass} className="h-10">
             {confirmPass
               ? t.catSpeak?.confirm || "Confirm Pass"

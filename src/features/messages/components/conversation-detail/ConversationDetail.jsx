@@ -41,7 +41,7 @@ const ConversationDetail = ({
       {/* Message List */}
       <div
         ref={scrollContainerRef}
-        className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-3"
+        className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-3 py-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-[#990011]"
       >
         {isLoading ? (
           <LoadingSpinner className="flex items-center justify-center py-4" />
@@ -57,7 +57,7 @@ const ConversationDetail = ({
           <>
             {/* Spacer pushes messages to the bottom when there are few messages */}
             <div className="flex-1" />
-            <div className="space-y-2">
+            <div className="space-y-1">
               {messageList.map((msg, idx) => {
                 const isMyMessage = msg.sender.accountId !== friendAccountId
                 return (
@@ -74,8 +74,8 @@ const ConversationDetail = ({
       </div>
 
       {/* Message Input */}
-      <div className="flex items-center gap-2 border-t px-4 py-3">
-        <PillButton
+      <div className="flex items-center gap-2 border-t px-3 py-2">
+        {/* <PillButton
           variant="outline"
           className="h-10 w-10 !min-w-0 !px-0"
           aria-label={t.messages.add}
@@ -95,7 +95,7 @@ const ConversationDetail = ({
           aria-label={t.messages.image}
         >
           <FiImage className="h-5 w-5" />
-        </PillButton>
+        </PillButton> */}
         <TextInput
           value={input}
           onChange={onInputChange}

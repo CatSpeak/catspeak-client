@@ -10,6 +10,14 @@ export const eventsApi = baseApi.injectEndpoints({
       ],
     }),
 
+    // GET /api/v1/Events/occurrences/{occurrenceId}
+    getEventOccurrenceById: builder.query({
+      query: (occurrenceId) => `/v1/Events/occurrences/${occurrenceId}`,
+      providesTags: (result, error, occurrenceId) => [
+        { type: "Events", id: `occurrence-${occurrenceId}` },
+      ],
+    }),
+
     // PUT /api/v1/Events/{eventId}
     updateEvent: builder.mutation({
       query: ({ eventId, ...data }) => ({
@@ -85,6 +93,15 @@ export const eventsApi = baseApi.injectEndpoints({
       providesTags: ["Events"],
     }),
 
+    // GET /api/v1/events/mine
+    getMyEvents: builder.query({
+      query: (params) => ({
+        url: "/v1/events/mine",
+        params,
+      }),
+      providesTags: ["Events"],
+    }),
+
     // POST /api/v1/events/{eventId}/shared-links
     createSharedLink: builder.mutation({
       query: ({ eventId, ...body }) => ({
@@ -124,11 +141,21 @@ export const eventsApi = baseApi.injectEndpoints({
         "Events",
       ],
     }),
+
+    // GET /api/v1/Events/occurrence/{occurrenceId}/register
+    getOccurrenceRegistrations: builder.query({
+      query: (occurrenceId) => `/v1/Events/occurrence/${occurrenceId}/register`,
+      providesTags: (result, error, occurrenceId) => [
+        { type: "Events", id: `registrations-${occurrenceId}` },
+        "Events",
+      ],
+    }),
   }),
 })
 
 export const {
   useGetEventByIdQuery,
+  useGetEventOccurrenceByIdQuery,
   useUpdateEventMutation,
   useDeleteEventMutation,
   useCreateEventMutation,
@@ -136,8 +163,10 @@ export const {
   useGetEventCountsQuery,
   useGetEventsByDateQuery,
   useGetRegisteredEventsQuery,
+  useGetMyEventsQuery,
   useCreateSharedLinkMutation,
   useGetSharedEventQuery,
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
+  useGetOccurrenceRegistrationsQuery,
 } = eventsApi

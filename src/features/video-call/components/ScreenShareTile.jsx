@@ -36,7 +36,7 @@ const ScreenShareTile = ({
   return (
     <div
       onClick={onClick}
-      className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border border-[#C6C6C6] bg-neutral-900 shadow-sm ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border border-[#E5E5E5] bg-neutral-900 shadow-sm ${onClick ? "cursor-pointer" : ""}`}
     >
       <video
         autoPlay

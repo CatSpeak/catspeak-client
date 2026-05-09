@@ -28,8 +28,7 @@ export default {
     yours: "yours",
     total: "total",
   },
-  newsLoginPrompt:
-    "Please log in to see the latest posts from the community.",
+  newsLoginPrompt: "Please log in to see the latest posts from the community.",
   sidebar: {
     news: "Cat Speak News",
     discover: "Discover World",
@@ -44,4 +43,5 @@ export default {
   },
   created: "Created",
   expiresIn: "Expires in",
+  story: "Story",
 }

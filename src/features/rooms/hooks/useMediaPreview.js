@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
+import { useGetCurrentBackgroundQuery } from "@/store/api/authApi"
+import { LocalVideoTrack } from "livekit-client"
+import { BackgroundProcessor, supportsBackgroundProcessors } from "@livekit/track-processors"
 
 export const useMediaPreview = () => {
   const { t } = useLanguage()
@@ -10,11 +13,37 @@ export const useMediaPreview = () => {
   const [localStream, setLocalStream] = useState(null)
 
   const streamRef = useRef(null)
+  const lkVideoTrackRef = useRef(null)
+  const rawVideoTrackRef = useRef(null)
+  const processorRef = useRef(null)
+
+  const { data: bgData } = useGetCurrentBackgroundQuery()
+  const virtualBackgroundUrl = bgData?.data?.activeBackgroundUrl
+
+  // Update background if it changes
+  useEffect(() => {
+    const updateBg = async () => {
+      if (!processorRef.current) return
+      try {
+        if (virtualBackgroundUrl) {
+          await processorRef.current.switchTo({ mode: "virtual-background", imagePath: virtualBackgroundUrl })
+        } else {
+          await processorRef.current.switchTo({ mode: "disabled" })
+        }
+      } catch (err) {
+        console.error("Failed to update background processor:", err)
+      }
+    }
+    updateBg()
+  }, [virtualBackgroundUrl])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach((t) => t.stop())
+      if (processorRef.current?.destroy) processorRef.current.destroy()
+      if (lkVideoTrackRef.current) lkVideoTrackRef.current.stop()
+      if (rawVideoTrackRef.current) rawVideoTrackRef.current.stop()
     }
   }, [])
 
@@ -48,6 +77,36 @@ export const useMediaPreview = () => {
             )
             return null
           }
+        }
+      }
+
+      // Apply virtual background to video track
+      if (video && supportsBackgroundProcessors()) {
+        const rawVideoTrack = stream.getVideoTracks()[0]
+        if (rawVideoTrack) {
+          if (lkVideoTrackRef.current) lkVideoTrackRef.current.stop()
+          if (rawVideoTrackRef.current) rawVideoTrackRef.current.stop()
+          
+          rawVideoTrackRef.current = rawVideoTrack
+
+          const lkTrack = new LocalVideoTrack(rawVideoTrack)
+          lkVideoTrackRef.current = lkTrack
+
+          if (!processorRef.current) {
+            processorRef.current = BackgroundProcessor({ mode: "disabled" })
+          }
+
+          await lkTrack.setProcessor(processorRef.current)
+
+          if (virtualBackgroundUrl) {
+            await processorRef.current.switchTo({
+              mode: "virtual-background",
+              imagePath: virtualBackgroundUrl,
+            })
+          }
+
+          stream.removeTrack(rawVideoTrack)
+          stream.addTrack(lkTrack.mediaStreamTrack)
         }
       }
 
@@ -118,6 +177,17 @@ export const useMediaPreview = () => {
         videoTracks.forEach((t) => (t.enabled = true))
       } else {
         videoTracks.forEach((t) => t.stop())
+        
+        if (lkVideoTrackRef.current) {
+          lkVideoTrackRef.current.stop()
+          lkVideoTrackRef.current = null
+        }
+        
+        if (rawVideoTrackRef.current) {
+          rawVideoTrackRef.current.stop()
+          rawVideoTrackRef.current = null
+        }
+        
         // Remove stopped tracks from streamRef
         streamRef.current = new MediaStream(
           streamRef.current.getAudioTracks(), // keep only mic

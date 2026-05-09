@@ -1,9 +1,14 @@
 export default {
   languageLabel: "中文",
+  you: "你",
   switchTo: "Switch to English",
   getStarted: "开始使用",
   seeMore: "查看更多",
   back: "返回",
+  toggle: {
+    on: "开",
+    off: "关",
+  },
   pagination: {
     range: "{{start}}-{{end}} 共 {{total}}",
   },
@@ -14,6 +19,7 @@ export default {
     catSpeak: "猫语",
     cart: "课程",
     connect: "个人",
+    workspace: "我的工作区",
   },
   comingSoon: {
     badge: "即将推出",

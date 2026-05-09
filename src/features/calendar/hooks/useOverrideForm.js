@@ -2,8 +2,14 @@ import { useState } from "react"
 import dayjs from "dayjs"
 import { useUpdateEventOccurrenceMutation } from "@/store/api/eventsApi"
 
-export const useOverrideForm = (eventId, occurrenceId, initialEvent, onClose) => {
-  const [updateEventOccurrence, { isLoading }] = useUpdateEventOccurrenceMutation()
+export const useOverrideForm = (
+  eventId,
+  occurrenceId,
+  initialEvent,
+  onClose,
+) => {
+  const [updateEventOccurrence, { isLoading }] =
+    useUpdateEventOccurrenceMutation()
 
   const initialStartTime = initialEvent?.startTime
     ? dayjs(initialEvent.startTime)
@@ -11,10 +17,10 @@ export const useOverrideForm = (eventId, occurrenceId, initialEvent, onClose) =>
   const initialEndTime = initialEvent?.endTime
     ? dayjs(initialEvent.endTime)
     : dayjs().add(1, "hour")
-  
+
   const initialLocation = initialEvent?.location || ""
   const initialParticipants = initialEvent?.maxParticipants || 50
-  
+
   // These aren't usually on the main event object natively if it's just the series template,
   // but if the user has already overridden this occurrence, they might be present.
   const initialIsCancelled = initialEvent?.isCancelled || false
@@ -29,7 +35,7 @@ export const useOverrideForm = (eventId, occurrenceId, initialEvent, onClose) =>
 
   const handleSubmit = async (e) => {
     e?.preventDefault()
-    
+
     // Convert states to payload
     const payload = {
       startTime: startTime.toISOString(),
@@ -46,7 +52,7 @@ export const useOverrideForm = (eventId, occurrenceId, initialEvent, onClose) =>
         occurrenceId,
         ...payload,
       }).unwrap()
-      
+
       onClose()
     } catch (err) {
       console.error("Failed to update occurrence:", err)
@@ -67,6 +73,6 @@ export const useOverrideForm = (eventId, occurrenceId, initialEvent, onClose) =>
     overrideReason,
     setOverrideReason,
     handleSubmit,
-    isLoading
+    isLoading,
   }
 }

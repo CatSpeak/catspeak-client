@@ -1,8 +1,7 @@
-import React from "react"
-import { Navigate, useNavigate, useParams } from "react-router-dom"
+import React, { useState, useRef, useEffect } from "react"
+import { Navigate } from "react-router-dom"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MainLogo } from "@/shared/assets/icons/logo"
 import { useConnectionState } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
 
@@ -11,9 +10,9 @@ import {
   ParticipantList,
   ChatBox,
   ControlBar as VideoCallControlBar,
-  useSessionTimer,
+  RoomHeader,
 } from "@/features/video-call"
-import { formatDate } from "@/shared/utils/dateFormatter"
+import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -21,15 +20,14 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
 
 const VideoCallRoomContent = () => {
-  const { t, language } = useLanguage()
-  const { lang } = useParams()
-  const navigate = useNavigate()
+  const { t } = useLanguage()
   const {
-    // Layout state
     showChat,
     setShowChat,
     showParticipants,
     setShowParticipants,
+    showVirtualBackground,
+    setShowVirtualBackground,
     // Auth guard
     user,
     location,
@@ -44,43 +42,12 @@ const VideoCallRoomContent = () => {
     enterPiP,
   } = useVideoCallContext()
 
-  const { formattedElapsed, formattedMax } = useSessionTimer(session)
-
-  const rawRoomName = session?.name || session?.roomName || "General"
-
-  const isSidePanelOpen = showChat || showParticipants
+  const isSidePanelOpen = showChat || showParticipants || showVirtualBackground
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
-    : t.rooms.chatBox.title
-
-  // Unread message count
-  const [unreadMessages, setUnreadMessages] = React.useState(0)
-  const prevMessagesLength = React.useRef(messages.length)
-
-  React.useEffect(() => {
-    if (messages.length > prevMessagesLength.current) {
-      if (!showChat) {
-        let newUnread = 0
-        for (let i = prevMessagesLength.current; i < messages.length; i++) {
-          // LiveKit chat: msg.from?.isLocal identifies own messages
-          if (!messages[i].from?.isLocal) newUnread++
-        }
-        setUnreadMessages((prev) => prev + newUnread)
-      }
-    }
-    prevMessagesLength.current = messages.length
-  }, [messages, showChat])
-
-  React.useEffect(() => {
-    if (showChat) setUnreadMessages(0)
-  }, [showChat])
-
-  // ── Logo click → enter PiP and navigate home ──
-  const handleLogoClick = (e) => {
-    e.preventDefault()
-    const homePath = `/${lang || language || "en"}/community`
-    enterPiP(homePath)
-  }
+    : showVirtualBackground
+      ? t.rooms?.videoCall?.applyVisualEffects || "Backgrounds and effects"
+      : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -102,66 +69,15 @@ const VideoCallRoomContent = () => {
   }
 
   return (
-    <div className="flex h-full w-full flex-col bg-primary2 text-textColor font-sans">
+    <div className="flex h-full w-full flex-col">
       {/* Top Bar */}
-      <div className="flex items-center justify-between border-b border-[#C6C6C6] bg-white px-5 py-3">
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="hidden w-40 shrink-0 items-center md:flex">
-            {/* Logo: clicking enters PiP mode instead of navigating away */}
-            <button
-              type="button"
-              onClick={handleLogoClick}
-              className="flex items-center gap-4 cursor-pointer bg-transparent border-none p-0"
-              aria-label="Minimize to Picture-in-Picture"
-              title="Continue browsing (call stays active)"
-            >
-              <img
-                src={MainLogo}
-                alt="Cat Speak logo"
-                className="h-10 w-auto"
-              />
-            </button>
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="text-base font-semibold">{rawRoomName}</div>
-              {room?.requiredLevel && (
-                <span className="rounded-full bg-[#990011] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                  {room.requiredLevel}
-                </span>
-              )}
-              {room?.topic &&
-                room.topic.split(",").map((t_topic) => {
-                  const trimmed = t_topic.trim()
-                  return (
-                    <span
-                      key={trimmed}
-                      className="rounded-full bg-[#990011] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
-                    >
-                      {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
-                        trimmed}
-                    </span>
-                  )
-                })}
-            </div>
-            <div className="hidden text-sm text-[#60600] md:block">
-              {formatDate(new Date())}
-            </div>
-          </div>
-        </div>
-        {formattedElapsed && formattedElapsed !== "00:00" && (
-          <div className="text-xs font-medium text-[#7A7574] md:text-sm">
-            {formattedElapsed}
-            {formattedMax ? ` / ${formattedMax}` : ""}
-          </div>
-        )}
-      </div>
+      <RoomHeader />
 
       {/* Main Content Area */}
-      <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
+      <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row bg-[#F3F3F3]">
+        <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
-        <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden bg-gradient-to-br from-primary2 via-white to-primary2">
-          <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
+        <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           <VideoGrid />
         </div>
 
@@ -170,15 +86,16 @@ const VideoCallRoomContent = () => {
           {isSidePanelOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
+              animate={{ width: 336, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="hidden flex-col border-l border-[#C6C6C6] bg-white md:flex overflow-hidden relative"
-              style={{ width: 320 }}
+              className="hidden md:flex flex-col overflow-hidden relative py-5"
+              style={{ width: 336 }}
             >
-              <div className="w-80 h-full flex flex-col shrink-0">
+              <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-lg shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
-                {showChat && !showParticipants && (
+                {showVirtualBackground && <VirtualBackgroundPicker />}
+                {showChat && !showParticipants && !showVirtualBackground && (
                   <ChatBox
                     messages={messages}
                     currentUser={user}
@@ -205,6 +122,7 @@ const VideoCallRoomContent = () => {
                 onClick={() => {
                   setShowChat(false)
                   setShowParticipants(false)
+                  setShowVirtualBackground(false)
                 }}
               >
                 <motion.div
@@ -217,10 +135,11 @@ const VideoCallRoomContent = () => {
                 >
                   <button
                     type="button"
-                    className="text-black flex w-full items-center gap-2 border-b border-[#C6C6C6] px-4 py-3 text-left hover:bg-gray-50"
+                    className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50"
                     onClick={() => {
                       setShowChat(false)
                       setShowParticipants(false)
+                      setShowVirtualBackground(false)
                     }}
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
@@ -233,7 +152,8 @@ const VideoCallRoomContent = () => {
 
                   <div className="flex-1 overflow-y-auto">
                     {showParticipants && <ParticipantList hideTitle />}
-                    {showChat && !showParticipants && (
+                    {showVirtualBackground && <VirtualBackgroundPicker />}
+                    {showChat && !showParticipants && !showVirtualBackground && (
                       <ChatBox
                         messages={messages}
                         currentUser={user}
@@ -251,7 +171,7 @@ const VideoCallRoomContent = () => {
         </AnimatePresence>
       </div>
 
-      <VideoCallControlBar unreadMessages={unreadMessages} />
+      <VideoCallControlBar />
     </div>
   )
 }

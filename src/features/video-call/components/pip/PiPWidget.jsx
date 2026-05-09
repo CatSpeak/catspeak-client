@@ -57,7 +57,7 @@ const PiPWidget = () => {
         ref={constraintsRef}
         style={{
           position: "fixed",
-          inset: 0,
+          inset: "20px",
           pointerEvents: "none",
           zIndex: shouldRender ? 9998 : -1,
         }}

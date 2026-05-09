@@ -3,6 +3,7 @@ import errors from "./errors"
 import validation from "./validation"
 import * as pages from "./pages"
 import * as components from "./components"
+import recordings from "./recordings"
 
 export default {
   ...common,
@@ -10,4 +11,5 @@ export default {
   validation,
   ...pages,
   ...components,
+  recordings,
 }

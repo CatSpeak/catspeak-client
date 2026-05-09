@@ -9,9 +9,11 @@ import {
   useInteractWithStoryMutation,
   useDeleteStoryMutation,
 } from "@/store/api/storiesApi"
+import { useConversationSignalRContext } from "@/features/messages/context/ConversationSignalRContext"
 
 const useStories = (languageCommunity) => {
   const dispatch = useDispatch()
+  const signalR = useConversationSignalRContext()
   const [inputValue, setInputValue] = useState("")
 
   // API Hooks
@@ -62,13 +64,26 @@ const useStories = (languageCommunity) => {
         action: actionType,
       }).unwrap()
 
-      // If accepted provided, open conversation (assuming response structure matches requirements)
+      const convId = response?.data?.conversationId || response?.conversationId
+
+      // If accepted provided, open conversation
       if (
         actionType === 1 &&
-        response.success &&
-        response.data?.conversationId
+        (response?.success || response?.isSuccess || convId) &&
+        convId
       ) {
-        dispatch(setActiveConversation(response.data.conversationId))
+        // Join the SignalR group for the new conversation so real-time
+        // messages work immediately without requiring a page refresh.
+        if (signalR?.invoke) {
+          signalR.invoke("JoinConversation", Number(convId)).catch((err) => {
+            console.warn("[useStories] Failed to join conversation group, falling back to reconnect:", err)
+            if (signalR.reconnect) signalR.reconnect()
+          })
+        } else if (signalR?.reconnect) {
+           signalR.reconnect()
+        }
+
+        dispatch(setActiveConversation(convId))
       }
     } catch (error) {
       console.error("Interaction failed:", error)

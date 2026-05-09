@@ -1,9 +1,14 @@
 export default {
   languageLabel: "Tiếng Việt",
+  you: "Bạn",
   switchTo: "English",
   getStarted: "Bắt đầu ngay",
   seeMore: "Xem thêm",
   back: "Quay lại",
+  toggle: {
+    on: "Bật",
+    off: "Tắt",
+  },
   pagination: {
     range: "{{start}}-{{end}} trong số {{total}}",
   },
@@ -14,6 +19,7 @@ export default {
     catSpeak: "Cat Speak",
     cart: "Khóa học",
     connect: "Cá nhân",
+    workspace: "Nhà của bạn",
   },
   comingSoon: {
     badge: "Sắp ra mắt",

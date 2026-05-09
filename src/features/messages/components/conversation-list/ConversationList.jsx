@@ -15,7 +15,7 @@ const ConversationList = ({
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex-1 space-y-2 overflow-y-auto overscroll-contain">
+      <div className="flex-1 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-[#990011]">
         {isLoading ? (
           <LoadingSpinner className="flex items-center justify-center py-4" />
         ) : isError ? (
@@ -23,13 +23,15 @@ const ConversationList = ({
         ) : conversations.length === 0 ? (
           <EmptyState message={t.messages.noMessages} className="py-4" />
         ) : (
-          conversations.map((conv) => (
-            <ConversationItem
-              key={conv.conversationId}
-              conversation={conv}
-              onClick={() => onSelectConversation(conv)}
-            />
-          ))
+          <div className="flex flex-col gap-1 p-1">
+            {conversations.map((conv) => (
+              <ConversationItem
+                key={conv.conversationId}
+                conversation={conv}
+                onClick={() => onSelectConversation(conv)}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

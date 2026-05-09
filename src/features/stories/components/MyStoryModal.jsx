@@ -64,7 +64,7 @@ const MyStoryModal = ({ open, story, onClose, onDelete }) => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pb-4 pt-2">
           <PillButton
             variant="secondary"
             onClick={handleClose}

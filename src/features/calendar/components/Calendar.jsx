@@ -20,10 +20,18 @@ const Calendar = ({ currentDate = dayjs() }) => {
   const dates = Array.from({ length: 42 }, (_, i) => {
     const dayValue = i - startDay + 1
     if (dayValue < 1) {
-      return { day: prevMonthDays + dayValue, isCurrentMonth: false, originalDate: null }
+      return {
+        day: prevMonthDays + dayValue,
+        isCurrentMonth: false,
+        originalDate: null,
+      }
     }
     if (dayValue > daysInMonth) {
-      return { day: dayValue - daysInMonth, isCurrentMonth: false, originalDate: null }
+      return {
+        day: dayValue - daysInMonth,
+        isCurrentMonth: false,
+        originalDate: null,
+      }
     }
     return { day: dayValue, isCurrentMonth: true, originalDate: dayValue }
   })
@@ -45,7 +53,7 @@ const Calendar = ({ currentDate = dayjs() }) => {
   }, [eventCountsData])
 
   const selectedIndex = dates.findIndex(
-    (d) => d.isCurrentMonth && d.day === selectedDate
+    (d) => d.isCurrentMonth && d.day === selectedDate,
   )
   const endOfRowIdx =
     selectedIndex !== -1 ? (Math.floor(selectedIndex / 7) + 1) * 7 - 1 : -1
@@ -112,7 +120,9 @@ const Calendar = ({ currentDate = dayjs() }) => {
             return (
               <React.Fragment key={`empty-${idx}`}>
                 <div className="relative flex flex-col rounded-lg sm:rounded-xl bg-gray-50/50 border border-[#E5E5E5] overflow-hidden min-h-[80px] sm:min-h-0 sm:aspect-[5/4] items-start justify-start p-1.5 sm:p-3">
-                  <span className="text-sm sm:text-base text-gray-400/60 font-medium">{day}</span>
+                  <span className="text-sm sm:text-base text-gray-400/60 font-medium">
+                    {day}
+                  </span>
                 </div>
                 {renderExpandedDetail()}
               </React.Fragment>
@@ -136,7 +146,11 @@ const Calendar = ({ currentDate = dayjs() }) => {
               >
                 {/* Top Row: Date and Event Count */}
                 <div className="flex items-start justify-between p-1.5 sm:p-3 z-10 text-sm sm:text-base">
-                  <span className={`font-medium ${isToday ? "text-[#990011]" : "text-gray-900"}`}>{date}</span>
+                  <span
+                    className={`font-medium ${isToday ? "text-[#990011]" : "text-gray-900"}`}
+                  >
+                    {date}
+                  </span>
                   {eventCount > 0 && (
                     <span className="text-[#990011] font-bold text-xs sm:text-base">
                       {eventCount}

@@ -1,11 +1,12 @@
 // Video call components
-export { default as ChatBox } from "./components/ChatBox"
+export { default as ChatBox } from "./components/chat/ChatBox"
 export { default as ControlBar } from "./components/ControlBar"
 export { default as ParticipantList } from "./components/ParticipantList"
 export { default as VideoGrid } from "./components/VideoGrid"
 export { default as VideoTile } from "./components/VideoTile"
 export { default as ScreenShareTile } from "./components/ScreenShareTile"
 export { default as PiPWidget } from "./components/pip/PiPWidget"
+export { default as RoomHeader } from "./components/RoomHeader"
 
 // Hooks
 export { useVideoCall } from "./hooks/useVideoCall"

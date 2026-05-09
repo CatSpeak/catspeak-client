@@ -12,9 +12,16 @@ import { ConnectionState, RoomEvent } from "livekit-client"
 
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
+import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallCleanup } from "@/features/video-call/hooks/useCallCleanup"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
+import { useSystemMessages } from "@/features/video-call/hooks/useSystemMessages"
+import { useAiMessages } from "@/features/video-call/hooks/useAiMessages"
+import {
+  useChatPublicAiMutation,
+  useChatPrivateAiMutation,
+} from "@/store/api/conversationsApi"
 import {
   getNavigate,
   getLocation,
@@ -28,7 +35,12 @@ import {
  *
  * @param {{ children: React.ReactNode, ContextProvider: React.Provider }} props
  */
-const GlobalCallContent = ({ children, ContextProvider }) => {
+const GlobalCallContent = ({
+  children,
+  ContextProvider,
+  receiveSystemMsgs,
+  setReceiveSystemMsgs,
+}) => {
   const { t, language } = useLanguage()
 
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
@@ -37,6 +49,11 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   // ── UI state ──
   const [showChat, setShowChat] = useState(false)
   const [showParticipants, setShowParticipants] = useState(false)
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false)
+  const [isAiCollapsed, setIsAiCollapsed] = useState(false)
+  const [unreadRoomChat, setUnreadRoomChat] = useState(0)
+  const [unreadAiChat, setUnreadAiChat] = useState(0)
+  const [showVirtualBackground, setShowVirtualBackground] = useState(false)
 
   // ── Session cleanup (beforeunload / pagehide) ──
   const cleanupRefs = useCallCleanup(sessionId, isInCall)
@@ -58,6 +75,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
 
   const videoCallState = useVideoCall(t)
   const screenShareState = useScreenShare()
+  const recordingState = useRecording(lkRoom)
 
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
@@ -65,70 +83,113 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
   const baseChatMessages = chatState.chatMessages ?? []
   const chatSend = chatState.send ?? (() => {})
 
-  const [systemMessages, setSystemMessages] = useState([])
+  // ── Deduplicated participant list (local first) ──
+  const seenIdentities = new Set()
+  const participants = []
+
+  if (localParticipant) {
+    seenIdentities.add(localParticipant.identity)
+    participants.push(localParticipant)
+  }
+
+  allParticipants.forEach((p) => {
+    if (p.identity === localParticipant?.identity) return
+    if (seenIdentities.has(p.identity)) return
+    seenIdentities.add(p.identity)
+    participants.push(p)
+  })
+
+  const currentUserId = user?.accountId
+
+  const systemMessages = useSystemMessages(lkRoom, receiveSystemMsgs)
+
+  const {
+    aiMessages,
+    addOptimisticAiMessage,
+    updateAiInteraction,
+    isCurrentUserPrompting,
+    startNewThread,
+    continueThread,
+    getConversationThread,
+  } = useAiMessages(lkRoom, currentUserId, participants)
+  const [chatPublicAi] = useChatPublicAiMutation()
+  const [chatPrivateAi] = useChatPrivateAiMutation()
+
+  const chatMessages = [...baseChatMessages].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  )
+
+  const combinedAiMessages = [...aiMessages, ...systemMessages].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  )
+
+  // ── Unread Counts Tracking ──
+  const prevChatMessagesLength = React.useRef(chatMessages.length)
+  useEffect(() => {
+    if (chatMessages.length > prevChatMessagesLength.current) {
+      if (!showChat || isChatCollapsed) {
+        let newUnread = 0
+        for (
+          let i = prevChatMessagesLength.current;
+          i < chatMessages.length;
+          i++
+        ) {
+          if (!chatMessages[i].from?.isLocal) newUnread++
+        }
+        setUnreadRoomChat((prev) => prev + newUnread)
+      }
+    }
+    prevChatMessagesLength.current = chatMessages.length
+  }, [chatMessages, showChat, isChatCollapsed])
+
+  const prevAiMessagesRef = React.useRef(combinedAiMessages)
+  useEffect(() => {
+    if (combinedAiMessages === prevAiMessagesRef.current) return
+
+    if (!showChat || isAiCollapsed) {
+      let newUnread = 0
+      const prevStatuses = new Map(
+        prevAiMessagesRef.current.map((m) => [m.id, m.status]),
+      )
+
+      for (const msg of combinedAiMessages) {
+        // Skip local user's own prompts. (Note: AI responses have isLocal=false)
+        if (msg.from?.isLocal) continue
+
+        const hasPrev = prevStatuses.has(msg.id)
+
+        if (!hasPrev) {
+          // It's a completely new message (e.g. system msg, or another user's prompt)
+          // Exception: don't increment for "loading" placeholders immediately when the user prompts.
+          if (msg.status !== "loading") {
+            newUnread++
+          }
+        } else {
+          const prevStatus = prevStatuses.get(msg.id)
+          if (
+            prevStatus === "loading" &&
+            (msg.status === "done" || msg.status === "error")
+          ) {
+            // An AI message finished generating or errored
+            newUnread++
+          }
+        }
+      }
+
+      if (newUnread > 0) {
+        setUnreadAiChat((prev) => prev + newUnread)
+      }
+    }
+
+    prevAiMessagesRef.current = combinedAiMessages
+  }, [combinedAiMessages, showChat, isAiCollapsed])
 
   useEffect(() => {
-    if (!lkRoom) {
-      console.warn("[LiveKit Debug] lkRoom is null, cannot attach DataReceived listener.");
-      return
+    if (showChat) {
+      if (!isChatCollapsed) setUnreadRoomChat(0)
+      if (!isAiCollapsed) setUnreadAiChat(0)
     }
-
-    console.log(`[LiveKit Debug] DataReceived listener actively attached to room: ${lkRoom.name || "Unknown"}`);
-
-    const handleData = (payload, participant, kind, topic) => {
-      const decoded = new TextDecoder().decode(payload)
-      console.log(`[LiveKit Debug] Packet Received! Topic:`, topic, `| Participant:`, participant?.identity, `| Content:`, decoded)
-
-      if (!participant) {
-        console.log("🚀 [BACKEND PAYLOAD RECEIVED] Topic:", topic);
-        console.log("Raw decoded:", decoded);
-        try {
-          const parsed = JSON.parse(decoded);
-          console.log("Parsed JSON:", parsed);
-        } catch (e) {
-          // Not a JSON payload, ignore
-        }
-      }
-
-      // We accept any packet without a source participant (likely server-sent API),
-      // OR specifically packets on 'lk-chat'/'system' topics.
-      if (!participant || topic === "lk-chat" || topic === "system") {
-        let messageText = decoded
-        let messageId = `sys-${Date.now()}-${Math.random()}`
-        let timestamp = Date.now()
-
-        try {
-          const json = JSON.parse(decoded)
-          // If it's a standard user chat message that `useChat` will naturally handle, ignore it here
-          if (participant && topic === "lk-chat") return 
-          
-          messageText = json.message || decoded
-          if (json.id) messageId = json.id
-          if (json.timestamp) timestamp = json.timestamp
-        } catch {
-          // string payload
-        }
-
-        const newSysMsg = {
-          id: messageId,
-          timestamp,
-          message: messageText,
-          from: { name: "System", isSystem: true }
-        }
-
-        setSystemMessages((prev) => [...prev, newSysMsg])
-      }
-    }
-
-    lkRoom.on(RoomEvent.DataReceived, handleData)
-    return () => {
-      lkRoom.off(RoomEvent.DataReceived, handleData)
-    }
-  }, [lkRoom])
-
-  const chatMessages = [...baseChatMessages, ...systemMessages].sort(
-    (a, b) => a.timestamp - b.timestamp
-  )
+  }, [showChat, isChatCollapsed, isAiCollapsed])
 
   // ── Action handlers ──
   const actions = useCallActions({
@@ -147,22 +208,6 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
     setShowParticipants,
   })
 
-  // ── Deduplicated participant list (local first) ──
-  const seenIdentities = new Set()
-  const participants = []
-
-  if (localParticipant) {
-    seenIdentities.add(localParticipant.identity)
-    participants.push(localParticipant)
-  }
-
-  allParticipants.forEach((p) => {
-    if (p.identity === localParticipant?.identity) return
-    if (seenIdentities.has(p.identity)) return
-    seenIdentities.add(p.identity)
-    participants.push(p)
-  })
-
   // ── Context value ──
   const value = {
     // Call lifecycle
@@ -178,6 +223,7 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
     location: getLocation(),
     session: sessionData,
     room: roomData,
+    lkRoomName: lkRoom?.name,
     sessionError: null,
 
     // User
@@ -192,15 +238,38 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
     micOn: videoCallState.micOn,
     cameraOn: videoCallState.cameraOn,
     isConnected,
+    isTogglingMic: videoCallState.isTogglingMic,
+    isTogglingCam: videoCallState.isTogglingCam,
 
     // UI panels
     showChat,
     setShowChat,
     showParticipants,
     setShowParticipants,
+    isChatCollapsed,
+    setIsChatCollapsed,
+    isAiCollapsed,
+    setIsAiCollapsed,
+    unreadRoomChat,
+    setUnreadRoomChat,
+    unreadAiChat,
+    setUnreadAiChat,
+    showVirtualBackground,
+    setShowVirtualBackground,
 
     // Chat
     messages: chatMessages,
+    aiMessages: combinedAiMessages,
+    addOptimisticAiMessage,
+    chatPublicAi,
+    chatPrivateAi,
+    receiveSystemMsgs,
+    setReceiveSystemMsgs,
+    updateAiInteraction,
+    isCurrentUserPrompting,
+    startNewThread,
+    continueThread,
+    getConversationThread,
 
     // Actions
     handleToggleMic: actions.handleToggleMic,
@@ -217,6 +286,14 @@ const GlobalCallContent = ({ children, ContextProvider }) => {
     isLocalScreenShare: screenShareState.isLocalScreenShare,
     presenterDisplayName: screenShareState.presenterDisplayName,
     handleToggleScreenShare: actions.handleToggleScreenShare,
+    isTogglingScreenShare: screenShareState.isTogglingScreenShare,
+    // Recording
+    isRecording: recordingState.isRecording,
+    isTogglingRecording: recordingState.isTogglingRecording,
+    handleToggleRecording: recordingState.handleToggleRecording,
+    showStopModal: recordingState.showStopModal,
+    confirmStopRecording: recordingState.confirmStopRecording,
+    cancelStopRecording: recordingState.cancelStopRecording,
   }
 
   return (

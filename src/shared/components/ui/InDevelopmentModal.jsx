@@ -10,7 +10,7 @@ const InDevelopmentModal = ({ open, onCancel }) => {
 
   return (
     <Modal open={open} onClose={onCancel}>
-      <div className="flex flex-col gap-4 items-center justify-center text-center">
+      <div className="flex flex-col gap-4 items-center justify-center text-center pb-6">
         {/* You can add an illustration here if desired from constants or assets */}
         <h2 className="text-2xl font-bold">
           {comingSoon.title || "Feature in Development"}

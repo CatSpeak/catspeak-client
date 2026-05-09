@@ -1,11 +1,16 @@
 import React, { useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import dayjs from "dayjs"
 import CalendarHeadline from "../components/CalendarHeadline"
 import CalendarToolBar from "../components/CalendarToolBar"
 import Calendar from "../components/Calendar"
+import EventDetailModal from "../components/EventDetailModal/index"
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(dayjs())
+  const [searchParams, setSearchParams] = useSearchParams()
+  const eventIdFromUrl = searchParams.get("eventId")
+  const occurrenceIdFromUrl = searchParams.get("occurrenceId")
 
   const handleNextMonth = () => setCurrentDate((prev) => prev.add(1, "month"))
   const handlePrevMonth = () =>
@@ -28,6 +33,21 @@ const CalendarPage = () => {
           </div>
         </div>
       </div>
+
+      {eventIdFromUrl && (
+        <EventDetailModal
+          event={{ 
+            eventId: eventIdFromUrl, 
+            occurrenceId: occurrenceIdFromUrl || undefined 
+          }}
+          onClose={() => {
+            const newParams = new URLSearchParams(searchParams)
+            newParams.delete("eventId")
+            newParams.delete("occurrenceId")
+            setSearchParams(newParams, { replace: true })
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { useGetProfileQuery } from "@/features/auth"
 import {
   useGetVideoSessionByIdQuery,
   useGetLivekitTokenMutation,
+  useLeaveVideoSessionMutation,
 } from "@/store/api/videoSessionsApi"
 import {
   useGetRoomByIdQuery,
@@ -15,8 +16,9 @@ import {
 } from "@/features/rooms"
 import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { enterCall, setPiP } from "@/store/slices/videoCallSlice"
+import { enterCall, setPiP, leaveCall } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
+import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import WebViewBlockScreen from "../components/WebViewBlockScreen"
@@ -70,6 +72,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const dispatch = useDispatch()
   const { t, language } = useLanguage()
 
+  const { isInCall, callInfo } = useSelector((s) => s.videoCall)
+  const [leaveSessionMut] = useLeaveVideoSessionMutation()
+
   // ── WebView gate (must be before any conditional hooks) ──
   const webview = useMemo(() => detectWebView(), [])
 
@@ -81,6 +86,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const [joinedSessionId, setJoinedSessionId] = useState(null)
   const [initMicOn, setInitMicOn] = useState(false)
   const [initCamOn, setInitCamOn] = useState(false)
+
+  const [showSwitchModal, setShowSwitchModal] = useState(false)
+  const [pendingJoinArgs, setPendingJoinArgs] = useState(null)
 
   // Password verification state
   const [passwordError, setPasswordError] = useState("")
@@ -218,8 +226,37 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     }
   }
 
+  const handleConfirmSwitch = () => {
+    setShowSwitchModal(false)
+    handleJoinClick({ ...pendingJoinArgs, confirmedSwitch: true })
+  }
+
+  const handleCancelSwitch = () => {
+    setShowSwitchModal(false)
+    if (pendingJoinArgs?.isAutoJoin && callInfo?.callPath) {
+      navigate(callInfo.callPath)
+    }
+    setPendingJoinArgs(null)
+  }
+
   // --- Handle "Join Now" click ---
-  const handleJoinClick = async ({ skipRoomFullCheck = false } = {}) => {
+  const handleJoinClick = async ({ skipRoomFullCheck = false, confirmedSwitch = false, isAutoJoin = false } = {}) => {
+    // If we are already in a different call, cleanly leave it first
+    if (isInCall && callInfo?.sessionId && !confirmedSwitch) {
+      setShowSwitchModal(true)
+      setPendingJoinArgs({ skipRoomFullCheck, isAutoJoin })
+      return
+    }
+
+    if (isInCall && callInfo?.sessionId && confirmedSwitch) {
+      try {
+        await leaveSessionMut(callInfo.sessionId).unwrap()
+      } catch (err) {
+        console.error("[VideoCall] Failed to leave previous session:", err)
+      }
+      dispatch(leaveCall())
+    }
+
     setPhase("joining")
 
     try {
@@ -323,13 +360,21 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       // Clear fromQueue state to prevent re-trigger on page refresh
       navigate(location.pathname, { replace: true, state: {} })
       // Auto-join with mic/camera OFF, bypassing room-full check
-      handleJoinClick({ skipRoomFullCheck: true })
+      handleJoinClick({ skipRoomFullCheck: true, isAutoJoin: true })
     }
   }, [fromQueue, user, room, isLoadingUser, isLoadingRoom])
 
   // ========================================
   //  RENDER: Guards & phase-based rendering
   // ========================================
+
+  const switchModal = (
+    <SwitchCallModal
+      open={showSwitchModal}
+      onCancel={handleCancelSwitch}
+      onConfirm={handleConfirmSwitch}
+    />
+  )
 
   // WebView block — must come first
   if (webview.isWebView) {
@@ -379,29 +424,35 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     }
 
     return (
-      <WaitingScreen
-        session={displaySession}
-        room={room}
-        participantCount={currentParticipantCount}
-        user={user}
-        micOn={micOn}
-        cameraOn={cameraOn}
-        localStream={localStream}
-        onToggleMic={toggleMic}
-        onToggleCam={toggleCamera}
-        onJoin={handleJoinClick}
-        isFull={isRoomFull}
-        maxParticipants={maxParticipants}
-      />
+      <>
+        {switchModal}
+        <WaitingScreen
+          session={displaySession}
+          room={room}
+          participantCount={currentParticipantCount}
+          user={user}
+          micOn={micOn}
+          cameraOn={cameraOn}
+          localStream={localStream}
+          onToggleMic={toggleMic}
+          onToggleCam={toggleCamera}
+          onJoin={handleJoinClick}
+          isFull={isRoomFull}
+          maxParticipants={maxParticipants}
+        />
+      </>
     )
   }
 
   // ---- PHASE: JOINING ----
   if (phase === "joining") {
     return (
-      <VideoCallLoading
-        message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
-      />
+      <>
+        {switchModal}
+        <VideoCallLoading
+          message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
+        />
+      </>
     )
   }
 

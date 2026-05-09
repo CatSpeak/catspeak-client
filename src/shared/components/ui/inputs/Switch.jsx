@@ -1,4 +1,5 @@
 import React from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * A reusable Switch component styled with Tailwind CSS.
@@ -9,16 +10,36 @@ import React from "react"
  * @param {string} [props.className] - Optional container class.
  * @param {string} [props.colorClass] - Optional color for the checked state (default: bg-[#eab308]).
  */
-const Switch = ({ checked, onChange, className = "", colorClass = "peer-checked:bg-[#eab308]" }) => {
+const Switch = ({
+  checked,
+  onChange,
+  className = "",
+  colorClass = "peer-checked:bg-[#eab308]",
+  showLabel = false,
+}) => {
+  const { t } = useLanguage()
+
+  const onText = t.toggle?.on || "On"
+  const offText = t.toggle?.off || "Off"
+
   return (
-    <label className={`relative inline-flex items-center cursor-pointer ${className}`}>
+    <label
+      className={`relative inline-flex items-center cursor-pointer ${className}`}
+    >
+      {showLabel && (
+        <span className="mr-3 text-sm select-none">
+          {checked ? onText : offText}
+        </span>
+      )}
       <input
         type="checkbox"
         className="sr-only peer"
         checked={checked}
         onChange={onChange}
       />
-      <div className={`w-8 h-4 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 ${colorClass}`}></div>
+      <div
+        className={`relative w-10 h-5 shrink-0 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:shadow-sm after:rounded-full after:h-3 after:w-3 after:transition-all ${colorClass}`}
+      ></div>
     </label>
   )
 }

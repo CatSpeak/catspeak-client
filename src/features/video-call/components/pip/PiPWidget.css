@@ -3,14 +3,14 @@
 .pip-widget {
   position: fixed;
   z-index: 9999;
-  width: 280px;
-  height: 180px;
-  border-radius: 16px;
+  width: 320px;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.28),
     0 2px 8px rgba(0, 0, 0, 0.12);
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border: none;
   background: #1a1a1a;
   cursor: grab;
   user-select: none;
@@ -74,18 +74,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Speaking Indicator ─────────────────────────────────────────────────── */
-
-.pip-speaking-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  border: 2px solid #4caf50;
-  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
-  pointer-events: none;
-  transition: opacity 200ms ease;
-}
-
 /* ── Bottom Controls ──────────────────────────────────────────────────────── */
 
 .pip-controls {
@@ -105,8 +93,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -114,14 +102,6 @@
   color: #fff;
   pointer-events: auto;
   flex-shrink: 0;
-}
-
-.pip-btn:hover {
-  transform: scale(1.1);
-}
-
-.pip-btn:active {
-  transform: scale(0.95);
 }
 
 .pip-btn--default {
@@ -180,37 +160,3 @@
 }
 
 /* ── Responsive: smaller on mobile ───────────────────────────────────────── */
-
-@media (max-width: 640px) {
-  .pip-widget {
-    width: 200px;
-    height: 130px;
-    border-radius: 12px;
-  }
-
-  .pip-speaking-ring {
-    border-radius: 12px;
-  }
-
-  .pip-top-overlay {
-    padding: 5px 8px;
-  }
-
-  .pip-room-name {
-    font-size: 10px;
-  }
-
-  .pip-timer {
-    font-size: 9px;
-  }
-
-  .pip-btn {
-    width: 26px;
-    height: 26px;
-  }
-
-  .pip-controls {
-    padding: 4px 6px;
-    gap: 3px;
-  }
-}

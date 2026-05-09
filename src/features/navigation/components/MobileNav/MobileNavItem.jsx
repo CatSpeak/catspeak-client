@@ -4,9 +4,11 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "../../hooks/useActiveLink"
 
 const MobileNavItem = ({ navKey, onClose }) => {
-  if (navKey === "cart" || navKey === "connect") return null;
   const { t } = useLanguage()
   const { lang } = useParams()
+  const isActive = useActiveLink(navKey)
+
+  if (navKey === "cart" || navKey === "connect") return null;
 
   const currentLang = lang || localStorage.getItem("communityLanguage") || "en"
 
@@ -20,8 +22,6 @@ const MobileNavItem = ({ navKey, onClose }) => {
   } else {
     href = "/"
   }
-
-  const isActive = useActiveLink(navKey)
 
   return (
     <NavLink

@@ -2,13 +2,12 @@ import { useState, useEffect, useRef, useCallback } from "react"
 
 // ─── Corner snap math ──────────────────────────────────────────────────────
 
-const SNAP_MARGIN = 16
+const SNAP_MARGIN = 20
 
 const getWidgetSize = () => {
-  const isMobile = window.innerWidth <= 640
   return {
-    w: isMobile ? 200 : 280,
-    h: isMobile ? 130 : 180,
+    w: 320,
+    h: 180,
   }
 }
 

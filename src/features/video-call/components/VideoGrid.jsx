@@ -48,7 +48,7 @@ const VideoGrid = () => {
       sidebarScreenShares.length > 0 || sidebarParticipants.length > 0
 
     return (
-      <div className="flex h-full w-full flex-col md:flex-row gap-3 p-4 overflow-hidden">
+      <div className="flex h-full w-full flex-col md:flex-row gap-2 p-5 overflow-hidden">
         {/* Main: spotlighted tile */}
         <div className="flex-[3] md:flex-[4] min-h-0 min-w-0">
           {spotlightItem.type === "screen" ? (
@@ -127,8 +127,8 @@ const VideoGrid = () => {
     <div
       className={`
     flex flex-col min-[426px]:grid h-full w-full
-    gap-4
-    p-4
+    gap-2
+    p-5
     overflow-y-auto
     min-[426px]:place-content-center
     min-[426px]:auto-rows-fr

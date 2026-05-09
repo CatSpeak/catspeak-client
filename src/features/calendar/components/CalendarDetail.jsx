@@ -3,7 +3,7 @@ import { useSelector } from "react-redux"
 import { selectCurrentUser } from "@/store/slices/authSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetEventsByDateQuery } from "@/store/api/eventsApi"
-import { processOverlappingEvents } from "../utils/EventUtils"
+import { processOverlappingEvents, parseTime } from "../utils/EventUtils"
 import TimelineGrid from "./TimelineGrid"
 import EventBlock from "./EventBlock"
 import EventDetailModal from "./EventDetailModal/index"
@@ -17,53 +17,126 @@ const DEFAULT_COLOR = "#B91264"
 const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
   const { t } = useLanguage()
   const scrollRef = useRef(null)
+  const hasScrolledToEvent = useRef(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const currentUser = useSelector(selectCurrentUser)
 
   useEffect(() => {
-    // Scroll to 8 AM by default when opened
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 8 * HOUR_HEIGHT - 20
-    }
+    // Reset scroll state when selecting a new date
+    hasScrolledToEvent.current = false
   }, [selectedDate])
 
-  if (selectedDate === null) return null
-
-  const displayDate = currentDate.date(selectedDate)
+  const displayDate = currentDate.date(selectedDate || 1)
   const formattedDate = displayDate.format("MMMM D, YYYY")
   const ddMmYyyy = displayDate.format("DD/MM/YYYY")
 
-  // Fetch events for the selected date from the API
-  const { data: eventsByDateData, isLoading } = useGetEventsByDateQuery(
+  const localStart = displayDate.startOf("day")
+  const localEnd = displayDate.endOf("day")
+
+  const utcDateA = localStart.toISOString()
+  const utcDateB = localEnd.toISOString()
+  const needsTwoQueries = utcDateA.split("T")[0] !== utcDateB.split("T")[0]
+
+  const { data: eventsDataA, isLoading: isLoadingA } = useGetEventsByDateQuery(
     {
-      date: displayDate.toISOString(),
-      ...(currentUser?.id ? { userId: currentUser.id } : {}),
+      date: utcDateA,
+      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
     },
     { skip: selectedDate === null },
   )
 
-  // Map API events to the shape EventBlock expects
+  const { data: eventsDataB, isLoading: isLoadingB } = useGetEventsByDateQuery(
+    {
+      date: utcDateB,
+      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
+    },
+    { skip: selectedDate === null || !needsTwoQueries },
+  )
+
+  const isLoading = isLoadingA || isLoadingB
+
+  // Map API events to the shape EventBlock expects and filter by local date
   const mappedEvents = useMemo(() => {
-    if (!eventsByDateData?.events) return []
+    const allEvents = []
+    const seenIds = new Set()
 
-    return eventsByDateData.events.map((ev) => ({
-      id: ev.occurrenceId ?? ev.eventId,
-      eventId: ev.eventId,
-      occurrenceId: ev.occurrenceId,
-      title: ev.title,
-      startTime: dayjs(ev.startTime).format("HH:mm"),
-      endTime: dayjs(ev.endTime).format("HH:mm"),
-      originalStartTime: ev.startTime, // preserve full ISO for API calls
-      originalEndTime: ev.endTime, // preserve full ISO for API calls
-      color: ev.color || DEFAULT_COLOR,
-      isRegistered: ev.isRegistered,
-      currentParticipants: ev.currentParticipants,
-      maxParticipants: ev.maxParticipants,
-      location: ev.location || "",
-    }))
-  }, [eventsByDateData])
+    const addEvents = (eventsArr) => {
+      if (!eventsArr) return
+      eventsArr.forEach((ev) => {
+        const id = ev.occurrenceId || ev.eventId
+        if (!seenIds.has(id)) {
+          // Keep only events where local start time is on the selected date
+          if (dayjs(ev.startTime).isSame(displayDate, "day")) {
+            seenIds.add(id)
+            allEvents.push({
+              ...ev,
+              id,
+              eventId: ev.eventId,
+              occurrenceId: ev.occurrenceId,
+              title: ev.title,
+              startTime: dayjs(ev.startTime).format("HH:mm"),
+              endTime: dayjs(ev.endTime).format("HH:mm"),
+              originalStartTime: ev.startTime, // preserve full ISO for API calls
+              originalEndTime: ev.endTime, // preserve full ISO for API calls
+              color: ev.color || DEFAULT_COLOR,
+              isRegistered: ev.isRegistered,
+              currentParticipants: ev.currentParticipants,
+              maxParticipants: ev.maxParticipants,
+              location: ev.location || "",
+            })
+          }
+        }
+      })
+    }
 
-  const positionedEvents = processOverlappingEvents(mappedEvents)
+    if (eventsDataA?.events) addEvents(eventsDataA.events)
+    if (eventsDataB?.events && needsTwoQueries) addEvents(eventsDataB.events)
+
+    return allEvents
+  }, [eventsDataA, eventsDataB, needsTwoQueries, displayDate])
+
+  const positionedEvents = useMemo(
+    () => processOverlappingEvents(mappedEvents),
+    [mappedEvents],
+  )
+
+  // Handle automatic scrolling to the most recent event once loaded
+  useEffect(() => {
+    if (!scrollRef.current || isLoading || hasScrolledToEvent.current) return
+
+    let targetTime = 8 // Default to 8 AM
+    if (positionedEvents.length > 0) {
+      const isToday = displayDate.isSame(dayjs(), "day")
+      if (isToday) {
+        const currentHour = dayjs().hour() + dayjs().minute() / 60
+        // Find the first event that hasn't ended yet, or started within the last hour
+        const upcoming = positionedEvents.find(
+          (e) =>
+            parseTime(e.endTime) >= currentHour ||
+            parseTime(e.startTime) >= currentHour - 1
+        )
+        if (upcoming) {
+          targetTime = parseTime(upcoming.startTime)
+        } else {
+          // All events are in the past today, scroll to the last one
+          targetTime = parseTime(
+            positionedEvents[positionedEvents.length - 1].startTime
+          )
+        }
+      } else {
+        // For other days, scroll to the first event
+        targetTime = parseTime(positionedEvents[0].startTime)
+      }
+    }
+
+    scrollRef.current.scrollTo({
+      top: Math.max(0, targetTime * HOUR_HEIGHT - 20),
+      behavior: "smooth",
+    })
+    hasScrolledToEvent.current = true
+  }, [positionedEvents, isLoading, displayDate])
+
+  if (selectedDate === null) return null
 
   // Compute canvas width: at least 1 column, grow with max parallel cols
   const maxCols = positionedEvents.reduce(

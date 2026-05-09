@@ -3,6 +3,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { Play } from "lucide-react"
 import CatIcon from "@/shared/assets/icons/logo/icon.svg"
 import RegisteredEvents from "./RegisteredEvents"
+import MyEvents from "./MyEvents"
 
 const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
   const { t } = useLanguage()
@@ -44,8 +45,7 @@ const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
 
       <div className="w-full h-[1px] bg-[#E5E5E5] my-5" />
 
-      <div className="flex flex-col">
-        {/*
+      {/* <div className="flex flex-col">
         <h3 className="text-[32px] leading-[1.1] font-bold text-[#990011] tracking-tight">
           HCM, VN
         </h3>
@@ -57,7 +57,7 @@ const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
             Sự kiện
           </span>
         </div>
-        */}
+
         <div className="flex items-center gap-2">
           <img
             src={CatIcon}
@@ -70,9 +70,12 @@ const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
         </div>
       </div>
 
-      <div className="w-full h-[1px] bg-[#E5E5E5] my-5" />
+      <div className="w-full h-[1px] bg-[#E5E5E5] my-5" /> */}
 
-      <RegisteredEvents />
+      <div className="space-y-5">
+        <RegisteredEvents />
+        <MyEvents />
+      </div>
     </div>
   )
 }

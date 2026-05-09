@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
@@ -16,6 +16,7 @@ const CategoryRoomSection = ({
   requiredLevels,
   topics,
   onSeeMore,
+  onTotalCountLoaded,
 }) => {
   const { t } = useLanguage()
   const itemsPerPage = useResponsiveItemsPerPage()
@@ -36,11 +37,20 @@ const CategoryRoomSection = ({
     categories: [categoryKey],
   })
 
-  const currentRooms = responseData?.data ?? []
+  const currentRooms = useMemo(() => responseData?.data ?? [], [responseData])
   const additionalData = responseData?.additionalData || {}
   const totalCount = additionalData.totalCount || 0
   const totalPages = additionalData.totalPages || 1
   const hasNextPage = additionalData.hasNextPage || false
+
+  // Report totalCount to parent for sorting
+  const lastReportedCount = useRef(null)
+  useEffect(() => {
+    if (onTotalCountLoaded && !isLoading && lastReportedCount.current !== totalCount) {
+      lastReportedCount.current = totalCount
+      onTotalCountLoaded(categoryKey, totalCount)
+    }
+  }, [totalCount, isLoading, onTotalCountLoaded, categoryKey])
 
   const [accumulatedRooms, setAccumulatedRooms] = useState([])
   const scrollContainerRef = useRef(null)

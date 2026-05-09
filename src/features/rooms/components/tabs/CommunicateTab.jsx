@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useCallback, useMemo } from "react"
 
 import { useSearchParams } from "react-router-dom"
 import RoomCard from "../RoomCard"
@@ -46,7 +46,22 @@ const CommunicateTab = ({
 
   const isFilteredView = selectedCategories && selectedCategories.length > 0
 
-  const sections = getSections(t)
+  const [categoryCounts, setCategoryCounts] = useState({})
+
+  const handleTotalCountLoaded = useCallback((categoryKey, count) => {
+    setCategoryCounts((prev) => {
+      if (prev[categoryKey] === count) return prev
+      return { ...prev, [categoryKey]: count }
+    })
+  }, [])
+
+  const sortedSections = useMemo(() => {
+    return getSections(t).sort((a, b) => {
+      const countA = categoryCounts[a.key] ?? -1
+      const countB = categoryCounts[b.key] ?? -1
+      return countB - countA
+    })
+  }, [t, categoryCounts])
 
   return (
     <div className="w-full relative">
@@ -116,7 +131,7 @@ const CommunicateTab = ({
             </div>
           ) : (
             <div className="w-full flex flex-col gap-10">
-              {sections.map((section) => (
+              {sortedSections.map((section) => (
                 <CategoryRoomSection
                   key={section.key}
                   categoryKey={section.key}
@@ -125,6 +140,7 @@ const CommunicateTab = ({
                   requiredLevels={requiredLevels}
                   topics={topics}
                   onSeeMore={handleCategoryClick}
+                  onTotalCountLoaded={handleTotalCountLoaded}
                 />
               ))}
             </div>

@@ -1,9 +1,14 @@
 export default {
   languageLabel: "English",
+  you: "You",
   switchTo: "Tiếng Việt",
   getStarted: "Get started",
   seeMore: "See more",
   back: "Back",
+  toggle: {
+    on: "On",
+    off: "Off",
+  },
   pagination: {
     range: "{{start}}-{{end}} of {{total}}",
   },
@@ -14,6 +19,7 @@ export default {
     catSpeak: "Cat Speak",
     cart: "Courses",
     connect: "Profile",
+    workspace: "My Workspace",
   },
   comingSoon: {
     badge: "Coming Soon",

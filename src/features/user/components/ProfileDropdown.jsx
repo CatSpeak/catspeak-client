@@ -55,6 +55,11 @@ const ProfileDropdown = () => {
     navigate("/profile")
   }
 
+  const handleSettingsClick = () => {
+    handleCloseMenu()
+    navigate("/setting")
+  }
+
   // Click outside to close (desktop only)
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -80,10 +85,10 @@ const ProfileDropdown = () => {
   }
 
   const menuItemClass =
-    "flex w-full items-center gap-3 px-4 h-10 text-base hover:bg-[#E5E5E5] transition-colors"
+    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm hover:bg-[#F6F6F6]"
 
   const menuItemDisabledClass =
-    "flex w-full items-center gap-3 px-4 h-10 text-base text-[#7A7574] cursor-not-allowed"
+    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-[#7A7574] cursor-not-allowed"
 
   const dropdownContent = (
     <>
@@ -100,7 +105,7 @@ const ProfileDropdown = () => {
         </span>
       </div>
 
-      <div className="flex items-center gap-3 p-4">
+      <div className="flex items-center gap-3 p-3">
         <Avatar
           size={40}
           src={user?.avatarImageUrl}
@@ -118,23 +123,21 @@ const ProfileDropdown = () => {
         </div>
       </div>
 
-      <div className="border-t border-[#F0F0F0]" />
+      <div className="border-t border-[#e5e5e5]" />
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 p-1">
         <button onClick={handleProfileClick} className={menuItemClass}>
-          <User />
-          <span className="text-sm">{t.header.profile}</span>
+          <User size={20} />
+          <span>{t.header.profile}</span>
         </button>
 
-        {/*
-        <button disabled className={menuItemDisabledClass}>
-          <Settings />
-          <span className="text-sm">{t.header.settings}</span>
-        </button> */}
-
+        <button onClick={handleSettingsClick} className={menuItemClass}>
+          <Settings size={20} />
+          <span>{t.header.settings || "Settings"}</span>
+        </button>
         <button onClick={handleLogout} className={menuItemClass}>
-          <LogOut />
-          <span className="text-sm">{t.header.logout}</span>
+          <LogOut size={20} />
+          <span>{t.header.logout}</span>
         </button>
       </div>
     </>
@@ -199,7 +202,7 @@ const ProfileDropdown = () => {
             exit={true}
             className="absolute right-0 top-full z-[1200] mt-2 w-64"
           >
-            <div className="flex flex-col bg-white overflow-hidden rounded-xl shadow-lg focus:outline-none">
+            <div className="flex flex-col bg-white overflow-hidden rounded-lg border border-[#e5e5e5] shadow-lg focus:outline-none">
               {dropdownContent}
             </div>
           </FluentAnimation>

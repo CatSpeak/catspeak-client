@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useCreateSharedLinkMutation } from "@/store/api/eventsApi"
 
-const useEventShare = (eventId) => {
+const useEventShare = (eventId, occurrenceId) => {
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
   const [copied, setCopied] = useState(false)
@@ -29,15 +29,24 @@ const useEventShare = (eventId) => {
     }
     if (!shareUrl) {
       try {
-        const res = await createSharedLink({
-          eventId,
+        if (!occurrenceId) {
+          console.error("Cannot create share link: occurrenceId is missing")
+          return
+        }
+        const payload = {
+          eventId: occurrenceId,
           expiresAt: new Date(
             Date.now() + 7 * 24 * 60 * 60 * 1000,
           ).toISOString(),
-          maxUses: 0,
-        }).unwrap()
-        const url =
-          res.shareUrl || `${window.location.origin}/events/shared/${res.token}`
+        }
+
+        const res = await createSharedLink(payload).unwrap()
+        const token =
+          res.token ||
+          (typeof res === "string"
+            ? res.split("/").pop()
+            : res.shareUrl?.split("/").pop())
+        const url = `${window.location.origin}/events/shared/${token}`
         setShareUrl(url)
       } catch (err) {
         console.error("Failed to create share link:", err)

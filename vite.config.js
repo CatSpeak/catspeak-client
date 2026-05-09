@@ -1,3 +1,4 @@
+/* global process */
 import { defineConfig, loadEnv } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
@@ -27,6 +28,13 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: true,
           ws: true,
+        },
+        "/r2": {
+          target:
+            "https://3bef3ed6d4d479f38c51000461eeaa0f.r2.cloudflarestorage.com",
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/r2/, ""),
         },
       },
     },

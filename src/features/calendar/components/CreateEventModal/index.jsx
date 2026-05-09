@@ -17,6 +17,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
       onClose={onClose}
       showCloseButton={false}
       className="p-0 !max-w-[900px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible max-[425px]:h-full"
+      bodyClassName="flex-1"
     >
       <form
         onSubmit={form.handleSubmit}
@@ -67,16 +68,37 @@ const CreateEventModal = ({ onClose, editEvent }) => {
 
               <EventDetailsSection
                 title={form.title}
-                onTitleChange={form.setTitle}
+                onTitleChange={(val) => {
+                  form.setTitle(val)
+                  if (form.errors?.title) form.setErrors(prev => ({ ...prev, title: undefined }))
+                }}
                 eventColor={form.eventColor}
+                countryId={form.countryId}
+                onCountryIdChange={(val) => {
+                  form.setCountryId(val)
+                  form.setCityId(0) // reset city when country changes
+                  if (form.errors?.countryId) form.setErrors(prev => ({ ...prev, countryId: undefined }))
+                }}
+                cityId={form.cityId}
+                onCityIdChange={(val) => {
+                  form.setCityId(val)
+                  if (form.errors?.cityId) form.setErrors(prev => ({ ...prev, cityId: undefined }))
+                }}
                 eventLocation={form.eventLocation}
-                onLocationChange={form.setEventLocation}
+                onLocationChange={(val) => {
+                  form.setEventLocation(val)
+                  if (form.errors?.eventLocation) form.setErrors(prev => ({ ...prev, eventLocation: undefined }))
+                }}
                 description={form.description}
                 onDescriptionChange={form.setDescription}
                 maxParticipants={form.maxParticipants}
-                onMaxParticipantsChange={form.setMaxParticipants}
+                onMaxParticipantsChange={(val) => {
+                  form.setMaxParticipants(val)
+                  if (form.errors?.maxParticipants) form.setErrors(prev => ({ ...prev, maxParticipants: undefined }))
+                }}
                 conditionsInput={form.conditionsInput}
                 onConditionsChange={form.setConditionsInput}
+                errors={form.errors}
               />
             </div>
           </div>

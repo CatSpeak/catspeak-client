@@ -29,10 +29,11 @@ import { ComingSoonPage } from "@/shared/pages"
 import UserDashboard from "@/features/user/pages/UserDashboard"
 import ProfileLayout from "@/features/user/layouts/ProfileLayout"
 import PersonalInformationPage from "@/features/user/pages/PersonalInformationPage"
-import LecturerPage from "@/features/user/pages/LecturerPage"
+import RecordingsPage from "@/features/recordings/pages/RecordingsPage"
+import WorkspaceLayout from "@/features/workspace/layouts/WorkspaceLayout"
+import InstructorPage from "@/features/user/pages/InstructorPage"
 import OrganizationPage from "@/features/user/pages/OrganizationPage"
 import AccountSettingsPage from "@/features/user/pages/AccountSettingsPage"
-import SettingsPage from "@/features/settings/pages/SettingsPage"
 
 // Language routing components
 import LanguageLayout from "./LanguageLayout"
@@ -187,15 +188,37 @@ const routesConfig = [
                 index: true,
                 element: <UserDashboard />,
               },
+              { path: "*", element: <PageNotFound /> },
+            ],
+          },
+        ],
+      },
+      // Workspace routes
+      {
+        path: "/workspace",
+        element: (
+          <AuthGuard>
+            <UserLayout showFooter={false} />
+          </AuthGuard>
+        ),
+        children: [
+          {
+            element: <WorkspaceLayout />,
+            children: [
               {
-                path: "setting",
-                element: <SettingsPage />,
+                index: true,
+                element: <Navigate to="recordings" replace />,
+              },
+              {
+                path: "recordings",
+                element: <RecordingsPage />,
               },
               { path: "*", element: <PageNotFound /> },
             ],
           },
         ],
       },
+
       {
         element: (
           <AuthGuard>
@@ -211,8 +234,8 @@ const routesConfig = [
                 element: <PersonalInformationPage />,
               },
               {
-                path: "lecturer",
-                element: <LecturerPage />,
+                path: "instructor",
+                element: <InstructorPage />,
               },
               {
                 path: "organization",

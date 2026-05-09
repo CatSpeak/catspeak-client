@@ -1,8 +1,9 @@
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useMemo } from "react"
 import { Track } from "livekit-client"
 import { useIsSpeaking } from "@livekit/components-react"
 import { MonitorUp } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 
 // ─── Dominant Speaker Video ─────────────────────────────────────────────────
 
@@ -17,6 +18,11 @@ const DominantVideo = ({ participant }) => {
 
   const isLocal = participant?.isLocal
   const displayName = participant?.name || participant?.identity || "?"
+
+  const theme = useMemo(
+    () => getParticipantTheme(participant?.identity, displayName),
+    [participant?.identity, displayName],
+  )
 
   useEffect(() => {
     const el = videoRef.current
@@ -38,13 +44,12 @@ const DominantVideo = ({ participant }) => {
           className="pip-video"
         />
       ) : (
-        <div className="pip-avatar-fallback">
-          <Avatar size={48} name={displayName} speaking={isSpeaking} />
+        <div className="pip-avatar-fallback" style={{ background: theme.bg }}>
+          <Avatar size={48} name={displayName} speaking={isSpeaking} className={`!border-none ${theme.avatarClass}`} />
         </div>
       )}
 
 
-      {isSpeaking && <div className="pip-speaking-ring" />}
     </>
   )
 }
@@ -102,9 +107,10 @@ const PiPVideoContent = ({ activeScreenShare, dominant }) => {
     return <DominantVideo participant={dominant} />
   }
 
+  const theme = getParticipantTheme("", "?")
   return (
-    <div className="pip-avatar-fallback">
-      <Avatar size={48} name="?" />
+    <div className="pip-avatar-fallback" style={{ background: theme.bg }}>
+      <Avatar size={48} name="?" className={`!border-none ${theme.avatarClass}`} />
     </div>
   )
 }

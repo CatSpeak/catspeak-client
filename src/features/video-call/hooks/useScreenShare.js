@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import {
   useRoomContext,
   useLocalParticipant,
@@ -16,8 +16,17 @@ export const useScreenShare = () => {
   const room = useRoomContext()
   const { isScreenShareEnabled } = useLocalParticipant()
 
-  // Get all screen share tracks across all participants
-  const screenShareTracks = useTracks([Track.Source.ScreenShare])
+  // Subscribe to both video and audio screen share tracks.
+  // Audio tracks are handled automatically by <RoomAudioRenderer />.
+  const allScreenShareTracks = useTracks([
+    Track.Source.ScreenShare,
+    Track.Source.ScreenShareAudio,
+  ])
+
+  // Expose only video tracks for rendering ScreenShareTile components
+  const screenShareTracks = allScreenShareTracks.filter(
+    (t) => t.source === Track.Source.ScreenShare,
+  )
 
   // Find the first active screen share (legacy support)
   const screenShareTrackRef =
@@ -27,9 +36,20 @@ export const useScreenShare = () => {
   const isLocalScreenShare = isScreenShareEnabled
   const screenShareOn = screenShareTracks.length > 0
 
+  const [isTogglingScreenShare, setIsTogglingScreenShare] = useState(false)
+
   const toggleScreenShare = useCallback(async () => {
-    await room.localParticipant.setScreenShareEnabled(!isScreenShareEnabled)
-  }, [room, isScreenShareEnabled])
+    if (isTogglingScreenShare) return
+    setIsTogglingScreenShare(true)
+    try {
+      await room.localParticipant.setScreenShareEnabled(
+        !isScreenShareEnabled,
+        { audio: true },
+      )
+    } finally {
+      setIsTogglingScreenShare(false)
+    }
+  }, [room, isScreenShareEnabled, isTogglingScreenShare])
 
   return {
     screenShareOn,
@@ -37,6 +57,7 @@ export const useScreenShare = () => {
     screenShareTracks,   // Expose all tracks
     presenterId: presenter?.identity ?? null,
     isLocalScreenShare,
+    isTogglingScreenShare,
     toggleScreenShare,
     presenterDisplayName: presenter?.name ?? null,
   }
