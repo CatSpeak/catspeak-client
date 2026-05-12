@@ -12,10 +12,8 @@ const initialState = {
   /** Static info about the active call */
   callInfo: {
     roomId: null,
-    sessionId: null,
     callPath: null, // e.g. "/en/meet/42"
     roomData: null, // room object snapshot
-    sessionData: null, // session object snapshot
     user: null,
     initMicOn: false,
     initCamOn: false,
@@ -35,10 +33,8 @@ const videoCallSlice = createSlice({
         livekitToken,
         livekitServerUrl,
         roomId,
-        sessionId,
         callPath,
         roomData,
-        sessionData,
         user,
         initMicOn,
         initCamOn,
@@ -50,10 +46,8 @@ const videoCallSlice = createSlice({
       state.livekitServerUrl = livekitServerUrl ?? state.livekitServerUrl
       state.callInfo = {
         roomId,
-        sessionId,
         callPath,
         roomData,
-        sessionData,
         user,
         initMicOn: initMicOn ?? false,
         initCamOn: initCamOn ?? false,
@@ -68,13 +62,6 @@ const videoCallSlice = createSlice({
     },
 
     /**
-     * Update session data (e.g., when session details are refreshed).
-     */
-    updateSessionData(state, action) {
-      state.callInfo.sessionData = action.payload
-    },
-
-    /**
      * Fully leave the call and reset all state.
      */
     leaveCall() {
@@ -83,7 +70,7 @@ const videoCallSlice = createSlice({
   },
 })
 
-export const { enterCall, setPiP, updateSessionData, leaveCall } =
+export const { enterCall, setPiP, leaveCall } =
   videoCallSlice.actions
 
 export default videoCallSlice.reducer

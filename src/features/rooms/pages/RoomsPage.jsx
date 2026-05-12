@@ -22,7 +22,6 @@ import {
   FluentAnimation,
 } from "@/shared/components/ui/animations"
 import { useSelector, useDispatch } from "react-redux"
-import { useLeaveVideoSessionMutation } from "@/store/api/videoSessionsApi"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 
@@ -36,7 +35,7 @@ const RoomsPage = () => {
   
   const { isInCall, callInfo } = useSelector((s) => s.videoCall)
   const dispatch = useDispatch()
-  const [leaveSessionMut] = useLeaveVideoSessionMutation()
+
 
   const [page, setPage] = useState(1)
   const [tab, setTab] = useState("communicate")
@@ -80,7 +79,7 @@ const RoomsPage = () => {
   }
 
   const handleCreateOneOnOne = () => {
-    if (isInCall && callInfo?.sessionId) {
+    if (isInCall) {
       setPendingAction("1:1")
       setShowSwitchModal(true)
       return
@@ -96,12 +95,7 @@ const RoomsPage = () => {
 
   const handleConfirmSwitch = async () => {
     setShowSwitchModal(false)
-    if (isInCall && callInfo?.sessionId) {
-      try {
-        await leaveSessionMut(callInfo.sessionId).unwrap()
-      } catch (err) {
-        console.error("Failed to leave session:", err)
-      }
+    if (isInCall) {
       dispatch(leaveCall())
     }
     

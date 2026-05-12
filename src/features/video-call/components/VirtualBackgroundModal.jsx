@@ -54,7 +54,7 @@ const VirtualBackgroundModal = ({
 
         {/* Right Column: Picker */}
         <div className="w-full md:w-80 flex-shrink-0 flex flex-col flex-1 md:h-auto">
-          <VirtualBackgroundPicker onApply={handleApply} />
+          <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
         </div>
       </div>
     </Modal>

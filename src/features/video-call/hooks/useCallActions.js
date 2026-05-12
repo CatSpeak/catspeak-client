@@ -4,7 +4,6 @@ import { toast } from "react-hot-toast"
 
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
 import { getCommunityPath } from "@/shared/utils/navigation"
-import { useLeaveVideoSessionMutation } from "@/store/api/videoSessionsApi"
 import {
   setPiP as setPiPAction,
   leaveCall as leaveCallAction,
@@ -20,7 +19,6 @@ import { getNavigate, getLocation } from "./useNavigateRef"
  * @param {object} params
  * @param {object} params.t               - Translation object
  * @param {string} params.language        - Current language code
- * @param {string} params.sessionId       - Active session ID
  * @param {boolean} params.isPiP          - Whether currently in PiP mode
  * @param {object} params.callInfo        - Call info from Redux (callPath etc.)
  * @param {Function} params.toggleAudioFn - LiveKit mic toggle
@@ -28,14 +26,12 @@ import { getNavigate, getLocation } from "./useNavigateRef"
  * @param {Function} params.leaveMeetingFn - LiveKit room.disconnect()
  * @param {object} params.screenShareState - Screen share state from useScreenShare()
  * @param {Function} params.chatSend      - LiveKit chat send function
- * @param {object} params.cleanupRefs     - { hasLeftRef, isLeavingRef }
  * @param {Function} params.setShowChat   - UI state setter
  * @param {Function} params.setShowParticipants - UI state setter
  */
 export const useCallActions = ({
   t,
   language,
-  sessionId,
   isPiP,
   callInfo,
   toggleAudioFn,
@@ -43,12 +39,10 @@ export const useCallActions = ({
   leaveMeetingFn,
   screenShareState,
   chatSend,
-  cleanupRefs,
   setShowChat,
   setShowParticipants,
 }) => {
   const dispatch = useDispatch()
-  const [leaveSessionMut] = useLeaveVideoSessionMutation()
 
   // ── Media toggles ──
 
@@ -89,15 +83,6 @@ export const useCallActions = ({
   // ── Leave session ──
 
   const handleLeaveSession = useCallback(async () => {
-    cleanupRefs.hasLeftRef.current = true
-    cleanupRefs.isLeavingRef.current = true
-    if (sessionId) {
-      try {
-        await leaveSessionMut(sessionId).unwrap()
-      } catch (error) {
-        console.error("Failed to leave session:", error)
-      }
-    }
     await leaveMeetingFn()
     dispatch(leaveCallAction())
 
@@ -108,7 +93,7 @@ export const useCallActions = ({
       const lang = pathname.split("/")[1] || language
       navigate(getCommunityPath(lang))
     }
-  }, [sessionId, isPiP, language, leaveMeetingFn, cleanupRefs, dispatch])
+  }, [isPiP, language, leaveMeetingFn, dispatch])
 
   // ── Copy link ──
 

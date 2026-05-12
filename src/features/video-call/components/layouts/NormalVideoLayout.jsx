@@ -59,7 +59,7 @@ const NormalVideoLayout = ({
                 "Unknown"
               }
               isLocal={trackRef.participant?.isLocal}
-              onClick={() => handleTileClick({ type: "screen", trackRef })}
+              onClick={totalItems >= 2 ? () => handleTileClick({ type: "screen", trackRef }) : undefined}
             />
           </div>
         ))}
@@ -70,7 +70,7 @@ const NormalVideoLayout = ({
           >
             <VideoTile
               participant={participant}
-              onClick={() => handleTileClick({ type: "video", participant })}
+              onClick={totalItems >= 2 ? () => handleTileClick({ type: "video", participant }) : undefined}
             />
           </div>
         ))}
