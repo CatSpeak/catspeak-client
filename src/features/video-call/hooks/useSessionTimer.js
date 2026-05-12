@@ -1,25 +1,33 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
-export const useSessionTimer = (session) => {
+/**
+ * Local elapsed-time timer that starts counting from when the hook mounts
+ * (i.e., when the user joins the call).
+ *
+ * @param {number|null} durationMinutes - Room duration in minutes (from room.duration). If null, timer is hidden.
+ * @returns {{ elapsedSeconds: number, formattedElapsed: string, formattedMax: string|null, hasDuration: boolean }}
+ */
+export const useSessionTimer = (durationMinutes = null) => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const startTimeRef = useRef(Date.now())
+
+  const hasDuration = durationMinutes != null
 
   useEffect(() => {
-    if (!session?.startTime || !session?.maxDurationMinutes) return
+    if (!hasDuration) return
 
-    const start = new Date(session.startTime).getTime()
-    const maxSeconds = session.maxDurationMinutes * 60
+    const maxSeconds = durationMinutes * 60
 
     const updateElapsed = () => {
-      const now = Date.now()
-      const diff = Math.max(0, Math.floor((now - start) / 1000))
+      const diff = Math.floor((Date.now() - startTimeRef.current) / 1000)
+      // Cap at max duration
       setElapsedSeconds(diff > maxSeconds ? maxSeconds : diff)
     }
 
     updateElapsed()
     const intervalId = setInterval(updateElapsed, 1000)
-
     return () => clearInterval(intervalId)
-  }, [session?.startTime, session?.maxDurationMinutes])
+  }, [hasDuration, durationMinutes])
 
   const formatDuration = (totalSeconds) => {
     const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0))
@@ -28,14 +36,14 @@ export const useSessionTimer = (session) => {
     return `${minutes}:${seconds}`
   }
 
-  const formattedElapsed = formatDuration(elapsedSeconds)
-  const formattedMax = session?.maxDurationMinutes
-    ? formatDuration(session.maxDurationMinutes * 60)
-    : null
+  const maxSeconds = hasDuration ? durationMinutes * 60 : 0
+  const remainingSeconds = Math.max(0, maxSeconds - elapsedSeconds)
 
   return {
     elapsedSeconds,
-    formattedElapsed,
-    formattedMax,
+    remainingSeconds,
+    formattedRemaining: hasDuration ? formatDuration(remainingSeconds) : null,
+    formattedMax: hasDuration ? formatDuration(maxSeconds) : null,
+    hasDuration,
   }
 }

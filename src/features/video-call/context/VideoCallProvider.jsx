@@ -3,16 +3,11 @@ import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
 import { useGetProfileQuery } from "@/features/auth"
-import {
-  useGetVideoSessionByIdQuery,
-  useGetLivekitTokenMutation,
-  useLeaveVideoSessionMutation,
-} from "@/store/api/videoSessionsApi"
+import { useGetLivekitTokenMutation } from "@/store/api/livekitApi"
 import {
   useGetRoomByIdQuery,
   WaitingScreen,
   useMediaPreview,
-  useJoinVideoSession,
 } from "@/features/rooms"
 import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -22,7 +17,6 @@ import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import WebViewBlockScreen from "../components/WebViewBlockScreen"
-import SessionErrorScreen from "../components/SessionErrorScreen"
 import PasswordScreen from "../components/PasswordScreen"
 
 /**
@@ -30,8 +24,8 @@ import PasswordScreen from "../components/PasswordScreen"
  *  - "verifying"         : Checking if user has access to a private room
  *  - "password-required" : Private room, no grant — user must enter password
  *  - "waiting"           : Room loaded, showing WaitingScreen with media preview
- *  - "joining"           : User clicked "Join Now", creating/joining video session
- *  - "in-call"           : Session joined, delegated to GlobalVideoCallProvider
+ *  - "joining"           : User clicked "Join Now", fetching LiveKit token
+ *  - "in-call"           : Token acquired, delegated to GlobalVideoCallProvider
  */
 export const VideoCallProvider = ({ children }) => {
   const { id: roomId, lang } = useParams()
@@ -73,7 +67,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const { t, language } = useLanguage()
 
   const { isInCall, callInfo } = useSelector((s) => s.videoCall)
-  const [leaveSessionMut] = useLeaveVideoSessionMutation()
 
   // ── WebView gate (must be before any conditional hooks) ──
   const webview = useMemo(() => detectWebView(), [])
@@ -83,7 +76,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // Phase state machine — skip waiting if from queue
   const [phase, setPhase] = useState(fromQueue ? "joining" : "verifying")
-  const [joinedSessionId, setJoinedSessionId] = useState(null)
   const [initMicOn, setInitMicOn] = useState(false)
   const [initCamOn, setInitCamOn] = useState(false)
 
@@ -126,35 +118,14 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     await hookToggleCamera()
   }
 
-  // --- Join/create session logic ---
-  const {
-    handleJoin: hookJoin,
-    isLoadingSessions,
-    activeSession,
-    isJoining,
-    isCreating,
-  } = useJoinVideoSession({
-    roomId,
-    isAuthenticated: !!user,
-  })
+  // --- LiveKit token mutation ---
+  const [getLivekitToken] = useGetLivekitTokenMutation()
 
   // Room full check
   const currentParticipantCount = room?.currentParticipantCount ?? 0
   const maxParticipants = room?.maxParticipants ?? null
   const isRoomFull =
     maxParticipants !== null && currentParticipantCount >= maxParticipants
-
-  // --- Session data (fetched after join) ---
-  const {
-    data: session,
-    isLoading: isLoadingSession,
-    error: sessionError,
-  } = useGetVideoSessionByIdQuery(joinedSessionId, {
-    skip: !joinedSessionId,
-  })
-
-  // --- LiveKit token mutation ---
-  const [getLivekitToken] = useGetLivekitTokenMutation()
 
   // --- Cleanup media preview tracks when transitioning to in-call ---
   const cleanupMediaPreview = useCallback(() => {
@@ -241,31 +212,32 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // --- Handle "Join Now" click ---
   const handleJoinClick = async ({ skipRoomFullCheck = false, confirmedSwitch = false, isAutoJoin = false } = {}) => {
-    // If we are already in a different call, cleanly leave it first
-    if (isInCall && callInfo?.sessionId && !confirmedSwitch) {
+    // If we are already in a different call, show switch modal
+    if (isInCall && !confirmedSwitch) {
       setShowSwitchModal(true)
       setPendingJoinArgs({ skipRoomFullCheck, isAutoJoin })
       return
     }
 
-    if (isInCall && callInfo?.sessionId && confirmedSwitch) {
-      try {
-        await leaveSessionMut(callInfo.sessionId).unwrap()
-      } catch (err) {
-        console.error("[VideoCall] Failed to leave previous session:", err)
-      }
+    // If switching from another call, cleanly leave it first
+    if (isInCall && confirmedSwitch) {
       dispatch(leaveCall())
+    }
+
+    // Room full check (moved from deleted useJoinVideoSession hook)
+    if (isRoomFull && !skipRoomFullCheck) {
+      toast.error(t.rooms.waitingScreen.roomFull)
+      return
     }
 
     setPhase("joining")
 
     try {
-      // 1. Fetch LiveKit token FIRST to validate connectivity
+      // Fetch LiveKit token to validate connectivity and join
       const livekitTokenBody = {
         roomId: Number(roomId),
         participantName: user.username,
       }
-      console.log("[VideoCall] POST /api/livekit/token body:", livekitTokenBody)
       const tokenRes = await getLivekitToken(livekitTokenBody).unwrap()
 
       const token = tokenRes?.participantToken
@@ -274,48 +246,31 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         throw new Error("Invalid LiveKit token received from backend")
       }
 
-      // 2. Token is valid → now create/join the backend session
-      const result = await hookJoin({
-        isRoomFull,
-        micOn,
-        cameraOn,
-        skipRoomFullCheck,
-      })
+      // Stop preview tracks before entering the call
+      cleanupMediaPreview()
 
-      if (result) {
-        // Stop preview tracks before entering the call
-        cleanupMediaPreview()
+      setInitMicOn(micOn)
+      setInitCamOn(cameraOn)
 
-        setInitMicOn(result.micOn)
-        setInitCamOn(result.cameraOn)
-        setJoinedSessionId(result.sessionId)
+      // Set phase to in-call
+      setPhase("in-call")
 
-        // Don't set phase to "in-call" yet — wait for session data to load
-        // Then we dispatch enterCall to the global provider
-        setPhase("in-call")
+      // Build the call path for PiP return navigation
+      const callPath = `/${lang || language}/meet/${roomId}`
 
-        // Build the call path for PiP return navigation
-        const callPath = `/${lang || language}/meet/${roomId}`
-
-        // Dispatch to global provider — this triggers LiveKitRoom rendering
-        dispatch(
-          enterCall({
-            livekitToken: token,
-            livekitServerUrl: serverUrl,
-            roomId,
-            sessionId: result.sessionId,
-            callPath,
-            roomData: room,
-            sessionData: null, // Will be updated once session query resolves
-            user,
-            initMicOn: result.micOn,
-            initCamOn: result.cameraOn,
-          }),
-        )
-      } else {
-        // Backend session join failed, go back to waiting
-        setPhase("waiting")
-      }
+      // Dispatch to global provider — this triggers LiveKitRoom rendering
+      dispatch(
+        enterCall({
+          livekitToken: token,
+          livekitServerUrl: serverUrl,
+          roomId,
+          callPath,
+          roomData: room,
+          user,
+          initMicOn: micOn,
+          initCamOn: cameraOn,
+        }),
+      )
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
       toast.error(
@@ -325,25 +280,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       setPhase("waiting")
     }
   }
-
-  // --- Update global session data once it loads ---
-  useEffect(() => {
-    if (session && phase === "in-call") {
-      dispatch(
-        enterCall({
-          livekitToken: undefined, // Don't overwrite — keep existing
-          roomId,
-          sessionId: session.sessionId,
-          callPath: `/${lang || language}/meet/${roomId}`,
-          roomData: room,
-          sessionData: session,
-          user,
-          initMicOn,
-          initCamOn,
-        }),
-      )
-    }
-  }, [session, phase])
 
   // --- Auto-join for queue-matched users (skip WaitingScreen) ---
   const autoJoinTriggered = useRef(false)
@@ -385,7 +321,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   if (
     isLoadingUser ||
     isLoadingRoom ||
-    isLoadingSessions ||
     isRoomQuerySkipped
   ) {
     return <div className="h-screen w-full bg-white"></div>
@@ -415,7 +350,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // ---- PHASE: WAITING ----
   if (phase === "waiting") {
-    const displaySession = activeSession || {
+    const displaySession = {
       name: room.name,
       roomName: room.name,
       topic: room.topic,

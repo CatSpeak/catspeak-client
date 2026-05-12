@@ -10,7 +10,7 @@ import {
   useSetActiveBackgroundMutation,
 } from "@/store/api/authApi"
 
-const VirtualBackgroundPicker = ({ onApply }) => {
+const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
   const { t } = useLanguage()
 
   // Fetch sample backgrounds
@@ -104,7 +104,7 @@ const VirtualBackgroundPicker = ({ onApply }) => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className={`flex flex-col h-full w-full ${className}`}>
       <div className="text-sm font-medium text-gray-900 mb-3">
         {t?.rooms?.virtualBackground?.title || "Backgrounds"}
       </div>

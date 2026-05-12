@@ -24,7 +24,6 @@ export { default as ClassTab } from "./components/tabs/ClassTab"
 // Hooks
 export { useRoomsPageLogic } from "./hooks/useRoomsPageLogic"
 export { useMediaPreview } from "./hooks/useMediaPreview"
-export { useJoinVideoSession } from "./hooks/useJoinVideoSession"
 
 // API
 export {

@@ -10,7 +10,6 @@ import Modal from "@/shared/components/ui/Modal"
 import { motion, AnimatePresence } from "framer-motion"
 import { TOPICS, LEVELS } from "../config/constants"
 import { useSelector, useDispatch } from "react-redux"
-import { useLeaveVideoSessionMutation } from "@/store/api/videoSessionsApi"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 
@@ -48,7 +47,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
 
   const { isInCall, callInfo } = useSelector((s) => s.videoCall)
   const dispatch = useDispatch()
-  const [leaveSessionMut] = useLeaveVideoSessionMutation()
+
 
   const [showSwitchModal, setShowSwitchModal] = useState(false)
   const [pendingAction, setPendingAction] = useState(null)
@@ -93,7 +92,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
     if (e) e.preventDefault()
     if (!selectedLanguage) return
 
-    if (isInCall && callInfo?.sessionId) {
+    if (isInCall) {
       setPendingAction("join")
       setPendingEvent(e)
       setShowSwitchModal(true)
@@ -135,7 +134,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
     if (e) e.preventDefault()
     if (!selectedLanguage) return
 
-    if (isInCall && callInfo?.sessionId) {
+    if (isInCall) {
       setPendingAction("create")
       setPendingEvent(e)
       setShowSwitchModal(true)
@@ -146,12 +145,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
 
   const handleConfirmSwitch = async () => {
     setShowSwitchModal(false)
-    if (isInCall && callInfo?.sessionId) {
-      try {
-        await leaveSessionMut(callInfo.sessionId).unwrap()
-      } catch (err) {
-        console.error("Failed to leave session:", err)
-      }
+    if (isInCall) {
       dispatch(leaveCall())
     }
 
