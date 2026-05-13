@@ -18,6 +18,7 @@ import NewsPage from "@/features/news/pages/NewsPage"
 import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
 import DiscoverPage from "@/features/discover/DiscoverPage"
 import VideoPage from "@/features/video/VideoPage"
+import VideoDetailPage from "@/features/video/pages/VideoDetailPage"
 import MailPage from "@/features/mail/pages/MailPage"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
 import CalendarPage from "@/features/calendar/pages/CalendarPage"
@@ -131,6 +132,10 @@ const routesConfig = [
                   {
                     path: "video",
                     element: <VideoPage />,
+                  },
+                  {
+                    path: "video/:id",
+                    element: <VideoDetailPage />,
                   },
                   {
                     path: "mail",

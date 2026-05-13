@@ -80,7 +80,7 @@ const RoomCard = ({ room }) => {
       <motion.div
         onClick={handleRoomClick}
         style={{
-          fontFamily: "var(--font-outfit)",
+          fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
         whileHover={{ y: -4 }}

@@ -6,7 +6,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import colors from "@/shared/utils/colors"
 
 const LANGUAGES = [
-  { key: "vi", label: "Tiếng Việt (Quốc Ngữ)" },
+  { key: "vi", label: "Tiếng Việt" },
   // { key: "viNom", label: "Tiếng Việt (Nôm)", disabled: true },
   { key: "zh", label: "中文" },
   { key: "en", label: "English" },
@@ -53,9 +53,7 @@ const LanguageSwitcher = ({ className = "" }) => {
 
           <ChevronDown
             size={20}
-            className={`transition-transform duration-200 ${
-              open ? "rotate-180" : ""
-            }`}
+            className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
         </div>
       </div>
@@ -78,12 +76,11 @@ const LanguageSwitcher = ({ className = "" }) => {
                       disabled={disabled}
                       onClick={() => !disabled && handleLanguageSelect(key)}
                       className={`w-full text-left px-3 py-2 min-h-10 text-sm rounded-md transition-colors
-                        ${
-                          disabled
-                            ? "text-[#7A7574] cursor-default"
-                            : isActive
-                              ? "bg-[#F2F2F2] hover:bg-[#E6E6E6]"
-                              : "hover:bg-[#F2F2F2]"
+                        ${disabled
+                          ? "text-[#7A7574] cursor-default"
+                          : isActive
+                            ? "bg-[#F2F2F2] hover:bg-[#E6E6E6]"
+                            : "hover:bg-[#F2F2F2]"
                         }`}
                     >
                       {label}

@@ -23,7 +23,7 @@ const PolicyModal = ({ open, onClose, title }) => {
           <FiX />
         </button>
 
-        <h2 className="text-center text-[#8f0d15] text-2xl font-bold font-[var(--font-outfit)] pb-4 pr-6">
+        <h2 className="text-center text-[#8f0d15] text-2xl font-bold font-[var(--font-primary)] pb-4 pr-6">
           {title}
         </h2>
 

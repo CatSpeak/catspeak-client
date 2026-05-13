@@ -8,6 +8,7 @@ import {
   HelpCircle,
   MessageSquare,
   Calendar,
+  Video,
 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
@@ -36,7 +37,7 @@ const CatSpeakSidebar = () => {
   const menuItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
     // { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
-    // { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
+    { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
     { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]
@@ -84,11 +85,10 @@ const CatSpeakSidebar = () => {
     return (
       <button
         onClick={onClick}
-        className={`relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors overflow-hidden ${
-          isActive
-            ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
-            : "font-normal text-black hover:bg-[#F2F2F2]"
-        }`}
+        className={`relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors overflow-hidden ${isActive
+          ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
+          : "font-normal text-black hover:bg-[#F2F2F2]"
+          }`}
       >
         <Icon size={20} className="flex-shrink-0" />
         <span className="truncate">{item.label}</span>
@@ -128,7 +128,7 @@ const CatSpeakSidebar = () => {
   return (
     <>
       {/* Desktop Sidebar Only — mobile nav is handled by the header's MobileDrawer */}
-      <div className="hidden lg:block w-[320px] shrink-0 p-5 sticky top-[72px] h-[calc(100vh-80px)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <div className="hidden lg:block w-[320px] shrink-0 sticky top-[72px] h-[calc(100vh-80px)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <SidebarContent />
       </div>
 

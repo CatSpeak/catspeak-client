@@ -4,7 +4,7 @@ export default {
   logout: "Đăng xuất",
   soon: "Sắp ra mắt",
   languages: {
-    vi: "Tiếng Việt (Quốc Ngữ)",
+    vi: "Tiếng Việt",
     viNom: "Tiếng Việt (Nôm) - Sắp ra mắt",
     zh: "Tiếng Trung",
     en: "Tiếng Anh",

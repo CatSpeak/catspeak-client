@@ -4,7 +4,7 @@
 
 /* CSS Variables cho sử dụng trong CSS thuần */
 :root {
-  --font-outfit: "Outfit", sans-serif;
+  --font-primary: "Noto Sans", sans-serif;
   --cath-red-50: #100002;
   --cath-red-100: #230004;
   --cath-red-200: #370006;
@@ -40,7 +40,7 @@ body {
 }
 
 body {
-  font-family: var(--font-outfit);
+  font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
