@@ -11,9 +11,17 @@ export const livekitApi = baseApi.injectEndpoints({
       transformResponse: (response) => ({
         serverUrl: response.server_url,
         participantToken: response.participant_token,
+        sessionId: response.cathspeak?.session_id,
+      }),
+    }),
+    raiseHand: builder.mutation({
+      query: (body) => ({
+        url: "/livekit/hand-raise",
+        method: "POST",
+        body,
       }),
     }),
   }),
 })
 
-export const { useGetLivekitTokenMutation } = livekitApi
+export const { useGetLivekitTokenMutation, useRaiseHandMutation } = livekitApi

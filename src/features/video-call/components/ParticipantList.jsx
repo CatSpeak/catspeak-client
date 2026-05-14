@@ -1,5 +1,5 @@
 import React from "react"
-import { Mic, MicOff, Video, VideoOff } from "lucide-react"
+import { Mic, MicOff, Video, VideoOff, Hand } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -22,6 +22,17 @@ const ParticipantItem = ({ participant }) => {
     ? localCameraOn
     : (participant.isCameraEnabled ?? false)
 
+  const parseMetadata = (metadata) => {
+    if (!metadata) return {}
+    try {
+      return JSON.parse(metadata)
+    } catch {
+      return {}
+    }
+  }
+  const meta = parseMetadata(participant.metadata)
+  const isHandRaised = meta.handRaised === true
+
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
 
@@ -33,9 +44,14 @@ const ParticipantItem = ({ participant }) => {
 
         <div className="flex flex-col min-w-0 flex-1">
           {/* Name */}
-          <p className="text-sm leading-5 truncate m-0">
-            {name} {isLocal && pl.youSuffix}
-          </p>
+          <div className="flex items-center gap-2 m-0">
+            <p className="text-sm leading-5 truncate m-0">
+              {name} {isLocal && pl.youSuffix}
+            </p>
+            {isHandRaised && (
+              <Hand size={16} className="text-yellow-500 shrink-0" />
+            )}
+          </div>
 
           {/* Mic + Camera UNDER name */}
           <div className="flex items-center gap-1 mt-1">

@@ -12,7 +12,9 @@ import {
   Circle,
   Loader2,
   MoreVertical,
+  Hand,
 } from "lucide-react"
+import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -46,7 +48,24 @@ const VideoCallControlBar = () => {
     cancelStopRecording,
     unreadRoomChat,
     unreadAiChat,
+    isHandRaised,
+    sessionId,
   } = useVideoCallContext()
+
+  const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
+
+  const handleToggleHand = async () => {
+    console.log("Toggle hand clicked. SessionId:", sessionId, "isHandRaised:", isHandRaised)
+    if (!sessionId) {
+      console.warn("Cannot raise hand: sessionId is missing in context!")
+      return
+    }
+    try {
+      await raiseHand({ sessionId, isRaised: !isHandRaised }).unwrap()
+    } catch (error) {
+      console.error("Failed to toggle hand raise:", error)
+    }
+  }
 
   const unreadMessages = unreadRoomChat + unreadAiChat
 
@@ -192,6 +211,28 @@ const VideoCallControlBar = () => {
         }`}
       >
         <Users className={iconClass} />
+      </button>
+
+      {/* Raise Hand Toggle */}
+      <button
+        onClick={handleToggleHand}
+        disabled={isTogglingHand}
+        title={isHandRaised ? "Lower hand" : "Raise hand"}
+        className={`${buttonBaseClass} ${
+          isTogglingHand
+            ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black"
+            : isHandRaised
+              ? activeToggleClass
+              : inactiveClass
+        }`}
+      >
+        {isTogglingHand ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className={`animate-spin origin-center ${iconClass}`} />
+          </div>
+        ) : (
+          <Hand className={iconClass} />
+        )}
       </button>
 
       {/* Chat Toggle */}
