@@ -43,9 +43,7 @@ const EventList = ({
           {title}
         </h3>
 
-        <div
-          className="flex flex-col gap-1 mt-3 mb-1 max-h-[132px] overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011]"
-        >
+        <div className="flex flex-col gap-1 mt-3 mb-1 max-h-[132px] overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011]">
           {events.map((event) => (
             <div
               key={event.id}
@@ -73,7 +71,11 @@ const EventList = ({
                 </span>
                 {(event.location || event.cityName || event.countryName) && (
                   <span className="text-xs opacity-90 truncate font-normal normal-case">
-                    {formatLocation(event.location, event.cityName, event.countryName)}
+                    {formatLocation(
+                      event.location,
+                      event.cityName,
+                      event.countryName,
+                    )}
                   </span>
                 )}
               </div>
@@ -88,7 +90,6 @@ const EventList = ({
             </div>
           ))}
         </div>
-
       </div>
 
       {/* Event detail modal */}

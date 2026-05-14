@@ -14,7 +14,7 @@ const COL_WIDTH = 180 // minimum px width per overlapping event column
 
 const DEFAULT_COLOR = "#B91264"
 
-const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
+const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { t } = useLanguage()
   const scrollRef = useRef(null)
   const hasScrolledToEvent = useRef(false)
@@ -113,14 +113,14 @@ const CalendarDetail = ({ selectedDate, currentDate, onClose }) => {
         const upcoming = positionedEvents.find(
           (e) =>
             parseTime(e.endTime) >= currentHour ||
-            parseTime(e.startTime) >= currentHour - 1
+            parseTime(e.startTime) >= currentHour - 1,
         )
         if (upcoming) {
           targetTime = parseTime(upcoming.startTime)
         } else {
           // All events are in the past today, scroll to the last one
           targetTime = parseTime(
-            positionedEvents[positionedEvents.length - 1].startTime
+            positionedEvents[positionedEvents.length - 1].startTime,
           )
         }
       } else {

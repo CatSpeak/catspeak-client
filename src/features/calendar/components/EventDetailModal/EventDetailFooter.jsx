@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Trash2, Pencil, X } from "lucide-react"
+import { Trash2, Pencil } from "lucide-react"
 import SharePopover from "./SharePopover"
 import useEventDelete from "../../hooks/useEventDelete"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -8,7 +8,7 @@ import {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
 } from "@/store/api/eventsApi"
-import Modal from "@/shared/components/ui/Modal"
+
 import ParticipantListModal from "./ParticipantListModal"
 
 const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
@@ -25,7 +25,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         user.username === event.creatorName ||
         (user.fullName && user.fullName === event.creatorName)))
   const isRegistered = event?.isRegistered ?? false
-  const [cancelMode, setCancelMode] = useState("none") // "none" | "choice"
+
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
     useEventDelete(eventId, onClose)
 
@@ -36,48 +36,19 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   const isProcessing = isRegistering || isCancelling
 
-  /** Cancel a specific occurrence's registration */
-  const handleCancelOccurrence = async () => {
-    try {
-      const body = {
-        eventId,
-        cancellationReason: "User cancelled",
-        registrationDate: event?.originalStartTime,
-      }
-      await cancelRegistration(body).unwrap()
-      setCancelMode("none")
-    } catch (err) {
-      console.error("Cancel occurrence registration failed:", err)
-    }
-  }
-
-  /** Cancel all registrations for the entire series */
-  const handleCancelAll = async () => {
-    try {
-      const body = {
-        eventId,
-        cancellationReason: "User cancelled",
-      }
-      await cancelRegistration(body).unwrap()
-      setCancelMode("none")
-    } catch (err) {
-      console.error("Cancel all registrations failed:", err)
-    }
-  }
-
   const handleRegister = async () => {
     if (isRegistered) {
-      // For recurring events, show a choice dialog
-      if (event?.isRecurring) {
-        setCancelMode("choice")
-        return
-      }
-      // For non-recurring events, cancel directly (no registrationDate)
+      // Cancel registration for this occurrence (or the single event)
       try {
-        await cancelRegistration({
+        const body = {
           eventId,
           cancellationReason: "User cancelled",
-        }).unwrap()
+          ...(event?.occurrenceId ? { occurrenceId: event.occurrenceId } : {}),
+          ...(event?.isRecurring && event?.originalStartTime && !event?.occurrenceId
+            ? { registrationDate: event.originalStartTime }
+            : {}),
+        }
+        await cancelRegistration(body).unwrap()
       } catch (err) {
         console.error("Cancel registration failed:", err)
       }
@@ -179,55 +150,6 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           </div>
         )}
       </div>
-
-      {/* Cancel registration choice modal for recurring events */}
-      {cancelMode === "choice" && (
-        <Modal
-          open
-          onClose={() => setCancelMode("none")}
-          showCloseButton={false}
-          className="!max-w-[400px] w-full p-6 bg-white rounded-xl shadow-xl border overflow-visible"
-        >
-          <div className="relative flex flex-col text-center">
-            {/* Floating close button */}
-            <button
-              onClick={() => setCancelMode("none")}
-              className="absolute -top-10 -right-10 bg-[#B81919] text-white p-2 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.3)] z-50 hover:bg-red-800 transition-colors border-[4px] border-white"
-            >
-              <X size={20} strokeWidth={4} />
-            </button>
-            <h3 className="text-xl font-bold mb-2 text-gray-800">
-              {cal.cancelRecurringTitle || "Hủy đăng ký"}
-            </h3>
-            <p className="text-sm text-gray-600 mb-6">
-              {cal.cancelChoicePrompt ||
-                "Đây là sự kiện lặp lại. Bạn muốn hủy đăng ký nào?"}
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={handleCancelOccurrence}
-                disabled={isCancelling}
-                className="bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 font-semibold py-3 px-4 rounded-lg transition-colors border disabled:opacity-60"
-              >
-                {cal.cancelThisOccurrence || "Chỉ buổi này"}
-              </button>
-              <button
-                onClick={handleCancelAll}
-                disabled={isCancelling}
-                className="bg-[#B81919] hover:bg-[#990011] text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-60"
-              >
-                {cal.cancelEntireSeries || "Toàn bộ đăng ký"}
-              </button>
-              <button
-                onClick={() => setCancelMode("none")}
-                className="text-gray-500 hover:text-gray-700 font-medium py-2 mt-2"
-              >
-                {cal.cancel || "Hủy"}
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       {/* Participant List Modal */}
       {showParticipants && (

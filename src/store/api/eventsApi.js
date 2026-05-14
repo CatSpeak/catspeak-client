@@ -123,10 +123,16 @@ export const eventsApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: (result, error, { eventId }) => [
-        { type: "Events", id: eventId },
-        "Events",
-      ],
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => {
+        const tags = [
+          { type: "Events", id: eventId },
+          "Events",
+        ]
+        if (occurrenceId) {
+          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
+        }
+        return tags
+      },
     }),
 
     // DELETE /api/v1/Events/{eventId}/registration
@@ -136,10 +142,16 @@ export const eventsApi = baseApi.injectEndpoints({
         method: "DELETE",
         body,
       }),
-      invalidatesTags: (result, error, { eventId }) => [
-        { type: "Events", id: eventId },
-        "Events",
-      ],
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => {
+        const tags = [
+          { type: "Events", id: eventId },
+          "Events",
+        ]
+        if (occurrenceId) {
+          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
+        }
+        return tags
+      },
     }),
 
     // GET /api/v1/Events/occurrence/{occurrenceId}/register

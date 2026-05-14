@@ -88,8 +88,8 @@ const EventDetailModal = ({ event, onClose }) => {
           occurrenceDetail?.registrationId !== undefined
             ? occurrenceDetail.registrationId
             : detail?.registrationId !== undefined
-            ? detail.registrationId
-            : event?.registrationId,
+              ? detail.registrationId
+              : event?.registrationId,
       }
     : {
         ...event,
