@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { translations } from "@/shared/i18n"
 import { useGetProfileQuery } from "@/features/auth"
+import CommunityPresence from "./CommunityPresence"
 
 const WelcomeSection = () => {
   const { t } = useLanguage()
@@ -44,6 +45,8 @@ const WelcomeSection = () => {
         {dynamicT?.welcomeSection?.funFact?.footer}
       </p>
       {/* dynamic content ends here */}
+      
+      <CommunityPresence />
     </div>
   )
 }
