@@ -12,6 +12,7 @@ const initialState = {
   /** Static info about the active call */
   callInfo: {
     roomId: null,
+    sessionId: null,
     callPath: null, // e.g. "/en/meet/42"
     roomData: null, // room object snapshot
     user: null,
@@ -33,6 +34,7 @@ const videoCallSlice = createSlice({
         livekitToken,
         livekitServerUrl,
         roomId,
+        sessionId,
         callPath,
         roomData,
         user,
@@ -46,6 +48,7 @@ const videoCallSlice = createSlice({
       state.livekitServerUrl = livekitServerUrl ?? state.livekitServerUrl
       state.callInfo = {
         roomId,
+        sessionId,
         callPath,
         roomData,
         user,
