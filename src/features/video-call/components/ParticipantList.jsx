@@ -48,9 +48,6 @@ const ParticipantItem = ({ participant }) => {
             <p className="text-sm leading-5 truncate m-0">
               {name} {isLocal && pl.youSuffix}
             </p>
-            {isHandRaised && (
-              <Hand size={16} className="text-yellow-500 shrink-0" />
-            )}
           </div>
 
           {/* Mic + Camera UNDER name */}
@@ -76,12 +73,11 @@ const ParticipantItem = ({ participant }) => {
         </div>
       </div>
 
-      {/* RIGHT: indicators + popover */}
+      {/* RIGHT: indicators (Hand icon to replace old popover trigger) */}
       <div className="flex items-center gap-1">
-        {/* Volume (ONLY interactive element) */}
-        {!isLocal && (
-          <div className="flex items-center justify-center">
-            <ParticipantVolumePopover participant={participant} />
+        {isHandRaised && (
+          <div className="h-9 w-9 flex items-center justify-center">
+            <Hand size={20} className="text-yellow-500 shrink-0" />
           </div>
         )}
       </div>
@@ -98,6 +94,25 @@ const ParticipantList = ({ hideTitle }) => {
   const { participants } = useVideoCallContext()
   const pl = t.rooms.videoCall.participantList
 
+  const parseMetadata = (metadata) => {
+    if (!metadata) return {}
+    try {
+      return JSON.parse(metadata)
+    } catch {
+      return {}
+    }
+  }
+
+  const raisedHandParticipants = participants.filter((p) => {
+    const meta = parseMetadata(p.metadata)
+    return meta.handRaised === true
+  })
+
+  const otherParticipants = participants.filter((p) => {
+    const meta = parseMetadata(p.metadata)
+    return meta.handRaised !== true
+  })
+
   return (
     <div className="flex flex-col h-full w-full bg-white">
       {!hideTitle && (
@@ -107,14 +122,34 @@ const ParticipantList = ({ hideTitle }) => {
           </h3>
         </div>
       )}
-      <div className="flex-1 overflow-y-auto p-2">
-        <ul className="flex flex-col gap-1">
-          {participants.map((participant) => (
-            <li key={participant.identity}>
-              <ParticipantItem participant={participant} />
-            </li>
-          ))}
-        </ul>
+      <div className="flex-1 overflow-y-auto p-1">
+        {raisedHandParticipants.length > 0 && (
+          <ul className="flex flex-col gap-1">
+            {raisedHandParticipants.map((participant) => (
+              <li key={participant.identity} className="w-full">
+                <ParticipantVolumePopover participant={participant}>
+                  <ParticipantItem participant={participant} />
+                </ParticipantVolumePopover>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {raisedHandParticipants.length > 0 && otherParticipants.length > 0 && (
+          <div className="my-2 mx-1 border-t border-[#E5E5E5]" />
+        )}
+
+        {otherParticipants.length > 0 && (
+          <ul className="flex flex-col gap-1">
+            {otherParticipants.map((participant) => (
+              <li key={participant.identity} className="w-full">
+                <ParticipantVolumePopover participant={participant}>
+                  <ParticipantItem participant={participant} />
+                </ParticipantVolumePopover>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   )

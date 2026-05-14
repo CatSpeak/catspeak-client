@@ -100,20 +100,19 @@ const ParticipantVolumeSlider = ({ participant }) => {
   )
 }
 
-export const ParticipantVolumePopover = ({ participant }) => {
+export const ParticipantVolumePopover = ({ participant, children }) => {
   const { t } = useLanguage()
   const pl = t.rooms.videoCall.participantList
 
-  if (participant.isLocal) return null
+  if (participant.isLocal) return <>{children}</>
 
   return (
     <Popover
+      className="w-full"
+      triggerClassName="w-full text-left"
       trigger={
-        <button
-          className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-[#E5E5E5]"
-          title={pl.options}
-        >
-          <MoreVertical size={20} />
+        <button className="w-full text-left rounded hover:bg-[#F2F2F2] transition-colors focus:outline-none">
+          {children}
         </button>
       }
       content={<ParticipantVolumeSlider participant={participant} />}
