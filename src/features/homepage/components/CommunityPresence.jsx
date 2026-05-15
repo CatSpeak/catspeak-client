@@ -169,21 +169,21 @@ const CommunityPresence = () => {
   )
 
   return (
-    <div className="mt-6 flex items-center gap-3">
-      <div className="group relative flex flex-col items-center rounded-full bg-white/40 backdrop-blur-md border border-white/50 px-4 py-2 shadow-sm transition-all hover:bg-white/60 hover:shadow-md">
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex h-3 w-3 items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
-          </div>
-
-          <span className="text-sm font-medium text-gray-500 capitalize">
-            {t.welcomeSection?.presence?.onlineIn || "online"}
-          </span>
+    <div className="flex-col mt-8">
+      <div className="flex items-center gap-2.5">
+        <div className="relative flex h-3 w-3 items-center justify-center">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
         </div>
 
-        <span className="font-semibold">{currentCount}</span>
+        <span className="text-xs leading-4 text-[#606060] uppercase">
+          {t.welcomeSection?.presence?.onlineIn || "online"}
+        </span>
       </div>
+
+      <span className="font-semibold text-[24px] leading-[32px]">
+        {currentCount}
+      </span>
     </div>
   )
 }
