@@ -50,11 +50,7 @@ const HomePage = () => {
 
   return (
     <AnimatePresence mode="wait">
-      <FluentAnimation
-        animationKey="home-page"
-        direction="up"
-        className="p-5"
-      >
+      <FluentAnimation animationKey="home-page" direction="up" className="p-5">
         <div className="flex flex-col gap-10 w-full">
           <div className="flex flex-col gap-8 w-full">
             <WelcomeSection />
