@@ -9,6 +9,7 @@ import {
   SessionActionButtons,
   CreateRoomModal,
 } from "@/features/rooms"
+import CommunityPresence from "../components/CommunityPresence"
 
 const HomePage = () => {
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
@@ -50,14 +51,11 @@ const HomePage = () => {
 
   return (
     <AnimatePresence mode="wait">
-      <FluentAnimation
-        animationKey="home-page"
-        direction="up"
-        className="p-5"
-      >
+      <FluentAnimation animationKey="home-page" direction="up" className="p-5">
         <div className="flex flex-col gap-10 w-full">
-          <div className="flex flex-col gap-8 w-full">
+          <div className="flex flex-col gap-5 w-full">
             <WelcomeSection />
+            <CommunityPresence />
             <SessionActionButtons
               handleCreateOneOnOneSession={handleCreateOneOnOne}
               handleCreateStudyGroupSession={handleCreateStudyGroup}
