@@ -44,7 +44,7 @@ const WorkshopCard = ({ slide, onCtaClick }) => {
               }}
               bgColor="#f5c518"
               textColor="#990011"
-              className="h-10 px-6 shadow-md transition-transform hover:scale-105"
+              className="h-10 px-6"
             >
               {slide.cta}
             </PillButton>
