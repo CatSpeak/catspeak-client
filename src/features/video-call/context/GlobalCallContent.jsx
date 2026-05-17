@@ -174,6 +174,34 @@ const GlobalCallContent = ({
     prevChatMessagesLength.current = chatMessages.length
   }, [chatMessages, showChat, isChatCollapsed])
 
+  // ── Hand Raise Audio Notification ──
+  const prevRaisedHandsRef = React.useRef(new Set())
+  useEffect(() => {
+    const currentRaisedHands = new Set()
+    let newHandRaised = false
+
+    participants.forEach((p) => {
+      const meta = parseMetadata(p.metadata)
+      if (meta.handRaised === true) {
+        currentRaisedHands.add(p.identity)
+        // Check if this is a newly raised hand
+        if (!prevRaisedHandsRef.current.has(p.identity)) {
+          newHandRaised = true
+        }
+      }
+    })
+
+    if (newHandRaised) {
+      const audio = new Audio('/sounds/hand-raise.mp3')
+      audio.volume = 0.5
+      audio.play().catch(err => {
+        console.warn("Hand raise audio blocked by browser autoplay policy:", err)
+      })
+    }
+
+    prevRaisedHandsRef.current = currentRaisedHands
+  }, [participants])
+
   const prevAiMessagesRef = React.useRef(combinedAiMessages)
   useEffect(() => {
     if (combinedAiMessages === prevAiMessagesRef.current) return

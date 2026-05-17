@@ -1,8 +1,9 @@
-import { MicOff, VideoOff, MonitorUp } from "lucide-react"
+import { MicOff, VideoOff, MonitorUp, Hand } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useEffect, useRef, useReducer, useMemo } from "react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { Track, ParticipantEvent } from "livekit-client"
+import { motion } from "framer-motion"
 
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 
@@ -30,6 +31,7 @@ const VideoTile = ({ participant, onClick }) => {
       ParticipantEvent.TrackUnmuted,
       ParticipantEvent.TrackPublished,
       ParticipantEvent.TrackUnpublished,
+      ParticipantEvent.MetadataChanged,
     ]
 
     events.forEach((evt) => participant.on(evt, forceUpdate))
@@ -44,6 +46,17 @@ const VideoTile = ({ participant, onClick }) => {
   const micOn = participant.isMicrophoneEnabled
   const webcamOn = participant.isCameraEnabled
   const screenShareOn = participant.isScreenShareEnabled
+
+  const parseMetadata = (metadata) => {
+    if (!metadata) return {}
+    try {
+      return JSON.parse(metadata)
+    } catch {
+      return {}
+    }
+  }
+  const meta = parseMetadata(participant.metadata)
+  const isHandRaised = meta.handRaised === true
 
   const theme = useMemo(
     () => getParticipantTheme(participant.identity),
@@ -109,16 +122,37 @@ const VideoTile = ({ participant, onClick }) => {
       )}
 
       {/* Status icons and Name */}
-      <div className="absolute bottom-1 left-1 flex max-w-[90%] items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-white backdrop-blur-sm">
-        <div className="flex flex-shrink-0 items-center gap-1">
-          {screenShareOn && <MonitorUp size={16} />}
-          {!micOn && <MicOff size={16} />}
-          {!webcamOn && <VideoOff size={16} />}
+      {isHandRaised ? (
+        <div className="absolute bottom-1 left-1 flex max-w-[90%] items-center gap-2 rounded-md bg-yellow-500/90 px-2 py-1 text-white shadow-md backdrop-blur-sm">
+          <motion.div
+            animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.5,
+              ease: "easeInOut",
+              repeatDelay: 1,
+            }}
+            style={{ originX: 0.7, originY: 0.7 }}
+            className="flex flex-shrink-0 items-center justify-center"
+          >
+            <Hand size={16} className="white" />
+          </motion.div>
+          <div className="min-w-0 truncate font-medium text-sm text-white">
+            {displayName} {isLocal && "(You)"}
+          </div>
         </div>
-        <div className="min-w-0 truncate font-medium text-sm">
-          {displayName} {isLocal && "(You)"}
+      ) : (
+        <div className="absolute bottom-1 left-1 flex max-w-[90%] items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-white backdrop-blur-sm">
+          <div className="flex flex-shrink-0 items-center gap-1">
+            {screenShareOn && <MonitorUp size={16} />}
+            {!micOn && <MicOff size={16} />}
+            {!webcamOn && <VideoOff size={16} />}
+          </div>
+          <div className="min-w-0 truncate font-medium text-sm">
+            {displayName} {isLocal && "(You)"}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
