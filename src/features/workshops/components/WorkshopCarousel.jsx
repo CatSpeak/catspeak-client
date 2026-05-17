@@ -6,6 +6,7 @@ import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import ChinaWorkshopModal from "./modals/ChinaWorkshopModal"
+import HskWorkshopModal from "./modals/HskWorkshopModal"
 import { getWorkshopSlides } from "../data/workshopSlides"
 import WorkshopCard from "./WorkshopCard"
 import colors from "@/shared/utils/colors"
@@ -45,27 +46,6 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
           </h2>
         )}
         {hideTitle && <div />}
-
-        {slides.length > 1 && (
-          <div className="flex items-center gap-2 pr-2">
-            <button
-              onClick={goPrev}
-              disabled={!canGoPrev}
-              aria-label="Previous workshop"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-gray-50 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              onClick={goNext}
-              disabled={!canGoNext}
-              aria-label="Next workshop"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-gray-50 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Single full-width carousel slide */}
@@ -107,6 +87,12 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
 
       <ChinaWorkshopModal
         open={modalType === "china"}
+        onClose={() => setModalType(null)}
+        t={t}
+      />
+
+      <HskWorkshopModal
+        open={modalType === "hsk"}
         onClose={() => setModalType(null)}
         t={t}
       />
