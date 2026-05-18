@@ -128,7 +128,7 @@ const CatSpeakSidebar = () => {
   return (
     <>
       {/* Desktop Sidebar Only — mobile nav is handled by the header's MobileDrawer */}
-      <div className="hidden lg:block w-[320px] shrink-0 sticky top-[72px] h-[calc(100vh-80px)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <div className="hidden lg:block w-[320px] shrink-0 sticky h-[calc(100vh-80px)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <SidebarContent />
       </div>
 

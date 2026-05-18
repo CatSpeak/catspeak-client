@@ -6,7 +6,7 @@ const WorkspaceLayout = () => {
   return (
     <div className="flex flex-col lg:flex-row w-full h-[calc(100vh-72px)] lg:overflow-hidden relative">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-[320px] p-5 overflow-y-auto">
+      <aside className="hidden lg:block w-[320px] overflow-y-auto">
         <WorkspaceSidebar />
       </aside>
 
