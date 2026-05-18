@@ -8,8 +8,8 @@ import { useSessionTimer } from "@/features/video-call"
 const RoomHeader = () => {
   const { t, language } = useLanguage()
   const { lang } = useParams()
-  const { session, room, enterPiP } = useVideoCallContext()
-  const { formattedElapsed, formattedMax } = useSessionTimer(session)
+  const { room, enterPiP } = useVideoCallContext()
+  const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(room?.duration)
 
   const rawRoomName = room?.name || "General"
 
@@ -62,10 +62,9 @@ const RoomHeader = () => {
           </div>
         </div>
       </div>
-      {formattedElapsed && formattedElapsed !== "00:00" && (
+      {hasDuration && (
         <div className="text-xs font-medium text-[#7A7574] md:text-sm">
-          {formattedElapsed}
-          {formattedMax ? ` / ${formattedMax}` : ""}
+          {formattedRemaining} / {formattedMax}
         </div>
       )}
     </div>

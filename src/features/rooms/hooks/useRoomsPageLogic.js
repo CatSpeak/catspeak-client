@@ -1,4 +1,3 @@
-import { useCreateVideoSessionMutation } from "@/store/api/videoSessionsApi"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useAuth } from "@/features/auth"
 import { useState } from "react"
@@ -6,8 +5,6 @@ import { useState } from "react"
 export const useRoomsPageLogic = () => {
   const { isAuthenticated } = useAuth()
   const { openAuthModal } = useAuthModal()
-  const [createVideoSession, { isLoading: isCreating }] =
-    useCreateVideoSessionMutation()
 
   // Business loading states
   const [isCreatingOneOnOne, setIsCreatingOneOnOne] = useState(false)
@@ -37,7 +34,7 @@ export const useRoomsPageLogic = () => {
 
   return {
     state: {
-      isCreating: isCreating || isCreatingOneOnOne || isCreatingStudyGroup,
+      isCreating: isCreatingOneOnOne || isCreatingStudyGroup,
       isCreatingOneOnOne,
       isCreatingStudyGroup,
     },

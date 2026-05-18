@@ -14,7 +14,6 @@ import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
 import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useCallCleanup } from "@/features/video-call/hooks/useCallCleanup"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
 import { useSystemMessages } from "@/features/video-call/hooks/useSystemMessages"
 import { useAiMessages } from "@/features/video-call/hooks/useAiMessages"
@@ -44,7 +43,7 @@ const GlobalCallContent = ({
   const { t, language } = useLanguage()
 
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
-  const { sessionId, roomData, sessionData, user } = callInfo ?? {}
+  const { roomData, user } = callInfo ?? {}
 
   // ── UI state ──
   const [showChat, setShowChat] = useState(false)
@@ -55,8 +54,7 @@ const GlobalCallContent = ({
   const [unreadAiChat, setUnreadAiChat] = useState(0)
   const [showVirtualBackground, setShowVirtualBackground] = useState(false)
 
-  // ── Session cleanup (beforeunload / pagehide) ──
-  const cleanupRefs = useCallCleanup(sessionId, isInCall)
+
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -195,7 +193,6 @@ const GlobalCallContent = ({
   const actions = useCallActions({
     t,
     language,
-    sessionId,
     isPiP,
     callInfo,
     toggleAudioFn: videoCallState.toggleAudio,
@@ -203,7 +200,6 @@ const GlobalCallContent = ({
     leaveMeetingFn: videoCallState.leaveMeeting,
     screenShareState,
     chatSend,
-    cleanupRefs,
     setShowChat,
     setShowParticipants,
   })
@@ -218,10 +214,9 @@ const GlobalCallContent = ({
     returnToCall: actions.returnToCall,
 
     // Session
-    id: sessionId,
+    id: callInfo?.roomId,
     navigate: getNavigate(),
     location: getLocation(),
-    session: sessionData,
     room: roomData,
     lkRoomName: lkRoom?.name,
     sessionError: null,

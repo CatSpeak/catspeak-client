@@ -153,16 +153,18 @@ const VideoCallRoomContent = () => {
                   <div className="flex-1 overflow-y-auto">
                     {showParticipants && <ParticipantList hideTitle />}
                     {showVirtualBackground && <VirtualBackgroundPicker />}
-                    {showChat && !showParticipants && !showVirtualBackground && (
-                      <ChatBox
-                        messages={messages}
-                        currentUser={user}
-                        onSendMessage={handleSendMessage}
-                        isConnected={isConnected}
-                        className="h-full w-full"
-                        hideTitle
-                      />
-                    )}
+                    {showChat &&
+                      !showParticipants &&
+                      !showVirtualBackground && (
+                        <ChatBox
+                          messages={messages}
+                          currentUser={user}
+                          onSendMessage={handleSendMessage}
+                          isConnected={isConnected}
+                          className="h-full w-full"
+                          hideTitle
+                        />
+                      )}
                   </div>
                 </motion.div>
               </motion.div>

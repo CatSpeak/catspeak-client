@@ -77,13 +77,13 @@ const VideoTile = ({ participant, onClick }) => {
     <div
       onClick={onClick}
       className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-lg border-solid transition-all duration-200 ease-in-out [container-type:inline-size] ${
-        isVideoVisible ? "border-0" : "border-2"
+        isVideoVisible ? "border-0 bg-neutral-900" : "border-2"
       } ${
         isSpeaking
           ? "border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
           : "border-transparent shadow-sm"
       } ${onClick ? "cursor-pointer" : ""}`}
-      style={{ background: theme.bg }}
+      style={isVideoVisible ? undefined : { background: theme.bg }}
     >
       {/* Video element for camera track */}
       <video
@@ -91,7 +91,7 @@ const VideoTile = ({ participant, onClick }) => {
         playsInline
         muted={isLocal}
         ref={videoRef}
-        className={`h-full w-full object-cover ${
+        className={`h-full w-full object-contain ${
           isVideoVisible ? "block" : "hidden"
         }`}
       />
