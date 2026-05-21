@@ -30,6 +30,8 @@ export default {
     nationality: "Quốc tịch",
     yourLanguage: "Ngôn ngữ bạn dạy",
     yourLevel: "Trình độ của bạn",
+    selectLanguageFirst: "Vui lòng chọn ngôn ngữ giảng dạy trước",
+    selectLevel: "Chọn trình độ...",
     nativeLanguage: "Ngôn ngữ mẹ đẻ",
     idCard: "Căn cước công dân",
     idFront: "Mặt trước",

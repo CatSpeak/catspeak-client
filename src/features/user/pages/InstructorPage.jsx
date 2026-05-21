@@ -21,8 +21,6 @@ const INITIAL_FORM_DATA = {
   phoneNumber: "",
   nationality: "",
   languagesTeach: [],
-  levelCode: "English - B2",
-  levelLanguage: "Tiếng Việt",
   nativeLanguage: "English",
   idFrontFile: null,
   idBackFile: null,
@@ -51,6 +49,24 @@ function safeParseArray(value) {
 }
 
 /**
+ * Normalize languagesTeach from the API into an array of {language, level} objects.
+ * Supports:
+ *  - Array of objects: [{language: "English", level: "B2"}, ...]
+ *  - Array of strings: ["English", "Japanese"] → [{language: "English", level: ""}, ...]
+ *  - JSON string of either format above
+ */
+function normalizeLanguagesTeach(raw) {
+  const arr = safeParseArray(raw)
+  return arr.map((item) => {
+    if (typeof item === "object" && item !== null) {
+      return { language: item.language || "", level: item.level || "" }
+    }
+    // Legacy format: plain string = language name only
+    return { language: String(item), level: "" }
+  })
+}
+
+/**
  * Map GET /InstructorProfile/my response into form data shape.
  */
 function mapApplicationToFormData(app) {
@@ -61,9 +77,7 @@ function mapApplicationToFormData(app) {
     address: app.address || app.Address || "",
     phoneNumber: app.phoneNumber || app.PhoneNumber || "",
     nationality: app.nationality || app.Nationality || "",
-    languagesTeach: safeParseArray(app.languagesTeach || app.LanguagesTeach),
-    levelCode: app.levelCode || app.LevelCode || "English - B2",
-    levelLanguage: app.levelLanguage || app.LevelLanguage || "Tiếng Việt",
+    languagesTeach: normalizeLanguagesTeach(app.languagesTeach || app.LanguagesTeach),
     nativeLanguage: app.nativeLanguage || app.NativeLanguage || "English",
     idFrontFile: app.idCardFrontUrl || app.IdCardFrontUrl || null,
     idBackFile: app.idCardBackUrl || app.IdCardBackUrl || null,
@@ -135,7 +149,6 @@ const InstructorPage = () => {
   // Local UI state
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState(INITIAL_FORM_DATA)
-  const [editingField, setEditingField] = useState(null)
   const [agreed, setAgreed] = useState(false)
   const [hasPreFilled, setHasPreFilled] = useState(false)
 
@@ -199,14 +212,6 @@ const InstructorPage = () => {
     [canEdit],
   )
 
-  const handleCountryChange = useCallback(
-    (val) => {
-      if (!canEdit) return
-      setFormData((prev) => ({ ...prev, nationality: val }))
-    },
-    [canEdit],
-  )
-
   const handleLanguagesChange = useCallback(
     (languages) => {
       if (!canEdit) return
@@ -220,19 +225,12 @@ const InstructorPage = () => {
       if (!canEdit) return
       if (field === "idFront") {
         idFrontInputRef.current?.click()
-        return
-      }
-      if (field === "idBack") {
+      } else if (field === "idBack") {
         idBackInputRef.current?.click()
-        return
       }
-      setEditingField(field)
     },
     [canEdit],
   )
-
-  const handleCancel = useCallback(() => setEditingField(null), [])
-  const handleSave = useCallback(() => setEditingField(null), [])
 
 
 
@@ -295,6 +293,7 @@ const InstructorPage = () => {
     introVideo: formData.videoFile,
   }), [formData])
 
+
   const handleSubmit = useCallback(async () => {
     if (!agreed || isSubmitting) return
 
@@ -318,7 +317,7 @@ const InstructorPage = () => {
   if (isLoadingInstructor || isLoadingProfile) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-3 border-[#990011] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-3 border-cath-red-700 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -327,7 +326,7 @@ const InstructorPage = () => {
   if (hasNotApplied && !showForm) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="text-xl font-bold text-[#990011]">{ins.title}</h1>
+        <h1 className="text-xl font-bold text-cath-red-700">{ins.title}</h1>
         <InstructorEmptyState onApply={() => setShowForm(true)} t={t} />
       </div>
     )
@@ -338,7 +337,7 @@ const InstructorPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-xl font-bold text-[#990011]">{ins.title}</h1>
+      <h1 className="text-xl font-bold text-cath-red-700">{ins.title}</h1>
 
       {/* Status Banner — shown when an application exists */}
       {applicationStatus && (
@@ -354,13 +353,8 @@ const InstructorPage = () => {
 
       <InstructorInfoSection
         formData={formData}
-        editingField={readOnly ? null : editingField}
-        isUpdating={isSubmitting}
         onEdit={handleEdit}
-        onCancel={handleCancel}
-        onSave={handleSave}
         onChange={handleChange}
-        onCountryChange={handleCountryChange}
         onLanguagesChange={handleLanguagesChange}
         readOnly={readOnly}
         t={t}
