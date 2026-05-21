@@ -15,9 +15,11 @@ export const useConversationThreads = () => {
    * Start a brand-new conversation thread for a fresh prompt.
    * @param {string} interactionId - The optimistic interaction ID
    * @param {string} prompt - The user's message text
+   * @param {Array} initialContext - Optional existing messages to prepend
    */
-  const startNewThread = useCallback((interactionId, prompt) => {
+  const startNewThread = useCallback((interactionId, prompt, initialContext = []) => {
     threadsRef.current[interactionId] = [
+      ...initialContext,
       { role: "user", content: prompt },
     ]
   }, [])
