@@ -19,7 +19,7 @@ const CommunitySection = () => {
         <img
           src={IconLogo}
           alt=""
-          className="h-16 w-16 sm:h-[72px] sm:w-[72px]"
+          className="h-16 w-16 sm:h-[72px] sm:w-[72px] border-2 border-white rounded-full"
           draggable={false}
         />
       </Link>

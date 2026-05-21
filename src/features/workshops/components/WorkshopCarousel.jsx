@@ -97,7 +97,7 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
               aria-label={`Go to slide ${idx + 1}`}
               className={`rounded-full transition-all duration-300 ${
                 idx === currentIndex
-                  ? "w-6 h-2 bg-[#990011]"
+                  ? "w-6 h-2 bg-cath-red-700"
                   : "w-2 h-2 bg-[#C6C6C6] hover:bg-[#999]"
               }`}
             />

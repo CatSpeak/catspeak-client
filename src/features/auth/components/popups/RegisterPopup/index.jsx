@@ -59,7 +59,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
         </h2>
 
         {/* Scrollable content */}
-        <div className="max-h-[80vh] overflow-y-auto -mx-3 px-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
+        <div className="max-h-[80vh] overflow-y-auto -mx-3 px-3 scrollbar-app-transparent">
           <RegisterFormFields
             authText={authText}
             formData={formData}
@@ -111,7 +111,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
             {authText.haveAccount}{" "}
             <button
               type="button"
-              className="font-semibold text-[#990011] hover:underline"
+              className="font-semibold text-cath-red-700 hover:underline"
               onClick={() => onSwitchMode("login")}
             >
               {authText.loginLink}

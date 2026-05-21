@@ -111,7 +111,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           (isCreatorOrAdmin ? (
             <button
               onClick={() => setShowParticipants(true)}
-              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-[#990011]"
+              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-cath-red-700"
             >
               {cal.viewParticipants || "Xem danh sách người đăng ký"}
             </button>
@@ -214,7 +214,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
               <button
                 onClick={handleCancelAll}
                 disabled={isCancelling}
-                className="bg-[#B81919] hover:bg-[#990011] text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-60"
+                className="bg-[#B81919] hover:bg-cath-red-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-60"
               >
                 {cal.cancelEntireSeries || "Toàn bộ đăng ký"}
               </button>

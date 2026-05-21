@@ -2,9 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CSS Variables cho sử dụng trong CSS thuần */
+/* CSS Variables */
 :root {
   --font-primary: "Noto Sans", sans-serif;
+  --header-height: 72px;
   --cath-red-50: #100002;
   --cath-red-100: #230004;
   --cath-red-200: #370006;
@@ -55,28 +56,82 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Tailwind Scrollbar utilities */
+/* ─── Scrollbar Utilities ──────────────────────────────────────── */
 @layer utilities {
-  .scrollbar-thin {
+  /* Standard thin scrollbar (used in sidebar, lists, etc.) */
+  .scrollbar-app {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    scrollbar-color: #990011 #e5e7eb;
   }
 
-  .scrollbar-thin::-webkit-scrollbar {
+  .scrollbar-app::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-track {
+  .scrollbar-app::-webkit-scrollbar-track {
+    background: #e5e7eb;
+  }
+
+  .scrollbar-app::-webkit-scrollbar-thumb {
+    background-color: #990011;
+    border-radius: 9999px;
+  }
+
+  /* Scrollbar visible only on hover */
+  .scrollbar-app-hover {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-app-hover::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-app-hover::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+  .scrollbar-app-hover::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.5);
+  .scrollbar-app-hover:hover::-webkit-scrollbar-thumb {
+    background-color: #990011;
+  }
+
+  .scrollbar-app-hover:hover::-webkit-scrollbar-track {
+    background: #e5e7eb;
+  }
+
+  /* Transparent track variant (modals, overlays) */
+  .scrollbar-app-transparent {
+    scrollbar-width: thin;
+    scrollbar-color: #990011 transparent;
+  }
+
+  .scrollbar-app-transparent::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-app-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-app-transparent::-webkit-scrollbar-thumb {
+    background-color: #990011;
+    border-radius: 9999px;
+  }
+
+  /* Hidden scrollbar */
+  .scrollbar-hidden {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
   }
 }

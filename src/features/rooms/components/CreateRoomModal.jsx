@@ -204,7 +204,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
             transition={{ duration: 0.2 }}
             className="flex flex-col flex-1"
           >
-            <div className="flex flex-col gap-5 max-h-[60vh] overflow-y-auto -mx-3 px-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5 max-[425px]:max-h-none max-[425px]:flex-1">
+            <div className="flex flex-col gap-5 max-h-[60vh] overflow-y-auto -mx-3 px-3 scrollbar-app-transparent max-[425px]:max-h-none max-[425px]:flex-1">
               {/* Room Name */}
               {mode === "create" && (
                 <TextInput

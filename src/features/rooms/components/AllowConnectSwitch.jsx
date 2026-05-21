@@ -20,7 +20,7 @@ const AllowConnectSwitch = () => {
   return (
     <>
       {/* 
-      <div className="flex items-center gap-2 px-2 text-[#990011] font-medium">
+      <div className="flex items-center gap-2 px-2 text-cath-red-700 font-medium">
         <Switch checked={allowConnect} onChange={handleSwitchChange} />
         {t.rooms?.welcome?.allowConnect}
       </div>

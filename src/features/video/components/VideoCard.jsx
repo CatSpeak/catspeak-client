@@ -3,6 +3,7 @@ import { Play, Heart, Eye, Volume2, VolumeX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { formatCompactNumber } from "../utils/formatters"
 import styles from "../styles/videoReels.module.css"
+import colors from "@/shared/utils/colors"
 
 /**
  * Aspect ratios cycled by index for Pinterest-style height variance.
@@ -115,17 +116,13 @@ const VideoCard = ({ video, index, onClick }) => {
     >
       {/* Thumbnail + video area with dynamic aspect ratio */}
       <div style={{ position: "relative", ...aspect, width: "100%" }}>
-        {/* Video element — replacing static thumbnail */}
-        {hasVideo ? (
-          <video
-            ref={videoRef}
-            src={`${video.videoUrl}#t=1.0`}
-            muted={isMuted}
-            loop
-            playsInline
-            preload="metadata"
-            className={styles.cardVideo}
-            style={{ opacity: 1 }}
+        {/* Thumbnail image — always visible as poster */}
+        {video.thumbnailUrl ? (
+          <img
+            src={video.thumbnailUrl}
+            alt={video.title}
+            className={styles.cardThumbnail}
+            loading="lazy"
           />
         ) : (
           <div
@@ -135,7 +132,7 @@ const VideoCard = ({ video, index, onClick }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#990011",
+              background: colors.primaryRed,
               color: "white",
               fontSize: 24,
               fontWeight: 700,
@@ -143,6 +140,20 @@ const VideoCard = ({ video, index, onClick }) => {
           >
             {video.title.charAt(0)}
           </div>
+        )}
+
+        {/* Video element — overlays thumbnail on hover */}
+        {hasVideo && (
+          <video
+            ref={videoRef}
+            src={video.videoUrl}
+            muted={isMuted}
+            loop
+            playsInline
+            preload="none"
+            className={styles.cardVideo}
+            style={{ opacity: showVideo ? 1 : 0 }}
+          />
         )}
 
         {/* Hover overlay gradient */}

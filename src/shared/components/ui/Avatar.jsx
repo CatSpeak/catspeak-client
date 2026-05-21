@@ -59,7 +59,7 @@ const Avatar = ({
 
   return (
     <div
-      className={`flex items-center justify-center rounded-full font-semibold bg-[#990011] text-white ${speakingClass} ${className}`}
+      className={`flex items-center justify-center rounded-full font-semibold bg-cath-red-700 text-white ${speakingClass} ${className}`}
       style={baseStyle}
     >
       {initial}

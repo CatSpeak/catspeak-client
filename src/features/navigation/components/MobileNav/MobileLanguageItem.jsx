@@ -17,7 +17,7 @@ const MobileLanguageItem = ({
         disabled
           ? "cursor-default hover:bg-[#F2F2F2]"
           : isActive
-            ? "bg-[#F2F2F2] text-[#990011] hover:bg-[#E6E6E6]"
+            ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
             : "hover:bg-[#F2F2F2]"
       }`}
     >

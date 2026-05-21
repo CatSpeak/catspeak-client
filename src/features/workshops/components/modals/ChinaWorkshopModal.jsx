@@ -1,6 +1,7 @@
 import LogoDefault from "@/shared/assets/images/LogoDefault.png"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import colors from "@/shared/utils/colors"
 
 const ChinaWorkshopModal = ({ open, onClose, t }) => {
   const workshop = t.workshops.chinaWorkshop
@@ -12,7 +13,7 @@ const ChinaWorkshopModal = ({ open, onClose, t }) => {
       title={workshop.title}
       className="max-w-xl sm:max-w-2xl md:max-w-3xl"
     >
-      <div className="flex flex-col gap-6 py-2 max-h-[75vh] overflow-y-auto px-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5">
+      <div className="flex flex-col gap-6 py-2 max-h-[75vh] overflow-y-auto px-1 scrollbar-app">
         {/* Cover Image */}
         <div className="relative h-48 flex-shrink-0 overflow-hidden rounded-xl sm:h-64">
           <img
@@ -144,7 +145,7 @@ const ChinaWorkshopModal = ({ open, onClose, t }) => {
           <PillButton
             onClick={onClose}
             bgColor="#f5c518"
-            textColor="#990011"
+            textColor={colors.primaryRed}
             className="w-full"
           >
             {workshop.closeButton}

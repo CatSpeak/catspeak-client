@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react"
+import React, { useState, useRef, useMemo } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { ChevronDown } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
@@ -6,6 +6,7 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
 import LanguageMenuItem from "./LanguageMenuItem"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const MotionDiv = motion.div
 const MotionSpan = motion.span
@@ -45,16 +46,7 @@ const DesktopCommunityDropdown = ({ navKey, isActive, onActivate }) => {
     )
   }, [currentCommunity, t])
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   const handleCommunitySelect = (newCode) => {
     if (newCode === currentCommunity) {

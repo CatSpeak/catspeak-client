@@ -160,7 +160,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
       {/* Left: metadata */}
       <div className="flex flex-col">
         {/* Top row: meeting ID */}
-        <span className="text-[#990011]" title={meetingId}>
+        <span className="text-cath-red-700" title={meetingId}>
           {meetingId}
         </span>
 

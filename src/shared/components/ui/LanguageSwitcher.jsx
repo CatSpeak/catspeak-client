@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import { Check } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const MotionButton = motion.button
 
@@ -24,16 +25,7 @@ const LanguageSwitcher = ({ className = "" }) => {
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setOpen(false))
 
   const handleToggle = () => setOpen((prev) => !prev)
 

@@ -19,7 +19,7 @@ const InstructorSubmitSection = ({
   const isDisabled = !agreed || isSubmitting || disabled
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
       <div className="px-5 py-5">
         {/* Terms */}
         <label className="flex items-start gap-3 cursor-pointer group">
@@ -27,7 +27,7 @@ const InstructorSubmitSection = ({
             type="checkbox"
             checked={agreed}
             onChange={(e) => onAgreeChange(e.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-[#990011] rounded border-gray-300 flex-shrink-0"
+            className="mt-0.5 w-4 h-4 accent-cath-red-700 rounded border-gray-300 flex-shrink-0"
           />
           <div className="flex items-start gap-2">
             <ShieldCheck className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -43,7 +43,7 @@ const InstructorSubmitSection = ({
             type="button"
             onClick={onSubmit}
             disabled={isDisabled}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#990011] text-white text-sm font-semibold rounded-lg hover:bg-[#7a000d] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all shadow-sm hover:shadow"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-cath-red-700 text-white text-sm font-semibold rounded-lg hover:bg-[#7a000d] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-all shadow-sm hover:shadow"
           >
             {isSubmitting && (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

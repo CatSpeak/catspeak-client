@@ -22,7 +22,7 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
   return (
     <div
       ref={scrollRef}
-      className="flex flex-1 flex-col overflow-y-auto p-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent hover:[&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5 bg-white min-h-0"
+      className="flex flex-1 flex-col overflow-y-auto p-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-track]:bg-transparent hover:[&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5 bg-white min-h-0"
     >
       {messages.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
@@ -115,7 +115,7 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
                   <div
                     className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${
                       isMe
-                        ? "bg-[#990011] text-white"
+                        ? "bg-cath-red-700 text-white"
                         : msg.status === "error"
                           ? "bg-red-100 text-red-900 border border-red-200"
                           : isSystem
@@ -199,7 +199,7 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
                     <button
                       type="button"
                       onClick={() => onReplyTo(msg)}
-                      className="flex items-center gap-1 mt-1 px-2 py-0.5 text-xs text-[#606060] hover:text-[#990011] transition-colors rounded hover:bg-[#F6F6F6]"
+                      className="flex items-center gap-1 mt-1 px-2 py-0.5 text-xs text-[#606060] hover:text-cath-red-700 transition-colors rounded hover:bg-[#F6F6F6]"
                     >
                       <Reply size={12} />
                       <span>{t.rooms?.chatBox?.reply || "Reply"}</span>

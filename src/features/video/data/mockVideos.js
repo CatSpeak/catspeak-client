@@ -93,8 +93,31 @@ const ORIENTATIONS = ["portrait", "portrait", "portrait", "landscape", "square"]
 const VIDEO_URLS = [
   "https://media.w3.org/2010/05/sintel/trailer.mp4",
   "https://media.w3.org/2010/05/bunny/trailer.mp4",
-  // "https://media.w3.org/2010/05/bunny/movie.mp4",
   "https://media.w3.org/2010/05/video/movie_300.mp4",
+]
+
+/**
+ * Thumbnail images for each video.
+ * Using high-quality Unsplash photos as placeholders.
+ * Replace with real thumbnail URLs from your API / CDN.
+ */
+const THUMBNAIL_URLS = [
+  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1546410531-bb4caa6b3243?w=400&h=600&fit=crop",
 ]
 
 const TITLES = [
@@ -169,6 +192,7 @@ export const generateMockVideos = (count = 16) =>
       id: `v${i + 1}`,
       title: TITLES[i % TITLES.length],
       description: DESCRIPTIONS[i % DESCRIPTIONS.length],
+      thumbnailUrl: THUMBNAIL_URLS[i % THUMBNAIL_URLS.length],
       videoUrl: VIDEO_URLS[videoIndex],
       duration: 15 + Math.floor(Math.random() * 45),
       views: Math.floor(1000 + Math.random() * 500000),

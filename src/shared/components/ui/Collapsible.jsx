@@ -43,7 +43,7 @@ const Collapsible = ({
             <div
               className={
                 scrollable
-                  ? "overflow-y-auto pr-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5"
+                  ? "overflow-y-auto pr-1 scrollbar-app"
                   : ""
               }
               style={maxHeight !== "none" ? { maxHeight } : undefined}

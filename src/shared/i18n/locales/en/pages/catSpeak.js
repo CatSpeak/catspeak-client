@@ -23,7 +23,7 @@ export default {
   },
   mail: {
     placeholderEmpty: "Be the first to say hello...",
-    placeholder: "Type your story...",
+    placeholder: "Write your story...",
     noStories: "No stories yet. Start the conversation!",
     yours: "yours",
     total: "total",

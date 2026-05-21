@@ -86,7 +86,7 @@ const CatSpeakSidebar = () => {
       <button
         onClick={onClick}
         className={`relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors overflow-hidden ${isActive
-          ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
+          ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-cath-red-700 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-cath-red-700"
           : "font-normal text-black hover:bg-[#F2F2F2]"
           }`}
       >
@@ -128,7 +128,7 @@ const CatSpeakSidebar = () => {
   return (
     <>
       {/* Desktop Sidebar Only — mobile nav is handled by the header's MobileDrawer */}
-      <div className="hidden lg:block w-[320px] shrink-0 sticky h-[calc(100vh-80px)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <div className="hidden lg:block w-[320px] shrink-0 sticky h-[calc(100vh-88px)] overflow-y-auto scrollbar-hidden">
         <SidebarContent />
       </div>
 

@@ -26,16 +26,16 @@ const WelcomeSection = () => {
       </h2>
 
       {/* dynamic content starts here */}
-      <h2 className="font-bold text-[#990011] text-[1.5rem] sm:text-[1.875rem] md:text-[2.25rem]">
+      <h2 className="font-bold text-cath-red-700 text-[1.5rem] sm:text-[1.875rem] md:text-[2.25rem]">
         {dynamicT?.welcomeSection?.funFact?.title}
       </h2>
       <p className="mt-2 text-base text-black leading-[1.6]">
         {dynamicT?.welcomeSection?.funFact?.description?.part1}
-        <span className="text-[#990011]">
+        <span className="text-cath-red-700">
           {dynamicT?.welcomeSection?.funFact?.description?.highlight1}
         </span>
         {dynamicT?.welcomeSection?.funFact?.description?.part2}
-        <span className="text-[#990011]">
+        <span className="text-cath-red-700">
           {dynamicT?.welcomeSection?.funFact?.description?.highlight2}
         </span>
         {dynamicT?.welcomeSection?.funFact?.description?.part3}

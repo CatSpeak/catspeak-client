@@ -1,22 +1,15 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import { ChevronDown } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const FilterDropdown = ({ label, options = [], onSelect }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState(null)
   const dropdownRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   const handleSelect = (option) => {
     setSelected(option)
@@ -59,7 +52,7 @@ const FilterDropdown = ({ label, options = [], onSelect }) => {
                     onClick={() => handleSelect(option)}
                     className={`w-full h-[32px] rounded-[5px] text-left px-3 text-sm hover:bg-[#F0F0F0] ${
                       selected?.value === option.value
-                        ? "text-[#990011] bg-[#F0F0F0]"
+                        ? "text-cath-red-700 bg-[#F0F0F0]"
                         : ""
                     }`}
                   >

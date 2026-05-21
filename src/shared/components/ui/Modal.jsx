@@ -52,7 +52,7 @@ const Modal = ({
             aria-modal="true"
           >
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-3">
+              <div className="flex items-center justify-between p-4">
                 {title ? (
                   <h2 className="text-[20px] leading-[26px] font-semibold">
                     {title}
@@ -74,7 +74,7 @@ const Modal = ({
 
             <div className={bodyClassName}>{children}</div>
 
-            {footer && <div className="p-6">{footer}</div>}
+            {footer && <div className="p-4">{footer}</div>}
           </motion.div>
         </div>
       )}

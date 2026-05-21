@@ -30,6 +30,8 @@ export default {
     nationality: "国籍",
     yourLanguage: "您教授的语言",
     yourLevel: "您的水平",
+    selectLanguageFirst: "请先选择教学语言",
+    selectLevel: "选择水平...",
     nativeLanguage: "母语",
     idCard: "身份证",
     idFront: "正面",

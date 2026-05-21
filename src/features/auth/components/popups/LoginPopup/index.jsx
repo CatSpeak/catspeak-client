@@ -142,7 +142,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           </label>
           <button
             type="button"
-            className="font-semibold text-[#990011] hover:underline"
+            className="font-semibold text-cath-red-700 hover:underline"
             onClick={() => onSwitchMode("forgot")}
           >
             {authText.forgotLink}
@@ -170,7 +170,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           {authText.dontHaveAccount}{" "}
           <button
             type="button"
-            className="font-semibold text-[#990011] hover:underline"
+            className="font-semibold text-cath-red-700 hover:underline"
             onClick={() => onSwitchMode("register")}
           >
             {authText.registerLink}
