@@ -66,8 +66,24 @@ export const useAiSend = () => {
         })
 
         // 2. Track conversation thread
-        if (replyTarget?.interactionId) {
-          continueThread(replyTarget.interactionId, interactionId, text)
+        if (replyTarget) {
+          const parentHistory = replyTarget.interactionId 
+            ? getConversationThread(replyTarget.interactionId) 
+            : []
+            
+          if (parentHistory.length > 0) {
+            continueThread(replyTarget.interactionId, interactionId, text)
+          } else {
+            // Reconstruct a minimal context from the replyTarget UI state
+            const initialContext = []
+            if (replyTarget.replyTo?.message) {
+              initialContext.push({ role: "user", content: replyTarget.replyTo.message })
+            }
+            if (replyTarget.message) {
+              initialContext.push({ role: "assistant", content: replyTarget.message })
+            }
+            startNewThread(interactionId, text, initialContext)
+          }
         } else {
           startNewThread(interactionId, text)
         }
