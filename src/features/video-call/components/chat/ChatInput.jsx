@@ -115,11 +115,11 @@ const ChatInput = ({
           placeholder={
             isConnected
               ? isAiInput
-                ? isPrivateAi
-                  ? t.rooms?.chatBox?.privateAiPlaceholder ||
-                    "Ask AI (Private)"
-                  : t.rooms?.chatBox?.publicAiPlaceholder ||
-                    "Ask AI (Public)"
+                ? replyTarget?.from?.isSystem
+                  ? "Reply to system..."
+                  : isPrivateAi
+                    ? t.rooms?.chatBox?.privateAiPlaceholder || "Ask AI (Private)"
+                    : t.rooms?.chatBox?.publicAiPlaceholder || "Ask AI (Public)"
                 : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
               : t.rooms?.chatBox?.connectingPlaceholder || "Connecting..."
           }

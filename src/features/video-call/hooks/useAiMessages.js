@@ -31,7 +31,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
 
   const updateAiInteraction = useCallback((id, updates) => {
     setAiInteractions((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
+      prev.map((item) => (item.id === id ? { ...item, ...updates } : item)),
     )
   }, [])
 
@@ -46,21 +46,28 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
         try {
           const decoded = new TextDecoder().decode(payload)
           const json = JSON.parse(decoded)
-          const questionerName = participant?.name || participant?.identity || "Someone"
+          const questionerName =
+            participant?.name || participant?.identity || "Someone"
 
-          setAiInteractions(prev => [...prev, {
-            id: `ai-prompt-${Date.now()}-${Math.random()}`,
-            type: "interaction",
-            timestamp: Date.now(),
-            prompt: json.message,
-            topic: "public-ai",
-            questioner: json.questioner,
-            response: null,
-            status: "loading",
-            from: { name: questionerName, isLocal: false, isAi: false },
-          }])
+          setAiInteractions((prev) => [
+            ...prev,
+            {
+              id: `ai-prompt-${Date.now()}-${Math.random()}`,
+              type: "interaction",
+              timestamp: Date.now(),
+              prompt: json.message,
+              topic: "public-ai",
+              questioner: json.questioner,
+              response: null,
+              status: "loading",
+              from: { name: questionerName, isLocal: false, isAi: false },
+            },
+          ])
         } catch (e) {
-          console.warn("[LiveKit Debug] Failed to parse public-ai-prompt payload:", e)
+          console.warn(
+            "[LiveKit Debug] Failed to parse public-ai-prompt payload:",
+            e,
+          )
         }
         return
       }
@@ -73,7 +80,11 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
         const json = JSON.parse(decoded)
 
         // Filter private messages not meant for the current user
-        if (topic === "private-ai" && json.questioner && String(json.questioner) !== String(currentUserIdRef.current)) {
+        if (
+          topic === "private-ai" &&
+          json.questioner &&
+          String(json.questioner) !== String(currentUserIdRef.current)
+        ) {
           return
         }
 
@@ -134,7 +145,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
   const isCurrentUserPrompting = aiInteractions.some(
     (interaction) =>
       String(interaction.questioner) === String(currentUserIdRef.current) &&
-      interaction.status === "loading"
+      interaction.status === "loading",
   )
 
   const flatAiMessages = flattenAiInteractions(aiInteractions)
