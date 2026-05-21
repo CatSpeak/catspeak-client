@@ -67,6 +67,14 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
                     </>
                   )
                 }
+                if (text.startsWith("@AISystem")) {
+                  return (
+                    <>
+                      <span className="font-bold">@AISystem</span>
+                      {text.slice(9)}
+                    </>
+                  )
+                }
                 return text
               }
 

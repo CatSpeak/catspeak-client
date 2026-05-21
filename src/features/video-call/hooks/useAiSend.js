@@ -45,7 +45,9 @@ export const useAiSend = () => {
 
       try {
         const isPublic = !isPrivateAi
-        const formattedPrompt = `${isPublic ? "@AIPublic" : "@AIPrivate"} ${text}`
+        const isSystemReply = replyTarget?.from?.isSystem
+        const prefix = isSystemReply ? "@AISystem" : (isPublic ? "@AIPublic" : "@AIPrivate")
+        const formattedPrompt = `${prefix} ${text}`
         const roomName = lkRoomName || "General"
 
         // 1. Optimistic UI update
@@ -67,20 +69,26 @@ export const useAiSend = () => {
 
         // 2. Track conversation thread
         if (replyTarget) {
-          const parentHistory = replyTarget.interactionId 
-            ? getConversationThread(replyTarget.interactionId) 
+          const parentHistory = replyTarget.interactionId
+            ? getConversationThread(replyTarget.interactionId)
             : []
-            
+
           if (parentHistory.length > 0) {
             continueThread(replyTarget.interactionId, interactionId, text)
           } else {
             // Reconstruct a minimal context from the replyTarget UI state
             const initialContext = []
             if (replyTarget.replyTo?.message) {
-              initialContext.push({ role: "user", content: replyTarget.replyTo.message })
+              initialContext.push({
+                role: "user",
+                content: replyTarget.replyTo.message,
+              })
             }
             if (replyTarget.message) {
-              initialContext.push({ role: "assistant", content: replyTarget.message })
+              initialContext.push({
+                role: "assistant",
+                content: replyTarget.message,
+              })
             }
             startNewThread(interactionId, text, initialContext)
           }
