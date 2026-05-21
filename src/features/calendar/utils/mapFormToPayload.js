@@ -65,8 +65,8 @@ export const mapFormToPayload = ({
     maxParticipants: Number(maxParticipants),
     visibilityScope: VISIBILITY_MAP[visibility] ?? visibility,
     isRecurring,
-    startTime: dayjs(startTime).toISOString(),
-    endTime: dayjs(endTime).toISOString(),
+    startTime: isRecurring ? null : dayjs(startTime).toISOString(),
+    endTime: isRecurring ? null : dayjs(endTime).toISOString(),
     conditions,
   }
 
@@ -84,7 +84,8 @@ export const mapFormToPayload = ({
       startTime: dayjs(startTime).format("HH:mm:ss"),
       endTime: dayjs(endTime).format("HH:mm:ss"),
       recurrenceStartDate: dayjs(startTime).toISOString(),
-      recurrenceEndDate: dayjs(recurrenceEndDate).toISOString(),
+      recurrenceEndDate: recurrenceEndDate ? dayjs(recurrenceEndDate).toISOString() : null,
+      endCondition: recurrenceEndDate ? "UNTIL_DATE" : "NEVER",
       timeZone: selectedTimezone?.id ?? "Asia/Bangkok",
     }
   }

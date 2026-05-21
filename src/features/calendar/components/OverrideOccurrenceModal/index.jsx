@@ -26,6 +26,8 @@ const OverrideOccurrenceModal = ({ event, occurrenceId, onClose }) => {
     setEndTime,
     location,
     setLocation,
+    description,
+    setDescription,
     maxParticipants,
     setMaxParticipants,
     isCancelled,
@@ -154,6 +156,19 @@ const OverrideOccurrenceModal = ({ event, occurrenceId, onClose }) => {
               placeholder={cal.locationPlaceholder}
               variant="square"
               containerClassName="flex-1 max-[425px]:w-full"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="flex items-start gap-4 max-[425px]:flex-col max-[425px]:items-start max-[425px]:gap-1">
+            <span className="font-bold text-gray-900 w-[120px] max-[425px]:w-full mt-2">
+              {cal.description || "Mô tả"}
+            </span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={cal.descriptionPlaceholder || "Thêm mô tả cho buổi này..."}
+              className="flex-1 max-[425px]:w-full min-h-[100px] p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B91264] resize-y"
             />
           </div>
 

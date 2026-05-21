@@ -37,10 +37,7 @@ export const eventsApi = baseApi.injectEndpoints({
         url: `/v1/Events/${eventId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, eventId) => [
-        { type: "Events", id: eventId },
-        "Events",
-      ],
+      invalidatesTags: ["Events"], // Only invalidate lists, not the specific ID to prevent 404 refetch
     }),
 
     // POST /api/v1/Events
@@ -60,8 +57,36 @@ export const eventsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => [
+        { type: "Events", id: eventId },
+        { type: "Events", id: `occurrence-${occurrenceId}` },
+        "Events",
+      ],
+    }),
+
+    // PUT /api/v1/Events/{eventId}/series
+    updateEventSeries: builder.mutation({
+      query: ({ eventId, ...data }) => ({
+        url: `/v1/Events/${eventId}/series`,
+        method: "PUT",
+        body: data,
+      }),
       invalidatesTags: (result, error, { eventId }) => [
         { type: "Events", id: eventId },
+        "Events",
+      ],
+    }),
+
+    // DELETE /api/v1/Events/{eventId}/occurrences/{occurrenceId}
+    cancelEventOccurrence: builder.mutation({
+      query: ({ eventId, occurrenceId, reason }) => ({
+        url: `/v1/Events/${eventId}/occurrences/${occurrenceId}`,
+        method: "DELETE",
+        params: reason ? { reason } : undefined,
+      }),
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => [
+        { type: "Events", id: eventId },
+        { type: "Events", id: `occurrence-${occurrenceId}` },
         "Events",
       ],
     }),
@@ -162,6 +187,16 @@ export const eventsApi = baseApi.injectEndpoints({
         "Events",
       ],
     }),
+
+    // DELETE /api/v1/registrations/{registrationId}
+    deleteRegistration: builder.mutation({
+      query: ({ registrationId, ...body }) => ({
+        url: `/v1/registrations/${registrationId}`,
+        method: "DELETE",
+        body,
+      }),
+      invalidatesTags: ["Events"],
+    }),
   }),
 })
 
@@ -181,4 +216,7 @@ export const {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
   useGetOccurrenceRegistrationsQuery,
+  useUpdateEventSeriesMutation,
+  useCancelEventOccurrenceMutation,
+  useDeleteRegistrationMutation,
 } = eventsApi

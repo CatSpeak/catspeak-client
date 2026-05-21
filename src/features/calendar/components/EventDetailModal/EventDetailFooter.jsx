@@ -7,6 +7,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth"
 import {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
+  useDeleteRegistrationMutation,
 } from "@/store/api/eventsApi"
 
 import ParticipantListModal from "./ParticipantListModal"
@@ -27,28 +28,37 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
   const isRegistered = event?.isRegistered ?? false
 
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
-    useEventDelete(eventId, onClose)
+    useEventDelete(eventId, event?.occurrenceId, onClose)
 
   const [registerForEvent, { isLoading: isRegistering }] =
     useRegisterForEventMutation()
   const [cancelRegistration, { isLoading: isCancelling }] =
     useCancelRegistrationMutation()
+  const [deleteRegistration, { isLoading: isDeletingReg }] = 
+    useDeleteRegistrationMutation()
 
-  const isProcessing = isRegistering || isCancelling
+  const isProcessing = isRegistering || isCancelling || isDeletingReg
 
   const handleRegister = async () => {
     if (isRegistered) {
       // Cancel registration for this occurrence (or the single event)
       try {
-        const body = {
-          eventId,
-          cancellationReason: "User cancelled",
-          ...(event?.occurrenceId ? { occurrenceId: event.occurrenceId } : {}),
-          ...(event?.isRecurring && event?.originalStartTime && !event?.occurrenceId
-            ? { registrationDate: event.originalStartTime }
-            : {}),
+        if (event?.registrationId) {
+          await deleteRegistration({
+            registrationId: event.registrationId,
+            cancellationReason: "User cancelled",
+          }).unwrap()
+        } else {
+          const body = {
+            eventId,
+            cancellationReason: "User cancelled",
+            ...(event?.occurrenceId ? { occurrenceId: event.occurrenceId } : {}),
+            ...(event?.isRecurring && event?.originalStartTime && !event?.occurrenceId
+              ? { registrationDate: event.originalStartTime }
+              : {}),
+          }
+          await cancelRegistration(body).unwrap()
         }
-        await cancelRegistration(body).unwrap()
       } catch (err) {
         console.error("Cancel registration failed:", err)
       }
@@ -108,19 +118,38 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
         {/* Delete confirm / action icons */}
         {confirmDelete ? (
-          <div className="flex items-center gap-2 w-full">
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex-1 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors h-10 rounded-[10px] disabled:opacity-60"
-            >
-              {isDeleting
-                ? cal.deleting || "Đang xóa..."
-                : cal.confirm || "Xác nhận?"}
-            </button>
+          <div className="flex flex-wrap items-center gap-2 w-full">
+            {event?.isRecurring && event?.occurrenceId ? (
+              <>
+                <button
+                  onClick={() => handleDelete('occurrence')}
+                  disabled={isDeleting}
+                  className="flex-1 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors h-10 rounded-[10px] disabled:opacity-60 px-2 min-w-[max-content]"
+                >
+                  {isDeleting ? cal.deleting || "Đang xóa..." : "Chỉ xóa buổi này"}
+                </button>
+                <button
+                  onClick={() => handleDelete('series')}
+                  disabled={isDeleting}
+                  className="flex-1 text-xs font-semibold text-white bg-red-800 hover:bg-red-900 transition-colors h-10 rounded-[10px] disabled:opacity-60 px-2 min-w-[max-content]"
+                >
+                  {isDeleting ? cal.deleting || "Đang xóa..." : "Xóa toàn bộ chuỗi"}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => handleDelete('series')}
+                disabled={isDeleting}
+                className="flex-1 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors h-10 rounded-[10px] disabled:opacity-60 px-2"
+              >
+                {isDeleting
+                  ? cal.deleting || "Đang xóa..."
+                  : cal.confirm || "Xác nhận?"}
+              </button>
+            )}
             <button
               onClick={() => setConfirmDelete(false)}
-              className="flex-1 text-sm bg-[#f2f2f2] transition-colors h-10 rounded-[10px] hover:bg-[#d9d9d9]"
+              className="flex-1 text-sm bg-[#f2f2f2] transition-colors h-10 rounded-[10px] hover:bg-[#d9d9d9] px-2 min-w-[60px]"
             >
               {cal.cancel || "Hủy"}
             </button>
