@@ -54,8 +54,6 @@ const GlobalCallContent = ({
   const [unreadAiChat, setUnreadAiChat] = useState(0)
   const [showVirtualBackground, setShowVirtualBackground] = useState(false)
 
-
-
   // ── LiveKit hooks ──
   let lkRoom = null
   try {
@@ -83,7 +81,16 @@ const GlobalCallContent = ({
 
   // ── Deduplicated participant list (local first) ──
   const seenIdentities = new Set()
-  const participants = []
+  let participants = []
+
+  const parseMetadata = (metadata) => {
+    if (!metadata) return {}
+    try {
+      return JSON.parse(metadata)
+    } catch {
+      return {}
+    }
+  }
 
   if (localParticipant) {
     seenIdentities.add(localParticipant.identity)
@@ -96,6 +103,33 @@ const GlobalCallContent = ({
     seenIdentities.add(p.identity)
     participants.push(p)
   })
+
+  // ── Hand Raise Sorting ──
+  participants.sort((a, b) => {
+    const metaA = parseMetadata(a.metadata)
+    const metaB = parseMetadata(b.metadata)
+
+    const aRaised = metaA.handRaised === true
+    const bRaised = metaB.handRaised === true
+
+    if (aRaised && !bRaised) return -1
+    if (!aRaised && bRaised) return 1
+
+    if (aRaised && bRaised) {
+      const timeA = metaA.handRaisedAt || 0
+      const timeB = metaB.handRaisedAt || 0
+      return timeA - timeB // Ascending
+    }
+
+    // Both not raised, keep local user first
+    if (a.isLocal && !b.isLocal) return -1
+    if (!a.isLocal && b.isLocal) return 1
+
+    return 0
+  })
+
+  const localMetadata = parseMetadata(localParticipant?.metadata)
+  const isHandRaised = localMetadata.handRaised === true
 
   const currentUserId = user?.accountId
 
@@ -139,6 +173,34 @@ const GlobalCallContent = ({
     }
     prevChatMessagesLength.current = chatMessages.length
   }, [chatMessages, showChat, isChatCollapsed])
+
+  // ── Hand Raise Audio Notification ──
+  const prevRaisedHandsRef = React.useRef(new Set())
+  useEffect(() => {
+    const currentRaisedHands = new Set()
+    let newHandRaised = false
+
+    participants.forEach((p) => {
+      const meta = parseMetadata(p.metadata)
+      if (meta.handRaised === true) {
+        currentRaisedHands.add(p.identity)
+        // Check if this is a newly raised hand
+        if (!prevRaisedHandsRef.current.has(p.identity)) {
+          newHandRaised = true
+        }
+      }
+    })
+
+    if (newHandRaised) {
+      const audio = new Audio('/sounds/hand-raise.mp3')
+      audio.volume = 0.5
+      audio.play().catch(err => {
+        console.warn("Hand raise audio blocked by browser autoplay policy:", err)
+      })
+    }
+
+    prevRaisedHandsRef.current = currentRaisedHands
+  }, [participants])
 
   const prevAiMessagesRef = React.useRef(combinedAiMessages)
   useEffect(() => {
@@ -215,6 +277,7 @@ const GlobalCallContent = ({
 
     // Session
     id: callInfo?.roomId,
+    sessionId: callInfo?.sessionId || localMetadata?.sessionId,
     navigate: getNavigate(),
     location: getLocation(),
     room: roomData,
@@ -228,6 +291,7 @@ const GlobalCallContent = ({
     // Participants
     localParticipant,
     participants,
+    isHandRaised,
 
     // Media state
     micOn: videoCallState.micOn,

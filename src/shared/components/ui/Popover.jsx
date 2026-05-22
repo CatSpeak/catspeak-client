@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 
-const Popover = ({ trigger, content, placement = "bottom-right", className = "" }) => {
+const Popover = ({ trigger, content, placement = "bottom-right", className = "", triggerClassName = "" }) => {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
 
@@ -24,7 +24,7 @@ const Popover = ({ trigger, content, placement = "bottom-right", className = "" 
           e.stopPropagation()
           setIsOpen(!isOpen)
         }} 
-        className="cursor-pointer inline-flex items-center justify-center"
+        className={`cursor-pointer ${triggerClassName || "inline-flex items-center justify-center"}`}
       >
         {trigger}
       </div>

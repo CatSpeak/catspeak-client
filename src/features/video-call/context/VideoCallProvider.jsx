@@ -211,7 +211,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   }
 
   // --- Handle "Join Now" click ---
-  const handleJoinClick = async ({ skipRoomFullCheck = false, confirmedSwitch = false, isAutoJoin = false } = {}) => {
+  const handleJoinClick = async ({
+    skipRoomFullCheck = false,
+    confirmedSwitch = false,
+    isAutoJoin = false,
+  } = {}) => {
     // If we are already in a different call, show switch modal
     if (isInCall && !confirmedSwitch) {
       setShowSwitchModal(true)
@@ -242,6 +246,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
       const token = tokenRes?.participantToken
       const serverUrl = tokenRes?.serverUrl
+      const sessionId = tokenRes?.sessionId
       if (!token || typeof token !== "string") {
         throw new Error("Invalid LiveKit token received from backend")
       }
@@ -264,6 +269,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           livekitToken: token,
           livekitServerUrl: serverUrl,
           roomId,
+          sessionId,
           callPath,
           roomData: room,
           user,
@@ -318,11 +324,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   }
 
   // Loading room data
-  if (
-    isLoadingUser ||
-    isLoadingRoom ||
-    isRoomQuerySkipped
-  ) {
+  if (isLoadingUser || isLoadingRoom || isRoomQuerySkipped) {
     return <div className="h-screen w-full bg-white"></div>
   }
 
