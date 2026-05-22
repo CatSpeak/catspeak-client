@@ -39,13 +39,13 @@ import styles from "../styles/reels.module.css"
  * Individual comment node inside the hierarchical comments tree.
  * Renders the author, time, content, actions (Reply, Delete), and recursively renders replies.
  */
-const CommentItemNode = ({
+const CommentItemNode = React.memo(function CommentItemNode({
   comment,
   reelId,
   currentUser,
   onReply,
   onDelete,
-}) => {
+}) {
   const [expanded, setExpanded] = useState(false)
   const hasReplies = comment.replies && comment.replies.length > 0
 
@@ -141,27 +141,29 @@ const CommentItemNode = ({
       )}
     </div>
   )
-}
+})
 
 /**
  * Individual full-screen Reel Slide rendered in the Vertical Snapper.
  * Encapsulates playback states, isolation, progress controls, volume preferences,
  * and the sliding Comments Drawers to avoid DOM overlap conflicts.
  */
-const ReelDetailSlide = ({
+const ReelDetailSlide = React.memo(function ReelDetailSlide({
   reel,
   isActive,
+  shouldPreload = false,
   onClose,
   sharedMuted,
   setSharedMuted,
   sharedVolume,
   setSharedVolume,
-}) => {
+}) {
   /* ── Refs ───────────────────────────────────────── */
   const videoRef = useRef(null)
   const progressRef = useRef(null)
   const containerRef = useRef(null)
   const commentInputRef = useRef(null)
+  const resetTimerRef = useRef(null)
 
   /* ── State ──────────────────────────────────────── */
   const [isPlaying, setIsPlaying] = useState(false)
@@ -179,7 +181,7 @@ const ReelDetailSlide = ({
   const isAuthenticated = useSelector(selectIsAuthenticated)
 
   const { data: commentsResponse, isLoading: isCommentsLoading } =
-    useGetReelCommentsQuery(reel.id, { skip: !reel.id || !isActive })
+    useGetReelCommentsQuery(reel.id, { skip: !reel.id || !isActive || !showInfo })
 
   const [toggleLike] = useToggleLikeReelMutation()
   const [createComment, { isLoading: isPostingComment }] =
@@ -195,25 +197,50 @@ const ReelDetailSlide = ({
         : []
   }, [commentsResponse])
 
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !hasVideo || !shouldPreload) return
+
+    if (video.readyState < video.HAVE_CURRENT_DATA) {
+      video.load()
+    }
+  }, [hasVideo, reel.videoUrl, shouldPreload])
+
   /* ── Autoplay / Pause isolation ─────────────────── */
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
+    if (resetTimerRef.current) {
+      window.clearTimeout(resetTimerRef.current)
+      resetTimerRef.current = null
+    }
+
     if (isActive) {
       video.play()
         .then(() => setIsPlaying(true))
-        .catch((e) => {
-          console.log("Autoplay blocked or failed", e)
+        .catch(() => {
           setIsPlaying(false)
         })
     } else {
       video.pause()
-      video.currentTime = 0
-      setTimeout(() => {
+
+      resetTimerRef.current = window.setTimeout(() => {
+        const currentVideo = videoRef.current
+        if (currentVideo?.readyState > 0) {
+          currentVideo.currentTime = 0
+        }
         setIsPlaying(false)
         setProgress(0)
-      }, 0)
+        resetTimerRef.current = null
+      }, 250)
+    }
+
+    return () => {
+      if (resetTimerRef.current) {
+        window.clearTimeout(resetTimerRef.current)
+        resetTimerRef.current = null
+      }
     }
   }, [isActive])
 
@@ -381,6 +408,8 @@ const ReelDetailSlide = ({
               <video
                 ref={videoRef}
                 src={reel.videoUrl}
+                preload={shouldPreload ? "auto" : "metadata"}
+                poster={reel.thumbnailUrl || undefined}
                 muted={sharedMuted}
                 loop
                 playsInline
@@ -392,7 +421,7 @@ const ReelDetailSlide = ({
               />
 
               {/* Play overlay — shown when paused */}
-              {!isPlaying && (
+              {isActive && !isPlaying && (
                 <div className={styles.detailPlayButton}>
                   <div
                     className={styles.detailPlayIcon}
@@ -658,7 +687,7 @@ const ReelDetailSlide = ({
       </div>
     </div>
   )
-}
+})
 
 /**
  * Instagram-style reels detail page refactored into a full-viewport snapped scroller.
@@ -749,7 +778,7 @@ const ReelDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center bg-black/5 rounded-2xl border border-gray-100">
+      <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-[#990011]" />
       </div>
     )
@@ -793,10 +822,11 @@ const ReelDetailPage = () => {
       isLoading={false}
       onActiveIndexChange={handleActiveIndexChange}
     >
-      {(reel, index, isActive) => (
+      {(reel, index, isActive, preloadState = {}) => (
         <ReelDetailSlide
           reel={reel}
           isActive={isActive}
+          shouldPreload={preloadState.shouldPreload}
           onClose={handleClose}
           sharedMuted={sharedMuted}
           setSharedMuted={setSharedMuted}

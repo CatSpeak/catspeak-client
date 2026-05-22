@@ -10,6 +10,55 @@ import { Loader2 } from "lucide-react"
  * - Infinite scroll with IntersectionObserver (observes sentinel prior to list end)
  * - Render prop child rendering for flexible parent integration
  */
+const ACTIVE_SNAP_VISIBLE_RATIO = 0.92
+const DEFAULT_RENDER_WINDOW = 2
+const DEFAULT_PRELOAD_WINDOW = 1
+
+const CONTAINER_STYLE = {
+  width: "100%",
+  height: "calc(100vh - 120px)",
+  overflowY: "scroll",
+  scrollSnapType: "y mandatory",
+  WebkitOverflowScrolling: "touch",
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
+  backgroundColor: "transparent",
+  position: "relative",
+  boxSizing: "border-box",
+  borderRadius: "16px",
+}
+
+const ITEM_STYLE = {
+  scrollSnapAlign: "start",
+  scrollSnapStop: "always",
+  width: "100%",
+  height: "calc(100vh - 120px)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxSizing: "border-box",
+  position: "relative",
+  overflow: "hidden",
+}
+
+const SENTINEL_STYLE = {
+  height: "1px",
+  width: "100%",
+  position: "absolute",
+  bottom: "100px",
+}
+
+const PLACEHOLDER_STYLE = {
+  width: "100%",
+  height: "100%",
+  background: "#000",
+}
+
+const clampIndex = (index, length) => {
+  if (length <= 0) return 0
+  return Math.min(Math.max(index, 0), length - 1)
+}
+
 export default function ReelScrollContainer({
   reels = [],
   onLoadMore,
@@ -18,10 +67,31 @@ export default function ReelScrollContainer({
   initialIndex = 0,
   children,
   onActiveIndexChange,
+  renderWindow = DEFAULT_RENDER_WINDOW,
+  preloadWindow = DEFAULT_PRELOAD_WINDOW,
 }) {
   const containerRef = useRef(null)
   const sentinelRef = useRef(null)
+  const activeIndexRef = useRef(initialIndex)
+  const renderCenterIndexRef = useRef(initialIndex)
+  const scrollRafRef = useRef(null)
+  const syncRafRef = useRef(null)
+  const hasSyncedInitialScrollRef = useRef(false)
   const [activeIndex, setActiveIndex] = useState(initialIndex)
+  const [renderCenterIndex, setRenderCenterIndex] = useState(initialIndex)
+
+  const commitActiveIndex = useCallback((nextIndex) => {
+    if (reels.length === 0) return
+
+    const safeIndex = clampIndex(nextIndex, reels.length)
+    if (safeIndex === activeIndexRef.current) return
+
+    activeIndexRef.current = safeIndex
+    renderCenterIndexRef.current = safeIndex
+    setActiveIndex(safeIndex)
+    setRenderCenterIndex(safeIndex)
+    onActiveIndexChange?.(safeIndex)
+  }, [onActiveIndexChange, reels.length])
 
   // Sync scroll position to match initialIndex (on mount or browser back/forward)
   useEffect(() => {
@@ -31,83 +101,90 @@ export default function ReelScrollContainer({
     const height = container.clientHeight
     if (height <= 0) return
 
-    const expectedScrollTop = initialIndex * height
+    const safeInitialIndex = clampIndex(initialIndex, reels.length)
+    const isInternalUrlSync =
+      hasSyncedInitialScrollRef.current &&
+      safeInitialIndex === activeIndexRef.current
+
+    if (isInternalUrlSync) return
+
+    activeIndexRef.current = safeInitialIndex
+    renderCenterIndexRef.current = safeInitialIndex
+
+    if (syncRafRef.current !== null) {
+      window.cancelAnimationFrame(syncRafRef.current)
+    }
+
+    syncRafRef.current = window.requestAnimationFrame(() => {
+      syncRafRef.current = null
+      setActiveIndex(safeInitialIndex)
+      setRenderCenterIndex(safeInitialIndex)
+    })
+
+    const expectedScrollTop = safeInitialIndex * height
     if (Math.abs(container.scrollTop - expectedScrollTop) > 2) {
       container.scrollTop = expectedScrollTop
     }
-  }, [initialIndex, reels.length])
+    hasSyncedInitialScrollRef.current = true
 
-  // Track the current active index and trigger callback if provided
-  const handleScroll = useCallback((e) => {
-    const container = e.currentTarget
-    const height = container.clientHeight
-    if (height <= 0) return
-
-    const index = Math.round(container.scrollTop / height)
-    if (index >= 0 && index < reels.length && index !== activeIndex) {
-      setActiveIndex(index)
-      if (onActiveIndexChange) {
-        onActiveIndexChange(index)
+    return () => {
+      if (syncRafRef.current !== null) {
+        window.cancelAnimationFrame(syncRafRef.current)
+        syncRafRef.current = null
       }
     }
-  }, [reels.length, activeIndex, onActiveIndexChange])
+  }, [initialIndex, reels.length])
+
+  const updateActiveIndexFromScroll = useCallback((container) => {
+    const height = container.clientHeight
+    if (height <= 0 || reels.length === 0) return
+
+    const rawIndex = container.scrollTop / height
+    const nearestIndex = clampIndex(Math.round(rawIndex), reels.length)
+    const visibleRatio = 1 - Math.min(1, Math.abs(rawIndex - nearestIndex))
+
+    if (nearestIndex !== renderCenterIndexRef.current) {
+      renderCenterIndexRef.current = nearestIndex
+      setRenderCenterIndex(nearestIndex)
+    }
+
+    if (visibleRatio >= ACTIVE_SNAP_VISIBLE_RATIO) {
+      commitActiveIndex(nearestIndex)
+    }
+  }, [commitActiveIndex, reels.length])
+
+  const handleScroll = useCallback((e) => {
+    const container = e.currentTarget
+    if (scrollRafRef.current !== null) return
+
+    scrollRafRef.current = window.requestAnimationFrame(() => {
+      scrollRafRef.current = null
+      updateActiveIndexFromScroll(container)
+    })
+  }, [updateActiveIndexFromScroll])
+
+  useEffect(() => {
+    return () => {
+      if (scrollRafRef.current !== null) {
+        window.cancelAnimationFrame(scrollRafRef.current)
+      }
+      if (syncRafRef.current !== null) {
+        window.cancelAnimationFrame(syncRafRef.current)
+      }
+    }
+  }, [])
 
   // Setup infinite scroll observer to fetch more reels close to the end
   useEffect(() => {
     if (!onLoadMore || !hasMore || isLoading) return
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          onLoadMore()
-        }
-      },
-      {
-        root: containerRef.current,
-        rootMargin: "300px", // Pre-fetch 300px before the user scrolls completely to the end
-        threshold: 0.1,
-      }
+      (entries) => { if (entries[0].isIntersecting) onLoadMore() },
+      { root: containerRef.current, rootMargin: "300px", threshold: 0.1 }
     )
-
     const sentinel = sentinelRef.current
-    if (sentinel) {
-      observer.observe(sentinel)
-    }
-
-    return () => {
-      if (sentinel) {
-        observer.unobserve(sentinel)
-      }
-    }
+    if (sentinel) observer.observe(sentinel)
+    return () => { if (sentinel) observer.unobserve(sentinel) }
   }, [onLoadMore, hasMore, isLoading, reels.length])
-
-  // Inline container and item style definitions
-  const containerStyle = {
-    width: "100%",
-    height: "calc(100vh - 120px)",
-    overflowY: "scroll",
-    scrollSnapType: "y mandatory",
-    WebkitOverflowScrolling: "touch",
-    scrollbarWidth: "none",
-    msOverflowStyle: "none",
-    backgroundColor: "transparent",
-    position: "relative",
-    boxSizing: "border-box",
-    borderRadius: "16px",
-  }
-
-  const itemStyle = {
-    scrollSnapAlign: "start",
-    scrollSnapStop: "always",
-    width: "100%",
-    height: "calc(100vh - 120px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    boxSizing: "border-box",
-    position: "relative",
-    overflow: "hidden",
-  }
 
   return (
     <>
@@ -125,27 +202,47 @@ export default function ReelScrollContainer({
       <div
         ref={containerRef}
         className="reel-scroll-container"
-        style={containerStyle}
+        style={CONTAINER_STYLE}
         onScroll={handleScroll}
       >
         {/* Render actual reels list */}
         {reels.map((reel, index) => {
           const isActive = index === activeIndex
+          const distanceFromActive = Math.abs(index - activeIndex)
+          const distanceFromRenderCenter = Math.abs(index - renderCenterIndex)
+          const shouldRender =
+            distanceFromActive <= renderWindow ||
+            distanceFromRenderCenter <= renderWindow
+          const shouldPreload =
+            distanceFromActive <= preloadWindow ||
+            distanceFromRenderCenter <= preloadWindow
+
           return (
-            <div key={reel.id || index} className="reel-scroll-item" style={itemStyle}>
-              {typeof children === "function" ? children(reel, index, isActive) : null}
+            <div
+              key={reel.id || index}
+              className="reel-scroll-item"
+              style={ITEM_STYLE}
+              data-reel-index={index}
+            >
+              {shouldRender && typeof children === "function"
+                ? children(reel, index, isActive, {
+                  activeIndex,
+                  shouldPreload,
+                  shouldRender,
+                })
+                : <div style={PLACEHOLDER_STYLE} aria-hidden="true" />}
             </div>
           )
         })}
 
         {/* Infinite Scroll Sentinel element */}
         {hasMore && !isLoading && (
-          <div ref={sentinelRef} style={{ height: "1px", width: "100%", position: "absolute", bottom: "100px" }} />
+          <div ref={sentinelRef} style={SENTINEL_STYLE} />
         )}
 
         {/* Minimal loading indicator slide at the end */}
         {isLoading && (
-          <div style={{ ...itemStyle, flexDirection: "column", gap: "12px", background: "transparent" }}>
+          <div style={{ ...ITEM_STYLE, flexDirection: "column", gap: "12px", background: "transparent" }}>
             <Loader2
               style={{
                 width: "40px",
@@ -164,7 +261,7 @@ export default function ReelScrollContainer({
         {!hasMore && (
           <div
             style={{
-              ...itemStyle,
+              ...ITEM_STYLE,
               flexDirection: "column",
               gap: "16px",
               background: "#fafafa",

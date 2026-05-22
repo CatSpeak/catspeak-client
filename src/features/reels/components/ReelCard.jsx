@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback } from "react"
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import { Play, Heart, Eye, Volume2, VolumeX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { formatCompactNumber } from "../utils/formatters"
@@ -26,7 +26,7 @@ const ASPECT_RATIOS = [
  * - Play button ONLY shows when the user explicitly pauses a playing video
  *   (never on initial hover, never as a default state)
  */
-const ReelCard = ({ reel, index, onClick }) => {
+const ReelCard = React.memo(function ReelCard({ reel, index, onSelect }) {
   const videoRef = useRef(null)
   const hoverIntentRef = useRef(null)
 
@@ -42,6 +42,36 @@ const ReelCard = ({ reel, index, onClick }) => {
 
   const hasVideo = Boolean(reel.videoUrl)
 
+  const handleCardClick = useCallback(() => {
+    onSelect(reel)
+  }, [onSelect, reel])
+
+  const stopPreview = useCallback((resetState = true) => {
+    if (hoverIntentRef.current) {
+      clearTimeout(hoverIntentRef.current)
+      hoverIntentRef.current = null
+    }
+
+    const el = videoRef.current
+    if (el) {
+      el.pause()
+      if (el.readyState > 0) {
+        el.currentTime = 0
+      }
+    }
+    if (resetState) {
+      setShowVideo(false)
+      setIsPlaying(false)
+      setIsPaused(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      stopPreview(false)
+    }
+  }, [stopPreview])
+
   /** Start playback on hover (with small delay to avoid flicker on quick passes) */
   const handleMouseEnter = useCallback(() => {
     if (!hasVideo) return
@@ -53,7 +83,9 @@ const ReelCard = ({ reel, index, onClick }) => {
       // Make the video visible, then play
       setShowVideo(true)
       setIsPaused(false)
-      el.currentTime = 0
+      if (el.readyState > 0) {
+        el.currentTime = 0
+      }
       el.play()
         .then(() => setIsPlaying(true))
         .catch(() => setIsPlaying(false))
@@ -62,21 +94,8 @@ const ReelCard = ({ reel, index, onClick }) => {
 
   /** Pause and hide on mouse leave */
   const handleMouseLeave = useCallback(() => {
-    // Cancel pending hover intent
-    if (hoverIntentRef.current) {
-      clearTimeout(hoverIntentRef.current)
-      hoverIntentRef.current = null
-    }
-
-    const el = videoRef.current
-    if (el) {
-      el.pause()
-      el.currentTime = 0
-    }
-    setShowVideo(false)
-    setIsPlaying(false)
-    setIsPaused(false)
-  }, [])
+    stopPreview()
+  }, [stopPreview])
 
   /** User explicitly pauses or resumes — this is the ONLY way the play button appears */
   const handlePlayPause = useCallback((e) => {
@@ -110,7 +129,7 @@ const ReelCard = ({ reel, index, onClick }) => {
   return (
     <div
       className={styles.card}
-      onClick={onClick}
+      onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -220,6 +239,6 @@ const ReelCard = ({ reel, index, onClick }) => {
       </div>
     </div>
   )
-}
+})
 
 export default ReelCard

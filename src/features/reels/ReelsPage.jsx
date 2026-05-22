@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -27,18 +27,22 @@ const ReelsPage = () => {
     setActiveTag,
   } = useReels()
 
-  const handleReelClick = (reel) => {
+  const handleReelClick = useCallback((reel) => {
     navigate(reel.id)
-  }
+  }, [navigate])
 
-  const handleUploadClick = () => {
+  const handleUploadClick = useCallback(() => {
     if (!isAuthenticated) {
       toast.error(t.catSpeak.reels.loginRequired || "Please log in to upload a Reel.")
       openAuthModal("login")
       return
     }
     setIsUploadOpen(true)
-  }
+  }, [isAuthenticated, openAuthModal, t.catSpeak.reels.loginRequired])
+
+  const handleUploadClose = useCallback(() => {
+    setIsUploadOpen(false)
+  }, [])
 
   return (
     <div className="flex flex-col gap-4">
@@ -71,10 +75,12 @@ const ReelsPage = () => {
       )}
 
       {/* Creation Modal */}
-      <CreateReelModal
-        open={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
-      />
+      {isUploadOpen && (
+        <CreateReelModal
+          open={isUploadOpen}
+          onClose={handleUploadClose}
+        />
+      )}
     </div>
   )
 }

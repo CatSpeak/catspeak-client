@@ -23,13 +23,18 @@ const MENU_ITEMS = [
  * Three-dot "More" dropdown menu.
  * Self-contained: manages its own open/close state and click-outside dismissal.
  */
-const ReelMoreMenu = () => {
+const ReelMoreMenu = React.memo(function ReelMoreMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
 
   const toggle = useCallback((e) => {
     e.stopPropagation()
     setIsOpen((prev) => !prev)
+  }, [])
+
+  const handleItemClick = useCallback((e) => {
+    e.stopPropagation()
+    setIsOpen(false)
   }, [])
 
   /* Close on outside click or Escape */
@@ -66,24 +71,21 @@ const ReelMoreMenu = () => {
 
       {isOpen && (
         <div className={styles.moreMenuDropdown} role="menu">
-          {MENU_ITEMS.map(({ icon: Icon, label }) => (
+          {MENU_ITEMS.map((item) => (
             <button
-              key={label}
+              key={item.label}
               className={styles.moreMenuItem}
               role="menuitem"
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsOpen(false)
-              }}
+              onClick={handleItemClick}
             >
-              <Icon size={18} />
-              <span>{label}</span>
+              {React.createElement(item.icon, { size: 18 })}
+              <span>{item.label}</span>
             </button>
           ))}
         </div>
       )}
     </div>
   )
-}
+})
 
 export default ReelMoreMenu

@@ -11,7 +11,8 @@ const SKELETON_HEIGHTS = [260, 320, 220, 280, 340, 240, 300, 250]
  *
  * @param {{ count?: number }} props
  */
-const ReelGridSkeleton = ({ count = 12 }) => (
+const ReelGridSkeleton = React.memo(function ReelGridSkeleton({ count = 12 }) {
+  return (
   <div className={styles.masonryGrid}>
     {Array.from({ length: count }, (_, i) => (
       <div key={i} className={styles.masonryItem}>
@@ -39,6 +40,7 @@ const ReelGridSkeleton = ({ count = 12 }) => (
       </div>
     ))}
   </div>
-)
+  )
+})
 
 export default ReelGridSkeleton

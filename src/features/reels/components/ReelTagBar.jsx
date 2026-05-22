@@ -10,7 +10,7 @@ import styles from "../styles/reels.module.css"
  *   onTagClick: (tag: string) => void,
  * }} props
  */
-const ReelTagBar = ({ tags, activeTag, onTagClick }) => {
+const ReelTagBar = React.memo(function ReelTagBar({ tags, activeTag, onTagClick }) {
   if (tags.length === 0) return null
 
   return (
@@ -26,6 +26,6 @@ const ReelTagBar = ({ tags, activeTag, onTagClick }) => {
       ))}
     </div>
   )
-}
+})
 
 export default ReelTagBar
