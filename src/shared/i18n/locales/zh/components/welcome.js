@@ -10,4 +10,8 @@ export default {
     },
     footer: "恭贺新禧",
   },
+  presence: {
+    onlineIn: "在线",
+    live: "实时",
+  },
 }

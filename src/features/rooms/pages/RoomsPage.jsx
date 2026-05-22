@@ -24,6 +24,7 @@ import {
 import { useSelector, useDispatch } from "react-redux"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
+import CommunityPresence from "@/features/homepage/components/CommunityPresence"
 
 const RoomsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -32,10 +33,9 @@ const RoomsPage = () => {
 
   const [showSwitchModal, setShowSwitchModal] = useState(false)
   const [pendingAction, setPendingAction] = useState(null)
-  
+
   const { isInCall, callInfo } = useSelector((s) => s.videoCall)
   const dispatch = useDispatch()
-
 
   const [page, setPage] = useState(1)
   const [tab, setTab] = useState("communicate")
@@ -98,7 +98,7 @@ const RoomsPage = () => {
     if (isInCall) {
       dispatch(leaveCall())
     }
-    
+
     if (pendingAction === "1:1") {
       proceedCreateOneOnOne()
     }
@@ -171,79 +171,80 @@ const RoomsPage = () => {
           direction="up"
           className="w-full"
         >
-        {/* ─── Hero Section: WelcomeSection + WorkshopCarousel ─── */}
-        <div className="p-5 pb-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-            {/* Left: Welcome + Action Buttons */}
-            <div className="flex flex-col gap-8">
-              <WelcomeSection />
-              <SessionActionButtons
-                handleCreateOneOnOneSession={handleCreateOneOnOne}
-                handleCreateStudyGroupSession={handleCreateStudyGroup}
-                isCreatingOneOnOne={state.isCreatingOneOnOne}
-                isCreatingStudyGroup={state.isCreatingStudyGroup}
-              />
-            </div>
-
-            {/* Right: Workshop Carousel */}
-            <div className="w-full">
-              <WorkshopCarousel hideTitle />
-            </div>
-          </div>
-        </div>
-
-        {/* ─── Rooms Section: Filter Sidebar + CommunicateTab ─── */}
-        <div className="p-5">
-          {/* Mobile Filter Button (inline, above content) */}
-          <div className="lg:hidden mb-4 flex justify-end">
-            <button
-              onClick={() => setFiltersOpen(true)}
-              className="flex items-center gap-2 rounded-lg h-10 px-4 text-sm font-medium border border-[#C6C6C6] bg-white hover:bg-gray-50 transition-colors"
-            >
-              <Filter className="w-4 h-4" />
-              <span>{t.rooms?.filters?.title || "Filters"}</span>
-            </button>
-          </div>
-
-          <RoomsMobileDrawer
-            isOpen={filtersOpen}
-            onClose={() => setFiltersOpen(false)}
-            title={t.rooms?.filters?.title || "Filters"}
-          >
-            <RoomFilterSidebar inDrawer />
-          </RoomsMobileDrawer>
-
-          <div className="flex gap-10 w-full">
-            {/* Desktop Filter Sidebar */}
-            <div className="hidden lg:block w-[280px] shrink-0">
-              <RoomFilterSidebar />
-            </div>
-
-            {/* Content area */}
-            <div className="flex-1 min-w-0">
+          {/* ─── Hero Section: WelcomeSection + WorkshopCarousel ─── */}
+          <div className="p-5 pb-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+              {/* Left: Welcome + Action Buttons */}
               <div>
-                <AnimatePresence mode="wait">
-                  <FadeAnimation key={tab} className="w-full">
-                    {tab === "communicate" && (
-                      <CommunicateTab
-                        rooms={rooms}
-                        selectedCategories={categories}
-                        page={page}
-                        totalPages={totalPages}
-                        setPage={setPage}
-                        languageType={languageType}
-                        requiredLevels={requiredLevelsArg}
-                        topics={topicsArg}
-                      />
-                    )}
-                  </FadeAnimation>
-                </AnimatePresence>
+                <WelcomeSection />
+                <CommunityPresence />
+                <SessionActionButtons
+                  handleCreateOneOnOneSession={handleCreateOneOnOne}
+                  handleCreateStudyGroupSession={handleCreateStudyGroup}
+                  isCreatingOneOnOne={state.isCreatingOneOnOne}
+                  isCreatingStudyGroup={state.isCreatingStudyGroup}
+                />
+              </div>
+
+              {/* Right: Workshop Carousel */}
+              <div className="w-full">
+                <WorkshopCarousel hideTitle />
               </div>
             </div>
           </div>
-        </div>
-      </FluentAnimation>
-    </AnimatePresence>
+
+          {/* ─── Rooms Section: Filter Sidebar + CommunicateTab ─── */}
+          <div className="p-5">
+            {/* Mobile Filter Button (inline, above content) */}
+            <div className="lg:hidden mb-4 flex justify-end">
+              <button
+                onClick={() => setFiltersOpen(true)}
+                className="flex items-center gap-2 rounded-lg h-10 px-4 text-sm font-medium border border-[#C6C6C6] bg-white hover:bg-gray-50 transition-colors"
+              >
+                <Filter className="w-4 h-4" />
+                <span>{t.rooms?.filters?.title || "Filters"}</span>
+              </button>
+            </div>
+
+            <RoomsMobileDrawer
+              isOpen={filtersOpen}
+              onClose={() => setFiltersOpen(false)}
+              title={t.rooms?.filters?.title || "Filters"}
+            >
+              <RoomFilterSidebar inDrawer />
+            </RoomsMobileDrawer>
+
+            <div className="flex gap-10 w-full">
+              {/* Desktop Filter Sidebar */}
+              <div className="hidden lg:block w-[280px] shrink-0">
+                <RoomFilterSidebar />
+              </div>
+
+              {/* Content area */}
+              <div className="flex-1 min-w-0">
+                <div>
+                  <AnimatePresence mode="wait">
+                    <FadeAnimation key={tab} className="w-full">
+                      {tab === "communicate" && (
+                        <CommunicateTab
+                          rooms={rooms}
+                          selectedCategories={categories}
+                          page={page}
+                          totalPages={totalPages}
+                          setPage={setPage}
+                          languageType={languageType}
+                          requiredLevels={requiredLevelsArg}
+                          topics={topicsArg}
+                        />
+                      )}
+                    </FadeAnimation>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FluentAnimation>
+      </AnimatePresence>
     </>
   )
 }

@@ -11,4 +11,8 @@ export default {
     },
     footer: "Best Wishes for the New Spring",
   },
+  presence: {
+    onlineIn: "online",
+    live: "Live",
+  },
 }

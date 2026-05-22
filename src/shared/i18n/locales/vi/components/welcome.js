@@ -11,4 +11,8 @@ export default {
     },
     footer: "Cung Chúc Tân Xuân",
   },
+  presence: {
+    onlineIn: "đang trực tuyến",
+    live: "Trực tiếp",
+  },
 }
