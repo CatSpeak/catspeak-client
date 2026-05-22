@@ -34,7 +34,6 @@ const ChatBox = ({
   } = useGlobalVideoCall()
 
   const [aiReplyTarget, setAiReplyTarget] = useState(null)
-  const [roomReplyTarget, setRoomReplyTarget] = useState(null)
   const [aiSplit, setAiSplit] = useState(50) // percentage (0-100)
   const containerRef = useRef(null)
   const dragRef = useRef({ isDragging: false, startY: 0, startSplit: 0 })
@@ -208,13 +207,10 @@ const ChatBox = ({
                 messages={messages}
                 t={t}
                 emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
-                onReplyTo={(msg) => setRoomReplyTarget(msg)}
               />
               <ChatInput
                 onSendMessage={onSendMessage}
                 isConnected={isConnected}
-                replyTarget={roomReplyTarget}
-                onCancelReply={() => setRoomReplyTarget(null)}
               />
             </>
           )}
