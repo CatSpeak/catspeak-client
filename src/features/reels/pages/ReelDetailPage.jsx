@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react"
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import {
   X,
@@ -18,6 +18,9 @@ import Avatar from "@/shared/components/ui/Avatar"
 import ReelMoreMenu from "../components/ReelMoreMenu"
 import useReelDetail from "../hooks/useReelDetail"
 import useFullscreen from "../hooks/useFullscreen"
+import { useGetReelsFeedQuery } from "@/store/api/reelsApi"
+import { mapReelDtoToFrontend } from "../utils/mappers"
+import ReelScrollContainer from "../components/ReelScrollContainer"
 import {
   formatCompactNumber,
   formatRelativeTime,
@@ -25,27 +28,26 @@ import {
 import styles from "../styles/reels.module.css"
 
 /**
- * Instagram-style reel detail page.
- *
- * Desktop  : [ Reel ] [ Action column ] [ Side panel ]
- * Mobile   : Reel + action column below, bottom-sheet panel
- * Fullscreen: Reel fills viewport with floating overlays
+ * Individual full-screen Reel Slide rendered in the Vertical Snapper.
+ * Encapsulates playback states, isolation, progress controls, volume preferences,
+ * and the sliding Comments Drawers to avoid DOM overlap conflicts.
  */
-const ReelDetailPage = () => {
-  const { id, lang } = useParams()
-  const navigate = useNavigate()
-
-  const { reel, isLoading, notFound } = useReelDetail(id)
-
+const ReelDetailSlide = ({
+  reel,
+  isActive,
+  onClose,
+  sharedMuted,
+  setSharedMuted,
+  sharedVolume,
+  setSharedVolume,
+}) => {
   /* ── Refs ───────────────────────────────────────── */
   const videoRef = useRef(null)
   const progressRef = useRef(null)
   const containerRef = useRef(null)
 
   /* ── State ──────────────────────────────────────── */
-  const [isPlaying, setIsPlaying] = useState(true)
-  const [isMuted, setIsMuted] = useState(false)
-  const [volume, setVolume] = useState(0.5)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isSeeking, setIsSeeking] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
@@ -53,28 +55,41 @@ const ReelDetailPage = () => {
   const { isFullscreen, toggleFullscreen } = useFullscreen()
   const hasVideo = Boolean(reel?.videoUrl)
 
-  /* ── Sync volume to <video> ─────────────────────── */
+  /* ── Autoplay / Pause isolation ─────────────────── */
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (isActive) {
+      video.play()
+        .then(() => setIsPlaying(true))
+        .catch((e) => {
+          console.log("Autoplay blocked or failed", e)
+          setIsPlaying(false)
+        })
+    } else {
+      video.pause()
+      video.currentTime = 0
+      setIsPlaying(false)
+      setProgress(0)
+    }
+  }, [isActive])
+
+  /* ── Sync shared volume and mute preferences ────── */
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.volume = volume
-      videoRef.current.muted = isMuted
+      videoRef.current.volume = sharedVolume
+      videoRef.current.muted = sharedMuted
     }
-  }, [volume, isMuted])
+  }, [sharedVolume, sharedMuted])
 
-  /* ── Navigation ─────────────────────────────────── */
-  const handleClose = useCallback(() => {
-    if (window.history.length > 1) {
-      navigate(-1)
-    } else {
-      navigate(`/${lang}/cat-speak/reels`)
-    }
-  }, [navigate, lang])
-
-  /* ── Playback ───────────────────────────────────── */
+  /* ── Playback control ───────────────────────────── */
   const handlePlayPause = useCallback(() => {
     if (!videoRef.current) return
     if (videoRef.current.paused) {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => { })
+      videoRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => { })
     } else {
       videoRef.current.pause()
       setIsPlaying(false)
@@ -83,20 +98,20 @@ const ReelDetailPage = () => {
 
   const handleToggleMute = useCallback((e) => {
     e.stopPropagation()
-    if (isMuted || volume === 0) {
-      setIsMuted(false)
-      if (volume === 0) setVolume(1)
+    if (sharedMuted || sharedVolume === 0) {
+      setSharedMuted(false)
+      if (sharedVolume === 0) setSharedVolume(1)
     } else {
-      setIsMuted(true)
+      setSharedMuted(true)
     }
-  }, [isMuted, volume])
+  }, [sharedMuted, sharedVolume, setSharedMuted, setSharedVolume])
 
   const handleVolumeChange = useCallback((e) => {
     const newVol = parseFloat(e.target.value)
-    setVolume(newVol)
-    if (newVol > 0 && isMuted) setIsMuted(false)
-    else if (newVol === 0 && !isMuted) setIsMuted(true)
-  }, [isMuted])
+    setSharedVolume(newVol)
+    if (newVol > 0 && sharedMuted) setSharedMuted(false)
+    else if (newVol === 0 && !sharedMuted) setSharedMuted(true)
+  }, [sharedMuted, setSharedMuted, setSharedVolume])
 
   /* ── Progress bar ───────────────────────────────── */
   const handleTimeUpdate = useCallback(() => {
@@ -137,61 +152,21 @@ const ReelDetailPage = () => {
     toggleFullscreen(containerRef.current)
   }, [toggleFullscreen])
 
-
-  /* ── Cleanup on unmount ─────────────────────────── */
-  useEffect(() => {
-    return () => {
-      if (videoRef.current) videoRef.current.pause()
-    }
+  const toggleInfo = useCallback(() => {
+    setShowInfo((prev) => !prev)
   }, [])
-
-  /* ── Loading state ───────────────────────────────── */
-  if (isLoading) {
-    return (
-      <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center bg-black/5 rounded-2xl border border-gray-100">
-        <Loader2 className="h-10 w-10 animate-spin text-[#990011]" />
-      </div>
-    )
-  }
-
-  /* ── Not found / Safe Guard check ───────────────── */
-  if (notFound || !reel) {
-    return (
-      <div className={styles.emptyState}>
-        <svg
-          className={styles.emptyIcon}
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="23 7 16 12 23 17 23 7" />
-          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-        </svg>
-        <span className={styles.emptyText}>Reel not found</span>
-        <span className={styles.emptySubtext}>
-          The reel you're looking for doesn't exist or has been removed.
-        </span>
-        <button className={styles.backToVideosBtn} onClick={handleClose}>
-          ← Back to Reels
-        </button>
-      </div>
-    )
-  }
 
   const containerClasses = [
     styles.detailVideoContainer,
     isFullscreen ? styles.detailVideoContainerFullscreen : "",
   ].filter(Boolean).join(" ")
 
-  /* ── Render ─────────────────────────────────────── */
   return (
-    <div className={`${styles.detailPage} ${isFullscreen ? styles.detailPageFullscreen : ""}`}>
-      {/* ─── Left area: dark background containing video ─── */}
+    <div
+      className={`${styles.detailPage} ${isFullscreen ? styles.detailPageFullscreen : ""}`}
+      style={{ height: "100%", width: "100%", borderRadius: 0 }}
+    >
+      {/* Left area: dark background containing video */}
       <div className={styles.detailLeftArea}>
         <div className={containerClasses} ref={containerRef}>
           {hasVideo ? (
@@ -200,11 +175,11 @@ const ReelDetailPage = () => {
               <div className={styles.videoTopOverlay} />
               <div className={styles.videoBottomOverlay} />
 
-              {/* ── Top bar: Close (left) + More (right) ── */}
+              {/* Top bar: Close (left) + More (right) */}
               <div className={styles.topBar}>
                 <button
                   className={styles.detailCloseButton}
-                  onClick={(e) => { e.stopPropagation(); handleClose() }}
+                  onClick={(e) => { e.stopPropagation(); onClose() }}
                   aria-label="Close"
                 >
                   <X size={22} color="white" />
@@ -213,14 +188,13 @@ const ReelDetailPage = () => {
                 <ReelMoreMenu />
               </div>
 
-              {/* ── Video element ── */}
+              {/* Video element */}
               <video
                 ref={videoRef}
                 src={reel.videoUrl}
-                muted={isMuted}
+                muted={sharedMuted}
                 loop
                 playsInline
-                autoPlay
                 onClick={handlePlayPause}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
@@ -240,7 +214,7 @@ const ReelDetailPage = () => {
                 </div>
               )}
 
-              {/* ── Bottom controls: volume (left) + fullscreen (right) ── */}
+              {/* Bottom controls: volume (left) + fullscreen (right) */}
               <div className={styles.bottomControls}>
                 <div
                   className={styles.volumeControlWrapper}
@@ -249,11 +223,11 @@ const ReelDetailPage = () => {
                   <button
                     className={styles.detailMuteButton}
                     onClick={handleToggleMute}
-                    aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}
+                    aria-label={sharedMuted || sharedVolume === 0 ? "Unmute" : "Mute"}
                   >
-                    {isMuted || volume === 0 ? (
+                    {sharedMuted || sharedVolume === 0 ? (
                       <VolumeX size={20} color="white" />
-                    ) : volume < 0.6 ? (
+                    ) : sharedVolume < 0.6 ? (
                       <Volume1 size={20} color="white" />
                     ) : (
                       <Volume2 size={20} color="white" />
@@ -264,10 +238,10 @@ const ReelDetailPage = () => {
                     min="0"
                     max="1"
                     step="0.01"
-                    value={isMuted ? 0 : volume}
+                    value={sharedMuted ? 0 : sharedVolume}
                     onChange={handleVolumeChange}
                     className={styles.volumeSlider}
-                    style={{ '--volume-fill': `${(isMuted ? 0 : volume) * 100}%` }}
+                    style={{ '--volume-fill': `${(sharedMuted ? 0 : sharedVolume) * 100}%` }}
                     aria-label="Volume"
                   />
                 </div>
@@ -285,7 +259,7 @@ const ReelDetailPage = () => {
                 </button>
               </div>
 
-              {/* ── Progress bar ── */}
+              {/* Progress bar */}
               <div
                 ref={progressRef}
                 className={styles.progressBar}
@@ -301,7 +275,6 @@ const ReelDetailPage = () => {
                   style={{ left: `${progress}%` }}
                 />
               </div>
-
             </>
           ) : (
             <div className={styles.detailNoVideo}>
@@ -310,7 +283,7 @@ const ReelDetailPage = () => {
           )}
         </div>
 
-        {/* ── Action bar (Instagram-style, outside video) ── */}
+        {/* Action bar (Instagram-style, outside video) */}
         {hasVideo && (
           <div className={styles.actionBar}>
             <Avatar
@@ -362,7 +335,7 @@ const ReelDetailPage = () => {
         )}
       </div>
 
-      {/* ─── Info / Comments panel ─── */}
+      {/* Info / Comments panel */}
       <div className={`${styles.detailInfo} ${showInfo ? styles.detailInfoVisible : ""}`}>
         <div className={styles.panelHeader}>
           <h3 className={styles.panelHeading}>Comments {formatCompactNumber(reel.comments)}</h3>
@@ -426,11 +399,135 @@ const ReelDetailPage = () => {
       </div>
     </div>
   )
+}
 
-  /* ── Inline helper (avoids repeating onClick + toggleInfo) ─── */
-  function toggleInfo() {
-    setShowInfo((prev) => !prev)
+/**
+ * Instagram-style reels detail page refactored into a full-viewport snapped scroller.
+ * Intersects queries to allow keyboard, mouse, and gesture sliding natively.
+ */
+const ReelDetailPage = () => {
+  const { id, lang } = useParams()
+  const navigate = useNavigate()
+
+  // Fetch the current single reel (deep-linked)
+  const { reel: currentReel, isLoading: isDetailLoading, notFound } = useReelDetail(id)
+
+  // Fetch the wider feed for scroll-snapping context
+  const { data: feedResponse, isLoading: isFeedLoading } = useGetReelsFeedQuery()
+
+  // Mapped reels list from the feed query
+  const feedReels = useMemo(() => {
+    if (feedResponse?.data && feedResponse.data.length > 0) {
+      return feedResponse.data.map(mapReelDtoToFrontend)
+    }
+    return []
+  }, [feedResponse])
+
+  // Combine feed with the deep-linked currentReel prepended if it's missing from the feed list
+  const combinedReels = useMemo(() => {
+    if (!currentReel) return feedReels
+
+    const exists = feedReels.some((r) => r.id === currentReel.id)
+    if (exists) return feedReels
+
+    return [currentReel, ...feedReels]
+  }, [currentReel, feedReels])
+
+  // Global shared volume state across slides
+  const [sharedVolume, setSharedVolume] = useState(() => {
+    const saved = localStorage.getItem("reelVolume")
+    return saved !== null ? parseFloat(saved) : 0.5
+  })
+  const [sharedMuted, setSharedMuted] = useState(true)
+
+  // Save volume updates to local storage
+  const handleVolumeChange = useCallback((vol) => {
+    setSharedVolume(vol)
+    localStorage.setItem("reelVolume", String(vol))
+  }, [])
+
+  // Calculate the correct initial active index based on URL parameter ID
+  const initialIndex = useMemo(() => {
+    if (!id || combinedReels.length === 0) return 0
+    const idx = combinedReels.findIndex((r) => r.id === id)
+    return idx !== -1 ? idx : 0
+  }, [combinedReels, id])
+
+  const handleClose = useCallback(() => {
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate(`/${lang}/cat-speak/reels`)
+    }
+  }, [navigate, lang])
+
+  // Dynamic URL Sync on scrolling
+  const handleActiveIndexChange = useCallback((index) => {
+    const activeReel = combinedReels[index]
+    if (activeReel && activeReel.id !== id) {
+      navigate(`/${lang}/cat-speak/reels/${activeReel.id}`, { replace: true })
+    }
+  }, [combinedReels, id, lang, navigate])
+
+  const isLoading = (isDetailLoading || isFeedLoading) && combinedReels.length === 0
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center bg-black/5 rounded-2xl border border-gray-100">
+        <Loader2 className="h-10 w-10 animate-spin text-[#990011]" />
+      </div>
+    )
   }
+
+  if (notFound || combinedReels.length === 0) {
+    return (
+      <div className={styles.emptyState}>
+        <svg
+          className={styles.emptyIcon}
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polygon points="23 7 16 12 23 17 23 7" />
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+        </svg>
+        <span className={styles.emptyText}>Reel not found</span>
+        <span className={styles.emptySubtext}>
+          The reel you're looking for doesn't exist or has been removed.
+        </span>
+        <button className={styles.backToVideosBtn} onClick={handleClose}>
+          ← Back to Reels
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <ReelScrollContainer
+      reels={combinedReels}
+      initialIndex={initialIndex}
+      hasMore={false}
+      isLoading={false}
+      onActiveIndexChange={handleActiveIndexChange}
+    >
+      {(reel, index, isActive) => (
+        <ReelDetailSlide
+          reel={reel}
+          isActive={isActive}
+          onClose={handleClose}
+          sharedMuted={sharedMuted}
+          setSharedMuted={setSharedMuted}
+          sharedVolume={sharedVolume}
+          setSharedVolume={handleVolumeChange}
+        />
+      )}
+    </ReelScrollContainer>
+  )
 }
 
 export default ReelDetailPage

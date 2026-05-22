@@ -182,16 +182,6 @@ const ReelCard = ({ reel, index, onClick }) => {
             {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
           </button>
         )}
-
-        {/* Stats on hover */}
-        <div className={styles.cardInfo}>
-          <div className={styles.cardMeta}>
-            <Eye size={12} />
-            <span>{formatCompactNumber(reel.views)}</span>
-            <Heart size={12} style={{ marginLeft: 4 }} />
-            <span>{formatCompactNumber(reel.likes)}</span>
-          </div>
-        </div>
       </div>
 
       {/* Footer — always visible */}

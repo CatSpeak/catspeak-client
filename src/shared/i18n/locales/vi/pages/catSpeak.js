@@ -19,8 +19,8 @@ export default {
   reels: {
     title: "Reels",
     description:
-      "Xem thước phim ngắn từ cộng đồng của chúng tôi.",
-    loginRequired: "Vui lòng đăng nhập để đăng reels",
+      "Xem video từ cộng đồng của chúng tôi.",
+    loginRequired: "Vui lòng đăng nhập để đăng tải",
   },
   mail: {
     placeholderEmpty: "Hãy là người đầu tiên nói xin chào...",
