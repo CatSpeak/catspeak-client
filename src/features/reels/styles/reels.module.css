@@ -848,35 +848,254 @@
 
 .commentsSection {
   border-top: 1px solid #e0e0e0;
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
 .noCommentsMessage {
   color: #8a8a8a;
   text-align: center;
   font-size: 14px;
-  margin-top: 20px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
+/* Comment Item Threading */
+.commentList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.commentItem {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
+}
+
+.commentDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.commentNickname {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.commentUsername {
+  font-size: 12px;
+  color: #8a8a8a;
+}
+
+.commentTime {
+  font-size: 12px;
+  color: #8a8a8a;
+  margin-left: auto;
+}
+
+.commentContent {
+  font-size: 14px;
+  color: #1a1a1a;
+  line-height: 1.45;
+  margin-top: 4px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.commentActions {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.commentActionBtn {
+  background: none;
+  border: none;
+  color: #8a8a8a;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.commentActionBtn:hover {
+  color: #1a1a1a;
+}
+
+.commentDeleteBtn {
+  background: none;
+  border: none;
+  color: #8a8a8a;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.commentDeleteBtn:hover {
+  color: #ff3b30;
+}
+
+/* Recursive Reply Indentation */
+.replyList {
+  margin-left: 28px;
+  border-left: 2px solid #e5e7eb;
+  padding-left: 12px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 767px) {
+  .replyList {
+    margin-left: 16px;
+    padding-left: 8px;
+  }
+}
+
+.repliesToggle {
+  background: none;
+  border: none;
+  color: #2b5db0;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  margin-top: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+}
+
+.repliesToggle:hover {
+  color: #1d4080;
+}
+
+/* Active Liked Heart Styles & Pop Animation */
+.heartIconLiked {
+  color: #e11d48 !important;
+  fill: #e11d48 !important;
+  animation: heartPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.35);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Controlled Comment Input Panel */
 .commentInputWrapper {
-  padding: 16px 24px;
   background: #fff;
   border-top: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.replyIndicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.replyIndicatorText {
+  font-weight: 500;
+}
+
+.replyIndicatorCancel {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.replyIndicatorCancel:hover {
+  background-color: #fee2e2;
+}
+
+.commentInputContainer {
+  display: flex;
+  padding: 12px 16px;
+  gap: 8px;
+  align-items: center;
+  background: #fff;
 }
 
 .commentInput {
-  width: 100%;
-  background: #f1f1f2;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 16px;
+  flex: 1;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  padding: 10px 16px;
   font-size: 14px;
   color: #1a1a1a;
   outline: none;
+  transition: all 0.2s ease;
+}
+
+.commentInput:focus {
+  background: #fff;
+  border-color: #990011;
+  box-shadow: 0 0 0 2px rgba(153, 0, 17, 0.1);
 }
 
 .commentInput::placeholder {
-  color: #8a8a8a;
+  color: #9ca3af;
+}
+
+.commentPostBtn {
+  background: none;
+  border: none;
+  color: #990011;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.commentPostBtn:hover:not(.commentPostBtnDisabled) {
+  background: rgba(153, 0, 17, 0.05);
+}
+
+.commentPostBtnDisabled {
+  color: #d1d5db;
+  cursor: not-allowed;
 }
 
 /* Back to videos button */

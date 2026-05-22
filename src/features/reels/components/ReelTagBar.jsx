@@ -21,7 +21,7 @@ const ReelTagBar = ({ tags, activeTag, onTagClick }) => {
           className={`${styles.tag} ${activeTag === tag ? styles.tagActive : ""}`}
           onClick={() => onTagClick(tag)}
         >
-          #{tag}
+          {tag}
         </button>
       ))}
     </div>

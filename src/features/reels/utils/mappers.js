@@ -13,8 +13,8 @@ export const mapReelDtoToFrontend = (dto) => {
   if (!dto) return null
 
   // Ensure tags is always an array of strings
-  const tags = Array.isArray(dto.hashtags) 
-    ? dto.hashtags 
+  const tags = Array.isArray(dto.hashtags)
+    ? dto.hashtags
     : (dto.tags || [])
 
   // Create a clean, unified author object
@@ -36,6 +36,7 @@ export const mapReelDtoToFrontend = (dto) => {
     likes: dto.likesCount || 0,
     comments: dto.commentsCount || 0,
     shares: 0, // Fallback default
+    isLiked: Boolean(dto.isLiked),
     createdAt: dto.createdAt || new Date().toISOString(),
     tags,
     author,

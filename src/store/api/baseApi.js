@@ -241,6 +241,7 @@ export const baseApi = createApi({
     "InstructorProfile",
     "Locations",
     "Reels",
+    "ReelComments",
   ],
   endpoints: () => ({}),
 })

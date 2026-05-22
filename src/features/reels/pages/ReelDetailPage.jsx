@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
 import {
   X,
   Play,
@@ -18,7 +19,14 @@ import Avatar from "@/shared/components/ui/Avatar"
 import ReelMoreMenu from "../components/ReelMoreMenu"
 import useReelDetail from "../hooks/useReelDetail"
 import useFullscreen from "../hooks/useFullscreen"
-import { useGetReelsFeedQuery } from "@/store/api/reelsApi"
+import {
+  useGetReelsFeedQuery,
+  useToggleLikeReelMutation,
+  useGetReelCommentsQuery,
+  useCreateReelCommentMutation,
+  useDeleteReelCommentMutation,
+} from "@/store/api/reelsApi"
+import { selectCurrentUser, selectIsAuthenticated } from "@/store/slices/authSlice"
 import { mapReelDtoToFrontend } from "../utils/mappers"
 import ReelScrollContainer from "../components/ReelScrollContainer"
 import {
@@ -26,6 +34,114 @@ import {
   formatRelativeTime,
 } from "../utils/formatters"
 import styles from "../styles/reels.module.css"
+
+/**
+ * Individual comment node inside the hierarchical comments tree.
+ * Renders the author, time, content, actions (Reply, Delete), and recursively renders replies.
+ */
+const CommentItemNode = ({
+  comment,
+  reelId,
+  currentUser,
+  onReply,
+  onDelete,
+}) => {
+  const [expanded, setExpanded] = useState(false)
+  const hasReplies = comment.replies && comment.replies.length > 0
+
+  const handleReplyClick = () => {
+    onReply({
+      parentCommentId: comment.reelCommentId,
+      username: comment.nickname || comment.username || "user",
+    })
+  }
+
+  const handleDeleteClick = () => {
+    if (window.confirm("Are you sure you want to delete this comment?")) {
+      onDelete(comment.reelCommentId)
+    }
+  }
+
+  const isOwner = currentUser && String(currentUser.accountId) === String(comment.accountId)
+
+  return (
+    <div className={styles.commentItemWrapper}>
+      <div className={styles.commentItem}>
+        <Avatar
+          size={36}
+          src={comment.avatarUrl}
+          name={comment.nickname || comment.username}
+          alt={comment.nickname || comment.username}
+          className={styles.commentAvatar}
+        />
+        <div className={styles.commentDetails}>
+          <div className={styles.commentHeader}>
+            <span className={styles.commentNickname}>
+              {comment.nickname || comment.username || "Anonymous"}
+            </span>
+            {comment.username && (
+              <span className={styles.commentUsername}>@{comment.username}</span>
+            )}
+            <span className={styles.commentTime}>
+              {formatRelativeTime(comment.createdAt)}
+            </span>
+          </div>
+          <p className={styles.commentContent}>{comment.content}</p>
+          <div className={styles.commentActions}>
+            <button
+              onClick={handleReplyClick}
+              className={styles.commentActionBtn}
+            >
+              Reply
+            </button>
+            {isOwner && (
+              <button
+                onClick={handleDeleteClick}
+                className={styles.commentDeleteBtn}
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {hasReplies && (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {!expanded ? (
+            <button
+              onClick={() => setExpanded(true)}
+              className={styles.repliesToggle}
+            >
+              ── View replies ({comment.replies.length})
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setExpanded(false)}
+                className={styles.repliesToggle}
+              >
+                ── Hide replies
+              </button>
+              <div className={styles.replyList}>
+                {comment.replies.map((reply) => (
+                  <CommentItemNode
+                    key={reply.reelCommentId}
+                    comment={reply}
+                    reelId={reelId}
+                    currentUser={currentUser}
+                    onReply={onReply}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 /**
  * Individual full-screen Reel Slide rendered in the Vertical Snapper.
@@ -45,15 +161,39 @@ const ReelDetailSlide = ({
   const videoRef = useRef(null)
   const progressRef = useRef(null)
   const containerRef = useRef(null)
+  const commentInputRef = useRef(null)
 
   /* ── State ──────────────────────────────────────── */
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isSeeking, setIsSeeking] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [commentText, setCommentText] = useState("")
+  const [replyTarget, setReplyTarget] = useState(null)
 
   const { isFullscreen, toggleFullscreen } = useFullscreen()
   const hasVideo = Boolean(reel?.videoUrl)
+
+  /* ── Redux/API Hooks ────────────────────────────── */
+  const currentUser = useSelector(selectCurrentUser)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+
+  const { data: commentsResponse, isLoading: isCommentsLoading } =
+    useGetReelCommentsQuery(reel.id, { skip: !reel.id || !isActive })
+
+  const [toggleLike] = useToggleLikeReelMutation()
+  const [createComment, { isLoading: isPostingComment }] =
+    useCreateReelCommentMutation()
+  const [deleteComment] = useDeleteReelCommentMutation()
+
+  const comments = useMemo(() => {
+    if (!commentsResponse) return []
+    return commentsResponse.data !== undefined
+      ? commentsResponse.data
+      : Array.isArray(commentsResponse)
+        ? commentsResponse
+        : []
+  }, [commentsResponse])
 
   /* ── Autoplay / Pause isolation ─────────────────── */
   useEffect(() => {
@@ -70,8 +210,10 @@ const ReelDetailSlide = ({
     } else {
       video.pause()
       video.currentTime = 0
-      setIsPlaying(false)
-      setProgress(0)
+      setTimeout(() => {
+        setIsPlaying(false)
+        setProgress(0)
+      }, 0)
     }
   }, [isActive])
 
@@ -155,6 +297,53 @@ const ReelDetailSlide = ({
   const toggleInfo = useCallback(() => {
     setShowInfo((prev) => !prev)
   }, [])
+
+  /* ── Actions ─────────────────────────────────────── */
+  const handleLikeToggle = useCallback(async (e) => {
+    e.stopPropagation()
+    if (!isAuthenticated) {
+      alert("Please sign in to like this reel.")
+      return
+    }
+    try {
+      await toggleLike(reel.id).unwrap()
+    } catch (err) {
+      console.error("Failed to toggle like", err)
+    }
+  }, [reel.id, isAuthenticated, toggleLike])
+
+  const handleReply = useCallback((target) => {
+    setReplyTarget(target)
+    if (commentInputRef.current) {
+      commentInputRef.current.focus()
+    }
+  }, [])
+
+  const handleDelete = useCallback(async (commentId) => {
+    try {
+      await deleteComment({ commentId, reelId: reel.id }).unwrap()
+    } catch (err) {
+      console.error("Failed to delete comment", err)
+    }
+  }, [deleteComment, reel.id])
+
+  const handlePostComment = useCallback(async (e) => {
+    e.preventDefault()
+    if (!isAuthenticated) return
+    if (!commentText.trim()) return
+
+    try {
+      await createComment({
+        reelId: reel.id,
+        content: commentText.trim(),
+        parentCommentId: replyTarget ? replyTarget.parentCommentId : null,
+      }).unwrap()
+      setCommentText("")
+      setReplyTarget(null)
+    } catch (err) {
+      console.error("Failed to post comment", err)
+    }
+  }, [commentText, createComment, isAuthenticated, reel.id, replyTarget])
 
   const containerClasses = [
     styles.detailVideoContainer,
@@ -294,9 +483,16 @@ const ReelDetailSlide = ({
               className={styles.actionAvatar}
             />
 
-            <button className={styles.actionBarBtn} aria-label="Like">
+            <button
+              className={styles.actionBarBtn}
+              onClick={handleLikeToggle}
+              aria-label={reel.isLiked ? "Unlike" : "Like"}
+            >
               <div className={styles.actionIconWrapper}>
-                <Heart size={24} />
+                <Heart
+                  size={24}
+                  className={reel.isLiked ? styles.heartIconLiked : ""}
+                />
               </div>
               <span className={styles.actionBarLabel}>
                 {formatCompactNumber(reel.likes)}
@@ -383,18 +579,81 @@ const ReelDetailSlide = ({
           <div className={styles.detailTags}>
             {reel.tags.map((tag) => (
               <span key={tag} className={styles.detailTag}>
-                #{tag}
+                {tag}
               </span>
             ))}
           </div>
 
           <div className={styles.commentsSection}>
-            <p className={styles.noCommentsMessage}>Be the first to comment.</p>
+            {isCommentsLoading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-6 w-6 animate-spin text-[#990011]" />
+              </div>
+            ) : comments.length === 0 ? (
+              <p className={styles.noCommentsMessage}>Be the first to comment.</p>
+            ) : (
+              <div className={styles.commentList}>
+                {comments.map((comment) => (
+                  <CommentItemNode
+                    key={comment.reelCommentId}
+                    comment={comment}
+                    reelId={reel.id}
+                    currentUser={currentUser}
+                    onReply={handleReply}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         <div className={styles.commentInputWrapper}>
-          <input type="text" placeholder="Add comment..." className={styles.commentInput} />
+          {replyTarget && (
+            <div className={styles.replyIndicator}>
+              <span className={styles.replyIndicatorText}>
+                Replying to @{replyTarget.username}
+              </span>
+              <button
+                type="button"
+                onClick={() => setReplyTarget(null)}
+                className={styles.replyIndicatorCancel}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+          <form onSubmit={handlePostComment} className={styles.commentInputContainer}>
+            <input
+              ref={commentInputRef}
+              type="text"
+              placeholder={
+                !isAuthenticated
+                  ? "Please sign in to comment..."
+                  : replyTarget
+                    ? `Reply to @${replyTarget.username}...`
+                    : "Add comment..."
+              }
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              className={styles.commentInput}
+              disabled={!isAuthenticated || isPostingComment}
+            />
+            {isAuthenticated && (
+              <button
+                type="submit"
+                disabled={isPostingComment || !commentText.trim()}
+                className={`${styles.commentPostBtn} ${isPostingComment || !commentText.trim() ? styles.commentPostBtnDisabled : ""
+                  }`}
+              >
+                {isPostingComment ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-[#990011]" />
+                ) : (
+                  "Post"
+                )}
+              </button>
+            )}
+          </form>
         </div>
       </div>
     </div>
@@ -409,8 +668,11 @@ const ReelDetailPage = () => {
   const { id, lang } = useParams()
   const navigate = useNavigate()
 
+  // Track the initial deep-linked ID to keep the prepended list stable
+  const [initialId, setInitialId] = useState(id)
+
   // Fetch the current single reel (deep-linked)
-  const { reel: currentReel, isLoading: isDetailLoading, notFound } = useReelDetail(id)
+  const { reel: currentReel, isLoading: isDetailLoading, notFound } = useReelDetail(initialId)
 
   // Fetch the wider feed for scroll-snapping context
   const { data: feedResponse, isLoading: isFeedLoading } = useGetReelsFeedQuery()
@@ -433,12 +695,26 @@ const ReelDetailPage = () => {
     return [currentReel, ...feedReels]
   }, [currentReel, feedReels])
 
+  // Sync initialId if the URL ID changes to a reel not currently present in the list
+  const hasReel = useMemo(() => {
+    return combinedReels.some((r) => r.id === id)
+  }, [combinedReels, id])
+
+  useEffect(() => {
+    if (id && !hasReel) {
+      const timer = setTimeout(() => {
+        setInitialId(id)
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+  }, [id, hasReel])
+
   // Global shared volume state across slides
   const [sharedVolume, setSharedVolume] = useState(() => {
     const saved = localStorage.getItem("reelVolume")
     return saved !== null ? parseFloat(saved) : 0.5
   })
-  const [sharedMuted, setSharedMuted] = useState(true)
+  const [sharedMuted, setSharedMuted] = useState(false)
 
   // Save volume updates to local storage
   const handleVolumeChange = useCallback((vol) => {
@@ -479,7 +755,9 @@ const ReelDetailPage = () => {
     )
   }
 
-  if (notFound || combinedReels.length === 0) {
+  const isReelNotFound = notFound && !feedReels.some((r) => r.id === id)
+
+  if (isReelNotFound || combinedReels.length === 0) {
     return (
       <div className={styles.emptyState}>
         <svg
