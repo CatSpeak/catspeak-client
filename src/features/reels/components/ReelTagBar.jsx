@@ -1,5 +1,5 @@
 import React from "react"
-import styles from "../styles/videoReels.module.css"
+import styles from "../styles/reels.module.css"
 
 /**
  * Horizontal scrollable tag filter bar.
@@ -10,7 +10,7 @@ import styles from "../styles/videoReels.module.css"
  *   onTagClick: (tag: string) => void,
  * }} props
  */
-const VideoTagBar = ({ tags, activeTag, onTagClick }) => {
+const ReelTagBar = ({ tags, activeTag, onTagClick }) => {
   if (tags.length === 0) return null
 
   return (
@@ -28,4 +28,4 @@ const VideoTagBar = ({ tags, activeTag, onTagClick }) => {
   )
 }
 
-export default VideoTagBar
+export default ReelTagBar

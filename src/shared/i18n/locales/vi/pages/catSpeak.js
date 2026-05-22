@@ -16,10 +16,11 @@ export default {
     description:
       "Sắp ra mắt: Khám phá các nền văn hóa, địa điểm và con người từ khắp nơi trên thế giới.",
   },
-  video: {
-    title: "Video",
+  reels: {
+    title: "Reels",
     description:
-      "Sắp ra mắt: Xem các video tuyển chọn để cải thiện kỹ năng nghe của bạn.",
+      "Xem thước phim ngắn từ cộng đồng của chúng tôi.",
+    loginRequired: "Vui lòng đăng nhập để đăng reels",
   },
   mail: {
     placeholderEmpty: "Hãy là người đầu tiên nói xin chào...",
@@ -33,7 +34,7 @@ export default {
   sidebar: {
     news: "Bản tin Cat Speak",
     discover: "Khám phá thế giới",
-    video: "Video",
+    reels: "Reels",
     mail: "Thư",
     calendar: "Lịch",
     settings: "Cài đặt",

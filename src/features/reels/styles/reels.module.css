@@ -289,9 +289,11 @@
   gap: 3px;
 }
 
-/* ── Detail page ────────────────────────────────── */
-/* ── Detail page — TikTok 3-column layout ───────── */
-/* Layout: [ Left Area (Video + Action Btns) ] [ Info Panel (white) ] */
+/* ═══════════════════════════════════════════════════
+   DETAIL PAGE — Reel Video View
+   ═══════════════════════════════════════════════════ */
+
+/* ── Page wrapper ─────────────────────────────────── */
 .detailPage {
   display: flex;
   flex-direction: row;
@@ -302,18 +304,22 @@
   position: relative;
 }
 
-/* ── Left Area: dark background containing video & buttons ── */
+.detailPageFullscreen {
+  height: 100vh;
+  border-radius: 0;
+}
+
+/* ── Left area (video side) ───────────────────────── */
 .detailLeftArea {
   flex: 1;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
   position: relative;
   min-width: 0;
 }
 
-/* ── Video container — standalone dark block ──────── */
+/* ── Video container ──────────────────────────────── */
 .detailVideoContainer {
   position: relative;
   height: 100%;
@@ -326,6 +332,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.detailVideoContainerFullscreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
 }
 
 .detailVideo {
@@ -344,7 +356,7 @@
   padding: 40px;
 }
 
-/* ── Video Overlays (Hover Gradients) ──────────────── */
+/* ── Gradient overlays (hover-reveal) ─────────────── */
 .videoTopOverlay,
 .videoBottomOverlay {
   position: absolute;
@@ -372,75 +384,161 @@
   opacity: 1;
 }
 
-/* ── Close button — inside video top-left ─────────── */
-.detailCloseButton {
+/* ── Top bar: Close + More menu ───────────────────── */
+.topBar {
   position: absolute;
-  top: 24px;
-  left: 24px;
-  z-index: 10;
-  width: 44px;
-  height: 44px;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  z-index: 12;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.detailVideoContainer:hover .topBar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detailCloseButton {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
   border: none;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.3s ease, background 0.2s ease;
-}
-
-.detailVideoContainer:hover .detailCloseButton {
-  opacity: 1;
+  transition: background 0.2s ease;
 }
 
 .detailCloseButton:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* ── Duration badge — top-right of video ──────────── */
-.detailDuration {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.6);
+/* ── More menu ────────────────────────────────────── */
+.moreMenuWrapper {
+  position: relative;
+}
+
+.moreMenuBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  border: none;
   color: white;
-  font-size: 12px;
-  font-weight: 600;
-  z-index: 5;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.detailVideoContainer:hover .detailDuration {
-  opacity: 1;
+.moreMenuBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* ── Volume Control (Mute & Slider) ───────────────── */
-.volumeControlWrapper {
+.moreMenuDropdown {
   position: absolute;
-  bottom: 24px;
-  left: 24px;
-  z-index: 10;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: rgba(28, 28, 30, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 0;
+  z-index: 50;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.moreMenuItem {
   display: flex;
   align-items: center;
   gap: 12px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-align: left;
 }
 
-.detailVideoContainer:hover .volumeControlWrapper {
+.moreMenuItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.moreMenuItem:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.moreMenuItem:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.moreMenuDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+}
+
+/* ── Bottom controls: Volume + Fullscreen ─────────── */
+.bottomControls {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.detailVideoContainer:hover .bottomControls {
   opacity: 1;
+  pointer-events: auto;
+}
+
+.volumeControlWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .detailMuteButton {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: transparent;
   border: none;
@@ -467,7 +565,7 @@
   outline: none;
   transition: width 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
   cursor: pointer;
-  margin-left: -12px;
+  margin-left: -8px;
 }
 
 .volumeSlider::-webkit-slider-thumb {
@@ -486,6 +584,24 @@
   margin-left: 0;
 }
 
+.fullscreenBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.fullscreenBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* ── Play overlay ─────────────────────────────────── */
 .detailPlayButton {
   position: absolute;
@@ -494,6 +610,7 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  z-index: 5;
 }
 
 .detailPlayIcon {
@@ -512,7 +629,7 @@
   transform: scale(1.1);
 }
 
-/* ── Progress bar — bottom of video container ─────── */
+/* ── Progress bar ─────────────────────────────────── */
 .progressBar {
   position: absolute;
   bottom: 0;
@@ -521,7 +638,7 @@
   height: 4px;
   background: rgba(255, 255, 255, 0.25);
   cursor: pointer;
-  z-index: 10;
+  z-index: 15;
   transition: height 0.15s ease;
 }
 
@@ -555,23 +672,16 @@
   opacity: 1;
 }
 
-/* ── Action bar — INSIDE video, vertical column ──── */
+/* ── Action bar (vertical, right side of video) ───── */
 .actionBar {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: flex-end;
+  align-self: flex-end;
   flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.detailVideoContainer:hover .actionBar {
-  opacity: 1;
+  padding: 0 16px;
+  margin-bottom: 20px;
 }
 
 .actionAvatar {
@@ -582,43 +692,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
   background: none;
   border: none;
-  color: white;
+  color: #1a1a1a;
   cursor: pointer;
   padding: 0;
 }
 
 .actionIconWrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
   padding: 4px;
-  background: rgba(255, 255, 255, 0.12);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease;
 }
 
-.actionBarBtn:hover .actionIconWrapper {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* 
-.actionBarBtnActive .actionIconWrapper {
-  color: #fe2c55;
-} */
-
 .actionBarLabel {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  color: white;
+  color: #1a1a1a;
 }
 
-/* ── Info panel — separate white card, slides in ──── */
+/* ── Info panel (side panel / bottom sheet) ────────── */
 .detailInfo {
   width: 380px;
   height: 100%;
@@ -645,7 +741,7 @@
   margin-left: 16px;
 }
 
-/* ── Info panel content ──────────────────────────── */
+/* ── Panel content ────────────────────────────────── */
 .panelHeader {
   display: flex;
   align-items: center;
@@ -801,12 +897,21 @@
   background: #7a000e;
 }
 
-/* ── Mobile ──────────────────────────────────────── */
+
+
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE — Mobile (≤ 767px)
+   ═══════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .detailPage {
     flex-direction: column;
     height: calc(100vh - 120px);
     border-radius: 0;
+  }
+
+  .detailPageFullscreen {
+    height: 100vh;
   }
 
   .detailLeftArea {
@@ -815,21 +920,27 @@
     align-items: stretch;
   }
 
-  /* Video fills the screen */
   .detailVideoContainer {
-    aspect-ratio: unset;
-    width: 100%;
+    flex: 1;
     height: 100%;
     border-radius: 0;
+    aspect-ratio: unset;
   }
 
-  /* Action bar — floats over the video on mobile */
+  /* Always visible on mobile — no hover needed */
+  .topBar,
+  .bottomControls,
+  .actionBar,
+  .videoTopOverlay,
+  .videoBottomOverlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .actionBar {
-    position: absolute;
-    bottom: 24px;
-    right: 12px;
-    padding-left: 0;
-    background: transparent;
+    padding: 0 8px;
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
   .actionIconWrapper {
@@ -846,14 +957,11 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   }
 
-  .detailMuteButton {
-    bottom: 40px;
-    left: 12px;
-    width: 32px;
-    height: 32px;
+  .volumeSlider {
+    display: none;
   }
 
-  /* Info panel — bottom sheet overlay */
+  /* Info panel → bottom sheet */
   .detailInfo {
     position: absolute;
     bottom: 0;
@@ -878,29 +986,80 @@
     transform: translateY(0);
     margin-left: 0;
   }
+}
 
-  .detailCloseButton {
-    top: 12px;
-    left: 12px;
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE — Landscape on mobile/tablet
+   ═══════════════════════════════════════════════════ */
+@media (orientation: landscape) and (max-width: 1024px) {
+  .detailPage {
+    flex-direction: row;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .detailLeftArea {
+    flex: 1;
+    align-items: center;
+  }
+
+  .detailVideoContainer {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .actionBar {
+    bottom: 20px;
+    right: 12px;
+  }
+
+  .actionIconWrapper {
     width: 36px;
     height: 36px;
-    z-index: 20;
-    opacity: 1;
-    /* Always visible on mobile */
   }
 
-  .videoTopOverlay,
-  .videoBottomOverlay,
-  .volumeControlWrapper,
-  .actionBar {
-    opacity: 1;
-    /* Always visible on mobile */
+  .actionBarLabel {
+    font-size: 11px;
   }
 
-  .volumeSlider {
-    display: none;
-    /* Hide slider on mobile */
+  .actionAvatar {
+    width: 28px !important;
+    height: 28px !important;
   }
+
+  /* Side panel in landscape */
+  .detailInfo {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 320px;
+    height: 100%;
+    max-width: 0;
+    border-radius: 0;
+    border: none;
+    border-left: 1px solid #e0e0e0;
+    transform: none;
+    margin-left: 0;
+    transition:
+      max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.25s ease;
+  }
+
+  .detailInfoVisible {
+    max-width: 320px;
+    transform: none;
+    margin-left: 0;
+  }
+
+  .bottomControls {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+
+
 }
 
 /* ── Empty & loading states ─────────────────────── */

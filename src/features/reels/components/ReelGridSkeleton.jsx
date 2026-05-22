@@ -1,5 +1,5 @@
 import React from "react"
-import styles from "../styles/videoReels.module.css"
+import styles from "../styles/reels.module.css"
 
 /**
  * Heights cycled to mimic the masonry visual during loading.
@@ -7,11 +7,11 @@ import styles from "../styles/videoReels.module.css"
 const SKELETON_HEIGHTS = [260, 320, 220, 280, 340, 240, 300, 250]
 
 /**
- * Skeleton placeholder grid displayed while videos are loading.
+ * Skeleton placeholder grid displayed while reels are loading.
  *
  * @param {{ count?: number }} props
  */
-const VideoGridSkeleton = ({ count = 12 }) => (
+const ReelGridSkeleton = ({ count = 12 }) => (
   <div className={styles.masonryGrid}>
     {Array.from({ length: count }, (_, i) => (
       <div key={i} className={styles.masonryItem}>
@@ -41,4 +41,4 @@ const VideoGridSkeleton = ({ count = 12 }) => (
   </div>
 )
 
-export default VideoGridSkeleton
+export default ReelGridSkeleton

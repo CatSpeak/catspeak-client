@@ -17,7 +17,7 @@ const HeaderBar = ({ onGetStarted }) => {
   }
 
   return (
-    <header className="sticky top-0 z-50 pb-4">
+    <header className="sticky top-0 z-50 pb-2">
       <div
         className="mx-auto flex w-full min-h-[60px] border items-center gap-3 bg-white/80 py-2 px-3 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 sm:gap-4 sm:px-4 lg:min-h-[64px] lg:py-2.5 lg:px-5"
       >

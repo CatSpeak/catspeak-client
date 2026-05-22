@@ -2,7 +2,7 @@ import React, { useMemo, useState, useRef, useCallback } from "react"
 import { Play, Heart, Eye, Volume2, VolumeX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { formatCompactNumber } from "../utils/formatters"
-import styles from "../styles/videoReels.module.css"
+import styles from "../styles/reels.module.css"
 import colors from "@/shared/utils/colors"
 
 /**
@@ -18,7 +18,7 @@ const ASPECT_RATIOS = [
 ]
 
 /**
- * Single video reel card in the Pinterest masonry grid.
+ * Single reel card in the Pinterest masonry grid.
  *
  * Behavior:
  * - Hover → video auto-plays (muted) over the thumbnail
@@ -26,7 +26,7 @@ const ASPECT_RATIOS = [
  * - Play button ONLY shows when the user explicitly pauses a playing video
  *   (never on initial hover, never as a default state)
  */
-const VideoCard = ({ video, index, onClick }) => {
+const ReelCard = ({ reel, index, onClick }) => {
   const videoRef = useRef(null)
   const hoverIntentRef = useRef(null)
 
@@ -40,7 +40,7 @@ const VideoCard = ({ video, index, onClick }) => {
     [index],
   )
 
-  const hasVideo = Boolean(video.videoUrl)
+  const hasVideo = Boolean(reel.videoUrl)
 
   /** Start playback on hover (with small delay to avoid flicker on quick passes) */
   const handleMouseEnter = useCallback(() => {
@@ -117,10 +117,10 @@ const VideoCard = ({ video, index, onClick }) => {
       {/* Thumbnail + video area with dynamic aspect ratio */}
       <div style={{ position: "relative", ...aspect, width: "100%" }}>
         {/* Thumbnail image — always visible as poster */}
-        {video.thumbnailUrl ? (
+        {reel.thumbnailUrl ? (
           <img
-            src={video.thumbnailUrl}
-            alt={video.title}
+            src={reel.thumbnailUrl}
+            alt={reel.title}
             className={styles.cardThumbnail}
             loading="lazy"
           />
@@ -138,7 +138,7 @@ const VideoCard = ({ video, index, onClick }) => {
               fontWeight: 700,
             }}
           >
-            {video.title.charAt(0)}
+            {reel.title.charAt(0)}
           </div>
         )}
 
@@ -146,7 +146,7 @@ const VideoCard = ({ video, index, onClick }) => {
         {hasVideo && (
           <video
             ref={videoRef}
-            src={video.videoUrl}
+            src={reel.videoUrl}
             muted={isMuted}
             loop
             playsInline
@@ -187,26 +187,26 @@ const VideoCard = ({ video, index, onClick }) => {
         <div className={styles.cardInfo}>
           <div className={styles.cardMeta}>
             <Eye size={12} />
-            <span>{formatCompactNumber(video.views)}</span>
+            <span>{formatCompactNumber(reel.views)}</span>
             <Heart size={12} style={{ marginLeft: 4 }} />
-            <span>{formatCompactNumber(video.likes)}</span>
+            <span>{formatCompactNumber(reel.likes)}</span>
           </div>
         </div>
       </div>
 
       {/* Footer — always visible */}
       <div className={styles.cardFooter}>
-        <p className={styles.cardFooterTitle}>{video.title}</p>
+        <p className={styles.cardFooterTitle}>{reel.title}</p>
 
         <div className={styles.cardFooterAuthor}>
           <Avatar
             size={22}
-            src={video.author.avatarUrl}
-            name={video.author.name}
-            alt={video.author.name}
+            src={reel.author.avatarUrl}
+            name={reel.author.name}
+            alt={reel.author.name}
           />
-          <span className={styles.authorName}>{video.author.name}</span>
-          {video.author.verified && (
+          <span className={styles.authorName}>{reel.author.name}</span>
+          {reel.author.verified && (
             <svg
               className={styles.verifiedBadge}
               viewBox="0 0 24 24"
@@ -220,11 +220,11 @@ const VideoCard = ({ video, index, onClick }) => {
         <div className={styles.cardFooterStats}>
           <span className={styles.statItem}>
             <Eye size={12} />
-            {formatCompactNumber(video.views)}
+            {formatCompactNumber(reel.views)}
           </span>
           <span className={styles.statItem}>
             <Heart size={12} />
-            {formatCompactNumber(video.likes)}
+            {formatCompactNumber(reel.likes)}
           </span>
         </div>
       </div>
@@ -232,4 +232,4 @@ const VideoCard = ({ video, index, onClick }) => {
   )
 }
 
-export default VideoCard
+export default ReelCard

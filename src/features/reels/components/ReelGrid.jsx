@@ -1,7 +1,7 @@
 import React from "react"
 import { motion } from "framer-motion"
-import VideoCard from "./VideoCard"
-import styles from "../styles/videoReels.module.css"
+import ReelCard from "./ReelCard"
+import styles from "../styles/reels.module.css"
 
 /**
  * Stagger animation config for the masonry items.
@@ -21,12 +21,12 @@ const itemVariants = {
 }
 
 /**
- * Pinterest-style masonry grid of video cards.
+ * Pinterest-style masonry grid of reel cards.
  *
- * @param {{ videos: Video[], onVideoClick: (video: Video) => void }} props
+ * @param {{ reels: Reel[], onReelClick: (reel: Reel) => void }} props
  */
-const VideoGrid = ({ videos, onVideoClick }) => {
-  if (videos.length === 0) {
+const ReelGrid = ({ reels, onReelClick }) => {
+  if (reels.length === 0) {
     return (
       <div className={styles.emptyState}>
         <svg
@@ -43,7 +43,7 @@ const VideoGrid = ({ videos, onVideoClick }) => {
           <polygon points="23 7 16 12 23 17 23 7" />
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
         </svg>
-        <span className={styles.emptyText}>No videos found</span>
+        <span className={styles.emptyText}>No reels found</span>
         <span className={styles.emptySubtext}>
           Try selecting a different tag or check back later.
         </span>
@@ -57,18 +57,18 @@ const VideoGrid = ({ videos, onVideoClick }) => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      key={videos.map((v) => v.id).join(",")}
+      key={reels.map((v) => v.id).join(",")}
     >
-      {videos.map((video, index) => (
+      {reels.map((reel, index) => (
         <motion.div
-          key={video.id}
+          key={reel.id}
           className={styles.masonryItem}
           variants={itemVariants}
         >
-          <VideoCard
-            video={video}
+          <ReelCard
+            reel={reel}
             index={index}
-            onClick={() => onVideoClick(video)}
+            onClick={() => onReelClick(reel)}
           />
         </motion.div>
       ))}
@@ -76,4 +76,4 @@ const VideoGrid = ({ videos, onVideoClick }) => {
   )
 }
 
-export default VideoGrid
+export default ReelGrid

@@ -8,7 +8,7 @@ import {
   HelpCircle,
   MessageSquare,
   Calendar,
-  Video,
+  Film,
 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
@@ -37,7 +37,7 @@ const CatSpeakSidebar = () => {
   const menuItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
     // { key: "discover", label: t.catSpeak.sidebar.discover, icon: Globe },
-    { key: "video", label: t.catSpeak.sidebar.video, icon: Video },
+    { key: "reels", label: t.catSpeak.sidebar.reels || "Reels", icon: Film },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
     { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]

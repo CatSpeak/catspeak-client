@@ -16,10 +16,11 @@ export default {
     description:
       "Coming soon: Explore cultures, places, and people from around the world.",
   },
-  video: {
-    title: "Video",
+  reels: {
+    title: "Reels",
     description:
-      "Coming soon: Watch curated videos to improve your listening skills.",
+      "Watch short videos from our community.",
+    loginRequired: "Please log in to upload a Reel.",
   },
   mail: {
     placeholderEmpty: "Be the first to say hello...",
@@ -32,7 +33,7 @@ export default {
   sidebar: {
     news: "Cat Speak News",
     discover: "Discover World",
-    video: "Video",
+    reels: "Reels",
     mail: "Mail",
     calendar: "Calendar",
     settings: "Settings",
