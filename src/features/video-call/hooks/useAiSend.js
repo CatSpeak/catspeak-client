@@ -46,7 +46,11 @@ export const useAiSend = () => {
       try {
         const isPublic = !isPrivateAi
         const isSystemReply = replyTarget?.from?.isSystem
-        const prefix = isSystemReply ? "@AISystem" : (isPublic ? "@AIPublic" : "@AIPrivate")
+        const prefix = isSystemReply
+          ? "@AISystem"
+          : isPublic
+            ? "@AIPublic"
+            : "@AIPrivate"
         const formattedPrompt = `${prefix} ${text}`
         const roomName = lkRoomName || "General"
 
@@ -65,6 +69,7 @@ export const useAiSend = () => {
             isLocal: true,
             isAi: false,
           },
+          replyTo: replyTarget ? { message: replyTarget.message, name: replyTarget.from?.name || "Cat Speak" } : undefined,
         })
 
         // 2. Track conversation thread
@@ -102,6 +107,7 @@ export const useAiSend = () => {
             const payload = JSON.stringify({
               message: formattedPrompt,
               questioner: currentUserId,
+              replyTo: replyTarget ? { message: replyTarget.message, name: replyTarget.from?.name || "Cat Speak" } : undefined,
             })
             const encoded = new TextEncoder().encode(payload)
             localParticipant.publishData(encoded, {

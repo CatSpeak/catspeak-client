@@ -23,6 +23,7 @@ export const flattenAiInteractions = (interactions) =>
       topic: interaction.topic,
       questioner: interaction.questioner,
       from: interaction.from,
+      replyTo: interaction.replyTo,
     })
 
     // 2. The AI response (or loading / error state)
