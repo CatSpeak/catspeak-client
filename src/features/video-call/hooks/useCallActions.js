@@ -76,7 +76,22 @@ export const useCallActions = ({
   // ── Chat ──
 
   const handleSendMessage = useCallback(
-    (text) => chatSend(text),
+    (text, replyTarget) => {
+      if (replyTarget) {
+        chatSend(
+          JSON.stringify({
+            isReply: true,
+            text,
+            replyTo: {
+              message: replyTarget.message,
+              name: replyTarget.from?.name || "User",
+            },
+          }),
+        )
+      } else {
+        chatSend(text)
+      }
+    },
     [chatSend],
   )
 

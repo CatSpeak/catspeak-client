@@ -33,11 +33,11 @@ const ChatInput = ({
         return
       }
 
-      await sendAiMessage(text, { isPrivateAi, replyTarget })
-
       setMessage("")
       if (onCancelReply) onCancelReply()
       if (onAiMessageSent) onAiMessageSent()
+
+      await sendAiMessage(text, { isPrivateAi, replyTarget })
 
       requestAnimationFrame(() => {
         sendingRef.current = false
@@ -108,18 +108,20 @@ const ChatInput = ({
         }`}
       >
         <TextInput
-          disabled={!isConnected}
+          disabled={!isConnected || (isAiInput && isAiBlocked)}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={
             isConnected
               ? isAiInput
-                ? replyTarget?.from?.isSystem
-                  ? "Reply to system..."
-                  : isPrivateAi
-                    ? t.rooms?.chatBox?.privateAiPlaceholder || "Ask AI (Private)"
-                    : t.rooms?.chatBox?.publicAiPlaceholder || "Ask AI (Public)"
+                ? isAiBlocked
+                  ? t.rooms?.chatBox?.aiGeneratingPlaceholder || "AI is typing..."
+                  : replyTarget?.from?.isSystem
+                    ? "Reply to system..."
+                    : isPrivateAi
+                      ? t.rooms?.chatBox?.privateAiPlaceholder || "Ask AI (Private)"
+                      : t.rooms?.chatBox?.publicAiPlaceholder || "Ask AI (Public)"
                 : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
               : t.rooms?.chatBox?.connectingPlaceholder || "Connecting..."
           }
@@ -143,7 +145,7 @@ const ChatInput = ({
           rightContent={
             <button
               type="submit"
-              disabled={!isConnected || !message.trim()}
+              disabled={!isConnected || !message.trim() || (isAiInput && isAiBlocked)}
               className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-colors disabled:bg-black/10 disabled:text-black/25 disabled:cursor-not-allowed hover:opacity-90"
               style={
                 isConnected && message.trim()
