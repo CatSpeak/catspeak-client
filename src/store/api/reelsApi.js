@@ -163,9 +163,7 @@ export const reelsApi = baseApi.injectEndpoints({
           patchResults.forEach((patchResult) => patchResult.undo())
         }
       },
-      invalidatesTags: (result, error, reelId) => [
-        { type: "Reels", id: String(reelId) },
-      ],
+      invalidatesTags: [],
     }),
 
     // Get hierarchical comments tree for a Reel
@@ -201,7 +199,6 @@ export const reelsApi = baseApi.injectEndpoints({
       },
       invalidatesTags: (result, error, { reelId }) => [
         { type: "ReelComments", id: String(reelId) },
-        { type: "Reels", id: String(reelId) },
       ],
     }),
 
@@ -229,7 +226,6 @@ export const reelsApi = baseApi.injectEndpoints({
       },
       invalidatesTags: (result, error, { reelId }) => [
         { type: "ReelComments", id: String(reelId) },
-        { type: "Reels", id: String(reelId) },
       ],
     }),
 
