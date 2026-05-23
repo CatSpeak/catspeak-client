@@ -178,6 +178,35 @@ export const reelsApi = baseApi.injectEndpoints({
         { type: "ReelComments", id: String(reelId) },
       ],
     }),
+
+    // Get active challenges currently running
+    getActiveChallenges: builder.query({
+      query: () => "/Reels/challenges/active",
+    }),
+
+    // Get past challenges
+    getPastChallenges: builder.query({
+      query: () => "/Reels/challenges/past",
+    }),
+
+    // Get reels associated with a specific challenge
+    getReelsByChallenge: builder.query({
+      query: ({ challengeId, page = 1, pageSize = 10 } = {}) =>
+        `/Reels/challenge/${challengeId}?page=${page}&pageSize=${pageSize}`,
+      providesTags: (result) =>
+        result?.data
+          ? [
+            ...result.data.map(({ reelId }) => ({ type: "Reels", id: String(reelId) })),
+            { type: "Reels", id: "FEED" },
+          ]
+          : [{ type: "Reels", id: "FEED" }],
+    }),
+
+    // Get challenge leaderboard ranking list
+    getChallengeLeaderboard: builder.query({
+      query: ({ challengeId, take = 10 } = {}) =>
+        `/Reels/challenges/${challengeId}/leaderboard?take=${take}`,
+    }),
   }),
 })
 
@@ -190,4 +219,8 @@ export const {
   useGetReelCommentsQuery,
   useCreateReelCommentMutation,
   useDeleteReelCommentMutation,
+  useGetActiveChallengesQuery,
+  useGetPastChallengesQuery,
+  useGetReelsByChallengeQuery,
+  useGetChallengeLeaderboardQuery,
 } = reelsApi

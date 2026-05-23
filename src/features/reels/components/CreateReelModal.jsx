@@ -590,7 +590,9 @@ const CreateReelModal = ({ open, onClose }) => {
               <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 text-[10px] text-gray-400">
                 <span>MP4, WebM or MOV</span>
                 <span>•</span>
-                <span>Up to 50MB</span>
+                <span>5 minutes</span>
+                <span>•</span>
+                <span>Up to 150MB</span>
               </div>
             </div>
 

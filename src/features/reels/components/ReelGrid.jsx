@@ -1,4 +1,5 @@
 import React from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import ReelCard from "./ReelCard"
 import styles from "../styles/reels.module.css"
 
@@ -8,6 +9,8 @@ import styles from "../styles/reels.module.css"
  * @param {{ reels: Reel[], onReelClick: (reel: Reel) => void }} props
  */
 const ReelGrid = React.memo(function ReelGrid({ reels, onReelClick }) {
+  const { t } = useLanguage()
+
   if (reels.length === 0) {
     return (
       <div className={styles.emptyState}>
@@ -25,9 +28,9 @@ const ReelGrid = React.memo(function ReelGrid({ reels, onReelClick }) {
           <polygon points="23 7 16 12 23 17 23 7" />
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
         </svg>
-        <span className={styles.emptyText}>No reels found</span>
+        <span className={styles.emptyText}>{t.catSpeak.reels.noReelsFound}</span>
         <span className={styles.emptySubtext}>
-          Try selecting a different tag or check back later.
+          {t.catSpeak.reels.trySelectingDifferentTag}
         </span>
       </div>
     )
