@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import EventDetailModal from "./EventDetailModal/index"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { formatLocation } from "../utils/eventFormatters"
@@ -23,13 +23,41 @@ const EventList = ({
   const isOccurrences = Array.isArray(data?.occurrences)
   const events = isOccurrences ? data.occurrences : (data?.events ?? [])
 
+  useEffect(() => {
+    if (selectedEvent && events.length > 0) {
+      const freshEvent = events.find((e) => e.id === selectedEvent.id)
+      if (freshEvent) {
+        setSelectedEvent((prev) => {
+          const newSelected = {
+            ...freshEvent,
+            eventId: freshEvent.eventId ?? freshEvent.recurringEventId ?? freshEvent.id,
+            occurrenceId: isOccurrences
+              ? (freshEvent.isRecurringGroup
+                  ? undefined
+                  : (freshEvent.occurrenceId ?? freshEvent.id))
+              : freshEvent.occurrenceId,
+            isRecurring: freshEvent.isRecurring || freshEvent.isRecurringGroup || !!freshEvent.recurringEventId,
+            ...eventFlags,
+          }
+          if (JSON.stringify(prev) !== JSON.stringify(newSelected)) {
+            return newSelected
+          }
+          return prev
+        })
+      }
+    }
+  }, [events, isOccurrences, eventFlags])
+
   const handleChipClick = (event) => {
     setSelectedEvent({
       ...event,
-      eventId: event.eventId ?? event.id,
+      eventId: event.eventId ?? event.recurringEventId ?? event.id,
       occurrenceId: isOccurrences
-        ? (event.occurrenceId ?? event.id)
+        ? (event.isRecurringGroup
+            ? undefined
+            : (event.occurrenceId ?? event.id))
         : event.occurrenceId,
+      isRecurring: event.isRecurring || event.isRecurringGroup || !!event.recurringEventId,
       ...eventFlags,
     })
   }

@@ -1,5 +1,25 @@
 import { baseApi } from "./baseApi"
 
+const getOccurrenceTags = (result) => {
+  const tags = ["Events"]
+  if (result?.occurrences) {
+    result.occurrences.forEach((occ) => {
+      if (occ.id != null)
+        tags.push({ type: "Events", id: `occurrence-${occ.id}` })
+      if (occ.recurringEventId != null)
+        tags.push({ type: "Events", id: occ.recurringEventId })
+      if (occ.eventId != null) tags.push({ type: "Events", id: occ.eventId })
+      if (occ.subOccurrences) {
+        occ.subOccurrences.forEach((sub) => {
+          if (sub.id != null)
+            tags.push({ type: "Events", id: `occurrence-${sub.id}` })
+        })
+      }
+    })
+  }
+  return tags
+}
+
 export const eventsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET /api/v1/Events/{eventId}
@@ -115,16 +135,16 @@ export const eventsApi = baseApi.injectEndpoints({
         url: "/v1/Events/registered",
         params,
       }),
-      providesTags: ["Events"],
+      providesTags: getOccurrenceTags,
     }),
 
-    // GET /api/v1/events/mine
+    // GET /api/v1/Events/mine
     getMyEvents: builder.query({
       query: (params) => ({
-        url: "/v1/events/mine",
+        url: "/v1/Events/mine",
         params,
       }),
-      providesTags: ["Events"],
+      providesTags: getOccurrenceTags,
     }),
 
     // POST /api/v1/events/{eventId}/shared-links
@@ -149,10 +169,7 @@ export const eventsApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: (result, error, { eventId, occurrenceId }) => {
-        const tags = [
-          { type: "Events", id: eventId },
-          "Events",
-        ]
+        const tags = [{ type: "Events", id: eventId }, "Events"]
         if (occurrenceId) {
           tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
         }
@@ -168,10 +185,7 @@ export const eventsApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: (result, error, { eventId, occurrenceId }) => {
-        const tags = [
-          { type: "Events", id: eventId },
-          "Events",
-        ]
+        const tags = [{ type: "Events", id: eventId }, "Events"]
         if (occurrenceId) {
           tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
         }

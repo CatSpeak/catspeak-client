@@ -59,32 +59,64 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
   const mappedEvents = useMemo(() => {
     const allEvents = []
     const seenIds = new Set()
+    const displayStartOfDay = displayDate.startOf("day")
 
     const addEvents = (eventsArr) => {
       if (!eventsArr) return
       eventsArr.forEach((ev) => {
         const id = ev.occurrenceId || ev.eventId
+        
+        const localStart = dayjs(ev.startTime)
+        const localEnd = dayjs(ev.endTime)
+
+        // Skip if displayDate is completely outside the event's days
+        if (displayStartOfDay.isBefore(localStart.startOf("day"))) return
+        if (displayStartOfDay.isAfter(localEnd.startOf("day"))) return
+        
+        // If event ends exactly at 00:00:00 on the display date, and it didn't start on this same day,
+        // it doesn't span into this day visually (it ended exactly at the start of the day).
+        if (
+          displayStartOfDay.isSame(localEnd.startOf("day")) &&
+          displayStartOfDay.isAfter(localStart.startOf("day")) &&
+          localEnd.format("HH:mm:ss") === "00:00:00"
+        ) {
+          return
+        }
+
         if (!seenIds.has(id)) {
-          // Keep only events where local start time is on the selected date
-          if (dayjs(ev.startTime).isSame(displayDate, "day")) {
-            seenIds.add(id)
-            allEvents.push({
-              ...ev,
-              id,
-              eventId: ev.eventId,
-              occurrenceId: ev.occurrenceId,
-              title: ev.title,
-              startTime: dayjs(ev.startTime).format("HH:mm"),
-              endTime: dayjs(ev.endTime).format("HH:mm"),
-              originalStartTime: ev.startTime, // preserve full ISO for API calls
-              originalEndTime: ev.endTime, // preserve full ISO for API calls
-              color: ev.color || DEFAULT_COLOR,
-              isRegistered: ev.isRegistered,
-              currentParticipants: ev.currentParticipants,
-              maxParticipants: ev.maxParticipants,
-              location: ev.location || "",
-            })
+          seenIds.add(id)
+
+          let displayStartTime = localStart.format("HH:mm")
+          let displayEndTime = localEnd.format("HH:mm")
+
+          // If the event started on a previous day relative to displayDate
+          if (localStart.startOf("day").isBefore(displayStartOfDay)) {
+            displayStartTime = "00:00"
           }
+
+          // If the event ends on a future day relative to displayDate
+          if (localEnd.startOf("day").isAfter(displayStartOfDay)) {
+            displayEndTime = "24:00"
+          } else if (displayEndTime === "00:00" && localEnd.startOf("day").isAfter(localStart.startOf("day"))) {
+            displayEndTime = "24:00"
+          }
+
+          allEvents.push({
+            ...ev,
+            id,
+            eventId: ev.eventId,
+            occurrenceId: ev.occurrenceId,
+            title: ev.title,
+            startTime: displayStartTime,
+            endTime: displayEndTime,
+            originalStartTime: ev.startTime, // preserve full ISO for API calls
+            originalEndTime: ev.endTime, // preserve full ISO for API calls
+            color: ev.color || DEFAULT_COLOR,
+            isRegistered: ev.isRegistered,
+            currentParticipants: ev.currentParticipants,
+            maxParticipants: ev.maxParticipants,
+            location: ev.location || "",
+          })
         }
       })
     }
