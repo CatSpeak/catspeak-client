@@ -1,9 +1,77 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
-import { UploadCloud, Video, Image, Trash2, Globe, Users, Lock, AlertCircle, Film, Heart, MessageCircle, Share, Music, X, Camera } from "lucide-react"
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import { UploadCloud, Video, Image, Trash2, Globe, Users, Lock, AlertCircle, Film, Heart, MessageCircle, Share, Music, X, Hash, Loader2 } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
-import { useCreateReelMutation } from "@/store/api/reelsApi"
+import Avatar from "@/shared/components/ui/Avatar"
+import {
+  useCreateReelMutation,
+  useSearchReelHashtagsQuery,
+  useSearchReelMentionsQuery,
+} from "@/store/api/reelsApi"
+
+const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
+const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
+
+const detectDescriptionTrigger = (value, caretPosition = value.length) => {
+  const beforeCaret = value.slice(0, caretPosition)
+  const match = beforeCaret.match(DESCRIPTION_TRIGGER_REGEX)
+
+  if (!match) return null
+
+  const marker = match[2]
+  const query = match[3] || ""
+  const start = beforeCaret.length - marker.length - query.length
+
+  return {
+    type: marker === "@" ? "mention" : "hashtag",
+    marker,
+    query,
+    start,
+    end: caretPosition,
+  }
+}
+
+const getHashtagName = (item) =>
+  String(item?.hashtag || "")
+    .replace(/^#+/, "")
+    .trim()
+
+const getMentionUsername = (item) =>
+  String(item?.username || item?.nickname || "")
+    .replace(/^@+/, "")
+    .replace(/\s+/g, "")
+    .trim()
+
+const renderHighlightedDescription = (text, tokenClassName) => {
+  if (!text) return null
+
+  const parts = []
+  let lastIndex = 0
+
+  for (const match of text.matchAll(DESCRIPTION_LINK_REGEX)) {
+    const token = match[0]
+    const index = match.index || 0
+
+    if (index > lastIndex) {
+      parts.push(text.slice(lastIndex, index))
+    }
+
+    parts.push(
+      <span key={`${token}-${index}`} className={tokenClassName}>
+        {token}
+      </span>
+    )
+
+    lastIndex = index + token.length
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex))
+  }
+
+  return parts
+}
 
 const CreateReelModal = ({ open, onClose }) => {
   // RTK Query Mutation Hook
@@ -12,6 +80,9 @@ const CreateReelModal = ({ open, onClose }) => {
   // Form states
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [activeDescriptionTrigger, setActiveDescriptionTrigger] = useState(null)
+  const [debouncedDescriptionTrigger, setDebouncedDescriptionTrigger] = useState(null)
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
   const [privacy, setPrivacy] = useState("Public")
 
   // File states & previews
@@ -46,11 +117,96 @@ const CreateReelModal = ({ open, onClose }) => {
   const videoInputRef = useRef(null)
   const coverInputRef = useRef(null)
   const videoRef = useRef(null)
+  const descriptionInputRef = useRef(null)
+  const descriptionHighlightRef = useRef(null)
+
+  const hashtagSearchArgs = useMemo(
+    () => ({
+      query: debouncedDescriptionTrigger?.type === "hashtag"
+        ? debouncedDescriptionTrigger.query
+        : "",
+      take: 8,
+    }),
+    [debouncedDescriptionTrigger?.type, debouncedDescriptionTrigger?.query]
+  )
+
+  const mentionSearchArgs = useMemo(
+    () => ({
+      query: debouncedDescriptionTrigger?.type === "mention"
+        ? debouncedDescriptionTrigger.query
+        : "",
+      take: 8,
+    }),
+    [debouncedDescriptionTrigger?.type, debouncedDescriptionTrigger?.query]
+  )
+
+  const {
+    data: hashtagResults = [],
+    isFetching: isFetchingHashtags,
+  } = useSearchReelHashtagsQuery(hashtagSearchArgs, {
+    skip: !open || debouncedDescriptionTrigger?.type !== "hashtag",
+  })
+
+  const {
+    data: mentionResults = [],
+    isFetching: isFetchingMentions,
+  } = useSearchReelMentionsQuery(mentionSearchArgs, {
+    skip: !open || debouncedDescriptionTrigger?.type !== "mention",
+  })
+
+  const hashtagSuggestions = useMemo(
+    () => hashtagResults.filter((item) => getHashtagName(item)),
+    [hashtagResults]
+  )
+
+  const mentionSuggestions = useMemo(
+    () => mentionResults.filter((item) => getMentionUsername(item)),
+    [mentionResults]
+  )
+
+  const activeSuggestions = activeDescriptionTrigger?.type === "hashtag"
+    ? hashtagSuggestions
+    : mentionSuggestions
+
+  const isFetchingDescriptionSuggestions = activeDescriptionTrigger?.type === "hashtag"
+    ? isFetchingHashtags
+    : isFetchingMentions
+
+  const hasSettledDescriptionTrigger = Boolean(
+    activeDescriptionTrigger
+    && debouncedDescriptionTrigger
+    && activeDescriptionTrigger.type === debouncedDescriptionTrigger.type
+    && activeDescriptionTrigger.query === debouncedDescriptionTrigger.query
+    && activeDescriptionTrigger.start === debouncedDescriptionTrigger.start
+    && activeDescriptionTrigger.end === debouncedDescriptionTrigger.end
+  )
+
+  const showDescriptionSuggestions = hasSettledDescriptionTrigger
+
+  useEffect(() => {
+    if (!activeDescriptionTrigger) {
+      setDebouncedDescriptionTrigger(null)
+      return undefined
+    }
+
+    const timer = window.setTimeout(() => {
+      setDebouncedDescriptionTrigger(activeDescriptionTrigger)
+    }, 180)
+
+    return () => window.clearTimeout(timer)
+  }, [activeDescriptionTrigger])
+
+  useEffect(() => {
+    setActiveSuggestionIndex(0)
+  }, [activeDescriptionTrigger?.type, activeDescriptionTrigger?.query, activeSuggestions.length])
 
   // Handle closing modal and resetting form/previews
   const handleClose = useCallback(() => {
     setTitle("")
     setDescription("")
+    setActiveDescriptionTrigger(null)
+    setDebouncedDescriptionTrigger(null)
+    setActiveSuggestionIndex(0)
     setPrivacy("Public")
     setCoverType("frame")
     setVideoDuration(0)
@@ -112,6 +268,9 @@ const CreateReelModal = ({ open, onClose }) => {
   const handleDiscardVideo = () => {
     setTitle("")
     setDescription("")
+    setActiveDescriptionTrigger(null)
+    setDebouncedDescriptionTrigger(null)
+    setActiveSuggestionIndex(0)
     setPrivacy("Public")
     setCoverType("frame")
     setVideoDuration(0)
@@ -381,7 +540,7 @@ const CreateReelModal = ({ open, onClose }) => {
       console.error("Frame capture error:", err)
       setIsCapturing(false)
     }
-  }, [coverFile])
+  }, [])
 
   // Drag & drop handlers for Video
   const handleVideoDrag = (e) => {
@@ -450,6 +609,92 @@ const CreateReelModal = ({ open, onClose }) => {
     }
   }
 
+  const updateDescriptionTrigger = useCallback((value, caretPosition) => {
+    setActiveDescriptionTrigger(detectDescriptionTrigger(value, caretPosition))
+  }, [])
+
+  const handleDescriptionChange = useCallback((e) => {
+    const nextDescription = e.target.value
+    setDescription(nextDescription)
+    updateDescriptionTrigger(nextDescription, e.target.selectionStart ?? nextDescription.length)
+  }, [updateDescriptionTrigger])
+
+  const handleDescriptionCursorUpdate = useCallback((e) => {
+    updateDescriptionTrigger(e.target.value, e.target.selectionStart ?? e.target.value.length)
+  }, [updateDescriptionTrigger])
+
+  const handleDescriptionScroll = useCallback((e) => {
+    if (!descriptionHighlightRef.current) return
+    descriptionHighlightRef.current.scrollTop = e.currentTarget.scrollTop
+    descriptionHighlightRef.current.scrollLeft = e.currentTarget.scrollLeft
+  }, [])
+
+  const applyDescriptionSuggestion = useCallback((item) => {
+    if (!activeDescriptionTrigger) return
+
+    const completionValue = activeDescriptionTrigger.type === "mention"
+      ? getMentionUsername(item)
+      : getHashtagName(item)
+
+    if (!completionValue) return
+
+    const completion = `${activeDescriptionTrigger.marker}${completionValue}`
+    const suffix = description.slice(activeDescriptionTrigger.end)
+    const separator = suffix && /^\s/.test(suffix) ? "" : " "
+    const nextDescription = `${description.slice(0, activeDescriptionTrigger.start)}${completion}${separator}${suffix}`.slice(0, 500)
+    const nextCaretPosition = Math.min(
+      activeDescriptionTrigger.start + completion.length + separator.length,
+      nextDescription.length
+    )
+
+    setDescription(nextDescription)
+    setActiveDescriptionTrigger(null)
+    setDebouncedDescriptionTrigger(null)
+    setActiveSuggestionIndex(0)
+
+    window.requestAnimationFrame(() => {
+      if (!descriptionInputRef.current) return
+      descriptionInputRef.current.focus()
+      descriptionInputRef.current.setSelectionRange(nextCaretPosition, nextCaretPosition)
+    })
+  }, [activeDescriptionTrigger, description])
+
+  const handleDescriptionKeyDown = useCallback((e) => {
+    if (!showDescriptionSuggestions) return
+
+    if (e.key === "Escape") {
+      setActiveDescriptionTrigger(null)
+      setDebouncedDescriptionTrigger(null)
+      return
+    }
+
+    if (!activeSuggestions.length) return
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      setActiveSuggestionIndex((index) => (index + 1) % activeSuggestions.length)
+      return
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault()
+      setActiveSuggestionIndex((index) =>
+        index === 0 ? activeSuggestions.length - 1 : index - 1
+      )
+      return
+    }
+
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault()
+      applyDescriptionSuggestion(activeSuggestions[activeSuggestionIndex])
+    }
+  }, [
+    activeSuggestionIndex,
+    activeSuggestions,
+    applyDescriptionSuggestion,
+    showDescriptionSuggestions,
+  ])
+
   // Form Submit Handler
   const handleSubmit = async (e) => {
     if (e) e.preventDefault()
@@ -487,6 +732,73 @@ const CreateReelModal = ({ open, onClose }) => {
     } catch (err) {
       setGeneralError(err?.data?.message || err?.message || "Failed to upload Reel. Please try again.")
     }
+  }
+
+  const renderDescriptionSuggestion = (item, index) => {
+    const isActive = index === activeSuggestionIndex
+
+    if (activeDescriptionTrigger?.type === "mention") {
+      const username = getMentionUsername(item)
+      const displayName = item.nickname || username
+
+      return (
+        <button
+          key={`mention-${item.accountId || username}`}
+          type="button"
+          role="option"
+          aria-selected={isActive}
+          onMouseDown={(event) => {
+            event.preventDefault()
+            applyDescriptionSuggestion(item)
+          }}
+          className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${isActive
+            ? "bg-red-50 text-[#990011]"
+            : "text-gray-700 hover:bg-gray-50"
+            }`}
+        >
+          <Avatar
+            size={30}
+            src={item.avatarUrl}
+            name={displayName}
+            alt={displayName}
+            className="shrink-0"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold">{displayName}</span>
+            <span className="block truncate text-xs text-gray-500">@{username}</span>
+          </span>
+        </button>
+      )
+    }
+
+    const hashtagName = getHashtagName(item)
+
+    return (
+      <button
+        key={`hashtag-${hashtagName}`}
+        type="button"
+        role="option"
+        aria-selected={isActive}
+        onMouseDown={(event) => {
+          event.preventDefault()
+          applyDescriptionSuggestion(item)
+        }}
+        className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${isActive
+          ? "bg-red-50 text-[#990011]"
+          : "text-gray-700 hover:bg-gray-50"
+          }`}
+      >
+        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-white" : "bg-gray-100"}`}>
+          <Hash size={15} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold">#{hashtagName}</span>
+          <span className="block truncate text-xs text-gray-500">
+            {item.isChallenge ? "Challenge" : `${item.useCount || 0} uses`}
+          </span>
+        </span>
+      </button>
+    )
   }
 
   return (
@@ -689,15 +1001,56 @@ const CreateReelModal = ({ open, onClose }) => {
                   <label htmlFor="description" className="text-sm font-semibold text-gray-700">
                     Description
                   </label>
-                  <textarea
-                    id="description"
-                    placeholder="What's this video about? Add tags like #catspeak..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    maxLength={500}
-                    rows={3}
-                    className="w-full border border-gray-300 rounded-xl p-3 text-sm outline-none transition-colors focus:border-[#990011] focus:ring-1 focus:ring-[#990011] hover:border-[#990011] placeholder-gray-400 resize-none shadow-sm"
-                  />
+                  <div className="relative">
+                    <div className="relative rounded-xl border border-gray-300 bg-white shadow-sm transition-colors hover:border-[#990011] focus-within:border-[#990011] focus-within:ring-1 focus-within:ring-[#990011]">
+                      <div
+                        ref={descriptionHighlightRef}
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800 whitespace-pre-wrap break-words"
+                      >
+                        {renderHighlightedDescription(description, "font-semibold text-[#2b5db0]")}
+                      </div>
+                      <textarea
+                        ref={descriptionInputRef}
+                        id="description"
+                        placeholder="What's this video about? Add tags like #catspeak..."
+                        value={description}
+                        onChange={handleDescriptionChange}
+                        onKeyDown={handleDescriptionKeyDown}
+                        onKeyUp={handleDescriptionCursorUpdate}
+                        onClick={handleDescriptionCursorUpdate}
+                        onSelect={handleDescriptionCursorUpdate}
+                        onScroll={handleDescriptionScroll}
+                        onBlur={() => {
+                          window.setTimeout(() => {
+                            setActiveDescriptionTrigger(null)
+                            setDebouncedDescriptionTrigger(null)
+                          }, 120)
+                        }}
+                        maxLength={500}
+                        rows={3}
+                        className="relative z-10 min-h-[84px] w-full resize-none rounded-xl bg-transparent p-3 text-sm leading-5 text-transparent caret-gray-900 outline-none placeholder:text-gray-400"
+                      />
+                    </div>
+
+                    {showDescriptionSuggestions && (
+                      <div
+                        role="listbox"
+                        className="absolute left-0 right-0 top-full z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
+                      >
+                        {isFetchingDescriptionSuggestions ? (
+                          <div className="flex items-center gap-2 px-3 py-3 text-sm text-gray-500">
+                            <Loader2 size={15} className="animate-spin text-[#990011]" />
+                            <span>Searching...</span>
+                          </div>
+                        ) : activeSuggestions.length > 0 ? (
+                          activeSuggestions.map((item, index) => renderDescriptionSuggestion(item, index))
+                        ) : (
+                          <div className="px-3 py-3 text-sm text-gray-500">No matches found</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <span className="self-end px-2 text-[10px] text-gray-400 font-semibold">
                     {description.length} / 500
                   </span>
@@ -1054,8 +1407,8 @@ const CreateReelModal = ({ open, onClose }) => {
                       </p>
 
                       {description && (
-                        <p className="text-[8px] text-white/80 line-clamp-2 leading-relaxed opacity-90">
-                          {description}
+                        <p className="text-[8px] text-white/80 line-clamp-2 leading-relaxed opacity-90 whitespace-pre-wrap break-words">
+                          {renderHighlightedDescription(description, "font-bold text-sky-200")}
                         </p>
                       )}
 

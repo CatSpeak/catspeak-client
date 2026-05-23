@@ -121,6 +121,30 @@ export const reelsApi = baseApi.injectEndpoints({
       ],
     }),
 
+    // Search #hashtags for Reel description autocomplete
+    searchReelHashtags: builder.query({
+      query: ({ query = "", take = 10 } = {}) => {
+        const params = new URLSearchParams()
+        params.append("query", query)
+        params.append("take", String(take))
+
+        return `/Reels/search/hashtags?${params.toString()}`
+      },
+      transformResponse: (response) => (Array.isArray(response) ? response : []),
+    }),
+
+    // Search @mentions for Reel description autocomplete
+    searchReelMentions: builder.query({
+      query: ({ query = "", take = 10 } = {}) => {
+        const params = new URLSearchParams()
+        params.append("query", query)
+        params.append("take", String(take))
+
+        return `/Reels/search/mentions?${params.toString()}`
+      },
+      transformResponse: (response) => (Array.isArray(response) ? response : []),
+    }),
+
     // Toggle like/unlike state for a Reel
     toggleLikeReel: builder.mutation({
       query: (reelId) => ({
@@ -325,6 +349,8 @@ export const {
   useGetReelsFeedQuery,
   useGetReelByIdQuery,
   useCreateReelMutation,
+  useSearchReelHashtagsQuery,
+  useSearchReelMentionsQuery,
   useToggleLikeReelMutation,
   useGetReelCommentsQuery,
   useCreateReelCommentMutation,
