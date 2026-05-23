@@ -6,7 +6,7 @@ import {
   Play,
   Heart,
   MessageCircle,
-  Share2,
+  Share,
   Bookmark,
   VolumeX,
   Volume1,
@@ -79,9 +79,9 @@ const CommentItemNode = React.memo(function CommentItemNode({
             <span className={styles.commentNickname}>
               {comment.nickname || comment.username || "Anonymous"}
             </span>
-            {comment.username && (
+            {/* {comment.username && (
               <span className={styles.commentUsername}>@{comment.username}</span>
-            )}
+            )} */}
             <span className={styles.commentTime}>
               {formatRelativeTime(comment.createdAt)}
             </span>
@@ -505,7 +505,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         {hasVideo && (
           <div className={styles.actionBar}>
             <Avatar
-              size={48}
+              size={40}
               src={reel.author.avatarUrl}
               name={reel.author.name}
               alt={reel.author.name}
@@ -552,7 +552,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
 
             <button className={styles.actionBarBtn} aria-label="Share">
               <div className={styles.actionIconWrapper}>
-                <Share2 size={24} />
+                <Share size={24} />
               </div>
               <span className={styles.actionBarLabel}>Share</span>
             </button>

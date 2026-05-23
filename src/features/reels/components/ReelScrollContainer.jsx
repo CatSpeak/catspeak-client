@@ -266,7 +266,6 @@ export default function ReelScrollContainer({
               gap: "16px",
               background: "#fafafa",
               color: "#1a1a1a",
-              borderTop: "1px solid #e5e7eb"
             }}
           >
             <div

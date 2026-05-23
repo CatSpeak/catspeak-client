@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
-import { UploadCloud, Video, Image, Trash2, Globe, Users, Lock, AlertCircle, Film, Heart, MessageCircle, Share2, Music, X, Camera } from "lucide-react"
+import { UploadCloud, Video, Image, Trash2, Globe, Users, Lock, AlertCircle, Film, Heart, MessageCircle, Share, Music, X, Camera } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
@@ -1027,7 +1027,7 @@ const CreateReelModal = ({ open, onClose }) => {
 
                       <div className="flex flex-col items-center">
                         <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-black/60 shadow-sm cursor-pointer active:scale-95 transition-all">
-                          <Share2 size={12} className="text-white" />
+                          <Share size={12} className="text-white" />
                         </div>
                         <span className="text-[8px] text-white/90 font-medium mt-0.5">Share</span>
                       </div>
