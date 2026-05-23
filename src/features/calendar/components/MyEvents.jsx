@@ -7,6 +7,10 @@ const MyEvents = () => {
   const { t } = useLanguage()
   const { data, isLoading } = useGetMyEventsQuery()
 
+  React.useEffect(() => {
+    console.log("=== MY EVENTS API DATA ===", data)
+  }, [data])
+
   return (
     <EventList
       title={t.calendar?.myEvents || "Sự kiện của tôi"}

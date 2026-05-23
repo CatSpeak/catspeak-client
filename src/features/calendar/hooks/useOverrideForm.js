@@ -19,6 +19,7 @@ export const useOverrideForm = (
     : dayjs().add(1, "hour")
 
   const initialLocation = initialEvent?.location || ""
+  const initialDescription = initialEvent?.description || ""
   const initialParticipants = initialEvent?.maxParticipants || 50
 
   // These aren't usually on the main event object natively if it's just the series template,
@@ -29,6 +30,7 @@ export const useOverrideForm = (
   const [startTime, setStartTime] = useState(initialStartTime)
   const [endTime, setEndTime] = useState(initialEndTime)
   const [location, setLocation] = useState(initialLocation)
+  const [description, setDescription] = useState(initialDescription)
   const [maxParticipants, setMaxParticipants] = useState(initialParticipants)
   const [isCancelled, setIsCancelled] = useState(initialIsCancelled)
   const [overrideReason, setOverrideReason] = useState(initialOverrideReason)
@@ -41,6 +43,7 @@ export const useOverrideForm = (
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
       location,
+      description,
       maxParticipants: Number(maxParticipants),
       isCancelled,
       overrideReason: isCancelled ? overrideReason : undefined, // Optional logic, but let's pass it if provided
@@ -66,6 +69,8 @@ export const useOverrideForm = (
     setEndTime,
     location,
     setLocation,
+    description,
+    setDescription,
     maxParticipants,
     setMaxParticipants,
     isCancelled,

@@ -36,9 +36,9 @@ const CalendarPage = () => {
 
       {eventIdFromUrl && (
         <EventDetailModal
-          event={{ 
-            eventId: eventIdFromUrl, 
-            occurrenceId: occurrenceIdFromUrl || undefined 
+          event={{
+            eventId: eventIdFromUrl,
+            occurrenceId: occurrenceIdFromUrl || undefined,
           }}
           onClose={() => {
             const newParams = new URLSearchParams(searchParams)

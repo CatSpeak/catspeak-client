@@ -3,6 +3,7 @@ import dayjs from "dayjs"
 import {
   useCreateEventMutation,
   useUpdateEventMutation,
+  useUpdateEventSeriesMutation,
 } from "@/store/api/eventsApi"
 import { mapFormToPayload } from "../utils/mapFormToPayload"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -30,7 +31,9 @@ export const useEventForm = (onClose, editEvent) => {
   const { t } = useLanguage()
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation()
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation()
-  const isLoading = isCreating || isUpdating
+  const [updateEventSeries, { isLoading: isUpdatingSeries }] =
+    useUpdateEventSeriesMutation()
+  const isLoading = isCreating || isUpdating || isUpdatingSeries
 
   // Evaluate initial values once
   const initialTitle = editEvent?.title || ""
@@ -115,8 +118,10 @@ export const useEventForm = (onClose, editEvent) => {
     if (!title.trim()) newErrors.title = t.validation.calendar.titleRequired
     if (!countryId) newErrors.countryId = t.validation.calendar.countryRequired
     if (!cityId) newErrors.cityId = t.validation.calendar.cityRequired
-    if (!eventLocation.trim()) newErrors.eventLocation = t.validation.calendar.locationRequired
-    if (!description.trim()) newErrors.description = t.validation.calendar.descriptionRequired
+    if (!eventLocation.trim())
+      newErrors.eventLocation = t.validation.calendar.locationRequired
+    if (!description.trim())
+      newErrors.description = t.validation.calendar.descriptionRequired
     if (!maxParticipants || Number(maxParticipants) <= 0) {
       newErrors.maxParticipants = t.validation.calendar.maxParticipantsRequired
     }
@@ -147,10 +152,21 @@ export const useEventForm = (onClose, editEvent) => {
 
     try {
       if (editEvent?.id || editEvent?.eventId) {
+        const id = editEvent.id || editEvent.eventId
         await updateEvent({
-          eventId: editEvent.id || editEvent.eventId,
+          eventId: id,
           ...payload,
         }).unwrap()
+
+        if (
+          (editEvent.isRecurring || payload.isRecurring) &&
+          payload.recurrenceRule
+        ) {
+          await updateEventSeries({
+            eventId: id,
+            ...payload.recurrenceRule,
+          }).unwrap()
+        }
       } else {
         await createEvent(payload).unwrap()
       }
