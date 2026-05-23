@@ -54,7 +54,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
           onClick={handleNavigateClick}
           className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors ${
             isActive || open
-              ? "bg-[#F2F2F2] text-[#990011] hover:bg-[#E6E6E6]"
+              ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
               : "hover:bg-[#F2F2F2]"
           }`}
         >
@@ -68,7 +68,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
             setOpen((prev) => !prev)
           }}
           className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-[#F2F2F2] ${
-            isActive || open ? "text-[#990011]" : ""
+            isActive || open ? "text-cath-red-700" : ""
           }`}
         >
           {open ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -91,14 +91,14 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
                 onClick={() => handleSubItemClick(item)}
                 className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors ${
                   isItemActive
-                    ? "bg-[#F2F2F2] text-[#990011] hover:bg-[#E6E6E6]"
+                    ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
                     : "hover:bg-[#F2F2F2]"
                 }`}
               >
                 <div className="flex-shrink-0 min-w-[32px]">
                   <Icon
                     size={18}
-                    className={isItemActive ? "text-[#990011]" : ""}
+                    className={isItemActive ? "text-cath-red-700" : ""}
                   />
                 </div>
                 <span className="flex-grow text-sm">{item.label}</span>

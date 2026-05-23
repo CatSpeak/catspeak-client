@@ -29,7 +29,7 @@ const MobileNavItem = ({ navKey, onClose }) => {
       onClick={onClose}
       className={`flex items-center px-3 h-10 text-sm rounded-[5px] transition-colors ${
         isActive
-          ? "text-[#990011] bg-[#F2F2F2] hover:bg-[#E6E6E6]"
+          ? "text-cath-red-700 bg-[#F2F2F2] hover:bg-[#E6E6E6]"
           : "hover:bg-[#F2F2F2]"
       }`}
     >

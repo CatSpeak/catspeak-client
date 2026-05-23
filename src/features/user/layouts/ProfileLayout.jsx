@@ -9,7 +9,7 @@ const ProfileLayout = () => {
   return (
     <div className="flex flex-col lg:flex-row w-full flex-1 lg:overflow-hidden relative">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-[320px] p-5 flex-shrink-0 overflow-y-auto">
+      <aside className="hidden lg:block w-[320px] flex-shrink-0 overflow-y-auto">
         <ProfileSidebar />
       </aside>
 

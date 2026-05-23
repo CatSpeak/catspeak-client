@@ -1,5 +1,3 @@
-import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import FormDatePicker from "../../forms/FormDatePicker"
 import FormSelectField from "../../forms/FormSelectField"
@@ -11,7 +9,6 @@ const RegisterFormFields = ({
   errors,
   setErrors,
 }) => {
-  const [showPassword, setShowPassword] = useState(false)
 
   const languageOptions = [
     { value: "english", label: "English" },
@@ -109,24 +106,16 @@ const RegisterFormFields = ({
           <label className="block text-sm mb-2">{authText.passwordLabel}</label>
           <div className="relative">
             <TextInput
-              type={showPassword ? "text" : "password"}
+              type="password"
               variant="square"
               placeholder={authText.passwordPlaceholder}
               value={formData.password}
               onChange={handleChange("password")}
-              className={`pr-12 ${
-                errors.password
-                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                  : ""
-              }`}
+              className={`pr-12 ${errors.password
+                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                : ""
+                }`}
             />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
           </div>
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password}</p>

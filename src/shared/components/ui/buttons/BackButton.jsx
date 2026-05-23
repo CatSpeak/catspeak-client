@@ -18,7 +18,7 @@ const BackButton = ({ to, onClick, children, className = "" }) => {
   if (to) {
     return (
       <Link to={to} className={`${base} ${className}`}>
-        <ArrowLeft className="transition-all duration-200 group-hover:-translate-x-1 group-hover:text-[#990011]" />
+        <ArrowLeft className="transition-all duration-200 group-hover:-translate-x-1 group-hover:text-cath-red-700" />
         {children}
       </Link>
     )
@@ -26,7 +26,7 @@ const BackButton = ({ to, onClick, children, className = "" }) => {
 
   return (
     <button onClick={onClick} className={`${base} ${className}`}>
-      <ArrowLeft className="transition-all duration-200 group-hover:-translate-x-1 group-hover:text-[#990011]" />
+      <ArrowLeft className="transition-all duration-200 group-hover:-translate-x-1 group-hover:text-cath-red-700" />
       {children}
     </button>
   )

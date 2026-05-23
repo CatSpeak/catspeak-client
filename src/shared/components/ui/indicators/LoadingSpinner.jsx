@@ -7,7 +7,7 @@ const LoadingSpinner = ({
 }) => {
   return (
     <div className={className}>
-      <Loader2 className="h-8 w-8 animate-spin text-[#990011]" />
+      <Loader2 className="h-8 w-8 animate-spin text-cath-red-700" />
       {text && <span className="mt-3 text-sm">{text}</span>}
     </div>
   )

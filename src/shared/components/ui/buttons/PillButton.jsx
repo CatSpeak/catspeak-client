@@ -27,7 +27,7 @@ const PillButton = ({
     ? "bg-transparent hover:bg-[#f3f3f3] active:bg-[#e5e5e5]"
     : isSecondary
     ? "bg-white text-black hover:bg-[#E5E5E5] active:bg-[#e0e0e0]"
-    : "bg-[#990011] text-white hover:brightness-90 active:brightness-75"
+    : "bg-cath-red-700 text-white hover:brightness-90 active:brightness-75"
 
   const disabledStyles =
     "disabled:bg-[#BFBFBF] disabled:text-white disabled:brightness-100 disabled:border-transparent"

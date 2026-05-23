@@ -1,27 +1,46 @@
 import React from "react"
+import { Link } from "react-router-dom"
+import { IconLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 
+const COMMUNITY_LINKS = [
+  { code: "vi", labelKey: "vietnamese" },
+  { code: "en", labelKey: "english" },
+  { code: "zh", labelKey: "chinese" },
+]
 
-const CommunitySection = ({ languages }) => {
+const CommunitySection = () => {
   const { t } = useLanguage()
   const footerText = t.footer
 
   return (
-    <div className="flex-1 text-center lg:text-left">
-      <h3
-        className="font-bold uppercase tracking-wide text-lg"
-      >
-        {footerText.ourCommunity}
-      </h3>
-      <ul className="pt-6 text-white/85 flex flex-row flex-wrap justify-center lg:flex-col lg:justify-start lg:items-start gap-4 lg:gap-2">
-        {languages.map((lang) => (
-          <li key={lang} className="drop-shadow-md">
-            <span className="text-white font-bold text-base">
-              {lang}
-            </span>
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+      <Link to="/" aria-label="Cat Speak Home" className="shrink-0">
+        <img
+          src={IconLogo}
+          alt=""
+          className="h-16 w-16 sm:h-[72px] sm:w-[72px] border-2 border-white rounded-full"
+          draggable={false}
+        />
+      </Link>
+
+      <div>
+        <h3 className="text-base font-bold uppercase tracking-wide text-white sm:text-lg">
+          {footerText.ourCommunity}
+        </h3>
+        <ul className="mt-4 flex flex-col gap-2 sm:gap-2.5">
+          {COMMUNITY_LINKS.map(({ code, labelKey }) => (
+            <li key={code}>
+              <Link
+                to={`/${code}/community`}
+                className="text-sm font-semibold text-white/90 transition-colors hover:text-[#FFB400] sm:text-base"
+              >
+                {footerText.languages[labelKey]}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

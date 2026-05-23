@@ -53,7 +53,7 @@ const WaitingScreen = ({
         {(room?.requiredLevel || room?.topic) && (
           <div className="flex flex-wrap justify-center gap-2 mb-3 mt-2">
             {room?.requiredLevel && (
-              <span className="rounded-full bg-[#990011] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                 {room.requiredLevel}
               </span>
             )}
@@ -63,7 +63,7 @@ const WaitingScreen = ({
                 return (
                   <span
                     key={trimmed}
-                    className="rounded-full bg-[#990011] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
+                    className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
                   >
                     {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
                       trimmed}

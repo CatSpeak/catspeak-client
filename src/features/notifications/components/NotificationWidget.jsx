@@ -6,6 +6,7 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import NotificationDropdown from "./NotificationDropdown"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -29,17 +30,7 @@ const NotificationWidget = () => {
   const { openAuthModal } = useContext(AuthModalContext)
   const isMobile = useIsMobile(425)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-    if (isOpen && !isMobile) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isOpen, isMobile])
+  useClickOutside(dropdownRef, () => setIsOpen(false), { enabled: isOpen && !isMobile })
 
   // Lock body scroll when fullscreen on mobile
   useEffect(() => {

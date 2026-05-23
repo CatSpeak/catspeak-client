@@ -92,7 +92,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           (isCreatorOrAdmin ? (
             <button
               onClick={() => setShowParticipants(true)}
-              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-[#990011]"
+              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-cath-red-700"
             >
               {cal.viewParticipants || "Xem danh sách người đăng ký"}
             </button>

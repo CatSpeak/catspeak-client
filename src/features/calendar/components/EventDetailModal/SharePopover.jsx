@@ -47,7 +47,7 @@ const SharePopover = ({ eventId, occurrenceId }) => {
                 </span>
                 <button
                   onClick={handleCopy}
-                  className="shrink-0 hover:text-[#990011] transition-colors"
+                  className="shrink-0 hover:text-cath-red-700 transition-colors"
                   title={t.calendar?.copy || "Sao chép"}
                 >
                   {copied ? (

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react"
+import React, { useState, useRef, useMemo } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { ChevronDown, Globe } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
@@ -6,6 +6,7 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
 import LanguageMenuItem from "@/features/navigation/components/DesktopNav/LanguageMenuItem"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const DEFAULT_COMMUNITY = "zh"
 
@@ -37,16 +38,7 @@ const SidebarCommunityDropdown = () => {
     )
   }, [currentCommunity, t])
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   const handleCommunitySelect = (newCode) => {
     if (newCode === currentCommunity) {
@@ -81,7 +73,7 @@ const SidebarCommunityDropdown = () => {
         }`}
       >
         <div className="flex items-center gap-3">
-          <Globe className="w-5 h-5" />
+          <Globe size={20} />
           <span className="text-sm truncate">
             {t.nav?.community || "Community"}: {selectedLabel}
           </span>

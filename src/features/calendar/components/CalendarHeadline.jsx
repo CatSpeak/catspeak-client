@@ -23,11 +23,11 @@ const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
         <h2 className="text-[38px] leading-[1.1] font-bold text-black tracking-tight">
           {t.calendar?.meeting || "MEETING"}
         </h2>
-        <h2 className="text-[38px] leading-[1.1] font-bold text-[#990011] tracking-tight">
+        <h2 className="text-[38px] leading-[1.1] font-bold text-cath-red-700 tracking-tight">
           {t.calendar?.month || "THÁNG"} {monthString}
         </h2>
         <div className="flex items-center gap-3">
-          <h2 className="text-[38px] leading-[1.1] font-bold text-[#990011] tracking-tight">
+          <h2 className="text-[38px] leading-[1.1] font-bold text-cath-red-700 tracking-tight">
             {yearString}
           </h2>
           <div className="flex items-center gap-1 mt-1">
@@ -46,7 +46,7 @@ const CalendarHeadline = ({ currentDate, onNextMonth, onPrevMonth }) => {
       <div className="w-full h-[1px] bg-[#E5E5E5] my-5" />
 
       {/* <div className="flex flex-col">
-        <h3 className="text-[32px] leading-[1.1] font-bold text-[#990011] tracking-tight">
+        <h3 className="text-[32px] leading-[1.1] font-bold text-cath-red-700 tracking-tight">
           HCM, VN
         </h3>
         <div className="flex items-baseline gap-2 mt-2 mb-3">
