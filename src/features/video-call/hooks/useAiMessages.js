@@ -61,6 +61,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
               response: null,
               status: "loading",
               from: { name: questionerName, isLocal: false, isAi: false },
+              replyTo: json.replyTo,
             },
           ])
         } catch (e) {
