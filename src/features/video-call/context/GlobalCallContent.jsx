@@ -147,9 +147,21 @@ const GlobalCallContent = ({
   const [chatPublicAi] = useChatPublicAiMutation()
   const [chatPrivateAi] = useChatPrivateAiMutation()
 
-  const chatMessages = [...baseChatMessages].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  )
+  const chatMessages = [...baseChatMessages].map((msg) => {
+    try {
+      const json = JSON.parse(msg.message)
+      if (json && json.isReply) {
+        return {
+          ...msg,
+          message: json.text,
+          replyTo: json.replyTo,
+        }
+      }
+    } catch {
+      // not JSON or not a reply
+    }
+    return msg
+  })
 
   const combinedAiMessages = [...aiMessages, ...systemMessages].sort(
     (a, b) => a.timestamp - b.timestamp,
