@@ -13,10 +13,13 @@ import { Loader2 } from "lucide-react"
 const ACTIVE_SNAP_VISIBLE_RATIO = 0.92
 const DEFAULT_RENDER_WINDOW = 2
 const DEFAULT_PRELOAD_WINDOW = 1
+const DEFAULT_BOTTOM_GAP = 16
+
+const DEFAULT_CONTAINER_HEIGHT = "calc(100dvh - 120px)"
 
 const CONTAINER_STYLE = {
   width: "100%",
-  height: "calc(100vh - 120px)",
+  height: DEFAULT_CONTAINER_HEIGHT,
   overflowY: "scroll",
   scrollSnapType: "y mandatory",
   WebkitOverflowScrolling: "touch",
@@ -32,7 +35,7 @@ const ITEM_STYLE = {
   scrollSnapAlign: "start",
   scrollSnapStop: "always",
   width: "100%",
-  height: "calc(100vh - 120px)",
+  height: DEFAULT_CONTAINER_HEIGHT,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -54,6 +57,21 @@ const PLACEHOLDER_STYLE = {
   background: "#000",
 }
 
+const getAncestorBottomPadding = (element) => {
+  let current = element.parentElement
+  let largestPadding = 0
+
+  while (current && current !== document.body) {
+    const paddingBottom = parseFloat(window.getComputedStyle(current).paddingBottom)
+    if (Number.isFinite(paddingBottom)) {
+      largestPadding = Math.max(largestPadding, paddingBottom)
+    }
+    current = current.parentElement
+  }
+
+  return largestPadding
+}
+
 const clampIndex = (index, length) => {
   if (length <= 0) return 0
   return Math.min(Math.max(index, 0), length - 1)
@@ -69,7 +87,8 @@ export default function ReelScrollContainer({
   onActiveIndexChange,
   renderWindow = DEFAULT_RENDER_WINDOW,
   preloadWindow = DEFAULT_PRELOAD_WINDOW,
-  containerHeight = "calc(100vh - 120px)",
+  containerHeight = DEFAULT_CONTAINER_HEIGHT,
+  bottomGap = DEFAULT_BOTTOM_GAP,
 }) {
   const containerRef = useRef(null)
   const sentinelRef = useRef(null)
@@ -77,19 +96,95 @@ export default function ReelScrollContainer({
   const renderCenterIndexRef = useRef(initialIndex)
   const scrollRafRef = useRef(null)
   const syncRafRef = useRef(null)
+  const measureRafRef = useRef(null)
   const hasSyncedInitialScrollRef = useRef(false)
   const [activeIndex, setActiveIndex] = useState(initialIndex)
   const [renderCenterIndex, setRenderCenterIndex] = useState(initialIndex)
+  const [measuredContainerHeight, setMeasuredContainerHeight] = useState(null)
+
+  const effectiveContainerHeight = measuredContainerHeight
+    ? `${measuredContainerHeight}px`
+    : containerHeight
 
   const containerStyle = useMemo(() => ({
     ...CONTAINER_STYLE,
-    height: containerHeight,
-  }), [containerHeight])
+    height: effectiveContainerHeight,
+  }), [effectiveContainerHeight])
 
   const itemStyle = useMemo(() => ({
     ...ITEM_STYLE,
-    height: containerHeight,
-  }), [containerHeight])
+    height: effectiveContainerHeight,
+  }), [effectiveContainerHeight])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const measureAvailableHeight = () => {
+      const container = containerRef.current
+      if (!container) return
+
+      const viewportHeight = window.visualViewport?.height || window.innerHeight
+      const { top } = container.getBoundingClientRect()
+      const reservedBottomSpace = Math.max(bottomGap, getAncestorBottomPadding(container))
+      const nextHeight = Math.max(
+        1,
+        Math.floor(viewportHeight - Math.max(top, 0) - reservedBottomSpace)
+      )
+
+      setMeasuredContainerHeight((currentHeight) => {
+        if (currentHeight !== null && Math.abs(currentHeight - nextHeight) <= 1) {
+          return currentHeight
+        }
+        return nextHeight
+      })
+    }
+
+    const scheduleMeasure = () => {
+      if (measureRafRef.current !== null) return
+      measureRafRef.current = window.requestAnimationFrame(() => {
+        measureRafRef.current = null
+        measureAvailableHeight()
+      })
+    }
+
+    measureAvailableHeight()
+    scheduleMeasure()
+    const settleTimer = window.setTimeout(scheduleMeasure, 350)
+    const visualViewport = window.visualViewport
+
+    window.addEventListener("resize", scheduleMeasure)
+    window.addEventListener("orientationchange", scheduleMeasure)
+    window.addEventListener("scroll", scheduleMeasure, { passive: true })
+    visualViewport?.addEventListener("resize", scheduleMeasure)
+    visualViewport?.addEventListener("scroll", scheduleMeasure)
+
+    return () => {
+      window.clearTimeout(settleTimer)
+      window.removeEventListener("resize", scheduleMeasure)
+      window.removeEventListener("orientationchange", scheduleMeasure)
+      window.removeEventListener("scroll", scheduleMeasure)
+      visualViewport?.removeEventListener("resize", scheduleMeasure)
+      visualViewport?.removeEventListener("scroll", scheduleMeasure)
+
+      if (measureRafRef.current !== null) {
+        window.cancelAnimationFrame(measureRafRef.current)
+        measureRafRef.current = null
+      }
+    }
+  }, [bottomGap])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || reels.length === 0) return
+
+    const height = container.clientHeight
+    if (height <= 0) return
+
+    const expectedScrollTop = activeIndexRef.current * height
+    if (Math.abs(container.scrollTop - expectedScrollTop) > 2) {
+      container.scrollTop = expectedScrollTop
+    }
+  }, [effectiveContainerHeight, reels.length])
 
   const commitActiveIndex = useCallback((nextIndex) => {
     if (reels.length === 0) return
@@ -181,6 +276,9 @@ export default function ReelScrollContainer({
       }
       if (syncRafRef.current !== null) {
         window.cancelAnimationFrame(syncRafRef.current)
+      }
+      if (measureRafRef.current !== null) {
+        window.cancelAnimationFrame(measureRafRef.current)
       }
     }
   }, [])

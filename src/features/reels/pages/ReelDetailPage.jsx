@@ -37,6 +37,48 @@ import {
 } from "../utils/formatters"
 import styles from "../styles/reels.module.css"
 
+const REEL_VOLUME_STORAGE_KEY = "reelVolume"
+const REEL_MUTED_STORAGE_KEY = "reelMuted"
+const DEFAULT_REEL_VOLUME = 0.5
+const DEFAULT_REEL_MUTED = true
+
+const readReelPreference = (key) => {
+  if (typeof window === "undefined") return null
+
+  try {
+    return window.localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+const readStoredReelVolume = () => {
+  const saved = readReelPreference(REEL_VOLUME_STORAGE_KEY)
+  const parsed = saved !== null ? Number.parseFloat(saved) : DEFAULT_REEL_VOLUME
+
+  return Number.isFinite(parsed)
+    ? Math.min(Math.max(parsed, 0), 1)
+    : DEFAULT_REEL_VOLUME
+}
+
+const readStoredReelMuted = () => {
+  const saved = readReelPreference(REEL_MUTED_STORAGE_KEY)
+  if (saved === "false") return false
+  if (saved === "true") return true
+
+  return DEFAULT_REEL_MUTED
+}
+
+const writeReelPreference = (key, value) => {
+  if (typeof window === "undefined") return
+
+  try {
+    window.localStorage.setItem(key, String(value))
+  } catch {
+    // Storage can be unavailable in strict private/security modes.
+  }
+}
+
 /**
  * Individual comment node inside the hierarchical comments tree.
  * Renders the author, time, content, actions (Reply, Delete), and recursively renders replies.
@@ -219,10 +261,20 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     }
 
     if (isActive) {
+      video.muted = sharedMuted
       video.play()
         .then(() => setIsPlaying(true))
         .catch(() => {
-          setIsPlaying(false)
+          if (sharedMuted) {
+            setIsPlaying(false)
+            return
+          }
+
+          video.muted = true
+          setSharedMuted(true, { persist: false })
+          video.play()
+            .then(() => setIsPlaying(true))
+            .catch(() => setIsPlaying(false))
         })
     } else {
       video.pause()
@@ -244,7 +296,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         resetTimerRef.current = null
       }
     }
-  }, [isActive])
+  }, [isActive, setSharedMuted, sharedMuted])
 
   /* ── Sync shared volume and mute preferences ────── */
   useEffect(() => {
@@ -271,7 +323,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     e.stopPropagation()
     if (sharedMuted || sharedVolume === 0) {
       setSharedMuted(false)
-      if (sharedVolume === 0) setSharedVolume(1)
+      setSharedVolume(sharedVolume === 0 ? 1 : sharedVolume)
     } else {
       setSharedMuted(true)
     }
@@ -413,6 +465,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                 preload={shouldPreload ? "auto" : "metadata"}
                 poster={reel.thumbnailUrl || undefined}
                 muted={sharedMuted}
+                autoPlay={isActive}
                 loop
                 playsInline
                 onClick={handlePlayPause}
@@ -765,16 +818,20 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   }, [id, hasReel])
 
   // Global shared volume state across slides
-  const [sharedVolume, setSharedVolume] = useState(() => {
-    const saved = localStorage.getItem("reelVolume")
-    return saved !== null ? parseFloat(saved) : 0.5
-  })
-  const [sharedMuted, setSharedMuted] = useState(false)
+  const [sharedVolume, setSharedVolume] = useState(readStoredReelVolume)
+  const [sharedMuted, setSharedMutedState] = useState(readStoredReelMuted)
+
+  const setSharedMuted = useCallback((muted, { persist = true } = {}) => {
+    setSharedMutedState(muted)
+    if (persist) {
+      writeReelPreference(REEL_MUTED_STORAGE_KEY, muted)
+    }
+  }, [])
 
   // Save volume updates to local storage
   const handleVolumeChange = useCallback((vol) => {
     setSharedVolume(vol)
-    localStorage.setItem("reelVolume", String(vol))
+    writeReelPreference(REEL_VOLUME_STORAGE_KEY, vol)
   }, [])
 
   // Calculate the correct initial active index based on URL parameter ID
@@ -819,7 +876,7 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
 
   if (isLoading) {
     return (
-      <div className={`flex w-full items-center justify-center ${isWorkspace ? "h-[calc(100vh-128px)]" : "h-[calc(100vh-120px)]"}`}>
+      <div className={`flex w-full items-center justify-center ${isWorkspace ? "h-[calc(100dvh-128px)]" : "h-[calc(100dvh-120px)]"}`}>
         <Loader2 className="h-10 w-10 animate-spin text-[#990011]" />
       </div>
     )
@@ -863,7 +920,7 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
       isLoading={isWorkspace && isWorkspaceFeedFetching && combinedReels.length > 0}
       onLoadMore={isWorkspace ? handleLoadMore : undefined}
       onActiveIndexChange={handleActiveIndexChange}
-      containerHeight={isWorkspace ? "calc(100vh - 128px)" : "calc(100vh - 120px)"}
+      containerHeight={isWorkspace ? "calc(100dvh - 128px)" : "calc(100dvh - 120px)"}
     >
       {(reel, index, isActive, preloadState = {}) => (
         <ReelDetailSlide
