@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Mail,
   Calendar,
+  Film
 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "../../hooks/useActiveLink"
@@ -24,6 +25,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
 
   const subItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
+    { key: "reels", label: t.catSpeak.sidebar.reels, icon: Film },
     { key: "mail", label: t.catSpeak.sidebar.mail, icon: Mail },
     { key: "calendar", label: t.catSpeak.sidebar.calendar, icon: Calendar },
   ]
@@ -52,11 +54,10 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
         {/* Navigate button */}
         <button
           onClick={handleNavigateClick}
-          className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors ${
-            isActive || open
-              ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
-              : "hover:bg-[#F2F2F2]"
-          }`}
+          className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors ${isActive || open
+            ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
+            : "hover:bg-[#F2F2F2]"
+            }`}
         >
           <span>{t.nav[navKey]}</span>
         </button>
@@ -67,9 +68,8 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
             e.stopPropagation()
             setOpen((prev) => !prev)
           }}
-          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-[#F2F2F2] ${
-            isActive || open ? "text-cath-red-700" : ""
-          }`}
+          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-[#F2F2F2] ${isActive || open ? "text-cath-red-700" : ""
+            }`}
         >
           {open ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </button>
@@ -77,9 +77,8 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
 
       {/* Collapse Container */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          open ? "max-h-[160px] opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${open ? "opacity-100" : "max-h-0 opacity-0"
+          }`}
       >
         <div className="flex flex-col gap-1 mt-1">
           {subItems.map((item) => {
@@ -89,11 +88,10 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
               <button
                 key={item.key}
                 onClick={() => handleSubItemClick(item)}
-                className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors ${
-                  isItemActive
-                    ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
-                    : "hover:bg-[#F2F2F2]"
-                }`}
+                className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors ${isItemActive
+                  ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
+                  : "hover:bg-[#F2F2F2]"
+                  }`}
               >
                 <div className="flex-shrink-0 min-w-[32px]">
                   <Icon
