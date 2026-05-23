@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Eye, EyeOff, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
 import { useLoginMutation } from "@/store/api/authApi"
@@ -21,7 +20,6 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [remember, setRemember] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [passwordError, setPasswordError] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
 
   const [login, { isLoading }] = useLoginMutation()
 
@@ -60,9 +58,9 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         isInvalidCredentials
           ? authText.invalidCredentials
           : err?.data?.message ||
-              err.message ||
-              t.common?.errorGeneric ||
-              "Login failed",
+          err.message ||
+          t.common?.errorGeneric ||
+          "Login failed",
       )
     }
   }
@@ -106,7 +104,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
             </label>
             <div className="relative">
               <TextInput
-                type={showPassword ? "text" : "password"}
+                type="password"
                 variant="square"
                 autoComplete="current-password"
                 placeholder={authText.passwordPlaceholder}
@@ -117,13 +115,6 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
                 }}
                 className={`pr-12 ${passwordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}`}
               />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
             {passwordError && (
               <p className="mt-1 text-xs text-red-600">{passwordError}</p>

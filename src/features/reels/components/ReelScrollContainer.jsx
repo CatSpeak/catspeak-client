@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Loader2 } from "lucide-react"
 
 /**
@@ -69,6 +69,7 @@ export default function ReelScrollContainer({
   onActiveIndexChange,
   renderWindow = DEFAULT_RENDER_WINDOW,
   preloadWindow = DEFAULT_PRELOAD_WINDOW,
+  containerHeight = "calc(100vh - 120px)",
 }) {
   const containerRef = useRef(null)
   const sentinelRef = useRef(null)
@@ -79,6 +80,16 @@ export default function ReelScrollContainer({
   const hasSyncedInitialScrollRef = useRef(false)
   const [activeIndex, setActiveIndex] = useState(initialIndex)
   const [renderCenterIndex, setRenderCenterIndex] = useState(initialIndex)
+
+  const containerStyle = useMemo(() => ({
+    ...CONTAINER_STYLE,
+    height: containerHeight,
+  }), [containerHeight])
+
+  const itemStyle = useMemo(() => ({
+    ...ITEM_STYLE,
+    height: containerHeight,
+  }), [containerHeight])
 
   const commitActiveIndex = useCallback((nextIndex) => {
     if (reels.length === 0) return
@@ -187,122 +198,109 @@ export default function ReelScrollContainer({
   }, [onLoadMore, hasMore, isLoading, reels.length])
 
   return (
-    <>
-      {/* Self-contained styling overrides for scrollbar hiding and spinning keyframes */}
-      <style>{`
-        .reel-scroll-container::-webkit-scrollbar {
-          display: none;
-        }
-        @keyframes reel-spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+    <div
+      ref={containerRef}
+      className="reel-scroll-container scrollbar-hidden"
+      style={containerStyle}
+      onScroll={handleScroll}
+    >
+      {/* Render actual reels list */}
+      {reels.map((reel, index) => {
+        const isActive = index === activeIndex
+        const distanceFromActive = Math.abs(index - activeIndex)
+        const distanceFromRenderCenter = Math.abs(index - renderCenterIndex)
+        const shouldRender =
+          distanceFromActive <= renderWindow ||
+          distanceFromRenderCenter <= renderWindow
+        const shouldPreload =
+          distanceFromActive <= preloadWindow ||
+          distanceFromRenderCenter <= preloadWindow
 
-      <div
-        ref={containerRef}
-        className="reel-scroll-container"
-        style={CONTAINER_STYLE}
-        onScroll={handleScroll}
-      >
-        {/* Render actual reels list */}
-        {reels.map((reel, index) => {
-          const isActive = index === activeIndex
-          const distanceFromActive = Math.abs(index - activeIndex)
-          const distanceFromRenderCenter = Math.abs(index - renderCenterIndex)
-          const shouldRender =
-            distanceFromActive <= renderWindow ||
-            distanceFromRenderCenter <= renderWindow
-          const shouldPreload =
-            distanceFromActive <= preloadWindow ||
-            distanceFromRenderCenter <= preloadWindow
-
-          return (
-            <div
-              key={reel.id || index}
-              className="reel-scroll-item"
-              style={ITEM_STYLE}
-              data-reel-index={index}
-            >
-              {shouldRender && typeof children === "function"
-                ? children(reel, index, isActive, {
-                  activeIndex,
-                  shouldPreload,
-                  shouldRender,
-                })
-                : <div style={PLACEHOLDER_STYLE} aria-hidden="true" />}
-            </div>
-          )
-        })}
-
-        {/* Infinite Scroll Sentinel element */}
-        {hasMore && !isLoading && (
-          <div ref={sentinelRef} style={SENTINEL_STYLE} />
-        )}
-
-        {/* Minimal loading indicator slide at the end */}
-        {isLoading && (
-          <div style={{ ...ITEM_STYLE, flexDirection: "column", gap: "12px", background: "transparent" }}>
-            <Loader2
-              style={{
-                width: "40px",
-                height: "40px",
-                animation: "reel-spin 1s linear infinite",
-                color: "#990011"
-              }}
-            />
-            <span style={{ color: "#4b5563", fontSize: "14px", fontWeight: "500" }}>
-              Loading more reels...
-            </span>
+        return (
+          <div
+            key={reel.id || index}
+            className="reel-scroll-item"
+            style={itemStyle}
+            data-reel-index={index}
+          >
+            {shouldRender && typeof children === "function"
+              ? children(reel, index, isActive, {
+                activeIndex,
+                shouldPreload,
+                shouldRender,
+              })
+              : <div style={PLACEHOLDER_STYLE} aria-hidden="true" />}
           </div>
-        )}
+        )
+      })}
 
-        {/* Premium End of Feed Message Slide */}
-        {!hasMore && (
+      {/* Infinite Scroll Sentinel element */}
+      {hasMore && !isLoading && (
+        <div ref={sentinelRef} style={SENTINEL_STYLE} />
+      )}
+
+      {/* Minimal loading indicator slide at the end */}
+      {isLoading && (
+        <div style={{ ...itemStyle, flexDirection: "column", gap: "12px", background: "transparent" }}>
+          <Loader2
+            className="animate-spin"
+            style={{
+              width: "40px",
+              height: "40px",
+              color: "#990011"
+            }}
+          />
+          <span style={{ color: "#4b5563", fontSize: "14px", fontWeight: "500" }}>
+            Loading more reels...
+          </span>
+        </div>
+      )}
+
+      {/* Premium End of Feed Message Slide */}
+      {!hasMore && (
+        <div
+          style={{
+            ...itemStyle,
+            flexDirection: "column",
+            gap: "16px",
+            background: "#fafafa",
+            color: "#1a1a1a",
+          }}
+        >
           <div
             style={{
-              ...ITEM_STYLE,
-              flexDirection: "column",
-              gap: "16px",
-              background: "#fafafa",
-              color: "#1a1a1a",
+              width: "64px",
+              height: "64px",
+              borderRadius: "50%",
+              background: "#fef2f2",
+              border: "1px solid #fca5a5",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#990011",
             }}
           >
-            <div
-              style={{
-                width: "64px",
-                height: "64px",
-                borderRadius: "50%",
-                background: "#fef2f2",
-                border: "1px solid #fca5a5",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#990011",
-              }}
+            <svg
+              style={{ width: "32px", height: "32px" }}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <svg
-                style={{ width: "32px", height: "32px" }}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
-            <span style={{ fontSize: "18px", fontWeight: "600", color: "#111827" }}>
-              You're all caught up
-            </span>
-            <span style={{ fontSize: "14px", color: "#4b5563" }}>
-              You've watched all the available reels
-            </span>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
           </div>
-        )}
-      </div>
-    </>
+          <span style={{ fontSize: "18px", fontWeight: "600", color: "#111827" }}>
+            You're all caught up
+          </span>
+          <span style={{ fontSize: "14px", color: "#4b5563" }}>
+            You've watched all the available reels
+          </span>
+        </div>
+      )}
+    </div>
   )
 }

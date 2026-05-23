@@ -21,11 +21,13 @@ import useReelDetail from "../hooks/useReelDetail"
 import useFullscreen from "../hooks/useFullscreen"
 import {
   useGetReelsFeedQuery,
+  useGetUserReelsQuery,
   useToggleLikeReelMutation,
   useGetReelCommentsQuery,
   useCreateReelCommentMutation,
   useDeleteReelCommentMutation,
 } from "@/store/api/reelsApi"
+import { useAuth } from "@/features/auth"
 import { selectCurrentUser, selectIsAuthenticated } from "@/store/slices/authSlice"
 import { mapReelDtoToFrontend } from "../utils/mappers"
 import ReelScrollContainer from "../components/ReelScrollContainer"
@@ -689,13 +691,18 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   )
 })
 
+const DETAIL_PAGE_SIZE = 10
+
 /**
- * Instagram-style reels detail page refactored into a full-viewport snapped scroller.
- * Intersects queries to allow keyboard, mouse, and gesture sliding natively.
+ * Shared snapped scroller for public Reels and the workspace-owned Reels list.
  */
-const ReelDetailPage = () => {
+export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   const { id, lang } = useParams()
   const navigate = useNavigate()
+  const isWorkspace = source === "workspace"
+  const { user } = useAuth()
+  const userId = user?.accountId
+  const [feedPage, setFeedPage] = useState(1)
 
   // Track the initial deep-linked ID to keep the prepended list stable
   const [initialId, setInitialId] = useState(id)
@@ -703,8 +710,23 @@ const ReelDetailPage = () => {
   // Fetch the current single reel (deep-linked)
   const { reel: currentReel, isLoading: isDetailLoading, notFound } = useReelDetail(initialId)
 
-  // Fetch the wider feed for scroll-snapping context
-  const { data: feedResponse, isLoading: isFeedLoading } = useGetReelsFeedQuery()
+  // Fetch the wider feed for scroll-snapping context.
+  const {
+    data: publicFeedResponse,
+    isLoading: isPublicFeedLoading,
+  } = useGetReelsFeedQuery(undefined, { skip: isWorkspace })
+
+  const {
+    data: workspaceFeedResponse,
+    isLoading: isWorkspaceFeedLoading,
+    isFetching: isWorkspaceFeedFetching,
+  } = useGetUserReelsQuery(
+    { userId, page: feedPage, pageSize: DETAIL_PAGE_SIZE },
+    { skip: !isWorkspace || !userId }
+  )
+
+  const feedResponse = isWorkspace ? workspaceFeedResponse : publicFeedResponse
+  const isFeedLoading = isWorkspace ? isWorkspaceFeedLoading : isPublicFeedLoading
 
   // Mapped reels list from the feed query
   const feedReels = useMemo(() => {
@@ -714,12 +736,16 @@ const ReelDetailPage = () => {
     return []
   }, [feedResponse])
 
-  // Combine feed with the deep-linked currentReel prepended if it's missing from the feed list
+  // Combine feed with the deep-linked currentReel, replacing stale cached list data when present.
   const combinedReels = useMemo(() => {
     if (!currentReel) return feedReels
 
-    const exists = feedReels.some((r) => r.id === currentReel.id)
-    if (exists) return feedReels
+    const existingIndex = feedReels.findIndex((r) => r.id === currentReel.id)
+    if (existingIndex !== -1) {
+      const nextReels = [...feedReels]
+      nextReels[existingIndex] = currentReel
+      return nextReels
+    }
 
     return [currentReel, ...feedReels]
   }, [currentReel, feedReels])
@@ -758,27 +784,42 @@ const ReelDetailPage = () => {
     return idx !== -1 ? idx : 0
   }, [combinedReels, id])
 
+  const getListPath = useCallback(() => {
+    return isWorkspace ? "/workspace/reels" : `/${lang}/cat-speak/reels`
+  }, [isWorkspace, lang])
+
+  const getDetailPath = useCallback((reelId) => {
+    return isWorkspace ? `/workspace/reels/${reelId}` : `/${lang}/cat-speak/reels/${reelId}`
+  }, [isWorkspace, lang])
+
   const handleClose = useCallback(() => {
-    if (window.history.length > 1) {
+    if (!isWorkspace && window.history.length > 1) {
       navigate(-1)
     } else {
-      navigate(`/${lang}/cat-speak/reels`)
+      navigate(getListPath())
     }
-  }, [navigate, lang])
+  }, [getListPath, isWorkspace, navigate])
 
   // Dynamic URL Sync on scrolling
   const handleActiveIndexChange = useCallback((index) => {
     const activeReel = combinedReels[index]
     if (activeReel && activeReel.id !== id) {
-      navigate(`/${lang}/cat-speak/reels/${activeReel.id}`, { replace: true })
+      navigate(getDetailPath(activeReel.id), { replace: true })
     }
-  }, [combinedReels, id, lang, navigate])
+  }, [combinedReels, getDetailPath, id, navigate])
+
+  const hasMore = isWorkspace && (feedResponse?.lastPageCount || 0) >= DETAIL_PAGE_SIZE
+
+  const handleLoadMore = useCallback(() => {
+    if (!hasMore || isWorkspaceFeedFetching) return
+    setFeedPage((page) => page + 1)
+  }, [hasMore, isWorkspaceFeedFetching])
 
   const isLoading = (isDetailLoading || isFeedLoading) && combinedReels.length === 0
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center">
+      <div className={`flex w-full items-center justify-center ${isWorkspace ? "h-[calc(100vh-128px)]" : "h-[calc(100vh-120px)]"}`}>
         <Loader2 className="h-10 w-10 animate-spin text-[#990011]" />
       </div>
     )
@@ -818,9 +859,11 @@ const ReelDetailPage = () => {
     <ReelScrollContainer
       reels={combinedReels}
       initialIndex={initialIndex}
-      hasMore={false}
-      isLoading={false}
+      hasMore={hasMore}
+      isLoading={isWorkspace && isWorkspaceFeedFetching && combinedReels.length > 0}
+      onLoadMore={isWorkspace ? handleLoadMore : undefined}
       onActiveIndexChange={handleActiveIndexChange}
+      containerHeight={isWorkspace ? "calc(100vh - 128px)" : "calc(100vh - 120px)"}
     >
       {(reel, index, isActive, preloadState = {}) => (
         <ReelDetailSlide
@@ -837,5 +880,7 @@ const ReelDetailPage = () => {
     </ReelScrollContainer>
   )
 }
+
+const ReelDetailPage = () => <ReelDetailPageBase source="feed" />
 
 export default ReelDetailPage

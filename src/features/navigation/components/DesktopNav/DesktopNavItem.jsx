@@ -2,6 +2,8 @@ import React from "react"
 import { NavLink, useParams } from "react-router-dom"
 import { motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 
 const MotionDiv = motion.div
 const MotionSpan = motion.span
@@ -12,6 +14,8 @@ const navHover = { scale: 1.02 }
 const DesktopNavItem = ({ navKey, noActive, isActive, onActivate }) => {
   const { t } = useLanguage()
   const { lang } = useParams()
+  const { isAuthenticated } = useAuth()
+  const authModal = useAuthModal()
 
   if (navKey === "cart" || navKey === "connect") return null
 
@@ -30,11 +34,20 @@ const DesktopNavItem = ({ navKey, noActive, isActive, onActivate }) => {
     href = "/"
   }
 
+  const handleClick = (e) => {
+    if (navKey === "workspace" && !isAuthenticated) {
+      e.preventDefault()
+      authModal.openAuthModal("login", "/workspace")
+      return
+    }
+    onActivate?.()
+  }
+
   return (
     <MotionDiv whileHover={navHover} whileTap={navTap} className="flex shrink-0">
       <NavLink
         to={href}
-        onClick={() => onActivate?.()}
+        onClick={handleClick}
         className={`
           relative flex min-w-max h-9 flex-1 items-center justify-center overflow-hidden whitespace-nowrap rounded-full px-5 text-sm font-semibold tracking-wide no-underline transition-colors duration-200
           ${noActive

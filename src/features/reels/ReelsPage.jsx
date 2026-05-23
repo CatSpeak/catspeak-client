@@ -35,8 +35,14 @@ const ReelsPage = () => {
   const { data: activeChallengesResponse } = useGetActiveChallengesQuery()
   const { data: pastChallengesResponse } = useGetPastChallengesQuery()
 
-  const activeChallenges = activeChallengesResponse?.data || []
-  const pastChallenges = pastChallengesResponse?.data || []
+  const activeChallenges = useMemo(
+    () => activeChallengesResponse?.data || [],
+    [activeChallengesResponse]
+  )
+  const pastChallenges = useMemo(
+    () => pastChallengesResponse?.data || [],
+    [pastChallengesResponse]
+  )
 
   // Check if a specific challenge object with challengeId is selected
   const hasSpecificChallenge = useMemo(() => {
@@ -65,58 +71,72 @@ const ReelsPage = () => {
     { skip: !hasSpecificChallenge }
   )
 
+  const feedReels = useMemo(
+    () => feedResponse?.data ? feedResponse.data.map(mapReelDtoToFrontend) : [],
+    [feedResponse]
+  )
+
+  const challengeReels = useMemo(
+    () => challengeReelsResponse?.data
+      ? challengeReelsResponse.data.map(mapReelDtoToFrontend)
+      : [],
+    [challengeReelsResponse]
+  )
+
+  const activeHashtags = useMemo(
+    () => new Set(
+      activeChallenges
+        .map((challenge) => challenge.hashtag?.replace("#", "").toLowerCase())
+        .filter(Boolean)
+    ),
+    [activeChallenges]
+  )
+
+  const pastHashtags = useMemo(
+    () => new Set(
+      pastChallenges
+        .map((challenge) => challenge.hashtag?.replace("#", "").toLowerCase())
+        .filter(Boolean)
+    ),
+    [pastChallenges]
+  )
+
   // Determine display reels based on the selected filters
   const displayReels = useMemo(() => {
-    const feedReels = feedResponse?.data ? feedResponse.data.map(mapReelDtoToFrontend) : []
-
     if (activeFilter === "foryou") {
       return feedReels
     }
 
     if (activeFilter === "active") {
       if (selectedChallenge === "all" || !selectedChallenge) {
-        // Filter feed reels containing hashtags of any active challenge
-        const activeHashtags = activeChallenges
-          .map((c) => c.hashtag?.replace("#", "").toLowerCase())
-          .filter(Boolean)
-
         return feedReels.filter((reel) =>
-          reel.tags.some((tag) => activeHashtags.includes(tag.toLowerCase()))
+          reel.tags.some((tag) => activeHashtags.has(tag.toLowerCase()))
         )
       }
 
       // Show reels from specific active challenge reels endpoint
-      return challengeReelsResponse?.data
-        ? challengeReelsResponse.data.map(mapReelDtoToFrontend)
-        : []
+      return challengeReels
     }
 
     if (activeFilter === "past") {
       if (selectedChallenge === "all_past" || !selectedChallenge) {
-        // Filter feed reels containing hashtags of any past challenge
-        const pastHashtags = pastChallenges
-          .map((c) => c.hashtag?.replace("#", "").toLowerCase())
-          .filter(Boolean)
-
         return feedReels.filter((reel) =>
-          reel.tags.some((tag) => pastHashtags.includes(tag.toLowerCase()))
+          reel.tags.some((tag) => pastHashtags.has(tag.toLowerCase()))
         )
       }
 
       // Show reels from specific past challenge reels endpoint
-      return challengeReelsResponse?.data
-        ? challengeReelsResponse.data.map(mapReelDtoToFrontend)
-        : []
+      return challengeReels
     }
 
     return []
   }, [
     activeFilter,
     selectedChallenge,
-    feedResponse,
-    activeChallenges,
-    pastChallenges,
-    challengeReelsResponse,
+    feedReels,
+    activeHashtags,
+    pastHashtags,
+    challengeReels,
   ])
 
   // Determine standard loading states
@@ -173,7 +193,7 @@ const ReelsPage = () => {
             className="bg-[#990011] text-white px-8 py-3.5 rounded-xl font-bold shadow-md hover:bg-[#80000e] hover:scale-[1.03] transition-all transform flex items-center space-x-2 shrink-0 relative z-10"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
             <span>{t.catSpeak.reels.uploadReel}</span>
           </button>

@@ -36,7 +36,6 @@ const CreateReelModal = ({ open, onClose }) => {
 
   // Interactive Cover selector states
   const [previewMode, setPreviewMode] = useState("video") // "video" | "cover"
-  const [isScrubbing, setIsScrubbing] = useState(false)
   const [filmstripFrames, setFilmstripFrames] = useState([])
   const [isExtractingFilmstrip, setIsExtractingFilmstrip] = useState(false)
 
@@ -56,7 +55,6 @@ const CreateReelModal = ({ open, onClose }) => {
     setCoverType("frame")
     setVideoDuration(0)
     setCurrentTime(0)
-    setIsScrubbing(false)
     setFilmstripFrames([])
     setIsExtractingFilmstrip(false)
     setPreviewMode("video")
@@ -67,7 +65,9 @@ const CreateReelModal = ({ open, onClose }) => {
         videoRef.current.pause()
         videoRef.current.src = ""
         videoRef.current.load()
-      } catch (_) { }
+      } catch (err) {
+        console.warn("[CreateReelModal] Failed to reset video preview.", err)
+      }
     }
 
     if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl)
@@ -116,7 +116,6 @@ const CreateReelModal = ({ open, onClose }) => {
     setCoverType("frame")
     setVideoDuration(0)
     setCurrentTime(0)
-    setIsScrubbing(false)
     setFilmstripFrames([])
     setIsExtractingFilmstrip(false)
     setPreviewMode("video")
@@ -127,7 +126,9 @@ const CreateReelModal = ({ open, onClose }) => {
         videoRef.current.pause()
         videoRef.current.src = ""
         videoRef.current.load()
-      } catch (_) { }
+      } catch (err) {
+        console.warn("[CreateReelModal] Failed to discard video preview.", err)
+      }
     }
 
     if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl)
@@ -296,7 +297,9 @@ const CreateReelModal = ({ open, onClose }) => {
         tempVideo.src = ""
         try {
           tempVideo.load() // Release hardware decoder resources
-        } catch (_) { }
+        } catch (err) {
+          console.warn("[CreateReelModal] Failed to release filmstrip video.", err)
+        }
         if (tempVideo.parentNode) {
           tempVideo.parentNode.removeChild(tempVideo)
         }
@@ -432,7 +435,6 @@ const CreateReelModal = ({ open, onClose }) => {
   }
 
   const handleSliderRelease = () => {
-    setIsScrubbing(false)
     captureFrame()
   }
 
@@ -1103,9 +1105,7 @@ const CreateReelModal = ({ open, onClose }) => {
             Post
           </PillButton>
         </div>
-
       </form>
-
     </Modal>
   )
 }

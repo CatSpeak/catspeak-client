@@ -1,10 +1,8 @@
+import { lazy } from "react"
 import { MainLayout, UserLayout, VideoCallLayout } from "@layouts"
 import { PageNotFound, ForbiddenPage } from "@/shared/pages"
-import { Outlet, useNavigate, useLocation } from "react-router-dom"
-import { useRegisterNavigate } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 // Guest Pages
-import LandingPage from "@/features/landing/pages/LandingPage"
 import PolicyPage from "@/features/auth/pages/PolicyPage"
 import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage"
 import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
@@ -17,8 +15,6 @@ import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
 import NewsPage from "@/features/news/pages/NewsPage"
 import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
 import DiscoverPage from "@/features/discover/DiscoverPage"
-import ReelsPage from "@/features/reels/ReelsPage"
-import ReelDetailPage from "@/features/reels/pages/ReelDetailPage"
 import MailPage from "@/features/mail/pages/MailPage"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
 import CalendarPage from "@/features/calendar/pages/CalendarPage"
@@ -38,25 +34,15 @@ import AccountSettingsPage from "@/features/user/pages/AccountSettingsPage"
 
 // Language routing components
 import LanguageLayout from "./LanguageLayout"
+import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
 
 import { Navigate } from "react-router-dom"
-import { useAuth } from "@/features/auth"
 import { AuthGuard } from "@/shared/components"
 
-/**
- * Root layout that registers the router's navigate function
- * for the GlobalVideoCallProvider (which lives above the router).
- */
-const RootLayout = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  useRegisterNavigate(navigate, location)
-  return <Outlet />
-}
-
-const RootRoute = () => {
-  return <LandingPage />
-}
+const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
+const ReelDetailPage = lazy(() => import("@/features/reels/pages/ReelDetailPage"))
+const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceReelsPage"))
+const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
 
 const routesConfig = [
   {
@@ -131,11 +117,19 @@ const routesConfig = [
                   },
                   {
                     path: "reels",
-                    element: <ReelsPage />,
+                    element: (
+                      <LazyRoute>
+                        <ReelsPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "reels/:id",
-                    element: <ReelDetailPage />,
+                    element: (
+                      <LazyRoute>
+                        <ReelDetailPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "mail",
@@ -217,6 +211,22 @@ const routesConfig = [
               {
                 path: "recordings",
                 element: <RecordingsPage />,
+              },
+              {
+                path: "reels",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceReelsPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "reels/:id",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceReelDetailPage />
+                  </LazyRoute>
+                ),
               },
               { path: "*", element: <PageNotFound /> },
             ],
