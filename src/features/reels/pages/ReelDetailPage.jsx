@@ -216,9 +216,12 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   const [showInfo, setShowInfo] = useState(false)
   const [commentText, setCommentText] = useState("")
   const [replyTarget, setReplyTarget] = useState(null)
+  const [isPlaybackMuted, setIsPlaybackMuted] = useState(sharedMuted)
 
   const { isFullscreen, toggleFullscreen } = useFullscreen()
   const hasVideo = Boolean(reel?.videoUrl)
+  const preferredMuted = sharedMuted || sharedVolume === 0
+  const isEffectivelyMuted = preferredMuted || isPlaybackMuted
 
   /* ── Redux/API Hooks ────────────────────────────── */
   const currentUser = useSelector(selectCurrentUser)
@@ -261,17 +264,22 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     }
 
     if (isActive) {
-      video.muted = sharedMuted
+      video.volume = sharedVolume
+      video.muted = preferredMuted
       video.play()
-        .then(() => setIsPlaying(true))
+        .then(() => {
+          setIsPlaying(true)
+          setIsPlaybackMuted(video.muted)
+        })
         .catch(() => {
-          if (sharedMuted) {
+          if (preferredMuted) {
             setIsPlaying(false)
             return
           }
 
           video.muted = true
-          setSharedMuted(true, { persist: false })
+          // Mobile autoplay may require muted playback for this element only.
+          setIsPlaybackMuted(true)
           video.play()
             .then(() => setIsPlaying(true))
             .catch(() => setIsPlaying(false))
@@ -296,15 +304,21 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         resetTimerRef.current = null
       }
     }
-  }, [isActive, setSharedMuted, sharedMuted])
+  }, [isActive, preferredMuted, reel.videoUrl, sharedVolume])
 
   /* ── Sync shared volume and mute preferences ────── */
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.volume = sharedVolume
-      videoRef.current.muted = sharedMuted
+    const video = videoRef.current
+    if (!video) return
+
+    video.volume = sharedVolume
+
+    if (preferredMuted) {
+      video.muted = true
+    } else if (!isPlaybackMuted) {
+      video.muted = false
     }
-  }, [sharedVolume, sharedMuted])
+  }, [isPlaybackMuted, preferredMuted, sharedVolume])
 
   /* ── Playback control ───────────────────────────── */
   const handlePlayPause = useCallback(() => {
@@ -321,20 +335,61 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
 
   const handleToggleMute = useCallback((e) => {
     e.stopPropagation()
-    if (sharedMuted || sharedVolume === 0) {
+    const video = videoRef.current
+
+    if (isEffectivelyMuted) {
+      const nextVolume = sharedVolume === 0 ? 1 : sharedVolume
+      setSharedVolume(nextVolume)
       setSharedMuted(false)
-      setSharedVolume(sharedVolume === 0 ? 1 : sharedVolume)
+      setIsPlaybackMuted(false)
+
+      if (video) {
+        video.volume = nextVolume
+        video.muted = false
+
+        if (video.paused) {
+          video.play()
+            .then(() => setIsPlaying(true))
+            .catch(() => {
+              video.muted = true
+              setIsPlaybackMuted(true)
+              setIsPlaying(false)
+            })
+        }
+      }
     } else {
+      if (video) {
+        video.muted = true
+      }
+      setIsPlaybackMuted(true)
       setSharedMuted(true)
     }
-  }, [sharedMuted, sharedVolume, setSharedMuted, setSharedVolume])
+  }, [isEffectivelyMuted, sharedVolume, setSharedMuted, setSharedVolume])
 
   const handleVolumeChange = useCallback((e) => {
     const newVol = parseFloat(e.target.value)
+    const video = videoRef.current
+
     setSharedVolume(newVol)
-    if (newVol > 0 && sharedMuted) setSharedMuted(false)
-    else if (newVol === 0 && !sharedMuted) setSharedMuted(true)
-  }, [sharedMuted, setSharedMuted, setSharedVolume])
+
+    if (video) {
+      video.volume = newVol
+    }
+
+    if (newVol > 0) {
+      if (video) {
+        video.muted = false
+      }
+      setIsPlaybackMuted(false)
+      setSharedMuted(false)
+    } else {
+      if (video) {
+        video.muted = true
+      }
+      setIsPlaybackMuted(true)
+      setSharedMuted(true)
+    }
+  }, [setSharedMuted, setSharedVolume])
 
   /* ── Progress bar ───────────────────────────────── */
   const handleTimeUpdate = useCallback(() => {
@@ -464,7 +519,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                 src={reel.videoUrl}
                 preload={shouldPreload ? "auto" : "metadata"}
                 poster={reel.thumbnailUrl || undefined}
-                muted={sharedMuted}
+                muted={isEffectivelyMuted}
                 autoPlay={isActive}
                 loop
                 playsInline
@@ -496,9 +551,9 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                   <button
                     className={styles.detailMuteButton}
                     onClick={handleToggleMute}
-                    aria-label={sharedMuted || sharedVolume === 0 ? "Unmute" : "Mute"}
+                    aria-label={isEffectivelyMuted ? "Unmute" : "Mute"}
                   >
-                    {sharedMuted || sharedVolume === 0 ? (
+                    {isEffectivelyMuted ? (
                       <VolumeX size={20} color="white" />
                     ) : sharedVolume < 0.6 ? (
                       <Volume1 size={20} color="white" />
@@ -511,10 +566,10 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                     min="0"
                     max="1"
                     step="0.01"
-                    value={sharedMuted ? 0 : sharedVolume}
+                    value={isEffectivelyMuted ? 0 : sharedVolume}
                     onChange={handleVolumeChange}
                     className={styles.volumeSlider}
-                    style={{ '--volume-fill': `${(sharedMuted ? 0 : sharedVolume) * 100}%` }}
+                    style={{ '--volume-fill': `${(isEffectivelyMuted ? 0 : sharedVolume) * 100}%` }}
                     aria-label="Volume"
                   />
                 </div>
