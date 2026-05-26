@@ -1,4 +1,9 @@
 import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 /** Maps Vietnamese recurrence label → API frequency string */
 const RECURRENCE_MAP = {
@@ -55,6 +60,18 @@ export const mapFormToPayload = ({
   const isRecurring = recurrenceOption !== "Không lặp lại"
   const frequency = RECURRENCE_MAP[recurrenceOption] ?? null
 
+  const timezoneId = selectedTimezone?.id || "Asia/Bangkok"
+
+  // Helper to convert a local dayjs object to a UTC ISO string, assuming
+  // the user's input time was meant for the selected timezone.
+  const toUtcInTimezone = (dateObj) => {
+    if (!dateObj) return null
+    // Get the exact string the user meant (e.g. "2026-05-23T10:17:31")
+    const dateString = dayjs(dateObj).format("YYYY-MM-DDTHH:mm:ss")
+    // Parse that exact string into the selected timezone
+    return dayjs.tz(dateString, timezoneId).toISOString()
+  }
+
   const payload = {
     title,
     description,
@@ -64,9 +81,10 @@ export const mapFormToPayload = ({
     color: eventColor,
     maxParticipants: Number(maxParticipants),
     visibilityScope: VISIBILITY_MAP[visibility] ?? visibility,
+    timezone: timezoneId,
     isRecurring,
-    startTime: dayjs(startTime).toISOString(),
-    endTime: dayjs(endTime).toISOString(),
+    startTime: isRecurring ? null : toUtcInTimezone(startTime),
+    endTime: isRecurring ? null : toUtcInTimezone(endTime),
     conditions,
   }
 
@@ -81,11 +99,13 @@ export const mapFormToPayload = ({
       ...(frequency === "MONTHLY" && {
         byMonthDay: [dayjs(startTime).date()],
       }),
+      // Assuming backend wants local time string for rule bounds if timezone is provided
       startTime: dayjs(startTime).format("HH:mm:ss"),
       endTime: dayjs(endTime).format("HH:mm:ss"),
-      recurrenceStartDate: dayjs(startTime).toISOString(),
-      recurrenceEndDate: dayjs(recurrenceEndDate).toISOString(),
-      timeZone: selectedTimezone?.id ?? "Asia/Bangkok",
+      recurrenceStartDate: toUtcInTimezone(startTime),
+      recurrenceEndDate: recurrenceEndDate ? toUtcInTimezone(recurrenceEndDate) : null,
+      endCondition: recurrenceEndDate ? "UNTIL_DATE" : "NEVER",
+      timeZone: timezoneId,
     }
   }
 

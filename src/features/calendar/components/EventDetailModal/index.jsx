@@ -66,6 +66,14 @@ const EventDetailModal = ({ event, onClose }) => {
           detail?.location ||
           event?.location ||
           "",
+        startTime:
+          occurrenceDetail?.startTime ||
+          detail?.startTime ||
+          event?.startTime,
+        endTime:
+          occurrenceDetail?.endTime ||
+          detail?.endTime ||
+          event?.endTime,
         participants:
           occurrenceDetail?.participants ??
           detail?.participants ??
@@ -88,13 +96,16 @@ const EventDetailModal = ({ event, onClose }) => {
           occurrenceDetail?.registrationId !== undefined
             ? occurrenceDetail.registrationId
             : detail?.registrationId !== undefined
-            ? detail.registrationId
-            : event?.registrationId,
+              ? detail.registrationId
+              : event?.registrationId,
+        isRecurring: event?.isRecurring || detail?.isRecurring || occurrenceDetail?.isRecurring || event?.isRecurringGroup || detail?.isRecurringGroup || !!event?.recurringEventId || !!detail?.recurringEventId,
       }
     : {
         ...event,
         ...occurrenceDetail,
         location: occurrenceDetail?.location || event?.location || "",
+        startTime: occurrenceDetail?.startTime || event?.startTime,
+        endTime: occurrenceDetail?.endTime || event?.endTime,
         participants: occurrenceDetail?.participants ?? event?.participants,
         currentParticipants:
           occurrenceDetail?.participants?.length ??
@@ -105,6 +116,7 @@ const EventDetailModal = ({ event, onClose }) => {
           occurrenceDetail?.registrationId !== undefined
             ? occurrenceDetail.registrationId
             : event?.registrationId,
+        isRecurring: event?.isRecurring || occurrenceDetail?.isRecurring || event?.isRecurringGroup || !!event?.recurringEventId,
       }
   const headerColor = ev.color || "#B91264"
 

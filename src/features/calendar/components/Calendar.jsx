@@ -6,7 +6,7 @@ import CalendarDetail from "./CalendarDetail"
 import { motion } from "framer-motion"
 import { useGetEventCountsQuery } from "@/store/api/eventsApi"
 
-const Calendar = ({ currentDate = dayjs() }) => {
+const Calendar = ({ currentDate }) => {
   const [selectedDate, setSelectedDate] = useState(null)
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -109,7 +109,6 @@ const Calendar = ({ currentDate = dayjs() }) => {
                   key={`detail-${selectedDate}`}
                   selectedDate={selectedDate}
                   currentDate={currentDate}
-                  onClose={() => setSelectedDate(null)}
                 />
               )
             }

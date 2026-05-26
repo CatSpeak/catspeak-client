@@ -3,12 +3,8 @@ export const parseTime = (timeStr) => {
   // Handle ISO strings like "2026-03-05T01:22:55.454Z"
   if (timeStr.includes("T")) {
     const date = new Date(timeStr)
-    // Convert to Vietnam time (UTC+7)
-    const utcHours =
-      date.getUTCHours() +
-      date.getUTCMinutes() / 60 +
-      date.getUTCSeconds() / 3600
-    return (utcHours + 7) % 24
+    // Use local time instead of hardcoding a specific timezone
+    return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600
   }
   // Plain "HH:MM" fallback
   const [hours, minutes] = timeStr.split(":").map(Number)

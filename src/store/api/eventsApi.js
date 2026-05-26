@@ -1,5 +1,25 @@
 import { baseApi } from "./baseApi"
 
+const getOccurrenceTags = (result) => {
+  const tags = ["Events"]
+  if (result?.occurrences) {
+    result.occurrences.forEach((occ) => {
+      if (occ.id != null)
+        tags.push({ type: "Events", id: `occurrence-${occ.id}` })
+      if (occ.recurringEventId != null)
+        tags.push({ type: "Events", id: occ.recurringEventId })
+      if (occ.eventId != null) tags.push({ type: "Events", id: occ.eventId })
+      if (occ.subOccurrences) {
+        occ.subOccurrences.forEach((sub) => {
+          if (sub.id != null)
+            tags.push({ type: "Events", id: `occurrence-${sub.id}` })
+        })
+      }
+    })
+  }
+  return tags
+}
+
 export const eventsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET /api/v1/Events/{eventId}
@@ -37,10 +57,7 @@ export const eventsApi = baseApi.injectEndpoints({
         url: `/v1/Events/${eventId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, eventId) => [
-        { type: "Events", id: eventId },
-        "Events",
-      ],
+      invalidatesTags: ["Events"], // Only invalidate lists, not the specific ID to prevent 404 refetch
     }),
 
     // POST /api/v1/Events
@@ -60,8 +77,36 @@ export const eventsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => [
+        { type: "Events", id: eventId },
+        { type: "Events", id: `occurrence-${occurrenceId}` },
+        "Events",
+      ],
+    }),
+
+    // PUT /api/v1/Events/{eventId}/series
+    updateEventSeries: builder.mutation({
+      query: ({ eventId, ...data }) => ({
+        url: `/v1/Events/${eventId}/series`,
+        method: "PUT",
+        body: data,
+      }),
       invalidatesTags: (result, error, { eventId }) => [
         { type: "Events", id: eventId },
+        "Events",
+      ],
+    }),
+
+    // DELETE /api/v1/Events/{eventId}/occurrences/{occurrenceId}
+    cancelEventOccurrence: builder.mutation({
+      query: ({ eventId, occurrenceId, reason }) => ({
+        url: `/v1/Events/${eventId}/occurrences/${occurrenceId}`,
+        method: "DELETE",
+        params: reason ? { reason } : undefined,
+      }),
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => [
+        { type: "Events", id: eventId },
+        { type: "Events", id: `occurrence-${occurrenceId}` },
         "Events",
       ],
     }),
@@ -90,16 +135,16 @@ export const eventsApi = baseApi.injectEndpoints({
         url: "/v1/Events/registered",
         params,
       }),
-      providesTags: ["Events"],
+      providesTags: getOccurrenceTags,
     }),
 
-    // GET /api/v1/events/mine
+    // GET /api/v1/Events/mine
     getMyEvents: builder.query({
       query: (params) => ({
-        url: "/v1/events/mine",
+        url: "/v1/Events/mine",
         params,
       }),
-      providesTags: ["Events"],
+      providesTags: getOccurrenceTags,
     }),
 
     // POST /api/v1/events/{eventId}/shared-links
@@ -123,10 +168,13 @@ export const eventsApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: (result, error, { eventId }) => [
-        { type: "Events", id: eventId },
-        "Events",
-      ],
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => {
+        const tags = [{ type: "Events", id: eventId }, "Events"]
+        if (occurrenceId) {
+          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
+        }
+        return tags
+      },
     }),
 
     // DELETE /api/v1/Events/{eventId}/registration
@@ -136,10 +184,13 @@ export const eventsApi = baseApi.injectEndpoints({
         method: "DELETE",
         body,
       }),
-      invalidatesTags: (result, error, { eventId }) => [
-        { type: "Events", id: eventId },
-        "Events",
-      ],
+      invalidatesTags: (result, error, { eventId, occurrenceId }) => {
+        const tags = [{ type: "Events", id: eventId }, "Events"]
+        if (occurrenceId) {
+          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
+        }
+        return tags
+      },
     }),
 
     // GET /api/v1/Events/occurrence/{occurrenceId}/register
@@ -149,6 +200,16 @@ export const eventsApi = baseApi.injectEndpoints({
         { type: "Events", id: `registrations-${occurrenceId}` },
         "Events",
       ],
+    }),
+
+    // DELETE /api/v1/registrations/{registrationId}
+    deleteRegistration: builder.mutation({
+      query: ({ registrationId, ...body }) => ({
+        url: `/v1/registrations/${registrationId}`,
+        method: "DELETE",
+        body,
+      }),
+      invalidatesTags: ["Events"],
     }),
   }),
 })
@@ -169,4 +230,7 @@ export const {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
   useGetOccurrenceRegistrationsQuery,
+  useUpdateEventSeriesMutation,
+  useCancelEventOccurrenceMutation,
+  useDeleteRegistrationMutation,
 } = eventsApi
