@@ -40,7 +40,7 @@ import styles from "../styles/reels.module.css"
 const REEL_VOLUME_STORAGE_KEY = "reelVolume"
 const REEL_MUTED_STORAGE_KEY = "reelMuted"
 const DEFAULT_REEL_VOLUME = 0.5
-const DEFAULT_REEL_MUTED = true
+const DEFAULT_REEL_MUTED = false
 
 const readReelPreference = (key) => {
   if (typeof window === "undefined") return null
@@ -188,6 +188,79 @@ const CommentItemNode = React.memo(function CommentItemNode({
 })
 
 /**
+ * Interactive Reel Caption component overlaying or standing beside the video player.
+ * Features description truncation with "Show more/Show less" toggles and premium tags.
+ */
+const ReelCaption = React.memo(function ReelCaption({ reel }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const description = reel.description || ""
+  const DESCRIPTION_CHAR_LIMIT = 90
+  const shouldTruncate = description.length > DESCRIPTION_CHAR_LIMIT
+
+  const displayDescription = isExpanded
+    ? description
+    : shouldTruncate
+      ? `${description.slice(0, DESCRIPTION_CHAR_LIMIT)}...`
+      : description
+
+  return (
+    <div className={styles.captionContainer}>
+      <div className={styles.captionHeader}>
+        <Avatar
+          size={36}
+          src={reel.author.avatarUrl}
+          name={reel.author.name}
+          alt={reel.author.name}
+          className={styles.captionAvatar}
+        />
+        <div className={styles.captionAuthorDetails}>
+          <span className={styles.captionAuthorName}>
+            {reel.author.name}
+            {reel.author.verified && (
+              <svg
+                className={styles.captionVerifiedBadge}
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+              </svg>
+            )}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.captionTextContent}>
+        {reel.title && <h3 className={styles.captionTitle}>{reel.title}</h3>}
+        <p className={styles.captionDescription}>
+          {displayDescription}
+          {shouldTruncate && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsExpanded(!isExpanded)
+              }}
+              className={styles.captionExpandBtn}
+            >
+              {isExpanded ? "Show less" : "Show more"}
+            </button>
+          )}
+        </p>
+      </div>
+
+      {reel.tags && reel.tags.length > 0 && (
+        <div className={styles.captionTags}>
+          {reel.tags.map((tag) => (
+            <span key={tag} className={styles.captionTag}>
+              {tag.startsWith("#") ? tag : `#${tag}`}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+})
+
+/**
  * Individual full-screen Reel Slide rendered in the Vertical Snapper.
  * Encapsulates playback states, isolation, progress controls, volume preferences,
  * and the sliding Comments Drawers to avoid DOM overlap conflicts.
@@ -201,6 +274,9 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   setSharedMuted,
   sharedVolume,
   setSharedVolume,
+  hasUserInteracted,
+  showComments,
+  setShowComments,
 }) {
   /* ── Refs ───────────────────────────────────────── */
   const videoRef = useRef(null)
@@ -213,7 +289,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isSeeking, setIsSeeking] = useState(false)
-  const [showInfo, setShowInfo] = useState(false)
+  const showInfo = showComments
   const [commentText, setCommentText] = useState("")
   const [replyTarget, setReplyTarget] = useState(null)
   const [isPlaybackMuted, setIsPlaybackMuted] = useState(sharedMuted)
@@ -264,27 +340,92 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     }
 
     if (isActive) {
-      video.volume = sharedVolume
-      video.muted = preferredMuted
-      video.play()
-        .then(() => {
-          setIsPlaying(true)
-          setIsPlaybackMuted(video.muted)
-        })
-        .catch(() => {
-          if (preferredMuted) {
-            setIsPlaying(false)
-            return
+      // On mobile, browsers block unmuted autoplay until user has interacted.
+      // Strategy (same as YouTube Shorts):
+      //   - If no user interaction yet → start muted, then unmute on first gesture
+      //   - If user has interacted (scrolled/tapped) → play unmuted directly
+      const userHasInteracted = hasUserInteracted?.current === true
+      const shouldStartMuted = !userHasInteracted && !preferredMuted
+
+      const attemptPlay = (muted) => {
+        video.volume = sharedVolume
+        video.muted = muted
+        video.play()
+          .then(() => {
+            setIsPlaying(true)
+            setIsPlaybackMuted(video.muted)
+          })
+          .catch(() => {
+            if (muted) {
+              // Already muted and still failed — give up
+              setIsPlaying(false)
+              return
+            }
+            // Unmuted play was blocked by browser policy → fall back to muted
+            video.muted = true
+            setIsPlaybackMuted(true)
+            video.play()
+              .then(() => setIsPlaying(true))
+              .catch(() => setIsPlaying(false))
+          })
+      }
+
+      const startPlayback = () => {
+        if (shouldStartMuted) {
+          // Start muted, then unmute on first user gesture
+          attemptPlay(true)
+
+          const unmuteOnInteraction = () => {
+            const v = videoRef.current
+            if (v && !v.paused) {
+              v.muted = preferredMuted
+              setIsPlaybackMuted(preferredMuted)
+            }
+            document.removeEventListener("touchstart", unmuteOnInteraction, true)
+            document.removeEventListener("click", unmuteOnInteraction, true)
+            document.removeEventListener("scroll", unmuteOnInteraction, true)
           }
 
-          video.muted = true
-          // Mobile autoplay may require muted playback for this element only.
-          setIsPlaybackMuted(true)
-          video.play()
-            .then(() => setIsPlaying(true))
-            .catch(() => setIsPlaying(false))
-        })
+          document.addEventListener("touchstart", unmuteOnInteraction, { capture: true, once: true })
+          document.addEventListener("click", unmuteOnInteraction, { capture: true, once: true })
+          document.addEventListener("scroll", unmuteOnInteraction, { capture: true, once: true, passive: true })
+
+          // Store cleanup ref for the listeners
+          video._unmuteCleanup = () => {
+            document.removeEventListener("touchstart", unmuteOnInteraction, true)
+            document.removeEventListener("click", unmuteOnInteraction, true)
+            document.removeEventListener("scroll", unmuteOnInteraction, true)
+          }
+        } else {
+          // User has previously interacted → try unmuted directly
+          attemptPlay(preferredMuted)
+        }
+      }
+
+      // If the video has enough data, play immediately.
+      // Otherwise, wait for `canplay` to avoid a silent failure.
+      if (video.readyState >= video.HAVE_FUTURE_DATA) {
+        startPlayback()
+      } else {
+        const onCanPlay = () => {
+          video.removeEventListener("canplay", onCanPlay)
+          startPlayback()
+        }
+        video.addEventListener("canplay", onCanPlay)
+        // Also try immediately — readyState can change between the check and listener
+        startPlayback()
+
+        return () => {
+          video.removeEventListener("canplay", onCanPlay)
+        }
+      }
     } else {
+      // Clean up any pending unmute listeners when going inactive
+      if (video._unmuteCleanup) {
+        video._unmuteCleanup()
+        video._unmuteCleanup = null
+      }
+
       video.pause()
 
       resetTimerRef.current = window.setTimeout(() => {
@@ -303,8 +444,12 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         window.clearTimeout(resetTimerRef.current)
         resetTimerRef.current = null
       }
+      if (video._unmuteCleanup) {
+        video._unmuteCleanup()
+        video._unmuteCleanup = null
+      }
     }
-  }, [isActive, preferredMuted, reel.videoUrl, sharedVolume])
+  }, [isActive, preferredMuted, reel.videoUrl, sharedVolume, hasUserInteracted])
 
   /* ── Sync shared volume and mute preferences ────── */
   useEffect(() => {
@@ -431,8 +576,8 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   }, [toggleFullscreen])
 
   const toggleInfo = useCallback(() => {
-    setShowInfo((prev) => !prev)
-  }, [])
+    setShowComments((prev) => !prev)
+  }, [setShowComments])
 
   /* ── Actions ─────────────────────────────────────── */
   const handleLikeToggle = useCallback(async (e) => {
@@ -500,15 +645,50 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
               <div className={styles.videoTopOverlay} />
               <div className={styles.videoBottomOverlay} />
 
-              {/* Top bar: Close (left) + More (right) */}
+              {/* Reel Caption overlay inside the video player (hidden in fullscreen) */}
+              <ReelCaption reel={reel} />
+
+              {/* Top bar: Close (left) + Volume next to it, and More (right) */}
               <div className={styles.topBar}>
-                <button
-                  className={styles.detailCloseButton}
-                  onClick={(e) => { e.stopPropagation(); onClose() }}
-                  aria-label="Close"
-                >
-                  <X size={22} color="white" />
-                </button>
+                <div className={styles.topLeftControls}>
+                  <button
+                    className={styles.detailCloseButton}
+                    onClick={(e) => { e.stopPropagation(); onClose() }}
+                    aria-label="Close"
+                  >
+                    <X size={22} color="white" />
+                  </button>
+
+                  <div
+                    className={styles.volumeControlWrapper}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      className={styles.detailMuteButton}
+                      onClick={handleToggleMute}
+                      aria-label={isEffectivelyMuted ? "Unmute" : "Mute"}
+                    >
+                      {isEffectivelyMuted ? (
+                        <VolumeX size={20} color="white" />
+                      ) : sharedVolume < 0.6 ? (
+                        <Volume1 size={20} color="white" />
+                      ) : (
+                        <Volume2 size={20} color="white" />
+                      )}
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={isEffectivelyMuted ? 0 : sharedVolume}
+                      onChange={handleVolumeChange}
+                      className={styles.volumeSlider}
+                      style={{ '--volume-fill': `${(isEffectivelyMuted ? 0 : sharedVolume) * 100}%` }}
+                      aria-label="Volume"
+                    />
+                  </div>
+                </div>
 
                 <ReelMoreMenu />
               </div>
@@ -542,38 +722,9 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                 </div>
               )}
 
-              {/* Bottom controls: volume (left) + fullscreen (right) */}
+              {/* Bottom controls: fullscreen (right) */}
               <div className={styles.bottomControls}>
-                <div
-                  className={styles.volumeControlWrapper}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    className={styles.detailMuteButton}
-                    onClick={handleToggleMute}
-                    aria-label={isEffectivelyMuted ? "Unmute" : "Mute"}
-                  >
-                    {isEffectivelyMuted ? (
-                      <VolumeX size={20} color="white" />
-                    ) : sharedVolume < 0.6 ? (
-                      <Volume1 size={20} color="white" />
-                    ) : (
-                      <Volume2 size={20} color="white" />
-                    )}
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={isEffectivelyMuted ? 0 : sharedVolume}
-                    onChange={handleVolumeChange}
-                    className={styles.volumeSlider}
-                    style={{ '--volume-fill': `${(isEffectivelyMuted ? 0 : sharedVolume) * 100}%` }}
-                    aria-label="Volume"
-                  />
-                </div>
-
+                <div style={{ flex: 1 }} />
                 <button
                   className={styles.fullscreenBtn}
                   onClick={handleFullscreen}
@@ -614,14 +765,6 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         {/* Action bar (Instagram-style, outside video) */}
         {hasVideo && (
           <div className={styles.actionBar}>
-            <Avatar
-              size={40}
-              src={reel.author.avatarUrl}
-              name={reel.author.name}
-              alt={reel.author.name}
-              className={styles.actionAvatar}
-            />
-
             <button
               className={styles.actionBarBtn}
               onClick={handleLikeToggle}
@@ -684,50 +827,9 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         </div>
 
         <div className={styles.panelScrollableContent}>
-          <div className={styles.detailHeader}>
-            <Avatar
-              size={40}
-              src={reel.author.avatarUrl}
-              name={reel.author.name}
-              alt={reel.author.name}
-            />
-            <div className={styles.detailAuthorInfo}>
-              <div className={styles.detailAuthorName}>
-                {reel.author.name}
-                {reel.author.verified && (
-                  <svg
-                    className={styles.verifiedBadge}
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                  </svg>
-                )}
-              </div>
-              <div className={styles.detailTime}>
-                {formatRelativeTime(reel.createdAt)}
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.detailTextContent}>
-            <h2 className={styles.detailTitle}>{reel.title}</h2>
-            <p className={styles.detailDescription}>{reel.description}</p>
-          </div>
-
-          <div className={styles.detailTags}>
-            {reel.tags.map((tag) => (
-              <span key={tag} className={styles.detailTag}>
-                {tag}
-              </span>
-            ))}
-          </div>
-
           <div className={styles.commentsSection}>
             {isCommentsLoading ? (
-              <div className="flex justify-center py-6">
-                <Loader2 className="h-6 w-6 animate-spin text-[#990011]" />
-              </div>
+              <CommentsSkeleton />
             ) : comments.length === 0 ? (
               <p className={styles.noCommentsMessage}>Be the first to comment.</p>
             ) : (
@@ -799,6 +901,73 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   )
 })
 
+/**
+ * Premium shimmer skeleton loading block for comments.
+ */
+const CommentsSkeleton = () => {
+  return (
+    <div className={styles.commentList} aria-hidden="true">
+      {[1, 2, 3, 4].map((n) => (
+        <div key={n} className={styles.commentItem} style={{ gap: "12px", padding: "4px 0" }}>
+          {/* Avatar Skeleton */}
+          <div
+            className={styles.skeleton}
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              flexShrink: 0
+            }}
+          />
+          {/* Details Skeleton */}
+          <div className={styles.commentDetails} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+              {/* Nickname Skeleton */}
+              <div
+                className={styles.skeleton}
+                style={{
+                  width: "90px",
+                  height: "14px",
+                  borderRadius: "4px"
+                }}
+              />
+              {/* Time Skeleton */}
+              <div
+                className={styles.skeleton}
+                style={{
+                  width: "40px",
+                  height: "12px",
+                  borderRadius: "4px",
+                  marginLeft: "auto"
+                }}
+              />
+            </div>
+            {/* Content line 1 Skeleton */}
+            <div
+              className={styles.skeleton}
+              style={{
+                width: "90%",
+                height: "14px",
+                borderRadius: "4px",
+                marginTop: "2px"
+              }}
+            />
+            {/* Content line 2 Skeleton */}
+            <div
+              className={styles.skeleton}
+              style={{
+                width: "70%",
+                height: "14px",
+                borderRadius: "4px"
+              }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const DETAIL_PAGE_SIZE = 10
 
 /**
@@ -844,18 +1013,13 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
     return []
   }, [feedResponse])
 
-  // Combine feed with the deep-linked currentReel, replacing stale cached list data when present.
+  // Combine feed with the deep-linked currentReel, placing the currentReel at the very start (index 0) to reset the feed order on refresh.
   const combinedReels = useMemo(() => {
     if (!currentReel) return feedReels
 
-    const existingIndex = feedReels.findIndex((r) => r.id === currentReel.id)
-    if (existingIndex !== -1) {
-      const nextReels = [...feedReels]
-      nextReels[existingIndex] = currentReel
-      return nextReels
-    }
-
-    return [currentReel, ...feedReels]
+    // Filter out currentReel from feedReels to prevent duplication
+    const otherReels = feedReels.filter((r) => r.id !== currentReel.id)
+    return [currentReel, ...otherReels]
   }, [currentReel, feedReels])
 
   // Sync initialId if the URL ID changes to a reel not currently present in the list
@@ -875,6 +1039,29 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   // Global shared volume state across slides
   const [sharedVolume, setSharedVolume] = useState(readStoredReelVolume)
   const [sharedMuted, setSharedMutedState] = useState(readStoredReelMuted)
+
+  // Lifted state to persist comments drawer visibility across reels
+  const [showComments, setShowComments] = useState(false)
+
+  // Track whether the user has interacted with the page (for mobile autoplay policy)
+  const hasUserInteracted = useRef(false)
+  useEffect(() => {
+    const markInteracted = () => {
+      hasUserInteracted.current = true
+      // Clean up after first interaction — we only need to detect it once
+      document.removeEventListener("touchstart", markInteracted, true)
+      document.removeEventListener("click", markInteracted, true)
+      document.removeEventListener("scroll", markInteracted, true)
+    }
+    document.addEventListener("touchstart", markInteracted, { capture: true })
+    document.addEventListener("click", markInteracted, { capture: true })
+    document.addEventListener("scroll", markInteracted, { capture: true, passive: true })
+    return () => {
+      document.removeEventListener("touchstart", markInteracted, true)
+      document.removeEventListener("click", markInteracted, true)
+      document.removeEventListener("scroll", markInteracted, true)
+    }
+  }, [])
 
   const setSharedMuted = useCallback((muted, { persist = true } = {}) => {
     setSharedMutedState(muted)
@@ -987,6 +1174,9 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
           setSharedMuted={setSharedMuted}
           sharedVolume={sharedVolume}
           setSharedVolume={handleVolumeChange}
+          hasUserInteracted={hasUserInteracted}
+          showComments={showComments}
+          setShowComments={setShowComments}
         />
       )}
     </ReelScrollContainer>
