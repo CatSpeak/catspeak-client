@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import { Play, Heart, Eye, Volume2, VolumeX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { formatCompactNumber } from "../utils/formatters"
+import { formatCompactNumber, formatRelativeTime } from "../utils/formatters"
 import styles from "../styles/reels.module.css"
 import colors from "@/shared/utils/colors"
 
@@ -201,40 +201,59 @@ const ReelCard = React.memo(function ReelCard({ reel, index, onSelect }) {
             {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
           </button>
         )}
-      </div>
 
-      {/* Footer — always visible */}
-      <div className={styles.cardFooter}>
-        <p className={styles.cardFooterTitle}>{reel.title}</p>
-
-        <div className={styles.cardFooterAuthor}>
-          <Avatar
-            size={22}
-            src={reel.author.avatarUrl}
-            name={reel.author.name}
-            alt={reel.author.name}
-          />
-          <span className={styles.authorName}>{reel.author.name}</span>
-          {reel.author.verified && (
-            <svg
-              className={styles.verifiedBadge}
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-            </svg>
+        {/* Floating immersive text and stats overlay */}
+        <div className={styles.cardInfoOverlay}>
+          {/* Tags row */}
+          {reel.tags && reel.tags.length > 0 && (
+            <div className={styles.cardTagsRow}>
+              {reel.tags.slice(0, 2).map((tag, idx) => (
+                <span key={idx} className={styles.cardTagPill}>
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
-        </div>
 
-        <div className={styles.cardFooterStats}>
-          <span className={styles.statItem}>
-            <Eye size={12} />
-            {formatCompactNumber(reel.views)}
-          </span>
-          <span className={styles.statItem}>
-            <Heart size={12} />
-            {formatCompactNumber(reel.likes)}
-          </span>
+          {/* Title */}
+          <p className={styles.cardTitle}>{reel.title}</p>
+
+          {/* Creator details and Stats row */}
+          <div className={styles.cardMetaRow}>
+            <div className={styles.authorBlock}>
+              <span className={styles.avatarWrapper}>
+                <Avatar
+                  size={22}
+                  src={reel.author.avatarUrl}
+                  name={reel.author.name}
+                  alt={reel.author.name}
+                />
+              </span>
+              <span className={styles.authorName}>{reel.author.name}</span>
+              {reel.author.verified && (
+                <svg
+                  className={styles.verifiedBadge}
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                </svg>
+              )}
+              <span className={styles.dotSeparator}>•</span>
+              <span className={styles.uploadTime}>{formatRelativeTime(reel.createdAt)}</span>
+            </div>
+
+            <div className={styles.cardFooterStats}>
+              <span className={styles.viewsPill} title="Views">
+                <Eye size={10} />
+                {formatCompactNumber(reel.views)}
+              </span>
+              <span className={styles.likesPill} title="Likes">
+                <Heart size={10} />
+                {formatCompactNumber(reel.likes)}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

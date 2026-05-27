@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react"
  * - Render prop child rendering for flexible parent integration
  */
 const ACTIVE_SNAP_VISIBLE_RATIO = 0.92
-const DEFAULT_RENDER_WINDOW = 2
+const DEFAULT_RENDER_WINDOW = 3
 const DEFAULT_PRELOAD_WINDOW = 1
 const DEFAULT_BOTTOM_GAP = 16
 
@@ -97,6 +97,7 @@ export default function ReelScrollContainer({
   const scrollRafRef = useRef(null)
   const syncRafRef = useRef(null)
   const measureRafRef = useRef(null)
+  const scrollEndTimerRef = useRef(null)
   const hasSyncedInitialScrollRef = useRef(false)
   const [activeIndex, setActiveIndex] = useState(initialIndex)
   const [renderCenterIndex, setRenderCenterIndex] = useState(initialIndex)
@@ -115,6 +116,9 @@ export default function ReelScrollContainer({
     ...ITEM_STYLE,
     height: effectiveContainerHeight,
   }), [effectiveContainerHeight])
+
+  const trailingSlideCount = (isLoading ? 1 : 0) + (!hasMore ? 1 : 0)
+  const snapItemCount = reels.length + trailingSlideCount
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -187,17 +191,19 @@ export default function ReelScrollContainer({
   }, [effectiveContainerHeight, reels.length])
 
   const commitActiveIndex = useCallback((nextIndex) => {
-    if (reels.length === 0) return
+    if (snapItemCount === 0) return
 
-    const safeIndex = clampIndex(nextIndex, reels.length)
+    const safeIndex = clampIndex(nextIndex, snapItemCount)
     if (safeIndex === activeIndexRef.current) return
 
     activeIndexRef.current = safeIndex
     renderCenterIndexRef.current = safeIndex
     setActiveIndex(safeIndex)
     setRenderCenterIndex(safeIndex)
-    onActiveIndexChange?.(safeIndex)
-  }, [onActiveIndexChange, reels.length])
+    if (safeIndex < reels.length) {
+      onActiveIndexChange?.(safeIndex)
+    }
+  }, [onActiveIndexChange, reels.length, snapItemCount])
 
   // Sync scroll position to match initialIndex (on mount or browser back/forward)
   useEffect(() => {
@@ -241,12 +247,12 @@ export default function ReelScrollContainer({
     }
   }, [initialIndex, reels.length])
 
-  const updateActiveIndexFromScroll = useCallback((container) => {
+  const updateActiveIndexFromScroll = useCallback((container, forceCommit = false) => {
     const height = container.clientHeight
-    if (height <= 0 || reels.length === 0) return
+    if (height <= 0 || snapItemCount === 0) return
 
     const rawIndex = container.scrollTop / height
-    const nearestIndex = clampIndex(Math.round(rawIndex), reels.length)
+    const nearestIndex = clampIndex(Math.round(rawIndex), snapItemCount)
     const visibleRatio = 1 - Math.min(1, Math.abs(rawIndex - nearestIndex))
 
     if (nearestIndex !== renderCenterIndexRef.current) {
@@ -254,10 +260,17 @@ export default function ReelScrollContainer({
       setRenderCenterIndex(nearestIndex)
     }
 
-    if (visibleRatio >= ACTIVE_SNAP_VISIBLE_RATIO) {
+    if (forceCommit || visibleRatio >= ACTIVE_SNAP_VISIBLE_RATIO) {
       commitActiveIndex(nearestIndex)
     }
-  }, [commitActiveIndex, reels.length])
+  }, [commitActiveIndex, snapItemCount])
+
+  // Fired when scroll-snap finishes — guarantees active index is committed
+  const handleScrollEnd = useCallback(() => {
+    const container = containerRef.current
+    if (!container) return
+    updateActiveIndexFromScroll(container, true)
+  }, [updateActiveIndexFromScroll])
 
   const handleScroll = useCallback((e) => {
     const container = e.currentTarget
@@ -267,7 +280,25 @@ export default function ReelScrollContainer({
       scrollRafRef.current = null
       updateActiveIndexFromScroll(container)
     })
-  }, [updateActiveIndexFromScroll])
+
+    // Debounced fallback for browsers without native scrollend support
+    if (scrollEndTimerRef.current !== null) {
+      window.clearTimeout(scrollEndTimerRef.current)
+    }
+    scrollEndTimerRef.current = window.setTimeout(() => {
+      scrollEndTimerRef.current = null
+      handleScrollEnd()
+    }, 150)
+  }, [updateActiveIndexFromScroll, handleScrollEnd])
+
+  // Attach native scrollend event for reliable snap detection
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    container.addEventListener("scrollend", handleScrollEnd)
+    return () => container.removeEventListener("scrollend", handleScrollEnd)
+  }, [handleScrollEnd])
 
   useEffect(() => {
     return () => {
@@ -279,6 +310,10 @@ export default function ReelScrollContainer({
       }
       if (measureRafRef.current !== null) {
         window.cancelAnimationFrame(measureRafRef.current)
+      }
+      if (scrollEndTimerRef.current !== null) {
+        window.clearTimeout(scrollEndTimerRef.current)
+        scrollEndTimerRef.current = null
       }
     }
   }, [])
