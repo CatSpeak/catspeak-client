@@ -10,6 +10,7 @@ import {
   SessionActionButtons,
   CreateRoomModal,
 } from "@/features/rooms"
+import { useCreateAISessionMutation } from "@/store/api/roomsApi"
 
 import RoomFilterSidebar from "@/features/rooms/components/navigation/RoomFilterSidebar"
 import WelcomeSection from "@/features/homepage/components/WelcomeSection"
@@ -45,6 +46,7 @@ const RoomsPage = () => {
 
   // Session logic (moved from HomePage)
   const { state, actions } = useRoomsPageLogic()
+  const [createAISession] = useCreateAISessionMutation()
 
   const langMap = {
     en: "English",
@@ -90,6 +92,21 @@ const RoomsPage = () => {
   const handleCreateStudyGroup = () => {
     actions.handleCreateStudyGroupSession(() => {
       setCreateRoomModalOpen(true)
+    })
+  }
+
+  const handleCreateAI = () => {
+    actions.handleCreateAISession(async () => {
+      const language = lang === "zh" ? "chinese" : "english"
+      try {
+        const result = await createAISession({ language }).unwrap()
+        navigate(`/${lang}/meet/${result.roomId}`, {
+          state: { fromQueue: true },
+        })
+      } catch (err) {
+        // Surface a console error; UI loading state will clear via the hook's finally block.
+        console.error("Failed to create AI session", err)
+      }
     })
   }
 
@@ -181,8 +198,11 @@ const RoomsPage = () => {
                 <SessionActionButtons
                   handleCreateOneOnOneSession={handleCreateOneOnOne}
                   handleCreateStudyGroupSession={handleCreateStudyGroup}
+                  handleCreateAISession={handleCreateAI}
                   isCreatingOneOnOne={state.isCreatingOneOnOne}
                   isCreatingStudyGroup={state.isCreatingStudyGroup}
+                  isCreatingAI={state.isCreatingAI}
+                  canUseAI={state.canUseAI}
                 />
               </div>
 

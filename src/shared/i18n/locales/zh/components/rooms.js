@@ -150,7 +150,7 @@ export default {
   sessionActions: {
     connect11: "1:1 连接",
     connect25: "2:5 连接",
-    yourAI: "你的 Cat Speak",
+    yourAI: "1:1 AI 对话",
   },
   queue: {
     title: "寻找匹配",

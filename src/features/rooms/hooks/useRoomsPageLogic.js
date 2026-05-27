@@ -2,13 +2,18 @@ import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useAuth } from "@/features/auth"
 import { useState } from "react"
 
+const AI_ALLOWED_ACCOUNT_IDS = [39]
+
 export const useRoomsPageLogic = () => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { openAuthModal } = useAuthModal()
 
   // Business loading states
   const [isCreatingOneOnOne, setIsCreatingOneOnOne] = useState(false)
   const [isCreatingStudyGroup, setIsCreatingStudyGroup] = useState(false)
+  const [isCreatingAI, setIsCreatingAI] = useState(false)
+
+  const canUseAI = AI_ALLOWED_ACCOUNT_IDS.includes(user?.accountId)
 
   const handleCreateOneOnOneSession = (onSuccess) => {
     // Check if user is authenticated
@@ -32,15 +37,31 @@ export const useRoomsPageLogic = () => {
     onSuccess?.()
   }
 
+  const handleCreateAISession = async (onSuccess) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
+    try {
+      setIsCreatingAI(true)
+      await onSuccess?.()
+    } finally {
+      setIsCreatingAI(false)
+    }
+  }
+
   return {
     state: {
-      isCreating: isCreatingOneOnOne || isCreatingStudyGroup,
+      isCreating: isCreatingOneOnOne || isCreatingStudyGroup || isCreatingAI,
       isCreatingOneOnOne,
       isCreatingStudyGroup,
+      isCreatingAI,
+      canUseAI,
     },
     actions: {
       handleCreateOneOnOneSession,
       handleCreateStudyGroupSession,
+      handleCreateAISession,
     },
   }
 }

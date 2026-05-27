@@ -178,7 +178,7 @@ export default {
   sessionActions: {
     connect11: "1:1 Connect",
     connect25: "2:5 Connect",
-    yourAI: "Your Cat Speak",
+    yourAI: "1:1 with AI",
   },
   queue: {
     title: "Find a Match",
