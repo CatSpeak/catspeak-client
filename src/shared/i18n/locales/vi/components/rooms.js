@@ -153,7 +153,7 @@ export default {
   sessionActions: {
     connect11: "Kết nối 1:1",
     connect25: "Kết nối 2:5",
-    yourAI: "Cat Speak của bạn",
+    yourAI: "1:1 với AI",
   },
   queue: {
     title: "Tìm đối tác",
