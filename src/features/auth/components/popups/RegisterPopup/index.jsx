@@ -20,6 +20,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
+    phoneNumber: "",
     dateOfBirth: "",
     preferredLanguage: "",
     password: "",
@@ -36,9 +37,8 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
 
     try {
       await register(formData).unwrap()
-      console.log("Registration successful! Please check your email.")
-      onClose()
-      navigate("/")
+      console.log("Registration successful! Please verify your email.")
+      onSwitchMode("verify-email", formData.email)
     } catch (err) {
       console.error("Registration failed:", err)
 

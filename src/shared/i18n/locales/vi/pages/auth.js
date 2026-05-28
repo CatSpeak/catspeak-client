@@ -100,4 +100,10 @@ export default {
   passwordChangedTitle: "Đổi mật khẩu thành công!",
   passwordChangedSubtitle: "Mật khẩu của bạn đã được cập nhật thành công.",
   loginNowButton: "ĐĂNG NHẬP NGAY",
+  verifyEmailTitle: "Xác minh Email",
+  verifyEmailSubtitle: "Chúng tôi đã gửi mã 6 chữ số đến",
+  editEmail: "Chỉnh sửa Email",
+  updateEmail: "Cập nhật Email",
+  newEmailPlaceholder: "Nhập email chính xác",
+  accountNotActivated: "Tài khoản chưa được kích hoạt. Vui lòng xác minh email.",
 }

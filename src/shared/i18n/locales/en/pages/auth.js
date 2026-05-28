@@ -98,4 +98,10 @@ export default {
   passwordChangedTitle: "Password Changed!",
   passwordChangedSubtitle: "Your password has been successfully updated.",
   loginNowButton: "LOGIN NOW",
+  verifyEmailTitle: "Verify Your Email",
+  verifyEmailSubtitle: "We've sent a 6-digit code to",
+  editEmail: "Edit Email",
+  updateEmail: "Update Email",
+  newEmailPlaceholder: "Enter correct email",
+  accountNotActivated: "Account is not activated. Please verify your email.",
 }

@@ -2,8 +2,7 @@ import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import FormDatePicker from "../../forms/FormDatePicker"
-import FormSelectField from "../../forms/FormSelectField"
-
+import Dropdown from "@/shared/components/ui/Dropdown"
 const RegisterFormFields = ({
   authText,
   formData,
@@ -11,7 +10,6 @@ const RegisterFormFields = ({
   errors,
   setErrors,
 }) => {
-  const [showPassword, setShowPassword] = useState(false)
 
   const languageOptions = [
     { value: "english", label: "English" },
@@ -55,24 +53,45 @@ const RegisterFormFields = ({
         )}
       </div>
 
-      {/* Email */}
-      <div>
-        <label className="block text-sm mb-2">{authText.emailLabel}</label>
-        <TextInput
-          type="email"
-          variant="square"
-          placeholder={authText.emailPlaceholder}
-          value={formData.email}
-          onChange={handleChange("email")}
-          className={
-            errors.email
-              ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-              : ""
-          }
-        />
-        {errors.email && (
-          <p className="mt-1 text-xs text-red-600">{errors.email}</p>
-        )}
+      {/* Email & Phone - Side by Side */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <label className="block text-sm mb-2">{authText.emailLabel}</label>
+          <TextInput
+            type="email"
+            variant="square"
+            placeholder={authText.emailPlaceholder}
+            value={formData.email}
+            onChange={handleChange("email")}
+            className={
+              errors.email
+                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                : ""
+            }
+          />
+          {errors.email && (
+            <p className="mt-1 text-xs text-red-600">{errors.email}</p>
+          )}
+        </div>
+
+        <div className="flex-1">
+          <label className="block text-sm mb-2">{authText.phoneLabel}</label>
+          <TextInput
+            type="tel"
+            variant="square"
+            placeholder={authText.phonePlaceholder}
+            value={formData.phoneNumber}
+            onChange={handleChange("phoneNumber")}
+            className={
+              errors.phoneNumber
+                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                : ""
+            }
+          />
+          {errors.phoneNumber && (
+            <p className="mt-1 text-xs text-red-600">{errors.phoneNumber}</p>
+          )}
+        </div>
       </div>
 
       {/* Date of Birth & Language - Side by Side */}
@@ -92,14 +111,16 @@ const RegisterFormFields = ({
 
         <div className="flex-1">
           <label className="block text-sm mb-2">{authText.languageLabel}</label>
-          <FormSelectField
+          <Dropdown
             placeholder={authText.languagePlaceholder}
             value={formData.preferredLanguage}
-            onChange={handleChange("preferredLanguage")}
-            error={!!errors.preferredLanguage}
-            errorText={errors.preferredLanguage}
+            onChange={(val) => handleChange("preferredLanguage")({ target: { value: val } })}
             options={languageOptions}
+            triggerClassName={errors.preferredLanguage ? "!border-red-600" : ""}
           />
+          {errors.preferredLanguage && (
+            <p className="mt-1 text-xs text-red-600">{errors.preferredLanguage}</p>
+          )}
         </div>
       </div>
 
@@ -107,27 +128,18 @@ const RegisterFormFields = ({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <label className="block text-sm mb-2">{authText.passwordLabel}</label>
-          <div className="relative">
-            <TextInput
-              type={showPassword ? "text" : "password"}
-              variant="square"
-              placeholder={authText.passwordPlaceholder}
-              value={formData.password}
-              onChange={handleChange("password")}
-              className={`pr-12 ${
-                errors.password
-                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                  : ""
-              }`}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
+          <TextInput
+            type="password"
+            variant="square"
+            placeholder={authText.passwordPlaceholder}
+            value={formData.password}
+            onChange={handleChange("password")}
+            className={
+              errors.password
+                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                : ""
+            }
+          />
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password}</p>
           )}
@@ -135,14 +147,16 @@ const RegisterFormFields = ({
 
         <div className="flex-1">
           <label className="block text-sm mb-2">{authText.countryLabel}</label>
-          <FormSelectField
+          <Dropdown
             placeholder={authText.countryPlaceholder}
             value={formData.country}
-            onChange={handleChange("country")}
-            error={!!errors.country}
-            errorText={errors.country}
+            onChange={(val) => handleChange("country")({ target: { value: val } })}
             options={countryOptions}
+            triggerClassName={errors.country ? "!border-red-600" : ""}
           />
+          {errors.country && (
+            <p className="mt-1 text-xs text-red-600">{errors.country}</p>
+          )}
         </div>
       </div>
     </div>

@@ -96,4 +96,10 @@ export default {
   passwordChangedTitle: "密码修改成功！",
   passwordChangedSubtitle: "您的密码已成功更新。",
   loginNowButton: "立即登录",
+  verifyEmailTitle: "验证您的电子邮件",
+  verifyEmailSubtitle: "我们将6位代码发送至",
+  editEmail: "编辑电子邮件",
+  updateEmail: "更新电子邮件",
+  newEmailPlaceholder: "输入正确的电子邮件",
+  accountNotActivated: "账户未激活。请验证您的电子邮件。",
 }

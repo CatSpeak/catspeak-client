@@ -21,7 +21,6 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [remember, setRemember] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [passwordError, setPasswordError] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
 
   const [login, { isLoading }] = useLoginMutation()
 
@@ -47,22 +46,47 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
     if (emailErr || passwordErr) return
 
     try {
-      await login({ email, password }).unwrap()
+      const result = await login({ email, password })
+
+      // Check for errors in the result (RTK Query shape)
+      const err = result?.error
+      if (err) {
+        const errData = err?.data
+        const errMessage = errData?.message
+
+        const isNotActivated =
+          err?.status === 401 &&
+          errMessage === "Account is not activated. Please verify your email."
+
+        if (isNotActivated) {
+          onSwitchMode("verify-email", email)
+          return
+        }
+
+        const isInvalidCredentials =
+          err?.status === 401 ||
+          errMessage === "Invalid email or password"
+
+        setApiError(
+          isInvalidCredentials
+            ? authText.invalidCredentials
+            : errMessage ||
+                t.common?.errorGeneric ||
+                "Login failed",
+        )
+        return
+      }
+
+      // Success — close modal and redirect
       onClose()
       if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
     } catch (err) {
-      const isInvalidCredentials =
-        err?.status === 401 ||
-        err?.data?.message === "Invalid email or password" ||
-        err?.message === "Invalid email or password"
-
+      console.error("Login unexpected error:", err)
       setApiError(
-        isInvalidCredentials
-          ? authText.invalidCredentials
-          : err?.data?.message ||
-              err.message ||
-              t.common?.errorGeneric ||
-              "Login failed",
+        err?.data?.message ||
+          err?.message ||
+          t.common?.errorGeneric ||
+          "Login failed",
       )
     }
   }
@@ -104,27 +128,18 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
             <label className="block text-sm mb-1">
               {authText.passwordLabel}
             </label>
-            <div className="relative">
-              <TextInput
-                type={showPassword ? "text" : "password"}
-                variant="square"
-                autoComplete="current-password"
-                placeholder={authText.passwordPlaceholder}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value)
-                  setPasswordError("")
-                }}
-                className={`pr-12 ${passwordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}`}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
+            <TextInput
+              type="password"
+              variant="square"
+              autoComplete="current-password"
+              placeholder={authText.passwordPlaceholder}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setPasswordError("")
+              }}
+              className={passwordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}
+            />
             {passwordError && (
               <p className="mt-1 text-xs text-red-600">{passwordError}</p>
             )}

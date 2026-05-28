@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { LoginPopup, RegisterPopup } from "@/features/auth"
+import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
 import HeroSection from "@/features/landing/components/HeroSection"
 import LanguageBar from "@/features/landing/components/LanguageBar"
 import ValuesSection from "@/features/landing/components/ValuesSection"
@@ -10,12 +10,14 @@ const LandingPage = () => {
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
+    email: "",
   })
 
-  const openAuthModal = (mode = "login") =>
+  const openAuthModal = (mode = "login", email = "") =>
     setAuthModal({
       isOpen: true,
       mode,
+      email,
     })
 
   const closeAuthModal = () =>
@@ -24,19 +26,35 @@ const LandingPage = () => {
       isOpen: false,
     }))
 
-  const switchAuthMode = (mode) => openAuthModal(mode)
+  const switchAuthMode = (mode, email = "") => openAuthModal(mode, email)
 
   const renderAuthPopup = () => {
     if (!authModal.isOpen) return null
 
-    return authModal.mode === "register" ? (
-      <RegisterPopup
-        key="register"
-        open={true}
-        onClose={closeAuthModal}
-        onSwitchMode={switchAuthMode}
-      />
-    ) : (
+    if (authModal.mode === "register") {
+      return (
+        <RegisterPopup
+          key="register"
+          open={true}
+          onClose={closeAuthModal}
+          onSwitchMode={switchAuthMode}
+        />
+      )
+    }
+
+    if (authModal.mode === "verify-email") {
+      return (
+        <VerifyEmailOtpPopup
+          key="verify-email"
+          open={true}
+          email={authModal.email}
+          onClose={closeAuthModal}
+          onSwitchMode={switchAuthMode}
+        />
+      )
+    }
+
+    return (
       <LoginPopup
         key="login"
         open={true}

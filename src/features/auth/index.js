@@ -16,6 +16,7 @@ export { default as ResetPasswordPopup } from "./components/popups/ResetPassword
 export { default as RequestOtpStep } from "./components/popups/ResetPasswordPopup/RequestOtpStep"
 export { default as ResetPasswordFormStep } from "./components/popups/ResetPasswordPopup/ResetPasswordFormStep"
 export { default as VerifyOtpStep } from "./components/popups/ResetPasswordPopup/VerifyOtpStep"
+export { default as VerifyEmailOtpPopup } from "./components/popups/VerifyEmailOtpPopup"
 
 // Policies
 export {
