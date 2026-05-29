@@ -139,7 +139,7 @@ export const authApi = baseApi.injectEndpoints({
             dispatch(setCredentials(data.auth))
           }
         } catch (err) {
-          console.error("OTP verification failed:", err)
+          // Error handled by the component
         }
       },
     }),

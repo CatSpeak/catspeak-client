@@ -57,9 +57,11 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
       onClose()
       if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
     } catch (err) {
-      console.error("OTP verification failed:", err)
+      const apiMsg = err?.data?.message
       setApiError(
-        err?.data?.message || authText.verifyOtpFailed || "Invalid or expired OTP."
+        apiMsg === "Invalid or expired OTP"
+          ? authText.verifyOtpFailed
+          : apiMsg || authText.verifyOtpFailed || "Invalid or expired OTP."
       )
     }
   }
@@ -69,9 +71,14 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
     setSuccessMsg("")
     try {
       await resendEmailOtp({ email }).unwrap()
-      setSuccessMsg("OTP has been resent successfully")
+      setSuccessMsg(authText.otpResentSuccess || "OTP has been resent successfully")
     } catch (err) {
-      setApiError(err?.data?.message || "Failed to resend OTP.")
+      const apiMsg = err?.data?.message
+      setApiError(
+        apiMsg === "Too many OTP requests. Please try again later."
+          ? authText.tooManyOtpRequests
+          : apiMsg || "Failed to resend OTP."
+      )
     }
   }
 

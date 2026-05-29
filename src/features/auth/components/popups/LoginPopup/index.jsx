@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Eye, EyeOff, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
-import { useLoginMutation } from "@/store/api/authApi"
+import { useLoginMutation, useResendEmailOtpMutation } from "@/store/api/authApi"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import Modal from "@/shared/components/ui/Modal"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
@@ -21,8 +21,10 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [remember, setRemember] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [passwordError, setPasswordError] = useState("")
+  const [isNotActivatedError, setIsNotActivatedError] = useState(false)
 
   const [login, { isLoading }] = useLoginMutation()
+  const [resendEmailOtp, { isLoading: isResendingOtp }] = useResendEmailOtpMutation()
 
   const validateEmail = (value) => {
     if (!value) return authText.validationEmailRequired
@@ -37,6 +39,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setApiError(null)
+    setIsNotActivatedError(false)
 
     const emailErr = validateEmail(email)
     const passwordErr = validatePassword(password)
@@ -59,7 +62,8 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           errMessage === "Account is not activated. Please verify your email."
 
         if (isNotActivated) {
-          onSwitchMode("verify-email", email)
+          setIsNotActivatedError(true)
+          setApiError(errMessage)
           return
         }
 
@@ -166,9 +170,36 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
 
         {/* API Error */}
         {apiError && (
-          <p className="mb-2 rounded-lg bg-red-100 h-10 flex items-center px-3 text-sm text-red-700">
-            {apiError}
-          </p>
+          <div className="mb-2 rounded-lg bg-red-100 min-h-10 py-2 flex items-center px-3 text-sm text-red-700">
+            {isNotActivatedError ? (
+              <span>
+                {authText.accountNotActivated}{" "}
+                <button
+                  type="button"
+                  className="font-bold underline hover:text-red-900 disabled:opacity-50"
+                  disabled={isResendingOtp}
+                  onClick={async () => {
+                    try {
+                      await resendEmailOtp({ email }).unwrap()
+                    } catch (err) {
+                      const apiMsg = err?.data?.message
+                      if (apiMsg === "Too many OTP requests. Please try again later.") {
+                        setApiError(authText.tooManyOtpRequests)
+                      } else {
+                        setApiError(apiMsg || "Failed to resend OTP.")
+                      }
+                      return
+                    }
+                    onSwitchMode("verify-email", email)
+                  }}
+                >
+                  {isResendingOtp ? authText.sendingOtp || "Sending OTP..." : authText.clickToVerifyEmail}
+                </button>
+              </span>
+            ) : (
+              apiError
+            )}
+          </div>
         )}
 
         {/* Submit */}
