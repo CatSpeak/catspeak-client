@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Eye, EyeOff, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
-import { useLoginMutation } from "@/store/api/authApi"
+import { useLoginMutation, useResendEmailOtpMutation } from "@/store/api/authApi"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import Modal from "@/shared/components/ui/Modal"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
@@ -21,9 +21,10 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [remember, setRemember] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [passwordError, setPasswordError] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
+  const [isNotActivatedError, setIsNotActivatedError] = useState(false)
 
   const [login, { isLoading }] = useLoginMutation()
+  const [resendEmailOtp, { isLoading: isResendingOtp }] = useResendEmailOtpMutation()
 
   const validateEmail = (value) => {
     if (!value) return authText.validationEmailRequired
@@ -38,6 +39,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setApiError(null)
+    setIsNotActivatedError(false)
 
     const emailErr = validateEmail(email)
     const passwordErr = validatePassword(password)
@@ -47,22 +49,48 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
     if (emailErr || passwordErr) return
 
     try {
-      await login({ email, password }).unwrap()
+      const result = await login({ email, password })
+
+      // Check for errors in the result (RTK Query shape)
+      const err = result?.error
+      if (err) {
+        const errData = err?.data
+        const errMessage = errData?.message
+
+        const isNotActivated =
+          err?.status === 401 &&
+          errMessage === "Account is not activated. Please verify your email."
+
+        if (isNotActivated) {
+          setIsNotActivatedError(true)
+          setApiError(errMessage)
+          return
+        }
+
+        const isInvalidCredentials =
+          err?.status === 401 ||
+          errMessage === "Invalid email or password"
+
+        setApiError(
+          isInvalidCredentials
+            ? authText.invalidCredentials
+            : errMessage ||
+                t.common?.errorGeneric ||
+                "Login failed",
+        )
+        return
+      }
+
+      // Success — close modal and redirect
       onClose()
       if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
     } catch (err) {
-      const isInvalidCredentials =
-        err?.status === 401 ||
-        err?.data?.message === "Invalid email or password" ||
-        err?.message === "Invalid email or password"
-
+      console.error("Login unexpected error:", err)
       setApiError(
-        isInvalidCredentials
-          ? authText.invalidCredentials
-          : err?.data?.message ||
-              err.message ||
-              t.common?.errorGeneric ||
-              "Login failed",
+        err?.data?.message ||
+          err?.message ||
+          t.common?.errorGeneric ||
+          "Login failed",
       )
     }
   }
@@ -104,27 +132,18 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
             <label className="block text-sm mb-1">
               {authText.passwordLabel}
             </label>
-            <div className="relative">
-              <TextInput
-                type={showPassword ? "text" : "password"}
-                variant="square"
-                autoComplete="current-password"
-                placeholder={authText.passwordPlaceholder}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value)
-                  setPasswordError("")
-                }}
-                className={`pr-12 ${passwordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}`}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
+            <TextInput
+              type="password"
+              variant="square"
+              autoComplete="current-password"
+              placeholder={authText.passwordPlaceholder}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setPasswordError("")
+              }}
+              className={passwordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}
+            />
             {passwordError && (
               <p className="mt-1 text-xs text-red-600">{passwordError}</p>
             )}
@@ -151,9 +170,36 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
 
         {/* API Error */}
         {apiError && (
-          <p className="mb-2 rounded-lg bg-red-100 h-10 flex items-center px-3 text-sm text-red-700">
-            {apiError}
-          </p>
+          <div className="mb-2 rounded-lg bg-red-100 min-h-10 py-2 flex items-center px-3 text-sm text-red-700">
+            {isNotActivatedError ? (
+              <span>
+                {authText.accountNotActivated}{" "}
+                <button
+                  type="button"
+                  className="font-bold underline hover:text-red-900 disabled:opacity-50"
+                  disabled={isResendingOtp}
+                  onClick={async () => {
+                    try {
+                      await resendEmailOtp({ email }).unwrap()
+                    } catch (err) {
+                      const apiMsg = err?.data?.message
+                      if (apiMsg === "Too many OTP requests. Please try again later.") {
+                        setApiError(authText.tooManyOtpRequests)
+                      } else {
+                        setApiError(apiMsg || "Failed to resend OTP.")
+                      }
+                      return
+                    }
+                    onSwitchMode("verify-email", email)
+                  }}
+                >
+                  {isResendingOtp ? authText.sendingOtp || "Sending OTP..." : authText.clickToVerifyEmail}
+                </button>
+              </span>
+            ) : (
+              apiError
+            )}
+          </div>
         )}
 
         {/* Submit */}

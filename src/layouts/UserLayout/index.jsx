@@ -12,20 +12,34 @@ const UserLayout = ({ showFooter = true }) => {
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
+    email: "",
     redirectAfterLogin: null,
   })
 
-  const openAuthModal = (mode = "login", redirectPath = null) =>
-    setAuthModal({
-      isOpen: true,
-      mode,
-      redirectAfterLogin: redirectPath,
-    })
+  const openAuthModal = (mode = "login", secondArg = null) => {
+    // When switching to verify-email, the second arg is the email address
+    if (mode === "verify-email") {
+      setAuthModal({
+        isOpen: true,
+        mode,
+        email: secondArg || "",
+        redirectAfterLogin: null,
+      })
+    } else {
+      setAuthModal({
+        isOpen: true,
+        mode,
+        email: "",
+        redirectAfterLogin: secondArg,
+      })
+    }
+  }
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
       ...prev,
       isOpen: false,
+      email: "",
       redirectAfterLogin: null,
     }))
 
@@ -53,6 +67,7 @@ const UserLayout = ({ showFooter = true }) => {
         <Auth
           isOpen={authModal.isOpen}
           mode={authModal.mode}
+          email={authModal.email}
           onClose={closeAuthModal}
           onSwitchMode={openAuthModal}
         />

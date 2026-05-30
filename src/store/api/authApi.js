@@ -25,15 +25,6 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled
-          dispatch(setCredentials(data))
-        } catch (err) {
-          console.error(err)
-        }
-      },
     }),
     registerAdmin: builder.mutation({
       query: (userData) => ({
@@ -135,6 +126,30 @@ export const authApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    verifyEmailOtp: builder.mutation({
+      query: (body) => ({
+        url: "/Auth/verify-email-otp",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled
+          if (data?.auth) {
+            dispatch(setCredentials(data.auth))
+          }
+        } catch (err) {
+          // Error handled by the component
+        }
+      },
+    }),
+    resendEmailOtp: builder.mutation({
+      query: (body) => ({
+        url: "/Auth/resend-email-otp",
+        method: "POST",
+        body,
+      }),
+    }),
     forgotPassword: builder.mutation({
       query: (body) => ({
         url: "/Auth/forgot-password",
@@ -174,6 +189,8 @@ export const {
   useUploadCustomBackgroundMutation,
   useSetActiveBackgroundMutation,
   useVerifyEmailMutation,
+  useVerifyEmailOtpMutation,
+  useResendEmailOtpMutation,
   useForgotPasswordMutation,
   useVerifyResetOtpMutation,
   useResetPasswordMutation,

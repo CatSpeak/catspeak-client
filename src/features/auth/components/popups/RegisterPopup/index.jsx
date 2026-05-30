@@ -20,6 +20,8 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
+    phonePrefix: "+84",
+    phoneNumber: "",
     dateOfBirth: "",
     preferredLanguage: "",
     password: "",
@@ -35,10 +37,21 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     setApiError(null)
 
     try {
-      await register(formData).unwrap()
-      console.log("Registration successful! Please check your email.")
-      onClose()
-      navigate("/")
+      const payload = { ...formData }
+      if (payload.phoneNumber) {
+        let phone = payload.phoneNumber.replace(/\s+/g, "")
+        if (phone.startsWith("0")) {
+          phone = phone.substring(1)
+        }
+        const prefix = payload.phonePrefix.replace("+", "")
+        payload.phoneNumber = `${prefix}${phone}`
+      }
+      delete payload.phonePrefix
+
+      console.log("Sending payload to backend:", payload)
+      await register(payload).unwrap()
+      console.log("Registration successful! Please verify your email.")
+      onSwitchMode("verify-email", formData.email)
     } catch (err) {
       console.error("Registration failed:", err)
 

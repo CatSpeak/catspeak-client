@@ -55,6 +55,27 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hide all default browser password reveal and clear icons */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+}
+
+/* For Safari/Chrome auto-fill and decoration containers */
+input[type="password"]::-webkit-textfield-decoration-container {
+  visibility: hidden !important;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* For Chrome's new native password reveal */
+input[type="password"]::-webkit-reveal {
+  display: none !important;
+}
+
 /* Tailwind Scrollbar utilities */
 @layer utilities {
   .scrollbar-thin {

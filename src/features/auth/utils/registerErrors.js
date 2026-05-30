@@ -4,6 +4,7 @@
 const FIELD_MAP = {
   Username: "username",
   Email: "email",
+  PhoneNumber: "phoneNumber",
   DateOfBirth: "dateOfBirth",
   PreferredLanguage: "preferredLanguage",
   Password: "password",
@@ -36,14 +37,31 @@ export const parseRegisterError = (err, authText) => {
   if (apiErrors && typeof apiErrors === "object") {
     const mapped = {}
     for (const [key, messages] of Object.entries(apiErrors)) {
-      const field = FIELD_MAP[key]
+      // Find field matching key case-insensitively
+      const fieldKey = Object.keys(FIELD_MAP).find(
+        (k) => k.toLowerCase() === key.toLowerCase()
+      )
+      const field = fieldKey ? FIELD_MAP[fieldKey] : null
+
       if (field) {
-        // Use translated message if available, otherwise fall back to API message
-        const translationKey = FIELD_TRANSLATION_MAP[key]
-        mapped[field] =
-          (translationKey && authText[translationKey]) ||
-          (Array.isArray(messages) && messages[0]) ||
-          ""
+        const firstMessage = (Array.isArray(messages) && messages[0]) || ""
+        const lowerMsg = firstMessage.toLowerCase()
+
+        // Handle 'already exists' specific errors
+        if (field === "email" && lowerMsg.includes("already exists") && authText.emailExists) {
+          mapped[field] = authText.emailExists
+        } else if (field === "phoneNumber" && lowerMsg.includes("already exists") && authText.phoneExists) {
+          mapped[field] = authText.phoneExists
+        } else if (field === "username" && lowerMsg.includes("already exists") && authText.usernameExists) {
+          mapped[field] = authText.usernameExists
+        } else {
+          // Use translated message if available, otherwise fall back to API message
+          const translationKey = fieldKey ? FIELD_TRANSLATION_MAP[fieldKey] : null
+          mapped[field] =
+            (translationKey && authText[translationKey]) ||
+            firstMessage ||
+            ""
+        }
       }
     }
     if (Object.keys(mapped).length > 0) {
@@ -51,9 +69,24 @@ export const parseRegisterError = (err, authText) => {
     }
   }
 
+  // Handle generic message translation for "already exists"
+  let genericMessage = err?.data?.message || err?.data?.title || authText.registrationFailed
+  
+  if (typeof genericMessage === "string") {
+    const lowerMsg = genericMessage.toLowerCase()
+    if (lowerMsg.includes("already exists") || lowerMsg.includes("taken")) {
+      if (lowerMsg.includes("username") && authText.usernameExists) {
+        return { fieldErrors: { username: authText.usernameExists }, message: null }
+      } else if (lowerMsg.includes("email") && authText.emailExists) {
+        return { fieldErrors: { email: authText.emailExists }, message: null }
+      } else if (lowerMsg.includes("phone") && authText.phoneExists) {
+        return { fieldErrors: { phoneNumber: authText.phoneExists }, message: null }
+      }
+    }
+  }
+
   return {
     fieldErrors: null,
-    message:
-      err?.data?.message || err?.data?.title || authText.registrationFailed,
+    message: genericMessage,
   }
 }
