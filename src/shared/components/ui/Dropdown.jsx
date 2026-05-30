@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const Dropdown = ({
   options = [],
@@ -22,6 +24,7 @@ const Dropdown = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const { t } = useLanguage()
   const dropdownRef = useRef(null)
   const searchInputRef = useRef(null)
 
@@ -45,6 +48,51 @@ const Dropdown = ({
     }
   }, [isOpen, enableSearch])
 
+  const [portalCoords, setPortalCoords] = useState(null)
+  const portalRef = useRef(null)
+
+  useEffect(() => {
+    const handleClose = () => setIsOpen(false)
+    const handleScroll = (e) => {
+      // Don't close if scrolling inside the dropdown portal itself
+      if (portalRef.current && portalRef.current.contains(e.target)) return
+      handleClose()
+    }
+
+    const updateCoords = () => {
+      if (isOpen && dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        const spaceAbove = rect.top
+
+        // Flip up if there's less than ~300px below and more space above
+        const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow
+
+        // Check horizontal clipping (assume ~260px width default)
+        const forceAlignRight = rect.left + 260 > window.innerWidth
+
+        setPortalCoords({
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height,
+          flipUp,
+          forceAlignRight,
+        })
+      }
+    }
+
+    if (isOpen) {
+      updateCoords()
+      window.addEventListener("resize", handleClose)
+      window.addEventListener("scroll", handleScroll, true)
+      return () => {
+        window.removeEventListener("resize", handleClose)
+        window.removeEventListener("scroll", handleScroll, true)
+      }
+    }
+  }, [isOpen])
+
   const filteredOptions = useMemo(() => {
     if (!enableSearch || !searchQuery) return options
     const query = searchQuery.toLowerCase()
@@ -63,10 +111,10 @@ const Dropdown = ({
       type="button"
       onClick={() => !disabled && setIsOpen(!isOpen)}
       disabled={disabled}
-      className={`text-sm flex items-center justify-between border border-[#C6C6C6] rounded-lg px-4 h-10 shadow-sm w-full bg-white transition-colors ${
+      className={`flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white ${
         disabled
           ? "opacity-50 cursor-not-allowed bg-gray-100"
-          : "hover:bg-gray-50"
+          : "hover:bg-[#f0f0f0]"
       } ${triggerClassName}`}
     >
       <span className="truncate mr-2">
@@ -85,7 +133,7 @@ const Dropdown = ({
     const textColor = isSelected ? option.color || activeColor : "inherit"
     return (
       <div
-        className={`w-full h-10 px-3 text-left text-sm rounded-md flex items-center gap-3 ${
+        className={`w-full h-12 px-4 text-left text-sm rounded-md flex items-center gap-3 ${
           isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
         }`}
         style={isSelected ? { color: textColor } : {}}
@@ -112,8 +160,9 @@ const Dropdown = ({
     )
   }
 
-  const alignClass =
-    align === "right"
+  const alignClass = portalCoords?.forceAlignRight
+    ? "right-0 origin-top-right"
+    : align === "right"
       ? "right-0 origin-top-right"
       : align === "center"
         ? "-translate-x-1/2 left-1/2 origin-top"
@@ -134,59 +183,78 @@ const Dropdown = ({
             })
         : defaultTrigger}
 
-      <AnimatePresence>
-        {isOpen && (
-          <FluentAnimation
-            direction="down"
-            exit={true}
-            className={`absolute top-full mt-2 z-[60] shadow-lg border border-[#E5E5E5] rounded-lg bg-white ${maxHeightClass} overflow-y-auto overflow-x-hidden ${alignClass} ${dropdownClassName}`}
-          >
-            <div className="flex flex-col w-full">
-              {enableSearch && (
-                <div className="px-3 py-2 sticky top-0 bg-white z-10 border-b border-gray-100">
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Search size={14} className="text-gray-400" />
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && portalCoords && (
+              <div
+                ref={portalRef}
+                style={{
+                  position: "absolute",
+                  top: portalCoords.top,
+                  left: portalCoords.left,
+                  width: portalCoords.width,
+                  height: portalCoords.height,
+                  zIndex: 9999,
+                  pointerEvents: "none",
+                }}
+              >
+                <div className="relative w-full h-full">
+                  <FluentAnimation
+                    direction={portalCoords.flipUp ? "up" : "down"}
+                    exit={true}
+                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-2 origin-bottom" : "top-full mt-2"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-lg bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                  >
+                    {enableSearch && (
+                      <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-gray-100">
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search size={14} className="text-gray-400" />
+                          </div>
+                          <input
+                            ref={searchInputRef}
+                            type="text"
+                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-[#990011]"
+                            placeholder={searchPlaceholder}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+                      <div className="flex flex-col gap-1 p-1">
+                        {filteredOptions.length > 0 ? (
+                          filteredOptions.map((option, idx) => {
+                            const isSelected = option.value === value
+                            return (
+                              <button
+                                key={option.value || idx}
+                                type="button"
+                                onClick={() => handleSelect(option)}
+                                className="w-full focus:outline-none"
+                              >
+                                {renderOption
+                                  ? renderOption(option, isSelected)
+                                  : defaultRenderOption(option, isSelected)}
+                              </button>
+                            )
+                          })
+                        ) : (
+                          <div className="px-3 py-4 text-sm text-center text-gray-500">
+                            {t?.noOptionsFound || "No options found"}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-[#990011]"
-                      placeholder={searchPlaceholder}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
+                  </FluentAnimation>
                 </div>
-              )}
-              <div className="flex flex-col gap-1 p-1">
-                {filteredOptions.length > 0 ? (
-                  filteredOptions.map((option, idx) => {
-                    const isSelected = option.value === value
-                    return (
-                      <button
-                        key={option.value || idx}
-                        type="button"
-                        onClick={() => handleSelect(option)}
-                        className="w-full focus:outline-none"
-                      >
-                        {renderOption
-                          ? renderOption(option, isSelected)
-                          : defaultRenderOption(option, isSelected)}
-                      </button>
-                    )
-                  })
-                ) : (
-                  <div className="px-3 py-4 text-sm text-center text-gray-500">
-                    No options found
-                  </div>
-                )}
               </div>
-            </div>
-          </FluentAnimation>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   )
 }

@@ -9,23 +9,12 @@ import { mapFormToPayload } from "../utils/mapFormToPayload"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const DEFAULT_TIMEZONE = {
-  id: "Asia/Bangkok",
-  label: "Bangkok",
+  id: "Asia/Ho_Chi_Minh",
+  label: "Hồ Chí Minh",
   offset: "GMT +07:00",
 }
 
 const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-const INVERSE_VISIBILITY = {
-  PUBLIC: "Công khai",
-  SHARED_LINK_ONLY: "Chỉ những người có link",
-  // COMMUNITY_ONLY: "Cộng đồng",  // not yet supported by backend
-}
-const INVERSE_RECURRENCE = {
-  DAILY: "Hàng ngày",
-  WEEKLY: "Hàng tuần",
-  MONTHLY: "Hàng tháng",
-  YEARLY: "Hàng năm",
-}
 
 export const useEventForm = (onClose, editEvent) => {
   const { t } = useLanguage()
@@ -43,8 +32,7 @@ export const useEventForm = (onClose, editEvent) => {
   const initialCountryId = editEvent?.countryId || 0
   const initialCityId = editEvent?.cityId || 0
   const initialParticipants = editEvent?.maxParticipants || 50
-  const initialVisibility =
-    INVERSE_VISIBILITY[editEvent?.visibilityScope] || "Công khai"
+  const initialVisibility = editEvent?.visibilityScope || "PUBLIC"
   const initialConditions =
     editEvent?.conditions?.map((c) => c.title).join(", ") || ""
 
@@ -55,7 +43,7 @@ export const useEventForm = (onClose, editEvent) => {
     ? dayjs(editEvent.endTime)
     : dayjs().add(1, "hour")
 
-  let initialRecurOption = "Không lặp lại"
+  let initialRecurOption = "NONE"
   let initialRecurInterval = 1
   let initialSelectedDays = [1, 4] // default Tuesday, Friday
   let initialRecurEndDate = dayjs().add(1, "month").toDate()
@@ -63,7 +51,7 @@ export const useEventForm = (onClose, editEvent) => {
 
   if (editEvent?.isRecurring && editEvent?.recurrenceRule) {
     const rr = editEvent.recurrenceRule
-    initialRecurOption = INVERSE_RECURRENCE[rr.frequency] || "Tùy chỉnh..."
+    initialRecurOption = rr.frequency || "CUSTOM"
     initialRecurInterval = rr.interval || 1
     if (rr.byWeekDay && rr.byWeekDay.length > 0) {
       initialSelectedDays = rr.byWeekDay
@@ -149,6 +137,11 @@ export const useEventForm = (onClose, editEvent) => {
       selectedTimezone,
       conditionsInput,
     })
+
+    console.log(
+      "=== CREATING/UPDATING EVENT PAYLOAD ===",
+      JSON.stringify(payload, null, 2),
+    )
 
     try {
       if (editEvent?.id || editEvent?.eventId) {

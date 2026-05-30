@@ -8,14 +8,15 @@ const RecurrenceDropdown = ({ value, onChange, activeColor }) => {
 
   const OPTIONS = useMemo(
     () => [
-      { value: cal.recurrence.noRepeat, label: cal.recurrence.noRepeat },
+      { value: "NONE", label: cal.recurrence.noRepeat },
       // TODO: Re-enable after backend specs are finalized
-      // { value: cal.recurrence.daily, label: cal.recurrence.daily },
-      { value: cal.recurrence.weekly, label: cal.recurrence.weekly },
-      // { value: cal.recurrence.monthly, label: cal.recurrence.monthly },
-      // { value: cal.recurrence.yearly, label: cal.recurrence.yearly },
+      // { value: "DAILY", label: cal.recurrence.daily },
+      { value: "WEEKLY", label: cal.recurrence.weekly },
+      // { value: "MONTHLY", label: cal.recurrence.monthly },
+      // { value: "YEARLY", label: cal.recurrence.yearly },
+      // { value: "CUSTOM", label: cal.recurrence.custom },
     ],
-    [cal]
+    [cal],
   )
 
   return (

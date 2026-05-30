@@ -95,6 +95,12 @@ export default {
   noParticipants: "暂无报名人员",
   unknownUser: "未知用户",
   viewParticipants: "查看报名名单",
+  occurrencesList: "系列中的场次",
+  deleteOccurrence: "删除此场次",
+  deleteThisOccurrence: "仅删除此场次",
+  deleteEntireSeries: "删除整个系列",
+  confirmDeleteTitle: "确认删除",
+  confirmDeleteOccurrence: "您确定要删除此场次吗？",
   cancelRecurringTitle: "取消报名",
   cancelChoicePrompt: "这是一个重复的活动。您想取消哪一个报名？",
   cancelThisOccurrence: "仅此场次",
@@ -123,4 +129,5 @@ export default {
     conditionsJoin: "参与条件",
     seeMoreEvents: "在 CatSpeak 上查看更多活动",
   },
+  maxOccurrencesWarning: "系统仅支持每个重复活动系列最多创建 24 个活动。超出此限制的活动将不会被创建。",
 }

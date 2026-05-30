@@ -1,5 +1,6 @@
 import dayjs from "dayjs"
 import { useMemo } from "react"
+import { AlertCircle } from "lucide-react"
 import DatePicker from "@/shared/components/ui/inputs/DatePicker"
 import TimeDropdown from "../ui/TimeDropdown"
 import TimezoneDropdown from "../ui/TimezoneDropdown"
@@ -9,6 +10,7 @@ import RecurrenceIntervalRow from "./RecurrenceIntervalRow"
 import { formatTime } from "@/shared/utils/dateFormatter"
 import { colors } from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { calculateExactOccurrences } from "../../utils/recurrenceCalculator"
 
 /** Safely converts a Firestore Timestamp or plain Date to a JS Date */
 const toDate = (value) =>
@@ -37,35 +39,53 @@ const EventDateTimeSection = ({
   /** Human-readable unit label per recurrence option */
   const INTERVAL_UNIT = useMemo(
     () => ({
-      [cal.recurrence.daily]: cal.intervalUnit.day,
-      [cal.recurrence.weekly]: cal.intervalUnit.week,
-      [cal.recurrence.monthly]: cal.intervalUnit.month,
-      [cal.recurrence.yearly]: cal.intervalUnit.year,
-      [cal.recurrence.custom]: cal.intervalUnit.week,
+      DAILY: cal.intervalUnit.day,
+      WEEKLY: cal.intervalUnit.week,
+      MONTHLY: cal.intervalUnit.month,
+      YEARLY: cal.intervalUnit.year,
+      CUSTOM: cal.intervalUnit.week,
     }),
     [cal],
   )
 
   const WEEKLY_OPTIONS = useMemo(
-    () => [cal.recurrence.weekly, cal.recurrence.custom],
-    [cal],
+    () => ["WEEKLY", "CUSTOM"],
+    [],
   )
 
-  const isRecurring = recurrenceOption !== cal.recurrence.noRepeat
+  const isRecurring = recurrenceOption !== "NONE"
   const isWeekly = WEEKLY_OPTIONS.includes(recurrenceOption)
   const intervalUnit =
     INTERVAL_UNIT[recurrenceOption] ?? cal.intervalUnit.default
 
+  const estimatedOccurrences = useMemo(() => {
+    if (!isRecurring) return 1
+    return calculateExactOccurrences(
+      toDate(startTime),
+      toDate(recurrenceEndDate),
+      recurrenceOption,
+      recurrenceInterval,
+      selectedDays,
+    )
+  }, [
+    isRecurring,
+    startTime,
+    recurrenceEndDate,
+    recurrenceOption,
+    recurrenceInterval,
+    selectedDays,
+  ])
+
   return (
-    <div className="flex flex-col gap-4 items-start pb-2 w-full">
+    <div className="flex flex-col gap-4 items-start w-full">
       {/* Start / End time */}
-      <div className="flex flex-col md:flex-row gap-3 md:gap-2 w-full xl:w-auto">
+      <div className="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
         <div className="flex flex-col justify-between gap-3 w-full md:w-auto">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-            <span className="text-base font-bold text-gray-900 w-[150px] shrink-0">
+            <span className="text-base w-[150px] shrink-0">
               {cal.startTime}
             </span>
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
               <DatePicker
                 value={toDate(startTime)}
                 onChange={(d) => onStartTimeChange(d)}
@@ -89,10 +109,8 @@ const EventDateTimeSection = ({
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-            <span className="text-base font-bold text-gray-900 w-[150px] shrink-0">
-              {cal.endTime}
-            </span>
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+            <span className="text-base w-[150px] shrink-0">{cal.endTime}</span>
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
               <DatePicker
                 value={toDate(endTime)}
                 onChange={(d) => onEndTimeChange(d)}
@@ -136,7 +154,7 @@ const EventDateTimeSection = ({
         {isRecurring && (
           <div className="flex flex-col gap-3 w-full">
             {/* Interval row — only shown for custom recurrence */}
-            {recurrenceOption === cal.recurrence.custom && (
+            {recurrenceOption === "CUSTOM" && (
               <RecurrenceIntervalRow
                 intervalUnit={intervalUnit}
                 value={recurrenceInterval}
@@ -154,17 +172,31 @@ const EventDateTimeSection = ({
             )}
 
             {/* Recurrence end date */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 mt-1">
-              <span className="text-base font-bold text-gray-900 w-[150px] shrink-0">
-                {cal.endsOn}
-              </span>
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full">
-                <DatePicker
-                  value={recurrenceEndDate}
-                  onChange={onRecurrenceEndDateChange}
-                  color={eventColor}
-                />
+            <div className="flex flex-col gap-2 mt-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                <span className="text-base w-[150px] shrink-0">
+                  {cal.endsOn}
+                </span>
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full">
+                  <DatePicker
+                    value={recurrenceEndDate}
+                    onChange={onRecurrenceEndDateChange}
+                    color={eventColor}
+                  />
+                </div>
               </div>
+
+              {estimatedOccurrences > 24 && (
+                <div className="flex items-start gap-2 mt-1 p-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-sm">
+                  <AlertCircle
+                    size={18}
+                    className="shrink-0 mt-0.5 text-orange-500"
+                  />
+                  <span>
+                    {cal.maxOccurrencesWarning}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}

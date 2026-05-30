@@ -1,7 +1,10 @@
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetCountriesQuery, useGetCitiesByCountryIdQuery } from "@/store/api/locationsApi"
+import {
+  useGetCountriesQuery,
+  useGetCitiesByCountryIdQuery,
+} from "@/store/api/locationsApi"
 
 const EventDetailsSection = ({
   title,
@@ -24,13 +27,18 @@ const EventDetailsSection = ({
   const { t } = useLanguage()
   const cal = t.calendar
 
-  const { data: countries = [], isLoading: isCountriesLoading } = useGetCountriesQuery()
-  const { data: cities = [], isFetching: isCitiesFetching, error: citiesError } = useGetCitiesByCountryIdQuery(countryId, {
+  const { data: countries = [], isLoading: isCountriesLoading } =
+    useGetCountriesQuery()
+  const {
+    data: cities = [],
+    isFetching: isCitiesFetching,
+    error: citiesError,
+  } = useGetCitiesByCountryIdQuery(countryId, {
     skip: !countryId,
   })
 
-  const countryOptions = countries.map(c => ({ label: c.name, value: c.id }))
-  const cityOptions = cities.map(c => ({ label: c.name, value: c.id }))
+  const countryOptions = countries.map((c) => ({ label: c.name, value: c.id }))
+  const cityOptions = cities.map((c) => ({ label: c.name, value: c.id }))
 
   let cityPlaceholder = cal.selectCityProvince
   if (!countryId) cityPlaceholder = cal.selectCountryFirst
@@ -71,10 +79,10 @@ const EventDetailsSection = ({
   }
 
   return (
-    <div className="flex flex-col gap-3 mt-2">
+    <div className="flex flex-col gap-6">
       {/* Title */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+        <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.eventName}
         </div>
         <div className="flex-1 flex flex-col w-full">
@@ -92,7 +100,7 @@ const EventDetailsSection = ({
 
       {/* Location (Country, City, Address) */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+        <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.location}
         </div>
         <div className="flex-1 flex flex-col gap-3 w-full relative">
@@ -102,14 +110,20 @@ const EventDetailsSection = ({
                 options={countryOptions}
                 value={countryId}
                 onChange={(val) => onCountryIdChange(val)}
-                placeholder={isCountriesLoading ? cal.loadingLocations : cal.selectCountry}
+                placeholder={
+                  isCountriesLoading ? cal.loadingLocations : cal.selectCountry
+                }
                 disabled={isCountriesLoading}
                 activeColor={eventColor}
                 className="w-full"
                 triggerClassName={`border ${errors.countryId ? "border-red-500" : "border-[#C6C6C6]"}`}
                 enableSearch
               />
-              {errors.countryId && <span className="text-red-500 text-xs mt-1">{errors.countryId}</span>}
+              {errors.countryId && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.countryId}
+                </span>
+              )}
             </div>
 
             <div className="flex-1 flex flex-col w-full">
@@ -118,13 +132,19 @@ const EventDetailsSection = ({
                 value={cityId}
                 onChange={(val) => onCityIdChange(val)}
                 placeholder={cityPlaceholder}
-                disabled={!countryId || isCitiesFetching || cityOptions.length === 0}
+                disabled={
+                  !countryId || isCitiesFetching || cityOptions.length === 0
+                }
                 activeColor={eventColor}
                 className="w-full"
                 triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
                 enableSearch
               />
-              {errors.cityId && <span className="text-red-500 text-xs mt-1">{errors.cityId}</span>}
+              {errors.cityId && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.cityId}
+                </span>
+              )}
             </div>
           </div>
 
@@ -154,7 +174,7 @@ const EventDetailsSection = ({
 
       {/* Description */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+        <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.description}
         </div>
         <div className="flex-1 flex flex-col w-full">
@@ -172,7 +192,7 @@ const EventDetailsSection = ({
 
       {/* Max participants */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+        <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.maxParticipants}
         </div>
         <div className="flex items-start w-full">
@@ -194,7 +214,7 @@ const EventDetailsSection = ({
 
       {/* Conditions */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+        <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.conditions}
         </div>
         <div className="flex-1 flex flex-col gap-1 w-full relative">
@@ -228,7 +248,7 @@ const EventDetailsSection = ({
 
       {/* Ticket price (static / coming soon) */}
       <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:justify-between max-[425px]:gap-1">
-        <div className="w-[150px] font-bold text-base text-gray-900 shrink-0 max-[425px]:w-full">
+        <div className="w-[150px] shrink-0 max-[425px]:w-full">
           {cal.ticketPrice}
         </div>
         <div className="flex-1 flex items-center justify-between w-full h-10 border border-transparent max-[425px]:p-0">

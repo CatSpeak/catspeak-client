@@ -95,6 +95,12 @@ export default {
   noParticipants: "No participants yet",
   unknownUser: "Unknown user",
   viewParticipants: "View participant list",
+  occurrencesList: "Occurrences in series",
+  deleteOccurrence: "Delete this occurrence",
+  deleteThisOccurrence: "Only delete this occurrence",
+  deleteEntireSeries: "Delete entire series",
+  confirmDeleteTitle: "Confirm deletion",
+  confirmDeleteOccurrence: "Are you sure you want to delete this occurrence?",
   cancelRecurringTitle: "Cancel registration",
   cancelChoicePrompt: "This is a recurring event. Which registration do you want to cancel?",
   cancelThisOccurrence: "Only this occurrence",
@@ -124,4 +130,5 @@ export default {
     conditionsJoin: "Join conditions",
     seeMoreEvents: "See more events on CatSpeak",
   },
+  maxOccurrencesWarning: "The system supports creating a maximum of 24 sessions per recurring event series. Sessions exceeding this limit will not be created.",
 }

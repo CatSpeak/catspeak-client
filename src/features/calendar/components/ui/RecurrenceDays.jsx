@@ -26,10 +26,8 @@ const RecurrenceDays = ({ eventColor = "#B91264", value = [], onChange }) => {
             key={i}
             type="button"
             onClick={() => toggleDay(i)}
-            className={`w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center transition-colors duration-200 ${
-              isSelected
-                ? "text-white shadow-sm"
-                : "bg-[#F2F2F2] text-gray-600 hover:bg-[#D9D9D9] hover:text-gray-900 shadow-sm"
+            className={`border border-[#e5e5e5] w-12 h-12 rounded-full text flex items-center justify-center transition-colors duration-200 ${
+              isSelected ? "text-white" : "hover:bg-[#f0f0f0]"
             }`}
             style={isSelected ? { backgroundColor: eventColor } : {}}
           >

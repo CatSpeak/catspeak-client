@@ -44,10 +44,10 @@ const CreateEventModal = ({ onClose, editEvent }) => {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
+        <div className="flex-1 overflow-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:m-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
           {/* Body */}
-          <div className="px-5 sm:px-8 pt-8 pb-6 relative bg-white text-base">
-            <div className="flex flex-col gap-5">
+          <div className="p-6 relative bg-white text-base">
+            <div className="flex flex-col gap-6">
               <EventDateTimeSection
                 eventColor={form.eventColor}
                 startTime={form.startTime}
@@ -70,31 +70,45 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                 title={form.title}
                 onTitleChange={(val) => {
                   form.setTitle(val)
-                  if (form.errors?.title) form.setErrors(prev => ({ ...prev, title: undefined }))
+                  if (form.errors?.title)
+                    form.setErrors((prev) => ({ ...prev, title: undefined }))
                 }}
                 eventColor={form.eventColor}
                 countryId={form.countryId}
                 onCountryIdChange={(val) => {
                   form.setCountryId(val)
                   form.setCityId(0) // reset city when country changes
-                  if (form.errors?.countryId) form.setErrors(prev => ({ ...prev, countryId: undefined }))
+                  if (form.errors?.countryId)
+                    form.setErrors((prev) => ({
+                      ...prev,
+                      countryId: undefined,
+                    }))
                 }}
                 cityId={form.cityId}
                 onCityIdChange={(val) => {
                   form.setCityId(val)
-                  if (form.errors?.cityId) form.setErrors(prev => ({ ...prev, cityId: undefined }))
+                  if (form.errors?.cityId)
+                    form.setErrors((prev) => ({ ...prev, cityId: undefined }))
                 }}
                 eventLocation={form.eventLocation}
                 onLocationChange={(val) => {
                   form.setEventLocation(val)
-                  if (form.errors?.eventLocation) form.setErrors(prev => ({ ...prev, eventLocation: undefined }))
+                  if (form.errors?.eventLocation)
+                    form.setErrors((prev) => ({
+                      ...prev,
+                      eventLocation: undefined,
+                    }))
                 }}
                 description={form.description}
                 onDescriptionChange={form.setDescription}
                 maxParticipants={form.maxParticipants}
                 onMaxParticipantsChange={(val) => {
                   form.setMaxParticipants(val)
-                  if (form.errors?.maxParticipants) form.setErrors(prev => ({ ...prev, maxParticipants: undefined }))
+                  if (form.errors?.maxParticipants)
+                    form.setErrors((prev) => ({
+                      ...prev,
+                      maxParticipants: undefined,
+                    }))
                 }}
                 conditionsInput={form.conditionsInput}
                 onConditionsChange={form.setConditionsInput}

@@ -95,6 +95,12 @@ export default {
   noParticipants: "Chưa có người đăng ký",
   unknownUser: "Người dùng ẩn danh",
   viewParticipants: "Xem danh sách người đăng ký",
+  occurrencesList: "Các buổi trong chuỗi",
+  deleteOccurrence: "Xóa buổi này",
+  deleteThisOccurrence: "Chỉ xóa buổi này",
+  deleteEntireSeries: "Xóa toàn bộ chuỗi",
+  confirmDeleteTitle: "Xác nhận xóa",
+  confirmDeleteOccurrence: "Bạn có chắc chắn muốn xóa buổi này?",
   cancelRecurringTitle: "Hủy đăng ký",
   cancelChoicePrompt: "Đây là sự kiện lặp lại. Bạn muốn hủy đăng ký nào?",
   cancelThisOccurrence: "Chỉ buổi này",
@@ -124,4 +130,5 @@ export default {
     conditionsJoin: "Điều kiện tham gia",
     seeMoreEvents: "Xem thêm sự kiện trên CatSpeak",
   },
+  maxOccurrencesWarning: "Hệ thống chỉ hỗ trợ tạo tối đa 24 buổi học cho mỗi chuỗi sự kiện. Những buổi vượt quá giới hạn này sẽ không được tạo.",
 }
