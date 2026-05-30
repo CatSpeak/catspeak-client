@@ -158,6 +158,9 @@ export default {
   aiSettings: {
     title: "Cài đặt phiên AI",
     language: "Ngôn ngữ",
+    learningLanguage: "Ngôn ngữ học",
+    supportLanguage: "Ngôn ngữ hỗ trợ",
+    supportNone: "Không có",
     english: "Tiếng Anh",
     chinese: "Tiếng Trung",
     vietnamese: "Tiếng Việt",

@@ -155,6 +155,9 @@ export default {
   aiSettings: {
     title: "AI 会话设置",
     language: "语言",
+    learningLanguage: "学习语言",
+    supportLanguage: "辅助语言",
+    supportNone: "无",
     english: "英语",
     chinese: "中文",
     vietnamese: "越南语",

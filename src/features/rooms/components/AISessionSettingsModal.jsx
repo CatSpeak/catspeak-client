@@ -8,6 +8,7 @@ import {
   DEFAULT_AI_SETTINGS,
   SPEED_CONFIG,
   AI_SETTINGS_STORAGE_KEY,
+  SUPPORT_LANGUAGES,
 } from "../config/aiSessionConfig"
 
 const VOICES = ["female", "male"]
@@ -32,7 +33,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
 
   const voiceLabel = (voice) => (voice === "male" ? s.voiceMale : s.voiceFemale)
 
-  const [language, setLanguage] = useState(foreignLanguage)
+  const [supportLanguage, setSupportLanguage] = useState(null)
   const [speed, setSpeed] = useState(SPEED_CONFIG.default)
   const [voice, setVoice] = useState(DEFAULT_AI_SETTINGS.voice)
 
@@ -48,43 +49,37 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
       saved = null
     }
 
-    const initialLanguage = saved?.language ?? foreignLanguage
-    const available = VOICE_AVAILABILITY[initialLanguage] ?? ["female"]
-    const savedVoice = saved?.voice ?? DEFAULT_AI_SETTINGS.voice
-    const initialVoice = available.includes(savedVoice)
-      ? savedVoice
-      : available[0]
+    // supportLanguage is persisted; learningLanguage is always re-derived from URL.
+    const savedSupport = SUPPORT_LANGUAGES.includes(saved?.supportLanguage)
+      ? saved.supportLanguage
+      : null
+    setSupportLanguage(savedSupport)
 
-    setLanguage(initialLanguage)
+    const available = VOICE_AVAILABILITY[foreignLanguage] ?? ["female"]
+    const savedVoice = saved?.voice ?? DEFAULT_AI_SETTINGS.voice
+    setVoice(available.includes(savedVoice) ? savedVoice : available[0])
+
     setSpeed(
       typeof saved?.speed === "number" ? saved.speed : SPEED_CONFIG.default,
     )
-    setVoice(initialVoice)
   }, [open, foreignLanguage])
 
-  // When language changes, reset voice if the current one is unavailable.
-  const handleSelectLanguage = (value) => {
-    setLanguage(value)
-    const available = VOICE_AVAILABILITY[value] ?? ["female"]
-    if (!available.includes(voice)) {
-      setVoice(available[0])
-    }
-  }
-
   const handleConfirm = () => {
-    const settings = { language, speed, voice }
+    const settings = { supportLanguage, speed, voice }
     try {
       localStorage.setItem(AI_SETTINGS_STORAGE_KEY, JSON.stringify(settings))
     } catch {
       // localStorage unavailable — proceed with in-memory settings.
     }
-    onConfirm(settings)
+    onConfirm({
+      learningLanguage: foreignLanguage,
+      supportLanguage,
+      speed,
+      voice,
+    })
   }
 
-  const availableVoices = VOICE_AVAILABILITY[language] ?? ["female"]
-
-  // Language options: foreign (from URL) + Vietnamese.
-  const languageOptions = [foreignLanguage, "vietnamese"]
+  const availableVoices = VOICE_AVAILABILITY[foreignLanguage] ?? ["female"]
 
   const pillClass = (active) =>
     `inline-flex h-10 items-center rounded-full px-4 text-sm border transition-colors ${
@@ -101,16 +96,31 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
       className="max-w-sm min-[426px]:max-w-md max-[425px]:max-w-none max-[425px]:h-full max-[425px]:flex max-[425px]:flex-col"
     >
       <div className="flex flex-col gap-6 pb-2 max-h-[60vh] overflow-y-auto -mx-3 px-3 scrollbar-app-transparent max-[425px]:max-h-none max-[425px]:flex-1">
-        {/* Language */}
+        {/* Learning Language — read-only, derived from URL */}
         <div className="text-left flex flex-col">
-          <label className="text-sm mb-2">{s.language}</label>
+          <label className="text-sm mb-2">{s.learningLanguage}</label>
           <div className="flex flex-wrap gap-2">
-            {languageOptions.map((value) => (
+            <span className={pillClass(true)}>{languageLabel(foreignLanguage)}</span>
+          </div>
+        </div>
+
+        {/* Support Language — optional */}
+        <div className="text-left flex flex-col">
+          <label className="text-sm mb-2">{s.supportLanguage}</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setSupportLanguage(null)}
+              className={pillClass(supportLanguage === null)}
+            >
+              {s.supportNone}
+            </button>
+            {SUPPORT_LANGUAGES.map((value) => (
               <button
                 key={value}
                 type="button"
-                onClick={() => handleSelectLanguage(value)}
-                className={pillClass(language === value)}
+                onClick={() => setSupportLanguage(value)}
+                className={pillClass(supportLanguage === value)}
               >
                 {languageLabel(value)}
               </button>
@@ -151,7 +161,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
                 ? undefined
                 : s.voiceUnavailable
                     .replace("{{voice}}", voiceLabel(v))
-                    .replace("{{language}}", languageLabel(language))
+                    .replace("{{language}}", languageLabel(foreignLanguage))
               return (
                 <button
                   key={v}

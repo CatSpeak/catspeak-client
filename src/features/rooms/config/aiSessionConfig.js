@@ -1,9 +1,8 @@
 // Voice availability per language for AI tutor sessions.
-// Keys are the language values used by the settings modal / backend.
+// Keys are the learning language values used by the settings modal / backend.
 export const VOICE_AVAILABILITY = {
   english: ["female", "male"],
   chinese: ["female"],
-  vietnamese: ["female"],
 }
 
 export const DEFAULT_AI_SETTINGS = {
@@ -19,3 +18,6 @@ export const SPEED_CONFIG = {
 }
 
 export const AI_SETTINGS_STORAGE_KEY = "aiSessionSettings"
+
+// Languages available as speaking support aids (not learnable languages).
+export const SUPPORT_LANGUAGES = ["vietnamese"]

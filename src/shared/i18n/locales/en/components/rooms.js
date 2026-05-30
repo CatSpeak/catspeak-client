@@ -183,6 +183,9 @@ export default {
   aiSettings: {
     title: "AI Session Settings",
     language: "Language",
+    learningLanguage: "Learning Language",
+    supportLanguage: "Support Language",
+    supportNone: "None",
     english: "English",
     chinese: "Chinese",
     vietnamese: "Vietnamese",
