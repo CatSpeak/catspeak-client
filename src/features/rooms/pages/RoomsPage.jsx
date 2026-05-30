@@ -9,6 +9,7 @@ import {
   useRoomsPageLogic,
   SessionActionButtons,
   CreateRoomModal,
+  AISessionSettingsModal,
 } from "@/features/rooms"
 import { useCreateAISessionMutation } from "@/store/api/roomsApi"
 
@@ -30,6 +31,7 @@ import CommunityPresence from "@/features/homepage/components/CommunityPresence"
 const RoomsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const { t } = useLanguage()
 
   const [showSwitchModal, setShowSwitchModal] = useState(false)
@@ -95,16 +97,22 @@ const RoomsPage = () => {
     })
   }
 
-  const handleCreateAI = () => {
+  // "1:1 with AI" button → open the pre-join settings modal.
+  const handleOpenAISettings = () => {
+    setIsSettingsModalOpen(true)
+  }
+
+  // Modal confirm → create the AI session with the chosen settings.
+  const handleCreateAI = (settings) => {
+    setIsSettingsModalOpen(false)
     actions.handleCreateAISession(async () => {
-      const language = lang === "zh" ? "chinese" : "english"
       try {
-        const result = await createAISession({ language }).unwrap()
+        const result = await createAISession(settings).unwrap()
         navigate(`/${lang}/meet/${result.roomId}`, {
-          state: { fromQueue: true },
+          state: { fromQueue: true, isAISession: true },
         })
       } catch (err) {
-        // Surface a console error; UI loading state will clear via the hook's finally block.
+        // Surface a console error; UI loading state clears via the hook's finally block.
         console.error("Failed to create AI session", err)
       }
     })
@@ -181,6 +189,12 @@ const RoomsPage = () => {
         open={isCreateRoomModalOpen}
         onCancel={() => setCreateRoomModalOpen(false)}
       />
+      <AISessionSettingsModal
+        open={isSettingsModalOpen}
+        urlLang={lang}
+        onConfirm={handleCreateAI}
+        onCancel={() => setIsSettingsModalOpen(false)}
+      />
       <AnimatePresence mode="wait">
         <FluentAnimation
           key="rooms-page"
@@ -198,7 +212,7 @@ const RoomsPage = () => {
                 <SessionActionButtons
                   handleCreateOneOnOneSession={handleCreateOneOnOne}
                   handleCreateStudyGroupSession={handleCreateStudyGroup}
-                  handleCreateAISession={handleCreateAI}
+                  handleCreateAISession={handleOpenAISettings}
                   isCreatingOneOnOne={state.isCreatingOneOnOne}
                   isCreatingStudyGroup={state.isCreatingStudyGroup}
                   isCreatingAI={state.isCreatingAI}
