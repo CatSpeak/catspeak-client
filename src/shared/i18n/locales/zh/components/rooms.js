@@ -165,6 +165,8 @@ export default {
     speedSlow: "慢",
     speedNormal: "正常",
     speedFast: "快",
+    proficiencyLabel: "语言水平",
+    proficiencyOptional: "可选",
     voice: "语音",
     voiceFemale: "女声",
     voiceMale: "男声",
