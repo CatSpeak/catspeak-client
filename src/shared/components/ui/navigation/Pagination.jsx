@@ -21,7 +21,7 @@ const Pagination = ({ page, totalPages, onChangePage }) => {
             "flex h-9 w-9 items-center justify-center rounded-full border",
             page === 1
               ? "border-gray-200 text-gray-300"
-              : "border-[#990011]/30 text-[#990011] hover:bg-[#990011]/5",
+              : "border-cath-red-700/30 text-cath-red-700 hover:bg-cath-red-700/5",
           ].join(" ")}
           aria-label="Trang trước"
         >
@@ -36,8 +36,8 @@ const Pagination = ({ page, totalPages, onChangePage }) => {
               className={[
                 "min-w-[36px] rounded-full px-3 py-1 text-sm font-semibold transition",
                 n === page
-                  ? "bg-[#990011] text-white"
-                  : "text-gray-600 hover:bg-[#990011]/5",
+                  ? "bg-cath-red-700 text-white"
+                  : "text-gray-600 hover:bg-cath-red-700/5",
               ].join(" ")}
             >
               {n}
@@ -55,8 +55,8 @@ const Pagination = ({ page, totalPages, onChangePage }) => {
             className={[
               "min-w-[36px] rounded-full px-3 py-1 text-sm font-semibold transition",
               page === totalPages
-                ? "bg-[#990011] text-white"
-                : "text-gray-600 hover:bg-[#990011]/5",
+                ? "bg-cath-red-700 text-white"
+                : "text-gray-600 hover:bg-cath-red-700/5",
             ].join(" ")}
           >
             {totalPages}
@@ -70,7 +70,7 @@ const Pagination = ({ page, totalPages, onChangePage }) => {
             "flex h-9 w-9 items-center justify-center rounded-full border",
             page === totalPages
               ? "border-gray-200 text-gray-300"
-              : "border-[#990011]/30 text-[#990011] hover:bg-[#990011]/5",
+              : "border-cath-red-700/30 text-cath-red-700 hover:bg-cath-red-700/5",
           ].join(" ")}
           aria-label="Trang tiếp"
         >

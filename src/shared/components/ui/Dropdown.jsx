@@ -3,7 +3,8 @@ import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import useClickOutside from "@/shared/hooks/useClickOutside"
+import colors from "@/shared/utils/colors"
 
 const Dropdown = ({
   options = [],
@@ -17,7 +18,7 @@ const Dropdown = ({
   triggerClassName = "",
   align = "left", // 'left' | 'right' | 'center'
   maxHeightClass = "max-h-[250px]",
-  activeColor = "#990011",
+  activeColor = colors.primaryRed,
   disabled = false,
   enableSearch = false,
   searchPlaceholder = "Search...",
@@ -28,15 +29,7 @@ const Dropdown = ({
   const dropdownRef = useRef(null)
   const searchInputRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   useEffect(() => {
     if (isOpen && enableSearch) {
@@ -214,7 +207,7 @@ const Dropdown = ({
                           <input
                             ref={searchInputRef}
                             type="text"
-                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-[#990011]"
+                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-cath-red-700"
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -223,7 +216,7 @@ const Dropdown = ({
                         </div>
                       </div>
                     )}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
                       <div className="flex flex-col gap-1 p-1">
                         {filteredOptions.length > 0 ? (
                           filteredOptions.map((option, idx) => {

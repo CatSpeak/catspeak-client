@@ -46,8 +46,8 @@ const PasswordScreen = ({ room, error, isLoading, onSubmit }) => {
           className="hidden"
         />
 
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#990011]/10 mb-2">
-          <Lock size={36} className="text-[#990011]" />
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cath-red-700/10 mb-2">
+          <Lock size={36} className="text-cath-red-700" />
         </div>
 
         <div className="text-center">
@@ -62,7 +62,7 @@ const PasswordScreen = ({ room, error, isLoading, onSubmit }) => {
           {room && (
             <div className="flex flex-wrap justify-center gap-2 mb-3 mt-2">
               {room.requiredLevel && (
-                <span className="rounded-full bg-[#990011] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                <span className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                   {room.requiredLevel}
                 </span>
               )}
@@ -72,7 +72,7 @@ const PasswordScreen = ({ room, error, isLoading, onSubmit }) => {
                   return (
                     <span
                       key={trimmed}
-                      className="rounded-full bg-[#990011] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
+                      className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
                     >
                       {t.rooms?.createRoom?.topics?.[trimmed.toLowerCase()] ||
                         trimmed}

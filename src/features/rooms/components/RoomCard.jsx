@@ -80,7 +80,7 @@ const RoomCard = ({ room }) => {
       <motion.div
         onClick={handleRoomClick}
         style={{
-          fontFamily: "var(--font-outfit)",
+          fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
         whileHover={{ y: -4 }}
@@ -98,7 +98,7 @@ const RoomCard = ({ room }) => {
           {/* Top Overlay: Tags & Bookmark */}
           <div className="absolute left-4 top-4 right-14 flex flex-wrap gap-2">
             {room.requiredLevel && (
-              <span className="rounded-full bg-[#990011] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                 {room.requiredLevel}
               </span>
             )}
@@ -108,7 +108,7 @@ const RoomCard = ({ room }) => {
                 return (
                   <span
                     key={trimmed}
-                    className="rounded-full bg-[#990011] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
+                    className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
                   >
                     {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
                       trimmed}
@@ -152,7 +152,7 @@ const RoomCard = ({ room }) => {
             {/* Participants */}
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-[#E5E5E5]">
-                <Users size={16} className="text-[#990011]" />
+                <Users size={16} className="text-cath-red-700" />
               </div>
               <span className="text-sm whitespace-nowrap">
                 {room.maxParticipants === null
@@ -164,7 +164,7 @@ const RoomCard = ({ room }) => {
             {/* Date/Time */}
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-[#E5E5E5]">
-                <Clock size={16} className="text-[#990011]" />
+                <Clock size={16} className="text-cath-red-700" />
               </div>
               <div className="flex items-center gap-2 text-sm">
                 {/* <span>{dateStr}</span> */}

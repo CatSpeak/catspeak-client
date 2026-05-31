@@ -15,12 +15,12 @@ const TopicFilter = () => {
     <div className="w-full">
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between h-10 px-2 text-sm font-semibold text-gray-800 hover:text-[#990011] transition-colors duration-200 cursor-pointer select-none group"
+        className="flex w-full items-center justify-between h-10 px-2 text-sm font-semibold text-gray-800 hover:text-cath-red-700 transition-colors duration-200 cursor-pointer select-none group"
       >
         <div className="flex items-center gap-2">
           <span>{t.rooms?.filters?.topicsHeading || "Topics"}</span>
           {selectedCount > 0 && (
-            <span className="flex items-center justify-center bg-[#990011] text-white text-xs rounded-full min-w-[20px] h-5 px-1">
+            <span className="flex items-center justify-center bg-cath-red-700 text-white text-xs rounded-full min-w-[20px] h-5 px-1">
               {selectedCount}
             </span>
           )}
@@ -33,7 +33,7 @@ const TopicFilter = () => {
                 e.stopPropagation()
                 clearAll()
               }}
-              className="px-3 h-10 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-[#990011] rounded-md transition-colors"
+              className="px-3 h-10 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-cath-red-700 rounded-md transition-colors"
             >
               {t.rooms?.filters?.clear || "Clear"}
             </button>
@@ -48,7 +48,7 @@ const TopicFilter = () => {
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}
       >
-        <div className="flex flex-col gap-0.5 pt-1 pb-2 max-h-[200px] overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar]:w-1.5 pr-1">
+        <div className="flex flex-col gap-0.5 pt-1 pb-2 max-h-[200px] overflow-y-auto scrollbar-app pr-1">
           {TOPICS.map((topic) => {
             const isChecked = isSelected(topic)
 
@@ -65,7 +65,7 @@ const TopicFilter = () => {
                   type="checkbox"
                   checked={isChecked}
                   onChange={(e) => toggleValue(topic, e.target.checked)}
-                  className="w-4 h-4 text-[#990011] bg-white accent-[#990011] cursor-pointer"
+                  className="w-4 h-4 text-cath-red-700 bg-white accent-cath-red-700 cursor-pointer"
                 />
                 <span className="text-sm">
                   {t.rooms?.createRoom?.topics?.[topic.toLowerCase()] || topic}

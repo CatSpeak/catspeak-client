@@ -9,7 +9,9 @@ import {
   useRoomsPageLogic,
   SessionActionButtons,
   CreateRoomModal,
+  AISessionSettingsModal,
 } from "@/features/rooms"
+import { useCreateAISessionMutation } from "@/store/api/roomsApi"
 
 import RoomFilterSidebar from "@/features/rooms/components/navigation/RoomFilterSidebar"
 import WelcomeSection from "@/features/homepage/components/WelcomeSection"
@@ -29,6 +31,7 @@ import CommunityPresence from "@/features/homepage/components/CommunityPresence"
 const RoomsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const { t } = useLanguage()
 
   const [showSwitchModal, setShowSwitchModal] = useState(false)
@@ -45,6 +48,7 @@ const RoomsPage = () => {
 
   // Session logic (moved from HomePage)
   const { state, actions } = useRoomsPageLogic()
+  const [createAISession] = useCreateAISessionMutation()
 
   const langMap = {
     en: "English",
@@ -90,6 +94,27 @@ const RoomsPage = () => {
   const handleCreateStudyGroup = () => {
     actions.handleCreateStudyGroupSession(() => {
       setCreateRoomModalOpen(true)
+    })
+  }
+
+  // "1:1 with AI" button → open the pre-join settings modal.
+  const handleOpenAISettings = () => {
+    setIsSettingsModalOpen(true)
+  }
+
+  // Modal confirm → create the AI session with the chosen settings.
+  const handleCreateAI = (settings) => {
+    setIsSettingsModalOpen(false)
+    actions.handleCreateAISession(async () => {
+      try {
+        const result = await createAISession(settings).unwrap()
+        navigate(`/${lang}/meet/${result.roomId}`, {
+          state: { fromQueue: true, isAISession: true },
+        })
+      } catch (err) {
+        // Surface a console error; UI loading state clears via the hook's finally block.
+        console.error("Failed to create AI session", err)
+      }
     })
   }
 
@@ -164,6 +189,12 @@ const RoomsPage = () => {
         open={isCreateRoomModalOpen}
         onCancel={() => setCreateRoomModalOpen(false)}
       />
+      <AISessionSettingsModal
+        open={isSettingsModalOpen}
+        urlLang={lang}
+        onConfirm={handleCreateAI}
+        onCancel={() => setIsSettingsModalOpen(false)}
+      />
       <AnimatePresence mode="wait">
         <FluentAnimation
           key="rooms-page"
@@ -181,8 +212,11 @@ const RoomsPage = () => {
                 <SessionActionButtons
                   handleCreateOneOnOneSession={handleCreateOneOnOne}
                   handleCreateStudyGroupSession={handleCreateStudyGroup}
+                  handleCreateAISession={handleOpenAISettings}
                   isCreatingOneOnOne={state.isCreatingOneOnOne}
                   isCreatingStudyGroup={state.isCreatingStudyGroup}
+                  isCreatingAI={state.isCreatingAI}
+                  canUseAI={state.canUseAI}
                 />
               </div>
 

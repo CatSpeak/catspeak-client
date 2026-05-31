@@ -2,6 +2,7 @@ import React from "react"
 import { useGetRegisteredEventsQuery } from "@/store/api/eventsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import EventList from "./EventList"
+import colors from "@/shared/utils/colors"
 
 const RegisteredEvents = () => {
   const { t } = useLanguage()
@@ -12,7 +13,7 @@ const RegisteredEvents = () => {
       title={t.calendar?.registered || "Đã đăng kí"}
       data={data}
       isLoading={isLoading}
-      defaultColor="#990011"
+      defaultColor={colors.primaryRed}
       eventFlags={{ isRegistered: true }}
     />
   )

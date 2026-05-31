@@ -12,14 +12,14 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
     if (isHorizontal) {
       return `relative flex items-center justify-center gap-2 px-4 h-10 whitespace-nowrap transition-colors flex-1 min-w-fit text-sm ${
         isActive
-          ? "font-medium text-[#990011] border-b-2 !border-b-[#990011]"
+          ? "font-medium text-cath-red-700 border-b-2 !border-b-cath-red-700"
           : "font-normal text-black hover:bg-gray-50 border-b-2 !border-b-transparent"
       }`
     }
 
     return `relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors mb-1 overflow-hidden ${
       isActive
-        ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
+        ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-cath-red-700 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-cath-red-700"
         : "font-normal text-black hover:bg-[#F2F2F2]"
     }`
   }

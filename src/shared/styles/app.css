@@ -31,11 +31,6 @@ p {
   animation: fadeIn 0.4s ease-out;
 }
 
-/* Custom scrollbar styling với tailwind-scrollbar */
-.scrollbar-thin {
-  scrollbar-width: thin;
-}
-
 /* Liquid Glass Effect */
 @keyframes liquid-shimmer {
   0% {

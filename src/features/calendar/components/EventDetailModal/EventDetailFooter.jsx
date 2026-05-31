@@ -21,10 +21,10 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   const isCreator = Boolean(
     user &&
-      event &&
-      (user.id === event.creatorId ||
-        user.username === event.creatorName ||
-        (user.fullName && user.fullName === event.creatorName))
+    event &&
+    (user.id === event.creatorId ||
+      user.username === event.creatorName ||
+      (user.fullName && user.fullName === event.creatorName)),
   )
 
   const isRegistered = event?.isRegistered ?? false
@@ -36,7 +36,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
     useRegisterForEventMutation()
   const [cancelRegistration, { isLoading: isCancelling }] =
     useCancelRegistrationMutation()
-  const [deleteRegistration, { isLoading: isDeletingReg }] = 
+  const [deleteRegistration, { isLoading: isDeletingReg }] =
     useDeleteRegistrationMutation()
 
   const isProcessing = isRegistering || isCancelling || isDeletingReg
@@ -54,8 +54,12 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           const body = {
             eventId,
             cancellationReason: "User cancelled",
-            ...(event?.occurrenceId ? { occurrenceId: event.occurrenceId } : {}),
-            ...(event?.isRecurring && event?.originalStartTime && !event?.occurrenceId
+            ...(event?.occurrenceId
+              ? { occurrenceId: event.occurrenceId }
+              : {}),
+            ...(event?.isRecurring &&
+            event?.originalStartTime &&
+            !event?.occurrenceId
               ? { registrationDate: event.originalStartTime }
               : {}),
           }
@@ -94,8 +98,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           (isCreator ? (
             <PillButton
               onClick={() => setShowParticipants(true)}
-              bgColor="#B91264"
-              className="flex-1"
+              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-cath-red-700"
             >
               {cal.viewParticipants || "Xem danh sách người đăng ký"}
             </PillButton>
@@ -119,7 +122,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             {event?.isRecurring && event?.occurrenceId ? (
               <>
                 <PillButton
-                  onClick={() => handleDelete('occurrence')}
+                  onClick={() => handleDelete("occurrence")}
                   loading={isDeleting}
                   loadingText={cal.deleting || "Đang xóa..."}
                   bgColor="#dc2626"
@@ -128,7 +131,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
                   {cal.deleteThisOccurrence || "Chỉ xóa buổi này"}
                 </PillButton>
                 <PillButton
-                  onClick={() => handleDelete('series')}
+                  onClick={() => handleDelete("series")}
                   loading={isDeleting}
                   loadingText={cal.deleting || "Đang xóa..."}
                   bgColor="#991b1b"
@@ -139,7 +142,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
               </>
             ) : (
               <PillButton
-                onClick={() => handleDelete('series')}
+                onClick={() => handleDelete("series")}
                 loading={isDeleting}
                 loadingText={cal.deleting || "Đang xóa..."}
                 bgColor="#dc2626"

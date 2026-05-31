@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import colors from "@/shared/utils/colors"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const DatePicker = ({
   value,
@@ -22,19 +23,7 @@ const DatePicker = ({
     value ? dayjs(value).startOf("month") : dayjs().startOf("month"),
   )
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target) &&
-        (!portalRef.current || !portalRef.current.contains(event.target))
-      ) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   useEffect(() => {
     if (value) {

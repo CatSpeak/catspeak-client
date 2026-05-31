@@ -13,6 +13,7 @@ import {
   RoomHeader,
 } from "@/features/video-call"
 import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
+import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -28,6 +29,8 @@ const VideoCallRoomContent = () => {
     setShowParticipants,
     showVirtualBackground,
     setShowVirtualBackground,
+    isAISession,
+    showCC,
     // Auth guard
     user,
     location,
@@ -79,6 +82,7 @@ const VideoCallRoomContent = () => {
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           <VideoGrid />
+          {isAISession && showCC && <SubtitleOverlay />}
         </div>
 
         {/* Desktop Side Panel */}

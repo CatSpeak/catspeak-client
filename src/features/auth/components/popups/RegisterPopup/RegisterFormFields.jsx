@@ -1,5 +1,3 @@
-import { useState } from "react"
-import { Eye, EyeOff, ChevronDown } from "lucide-react"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import FormDatePicker from "../../forms/FormDatePicker"
 import Dropdown from "@/shared/components/ui/Dropdown"
@@ -11,7 +9,6 @@ const RegisterFormFields = ({
   errors,
   setErrors,
 }) => {
-
   const languageOptions = [
     { value: "english", label: "English" },
     { value: "vietnamese", label: "Tiếng Việt" },
@@ -19,15 +16,75 @@ const RegisterFormFields = ({
   ]
 
   const countryOptions = [
-    { value: "vietnam", label: "Vietnam", icon: <img src={VietNam} className="w-[20px] h-[20px] rounded-full object-cover" alt="VN" /> },
-    { value: "usa", label: "United States", icon: <img src={USA} className="w-[20px] h-[20px] rounded-full object-cover" alt="US" /> },
-    { value: "china", label: "China", icon: <img src={China} className="w-[20px] h-[20px] rounded-full object-cover" alt="CN" /> },
+    {
+      value: "vietnam",
+      label: "Vietnam",
+      icon: (
+        <img
+          src={VietNam}
+          className="w-[20px] h-[20px] rounded-full object-cover"
+          alt="VN"
+        />
+      ),
+    },
+    {
+      value: "usa",
+      label: "United States",
+      icon: (
+        <img
+          src={USA}
+          className="w-[20px] h-[20px] rounded-full object-cover"
+          alt="US"
+        />
+      ),
+    },
+    {
+      value: "china",
+      label: "China",
+      icon: (
+        <img
+          src={China}
+          className="w-[20px] h-[20px] rounded-full object-cover"
+          alt="CN"
+        />
+      ),
+    },
   ]
 
   const phonePrefixes = [
-    { value: "+1", label: "United States", icon: <img src={USA} className="w-[20px] h-[20px] rounded-full object-cover" alt="US" /> },
-    { value: "+86", label: "China", icon: <img src={China} className="w-[20px] h-[20px] rounded-full object-cover" alt="CN" /> },
-    { value: "+84", label: "Vietnam", icon: <img src={VietNam} className="w-[20px] h-[20px] rounded-full object-cover" alt="VN" /> },
+    {
+      value: "+1",
+      label: "United States",
+      icon: (
+        <img
+          src={USA}
+          className="w-[20px] h-[20px] rounded-full object-cover"
+          alt="US"
+        />
+      ),
+    },
+    {
+      value: "+86",
+      label: "China",
+      icon: (
+        <img
+          src={China}
+          className="w-[20px] h-[20px] rounded-full object-cover"
+          alt="CN"
+        />
+      ),
+    },
+    {
+      value: "+84",
+      label: "Vietnam",
+      icon: (
+        <img
+          src={VietNam}
+          className="w-[20px] h-[20px] rounded-full object-cover"
+          alt="VN"
+        />
+      ),
+    },
   ]
 
   const handleChange = (field) => (e) => {
@@ -109,11 +166,17 @@ const RegisterFormFields = ({
                       className="flex items-center gap-1 pl-0 pr-1 h-full focus:outline-none cursor-pointer"
                     >
                       <span className="text-base leading-none">
-                        {phonePrefixes.find((p) => p.value === formData.phonePrefix)?.icon}
+                        {
+                          phonePrefixes.find(
+                            (p) => p.value === formData.phonePrefix,
+                          )?.icon
+                        }
                       </span>
                       <ChevronDown size={14} className="text-gray-500" />
                     </button>
-                    <span className="text-[#606060] text-sm ml-1">{formData.phonePrefix}</span>
+                    <span className="text-[#606060] text-sm ml-1">
+                      {formData.phonePrefix}
+                    </span>
                   </div>
                 }
               />
@@ -121,7 +184,9 @@ const RegisterFormFields = ({
             renderOption={(option, isSelected) => (
               <div
                 className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${
-                  isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
+                  isSelected
+                    ? "bg-[#F6F6F6] font-semibold"
+                    : "hover:bg-[#F6F6F6]"
                 }`}
               >
                 <span className="text-base shrink-0">{option.icon}</span>
@@ -156,12 +221,16 @@ const RegisterFormFields = ({
           <Dropdown
             placeholder={authText.languagePlaceholder}
             value={formData.preferredLanguage}
-            onChange={(val) => handleChange("preferredLanguage")({ target: { value: val } })}
+            onChange={(val) =>
+              handleChange("preferredLanguage")({ target: { value: val } })
+            }
             options={languageOptions}
             triggerClassName={errors.preferredLanguage ? "!border-red-600" : ""}
           />
           {errors.preferredLanguage && (
-            <p className="mt-1 text-xs text-red-600">{errors.preferredLanguage}</p>
+            <p className="mt-1 text-xs text-red-600">
+              {errors.preferredLanguage}
+            </p>
           )}
         </div>
       </div>
@@ -170,18 +239,20 @@ const RegisterFormFields = ({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <label className="block text-sm mb-2">{authText.passwordLabel}</label>
-          <TextInput
-            type="password"
-            variant="square"
-            placeholder={authText.passwordPlaceholder}
-            value={formData.password}
-            onChange={handleChange("password")}
-            className={
-              errors.password
-                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                : ""
-            }
-          />
+          <div className="relative">
+            <TextInput
+              type="password"
+              variant="square"
+              placeholder={authText.passwordPlaceholder}
+              value={formData.password}
+              onChange={handleChange("password")}
+              className={`pr-12 ${
+                errors.password
+                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                  : ""
+              }`}
+            />
+          </div>
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password}</p>
           )}
@@ -192,7 +263,9 @@ const RegisterFormFields = ({
           <Dropdown
             placeholder={authText.countryPlaceholder}
             value={formData.country}
-            onChange={(val) => handleChange("country")({ target: { value: val } })}
+            onChange={(val) =>
+              handleChange("country")({ target: { value: val } })
+            }
             options={countryOptions}
             triggerClassName={errors.country ? "!border-red-600" : ""}
             trigger={
@@ -203,9 +276,13 @@ const RegisterFormFields = ({
                 }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
-                  {countryOptions.find(c => c.value === formData.country)?.icon}
+                  {
+                    countryOptions.find((c) => c.value === formData.country)
+                      ?.icon
+                  }
                   <span className="truncate">
-                    {countryOptions.find(c => c.value === formData.country)?.label || authText.countryPlaceholder}
+                    {countryOptions.find((c) => c.value === formData.country)
+                      ?.label || authText.countryPlaceholder}
                   </span>
                 </div>
                 <ChevronDown size={14} className="shrink-0 text-gray-500" />
