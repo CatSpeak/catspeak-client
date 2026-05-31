@@ -8,6 +8,7 @@ export const VOICE_AVAILABILITY = {
 export const DEFAULT_AI_SETTINGS = {
   speed: 1.0,
   voice: "female",
+  proficiencyLevel: null,
 }
 
 export const SPEED_CONFIG = {

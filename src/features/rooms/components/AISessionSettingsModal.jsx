@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import Slider from "@/shared/components/ui/Slider"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { LEVELS } from "../config/constants"
 import {
   VOICE_AVAILABILITY,
   DEFAULT_AI_SETTINGS,
@@ -14,14 +15,26 @@ import {
 const VOICES = ["female", "male"]
 
 // Map the URL lang param to the foreign-language value used by the modal/backend.
-const foreignLanguageForUrlLang = (urlLang) =>
-  urlLang === "zh" ? "chinese" : "english"
+const languageForUrlLang = (urlLang) => {
+  if (urlLang === "zh") {
+    return { apiValue: "chinese", levelsKey: "Chinese" }
+  }
+  if (urlLang === "vi") {
+    return { apiValue: "vietnamese", levelsKey: "Vietnamese" }
+  }
+  return { apiValue: "english", levelsKey: "English" }
+}
 
 const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
   const { t } = useLanguage()
   const s = t.rooms.aiSettings
 
-  const foreignLanguage = foreignLanguageForUrlLang(urlLang)
+  const { apiValue: foreignLanguage, levelsKey } = languageForUrlLang(urlLang)
+  const proficiencyLevels = useMemo(() => LEVELS[levelsKey] ?? [], [levelsKey])
+  const availableSupportLanguages = useMemo(
+    () => SUPPORT_LANGUAGES.filter((value) => value !== foreignLanguage),
+    [foreignLanguage],
+  )
 
   // Human-readable label for a language value.
   const languageLabel = (value) =>
@@ -36,6 +49,12 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
   const [supportLanguage, setSupportLanguage] = useState(null)
   const [speed, setSpeed] = useState(SPEED_CONFIG.default)
   const [voice, setVoice] = useState(DEFAULT_AI_SETTINGS.voice)
+  const [proficiencyLevel, setProficiencyLevel] = useState(
+    DEFAULT_AI_SETTINGS.proficiencyLevel,
+  )
+
+  const isValidProficiencyLevel = (value) =>
+    proficiencyLevels.some((level) => level.value === value)
 
   // Load persisted settings (or defaults) every time the modal opens.
   useEffect(() => {
@@ -50,7 +69,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
     }
 
     // supportLanguage is persisted; learningLanguage is always re-derived from URL.
-    const savedSupport = SUPPORT_LANGUAGES.includes(saved?.supportLanguage)
+    const savedSupport = availableSupportLanguages.includes(saved?.supportLanguage)
       ? saved.supportLanguage
       : null
     setSupportLanguage(savedSupport)
@@ -62,10 +81,14 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
     setSpeed(
       typeof saved?.speed === "number" ? saved.speed : SPEED_CONFIG.default,
     )
-  }, [open, foreignLanguage])
+    const savedProficiency = isValidProficiencyLevel(saved?.proficiencyLevel)
+      ? saved.proficiencyLevel
+      : DEFAULT_AI_SETTINGS.proficiencyLevel
+    setProficiencyLevel(savedProficiency)
+  }, [open, foreignLanguage, proficiencyLevels, availableSupportLanguages])
 
   const handleConfirm = () => {
-    const settings = { supportLanguage, speed, voice }
+    const settings = { supportLanguage, speed, voice, proficiencyLevel }
     try {
       localStorage.setItem(AI_SETTINGS_STORAGE_KEY, JSON.stringify(settings))
     } catch {
@@ -76,6 +99,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
       supportLanguage,
       speed,
       voice,
+      proficiencyLevel,
     })
   }
 
@@ -115,7 +139,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
             >
               {s.supportNone}
             </button>
-            {SUPPORT_LANGUAGES.map((value) => (
+            {availableSupportLanguages.map((value) => (
               <button
                 key={value}
                 type="button"
@@ -147,6 +171,29 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
             <span>{s.speedSlow}</span>
             <span>{s.speedNormal}</span>
             <span>{s.speedFast}</span>
+          </div>
+        </div>
+
+        {/* Proficiency Level — optional, matches Create Room levels */}
+        <div className="text-left flex flex-col">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <label className="text-sm">{s.proficiencyLabel}</label>
+            <span className="text-xs text-[#7A7574]">{s.proficiencyOptional}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {proficiencyLevels.map((level) => {
+              const isSelected = proficiencyLevel === level.value
+              return (
+                <button
+                  key={level.value}
+                  type="button"
+                  onClick={() => setProficiencyLevel(isSelected ? null : level.value)}
+                  className={pillClass(isSelected)}
+                >
+                  {level.label}
+                </button>
+              )
+            })}
           </div>
         </div>
 

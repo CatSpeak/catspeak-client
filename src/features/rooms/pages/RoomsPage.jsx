@@ -17,7 +17,6 @@ import RoomFilterSidebar from "@/features/rooms/components/navigation/RoomFilter
 import WelcomeSection from "@/features/homepage/components/WelcomeSection"
 import { WorkshopCarousel } from "@/features/workshops"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { PageNotFound } from "@/shared/pages"
 import { AnimatePresence } from "framer-motion"
 import {
   FadeAnimation,
@@ -168,11 +167,6 @@ const RoomsPage = () => {
   const rooms = responseData?.data ?? []
   const additionalData = responseData?.additionalData ?? {}
   const totalPages = additionalData.totalPages || 1
-
-  // Force 404 for Vietnamese language (after all hooks)
-  if (languageType?.includes("Vietnamese")) {
-    return <PageNotFound />
-  }
 
   const switchModal = (
     <SwitchCallModal
