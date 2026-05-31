@@ -115,10 +115,17 @@ export const reelsApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData, // FormData containing Title, Description, Privacy, VideoFile, CoverFile
       }),
-      invalidatesTags: [
-        { type: "Reels", id: "FEED" },
-        { type: "Reels", id: "USER_REELS" },
-      ],
+      invalidatesTags: (result, error, formData) => {
+        const challengeId = typeof formData?.get === "function"
+          ? formData.get("ChallengeId")
+          : null
+
+        return [
+          { type: "Reels", id: "FEED" },
+          { type: "Reels", id: "USER_REELS" },
+          challengeId ? { type: "Reels", id: `CHALLENGE_${challengeId}` } : null,
+        ].filter(Boolean)
+      },
     }),
 
     // Search #hashtags for Reel description autocomplete
@@ -243,13 +250,20 @@ export const reelsApi = baseApi.injectEndpoints({
     getReelsByChallenge: builder.query({
       query: ({ challengeId, page = 1, pageSize = 10 } = {}) =>
         `/Reels/challenge/${challengeId}?page=${page}&pageSize=${pageSize}`,
-      providesTags: (result) =>
-        result?.data
-          ? [
-            ...result.data.map(({ reelId }) => ({ type: "Reels", id: String(reelId) })),
-            { type: "Reels", id: "FEED" },
-          ]
-          : [{ type: "Reels", id: "FEED" }],
+      providesTags: (result, error, { challengeId } = {}) => {
+        const challengeTag = challengeId
+          ? { type: "Reels", id: `CHALLENGE_${challengeId}` }
+          : null
+        const listTags = result?.data
+          ? result.data.map(({ reelId }) => ({ type: "Reels", id: String(reelId) }))
+          : []
+
+        return [
+          ...listTags,
+          { type: "Reels", id: "FEED" },
+          challengeTag,
+        ].filter(Boolean)
+      },
     }),
 
     // Get challenge leaderboard ranking list

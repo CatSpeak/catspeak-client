@@ -12,6 +12,34 @@ import {
 
 const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
 const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
+const DESCRIPTION_MAX_LENGTH = 500
+
+const normalizeChallengeHashtag = (challenge) => {
+  const rawHashtag = String(challenge?.hashtag || "").trim()
+  if (!rawHashtag) return ""
+
+  const hashtag = rawHashtag.replace(/^#+/, "").replace(/\s+/g, "")
+  return hashtag ? `#${hashtag}` : ""
+}
+
+const buildChallengeDescription = (lockedHashtag, value = "") => {
+  const text = String(value || "").slice(0, DESCRIPTION_MAX_LENGTH)
+
+  if (!lockedHashtag) return text
+
+  // If the text already contains the locked hashtag, keep it as is
+  if (text.includes(lockedHashtag)) {
+    return text
+  }
+
+  // If text is empty or only whitespace, return the hashtag with a space
+  if (!text.trim()) {
+    return `${lockedHashtag} `
+  }
+
+  // If it doesn't contain the hashtag, append it at the end
+  return `${text} ${lockedHashtag}`.slice(0, DESCRIPTION_MAX_LENGTH)
+}
 
 const detectDescriptionTrigger = (value, caretPosition = value.length) => {
   const beforeCaret = value.slice(0, caretPosition)
@@ -73,13 +101,14 @@ const renderHighlightedDescription = (text, tokenClassName) => {
   return parts
 }
 
-const CreateReelModal = ({ open, onClose }) => {
+const CreateReelModal = ({ open, onClose, challenge = null }) => {
   // RTK Query Mutation Hook
   const [createReel, { isLoading, isSuccess, error: apiError }] = useCreateReelMutation()
+  const lockedChallengeHashtag = useMemo(() => normalizeChallengeHashtag(challenge), [challenge])
 
   // Form states
   const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
+  const [description, setDescription] = useState(() => buildChallengeDescription(lockedChallengeHashtag))
   const [activeDescriptionTrigger, setActiveDescriptionTrigger] = useState(null)
   const [debouncedDescriptionTrigger, setDebouncedDescriptionTrigger] = useState(null)
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
@@ -184,6 +213,13 @@ const CreateReelModal = ({ open, onClose }) => {
   const showDescriptionSuggestions = hasSettledDescriptionTrigger
 
   useEffect(() => {
+    if (!open) return
+    setDescription((currentDescription) =>
+      buildChallengeDescription(lockedChallengeHashtag, currentDescription)
+    )
+  }, [open, lockedChallengeHashtag])
+
+  useEffect(() => {
     if (!activeDescriptionTrigger) {
       setDebouncedDescriptionTrigger(null)
       return undefined
@@ -200,10 +236,12 @@ const CreateReelModal = ({ open, onClose }) => {
     setActiveSuggestionIndex(0)
   }, [activeDescriptionTrigger?.type, activeDescriptionTrigger?.query, activeSuggestions.length])
 
+  // No longer locking prefix at the front, cursor will snap to hashtag boundaries dynamically
+
   // Handle closing modal and resetting form/previews
   const handleClose = useCallback(() => {
     setTitle("")
-    setDescription("")
+    setDescription(buildChallengeDescription(lockedChallengeHashtag))
     setActiveDescriptionTrigger(null)
     setDebouncedDescriptionTrigger(null)
     setActiveSuggestionIndex(0)
@@ -240,7 +278,7 @@ const CreateReelModal = ({ open, onClose }) => {
     setGeneralError("")
 
     onClose()
-  }, [videoPreviewUrl, coverPreviewUrl, onClose])
+  }, [lockedChallengeHashtag, videoPreviewUrl, coverPreviewUrl, onClose])
 
   // Revoke object URLs on unmount to avoid memory leaks
   useEffect(() => {
@@ -267,7 +305,7 @@ const CreateReelModal = ({ open, onClose }) => {
   // Discard/Clear video file
   const handleDiscardVideo = () => {
     setTitle("")
-    setDescription("")
+    setDescription(buildChallengeDescription(lockedChallengeHashtag))
     setActiveDescriptionTrigger(null)
     setDebouncedDescriptionTrigger(null)
     setActiveSuggestionIndex(0)
@@ -614,14 +652,50 @@ const CreateReelModal = ({ open, onClose }) => {
   }, [])
 
   const handleDescriptionChange = useCallback((e) => {
-    const nextDescription = e.target.value
+    const rawDescription = e.target.value
+    const nextDescription = buildChallengeDescription(lockedChallengeHashtag, rawDescription)
+    const rawCaretPosition = e.target.selectionStart ?? rawDescription.length
+
     setDescription(nextDescription)
-    updateDescriptionTrigger(nextDescription, e.target.selectionStart ?? nextDescription.length)
-  }, [updateDescriptionTrigger])
+    updateDescriptionTrigger(nextDescription, rawCaretPosition)
+
+    if (nextDescription !== rawDescription) {
+      const nextCaretPosition = Math.min(rawCaretPosition, nextDescription.length)
+      window.requestAnimationFrame(() => {
+        if (!descriptionInputRef.current) return
+        descriptionInputRef.current.setSelectionRange(nextCaretPosition, nextCaretPosition)
+      })
+    }
+  }, [
+    lockedChallengeHashtag,
+    updateDescriptionTrigger,
+  ])
 
   const handleDescriptionCursorUpdate = useCallback((e) => {
-    updateDescriptionTrigger(e.target.value, e.target.selectionStart ?? e.target.value.length)
-  }, [updateDescriptionTrigger])
+    const input = e.currentTarget
+    if (lockedChallengeHashtag) {
+      const val = input.value
+      const startIndex = val.indexOf(lockedChallengeHashtag)
+      if (startIndex !== -1) {
+        const endIndex = startIndex + lockedChallengeHashtag.length
+        const selStart = input.selectionStart ?? val.length
+        const selEnd = input.selectionEnd ?? selStart
+
+        // Snap the caret if it is strictly inside the hashtag range
+        if (selStart === selEnd) {
+          if (selStart > startIndex && selStart < endIndex) {
+            const midPoint = startIndex + Math.floor(lockedChallengeHashtag.length / 2)
+            const snapPos = selStart < midPoint ? startIndex : endIndex
+            input.setSelectionRange(snapPos, snapPos)
+            updateDescriptionTrigger(val, snapPos)
+            return
+          }
+        }
+      }
+    }
+    const caretPosition = input.selectionStart ?? input.value.length
+    updateDescriptionTrigger(input.value, caretPosition)
+  }, [lockedChallengeHashtag, updateDescriptionTrigger])
 
   const handleDescriptionScroll = useCallback((e) => {
     if (!descriptionHighlightRef.current) return
@@ -641,7 +715,8 @@ const CreateReelModal = ({ open, onClose }) => {
     const completion = `${activeDescriptionTrigger.marker}${completionValue}`
     const suffix = description.slice(activeDescriptionTrigger.end)
     const separator = suffix && /^\s/.test(suffix) ? "" : " "
-    const nextDescription = `${description.slice(0, activeDescriptionTrigger.start)}${completion}${separator}${suffix}`.slice(0, 500)
+    const nextDescription = `${description.slice(0, activeDescriptionTrigger.start)}${completion}${separator}${suffix}`
+      .slice(0, DESCRIPTION_MAX_LENGTH)
     const nextCaretPosition = Math.min(
       activeDescriptionTrigger.start + completion.length + separator.length,
       nextDescription.length
@@ -660,6 +735,37 @@ const CreateReelModal = ({ open, onClose }) => {
   }, [activeDescriptionTrigger, description])
 
   const handleDescriptionKeyDown = useCallback((e) => {
+    if (lockedChallengeHashtag) {
+      const val = e.currentTarget.value
+      const startIndex = val.indexOf(lockedChallengeHashtag)
+      if (startIndex !== -1) {
+        const endIndex = startIndex + lockedChallengeHashtag.length
+        const selectionStart = e.currentTarget.selectionStart ?? 0
+        const selectionEnd = e.currentTarget.selectionEnd ?? selectionStart
+        const key = e.key
+        const isPrintableInput = key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey
+
+        const selectionOverlaps = selectionStart < endIndex && selectionEnd > startIndex
+        const isProtectedBackspace = key === "Backspace" && selectionStart === selectionEnd && selectionStart === endIndex
+        const isProtectedDelete = key === "Delete" && selectionStart === selectionEnd && selectionStart === startIndex
+
+        if (selectionOverlaps) {
+          const isModifyingKey = isPrintableInput || key === "Backspace" || key === "Delete" || key === "Enter"
+          const isClipboardEdit = (e.metaKey || e.ctrlKey) && (key.toLowerCase() === "x" || key.toLowerCase() === "v")
+
+          if (isModifyingKey || isClipboardEdit) {
+            e.preventDefault()
+            return
+          }
+        }
+
+        if (isProtectedBackspace || isProtectedDelete) {
+          e.preventDefault()
+          return
+        }
+      }
+    }
+
     if (!showDescriptionSuggestions) return
 
     if (e.key === "Escape") {
@@ -692,8 +798,26 @@ const CreateReelModal = ({ open, onClose }) => {
     activeSuggestionIndex,
     activeSuggestions,
     applyDescriptionSuggestion,
+    lockedChallengeHashtag,
     showDescriptionSuggestions,
   ])
+
+  const handleDescriptionProtectedClipboard = useCallback((e) => {
+    if (!lockedChallengeHashtag) return
+
+    const val = e.currentTarget.value
+    const startIndex = val.indexOf(lockedChallengeHashtag)
+    if (startIndex === -1) return
+    const endIndex = startIndex + lockedChallengeHashtag.length
+
+    const selectionStart = e.currentTarget.selectionStart ?? 0
+    const selectionEnd = e.currentTarget.selectionEnd ?? selectionStart
+
+    const selectionOverlaps = selectionStart < endIndex && selectionEnd > startIndex
+    if (selectionOverlaps) {
+      e.preventDefault()
+    }
+  }, [lockedChallengeHashtag])
 
   // Form Submit Handler
   const handleSubmit = async (e) => {
@@ -720,9 +844,13 @@ const CreateReelModal = ({ open, onClose }) => {
     try {
       const formData = new FormData()
       formData.append("Title", title.trim())
-      formData.append("Description", description.trim())
+      formData.append("Description", buildChallengeDescription(lockedChallengeHashtag, description).trim())
       formData.append("Privacy", privacy)
       formData.append("VideoFile", videoFile)
+
+      if (challenge?.challengeId) {
+        formData.append("ChallengeId", String(challenge.challengeId))
+      }
 
       if (coverFile) {
         formData.append("CoverFile", coverFile)
@@ -1020,6 +1148,8 @@ const CreateReelModal = ({ open, onClose }) => {
                         onKeyUp={handleDescriptionCursorUpdate}
                         onClick={handleDescriptionCursorUpdate}
                         onSelect={handleDescriptionCursorUpdate}
+                        onCut={handleDescriptionProtectedClipboard}
+                        onPaste={handleDescriptionProtectedClipboard}
                         onScroll={handleDescriptionScroll}
                         onBlur={() => {
                           window.setTimeout(() => {
@@ -1027,7 +1157,7 @@ const CreateReelModal = ({ open, onClose }) => {
                             setDebouncedDescriptionTrigger(null)
                           }, 120)
                         }}
-                        maxLength={500}
+                        maxLength={DESCRIPTION_MAX_LENGTH}
                         rows={3}
                         className="relative z-10 min-h-[84px] w-full resize-none rounded-xl bg-transparent p-3 text-sm leading-5 text-transparent caret-gray-900 outline-none placeholder:text-gray-400"
                       />
@@ -1052,7 +1182,7 @@ const CreateReelModal = ({ open, onClose }) => {
                     )}
                   </div>
                   <span className="self-end px-2 text-[10px] text-gray-400 font-semibold">
-                    {description.length} / 500
+                    {description.length} / {DESCRIPTION_MAX_LENGTH}
                   </span>
                 </div>
 
