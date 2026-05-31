@@ -23,6 +23,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [remember, setRemember] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [passwordError, setPasswordError] = useState("")
+  const [isNotActivatedError, setIsNotActivatedError] = useState(false)
 
   const [login, { isLoading }] = useLoginMutation()
   const [resendEmailOtp, { isLoading: isResendingOtp }] =
