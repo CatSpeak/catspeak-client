@@ -57,6 +57,7 @@ const VideoTile = ({ participant, onClick }) => {
   }
   const meta = parseMetadata(participant.metadata)
   const isHandRaised = meta.handRaised === true
+  const avatarUrl = meta.meetingAvatarUrl || meta.avatarImageUrl || meta.avatarUrl
 
   const theme = useMemo(
     () => getParticipantTheme(participant.identity),
@@ -115,6 +116,8 @@ const VideoTile = ({ participant, onClick }) => {
           <Avatar
             size={64}
             name={displayName || "?"}
+            src={avatarUrl}
+            isCurrentUser={isLocal}
             speaking={false}
             className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${theme.avatarClass}`}
           />

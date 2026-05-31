@@ -13,6 +13,7 @@ import {
   RoomHeader,
 } from "@/features/video-call"
 import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
+import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -28,6 +29,8 @@ const VideoCallRoomContent = () => {
     setShowParticipants,
     showVirtualBackground,
     setShowVirtualBackground,
+    showAvatarPicker,
+    setShowAvatarPicker,
     // Auth guard
     user,
     location,
@@ -42,12 +45,14 @@ const VideoCallRoomContent = () => {
     enterPiP,
   } = useVideoCallContext()
 
-  const isSidePanelOpen = showChat || showParticipants || showVirtualBackground
+  const isSidePanelOpen = showChat || showParticipants || showVirtualBackground || showAvatarPicker
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
     : showVirtualBackground
       ? t.rooms?.videoCall?.applyVisualEffects || "Backgrounds and effects"
-      : t.rooms.chatBox.title
+      : showAvatarPicker
+        ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
+        : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -95,7 +100,8 @@ const VideoCallRoomContent = () => {
               <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-lg shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <VirtualBackgroundPicker />}
-                {showChat && !showParticipants && !showVirtualBackground && (
+                {showAvatarPicker && <AvatarUrlPicker />}
+                {showChat && !showParticipants && !showVirtualBackground && !showAvatarPicker && (
                   <ChatBox
                     messages={messages}
                     currentUser={user}
@@ -123,6 +129,7 @@ const VideoCallRoomContent = () => {
                   setShowChat(false)
                   setShowParticipants(false)
                   setShowVirtualBackground(false)
+                  setShowAvatarPicker(false)
                 }}
               >
                 <motion.div
@@ -140,6 +147,7 @@ const VideoCallRoomContent = () => {
                       setShowChat(false)
                       setShowParticipants(false)
                       setShowVirtualBackground(false)
+                      setShowAvatarPicker(false)
                     }}
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
@@ -153,9 +161,11 @@ const VideoCallRoomContent = () => {
                   <div className="flex-1 overflow-y-auto">
                     {showParticipants && <ParticipantList hideTitle />}
                     {showVirtualBackground && <VirtualBackgroundPicker />}
+                    {showAvatarPicker && <AvatarUrlPicker />}
                     {showChat &&
                       !showParticipants &&
-                      !showVirtualBackground && (
+                      !showVirtualBackground &&
+                      !showAvatarPicker && (
                         <ChatBox
                           messages={messages}
                           currentUser={user}

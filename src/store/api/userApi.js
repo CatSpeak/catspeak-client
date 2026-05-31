@@ -24,7 +24,20 @@ export const userApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+    updateMeetingAvatar: builder.mutation({
+      query: (data) => ({
+        url: "/user-profile/meeting-avatar",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["UserProfile"],
+    }),
   }),
 })
 
-export const { useGetUserProfileQuery, useUpdateUserProfileMutation, useChangePasswordMutation } = userApi
+export const {
+  useGetUserProfileQuery,
+  useUpdateUserProfileMutation,
+  useChangePasswordMutation,
+  useUpdateMeetingAvatarMutation,
+} = userApi

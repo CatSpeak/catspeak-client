@@ -4,7 +4,9 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
+  useUpdateMeetingAvatarMutation,
 } from "@/store/api/userApi"
+import { toast } from "react-hot-toast"
 
 import ProfileHeader from "../components/ProfileHeader"
 import BasicInfoSection from "../components/BasicInfoSection"
@@ -19,6 +21,7 @@ const PersonalInformationPage = () => {
 
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateUserProfileMutation()
+  const [updateMeetingAvatar] = useUpdateMeetingAvatarMutation()
 
   const [formData, setFormData] = useState({
     username: "",
@@ -30,6 +33,7 @@ const PersonalInformationPage = () => {
     phoneNumber: "",
     country: "",
     avatarImageUrl: "",
+    meetingAvatarUrl: "",
   })
 
   const [editingField, setEditingField] = useState(null)
@@ -46,6 +50,7 @@ const PersonalInformationPage = () => {
         phoneNumber: profileData.data.phoneNumber || "",
         country: profileData.data.country || "",
         avatarImageUrl: profileData.data.avatarImageUrl || "",
+        meetingAvatarUrl: profileData.data.meetingAvatarUrl || "",
       })
     }
   }, [profileData])
@@ -101,14 +106,32 @@ const PersonalInformationPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleUpdateAvatarUrl = async (url) => {
+    try {
+      await updateMeetingAvatar({ meetingAvatarUrl: url }).unwrap()
+      toast.success(t?.profile?.personalInfo?.avatarUpdated || "Avatar updated successfully")
+    } catch (err) {
+      console.error("Failed to update avatar", err)
+      toast.error(t?.profile?.personalInfo?.avatarUpdateFailed || "Failed to update avatar")
+    }
+  }
+
   if (isLoading) return <div>Loading...</div>
+
+  // Use meetingAvatarUrl if available, otherwise fallback to avatarImageUrl
+  const displayAvatarUrl = formData.meetingAvatarUrl || formData.avatarImageUrl
 
   return (
     <div className="w-full flex flex-col gap-6">
       <PageTitle>{t.profile?.personalInfo?.title}</PageTitle>
 
       <FluentCard className="flex flex-col gap-6">
-        <ProfileHeader avatarImageUrl={formData.avatarImageUrl} username={formData.username} t={t} />
+        <ProfileHeader 
+          avatarImageUrl={displayAvatarUrl} 
+          onUpdateAvatarUrl={handleUpdateAvatarUrl}
+          username={formData.username} 
+          t={t} 
+        />
 
         <BasicInfoSection
           formData={formData}

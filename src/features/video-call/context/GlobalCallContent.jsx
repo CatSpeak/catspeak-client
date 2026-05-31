@@ -53,6 +53,7 @@ const GlobalCallContent = ({
   const [unreadRoomChat, setUnreadRoomChat] = useState(0)
   const [unreadAiChat, setUnreadAiChat] = useState(0)
   const [showVirtualBackground, setShowVirtualBackground] = useState(false)
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false)
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -327,6 +328,8 @@ const GlobalCallContent = ({
     setUnreadAiChat,
     showVirtualBackground,
     setShowVirtualBackground,
+    showAvatarPicker,
+    setShowAvatarPicker,
 
     // Chat
     messages: chatMessages,

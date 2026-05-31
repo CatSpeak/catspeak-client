@@ -46,7 +46,11 @@ const CategoryRoomSection = ({
   // Report totalCount to parent for sorting
   const lastReportedCount = useRef(null)
   useEffect(() => {
-    if (onTotalCountLoaded && !isLoading && lastReportedCount.current !== totalCount) {
+    if (
+      onTotalCountLoaded &&
+      !isLoading &&
+      lastReportedCount.current !== totalCount
+    ) {
       lastReportedCount.current = totalCount
       onTotalCountLoaded(categoryKey, totalCount)
     }
@@ -201,7 +205,7 @@ const CategoryRoomSection = ({
             direction="none"
             duration={0.15}
             exit={true}
-            className={`grid ${gridCols} gap-4 w-full`}
+            className={`grid ${gridCols} gap-3 w-full`}
           >
             {isLoading || isFetching
               ? Array.from({ length: itemsPerPage }).map((_, idx) => (
