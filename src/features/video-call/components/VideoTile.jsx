@@ -57,7 +57,8 @@ const VideoTile = ({ participant, onClick }) => {
   }
   const meta = parseMetadata(participant.metadata)
   const isHandRaised = meta.handRaised === true
-  const avatarUrl = meta.meetingAvatarUrl || meta.avatarImageUrl || meta.avatarUrl
+  const avatarUrl =
+    meta.meetingAvatarUrl || meta.avatarImageUrl || meta.avatarUrl
 
   const theme = useMemo(
     () => getParticipantTheme(participant.identity),
@@ -90,7 +91,7 @@ const VideoTile = ({ participant, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-lg border-solid transition-all duration-200 ease-in-out [container-type:inline-size] ${
+      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl border-solid transition-all duration-200 ease-in-out [container-type:inline-size] ${
         isVideoVisible ? "border-0 bg-neutral-900" : "border-2"
       } ${
         isSpeaking
