@@ -29,6 +29,7 @@ export default {
   startTime: "Thời gian bắt đầu",
   endTime: "Thời gian kết thúc",
   endsOn: "Kết thúc vào",
+  timezone: "Múi giờ",
   recurrence: {
     noRepeat: "Không lặp lại",
     daily: "Hàng ngày",

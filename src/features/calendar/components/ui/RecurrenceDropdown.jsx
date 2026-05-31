@@ -28,7 +28,7 @@ const RecurrenceDropdown = ({ value, onChange, activeColor }) => {
       }}
       activeColor={activeColor}
       className="w-full"
-      dropdownClassName="left-0 right-0 w-full"
+      dropdownClassName="w-full min-w-[180px]"
     />
   )
 }

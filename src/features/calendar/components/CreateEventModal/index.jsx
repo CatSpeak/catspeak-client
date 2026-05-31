@@ -16,12 +16,12 @@ const CreateEventModal = ({ onClose, editEvent }) => {
       open
       onClose={onClose}
       showCloseButton={false}
-      className="p-0 !max-w-[900px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible max-[425px]:h-full"
-      bodyClassName="flex-1"
+      className="flex flex-col p-0 !max-w-[900px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible max-[425px]:h-full"
+      bodyClassName="flex-1 flex flex-col min-h-0"
     >
       <form
         onSubmit={form.handleSubmit}
-        className="relative flex flex-col w-full bg-white rounded-none min-[426px]:rounded-xl min-[426px]:max-h-[90vh] h-full"
+        className="relative flex flex-col w-full bg-white rounded-none min-[426px]:rounded-xl min-[426px]:max-h-[90vh] flex-1 min-h-0"
       >
         {/* Floating close button */}
         <button
@@ -44,7 +44,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
           />
         </div>
 
-        <div className="flex-1 overflow-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:m-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+        <div className="flex-1 min-h-0 overflow-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:m-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
           {/* Body */}
           <div className="p-6 relative bg-white text-base">
             <div className="flex flex-col gap-6">

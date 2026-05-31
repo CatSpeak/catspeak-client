@@ -29,6 +29,7 @@ export default {
   startTime: "Start time",
   endTime: "End time",
   endsOn: "Ends on",
+  timezone: "Timezone",
   recurrence: {
     noRepeat: "No repeat",
     daily: "Daily",

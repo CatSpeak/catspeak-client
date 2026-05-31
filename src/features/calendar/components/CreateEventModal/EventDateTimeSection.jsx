@@ -48,10 +48,7 @@ const EventDateTimeSection = ({
     [cal],
   )
 
-  const WEEKLY_OPTIONS = useMemo(
-    () => ["WEEKLY", "CUSTOM"],
-    [],
-  )
+  const WEEKLY_OPTIONS = useMemo(() => ["WEEKLY", "CUSTOM"], [])
 
   const isRecurring = recurrenceOption !== "NONE"
   const isWeekly = WEEKLY_OPTIONS.includes(recurrenceOption)
@@ -77,102 +74,120 @@ const EventDateTimeSection = ({
   ])
 
   return (
-    <div className="flex flex-col gap-4 items-start w-full">
-      {/* Start / End time */}
-      <div className="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
-        <div className="flex flex-col justify-between gap-3 w-full md:w-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-            <span className="text-base w-[150px] shrink-0">
-              {cal.startTime}
-            </span>
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
-              <DatePicker
-                value={toDate(startTime)}
-                onChange={(d) => onStartTimeChange(d)}
-                color={eventColor}
-              />
-              <TimeDropdown
-                value={formatTime(toDate(startTime))}
-                color={eventColor}
-                onChange={(hhmm) => {
-                  const [h, m] = hhmm.split(":")
-                  onStartTimeChange(
-                    dayjs(toDate(startTime))
-                      .hour(Number(h))
-                      .minute(Number(m))
-                      .second(0)
-                      .toDate(),
-                  )
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-            <span className="text-base w-[150px] shrink-0">{cal.endTime}</span>
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
-              <DatePicker
-                value={toDate(endTime)}
-                onChange={(d) => onEndTimeChange(d)}
-                color={eventColor}
-              />
-              <TimeDropdown
-                value={formatTime(toDate(endTime))}
-                color={eventColor}
-                onChange={(hhmm) => {
-                  const [h, m] = hhmm.split(":")
-                  onEndTimeChange(
-                    dayjs(toDate(endTime))
-                      .hour(Number(h))
-                      .minute(Number(m))
-                      .second(0)
-                      .toDate(),
-                  )
-                }}
-              />
-            </div>
+    <div className="flex flex-col gap-6 items-start w-full">
+      {/* Start / End time & Timezone */}
+      <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+          <span className="text-base w-[150px] shrink-0">{cal.startTime}</span>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-6">
+            <DatePicker
+              value={toDate(startTime)}
+              onChange={(d) => onStartTimeChange(d)}
+              color={eventColor}
+            />
+            <TimeDropdown
+              value={formatTime(toDate(startTime))}
+              color={eventColor}
+              onChange={(hhmm) => {
+                const [h, m] = hhmm.split(":")
+                onStartTimeChange(
+                  dayjs(toDate(startTime))
+                    .hour(Number(h))
+                    .minute(Number(m))
+                    .second(0)
+                    .toDate(),
+                )
+              }}
+            />
           </div>
         </div>
 
-        <div className="flex w-full md:w-auto mt-0 md:h-auto h-auto min-h-[86px]">
-          <TimezoneDropdown
-            value={selectedTimezone}
-            onChange={onTimezoneChange}
-            activeColor={eventColor}
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+          <span className="text-base w-[150px] shrink-0">{cal.endTime}</span>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-6">
+            <DatePicker
+              value={toDate(endTime)}
+              onChange={(d) => onEndTimeChange(d)}
+              color={eventColor}
+            />
+            <TimeDropdown
+              value={formatTime(toDate(endTime))}
+              color={eventColor}
+              onChange={(hhmm) => {
+                const [h, m] = hhmm.split(":")
+                onEndTimeChange(
+                  dayjs(toDate(endTime))
+                    .hour(Number(h))
+                    .minute(Number(m))
+                    .second(0)
+                    .toDate(),
+                )
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+          <span className="text-base w-[150px] shrink-0">
+            {cal.timezone || "Timezone"}
+          </span>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 w-full sm:w-auto">
+            <TimezoneDropdown
+              value={selectedTimezone}
+              onChange={onTimezoneChange}
+              activeColor={eventColor}
+            />
+          </div>
         </div>
       </div>
 
       {/* Recurrence */}
-      <div className="flex flex-col gap-3 w-full">
-        <RecurrenceDropdown
-          value={recurrenceOption}
-          onChange={onRecurrenceChange}
-          activeColor={eventColor}
-        />
+      <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+          <span className="text-base w-[150px] shrink-0">
+            {cal.repeatLabel || "Repeat"}
+          </span>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 w-full sm:w-auto">
+            <RecurrenceDropdown
+              value={recurrenceOption}
+              onChange={onRecurrenceChange}
+              activeColor={eventColor}
+            />
+          </div>
+        </div>
 
         {isRecurring && (
-          <div className="flex flex-col gap-3 w-full">
+          <div className="flex flex-col gap-6 w-full">
             {/* Interval row — only shown for custom recurrence */}
             {recurrenceOption === "CUSTOM" && (
-              <RecurrenceIntervalRow
-                intervalUnit={intervalUnit}
-                value={recurrenceInterval}
-                onChange={onRecurrenceIntervalChange}
-              />
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                <div className="w-[150px] shrink-0 hidden sm:block"></div>
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 w-full sm:w-auto">
+                  <RecurrenceIntervalRow
+                    intervalUnit={intervalUnit}
+                    value={recurrenceInterval}
+                    onChange={onRecurrenceIntervalChange}
+                  />
+                </div>
+              </div>
             )}
 
             {/* Day-of-week picker — shown for weekly-type recurrences */}
             {isWeekly && (
-              <RecurrenceDays
-                value={selectedDays}
-                onChange={onSelectedDaysChange}
-                eventColor={eventColor}
-              />
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                <div className="w-[150px] shrink-0 hidden sm:block"></div>
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 w-full sm:w-auto">
+                  <RecurrenceDays
+                    value={selectedDays}
+                    onChange={onSelectedDaysChange}
+                    eventColor={eventColor}
+                  />
+                </div>
+              </div>
             )}
 
             {/* Recurrence end date */}
-            <div className="flex flex-col gap-2 mt-1 w-full">
+            <div className="flex flex-col gap-2 w-full">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
                 <span className="text-base w-[150px] shrink-0">
                   {cal.endsOn}
@@ -192,9 +207,7 @@ const EventDateTimeSection = ({
                     size={18}
                     className="shrink-0 mt-0.5 text-orange-500"
                   />
-                  <span>
-                    {cal.maxOccurrencesWarning}
-                  </span>
+                  <span>{cal.maxOccurrencesWarning}</span>
                 </div>
               )}
             </div>

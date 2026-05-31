@@ -103,8 +103,8 @@ const EventDetailsSection = ({
         <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.location}
         </div>
-        <div className="flex-1 flex flex-col gap-3 w-full relative">
-          <div className="flex flex-col min-[426px]:flex-row items-start gap-3 w-full">
+        <div className="flex-1 flex flex-col gap-6 w-full relative">
+          <div className="flex flex-col min-[426px]:flex-row items-start gap-6 w-full">
             <div className="flex-1 flex flex-col w-full">
               <Dropdown
                 options={countryOptions}
