@@ -52,6 +52,7 @@ const ReelsPage = () => {
       selectedChallenge.challengeId
     )
   }, [selectedChallenge])
+  const uploadChallenge = hasSpecificChallenge ? selectedChallenge : null
 
   // Fetch reels associated with a specific challenge
   const {
@@ -233,24 +234,46 @@ const ReelsPage = () => {
       }
     }
 
+    const hasBanner = hasSpecificChallenge && selectedChallenge?.bannerUrl
+    const bannerUrl = hasBanner ? selectedChallenge.bannerUrl : null
+
     return (
-      <div className={`bg-gradient-to-r ${bgGradient} rounded-2xl p-8 text-white shadow-md mb-8 flex flex-col md:flex-row justify-between items-center transition-all duration-300 gap-6`}>
-        <div>
-          <span className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block">
+      <div className="relative overflow-hidden rounded-2xl p-8 text-white shadow-md mb-8 flex flex-col md:flex-row justify-between items-center transition-all duration-300 gap-6 bg-gray-900 min-h-[220px]">
+        {/* Background Layer */}
+        {bannerUrl ? (
+          <>
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-all duration-500 transform hover:scale-[1.02]"
+              style={{ backgroundImage: `url(${bannerUrl})` }}
+            />
+            {/* Dark premium overlay gradient to guarantee readability of white text on any background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/60 to-black/40 md:bg-gradient-to-r md:from-black/85 md:via-black/55 md:to-black/35 transition-all duration-300" />
+          </>
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-r ${bgGradient} transition-all duration-500`} />
+        )}
+
+        {/* Content */}
+        <div className="relative z-10 flex-1">
+          <span className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block backdrop-blur-sm border border-white/10">
             {tagText}
           </span>
-          <h1 className="text-3xl font-bold mb-2">{titleText}</h1>
-          <p className="text-lg opacity-95">{descText}</p>
+          <h1 className="text-3xl font-extrabold mb-2 tracking-tight drop-shadow-sm">{titleText}</h1>
+          <p className="text-base md:text-lg opacity-95 leading-relaxed drop-shadow-sm">{descText}</p>
         </div>
-        <div className="flex flex-col space-y-3 shrink-0 w-full md:w-auto">
-          <button
-            onClick={handleUploadClick}
-            className="bg-white text-[#990011] px-8 py-3 rounded-xl font-bold shadow-md hover:bg-gray-50 hover:scale-[1.03] transition-all transform w-full"
-          >
-            + {t.catSpeak.reels.uploadReel}
-          </button>
+
+        {/* Actions */}
+        <div className="relative z-10 flex flex-col space-y-3 shrink-0 w-full md:w-auto">
+          {!isPast && (
+            <button
+              onClick={handleUploadClick}
+              className="bg-white text-[#990011] px-8 py-3 rounded-xl font-bold shadow-md hover:bg-gray-50 hover:scale-[1.03] transition-all transform w-full"
+            >
+              + {t.catSpeak.reels.uploadReel}
+            </button>
+          )}
           {showLearnMore && (
-            <button className="bg-transparent border-2 border-white/70 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-white/20 transition-all w-full">
+            <button className="bg-transparent border-2 border-white/70 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-white/20 transition-all w-full backdrop-blur-sm">
               {t.catSpeak.reels.learnMore}
             </button>
           )}
@@ -329,7 +352,7 @@ const ReelsPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       {/* Dynamic Page Banner */}
       {renderBanner()}
 
@@ -360,7 +383,11 @@ const ReelsPage = () => {
 
       {/* Creation Modal */}
       {isUploadOpen && (
-        <CreateReelModal open={isUploadOpen} onClose={handleUploadClose} />
+        <CreateReelModal
+          open={isUploadOpen}
+          onClose={handleUploadClose}
+          challenge={uploadChallenge}
+        />
       )}
     </div>
   )

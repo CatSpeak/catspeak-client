@@ -193,6 +193,8 @@ export default {
     speedSlow: "Slow",
     speedNormal: "Normal",
     speedFast: "Fast",
+    proficiencyLabel: "Proficiency level",
+    proficiencyOptional: "Optional",
     voice: "Voice",
     voiceFemale: "Female",
     voiceMale: "Male",

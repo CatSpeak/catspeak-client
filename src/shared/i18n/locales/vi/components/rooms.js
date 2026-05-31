@@ -168,6 +168,8 @@ export default {
     speedSlow: "Chậm",
     speedNormal: "Bình thường",
     speedFast: "Nhanh",
+    proficiencyLabel: "Trình độ",
+    proficiencyOptional: "Không bắt buộc",
     voice: "Giọng nói",
     voiceFemale: "Nữ",
     voiceMale: "Nam",
