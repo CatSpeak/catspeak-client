@@ -1,13 +1,21 @@
 import React, { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import dayjs from "dayjs"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import colors from "@/shared/utils/colors"
 
-const DatePicker = ({ value, onChange, color = "#B91264", className = "", disabled = false }) => {
+const DatePicker = ({
+  value,
+  onChange,
+  color = "#B91264",
+  className = "",
+  disabled = false,
+}) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
+  const portalRef = useRef(null)
 
   const [date, setDate] = useState(value ? dayjs(value) : dayjs())
   const [currentViewDate, setCurrentViewDate] = useState(
@@ -16,7 +24,11 @@ const DatePicker = ({ value, onChange, color = "#B91264", className = "", disabl
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        (!portalRef.current || !portalRef.current.contains(event.target))
+      ) {
         setIsOpen(false)
       }
     }
@@ -31,6 +43,49 @@ const DatePicker = ({ value, onChange, color = "#B91264", className = "", disabl
       setCurrentViewDate(newDate.startOf("month"))
     }
   }, [value])
+
+  const [portalCoords, setPortalCoords] = useState(null)
+
+  useEffect(() => {
+    const handleClose = () => setIsOpen(false)
+    const handleScroll = (e) => {
+      if (portalRef.current && portalRef.current.contains(e.target)) return
+      handleClose()
+    }
+
+    const updateCoords = () => {
+      if (isOpen && dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        const spaceAbove = rect.top
+
+        // DatePicker is relatively tall (~360px)
+        const flipUp = spaceBelow < 360 && spaceAbove > spaceBelow
+
+        // Datepicker is fixed 280px wide
+        const forceAlignRight = rect.left + 280 > window.innerWidth
+
+        setPortalCoords({
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height,
+          flipUp,
+          forceAlignRight,
+        })
+      }
+    }
+
+    if (isOpen) {
+      updateCoords()
+      window.addEventListener("resize", handleClose)
+      window.addEventListener("scroll", handleScroll, true)
+      return () => {
+        window.removeEventListener("resize", handleClose)
+        window.removeEventListener("scroll", handleScroll, true)
+      }
+    }
+  }, [isOpen])
 
   const handleSelectDate = (dayNumber) => {
     const selectedDate = currentViewDate.date(dayNumber)
@@ -95,98 +150,126 @@ const DatePicker = ({ value, onChange, color = "#B91264", className = "", disabl
     <div ref={dropdownRef} className={`relative inline-block ${className}`}>
       <button
         type="button"
-        onClick={() => { if (!disabled) setIsOpen(!isOpen) }}
+        onClick={() => {
+          if (!disabled) setIsOpen(!isOpen)
+        }}
         disabled={disabled}
-        className={`text-sm flex items-center justify-center border border-[#c6c6c6] rounded-md whitespace-nowrap text-center px-4 h-10 shadow-sm transition-colors bg-white outline-none text-gray-800 ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
+        className={`hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-2xl whitespace-nowrap text-center px-4 h-12 bg-white outline-none ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
       >
         <span>{formatVietnameseDate(date)}</span>
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <div className="absolute z-50 top-full mt-1 left-0 w-[280px] origin-top-left pointer-events-none">
-            <FluentAnimation
-              direction="down"
-              exit={true}
-              className="pointer-events-auto bg-white border rounded-lg shadow-xl p-4 flex flex-col"
-            >
-              {/* Header with Month Selection and Chevrons */}
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  type="button"
-                  onClick={handlePreviousMonth}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <ChevronLeft size={18} className="text-gray-600" />
-                </button>
-                <div className="font-bold text-gray-800 text-[14px]">
-                  Tháng {currentViewDate.format("M, YYYY")}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleNextMonth}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <ChevronRight size={18} className="text-gray-600" />
-                </button>
-              </div>
-
-              {/* Weekdays */}
-              <div className="grid grid-cols-7 gap-1 mb-2 shrink-0">
-                {weekDays.map((day) => (
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && portalCoords && (
+              <div
+                ref={portalRef}
+                style={{
+                  position: "absolute",
+                  top: portalCoords.top,
+                  left: portalCoords.left,
+                  width: portalCoords.width,
+                  height: portalCoords.height,
+                  zIndex: 9999,
+                  pointerEvents: "none",
+                }}
+              >
+                <div className="relative w-full h-full">
                   <div
-                    key={day}
-                    className="text-center text-[12px] font-bold text-gray-400 pb-2 border-b border-gray-100"
+                    className={`absolute z-50 ${portalCoords.flipUp ? "bottom-full mb-1" : "top-full mt-1"} ${portalCoords.forceAlignRight ? "right-0 origin-top-right" : "left-0 origin-top-left"} w-[280px] pointer-events-none`}
                   >
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              {/* Days Grid */}
-              <div className="grid grid-cols-7 gap-y-2 gap-x-1">
-                {days.map((item) => {
-                  if (item.isEmpty) {
-                    return <div key={item.key} />
-                  }
-
-                  const isSelected =
-                    item.day === date.date() &&
-                    currentViewDate.month() === date.month() &&
-                    currentViewDate.year() === date.year()
-
-                  // Highlight today optionally
-                  const today = dayjs()
-                  const isToday =
-                    item.day === today.date() &&
-                    currentViewDate.month() === today.month() &&
-                    currentViewDate.year() === today.year()
-
-                  return (
-                    <button
-                      type="button"
-                      key={item.key}
-                      onClick={() => handleSelectDate(item.day)}
-                      className={`
-                    w-8 h-8 flex items-center justify-center text-[13px] rounded-full mx-auto transition-colors font-medium
-                    ${isSelected ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}
-                  `}
-                      style={{
-                        ...(isSelected ? { backgroundColor: color } : {}),
-                        ...(isToday && !isSelected
-                          ? { border: `1px solid ${color}`, color: color }
-                          : {}),
-                      }}
+                    <FluentAnimation
+                      direction={portalCoords.flipUp ? "up" : "down"}
+                      exit={true}
+                      className="pointer-events-auto bg-white border rounded-lg shadow-xl p-4 flex flex-col"
                     >
-                      {item.day}
-                    </button>
-                  )
-                })}
+                      {/* Header with Month Selection and Chevrons */}
+                      <div className="flex items-center justify-between mb-4">
+                        <button
+                          type="button"
+                          onClick={handlePreviousMonth}
+                          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                          <ChevronLeft size={18} className="text-gray-600" />
+                        </button>
+                        <div className="font-bold text-gray-800 text-[14px]">
+                          Tháng {currentViewDate.format("M, YYYY")}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleNextMonth}
+                          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                          <ChevronRight size={18} className="text-gray-600" />
+                        </button>
+                      </div>
+
+                      {/* Weekdays */}
+                      <div className="grid grid-cols-7 gap-1 mb-2 shrink-0">
+                        {weekDays.map((day) => (
+                          <div
+                            key={day}
+                            className="text-center text-[12px] font-bold text-gray-400 pb-2 border-b border-gray-100"
+                          >
+                            {day}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Days Grid */}
+                      <div className="grid grid-cols-7 gap-y-2 gap-x-1">
+                        {days.map((item) => {
+                          if (item.isEmpty) {
+                            return <div key={item.key} />
+                          }
+
+                          const isSelected =
+                            item.day === date.date() &&
+                            currentViewDate.month() === date.month() &&
+                            currentViewDate.year() === date.year()
+
+                          // Highlight today optionally
+                          const today = dayjs()
+                          const isToday =
+                            item.day === today.date() &&
+                            currentViewDate.month() === today.month() &&
+                            currentViewDate.year() === today.year()
+
+                          return (
+                            <button
+                              type="button"
+                              key={item.key}
+                              onClick={() => handleSelectDate(item.day)}
+                              className={`
+                          w-8 h-8 flex items-center justify-center text-[13px] rounded-full mx-auto transition-colors font-medium
+                          ${isSelected ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}
+                        `}
+                              style={{
+                                ...(isSelected
+                                  ? { backgroundColor: color }
+                                  : {}),
+                                ...(isToday && !isSelected
+                                  ? {
+                                      border: `1px solid ${color}`,
+                                      color: color,
+                                    }
+                                  : {}),
+                              }}
+                            >
+                              {item.day}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </FluentAnimation>
+                  </div>
+                </div>
               </div>
-            </FluentAnimation>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   )
 }

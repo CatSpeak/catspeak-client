@@ -29,4 +29,5 @@ export default {
     backToHome: "返回首页",
     thankYou: "感谢您的耐心等待！^^",
   },
+  noOptionsFound: "未找到选项",
 }

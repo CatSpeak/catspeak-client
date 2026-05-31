@@ -118,7 +118,7 @@ const Calendar = ({ currentDate }) => {
           if (!isCurrentMonth) {
             return (
               <React.Fragment key={`empty-${idx}`}>
-                <div className="relative flex flex-col rounded-lg sm:rounded-xl bg-gray-50/50 border border-[#E5E5E5] overflow-hidden min-h-[80px] sm:min-h-0 sm:aspect-[5/4] items-start justify-start p-1.5 sm:p-3">
+                <div className="relative flex flex-col rounded-2xl bg-gray-50/50 border border-[#E5E5E5] overflow-hidden min-h-[80px] sm:min-h-0 sm:aspect-[5/4] items-start justify-start p-1.5 sm:p-3">
                   <span className="text-sm sm:text-base text-gray-400/60 font-medium">
                     {day}
                   </span>
@@ -138,7 +138,7 @@ const Calendar = ({ currentDate }) => {
                 onClick={() =>
                   setSelectedDate(selectedDate === date ? null : date)
                 }
-                className={`relative flex flex-col rounded-lg sm:rounded-xl bg-white border overflow-hidden cursor-pointer min-h-[80px] sm:min-h-0 sm:aspect-[5/4]
+                className={`relative flex flex-col rounded-2xl bg-white border overflow-hidden cursor-pointer min-h-[80px] sm:min-h-0 sm:aspect-[5/4]
                   ${isToday && selectedDate !== date ? "border-[#990011]" : "border-[#E5E5E5]"}
                   ${selectedDate === date ? "ring-2 ring-[#990011]/80 transform scale-[1.02] z-10" : ""}
                 `}
