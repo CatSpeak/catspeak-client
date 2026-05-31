@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 
