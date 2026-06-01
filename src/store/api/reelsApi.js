@@ -246,13 +246,22 @@ export const reelsApi = baseApi.injectEndpoints({
       query: () => "/Reels/challenges/past",
     }),
 
-    // Get reels associated with a specific challenge
+    // Get reels associated with a specific challenge or challenge filter
     getReelsByChallenge: builder.query({
-      query: ({ challengeId, page = 1, pageSize = 10 } = {}) =>
-        `/Reels/challenge/${challengeId}?page=${page}&pageSize=${pageSize}`,
-      providesTags: (result, error, { challengeId } = {}) => {
+      query: ({ challengeId, challengeFilter, page = 1, pageSize = 10 } = {}) => {
+        const params = new URLSearchParams()
+        if (challengeId) params.append("challengeId", String(challengeId))
+        if (challengeFilter) params.append("challengeFilter", challengeFilter)
+        if (page) params.append("page", String(page))
+        if (pageSize) params.append("pageSize", String(pageSize))
+        return `/Reels/challenge?${params.toString()}`
+      },
+      providesTags: (result, error, { challengeId, challengeFilter } = {}) => {
         const challengeTag = challengeId
           ? { type: "Reels", id: `CHALLENGE_${challengeId}` }
+          : null
+        const filterTag = challengeFilter
+          ? { type: "Reels", id: `CHALLENGE_FILTER_${challengeFilter}` }
           : null
         const listTags = result?.data
           ? result.data.map(({ reelId }) => ({ type: "Reels", id: String(reelId) }))
@@ -262,6 +271,7 @@ export const reelsApi = baseApi.injectEndpoints({
           ...listTags,
           { type: "Reels", id: "FEED" },
           challengeTag,
+          filterTag,
         ].filter(Boolean)
       },
     }),
