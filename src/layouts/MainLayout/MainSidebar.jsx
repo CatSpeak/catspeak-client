@@ -12,24 +12,23 @@ const MainSidebar = () => {
 
   // Active style helper for independent links
   const getLinkClasses = ({ isActive }) =>
-    `relative flex items-center gap-3 px-4 h-10 rounded-r-lg transition-colors mb-1 overflow-hidden ${
-      isActive
-        ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-[#990011] hover:text-[#990011] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-[#990011]"
-        : "hover:bg-[#F2F2F2] hover:text-gray-900"
+    `relative flex items-center gap-3 px-4 h-10 rounded-r-lg transition-colors mb-1 overflow-hidden ${isActive
+      ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-cath-red-700 hover:text-cath-red-700 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-cath-red-700"
+      : "hover:bg-[#F2F2F2] hover:text-gray-900"
     }`
 
   return (
-    <aside className="hidden lg:block w-[320px] shrink-0 bg-white sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto z-40">
+    <aside className="hidden lg:block w-[320px] shrink-0 bg-white sticky top-[88px] h-[calc(100vh-88px)] overflow-y-auto z-40">
       <div className="flex flex-col h-full p-5 text-gray-800">
         <SidebarCommunityDropdown />
 
         <NavLink to={`/${currentLang}/home`} className={getLinkClasses}>
-          <Home className="w-5 h-5" />
+          <Home size={20} />
           <span className="text-sm">{t.nav?.home || "Home"}</span>
         </NavLink>
 
         <NavLink to={`/${currentLang}/community`} className={getLinkClasses}>
-          <Users className="w-5 h-5" />
+          <Users size={20} />
           <span className="text-sm">{t.nav?.rooms || "Rooms"}</span>
         </NavLink>
 
@@ -37,7 +36,7 @@ const MainSidebar = () => {
           to={`/${currentLang}/cat-speak/news`}
           className={getLinkClasses}
         >
-          <LayoutDashboard className="w-5 h-5" />
+          <LayoutDashboard size={20} />
           <span className="text-sm">{t.catSpeak?.sidebar?.news || "News"}</span>
         </NavLink>
 
@@ -45,7 +44,7 @@ const MainSidebar = () => {
           to={`/${currentLang}/cat-speak/mail`}
           className={getLinkClasses}
         >
-          <Mail className="w-5 h-5" />
+          <Mail size={20} />
           <span className="text-sm">{t.catSpeak?.sidebar?.mail || "Mail"}</span>
         </NavLink>
 
@@ -53,7 +52,7 @@ const MainSidebar = () => {
           to={`/${currentLang}/cat-speak/calendar`}
           className={getLinkClasses}
         >
-          <Calendar className="w-5 h-5" />
+          <Calendar size={20} />
           <span className="text-sm">
             {t.catSpeak?.sidebar?.calendar || "Calendar"}
           </span>

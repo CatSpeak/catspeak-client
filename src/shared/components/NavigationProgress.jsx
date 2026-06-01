@@ -33,7 +33,7 @@ const NavigationProgress = () => {
       if (query?.endpointName === "getRooms" && query?.originalArgs?.page > 1) {
         return false
       }
-      
+
       // Ignore real-time background syncing for messages so it doesn't interrupt UX
       if (
         query?.endpointName === "getConversations" ||
@@ -50,7 +50,10 @@ const NavigationProgress = () => {
       // Ignore background refetches that shouldn't interrupt UX
       if (
         query?.endpointName === "getProfile" ||
-        query?.endpointName === "getSampleBackgrounds"
+        query?.endpointName === "getSampleBackgrounds" ||
+        query?.endpointName === "getReelsFeed" ||
+        query?.endpointName === "getReelById" ||
+        query?.endpointName === "getReelComments"
       ) {
         return false
       }

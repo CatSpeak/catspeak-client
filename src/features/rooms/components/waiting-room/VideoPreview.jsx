@@ -49,8 +49,8 @@ const VideoPreview = ({
           onClick={onToggleMic}
           className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
             micOn
-              ? "bg-[#990011] text-white hover:bg-[#7a000e]"
-              : "bg-white text-[#990011/80] hover:bg-[#E5E5E5]"
+              ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
+              : "bg-white text-cath-red-700/80 hover:bg-[#E5E5E5]"
           }`}
         >
           {micOn ? <Mic size={20} /> : <MicOff size={20} />}
@@ -60,8 +60,8 @@ const VideoPreview = ({
           onClick={onToggleCam}
           className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
             cameraOn
-              ? "bg-[#990011] text-white hover:bg-[#7a000e]"
-              : "bg-white text-[#990011/80] hover:bg-[#E5E5E5]"
+              ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
+              : "bg-white text-cath-red-700/80 hover:bg-[#E5E5E5]"
           }`}
         >
           {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}

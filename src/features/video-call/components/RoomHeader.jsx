@@ -42,7 +42,7 @@ const RoomHeader = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <div className="text-base font-semibold">{rawRoomName}</div>
             {room?.requiredLevel && (
-              <span className="rounded-full bg-[#990011] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="rounded-full bg-cath-red-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                 {room.requiredLevel}
               </span>
             )}
@@ -52,7 +52,7 @@ const RoomHeader = () => {
                 return (
                   <span
                     key={trimmed}
-                    className="rounded-full bg-[#990011] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
+                    className="rounded-full bg-cath-red-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
                   >
                     {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
                       trimmed}

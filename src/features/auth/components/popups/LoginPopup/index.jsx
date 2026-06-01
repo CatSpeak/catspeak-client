@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Eye, EyeOff, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
 import { useLoginMutation, useResendEmailOtpMutation } from "@/store/api/authApi"
@@ -161,7 +160,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           </label>
           <button
             type="button"
-            className="font-semibold text-[#990011] hover:underline"
+            className="font-semibold text-cath-red-700 hover:underline"
             onClick={() => onSwitchMode("forgot")}
           >
             {authText.forgotLink}
@@ -216,7 +215,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           {authText.dontHaveAccount}{" "}
           <button
             type="button"
-            className="font-semibold text-[#990011] hover:underline"
+            className="font-semibold text-cath-red-700 hover:underline"
             onClick={() => onSwitchMode("register")}
           >
             {authText.registerLink}
