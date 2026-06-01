@@ -1,4 +1,5 @@
 import React from 'react'
+import colors from '@/shared/utils/colors'
 
 const BubbleChevronLeft = ({ className = '', ...rest }) => {
   return (
@@ -28,7 +29,7 @@ const BubbleChevronLeft = ({ className = '', ...rest }) => {
         <g filter="url(#filter0_d_2386_4235)" data-figma-bg-blur-radius="7">
           <path
             d="M53.9063 29.3639C53.9062 42.3594 43.3713 52.8944 30.3757 52.8944L8.64766 52.8944C7.65221 52.8944 6.84523 53.7014 6.84523 54.6968C6.84523 56.2181 5.0769 57.0552 3.9003 56.0909L1.25312 53.9214C0.459896 53.2713 0 52.2998 0 51.2742L0 26.9531C0 12.0673 12.3227 0 27.2085 0C41.8149 0 53.9063 11.8408 53.9063 26.4472V29.3639Z"
-            fill="#990011"
+            fill={colors.primaryRed}
           />
         </g>
         <path

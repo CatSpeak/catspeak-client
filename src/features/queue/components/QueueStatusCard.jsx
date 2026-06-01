@@ -21,10 +21,10 @@ const QueueStatusCard = ({
   return (
     <div className="max-w-[400px] w-full rounded-xl overflow-hidden relative border border-[#C6C6C6] shadow-md bg-white">
       {/* Header / Loading State */}
-      <div className="bg-[#990011]/[0.04] p-6 flex flex-col items-center gap-4">
+      <div className="bg-cath-red-700/[0.04] p-6 flex flex-col items-center gap-4">
         <div className="relative inline-flex items-center justify-center">
           <Loader2
-            className="w-[72px] h-[72px] text-[#990011] opacity-80 animate-spin"
+            className="w-[72px] h-[72px] text-cath-red-700 opacity-80 animate-spin"
             strokeWidth={2}
           />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -63,7 +63,7 @@ const QueueStatusCard = ({
             <span className="text-xs font-semibold text-gray-500 mb-2">
               {t.rooms.queue.position}
             </span>
-            <div className="text-[1.25rem] font-bold text-[#990011] leading-none">
+            <div className="text-[1.25rem] font-bold text-cath-red-700 leading-none">
               {position > 0 ? `#${position}` : "--"}
             </div>
           </div>

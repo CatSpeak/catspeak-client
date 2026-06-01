@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react"
 import useScrollLock from "@/shared/hooks/useScrollLock"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { Settings, LogOut, Loader2, User, ArrowLeft } from "lucide-react"
@@ -61,21 +62,7 @@ const ProfileDropdown = () => {
   }
 
   // Click outside to close (desktop only)
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        handleCloseMenu()
-      }
-    }
-
-    if (isOpen && !isMobile) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen, isMobile])
+  useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile })
 
   // Lock body scroll when fullscreen on mobile
   useScrollLock(isOpen && isMobile)

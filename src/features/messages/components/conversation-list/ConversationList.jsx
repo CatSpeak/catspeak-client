@@ -15,7 +15,7 @@ const ConversationList = ({
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-[#990011]">
+      <div className="flex-1 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-cath-red-700">
         {isLoading ? (
           <LoadingSpinner className="flex items-center justify-center py-4" />
         ) : isError ? (

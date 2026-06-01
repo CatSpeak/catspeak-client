@@ -100,7 +100,7 @@ const CategoryRoomSection = ({
             >
               {title}
             </h6>
-            <ChevronRight color="#990011" />
+            <ChevronRight color={colors.primaryRed} />
           </div>
         </button>
 
@@ -165,7 +165,7 @@ const CategoryRoomSection = ({
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex gap-4 overflow-x-auto py-8 -my-8 px-2 -mx-2 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-4 overflow-x-auto py-8 -my-8 px-2 -mx-2 snap-x snap-mandatory scrollbar-hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {roomsToDisplay.map((room) => (
             <div

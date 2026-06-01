@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useMemo } from "react"
 import { ChevronDown, Search } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import useClickOutside from "@/shared/hooks/useClickOutside"
+import colors from "@/shared/utils/colors"
 
 const Dropdown = ({
   options = [],
@@ -15,7 +17,7 @@ const Dropdown = ({
   triggerClassName = "",
   align = "left", // 'left' | 'right' | 'center'
   maxHeightClass = "max-h-[250px]",
-  activeColor = "#990011",
+  activeColor = colors.primaryRed,
   disabled = false,
   enableSearch = false,
   searchPlaceholder = "Search...",
@@ -25,15 +27,7 @@ const Dropdown = ({
   const dropdownRef = useRef(null)
   const searchInputRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   useEffect(() => {
     if (isOpen && enableSearch) {
@@ -151,7 +145,7 @@ const Dropdown = ({
                     <input
                       ref={searchInputRef}
                       type="text"
-                      className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-[#990011]"
+                      className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-cath-red-700"
                       placeholder={searchPlaceholder}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}

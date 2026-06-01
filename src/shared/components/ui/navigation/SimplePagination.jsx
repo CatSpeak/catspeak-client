@@ -27,7 +27,7 @@ const SimplePagination = ({
   const buttonBaseClass =
     "flex h-8 w-8 items-center justify-center transition-colors"
   const buttonDisabledClass = "cursor-not-allowed text-gray-300"
-  const buttonEnabledClass = "text-[#990011] hover:bg-red-50"
+  const buttonEnabledClass = "text-cath-red-700 hover:bg-red-50"
 
   return (
     <div className="flex items-center gap-2">

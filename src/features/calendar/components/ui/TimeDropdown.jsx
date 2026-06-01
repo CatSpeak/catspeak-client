@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import colors from "@/shared/utils/colors"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const TimeDropdown = ({
   value,
@@ -24,15 +25,7 @@ const TimeDropdown = ({
     }
   }, [value])
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   const handleHourSelect = (hour) => {
     const [, min] = selectedTime.split(":")

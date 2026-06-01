@@ -61,7 +61,7 @@ const ResetPasswordPage = () => {
         className="relative z-10 mb-12 text-center"
       >
         <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 md:text-6xl">
-          Start Speaking <span className="text-[#990011]">Now</span>
+          Start Speaking <span className="text-cath-red-700">Now</span>
         </h1>
         <p className="text-lg text-gray-600 md:text-xl">
           Choose your preferred way to practice English.
@@ -84,7 +84,7 @@ const ResetPasswordPage = () => {
                 className={`group flex h-full flex-col justify-between overflow-hidden rounded-[2rem] border-2 p-8 transition-colors duration-300 ${
                   card.disabled
                     ? "cursor-not-allowed border-gray-100 opacity-60 bg-white"
-                    : "cursor-pointer border-gray-200 bg-white hover:border-[#990011]"
+                    : "cursor-pointer border-gray-200 bg-white hover:border-cath-red-700"
                 }`}
               >
                 <div>
@@ -92,7 +92,7 @@ const ResetPasswordPage = () => {
                     className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm ${
                       card.disabled
                         ? "bg-gray-200 text-gray-400"
-                        : "bg-[#990011] text-white"
+                        : "bg-cath-red-700 text-white"
                     }`}
                   >
                     {card.loading ? (
@@ -105,7 +105,7 @@ const ResetPasswordPage = () => {
                   <h3
                     className={`mb-2 text-2xl font-bold transition-colors ${
                       !card.disabled
-                        ? "group-hover:text-[#990011]"
+                        ? "group-hover:text-cath-red-700"
                         : "text-gray-800"
                     }`}
                   >
@@ -118,9 +118,9 @@ const ResetPasswordPage = () => {
 
                 {!card.disabled && (
                   <div className="mt-8 flex w-full justify-end">
-                    <div className="rounded-full overflow-hidden p-2 transition-all duration-300 group-hover:bg-[#990011]/10 group-hover:translate-x-2">
+                    <div className="rounded-full overflow-hidden p-2 transition-all duration-300 group-hover:bg-cath-red-700/10 group-hover:translate-x-2">
                       <svg
-                        className="h-6 w-6 text-gray-400 transition-colors group-hover:text-[#990011]"
+                        className="h-6 w-6 text-gray-400 transition-colors group-hover:text-cath-red-700"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"

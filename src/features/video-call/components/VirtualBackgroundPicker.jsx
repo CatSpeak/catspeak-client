@@ -113,7 +113,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
         <div
           onClick={() => handleSelect(null)}
           className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 block ${
-            selectedUrl === null ? "border-[#990011]" : "border-[#e5e5e5]"
+            selectedUrl === null ? "border-cath-red-700" : "border-[#e5e5e5]"
           } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
         >
           <div className="absolute inset-0 flex items-center justify-center">
@@ -121,7 +121,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
               {t?.rooms?.virtualBackground?.none || "None"}
             </span>
             {selectedUrl === null && (
-              <div className="absolute top-1.5 right-1.5 bg-[#990011] text-white rounded-full p-0.5 shadow-sm">
+              <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
                 <Check size={12} />
               </div>
             )}
@@ -137,7 +137,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             {isUploading ? (
               <div className="flex flex-col items-center">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#990011] border-t-transparent mb-1"></div>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-cath-red-700 border-t-transparent mb-1"></div>
               </div>
             ) : (
               <>
@@ -163,7 +163,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
             onClick={() => handleSelect(customUploadedUrl)}
             className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
               selectedUrl === customUploadedUrl
-                ? "border-[#990011]"
+                ? "border-cath-red-700"
                 : "border-[#e5e5e5]"
             } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
           >
@@ -174,7 +174,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
                 className="w-full h-full object-cover transition-transform duration-300"
               />
               {selectedUrl === customUploadedUrl && (
-                <div className="absolute top-1.5 right-1.5 bg-[#990011] text-white rounded-full p-0.5 shadow-sm">
+                <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
                   <Check size={12} />
                 </div>
               )}
@@ -194,7 +194,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
               key={url || i}
               onClick={() => handleSelect(url)}
               className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
-                selectedUrl === url ? "border-[#990011]" : "border-[#e5e5e5]"
+                selectedUrl === url ? "border-cath-red-700" : "border-[#e5e5e5]"
               } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
             >
               <div className="absolute inset-0">
@@ -204,7 +204,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
                   className="w-full h-full object-cover transition-transform duration-300"
                 />
                 {selectedUrl === url && (
-                  <div className="absolute top-1.5 right-1.5 bg-[#990011] text-white rounded-full p-0.5 shadow-sm">
+                  <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
                     <Check size={12} />
                   </div>
                 )}

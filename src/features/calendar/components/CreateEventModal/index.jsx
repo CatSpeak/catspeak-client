@@ -44,7 +44,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
+        <div className="flex-1 overflow-y-auto scrollbar-app-transparent">
           {/* Body */}
           <div className="px-5 sm:px-8 pt-8 pb-6 relative bg-white text-base">
             <div className="flex flex-col gap-5">

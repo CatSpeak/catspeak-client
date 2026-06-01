@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import { ChevronDown } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const COUNTRIES = [
   { value: "vietnam", label: "Vietnam" },
@@ -13,16 +14,7 @@ const CountryDropdown = ({ value, onChange, className = "" }) => {
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setOpen(false))
 
   const handleToggle = () => setOpen((prev) => !prev)
 

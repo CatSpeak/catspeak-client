@@ -1,15 +1,23 @@
-import React, { useState, useRef, useEffect } from "react"
-import { ChevronDown } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
+import React, { useState, useRef } from "react"
+import { Check } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import colors from "@/shared/utils/colors"
+import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
+const MotionButton = motion.button
+
+/**
+ * UI languages. Standard Vietnamese (`vi`) is fully enabled.
+ * Nôm Vietnamese is not listed here — when you add it for development, use e.g.
+ * `{ key: "viNom", label: "Tiếng Việt (Nôm)", flag: VietNam, disabled: true }`
+ * and omit or comment that entry for production builds.
+ */
 const LANGUAGES = [
-  { key: "vi", label: "Tiếng Việt (Quốc Ngữ)" },
-  // { key: "viNom", label: "Tiếng Việt (Nôm)", disabled: true },
-  { key: "zh", label: "中文" },
-  { key: "en", label: "English" },
+  { key: "vi", label: "Tiếng Việt", flag: VietNam },
+  { key: "zh", label: "中文", flag: China },
+  { key: "en", label: "English", flag: USA },
 ]
 
 const LanguageSwitcher = ({ className = "" }) => {
@@ -17,16 +25,7 @@ const LanguageSwitcher = ({ className = "" }) => {
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(dropdownRef, () => setOpen(false))
 
   const handleToggle = () => setOpen((prev) => !prev)
 
@@ -35,58 +34,86 @@ const LanguageSwitcher = ({ className = "" }) => {
     setOpen(false)
   }
 
-  const getDisplayLabel = () => {
-    return (
-      t.header?.languages?.[language] || t.header?.languages?.en || "English"
-    )
-  }
+  const current = LANGUAGES.find((l) => l.key === language) || LANGUAGES[0]
+  const displayLabel =
+    t.header?.languages?.[language] ||
+    t.header?.languages?.en ||
+    current.label
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
-      {/* Trigger */}
-      <div
+    <div
+      className={`relative flex items-center justify-center ${className}`}
+      ref={dropdownRef}
+    >
+      <MotionButton
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={displayLabel}
+        title={displayLabel}
         onClick={handleToggle}
-        className="hover:bg-[#E5E5E5] rounded-full h-10 flex items-center px-4 cursor-pointer"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-transparent p-0 transition-colors hover:bg-[#FFB400]/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB400]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
-        <div className="flex items-center gap-3 text-sm font-bold text-[#FFB400] justify-between w-full">
-          <span className="truncate">{getDisplayLabel()}</span>
-
-          <ChevronDown
-            size={20}
-            className={`transition-transform duration-200 ${
-              open ? "rotate-180" : ""
-            }`}
-          />
-        </div>
-      </div>
+        <img
+          src={current.flag}
+          alt=""
+          className="pointer-events-none block h-full w-full object-cover"
+          draggable={false}
+        />
+      </MotionButton>
 
       <AnimatePresence>
         {open && (
-          <div className="absolute top-full right-0 mt-2 min-w-[200px] max-w-[280px] z-50">
+          <div className="absolute right-0 top-full z-50 mt-2 min-w-[220px] max-w-[min(280px,calc(100vw-2rem))]">
             <FluentAnimation
               direction="down"
               exit
-              className="rounded-lg border border-[#E5E5E5] shadow-lg bg-white overflow-hidden"
+              className="overflow-hidden rounded-2xl border border-[#F0E4C4] bg-white/95 shadow-lg backdrop-blur-md"
             >
-              <div className="flex flex-col gap-1 p-1 whitespace-nowrap">
-                {LANGUAGES.map(({ key, label, disabled }) => {
+              <div className="p-1.5" role="listbox" aria-label="Language">
+                {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => {
                   const isActive = language === key
 
                   return (
                     <button
                       key={key}
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
                       disabled={disabled}
                       onClick={() => !disabled && handleLanguageSelect(key)}
-                      className={`w-full text-left px-3 py-2 min-h-10 text-sm rounded-md transition-colors
-                        ${
-                          disabled
-                            ? "text-[#7A7574] cursor-default"
-                            : isActive
-                              ? "bg-[#F2F2F2] hover:bg-[#E6E6E6]"
-                              : "hover:bg-[#F2F2F2]"
+                      className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${disabled
+                        ? "cursor-not-allowed text-lighttextGray"
+                        : isActive
+                          ? "bg-[#FFF4D6] text-[#9A7200] font-semibold"
+                          : "text-headingColor hover:bg-[#FFFAED] hover:text-[#B8860B]"
                         }`}
                     >
-                      {label}
+                      <span className="flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                        <img
+                          src={flag}
+                          alt=""
+                          className={`block h-full w-full object-cover ${disabled ? "grayscale opacity-50" : ""
+                            }`}
+                          draggable={false}
+                        />
+                      </span>
+                      <span className="min-w-0 flex-1 truncate font-medium">
+                        {label}
+                      </span>
+                      {disabled ? (
+                        <span className="shrink-0 rounded-full border border-[#E8D9B8] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#8A7A60]">
+                          {soonLabel || t.header?.soon || "Soon"}
+                        </span>
+                      ) : isActive ? (
+                        <Check
+                          className="h-4 w-4 shrink-0 text-[#FFB400]"
+                          strokeWidth={2.5}
+                          aria-hidden
+                        />
+                      ) : null}
                     </button>
                   )
                 })}

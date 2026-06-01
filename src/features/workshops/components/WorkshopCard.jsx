@@ -2,6 +2,7 @@ import React from "react"
 import { motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import colors from "@/shared/utils/colors"
 
 const WorkshopCard = ({ slide, onCtaClick }) => {
   const { t } = useLanguage()
@@ -43,7 +44,7 @@ const WorkshopCard = ({ slide, onCtaClick }) => {
                 onCtaClick(slide.modal || "development")
               }}
               bgColor="#f5c518"
-              textColor="#990011"
+              textColor={colors.primaryRed}
               className="h-10 px-6 shadow-md transition-transform hover:scale-105"
             >
               {slide.cta}

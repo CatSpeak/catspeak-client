@@ -42,7 +42,7 @@ const ParticipantItem = ({ participant }) => {
             {/* Camera (indicator only) */}
             <div className="flex items-center justify-center">
               {isCameraOn ? (
-                <Video size={16} className="text-[#990011]" />
+                <Video size={16} className="text-cath-red-700" />
               ) : (
                 <VideoOff size={16} className="text-[#606060]" />
               )}
@@ -51,7 +51,7 @@ const ParticipantItem = ({ participant }) => {
             {/* Mic (indicator only) */}
             <div className="flex items-center justify-center">
               {isMicOn ? (
-                <Mic size={16} className="text-[#990011]" />
+                <Mic size={16} className="text-cath-red-700" />
               ) : (
                 <MicOff size={16} className="text-[#606060]" />
               )}
