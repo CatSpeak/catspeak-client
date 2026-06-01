@@ -1,6 +1,7 @@
 // Components
 export { default as RoomCard } from "./components/RoomCard"
 export { default as CreateRoomModal } from "./components/CreateRoomModal"
+export { default as AISessionSettingsModal } from "./components/AISessionSettingsModal"
 export { default as CategoryRoomSection } from "./components/sections/CategoryRoomSection"
 export { default as ClassSidebar } from "./components/navigation/ClassSidebar"
 export { default as EmptyRoomState } from "./components/EmptyRoomState"

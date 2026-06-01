@@ -1,7 +1,9 @@
 import { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
-
 import { PolicyModal } from "@/features/auth"
+
+const linkClass =
+  "text-sm text-white/90 transition-colors hover:text-[#FFB400] whitespace-nowrap"
 
 const FooterBottom = () => {
   const { t } = useLanguage()
@@ -19,57 +21,46 @@ const FooterBottom = () => {
   }
 
   return (
-    <div className="w-full px-4 lg:px-12 lg:absolute lg:bottom-0 lg:left-0 lg:right-0">
-      <div className="flex flex-col lg:flex-row items-center justify-between py-4 gap-4 lg:gap-0">
-        {/* Left policies */}
-        <div className="flex flex-wrap justify-center lg:justify-start gap-4 lg:gap-8 text-yellow-300 text-center lg:text-left order-2 lg:order-1 px-4 lg:px-0">
-          <button
-            type="button"
-            className="hover:text-yellow-400 transition"
-            onClick={handleOpenPolicy(footerText.policies.privacy)}
-          >
-            <span className="text-sm whitespace-nowrap">
+    <>
+      <div className="w-full border-t border-white/15 pt-6 lg:pt-8">
+        <div className="flex flex-col items-center justify-between gap-4 text-center lg:flex-row lg:gap-6 lg:text-left">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 lg:justify-start">
+            <button
+              type="button"
+              className={linkClass}
+              onClick={handleOpenPolicy(footerText.policies.privacy)}
+            >
               {footerText.policies.privacy}
-            </span>
-          </button>
-          <button
-            type="button"
-            className="hover:text-yellow-400 transition"
-            onClick={handleOpenPolicy(footerText.policies.terms)}
-          >
-            <span className="text-sm whitespace-nowrap">
+            </button>
+            <button
+              type="button"
+              className={linkClass}
+              onClick={handleOpenPolicy(footerText.policies.terms)}
+            >
               {footerText.policies.terms}
-            </span>
-          </button>
-        </div>
+            </button>
+          </div>
 
-        {/* Center copyright */}
-        <div className="text-gray-400 uppercase text-center flex-shrink-0 mx-4 order-3 lg:order-2">
-          <span className="text-xs">
+          <p className="shrink-0 text-xs uppercase tracking-wide text-white/70">
             {footerText.copyright.replace("{year}", currentYear)}
-          </span>
-        </div>
+          </p>
 
-        {/* Right policies */}
-        <div className="flex flex-wrap justify-center lg:justify-end gap-4 lg:gap-8 text-yellow-300 text-center lg:text-right order-1 lg:order-3 px-4 lg:px-0">
-          <button
-            type="button"
-            className="hover:text-yellow-400 transition"
-            onClick={handleOpenPolicy(footerText.policies.payment)}
-          >
-            <span className="text-sm whitespace-nowrap">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 lg:justify-end">
+            <button
+              type="button"
+              className={linkClass}
+              onClick={handleOpenPolicy(footerText.policies.payment)}
+            >
               {footerText.policies.payment}
-            </span>
-          </button>
-          <button
-            type="button"
-            className="hover:text-yellow-400 transition"
-            onClick={handleOpenPolicy(footerText.policies.copyright)}
-          >
-            <span className="text-sm whitespace-nowrap">
+            </button>
+            <button
+              type="button"
+              className={linkClass}
+              onClick={handleOpenPolicy(footerText.policies.copyright)}
+            >
               {footerText.policies.copyright}
-            </span>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -78,7 +69,7 @@ const FooterBottom = () => {
         onClose={handleClosePolicy}
         title={policyModal.title}
       />
-    </div>
+    </>
   )
 }
 

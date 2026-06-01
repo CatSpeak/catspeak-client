@@ -25,19 +25,24 @@ const TextInput = ({
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const isPassword = type === "password"
-  const inputType = isPassword ? (isPasswordVisible ? "text" : "password") : type
+  const inputType = isPassword
+    ? isPasswordVisible
+      ? "text"
+      : "password"
+    : type
 
-  const variantClasses =
-    variant === "square" ? "rounded-lg px-3" : "rounded-full px-4"
+  const variantClasses = variant === "square" ? "rounded-2xl" : "rounded-full"
 
   const iconPadding = Icon ? "!pl-10" : ""
   const passwordPadding = isPassword ? "!pr-10" : ""
 
-  const errorClass = error ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500" : ""
+  const errorClass = error
+    ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500"
+    : ""
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
 
-  const finalClassName = `h-10 w-full border border-[#C6C6C6] text-sm outline-none transition-colors focus:border-[var(--focus-color)] focus:ring-1 focus:ring-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${className}`
+  const finalClassName = `px-4 h-12 w-full border border-[#e5e5e5] outline-none transition-colors focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${className}`
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>

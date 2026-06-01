@@ -33,7 +33,7 @@ const NavigationProgress = () => {
       if (query?.endpointName === "getRooms" && query?.originalArgs?.page > 1) {
         return false
       }
-      
+
       // Ignore real-time background syncing for messages so it doesn't interrupt UX
       if (
         query?.endpointName === "getConversations" ||
@@ -42,15 +42,21 @@ const NavigationProgress = () => {
         return false
       }
 
-      // Ignore getEventsByDate so clicking a date in the calendar doesn't trigger global nprogress
-      if (query?.endpointName === "getEventsByDate") {
+      // Ignore getEventsByDate and getEventCounts so clicking a date/switching months in the calendar doesn't trigger global nprogress
+      if (
+        query?.endpointName === "getEventsByDate" ||
+        query?.endpointName === "getEventCounts"
+      ) {
         return false
       }
 
       // Ignore background refetches that shouldn't interrupt UX
       if (
         query?.endpointName === "getProfile" ||
-        query?.endpointName === "getSampleBackgrounds"
+        query?.endpointName === "getSampleBackgrounds" ||
+        query?.endpointName === "getReelsFeed" ||
+        query?.endpointName === "getReelById" ||
+        query?.endpointName === "getReelComments"
       ) {
         return false
       }

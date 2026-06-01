@@ -20,14 +20,15 @@ const PillButton = ({
   const isActuallyDisabled = disabled || loading
 
   const heightClass = className && className.match(/\bh-\S+/) ? "" : "h-12"
-  const baseStyles = `${heightClass} px-4 rounded-full font-medium text-sm flex items-center justify-center gap-2 transition whitespace-nowrap`
+  const textClass = className && className.match(/\btext-(xs|sm|base|lg|xl|2xl|3xl|4xl)\b/) ? "" : "text-base"
+  const baseStyles = `${heightClass} ${textClass} px-4 rounded-full font-medium flex items-center justify-center gap-2 transition whitespace-nowrap`
 
   // Default variant styles
   const variantStyles = isOutline
     ? "bg-transparent hover:bg-[#f3f3f3] active:bg-[#e5e5e5]"
     : isSecondary
     ? "bg-white text-black hover:bg-[#E5E5E5] active:bg-[#e0e0e0]"
-    : "bg-[#990011] text-white hover:brightness-90 active:brightness-75"
+    : "bg-cath-red-700 text-white hover:brightness-90 active:brightness-75"
 
   const disabledStyles =
     "disabled:bg-[#BFBFBF] disabled:text-white disabled:brightness-100 disabled:border-transparent"

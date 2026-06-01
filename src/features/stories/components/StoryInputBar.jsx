@@ -31,13 +31,13 @@ const StoryInputBar = ({
           maxLength={200}
           placeholder={t.catSpeak.mail.placeholder}
           containerClassName="flex-1 md:w-72 md:flex-none"
-          className="!border-[#c38300]/70 focus:!border-[#990011] focus:!ring-[#990011] hover:!border-[#990011]"
+          className="!border-[#c38300]/70 focus:!border-cath-red-700 focus:!ring-cath-red-700 hover:!border-cath-red-700"
           showCount
         />
         <button
           type="button"
           onClick={onSend}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#990011] transition hover:scale-105 hover:bg-[#990011]/10"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-cath-red-700 transition hover:scale-105 hover:bg-cath-red-700/10"
           aria-label="Send message"
         >
           <Send />

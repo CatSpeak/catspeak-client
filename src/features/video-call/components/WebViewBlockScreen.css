@@ -7,7 +7,7 @@
   min-height: 100dvh;
   padding: 1.5rem;
   background: linear-gradient(135deg, #fdf6f0 0%, #fceee4 50%, #f9e0d0 100%);
-  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: "Noto Sans", sans-serif;
 }
 
 .webview-block-lang-switcher {

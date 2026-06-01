@@ -88,6 +88,15 @@ export const roomsApi = baseApi.injectEndpoints({
         body: { roomId, ...(password ? { password } : {}) },
       }),
     }),
+
+    // Create a 1:1 AI tutor session. Returns { roomId }.
+    createAISession: builder.mutation({
+      query: (body) => ({
+        url: "/rooms/ai-session",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 })
 
@@ -98,4 +107,5 @@ export const {
   useCreateRoomMutation,
   useDeleteRoomMutation,
   useVerifyJoinRoomMutation,
+  useCreateAISessionMutation,
 } = roomsApi

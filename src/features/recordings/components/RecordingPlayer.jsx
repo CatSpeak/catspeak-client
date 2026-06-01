@@ -39,7 +39,7 @@ const RecordingPlayer = ({ open, onClose, recording, t }) => {
     >
       <div className="flex flex-col flex-1 h-full">
         {/* Video player container */}
-        <div className="flex flex-col flex-1 bg-black overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5 max-[425px]:max-h-none">
+        <div className="flex flex-col flex-1 bg-black overflow-y-auto scrollbar-app-transparent max-[425px]:max-h-none">
           <div className="relative w-full h-full flex items-center justify-center">
             {fileUrl ? (
               <video

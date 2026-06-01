@@ -1,21 +1,13 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const Popover = ({ trigger, content, placement = "bottom-right", className = "", triggerClassName = "" }) => {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // If the click is outside the entire container (which includes the trigger), close it
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(containerRef, () => setIsOpen(false))
 
   return (
     <div className={`relative flex items-center justify-center ${className}`} ref={containerRef}>

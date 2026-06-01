@@ -12,7 +12,7 @@ const Modal = ({
   title,
   showCloseButton = true,
   footer,
-  bodyClassName = "px-3 flex-1 overflow-y-auto",
+  bodyClassName = "px-4 flex-1 overflow-y-auto",
 }) => {
   useScrollLock(open)
 
@@ -39,23 +39,21 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative h-full w-full shadow-xl min-[426px]:h-auto ${
-              /(^|\s)(min-\[[^\]]+\]:|md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
-                className,
-              )
-                ? ""
-                : "min-[426px]:max-w-md"
-            } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
-              /(^|\s)rounded/.test(className)
+            className={`relative h-full w-full shadow-xl min-[426px]:h-auto ${/(^|\s)(min-\[[^\]]+\]:|md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
+              className,
+            )
+              ? ""
+              : "min-[426px]:max-w-md"
+              } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${/(^|\s)rounded/.test(className)
                 ? ""
                 : "rounded-none min-[426px]:rounded-[8px] min-[426px]:border min-[426px]:border-[#E5e5e5]"
-            } ${className}`}
+              } ${className}`}
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
           >
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-3">
+              <div className="flex items-center justify-between p-4">
                 {title ? (
                   <h2 className="text-[20px] leading-[26px] font-semibold">
                     {title}
@@ -77,7 +75,7 @@ const Modal = ({
 
             <div className={bodyClassName}>{children}</div>
 
-            {footer && <div className="p-6">{footer}</div>}
+            {footer && <div className="p-4">{footer}</div>}
           </motion.div>
         </div>
       )}

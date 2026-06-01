@@ -7,7 +7,7 @@ const InstructorEmptyState = ({ onApply, t }) => {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
       <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-6">
-        <GraduationCap className="w-10 h-10 text-[#990011]" />
+        <GraduationCap className="w-10 h-10 text-cath-red-700" />
       </div>
 
       <h2 className="text-xl font-bold text-gray-900 mb-2">
@@ -21,7 +21,7 @@ const InstructorEmptyState = ({ onApply, t }) => {
       <button
         type="button"
         onClick={onApply}
-        className="px-8 py-2.5 bg-[#990011] text-white text-sm font-semibold rounded-lg hover:bg-[#7a000d] transition-colors"
+        className="px-8 py-2.5 bg-cath-red-700 text-white text-sm font-semibold rounded-lg hover:bg-[#7a000d] transition-colors"
       >
         {ins.applyNow}
       </button>

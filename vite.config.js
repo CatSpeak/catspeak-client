@@ -19,12 +19,12 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api": {
-          target: "https://api.catspeak.com.vn",
+          target: "https://stagingapi.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
         "/hubs": {
-          target: "https://api.catspeak.com.vn",
+          target: "https://stagingapi.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
           ws: true,
@@ -66,8 +66,8 @@ export default defineConfig(({ mode }) => {
         "@context": path.resolve(__dirname, "./src/shared/context"),
       },
     },
-    esbuild: {
-      drop: mode === "production" ? ["console", "debugger"] : [],
-    },
+    // esbuild: {
+    //   drop: mode === "production" ? ["console", "debugger"] : [],
+    // },
   }
 })

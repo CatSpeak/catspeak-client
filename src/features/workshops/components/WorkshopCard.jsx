@@ -2,6 +2,7 @@ import React from "react"
 import { motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import colors from "@/shared/utils/colors"
 
 const WorkshopCard = ({ slide, onCtaClick }) => {
   const { t } = useLanguage()

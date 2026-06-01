@@ -40,7 +40,7 @@ const EditChoiceModal = ({ open, onClose, onSelect, headerColor }) => {
           </button>
           <button
             onClick={() => onSelect("series")}
-            className="bg-[var(--cath-primary)] hover:bg-[#990011] text-white font-semibold h-10 px-4 rounded-lg transition-colors"
+            className="bg-[var(--cath-primary)] hover:bg-cath-red-700 text-white font-semibold h-10 px-4 rounded-lg transition-colors"
             style={{ backgroundColor: headerColor }}
           >
             {cal.editEntireSeries}

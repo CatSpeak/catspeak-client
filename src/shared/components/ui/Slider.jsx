@@ -1,4 +1,5 @@
 import React from "react"
+import colors from "@/shared/utils/colors"
 
 const Slider = ({
   value,
@@ -7,7 +8,7 @@ const Slider = ({
   step = 1,
   onChange,
   className = "",
-  thumbClassName = "accent-[#990011]",
+  thumbClassName = "accent-cath-red-700",
   ...props
 }) => {
   const percentage = ((value - min) / (max - min)) * 100
@@ -22,7 +23,7 @@ const Slider = ({
       onChange={onChange}
       className={`w-full h-1 rounded-lg appearance-none cursor-pointer ${thumbClassName} ${className}`}
       style={{
-        background: `linear-gradient(to right, #990011 ${percentage}%, #868686 ${percentage}%)`,
+        background: `linear-gradient(to right, ${colors.primaryRed} ${percentage}%, #868686 ${percentage}%)`,
       }}
       {...props}
     />

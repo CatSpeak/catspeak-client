@@ -18,6 +18,7 @@ const initialState = {
     user: null,
     initMicOn: false,
     initCamOn: false,
+    isAISession: false,
   },
 }
 
@@ -40,6 +41,7 @@ const videoCallSlice = createSlice({
         user,
         initMicOn,
         initCamOn,
+        isAISession,
       } = action.payload
 
       state.isInCall = true
@@ -54,6 +56,7 @@ const videoCallSlice = createSlice({
         user,
         initMicOn: initMicOn ?? false,
         initCamOn: initCamOn ?? false,
+        isAISession: isAISession ?? false,
       }
     },
 

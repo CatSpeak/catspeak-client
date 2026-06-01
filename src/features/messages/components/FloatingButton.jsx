@@ -5,7 +5,7 @@ const FloatingButton = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="flex h-12 w-12 items-center justify-center rounded-full bg-[#990011] text-white shadow-lg transition hover:scale-105"
+      className="flex h-12 w-12 items-center justify-center rounded-full bg-cath-red-700 text-white shadow-lg transition hover:scale-105"
       aria-label="Mở tin nhắn"
     >
       <FiMessageCircle className="h-6 w-6" />

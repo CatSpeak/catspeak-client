@@ -24,7 +24,7 @@ const Breadcrumb = ({ items }) => {
             )}
 
             {!isLast && (
-              <ChevronRight color="#990011" className="mx-2 shrink-0" />
+              <ChevronRight color={colors.primaryRed} className="mx-2 shrink-0" />
             )}
           </React.Fragment>
         )

@@ -14,9 +14,9 @@ const InstructorBackgroundSection = ({
   return (
     <div className="space-y-6">
       {/* --- Introduction Card --- */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
-          <h2 className="text-sm font-semibold text-[#990011] uppercase tracking-wide">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 rounded-t-xl">
+          <h2 className="text-sm font-semibold text-cath-red-700 uppercase tracking-wide">
             {ins.background}
           </h2>
         </div>
@@ -31,7 +31,7 @@ const InstructorBackgroundSection = ({
             rows={4}
             placeholder={ins.introPlaceholder}
             disabled={readOnly}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] resize-none disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed transition"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cath-red-700/20 focus:border-cath-red-700 resize-none disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed transition"
           />
           <p className="text-xs text-gray-400 mt-2 italic">
             {ins.introPlaceholder}
@@ -40,16 +40,16 @@ const InstructorBackgroundSection = ({
       </div>
 
       {/* --- Credentials Card --- */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#990011] uppercase tracking-wide">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 rounded-t-xl flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-cath-red-700 uppercase tracking-wide">
             {ins.uploadCredentials}
           </h2>
           {!readOnly && (
             <button
               type="button"
               onClick={onAddCredential}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#990011] hover:text-[#7a000d] transition"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-cath-red-700 hover:text-[#7a000d] transition"
             >
               <Plus className="w-3.5 h-3.5" />
               Add
@@ -82,16 +82,16 @@ const InstructorBackgroundSection = ({
       </div>
 
       {/* --- Intro Video Card --- */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#990011] uppercase tracking-wide">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 rounded-t-xl flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-cath-red-700 uppercase tracking-wide">
             {ins.uploadVideo}
           </h2>
           {!readOnly && (
             <button
               type="button"
               onClick={onSelectVideo}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#990011] hover:text-[#7a000d] transition"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-cath-red-700 hover:text-[#7a000d] transition"
             >
               <Video className="w-3.5 h-3.5" />
               {ins.videoLabel}
