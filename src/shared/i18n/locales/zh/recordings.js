@@ -28,7 +28,8 @@ export default {
   },
   status: {
     completed: "已完成",
-    failed: "失败"
+    failed: "失败",
+    partialCompleted: "部分完成"
   },
   player: {
     title: "录音",

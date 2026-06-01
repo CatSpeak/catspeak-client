@@ -33,8 +33,9 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
   } = recording
 
   const isCompleted = status === "completed"
+  const isPartialCompleted = status === "Partial Completed"
   const isFailed = status === "failed"
-  const hasFile = isCompleted && fileUrl
+  const hasFile = (isCompleted || isPartialCompleted) && fileUrl
 
   const [uploadToDrive, { isLoading: isUploading }] =
     useUploadRecordingToDriveMutation()
@@ -159,13 +160,20 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
     <div className="group flex flex-col gap-3 rounded-lg border border-[#e5e5e5] bg-white min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Left: metadata */}
       <div className="flex flex-col">
-        {/* Top row: meeting ID */}
-        <span className="text-[#990011]" title={meetingId}>
-          {meetingId}
-        </span>
+        {/* Top row: meeting ID & potential status badge */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[#990011] font-medium" title={meetingId}>
+            {meetingId}
+          </span>
+          {isPartialCompleted && (
+            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20">
+              {t?.recordings?.status?.partialCompleted || "Lưu một phần"}
+            </span>
+          )}
+        </div>
 
         {/* Meta row: date, duration, size */}
-        <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap">
+        <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap mt-1">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
             {formatDate(createdAt)}
@@ -181,8 +189,8 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
         </div>
 
         {/* File unavailable warning */}
-        {isCompleted && !fileUrl && (
-          <div className="flex items-center gap-1.5 text-xs text-amber-600">
+        {(isCompleted || isPartialCompleted) && !fileUrl && (
+          <div className="flex items-center gap-1.5 text-xs text-amber-600 mt-1">
             <AlertCircle className="h-3.5 w-3.5" />
             <span>
               {t?.recordings?.list?.fileUnavailable ||

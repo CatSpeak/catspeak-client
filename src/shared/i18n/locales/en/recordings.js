@@ -28,7 +28,8 @@ export default {
   },
   status: {
     completed: "completed",
-    failed: "failed"
+    failed: "failed",
+    partialCompleted: "partial completed"
   },
   player: {
     title: "Recording",
