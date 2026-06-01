@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useSelector } from "react-redux"
 import {
   useRoomContext,
@@ -9,10 +9,12 @@ import {
   RoomAudioRenderer,
 } from "@livekit/components-react"
 import { ConnectionState, RoomEvent } from "livekit-client"
+import { toast } from "react-hot-toast"
 
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
 import { useRecording } from "@/features/video-call/hooks/useRecording"
+import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
 import { useSystemMessages } from "@/features/video-call/hooks/useSystemMessages"
@@ -21,6 +23,7 @@ import {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
 } from "@/store/api/conversationsApi"
+import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import {
   getNavigate,
   getLocation,
@@ -69,9 +72,73 @@ const GlobalCallContent = ({
   const connectionState = useConnectionState()
   const isConnected = connectionState === ConnectionState.Connected
 
+  // ── Synchronized Recording States ──
+  const sessionId = callInfo?.sessionId || parseMetadata(localParticipant?.metadata)?.sessionId;
+  const token = useSelector((s) => s.videoCall.livekitToken)
+
+  const [isRecording, setIsRecording] = useState(false)
+  const [egressId, setEgressId] = useState(null)
+  const [startedByAccountId, setStartedByAccountId] = useState(null)
+
+  const { data: sessionRecordings } = useGetRecordingsBySessionQuery(sessionId, {
+    skip: !sessionId,
+  })
+
+  // Initialize recording state from active recordings on mount/refresh
+  useEffect(() => {
+    if (sessionRecordings) {
+      const activeRec = sessionRecordings.find(r => r.status === "started" || r.status === "active");
+      if (activeRec) {
+        console.log("[GlobalCallContent] Found active recording on load:", activeRec);
+        setIsRecording(true);
+        setEgressId(activeRec.egressId);
+        setStartedByAccountId(activeRec.startedByAccountId);
+      }
+    }
+  }, [sessionRecordings])
+
+  useVideoChatSignalR(sessionId, token, (event, data) => {
+    if (event === "RecordingStatusChanged") {
+      const isActive = data.status === "started" || data.status === "active"
+      setIsRecording(isActive)
+      setEgressId(isActive ? data.egressId : null)
+      setStartedByAccountId(isActive ? data.startedByAccountId : null)
+
+      if (data.status === "Partial Completed") {
+        if (data.reason === "storage_exceeded") {
+          toast.error(t.recordings?.storage?.warningLimitReached || "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.", { duration: 6000 })
+        } else if (data.reason === "reconnect_timeout") {
+          toast.error(t.recordings?.errors?.interrupted || "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.", { duration: 6000 })
+        }
+      }
+    } else if (event === "RecordingWarning") {
+      toast.error(t.recordings?.storage?.warningAlmostFull || "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.", { icon: "⚠️", duration: 6000 })
+    }
+  })
+
+  const prevConnectionState = useRef(connectionState)
+  useEffect(() => {
+    if (isRecording) {
+      if (connectionState === ConnectionState.Reconnecting) {
+        toast.error(t.recordings?.errors?.disconnected || "Kết nối bị gián đoạn. Recording tạm dừng...", { id: "rec-disconnect", duration: 99999 })
+      } else if (connectionState === ConnectionState.Connected && prevConnectionState.current === ConnectionState.Reconnecting) {
+        toast.dismiss("rec-disconnect")
+        toast.success(t.recordings?.actions?.reconnected || "Kết nối đã được khôi phục. Recording tiếp tục.", { duration: 3000 })
+      }
+    }
+    prevConnectionState.current = connectionState
+  }, [connectionState, isRecording, t])
+
   const videoCallState = useVideoCall(t)
   const screenShareState = useScreenShare()
-  const recordingState = useRecording(lkRoom)
+  const recordingState = useRecording(lkRoom, {
+    isRecording,
+    setIsRecording,
+    egressId,
+    setEgressId,
+    startedByAccountId,
+    setStartedByAccountId
+  })
 
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
@@ -359,12 +426,14 @@ const GlobalCallContent = ({
     handleToggleScreenShare: actions.handleToggleScreenShare,
     isTogglingScreenShare: screenShareState.isTogglingScreenShare,
     // Recording
-    isRecording: recordingState.isRecording,
+    isRecording: isRecording,
     isTogglingRecording: recordingState.isTogglingRecording,
     handleToggleRecording: recordingState.handleToggleRecording,
     showStopModal: recordingState.showStopModal,
     confirmStopRecording: recordingState.confirmStopRecording,
     cancelStopRecording: recordingState.cancelStopRecording,
+    egressId: egressId,
+    startedByAccountId: startedByAccountId,
   }
 
   return (

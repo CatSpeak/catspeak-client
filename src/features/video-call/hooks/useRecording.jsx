@@ -17,13 +17,20 @@ import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
  *                                can target the correct LiveKit Egress.
  * @returns recording state and toggle handler
  */
-export function useRecording(lkRoom = null) {
+export function useRecording(lkRoom = null, syncState = {}) {
   const dispatch = useDispatch()
   const { t } = useLanguage()
-  const [isRecording, setIsRecording] = useState(false)
+  const {
+    isRecording,
+    setIsRecording,
+    egressId,
+    setEgressId,
+    startedByAccountId,
+    setStartedByAccountId
+  } = syncState
+
   const [isTogglingRecording, setIsTogglingRecording] = useState(false)
   const [showStopModal, setShowStopModal] = useState(false)
-  const egressIdRef = useRef(null) // store egressId returned by start-recording
 
   const [startRecording] = useStartRecordingMutation()
   const [stopRecording] = useStopRecordingMutation()
@@ -82,8 +89,10 @@ export function useRecording(lkRoom = null) {
           )
         }
 
-        egressIdRef.current = result.egressId
-        setIsRecording(true)
+        if (setEgressId) setEgressId(result.egressId)
+        if (setIsRecording) setIsRecording(true)
+        if (setStartedByAccountId) setStartedByAccountId(lkRoom?.localParticipant?.identity)
+
         toast.success(
           t.recordings?.actions?.startSuccess || "Recording started",
           {
@@ -93,7 +102,6 @@ export function useRecording(lkRoom = null) {
         )
       } else {
         // ── STOP recording ─────────────────────────────────────────────
-        const egressId = egressIdRef.current
         console.log(
           "[Recording Debug] Intent to stop recording. egressId:",
           egressId,
@@ -103,7 +111,7 @@ export function useRecording(lkRoom = null) {
           console.error(
             "[Recording Debug] ⚠️ egressId is null — stop call will NOT be sent to backend!",
           )
-          setIsRecording(false)
+          if (setIsRecording) setIsRecording(false)
           return
         }
 
@@ -136,19 +144,19 @@ export function useRecording(lkRoom = null) {
     } finally {
       setIsTogglingRecording(false)
     }
-  }, [lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording])
+  }, [lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording, egressId, setIsRecording, setEgressId, setStartedByAccountId])
 
   const confirmStopRecording = async () => {
     setShowStopModal(false)
     setIsTogglingRecording(true)
     try {
-      const egressId = egressIdRef.current
       if (egressId) {
         const result = await stopRecording(egressId).unwrap()
         console.log("[Recording Debug] Stop response:", JSON.stringify(result))
       }
-      egressIdRef.current = null
-      setIsRecording(false)
+      if (setEgressId) setEgressId(null)
+      if (setIsRecording) setIsRecording(false)
+      if (setStartedByAccountId) setStartedByAccountId(null)
 
       toast(
         (tToast) => {

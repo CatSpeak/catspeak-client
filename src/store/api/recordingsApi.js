@@ -71,6 +71,10 @@ export const recordingsApi = baseApi.injectEndpoints({
         "Storage",
       ],
     }),
+    getRecordingsBySession: builder.query({
+      query: (sessionId) => `/livekit/recordings/session/${sessionId}`,
+      providesTags: ["Recordings"],
+    }),
   }),
 })
 
@@ -82,4 +86,5 @@ export const {
   useDeleteRecordingMutation,
   useGetStorageQuery,
   useUploadRecordingToDriveMutation,
+  useGetRecordingsBySessionQuery,
 } = recordingsApi

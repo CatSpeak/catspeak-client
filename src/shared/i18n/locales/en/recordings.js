@@ -7,11 +7,15 @@ export default {
     percentUsed: "{{percent}}% used",
     limit_used: "of {{limit}} used",
     quotaExceeded: "Storage full — delete recordings to free space",
+    warningAlmostFull: "Storage capacity is almost full. Recording may automatically stop if it exceeds the limit.",
+    warningLimitReached: "Recording has automatically stopped due to exceeding storage capacity. Partial recording has been saved.",
   },
   errors: {
     noRoom: "No active room — cannot record.",
     noEgress: "Recording started but no egress ID received — stop may not work.",
     noMedia: "Please turn on your camera, microphone, or share your screen before recording.",
+    interrupted: "The previous recording was interrupted. A partial recording file has been saved.",
+    disconnected: "Connection interrupted. Recording paused...",
   },
   list: {
     emptyTitle: "No recordings yet",
@@ -50,6 +54,7 @@ export default {
     stopSuccess: "Recording stopped — processing upload…",
     deleteSuccess: "Recording deleted",
     deleteFailed: "Failed to delete recording.",
-    viewRecordings: "View Recordings"
+    viewRecordings: "View Recordings",
+    reconnected: "Connection restored. Recording continues.",
   }
 }
