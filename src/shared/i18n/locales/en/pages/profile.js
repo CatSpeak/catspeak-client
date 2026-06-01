@@ -30,6 +30,8 @@ export default {
     nationality: "Nationality",
     yourLanguage: "The language you teach",
     yourLevel: "Your level",
+    selectLanguageFirst: "Please select a teaching language first",
+    selectLevel: "Select level...",
     nativeLanguage: "Native Language",
     idCard: "ID's card",
     idFront: "Front",
