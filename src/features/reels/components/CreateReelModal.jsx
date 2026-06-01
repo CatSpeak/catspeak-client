@@ -1136,7 +1136,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         aria-hidden="true"
                         className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800 whitespace-pre-wrap break-words"
                       >
-                        {renderHighlightedDescription(description, "font-semibold text-[#2b5db0]")}
+                        {renderHighlightedDescription(description, "text-[#2b5db0]")}
                       </div>
                       <textarea
                         ref={descriptionInputRef}

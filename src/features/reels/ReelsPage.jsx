@@ -6,6 +6,7 @@ import { useAuthModal } from "@/shared/context/AuthModalContext"
 import toast from "react-hot-toast"
 import { mapReelDtoToFrontend } from "./utils/mappers"
 import ReelTagBar from "./components/ReelTagBar"
+import ReelCard from "./components/ReelCard"
 import ReelGrid from "./components/ReelGrid"
 import ReelGridSkeleton from "./components/ReelGridSkeleton"
 import CreateReelModal from "./components/CreateReelModal"
@@ -54,19 +55,33 @@ const ReelsPage = () => {
   }, [selectedChallenge])
   const uploadChallenge = hasSpecificChallenge ? selectedChallenge : null
 
-  // Fetch reels associated with a specific challenge
+  // Determine the challengeFilter value based on the active tab/filter
+  const challengeFilter = useMemo(() => {
+    if (activeFilter === "active") return "Active_Challenge"
+    if (activeFilter === "past") return "Past_Challenge"
+    return undefined
+  }, [activeFilter])
+
+  // Fetch reels associated with the selected challenge or filter state
   const {
-    data: challengeReelsResponse,
+    currentData: challengeReelsResponse,
     isLoading: isChallengeReelsLoading,
+    isFetching: isChallengeReelsFetching,
   } = useGetReelsByChallengeQuery(
-    { challengeId: selectedChallenge?.challengeId },
-    { skip: !hasSpecificChallenge }
+    {
+      challengeId: hasSpecificChallenge ? selectedChallenge.challengeId : undefined,
+      challengeFilter,
+      page: 1,
+      pageSize: 10,
+    },
+    { skip: activeFilter === "foryou" }
   )
 
   // Fetch leaderboard ranking list for the selected challenge
   const {
-    data: leaderboardResponse,
+    currentData: leaderboardResponse,
     isLoading: isLeaderboardLoading,
+    isFetching: isLeaderboardFetching,
   } = useGetChallengeLeaderboardQuery(
     { challengeId: selectedChallenge?.challengeId },
     { skip: !hasSpecificChallenge }
@@ -84,23 +99,28 @@ const ReelsPage = () => {
     [challengeReelsResponse]
   )
 
-  const activeHashtags = useMemo(
-    () => new Set(
-      activeChallenges
-        .map((challenge) => challenge.hashtag?.replace("#", "").toLowerCase())
-        .filter(Boolean)
-    ),
-    [activeChallenges]
-  )
+  // Helper to check if a reel belongs to a challenge (matching challengeId or hashtag)
+  const isReelInChallenge = useCallback((reel, challenge) => {
+    if (reel.connectedChallenges && Array.isArray(reel.connectedChallenges)) {
+      if (
+        reel.connectedChallenges.some(
+          (c) => String(c.challengeId) === String(challenge.challengeId)
+        )
+      ) {
+        return true
+      }
+    }
+    if (challenge.hashtag) {
+      const hashtagLower = challenge.hashtag.toLowerCase().replace("#", "")
+      return reel.tags.some((tag) => tag.toLowerCase().replace("#", "") === hashtagLower)
+    }
+    return false
+  }, [])
 
-  const pastHashtags = useMemo(
-    () => new Set(
-      pastChallenges
-        .map((challenge) => challenge.hashtag?.replace("#", "").toLowerCase())
-        .filter(Boolean)
-    ),
-    [pastChallenges]
-  )
+  const selectedChallengeReels = useMemo(() => {
+    if (!hasSpecificChallenge) return challengeReels
+    return challengeReels.filter((reel) => isReelInChallenge(reel, selectedChallenge))
+  }, [challengeReels, hasSpecificChallenge, isReelInChallenge, selectedChallenge])
 
   // Determine display reels based on the selected filters
   const displayReels = useMemo(() => {
@@ -108,48 +128,44 @@ const ReelsPage = () => {
       return feedReels
     }
 
-    if (activeFilter === "active") {
-      if (selectedChallenge === "all" || !selectedChallenge) {
-        return feedReels.filter((reel) =>
-          reel.tags.some((tag) => activeHashtags.has(tag.toLowerCase()))
-        )
-      }
-
-      // Show reels from specific active challenge reels endpoint
-      return challengeReels
-    }
-
-    if (activeFilter === "past") {
-      if (selectedChallenge === "all_past" || !selectedChallenge) {
-        return feedReels.filter((reel) =>
-          reel.tags.some((tag) => pastHashtags.has(tag.toLowerCase()))
-        )
-      }
-
-      // Show reels from specific past challenge reels endpoint
-      return challengeReels
+    if (activeFilter === "active" || activeFilter === "past") {
+      return selectedChallengeReels
     }
 
     return []
-  }, [
-    activeFilter,
-    selectedChallenge,
-    feedReels,
-    activeHashtags,
-    pastHashtags,
-    challengeReels,
-  ])
+  }, [activeFilter, feedReels, selectedChallengeReels])
+
+  // Group challengeReels by their challenge when no specific challenge is selected
+  const reelsSections = useMemo(() => {
+    if (hasSpecificChallenge) return null
+
+    const currentChallenges = activeFilter === "active" ? activeChallenges : pastChallenges
+
+    return currentChallenges.map((challenge) => {
+      const reelsForChallenge = challengeReels.filter((reel) =>
+        isReelInChallenge(reel, challenge)
+      )
+
+      return {
+        challenge,
+        reels: reelsForChallenge,
+      }
+    })
+  }, [hasSpecificChallenge, activeFilter, activeChallenges, pastChallenges, challengeReels, isReelInChallenge])
 
   // Determine standard loading states
   const isLoading = useMemo(() => {
     if (activeFilter === "foryou") {
       return isFeedLoading
     }
-    if (hasSpecificChallenge) {
-      return isChallengeReelsLoading
-    }
-    return isFeedLoading
-  }, [activeFilter, hasSpecificChallenge, isFeedLoading, isChallengeReelsLoading])
+    return isChallengeReelsLoading || (isChallengeReelsFetching && !challengeReelsResponse)
+  }, [
+    activeFilter,
+    isFeedLoading,
+    isChallengeReelsLoading,
+    isChallengeReelsFetching,
+    challengeReelsResponse,
+  ])
 
   const handleReelClick = useCallback(
     (reel) => {
@@ -297,8 +313,8 @@ const ReelsPage = () => {
             </span>
           </div>
 
-          <div className="space-y-5">
-            {isLeaderboardLoading ? (
+          <div className="space-y-1">
+            {isLeaderboardLoading || (isLeaderboardFetching && !leaderboardResponse) ? (
               <div className="space-y-4 animate-pulse">
                 {[1, 2, 3].map((n) => (
                   <div key={n} className="h-14 bg-gray-100 rounded-lg w-full" />
@@ -319,7 +335,7 @@ const ReelsPage = () => {
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center justify-between p-3 rounded-lg border ${rank === 1 ? "bg-yellow-50 border-yellow-100" : "border-gray-50"
+                    className={`flex items-center justify-between p-3 rounded-lg ${rank === 1 ? "bg-yellow-50" : ""
                       }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -373,7 +389,82 @@ const ReelsPage = () => {
         >
           {isLoading ? (
             <ReelGridSkeleton />
+          ) : activeFilter !== "foryou" && !hasSpecificChallenge ? (
+            /* Render Grouped Challenges Sections */
+            <div className="flex flex-col w-full">
+              {reelsSections && reelsSections.length > 0 ? (
+                reelsSections.map(({ challenge, reels }) => (
+                  <div key={challenge.challengeId} className="mb-10 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                    {/* Section Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-gray-50 gap-4">
+                      <div>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-xl">🏆</span>
+                          <h3 className="text-lg font-bold text-gray-800 hover:text-[#990011] transition-colors cursor-pointer" onClick={() => handleSelectFilter(activeFilter, challenge)}>
+                            {challenge.name || challenge.hashtag}
+                          </h3>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${challenge.status === 'active'
+                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                            : 'bg-gray-100 text-gray-500 border border-gray-200'
+                            }`}>
+                            {challenge.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-400 font-semibold mb-2">
+                          {challenge.hashtag}
+                        </p>
+                        {challenge.description && (
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {challenge.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* View Challenge Button */}
+                      <button
+                        onClick={() => handleSelectFilter(activeFilter, challenge)}
+                        className="text-xs font-bold text-white bg-[#990011] hover:bg-[#80000e] px-4 py-2 rounded-lg transition-all shrink-0 flex items-center space-x-1 hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        <span>{t.catSpeak.reels.viewMore || "View More"}</span>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Section Content */}
+                    {reels.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {reels.slice(0, 4).map((reel, idx) => (
+                          <ReelCard
+                            key={reel.id}
+                            reel={reel}
+                            index={idx}
+                            onSelect={handleReelClick}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <svg className="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-xs font-semibold text-gray-400">
+                          {t.catSpeak.reels.noReelsFound || "No submissions yet."}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
+                  <span className="text-3xl block mb-2">🎈</span>
+                  <p className="text-sm font-semibold text-gray-500">{t.catSpeak.reels.noActiveChallenges || "No challenges found."}</p>
+                </div>
+              )}
+            </div>
           ) : (
+            /* Render Standard Flat Grid */
             <ReelGrid reels={displayReels} onReelClick={handleReelClick} />
           )}
         </div>
