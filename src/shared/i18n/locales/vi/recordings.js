@@ -28,7 +28,8 @@ export default {
   },
   status: {
     completed: "hoàn thành",
-    failed: "thất bại"
+    failed: "thất bại",
+    partialCompleted: "lưu một phần"
   },
   player: {
     title: "Bản ghi hình",
