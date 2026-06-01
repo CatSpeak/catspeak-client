@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react"
  * - Render prop child rendering for flexible parent integration
  */
 const ACTIVE_SNAP_VISIBLE_RATIO = 0.92
-const DEFAULT_RENDER_WINDOW = 3
+const DEFAULT_RENDER_WINDOW = 1
 const DEFAULT_PRELOAD_WINDOW = 1
 const DEFAULT_BOTTOM_GAP = 16
 

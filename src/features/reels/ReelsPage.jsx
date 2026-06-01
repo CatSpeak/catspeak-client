@@ -1,5 +1,6 @@
-import { useCallback, useState, useMemo } from "react"
-import { useNavigate } from "react-router-dom"
+import { useCallback, useState, useMemo, useEffect, useRef } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { Loader2 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
@@ -18,19 +19,50 @@ import {
   useGetChallengeLeaderboardQuery,
 } from "@/store/api/reelsApi"
 
+const CHALLENGE_FILTERS = {
+  ALL: "All",
+  ACTIVE: "Active_Challenge",
+  PAST: "Past_Challenge",
+}
+
+const DEFAULT_CHALLENGE_PAGE = 1
+const DEFAULT_CHALLENGE_PAGE_SIZE = 10
+
+const normalizeChallengeFilter = (value) => {
+  const filter = String(value || "").toLowerCase()
+
+  if (filter === "all") return CHALLENGE_FILTERS.ALL
+  if (filter === "active" || filter === "active_challenge") return CHALLENGE_FILTERS.ACTIVE
+  if (filter === "past" || filter === "past_challenge") return CHALLENGE_FILTERS.PAST
+
+  return null
+}
+
+const getPositiveIntegerParam = (value, fallback) => {
+  const parsed = Number.parseInt(value, 10)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+const isChallengeObject = (challenge) =>
+  challenge &&
+  typeof challenge === "object" &&
+  challenge.challengeId
+
 const ReelsPage = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const { isAuthenticated } = useAuth()
   const { openAuthModal } = useAuthModal()
 
-  // State management for filters and challenge selections
-  const [activeFilter, setActiveFilter] = useState("foryou") // 'foryou', 'active', 'past'
-  const [selectedChallenge, setSelectedChallenge] = useState(null) // ChallengeDto or 'all'/'all_past' or null
-
-  // Fetch standard feed
-  const { data: feedResponse, isLoading: isFeedLoading } = useGetReelsFeedQuery()
+  const challengeIdParam = searchParams.get("challengeId")
+  const challengeFilterParam = normalizeChallengeFilter(searchParams.get("challengeFilter"))
+  const challengePage = getPositiveIntegerParam(searchParams.get("page"), DEFAULT_CHALLENGE_PAGE)
+  const challengePageSize = getPositiveIntegerParam(
+    searchParams.get("pageSize"),
+    DEFAULT_CHALLENGE_PAGE_SIZE
+  )
 
   // Fetch active/past challenges lists
   const { data: activeChallengesResponse } = useGetActiveChallengesQuery()
@@ -45,22 +77,78 @@ const ReelsPage = () => {
     [pastChallengesResponse]
   )
 
-  // Check if a specific challenge object with challengeId is selected
-  const hasSpecificChallenge = useMemo(() => {
+  const challengeFromUrl = useMemo(() => {
+    if (!challengeIdParam) return null
+
     return (
-      selectedChallenge &&
-      typeof selectedChallenge === "object" &&
-      selectedChallenge.challengeId
+      activeChallenges.find(
+        (challenge) => String(challenge.challengeId) === String(challengeIdParam)
+      ) ||
+      pastChallenges.find(
+        (challenge) => String(challenge.challengeId) === String(challengeIdParam)
+      ) ||
+      null
     )
-  }, [selectedChallenge])
-  const uploadChallenge = hasSpecificChallenge ? selectedChallenge : null
+  }, [activeChallenges, challengeIdParam, pastChallenges])
+
+  const activeFilter = useMemo(() => {
+    if (challengeFilterParam === CHALLENGE_FILTERS.ACTIVE) return "active"
+    if (challengeFilterParam === CHALLENGE_FILTERS.PAST) return "past"
+
+    if (challengeIdParam) {
+      const isPastChallenge = pastChallenges.some(
+        (challenge) => String(challenge.challengeId) === String(challengeIdParam)
+      )
+
+      return isPastChallenge ? "past" : "active"
+    }
+
+    if (challengeFilterParam === CHALLENGE_FILTERS.ALL) return "active"
+
+    return "foryou"
+  }, [challengeFilterParam, challengeIdParam, pastChallenges])
+
+  const [feedPage, setFeedPage] = useState(1)
+
+  useEffect(() => {
+    setFeedPage(1)
+  }, [activeFilter])
+
+  const selectedChallenge = useMemo(() => {
+    if (activeFilter === "foryou") return null
+
+    if (challengeIdParam) {
+      return challengeFromUrl || {
+        challengeId: challengeIdParam,
+        name: `Challenge #${challengeIdParam}`,
+      }
+    }
+
+    return activeFilter === "past" ? "all_past" : "all"
+  }, [activeFilter, challengeFromUrl, challengeIdParam])
+
+  const hasSpecificChallenge = Boolean(challengeIdParam)
+  const uploadChallenge = isChallengeObject(selectedChallenge) ? selectedChallenge : null
+
+  // Fetch the standard feed only when the For You tab is visible.
+  const {
+    data: feedResponse,
+    isLoading: isFeedLoading,
+    isFetching: isFeedFetching,
+  } = useGetReelsFeedQuery(
+    { page: feedPage, pageSize: 20 },
+    { skip: activeFilter !== "foryou" }
+  )
 
   // Determine the challengeFilter value based on the active tab/filter
   const challengeFilter = useMemo(() => {
-    if (activeFilter === "active") return "Active_Challenge"
-    if (activeFilter === "past") return "Past_Challenge"
+    if (activeFilter === "foryou") return undefined
+    if (hasSpecificChallenge) return challengeFilterParam || CHALLENGE_FILTERS.ALL
+    if (challengeFilterParam) return challengeFilterParam
+    if (activeFilter === "active") return CHALLENGE_FILTERS.ACTIVE
+    if (activeFilter === "past") return CHALLENGE_FILTERS.PAST
     return undefined
-  }, [activeFilter])
+  }, [activeFilter, challengeFilterParam, hasSpecificChallenge])
 
   // Fetch reels associated with the selected challenge or filter state
   const {
@@ -69,10 +157,10 @@ const ReelsPage = () => {
     isFetching: isChallengeReelsFetching,
   } = useGetReelsByChallengeQuery(
     {
-      challengeId: hasSpecificChallenge ? selectedChallenge.challengeId : undefined,
+      challengeId: hasSpecificChallenge ? challengeIdParam : undefined,
       challengeFilter,
-      page: 1,
-      pageSize: 10,
+      page: challengePage,
+      pageSize: challengePageSize,
     },
     { skip: activeFilter === "foryou" }
   )
@@ -83,7 +171,7 @@ const ReelsPage = () => {
     isLoading: isLeaderboardLoading,
     isFetching: isLeaderboardFetching,
   } = useGetChallengeLeaderboardQuery(
-    { challengeId: selectedChallenge?.challengeId },
+    { challengeId: challengeIdParam },
     { skip: !hasSpecificChallenge }
   )
 
@@ -99,28 +187,39 @@ const ReelsPage = () => {
     [challengeReelsResponse]
   )
 
-  // Helper to check if a reel belongs to a challenge (matching challengeId or hashtag)
-  const isReelInChallenge = useCallback((reel, challenge) => {
-    if (reel.connectedChallenges && Array.isArray(reel.connectedChallenges)) {
-      if (
-        reel.connectedChallenges.some(
-          (c) => String(c.challengeId) === String(challenge.challengeId)
-        )
-      ) {
-        return true
+  const challengeReelsByChallenge = useMemo(() => {
+    const byId = new Map()
+    const byHashtag = new Map()
+
+    const addUnique = (map, key, reel) => {
+      if (!key) return
+      const normalizedKey = String(key).toLowerCase().replace(/^#/, "")
+      const existing = map.get(normalizedKey)
+
+      if (!existing) {
+        map.set(normalizedKey, [reel])
+        return
+      }
+
+      if (!existing.some((item) => item.id === reel.id)) {
+        existing.push(reel)
       }
     }
-    if (challenge.hashtag) {
-      const hashtagLower = challenge.hashtag.toLowerCase().replace("#", "")
-      return reel.tags.some((tag) => tag.toLowerCase().replace("#", "") === hashtagLower)
-    }
-    return false
-  }, [])
 
-  const selectedChallengeReels = useMemo(() => {
-    if (!hasSpecificChallenge) return challengeReels
-    return challengeReels.filter((reel) => isReelInChallenge(reel, selectedChallenge))
-  }, [challengeReels, hasSpecificChallenge, isReelInChallenge, selectedChallenge])
+    challengeReels.forEach((reel) => {
+      if (Array.isArray(reel.connectedChallenges)) {
+        reel.connectedChallenges.forEach((challenge) => {
+          addUnique(byId, challenge.challengeId, reel)
+        })
+      }
+
+      if (Array.isArray(reel.tags)) {
+        reel.tags.forEach((tag) => addUnique(byHashtag, tag, reel))
+      }
+    })
+
+    return { byId, byHashtag }
+  }, [challengeReels])
 
   // Determine display reels based on the selected filters
   const displayReels = useMemo(() => {
@@ -129,11 +228,11 @@ const ReelsPage = () => {
     }
 
     if (activeFilter === "active" || activeFilter === "past") {
-      return selectedChallengeReels
+      return challengeReels
     }
 
     return []
-  }, [activeFilter, feedReels, selectedChallengeReels])
+  }, [activeFilter, feedReels, challengeReels])
 
   // Group challengeReels by their challenge when no specific challenge is selected
   const reelsSections = useMemo(() => {
@@ -142,16 +241,23 @@ const ReelsPage = () => {
     const currentChallenges = activeFilter === "active" ? activeChallenges : pastChallenges
 
     return currentChallenges.map((challenge) => {
-      const reelsForChallenge = challengeReels.filter((reel) =>
-        isReelInChallenge(reel, challenge)
-      )
+      const idKey = String(challenge.challengeId).toLowerCase()
+      const hashtagKey = challenge.hashtag
+        ? String(challenge.hashtag).toLowerCase().replace(/^#/, "")
+        : ""
+      const reelsById = challengeReelsByChallenge.byId.get(idKey) || []
+      const reelsByHashtag = challengeReelsByChallenge.byHashtag.get(hashtagKey) || []
+      const idMatches = new Set(reelsById.map((reel) => reel.id))
+      const reelsForChallenge = reelsByHashtag.length > 0
+        ? [...reelsById, ...reelsByHashtag.filter((reel) => !idMatches.has(reel.id))]
+        : reelsById
 
       return {
         challenge,
         reels: reelsForChallenge,
       }
     })
-  }, [hasSpecificChallenge, activeFilter, activeChallenges, pastChallenges, challengeReels, isReelInChallenge])
+  }, [hasSpecificChallenge, activeFilter, activeChallenges, pastChallenges, challengeReelsByChallenge])
 
   // Determine standard loading states
   const isLoading = useMemo(() => {
@@ -167,11 +273,53 @@ const ReelsPage = () => {
     challengeReelsResponse,
   ])
 
+  const hasMore = useMemo(() => {
+    if (activeFilter === "foryou") {
+      return (feedResponse?.lastPageCount || 0) >= 20
+    }
+    return false
+  }, [activeFilter, feedResponse])
+
+  const handleLoadMore = useCallback(() => {
+    if (!hasMore || isFeedFetching) return
+    setFeedPage((prev) => prev + 1)
+  }, [hasMore, isFeedFetching])
+
+  const sentinelRef = useRef(null)
+
+  useEffect(() => {
+    if (activeFilter !== "foryou" || !hasMore || isFeedLoading) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleLoadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const sentinel = sentinelRef.current
+    if (sentinel) {
+      observer.observe(sentinel)
+    }
+
+    return () => {
+      if (sentinel) {
+        observer.unobserve(sentinel)
+      }
+    }
+  }, [activeFilter, hasMore, isFeedLoading, handleLoadMore])
+
   const handleReelClick = useCallback(
     (reel) => {
-      navigate(reel.id)
+      const queryString = activeFilter === "foryou" ? "" : searchParams.toString()
+      navigate({
+        pathname: reel.id,
+        search: queryString ? `?${queryString}` : "",
+      })
     },
-    [navigate]
+    [activeFilter, navigate, searchParams]
   )
 
   const handleUploadClick = useCallback(() => {
@@ -188,9 +336,31 @@ const ReelsPage = () => {
   }, [])
 
   const handleSelectFilter = useCallback((filterType, challenge) => {
-    setActiveFilter(filterType)
-    setSelectedChallenge(challenge)
-  }, [])
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (filterType === "foryou") {
+      nextParams.delete("challengeId")
+      nextParams.delete("challengeFilter")
+      nextParams.delete("page")
+      nextParams.delete("pageSize")
+    } else {
+      if (isChallengeObject(challenge)) {
+        nextParams.set("challengeId", String(challenge.challengeId))
+        nextParams.set("challengeFilter", CHALLENGE_FILTERS.ALL)
+      } else {
+        nextParams.delete("challengeId")
+        nextParams.set(
+          "challengeFilter",
+          filterType === "past" ? CHALLENGE_FILTERS.PAST : CHALLENGE_FILTERS.ACTIVE
+        )
+      }
+
+      nextParams.set("page", String(DEFAULT_CHALLENGE_PAGE))
+      nextParams.set("pageSize", String(challengePageSize))
+    }
+
+    setSearchParams(nextParams, { preventScrollReset: true })
+  }, [challengePageSize, searchParams, setSearchParams])
 
   // Render header banners dynamically matching mockup
   const renderBanner = () => {
@@ -465,7 +635,16 @@ const ReelsPage = () => {
             </div>
           ) : (
             /* Render Standard Flat Grid */
-            <ReelGrid reels={displayReels} onReelClick={handleReelClick} />
+            <div className="flex flex-col w-full">
+              <ReelGrid reels={displayReels} onReelClick={handleReelClick} />
+              {activeFilter === "foryou" && hasMore && (
+                <div ref={sentinelRef} className="h-20 w-full flex items-center justify-center mt-6">
+                  {isFeedFetching && (
+                    <Loader2 className="h-8 w-8 animate-spin text-[#990011]" />
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
 

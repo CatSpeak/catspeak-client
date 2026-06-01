@@ -968,7 +968,7 @@ const CommentsSkeleton = () => {
   )
 }
 
-const DETAIL_PAGE_SIZE = 10
+const DETAIL_PAGE_SIZE = 20
 
 /**
  * Shared snapped scroller for public Reels and the workspace-owned Reels list.
@@ -1107,12 +1107,22 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
     }
   }, [combinedReels, getDetailPath, id, navigate])
 
-  const hasMore = isWorkspace && (feedResponse?.lastPageCount || 0) >= DETAIL_PAGE_SIZE
+  const isFeedFetching = isWorkspace
+    ? isWorkspaceFeedFetching
+    : !hasChallengeContext
+      ? isPublicFeedFetching
+      : false
+
+  const hasMore = isWorkspace
+    ? (workspaceFeedResponse?.lastPageCount || 0) >= DETAIL_PAGE_SIZE
+    : !hasChallengeContext
+      ? (publicFeedResponse?.lastPageCount || 0) >= DETAIL_PAGE_SIZE
+      : false
 
   const handleLoadMore = useCallback(() => {
-    if (!hasMore || isWorkspaceFeedFetching) return
+    if (!hasMore || isFeedFetching) return
     setFeedPage((page) => page + 1)
-  }, [hasMore, isWorkspaceFeedFetching])
+  }, [hasMore, isFeedFetching])
 
   const isLoading = (isDetailLoading || isFeedLoading) && combinedReels.length === 0
 
@@ -1159,8 +1169,8 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
       reels={combinedReels}
       initialIndex={initialIndex}
       hasMore={hasMore}
-      isLoading={isWorkspace && isWorkspaceFeedFetching && combinedReels.length > 0}
-      onLoadMore={isWorkspace ? handleLoadMore : undefined}
+      isLoading={isFeedFetching && combinedReels.length > 0}
+      onLoadMore={isWorkspace || !hasChallengeContext ? handleLoadMore : undefined}
       onActiveIndexChange={handleActiveIndexChange}
       containerHeight={isWorkspace ? "calc(100dvh - 128px)" : "calc(100dvh - 120px)"}
     >

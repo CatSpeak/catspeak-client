@@ -13,6 +13,11 @@ import {
 const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
 const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
 const DESCRIPTION_MAX_LENGTH = 500
+const PRIVACY_OPTIONS = [
+  { value: "Public", label: "Public", icon: Globe },
+  { value: "FriendsOnly", label: "Friends Only", icon: Users },
+  { value: "Private", label: "Private", icon: Lock },
+]
 
 const normalizeChallengeHashtag = (challenge) => {
   const rawHashtag = String(challenge?.hashtag || "").trim()
@@ -148,6 +153,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
   const videoRef = useRef(null)
   const descriptionInputRef = useRef(null)
   const descriptionHighlightRef = useRef(null)
+  const filmstripRequestRef = useRef(0)
+  const filmstripSourceRef = useRef("")
+  const metadataSourceRef = useRef("")
 
   const hashtagSearchArgs = useMemo(
     () => ({
@@ -253,6 +261,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     setIsExtractingFilmstrip(false)
     setPreviewMode("video")
     setMobileTab("details")
+    filmstripRequestRef.current += 1
+    filmstripSourceRef.current = ""
+    metadataSourceRef.current = ""
 
     if (videoRef.current) {
       try {
@@ -317,6 +328,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     setIsExtractingFilmstrip(false)
     setPreviewMode("video")
     setMobileTab("details")
+    filmstripRequestRef.current += 1
+    filmstripSourceRef.current = ""
+    metadataSourceRef.current = ""
 
     if (videoRef.current) {
       try {
@@ -372,6 +386,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     }
 
     setVideoFile(file)
+    setVideoDuration(0)
+    setCurrentTime(0)
+    setFilmstripFrames([])
+    filmstripRequestRef.current += 1
+    filmstripSourceRef.current = ""
+    metadataSourceRef.current = ""
     setVideoPreviewUrl(URL.createObjectURL(file))
     setCoverType("frame") // Default cover source to frame extraction on video select
   }
@@ -418,13 +438,25 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${ms}`
   }
 
-  // Sequential Background Keyframes extraction engine
-  const generateFilmstrip = async (videoUrl, duration) => {
-    if (!duration || duration <= 0) return
+  // Sequential background keyframe extraction engine.
+  const generateFilmstrip = useCallback(async (videoUrl, duration) => {
+    if (!videoUrl || !Number.isFinite(duration) || duration <= 0) return
+
+    const sourceKey = `${videoUrl}:${Math.round(duration * 1000)}`
+    if (filmstripSourceRef.current === sourceKey) return
+
+    const requestId = filmstripRequestRef.current + 1
+    filmstripRequestRef.current = requestId
+    filmstripSourceRef.current = sourceKey
+
     setIsExtractingFilmstrip(true)
     setFilmstripFrames([])
 
     let tempVideo = null
+    let extractionCancelled = false
+
+    const isStaleRequest = () => filmstripRequestRef.current !== requestId
+
     try {
       tempVideo = document.createElement("video")
 
@@ -451,10 +483,20 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         setTimeout(resolve, 2000)
       })
 
+      if (isStaleRequest()) {
+        extractionCancelled = true
+        return
+      }
+
       const numberOfFrames = 6
       const frames = []
 
       for (let i = 0; i < numberOfFrames; i++) {
+        if (isStaleRequest()) {
+          extractionCancelled = true
+          return
+        }
+
         // Distribute frames evenly from 5% to 95% of duration
         const ratio = 0.05 + (0.9 / (numberOfFrames - 1)) * i
         const time = duration * ratio
@@ -469,6 +511,11 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
           tempVideo.addEventListener("seeked", onSeeked)
           setTimeout(resolve, 800)
         })
+
+        if (isStaleRequest()) {
+          extractionCancelled = true
+          return
+        }
 
         // Draw video frame to small offscreen canvas (highly optimized)
         const canvas = document.createElement("canvas")
@@ -485,9 +532,13 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         }
       }
 
-      setFilmstripFrames(frames)
+      if (!isStaleRequest()) {
+        setFilmstripFrames(frames)
+      }
     } catch (err) {
-      console.error("Error generating filmstrip:", err)
+      if (!extractionCancelled) {
+        console.error("Error generating filmstrip:", err)
+      }
     } finally {
       if (tempVideo) {
         tempVideo.pause()
@@ -501,20 +552,32 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
           tempVideo.parentNode.removeChild(tempVideo)
         }
       }
-      setIsExtractingFilmstrip(false)
+      if (!isStaleRequest()) {
+        setIsExtractingFilmstrip(false)
+      }
     }
-  }
+  }, [])
 
-  // Handle Video metadata loading
-  const handleVideoLoadedMetadata = (e) => {
+  // Handle video metadata loading once per selected source.
+  const handleVideoLoadedMetadata = useCallback((e) => {
     const duration = e.target.duration
-    setVideoDuration(duration)
-    setCurrentTime(0.1)
-    e.target.currentTime = 0.1 // seek to 0.1s to extract first frame immediately
+    if (!Number.isFinite(duration) || duration <= 0) return
+
+    const sourceKey = `${videoPreviewUrl}:${Math.round(duration * 1000)}`
+    setVideoDuration((currentDuration) =>
+      Math.abs((currentDuration || 0) - duration) < 0.01 ? currentDuration : duration
+    )
+
+    if (metadataSourceRef.current === sourceKey) return
+    metadataSourceRef.current = sourceKey
+
+    const initialTime = Math.min(0.1, Math.max(duration - 0.01, 0))
+    setCurrentTime(initialTime)
+    e.target.currentTime = initialTime // Seek once to extract the default cover frame.
 
     // Trigger background keyframe extraction
     generateFilmstrip(videoPreviewUrl, duration)
-  }
+  }, [generateFilmstrip, videoPreviewUrl])
 
   // Video Seeked capture frame (initial capture only)
   const handleVideoSeeked = () => {
@@ -1192,11 +1255,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     Privacy
                   </label>
                   <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { value: "Public", label: "Public", icon: Globe },
-                      { value: "FriendsOnly", label: "Friends Only", icon: Users },
-                      { value: "Private", label: "Private", icon: Lock },
-                    ].map((item) => {
+                    {PRIVACY_OPTIONS.map((item) => {
                       const IconComponent = item.icon
                       const isSelected = privacy === item.value
                       return (
@@ -1248,10 +1307,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       }`}>
                       <video
                         ref={videoRef}
-                        src={videoPreviewUrl}
+                        src={coverType === "frame" ? videoPreviewUrl : undefined}
                         muted
                         playsInline
-                        preload="auto"
+                        preload="metadata"
                         onLoadedMetadata={handleVideoLoadedMetadata}
                         onDurationChange={handleVideoLoadedMetadata}
                         onSeeked={handleVideoSeeked}
@@ -1389,7 +1448,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                                   setCoverPreviewUrl("")
                                   setCoverType("frame") // Revert back to frame extraction
                                   // Seek back to 0.1 to reset default frame preview
-                                  if (videoRef.current) {
+                                  if (videoRef.current?.readyState > 0) {
                                     videoRef.current.currentTime = 0.1
                                   }
                                 }}
@@ -1461,7 +1520,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           loop
                           muted
                           playsInline
-                          preload="auto"
+                          preload="metadata"
                           className="w-full h-full object-cover brightness-[0.80] transition-all duration-300"
                         />
                       ) : coverPreviewUrl ? (

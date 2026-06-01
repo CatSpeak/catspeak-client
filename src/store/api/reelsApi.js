@@ -81,7 +81,7 @@ export const reelsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get Reels feed using decay scoring (perfect for infinite scroll)
     getReelsFeed: builder.query({
-      query: ({ sourceFilter = "All", page = 1, pageSize = 10, excludeReelIds } = {}) => {
+      query: ({ sourceFilter = "All", page = 1, pageSize = 20, excludeReelIds } = {}) => {
         const params = new URLSearchParams()
         if (sourceFilter) params.append("sourceFilter", sourceFilter)
         if (page) params.append("page", String(page))
@@ -92,6 +92,47 @@ export const reelsApi = baseApi.injectEndpoints({
         }
 
         return `/Reels/feed?${params.toString()}`
+      },
+      transformResponse: (response) => ({
+        ...(response && typeof response === "object" && !Array.isArray(response) ? response : {}),
+        data: getReelList(response),
+        lastPageCount: getReelList(response).length,
+      }),
+      serializeQueryArgs: ({ endpointName, queryArgs = {} }) => {
+        const sourceFilter = queryArgs.sourceFilter || "All"
+        const pageSize = queryArgs.pageSize || 20
+        return `${endpointName}-${sourceFilter}-${pageSize}`
+      },
+      merge: (currentCache, incomingResponse, { arg }) => {
+        const incomingReels = getReelList(incomingResponse)
+
+        if (!arg?.page || arg.page === 1) {
+          Object.assign(currentCache, incomingResponse, {
+            data: incomingReels,
+            lastPageCount: incomingReels.length,
+          })
+          return
+        }
+
+        const currentReels = getReelList(currentCache)
+        const existingIds = new Set(currentReels.map((reel) => String(reel.reelId)))
+        incomingReels.forEach((reel) => {
+          if (!existingIds.has(String(reel.reelId))) {
+            currentReels.push(reel)
+          }
+        })
+
+        Object.entries(incomingResponse || {}).forEach(([key, value]) => {
+          if (key !== "data") currentCache[key] = value
+        })
+        currentCache.lastPageCount = incomingReels.length
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return (
+          currentArg?.sourceFilter !== previousArg?.sourceFilter ||
+          currentArg?.page !== previousArg?.page ||
+          currentArg?.pageSize !== previousArg?.pageSize
+        )
       },
       providesTags: (result) =>
         result?.data

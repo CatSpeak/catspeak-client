@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import {
   LayoutDashboard,
@@ -13,6 +13,28 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext"
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 
+const getActiveKey = (pathname) => {
+  const segments = pathname.split("/").filter(Boolean)
+  const catSpeakIndex = segments.indexOf("cat-speak")
+  return segments[catSpeakIndex + 1] || "news"
+}
+
+const MenuItem = ({ item, isActive, onClick }) => {
+  const Icon = item.icon
+  return (
+    <button
+      onClick={onClick}
+      className={`relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors overflow-hidden ${isActive
+        ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-cath-red-700 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-cath-red-700"
+        : "font-normal text-black hover:bg-[#F2F2F2]"
+        }`}
+    >
+      <Icon size={20} className="flex-shrink-0" />
+      <span className="truncate">{item.label}</span>
+    </button>
+  )
+}
+
 const CatSpeakSidebar = () => {
   const { t } = useLanguage()
   const [devModalOpen, setDevModalOpen] = useState(false)
@@ -20,19 +42,7 @@ const CatSpeakSidebar = () => {
   const location = useLocation()
   const { lang } = useParams()
   const currentLang = lang || "en"
-
-  // Determine active key based on current path
-  const getActiveKey = () => {
-    const path = location.pathname.split("/").pop()
-    if (path === "cat-speak") return "news" // Default
-    return path
-  }
-
-  const [activeKey, setActiveKey] = useState(getActiveKey())
-
-  useEffect(() => {
-    setActiveKey(getActiveKey())
-  }, [location.pathname])
+  const activeKey = getActiveKey(location.pathname)
 
   const menuItems = [
     { key: "news", label: t.catSpeak.sidebar.news, icon: LayoutDashboard },
@@ -80,56 +90,22 @@ const CatSpeakSidebar = () => {
     }
   }
 
-  const MenuItem = ({ item, isActive, onClick }) => {
-    const Icon = item.icon
-    return (
-      <button
-        onClick={onClick}
-        className={`relative flex w-full h-10 items-center gap-3 px-4 text-sm rounded-r-lg transition-colors overflow-hidden ${isActive
-          ? "font-medium bg-[#F2F2F2] hover:bg-[#E6E6E6] text-cath-red-700 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-cath-red-700"
-          : "font-normal text-black hover:bg-[#F2F2F2]"
-          }`}
-      >
-        <Icon size={20} className="flex-shrink-0" />
-        <span className="truncate">{item.label}</span>
-      </button>
-    )
-  }
-
-  const SidebarContent = () => (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-col space-y-1">
-        {menuItems.map((item) => (
-          <MenuItem
-            key={item.key}
-            item={item}
-            isActive={activeKey === item.key}
-            onClick={() => handleItemClick(item)}
-          />
-        ))}
-      </div>
-
-      {/* 
-      <div className="my-6 h-px w-full bg-gray-100" />
-      <div className="flex flex-col space-y-1">
-        {bottomItems.map((item) => (
-          <MenuItem
-            key={item.key}
-            item={item}
-            isActive={activeKey === item.key}
-            onClick={() => handleItemClick(item)}
-          />
-        ))}
-      </div>
-      */}
-    </div>
-  )
-
   return (
     <>
       {/* Desktop Sidebar Only — mobile nav is handled by the header's MobileDrawer */}
       <div className="hidden lg:block w-[320px] shrink-0 sticky h-[calc(100vh-88px)] overflow-y-auto scrollbar-hidden">
-        <SidebarContent />
+        <div className="flex h-full flex-col">
+          <div className="flex flex-col space-y-1">
+            {menuItems.map((item) => (
+              <MenuItem
+                key={item.key}
+                item={item}
+                isActive={activeKey === item.key}
+                onClick={() => handleItemClick(item)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Coming Soon Modal */}
