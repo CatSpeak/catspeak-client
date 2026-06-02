@@ -26,7 +26,8 @@ export function useRecording(lkRoom = null, syncState = {}) {
     egressId,
     setEgressId,
     startedByAccountId,
-    setStartedByAccountId
+    setStartedByAccountId,
+    sessionId
   } = syncState
 
   const [isTogglingRecording, setIsTogglingRecording] = useState(false)
@@ -73,8 +74,8 @@ export function useRecording(lkRoom = null, syncState = {}) {
           return
         }
 
-        console.log("[Recording Debug] Starting recording for room:", roomName)
-        const result = await startRecording({ roomName }).unwrap()
+        console.log("[Recording Debug] Starting recording for room:", roomName, "sessionId:", sessionId)
+        const result = await startRecording({ roomName, sessionId }).unwrap()
         console.log("[Recording Debug] Start response:", JSON.stringify(result))
         console.log("[Recording Debug] egressId received:", result.egressId)
 
@@ -144,7 +145,7 @@ export function useRecording(lkRoom = null, syncState = {}) {
     } finally {
       setIsTogglingRecording(false)
     }
-  }, [lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording, egressId, setIsRecording, setEgressId, setStartedByAccountId])
+  }, [lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording, egressId, setIsRecording, setEgressId, setStartedByAccountId, sessionId])
 
   const confirmStopRecording = async () => {
     setShowStopModal(false)

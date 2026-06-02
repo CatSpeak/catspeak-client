@@ -59,7 +59,7 @@ const VideoCallRoomContent = () => {
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
   const connectionState = useConnectionState()
-  const livekitReady = connectionState === ConnectionState.Connected
+  const livekitReady = connectionState === ConnectionState.Connected || connectionState === ConnectionState.Reconnecting
 
   if (!user) return <Navigate to="/" state={{ from: location }} replace />
 
