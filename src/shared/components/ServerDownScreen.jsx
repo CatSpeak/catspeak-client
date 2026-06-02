@@ -16,6 +16,7 @@ const RETRY_INTERVAL_SECONDS = 60
  */
 const ServerDownScreen = () => {
   const isServerDown = useSelector(selectIsServerDown)
+  const isInCall = useSelector((s) => s.videoCall.isInCall)
   const dispatch = useDispatch()
   const { t } = useLanguage()
 
@@ -29,7 +30,7 @@ const ServerDownScreen = () => {
 
   // Countdown timer
   useEffect(() => {
-    if (!isServerDown) return
+    if (!isServerDown || isInCall) return
 
     const interval = setInterval(() => {
       setCountdown((prev) => {
@@ -42,7 +43,7 @@ const ServerDownScreen = () => {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [isServerDown, healthCheck])
+  }, [isServerDown, isInCall, healthCheck])
 
   // Reset countdown when the overlay mounts
   useEffect(() => {
@@ -51,7 +52,7 @@ const ServerDownScreen = () => {
     }
   }, [isServerDown])
 
-  if (!isServerDown) return null
+  if (!isServerDown || isInCall) return null
 
   const strings = t?.errors?.serverDown ?? {}
 

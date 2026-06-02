@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useSelector } from "react-redux"
+import { selectCurrentToken } from "@/store/slices/authSlice"
 import {
   useRoomContext,
   useParticipants,
@@ -76,7 +77,7 @@ const GlobalCallContent = ({
 
   // ── Synchronized Recording States ──
   const sessionId = callInfo?.sessionId || parseMetadata(localParticipant?.metadata)?.sessionId;
-  const token = useSelector((s) => s.videoCall.livekitToken)
+  const token = useSelector(selectCurrentToken)
 
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState(null)
