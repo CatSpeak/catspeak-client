@@ -68,6 +68,13 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
         console.error("[VideoChatSignalR] Connection failed:", err)
       })
 
+    connection.onreconnected((connectionId) => {
+      console.log("[VideoChatSignalR] Automatically reconnected. Re-joining SignalR session:", sessionId)
+      connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
+        console.error("[VideoChatSignalR] Failed to re-invoke JoinSession after reconnect:", err)
+      })
+    })
+
     connectionRef.current = connection
 
     return () => {
