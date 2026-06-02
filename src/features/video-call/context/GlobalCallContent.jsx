@@ -89,16 +89,31 @@ const GlobalCallContent = ({
 
   // Initialize recording state from active recordings on mount/refresh
   useEffect(() => {
-    if (sessionRecordings) {
+    if (sessionRecordings && sessionRecordings.length > 0) {
       const activeRec = sessionRecordings.find(r => r.status === "started" || r.status === "active");
       if (activeRec) {
         console.log("[GlobalCallContent] Found active recording on load:", activeRec);
         setIsRecording(true);
         setEgressId(activeRec.egressId);
         setStartedByAccountId(activeRec.startedByAccountId);
+      } else {
+        // No active recording, check if there are completed or partially completed recordings in this session
+        // that we haven't notified the user about yet.
+        const finishedRec = sessionRecordings.find(r => r.status === "completed" || r.status === "Partial Completed");
+        if (finishedRec) {
+          const toastKey = `toast-notified-finished-${finishedRec.recordingId}`;
+          if (!sessionStorage.getItem(toastKey)) {
+            sessionStorage.setItem(toastKey, "true");
+            if (finishedRec.status === "completed") {
+              toast.success(t.recordings?.actions?.stopSuccess || "Recording trước đó đã được lưu thành công trong My Workspace.", { duration: 6000 });
+            } else if (finishedRec.status === "Partial Completed") {
+              toast.error(t.recordings?.storage?.warningLimitReached || "Recording trước đó đã dừng và được lưu một phần.", { duration: 6000 });
+            }
+          }
+        }
       }
     }
-  }, [sessionRecordings])
+  }, [sessionRecordings, t])
 
   useVideoChatSignalR(sessionId, token, (event, data) => {
     if (event === "RecordingStatusChanged") {
@@ -140,7 +155,8 @@ const GlobalCallContent = ({
     egressId,
     setEgressId,
     startedByAccountId,
-    setStartedByAccountId
+    setStartedByAccountId,
+    sessionId
   })
 
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
