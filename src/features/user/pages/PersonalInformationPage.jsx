@@ -144,6 +144,7 @@ const PersonalInformationPage = () => {
   }
 
   const handleSave = async () => {
+    if (isUpdating || isSendingOtp) return
     setErrors({})
     const field = editingField
 
@@ -272,7 +273,7 @@ const PersonalInformationPage = () => {
         <BasicInfoSection
           formData={formData}
           editingField={editingField}
-          isUpdating={isUpdating}
+          isUpdating={isUpdating || isSendingOtp}
           onEdit={handleEdit}
           onCancel={handleCancel}
           onSave={handleSave}
@@ -284,7 +285,7 @@ const PersonalInformationPage = () => {
         <AccountPrivacySection
           formData={formData}
           editingField={editingField}
-          isUpdating={isUpdating}
+          isUpdating={isUpdating || isSendingOtp}
           onEdit={handleEdit}
           onCancel={handleCancel}
           onSave={handleSave}
