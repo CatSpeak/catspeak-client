@@ -2,6 +2,7 @@ import TextInput from "@/shared/components/ui/inputs/TextInput"
 import FormDatePicker from "../../forms/FormDatePicker"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import { ChevronDown } from "lucide-react"
 const RegisterFormFields = ({
   authText,
   formData,
