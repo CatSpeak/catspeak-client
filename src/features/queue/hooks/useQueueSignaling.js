@@ -24,7 +24,7 @@ export const useQueueSignaling = (handlers = {}) => {
       return
     }
 
-    const apiUrl = import.meta.env.VITE_API_BASE_URL
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "/api"
     const baseUrl = apiUrl.replace(/\/api\/?$/, "")
     const hubUrl = `${baseUrl}/hubs/queue`
 

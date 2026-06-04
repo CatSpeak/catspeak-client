@@ -1,13 +1,18 @@
 import React, { useState } from "react"
 import { Check, X, Eye, EyeOff } from "lucide-react"
-import { useChangePasswordMutation } from "@/store/api/userApi"
+import { useChangePasswordMutation, useRequestUserProfileOtpMutation } from "@/store/api/userApi"
+import { useAuth } from "@/features/auth"
+import ProfileOtpModal from "./ProfileOtpModal"
 
 const ChangePasswordSection = ({ t }) => {
+  const { user } = useAuth()
   const [changePassword, { isLoading }] = useChangePasswordMutation()
+  const [requestUserProfileOtp, { isLoading: isSendingOtp }] = useRequestUserProfileOtpMutation()
 
   const [isEditing, setIsEditing] = useState(false)
   const [showPasswords, setShowPasswords] = useState(false)
   const [error, setError] = useState("")
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -41,23 +46,44 @@ const ChangePasswordSection = ({ t }) => {
     }
 
     try {
+      await requestUserProfileOtp().unwrap()
+      setIsOtpModalOpen(true)
+    } catch (err) {
+      console.error("Failed to request OTP for password change", err)
+      setError(err?.data?.message || err?.data?.title || "Không thể gửi OTP. Vui lòng thử lại sau.")
+    }
+  }
+
+  const handleOtpVerify = async (otpValue, { setError: setModalError }) => {
+    try {
       await changePassword({
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
         confirmPassword: formData.confirmPassword,
+        otpCode: otpValue,
       }).unwrap()
-
+      setIsOtpModalOpen(false)
       handleCancel()
     } catch (err) {
-      const serverMsg = err?.data?.message || ""
-      const isIncorrectPassword = serverMsg.toLowerCase().includes("current password")
-
-      setError(
-        isIncorrectPassword
-          ? (t.validation?.password?.currentIncorrect || "Current password is incorrect")
-          : (t.validation?.password?.changeFailed || "Failed to change password")
-      )
+      console.error("Failed to change password with OTP", err)
+      const apiMessage = err?.data?.message || err?.data?.title
+      if (apiMessage) {
+        const lowerMsg = apiMessage.toLowerCase()
+        if (lowerMsg.includes("otp") || lowerMsg.includes("mã otp")) {
+          setModalError(t.profile?.personalInfo?.otpInvalid || "Mã OTP không hợp lệ hoặc đã hết hạn")
+        } else if (lowerMsg.includes("current password")) {
+          setModalError(t.validation?.password?.currentIncorrect || "Mật khẩu hiện tại không đúng")
+        } else {
+          setModalError(apiMessage)
+        }
+      } else {
+        setModalError("Có lỗi xảy ra, vui lòng thử lại.")
+      }
     }
+  }
+
+  const handleOtpResend = async () => {
+    await requestUserProfileOtp().unwrap()
   }
 
   const handleChange = (e) => {
@@ -148,6 +174,17 @@ const ChangePasswordSection = ({ t }) => {
           <p className="text-sm text-red-600">{error}</p>
         )}
       </div>
+
+      <ProfileOtpModal
+        open={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
+        email={user?.email}
+        onVerify={handleOtpVerify}
+        isVerifying={isLoading}
+        onResend={handleOtpResend}
+        isResending={isSendingOtp}
+        t={t}
+      />
     </div>
   )
 }

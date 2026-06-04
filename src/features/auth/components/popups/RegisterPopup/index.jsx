@@ -32,9 +32,39 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
 
   const [errors, setErrors] = useState({})
 
+  const validatePhoneInput = (phoneNumber, prefix) => {
+    if (!phoneNumber) return true
+    const clean = phoneNumber.replace(/[\s\-\(\)]/g, "")
+    if (!/^[0-9]+$/.test(clean)) return false
+
+    if (prefix === "+84") {
+      return /^(0?[35789]\d{8})$/.test(clean)
+    }
+    if (prefix === "+86") {
+      return /^(1[3-9]\d{9})$/.test(clean)
+    }
+    if (prefix === "+1") {
+      return /^([2-9]\d{9})$/.test(clean)
+    }
+    return clean.length >= 7 && clean.length <= 15
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setApiError(null)
+
+    // Form validation
+    const localErrors = {}
+    if (formData.phoneNumber) {
+      if (!validatePhoneInput(formData.phoneNumber, formData.phonePrefix)) {
+        localErrors.phoneNumber = authText.validationPhoneInvalid || "Số điện thoại không đúng định dạng"
+      }
+    }
+
+    if (Object.keys(localErrors).length > 0) {
+      setErrors(localErrors)
+      return
+    }
 
     try {
       const payload = { ...formData }

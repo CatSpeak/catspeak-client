@@ -67,7 +67,6 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         }
 
         const isInvalidCredentials =
-          err?.status === 401 ||
           errMessage === "Invalid email or password"
 
         setApiError(
