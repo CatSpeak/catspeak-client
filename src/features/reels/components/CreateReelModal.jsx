@@ -12,7 +12,7 @@ import {
 
 const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
 const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
-const DESCRIPTION_MAX_LENGTH = 500
+const DESCRIPTION_MAX_LENGTH = 2000
 const PRIVACY_OPTIONS = [
   { value: "Public", label: "Public", icon: Globe },
   { value: "FriendsOnly", label: "Friends Only", icon: Users },
@@ -245,6 +245,14 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
   }, [activeDescriptionTrigger?.type, activeDescriptionTrigger?.query, activeSuggestions.length])
 
   // No longer locking prefix at the front, cursor will snap to hashtag boundaries dynamically
+
+  // Auto-resize textarea whenever description changes (covers programmatic updates)
+  useEffect(() => {
+    const el = descriptionInputRef.current
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = el.scrollHeight + "px"
+  }, [description])
 
   // Handle closing modal and resetting form/previews
   const handleClose = useCallback(() => {
@@ -1197,7 +1205,8 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       <div
                         ref={descriptionHighlightRef}
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800 whitespace-pre-wrap break-words"
+                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800"
+                        style={{ fontFamily: "inherit", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}
                       >
                         {renderHighlightedDescription(description, "text-[#2b5db0]")}
                       </div>
@@ -1206,7 +1215,13 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         id="description"
                         placeholder="What's this video about? Add tags like #catspeak..."
                         value={description}
-                        onChange={handleDescriptionChange}
+                        onChange={(e) => {
+                          handleDescriptionChange(e)
+                          // Auto-resize textarea to fit content
+                          const el = e.target
+                          el.style.height = "auto"
+                          el.style.height = el.scrollHeight + "px"
+                        }}
                         onKeyDown={handleDescriptionKeyDown}
                         onKeyUp={handleDescriptionCursorUpdate}
                         onClick={handleDescriptionCursorUpdate}
@@ -1223,6 +1238,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         maxLength={DESCRIPTION_MAX_LENGTH}
                         rows={3}
                         className="relative z-10 min-h-[84px] w-full resize-none rounded-xl bg-transparent p-3 text-sm leading-5 text-transparent caret-gray-900 outline-none placeholder:text-gray-400"
+                        style={{ fontFamily: "inherit", overflowY: "hidden", overflowWrap: "break-word", wordBreak: "break-word" }}
                       />
                     </div>
 
