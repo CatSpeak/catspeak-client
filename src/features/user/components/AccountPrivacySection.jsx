@@ -11,6 +11,7 @@ const AccountPrivacySection = ({
   onSave,
   onChange,
   t,
+  errors = {},
 }) => {
   return (
     <>
@@ -34,6 +35,7 @@ const AccountPrivacySection = ({
           onSave={onSave}
           onChange={onChange}
           editLabel={t.profile?.personalInfo?.edit || "Edit"}
+          error={errors.address}
         />
 
         {/* Phone Number */}
@@ -48,6 +50,7 @@ const AccountPrivacySection = ({
           onSave={onSave}
           onChange={onChange}
           editLabel={t.profile?.personalInfo?.edit || "Edit"}
+          error={errors.phoneNumber}
         />
 
         {/* Email */}
@@ -62,6 +65,7 @@ const AccountPrivacySection = ({
           onSave={onSave}
           onChange={onChange}
           editLabel={t.profile?.personalInfo?.edit || "Edit"}
+          error={errors.email}
         />
       </div>
     </>

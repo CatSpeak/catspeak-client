@@ -33,6 +33,7 @@ const PersonalInformationPage = () => {
   })
 
   const [editingField, setEditingField] = useState(null)
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     if (profileData?.data) {
@@ -52,10 +53,12 @@ const PersonalInformationPage = () => {
 
   const handleEdit = (field) => {
     setEditingField(field)
+    setErrors((prev) => ({ ...prev, [field]: "" }))
   }
 
   const handleCancel = () => {
     setEditingField(null)
+    setErrors({})
     if (profileData?.data) {
       setFormData((prev) => ({
         ...prev,
@@ -78,12 +81,68 @@ const PersonalInformationPage = () => {
     ...overrides,
   })
 
+  const validatePhoneInput = (phoneNumber, country) => {
+    if (!phoneNumber) return true
+    const clean = phoneNumber.replace(/[\s\-\(\)]/g, "")
+    if (!/^[0-9]+$/.test(clean)) return false
+
+    const lowerCountry = (country || "").trim().toLowerCase()
+    const isVN = lowerCountry === "vietnam" || lowerCountry === "vn" || lowerCountry === "việt nam"
+    const isCN = lowerCountry === "china" || lowerCountry === "cn" || lowerCountry === "trung quốc"
+    const isUS = lowerCountry === "united states" || lowerCountry === "usa" || lowerCountry === "us" || lowerCountry === "mỹ" || lowerCountry === "anh"
+
+    if (isVN) {
+      return /^(0?[35789]\d{8}|\+?84[35789]\d{8})$/.test(clean)
+    }
+    if (isCN) {
+      return /^(1[3-9]\d{9}|\+?861[3-9]\d{9})$/.test(clean)
+    }
+    if (isUS) {
+      return /^([2-9]\d{9}|\+?1[2-9]\d{9})$/.test(clean)
+    }
+    return clean.length >= 7 && clean.length <= 15
+  }
+
   const handleSave = async () => {
+    setErrors({})
+    const field = editingField
+
+    if (field === "phoneNumber") {
+      if (formData.phoneNumber && !validatePhoneInput(formData.phoneNumber, formData.country)) {
+        setErrors({ phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" })
+        return
+      }
+    }
+
+    if (field === "email") {
+      if (!formData.email) {
+        setErrors({ email: t.auth?.validationEmailRequired || "Vui lòng nhập email!" })
+        return
+      }
+      if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        setErrors({ email: t.auth?.validationEmailInvalid || "Vui lòng nhập email hợp lệ!" })
+        return
+      }
+    }
+
     try {
       await updateProfile(buildProfilePayload()).unwrap()
       setEditingField(null)
-    } catch (error) {
-      console.error("Failed to update profile", error)
+    } catch (err) {
+      console.error("Failed to update profile", err)
+      const apiMessage = err?.data?.message || err?.data?.title
+      if (apiMessage) {
+        const lowerMsg = apiMessage.toLowerCase()
+        if (lowerMsg.includes("email") && lowerMsg.includes("already exists")) {
+          setErrors({ email: t.auth?.emailExists || "Email đã tồn tại" })
+        } else if (lowerMsg.includes("phone") && lowerMsg.includes("already exists")) {
+          setErrors({ phoneNumber: t.auth?.phoneExists || "Số điện thoại đã tồn tại" })
+        } else if (lowerMsg.includes("phone") && (lowerMsg.includes("invalid") || lowerMsg.includes("hợp lệ"))) {
+          setErrors({ phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" })
+        } else {
+          setErrors({ [field]: apiMessage })
+        }
+      }
     }
   }
 
@@ -131,6 +190,7 @@ const PersonalInformationPage = () => {
           onSave={handleSave}
           onChange={handleChange}
           t={t}
+          errors={errors}
         />
       </FluentCard>
     </div>
