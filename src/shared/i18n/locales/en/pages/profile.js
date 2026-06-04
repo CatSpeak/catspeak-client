@@ -19,6 +19,13 @@ export default {
     address: "Address",
     edit: "Edit",
     reset: "Reset",
+    phoneNumber: "Phone number",
+    otpSentToEmail: "We've sent a 6-digit confirmation code to your email",
+    verifyAndSave: "VERIFY & SAVE",
+    cancel: "Cancel",
+    otpRequired: "OTP verification is required",
+    otpLabel: "OTP Code",
+    otpPlaceholder: "Enter 6-digit OTP code",
   },
   instructor: {
     title: "Instructor",

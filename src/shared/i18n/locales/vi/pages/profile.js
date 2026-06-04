@@ -19,6 +19,13 @@ export default {
     address: "Địa chỉ",
     edit: "Chỉnh sửa",
     reset: "Đặt lại",
+    phoneNumber: "Số điện thoại",
+    otpSentToEmail: "Chúng tôi đã gửi mã xác nhận 6 chữ số đến email của bạn",
+    verifyAndSave: "XÁC MINH & LƯU",
+    cancel: "Hủy",
+    otpRequired: "Xác thực OTP là bắt buộc",
+    otpLabel: "Mã OTP",
+    otpPlaceholder: "Nhập mã OTP 6 chữ số",
   },
   instructor: {
     title: "Giảng viên",

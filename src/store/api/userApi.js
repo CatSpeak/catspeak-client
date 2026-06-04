@@ -24,7 +24,18 @@ export const userApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+    requestUserProfileOtp: builder.mutation({
+      query: () => ({
+        url: "/user-profile/request-otp",
+        method: "POST",
+      }),
+    }),
   }),
 })
 
-export const { useGetUserProfileQuery, useUpdateUserProfileMutation, useChangePasswordMutation } = userApi
+export const {
+  useGetUserProfileQuery,
+  useUpdateUserProfileMutation,
+  useChangePasswordMutation,
+  useRequestUserProfileOtpMutation,
+} = userApi

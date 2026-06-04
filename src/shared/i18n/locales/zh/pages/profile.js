@@ -19,6 +19,13 @@ export default {
     address: "地址",
     edit: "编辑",
     reset: "重置",
+    phoneNumber: "电话号码",
+    otpSentToEmail: "我们已向您的邮箱发送了6位验证码",
+    verifyAndSave: "验证并保存",
+    cancel: "取消",
+    otpRequired: "必须进行 OTP 验证",
+    otpLabel: "OTP 验证码",
+    otpPlaceholder: "输入 6 位 OTP 验证码",
   },
   instructor: {
     title: "讲师",

@@ -4,6 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
+  useRequestUserProfileOtpMutation,
 } from "@/store/api/userApi"
 
 import ProfileHeader from "../components/ProfileHeader"
@@ -11,6 +12,7 @@ import BasicInfoSection from "../components/BasicInfoSection"
 import AccountPrivacySection from "../components/AccountPrivacySection"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import ProfileOtpModal from "../components/ProfileOtpModal"
 
 const PersonalInformationPage = () => {
   const { user } = useAuth()
@@ -20,6 +22,9 @@ const PersonalInformationPage = () => {
   const [updateProfile, { isLoading: isUpdating }] =
     useUpdateUserProfileMutation()
 
+  const [requestUserProfileOtp, { isLoading: isSendingOtp }] =
+    useRequestUserProfileOtpMutation()
+
   const [formData, setFormData] = useState({
     username: "",
     nickname: "",
@@ -28,15 +33,30 @@ const PersonalInformationPage = () => {
     level: "HSK3",
     address: "",
     phoneNumber: "",
+    phonePrefix: "+84",
     country: "",
     avatarImageUrl: "",
   })
 
   const [editingField, setEditingField] = useState(null)
   const [errors, setErrors] = useState({})
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false)
 
   useEffect(() => {
     if (profileData?.data) {
+      const fullPhone = profileData.data.phoneNumber || ""
+      let phonePrefix = "+84"
+      let phoneNumber = fullPhone
+      if (fullPhone.startsWith("+84")) {
+        phonePrefix = "+84"
+        phoneNumber = fullPhone.slice(3)
+      } else if (fullPhone.startsWith("+86")) {
+        phonePrefix = "+86"
+        phoneNumber = fullPhone.slice(3)
+      } else if (fullPhone.startsWith("+1")) {
+        phonePrefix = "+1"
+        phoneNumber = fullPhone.slice(2)
+      }
       setFormData({
         username: profileData.data.username || "",
         nickname: profileData.data.nickname || "",
@@ -44,7 +64,8 @@ const PersonalInformationPage = () => {
         accountType: profileData.data.roleName || "Student",
         level: profileData.data.level || "HSK3",
         address: profileData.data.address || "",
-        phoneNumber: profileData.data.phoneNumber || "",
+        phoneNumber: phoneNumber,
+        phonePrefix: phonePrefix,
         country: profileData.data.country || "",
         avatarImageUrl: profileData.data.avatarImageUrl || "",
       })
@@ -60,31 +81,50 @@ const PersonalInformationPage = () => {
     setEditingField(null)
     setErrors({})
     if (profileData?.data) {
+      const fullPhone = profileData.data.phoneNumber || ""
+      let phonePrefix = "+84"
+      let phoneNumber = fullPhone
+      if (fullPhone.startsWith("+84")) {
+        phonePrefix = "+84"
+        phoneNumber = fullPhone.slice(3)
+      } else if (fullPhone.startsWith("+86")) {
+        phonePrefix = "+86"
+        phoneNumber = fullPhone.slice(3)
+      } else if (fullPhone.startsWith("+1")) {
+        phonePrefix = "+1"
+        phoneNumber = fullPhone.slice(2)
+      }
       setFormData((prev) => ({
         ...prev,
         username: profileData.data.username || "",
         nickname: profileData.data.nickname || "",
         email: profileData.data.email || "",
         address: profileData.data.address || "",
-        phoneNumber: profileData.data.phoneNumber || "",
+        phoneNumber: phoneNumber,
+        phonePrefix: phonePrefix,
         country: profileData.data.country || "",
       }))
     }
   }
 
-  const buildProfilePayload = (overrides = {}) => ({
-    nickname: formData.nickname,
-    country: formData.country,
-    address: formData.address,
-    phoneNumber: formData.phoneNumber,
-    email: formData.email,
-    ...overrides,
-  })
+  const buildProfilePayload = (overrides = {}) => {
+    const prefix = overrides.phonePrefix || formData.phonePrefix || "+84"
+    const phone = overrides.phoneNumber !== undefined ? overrides.phoneNumber : formData.phoneNumber
+    const cleanPhone = phone ? `${prefix}${phone}` : ""
+    return {
+      nickname: formData.nickname,
+      country: formData.country,
+      address: formData.address,
+      phoneNumber: cleanPhone,
+      email: formData.email,
+      ...overrides,
+    }
+  }
 
   const validatePhoneInput = (phoneNumber, country) => {
     if (!phoneNumber) return true
     const clean = phoneNumber.replace(/[\s\-\(\)]/g, "")
-    if (!/^[0-9]+$/.test(clean)) return false
+    if (!/^\+?[0-9]+$/.test(clean)) return false
 
     const lowerCountry = (country || "").trim().toLowerCase()
     const isVN = lowerCountry === "vietnam" || lowerCountry === "vn" || lowerCountry === "việt nam"
@@ -108,7 +148,9 @@ const PersonalInformationPage = () => {
     const field = editingField
 
     if (field === "phoneNumber") {
-      if (formData.phoneNumber && !validatePhoneInput(formData.phoneNumber, formData.country)) {
+      const prefix = formData.phonePrefix || "+84"
+      const combinedPhone = formData.phoneNumber ? `${prefix}${formData.phoneNumber}` : ""
+      if (formData.phoneNumber && !validatePhoneInput(combinedPhone, formData.country)) {
         setErrors({ phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" })
         return
       }
@@ -125,25 +167,83 @@ const PersonalInformationPage = () => {
       }
     }
 
-    try {
-      await updateProfile(buildProfilePayload()).unwrap()
-      setEditingField(null)
-    } catch (err) {
-      console.error("Failed to update profile", err)
-      const apiMessage = err?.data?.message || err?.data?.title
-      if (apiMessage) {
-        const lowerMsg = apiMessage.toLowerCase()
-        if (lowerMsg.includes("email") && lowerMsg.includes("already exists")) {
-          setErrors({ email: t.auth?.emailExists || "Email đã tồn tại" })
-        } else if (lowerMsg.includes("phone") && lowerMsg.includes("already exists")) {
-          setErrors({ phoneNumber: t.auth?.phoneExists || "Số điện thoại đã tồn tại" })
-        } else if (lowerMsg.includes("phone") && (lowerMsg.includes("invalid") || lowerMsg.includes("hợp lệ"))) {
-          setErrors({ phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" })
-        } else {
-          setErrors({ [field]: apiMessage })
+    // Determine if sensitive fields are modified
+    let isSensitiveChange = false
+    if (field === "email") {
+      const origEmail = (profileData?.data?.email || "").toLowerCase()
+      const newEmail = (formData.email || "").toLowerCase()
+      if (origEmail !== newEmail) {
+        isSensitiveChange = true
+      }
+    } else if (field === "phoneNumber") {
+      const origPhone = (profileData?.data?.phoneNumber || "")
+      const prefix = formData.phonePrefix || "+84"
+      const cleanPhone = formData.phoneNumber ? `${prefix}${formData.phoneNumber}` : ""
+      if (origPhone !== cleanPhone) {
+        isSensitiveChange = true
+      }
+    }
+
+    if (isSensitiveChange) {
+      try {
+        await requestUserProfileOtp().unwrap()
+        setIsOtpModalOpen(true)
+      } catch (err) {
+        console.error("Failed to request OTP for profile update", err)
+        const apiMessage = err?.data?.message || err?.data?.title || "Không thể gửi OTP. Vui lòng thử lại sau."
+        setErrors({ [field]: apiMessage })
+      }
+    } else {
+      // Non-sensitive update, or sensitive field didn't change
+      try {
+        await updateProfile(buildProfilePayload()).unwrap()
+        setEditingField(null)
+      } catch (err) {
+        console.error("Failed to update profile", err)
+        const apiMessage = err?.data?.message || err?.data?.title
+        if (apiMessage) {
+          const lowerMsg = apiMessage.toLowerCase()
+          if (lowerMsg.includes("email") && lowerMsg.includes("already exists")) {
+            setErrors({ email: t.auth?.emailExists || "Email đã tồn tại" })
+          } else if (lowerMsg.includes("phone") && lowerMsg.includes("already exists")) {
+            setErrors({ phoneNumber: t.auth?.phoneExists || "Số điện thoại đã tồn tại" })
+          } else if (lowerMsg.includes("phone") && (lowerMsg.includes("invalid") || lowerMsg.includes("hợp lệ"))) {
+            setErrors({ phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" })
+          } else {
+            setErrors({ [field]: apiMessage })
+          }
         }
       }
     }
+  }
+
+  const handleOtpVerify = async (otpValue, { setError: setModalError }) => {
+    try {
+      await updateProfile(buildProfilePayload({ OtpCode: otpValue })).unwrap()
+      setIsOtpModalOpen(false)
+      setEditingField(null)
+    } catch (err) {
+      console.error("Failed to update profile with OTP", err)
+      const apiMessage = err?.data?.message || err?.data?.title
+      if (apiMessage) {
+        const lowerMsg = apiMessage.toLowerCase()
+        if (lowerMsg.includes("otp") || lowerMsg.includes("mã otp")) {
+          setModalError(t.profile?.personalInfo?.otpInvalid || "Mã OTP không hợp lệ hoặc đã hết hạn")
+        } else if (lowerMsg.includes("email") && lowerMsg.includes("already exists")) {
+          setModalError(t.auth?.emailExists || "Email đã tồn tại")
+        } else if (lowerMsg.includes("phone") && lowerMsg.includes("already exists")) {
+          setModalError(t.auth?.phoneExists || "Số điện thoại đã tồn tại")
+        } else {
+          setModalError(apiMessage)
+        }
+      } else {
+        setModalError("Có lỗi xảy ra, vui lòng thử lại.")
+      }
+    }
+  }
+
+  const handleOtpResend = async () => {
+    await requestUserProfileOtp().unwrap()
   }
 
   const handleCountryChange = async (val) => {
@@ -193,6 +293,17 @@ const PersonalInformationPage = () => {
           errors={errors}
         />
       </FluentCard>
+
+      <ProfileOtpModal
+        open={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
+        email={profileData?.data?.email}
+        onVerify={handleOtpVerify}
+        isVerifying={isUpdating}
+        onResend={handleOtpResend}
+        isResending={isSendingOtp}
+        t={t}
+      />
     </div>
   )
 }
