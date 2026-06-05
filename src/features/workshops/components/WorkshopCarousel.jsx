@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -7,6 +7,7 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import ChinaWorkshopModal from "./modals/ChinaWorkshopModal"
 import HskWorkshopModal from "./modals/HskWorkshopModal"
+import EnglishWorkshopModal from "./modals/EnglishWorkshopModal"
 import { getWorkshopSlides } from "../data/workshopSlides"
 import WorkshopCard from "./WorkshopCard"
 import colors from "@/shared/utils/colors"
@@ -20,10 +21,16 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
   // Get slides from data utility
   const slides = getWorkshopSlides(t, lang, propSlides)
 
+  useEffect(() => {
+    setCurrentIndex(0)
+  }, [lang])
+
   if (slides.length === 0) return null
 
-  const canGoPrev = currentIndex > 0
-  const canGoNext = currentIndex < slides.length - 1
+  const safeIndex = Math.max(0, Math.min(currentIndex, slides.length - 1))
+
+  const canGoPrev = safeIndex > 0
+  const canGoNext = safeIndex < slides.length - 1
 
   const goPrev = () => {
     if (canGoPrev) setCurrentIndex((i) => i - 1)
@@ -59,10 +66,7 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
             exit={true}
             className="w-full"
           >
-            <WorkshopCard
-              slide={slides[currentIndex]}
-              onCtaClick={setModalType}
-            />
+            <WorkshopCard slide={slides[safeIndex]} onCtaClick={setModalType} />
           </FluentAnimation>
         </AnimatePresence>
       </div>
@@ -76,8 +80,8 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
               onClick={() => setCurrentIndex(idx)}
               aria-label={`Go to slide ${idx + 1}`}
               className={`rounded-full transition-all duration-300 ${
-                idx === currentIndex
-                  ? "w-6 h-2 bg-cath-red-700"
+                idx === safeIndex
+                  ? "w-6 h-2 bg-[#990011]"
                   : "w-2 h-2 bg-[#C6C6C6] hover:bg-[#999]"
               }`}
             />
@@ -93,6 +97,12 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
 
       <HskWorkshopModal
         open={modalType === "hsk"}
+        onClose={() => setModalType(null)}
+        t={t}
+      />
+
+      <EnglishWorkshopModal
+        open={modalType === "english"}
         onClose={() => setModalType(null)}
         t={t}
       />
