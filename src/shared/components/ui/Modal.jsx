@@ -9,6 +9,7 @@ const Modal = ({
   onClose,
   children,
   className = "",
+  headerClassName = "flex items-center justify-between p-3",
   title,
   showCloseButton = true,
   footer,
@@ -55,7 +56,7 @@ const Modal = ({
             onClick={(e) => e.stopPropagation()}
           >
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-3">
+              <div className={headerClassName}>
                 {title ? (
                   <h2 className="text-[20px] leading-[26px] font-semibold">
                     {title}
