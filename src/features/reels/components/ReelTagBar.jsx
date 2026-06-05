@@ -120,7 +120,7 @@ const ReelTagBar = React.memo(function ReelTagBar({
         </button>
 
         {openDropdown === "active" && (
-          <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden text-sm font-semibold text-gray-700 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="absolute top-full left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-64 max-w-[calc(100vw-32px)] bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden text-sm font-semibold text-gray-700 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
             <div
               onClick={() => handleSelectChallenge("active", "all")}
               className="px-4 py-3 hover:bg-red-50 hover:text-[#990011] cursor-pointer border-b border-gray-50 flex items-center space-x-2"
@@ -167,7 +167,7 @@ const ReelTagBar = React.memo(function ReelTagBar({
         </button>
 
         {openDropdown === "past" && (
-          <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden text-sm font-semibold text-gray-700 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="absolute top-full right-0 md:right-auto md:left-0 mt-2 w-64 max-w-[calc(100vw-32px)] bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden text-sm font-semibold text-gray-700 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
             <div
               onClick={() => handleSelectChallenge("past", "all_past")}
               className="px-4 py-3 hover:bg-gray-50 hover:text-gray-900 cursor-pointer border-b border-gray-50 flex items-center space-x-2"
