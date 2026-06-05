@@ -92,7 +92,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   return (
     <>
-      <div className="p-5 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-4 bg-white">
+      <div className="p-6 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-2 bg-white">
         {/* Register / Unregister */}
         {!confirmDelete &&
           (isCreator ? (
@@ -164,22 +164,18 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           <div className="flex items-center gap-2">
             {isCreator && (
               <>
-                <PillButton
+                <button
                   onClick={onEdit}
-                  variant="secondary"
-                  bgColor="#F2F2F2"
-                  className="!px-0 w-12 h-12 flex-shrink-0"
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
                 >
-                  <Pencil size={20} />
-                </PillButton>
-                <PillButton
+                  <Pencil />
+                </button>
+                <button
                   onClick={() => setConfirmDelete(true)}
-                  variant="secondary"
-                  bgColor="#F2F2F2"
-                  className="!px-0 w-12 h-12 flex-shrink-0"
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
                 >
-                  <Trash2 size={20} />
-                </PillButton>
+                  <Trash2 />
+                </button>
               </>
             )}
             <SharePopover

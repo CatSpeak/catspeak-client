@@ -26,7 +26,7 @@ const SharePopover = ({ eventId, occurrenceId }) => {
       <button
         onClick={handleShare}
         disabled={isSharing}
-        className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-10 h-10 disabled:opacity-50"
+        className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 disabled:opacity-50"
         title={t.calendar?.shareEvent || "Chia sẻ sự kiện"}
       >
         {isSharing ? <Loader2 className="animate-spin" /> : <Share2 />}

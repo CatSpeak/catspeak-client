@@ -28,6 +28,7 @@ export default {
   maxParticipants: "最大参与人数",
   startTime: "开始时间",
   endTime: "结束时间",
+  to: "至",
   endsOn: "结束于",
   timezone: "时区",
   recurrence: {

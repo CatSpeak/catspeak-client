@@ -66,9 +66,9 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
         `/${currentCommunity}`,
         `/${newCode}`,
       )
-      navigate(newPath)
+      window.location.href = newPath
     } else {
-      navigate(`/${newCode}/community`)
+      window.location.href = `/${newCode}/community`
     }
 
     onClose?.()
