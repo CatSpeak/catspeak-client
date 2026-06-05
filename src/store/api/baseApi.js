@@ -33,6 +33,13 @@ const baseQuery = fetchBaseQuery({
     if (token) {
       headers.set("authorization", `Bearer ${token}`)
     }
+
+    // Extract community language from URL (e.g., /zh/cat-speak/...)
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
+    if (match) {
+      headers.set("X-Community-Lang", match[1])
+    }
+
     return headers
   },
 })

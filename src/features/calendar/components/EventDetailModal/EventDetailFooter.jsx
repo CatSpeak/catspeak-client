@@ -21,10 +21,10 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   const isCreator = Boolean(
     user &&
-      event &&
-      (user.id === event.creatorId ||
-        user.username === event.creatorName ||
-        (user.fullName && user.fullName === event.creatorName))
+    event &&
+    (user.id === event.creatorId ||
+      user.username === event.creatorName ||
+      (user.fullName && user.fullName === event.creatorName)),
   )
 
   const isRegistered = event?.isRegistered ?? false
@@ -36,7 +36,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
     useRegisterForEventMutation()
   const [cancelRegistration, { isLoading: isCancelling }] =
     useCancelRegistrationMutation()
-  const [deleteRegistration, { isLoading: isDeletingReg }] = 
+  const [deleteRegistration, { isLoading: isDeletingReg }] =
     useDeleteRegistrationMutation()
 
   const isProcessing = isRegistering || isCancelling || isDeletingReg
@@ -54,8 +54,12 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           const body = {
             eventId,
             cancellationReason: "User cancelled",
-            ...(event?.occurrenceId ? { occurrenceId: event.occurrenceId } : {}),
-            ...(event?.isRecurring && event?.originalStartTime && !event?.occurrenceId
+            ...(event?.occurrenceId
+              ? { occurrenceId: event.occurrenceId }
+              : {}),
+            ...(event?.isRecurring &&
+            event?.originalStartTime &&
+            !event?.occurrenceId
               ? { registrationDate: event.originalStartTime }
               : {}),
           }
@@ -88,7 +92,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   return (
     <>
-      <div className="p-5 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-4 bg-white">
+      <div className="p-6 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-2 bg-white">
         {/* Register / Unregister */}
         {!confirmDelete &&
           (isCreator ? (
@@ -119,7 +123,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             {event?.isRecurring && event?.occurrenceId ? (
               <>
                 <PillButton
-                  onClick={() => handleDelete('occurrence')}
+                  onClick={() => handleDelete("occurrence")}
                   loading={isDeleting}
                   loadingText={cal.deleting || "Đang xóa..."}
                   bgColor="#dc2626"
@@ -128,7 +132,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
                   {cal.deleteThisOccurrence || "Chỉ xóa buổi này"}
                 </PillButton>
                 <PillButton
-                  onClick={() => handleDelete('series')}
+                  onClick={() => handleDelete("series")}
                   loading={isDeleting}
                   loadingText={cal.deleting || "Đang xóa..."}
                   bgColor="#991b1b"
@@ -139,7 +143,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
               </>
             ) : (
               <PillButton
-                onClick={() => handleDelete('series')}
+                onClick={() => handleDelete("series")}
                 loading={isDeleting}
                 loadingText={cal.deleting || "Đang xóa..."}
                 bgColor="#dc2626"
@@ -161,22 +165,18 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           <div className="flex items-center gap-2">
             {isCreator && (
               <>
-                <PillButton
+                <button
                   onClick={onEdit}
-                  variant="secondary"
-                  bgColor="#F2F2F2"
-                  className="!px-0 w-12 h-12 flex-shrink-0"
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
                 >
-                  <Pencil size={20} />
-                </PillButton>
-                <PillButton
+                  <Pencil />
+                </button>
+                <button
                   onClick={() => setConfirmDelete(true)}
-                  variant="secondary"
-                  bgColor="#F2F2F2"
-                  className="!px-0 w-12 h-12 flex-shrink-0"
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
                 >
-                  <Trash2 size={20} />
-                </PillButton>
+                  <Trash2 />
+                </button>
               </>
             )}
             <SharePopover

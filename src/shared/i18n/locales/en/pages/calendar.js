@@ -28,6 +28,7 @@ export default {
   maxParticipants: "Max participants",
   startTime: "Start time",
   endTime: "End time",
+  to: "to",
   endsOn: "Ends on",
   timezone: "Timezone",
   recurrence: {

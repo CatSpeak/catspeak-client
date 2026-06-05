@@ -21,10 +21,10 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
 
   const isCreator = Boolean(
     user &&
-      ev &&
-      (user.id === ev.creatorId ||
-        user.username === ev.creatorName ||
-        (user.fullName && user.fullName === ev.creatorName))
+    ev &&
+    (user.id === ev.creatorId ||
+      user.username === ev.creatorName ||
+      (user.fullName && user.fullName === ev.creatorName)),
   )
 
   const handleDeleteOccurrence = async () => {
@@ -45,8 +45,8 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
   const tzOffsetLabel = eventTzObj ? `(${eventTzObj.offset})` : `(${eventTzId})`
 
   return (
-    <div className="p-6 relative bg-white text-base overflow-y-auto max-h-[60vh]">
-      <div className="flex flex-col gap-3">
+    <div className="relative bg-white text-base overflow-y-auto max-h-[60vh] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+      <div className="flex flex-col gap-3 p-6 pb-0">
         {/* Time */}
         <div className="flex items-baseline gap-2">
           <span className="font-bold min-w-max">
@@ -214,7 +214,7 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
               <span className="font-bold">
                 {t.calendar?.occurrencesList || "Các buổi trong chuỗi"}:
               </span>
-              <div className="flex flex-col gap-3 max-h-40 overflow-y-auto pr-2 py-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+              <div className="flex flex-col gap-3 py-2">
                 {ev.subOccurrences.map((sub) => (
                   <div
                     key={sub.id}

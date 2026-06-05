@@ -28,6 +28,7 @@ export default {
   maxParticipants: "Số lượng tối đa",
   startTime: "Thời gian bắt đầu",
   endTime: "Thời gian kết thúc",
+  to: "đến",
   endsOn: "Kết thúc vào",
   timezone: "Múi giờ",
   recurrence: {
