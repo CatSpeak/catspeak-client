@@ -26,8 +26,8 @@ import { getNavigate, getLocation } from "./useNavigateRef"
  * @param {Function} params.leaveMeetingFn - LiveKit room.disconnect()
  * @param {object} params.screenShareState - Screen share state from useScreenShare()
  * @param {Function} params.chatSend      - LiveKit chat send function
- * @param {Function} params.setShowChat   - UI state setter
- * @param {Function} params.setShowParticipants - UI state setter
+ * @param {Function} params.chatSend      - LiveKit chat send function
+ * @param {Function} params.setActiveSidePanel - UI state setter
  */
 export const useCallActions = ({
   t,
@@ -39,8 +39,7 @@ export const useCallActions = ({
   leaveMeetingFn,
   screenShareState,
   chatSend,
-  setShowChat,
-  setShowParticipants,
+  setActiveSidePanel,
 }) => {
   const dispatch = useDispatch()
 
@@ -125,14 +124,13 @@ export const useCallActions = ({
   const enterPiP = useCallback(
     (navigateTo) => {
       dispatch(setPiPAction(true))
-      setShowChat(false)
-      setShowParticipants(false)
+      setActiveSidePanel(null)
       const navigate = getNavigate()
       if (navigateTo && navigate) {
         navigate(navigateTo)
       }
     },
-    [dispatch, setShowChat, setShowParticipants],
+    [dispatch, setActiveSidePanel],
   )
 
   const exitPiP = useCallback(() => {

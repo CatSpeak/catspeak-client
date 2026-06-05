@@ -98,6 +98,7 @@ const ProfileDropdown = () => {
           src={user?.avatarImageUrl}
           alt={user?.username || "User"}
           name={user?.fullName || user?.username}
+          isCurrentUser={true}
         />
 
         <div className="min-w-0">
@@ -175,6 +176,7 @@ const ProfileDropdown = () => {
             src={user?.avatarImageUrl}
             alt={user?.username || "User"}
             name={user?.fullName || user?.username}
+            isCurrentUser={true}
           />
         </button>
       )}

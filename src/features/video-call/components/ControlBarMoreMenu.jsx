@@ -9,6 +9,7 @@ import {
   Sparkles,
   Captions,
   Check,
+  UserCircle,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -32,6 +33,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     isAISession,
     showCC,
     setShowCC,
+    showAvatarPicker,
+    setShowAvatarPicker,
   } = useGlobalVideoCall()
 
   const handleCopyLink = () => {
@@ -63,7 +66,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   <button
                     onClick={() => {
                       setShowParticipants(!showParticipants)
-                      setShowChat(false)
                       setShowMoreMenu(false)
                     }}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
@@ -80,9 +82,18 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
               <div className="p-1 flex flex-col gap-1">
                 <button
                   onClick={() => {
+                    setShowAvatarPicker(!showAvatarPicker)
+                    setShowMoreMenu(false)
+                  }}
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                >
+                  <UserCircle size={20} />
+                  {t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
+                </button>
+
+                <button
+                  onClick={() => {
                     setShowVirtualBackground(!showVirtualBackground)
-                    setShowChat(false)
-                    setShowParticipants(false)
                     setShowMoreMenu(false)
                   }}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
@@ -100,21 +111,23 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
                 </button>
 
-               {isAISession && (
-                 <button
-                   onClick={() => {
-                     setShowCC(!showCC)
-                     setShowMoreMenu(false)
-                   }}
-                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                 >
-                   <Captions size={20} />
-                   <span className="flex-1 text-left">
-                     {t?.rooms?.videoCall?.subtitles || "Subtitles (CC)"}
-                   </span>
-                   {showCC && <Check size={18} className="text-cath-red-700" />}
-                 </button>
-               )}
+                {isAISession && (
+                  <button
+                    onClick={() => {
+                      setShowCC(!showCC)
+                      setShowMoreMenu(false)
+                    }}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                  >
+                    <Captions size={20} />
+                    <span className="flex-1 text-left">
+                      {t?.rooms?.videoCall?.subtitles || "Subtitles (CC)"}
+                    </span>
+                    {showCC && (
+                      <Check size={18} className="text-cath-red-700" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </FluentAnimation>

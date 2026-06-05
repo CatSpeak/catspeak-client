@@ -31,7 +31,9 @@ const ParticipantItem = ({ participant }) => {
     }
   }
   const meta = parseMetadata(participant.metadata)
+  console.log("Participant Metadata [ParticipantList]:", meta)
   const isHandRaised = meta.handRaised === true
+  const avatarUrl = meta.avatarUrl
 
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
@@ -40,7 +42,7 @@ const ParticipantItem = ({ participant }) => {
     <div className="flex items-center justify-between gap-3 pl-1.5 pr-2 py-2 rounded w-full">
       {/* LEFT */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <Avatar size={36} name={name} />
+        <Avatar size={36} name={name} src={avatarUrl} />
 
         <div className="flex flex-col min-w-0 flex-1">
           {/* Name */}
@@ -122,7 +124,7 @@ const ParticipantList = ({ hideTitle }) => {
           </h3>
         </div>
       )}
-      <div className="flex-1 overflow-y-auto p-1">
+      <div className="flex-1 overflow-y-auto p-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
         {raisedHandParticipants.length > 0 && (
           <ul className="flex flex-col gap-1">
             {raisedHandParticipants.map((participant) => (

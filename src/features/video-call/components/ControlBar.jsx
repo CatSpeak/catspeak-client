@@ -55,7 +55,12 @@ const VideoCallControlBar = () => {
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
 
   const handleToggleHand = async () => {
-    console.log("Toggle hand clicked. SessionId:", sessionId, "isHandRaised:", isHandRaised)
+    console.log(
+      "Toggle hand clicked. SessionId:",
+      sessionId,
+      "isHandRaised:",
+      isHandRaised,
+    )
     if (!sessionId) {
       console.warn("Cannot raise hand: sessionId is missing in context!")
       return
@@ -73,13 +78,13 @@ const VideoCallControlBar = () => {
 
   // Common button styles
   const buttonBaseClass =
-    "flex items-center justify-center rounded-full transition-colors shadow-sm w-12 h-12 min-[769px]:w-10 min-[769px]:h-10 relative overflow-hidden"
+    "flex items-center justify-center rounded-full transition-colors shadow-sm w-12 h-12 relative overflow-hidden"
   const inactiveClass = "bg-[#F2F2F2] hover:bg-[#D9D9D9] text-black"
   const activeToggleClass = "bg-cath-red-600 hover:bg-cath-red-700 text-white"
-  const iconClass = "w-6 h-6 min-[769px]:w-5 min-[769px]:h-5"
+  const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] sm:gap-3 sm:px-6 sm:py-3">
+    <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div className="relative z-10 flex items-center justify-center">
         <button
           onClick={handleToggleMic}
@@ -202,8 +207,6 @@ const VideoCallControlBar = () => {
       <button
         onClick={() => {
           setShowParticipants(!showParticipants)
-          setShowChat(false)
-          if (setShowVirtualBackground) setShowVirtualBackground(false)
         }}
         title={t.rooms?.videoCall?.controls?.participants || "Participants"}
         className={`${buttonBaseClass} hidden min-[426px]:flex ${
@@ -240,8 +243,6 @@ const VideoCallControlBar = () => {
         <button
           onClick={() => {
             setShowChat(!showChat)
-            setShowParticipants(false)
-            if (setShowVirtualBackground) setShowVirtualBackground(false)
           }}
           title={t.rooms?.videoCall?.controls?.chat || "Chat"}
           className={`${buttonBaseClass} ${
@@ -280,9 +281,7 @@ const VideoCallControlBar = () => {
         title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
         className={`${buttonBaseClass} bg-[#d40018] text-white hover:bg-[#e7001a]`}
       >
-        <Phone
-          className={`rotate-[135deg] w-6 h-6 min-[769px]:w-5 min-[769px]:h-5`}
-        />
+        <Phone className={`rotate-[135deg] ${iconClass}`} />
       </button>
 
       {/* Stop Recording Confirmation Modal */}

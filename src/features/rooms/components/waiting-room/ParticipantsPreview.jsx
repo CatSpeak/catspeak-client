@@ -1,5 +1,6 @@
 import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import Avatar from "@/shared/components/ui/Avatar"
 
 const ParticipantsPreview = ({ participants = [], participantCount }) => {
   const { t } = useLanguage()
@@ -23,20 +24,14 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
       {/* Participant List - Overlapping Avatars */}
       <div className="mb-2 flex flex-row items-center justify-center">
         {visibleParticipants.map((p, index) => (
-          <img
-            key={p.participantId || index}
-            alt={p.username}
-            src={
-              p.avatarImageUrl ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                p.username,
-              )}&background=random`
-            }
-            className={`h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm ${
-              index !== 0 ? "-ml-3" : ""
-            }`}
-            title={p.username}
-          />
+          <div key={p.accountId || index} title={p.username} className={`relative ${index !== 0 ? "-ml-3" : ""}`}>
+            <Avatar
+              src={p.avatarUrl}
+              name={p.username || "User"}
+              size={40}
+              className="border-2 border-white shadow-sm"
+            />
+          </div>
         ))}
         {remainingCount > 0 && (
           <div className="z-10 -ml-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-semibold text-gray-600 shadow-sm">

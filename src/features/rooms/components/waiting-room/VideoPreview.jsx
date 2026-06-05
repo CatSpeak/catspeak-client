@@ -37,6 +37,7 @@ const VideoPreview = ({
             <Avatar
               size={64}
               name={user?.username}
+              isCurrentUser={true}
               className="md:!w-24 md:!h-24"
             />
           </div>

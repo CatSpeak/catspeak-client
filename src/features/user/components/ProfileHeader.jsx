@@ -1,7 +1,23 @@
-import React from "react"
+import React, { useState } from "react"
 import Avatar from "@/shared/components/ui/Avatar"
+import { Pencil, Check, X } from "lucide-react"
 
-const ProfileHeader = ({ avatarImageUrl, username, t }) => {
+const ProfileHeader = ({ avatarImageUrl, onUpdateAvatarUrl, username, t }) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [inputUrl, setInputUrl] = useState("")
+
+  const handleEditClick = () => {
+    setInputUrl(avatarImageUrl || "")
+    setIsEditing(true)
+  }
+
+  const handleSave = () => {
+    if (onUpdateAvatarUrl) {
+      onUpdateAvatarUrl(inputUrl)
+    }
+    setIsEditing(false)
+  }
+
   return (
     <div className="relative mb-10">
       {/* Cover Image — same as RoomCard for visual consistency */}
@@ -16,32 +32,49 @@ const ProfileHeader = ({ avatarImageUrl, username, t }) => {
       {/* Avatar Section */}
       <div className="absolute -bottom-12 left-8 flex items-end gap-6">
         <div className="flex flex-col items-center gap-2">
-          <Avatar
-            size={96}
-            src={avatarImageUrl}
-            alt="Avatar"
-            name={username}
-            className="border-4 border-white"
-          />
+          <div className="relative group">
+            <Avatar
+              size={96}
+              src={avatarImageUrl}
+              alt="Avatar"
+              name={username}
+              className="border-4 border-white shadow-sm"
+            />
+            {!isEditing && (
+              <button
+                onClick={handleEditClick}
+                className="absolute bottom-0 right-0 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm text-gray-600 hover:text-[#990011] hover:bg-gray-50 transition-colors opacity-0 group-hover:opacity-100"
+              >
+                <Pencil size={14} />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* TODO: Avatar Selection List — feature not yet implemented */}
-        {/* <div className="mb-2 flex flex-wrap gap-2">
-          {[...Array(10)].map((_, i) => (
-            <div
-              key={i}
-              className="h-10 w-10 rounded-full bg-gray-200 border-2 border-white overflow-hidden cursor-pointer hover:scale-110 transition-transform"
+        {isEditing && (
+          <div className="mb-2 flex items-center gap-2 bg-white p-1.5 rounded-lg border border-gray-200 shadow-sm">
+            <input
+              type="text"
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
+              placeholder="Paste image URL..."
+              className="px-3 py-1.5 text-sm border border-gray-200 rounded outline-none focus:border-[#990011] w-64"
+              autoFocus
+            />
+            <button
+              onClick={handleSave}
+              className="p-1.5 bg-[#990011] text-white rounded hover:bg-[#7a000d]"
             >
-              <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`}
-                alt="avatar option"
-              />
-            </div>
-          ))}
-          <button className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50">
-            <Plus size={16} />
-          </button>
-        </div> */}
+              <Check size={16} />
+            </button>
+            <button
+              onClick={() => setIsEditing(false)}
+              className="p-1.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

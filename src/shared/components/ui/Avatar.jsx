@@ -1,4 +1,5 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 
 /**
  * Reusable Avatar component — displays a user image or initial fallback.
@@ -12,6 +13,7 @@ import React from "react"
  * @param {string}  [fallback]   - Explicit fallback character (overrides name)
  * @param {boolean} [speaking]   - Show green speaking-indicator border
  * @param {string}  [className]  - Extra classes merged onto the outer wrapper
+ * @param {boolean} [isCurrentUser] - If true, fetches and uses the avatar from the API
  */
 const Avatar = ({
   size = 24,
@@ -21,7 +23,26 @@ const Avatar = ({
   fallback,
   speaking = false,
   className = "",
+  isCurrentUser = false,
 }) => {
+  const [imgError, setImgError] = useState(false)
+
+  // Use API if it's the current user
+  const { data: profileData } = useGetUserProfileQuery(undefined, {
+    skip: !isCurrentUser,
+  })
+  
+  const apiSrc = isCurrentUser 
+    ? (profileData?.data?.meetingAvatarUrl || profileData?.data?.avatarImageUrl)
+    : null;
+
+  const finalSrc = apiSrc || src
+
+  // Reset imgError if src changes
+  useEffect(() => {
+    setImgError(false)
+  }, [finalSrc])
+
   const initial = fallback || (name ? name.charAt(0).toUpperCase() : "U")
 
   // Scale font size relative to the avatar size
@@ -42,16 +63,17 @@ const Avatar = ({
     ? "shadow-[0_0_15px_rgba(46,125,50,0.4)]"
     : ""
 
-  if (src) {
+  if (finalSrc && !imgError) {
     return (
       <div
         className={`overflow-hidden rounded-full ${speakingClass} ${className}`}
         style={baseStyle}
       >
         <img
-          src={src}
+          src={finalSrc}
           alt={alt}
           className="h-full w-full object-cover"
+          onError={() => setImgError(true)}
         />
       </div>
     )

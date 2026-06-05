@@ -85,7 +85,7 @@ const RoomCard = ({ room }) => {
         }}
         whileHover={{ y: -4 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
-        className="relative flex h-full w-full flex-col overflow-hidden rounded-xl bg-white border border-[#E5E5E5] cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300"
+        className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white border border-[#E5E5E5] cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300"
       >
         {/* Cover Image Section */}
         <div className="relative aspect-video w-full shrink-0 overflow-hidden">
@@ -145,7 +145,7 @@ const RoomCard = ({ room }) => {
           </div>
 
           {/* Divider */}
-          <div className="mb-3 h-px w-full bg-gray-200" />
+          <div className="mb-3 h-px w-full bg-[#e5e5e5]" />
 
           {/* Footer Info */}
           <div className="mt-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
