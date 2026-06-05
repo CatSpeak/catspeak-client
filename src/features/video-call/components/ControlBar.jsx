@@ -207,8 +207,6 @@ const VideoCallControlBar = () => {
       <button
         onClick={() => {
           setShowParticipants(!showParticipants)
-          setShowChat(false)
-          if (setShowVirtualBackground) setShowVirtualBackground(false)
         }}
         title={t.rooms?.videoCall?.controls?.participants || "Participants"}
         className={`${buttonBaseClass} hidden min-[426px]:flex ${
@@ -245,8 +243,6 @@ const VideoCallControlBar = () => {
         <button
           onClick={() => {
             setShowChat(!showChat)
-            setShowParticipants(false)
-            if (setShowVirtualBackground) setShowVirtualBackground(false)
           }}
           title={t.rooms?.videoCall?.controls?.chat || "Chat"}
           className={`${buttonBaseClass} ${

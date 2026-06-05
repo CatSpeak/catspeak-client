@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React from "react"
 import { useSelector } from "react-redux"
 import {
   useRoomContext,
@@ -8,7 +8,7 @@ import {
   useConnectionState,
   RoomAudioRenderer,
 } from "@livekit/components-react"
-import { ConnectionState, RoomEvent } from "livekit-client"
+import { ConnectionState } from "livekit-client"
 
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
@@ -17,6 +17,9 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
 import { useSystemMessages } from "@/features/video-call/hooks/useSystemMessages"
 import { useAiMessages } from "@/features/video-call/hooks/useAiMessages"
+import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
+import { useParticipantList } from "@/features/video-call/hooks/useParticipantList"
+import { useUnreadTracking } from "@/features/video-call/hooks/useUnreadTracking"
 import {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
@@ -46,14 +49,7 @@ const GlobalCallContent = ({
   const { roomData, user } = callInfo ?? {}
 
   // ── UI state ──
-  const [showChat, setShowChat] = useState(false)
-  const [showParticipants, setShowParticipants] = useState(false)
-  const [isChatCollapsed, setIsChatCollapsed] = useState(false)
-  const [isAiCollapsed, setIsAiCollapsed] = useState(false)
-  const [unreadRoomChat, setUnreadRoomChat] = useState(0)
-  const [unreadAiChat, setUnreadAiChat] = useState(0)
-  const [showVirtualBackground, setShowVirtualBackground] = useState(false)
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false)
+  const panelState = useSidePanelState()
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -80,60 +76,20 @@ const GlobalCallContent = ({
   const baseChatMessages = chatState.chatMessages ?? []
   const chatSend = chatState.send ?? (() => {})
 
-  // ── Deduplicated participant list (local first) ──
-  const seenIdentities = new Set()
-  let participants = []
+  // ── Participants ──
+  const { participants, isHandRaised } = useParticipantList(
+    allParticipants,
+    localParticipant,
+  )
 
-  const parseMetadata = (metadata) => {
-    if (!metadata) return {}
-    try {
-      return JSON.parse(metadata)
-    } catch {
-      return {}
-    }
-  }
-
-  if (localParticipant) {
-    seenIdentities.add(localParticipant.identity)
-    participants.push(localParticipant)
-  }
-
-  allParticipants.forEach((p) => {
-    if (p.identity === localParticipant?.identity) return
-    if (seenIdentities.has(p.identity)) return
-    seenIdentities.add(p.identity)
-    participants.push(p)
-  })
-
-  // ── Hand Raise Sorting ──
-  participants.sort((a, b) => {
-    const metaA = parseMetadata(a.metadata)
-    const metaB = parseMetadata(b.metadata)
-
-    const aRaised = metaA.handRaised === true
-    const bRaised = metaB.handRaised === true
-
-    if (aRaised && !bRaised) return -1
-    if (!aRaised && bRaised) return 1
-
-    if (aRaised && bRaised) {
-      const timeA = metaA.handRaisedAt || 0
-      const timeB = metaB.handRaisedAt || 0
-      return timeA - timeB // Ascending
-    }
-
-    // Both not raised, keep local user first
-    if (a.isLocal && !b.isLocal) return -1
-    if (!a.isLocal && b.isLocal) return 1
-
-    return 0
-  })
-
-  const localMetadata = parseMetadata(localParticipant?.metadata)
-  const isHandRaised = localMetadata.handRaised === true
+  const localMetadata = (() => {
+    if (!localParticipant?.metadata) return {}
+    try { return JSON.parse(localParticipant.metadata) } catch { return {} }
+  })()
 
   const currentUserId = user?.accountId
 
+  // ── Messages ──
   const systemMessages = useSystemMessages(lkRoom, receiveSystemMsgs)
 
   const {
@@ -148,15 +104,12 @@ const GlobalCallContent = ({
   const [chatPublicAi] = useChatPublicAiMutation()
   const [chatPrivateAi] = useChatPrivateAiMutation()
 
-  const chatMessages = [...baseChatMessages].map((msg) => {
+  // Parse reply metadata from chat messages
+  const chatMessages = baseChatMessages.map((msg) => {
     try {
       const json = JSON.parse(msg.message)
       if (json && json.isReply) {
-        return {
-          ...msg,
-          message: json.text,
-          replyTo: json.replyTo,
-        }
+        return { ...msg, message: json.text, replyTo: json.replyTo }
       }
     } catch {
       // not JSON or not a reply
@@ -168,101 +121,16 @@ const GlobalCallContent = ({
     (a, b) => a.timestamp - b.timestamp,
   )
 
-  // ── Unread Counts Tracking ──
-  const prevChatMessagesLength = React.useRef(chatMessages.length)
-  useEffect(() => {
-    if (chatMessages.length > prevChatMessagesLength.current) {
-      if (!showChat || isChatCollapsed) {
-        let newUnread = 0
-        for (
-          let i = prevChatMessagesLength.current;
-          i < chatMessages.length;
-          i++
-        ) {
-          if (!chatMessages[i].from?.isLocal) newUnread++
-        }
-        setUnreadRoomChat((prev) => prev + newUnread)
-      }
-    }
-    prevChatMessagesLength.current = chatMessages.length
-  }, [chatMessages, showChat, isChatCollapsed])
-
-  // ── Hand Raise Audio Notification ──
-  const prevRaisedHandsRef = React.useRef(new Set())
-  useEffect(() => {
-    const currentRaisedHands = new Set()
-    let newHandRaised = false
-
-    participants.forEach((p) => {
-      const meta = parseMetadata(p.metadata)
-      if (meta.handRaised === true) {
-        currentRaisedHands.add(p.identity)
-        // Check if this is a newly raised hand
-        if (!prevRaisedHandsRef.current.has(p.identity)) {
-          newHandRaised = true
-        }
-      }
+  // ── Unread tracking & hand-raise audio ──
+  const { unreadRoomChat, setUnreadRoomChat, unreadAiChat, setUnreadAiChat } =
+    useUnreadTracking({
+      chatMessages,
+      combinedAiMessages,
+      showChat: panelState.showChat,
+      isChatCollapsed: panelState.isChatCollapsed,
+      isAiCollapsed: panelState.isAiCollapsed,
+      participants,
     })
-
-    if (newHandRaised) {
-      const audio = new Audio('/sounds/hand-raise.mp3')
-      audio.volume = 0.5
-      audio.play().catch(err => {
-        console.warn("Hand raise audio blocked by browser autoplay policy:", err)
-      })
-    }
-
-    prevRaisedHandsRef.current = currentRaisedHands
-  }, [participants])
-
-  const prevAiMessagesRef = React.useRef(combinedAiMessages)
-  useEffect(() => {
-    if (combinedAiMessages === prevAiMessagesRef.current) return
-
-    if (!showChat || isAiCollapsed) {
-      let newUnread = 0
-      const prevStatuses = new Map(
-        prevAiMessagesRef.current.map((m) => [m.id, m.status]),
-      )
-
-      for (const msg of combinedAiMessages) {
-        // Skip local user's own prompts. (Note: AI responses have isLocal=false)
-        if (msg.from?.isLocal) continue
-
-        const hasPrev = prevStatuses.has(msg.id)
-
-        if (!hasPrev) {
-          // It's a completely new message (e.g. system msg, or another user's prompt)
-          // Exception: don't increment for "loading" placeholders immediately when the user prompts.
-          if (msg.status !== "loading") {
-            newUnread++
-          }
-        } else {
-          const prevStatus = prevStatuses.get(msg.id)
-          if (
-            prevStatus === "loading" &&
-            (msg.status === "done" || msg.status === "error")
-          ) {
-            // An AI message finished generating or errored
-            newUnread++
-          }
-        }
-      }
-
-      if (newUnread > 0) {
-        setUnreadAiChat((prev) => prev + newUnread)
-      }
-    }
-
-    prevAiMessagesRef.current = combinedAiMessages
-  }, [combinedAiMessages, showChat, isAiCollapsed])
-
-  useEffect(() => {
-    if (showChat) {
-      if (!isChatCollapsed) setUnreadRoomChat(0)
-      if (!isAiCollapsed) setUnreadAiChat(0)
-    }
-  }, [showChat, isChatCollapsed, isAiCollapsed])
 
   // ── Action handlers ──
   const actions = useCallActions({
@@ -275,8 +143,7 @@ const GlobalCallContent = ({
     leaveMeetingFn: videoCallState.leaveMeeting,
     screenShareState,
     chatSend,
-    setShowChat,
-    setShowParticipants,
+    setActiveSidePanel: panelState.setActiveSidePanel,
   })
 
   // ── Context value ──
@@ -314,22 +181,11 @@ const GlobalCallContent = ({
     isTogglingCam: videoCallState.isTogglingCam,
 
     // UI panels
-    showChat,
-    setShowChat,
-    showParticipants,
-    setShowParticipants,
-    isChatCollapsed,
-    setIsChatCollapsed,
-    isAiCollapsed,
-    setIsAiCollapsed,
+    ...panelState,
     unreadRoomChat,
     setUnreadRoomChat,
     unreadAiChat,
     setUnreadAiChat,
-    showVirtualBackground,
-    setShowVirtualBackground,
-    showAvatarPicker,
-    setShowAvatarPicker,
 
     // Chat
     messages: chatMessages,

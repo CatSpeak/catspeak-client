@@ -44,6 +44,8 @@ const IDLE_VALUE = {
   isTogglingMic: false,
   isTogglingCam: false,
   isTogglingScreenShare: false,
+  activeSidePanel: null,
+  setActiveSidePanel: () => {},
   showChat: false,
   setShowChat: () => {},
   showParticipants: false,

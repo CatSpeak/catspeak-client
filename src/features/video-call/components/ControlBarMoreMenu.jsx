@@ -61,9 +61,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   <button
                     onClick={() => {
                       setShowParticipants(!showParticipants)
-                      setShowChat(false)
-                      setShowAvatarPicker(false)
-                      setShowVirtualBackground(false)
                       setShowMoreMenu(false)
                     }}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
@@ -81,9 +78,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                 <button
                   onClick={() => {
                     setShowAvatarPicker(!showAvatarPicker)
-                    setShowVirtualBackground(false)
-                    setShowChat(false)
-                    setShowParticipants(false)
                     setShowMoreMenu(false)
                   }}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
@@ -95,9 +89,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                 <button
                   onClick={() => {
                     setShowVirtualBackground(!showVirtualBackground)
-                    setShowAvatarPicker(false)
-                    setShowChat(false)
-                    setShowParticipants(false)
                     setShowMoreMenu(false)
                   }}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"

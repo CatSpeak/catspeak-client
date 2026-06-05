@@ -41,16 +41,16 @@ const AvatarUrlPicker = ({ className = "p-4" }) => {
         </div>
         
         <div className="flex flex-col gap-2">
-          <label className="text-xs text-gray-500 font-medium">Image URL</label>
+          <label className="text-xs text-gray-500 font-medium">{t?.rooms?.avatarPicker?.imageUrl || "Image URL"}</label>
           <input
             type="text"
             value={inputUrl}
             onChange={(e) => setInputUrl(e.target.value)}
-            placeholder="Paste image URL here..."
+            placeholder={t?.rooms?.avatarPicker?.placeholder || "Paste image URL here..."}
             className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm outline-none focus:border-[#990011] transition-colors"
           />
           <p className="text-[10px] text-gray-400">
-            Paste a valid image URL. If invalid, it will fallback to your initial.
+            {t?.rooms?.avatarPicker?.description || "Paste a valid image URL. If invalid, it will fallback to your initial."}
           </p>
         </div>
 
@@ -59,7 +59,7 @@ const AvatarUrlPicker = ({ className = "p-4" }) => {
           disabled={isLoading || inputUrl === currentAvatarUrl}
           className="mt-2 w-full flex items-center justify-center gap-2 bg-[#990011] text-white py-2.5 rounded-md text-sm font-medium hover:bg-[#7a000d] disabled:opacity-50 transition-colors"
         >
-          {isLoading ? "Saving..." : <><Check size={16} /> Save Avatar</>}
+          {isLoading ? (t?.rooms?.avatarPicker?.saving || "Saving...") : <><Check size={16} /> {t?.rooms?.avatarPicker?.saveAvatar || "Save Avatar"}</>}
         </button>
       </div>
     </div>

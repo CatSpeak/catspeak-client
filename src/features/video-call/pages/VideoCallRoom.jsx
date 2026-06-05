@@ -31,6 +31,8 @@ const VideoCallRoomContent = () => {
     setShowVirtualBackground,
     showAvatarPicker,
     setShowAvatarPicker,
+    activeSidePanel,
+    setActiveSidePanel,
     // Auth guard
     user,
     location,
@@ -45,7 +47,7 @@ const VideoCallRoomContent = () => {
     enterPiP,
   } = useVideoCallContext()
 
-  const isSidePanelOpen = showChat || showParticipants || showVirtualBackground || showAvatarPicker
+  const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
     : showVirtualBackground
@@ -101,7 +103,7 @@ const VideoCallRoomContent = () => {
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <VirtualBackgroundPicker />}
                 {showAvatarPicker && <AvatarUrlPicker />}
-                {showChat && !showParticipants && !showVirtualBackground && !showAvatarPicker && (
+                {showChat && (
                   <ChatBox
                     messages={messages}
                     currentUser={user}
@@ -125,12 +127,7 @@ const VideoCallRoomContent = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="fixed inset-0 z-30 flex bg-black/40"
-                onClick={() => {
-                  setShowChat(false)
-                  setShowParticipants(false)
-                  setShowVirtualBackground(false)
-                  setShowAvatarPicker(false)
-                }}
+                onClick={() => setActiveSidePanel(null)}
               >
                 <motion.div
                   initial={{ x: "100%" }}
@@ -143,12 +140,7 @@ const VideoCallRoomContent = () => {
                   <button
                     type="button"
                     className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50"
-                    onClick={() => {
-                      setShowChat(false)
-                      setShowParticipants(false)
-                      setShowVirtualBackground(false)
-                      setShowAvatarPicker(false)
-                    }}
+                    onClick={() => setActiveSidePanel(null)}
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
                       <ChevronRight className="rotate-180" />
@@ -162,10 +154,7 @@ const VideoCallRoomContent = () => {
                     {showParticipants && <ParticipantList hideTitle />}
                     {showVirtualBackground && <VirtualBackgroundPicker />}
                     {showAvatarPicker && <AvatarUrlPicker />}
-                    {showChat &&
-                      !showParticipants &&
-                      !showVirtualBackground &&
-                      !showAvatarPicker && (
+                    {showChat && (
                         <ChatBox
                           messages={messages}
                           currentUser={user}

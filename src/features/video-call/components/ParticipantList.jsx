@@ -31,8 +31,9 @@ const ParticipantItem = ({ participant }) => {
     }
   }
   const meta = parseMetadata(participant.metadata)
+  console.log("Participant Metadata [ParticipantList]:", meta)
   const isHandRaised = meta.handRaised === true
-  const avatarUrl = meta.meetingAvatarUrl || meta.avatarImageUrl || meta.avatarUrl
+  const avatarUrl = meta.avatarUrl
 
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
@@ -41,7 +42,7 @@ const ParticipantItem = ({ participant }) => {
     <div className="flex items-center justify-between gap-3 pl-1.5 pr-2 py-2 rounded w-full">
       {/* LEFT */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <Avatar size={36} name={name} src={avatarUrl} isCurrentUser={isLocal} />
+        <Avatar size={36} name={name} src={avatarUrl} />
 
         <div className="flex flex-col min-w-0 flex-1">
           {/* Name */}
