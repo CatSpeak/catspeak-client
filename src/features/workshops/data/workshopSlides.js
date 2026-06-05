@@ -1,5 +1,6 @@
 import workshop1 from "@/shared/assets/images/workshops/workshop1.jpg"
 import workshop2 from "@/shared/assets/images/workshops/workshop2.jpg"
+import workshopen1 from "@/shared/assets/images/workshops/workshopen-1.png"
 import logoDefault from "@/shared/assets/images/LogoDefault.png"
 
 /**
@@ -10,6 +11,19 @@ import logoDefault from "@/shared/assets/images/LogoDefault.png"
  * @returns {Array} Combined slides array
  */
 export const getWorkshopSlides = (t, lang, propSlides = []) => {
+  if (lang === "en") {
+    return [
+      {
+        title: t.workshops.englishWorkshop?.title,
+        subtext: t.workshops.englishWorkshop?.introText1,
+        cta: t.workshops.englishWorkshop?.cta,
+        image: workshopen1,
+        modal: "english",
+      },
+      ...propSlides,
+    ]
+  }
+
   if (lang !== "zh") {
     return [
       {
