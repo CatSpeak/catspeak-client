@@ -55,7 +55,7 @@ const NewsCard = ({ news }) => {
   }, [news.postId])
 
   const avatarSrc = news.avatarUrl
-    ? `${IMAGE_BASE_URL}${news.avatarUrl}`
+    ? (news.avatarUrl.startsWith('http') ? news.avatarUrl : `${IMAGE_BASE_URL}${news.avatarUrl}`)
     : undefined
 
   // Varied aspect ratio for masonry look
@@ -85,7 +85,7 @@ const NewsCard = ({ news }) => {
             style={{ transform: `translateX(-${currentMediaIndex * 100}%)` }}
           >
             {news.media.map((item) => {
-              const imageUrl = `${IMAGE_BASE_URL}${item.mediaUrl}`
+              const imageUrl = item.mediaUrl?.startsWith('http') ? item.mediaUrl : `${IMAGE_BASE_URL}${item.mediaUrl}`
               return (
                 <div
                   key={item.postMediaId}
