@@ -13,6 +13,7 @@ import {
   Loader2,
   MoreVertical,
   Hand,
+  Captions,
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -35,6 +36,11 @@ const VideoCallControlBar = () => {
     setShowParticipants,
     showVirtualBackground,
     setShowVirtualBackground,
+    showCC,
+    setShowCC,
+    showRoomSubtitles,
+    setShowRoomSubtitles,
+    isAISession,
     handleToggleMic,
     handleToggleCam,
     handleToggleScreenShare,
@@ -233,6 +239,39 @@ const VideoCallControlBar = () => {
         ) : (
           <Hand className={iconClass} />
         )}
+      </button>
+
+      {/* Subtitle Toggle — works for both AI and non-AI rooms */}
+      <button
+        onClick={() => {
+          if (isAISession) {
+            // AI room: toggle showCC (existing behavior)
+            setShowCC(!showCC)
+          } else {
+            // Non-AI room: toggle showRoomSubtitles (new feature)
+            setShowRoomSubtitles(!showRoomSubtitles)
+          }
+        }}
+        title={
+          isAISession
+            ? showCC
+              ? "Turn captions off"
+              : "Turn captions on"
+            : showRoomSubtitles
+              ? "Turn subtitles off"
+              : "Turn subtitles on"
+        }
+        className={`${buttonBaseClass} ${
+          isAISession
+            ? showCC
+              ? activeToggleClass
+              : inactiveClass
+            : showRoomSubtitles
+              ? activeToggleClass
+              : inactiveClass
+        }`}
+      >
+        <Captions className={iconClass} />
       </button>
 
       {/* Chat Toggle */}

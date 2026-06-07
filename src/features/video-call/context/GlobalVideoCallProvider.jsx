@@ -53,6 +53,8 @@ const IDLE_VALUE = {
   isAISession: false,
   showCC: false,
   setShowCC: () => {},
+  showRoomSubtitles: false,
+  setShowRoomSubtitles: () => {},
   lkRoomName: null,
   unreadRoomChat: 0,
   unreadAiChat: 0,

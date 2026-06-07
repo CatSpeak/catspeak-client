@@ -55,6 +55,7 @@ const GlobalCallContent = ({
   const [unreadAiChat, setUnreadAiChat] = useState(0)
   const [showVirtualBackground, setShowVirtualBackground] = useState(false)
   const [showCC, setShowCC] = useState(false)
+  const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -333,6 +334,10 @@ const GlobalCallContent = ({
     showCC,
     setShowCC,
     isAISession,
+
+    // Room subtitles
+    showRoomSubtitles,
+    setShowRoomSubtitles,
 
     // Chat
     messages: chatMessages,
