@@ -2,7 +2,7 @@ import React, { useMemo } from "react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const RecurrenceDropdown = ({ value, onChange, activeColor }) => {
+const RecurrenceDropdown = ({ value, onChange, activeColor, disabled }) => {
   const { t } = useLanguage()
   const cal = t.calendar
 
@@ -29,6 +29,7 @@ const RecurrenceDropdown = ({ value, onChange, activeColor }) => {
       activeColor={activeColor}
       className="w-full"
       dropdownClassName="w-full min-w-[180px]"
+      disabled={disabled}
     />
   )
 }

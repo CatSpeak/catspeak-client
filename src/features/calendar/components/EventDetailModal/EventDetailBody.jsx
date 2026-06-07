@@ -6,12 +6,18 @@ import {
 } from "../../utils/eventFormatters"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCancelEventOccurrenceMutation } from "@/store/api/eventsApi"
-import { Trash2 } from "lucide-react"
+import { Trash2, ChevronRight } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import Modal from "@/shared/components/ui/Modal"
 import { TIMEZONES } from "../ui/TimezoneDropdown"
 
-const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
+const EventDetailBody = ({
+  ev,
+  event,
+  headerColor,
+  isLoading,
+  onSelectOccurrence,
+}) => {
   const { t, language } = useLanguage()
   const { user, isAdmin } = useAuth()
   const localeStr = language === "vi" ? "vi-VN" : "en-US"
@@ -46,84 +52,88 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
 
   return (
     <div className="relative bg-white text-base overflow-y-auto max-h-[60vh] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
-      <div className="flex flex-col gap-3 p-6 pb-0">
+      <div className="flex flex-col gap-3 p-6">
         {/* Time */}
-        <div className="flex items-baseline gap-2">
-          <span className="font-bold min-w-max">
-            {t.calendar?.timeLabel || "Time"}:
-          </span>
-          <span className="text-[#60060]">
-            {formatTime(ev.startTime, eventTzId)} –{" "}
-            {formatTime(ev.endTime, eventTzId)} {tzOffsetLabel}
-          </span>
-        </div>
+        {!ev.isRecurringGroup && (
+          <div className="flex items-baseline gap-2">
+            <span className="font-bold min-w-max">
+              {t.calendar?.timeLabel || "Time"}:
+            </span>
+            <span className="text-[#60060]">
+              {formatTime(ev.startTime, eventTzId)} –{" "}
+              {formatTime(ev.endTime, eventTzId)} {tzOffsetLabel}
+            </span>
+          </div>
+        )}
 
         {/* Location / City / Country */}
-        <div className="flex flex-col gap-3">
-          {(() => {
-            const locationStr = ev.location?.trim() || ""
-            const cityStr = ev.cityName?.trim() || ""
-            const countryStr = ev.countryName?.trim() || ""
+        {!ev.isRecurringGroup && (
+          <div className="flex flex-col gap-3">
+            {(() => {
+              const locationStr = ev.location?.trim() || ""
+              const cityStr = ev.cityName?.trim() || ""
+              const countryStr = ev.countryName?.trim() || ""
 
-            if (!locationStr && !cityStr && !countryStr) {
+              if (!locationStr && !cityStr && !countryStr) {
+                return (
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-bold min-w-max">
+                      {t.calendar?.location || "Location"}:
+                    </span>
+                    <span className="text-[#60060]">
+                      {t.calendar?.notAssigned || "Not assigned"}
+                    </span>
+                  </div>
+                )
+              }
+
+              const queryParts = [locationStr, cityStr, countryStr].filter(
+                Boolean,
+              )
+              const queryStr = queryParts.join(", ")
+
+              const isUrl =
+                /^https?:\/\//i.test(locationStr) ||
+                locationStr.includes("google.com/maps") ||
+                locationStr.includes("maps.app.goo.gl")
+
+              const mapUrl = isUrl
+                ? locationStr.startsWith("http")
+                  ? locationStr
+                  : `https://${locationStr}`
+                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
+
               return (
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-start gap-2">
                   <span className="font-bold min-w-max">
                     {t.calendar?.location || "Location"}:
                   </span>
-                  <span className="text-[#60060]">
-                    {t.calendar?.notAssigned || "Not assigned"}
-                  </span>
+                  <a
+                    href={mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col hover:opacity-80 transition-opacity"
+                    style={{ color: headerColor }}
+                  >
+                    {locationStr && (
+                      <span className="font-medium">{locationStr}</span>
+                    )}
+                    {(cityStr || countryStr) && (
+                      <span
+                        className={`text-sm opacity-80 ${locationStr ? "mt-0.5" : ""}`}
+                      >
+                        {[cityStr, countryStr].filter(Boolean).join(", ")}
+                      </span>
+                    )}
+                  </a>
                 </div>
               )
-            }
-
-            const queryParts = [locationStr, cityStr, countryStr].filter(
-              Boolean,
-            )
-            const queryStr = queryParts.join(", ")
-
-            const isUrl =
-              /^https?:\/\//i.test(locationStr) ||
-              locationStr.includes("google.com/maps") ||
-              locationStr.includes("maps.app.goo.gl")
-
-            const mapUrl = isUrl
-              ? locationStr.startsWith("http")
-                ? locationStr
-                : `https://${locationStr}`
-              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
-
-            return (
-              <div className="flex items-start gap-2">
-                <span className="font-bold min-w-max">
-                  {t.calendar?.location || "Location"}:
-                </span>
-                <a
-                  href={mapUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col hover:opacity-80 transition-opacity"
-                  style={{ color: headerColor }}
-                >
-                  {locationStr && (
-                    <span className="font-medium">{locationStr}</span>
-                  )}
-                  {(cityStr || countryStr) && (
-                    <span
-                      className={`text-sm opacity-80 ${locationStr ? "mt-0.5" : ""}`}
-                    >
-                      {[cityStr, countryStr].filter(Boolean).join(", ")}
-                    </span>
-                  )}
-                </a>
-              </div>
-            )
-          })()}
-        </div>
+            })()}
+          </div>
+        )}
 
         {/* Description */}
-        {ev.description && (
+        {!ev.isRecurringGroup && ev.description && (
           <div className="flex items-baseline gap-2">
             <span className="font-bold min-w-max">
               {t.calendar?.description || "Description"}:
@@ -133,19 +143,20 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
         )}
 
         {/* Participants */}
-        {(ev.currentParticipants != null || ev.maxParticipants != null) && (
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold min-w-max">
-              {t.calendar?.registeredCount || "Registered amount"}:
-            </span>
-            <span className="text-[#60060]">
-              {ev.currentParticipants ?? 0}/{ev.maxParticipants ?? "∞"}
-            </span>
-          </div>
-        )}
+        {!ev.isRecurringGroup &&
+          (ev.currentParticipants != null || ev.maxParticipants != null) && (
+            <div className="flex items-baseline gap-2">
+              <span className="font-bold min-w-max">
+                {t.calendar?.registeredCount || "Registered amount"}:
+              </span>
+              <span className="text-[#60060]">
+                {ev.currentParticipants ?? 0}/{ev.maxParticipants ?? "∞"}
+              </span>
+            </div>
+          )}
 
         {/* Conditions */}
-        {ev.conditions && ev.conditions.length > 0 && (
+        {!ev.isRecurringGroup && ev.conditions && ev.conditions.length > 0 && (
           <div className="flex items-baseline gap-2">
             <span className="font-bold min-w-max">
               {t.calendar?.conditions || "Conditions"}:
@@ -166,7 +177,7 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
         )}
 
         {/* Recurrence */}
-        {ev.isRecurring && ev.recurrenceRule && (
+        {!ev.isRecurringGroup && ev.isRecurring && ev.recurrenceRule && (
           <div className="flex items-baseline gap-2">
             <span className="font-bold min-w-max">
               {t.calendar?.repeatLabel || "Repeat"}:
@@ -210,43 +221,32 @@ const EventDetailBody = ({ ev, event, headerColor, isLoading }) => {
         {ev.isRecurringGroup &&
           ev.subOccurrences &&
           ev.subOccurrences.length > 0 && (
-            <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-gray-200">
-              <span className="font-bold">
+            <div className="flex flex-col gap-3">
+              <span className="font-bold text-lg">
                 {t.calendar?.occurrencesList || "Các buổi trong chuỗi"}:
               </span>
-              <div className="flex flex-col gap-3 py-2">
+
+              <div className="flex flex-col gap-3">
                 {ev.subOccurrences.map((sub) => (
-                  <div
+                  <button
                     key={sub.id}
-                    className="flex items-center justify-between border border-[#e5e5e5] p-4 rounded-2xl"
+                    onClick={() =>
+                      onSelectOccurrence && onSelectOccurrence(sub)
+                    }
+                    className="flex items-center justify-between p-4 rounded-2xl border border-[#F5F5F5] bg-[#F5F5F5] hover:border-[#990011] text-left"
                   >
                     <div className="flex flex-col">
-                      <span>{sub.title || ev.title}</span>
+                      <span className="font-medium">
+                        {sub.title || ev.title}
+                      </span>
                       <span className="text-[#606060]">
                         {formatTime(sub.startTime, eventTzId)} –{" "}
-                        {formatTime(sub.endTime, eventTzId)}
+                        {formatTime(sub.endTime, eventTzId)}{" "}
+                        {new Date(sub.startTime).toLocaleDateString(localeStr)}
                       </span>
                     </div>
-                    {isCreator && (
-                      <button
-                        onClick={() => setConfirmDeleteId(sub.id)}
-                        disabled={isCancelling && confirmDeleteId === sub.id}
-                        className="
-                          h-10 w-10 flex items-center justify-center
-                          rounded-full
-                          text-red-600
-                          transition-all duration-200
-                          hover:bg-red-600
-                          hover:text-white
-                          hover:border hover:border-red-600
-                          disabled:opacity-50
-                        "
-                        title={t.calendar?.deleteOccurrence || "Xóa buổi này"}
-                      >
-                        <Trash2 size={24} />
-                      </button>
-                    )}
-                  </div>
+                    <ChevronRight className="text-gray-400" size={20} />
+                  </button>
                 ))}
               </div>
             </div>

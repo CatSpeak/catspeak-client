@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { X } from "lucide-react"
+import { X, ChevronLeft } from "lucide-react"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import Modal from "@/shared/components/ui/Modal"
 import {
@@ -10,17 +10,23 @@ import EventDetailHeader from "./EventDetailHeader"
 import EventDetailBody from "./EventDetailBody"
 import EventDetailFooter from "./EventDetailFooter"
 import CreateEventModal from "../CreateEventModal"
-import OverrideOccurrenceModal from "../OverrideOccurrenceModal"
-import EditChoiceModal from "./EditChoiceModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const EventDetailModal = ({ event, onClose }) => {
   const { t } = useLanguage()
   const cal = t.calendar || {}
   const [editMode, setEditMode] = useState("none") // "none" | "choice" | "series" | "occurrence"
+  const [overrideEvent, setOverrideEvent] = useState(null)
 
-  const eventId = event?.eventId ?? event?.id
-  const occurrenceId = event?.occurrenceId
+  // Reset override if the base event changes
+  React.useEffect(() => {
+    setOverrideEvent(null)
+  }, [event])
+
+  const currentEvent = overrideEvent || event
+
+  const eventId = currentEvent?.eventId ?? currentEvent?.id
+  const occurrenceId = currentEvent?.occurrenceId
 
   const {
     data: occurrenceDetail,
@@ -55,101 +61,29 @@ const EventDetailModal = ({ event, onClose }) => {
 
   if (!event) return null
 
-  // Merge: prefer fully-loaded detail, fall back to the summary object, then override with occurrence specifics
-  const ev = detail
-    ? {
-        ...event,
-        ...detail,
-        ...occurrenceDetail,
-        location:
-          occurrenceDetail?.location ||
-          detail?.location ||
-          event?.location ||
-          "",
-        startTime:
-          occurrenceDetail?.startTime || detail?.startTime || event?.startTime,
-        endTime: occurrenceDetail?.endTime || detail?.endTime || event?.endTime,
-        participants:
-          occurrenceDetail?.participants ??
-          detail?.participants ??
-          event?.participants,
-        currentParticipants:
-          occurrenceDetail?.participants?.length ??
-          occurrenceDetail?.currentParticipants ??
-          detail?.participants?.length ??
-          detail?.currentParticipants ??
-          event?.currentParticipants,
-        maxParticipants:
-          occurrenceDetail?.maxParticipants ??
-          detail?.maxParticipants ??
-          event?.maxParticipants,
-        isRegistered:
-          occurrenceDetail?.isRegistered ??
-          detail?.isRegistered ??
-          event?.isRegistered,
-        registrationId:
-          occurrenceDetail?.registrationId !== undefined
-            ? occurrenceDetail.registrationId
-            : detail?.registrationId !== undefined
-              ? detail.registrationId
-              : event?.registrationId,
-        isRecurring:
-          event?.isRecurring ||
-          detail?.isRecurring ||
-          occurrenceDetail?.isRecurring ||
-          event?.isRecurringGroup ||
-          detail?.isRecurringGroup ||
-          !!event?.recurringEventId ||
-          !!detail?.recurringEventId,
-      }
-    : {
-        ...event,
-        ...occurrenceDetail,
-        location: occurrenceDetail?.location || event?.location || "",
-        startTime: occurrenceDetail?.startTime || event?.startTime,
-        endTime: occurrenceDetail?.endTime || event?.endTime,
-        participants: occurrenceDetail?.participants ?? event?.participants,
-        currentParticipants:
-          occurrenceDetail?.participants?.length ??
-          occurrenceDetail?.currentParticipants ??
-          event?.currentParticipants,
-        isRegistered: occurrenceDetail?.isRegistered ?? event?.isRegistered,
-        registrationId:
-          occurrenceDetail?.registrationId !== undefined
-            ? occurrenceDetail.registrationId
-            : event?.registrationId,
-        isRecurring:
-          event?.isRecurring ||
-          occurrenceDetail?.isRecurring ||
-          event?.isRecurringGroup ||
-          !!event?.recurringEventId,
-      }
+  let ev;
+  if (occurrenceId) {
+    ev = {
+      ...currentEvent,
+      ...occurrenceDetail,
+      // Retain the recurrence context from the parent so users know this is part of a series
+      isRecurring: occurrenceDetail?.isRecurring || detail?.isRecurring || event?.isRecurring,
+      recurrenceRule: occurrenceDetail?.recurrenceRule || detail?.recurrenceRule || event?.recurrenceRule,
+      timezone: occurrenceDetail?.timezone || detail?.timezone || event?.timezone,
+      isRecurringGroup: false,
+      subOccurrences: undefined,
+    }
+  } else {
+    ev = {
+      ...currentEvent,
+      ...detail,
+    }
+  }
   const headerColor = ev.color || "#B91264"
 
-  if (editMode === "series") {
+  if (editMode === "series" || editMode === "occurrence") {
     return (
       <CreateEventModal editEvent={ev} onClose={() => setEditMode("none")} />
-    )
-  }
-
-  if (editMode === "occurrence") {
-    return (
-      <OverrideOccurrenceModal
-        event={ev}
-        occurrenceId={event?.occurrenceId}
-        onClose={() => setEditMode("none")}
-      />
-    )
-  }
-
-  if (editMode === "choice") {
-    return (
-      <EditChoiceModal
-        open={true}
-        onClose={() => setEditMode("none")}
-        onSelect={(mode) => setEditMode(mode)}
-        headerColor={headerColor}
-      />
     )
   }
 
@@ -159,10 +93,10 @@ const EventDetailModal = ({ event, onClose }) => {
       open={!!event}
       onClose={onClose}
       showCloseButton={false}
-      className="p-0 !max-w-[700px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible"
+      className="p-0 !max-w-[700px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-[24px] overflow-visible"
       bodyClassName="flex-1"
     >
-      <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-xl">
+      <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-[24px]">
         {/* Floating close button */}
         <button
           onClick={onClose}
@@ -178,35 +112,47 @@ const EventDetailModal = ({ event, onClose }) => {
           />
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto">
+            <div
+              className={`flex-1 overflow-y-auto ${!occurrenceId && ev?.isRecurringGroup ? "min-[426px]:rounded-b-[24px]" : ""}`}
+            >
               <EventDetailHeader
                 ev={ev}
                 headerColor={headerColor}
                 onClose={onClose}
+                onBack={overrideEvent ? () => setOverrideEvent(null) : undefined}
               />
 
               <EventDetailBody
                 ev={ev}
-                event={event}
+                event={currentEvent}
                 headerColor={headerColor}
                 isLoading={isLoading}
-              />
-            </div>
-
-            <div className="shrink-0 bg-white min-[426px]:rounded-b-xl">
-              <EventDetailFooter
-                eventId={actualEventId || eventId}
-                event={ev}
-                onClose={onClose}
-                onEdit={() => {
-                  if (ev?.isRecurring) {
-                    setEditMode("choice")
-                  } else {
-                    setEditMode("series")
-                  }
+                onSelectOccurrence={(sub) => {
+                  setOverrideEvent({
+                    eventId: actualEventId || eventId,
+                    occurrenceId: sub.id,
+                    ...sub,
+                  })
                 }}
               />
             </div>
+
+            {!(!occurrenceId && ev?.isRecurringGroup) && (
+              <div className="shrink-0 bg-white min-[426px]:rounded-b-[24px]">
+                <EventDetailFooter
+                  eventId={actualEventId || eventId}
+                  event={ev}
+                  onClose={onClose}
+                  onEdit={() => {
+                    if (ev?.isRecurring && ev?.occurrenceId) {
+                      setEditMode("occurrence")
+                    } else {
+                      setEditMode("series")
+                    }
+                  }}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

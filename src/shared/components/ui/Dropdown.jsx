@@ -111,7 +111,7 @@ const Dropdown = ({
       type="button"
       onClick={() => !disabled && setIsOpen(!isOpen)}
       disabled={disabled}
-      className={`flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white ${
+      className={`flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white text-base ${
         disabled
           ? "opacity-50 cursor-not-allowed bg-gray-100"
           : "hover:bg-[#f0f0f0]"
@@ -121,7 +121,7 @@ const Dropdown = ({
         {selectedOption ? selectedOption.label : placeholder}
       </span>
       <ChevronDown
-        size={14}
+        size={16}
         className={`shrink-0 text-gray-500 transition-transform duration-200 ${
           isOpen ? "rotate-180" : ""
         }`}
@@ -133,7 +133,7 @@ const Dropdown = ({
     const textColor = isSelected ? option.color || activeColor : "inherit"
     return (
       <div
-        className={`w-full h-12 px-4 text-left text-sm rounded-md flex items-center gap-3 ${
+        className={`w-full h-12 px-4 text-left text-base rounded-md flex items-center gap-3 ${
           isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
         }`}
         style={isSelected ? { color: textColor } : {}}
@@ -203,7 +203,7 @@ const Dropdown = ({
                   <FluentAnimation
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
-                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-2 origin-bottom" : "top-full mt-2"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-lg bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-4 origin-bottom" : "top-full mt-4"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-2xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
                   >
                     {enableSearch && (
                       <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-gray-100">

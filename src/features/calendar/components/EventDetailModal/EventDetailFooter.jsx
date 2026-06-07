@@ -92,7 +92,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   return (
     <>
-      <div className="p-6 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-2 bg-white">
+      <div className="p-6 rounded-none min-[426px]:rounded-b-[24px] flex items-center justify-between gap-2 bg-white">
         {/* Register / Unregister */}
         {!confirmDelete &&
           (isCreator ? (

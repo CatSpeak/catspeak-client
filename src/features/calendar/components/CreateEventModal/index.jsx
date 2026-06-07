@@ -1,3 +1,4 @@
+import React, { useState, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useEventForm } from "../../hooks/useEventForm"
@@ -6,9 +7,22 @@ import EventHeader from "./EventHeader"
 import EventDateTimeSection from "./EventDateTimeSection"
 import EventDetailsSection from "./EventDetailsSection"
 import EventFooter from "./EventFooter"
+import EditChoiceModal from "../EventDetailModal/EditChoiceModal"
 
 const CreateEventModal = ({ onClose, editEvent }) => {
-  const form = useEventForm(onClose, editEvent)
+  const [pendingPayload, setPendingPayload] = useState(null)
+  const performSaveRef = useRef(null)
+
+  const handleInterceptSubmit = (payload, performSave) => {
+    if (editEvent?.isRecurring && editEvent?.occurrenceId) {
+      setPendingPayload(payload)
+      performSaveRef.current = performSave
+    } else {
+      performSave(payload, "series")
+    }
+  }
+
+  const form = useEventForm(onClose, editEvent, handleInterceptSubmit)
   const { t } = useLanguage()
 
   return (
@@ -49,6 +63,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
           <div className="p-6 relative bg-white text-base">
             <div className="flex flex-col gap-6">
               <EventDateTimeSection
+                isEditing={!!editEvent}
                 eventColor={form.eventColor}
                 startTime={form.startTime}
                 onStartTimeChange={form.setStartTime}
@@ -126,6 +141,20 @@ const CreateEventModal = ({ onClose, editEvent }) => {
           />
         </div>
       </form>
+
+      {pendingPayload && (
+        <EditChoiceModal
+          open={!!pendingPayload}
+          onClose={() => setPendingPayload(null)}
+          onSelect={(choice) => {
+            if (performSaveRef.current) {
+              performSaveRef.current(pendingPayload, choice)
+            }
+            setPendingPayload(null)
+          }}
+          headerColor={form.eventColor}
+        />
+      )}
     </Modal>
   )
 }

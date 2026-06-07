@@ -13,9 +13,10 @@ const TimeDropdown = ({
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   const portalRef = useRef(null)
+
   const getCurrentTime = () => {
     const now = new Date()
-    return `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
+    return `${now.getHours().toString().padStart(2, "0")}:00`
   }
 
   const [selectedTime, setSelectedTime] = useState(value || getCurrentTime())
@@ -55,11 +56,11 @@ const TimeDropdown = ({
         const spaceBelow = window.innerHeight - rect.bottom
         const spaceAbove = rect.top
 
-        // TimeDropdown is 200px tall
+        // TimeDropdown list is ~200px tall
         const flipUp = spaceBelow < 220 && spaceAbove > spaceBelow
 
-        // Width is 140px
-        const forceAlignRight = rect.left + 140 > window.innerWidth
+        // Width is 100px
+        const forceAlignRight = rect.left + 100 > window.innerWidth
 
         setPortalCoords({
           top: rect.top + window.scrollY,
@@ -83,57 +84,40 @@ const TimeDropdown = ({
     }
   }, [isOpen])
 
-  const handleHourSelect = (hour) => {
-    const [, min] = selectedTime.split(":")
-    const newTime = `${hour}:${min || getCurrentTime().split(":")[1]}`
-    setSelectedTime(newTime)
-    if (onChange) onChange(newTime)
-  }
-
-  const handleMinuteSelect = (min) => {
-    const [h] = selectedTime.split(":")
-    const newTime = `${h || getCurrentTime().split(":")[0]}:${min}`
-    setSelectedTime(newTime)
-    if (onChange) onChange(newTime)
+  const handleTimeSelect = (time) => {
+    setSelectedTime(time)
+    if (onChange) onChange(time)
     setIsOpen(false)
   }
 
-  const hours = Array.from({ length: 24 }, (_, i) =>
-    i.toString().padStart(2, "0"),
-  )
-  const minutes = Array.from({ length: 60 }, (_, i) =>
-    i.toString().padStart(2, "0"),
-  )
+  const times = Array.from({ length: 24 * 4 }, (_, i) => {
+    const h = Math.floor(i / 4)
+      .toString()
+      .padStart(2, "0")
+    const m = ((i % 4) * 15).toString().padStart(2, "0")
+    return `${h}:${m}`
+  })
 
-  const [currentHour, currentMinute] = selectedTime.split(":")
+  // Ensure the current selected time is in the list, if not, add it
+  const displayTimes = [...times]
+  if (!displayTimes.includes(selectedTime)) {
+    displayTimes.push(selectedTime)
+    displayTimes.sort()
+  }
 
-  // Refs for auto-scrolling
-  const hoursRef = useRef(null)
-  const minutesRef = useRef(null)
+  const listRef = useRef(null)
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
-        if (hoursRef.current) {
-          const selectedHourEl =
-            hoursRef.current.querySelector(".selected-time")
-          if (selectedHourEl) {
-            const container = hoursRef.current
+        if (listRef.current) {
+          const selectedEl = listRef.current.querySelector(".selected-time")
+          if (selectedEl) {
+            const container = listRef.current
             container.scrollTop =
-              selectedHourEl.offsetTop -
+              selectedEl.offsetTop -
               container.clientHeight / 2 +
-              selectedHourEl.clientHeight / 2
-          }
-        }
-        if (minutesRef.current) {
-          const selectedMinEl =
-            minutesRef.current.querySelector(".selected-time")
-          if (selectedMinEl) {
-            const container = minutesRef.current
-            container.scrollTop =
-              selectedMinEl.offsetTop -
-              container.clientHeight / 2 +
-              selectedMinEl.clientHeight / 2
+              selectedEl.clientHeight / 2
           }
         }
       }, 0)
@@ -145,9 +129,12 @@ const TimeDropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-2xl px-4 h-12 outline-none bg-white"
+        className={`hover:bg-[#f0f0f0] flex items-center justify-center rounded-2xl px-4 h-12 outline-none bg-white min-w-[90px] transition-all border ${
+          isOpen ? "border-2" : "border-[#e5e5e5]"
+        }`}
+        style={isOpen ? { borderColor: color } : {}}
       >
-        <span>{selectedTime}</span>
+        <span className="text-base">{selectedTime}</span>
       </button>
 
       {typeof document !== "undefined" &&
@@ -168,64 +155,44 @@ const TimeDropdown = ({
               >
                 <div className="relative w-full h-full">
                   <div
-                    className={`absolute z-50 ${portalCoords.flipUp ? "bottom-full mb-1 origin-bottom" : "top-full mt-1 origin-top"} ${portalCoords.forceAlignRight ? "right-0 origin-top-right" : "left-0 origin-top-left"} w-[140px] h-[200px] pointer-events-none`}
+                    className={`absolute z-50 ${
+                      portalCoords.flipUp
+                        ? "bottom-full mb-4 origin-bottom"
+                        : "top-full mt-4 origin-top"
+                    } ${
+                      portalCoords.forceAlignRight
+                        ? "right-0 origin-top-right"
+                        : "left-0 origin-top-left"
+                    } w-[100px] h-[220px] pointer-events-none`}
                   >
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto w-full h-full flex bg-white border rounded-md shadow-lg overflow-hidden"
-                      style={{ borderColor: colors.border }}
+                      className="pointer-events-auto w-full h-full flex flex-col bg-white border border-[#E5E5E5] rounded-2xl shadow-lg overflow-hidden"
                     >
-                      {/* Hours Column */}
                       <div
-                        ref={hoursRef}
-                        className="flex-[1] overflow-y-auto scrollbar-none border-r border-gray-100"
+                        ref={listRef}
+                        className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
                       >
-                        {hours.map((hour) => {
-                          const isSelected = currentHour === hour
-                          return (
-                            <div
-                              key={`h-${hour}`}
-                              onClick={() => handleHourSelect(hour)}
-                              className={`flex justify-center items-center py-2 text-sm cursor-pointer transition-colors ${
-                                isSelected
-                                  ? "selected-time text-white font-bold hover:brightness-90"
-                                  : "text-gray-700 font-medium hover:bg-gray-100"
-                              }`}
-                              style={
-                                isSelected ? { backgroundColor: color } : {}
-                              }
-                            >
-                              {hour}
-                            </div>
-                          )
-                        })}
-                      </div>
-
-                      {/* Minutes Column */}
-                      <div
-                        ref={minutesRef}
-                        className="flex-[1] overflow-y-auto scrollbar-none"
-                      >
-                        {minutes.map((minute) => {
-                          const isSelected = currentMinute === minute
-                          return (
-                            <div
-                              key={`m-${minute}`}
-                              onClick={() => handleMinuteSelect(minute)}
-                              className={`flex justify-center items-center py-2 text-sm cursor-pointer transition-colors ${
-                                isSelected
-                                  ? "selected-time text-white font-bold hover:brightness-90"
-                                  : "text-gray-700 font-medium hover:bg-gray-100"
-                              }`}
-                              style={
-                                isSelected ? { backgroundColor: color } : {}
-                              }
-                            >
-                              {minute}
-                            </div>
-                          )
-                        })}
+                        <div className="flex flex-col gap-1 p-1">
+                          {displayTimes.map((time) => {
+                            const isSelected = selectedTime === time
+                            return (
+                              <div
+                                key={time}
+                                onClick={() => handleTimeSelect(time)}
+                                className={`w-full h-12 px-4 text-left text-base rounded-md flex items-center cursor-pointer transition-colors ${
+                                  isSelected
+                                    ? "bg-[#F6F6F6] font-semibold"
+                                    : "hover:bg-[#F6F6F6]"
+                                }`}
+                                style={isSelected ? { color: color } : {}}
+                              >
+                                {time}
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
                     </FluentAnimation>
                   </div>

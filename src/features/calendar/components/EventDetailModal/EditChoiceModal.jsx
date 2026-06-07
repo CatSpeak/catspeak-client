@@ -18,13 +18,6 @@ const EditChoiceModal = ({ open, onClose, onSelect, headerColor }) => {
       bodyClassName="flex-1"
     >
       <div className="relative flex flex-col text-center">
-        {/* Floating close button */}
-        <button
-          onClick={onClose}
-          className="absolute -top-10 -right-10 bg-[#B81919] text-white p-2 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.3)] z-50 hover:bg-red-800 transition-colors border-[4px] border-white"
-        >
-          <X size={20} strokeWidth={4} />
-        </button>
         <h3 className="text-xl font-bold mb-2 text-gray-800">
           {cal.editRecurringEvent}
         </h3>
