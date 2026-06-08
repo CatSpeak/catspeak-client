@@ -246,7 +246,7 @@ export default {
       participants: "Người tham gia",
       chat: "Trò chuyện",
     },
-    changeAvatar: "Thay đổi ảnh đại diện cuộc họp",
+    changeAvatar: "Thay đổi ảnh đại diện",
     backgroundsAndEffects: "Nền và hiệu ứng",
     applyVisualEffects: "Thay đổi phông nền",
     cameraOffWarning:
@@ -264,7 +264,8 @@ export default {
       unknownError: "Đã xảy ra lỗi không xác định",
       retry: "Thử lại",
       switchTitle: "Chuyển cuộc gọi?",
-      switchMessage: "Bạn đang trong một cuộc gọi khác. Bạn có muốn rời khỏi cuộc gọi hiện tại và tham gia cuộc gọi mới này không?",
+      switchMessage:
+        "Bạn đang trong một cuộc gọi khác. Bạn có muốn rời khỏi cuộc gọi hiện tại và tham gia cuộc gọi mới này không?",
       switchConfirm: "Rời và tiếp tục",
       switchCancel: "Ở lại cuộc gọi hiện tại",
     },
@@ -334,7 +335,8 @@ export default {
     error: "Cập nhật ảnh đại diện thất bại",
     imageUrl: "Đường dẫn hình ảnh",
     placeholder: "Dán đường dẫn hình ảnh vào đây...",
-    description: "Dán đường dẫn hình ảnh hợp lệ. Nếu không hợp lệ, sẽ hiển thị chữ cái đầu tên bạn.",
+    description:
+      "Dán đường dẫn hình ảnh hợp lệ. Nếu không hợp lệ, sẽ hiển thị chữ cái đầu tên bạn.",
     saving: "Đang lưu...",
     saveAvatar: "Lưu ảnh đại diện",
   },

@@ -21,13 +21,17 @@ import { useCallActions } from "@/features/video-call/hooks/useCallActions"
 import { useSystemMessages } from "@/features/video-call/hooks/useSystemMessages"
 import { useAiMessages } from "@/features/video-call/hooks/useAiMessages"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
-import { useParticipantList, parseMetadata } from "@/features/video-call/hooks/useParticipantList"
+import {
+  useParticipantList,
+  parseMetadata,
+} from "@/features/video-call/hooks/useParticipantList"
 import { useUnreadTracking } from "@/features/video-call/hooks/useUnreadTracking"
 import {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
 } from "@/store/api/conversationsApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
+import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
   getNavigate,
   getLocation,
@@ -73,38 +77,57 @@ const GlobalCallContent = ({
   const isConnected = connectionState === ConnectionState.Connected
 
   // ── Synchronized Recording States ──
-  const sessionId = callInfo?.sessionId || parseMetadata(localParticipant?.metadata)?.sessionId;
+  const sessionId =
+    callInfo?.sessionId || parseMetadata(localParticipant?.metadata)?.sessionId
   const token = useSelector(selectCurrentToken)
 
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState(null)
   const [startedByAccountId, setStartedByAccountId] = useState(null)
 
-  const { data: sessionRecordings } = useGetRecordingsBySessionQuery(sessionId, {
-    skip: !sessionId,
-  })
+  const { data: sessionRecordings } = useGetRecordingsBySessionQuery(
+    sessionId,
+    {
+      skip: !sessionId,
+    },
+  )
 
   // Initialize recording state from active recordings on mount/refresh
   useEffect(() => {
     if (sessionRecordings && sessionRecordings.length > 0) {
-      const activeRec = sessionRecordings.find(r => r.status === "started" || r.status === "active");
+      const activeRec = sessionRecordings.find(
+        (r) => r.status === "started" || r.status === "active",
+      )
       if (activeRec) {
-        console.log("[GlobalCallContent] Found active recording on load:", activeRec);
-        setIsRecording(true);
-        setEgressId(activeRec.egressId);
-        setStartedByAccountId(activeRec.startedByAccountId);
+        console.log(
+          "[GlobalCallContent] Found active recording on load:",
+          activeRec,
+        )
+        setIsRecording(true)
+        setEgressId(activeRec.egressId)
+        setStartedByAccountId(activeRec.startedByAccountId)
       } else {
         // No active recording, check if there are completed or partially completed recordings in this session
         // that we haven't notified the user about yet.
-        const finishedRec = sessionRecordings.find(r => r.status === "completed" || r.status === "Partial Completed");
+        const finishedRec = sessionRecordings.find(
+          (r) => r.status === "completed" || r.status === "Partial Completed",
+        )
         if (finishedRec) {
-          const toastKey = `toast-notified-finished-${finishedRec.recordingId}`;
+          const toastKey = `toast-notified-finished-${finishedRec.recordingId}`
           if (!sessionStorage.getItem(toastKey)) {
-            sessionStorage.setItem(toastKey, "true");
+            sessionStorage.setItem(toastKey, "true")
             if (finishedRec.status === "completed") {
-              toast.success(t.recordings?.actions?.stopSuccess || "Recording trước đó đã được lưu thành công trong My Workspace.", { duration: 6000 });
+              toast.success(
+                t.recordings?.actions?.stopSuccess ||
+                  "Recording trước đó đã được lưu thành công trong My Workspace.",
+                { duration: 6000 },
+              )
             } else if (finishedRec.status === "Partial Completed") {
-              toast.error(t.recordings?.storage?.warningLimitReached || "Recording trước đó đã dừng và được lưu một phần.", { duration: 6000 });
+              toast.error(
+                t.recordings?.storage?.warningLimitReached ||
+                  "Recording trước đó đã dừng và được lưu một phần.",
+                { duration: 6000 },
+              )
             }
           }
         }
@@ -121,13 +144,25 @@ const GlobalCallContent = ({
 
       if (data.status === "Partial Completed") {
         if (data.reason === "storage_exceeded") {
-          toast.error(t.recordings?.storage?.warningLimitReached || "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.", { duration: 6000 })
+          toast.error(
+            t.recordings?.storage?.warningLimitReached ||
+              "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
+            { duration: 6000 },
+          )
         } else if (data.reason === "reconnect_timeout") {
-          toast.error(t.recordings?.errors?.interrupted || "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.", { duration: 6000 })
+          toast.error(
+            t.recordings?.errors?.interrupted ||
+              "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
+            { duration: 6000 },
+          )
         }
       }
     } else if (event === "RecordingWarning") {
-      toast.error(t.recordings?.storage?.warningAlmostFull || "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.", { icon: "⚠️", duration: 6000 })
+      toast.error(
+        t.recordings?.storage?.warningAlmostFull ||
+          "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
+        { icon: "⚠️", duration: 6000 },
+      )
     }
   })
 
@@ -135,10 +170,21 @@ const GlobalCallContent = ({
   useEffect(() => {
     if (isRecording) {
       if (connectionState === ConnectionState.Reconnecting) {
-        toast.error(t.recordings?.errors?.disconnected || "Kết nối bị gián đoạn. Recording tạm dừng...", { id: "rec-disconnect", duration: 99999 })
-      } else if (connectionState === ConnectionState.Connected && prevConnectionState.current === ConnectionState.Reconnecting) {
+        toast.error(
+          t.recordings?.errors?.disconnected ||
+            "Kết nối bị gián đoạn. Recording tạm dừng...",
+          { id: "rec-disconnect", duration: 99999 },
+        )
+      } else if (
+        connectionState === ConnectionState.Connected &&
+        prevConnectionState.current === ConnectionState.Reconnecting
+      ) {
         toast.dismiss("rec-disconnect")
-        toast.success(t.recordings?.actions?.reconnected || "Kết nối đã được khôi phục. Recording tiếp tục.", { duration: 3000 })
+        toast.success(
+          t.recordings?.actions?.reconnected ||
+            "Kết nối đã được khôi phục. Recording tiếp tục.",
+          { duration: 3000 },
+        )
       }
     }
     prevConnectionState.current = connectionState
@@ -153,7 +199,7 @@ const GlobalCallContent = ({
     setEgressId,
     startedByAccountId,
     setStartedByAccountId,
-    sessionId
+    sessionId,
   })
 
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
@@ -168,9 +214,16 @@ const GlobalCallContent = ({
     localParticipant,
   )
 
+  // ── Join/Leave Audio ──
+  useParticipantAudioEffect(participants)
+
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
-    try { return JSON.parse(localParticipant.metadata) } catch { return {} }
+    try {
+      return JSON.parse(localParticipant.metadata)
+    } catch {
+      return {}
+    }
   })()
 
   const currentUserId = user?.accountId
