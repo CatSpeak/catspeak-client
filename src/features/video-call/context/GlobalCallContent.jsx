@@ -60,6 +60,8 @@ const GlobalCallContent = ({
   // ── UI state ──
   const panelState = useSidePanelState()
   const [showCC, setShowCC] = useState(false)
+  const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
+  const [subtitleSelectedLanguage, setSubtitleSelectedLanguage] = useState(null)
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -329,6 +331,12 @@ const GlobalCallContent = ({
     showCC,
     setShowCC,
     isAISession,
+
+    // Room subtitles
+    showRoomSubtitles,
+    setShowRoomSubtitles,
+    subtitleSelectedLanguage,
+    setSubtitleSelectedLanguage,
 
     // Chat
     messages: chatMessages,

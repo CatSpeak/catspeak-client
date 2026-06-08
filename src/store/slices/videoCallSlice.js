@@ -19,6 +19,7 @@ const initialState = {
     initMicOn: false,
     initCamOn: false,
     isAISession: false,
+    showRoomSubtitles: false,
   },
 }
 
@@ -57,6 +58,7 @@ const videoCallSlice = createSlice({
         initMicOn: initMicOn ?? false,
         initCamOn: initCamOn ?? false,
         isAISession: isAISession ?? false,
+        showRoomSubtitles: false,
       }
     },
 
@@ -73,10 +75,20 @@ const videoCallSlice = createSlice({
     leaveCall() {
       return initialState
     },
+
+    /**
+     * Toggle the per-user room subtitles visibility.
+     * Works for non-AI rooms (controls showRoomSubtitles).
+     */
+    toggleRoomSubtitles(state) {
+      if (state.callInfo) {
+        state.callInfo.showRoomSubtitles = !state.callInfo.showRoomSubtitles
+      }
+    },
   },
 })
 
-export const { enterCall, setPiP, leaveCall } =
+export const { enterCall, setPiP, leaveCall, toggleRoomSubtitles } =
   videoCallSlice.actions
 
 export default videoCallSlice.reducer

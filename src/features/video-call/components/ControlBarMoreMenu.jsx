@@ -30,7 +30,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     handleToggleRecording,
     showVirtualBackground,
     setShowVirtualBackground,
-    isAISession,
     showCC,
     setShowCC,
     showAvatarPicker,
@@ -110,24 +109,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   <Copy size={20} />
                   {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
                 </button>
-
-                {isAISession && (
-                  <button
-                    onClick={() => {
-                      setShowCC(!showCC)
-                      setShowMoreMenu(false)
-                    }}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                  >
-                    <Captions size={20} />
-                    <span className="flex-1 text-left">
-                      {t?.rooms?.videoCall?.subtitles || "Subtitles (CC)"}
-                    </span>
-                    {showCC && (
-                      <Check size={18} className="text-cath-red-700" />
-                    )}
-                  </button>
-                )}
               </div>
             </div>
           </FluentAnimation>
