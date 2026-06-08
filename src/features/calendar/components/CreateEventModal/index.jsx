@@ -5,6 +5,7 @@ import { useEventForm } from "../../hooks/useEventForm"
 import { X } from "lucide-react"
 import EventHeader from "./EventHeader"
 import EventDateTimeSection from "./EventDateTimeSection"
+import EventRecurrenceSection from "./EventRecurrenceSection"
 import EventDetailsSection from "./EventDetailsSection"
 import EventFooter from "./EventFooter"
 import EditChoiceModal from "../EventDetailModal/EditChoiceModal"
@@ -71,6 +72,12 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                 onEndTimeChange={form.setEndTime}
                 selectedTimezone={form.selectedTimezone}
                 onTimezoneChange={form.setSelectedTimezone}
+              />
+
+              <EventRecurrenceSection
+                isEditing={!!editEvent}
+                eventColor={form.eventColor}
+                startTime={form.startTime}
                 recurrenceOption={form.recurrenceOption}
                 onRecurrenceChange={form.setRecurrenceOption}
                 recurrenceInterval={form.recurrenceInterval}
@@ -79,6 +86,10 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                 onSelectedDaysChange={form.setSelectedDays}
                 recurrenceEndDate={form.recurrenceEndDate}
                 onRecurrenceEndDateChange={form.setRecurrenceEndDate}
+                recurrenceEndType={form.recurrenceEndType}
+                onRecurrenceEndTypeChange={form.setRecurrenceEndType}
+                occurrenceCount={form.occurrenceCount}
+                onOccurrenceCountChange={form.setOccurrenceCount}
               />
 
               <EventDetailsSection

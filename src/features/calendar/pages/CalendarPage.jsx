@@ -11,6 +11,7 @@ const CalendarPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const eventIdFromUrl = searchParams.get("eventId")
   const occurrenceIdFromUrl = searchParams.get("occurrenceId")
+  const tokenFromUrl = searchParams.get("token")
 
   const handleNextMonth = () => setCurrentDate((prev) => prev.add(1, "month"))
   const handlePrevMonth = () =>
@@ -34,16 +35,18 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      {eventIdFromUrl && (
+      {(eventIdFromUrl || occurrenceIdFromUrl) && (
         <EventDetailModal
           event={{
-            eventId: eventIdFromUrl,
+            eventId: eventIdFromUrl || undefined,
             occurrenceId: occurrenceIdFromUrl || undefined,
+            token: tokenFromUrl || undefined,
           }}
           onClose={() => {
             const newParams = new URLSearchParams(searchParams)
             newParams.delete("eventId")
             newParams.delete("occurrenceId")
+            newParams.delete("token")
             setSearchParams(newParams, { replace: true })
           }}
         />

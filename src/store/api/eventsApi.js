@@ -35,7 +35,7 @@ const fixOvernightEvents = (response) => {
       const newStr = end.toISOString().split(".")[0]
       ev.endTime = isZ ? newStr + "Z" : newStr
     }
-    
+
     if (ev.subOccurrences) {
       ev.subOccurrences.forEach(fix)
     }
@@ -50,7 +50,7 @@ const fixOvernightEvents = (response) => {
   } else {
     fix(clone)
   }
-  
+
   return clone
 }
 
@@ -186,10 +186,10 @@ export const eventsApi = baseApi.injectEndpoints({
       providesTags: getOccurrenceTags,
     }),
 
-    // POST /api/v1/events/{eventId}/shared-links
+    // POST /api/v1/events/{occurrenceId}/shared-links
     createSharedLink: builder.mutation({
-      query: ({ eventId, ...body }) => ({
-        url: `/v1/events/${eventId}/shared-links`,
+      query: ({ occurrenceId, ...body }) => ({
+        url: `/v1/events/${occurrenceId}/shared-links`,
         method: "POST",
         body,
       }),

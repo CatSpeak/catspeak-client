@@ -40,7 +40,6 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { data: eventsDataA, isLoading: isLoadingA } = useGetEventsByDateQuery(
     {
       date: utcDateA,
-      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
     },
     { skip: selectedDate === null },
   )
@@ -48,7 +47,6 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { data: eventsDataB, isLoading: isLoadingB } = useGetEventsByDateQuery(
     {
       date: utcDateB,
-      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
     },
     { skip: selectedDate === null || !needsTwoQueries },
   )

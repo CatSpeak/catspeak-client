@@ -281,8 +281,14 @@ const routesConfig = [
         ],
       },
       {
-        path: "/events/shared/:token",
-        element: <SharedEventPage />,
+        path: "/events",
+        element: <MainLayout showHeader={false} showFooter={false} />,
+        children: [
+          {
+            path: "shared/:token",
+            element: <SharedEventPage />,
+          },
+        ],
       },
       {
         path: "/403",

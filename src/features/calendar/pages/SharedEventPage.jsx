@@ -1,14 +1,14 @@
 import React, { useEffect } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { AlertTriangle } from "lucide-react"
-import { useGetSharedEventQuery, useGetEventOccurrenceByIdQuery } from "@/store/api/eventsApi"
+import { useGetSharedEventQuery } from "@/store/api/eventsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const SharedEventPage = () => {
   const { t, language } = useLanguage()
   const { token } = useParams()
   const navigate = useNavigate()
-  
+
   const { data, isLoading, isError, error } = useGetSharedEventQuery(token, {
     skip: !token,
   })
@@ -20,19 +20,6 @@ const SharedEventPage = () => {
     }
   }, [isError, error])
 
-  const targetIdRaw = data?.eventId || data?.event?.eventId || data?.event?.id || data?.shareLink?.eventId || data?.occurrenceId || data?.shareLink?.occurrenceId
-  
-  // To handle shared links created with an occurrenceId as the eventId,
-  // we blindly fetch the occurrence API. If it succeeds, targetIdRaw is an occurrence.
-  const { 
-    data: occurrenceData, 
-    isLoading: isLoadingOccurrence, 
-    isFetching: isFetchingOccurrence,
-    isUninitialized: isUninitializedOccurrence 
-  } = useGetEventOccurrenceByIdQuery(targetIdRaw, {
-    skip: !targetIdRaw,
-  })
-
   // Smart redirect to the native event modal
   useEffect(() => {
     if (data) {
@@ -40,40 +27,46 @@ const SharedEventPage = () => {
         return // Stay on page to show invalid link error
       }
 
-      // Wait to see if targetIdRaw was actually an occurrenceId.
-      // We must check isFetching and isUninitialized to avoid React race conditions where the redirect happens before the fetch even starts.
-      if (isLoadingOccurrence || isFetchingOccurrence || (targetIdRaw && isUninitializedOccurrence)) return;
+      // Use languageCommunity from backend if available, otherwise fallback to current language
+      let rawLang = (data.languageCommunity || language).toLowerCase()
 
-      let targetId = targetIdRaw
-      let occurrenceId = data?.occurrenceId || data?.shareLink?.occurrenceId
-
-      if (occurrenceData) {
-        targetId = occurrenceData.eventId !== undefined && occurrenceData.eventId !== 0 
-          ? occurrenceData.eventId 
-          : targetIdRaw;
-          
-        // If we queried the occurrence endpoint and it succeeded, the original targetIdRaw was indeed an occurrenceId
-        if (!occurrenceId) {
-          occurrenceId = targetIdRaw;
-        }
+      // Map backend language names to supported route codes
+      const langMap = {
+        chinese: "zh",
+        vietnamese: "vi",
+        english: "en",
       }
 
-      const hasTargetId = targetId !== undefined && targetId !== null
-      if (hasTargetId) {
+      let targetLanguage = langMap[rawLang] || rawLang
+
+      if (!["en", "zh", "vi"].includes(targetLanguage)) {
+        targetLanguage = "en"
+      }
+
+      // Extract occurrenceId centralized from backend response
+      const occurrenceId =
+        data.occurrenceId ??
+        data.shareLink?.occurrenceId ??
+        data.eventId ??
+        data.event?.eventId ??
+        data.event?.id
+
+      if (occurrenceId !== undefined && occurrenceId !== null) {
         const params = new URLSearchParams()
-        params.append("eventId", targetId)
-        if (occurrenceId) {
-          params.append("occurrenceId", occurrenceId)
+        params.append("occurrenceId", occurrenceId)
+
+        if (token) {
+          params.append("token", token)
         }
-        
-        navigate(`/${language}/cat-speak/calendar?${params.toString()}`, {
+
+        navigate(`/${targetLanguage}/cat-speak/calendar?${params.toString()}`, {
           replace: true,
         })
       }
     }
-  }, [data, occurrenceData, isLoadingOccurrence, isFetchingOccurrence, isUninitializedOccurrence, language, navigate, targetIdRaw])
+  }, [data, language, navigate, token])
 
-  if (isLoading || isLoadingOccurrence || isFetchingOccurrence) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
         <div className="flex flex-col items-center gap-4 text-slate-500">

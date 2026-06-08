@@ -31,7 +31,8 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
     useUpdateEventSeriesMutation()
   const [updateEventOccurrence, { isLoading: isUpdatingOccurrence }] =
     useUpdateEventOccurrenceMutation()
-  const isLoading = isCreating || isUpdating || isUpdatingSeries || isUpdatingOccurrence
+  const isLoading =
+    isCreating || isUpdating || isUpdatingSeries || isUpdatingOccurrence
 
   // Evaluate initial values once
   const initialTitle = editEvent?.title || ""
@@ -40,7 +41,7 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
   const initialLocation = editEvent?.location || ""
   const initialCountryId = editEvent?.countryId || 0
   const initialCityId = editEvent?.cityId || 0
-  const initialParticipants = editEvent?.maxParticipants || 20
+  const initialParticipants = editEvent?.maxParticipants || ""
   const initialVisibility = editEvent?.visibilityScope || "PUBLIC"
   const initialConditions =
     editEvent?.conditions?.map((c) => c.title).join(", ") || ""
@@ -50,12 +51,24 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
     editEvent?.recurrenceRule?.timeZone ||
     DEFAULT_TIMEZONE.id
 
+  const getClosest15Min = (dateObj) => {
+    const minutes = dateObj.minute()
+    let roundedMinutes = Math.round(minutes / 15) * 15
+    let newDate = dateObj.minute(roundedMinutes).second(0).millisecond(0)
+    if (roundedMinutes === 60) {
+      newDate = dateObj.minute(0).add(1, "hour").second(0).millisecond(0)
+    }
+    return newDate
+  }
+
   const initialStartTime = editEvent?.startTime
-    ? dayjs(dayjs(editEvent.startTime).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss"))
-    : dayjs()
+    ? dayjs(
+        dayjs(editEvent.startTime).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss"),
+      )
+    : getClosest15Min(dayjs())
   const initialEndTime = editEvent?.endTime
     ? dayjs(dayjs(editEvent.endTime).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss"))
-    : dayjs().add(1, "hour")
+    : getClosest15Min(dayjs()).add(1, "hour")
 
   let initialTimezone = DEFAULT_TIMEZONE
   const foundTz = TIMEZONES.find((tz) => tz.id === initTzId)
@@ -69,6 +82,8 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
   let initialRecurInterval = 1
   let initialSelectedDays = [1, 4] // default Tuesday, Friday
   let initialRecurEndDate = dayjs().add(1, "month").toDate()
+  let initialRecurrenceEndType = "DATE"
+  let initialOccurrenceCount = 10
 
   if (editEvent?.isRecurring && editEvent?.recurrenceRule) {
     const rr = editEvent.recurrenceRule
@@ -83,8 +98,17 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
       }
     }
     initialRecurEndDate = rr.recurrenceEndDate
-      ? dayjs(dayjs(rr.recurrenceEndDate).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss")).toDate()
+      ? dayjs(
+          dayjs(rr.recurrenceEndDate)
+            .tz(initTzId)
+            .format("YYYY-MM-DDTHH:mm:ss"),
+        ).toDate()
       : dayjs().add(1, "month").toDate()
+
+    if (rr.endCondition === "OCCURRENCE_COUNT") {
+      initialRecurrenceEndType = "COUNT"
+      initialOccurrenceCount = rr.occurrenceCount || 10
+    }
   }
 
   // Basic fields
@@ -94,7 +118,21 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
   const [eventLocation, setEventLocation] = useState(initialLocation)
   const [countryId, setCountryId] = useState(initialCountryId)
   const [cityId, setCityId] = useState(initialCityId)
-  const [maxParticipants, setMaxParticipants] = useState(initialParticipants)
+  const [maxParticipants, setMaxParticipantsState] = useState(initialParticipants)
+
+  const setMaxParticipants = (val) => {
+    if (val === "") {
+      setMaxParticipantsState("")
+      return
+    }
+    const num = Number(val)
+    if (!isNaN(num)) {
+      if (num > 20) setMaxParticipantsState(20)
+      else if (num < 1) setMaxParticipantsState(1)
+      else setMaxParticipantsState(num)
+    }
+  }
+
   const [visibility, setVisibility] = useState(initialVisibility)
   const [conditionsInput, setConditionsInput] = useState(initialConditions)
 
@@ -122,8 +160,23 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
   const [recurrenceInterval, setRecurrenceInterval] =
     useState(initialRecurInterval)
   const [selectedDays, setSelectedDays] = useState(initialSelectedDays)
-  const [recurrenceEndDate, setRecurrenceEndDate] =
-    useState(initialRecurEndDate)
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState(initialRecurEndDate)
+  const [recurrenceEndType, setRecurrenceEndType] = useState(initialRecurrenceEndType)
+  
+  const [occurrenceCount, setOccurrenceCountState] = useState(initialOccurrenceCount)
+  const setOccurrenceCount = (val) => {
+    if (val === "") {
+      setOccurrenceCountState("")
+      return
+    }
+    const num = Number(val)
+    if (!isNaN(num)) {
+      if (num > 24) setOccurrenceCountState(24)
+      else if (num < 1) setOccurrenceCountState(1)
+      else setOccurrenceCountState(num)
+    }
+  }
+
   const [selectedTimezone, setSelectedTimezone] = useState(initialTimezone)
 
   const [errors, setErrors] = useState({})
@@ -163,8 +216,12 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
       recurrenceInterval,
       selectedDays,
       recurrenceEndDate,
+      recurrenceEndType,
+      occurrenceCount,
       selectedTimezone,
       conditionsInput,
+      originalStartTime: editEvent?.startTime,
+      originalEndTime: editEvent?.endTime,
     })
 
     console.log(
@@ -186,7 +243,11 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
       const parentId = editEvent?.eventId || editEvent?.id
 
       if (parentId) {
-        if (editEvent.isRecurring && editEvent.occurrenceId && choice === "occurrence") {
+        if (
+          editEvent.isRecurring &&
+          editEvent.occurrenceId &&
+          choice === "occurrence"
+        ) {
           await updateEventOccurrence({
             eventId: editEvent.eventId || parentId,
             occurrenceId: editEvent.occurrenceId,
@@ -237,6 +298,10 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
     setSelectedDays,
     recurrenceEndDate,
     setRecurrenceEndDate,
+    recurrenceEndType,
+    setRecurrenceEndType,
+    occurrenceCount,
+    setOccurrenceCount,
     selectedTimezone,
     setSelectedTimezone,
     conditionsInput,

@@ -28,9 +28,9 @@ const EventDetailBody = ({
   const isCreator = Boolean(
     user &&
     ev &&
-    (user.id === ev.creatorId ||
-      user.username === ev.creatorName ||
-      (user.fullName && user.fullName === ev.creatorName)),
+    ((user.id != null && ev.creatorId != null && user.id === ev.creatorId) ||
+      (user.username != null && ev.creatorName != null && user.username === ev.creatorName) ||
+      (user.fullName != null && ev.creatorName != null && user.fullName === ev.creatorName)),
   )
 
   const handleDeleteOccurrence = async () => {
@@ -162,9 +162,9 @@ const EventDetailBody = ({
               {t.calendar?.conditions || "Conditions"}:
             </span>
             <div className="flex flex-wrap gap-2">
-              {ev.conditions.map((c) => (
+              {ev.conditions.map((c, index) => (
                 <span
-                  key={c.id}
+                  key={c.id || `cond-${index}`}
                   title={c.description || undefined}
                   className="px-3 py-1 rounded-full text-white text-sm flex items-center justify-center"
                   style={{ backgroundColor: headerColor }}

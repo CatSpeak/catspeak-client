@@ -5,6 +5,7 @@ import Modal from "@/shared/components/ui/Modal"
 import {
   useGetEventByIdQuery,
   useGetEventOccurrenceByIdQuery,
+  useGetSharedEventQuery,
 } from "@/store/api/eventsApi"
 import EventDetailHeader from "./EventDetailHeader"
 import EventDetailBody from "./EventDetailBody"
@@ -27,6 +28,15 @@ const EventDetailModal = ({ event, onClose }) => {
 
   const eventId = currentEvent?.eventId ?? currentEvent?.id
   const occurrenceId = currentEvent?.occurrenceId
+  const token = currentEvent?.token
+
+  const {
+    data: sharedData,
+    isLoading: isLoadingShared,
+    isFetching: isFetchingShared,
+  } = useGetSharedEventQuery(token, {
+    skip: !token,
+  })
 
   const {
     data: occurrenceDetail,
@@ -56,20 +66,30 @@ const EventDetailModal = ({ event, onClose }) => {
   const isLoading =
     isLoadingEvent ||
     isLoadingOccurrence ||
+    isLoadingShared ||
     isFetchingEvent ||
-    isFetchingOccurrence
+    isFetchingOccurrence ||
+    isFetchingShared
 
   if (!event) return null
 
-  let ev;
+  let ev
   if (occurrenceId) {
     ev = {
       ...currentEvent,
+      ...detail,
       ...occurrenceDetail,
       // Retain the recurrence context from the parent so users know this is part of a series
-      isRecurring: occurrenceDetail?.isRecurring || detail?.isRecurring || event?.isRecurring,
-      recurrenceRule: occurrenceDetail?.recurrenceRule || detail?.recurrenceRule || event?.recurrenceRule,
-      timezone: occurrenceDetail?.timezone || detail?.timezone || event?.timezone,
+      isRecurring:
+        occurrenceDetail?.isRecurring ||
+        detail?.isRecurring ||
+        event?.isRecurring,
+      recurrenceRule:
+        occurrenceDetail?.recurrenceRule ||
+        detail?.recurrenceRule ||
+        event?.recurrenceRule,
+      timezone:
+        occurrenceDetail?.timezone || detail?.timezone || event?.timezone,
       isRecurringGroup: false,
       subOccurrences: undefined,
     }
@@ -78,6 +98,10 @@ const EventDetailModal = ({ event, onClose }) => {
       ...currentEvent,
       ...detail,
     }
+  }
+  
+  if (sharedData?.shareLink) {
+    ev.shareLink = sharedData.shareLink
   }
   const headerColor = ev.color || "#B91264"
 
@@ -93,10 +117,10 @@ const EventDetailModal = ({ event, onClose }) => {
       open={!!event}
       onClose={onClose}
       showCloseButton={false}
-      className="p-0 !max-w-[700px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-[24px] overflow-visible"
-      bodyClassName="flex-1"
+      className="flex flex-col p-0 !max-w-[700px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-[24px] overflow-visible max-[425px]:h-full"
+      bodyClassName="flex-1 flex flex-col min-h-0"
     >
-      <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-[24px]">
+      <div className="relative flex flex-col w-full bg-white rounded-none min-[426px]:rounded-[24px] flex-1 min-h-0 min-[426px]:max-h-[90vh]">
         {/* Floating close button */}
         <button
           onClick={onClose}
@@ -119,7 +143,9 @@ const EventDetailModal = ({ event, onClose }) => {
                 ev={ev}
                 headerColor={headerColor}
                 onClose={onClose}
-                onBack={overrideEvent ? () => setOverrideEvent(null) : undefined}
+                onBack={
+                  overrideEvent ? () => setOverrideEvent(null) : undefined
+                }
               />
 
               <EventDetailBody

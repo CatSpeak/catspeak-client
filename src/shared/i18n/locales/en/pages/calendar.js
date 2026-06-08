@@ -30,6 +30,8 @@ export default {
   endTime: "End time",
   to: "to",
   endsOn: "Ends on",
+  afterOccurrences: "After",
+  occurrences: "occurrences",
   timezone: "Timezone",
   recurrence: {
     noRepeat: "No repeat",

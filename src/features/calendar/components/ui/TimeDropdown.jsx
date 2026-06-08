@@ -14,12 +14,23 @@ const TimeDropdown = ({
   const dropdownRef = useRef(null)
   const portalRef = useRef(null)
 
-  const getCurrentTime = () => {
+  const getClosestTime = () => {
     const now = new Date()
-    return `${now.getHours().toString().padStart(2, "0")}:00`
+    const minutes = now.getMinutes()
+    const hours = now.getHours()
+    
+    let roundedMinutes = Math.round(minutes / 15) * 15
+    let finalHours = hours
+    
+    if (roundedMinutes === 60) {
+      roundedMinutes = 0
+      finalHours = (finalHours + 1) % 24
+    }
+    
+    return `${finalHours.toString().padStart(2, "0")}:${roundedMinutes.toString().padStart(2, "0")}`
   }
 
-  const [selectedTime, setSelectedTime] = useState(value || getCurrentTime())
+  const [selectedTime, setSelectedTime] = useState(value || getClosestTime())
 
   useEffect(() => {
     if (value !== undefined) {
@@ -183,7 +194,7 @@ const TimeDropdown = ({
                                 onClick={() => handleTimeSelect(time)}
                                 className={`w-full h-12 px-4 text-left text-base rounded-md flex items-center cursor-pointer transition-colors ${
                                   isSelected
-                                    ? "bg-[#F6F6F6] font-semibold"
+                                    ? "bg-[#F6F6F6] font-semibold selected-time"
                                     : "hover:bg-[#F6F6F6]"
                                 }`}
                                 style={isSelected ? { color: color } : {}}
