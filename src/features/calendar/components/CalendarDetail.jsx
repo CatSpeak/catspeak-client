@@ -40,7 +40,6 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { data: eventsDataA, isLoading: isLoadingA } = useGetEventsByDateQuery(
     {
       date: utcDateA,
-      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
     },
     { skip: selectedDate === null },
   )
@@ -48,7 +47,6 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { data: eventsDataB, isLoading: isLoadingB } = useGetEventsByDateQuery(
     {
       date: utcDateB,
-      ...(currentUser?.accountId ? { userId: currentUser.accountId } : {}),
     },
     { skip: selectedDate === null || !needsTwoQueries },
   )
@@ -65,14 +63,14 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
       if (!eventsArr) return
       eventsArr.forEach((ev) => {
         const id = ev.occurrenceId || ev.eventId
-        
+
         const localStart = dayjs(ev.startTime)
         const localEnd = dayjs(ev.endTime)
 
         // Skip if displayDate is completely outside the event's days
         if (displayStartOfDay.isBefore(localStart.startOf("day"))) return
         if (displayStartOfDay.isAfter(localEnd.startOf("day"))) return
-        
+
         // If event ends exactly at 00:00:00 on the display date, and it didn't start on this same day,
         // it doesn't span into this day visually (it ended exactly at the start of the day).
         if (
@@ -97,7 +95,10 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
           // If the event ends on a future day relative to displayDate
           if (localEnd.startOf("day").isAfter(displayStartOfDay)) {
             displayEndTime = "24:00"
-          } else if (displayEndTime === "00:00" && localEnd.startOf("day").isAfter(localStart.startOf("day"))) {
+          } else if (
+            displayEndTime === "00:00" &&
+            localEnd.startOf("day").isAfter(localStart.startOf("day"))
+          ) {
             displayEndTime = "24:00"
           }
 
@@ -183,7 +184,7 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
         {/* Calendar Day View Scroll Container */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto overflow-x-auto pr-2 bg-gray-50/30 rounded-xl relative [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:rounded-[3px]"
+          className="flex-1 overflow-y-auto overflow-x-auto pr-2 bg-gray-50/30 rounded-xl relative [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
         >
           <div
             className="relative mt-5"

@@ -20,11 +20,46 @@ const getOccurrenceTags = (result) => {
   return tags
 }
 
+const fixOvernightEvents = (response) => {
+  if (!response) return response
+
+  const clone = JSON.parse(JSON.stringify(response))
+
+  const fix = (ev) => {
+    if (!ev || !ev.startTime || !ev.endTime) return
+    const start = new Date(ev.startTime)
+    const end = new Date(ev.endTime)
+    if (end < start) {
+      end.setTime(end.getTime() + 24 * 60 * 60 * 1000)
+      const isZ = ev.endTime.endsWith("Z")
+      const newStr = end.toISOString().split(".")[0]
+      ev.endTime = isZ ? newStr + "Z" : newStr
+    }
+
+    if (ev.subOccurrences) {
+      ev.subOccurrences.forEach(fix)
+    }
+  }
+
+  if (Array.isArray(clone)) {
+    clone.forEach(fix)
+  } else if (clone.events) {
+    clone.events.forEach(fix)
+  } else if (clone.items) {
+    clone.items.forEach(fix)
+  } else {
+    fix(clone)
+  }
+
+  return clone
+}
+
 export const eventsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET /api/v1/Events/{eventId}
     getEventById: builder.query({
       query: (eventId) => `/v1/Events/${eventId}`,
+      transformResponse: fixOvernightEvents,
       providesTags: (result, error, eventId) => [
         { type: "Events", id: eventId },
       ],
@@ -33,6 +68,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // GET /api/v1/Events/occurrences/{occurrenceId}
     getEventOccurrenceById: builder.query({
       query: (occurrenceId) => `/v1/Events/occurrences/${occurrenceId}`,
+      transformResponse: fixOvernightEvents,
       providesTags: (result, error, occurrenceId) => [
         { type: "Events", id: `occurrence-${occurrenceId}` },
       ],
@@ -126,6 +162,7 @@ export const eventsApi = baseApi.injectEndpoints({
         url: "/v1/Events/by-date",
         params,
       }),
+      transformResponse: fixOvernightEvents,
       providesTags: ["Events"],
     }),
 
@@ -135,6 +172,7 @@ export const eventsApi = baseApi.injectEndpoints({
         url: "/v1/Events/registered",
         params,
       }),
+      transformResponse: fixOvernightEvents,
       providesTags: getOccurrenceTags,
     }),
 
@@ -144,13 +182,14 @@ export const eventsApi = baseApi.injectEndpoints({
         url: "/v1/Events/mine",
         params,
       }),
+      transformResponse: fixOvernightEvents,
       providesTags: getOccurrenceTags,
     }),
 
-    // POST /api/v1/events/{eventId}/shared-links
+    // POST /api/v1/events/{occurrenceId}/shared-links
     createSharedLink: builder.mutation({
-      query: ({ eventId, ...body }) => ({
-        url: `/v1/events/${eventId}/shared-links`,
+      query: ({ occurrenceId, ...body }) => ({
+        url: `/v1/events/${occurrenceId}/shared-links`,
         method: "POST",
         body,
       }),

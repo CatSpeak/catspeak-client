@@ -1,7 +1,7 @@
 import { colors } from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const RecurrenceIntervalRow = ({ intervalUnit, value, onChange }) => {
+const RecurrenceIntervalRow = ({ intervalUnit, value, onChange, disabled }) => {
   const { t } = useLanguage()
   const cal = t.calendar
 
@@ -21,7 +21,8 @@ const RecurrenceIntervalRow = ({ intervalUnit, value, onChange }) => {
         min={1}
         value={value}
         onChange={(e) => onChange(Math.max(1, Number(e.target.value)))}
-        className="w-14 text-center border border-gray-200 rounded-[5px] text-black text-base outline-none py-0.5 shadow-sm"
+        disabled={disabled}
+        className={`w-14 text-center border border-gray-200 rounded-[5px] text-black text-base outline-none py-0.5 shadow-sm ${disabled ? "opacity-60 cursor-not-allowed bg-gray-50" : ""}`}
       />
       <span
         className="text-base font-medium"

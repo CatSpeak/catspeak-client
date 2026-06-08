@@ -9,22 +9,35 @@ import {
   useCancelRegistrationMutation,
   useDeleteRegistrationMutation,
 } from "@/store/api/eventsApi"
+import { useLocation, useNavigate } from "react-router-dom"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 
 import ParticipantListModal from "./ParticipantListModal"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
   const { user, isAdmin } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { openAuthModal } = useAuthModal()
   const { t } = useLanguage()
   const cal = t.calendar || {}
   const [showParticipants, setShowParticipants] = useState(false)
 
-  const isCreatorOrAdmin =
-    isAdmin ||
-    (user &&
-      event &&
-      (user.id === event.creatorId ||
-        user.username === event.creatorName ||
-        (user.fullName && user.fullName === event.creatorName)))
+  const isCreator = Boolean(
+    user &&
+    event &&
+    ((user.id != null &&
+      event.creatorId != null &&
+      user.id === event.creatorId) ||
+      (user.username != null &&
+        event.creatorName != null &&
+        user.username === event.creatorName) ||
+      (user.fullName != null &&
+        event.creatorName != null &&
+        user.fullName === event.creatorName)),
+  )
+
   const isRegistered = event?.isRegistered ?? false
 
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
@@ -34,12 +47,27 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
     useRegisterForEventMutation()
   const [cancelRegistration, { isLoading: isCancelling }] =
     useCancelRegistrationMutation()
-  const [deleteRegistration, { isLoading: isDeletingReg }] = 
+  const [deleteRegistration, { isLoading: isDeletingReg }] =
     useDeleteRegistrationMutation()
 
   const isProcessing = isRegistering || isCancelling || isDeletingReg
 
   const handleRegister = async () => {
+    if (!user || !user.id) {
+      if (location.pathname.includes("/events/shared/")) {
+        navigate("/", {
+          replace: true,
+          state: {
+            requireLogin: true,
+            redirectTo: location.pathname + location.search,
+          },
+        })
+      } else {
+        openAuthModal("login", location.pathname + location.search)
+      }
+      return
+    }
+
     if (isRegistered) {
       // Cancel registration for this occurrence (or the single event)
       try {
@@ -52,8 +80,12 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           const body = {
             eventId,
             cancellationReason: "User cancelled",
-            ...(event?.occurrenceId ? { occurrenceId: event.occurrenceId } : {}),
-            ...(event?.isRecurring && event?.originalStartTime && !event?.occurrenceId
+            ...(event?.occurrenceId
+              ? { occurrenceId: event.occurrenceId }
+              : {}),
+            ...(event?.isRecurring &&
+            event?.originalStartTime &&
+            !event?.occurrenceId
               ? { registrationDate: event.originalStartTime }
               : {}),
           }
@@ -86,34 +118,29 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   return (
     <>
-      <div className="p-5 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-4 bg-white">
+      <div className="p-4 min-[426px]:p-6 rounded-none min-[426px]:rounded-b-[24px] flex flex-col min-[426px]:flex-row items-center justify-between gap-3 min-[426px]:gap-2 bg-white">
         {/* Register / Unregister */}
         {!confirmDelete &&
-          (isCreatorOrAdmin ? (
-            <button
+          (isCreator ? (
+            <PillButton
               onClick={() => setShowParticipants(true)}
-              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-cath-red-700"
+              bgColor="#B91264"
+              className="w-full min-[426px]:flex-1"
             >
               {cal.viewParticipants || "Xem danh sách người đăng ký"}
-            </button>
+            </PillButton>
           ) : (
-            <button
+            <PillButton
               onClick={handleRegister}
-              disabled={isProcessing}
-              className={`flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg ${
-                isProcessing
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : isRegistered
-                    ? "bg-cath-red-700 hover:bg-cath-red-800"
-                    : "bg-[#06AA3B] hover:bg-green-700"
-              }`}
+              loading={isProcessing}
+              loadingText={cal.processing || "Đang xử lý..."}
+              bgColor={isRegistered ? undefined : "#06AA3B"}
+              className={`w-full min-[426px]:flex-1 ${isRegistered ? "bg-cath-red-700 hover:bg-cath-red-800" : ""}`}
             >
-              {isProcessing
-                ? cal.processing || "Đang xử lý..."
-                : isRegistered
-                  ? cal.cancelRegistration || "Hủy đăng kí"
-                  : cal.register || "Đăng kí"}
-            </button>
+              {isRegistered
+                ? cal.cancelRegistration || "Hủy đăng kí"
+                : cal.register || "Đăng kí"}
+            </PillButton>
           ))}
 
         {/* Delete confirm / action icons */}
@@ -121,52 +148,58 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           <div className="flex flex-wrap items-center gap-2 w-full">
             {event?.isRecurring && event?.occurrenceId ? (
               <>
-                <button
-                  onClick={() => handleDelete('occurrence')}
-                  disabled={isDeleting}
-                  className="flex-1 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors h-10 rounded-[10px] disabled:opacity-60 px-2 min-w-[max-content]"
+                <PillButton
+                  onClick={() => handleDelete("occurrence")}
+                  loading={isDeleting}
+                  loadingText={cal.deleting || "Đang xóa..."}
+                  bgColor="#dc2626"
+                  className="flex-1 min-w-[max-content]"
                 >
-                  {isDeleting ? cal.deleting || "Đang xóa..." : "Chỉ xóa buổi này"}
-                </button>
-                <button
-                  onClick={() => handleDelete('series')}
-                  disabled={isDeleting}
-                  className="flex-1 text-xs font-semibold text-white bg-red-800 hover:bg-red-900 transition-colors h-10 rounded-[10px] disabled:opacity-60 px-2 min-w-[max-content]"
+                  {cal.deleteThisOccurrence || "Chỉ xóa buổi này"}
+                </PillButton>
+                <PillButton
+                  onClick={() => handleDelete("series")}
+                  loading={isDeleting}
+                  loadingText={cal.deleting || "Đang xóa..."}
+                  bgColor="#991b1b"
+                  className="flex-1 min-w-[max-content]"
                 >
-                  {isDeleting ? cal.deleting || "Đang xóa..." : "Xóa toàn bộ chuỗi"}
-                </button>
+                  {cal.deleteEntireSeries || "Xóa toàn bộ chuỗi"}
+                </PillButton>
               </>
             ) : (
-              <button
-                onClick={() => handleDelete('series')}
-                disabled={isDeleting}
-                className="flex-1 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors h-10 rounded-[10px] disabled:opacity-60 px-2"
+              <PillButton
+                onClick={() => handleDelete("series")}
+                loading={isDeleting}
+                loadingText={cal.deleting || "Đang xóa..."}
+                bgColor="#dc2626"
+                className="flex-1"
               >
-                {isDeleting
-                  ? cal.deleting || "Đang xóa..."
-                  : cal.confirm || "Xác nhận?"}
-              </button>
+                {cal.confirm || "Xác nhận?"}
+              </PillButton>
             )}
-            <button
+            <PillButton
               onClick={() => setConfirmDelete(false)}
-              className="flex-1 text-sm bg-[#f2f2f2] transition-colors h-10 rounded-[10px] hover:bg-[#d9d9d9] px-2 min-w-[60px]"
+              variant="secondary"
+              bgColor="#f2f2f2"
+              className="flex-1 min-w-[60px]"
             >
               {cal.cancel || "Hủy"}
-            </button>
+            </PillButton>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            {isCreatorOrAdmin && (
+          <div className="relative flex items-center justify-center min-[426px]:justify-end gap-2 w-full min-[426px]:w-auto">
+            {isCreator && (
               <>
                 <button
                   onClick={onEdit}
-                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
                 >
                   <Pencil />
                 </button>
                 <button
                   onClick={() => setConfirmDelete(true)}
-                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors flex items-center justify-center rounded-full w-10 h-10"
+                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
                 >
                   <Trash2 />
                 </button>

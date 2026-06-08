@@ -39,7 +39,7 @@ const CountryDropdown = ({ value, onChange, className = "" }) => {
           <span className="truncate">{getDisplayLabel()}</span>
 
           <ChevronDown
-            size={20}
+            size={16}
             className={`transition-transform duration-200 ${
               open ? "rotate-180" : ""
             }`}
@@ -49,7 +49,7 @@ const CountryDropdown = ({ value, onChange, className = "" }) => {
 
       <AnimatePresence>
         {open && (
-          <div className="absolute top-full right-0 mt-2 min-w-[200px] max-w-[280px] z-50">
+          <div className="absolute top-full right-0 mt-4 min-w-[200px] max-w-[280px] z-50">
             <FluentAnimation
               direction="down"
               exit

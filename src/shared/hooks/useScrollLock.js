@@ -1,9 +1,9 @@
 import { useEffect } from "react"
 
 /**
- * Empty hook as per request to keep the scrollbar exactly as is.
- * This completely prevents layout shift and prevents empty gutters,
- * at the cost of allowing the background to remain scrollable.
+ * Locks the body scroll while preventing layout shift.
+ * It measures the scrollbar width and applies it as padding-right,
+ * simulating the behavior seen on modern sites like Facebook.
  *
  * @param {boolean} locked - Whether scroll should be locked
  */
@@ -11,10 +11,23 @@ const useScrollLock = (locked) => {
   useEffect(() => {
     if (!locked) return
 
-    // Since we want to keep the scrollbar completely visible and untouched,
-    // we purposefully don't apply overflow: hidden to the body.
-    
+    // Measure scrollbar width to prevent layout shift
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+
+    // Save original styles
+    const originalOverflow = document.body.style.overflow
+    const originalPaddingRight = document.body.style.paddingRight
+
+    // Apply scroll lock and padding
+    document.body.style.overflow = "hidden"
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`
+    }
+
     return () => {
+      // Restore original styles
+      document.body.style.overflow = originalOverflow
+      document.body.style.paddingRight = originalPaddingRight
     }
   }, [locked])
 }

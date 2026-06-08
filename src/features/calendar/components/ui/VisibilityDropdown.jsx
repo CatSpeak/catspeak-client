@@ -9,26 +9,26 @@ const VisibilityDropdown = ({ value, onChange, color = "#B91264" }) => {
 
   const OPTIONS = [
     {
-      value: "Công khai",
+      value: "PUBLIC",
       shortLabel: cal.public,
       label: cal.public,
       icon: <Globe size={16} />,
     },
     {
-      value: "Link",
+      value: "SHARED_LINK_ONLY",
       shortLabel: cal.linkOnly,
       label: cal.linkOnly,
       icon: <Link size={16} />,
     },
     // Uncomment when backend supports COMMUNITY_ONLY
     // {
-    //   value: "Cộng đồng",
+    //   value: "COMMUNITY_ONLY",
     //   shortLabel: cal.community,
     //   label: cal.community,
     //   icon: <Users size={16} />,
     // },
   ]
-  const selectedOpt = OPTIONS.find((o) => o.label === value) || OPTIONS[0]
+  const selectedOpt = OPTIONS.find((o) => o.value === value) || OPTIONS[0]
 
   const trigger = (isOpen, selectedOption, toggle) => {
     const icon = React.cloneElement(selectedOption ? selectedOption.icon : selectedOpt.icon, { size: 14 })
@@ -54,8 +54,8 @@ const VisibilityDropdown = ({ value, onChange, color = "#B91264" }) => {
     <Dropdown
       options={enhancedOptions}
       value={selectedOpt.value}
-      onChange={(val, opt) => {
-        if (onChange) onChange(opt.label)
+      onChange={(val) => {
+        if (onChange) onChange(val)
       }}
       trigger={trigger}
       align="right"

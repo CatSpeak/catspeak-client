@@ -5,22 +5,6 @@ import timezone from "dayjs/plugin/timezone"
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-/** Maps Vietnamese recurrence label → API frequency string */
-const RECURRENCE_MAP = {
-  "Hàng ngày": "DAILY",
-  "Hàng tuần": "WEEKLY",
-  "Hàng tháng": "MONTHLY",
-  "Hàng năm": "YEARLY",
-  "Tùy chỉnh...": "WEEKLY", // custom weekly by default
-}
-
-/** Maps Vietnamese visibility label → API visibilityScope string */
-const VISIBILITY_MAP = {
-  "Công khai": "PUBLIC",
-  "Chỉ những người có link": "SHARED_LINK_ONLY",
-  // "Cộng đồng": "COMMUNITY_ONLY",  // not yet supported by backend
-}
-
 /** Maps numeric weekday index (0=Mon) → API byWeekDay string */
 const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
@@ -42,9 +26,13 @@ export const mapFormToPayload = ({
   recurrenceOption,
   selectedDays,
   recurrenceEndDate,
+  recurrenceEndType,
+  occurrenceCount,
   selectedTimezone,
   conditionsInput,
   recurrenceInterval,
+  originalStartTime,
+  originalEndTime,
 }) => {
   /** Split "cond1, cond2" → [{ conditionType:'', category:'', title:'cond1', description:'' }, …] */
   const conditions = (conditionsInput || "")
@@ -57,10 +45,10 @@ export const mapFormToPayload = ({
       title,
       description: "",
     }))
-  const isRecurring = recurrenceOption !== "Không lặp lại"
-  const frequency = RECURRENCE_MAP[recurrenceOption] ?? null
+  const isRecurring = recurrenceOption !== "NONE"
+  const frequency = recurrenceOption === "CUSTOM" ? "WEEKLY" : recurrenceOption
 
-  const timezoneId = selectedTimezone?.id || "Asia/Bangkok"
+  const timezoneId = selectedTimezone?.id || "Asia/Ho_Chi_Minh"
 
   // Helper to convert a local dayjs object to a UTC ISO string, assuming
   // the user's input time was meant for the selected timezone.
@@ -80,11 +68,13 @@ export const mapFormToPayload = ({
     cityId: Number(cityId),
     color: eventColor,
     maxParticipants: Number(maxParticipants),
-    visibilityScope: VISIBILITY_MAP[visibility] ?? visibility,
+    visibilityScope: visibility,
     timezone: timezoneId,
     isRecurring,
-    startTime: isRecurring ? null : toUtcInTimezone(startTime),
-    endTime: isRecurring ? null : toUtcInTimezone(endTime),
+    startTime: toUtcInTimezone(startTime),
+    endTime: toUtcInTimezone(endTime),
+    originalStartTime: toUtcInTimezone(originalStartTime || startTime),
+    originalEndTime: toUtcInTimezone(originalEndTime || endTime),
     conditions,
   }
 
@@ -99,12 +89,15 @@ export const mapFormToPayload = ({
       ...(frequency === "MONTHLY" && {
         byMonthDay: [dayjs(startTime).date()],
       }),
-      // Assuming backend wants local time string for rule bounds if timezone is provided
-      startTime: dayjs(startTime).format("HH:mm:ss"),
-      endTime: dayjs(endTime).format("HH:mm:ss"),
+      // Convert the absolute UTC string into a UTC dayjs object and extract its HH:mm:ss
+      startTime: dayjs(toUtcInTimezone(startTime)).utc(),
+      endTime: dayjs(toUtcInTimezone(endTime)).utc(),
       recurrenceStartDate: toUtcInTimezone(startTime),
-      recurrenceEndDate: recurrenceEndDate ? toUtcInTimezone(recurrenceEndDate) : null,
-      endCondition: recurrenceEndDate ? "UNTIL_DATE" : "NEVER",
+      recurrenceEndDate: recurrenceEndType === "DATE" && recurrenceEndDate
+        ? toUtcInTimezone(recurrenceEndDate)
+        : null,
+      endCondition: recurrenceEndType === "COUNT" ? "OCCURRENCE_COUNT" : (recurrenceEndDate ? "UNTIL_DATE" : "NEVER"),
+      occurrenceCount: recurrenceEndType === "COUNT" ? Number(occurrenceCount) : 0,
       timeZone: timezoneId,
     }
   }

@@ -2,20 +2,21 @@ import React, { useMemo } from "react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const RecurrenceDropdown = ({ value, onChange, activeColor }) => {
+const RecurrenceDropdown = ({ value, onChange, activeColor, disabled }) => {
   const { t } = useLanguage()
   const cal = t.calendar
 
   const OPTIONS = useMemo(
     () => [
-      { value: cal.recurrence.noRepeat, label: cal.recurrence.noRepeat },
+      { value: "NONE", label: cal.recurrence.noRepeat },
       // TODO: Re-enable after backend specs are finalized
-      // { value: cal.recurrence.daily, label: cal.recurrence.daily },
-      { value: cal.recurrence.weekly, label: cal.recurrence.weekly },
-      // { value: cal.recurrence.monthly, label: cal.recurrence.monthly },
-      // { value: cal.recurrence.yearly, label: cal.recurrence.yearly },
+      // { value: "DAILY", label: cal.recurrence.daily },
+      { value: "WEEKLY", label: cal.recurrence.weekly },
+      // { value: "MONTHLY", label: cal.recurrence.monthly },
+      // { value: "YEARLY", label: cal.recurrence.yearly },
+      // { value: "CUSTOM", label: cal.recurrence.custom },
     ],
-    [cal]
+    [cal],
   )
 
   return (
@@ -27,7 +28,8 @@ const RecurrenceDropdown = ({ value, onChange, activeColor }) => {
       }}
       activeColor={activeColor}
       className="w-full"
-      dropdownClassName="left-0 right-0 w-full"
+      dropdownClassName="w-full min-w-[180px]"
+      disabled={disabled}
     />
   )
 }

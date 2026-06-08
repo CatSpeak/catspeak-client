@@ -30,4 +30,5 @@ export default {
     backToHome: "Back to Home",
     thankYou: "Thank you for your patience! ^^",
   },
+  noOptionsFound: "No options found",
 }

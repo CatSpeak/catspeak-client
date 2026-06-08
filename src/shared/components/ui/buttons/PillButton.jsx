@@ -20,7 +20,8 @@ const PillButton = ({
   const isActuallyDisabled = disabled || loading
 
   const heightClass = className && className.match(/\bh-\S+/) ? "" : "h-12"
-  const baseStyles = `${heightClass} px-4 rounded-full font-medium text-sm flex items-center justify-center gap-2 transition whitespace-nowrap`
+  const textClass = className && className.match(/\btext-(xs|sm|base|lg|xl|2xl|3xl|4xl)\b/) ? "" : "text-base"
+  const baseStyles = `${heightClass} ${textClass} px-4 rounded-full font-medium flex items-center justify-center gap-2 transition whitespace-nowrap`
 
   // Default variant styles
   const variantStyles = isOutline

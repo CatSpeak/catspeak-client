@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import colors from "@/shared/utils/colors"
@@ -12,12 +13,25 @@ const TimeDropdown = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
-  const getCurrentTime = () => {
+  const portalRef = useRef(null)
+
+  const getClosestTime = () => {
     const now = new Date()
-    return `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
+    const minutes = now.getMinutes()
+    const hours = now.getHours()
+
+    let roundedMinutes = Math.round(minutes / 15) * 15
+    let finalHours = hours
+
+    if (roundedMinutes === 60) {
+      roundedMinutes = 0
+      finalHours = (finalHours + 1) % 24
+    }
+
+    return `${finalHours.toString().padStart(2, "0")}:${roundedMinutes.toString().padStart(2, "0")}`
   }
 
-  const [selectedTime, setSelectedTime] = useState(value || getCurrentTime())
+  const [selectedTime, setSelectedTime] = useState(value || getClosestTime())
 
   useEffect(() => {
     if (value !== undefined) {
@@ -25,51 +39,97 @@ const TimeDropdown = ({
     }
   }, [value])
 
-  useClickOutside(dropdownRef, () => setIsOpen(false))
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        (!portalRef.current || !portalRef.current.contains(event.target))
+      ) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-  const handleHourSelect = (hour) => {
-    const [, min] = selectedTime.split(":")
-    const newTime = `${hour}:${min || getCurrentTime().split(":")[1]}`
-    setSelectedTime(newTime)
-    if (onChange) onChange(newTime)
-  }
+  const [portalCoords, setPortalCoords] = useState(null)
 
-  const handleMinuteSelect = (min) => {
-    const [h] = selectedTime.split(":")
-    const newTime = `${h || getCurrentTime().split(":")[0]}:${min}`
-    setSelectedTime(newTime)
-    if (onChange) onChange(newTime)
+  useEffect(() => {
+    const handleClose = () => setIsOpen(false)
+    const handleScroll = (e) => {
+      if (portalRef.current && portalRef.current.contains(e.target)) return
+      handleClose()
+    }
+
+    const updateCoords = () => {
+      if (isOpen && dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        const spaceAbove = rect.top
+
+        // TimeDropdown list is ~200px tall
+        const flipUp = spaceBelow < 220 && spaceAbove > spaceBelow
+
+        // Width is 100px
+        const forceAlignRight = rect.left + 100 > window.innerWidth
+
+        setPortalCoords({
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height,
+          flipUp,
+          forceAlignRight,
+        })
+      }
+    }
+
+    if (isOpen) {
+      updateCoords()
+      window.addEventListener("resize", handleClose)
+      window.addEventListener("scroll", handleScroll, true)
+      return () => {
+        window.removeEventListener("resize", handleClose)
+        window.removeEventListener("scroll", handleScroll, true)
+      }
+    }
+  }, [isOpen])
+
+  const handleTimeSelect = (time) => {
+    setSelectedTime(time)
+    if (onChange) onChange(time)
     setIsOpen(false)
   }
 
-  const hours = Array.from({ length: 24 }, (_, i) =>
-    i.toString().padStart(2, "0"),
-  )
-  const minutes = Array.from({ length: 60 }, (_, i) =>
-    i.toString().padStart(2, "0"),
-  )
+  const times = Array.from({ length: 24 * 4 }, (_, i) => {
+    const h = Math.floor(i / 4)
+      .toString()
+      .padStart(2, "0")
+    const m = ((i % 4) * 15).toString().padStart(2, "0")
+    return `${h}:${m}`
+  })
 
-  const [currentHour, currentMinute] = selectedTime.split(":")
+  // Ensure the current selected time is in the list, if not, add it
+  const displayTimes = [...times]
+  if (!displayTimes.includes(selectedTime)) {
+    displayTimes.push(selectedTime)
+    displayTimes.sort()
+  }
 
-  // Refs for auto-scrolling
-  const hoursRef = useRef(null)
-  const minutesRef = useRef(null)
+  const listRef = useRef(null)
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
-        if (hoursRef.current) {
-          const selectedHourEl =
-            hoursRef.current.querySelector(".selected-time")
-          if (selectedHourEl) {
-            selectedHourEl.scrollIntoView({ block: "center" })
-          }
-        }
-        if (minutesRef.current) {
-          const selectedMinEl =
-            minutesRef.current.querySelector(".selected-time")
-          if (selectedMinEl) {
-            selectedMinEl.scrollIntoView({ block: "center" })
+        if (listRef.current) {
+          const selectedEl = listRef.current.querySelector(".selected-time")
+          if (selectedEl) {
+            const container = listRef.current
+            container.scrollTop =
+              selectedEl.offsetTop -
+              container.clientHeight / 2 +
+              selectedEl.clientHeight / 2
           }
         }
       }, 0)
@@ -81,71 +141,79 @@ const TimeDropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="text-sm flex items-center justify-center border border-[#c6c6c6] rounded-md px-4 h-10 text-gray-800 shadow-sm hover:bg-gray-50 transition-colors outline-none bg-white"
+        className={`hover:bg-[#f0f0f0] flex items-center justify-center rounded-2xl px-4 h-12 outline-none bg-white min-w-[90px] transition-all border ${
+          isOpen ? "border-2" : "border-[#e5e5e5]"
+        }`}
+        style={isOpen ? { borderColor: color } : {}}
       >
-        <span>{selectedTime}</span>
+        <span className="text-base">{selectedTime}</span>
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <div className="absolute z-50 top-full mt-1 left-0 w-[140px] h-[200px] origin-top-left pointer-events-none">
-            <FluentAnimation
-              direction="down"
-              exit={true}
-              className="pointer-events-auto w-full h-full flex bg-white border rounded-md shadow-lg overflow-hidden"
-              style={{ borderColor: colors.border }}
-            >
-              {/* Hours Column */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && portalCoords && (
               <div
-                ref={hoursRef}
-                className="flex-[1] overflow-y-auto scrollbar-none border-r border-gray-100"
+                ref={portalRef}
+                style={{
+                  position: "absolute",
+                  top: portalCoords.top,
+                  left: portalCoords.left,
+                  width: portalCoords.width,
+                  height: portalCoords.height,
+                  zIndex: 9999,
+                  pointerEvents: "none",
+                }}
               >
-                {hours.map((hour) => {
-                  const isSelected = currentHour === hour
-                  return (
-                    <div
-                      key={`h-${hour}`}
-                      onClick={() => handleHourSelect(hour)}
-                      className={`flex justify-center items-center py-2 text-sm cursor-pointer transition-colors ${
-                        isSelected
-                          ? "selected-time text-white font-bold hover:brightness-90"
-                          : "text-gray-700 font-medium hover:bg-gray-100"
-                      }`}
-                      style={isSelected ? { backgroundColor: color } : {}}
+                <div className="relative w-full h-full">
+                  <div
+                    className={`absolute z-50 ${
+                      portalCoords.flipUp
+                        ? "bottom-full mb-4 origin-bottom"
+                        : "top-full mt-4 origin-top"
+                    } ${
+                      portalCoords.forceAlignRight
+                        ? "right-0 origin-top-right"
+                        : "left-0 origin-top-left"
+                    } w-[100px] h-[220px] pointer-events-none`}
+                  >
+                    <FluentAnimation
+                      direction={portalCoords.flipUp ? "up" : "down"}
+                      exit={true}
+                      className="pointer-events-auto w-full h-full flex flex-col bg-white border border-[#E5E5E5] rounded-2xl shadow-lg overflow-hidden"
                     >
-                      {hour}
-                    </div>
-                  )
-                })}
+                      <div
+                        ref={listRef}
+                        className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+                      >
+                        <div className="flex flex-col gap-1 p-1">
+                          {displayTimes.map((time) => {
+                            const isSelected = selectedTime === time
+                            return (
+                              <div
+                                key={time}
+                                onClick={() => handleTimeSelect(time)}
+                                className={`w-full h-12 px-4 text-left text-base rounded-md flex items-center cursor-pointer transition-colors ${
+                                  isSelected
+                                    ? "bg-[#F6F6F6] font-semibold selected-time"
+                                    : "hover:bg-[#F6F6F6]"
+                                }`}
+                                style={isSelected ? { color: color } : {}}
+                              >
+                                {time}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </FluentAnimation>
+                  </div>
+                </div>
               </div>
-
-              {/* Minutes Column */}
-              <div
-                ref={minutesRef}
-                className="flex-[1] overflow-y-auto scrollbar-none"
-              >
-                {minutes.map((minute) => {
-                  const isSelected = currentMinute === minute
-                  return (
-                    <div
-                      key={`m-${minute}`}
-                      onClick={() => handleMinuteSelect(minute)}
-                      className={`flex justify-center items-center py-2 text-sm cursor-pointer transition-colors ${
-                        isSelected
-                          ? "selected-time text-white font-bold hover:brightness-90"
-                          : "text-gray-700 font-medium hover:bg-gray-100"
-                      }`}
-                      style={isSelected ? { backgroundColor: color } : {}}
-                    >
-                      {minute}
-                    </div>
-                  )
-                })}
-              </div>
-            </FluentAnimation>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   )
 }

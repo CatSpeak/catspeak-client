@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect } from "react"
 import { useCreateSharedLinkMutation } from "@/store/api/eventsApi"
+import { useAuth } from "@/features/auth"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
+import { useLocation, useNavigate } from "react-router-dom"
 
 const useEventShare = (eventId, occurrenceId) => {
+  const { isAuthenticated } = useAuth()
+  const { openAuthModal } = useAuthModal()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
-  const [copied, setCopied] = useState(false)
   const shareRef = useRef(null)
 
   const [createSharedLink, { isLoading: isSharing }] =
@@ -23,6 +29,18 @@ const useEventShare = (eventId, occurrenceId) => {
   }, [sharePopoverOpen])
 
   const handleShare = async () => {
+    if (!isAuthenticated) {
+      if (location.pathname.includes("/events/shared/")) {
+        navigate("/", { 
+          replace: true, 
+          state: { requireLogin: true, redirectTo: location.pathname + location.search }
+        })
+      } else {
+        openAuthModal("login", location.pathname + location.search)
+      }
+      return
+    }
+
     if (sharePopoverOpen) {
       setSharePopoverOpen(false)
       return
@@ -34,7 +52,7 @@ const useEventShare = (eventId, occurrenceId) => {
           return
         }
         const payload = {
-          eventId: occurrenceId,
+          occurrenceId,
           expiresAt: new Date(
             Date.now() + 7 * 24 * 60 * 60 * 1000,
           ).toISOString(),
@@ -56,21 +74,12 @@ const useEventShare = (eventId, occurrenceId) => {
     setSharePopoverOpen(true)
   }
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
-
   return {
     shareRef,
     sharePopoverOpen,
     shareUrl,
-    copied,
     isSharing,
     handleShare,
-    handleCopy,
   }
 }
 

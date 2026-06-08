@@ -1,19 +1,23 @@
-export const formatTime = (isoString) => {
+export const formatTime = (isoString, timeZoneId) => {
   if (!isoString) return ""
   const date = new Date(isoString)
-  const datePart = date.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "Asia/Ho_Chi_Minh",
-  })
-  const timePart = date.toLocaleTimeString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Ho_Chi_Minh",
-  })
-  return `${datePart} ${timePart}`
+  const options = {
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  }
+  if (timeZoneId) {
+    options.timeZone = timeZoneId
+  }
+  
+  try {
+    return new Intl.DateTimeFormat(undefined, options).format(date)
+  } catch (error) {
+    // Fallback if timezone is invalid
+    delete options.timeZone
+    return new Intl.DateTimeFormat(undefined, options).format(date)
+  }
 }
 
 export const FREQUENCY_LABEL = {

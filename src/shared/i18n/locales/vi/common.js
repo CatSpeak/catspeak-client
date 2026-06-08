@@ -30,4 +30,5 @@ export default {
     backToHome: "Quay về trang chủ",
     thankYou: "Cảm ơn bạn đã kiên nhẫn chờ đợi! ^^",
   },
+  noOptionsFound: "Không tìm thấy lựa chọn nào",
 }

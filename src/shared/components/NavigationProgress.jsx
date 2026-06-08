@@ -42,8 +42,11 @@ const NavigationProgress = () => {
         return false
       }
 
-      // Ignore getEventsByDate so clicking a date in the calendar doesn't trigger global nprogress
-      if (query?.endpointName === "getEventsByDate") {
+      // Ignore getEventsByDate and getEventCounts so clicking a date/switching months in the calendar doesn't trigger global nprogress
+      if (
+        query?.endpointName === "getEventsByDate" ||
+        query?.endpointName === "getEventCounts"
+      ) {
         return false
       }
 
