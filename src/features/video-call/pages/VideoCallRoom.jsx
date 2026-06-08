@@ -99,7 +99,7 @@ const VideoCallRoomContent = () => {
               className="hidden md:flex flex-col overflow-hidden relative py-5"
               style={{ width: 336 }}
             >
-              <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-lg shadow-sm border border-[#E5E5E5] overflow-hidden">
+              <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <VirtualBackgroundPicker />}
                 {showAvatarPicker && <AvatarUrlPicker />}
@@ -155,15 +155,15 @@ const VideoCallRoomContent = () => {
                     {showVirtualBackground && <VirtualBackgroundPicker />}
                     {showAvatarPicker && <AvatarUrlPicker />}
                     {showChat && (
-                        <ChatBox
-                          messages={messages}
-                          currentUser={user}
-                          onSendMessage={handleSendMessage}
-                          isConnected={isConnected}
-                          className="h-full w-full"
-                          hideTitle
-                        />
-                      )}
+                      <ChatBox
+                        messages={messages}
+                        currentUser={user}
+                        onSendMessage={handleSendMessage}
+                        isConnected={isConnected}
+                        className="h-full w-full"
+                        hideTitle
+                      />
+                    )}
                   </div>
                 </motion.div>
               </motion.div>

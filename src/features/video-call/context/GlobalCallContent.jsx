@@ -24,6 +24,7 @@ import {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
 } from "@/store/api/conversationsApi"
+import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
   getNavigate,
   getLocation,
@@ -81,6 +82,9 @@ const GlobalCallContent = ({
     allParticipants,
     localParticipant,
   )
+
+  // ── Join/Leave Audio ──
+  useParticipantAudioEffect(participants)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
