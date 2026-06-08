@@ -103,12 +103,19 @@ const ParticipantList = ({ hideTitle }) => {
     }
   }
 
+  const isSttAgent = (p) => {
+    const meta = parseMetadata(p.metadata)
+    return meta.is_stt_agent === true
+  }
+
   const raisedHandParticipants = participants.filter((p) => {
+    if (isSttAgent(p)) return false
     const meta = parseMetadata(p.metadata)
     return meta.handRaised === true
   })
 
   const otherParticipants = participants.filter((p) => {
+    if (isSttAgent(p)) return false
     const meta = parseMetadata(p.metadata)
     return meta.handRaised !== true
   })
@@ -118,7 +125,7 @@ const ParticipantList = ({ hideTitle }) => {
       {!hideTitle && (
         <div className="px-4 py-3 border-b border-[#E5E5E5]">
           <h3 className="text-black text-sm font-semibold m-0">
-            {pl.title} ({participants.length})
+            {pl.title} ({participants.filter((p) => !isSttAgent(p)).length})
           </h3>
         </div>
       )}

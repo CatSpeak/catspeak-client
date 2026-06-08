@@ -56,6 +56,7 @@ const GlobalCallContent = ({
   const [showVirtualBackground, setShowVirtualBackground] = useState(false)
   const [showCC, setShowCC] = useState(false)
   const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
+  const [subtitleSelectedLanguage, setSubtitleSelectedLanguage] = useState(null)
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -338,6 +339,8 @@ const GlobalCallContent = ({
     // Room subtitles
     showRoomSubtitles,
     setShowRoomSubtitles,
+    subtitleSelectedLanguage,
+    setSubtitleSelectedLanguage,
 
     // Chat
     messages: chatMessages,

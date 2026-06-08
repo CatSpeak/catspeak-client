@@ -20,6 +20,8 @@ import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
+import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
@@ -38,8 +40,6 @@ const VideoCallControlBar = () => {
     setShowVirtualBackground,
     showCC,
     setShowCC,
-    showRoomSubtitles,
-    setShowRoomSubtitles,
     isAISession,
     handleToggleMic,
     handleToggleCam,
@@ -59,6 +59,16 @@ const VideoCallControlBar = () => {
   } = useVideoCallContext()
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
+
+  const {
+    isSubtitleActive,
+    isStarting,
+    subtitleSupportedLangs,
+    startSubtitles,
+    stopSubtitles,
+  } = useSubtitleControls()
+
+  const [showSubtitlePicker, setShowSubtitlePicker] = React.useState(false)
 
   const handleToggleHand = async () => {
     console.log("Toggle hand clicked. SessionId:", sessionId, "isHandRaised:", isHandRaised)
@@ -241,38 +251,58 @@ const VideoCallControlBar = () => {
         )}
       </button>
 
-      {/* Subtitle Toggle — works for both AI and non-AI rooms */}
-      <button
-        onClick={() => {
-          if (isAISession) {
-            // AI room: toggle showCC (existing behavior)
-            setShowCC(!showCC)
-          } else {
-            // Non-AI room: toggle showRoomSubtitles (new feature)
-            setShowRoomSubtitles(!showRoomSubtitles)
-          }
-        }}
-        title={
-          isAISession
-            ? showCC
-              ? "Turn captions off"
-              : "Turn captions on"
-            : showRoomSubtitles
-              ? "Turn subtitles off"
-              : "Turn subtitles on"
-        }
-        className={`${buttonBaseClass} ${
-          isAISession
-            ? showCC
-              ? activeToggleClass
-              : inactiveClass
-            : showRoomSubtitles
-              ? activeToggleClass
-              : inactiveClass
-        }`}
-      >
-        <Captions className={iconClass} />
-      </button>
+      {/* Subtitle Toggle — AI rooms use showCC; non-AI rooms use useSubtitleControls */}
+      {isAISession ? (
+        <button
+          onClick={() => setShowCC(!showCC)}
+          title={showCC ? "Turn captions off" : "Turn captions on"}
+          className={`${buttonBaseClass} ${showCC ? activeToggleClass : inactiveClass}`}
+        >
+          <Captions className={iconClass} />
+        </button>
+      ) : (
+        <div className="relative">
+          <button
+            onClick={() => {
+              if (isSubtitleActive) {
+                stopSubtitles()
+              } else {
+                setShowSubtitlePicker((v) => !v)
+              }
+            }}
+            disabled={isStarting}
+            title={isSubtitleActive ? "Turn subtitles off" : "Turn subtitles on"}
+            className={`${buttonBaseClass} ${
+              isStarting
+                ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black"
+                : isSubtitleActive
+                  ? activeToggleClass
+                  : inactiveClass
+            }`}
+          >
+            {isStarting ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className={`animate-spin origin-center ${iconClass}`} />
+              </div>
+            ) : (
+              <Captions className={iconClass} />
+            )}
+          </button>
+
+          {showSubtitlePicker && !isSubtitleActive && (
+            <SubtitleLanguagePicker
+              languages={subtitleSupportedLangs}
+              selectedLanguage={null}
+              onSelect={(lang) => {
+                startSubtitles(lang)
+                setShowSubtitlePicker(false)
+              }}
+              label="Detect language"
+              onClose={() => setShowSubtitlePicker(false)}
+            />
+          )}
+        </div>
+      )}
 
       {/* Chat Toggle */}
       <div className="relative">

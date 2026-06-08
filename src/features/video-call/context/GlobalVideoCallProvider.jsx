@@ -55,6 +55,8 @@ const IDLE_VALUE = {
   setShowCC: () => {},
   showRoomSubtitles: false,
   setShowRoomSubtitles: () => {},
+  subtitleSelectedLanguage: null,
+  setSubtitleSelectedLanguage: () => {},
   lkRoomName: null,
   unreadRoomChat: 0,
   unreadAiChat: 0,
