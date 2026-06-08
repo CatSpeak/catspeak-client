@@ -44,8 +44,8 @@ const NewsPage = () => {
   }
 
   return (
-    <div className="flex w-full lg:pr-[320px]">
-      <div className="columns-1 sm:columns-2 md:columns-3 xl:columns-4 gap-4">
+    <div className="flex flex-col w-full">
+      <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
         {accumulatedPosts.map((post) => (
           <div
             key={`${post.postId}-${page}`}

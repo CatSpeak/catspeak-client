@@ -13,7 +13,7 @@ import BackButton from "@/shared/components/ui/buttons/BackButton"
 import Avatar from "@/shared/components/ui/Avatar"
 import { formatDaysAgo, formatExactDate } from "@/features/news/utils/newsUtils"
 
-const IMAGE_BASE_URL = "https://api.catspeak.com.vn"
+import { getImageUrl } from "@/shared/utils/imageUtils"
 
 const NewsDetailPage = () => {
   const { id, lang } = useParams()
@@ -44,12 +44,10 @@ const NewsDetailPage = () => {
     )
   }
 
-  const avatarSrc = newsItem.avatarUrl
-    ? `${IMAGE_BASE_URL}${newsItem.avatarUrl}`
-    : undefined
+  const avatarSrc = getImageUrl(newsItem.avatarUrl)
 
   return (
-    <div className="w-full lg:pr-[320px]">
+    <div className="w-full">
       {/* Back Button */}
       <BackButton to={`/${lang}/cat-speak/news`}>
         {t.news?.newsDetail?.back}
@@ -86,10 +84,11 @@ const NewsDetailPage = () => {
       {newsItem.media && newsItem.media.length > 0 && (
         <Carousel
           images={newsItem.media.map((item) => ({
-            url: `${IMAGE_BASE_URL}${item.mediaUrl}`,
+            url: getImageUrl(item.mediaUrl),
             alt: newsItem.title,
           }))}
-          className="rounded-xl mb-3"
+          className="rounded-xl mb-3 max-h-[60vh] bg-black/5"
+          objectFit="contain"
         />
       )}
 

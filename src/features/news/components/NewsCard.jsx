@@ -8,7 +8,7 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
 import { ThumbsUp, Heart, Smile } from "lucide-react"
 import { useReactToPostMutation } from "@/store/api/postsApi"
 
-const IMAGE_BASE_URL = "https://api.catspeak.com.vn"
+import { getImageUrl } from "@/shared/utils/imageUtils"
 
 const NewsCard = ({ news }) => {
   const navigate = useNavigate()
@@ -54,9 +54,7 @@ const NewsCard = ({ news }) => {
     return COLORS[index].value
   }, [news.postId])
 
-  const avatarSrc = news.avatarUrl
-    ? (news.avatarUrl.startsWith('http') ? news.avatarUrl : `${IMAGE_BASE_URL}${news.avatarUrl}`)
-    : undefined
+  const avatarSrc = getImageUrl(news.avatarUrl)
 
   // Varied aspect ratio for masonry look
   const aspectRatios = ["aspect-[3/4]", "aspect-[4/5]", "aspect-[4/3]"]
@@ -85,7 +83,7 @@ const NewsCard = ({ news }) => {
             style={{ transform: `translateX(-${currentMediaIndex * 100}%)` }}
           >
             {news.media.map((item) => {
-              const imageUrl = item.mediaUrl?.startsWith('http') ? item.mediaUrl : `${IMAGE_BASE_URL}${item.mediaUrl}`
+              const imageUrl = getImageUrl(item.mediaUrl)
               return (
                 <div
                   key={item.postMediaId}

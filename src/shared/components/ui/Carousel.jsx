@@ -14,6 +14,7 @@ const Carousel = ({
   className = "",
   autoPlay = true,
   interval = 5000,
+  objectFit = "cover",
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
@@ -59,7 +60,7 @@ const Carousel = ({
             <img
               src={image.url}
               alt={image.alt || `Slide ${index}`}
-              className="w-full h-full object-cover"
+              className={`w-full h-full ${objectFit === "contain" ? "object-contain" : "object-cover"}`}
             />
             {/* Subtle overlay */}
             <div className="absolute inset-0 bg-black/5 pointer-events-none" />
