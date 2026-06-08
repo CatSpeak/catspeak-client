@@ -30,6 +30,14 @@ export const userApi = baseApi.injectEndpoints({
         method: "POST",
       }),
     }),
+    updateMeetingAvatar: builder.mutation({
+      query: (data) => ({
+        url: "/user-profile/meeting-avatar",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["UserProfile"],
+    }),
   }),
 })
 
@@ -38,4 +46,5 @@ export const {
   useUpdateUserProfileMutation,
   useChangePasswordMutation,
   useRequestUserProfileOtpMutation,
+  useUpdateMeetingAvatarMutation,
 } = userApi

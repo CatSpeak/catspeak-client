@@ -56,7 +56,9 @@ const VideoTile = ({ participant, onClick }) => {
     }
   }
   const meta = parseMetadata(participant.metadata)
+  console.log("Participant Metadata [VideoTile]:", meta)
   const isHandRaised = meta.handRaised === true
+  const avatarUrl = meta.avatarUrl
 
   const theme = useMemo(
     () => getParticipantTheme(participant.identity),
@@ -89,7 +91,7 @@ const VideoTile = ({ participant, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-lg border-solid transition-all duration-200 ease-in-out [container-type:inline-size] ${
+      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl border-solid transition-all duration-200 ease-in-out [container-type:inline-size] ${
         isVideoVisible ? "border-0 bg-neutral-900" : "border-2"
       } ${
         isSpeaking
@@ -115,6 +117,7 @@ const VideoTile = ({ participant, onClick }) => {
           <Avatar
             size={64}
             name={displayName || "?"}
+            src={avatarUrl}
             speaking={false}
             className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${theme.avatarClass}`}
           />

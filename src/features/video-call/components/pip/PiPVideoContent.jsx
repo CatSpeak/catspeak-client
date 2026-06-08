@@ -19,6 +19,19 @@ const DominantVideo = ({ participant }) => {
   const isLocal = participant?.isLocal
   const displayName = participant?.name || participant?.identity || "?"
 
+  const parseMetadata = (metadata) => {
+    if (!metadata) return {}
+    try {
+      return JSON.parse(metadata)
+    } catch {
+      return {}
+    }
+  }
+
+  const meta = parseMetadata(participant?.metadata)
+  console.log("Participant Metadata [PiPVideoContent]:", meta)
+  const avatarUrl = meta?.avatarUrl
+
   const theme = useMemo(
     () => getParticipantTheme(participant?.identity, displayName),
     [participant?.identity, displayName],
@@ -45,7 +58,7 @@ const DominantVideo = ({ participant }) => {
         />
       ) : (
         <div className="pip-avatar-fallback" style={{ background: theme.bg }}>
-          <Avatar size={48} name={displayName} speaking={isSpeaking} className={`!border-none ${theme.avatarClass}`} />
+          <Avatar size={48} src={avatarUrl} name={displayName} speaking={isSpeaking} className={`!border-none ${theme.avatarClass}`} />
         </div>
       )}
 

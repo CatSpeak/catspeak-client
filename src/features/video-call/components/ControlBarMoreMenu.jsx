@@ -7,6 +7,7 @@ import {
   Loader2,
   Copy,
   Sparkles,
+  UserCircle,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -27,6 +28,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     handleToggleRecording,
     showVirtualBackground,
     setShowVirtualBackground,
+    showAvatarPicker,
+    setShowAvatarPicker,
   } = useGlobalVideoCall()
 
   const handleCopyLink = () => {
@@ -58,7 +61,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   <button
                     onClick={() => {
                       setShowParticipants(!showParticipants)
-                      setShowChat(false)
                       setShowMoreMenu(false)
                     }}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
@@ -75,9 +77,18 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
               <div className="p-1 flex flex-col gap-1">
                 <button
                   onClick={() => {
+                    setShowAvatarPicker(!showAvatarPicker)
+                    setShowMoreMenu(false)
+                  }}
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                >
+                  <UserCircle size={20} />
+                  {t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
+                </button>
+
+                <button
+                  onClick={() => {
                     setShowVirtualBackground(!showVirtualBackground)
-                    setShowChat(false)
-                    setShowParticipants(false)
                     setShowMoreMenu(false)
                   }}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
