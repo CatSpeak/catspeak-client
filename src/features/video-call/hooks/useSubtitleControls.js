@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   useStartSubtitlesMutation,
   useStopSubtitlesMutation,
+  useGetSubtitleStatusQuery,
 } from "@/store/api/subtitlesApi"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
@@ -10,6 +11,7 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
  *
  * - startSubtitles(language) dispatches the room-stt agent and enables the overlay
  * - stopSubtitles()          removes the dispatch and hides the overlay
+ * - On mount, syncs with server status so users who join mid-session see active subtitles
  *
  * `subtitleSupportedLangs` is derived from room.languageType so no extra API call
  * is required before presenting the language picker to the user.
@@ -28,11 +30,37 @@ export const useSubtitleControls = () => {
   const [startMutation, { isLoading: isStarting }] = useStartSubtitlesMutation()
   const [stopMutation,  { isLoading: isStopping  }] = useStopSubtitlesMutation()
 
+  // Poll server once on mount to sync with any already-active subtitle session
+  const { data: statusData } = useGetSubtitleStatusQuery(sessionId, {
+    skip: !sessionId,
+  })
+
   // Derive the two supported language codes from room metadata
   const LANG_MAP = { English: "en", Chinese: "zh", Vietnamese: "vi" }
   const roomLangCode = LANG_MAP[room?.languageType] ?? "en"
   const subtitleSupportedLangs =
     roomLangCode === "vi" ? ["vi"] : [roomLangCode, "vi"]
+
+  // Sync local state when the server reports an active dispatch
+  useEffect(() => {
+    if (!statusData) return
+    if (statusData.active && statusData.dispatchId && !isSubtitleActive) {
+      setDispatchId(statusData.dispatchId)
+      setIsSubtitleActive(true)
+      setShowRoomSubtitles(true)
+      // Default display language to first supported language if not already set
+      setSubtitleSelectedLanguage((prev) =>
+        prev ?? statusData.supportedLanguages?.[0] ?? roomLangCode
+      )
+    } else if (!statusData.active && isSubtitleActive) {
+      // Agent stopped externally (e.g. another user stopped it)
+      setDispatchId(null)
+      setIsSubtitleActive(false)
+      setShowRoomSubtitles(false)
+      setSubtitleSelectedLanguage(null)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusData])
 
   const startSubtitles = async (language) => {
     try {
@@ -53,7 +81,6 @@ export const useSubtitleControls = () => {
     } catch (err) {
       console.error("[useSubtitleControls] Failed to stop subtitles:", err)
     } finally {
-      // Clear state regardless of API result so the UI resets
       setDispatchId(null)
       setIsSubtitleActive(false)
       setShowRoomSubtitles(false)
