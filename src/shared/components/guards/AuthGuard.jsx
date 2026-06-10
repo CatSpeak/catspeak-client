@@ -21,7 +21,16 @@ const AuthGuard = ({ allowedRoles, children }) => {
     // If we have a modal context, we triggered it in useEffect above — render nothing.
     // If we don't (e.g. route not wrapped in a layout with AuthModalContext), fall back to redirect.
     if (authModalCtx) return null
-    return <Navigate to="/" state={{ from: location }} replace />
+    return (
+      <Navigate
+        to="/"
+        state={{
+          requireLogin: true,
+          redirectTo: location.pathname + location.search + location.hash,
+        }}
+        replace
+      />
+    )
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
