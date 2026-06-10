@@ -5,10 +5,13 @@ import { useState, useEffect, useRef, useCallback } from "react"
 const SNAP_MARGIN = 20
 
 const getWidgetSize = () => {
-  return {
-    w: 320,
-    h: 180,
-  }
+  const vw = window.innerWidth
+  // Responsive width: max 400, but fit in viewport with 20px margin on each side
+  const w = Math.min(vw - 40, 400)
+  // Height = aspect-video (16:9) + 64px for the control bar
+  const h = (w * 9) / 16 + 64
+
+  return { w, h }
 }
 
 export const getCornerPositions = () => {

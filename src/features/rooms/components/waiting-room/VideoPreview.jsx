@@ -1,5 +1,5 @@
 import React from "react"
-import { Mic, MicOff, Video, VideoOff, Image } from "lucide-react"
+import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 
@@ -11,11 +11,12 @@ const VideoPreview = ({
   onToggleMic,
   onToggleCam,
   onOpenBgModal,
+  onOpenSettings,
 }) => {
   const { t } = useLanguage()
   return (
     <div className="relative w-full max-w-3xl flex flex-col items-center">
-      <div className="mb-3 relative w-full aspect-video overflow-hidden rounded-xl border border-[#e5e5e5] bg-white">
+      <div className="mb-3 relative w-full aspect-video overflow-hidden rounded-2xl border border-[#e5e5e5] bg-white">
         {/* Video Preview */}
         {localStream && (
           <video
@@ -48,32 +49,44 @@ const VideoPreview = ({
       <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-6 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0">
         <button
           onClick={onToggleMic}
-          className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${
             micOn
               ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
-              : "bg-white text-cath-red-700/80 hover:bg-[#E5E5E5]"
+              : "bg-white hover:bg-[#E5E5E5]"
           }`}
         >
-          {micOn ? <Mic size={20} /> : <MicOff size={20} />}
+          {micOn ? <Mic /> : <MicOff />}
         </button>
 
         <button
           onClick={onToggleCam}
-          className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${
             cameraOn
               ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
-              : "bg-white text-cath-red-700/80 hover:bg-[#E5E5E5]"
+              : "bg-white hover:bg-[#E5E5E5]"
           }`}
         >
-          {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
+          {cameraOn ? <Video /> : <VideoOff />}
         </button>
 
         <button
           onClick={onOpenBgModal}
-          title={t?.rooms?.waitingScreen?.changeBackground || "Change Background"}
-          className={`border border-[#C6C6C6] flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
+          title={
+            t?.rooms?.waitingScreen?.changeBackground || "Change Background"
+          }
+          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
-          <Image size={20} />
+          <Image />
+        </button>
+
+        <button
+          onClick={onOpenSettings}
+          title={
+            t?.rooms?.waitingScreen?.deviceSettings || "Device Settings"
+          }
+          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
+        >
+          <Settings />
         </button>
       </div>
     </div>

@@ -8,6 +8,7 @@ import {
   useGetRoomByIdQuery,
   WaitingScreen,
   useMediaPreview,
+  useDeviceSelection,
 } from "@/features/rooms"
 import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -101,6 +102,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     skip: isRoomQuerySkipped,
   })
 
+  // --- Device Selection ---
+  const deviceSelection = useDeviceSelection()
+
   // --- Media Preview (for waiting screen) ---
   const {
     micOn,
@@ -108,7 +112,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     localStream,
     toggleMic: hookToggleMic,
     toggleCamera: hookToggleCamera,
-  } = useMediaPreview()
+  } = useMediaPreview({
+    audioDeviceId: deviceSelection.selectedMic,
+    videoDeviceId: deviceSelection.selectedCamera,
+  })
 
   const toggleMic = async () => {
     await hookToggleMic()
@@ -376,6 +383,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           onJoin={handleJoinClick}
           isFull={isRoomFull}
           maxParticipants={maxParticipants}
+          deviceSelection={deviceSelection}
         />
       </>
     )

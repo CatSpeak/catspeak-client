@@ -44,7 +44,7 @@ const ParticipantItem = ({ participant }) => {
     <div className="flex items-center justify-between gap-3 pl-1.5 pr-2 py-2 rounded w-full">
       {/* LEFT */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className={`rounded-full transition-all duration-200 ${isSpeaking ? "ring-2 ring-green-500 ring-offset-1" : "ring-0 ring-transparent"}`}>
+        <div className={`rounded-full transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}>
           <Avatar size={36} name={name} src={avatarUrl} />
         </div>
 
