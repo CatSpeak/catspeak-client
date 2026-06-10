@@ -15,6 +15,7 @@ import AccountPrivacySection from "../components/AccountPrivacySection"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import ProfileOtpModal from "../components/ProfileOtpModal"
+import { countries } from "@/shared/constants/countriesData"
 
 const PersonalInformationPage = () => {
   const { user } = useAuth()
@@ -51,15 +52,18 @@ const PersonalInformationPage = () => {
       const fullPhone = profileData.data.phoneNumber || ""
       let phonePrefix = "+84"
       let phoneNumber = fullPhone
-      if (fullPhone.startsWith("+84")) {
-        phonePrefix = "+84"
-        phoneNumber = fullPhone.slice(3)
-      } else if (fullPhone.startsWith("+86")) {
-        phonePrefix = "+86"
-        phoneNumber = fullPhone.slice(3)
-      } else if (fullPhone.startsWith("+1")) {
-        phonePrefix = "+1"
-        phoneNumber = fullPhone.slice(2)
+
+      if (fullPhone.startsWith("+")) {
+        // Sort dialCodes by length descending to match longest prefix first (e.g. +35818 before +358)
+        const sortedCountries = [...countries]
+          .filter((c) => c.dialCode)
+          .sort((a, b) => b.dialCode.length - a.dialCode.length)
+
+        const matchedCountry = sortedCountries.find((c) => fullPhone.startsWith(c.dialCode))
+        if (matchedCountry) {
+          phonePrefix = matchedCountry.dialCode
+          phoneNumber = fullPhone.slice(phonePrefix.length)
+        }
       }
       setFormData({
         username: profileData.data.username || "",
@@ -89,15 +93,16 @@ const PersonalInformationPage = () => {
       const fullPhone = profileData.data.phoneNumber || ""
       let phonePrefix = "+84"
       let phoneNumber = fullPhone
-      if (fullPhone.startsWith("+84")) {
-        phonePrefix = "+84"
-        phoneNumber = fullPhone.slice(3)
-      } else if (fullPhone.startsWith("+86")) {
-        phonePrefix = "+86"
-        phoneNumber = fullPhone.slice(3)
-      } else if (fullPhone.startsWith("+1")) {
-        phonePrefix = "+1"
-        phoneNumber = fullPhone.slice(2)
+      if (fullPhone.startsWith("+")) {
+        const sortedCountries = [...countries]
+          .filter((c) => c.dialCode)
+          .sort((a, b) => b.dialCode.length - a.dialCode.length)
+
+        const matchedCountry = sortedCountries.find((c) => fullPhone.startsWith(c.dialCode))
+        if (matchedCountry) {
+          phonePrefix = matchedCountry.dialCode
+          phoneNumber = fullPhone.slice(phonePrefix.length)
+        }
       }
       setFormData((prev) => ({
         ...prev,

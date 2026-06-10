@@ -4,7 +4,7 @@ import ChangePasswordSection from "./ChangePasswordSection"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { ChevronDown } from "lucide-react"
-import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import { countries } from "@/shared/constants/countriesData"
 
 const AccountPrivacySection = ({
   formData,
@@ -17,11 +17,29 @@ const AccountPrivacySection = ({
   t,
   errors = {},
 }) => {
-  const phonePrefixes = [
-    { value: "+1", label: "United States", icon: <img src={USA} className="w-[20px] h-[20px] rounded-full object-cover" alt="US" /> },
-    { value: "+86", label: "China", icon: <img src={China} className="w-[20px] h-[20px] rounded-full object-cover" alt="CN" /> },
-    { value: "+84", label: "Vietnam", icon: <img src={VietNam} className="w-[20px] h-[20px] rounded-full object-cover" alt="VN" /> },
-  ]
+  const phonePrefixes = countries
+    .filter((c) => c.dialCode)
+    .map((c) => ({
+      key: c.code,
+      value: c.dialCode,
+      label: `${c.dialCode} (${c.label})`,
+      subtitle: c.label,
+      searchTerms: `${c.code} ${c.value} ${c.label} ${c.dialCode}`,
+      icon: (
+        <img
+          src={`https://flagcdn.com/w40/${c.value}.png`}
+          className="w-[20px] h-[20px] rounded-full object-cover"
+          alt={c.code}
+        />
+      ),
+    }))
+
+  const prefixLength = (formData.phonePrefix || "+84").length
+  const plClass = prefixLength <= 2 ? "pl-[80px]"
+                : prefixLength === 3 ? "pl-[90px]"
+                : prefixLength === 4 ? "pl-[100px]"
+                : prefixLength === 5 ? "pl-[110px]"
+                : "pl-[120px]"
 
   const displayPhoneValue = () => {
     if (!formData.phoneNumber) return ""
@@ -72,7 +90,9 @@ const AccountPrivacySection = ({
                 options={phonePrefixes}
                 value={formData.phonePrefix || "+84"}
                 onChange={(val) => onChange({ target: { name: "phonePrefix", value: val } })}
-                dropdownClassName="w-[240px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+                enableSearch={true}
+                searchPlaceholder="Search phone code..."
+                dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
                 trigger={(isOpen, selectedOption, toggleDropdown) => (
                   <TextInput
                     type="tel"
@@ -80,12 +100,15 @@ const AccountPrivacySection = ({
                     placeholder={t.auth?.phonePlaceholder || "Nhập sđt"}
                     value={formData.phoneNumber}
                     onChange={onChange}
-                    leftContentWidthClass="pl-[95px]"
+                    leftContentWidthClass={plClass}
                     leftContent={
                       <div className="flex items-center h-full">
                         <button
                           type="button"
-                          onClick={toggleDropdown}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleDropdown()
+                          }}
                           className="flex items-center gap-1 pl-0 pr-1 h-full focus:outline-none cursor-pointer"
                         >
                           <span className="text-base leading-none">

@@ -1,83 +1,57 @@
-import React, { useState, useRef } from "react"
+import React from "react"
 import { ChevronDown } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
-import useClickOutside from "@/shared/hooks/useClickOutside"
-
-const COUNTRIES = [
-  { value: "vietnam", label: "Vietnam" },
-  { value: "usa", label: "United States" },
-  { value: "china", label: "China" },
-]
+import Dropdown from "@/shared/components/ui/Dropdown"
+import { countries } from "@/shared/constants/countriesData"
 
 const CountryDropdown = ({ value, onChange, className = "" }) => {
-  const [open, setOpen] = useState(false)
-  const dropdownRef = useRef(null)
+  const countryOptions = countries.map((c) => ({
+    key: c.code,
+    value: c.value,
+    label: c.label,
+    searchTerms: `${c.code} ${c.value} ${c.label}`,
+    icon: (
+      <img
+        src={`https://flagcdn.com/w40/${c.value}.png`}
+        className="w-[20px] h-[20px] rounded-full object-cover"
+        alt={c.code}
+      />
+    ),
+  }))
 
-  useClickOutside(dropdownRef, () => setOpen(false))
-
-  const handleToggle = () => setOpen((prev) => !prev)
-
-  const handleSelect = (country) => {
-    onChange(country.value)
-    setOpen(false)
-  }
-
-  const getDisplayLabel = () => {
-    const match = COUNTRIES.find((c) => c.value === value)
-    return match?.label || value || "Viet Nam"
-  }
+  const selectedCountry = countryOptions.find(
+    (c) => c.value?.toLowerCase() === value?.toLowerCase()
+  )
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
-      {/* Trigger */}
-      <div
-        onClick={handleToggle}
-        className="hover:bg-[#E5E5E5] rounded-lg h-10 flex items-center px-4 cursor-pointer"
-      >
-        <div className="flex items-center gap-3 text-sm font-bold text-[#8B1A1A] justify-between w-full">
-          <span className="truncate">{getDisplayLabel()}</span>
-
-          <ChevronDown
-            size={16}
-            className={`transition-transform duration-200 ${
-              open ? "rotate-180" : ""
-            }`}
-          />
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {open && (
-          <div className="absolute top-full right-0 mt-4 min-w-[200px] max-w-[280px] z-50">
-            <FluentAnimation
-              direction="down"
-              exit
-              className="rounded-lg shadow-lg bg-white overflow-hidden"
-            >
-              <div className="flex flex-col whitespace-nowrap">
-                {COUNTRIES.map(({ value: val, label }) => {
-                  const isActive = value === val
-
-                  return (
-                    <button
-                      key={val}
-                      onClick={() => handleSelect({ value: val, label })}
-                      className={`w-full text-left px-4 h-10 text-sm transition-colors hover:bg-[#E5E5E5]`}
-                      style={{
-                        backgroundColor: isActive ? "#E5E5E5" : undefined,
-                      }}
-                    >
-                      {label}
-                    </button>
-                  )
-                })}
-              </div>
-            </FluentAnimation>
+    <Dropdown
+      options={countryOptions}
+      value={value}
+      onChange={onChange}
+      enableSearch={true}
+      searchPlaceholder="Search country..."
+      className={className}
+      dropdownClassName="min-w-[200px] max-w-[280px]"
+      trigger={(isOpen, selectedOption, toggleDropdown) => (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleDropdown()
+          }}
+          className="hover:bg-[#E5E5E5] rounded-lg h-10 flex items-center px-4 cursor-pointer w-full border-0 focus:outline-none bg-transparent"
+        >
+          <div className="flex items-center gap-3 text-sm font-bold text-[#8B1A1A] justify-between w-full">
+            <span className="truncate">
+              {selectedCountry ? selectedCountry.label : value || "Select Country..."}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            />
           </div>
-        )}
-      </AnimatePresence>
-    </div>
+        </button>
+      )}
+    />
   )
 }
 
