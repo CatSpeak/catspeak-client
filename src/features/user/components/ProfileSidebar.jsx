@@ -10,10 +10,10 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
 
   const getLinkClasses = ({ isActive }) => {
     if (isHorizontal) {
-      return `relative flex items-center justify-center gap-2 px-4 h-10 whitespace-nowrap transition-colors flex-1 min-w-fit text-sm ${
+      return `relative flex items-center justify-center gap-2 p-3 mt-6 whitespace-nowrap transition-colors flex-1 min-w-fit ${
         isActive
           ? "font-medium text-cath-red-700 border-b-2 !border-b-cath-red-700"
-          : "font-normal text-black hover:bg-gray-50 border-b-2 !border-b-transparent"
+          : "font-normal text-black hover:bg-gray-50 border-b-2"
       }`
     }
 
@@ -56,7 +56,7 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
     <div
       className={
         isHorizontal
-          ? "flex overflow-x-auto hide-scrollbar w-full divide-x divide-gray-100"
+          ? "flex overflow-x-auto hide-scrollbar"
           : "flex flex-col h-full text-gray-800"
       }
     >

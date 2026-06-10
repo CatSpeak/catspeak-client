@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
-import { useGetCurrentBackgroundQuery } from "@/store/api/authApi"
+import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
 import { LocalVideoTrack } from "livekit-client"
 import { BackgroundProcessor, supportsBackgroundProcessors } from "@livekit/track-processors"
 

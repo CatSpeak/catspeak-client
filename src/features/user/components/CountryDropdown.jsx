@@ -33,13 +33,13 @@ const CountryDropdown = ({ value, onChange, className = "" }) => {
       {/* Trigger */}
       <div
         onClick={handleToggle}
-        className="hover:bg-[#E5E5E5] rounded-lg h-10 flex items-center px-4 cursor-pointer"
+        className="bg-white border border-[#e2e2e2] hover:bg-gray-50 transition-colors duration-200 rounded-2xl h-12 flex items-center px-4 cursor-pointer"
       >
-        <div className="flex items-center gap-3 text-sm font-bold text-[#8B1A1A] justify-between w-full">
+        <div className="flex items-center gap-3 text-base text-gray-900 justify-between w-full">
           <span className="truncate">{getDisplayLabel()}</span>
 
           <ChevronDown
-            size={16}
+            size={18}
             className={`transition-transform duration-200 ${
               open ? "rotate-180" : ""
             }`}

@@ -29,12 +29,7 @@ const AccountPrivacySection = ({
   }
 
   return (
-    <>
-      <h2 className="text-xl font-bold text-red-900 mt-6">
-        {t.profile?.personalInfo?.accountAndPrivacy || "Account and Privacy"}
-      </h2>
-
-      <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
         {/* Password */}
         <ChangePasswordSection t={t} />
 
@@ -66,8 +61,9 @@ const AccountPrivacySection = ({
           onChange={onChange}
           editLabel={t.profile?.personalInfo?.edit || "Edit"}
           error={errors.phoneNumber}
+          helperText={t.profile?.personalInfo?.phoneRateLimitHint || "Bạn chỉ có thể thay đổi số điện thoại 1 lần trong 30 ngày."}
           customInput={
-            <div className="flex-1 mr-4">
+            <div className="w-full md:flex-1">
               <Dropdown
                 options={phonePrefixes}
                 value={formData.phonePrefix || "+84"}
@@ -128,8 +124,7 @@ const AccountPrivacySection = ({
           editLabel={t.profile?.personalInfo?.edit || "Edit"}
           error={errors.email}
         />
-      </div>
-    </>
+    </div>
   )
 }
 

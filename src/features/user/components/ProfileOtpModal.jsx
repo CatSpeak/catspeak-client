@@ -3,7 +3,7 @@ import { Hash, RefreshCw } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 
-const ProfileOtpModal = ({ open, onClose, email, onVerify, isVerifying, onResend, isResending, t }) => {
+const ProfileOtpModal = ({ open, onClose, email, onVerify, isVerifying, onResend, isResending, t, title }) => {
   const [otp, setOtp] = useState("")
   const [validationError, setValidationError] = useState("")
   const [successMsg, setSuccessMsg] = useState("")
@@ -59,7 +59,7 @@ const ProfileOtpModal = ({ open, onClose, email, onVerify, isVerifying, onResend
     <Modal open={open} onClose={onClose}>
       <div className="pb-6">
         <h2 className="mb-2 text-center text-3xl font-bold text-[#8f0d15]">
-          {authText.verifyEmailTitle || "Xác minh Email"}
+          {title || authText.verifyEmailTitle || "Xác minh Email"}
         </h2>
         <p className="mb-6 text-center text-sm text-[#7A7574]">
           {profileText.otpSentToEmail || "Chúng tôi đã gửi mã xác nhận 6 chữ số đến email của bạn"}{" "}
