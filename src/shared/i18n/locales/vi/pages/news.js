@@ -15,6 +15,7 @@ export default {
     like: "Thích",
     love: "Yêu",
     haha: "Haha",
+    edited: "Đã chỉnh sửa",
   },
   newsCard: {
     reaction: "lượt tương tác",

@@ -15,6 +15,7 @@ export default {
     like: "Like",
     love: "Love",
     haha: "Haha",
+    edited: "Edited",
   },
   newsCard: {
     reaction: "reaction",

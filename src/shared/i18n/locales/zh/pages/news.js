@@ -15,6 +15,7 @@ export default {
     like: "赞",
     love: "爱",
     haha: "哈哈",
+    edited: "已编辑",
   },
   newsCard: {
     reaction: "个互动",
