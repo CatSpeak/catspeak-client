@@ -22,12 +22,18 @@ const BasicInfoSection = ({
   return (
     <div className="flex flex-col gap-6">
         {/* Full Name / Username */}
-        <div className="flex flex-col gap-3">
-          <span>{t.profile?.personalInfo?.username || "Họ và tên"}</span>
-          <div className="w-full h-12 rounded-2xl border border-[#e2e2e2] bg-gray-50 text-gray-500 cursor-not-allowed px-4 flex items-center text-base">
-            {formData.username}
-          </div>
-        </div>
+        <EditableField
+          label={t.profile?.personalInfo?.username || "Họ và tên"}
+          value={formData.username}
+          name="username"
+          isEditing={editingField === "username"}
+          isUpdating={isUpdating}
+          onEdit={onEdit}
+          onCancel={onCancel}
+          onSave={onSave}
+          onChange={onChange}
+          editLabel={t.profile?.personalInfo?.edit || "Edit"}
+        />
 
         {/* Nickname */}
         <EditableField
