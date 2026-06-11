@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
 import { useGetProfileQuery } from "@/features/auth"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useGetLivekitTokenMutation } from "@/store/api/livekitApi"
 import {
   useGetRoomByIdQuery,
@@ -89,7 +90,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     useVerifyJoinRoomMutation()
 
   // --- User data ---
-  const { data: userData, isLoading: isLoadingUser } = useGetProfileQuery()
+  const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery()
   const user = userData?.data ?? null
 
   // --- Room data (fetched by roomId from URL) ---
@@ -247,7 +248,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       // Fetch LiveKit token to validate connectivity and join
       const livekitTokenBody = {
         roomId: Number(roomId),
-        participantName: user.username,
       }
       const tokenRes = await getLivekitToken(livekitTokenBody).unwrap()
 

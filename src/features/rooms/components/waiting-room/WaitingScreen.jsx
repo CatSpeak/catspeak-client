@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { Copy, Mic, Video, Volume2, Info } from "lucide-react"
+import { Copy, Mic, Video, Volume2, Info, Check, X, Edit2 } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ParticipantsPreview from "./ParticipantsPreview"
@@ -11,6 +11,7 @@ import meetingFallbackImage from "@/shared/assets/images/LogoDefault.png"
 import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayShell"
 import { getCommunityPath } from "@/shared/utils/navigation"
 import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal"
+import EditNicknameModal from "./EditNicknameModal"
 
 import DeviceSettingsModal from "./DeviceSettingsModal"
 
@@ -37,6 +38,8 @@ const WaitingScreen = ({
   const effectiveParticipantCount = participantCount ?? participants.length
   const [isBgModalOpen, setIsBgModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+
+  const [isEditingName, setIsEditingName] = useState(false)
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -124,11 +127,32 @@ const WaitingScreen = ({
           </p>
         )}
 
-        <p className="text-sm text-gray-500">
-          {t.rooms.waitingScreen.joinedAs}{" "}
-          <span className="font-medium text-gray-900">{user?.username}</span>
-        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <p>
+            {t?.rooms?.waitingScreen?.joinedAsNickname || "Joined as nickname"}:{" "}
+            <span className="font-medium text-gray-900">
+              {user?.nickname || user?.username}
+            </span>
+          </p>
+          <span className="text-gray-300">|</span>
+          <button
+            onClick={() => {
+              setIsEditingName(true)
+            }}
+            className="flex items-center gap-1 text-cath-red-600 hover:text-cath-red-700 font-medium transition-colors"
+          >
+            <Edit2 size={14} />
+            {t?.rooms?.waitingScreen?.editName || "Edit Name"}
+          </button>
+        </div>
       </div>
+
+      <EditNicknameModal
+        open={isEditingName}
+        onClose={() => setIsEditingName(false)}
+        user={user}
+        t={t}
+      />
 
       <VirtualBackgroundModal
         open={isBgModalOpen}

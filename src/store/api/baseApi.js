@@ -205,10 +205,13 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
   }
 
   // ── Handle server-down / network errors ─────────────────────────
+  const isAborted = api.signal.aborted || result.error?.name === "AbortError"
+
   if (
-    result.error?.status === "FETCH_ERROR" ||
-    result.error?.status === 502 ||
-    result.error?.status === 503
+    !isAborted &&
+    (result.error?.status === "FETCH_ERROR" ||
+      result.error?.status === 502 ||
+      result.error?.status === 503)
   ) {
     console.warn(
       AUTH_LOG,

@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, env)
 
   return {
-    plugins: [react(), livekitDevToken()],
+    plugins: [react()],
     server: {
       proxy: {
         "/api": {

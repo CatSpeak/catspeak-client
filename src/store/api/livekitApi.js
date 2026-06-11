@@ -3,10 +3,10 @@ import { baseApi } from "./baseApi"
 export const livekitApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getLivekitToken: builder.mutation({
-      query: ({ roomId, roomName, participantName }) => ({
+      query: ({ roomId, roomName }) => ({
         url: "/livekit/token",
         method: "POST",
-        body: { roomId, roomName, participantName },
+        body: { roomId, roomName },
       }),
       transformResponse: (response) => ({
         serverUrl: response.server_url,

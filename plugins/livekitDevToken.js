@@ -31,10 +31,10 @@ export default function livekitDevToken() {
           JSON.parse(body)
 
         // Generate token
-        const identity = participantIdentity || participantName
+        const identity = participantIdentity || participantName || `dev-user-${Math.floor(Math.random() * 10000)}`
         const token = new AccessToken(apiKey, apiSecret, {
           identity,
-          name: participantName,
+          name: participantName || "Dev User",
         })
         const effectiveRoomName =
           roomName || (roomId ? `room-${roomId}` : "dev-room")
@@ -50,7 +50,7 @@ export default function livekitDevToken() {
         res.setHeader("Content-Type", "application/json")
         res.end(
           JSON.stringify({
-            server_url: "wss://livekit.catspeak.com.vn",
+            server_url: process.env.LIVEKIT_URL || "wss://livekit2.catspeak.com.vn",
             participant_token: jwt,
             cathspeak: {
               account_id: null,
