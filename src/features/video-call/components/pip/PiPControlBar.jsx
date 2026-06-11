@@ -3,7 +3,6 @@ import {
   MicOff,
   Video,
   VideoOff,
-  MessageSquare,
   Maximize2,
   Phone,
 } from "lucide-react"
@@ -17,79 +16,65 @@ import {
 const PiPControlBar = ({
   micOn,
   cameraOn,
-  unreadCount,
   onToggleMic,
   onToggleCam,
   onReturnToCall,
   onLeave,
 }) => {
+  const baseBtnClass = "flex shrink-0 items-center justify-center w-12 h-12 rounded-full border-none cursor-pointer transition-all duration-150 pointer-events-auto"
+  const defaultBtnClass = "bg-gray-100 text-gray-700 hover:bg-gray-200"
+  const activeBtnClass = "bg-[#990011] text-white hover:bg-[#b3001b]"
+  const leaveBtnClass = "bg-[#d40018] text-white hover:bg-[#e7001a]"
+  const expandBtnClass = "bg-gray-100 text-gray-700 hover:bg-gray-200"
+
   return (
-    <div className="pip-controls">
+    <div className="flex items-center justify-center gap-2 p-2 bg-white">
       {/* Mic */}
       <button
-        className={`pip-btn ${micOn ? "pip-btn--active" : "pip-btn--default"}`}
+        className={`${baseBtnClass} ${micOn ? activeBtnClass : defaultBtnClass}`}
         onClick={(e) => {
           e.stopPropagation()
           onToggleMic()
         }}
         title={micOn ? "Mute" : "Unmute"}
       >
-        {micOn ? <Mic size={20} /> : <MicOff size={20} />}
+        {micOn ? <Mic size={24} /> : <MicOff size={24} />}
       </button>
 
       {/* Camera */}
       <button
-        className={`pip-btn ${cameraOn ? "pip-btn--active" : "pip-btn--default"}`}
+        className={`${baseBtnClass} ${cameraOn ? activeBtnClass : defaultBtnClass}`}
         onClick={(e) => {
           e.stopPropagation()
           onToggleCam()
         }}
         title={cameraOn ? "Camera off" : "Camera on"}
       >
-        {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
+        {cameraOn ? <Video size={24} /> : <VideoOff size={24} />}
       </button>
-
-      {/* Chat (tap → return to call) */}
-      <div style={{ position: "relative" }}>
-        <button
-          className="pip-btn pip-btn--default"
-          onClick={(e) => {
-            e.stopPropagation()
-            onReturnToCall()
-          }}
-          title="Open chat"
-        >
-          <MessageSquare size={20} />
-        </button>
-        {unreadCount > 0 && (
-          <span className="pip-chat-badge">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </div>
 
       {/* Expand (return to call) */}
       <button
-        className="pip-btn pip-btn--expand"
+        className={`${baseBtnClass} ${expandBtnClass}`}
         onClick={(e) => {
           e.stopPropagation()
           onReturnToCall()
         }}
         title="Return to call"
         >
-        <Maximize2 size={20} />
+        <Maximize2 size={24} />
       </button>
 
       {/* Leave */}
       <button
-        className="pip-btn pip-btn--leave"
+        className={`${baseBtnClass} ${leaveBtnClass}`}
         onClick={(e) => {
           e.stopPropagation()
           onLeave()
         }}
         title="Leave call"
       >
-        <Phone size={20} className="rotate-[135deg]" />
+        <Phone size={24} className="rotate-[135deg]" />
       </button>
     </div>
   )

@@ -127,7 +127,7 @@ const Dropdown = ({
     const textColor = isSelected ? option.color || activeColor : "inherit"
     return (
       <div
-        className={`w-full h-12 px-4 text-left text-base rounded-md flex items-center gap-3 ${
+        className={`w-full min-h-[48px] py-2 px-4 text-left text-base rounded-md flex items-center gap-3 ${
           isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
         }`}
         style={isSelected ? { color: textColor } : {}}
@@ -140,11 +140,11 @@ const Dropdown = ({
             {option.icon}
           </div>
         )}
-        <div className="flex flex-col min-w-0">
-          <span className="truncate">{option.label}</span>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="whitespace-normal break-words leading-tight">{option.label}</span>
           {option.subtitle && (
             <span
-              className={`text-xs font-normal truncate ${isSelected ? "" : "text-gray-500"}`}
+              className={`text-xs font-normal whitespace-normal break-words mt-0.5 ${isSelected ? "" : "text-gray-500"}`}
             >
               {option.subtitle}
             </span>

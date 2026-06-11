@@ -230,6 +230,14 @@ export default {
       "Microphone access denied. Please allow it in settings.",
     cameraPermissionDenied:
       "Camera access denied. Please allow it in settings.",
+    deviceSettings: "Device Settings",
+    selectMicrophone: "Select Microphone",
+    selectSpeaker: "Select Speaker",
+    systemDefaultSpeaker: "System Default Speaker",
+    speakerNotSupported: "Speaker selection is not supported in your browser.",
+    selectCamera: "Select Camera",
+    testMic: "Test Microphone (Playback)",
+    unknownDevice: "Unknown Device",
   },
   videoCall: {
     moreOptions: "More options",

@@ -6,7 +6,7 @@ import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
 import { LocalVideoTrack } from "livekit-client"
 import { BackgroundProcessor, supportsBackgroundProcessors } from "@livekit/track-processors"
 
-export const useMediaPreview = () => {
+export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
   const { t } = useLanguage()
   const [micOn, setMicOn] = useState(false)
   const [cameraOn, setCameraOn] = useState(false)
@@ -48,9 +48,16 @@ export const useMediaPreview = () => {
   }, [])
 
   // Helper to request media
-  const getMediaStream = async ({ audio, video, device }) => {
+  const getMediaStream = async ({ audio, video, device, customAudioId, customVideoId }) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio, video })
+      const constraints = {}
+      if (audio) {
+        constraints.audio = customAudioId ? { deviceId: { exact: customAudioId } } : true
+      }
+      if (video) {
+        constraints.video = customVideoId ? { deviceId: { exact: customVideoId } } : true
+      }
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
 
       // When another app (e.g. Google Meet) holds exclusive mic access,
       // getUserMedia succeeds but the audio track's `muted` property is true
@@ -110,8 +117,13 @@ export const useMediaPreview = () => {
         }
       }
 
-      streamRef.current = stream
-      setLocalStream(stream)
+      if (!streamRef.current) {
+        streamRef.current = new MediaStream()
+      }
+      
+      // If we're fetching a new device for an active stream, we should not duplicate tracks.
+      // We will handle track replacement in the callers (useEffect or toggleMic/toggleCamera).
+      
       return stream
     } catch (err) {
       handleMediaError(err, device === "mic" ? "mic" : "camera", t)
@@ -128,8 +140,15 @@ export const useMediaPreview = () => {
         audio: true,
         video: false,
         device: "mic",
+        customAudioId: audioDeviceId,
       })
       audioTracks = stream?.getAudioTracks() || []
+      
+      if (stream) {
+        if (!streamRef.current) streamRef.current = new MediaStream()
+        audioTracks.forEach(t => streamRef.current.addTrack(t))
+        setLocalStream(new MediaStream(streamRef.current.getTracks()))
+      }
     }
 
     if (audioTracks.length === 0) return false
@@ -164,8 +183,15 @@ export const useMediaPreview = () => {
         audio: false,
         video: true,
         device: "camera",
+        customVideoId: videoDeviceId,
       })
       videoTracks = stream?.getVideoTracks() || []
+
+      if (stream) {
+        if (!streamRef.current) streamRef.current = new MediaStream()
+        videoTracks.forEach(t => streamRef.current.addTrack(t))
+        setLocalStream(new MediaStream(streamRef.current.getTracks()))
+      }
     }
 
     if (videoTracks.length === 0) return false
@@ -200,6 +226,41 @@ export const useMediaPreview = () => {
 
     return true
   }
+
+  // Handle device changes on the fly
+  useEffect(() => {
+    if (micOn && audioDeviceId) {
+      (async () => {
+        const stream = await getMediaStream({ audio: true, video: false, device: "mic", customAudioId: audioDeviceId })
+        if (stream) {
+          const oldAudio = streamRef.current?.getAudioTracks() || []
+          oldAudio.forEach(t => {
+            t.stop()
+            streamRef.current.removeTrack(t)
+          })
+          stream.getAudioTracks().forEach(t => streamRef.current.addTrack(t))
+          setLocalStream(new MediaStream(streamRef.current.getTracks()))
+        }
+      })()
+    }
+  }, [audioDeviceId])
+
+  useEffect(() => {
+    if (cameraOn && videoDeviceId) {
+      (async () => {
+        const stream = await getMediaStream({ audio: false, video: true, device: "camera", customVideoId: videoDeviceId })
+        if (stream) {
+          const oldVideo = streamRef.current?.getVideoTracks() || []
+          oldVideo.forEach(t => {
+            t.stop()
+            streamRef.current.removeTrack(t)
+          })
+          stream.getVideoTracks().forEach(t => streamRef.current.addTrack(t))
+          setLocalStream(new MediaStream(streamRef.current.getTracks()))
+        }
+      })()
+    }
+  }, [videoDeviceId])
 
   return {
     micOn,

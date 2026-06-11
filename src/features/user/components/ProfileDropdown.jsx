@@ -3,8 +3,10 @@ import useScrollLock from "@/shared/hooks/useScrollLock"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
 import { Settings, LogOut, Loader2, User, ArrowLeft } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { AnimatePresence, motion } from "framer-motion"
 import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -32,8 +34,10 @@ const ProfileDropdown = () => {
   const [logoutApi] = useLogoutMutation()
   const { data: userData, isLoading } = useGetProfileQuery()
   const [isOpen, setIsOpen] = useState(false)
+  const [showLogoutWarning, setShowLogoutWarning] = useState(false)
   const menuRef = useRef(null)
   const isMobile = useIsMobile(425)
+  const { isInCall } = useSelector((state) => state.videoCall)
 
   const user = userData?.data ?? authUser ?? {}
 
@@ -46,6 +50,15 @@ const ProfileDropdown = () => {
   }
 
   const handleLogout = () => {
+    if (isInCall) {
+      setShowLogoutWarning(true)
+    } else {
+      executeLogout()
+    }
+  }
+
+  const executeLogout = () => {
+    setShowLogoutWarning(false)
     logoutApi()
     handleCloseMenu()
     navigate("/")
@@ -200,6 +213,17 @@ const ProfileDropdown = () => {
 
       {/* Mobile: fullscreen portal */}
       {mobileDropdown}
+
+      <ConfirmationModal
+        open={showLogoutWarning}
+        onClose={() => setShowLogoutWarning(false)}
+        onConfirm={executeLogout}
+        title={t.header.logoutWarning?.title || "End Call & Log Out"}
+        message={t.header.logoutWarning?.message || "You are currently in a call. Logging out will disconnect you. Are you sure you want to log out?"}
+        cancelText={t.header.logoutWarning?.cancel || "Cancel"}
+        confirmText={t.header.logoutWarning?.confirm || "Log Out"}
+        confirmVariant="destructive"
+      />
     </div>
   )
 }

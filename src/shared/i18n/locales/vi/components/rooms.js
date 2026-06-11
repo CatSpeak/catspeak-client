@@ -208,6 +208,14 @@ export default {
       "Quyền truy cập micro bị từ chối. Vui lòng cho phép trong cài đặt.",
     cameraPermissionDenied:
       "Quyền truy cập camera bị từ chối. Vui lòng cho phép trong cài đặt.",
+    deviceSettings: "Cài đặt thiết bị",
+    selectMicrophone: "Chọn Micro",
+    selectSpeaker: "Chọn Loa",
+    systemDefaultSpeaker: "Loa Mặc Định Hệ Thống",
+    speakerNotSupported: "Trình duyệt của bạn không hỗ trợ chọn loa.",
+    selectCamera: "Chọn Camera",
+    testMic: "Kiểm tra Micro (Phát lại)",
+    unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
     moreOptions: "Tùy chọn khác",

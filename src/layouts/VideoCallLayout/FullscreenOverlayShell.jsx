@@ -14,7 +14,9 @@ const FullscreenOverlayShell = ({
     <div
       className="flex h-[100dvh] w-full flex-col bg-contain bg-center bg-no-repeat relative overflow-y-auto"
       style={
-        backgroundImageUrl ? { backgroundImage: `url(${backgroundImageUrl})` } : undefined
+        backgroundImageUrl
+          ? { backgroundImage: `url(${backgroundImageUrl})` }
+          : undefined
       }
     >
       <div className="fixed inset-0 bg-[#111111]/40 backdrop-blur-[20px]" />
@@ -36,7 +38,7 @@ const FullscreenOverlayShell = ({
         className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center p-5 ${contentClassName}`}
       >
         <div
-          className={`bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-2xl w-full ${maxWidthClass} flex flex-col items-center ${cardClassName}`}
+          className={`bg-white p-6 rounded-3xl shadow-2xl w-full ${maxWidthClass} flex flex-col items-center ${cardClassName}`}
         >
           {children}
         </div>
@@ -46,4 +48,3 @@ const FullscreenOverlayShell = ({
 }
 
 export default FullscreenOverlayShell
-
