@@ -7,6 +7,15 @@ import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
+const removeDiacritics = (str) => {
+  if (!str) return ""
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+}
+
 const Dropdown = ({
   options = [],
   value,
@@ -29,8 +38,15 @@ const Dropdown = ({
   const { t } = useLanguage()
   const dropdownRef = useRef(null)
   const searchInputRef = useRef(null)
+  const [portalCoords, setPortalCoords] = useState(null)
+  const portalRef = useRef(null)
 
-  useClickOutside(dropdownRef, () => setIsOpen(false))
+  useClickOutside(dropdownRef, (e) => {
+    if (portalRef.current && portalRef.current.contains(e.target)) {
+      return
+    }
+    setIsOpen(false)
+  })
 
   useEffect(() => {
     if (isOpen && enableSearch) {
@@ -41,9 +57,6 @@ const Dropdown = ({
       setSearchQuery("")
     }
   }, [isOpen, enableSearch])
-
-  const [portalCoords, setPortalCoords] = useState(null)
-  const portalRef = useRef(null)
 
   useEffect(() => {
     const handleClose = () => setIsOpen(false)
@@ -89,8 +102,34 @@ const Dropdown = ({
 
   const filteredOptions = useMemo(() => {
     if (!enableSearch || !searchQuery) return options
-    const query = searchQuery.toLowerCase()
-    return options.filter((opt) => opt.label.toLowerCase().includes(query))
+    const query = searchQuery.toLowerCase().trim()
+    const cleanQuery = query.replace(/^\+/, "")
+    const queryNoDiacritics = removeDiacritics(cleanQuery).replace(/\s+/g, "")
+
+    return options.filter((opt) => {
+      const label = (opt.label || "").toLowerCase()
+      const val = (opt.value || "").toLowerCase()
+      const cleanVal = val.replace(/^\+/, "")
+      const subtitle = (opt.subtitle || "").toLowerCase()
+      const searchTerms = (opt.searchTerms || "").toLowerCase()
+      const cleanSearchTerms = searchTerms.replace(/\+/g, "")
+
+      const matchLabel = removeDiacritics(label).replace(/\s+/g, "").includes(queryNoDiacritics)
+      const matchSubtitle = removeDiacritics(subtitle).replace(/\s+/g, "").includes(queryNoDiacritics)
+      const matchSearchTerms = removeDiacritics(cleanSearchTerms).replace(/\s+/g, "").includes(queryNoDiacritics)
+
+      return (
+        label.includes(query) ||
+        val.includes(query) ||
+        cleanVal.includes(cleanQuery) ||
+        subtitle.includes(query) ||
+        searchTerms.includes(query) ||
+        cleanSearchTerms.includes(cleanQuery) ||
+        matchLabel ||
+        matchSubtitle ||
+        matchSearchTerms
+      )
+    })
   }, [options, enableSearch, searchQuery])
 
   const handleSelect = (option) => {
@@ -224,7 +263,7 @@ const Dropdown = ({
                             const isSelected = option.value === value
                             return (
                               <button
-                                key={option.value || idx}
+                                key={option.key || option.code || (option.value ? `${option.value}-${idx}` : idx)}
                                 type="button"
                                 onClick={() => handleSelect(option)}
                                 className="w-full focus:outline-none"

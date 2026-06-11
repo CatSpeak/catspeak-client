@@ -69,7 +69,8 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     if (isSensitiveChange) {
       try {
         if (field === "phoneNumber") {
-          await requestPhoneUpdateOtp({ newPhoneNumber: formData.phoneNumber }).unwrap()
+          const fullPhone = `${formData.phonePrefix || "+84"}${formData.phoneNumber}`
+          await requestPhoneUpdateOtp({ newPhoneNumber: fullPhone }).unwrap()
         } else {
           await requestUserProfileOtp().unwrap()
         }
@@ -116,9 +117,10 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
   const handleOtpVerify = async (otpValue, { setError: setModalError }) => {
     try {
       if (editingField === "phoneNumber") {
+        const fullPhone = `${formData.phonePrefix || "+84"}${formData.phoneNumber}`
         await updatePhoneNumber({
           otpCode: otpValue,
-          newPhoneNumber: formData.phoneNumber,
+          newPhoneNumber: fullPhone,
         }).unwrap()
         toast.success(t.profile?.personalInfo?.phoneUpdateSuccess || "Cập nhật số điện thoại thành công!")
       } else {
@@ -149,7 +151,8 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
 
   const handleOtpResend = async () => {
     if (editingField === "phoneNumber") {
-      await requestPhoneUpdateOtp({ newPhoneNumber: formData.phoneNumber }).unwrap()
+      const fullPhone = `${formData.phonePrefix || "+84"}${formData.phoneNumber}`
+      await requestPhoneUpdateOtp({ newPhoneNumber: fullPhone }).unwrap()
     } else {
       await requestUserProfileOtp().unwrap()
     }

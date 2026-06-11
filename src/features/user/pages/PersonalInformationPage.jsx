@@ -11,6 +11,7 @@ import AccountPrivacySection from "../components/AccountPrivacySection"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import ProfileOtpModal from "../components/ProfileOtpModal"
+import { countries } from "@/shared/constants/countriesData"
 
 const PersonalInformationPage = () => {
   const { user } = useAuth()
