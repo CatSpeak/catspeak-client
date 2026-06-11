@@ -48,10 +48,14 @@ const GlobalCallContent = ({
 
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
+  const isAISession = callInfo?.isAISession ?? false
 
   // ── UI state ──
   const panelState = useSidePanelState()
-
+  const [showCC, setShowCC] = useState(false)
+  const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
+  const [subtitleSelectedLanguage, setSubtitleSelectedLanguage] = useState(null)
+  
   // ── LiveKit hooks ──
   let lkRoom = null
   try {
@@ -165,6 +169,7 @@ const GlobalCallContent = ({
     navigate: getNavigate(),
     location: getLocation(),
     room: roomData,
+    lkRoom,
     lkRoomName: lkRoom?.name,
     sessionError: null,
 
@@ -190,7 +195,16 @@ const GlobalCallContent = ({
     setUnreadRoomChat,
     unreadAiChat,
     setUnreadAiChat,
+    showCC,
+    setShowCC,
+    isAISession,
 
+    // Room subtitles
+    showRoomSubtitles,
+    setShowRoomSubtitles,
+    subtitleSelectedLanguage,
+    setSubtitleSelectedLanguage,
+    
     // Chat
     messages: chatMessages,
     aiMessages: combinedAiMessages,

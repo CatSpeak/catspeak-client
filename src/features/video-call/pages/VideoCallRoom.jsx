@@ -14,6 +14,8 @@ import {
 } from "@/features/video-call"
 import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
+import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
+import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -33,6 +35,8 @@ const VideoCallRoomContent = () => {
     setShowAvatarPicker,
     activeSidePanel,
     setActiveSidePanel,
+    isAISession,
+    showCC,
     // Auth guard
     user,
     location,
@@ -45,6 +49,8 @@ const VideoCallRoomContent = () => {
     isConnected,
     // PiP controls
     enterPiP,
+    // Room subtitles
+    showRoomSubtitles,
   } = useVideoCallContext()
 
   const isSidePanelOpen = activeSidePanel !== null
@@ -97,6 +103,10 @@ const VideoCallRoomContent = () => {
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           <VideoGrid />
+          {/* AI Room subtitles — only show in AI rooms when enabled */}
+          {isAISession && showCC && <SubtitleOverlay />}
+          {/* Non-AI Room subtitles — only show in non-AI rooms when enabled */}
+          {!isAISession && showRoomSubtitles && <SubtitleOverlayNonAI showRoomSubtitles={showRoomSubtitles} />}
         </div>
 
         {/* Desktop Side Panel */}

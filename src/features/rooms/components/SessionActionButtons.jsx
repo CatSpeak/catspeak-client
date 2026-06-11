@@ -1,6 +1,4 @@
-import { useState } from "react"
 import { motion } from "framer-motion"
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import { badges } from "@/shared/constants/constants"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Button3D from "@/shared/components/ui/buttons/Button3D"
@@ -8,19 +6,16 @@ import Button3D from "@/shared/components/ui/buttons/Button3D"
 const SessionActionButtons = ({
   handleCreateOneOnOneSession,
   handleCreateStudyGroupSession,
+  handleCreateAISession,
   isCreatingOneOnOne,
   isCreatingStudyGroup,
+  isCreatingAI,
+  canUseAI,
 }) => {
   const { t } = useLanguage()
-  const [isDevelopmentModalOpen, setIsDevelopmentModalOpen] = useState(false)
 
   return (
     <div className="relative mt-5">
-      <InDevelopmentModal
-        open={isDevelopmentModalOpen}
-        onCancel={() => setIsDevelopmentModalOpen(false)}
-      />
-      {/* Line removed as requested */}
       <div className="relative flex flex-col min-[426px]:flex-row min-[426px]:flex-wrap gap-3 sm:gap-4 mt-2">
         {badges.map((b) => {
           const Icon = b.icon
@@ -28,17 +23,20 @@ const SessionActionButtons = ({
           const isStudyGroup = b.id === "connect_2_5"
           const isAI = b.id === "your_ai"
 
+          if (isAI && !canUseAI) return null
+
           const isActionable = isOneOnOne || isStudyGroup || isAI
 
           const handleClick = () => {
             if (isOneOnOne) handleCreateOneOnOneSession()
             if (isStudyGroup) handleCreateStudyGroupSession()
-            if (isAI) setIsDevelopmentModalOpen(true)
+            if (isAI) handleCreateAISession()
           }
 
           const isLoadingThis =
             (isOneOnOne && isCreatingOneOnOne) ||
-            (isStudyGroup && isCreatingStudyGroup)
+            (isStudyGroup && isCreatingStudyGroup) ||
+            (isAI && isCreatingAI)
 
           // Map IDs to translation keys
           let labelKey = ""
@@ -47,8 +45,6 @@ const SessionActionButtons = ({
           if (isAI) labelKey = "yourAI"
 
           const label = labelKey ? t.rooms.sessionActions[labelKey] : b.label
-
-          if (isAI) return null
 
           return (
             <motion.div

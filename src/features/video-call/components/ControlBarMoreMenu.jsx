@@ -8,6 +8,8 @@ import {
   Copy,
   Sparkles,
   UserCircle,
+  Captions,
+  Check,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -30,6 +32,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     setShowVirtualBackground,
     showAvatarPicker,
     setShowAvatarPicker,
+    showCC,
+    setShowCC,
   } = useGlobalVideoCall()
 
   const handleCopyLink = () => {

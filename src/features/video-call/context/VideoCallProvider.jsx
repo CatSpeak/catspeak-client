@@ -76,6 +76,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   // Detect if user arrived from queue match
   const fromQueue = location.state?.fromQueue === true
 
+  // AI sessions are flagged via navigation state (set in RoomsPage).
+  const isAISession = location.state?.isAISession === true
+
   // Phase state machine — skip waiting if from queue
   const [phase, setPhase] = useState(fromQueue ? "joining" : "verifying")
   const [initMicOn, setInitMicOn] = useState(false)
@@ -282,6 +285,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           user,
           initMicOn: micOn,
           initCamOn: cameraOn,
+          isAISession,
         }),
       )
     } catch (err) {

@@ -20,6 +20,8 @@ const initialState = {
     user: null,
     initMicOn: false,
     initCamOn: false,
+    isAISession: false,
+    showRoomSubtitles: false,
   },
 }
 
@@ -42,6 +44,7 @@ const videoCallSlice = createSlice({
         user,
         initMicOn,
         initCamOn,
+        isAISession,
       } = action.payload
 
       state.isInCall = true
@@ -56,6 +59,8 @@ const videoCallSlice = createSlice({
         user,
         initMicOn: initMicOn ?? false,
         initCamOn: initCamOn ?? false,
+        isAISession: isAISession ?? false,
+        showRoomSubtitles: false,
       }
     },
 
@@ -72,6 +77,16 @@ const videoCallSlice = createSlice({
     leaveCall() {
       return initialState
     },
+
+    /**
+     * Toggle the per-user room subtitles visibility.
+     * Works for non-AI rooms (controls showRoomSubtitles).
+     */
+    toggleRoomSubtitles(state) {
+      if (state.callInfo) {
+        state.callInfo.showRoomSubtitles = !state.callInfo.showRoomSubtitles
+      }
+    },
   },
   extraReducers: (builder) => {
     // Automatically leave the call and clear state when the user logs out
@@ -81,7 +96,7 @@ const videoCallSlice = createSlice({
   },
 })
 
-export const { enterCall, setPiP, leaveCall } =
+export const { enterCall, setPiP, leaveCall, toggleRoomSubtitles } =
   videoCallSlice.actions
 
 export default videoCallSlice.reducer
