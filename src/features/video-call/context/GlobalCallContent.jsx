@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useSelector } from "react-redux"
 import {
   useRoomContext,
@@ -55,7 +55,7 @@ const GlobalCallContent = ({
   const [showCC, setShowCC] = useState(false)
   const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
   const [subtitleSelectedLanguage, setSubtitleSelectedLanguage] = useState(null)
-  
+
   // ── LiveKit hooks ──
   let lkRoom = null
   try {
@@ -92,7 +92,11 @@ const GlobalCallContent = ({
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
-    try { return JSON.parse(localParticipant.metadata) } catch { return {} }
+    try {
+      return JSON.parse(localParticipant.metadata)
+    } catch {
+      return {}
+    }
   })()
 
   const currentUserId = user?.accountId
@@ -204,7 +208,7 @@ const GlobalCallContent = ({
     setShowRoomSubtitles,
     subtitleSelectedLanguage,
     setSubtitleSelectedLanguage,
-    
+
     // Chat
     messages: chatMessages,
     aiMessages: combinedAiMessages,
