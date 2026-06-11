@@ -54,17 +54,10 @@ export const getPreviewText = (html) => {
   return div.textContent?.replace(/\s+/g, " ").trim() || ""
 }
 
-export const formatDaysAgo = (dateStr) => {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24))
-  if (diff === 0) return "Today"
-  if (diff === 1) return "1 day ago"
-  return `${diff} days ago`
-}
 
-export const formatExactDate = (dateStr) => {
-  return new Date(dateStr).toLocaleDateString("en-GB", {
+
+export const formatExactDate = (dateStr, locale = "en-GB") => {
+  return new Date(dateStr).toLocaleDateString(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",

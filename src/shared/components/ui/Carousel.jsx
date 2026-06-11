@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
 
 /**
  * A custom-built carousel component with smooth transitions and premium feel.
@@ -18,6 +18,7 @@ const Carousel = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prevIndex) =>
@@ -36,34 +37,74 @@ const Carousel = ({
   }
 
   useEffect(() => {
-    if (autoPlay && !isHovered && images.length > 1) {
+    if (autoPlay && !isHovered && !isFullscreen && images.length > 1) {
       const timer = setInterval(nextSlide, interval)
       return () => clearInterval(timer)
     }
-  }, [autoPlay, isHovered, images.length, nextSlide, interval])
+  }, [autoPlay, isHovered, isFullscreen, images.length, nextSlide, interval])
+
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isFullscreen])
 
   if (!images || images.length === 0) return null
 
   return (
     <div
-      className={`relative w-full aspect-video overflow-hidden group select-none ${className}`}
+      className={
+        isFullscreen
+          ? "fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm select-none group overflow-hidden"
+          : `relative w-full aspect-video overflow-hidden group select-none ${className}`
+      }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Close Fullscreen Button */}
+      {isFullscreen && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsFullscreen(false)
+          }}
+          className="absolute top-4 right-4 z-50 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+          aria-label="Close fullscreen"
+        >
+          <X size={24} />
+        </button>
+      )}
+
       {/* Slides (Sliding Effect) */}
       <div
         className="flex h-full transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {images.map((image, index) => (
-          <div key={index} className="w-full h-full flex-shrink-0 relative">
+          <div key={index} className="w-full h-full flex-shrink-0 relative overflow-hidden">
+            {/* Blurred Background Image */}
+            <div
+              className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
+              style={{ backgroundImage: `url(${image.url})` }}
+            />
+            {/* Main Image */}
             <img
               src={image.url}
               alt={image.alt || `Slide ${index}`}
-              className={`w-full h-full ${objectFit === "contain" ? "object-contain" : "object-cover"}`}
+              onClick={() => !isFullscreen && setIsFullscreen(true)}
+              className={`relative z-10 w-full h-full transition-all duration-300 ${
+                isFullscreen
+                  ? "object-contain cursor-default"
+                  : `cursor-pointer ${objectFit === "contain" ? "object-contain" : "object-cover"}`
+              }`}
             />
             {/* Subtle overlay */}
-            <div className="absolute inset-0 bg-black/5 pointer-events-none" />
+            <div className="absolute inset-0 z-20 bg-black/5 pointer-events-none" />
           </div>
         ))}
       </div>

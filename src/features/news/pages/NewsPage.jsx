@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPostsQuery } from "@/store/api/postsApi"
 import NewsCard from "../components/NewsCard"
@@ -11,25 +11,13 @@ const NewsPage = () => {
   const [page, setPage] = useState(1)
   const pageSize = 10
 
-  const [accumulatedPosts, setAccumulatedPosts] = useState([])
-
   const { data, isLoading, isFetching, error } = useGetPostsQuery({
     page,
     pageSize,
   })
 
-  useEffect(() => {
-    if (data?.data) {
-      const publicPosts = data.data.filter((post) => post.privacy === "Public")
-      if (page === 1) {
-        setAccumulatedPosts(publicPosts)
-      } else {
-        setAccumulatedPosts((prev) => [...prev, ...publicPosts])
-      }
-    }
-  }, [data, page])
-
-  const hasMore = data?.data && data.data.length === pageSize
+  const publicPosts = data?.data?.filter((post) => post.privacy === "Public") || []
+  const hasMore = data?.hasMore ?? false
 
   if (error && page === 1) {
     if (error?.status === 404) {
@@ -46,7 +34,7 @@ const NewsPage = () => {
   return (
     <div className="flex flex-col w-full">
       <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
-        {accumulatedPosts.map((post) => (
+        {publicPosts.map((post) => (
           <div
             key={`${post.postId}-${page}`}
             className="break-inside-avoid mb-4 sm:mb-6"
