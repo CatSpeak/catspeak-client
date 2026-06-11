@@ -15,16 +15,16 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, env)
 
   return {
-    plugins: [react(), livekitDevToken()],
+    plugins: [react()],
     server: {
       proxy: {
         "/api": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
         "/hubs": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
           ws: true,

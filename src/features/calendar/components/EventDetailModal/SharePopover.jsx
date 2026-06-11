@@ -1,5 +1,6 @@
 import React from "react"
-import { Share2, Copy, Check, Loader2 } from "lucide-react"
+import { Share2, Copy, Loader2 } from "lucide-react"
+import { toast } from "react-hot-toast"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import useEventShare from "../../hooks/useEventShare"
@@ -11,18 +12,19 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  */
 const SharePopover = ({ eventId, occurrenceId }) => {
   const { t } = useLanguage()
-  const {
-    shareRef,
-    sharePopoverOpen,
-    shareUrl,
-    copied,
-    isSharing,
-    handleShare,
-    handleCopy,
-  } = useEventShare(eventId, occurrenceId)
+  const { shareRef, sharePopoverOpen, shareUrl, isSharing, handleShare } =
+    useEventShare(eventId, occurrenceId)
+
+  const handleCopy = () => {
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast.success(t.calendar?.copied || "Đã sao chép liên kết")
+      })
+    }
+  }
 
   return (
-    <div className="relative" ref={shareRef}>
+    <div ref={shareRef}>
       <button
         onClick={handleShare}
         disabled={isSharing}
@@ -37,26 +39,24 @@ const SharePopover = ({ eventId, occurrenceId }) => {
           <FluentAnimation
             direction="up"
             exit
-            className="absolute bottom-12 right-0 z-50"
+            className="fixed inset-0 flex items-center justify-center z-[60] pointer-events-none min-[426px]:absolute min-[426px]:inset-auto min-[426px]:bottom-14 min-[426px]:right-0 min-[426px]:block"
           >
-            <div className="w-80 bg-white border border-[#e5e5e5] rounded-xl shadow-xl p-5">
-              <p className="text-sm mb-2">{t.calendar?.shareLink || "Chia sẻ liên kết"}</p>
-              <div className="mb-1 h-10 flex items-center gap-2 bg-[#f2f2f2] border border-[#e5e5e5] rounded-xl px-3 py-2">
-                <span className="flex-1 text-sm truncate select-all">
-                  {shareUrl}
-                </span>
+            <div className="w-[calc(100vw-2rem)] min-[426px]:w-80 bg-white border rounded-2xl shadow-xl p-6 pointer-events-auto">
+              <p className="mb-3">
+                {t.calendar?.shareLink || "Chia sẻ liên kết"}
+              </p>
+
+              <div className="mb-3 h-12 flex items-center gap-2 border border-[#d3d3d3] rounded-2xl px-4 py-2">
+                <span className="flex-1 truncate select-all">{shareUrl}</span>
                 <button
                   onClick={handleCopy}
                   className="shrink-0 hover:text-cath-red-700 transition-colors"
                   title={t.calendar?.copy || "Sao chép"}
                 >
-                  {copied ? (
-                    <Check size={16} className="text-green-500" />
-                  ) : (
-                    <Copy size={16} />
-                  )}
+                  <Copy />
                 </button>
               </div>
+
               <p className="text-xs text-[#606060]">
                 {t.calendar?.linkExpires || "Liên kết hết hạn sau 7 ngày"}
               </p>

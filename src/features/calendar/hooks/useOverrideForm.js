@@ -20,7 +20,7 @@ export const useOverrideForm = (
 
   const initialLocation = initialEvent?.location || ""
   const initialDescription = initialEvent?.description || ""
-  const initialParticipants = initialEvent?.maxParticipants || 50
+  const initialParticipants = initialEvent?.maxParticipants || 20
 
   // These aren't usually on the main event object natively if it's just the series template,
   // but if the user has already overridden this occurrence, they might be present.

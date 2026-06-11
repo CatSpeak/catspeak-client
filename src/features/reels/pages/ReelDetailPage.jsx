@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import {
   X,
@@ -22,6 +22,7 @@ import useFullscreen from "../hooks/useFullscreen"
 import {
   useGetReelsFeedQuery,
   useGetUserReelsQuery,
+  useGetReelsByChallengeQuery,
   useToggleLikeReelMutation,
   useGetReelCommentsQuery,
   useCreateReelCommentMutation,
@@ -968,7 +969,7 @@ const CommentsSkeleton = () => {
   )
 }
 
-const DETAIL_PAGE_SIZE = 10
+const DETAIL_PAGE_SIZE = 20
 
 /**
  * Shared snapped scroller for public Reels and the workspace-owned Reels list.
@@ -976,10 +977,18 @@ const DETAIL_PAGE_SIZE = 10
 export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   const { id, lang } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isWorkspace = source === "workspace"
   const { user } = useAuth()
   const userId = user?.accountId
   const [feedPage, setFeedPage] = useState(1)
+
+  const challengeIdParam = searchParams.get("challengeId") || undefined
+  const challengeFilterParam = searchParams.get("challengeFilter") || undefined
+
+  const hasChallengeContext = useMemo(() => {
+    return Boolean(challengeIdParam || challengeFilterParam)
+  }, [challengeIdParam, challengeFilterParam])
 
   // Track the initial deep-linked ID to keep the prepended list stable
   const [initialId, setInitialId] = useState(id)
@@ -987,11 +996,27 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   // Fetch the current single reel (deep-linked)
   const { reel: currentReel, isLoading: isDetailLoading, notFound } = useReelDetail(initialId)
 
-  // Fetch the wider feed for scroll-snapping context.
+  // Fetch the general "For You" feed — skip when viewing a challenge or workspace.
   const {
     data: publicFeedResponse,
     isLoading: isPublicFeedLoading,
-  } = useGetReelsFeedQuery(undefined, { skip: isWorkspace })
+    isFetching: isPublicFeedFetching,
+  } = useGetReelsFeedQuery(undefined, { skip: isWorkspace || hasChallengeContext })
+
+  // Fetch challenge reels — only when navigated from a challenge tab.
+  const {
+    data: challengeFeedResponse,
+    isLoading: isChallengeFeedLoading,
+    isFetching: isChallengeFeedFetching,
+  } = useGetReelsByChallengeQuery(
+    {
+      challengeId: challengeIdParam,
+      challengeFilter: challengeFilterParam,
+      page: feedPage,
+      pageSize: DETAIL_PAGE_SIZE,
+    },
+    { skip: !hasChallengeContext || isWorkspace }
+  )
 
   const {
     data: workspaceFeedResponse,
@@ -1002,8 +1027,16 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
     { skip: !isWorkspace || !userId }
   )
 
-  const feedResponse = isWorkspace ? workspaceFeedResponse : publicFeedResponse
-  const isFeedLoading = isWorkspace ? isWorkspaceFeedLoading : isPublicFeedLoading
+  const feedResponse = isWorkspace
+    ? workspaceFeedResponse
+    : hasChallengeContext
+      ? challengeFeedResponse
+      : publicFeedResponse
+  const isFeedLoading = isWorkspace
+    ? isWorkspaceFeedLoading
+    : hasChallengeContext
+      ? isChallengeFeedLoading
+      : isPublicFeedLoading
 
   // Mapped reels list from the feed query
   const feedReels = useMemo(() => {
@@ -1103,16 +1136,28 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   const handleActiveIndexChange = useCallback((index) => {
     const activeReel = combinedReels[index]
     if (activeReel && activeReel.id !== id) {
-      navigate(getDetailPath(activeReel.id), { replace: true })
+      // Preserve challenge search params when scrolling between reels
+      const challengeSearch = hasChallengeContext ? `?${searchParams.toString()}` : ""
+      navigate(getDetailPath(activeReel.id) + challengeSearch, { replace: true })
     }
-  }, [combinedReels, getDetailPath, id, navigate])
+  }, [combinedReels, getDetailPath, hasChallengeContext, id, navigate, searchParams])
 
-  const hasMore = isWorkspace && (feedResponse?.lastPageCount || 0) >= DETAIL_PAGE_SIZE
+  const isFeedFetching = isWorkspace
+    ? isWorkspaceFeedFetching
+    : hasChallengeContext
+      ? isChallengeFeedFetching
+      : isPublicFeedFetching
+
+  const hasMore = isWorkspace
+    ? (workspaceFeedResponse?.lastPageCount || 0) >= DETAIL_PAGE_SIZE
+    : hasChallengeContext
+      ? (challengeFeedResponse?.data?.length || 0) >= DETAIL_PAGE_SIZE
+      : (publicFeedResponse?.lastPageCount || 0) >= DETAIL_PAGE_SIZE
 
   const handleLoadMore = useCallback(() => {
-    if (!hasMore || isWorkspaceFeedFetching) return
+    if (!hasMore || isFeedFetching) return
     setFeedPage((page) => page + 1)
-  }, [hasMore, isWorkspaceFeedFetching])
+  }, [hasMore, isFeedFetching])
 
   const isLoading = (isDetailLoading || isFeedLoading) && combinedReels.length === 0
 
@@ -1159,8 +1204,8 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
       reels={combinedReels}
       initialIndex={initialIndex}
       hasMore={hasMore}
-      isLoading={isWorkspace && isWorkspaceFeedFetching && combinedReels.length > 0}
-      onLoadMore={isWorkspace ? handleLoadMore : undefined}
+      isLoading={isFeedFetching && combinedReels.length > 0}
+      onLoadMore={handleLoadMore}
       onActiveIndexChange={handleActiveIndexChange}
       containerHeight={isWorkspace ? "calc(100dvh - 128px)" : "calc(100dvh - 120px)"}
     >

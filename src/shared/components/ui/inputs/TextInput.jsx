@@ -15,6 +15,7 @@ const TextInput = ({
   color,
   className = "",
   containerClassName = "",
+  labelClassName = "",
   showCount = false,
   error,
   leftContent,
@@ -47,7 +48,7 @@ const TextInput = ({
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
       {label && (
-        <label htmlFor={id} className="text-sm">
+        <label htmlFor={id} className={labelClassName || "text-sm"}>
           {label}
         </label>
       )}

@@ -9,12 +9,17 @@ import {
   useCancelRegistrationMutation,
   useDeleteRegistrationMutation,
 } from "@/store/api/eventsApi"
+import { useLocation, useNavigate } from "react-router-dom"
+import { useAuthModal } from "@/shared/context/AuthModalContext"
 
 import ParticipantListModal from "./ParticipantListModal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
   const { user, isAdmin } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { openAuthModal } = useAuthModal()
   const { t } = useLanguage()
   const cal = t.calendar || {}
   const [showParticipants, setShowParticipants] = useState(false)
@@ -22,9 +27,15 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
   const isCreator = Boolean(
     user &&
     event &&
-    (user.id === event.creatorId ||
-      user.username === event.creatorName ||
-      (user.fullName && user.fullName === event.creatorName)),
+    ((user.id != null &&
+      event.creatorId != null &&
+      user.id === event.creatorId) ||
+      (user.username != null &&
+        event.creatorName != null &&
+        user.username === event.creatorName) ||
+      (user.fullName != null &&
+        event.creatorName != null &&
+        user.fullName === event.creatorName)),
   )
 
   const isRegistered = event?.isRegistered ?? false
@@ -42,6 +53,21 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
   const isProcessing = isRegistering || isCancelling || isDeletingReg
 
   const handleRegister = async () => {
+    if (!user || !user.id) {
+      if (location.pathname.includes("/events/shared/")) {
+        navigate("/", {
+          replace: true,
+          state: {
+            requireLogin: true,
+            redirectTo: location.pathname + location.search,
+          },
+        })
+      } else {
+        openAuthModal("login", location.pathname + location.search)
+      }
+      return
+    }
+
     if (isRegistered) {
       // Cancel registration for this occurrence (or the single event)
       try {
@@ -92,13 +118,14 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
 
   return (
     <>
-      <div className="p-6 rounded-none min-[426px]:rounded-b-xl flex items-center justify-between gap-2 bg-white">
+      <div className="p-4 min-[426px]:p-6 rounded-none min-[426px]:rounded-b-[24px] flex flex-col min-[426px]:flex-row items-center justify-between gap-3 min-[426px]:gap-2 bg-white">
         {/* Register / Unregister */}
         {!confirmDelete &&
           (isCreator ? (
             <PillButton
               onClick={() => setShowParticipants(true)}
-              className="flex-1 transition-colors text-base text-white font-bold h-10 rounded-lg bg-[#B91264] hover:bg-cath-red-700"
+              bgColor="#B91264"
+              className="w-full min-[426px]:flex-1"
             >
               {cal.viewParticipants || "Xem danh sách người đăng ký"}
             </PillButton>
@@ -108,7 +135,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
               loading={isProcessing}
               loadingText={cal.processing || "Đang xử lý..."}
               bgColor={isRegistered ? undefined : "#06AA3B"}
-              className={`flex-1 ${isRegistered ? "bg-cath-red-700 hover:bg-cath-red-800" : ""}`}
+              className={`w-full min-[426px]:flex-1 ${isRegistered ? "bg-cath-red-700 hover:bg-cath-red-800" : ""}`}
             >
               {isRegistered
                 ? cal.cancelRegistration || "Hủy đăng kí"
@@ -161,7 +188,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             </PillButton>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="relative flex items-center justify-center min-[426px]:justify-end gap-2 w-full min-[426px]:w-auto">
             {isCreator && (
               <>
                 <button

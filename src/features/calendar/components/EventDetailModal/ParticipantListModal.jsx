@@ -23,10 +23,10 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
       open={open}
       onClose={onClose}
       showCloseButton={false}
-      className="!max-w-[500px] w-full p-0 bg-white rounded-none min-[426px]:rounded-xl shadow-xl overflow-visible"
+      className="!max-w-[500px] w-full p-0 bg-white rounded-none min-[426px]:rounded-2xl shadow-xl overflow-visible"
       bodyClassName="flex-1"
     >
-      <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-xl max-h-[80vh]">
+      <div className="relative flex flex-col w-full h-full bg-white rounded-none min-[426px]:rounded-2xl max-h-[80vh]">
         {/* Floating close button */}
         <button
           onClick={onClose}
@@ -35,7 +35,7 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
           <X size={18} strokeWidth={4} />
         </button>
 
-        <div className="p-5 border-b border-gray-100 shrink-0 flex flex-col gap-1">
+        <div className="p-6 border-b border-gray-100 shrink-0 flex flex-col gap-1">
           <div className="flex items-start justify-between">
             <h3 className="text-xl font-bold text-gray-800">
               {t.calendar?.participantList || "Danh sách người đăng ký"}
@@ -53,7 +53,7 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
           </span>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-6 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
           {isLoading || isFetching ? (
             <LoadingSpinner
               className="flex flex-col items-center justify-center py-10"

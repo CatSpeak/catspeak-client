@@ -71,7 +71,18 @@ const VideoCallRoomContent = () => {
   const connectionState = useConnectionState()
   const livekitReady = connectionState === ConnectionState.Connected || connectionState === ConnectionState.Reconnecting
 
-  if (!user) return <Navigate to="/" state={{ from: location }} replace />
+  if (!user) {
+    return (
+      <Navigate
+        to="/"
+        state={{
+          requireLogin: true,
+          redirectTo: location.pathname + location.search + location.hash,
+        }}
+        replace
+      />
+    )
+  }
 
   if (!livekitReady) {
     return (

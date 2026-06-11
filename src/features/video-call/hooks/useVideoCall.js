@@ -6,7 +6,7 @@ import {
 } from "@livekit/components-react"
 import { ConnectionState, Track } from "livekit-client"
 import toast from "react-hot-toast"
-import { useGetCurrentBackgroundQuery } from "@/store/api/authApi"
+import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
 import { useEffect, useRef } from "react"
 import { BackgroundProcessor, supportsBackgroundProcessors } from "@livekit/track-processors"
 

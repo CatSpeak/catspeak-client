@@ -1,153 +1,119 @@
-import React, { useState } from "react"
-import { Check, X, Eye, EyeOff } from "lucide-react"
-import { useChangePasswordMutation } from "@/store/api/userApi"
+import React from "react"
+import { Check, X, Pencil } from "lucide-react"
+import { useAuth } from "@/features/auth"
+import { useChangePassword } from "../hooks/useChangePassword"
+import ProfileOtpModal from "./ProfileOtpModal"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import PasswordInput from "@/shared/components/ui/PasswordInput"
 
 const ChangePasswordSection = ({ t }) => {
-  const [changePassword, { isLoading }] = useChangePasswordMutation()
-
-  const [isEditing, setIsEditing] = useState(false)
-  const [showPasswords, setShowPasswords] = useState(false)
-  const [error, setError] = useState("")
-  const [formData, setFormData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
-
-  const handleEdit = () => {
-    setIsEditing(true)
-    setShowPasswords(false)
-    setError("")
-  }
-
-  const handleCancel = () => {
-    setIsEditing(false)
-    setShowPasswords(false)
-    setError("")
-    setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-  }
-
-  const handleSave = async () => {
-    setError("")
-
-    if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
-      setError(t.validation?.password?.allFieldsRequired || "All password fields are required")
-      return
-    }
-
-    if (formData.newPassword !== formData.confirmPassword) {
-      setError(t.validation?.password?.mismatch || "Passwords do not match")
-      return
-    }
-
-    try {
-      await changePassword({
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword,
-        confirmPassword: formData.confirmPassword,
-      }).unwrap()
-
-      handleCancel()
-    } catch (err) {
-      const serverMsg = err?.data?.message || ""
-      const isIncorrectPassword = serverMsg.toLowerCase().includes("current password")
-
-      setError(
-        isIncorrectPassword
-          ? (t.validation?.password?.currentIncorrect || "Current password is incorrect")
-          : (t.validation?.password?.changeFailed || "Failed to change password")
-      )
-    }
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const inputType = showPasswords ? "text" : "password"
+  const { user } = useAuth()
+  
+  const {
+    isEditing,
+    isLoading,
+    isSendingOtp,
+    error,
+    isOtpModalOpen,
+    setIsOtpModalOpen,
+    formData,
+    isNewPasswordValid,
+    isConfirmPasswordValid,
+    isFormInvalid,
+    handleEdit,
+    handleCancel,
+    handleChange,
+    handleSave,
+    handleOtpVerify,
+    handleOtpResend
+  } = useChangePassword(t)
 
   if (!isEditing) {
     return (
-      <div className="flex items-center justify-between border-b border-gray-100 py-3">
-        <span className="w-32 font-bold text-gray-900">
-          {t.profile?.personalInfo?.password || "Password"}
-        </span>
-        <span className="flex-1 text-gray-600 tracking-widest text-lg">
+      <div className="flex flex-col gap-3">
+        <span>{t.profile?.personalInfo?.password || "Password"}</span>
+        <div className="w-full h-12 rounded-2xl border border-[#e2e2e2] bg-gray-50 text-gray-500 cursor-not-allowed px-4 flex items-center text-lg tracking-widest">
           ***********
-        </span>
-        <button
-          onClick={handleEdit}
-          className="font-bold text-red-800 hover:text-red-900"
-        >
-          {t.profile?.personalInfo?.reset || "Reset"}
-        </button>
+        </div>
+        <div className="flex justify-end gap-3 mt-1">
+          <PillButton
+            onClick={handleEdit}
+            variant="outline"
+            startIcon={<Pencil size={18} />}
+          >
+            {t.profile?.personalInfo?.reset || "Reset"}
+          </PillButton>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="border-b border-gray-100 py-3">
-      <div className="flex items-center justify-between mb-4">
-        <span className="w-32 font-bold text-gray-900">
-          {t.profile?.personalInfo?.password || "Password"}
-        </span>
-        <div className="flex-1" />
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowPasswords((prev) => !prev)}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-            title={showPasswords ? "Hide passwords" : "Show passwords"}
-          >
-            {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isLoading}
-            className="font-bold text-green-600 hover:text-green-700 disabled:opacity-50"
-          >
-            <Check size={18} />
-          </button>
-          <button
-            onClick={handleCancel}
-            disabled={isLoading}
-            className="font-bold text-red-600 hover:text-red-700 disabled:opacity-50"
-          >
-            <X size={18} />
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col gap-3">
+      <span>{t.profile?.personalInfo?.password || "Password"}</span>
 
-      <div className="flex flex-col gap-3 pl-32">
-        <input
-          type={inputType}
+      <div className="flex flex-col gap-4">
+        <PasswordInput
           name="currentPassword"
           value={formData.currentPassword}
           onChange={handleChange}
           placeholder={t.profile?.personalInfo?.currentPassword || "Current password"}
-          className="rounded border border-gray-300 px-3 py-2 text-sm focus:border-red-900 focus:outline-none"
         />
-        <input
-          type={inputType}
+
+        <PasswordInput
           name="newPassword"
           value={formData.newPassword}
           onChange={handleChange}
           placeholder={t.profile?.personalInfo?.newPassword || "New password"}
-          className="rounded border border-gray-300 px-3 py-2 text-sm focus:border-red-900 focus:outline-none"
+          isValid={isNewPasswordValid}
+          invalidMessage={t.profile?.personalInfo?.newPasswordMinLength || "Mật khẩu mới phải có ít nhất 6 ký tự"}
+          validMessage={t.profile?.personalInfo?.newPasswordLengthValid || "Độ dài mật khẩu hợp lệ"}
         />
-        <input
-          type={inputType}
+
+        <PasswordInput
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
           placeholder={t.profile?.personalInfo?.confirmPassword || "Confirm new password"}
-          className="rounded border border-gray-300 px-3 py-2 text-sm focus:border-red-900 focus:outline-none"
+          isValid={isConfirmPasswordValid}
+          invalidMessage={t.profile?.personalInfo?.passwordsMismatch || "Mật khẩu xác nhận không khớp"}
+          validMessage={t.profile?.personalInfo?.passwordsMatch || "Mật khẩu xác nhận khớp"}
         />
 
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-600 px-1">{error}</p>}
       </div>
+
+      <div className="flex justify-end gap-3 mt-2">
+        <PillButton
+          onClick={handleCancel}
+          disabled={isLoading || isSendingOtp}
+          variant="outline"
+          startIcon={<X size={18} />}
+        >
+          {t.profile?.personalInfo?.cancel || "Hủy"}
+        </PillButton>
+        <PillButton
+          onClick={handleSave}
+          disabled={isLoading || isSendingOtp || isFormInvalid}
+          loading={isSendingOtp}
+          variant="primary"
+          bgColor="#16a34a"
+          startIcon={!isSendingOtp && <Check size={18} />}
+        >
+          {t.profile?.personalInfo?.save || "Lưu"}
+        </PillButton>
+      </div>
+
+      <ProfileOtpModal
+        open={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
+        email={user?.email}
+        onVerify={handleOtpVerify}
+        isVerifying={isLoading}
+        onResend={handleOtpResend}
+        isResending={isSendingOtp}
+        t={t}
+      />
     </div>
   )
 }

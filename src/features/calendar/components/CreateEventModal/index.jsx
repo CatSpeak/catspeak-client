@@ -1,14 +1,29 @@
+import React, { useState, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useEventForm } from "../../hooks/useEventForm"
 import { X } from "lucide-react"
 import EventHeader from "./EventHeader"
 import EventDateTimeSection from "./EventDateTimeSection"
+import EventRecurrenceSection from "./EventRecurrenceSection"
 import EventDetailsSection from "./EventDetailsSection"
 import EventFooter from "./EventFooter"
+import EditChoiceModal from "../EventDetailModal/EditChoiceModal"
 
 const CreateEventModal = ({ onClose, editEvent }) => {
-  const form = useEventForm(onClose, editEvent)
+  const [pendingPayload, setPendingPayload] = useState(null)
+  const performSaveRef = useRef(null)
+
+  const handleInterceptSubmit = (payload, performSave) => {
+    if (editEvent?.isRecurring && editEvent?.occurrenceId) {
+      setPendingPayload(payload)
+      performSaveRef.current = performSave
+    } else {
+      performSave(payload, "series")
+    }
+  }
+
+  const form = useEventForm(onClose, editEvent, handleInterceptSubmit)
   const { t } = useLanguage()
 
   return (
@@ -44,11 +59,12 @@ const CreateEventModal = ({ onClose, editEvent }) => {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-app-transparent">
+        <div className="flex-1 min-h-0 overflow-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:m-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
           {/* Body */}
           <div className="p-6 relative bg-white text-base">
             <div className="flex flex-col gap-6">
               <EventDateTimeSection
+                isEditing={!!editEvent}
                 eventColor={form.eventColor}
                 startTime={form.startTime}
                 onStartTimeChange={form.setStartTime}
@@ -56,6 +72,12 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                 onEndTimeChange={form.setEndTime}
                 selectedTimezone={form.selectedTimezone}
                 onTimezoneChange={form.setSelectedTimezone}
+              />
+
+              <EventRecurrenceSection
+                isEditing={!!editEvent}
+                eventColor={form.eventColor}
+                startTime={form.startTime}
                 recurrenceOption={form.recurrenceOption}
                 onRecurrenceChange={form.setRecurrenceOption}
                 recurrenceInterval={form.recurrenceInterval}
@@ -64,6 +86,10 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                 onSelectedDaysChange={form.setSelectedDays}
                 recurrenceEndDate={form.recurrenceEndDate}
                 onRecurrenceEndDateChange={form.setRecurrenceEndDate}
+                recurrenceEndType={form.recurrenceEndType}
+                onRecurrenceEndTypeChange={form.setRecurrenceEndType}
+                occurrenceCount={form.occurrenceCount}
+                onOccurrenceCountChange={form.setOccurrenceCount}
               />
 
               <EventDetailsSection
@@ -126,6 +152,20 @@ const CreateEventModal = ({ onClose, editEvent }) => {
           />
         </div>
       </form>
+
+      {pendingPayload && (
+        <EditChoiceModal
+          open={!!pendingPayload}
+          onClose={() => setPendingPayload(null)}
+          onSelect={(choice) => {
+            if (performSaveRef.current) {
+              performSaveRef.current(pendingPayload, choice)
+            }
+            setPendingPayload(null)
+          }}
+          headerColor={form.eventColor}
+        />
+      )}
     </Modal>
   )
 }

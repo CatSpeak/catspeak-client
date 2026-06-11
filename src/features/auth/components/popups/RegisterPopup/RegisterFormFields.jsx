@@ -1,8 +1,10 @@
+import { useState } from "react"
+import { Eye, EyeOff, ChevronDown } from "lucide-react"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import FormDatePicker from "../../forms/FormDatePicker"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { VietNam, China, USA } from "@/shared/assets/icons/flags"
-import { ChevronDown } from "lucide-react"
+import { countries } from "@/shared/constants/countriesData"
+
 const RegisterFormFields = ({
   authText,
   formData,
@@ -16,77 +18,48 @@ const RegisterFormFields = ({
     { value: "chinese", label: "中文" },
   ]
 
-  const countryOptions = [
-    {
-      value: "vietnam",
-      label: "Vietnam",
-      icon: (
-        <img
-          src={VietNam}
-          className="w-[20px] h-[20px] rounded-full object-cover"
-          alt="VN"
-        />
-      ),
-    },
-    {
-      value: "usa",
-      label: "United States",
-      icon: (
-        <img
-          src={USA}
-          className="w-[20px] h-[20px] rounded-full object-cover"
-          alt="US"
-        />
-      ),
-    },
-    {
-      value: "china",
-      label: "China",
-      icon: (
-        <img
-          src={China}
-          className="w-[20px] h-[20px] rounded-full object-cover"
-          alt="CN"
-        />
-      ),
-    },
-  ]
+  const countryOptions = countries.map((c) => ({
+    key: c.code,
+    value: c.value,
+    label: c.label,
+    searchTerms: `${c.code} ${c.value} ${c.label}`,
+    icon: (
+      <img
+        src={`https://flagcdn.com/w40/${c.value}.png`}
+        className="w-[20px] h-[20px] rounded-full object-cover"
+        alt={c.code}
+      />
+    ),
+  }))
 
-  const phonePrefixes = [
-    {
-      value: "+1",
-      label: "United States",
+  const phonePrefixes = countries
+    .filter((c) => c.dialCode)
+    .map((c) => ({
+      key: c.code,
+      value: c.dialCode,
+      label: `${c.dialCode} (${c.label})`,
+      subtitle: c.label,
+      searchTerms: `${c.code} ${c.value} ${c.label} ${c.dialCode}`,
       icon: (
         <img
-          src={USA}
+          src={`https://flagcdn.com/w40/${c.value}.png`}
           className="w-[20px] h-[20px] rounded-full object-cover"
-          alt="US"
+          alt={c.code}
         />
       ),
-    },
-    {
-      value: "+86",
-      label: "China",
-      icon: (
-        <img
-          src={China}
-          className="w-[20px] h-[20px] rounded-full object-cover"
-          alt="CN"
-        />
-      ),
-    },
-    {
-      value: "+84",
-      label: "Vietnam",
-      icon: (
-        <img
-          src={VietNam}
-          className="w-[20px] h-[20px] rounded-full object-cover"
-          alt="VN"
-        />
-      ),
-    },
-  ]
+    }))
+
+  const prefixLength = formData.phonePrefix?.length || 3
+  const plClass =
+    prefixLength <= 2
+      ? "pl-[80px]"
+      : prefixLength === 3
+        ? "pl-[90px]"
+        : prefixLength === 4
+          ? "pl-[100px]"
+          : prefixLength === 5
+            ? "pl-[110px]"
+            : "pl-[120px]"
 
   const handleChange = (field) => (e) => {
     const value =
@@ -101,10 +74,11 @@ const RegisterFormFields = ({
     <div className="flex flex-col gap-4 mb-6">
       {/* Username */}
       <div>
-        <label className="block text-sm mb-2">{authText.fullNameLabel}</label>
+        <label className="block text-sm mb-2">{authText.usernameLabel}</label>
         <TextInput
+          type="text"
           variant="square"
-          placeholder={authText.fullNamePlaceholder}
+          placeholder={authText.usernamePlaceholder}
           value={formData.username}
           onChange={handleChange("username")}
           className={
@@ -118,7 +92,7 @@ const RegisterFormFields = ({
         )}
       </div>
 
-      {/* Email & Phone - Side by Side */}
+      {/* Email & Phone Number - Side by Side */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <label className="block text-sm mb-2">{authText.emailLabel}</label>
@@ -145,7 +119,9 @@ const RegisterFormFields = ({
             options={phonePrefixes}
             value={formData.phonePrefix}
             onChange={(val) => setFormData({ ...formData, phonePrefix: val })}
-            dropdownClassName="w-full [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+            enableSearch={true}
+            searchPlaceholder="Search phone code..."
+            dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
             trigger={(isOpen, selectedOption, toggleDropdown) => (
               <TextInput
                 type="tel"
@@ -158,12 +134,15 @@ const RegisterFormFields = ({
                     ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
                     : ""
                 }
-                leftContentWidthClass="pl-[95px]"
+                leftContentWidthClass={plClass}
                 leftContent={
                   <div className="flex items-center h-full">
                     <button
                       type="button"
-                      onClick={toggleDropdown}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleDropdown()
+                      }}
                       className="flex items-center gap-1 pl-0 pr-1 h-full focus:outline-none cursor-pointer"
                     >
                       <span className="text-base leading-none">
@@ -240,20 +219,18 @@ const RegisterFormFields = ({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <label className="block text-sm mb-2">{authText.passwordLabel}</label>
-          <div className="relative">
-            <TextInput
-              type="password"
-              variant="square"
-              placeholder={authText.passwordPlaceholder}
-              value={formData.password}
-              onChange={handleChange("password")}
-              className={`pr-12 ${
-                errors.password
-                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                  : ""
-              }`}
-            />
-          </div>
+          <TextInput
+            type="password"
+            variant="square"
+            placeholder={authText.passwordPlaceholder}
+            value={formData.password}
+            onChange={handleChange("password")}
+            className={
+              errors.password
+                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                : ""
+            }
+          />
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password}</p>
           )}
@@ -268,6 +245,8 @@ const RegisterFormFields = ({
               handleChange("country")({ target: { value: val } })
             }
             options={countryOptions}
+            enableSearch={true}
+            searchPlaceholder="Search country..."
             triggerClassName={errors.country ? "!border-red-600" : ""}
             trigger={
               <button

@@ -30,6 +30,8 @@ export default {
   endTime: "Thời gian kết thúc",
   to: "đến",
   endsOn: "Kết thúc vào",
+  afterOccurrences: "Sau",
+  occurrences: "lần",
   timezone: "Múi giờ",
   recurrence: {
     noRepeat: "Không lặp lại",

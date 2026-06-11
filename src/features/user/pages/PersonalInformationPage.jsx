@@ -1,120 +1,48 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import {
-  useGetUserProfileQuery,
-  useUpdateUserProfileMutation,
-  useUpdateMeetingAvatarMutation,
-} from "@/store/api/userApi"
-import { toast } from "react-hot-toast"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useProfileState } from "../hooks/useProfileState"
+import { useProfileMutations } from "../hooks/useProfileMutations"
 
 import ProfileHeader from "../components/ProfileHeader"
 import BasicInfoSection from "../components/BasicInfoSection"
 import AccountPrivacySection from "../components/AccountPrivacySection"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import ProfileOtpModal from "../components/ProfileOtpModal"
+import { countries } from "@/shared/constants/countriesData"
 
 const PersonalInformationPage = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
   const { data: profileData, isLoading, error } = useGetUserProfileQuery()
 
-  const [updateProfile, { isLoading: isUpdating }] =
-    useUpdateUserProfileMutation()
-  const [updateMeetingAvatar] = useUpdateMeetingAvatarMutation()
+  const stateHooks = useProfileState(profileData)
+  const mutationHooks = useProfileMutations(t, profileData, stateHooks)
 
-  const [formData, setFormData] = useState({
-    username: "",
-    nickname: "",
-    email: "",
-    accountType: "Student",
-    level: "HSK3",
-    address: "",
-    phoneNumber: "",
-    country: "",
-    avatarImageUrl: "",
-    meetingAvatarUrl: "",
-  })
+  const {
+    formData,
+    editingField,
+    errors,
+    isOtpModalOpen,
+    setIsOtpModalOpen,
+    handleEdit,
+    handleCancel,
+    handleChange,
+  } = stateHooks
 
-  const [editingField, setEditingField] = useState(null)
-
-  useEffect(() => {
-    if (profileData?.data) {
-      setFormData({
-        username: profileData.data.username || "",
-        nickname: profileData.data.nickname || "",
-        email: profileData.data.email || "",
-        accountType: profileData.data.roleName || "Student",
-        level: profileData.data.level || "HSK3",
-        address: profileData.data.address || "",
-        phoneNumber: profileData.data.phoneNumber || "",
-        country: profileData.data.country || "",
-        avatarImageUrl: profileData.data.avatarImageUrl || "",
-        meetingAvatarUrl: profileData.data.meetingAvatarUrl || "",
-      })
-    }
-  }, [profileData])
-
-  const handleEdit = (field) => {
-    setEditingField(field)
-  }
-
-  const handleCancel = () => {
-    setEditingField(null)
-    if (profileData?.data) {
-      setFormData((prev) => ({
-        ...prev,
-        username: profileData.data.username || "",
-        nickname: profileData.data.nickname || "",
-        email: profileData.data.email || "",
-        address: profileData.data.address || "",
-        phoneNumber: profileData.data.phoneNumber || "",
-        country: profileData.data.country || "",
-      }))
-    }
-  }
-
-  const buildProfilePayload = (overrides = {}) => ({
-    nickname: formData.nickname,
-    country: formData.country,
-    address: formData.address,
-    phoneNumber: formData.phoneNumber,
-    email: formData.email,
-    ...overrides,
-  })
-
-  const handleSave = async () => {
-    try {
-      await updateProfile(buildProfilePayload()).unwrap()
-      setEditingField(null)
-    } catch (error) {
-      console.error("Failed to update profile", error)
-    }
-  }
-
-  const handleCountryChange = async (val) => {
-    setFormData((prev) => ({ ...prev, country: val }))
-    try {
-      await updateProfile(buildProfilePayload({ country: val })).unwrap()
-    } catch (error) {
-      console.error("Failed to update country", error)
-    }
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleUpdateAvatarUrl = async (url) => {
-    try {
-      await updateMeetingAvatar({ meetingAvatarUrl: url }).unwrap()
-      toast.success(t?.profile?.personalInfo?.avatarUpdated || "Avatar updated successfully")
-    } catch (err) {
-      console.error("Failed to update avatar", err)
-      toast.error(t?.profile?.personalInfo?.avatarUpdateFailed || "Failed to update avatar")
-    }
-  }
+  const {
+    isUpdating,
+    isUpdatingPhone,
+    isSendingOtp,
+    isSendingPhoneOtp,
+    handleSave,
+    handleOtpVerify,
+    handleOtpResend,
+    handleCountryChange,
+    handleUpdateAvatarUrl,
+  } = mutationHooks
 
   if (isLoading) return <div>Loading...</div>
 
@@ -122,41 +50,77 @@ const PersonalInformationPage = () => {
   const displayAvatarUrl = formData.meetingAvatarUrl || formData.avatarImageUrl
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <>
       <PageTitle>{t.profile?.personalInfo?.title}</PageTitle>
-
-      <FluentCard className="flex flex-col gap-6">
-        <ProfileHeader 
-          avatarImageUrl={displayAvatarUrl} 
+      <div className="w-full flex flex-col gap-6 relative z-10">
+        <ProfileHeader
+          avatarImageUrl={displayAvatarUrl}
           onUpdateAvatarUrl={handleUpdateAvatarUrl}
-          username={formData.username} 
-          t={t} 
-        />
-
-        <BasicInfoSection
-          formData={formData}
-          editingField={editingField}
-          isUpdating={isUpdating}
-          onEdit={handleEdit}
-          onCancel={handleCancel}
-          onSave={handleSave}
-          onChange={handleChange}
-          onCountryChange={handleCountryChange}
+          username={formData.username}
           t={t}
         />
 
-        <AccountPrivacySection
-          formData={formData}
-          editingField={editingField}
-          isUpdating={isUpdating}
-          onEdit={handleEdit}
-          onCancel={handleCancel}
-          onSave={handleSave}
-          onChange={handleChange}
+        <div className="flex flex-col gap-3">
+          <h2 className="text-xl font-bold text-red-900">
+            {t.profile?.personalInfo?.title || "Personal Information"}
+          </h2>
+          <FluentCard className="flex flex-col gap-6 !border-white/30 !bg-white/40 !backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+            <BasicInfoSection
+              formData={formData}
+              editingField={editingField}
+              isUpdating={isUpdating}
+              onEdit={handleEdit}
+              onCancel={handleCancel}
+              onSave={handleSave}
+              onChange={handleChange}
+              onCountryChange={handleCountryChange}
+              t={t}
+            />
+          </FluentCard>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h2 className="text-xl font-bold text-red-900">
+            {t.profile?.personalInfo?.accountAndPrivacy ||
+              "Account and Privacy"}
+          </h2>
+          <FluentCard className="flex flex-col gap-6 !border-white/30 !bg-white/40 !backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+            <AccountPrivacySection
+              formData={formData}
+              editingField={editingField}
+              isUpdating={isUpdating}
+              onEdit={handleEdit}
+              onCancel={handleCancel}
+              onSave={handleSave}
+              onChange={handleChange}
+              t={t}
+              errors={errors}
+            />
+          </FluentCard>
+        </div>
+
+        <ProfileOtpModal
+          open={isOtpModalOpen}
+          onClose={() => setIsOtpModalOpen(false)}
+          email={profileData?.data?.email}
+          title={
+            editingField === "phoneNumber"
+              ? t.profile?.personalInfo?.verifyPhoneTitle ||
+                "Xác nhận thay đổi số điện thoại"
+              : editingField === "email"
+                ? t.profile?.personalInfo?.verifyEmailTitle ||
+                  "Xác nhận thay đổi Email"
+                : t.profile?.personalInfo?.verifyChangesTitle ||
+                  "Xác minh thay đổi"
+          }
+          onVerify={handleOtpVerify}
+          isVerifying={isUpdating || isUpdatingPhone}
+          onResend={handleOtpResend}
+          isResending={isSendingOtp || isSendingPhoneOtp}
           t={t}
         />
-      </FluentCard>
-    </div>
+      </div>
+    </>
   )
 }
 

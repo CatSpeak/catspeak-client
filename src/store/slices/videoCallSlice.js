@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit"
+import { logout } from "./authSlice"
+
 
 const initialState = {
   /** Whether a call is currently active (LiveKit connected) */
@@ -85,6 +87,12 @@ const videoCallSlice = createSlice({
         state.callInfo.showRoomSubtitles = !state.callInfo.showRoomSubtitles
       }
     },
+  },
+  extraReducers: (builder) => {
+    // Automatically leave the call and clear state when the user logs out
+    builder.addCase(logout, () => {
+      return initialState
+    })
   },
 })
 

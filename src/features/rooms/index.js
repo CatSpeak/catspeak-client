@@ -25,6 +25,7 @@ export { default as ClassTab } from "./components/tabs/ClassTab"
 // Hooks
 export { useRoomsPageLogic } from "./hooks/useRoomsPageLogic"
 export { useMediaPreview } from "./hooks/useMediaPreview"
+export { useDeviceSelection } from "./hooks/useDeviceSelection"
 
 // API
 export {

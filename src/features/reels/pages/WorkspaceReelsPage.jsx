@@ -10,6 +10,7 @@ import CreateReelModal from "../components/CreateReelModal"
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"
 
 const PAGE_SIZE = 10
+const EMPTY_REELS = []
 
 const getLocale = (lang) => {
   if (lang === "zh") return "zh-CN"
@@ -130,7 +131,7 @@ const WorkspaceReelsContent = ({ userId }) => {
   )
   const [deleteReel, { isLoading: isDeleting }] = useDeleteReelMutation()
 
-  const reels = data?.data || []
+  const reels = data?.data || EMPTY_REELS
   const hasMore = (data?.lastPageCount || 0) >= PAGE_SIZE
 
   const dateFormatter = useMemo(

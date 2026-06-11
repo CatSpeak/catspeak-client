@@ -1,5 +1,22 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
-import { UploadCloud, Video, Image, Trash2, Globe, Users, Lock, AlertCircle, Film, Heart, MessageCircle, Share, Music, X, Hash, Loader2 } from "lucide-react"
+import {
+  UploadCloud,
+  Video,
+  Image,
+  Trash2,
+  Globe,
+  Users,
+  Lock,
+  AlertCircle,
+  Film,
+  Heart,
+  MessageCircle,
+  Share,
+  Music,
+  X,
+  Hash,
+  Loader2,
+} from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
@@ -12,7 +29,12 @@ import {
 
 const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
 const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
-const DESCRIPTION_MAX_LENGTH = 500
+const DESCRIPTION_MAX_LENGTH = 2000
+const PRIVACY_OPTIONS = [
+  { value: "Public", label: "Public", icon: Globe },
+  { value: "FriendsOnly", label: "Friends Only", icon: Users },
+  { value: "Private", label: "Private", icon: Lock },
+]
 
 const normalizeChallengeHashtag = (challenge) => {
   const rawHashtag = String(challenge?.hashtag || "").trim()
@@ -88,7 +110,7 @@ const renderHighlightedDescription = (text, tokenClassName) => {
     parts.push(
       <span key={`${token}-${index}`} className={tokenClassName}>
         {token}
-      </span>
+      </span>,
     )
 
     lastIndex = index + token.length
@@ -103,14 +125,21 @@ const renderHighlightedDescription = (text, tokenClassName) => {
 
 const CreateReelModal = ({ open, onClose, challenge = null }) => {
   // RTK Query Mutation Hook
-  const [createReel, { isLoading, isSuccess, error: apiError }] = useCreateReelMutation()
-  const lockedChallengeHashtag = useMemo(() => normalizeChallengeHashtag(challenge), [challenge])
+  const [createReel, { isLoading, isSuccess, error: apiError }] =
+    useCreateReelMutation()
+  const lockedChallengeHashtag = useMemo(
+    () => normalizeChallengeHashtag(challenge),
+    [challenge],
+  )
 
   // Form states
   const [title, setTitle] = useState("")
-  const [description, setDescription] = useState(() => buildChallengeDescription(lockedChallengeHashtag))
+  const [description, setDescription] = useState(() =>
+    buildChallengeDescription(lockedChallengeHashtag),
+  )
   const [activeDescriptionTrigger, setActiveDescriptionTrigger] = useState(null)
-  const [debouncedDescriptionTrigger, setDebouncedDescriptionTrigger] = useState(null)
+  const [debouncedDescriptionTrigger, setDebouncedDescriptionTrigger] =
+    useState(null)
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
   const [privacy, setPrivacy] = useState("Public")
 
@@ -148,66 +177,69 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
   const videoRef = useRef(null)
   const descriptionInputRef = useRef(null)
   const descriptionHighlightRef = useRef(null)
+  const filmstripRequestRef = useRef(0)
+  const filmstripSourceRef = useRef("")
+  const metadataSourceRef = useRef("")
 
   const hashtagSearchArgs = useMemo(
     () => ({
-      query: debouncedDescriptionTrigger?.type === "hashtag"
-        ? debouncedDescriptionTrigger.query
-        : "",
+      query:
+        debouncedDescriptionTrigger?.type === "hashtag"
+          ? debouncedDescriptionTrigger.query
+          : "",
       take: 8,
     }),
-    [debouncedDescriptionTrigger?.type, debouncedDescriptionTrigger?.query]
+    [debouncedDescriptionTrigger?.type, debouncedDescriptionTrigger?.query],
   )
 
   const mentionSearchArgs = useMemo(
     () => ({
-      query: debouncedDescriptionTrigger?.type === "mention"
-        ? debouncedDescriptionTrigger.query
-        : "",
+      query:
+        debouncedDescriptionTrigger?.type === "mention"
+          ? debouncedDescriptionTrigger.query
+          : "",
       take: 8,
     }),
-    [debouncedDescriptionTrigger?.type, debouncedDescriptionTrigger?.query]
+    [debouncedDescriptionTrigger?.type, debouncedDescriptionTrigger?.query],
   )
 
-  const {
-    data: hashtagResults = [],
-    isFetching: isFetchingHashtags,
-  } = useSearchReelHashtagsQuery(hashtagSearchArgs, {
-    skip: !open || debouncedDescriptionTrigger?.type !== "hashtag",
-  })
+  const { data: hashtagResults = [], isFetching: isFetchingHashtags } =
+    useSearchReelHashtagsQuery(hashtagSearchArgs, {
+      skip: !open || debouncedDescriptionTrigger?.type !== "hashtag",
+    })
 
-  const {
-    data: mentionResults = [],
-    isFetching: isFetchingMentions,
-  } = useSearchReelMentionsQuery(mentionSearchArgs, {
-    skip: !open || debouncedDescriptionTrigger?.type !== "mention",
-  })
+  const { data: mentionResults = [], isFetching: isFetchingMentions } =
+    useSearchReelMentionsQuery(mentionSearchArgs, {
+      skip: !open || debouncedDescriptionTrigger?.type !== "mention",
+    })
 
   const hashtagSuggestions = useMemo(
     () => hashtagResults.filter((item) => getHashtagName(item)),
-    [hashtagResults]
+    [hashtagResults],
   )
 
   const mentionSuggestions = useMemo(
     () => mentionResults.filter((item) => getMentionUsername(item)),
-    [mentionResults]
+    [mentionResults],
   )
 
-  const activeSuggestions = activeDescriptionTrigger?.type === "hashtag"
-    ? hashtagSuggestions
-    : mentionSuggestions
+  const activeSuggestions =
+    activeDescriptionTrigger?.type === "hashtag"
+      ? hashtagSuggestions
+      : mentionSuggestions
 
-  const isFetchingDescriptionSuggestions = activeDescriptionTrigger?.type === "hashtag"
-    ? isFetchingHashtags
-    : isFetchingMentions
+  const isFetchingDescriptionSuggestions =
+    activeDescriptionTrigger?.type === "hashtag"
+      ? isFetchingHashtags
+      : isFetchingMentions
 
   const hasSettledDescriptionTrigger = Boolean(
-    activeDescriptionTrigger
-    && debouncedDescriptionTrigger
-    && activeDescriptionTrigger.type === debouncedDescriptionTrigger.type
-    && activeDescriptionTrigger.query === debouncedDescriptionTrigger.query
-    && activeDescriptionTrigger.start === debouncedDescriptionTrigger.start
-    && activeDescriptionTrigger.end === debouncedDescriptionTrigger.end
+    activeDescriptionTrigger &&
+    debouncedDescriptionTrigger &&
+    activeDescriptionTrigger.type === debouncedDescriptionTrigger.type &&
+    activeDescriptionTrigger.query === debouncedDescriptionTrigger.query &&
+    activeDescriptionTrigger.start === debouncedDescriptionTrigger.start &&
+    activeDescriptionTrigger.end === debouncedDescriptionTrigger.end,
   )
 
   const showDescriptionSuggestions = hasSettledDescriptionTrigger
@@ -215,7 +247,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
   useEffect(() => {
     if (!open) return
     setDescription((currentDescription) =>
-      buildChallengeDescription(lockedChallengeHashtag, currentDescription)
+      buildChallengeDescription(lockedChallengeHashtag, currentDescription),
     )
   }, [open, lockedChallengeHashtag])
 
@@ -234,9 +266,21 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
   useEffect(() => {
     setActiveSuggestionIndex(0)
-  }, [activeDescriptionTrigger?.type, activeDescriptionTrigger?.query, activeSuggestions.length])
+  }, [
+    activeDescriptionTrigger?.type,
+    activeDescriptionTrigger?.query,
+    activeSuggestions.length,
+  ])
 
   // No longer locking prefix at the front, cursor will snap to hashtag boundaries dynamically
+
+  // Auto-resize textarea whenever description changes (covers programmatic updates)
+  useEffect(() => {
+    const el = descriptionInputRef.current
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = el.scrollHeight + "px"
+  }, [description])
 
   // Handle closing modal and resetting form/previews
   const handleClose = useCallback(() => {
@@ -253,6 +297,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     setIsExtractingFilmstrip(false)
     setPreviewMode("video")
     setMobileTab("details")
+    filmstripRequestRef.current += 1
+    filmstripSourceRef.current = ""
+    metadataSourceRef.current = ""
 
     if (videoRef.current) {
       try {
@@ -317,6 +364,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     setIsExtractingFilmstrip(false)
     setPreviewMode("video")
     setMobileTab("details")
+    filmstripRequestRef.current += 1
+    filmstripSourceRef.current = ""
+    metadataSourceRef.current = ""
 
     if (videoRef.current) {
       try {
@@ -348,14 +398,20 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
     // Verify file type
     if (!file.type.startsWith("video/")) {
-      setValidationErrors((prev) => ({ ...prev, video: "Please upload a valid video file." }))
+      setValidationErrors((prev) => ({
+        ...prev,
+        video: "Please upload a valid video file.",
+      }))
       return
     }
 
     // Verify size limit (e.g. 50MB)
     const maxSize = 50 * 1024 * 1024
     if (file.size > maxSize) {
-      setValidationErrors((prev) => ({ ...prev, video: "Video file size exceeds 50MB limit." }))
+      setValidationErrors((prev) => ({
+        ...prev,
+        video: "Video file size exceeds 50MB limit.",
+      }))
       return
     }
 
@@ -372,6 +428,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     }
 
     setVideoFile(file)
+    setVideoDuration(0)
+    setCurrentTime(0)
+    setFilmstripFrames([])
+    filmstripRequestRef.current += 1
+    filmstripSourceRef.current = ""
+    metadataSourceRef.current = ""
     setVideoPreviewUrl(URL.createObjectURL(file))
     setCoverType("frame") // Default cover source to frame extraction on video select
   }
@@ -382,14 +444,20 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
     // Verify file type
     if (!file.type.startsWith("image/")) {
-      setValidationErrors((prev) => ({ ...prev, cover: "Please upload a valid image file." }))
+      setValidationErrors((prev) => ({
+        ...prev,
+        cover: "Please upload a valid image file.",
+      }))
       return
     }
 
     // Verify size limit (e.g. 5MB)
     const maxSize = 5 * 1024 * 1024
     if (file.size > maxSize) {
-      setValidationErrors((prev) => ({ ...prev, cover: "Image file size exceeds 5MB limit." }))
+      setValidationErrors((prev) => ({
+        ...prev,
+        cover: "Image file size exceeds 5MB limit.",
+      }))
       return
     }
 
@@ -418,13 +486,25 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${ms}`
   }
 
-  // Sequential Background Keyframes extraction engine
-  const generateFilmstrip = async (videoUrl, duration) => {
-    if (!duration || duration <= 0) return
+  // Sequential background keyframe extraction engine.
+  const generateFilmstrip = useCallback(async (videoUrl, duration) => {
+    if (!videoUrl || !Number.isFinite(duration) || duration <= 0) return
+
+    const sourceKey = `${videoUrl}:${Math.round(duration * 1000)}`
+    if (filmstripSourceRef.current === sourceKey) return
+
+    const requestId = filmstripRequestRef.current + 1
+    filmstripRequestRef.current = requestId
+    filmstripSourceRef.current = sourceKey
+
     setIsExtractingFilmstrip(true)
     setFilmstripFrames([])
 
     let tempVideo = null
+    let extractionCancelled = false
+
+    const isStaleRequest = () => filmstripRequestRef.current !== requestId
+
     try {
       tempVideo = document.createElement("video")
 
@@ -451,10 +531,20 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         setTimeout(resolve, 2000)
       })
 
+      if (isStaleRequest()) {
+        extractionCancelled = true
+        return
+      }
+
       const numberOfFrames = 6
       const frames = []
 
       for (let i = 0; i < numberOfFrames; i++) {
+        if (isStaleRequest()) {
+          extractionCancelled = true
+          return
+        }
+
         // Distribute frames evenly from 5% to 95% of duration
         const ratio = 0.05 + (0.9 / (numberOfFrames - 1)) * i
         const time = duration * ratio
@@ -470,10 +560,16 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
           setTimeout(resolve, 800)
         })
 
+        if (isStaleRequest()) {
+          extractionCancelled = true
+          return
+        }
+
         // Draw video frame to small offscreen canvas (highly optimized)
         const canvas = document.createElement("canvas")
         const w = 120
-        const h = Math.round((tempVideo.videoHeight * w) / tempVideo.videoWidth) || 170
+        const h =
+          Math.round((tempVideo.videoHeight * w) / tempVideo.videoWidth) || 170
         canvas.width = w
         canvas.height = h
 
@@ -485,9 +581,13 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         }
       }
 
-      setFilmstripFrames(frames)
+      if (!isStaleRequest()) {
+        setFilmstripFrames(frames)
+      }
     } catch (err) {
-      console.error("Error generating filmstrip:", err)
+      if (!extractionCancelled) {
+        console.error("Error generating filmstrip:", err)
+      }
     } finally {
       if (tempVideo) {
         tempVideo.pause()
@@ -495,26 +595,46 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         try {
           tempVideo.load() // Release hardware decoder resources
         } catch (err) {
-          console.warn("[CreateReelModal] Failed to release filmstrip video.", err)
+          console.warn(
+            "[CreateReelModal] Failed to release filmstrip video.",
+            err,
+          )
         }
         if (tempVideo.parentNode) {
           tempVideo.parentNode.removeChild(tempVideo)
         }
       }
-      setIsExtractingFilmstrip(false)
+      if (!isStaleRequest()) {
+        setIsExtractingFilmstrip(false)
+      }
     }
-  }
+  }, [])
 
-  // Handle Video metadata loading
-  const handleVideoLoadedMetadata = (e) => {
-    const duration = e.target.duration
-    setVideoDuration(duration)
-    setCurrentTime(0.1)
-    e.target.currentTime = 0.1 // seek to 0.1s to extract first frame immediately
+  // Handle video metadata loading once per selected source.
+  const handleVideoLoadedMetadata = useCallback(
+    (e) => {
+      const duration = e.target.duration
+      if (!Number.isFinite(duration) || duration <= 0) return
 
-    // Trigger background keyframe extraction
-    generateFilmstrip(videoPreviewUrl, duration)
-  }
+      const sourceKey = `${videoPreviewUrl}:${Math.round(duration * 1000)}`
+      setVideoDuration((currentDuration) =>
+        Math.abs((currentDuration || 0) - duration) < 0.01
+          ? currentDuration
+          : duration,
+      )
+
+      if (metadataSourceRef.current === sourceKey) return
+      metadataSourceRef.current = sourceKey
+
+      const initialTime = Math.min(0.1, Math.max(duration - 0.01, 0))
+      setCurrentTime(initialTime)
+      e.target.currentTime = initialTime // Seek once to extract the default cover frame.
+
+      // Trigger background keyframe extraction
+      generateFilmstrip(videoPreviewUrl, duration)
+    },
+    [generateFilmstrip, videoPreviewUrl],
+  )
 
   // Video Seeked capture frame (initial capture only)
   const handleVideoSeeked = () => {
@@ -572,7 +692,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
           setIsCapturing(false)
         },
         "image/jpeg",
-        0.85
+        0.85,
       )
     } catch (err) {
       console.error("Frame capture error:", err)
@@ -651,51 +771,64 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     setActiveDescriptionTrigger(detectDescriptionTrigger(value, caretPosition))
   }, [])
 
-  const handleDescriptionChange = useCallback((e) => {
-    const rawDescription = e.target.value
-    const nextDescription = buildChallengeDescription(lockedChallengeHashtag, rawDescription)
-    const rawCaretPosition = e.target.selectionStart ?? rawDescription.length
+  const handleDescriptionChange = useCallback(
+    (e) => {
+      const rawDescription = e.target.value
+      const nextDescription = buildChallengeDescription(
+        lockedChallengeHashtag,
+        rawDescription,
+      )
+      const rawCaretPosition = e.target.selectionStart ?? rawDescription.length
 
-    setDescription(nextDescription)
-    updateDescriptionTrigger(nextDescription, rawCaretPosition)
+      setDescription(nextDescription)
+      updateDescriptionTrigger(nextDescription, rawCaretPosition)
 
-    if (nextDescription !== rawDescription) {
-      const nextCaretPosition = Math.min(rawCaretPosition, nextDescription.length)
-      window.requestAnimationFrame(() => {
-        if (!descriptionInputRef.current) return
-        descriptionInputRef.current.setSelectionRange(nextCaretPosition, nextCaretPosition)
-      })
-    }
-  }, [
-    lockedChallengeHashtag,
-    updateDescriptionTrigger,
-  ])
+      if (nextDescription !== rawDescription) {
+        const nextCaretPosition = Math.min(
+          rawCaretPosition,
+          nextDescription.length,
+        )
+        window.requestAnimationFrame(() => {
+          if (!descriptionInputRef.current) return
+          descriptionInputRef.current.setSelectionRange(
+            nextCaretPosition,
+            nextCaretPosition,
+          )
+        })
+      }
+    },
+    [lockedChallengeHashtag, updateDescriptionTrigger],
+  )
 
-  const handleDescriptionCursorUpdate = useCallback((e) => {
-    const input = e.currentTarget
-    if (lockedChallengeHashtag) {
-      const val = input.value
-      const startIndex = val.indexOf(lockedChallengeHashtag)
-      if (startIndex !== -1) {
-        const endIndex = startIndex + lockedChallengeHashtag.length
-        const selStart = input.selectionStart ?? val.length
-        const selEnd = input.selectionEnd ?? selStart
+  const handleDescriptionCursorUpdate = useCallback(
+    (e) => {
+      const input = e.currentTarget
+      if (lockedChallengeHashtag) {
+        const val = input.value
+        const startIndex = val.indexOf(lockedChallengeHashtag)
+        if (startIndex !== -1) {
+          const endIndex = startIndex + lockedChallengeHashtag.length
+          const selStart = input.selectionStart ?? val.length
+          const selEnd = input.selectionEnd ?? selStart
 
-        // Snap the caret if it is strictly inside the hashtag range
-        if (selStart === selEnd) {
-          if (selStart > startIndex && selStart < endIndex) {
-            const midPoint = startIndex + Math.floor(lockedChallengeHashtag.length / 2)
-            const snapPos = selStart < midPoint ? startIndex : endIndex
-            input.setSelectionRange(snapPos, snapPos)
-            updateDescriptionTrigger(val, snapPos)
-            return
+          // Snap the caret if it is strictly inside the hashtag range
+          if (selStart === selEnd) {
+            if (selStart > startIndex && selStart < endIndex) {
+              const midPoint =
+                startIndex + Math.floor(lockedChallengeHashtag.length / 2)
+              const snapPos = selStart < midPoint ? startIndex : endIndex
+              input.setSelectionRange(snapPos, snapPos)
+              updateDescriptionTrigger(val, snapPos)
+              return
+            }
           }
         }
       }
-    }
-    const caretPosition = input.selectionStart ?? input.value.length
-    updateDescriptionTrigger(input.value, caretPosition)
-  }, [lockedChallengeHashtag, updateDescriptionTrigger])
+      const caretPosition = input.selectionStart ?? input.value.length
+      updateDescriptionTrigger(input.value, caretPosition)
+    },
+    [lockedChallengeHashtag, updateDescriptionTrigger],
+  )
 
   const handleDescriptionScroll = useCallback((e) => {
     if (!descriptionHighlightRef.current) return
@@ -703,121 +836,154 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     descriptionHighlightRef.current.scrollLeft = e.currentTarget.scrollLeft
   }, [])
 
-  const applyDescriptionSuggestion = useCallback((item) => {
-    if (!activeDescriptionTrigger) return
+  const applyDescriptionSuggestion = useCallback(
+    (item) => {
+      if (!activeDescriptionTrigger) return
 
-    const completionValue = activeDescriptionTrigger.type === "mention"
-      ? getMentionUsername(item)
-      : getHashtagName(item)
+      const completionValue =
+        activeDescriptionTrigger.type === "mention"
+          ? getMentionUsername(item)
+          : getHashtagName(item)
 
-    if (!completionValue) return
+      if (!completionValue) return
 
-    const completion = `${activeDescriptionTrigger.marker}${completionValue}`
-    const suffix = description.slice(activeDescriptionTrigger.end)
-    const separator = suffix && /^\s/.test(suffix) ? "" : " "
-    const nextDescription = `${description.slice(0, activeDescriptionTrigger.start)}${completion}${separator}${suffix}`
-      .slice(0, DESCRIPTION_MAX_LENGTH)
-    const nextCaretPosition = Math.min(
-      activeDescriptionTrigger.start + completion.length + separator.length,
-      nextDescription.length
-    )
+      const completion = `${activeDescriptionTrigger.marker}${completionValue}`
+      const suffix = description.slice(activeDescriptionTrigger.end)
+      const separator = suffix && /^\s/.test(suffix) ? "" : " "
+      const nextDescription =
+        `${description.slice(0, activeDescriptionTrigger.start)}${completion}${separator}${suffix}`.slice(
+          0,
+          DESCRIPTION_MAX_LENGTH,
+        )
+      const nextCaretPosition = Math.min(
+        activeDescriptionTrigger.start + completion.length + separator.length,
+        nextDescription.length,
+      )
 
-    setDescription(nextDescription)
-    setActiveDescriptionTrigger(null)
-    setDebouncedDescriptionTrigger(null)
-    setActiveSuggestionIndex(0)
+      setDescription(nextDescription)
+      setActiveDescriptionTrigger(null)
+      setDebouncedDescriptionTrigger(null)
+      setActiveSuggestionIndex(0)
 
-    window.requestAnimationFrame(() => {
-      if (!descriptionInputRef.current) return
-      descriptionInputRef.current.focus()
-      descriptionInputRef.current.setSelectionRange(nextCaretPosition, nextCaretPosition)
-    })
-  }, [activeDescriptionTrigger, description])
+      window.requestAnimationFrame(() => {
+        if (!descriptionInputRef.current) return
+        descriptionInputRef.current.focus()
+        descriptionInputRef.current.setSelectionRange(
+          nextCaretPosition,
+          nextCaretPosition,
+        )
+      })
+    },
+    [activeDescriptionTrigger, description],
+  )
 
-  const handleDescriptionKeyDown = useCallback((e) => {
-    if (lockedChallengeHashtag) {
-      const val = e.currentTarget.value
-      const startIndex = val.indexOf(lockedChallengeHashtag)
-      if (startIndex !== -1) {
-        const endIndex = startIndex + lockedChallengeHashtag.length
-        const selectionStart = e.currentTarget.selectionStart ?? 0
-        const selectionEnd = e.currentTarget.selectionEnd ?? selectionStart
-        const key = e.key
-        const isPrintableInput = key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey
+  const handleDescriptionKeyDown = useCallback(
+    (e) => {
+      if (lockedChallengeHashtag) {
+        const val = e.currentTarget.value
+        const startIndex = val.indexOf(lockedChallengeHashtag)
+        if (startIndex !== -1) {
+          const endIndex = startIndex + lockedChallengeHashtag.length
+          const selectionStart = e.currentTarget.selectionStart ?? 0
+          const selectionEnd = e.currentTarget.selectionEnd ?? selectionStart
+          const key = e.key
+          const isPrintableInput =
+            key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey
 
-        const selectionOverlaps = selectionStart < endIndex && selectionEnd > startIndex
-        const isProtectedBackspace = key === "Backspace" && selectionStart === selectionEnd && selectionStart === endIndex
-        const isProtectedDelete = key === "Delete" && selectionStart === selectionEnd && selectionStart === startIndex
+          const selectionOverlaps =
+            selectionStart < endIndex && selectionEnd > startIndex
+          const isProtectedBackspace =
+            key === "Backspace" &&
+            selectionStart === selectionEnd &&
+            selectionStart === endIndex
+          const isProtectedDelete =
+            key === "Delete" &&
+            selectionStart === selectionEnd &&
+            selectionStart === startIndex
 
-        if (selectionOverlaps) {
-          const isModifyingKey = isPrintableInput || key === "Backspace" || key === "Delete" || key === "Enter"
-          const isClipboardEdit = (e.metaKey || e.ctrlKey) && (key.toLowerCase() === "x" || key.toLowerCase() === "v")
+          if (selectionOverlaps) {
+            const isModifyingKey =
+              isPrintableInput ||
+              key === "Backspace" ||
+              key === "Delete" ||
+              key === "Enter"
+            const isClipboardEdit =
+              (e.metaKey || e.ctrlKey) &&
+              (key.toLowerCase() === "x" || key.toLowerCase() === "v")
 
-          if (isModifyingKey || isClipboardEdit) {
+            if (isModifyingKey || isClipboardEdit) {
+              e.preventDefault()
+              return
+            }
+          }
+
+          if (isProtectedBackspace || isProtectedDelete) {
             e.preventDefault()
             return
           }
         }
-
-        if (isProtectedBackspace || isProtectedDelete) {
-          e.preventDefault()
-          return
-        }
       }
-    }
 
-    if (!showDescriptionSuggestions) return
+      if (!showDescriptionSuggestions) return
 
-    if (e.key === "Escape") {
-      setActiveDescriptionTrigger(null)
-      setDebouncedDescriptionTrigger(null)
-      return
-    }
+      if (e.key === "Escape") {
+        setActiveDescriptionTrigger(null)
+        setDebouncedDescriptionTrigger(null)
+        return
+      }
 
-    if (!activeSuggestions.length) return
+      if (!activeSuggestions.length) return
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault()
-      setActiveSuggestionIndex((index) => (index + 1) % activeSuggestions.length)
-      return
-    }
+      if (e.key === "ArrowDown") {
+        e.preventDefault()
+        setActiveSuggestionIndex(
+          (index) => (index + 1) % activeSuggestions.length,
+        )
+        return
+      }
 
-    if (e.key === "ArrowUp") {
-      e.preventDefault()
-      setActiveSuggestionIndex((index) =>
-        index === 0 ? activeSuggestions.length - 1 : index - 1
-      )
-      return
-    }
+      if (e.key === "ArrowUp") {
+        e.preventDefault()
+        setActiveSuggestionIndex((index) =>
+          index === 0 ? activeSuggestions.length - 1 : index - 1,
+        )
+        return
+      }
 
-    if (e.key === "Enter" || e.key === "Tab") {
-      e.preventDefault()
-      applyDescriptionSuggestion(activeSuggestions[activeSuggestionIndex])
-    }
-  }, [
-    activeSuggestionIndex,
-    activeSuggestions,
-    applyDescriptionSuggestion,
-    lockedChallengeHashtag,
-    showDescriptionSuggestions,
-  ])
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault()
+        applyDescriptionSuggestion(activeSuggestions[activeSuggestionIndex])
+      }
+    },
+    [
+      activeSuggestionIndex,
+      activeSuggestions,
+      applyDescriptionSuggestion,
+      lockedChallengeHashtag,
+      showDescriptionSuggestions,
+    ],
+  )
 
-  const handleDescriptionProtectedClipboard = useCallback((e) => {
-    if (!lockedChallengeHashtag) return
+  const handleDescriptionProtectedClipboard = useCallback(
+    (e) => {
+      if (!lockedChallengeHashtag) return
 
-    const val = e.currentTarget.value
-    const startIndex = val.indexOf(lockedChallengeHashtag)
-    if (startIndex === -1) return
-    const endIndex = startIndex + lockedChallengeHashtag.length
+      const val = e.currentTarget.value
+      const startIndex = val.indexOf(lockedChallengeHashtag)
+      if (startIndex === -1) return
+      const endIndex = startIndex + lockedChallengeHashtag.length
 
-    const selectionStart = e.currentTarget.selectionStart ?? 0
-    const selectionEnd = e.currentTarget.selectionEnd ?? selectionStart
+      const selectionStart = e.currentTarget.selectionStart ?? 0
+      const selectionEnd = e.currentTarget.selectionEnd ?? selectionStart
 
-    const selectionOverlaps = selectionStart < endIndex && selectionEnd > startIndex
-    if (selectionOverlaps) {
-      e.preventDefault()
-    }
-  }, [lockedChallengeHashtag])
+      const selectionOverlaps =
+        selectionStart < endIndex && selectionEnd > startIndex
+      if (selectionOverlaps) {
+        e.preventDefault()
+      }
+    },
+    [lockedChallengeHashtag],
+  )
 
   // Form Submit Handler
   const handleSubmit = async (e) => {
@@ -844,7 +1010,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     try {
       const formData = new FormData()
       formData.append("Title", title.trim())
-      formData.append("Description", buildChallengeDescription(lockedChallengeHashtag, description).trim())
+      formData.append(
+        "Description",
+        buildChallengeDescription(lockedChallengeHashtag, description).trim(),
+      )
       formData.append("Privacy", privacy)
       formData.append("VideoFile", videoFile)
 
@@ -858,7 +1027,11 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
       await createReel(formData).unwrap()
     } catch (err) {
-      setGeneralError(err?.data?.message || err?.message || "Failed to upload Reel. Please try again.")
+      setGeneralError(
+        err?.data?.message ||
+          err?.message ||
+          "Failed to upload Reel. Please try again.",
+      )
     }
   }
 
@@ -879,10 +1052,11 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
             event.preventDefault()
             applyDescriptionSuggestion(item)
           }}
-          className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${isActive
-            ? "bg-red-50 text-[#990011]"
-            : "text-gray-700 hover:bg-gray-50"
-            }`}
+          className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+            isActive
+              ? "bg-red-50 text-[#990011]"
+              : "text-gray-700 hover:bg-gray-50"
+          }`}
         >
           <Avatar
             size={30}
@@ -892,8 +1066,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
             className="shrink-0"
           />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold">{displayName}</span>
-            <span className="block truncate text-xs text-gray-500">@{username}</span>
+            <span className="block truncate text-sm font-semibold">
+              {displayName}
+            </span>
+            <span className="block truncate text-xs text-gray-500">
+              @{username}
+            </span>
           </span>
         </button>
       )
@@ -911,16 +1089,21 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
           event.preventDefault()
           applyDescriptionSuggestion(item)
         }}
-        className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${isActive
-          ? "bg-red-50 text-[#990011]"
-          : "text-gray-700 hover:bg-gray-50"
-          }`}
+        className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+          isActive
+            ? "bg-red-50 text-[#990011]"
+            : "text-gray-700 hover:bg-gray-50"
+        }`}
       >
-        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-white" : "bg-gray-100"}`}>
+        <span
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-white" : "bg-gray-100"}`}
+        >
           <Hash size={15} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold">#{hashtagName}</span>
+          <span className="block truncate text-sm font-semibold">
+            #{hashtagName}
+          </span>
           <span className="block truncate text-xs text-gray-500">
             {item.isChallenge ? "Challenge" : `${item.useCount || 0} uses`}
           </span>
@@ -943,8 +1126,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
       bodyClassName="p-4 sm:p-6 overflow-y-auto h-[calc(100vh-76px)] min-[426px]:h-auto min-[426px]:max-h-[80vh] scrollbar-thin flex flex-col"
     >
       {/* Dynamic Keyframes Injector */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes mockMarquee {
           0% { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-33.33%, 0, 0); }
@@ -982,16 +1166,20 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         .cover-slider-range::-webkit-slider-thumb:hover {
           transform: scale(1.15);
         }
-      `}} />
+      `,
+        }}
+      />
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
         {/* API Error Notification */}
         {(generalError || apiError) && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-2.5 text-sm animate-shake">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">Upload failed</p>
-              <p className="opacity-90">{generalError || "Something went wrong. Please check your file formats and network."}</p>
+              <p className="opacity-90">
+                {generalError ||
+                  "Something went wrong. Please check your file formats and network."}
+              </p>
             </div>
           </div>
         )}
@@ -1005,10 +1193,11 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
               onDragLeave={handleVideoDrag}
               onDrop={handleVideoDrop}
               onClick={() => videoInputRef.current?.click()}
-              className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-2xl h-[360px] cursor-pointer transition-all duration-300 ${isVideoDragging
-                ? "border-[#990011] bg-red-50/30 scale-[0.99] shadow-inner"
-                : "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
-                }`}
+              className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-2xl h-[360px] cursor-pointer transition-all duration-300 ${
+                isVideoDragging
+                  ? "border-[#990011] bg-red-50/30 scale-[0.99] shadow-inner"
+                  : "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
+              }`}
             >
               <input
                 type="file"
@@ -1064,7 +1253,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       Uploaded
                     </span>
                     <span>•</span>
-                    <span>{(videoFile.size / (1024 * 1024)).toFixed(2)} MB</span>
+                    <span>
+                      {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1083,20 +1274,22 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
               <button
                 type="button"
                 onClick={() => setMobileTab("details")}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-200 ${mobileTab === "details"
-                  ? "bg-white text-gray-800 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-200 ${
+                  mobileTab === "details"
+                    ? "bg-white text-gray-800 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
                 Edit Details
               </button>
               <button
                 type="button"
                 onClick={() => setMobileTab("preview")}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-200 ${mobileTab === "preview"
-                  ? "bg-white text-gray-800 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-200 ${
+                  mobileTab === "preview"
+                    ? "bg-white text-gray-800 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
                 Live Preview
               </button>
@@ -1104,10 +1297,13 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
             {/* Side-by-side editing layout */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8 items-start">
-
               {/* Left Column (Details and Cover thumbnail selector) */}
-              <div className={`md:col-span-2 flex-col gap-5 text-left ${mobileTab === "details" ? "flex" : "hidden md:flex"}`}>
-                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Details</h3>
+              <div
+                className={`md:col-span-2 flex-col gap-5 text-left ${mobileTab === "details" ? "flex" : "hidden md:flex"}`}
+              >
+                <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+                  Details
+                </h3>
 
                 {/* Title */}
                 <TextInput
@@ -1126,7 +1322,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
                 {/* Description */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="description" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="description"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Description
                   </label>
                   <div className="relative">
@@ -1134,16 +1333,31 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       <div
                         ref={descriptionHighlightRef}
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800 whitespace-pre-wrap break-words"
+                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl p-3 text-sm leading-5 text-gray-800"
+                        style={{
+                          fontFamily: "inherit",
+                          whiteSpace: "pre-wrap",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word",
+                        }}
                       >
-                        {renderHighlightedDescription(description, "text-[#2b5db0]")}
+                        {renderHighlightedDescription(
+                          description,
+                          "text-[#2b5db0]",
+                        )}
                       </div>
                       <textarea
                         ref={descriptionInputRef}
                         id="description"
                         placeholder="What's this video about? Add tags like #catspeak..."
                         value={description}
-                        onChange={handleDescriptionChange}
+                        onChange={(e) => {
+                          handleDescriptionChange(e)
+                          // Auto-resize textarea to fit content
+                          const el = e.target
+                          el.style.height = "auto"
+                          el.style.height = el.scrollHeight + "px"
+                        }}
                         onKeyDown={handleDescriptionKeyDown}
                         onKeyUp={handleDescriptionCursorUpdate}
                         onClick={handleDescriptionCursorUpdate}
@@ -1160,6 +1374,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         maxLength={DESCRIPTION_MAX_LENGTH}
                         rows={3}
                         className="relative z-10 min-h-[84px] w-full resize-none rounded-xl bg-transparent p-3 text-sm leading-5 text-transparent caret-gray-900 outline-none placeholder:text-gray-400"
+                        style={{
+                          fontFamily: "inherit",
+                          overflowY: "hidden",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word",
+                        }}
                       />
                     </div>
 
@@ -1170,13 +1390,20 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       >
                         {isFetchingDescriptionSuggestions ? (
                           <div className="flex items-center gap-2 px-3 py-3 text-sm text-gray-500">
-                            <Loader2 size={15} className="animate-spin text-[#990011]" />
+                            <Loader2
+                              size={15}
+                              className="animate-spin text-[#990011]"
+                            />
                             <span>Searching...</span>
                           </div>
                         ) : activeSuggestions.length > 0 ? (
-                          activeSuggestions.map((item, index) => renderDescriptionSuggestion(item, index))
+                          activeSuggestions.map((item, index) =>
+                            renderDescriptionSuggestion(item, index),
+                          )
                         ) : (
-                          <div className="px-3 py-3 text-sm text-gray-500">No matches found</div>
+                          <div className="px-3 py-3 text-sm text-gray-500">
+                            No matches found
+                          </div>
                         )}
                       </div>
                     )}
@@ -1192,11 +1419,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     Privacy
                   </label>
                   <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { value: "Public", label: "Public", icon: Globe },
-                      { value: "FriendsOnly", label: "Friends Only", icon: Users },
-                      { value: "Private", label: "Private", icon: Lock },
-                    ].map((item) => {
+                    {PRIVACY_OPTIONS.map((item) => {
                       const IconComponent = item.icon
                       const isSelected = privacy === item.value
                       return (
@@ -1204,13 +1427,23 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           key={item.value}
                           type="button"
                           onClick={() => setPrivacy(item.value)}
-                          className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all duration-200 ${isSelected
-                            ? "border-[#990011] bg-red-50/40 text-[#990011] shadow-sm font-medium scale-[1.01]"
-                            : "border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50/50"
-                            }`}
+                          className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all duration-200 ${
+                            isSelected
+                              ? "border-[#990011] bg-red-50/40 text-[#990011] shadow-sm font-medium scale-[1.01]"
+                              : "border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50/50"
+                          }`}
                         >
-                          <IconComponent size={14} className={isSelected ? "text-[#990011] mb-1" : "text-gray-400 mb-1"} />
-                          <span className="text-xs font-semibold">{item.label}</span>
+                          <IconComponent
+                            size={14}
+                            className={
+                              isSelected
+                                ? "text-[#990011] mb-1"
+                                : "text-gray-400 mb-1"
+                            }
+                          />
+                          <span className="text-xs font-semibold">
+                            {item.label}
+                          </span>
                         </button>
                       )
                     })}
@@ -1244,14 +1477,21 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
                   <div className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 border border-gray-200/60 rounded-2xl mt-1.5 animate-fadeIn">
                     {/* Video Player Container (always mounted, hidden if coverType !== 'frame') */}
-                    <div className={`relative aspect-[9/16] h-[160px] sm:h-[180px] rounded-xl overflow-hidden bg-black border border-gray-200/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0 ${coverType !== "frame" ? "absolute -left-[9999px] w-[1px] h-[1px] opacity-0 pointer-events-none" : ""
-                      }`}>
+                    <div
+                      className={`relative aspect-[9/16] h-[160px] sm:h-[180px] rounded-xl overflow-hidden bg-black border border-gray-200/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0 ${
+                        coverType !== "frame"
+                          ? "absolute -left-[9999px] w-[1px] h-[1px] opacity-0 pointer-events-none"
+                          : ""
+                      }`}
+                    >
                       <video
                         ref={videoRef}
-                        src={videoPreviewUrl}
+                        src={
+                          coverType === "frame" ? videoPreviewUrl : undefined
+                        }
                         muted
                         playsInline
-                        preload="auto"
+                        preload="metadata"
                         onLoadedMetadata={handleVideoLoadedMetadata}
                         onDurationChange={handleVideoLoadedMetadata}
                         onSeeked={handleVideoSeeked}
@@ -1274,7 +1514,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         <div className="flex flex-col gap-1.5">
                           <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 tracking-wider">
                             <span>SCRUB VIDEO TIMELINE</span>
-                            <span className="font-mono text-[#990011]">{formatTime(currentTime)} / {formatTime(videoDuration)}</span>
+                            <span className="font-mono text-[#990011]">
+                              {formatTime(currentTime)} /{" "}
+                              {formatTime(videoDuration)}
+                            </span>
                           </div>
 
                           <input
@@ -1292,12 +1535,16 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
                         {/* Quick Keyframes Filmstrip */}
                         <div className="flex flex-col gap-1.5">
-                          <span className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Quick Keyframes</span>
+                          <span className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">
+                            Quick Keyframes
+                          </span>
 
                           {isExtractingFilmstrip ? (
                             <div className="flex items-center justify-center h-14 bg-white border border-gray-150 rounded-xl gap-2 shadow-sm">
                               <div className="w-3.5 h-3.5 border-2 border-[#990011] border-t-transparent rounded-full animate-spin" />
-                              <span className="text-[10px] text-gray-400 font-bold">Extracting keyframes...</span>
+                              <span className="text-[10px] text-gray-400 font-bold">
+                                Extracting keyframes...
+                              </span>
                             </div>
                           ) : filmstripFrames.length > 0 ? (
                             <div className="grid grid-cols-6 gap-1 bg-white p-1 border border-gray-150 rounded-xl shadow-sm">
@@ -1305,11 +1552,14 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                                 <button
                                   key={index}
                                   type="button"
-                                  onClick={() => handleKeyframeSelect(frame.time)}
-                                  className={`relative aspect-[9/16] rounded-md overflow-hidden bg-gray-100 border transition-all duration-200 hover:scale-[1.03] ${Math.abs(currentTime - frame.time) < 0.15
-                                    ? "border-[#990011] ring-1 ring-[#990011] scale-[1.01]"
-                                    : "border-transparent hover:border-gray-300"
-                                    }`}
+                                  onClick={() =>
+                                    handleKeyframeSelect(frame.time)
+                                  }
+                                  className={`relative aspect-[9/16] rounded-md overflow-hidden bg-gray-100 border transition-all duration-200 hover:scale-[1.03] ${
+                                    Math.abs(currentTime - frame.time) < 0.15
+                                      ? "border-[#990011] ring-1 ring-[#990011] scale-[1.01]"
+                                      : "border-transparent hover:border-gray-300"
+                                  }`}
                                 >
                                   <img
                                     src={frame.url}
@@ -1324,13 +1574,17 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                             </div>
                           ) : (
                             <div className="flex items-center justify-center h-14 bg-white border border-gray-150 rounded-xl shadow-sm">
-                              <span className="text-[10px] text-gray-400 font-bold">No frames available</span>
+                              <span className="text-[10px] text-gray-400 font-bold">
+                                No frames available
+                              </span>
                             </div>
                           )}
                         </div>
 
                         <p className="text-[9px] text-gray-400 leading-normal font-medium mt-1">
-                          Scrub the timeline or select a quick keyframe to auto-update the cover image. Your chosen frame will be uploaded as the Reel's cover thumbnail.
+                          Scrub the timeline or select a quick keyframe to
+                          auto-update the cover image. Your chosen frame will be
+                          uploaded as the Reel's cover thumbnail.
                         </p>
                       </div>
                     ) : (
@@ -1349,47 +1603,62 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         </div>
 
                         <div className="flex-1 text-left flex flex-col justify-center py-1 w-full">
-                          {!coverPreviewUrl || coverFile?.name === "cover.jpg" ? (
+                          {!coverPreviewUrl ||
+                          coverFile?.name === "cover.jpg" ? (
                             <div
                               onDragEnter={handleCoverDrag}
                               onDragOver={handleCoverDrag}
                               onDragLeave={handleCoverDrag}
                               onDrop={handleCoverDrop}
                               onClick={() => coverInputRef.current?.click()}
-                              className={`border border-dashed rounded-xl h-[96px] flex flex-col items-center justify-center cursor-pointer transition-all duration-250 ${isCoverDragging
-                                ? "border-[#990011] bg-red-50/30"
-                                : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 bg-white"
-                                }`}
+                              className={`border border-dashed rounded-xl h-[96px] flex flex-col items-center justify-center cursor-pointer transition-all duration-250 ${
+                                isCoverDragging
+                                  ? "border-[#990011] bg-red-50/30"
+                                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 bg-white"
+                              }`}
                             >
                               <input
                                 type="file"
                                 ref={coverInputRef}
-                                onChange={(e) => handleCoverSelect(e.target.files?.[0])}
+                                onChange={(e) =>
+                                  handleCoverSelect(e.target.files?.[0])
+                                }
                                 accept="image/png,image/jpeg,image/webp,image/jpg"
                                 className="hidden"
                               />
-                              <UploadCloud size={18} className="text-[#990011] mb-1" />
-                              <p className="text-[10px] font-bold text-gray-700">Upload custom cover</p>
-                              <p className="text-[8px] text-gray-400 mt-0.5">PNG, JPG up to 5MB</p>
+                              <UploadCloud
+                                size={18}
+                                className="text-[#990011] mb-1"
+                              />
+                              <p className="text-[10px] font-bold text-gray-700">
+                                Upload custom cover
+                              </p>
+                              <p className="text-[8px] text-gray-400 mt-0.5">
+                                PNG, JPG up to 5MB
+                              </p>
                             </div>
                           ) : (
                             <div className="flex flex-col gap-1">
-                              <span className="text-[9px] text-[#990011] font-bold uppercase tracking-wider">Custom Image Uploaded</span>
+                              <span className="text-[9px] text-[#990011] font-bold uppercase tracking-wider">
+                                Custom Image Uploaded
+                              </span>
                               <div className="text-xs font-bold text-gray-700 truncate max-w-[200px] mt-0.5">
                                 {coverFile?.name}
                               </div>
                               <div className="text-[9px] text-gray-400 font-semibold font-mono">
-                                {(coverFile?.size / (1024 * 1024)).toFixed(2)} MB
+                                {(coverFile?.size / (1024 * 1024)).toFixed(2)}{" "}
+                                MB
                               </div>
                               <button
                                 type="button"
                                 onClick={() => {
                                   setCoverFile(null)
-                                  if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
+                                  if (coverPreviewUrl)
+                                    URL.revokeObjectURL(coverPreviewUrl)
                                   setCoverPreviewUrl("")
                                   setCoverType("frame") // Revert back to frame extraction
                                   // Seek back to 0.1 to reset default frame preview
-                                  if (videoRef.current) {
+                                  if (videoRef.current?.readyState > 0) {
                                     videoRef.current.currentTime = 0.1
                                   }
                                 }}
@@ -1404,34 +1673,39 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       </div>
                     )}
                   </div>
-
                 </div>
               </div>
 
               {/* Right Column (Live Mockup Preview) */}
-              <div className={`flex-col gap-4 text-left border-l-0 md:border-l border-gray-100 pl-0 md:pl-6 h-full ${mobileTab === "preview" ? "flex" : "hidden md:flex"}`}>
+              <div
+                className={`flex-col gap-4 text-left border-l-0 md:border-l border-gray-100 pl-0 md:pl-6 h-full ${mobileTab === "preview" ? "flex" : "hidden md:flex"}`}
+              >
                 <div className="flex flex-col gap-1 border-b border-gray-100 pb-2">
-                  <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Preview</h3>
+                  <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+                    Preview
+                  </h3>
 
                   {/* Live Feed Mode Tabs selector */}
                   <div className="flex bg-gray-200/60 p-0.5 rounded-lg text-[9px] font-bold shadow-sm mt-1.5">
                     <button
                       type="button"
                       onClick={() => setPreviewMode("video")}
-                      className={`flex-1 py-1 rounded-md transition-all ${previewMode === "video"
-                        ? "bg-white text-gray-800 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                        }`}
+                      className={`flex-1 py-1 rounded-md transition-all ${
+                        previewMode === "video"
+                          ? "bg-white text-gray-800 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
                     >
                       Video Playback
                     </button>
                     <button
                       type="button"
                       onClick={() => setPreviewMode("cover")}
-                      className={`flex-1 py-1 rounded-md transition-all ${previewMode === "cover"
-                        ? "bg-white text-gray-800 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                        }`}
+                      className={`flex-1 py-1 rounded-md transition-all ${
+                        previewMode === "cover"
+                          ? "bg-white text-gray-800 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
                     >
                       Cover Thumbnail
                     </button>
@@ -1445,7 +1719,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-4.5 bg-gray-800 rounded-b-xl z-30 flex items-center justify-between px-4 text-[7px] text-white/95 font-semibold">
                       <span className="font-mono">9:41</span>
                       <div className="flex items-center gap-0.5">
-                        <span className="w-1.5 h-1.5 bg-white/20 rounded-full flex items-center justify-center text-[5px]">⚡</span>
+                        <span className="w-1.5 h-1.5 bg-white/20 rounded-full flex items-center justify-center text-[5px]">
+                          ⚡
+                        </span>
                         <div className="w-2.5 h-1.2 border border-white/60 rounded-[2px] p-0.2 flex items-center">
                           <div className="w-full h-full bg-white rounded-[0.5px]" />
                         </div>
@@ -1461,7 +1737,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           loop
                           muted
                           playsInline
-                          preload="auto"
+                          preload="metadata"
                           className="w-full h-full object-cover brightness-[0.80] transition-all duration-300"
                         />
                       ) : coverPreviewUrl ? (
@@ -1472,15 +1748,22 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-950 to-red-950 flex flex-col items-center justify-center p-3 text-center">
-                          <Video className="text-gray-700 mb-1 animate-pulse" size={24} />
-                          <span className="text-[9px] text-gray-500">Thumbnail Previewing</span>
+                          <Video
+                            className="text-gray-700 mb-1 animate-pulse"
+                            size={24}
+                          />
+                          <span className="text-[9px] text-gray-500">
+                            Thumbnail Previewing
+                          </span>
                         </div>
                       )}
                     </div>
 
                     {/* Feed Tabs overlay */}
                     <div className="absolute top-6 left-0 right-0 flex justify-center gap-2 text-[9px] font-bold text-white/60 z-10">
-                      <span className="cursor-pointer hover:text-white">Following</span>
+                      <span className="cursor-pointer hover:text-white">
+                        Following
+                      </span>
                       <span className="text-white relative flex flex-col items-center">
                         For You
                         <span className="absolute -bottom-0.5 w-1 h-1 bg-white rounded-full" />
@@ -1500,23 +1783,35 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
 
                       <div className="flex flex-col items-center">
                         <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-black/60 shadow-sm cursor-pointer active:scale-95 transition-all">
-                          <Heart size={14} className="text-white fill-white/10" />
+                          <Heart
+                            size={14}
+                            className="text-white fill-white/10"
+                          />
                         </div>
-                        <span className="text-[8px] text-white/90 font-medium mt-0.5">1.2K</span>
+                        <span className="text-[8px] text-white/90 font-medium mt-0.5">
+                          1.2K
+                        </span>
                       </div>
 
                       <div className="flex flex-col items-center">
                         <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-black/60 shadow-sm cursor-pointer active:scale-95 transition-all">
-                          <MessageCircle size={14} className="text-white fill-white/10" />
+                          <MessageCircle
+                            size={14}
+                            className="text-white fill-white/10"
+                          />
                         </div>
-                        <span className="text-[8px] text-white/90 font-medium mt-0.5">0</span>
+                        <span className="text-[8px] text-white/90 font-medium mt-0.5">
+                          0
+                        </span>
                       </div>
 
                       <div className="flex flex-col items-center">
                         <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-black/60 shadow-sm cursor-pointer active:scale-95 transition-all">
                           <Share size={12} className="text-white" />
                         </div>
-                        <span className="text-[8px] text-white/90 font-medium mt-0.5">Share</span>
+                        <span className="text-[8px] text-white/90 font-medium mt-0.5">
+                          Share
+                        </span>
                       </div>
 
                       <div className="w-7 h-7 rounded-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-white/20 flex items-center justify-center animate-[spin_4s_linear_infinite] mt-1 shadow-md">
@@ -1528,17 +1823,24 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     <div className="absolute bottom-0 left-0 right-10 p-3 bg-gradient-to-t from-black/90 via-black/30 to-transparent z-10 flex flex-col gap-1 text-left text-white/95">
                       <span className="font-bold text-[9px] flex items-center gap-0.5">
                         @you
-                        <span className="w-2.5 h-2.5 bg-blue-500 rounded-full flex items-center justify-center text-[5px] text-white">✓</span>
+                        <span className="w-2.5 h-2.5 bg-blue-500 rounded-full flex items-center justify-center text-[5px] text-white">
+                          ✓
+                        </span>
                       </span>
 
                       <p className="text-[9px] leading-relaxed font-semibold line-clamp-1">
-                        <span className="text-[#990011] font-bold mr-1">#{privacy}</span>
+                        <span className="text-[#990011] font-bold mr-1">
+                          #{privacy}
+                        </span>
                         {title || "Untitled Reel"}
                       </p>
 
                       {description && (
                         <p className="text-[8px] text-white/80 line-clamp-2 leading-relaxed opacity-90 whitespace-pre-wrap break-words">
-                          {renderHighlightedDescription(description, "font-bold text-sky-200")}
+                          {renderHighlightedDescription(
+                            description,
+                            "font-bold text-sky-200",
+                          )}
                         </p>
                       )}
 
@@ -1548,11 +1850,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           <div
                             className="inline-block whitespace-nowrap pl-1 text-[7px] text-white/80 animate-marquee"
                             style={{
-                              animation: 'mockMarquee 8s linear infinite',
-                              display: 'inline-block'
+                              animation: "mockMarquee 8s linear infinite",
+                              display: "inline-block",
                             }}
                           >
-                            Original Audio - you • Original Audio - you • Original Audio - you •&nbsp;
+                            Original Audio - you • Original Audio - you •
+                            Original Audio - you •&nbsp;
                           </div>
                         </div>
                       </div>
@@ -1560,7 +1863,6 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         )}

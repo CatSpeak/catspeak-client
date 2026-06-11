@@ -1,51 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react"
-import { useLocation } from "react-router-dom"
+import React from "react"
 import { navLinks } from "../../config/navigation"
-import { getActiveDesktopNavKey } from "../../hooks/useActiveLink"
 import DesktopCommunityDropdown from "./DesktopCommunityDropdown"
 import DesktopNavItem from "./DesktopNavItem"
 
 const DesktopNav = () => {
-  const location = useLocation()
-  const routeActiveKey = useMemo(
-    () => getActiveDesktopNavKey(location.pathname),
-    [location.pathname],
-  )
-  const [activeKey, setActiveKey] = useState(routeActiveKey)
-
-  useEffect(() => {
-    setActiveKey(routeActiveKey)
-  }, [routeActiveKey])
-
   return (
-    <nav
-      role="navigation"
-      aria-label="Main"
-      className="flex items-center gap-0.5 rounded-full border border-cath-red-700/12 bg-white/55 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-md supports-[backdrop-filter]:bg-white/45"
-    >
+    <nav className="hidden items-center justify-between rounded-full bg-[linear-gradient(180deg,#FAC126_0%,#990011_100%)] p-1 gap-2 text-white shadow-[0_4px_12px_rgba(194,19,26,0.2)] lg:flex">
       {navLinks.map(({ key, hasDropdown, noActive }) => {
-        if (key === "cart" || key === "connect") return null
-
         if (hasDropdown && key === "community") {
-          return (
-            <DesktopCommunityDropdown
-              key={key}
-              navKey={key}
-              isActive={activeKey === key}
-              onActivate={() => setActiveKey(key)}
-            />
-          )
+          return <DesktopCommunityDropdown key={key} navKey={key} />
         }
-
-        return (
-          <DesktopNavItem
-            key={key}
-            navKey={key}
-            noActive={noActive}
-            isActive={!noActive && activeKey === key}
-            onActivate={() => setActiveKey(key)}
-          />
-        )
+        return <DesktopNavItem key={key} navKey={key} noActive={noActive} />
       })}
     </nav>
   )

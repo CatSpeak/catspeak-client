@@ -23,7 +23,19 @@ const DatePicker = ({
     value ? dayjs(value).startOf("month") : dayjs().startOf("month"),
   )
 
-  useClickOutside(dropdownRef, () => setIsOpen(false))
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        (!portalRef.current || !portalRef.current.contains(event.target))
+      ) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   useEffect(() => {
     if (value) {
@@ -143,7 +155,7 @@ const DatePicker = ({
           if (!disabled) setIsOpen(!isOpen)
         }}
         disabled={disabled}
-        className={`hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-2xl whitespace-nowrap text-center px-4 h-12 bg-white outline-none ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
+        className={`hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-2xl whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
       >
         <span>{formatVietnameseDate(date)}</span>
       </button>
@@ -166,12 +178,12 @@ const DatePicker = ({
               >
                 <div className="relative w-full h-full">
                   <div
-                    className={`absolute z-50 ${portalCoords.flipUp ? "bottom-full mb-1" : "top-full mt-1"} ${portalCoords.forceAlignRight ? "right-0 origin-top-right" : "left-0 origin-top-left"} w-[280px] pointer-events-none`}
+                    className={`absolute z-50 ${portalCoords.flipUp ? "bottom-full mb-4" : "top-full mt-4"} ${portalCoords.forceAlignRight ? "right-0 origin-top-right" : "left-0 origin-top-left"} w-[280px] pointer-events-none`}
                   >
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto bg-white border rounded-lg shadow-xl p-4 flex flex-col"
+                      className="pointer-events-auto bg-white border border-[#E5E5E5] rounded-2xl shadow-lg p-4 flex flex-col"
                     >
                       {/* Header with Month Selection and Chevrons */}
                       <div className="flex items-center justify-between mb-4">

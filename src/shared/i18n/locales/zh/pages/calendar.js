@@ -30,6 +30,8 @@ export default {
   endTime: "结束时间",
   to: "至",
   endsOn: "结束于",
+  afterOccurrences: "发生",
+  occurrences: "次后",
   timezone: "时区",
   recurrence: {
     noRepeat: "不重复",

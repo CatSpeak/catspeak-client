@@ -54,10 +54,10 @@ const DominantVideo = ({ participant }) => {
           autoPlay
           playsInline
           muted={isLocal}
-          className="pip-video"
+          className="w-full h-full object-cover"
         />
       ) : (
-        <div className="pip-avatar-fallback" style={{ background: theme.bg }}>
+        <div className="flex items-center justify-center w-full h-full" style={{ background: theme.bg }}>
           <Avatar size={48} src={avatarUrl} name={displayName} speaking={isSpeaking} className={`!border-none ${theme.avatarClass}`} />
         </div>
       )}
@@ -87,8 +87,7 @@ const ScreenShareVideo = ({ trackRef }) => {
         autoPlay
         playsInline
         muted
-        className="pip-video"
-        style={{ objectFit: "contain", background: "#111" }}
+        className="w-full h-full object-contain bg-[#111]"
       />
       <div
         style={{
@@ -122,7 +121,7 @@ const PiPVideoContent = ({ activeScreenShare, dominant }) => {
 
   const theme = getParticipantTheme("", "?")
   return (
-    <div className="pip-avatar-fallback" style={{ background: theme.bg }}>
+    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[#2d2d2d] to-[#1a1a1a]" style={{ background: theme.bg }}>
       <Avatar size={48} name="?" className={`!border-none ${theme.avatarClass}`} />
     </div>
   )

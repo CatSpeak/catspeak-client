@@ -26,9 +26,13 @@ export const mapFormToPayload = ({
   recurrenceOption,
   selectedDays,
   recurrenceEndDate,
+  recurrenceEndType,
+  occurrenceCount,
   selectedTimezone,
   conditionsInput,
   recurrenceInterval,
+  originalStartTime,
+  originalEndTime,
 }) => {
   /** Split "cond1, cond2" → [{ conditionType:'', category:'', title:'cond1', description:'' }, …] */
   const conditions = (conditionsInput || "")
@@ -69,6 +73,8 @@ export const mapFormToPayload = ({
     isRecurring,
     startTime: toUtcInTimezone(startTime),
     endTime: toUtcInTimezone(endTime),
+    originalStartTime: toUtcInTimezone(originalStartTime || startTime),
+    originalEndTime: toUtcInTimezone(originalEndTime || endTime),
     conditions,
   }
 
@@ -87,10 +93,11 @@ export const mapFormToPayload = ({
       startTime: dayjs(toUtcInTimezone(startTime)).utc(),
       endTime: dayjs(toUtcInTimezone(endTime)).utc(),
       recurrenceStartDate: toUtcInTimezone(startTime),
-      recurrenceEndDate: recurrenceEndDate
+      recurrenceEndDate: recurrenceEndType === "DATE" && recurrenceEndDate
         ? toUtcInTimezone(recurrenceEndDate)
         : null,
-      endCondition: recurrenceEndDate ? "UNTIL_DATE" : "NEVER",
+      endCondition: recurrenceEndType === "COUNT" ? "OCCURRENCE_COUNT" : (recurrenceEndDate ? "UNTIL_DATE" : "NEVER"),
+      occurrenceCount: recurrenceEndType === "COUNT" ? Number(occurrenceCount) : 0,
       timeZone: timezoneId,
     }
   }

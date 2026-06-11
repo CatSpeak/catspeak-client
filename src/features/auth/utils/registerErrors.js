@@ -17,6 +17,7 @@ const FIELD_MAP = {
 const FIELD_TRANSLATION_MAP = {
   Username: "validationUsernameRequired",
   Email: "validationEmailRequired",
+  PhoneNumber: "validationPhoneInvalid",
   DateOfBirth: "validationDobRequired",
   PreferredLanguage: "validationLanguageRequired",
   Password: "validationPasswordRequired",

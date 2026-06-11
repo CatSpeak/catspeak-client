@@ -49,7 +49,7 @@ const Modal = ({
             } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
               /(^|\s)rounded/.test(className)
                 ? ""
-                : "rounded-none min-[426px]:rounded-[8px] min-[426px]:border min-[426px]:border-[#E5e5e5]"
+                : "rounded-none min-[426px]:rounded-3xl min-[426px]:border min-[426px]:border-[#E5e5e5]"
             } ${className}`}
             role="dialog"
             aria-modal="true"

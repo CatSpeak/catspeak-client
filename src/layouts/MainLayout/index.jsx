@@ -25,7 +25,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
   const [searchParams] = useSearchParams()
   const isLandingPage = location.pathname === "/"
 
-  // Check for reset password intent
+  // Check for reset password intent or login redirect intent
   useEffect(() => {
     // If we are on the reset-password route OR we have parameters indicating a reset
     if (location.pathname === "/reset-password") {
@@ -46,7 +46,16 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         redirectAfterLogin: null,
       })
     }
-  }, [location.pathname, searchParams])
+    // Check for login required redirect via router state
+    else if (location.state?.requireLogin) {
+      setAuthModal({
+        isOpen: true,
+        mode: "login",
+        email: "",
+        redirectAfterLogin: location.state.redirectTo || null,
+      })
+    }
+  }, [location.pathname, searchParams, location.state])
 
   const openAuthModal = (mode = "login", secondArg = null) => {
     // When switching to verify-email, the second arg is the email address

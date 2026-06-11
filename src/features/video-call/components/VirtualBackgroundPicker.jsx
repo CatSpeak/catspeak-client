@@ -8,7 +8,7 @@ import {
   useGetSampleBackgroundsQuery,
   useUploadCustomBackgroundMutation,
   useSetActiveBackgroundMutation,
-} from "@/store/api/authApi"
+} from "@/store/api/userApi"
 
 const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
   const { t } = useLanguage()

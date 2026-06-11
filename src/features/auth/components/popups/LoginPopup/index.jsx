@@ -70,8 +70,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           return
         }
 
-        const isInvalidCredentials =
-          err?.status === 401 || errMessage === "Invalid email or password"
+        const isInvalidCredentials = errMessage === "Invalid email or password"
 
         setApiError(
           isInvalidCredentials
@@ -87,12 +86,10 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
     } catch (err) {
       console.error("Login unexpected error:", err)
       setApiError(
-        isInvalidCredentials
-          ? authText.invalidCredentials
-          : err?.data?.message ||
-              err.message ||
-              t.common?.errorGeneric ||
-              "Login failed",
+        err?.data?.message ||
+          err?.message ||
+          t.common?.errorGeneric ||
+          "Login failed",
       )
     }
   }
@@ -134,20 +131,22 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
             <label className="block text-sm mb-1">
               {authText.passwordLabel}
             </label>
-            <div className="relative">
-              <TextInput
-                type="password"
-                variant="square"
-                autoComplete="current-password"
-                placeholder={authText.passwordPlaceholder}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value)
-                  setPasswordError("")
-                }}
-                className={`pr-12 ${passwordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}`}
-              />
-            </div>
+            <TextInput
+              type="password"
+              variant="square"
+              autoComplete="current-password"
+              placeholder={authText.passwordPlaceholder}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setPasswordError("")
+              }}
+              className={
+                passwordError
+                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                  : ""
+              }
+            />
             {passwordError && (
               <p className="mt-1 text-xs text-red-600">{passwordError}</p>
             )}

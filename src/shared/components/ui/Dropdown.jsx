@@ -3,9 +3,18 @@ import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import { useLanguage } from "@/shared/context/LanguageContext"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
+import { useLanguage } from "@/shared/context/LanguageContext"
+
+const removeDiacritics = (str) => {
+  if (!str) return ""
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+}
 
 const Dropdown = ({
   options = [],
@@ -29,8 +38,15 @@ const Dropdown = ({
   const { t } = useLanguage()
   const dropdownRef = useRef(null)
   const searchInputRef = useRef(null)
+  const [portalCoords, setPortalCoords] = useState(null)
+  const portalRef = useRef(null)
 
-  useClickOutside(dropdownRef, () => setIsOpen(false))
+  useClickOutside(dropdownRef, (e) => {
+    if (portalRef.current && portalRef.current.contains(e.target)) {
+      return
+    }
+    setIsOpen(false)
+  })
 
   useEffect(() => {
     if (isOpen && enableSearch) {
@@ -41,9 +57,6 @@ const Dropdown = ({
       setSearchQuery("")
     }
   }, [isOpen, enableSearch])
-
-  const [portalCoords, setPortalCoords] = useState(null)
-  const portalRef = useRef(null)
 
   useEffect(() => {
     const handleClose = () => setIsOpen(false)
@@ -89,8 +102,40 @@ const Dropdown = ({
 
   const filteredOptions = useMemo(() => {
     if (!enableSearch || !searchQuery) return options
-    const query = searchQuery.toLowerCase()
-    return options.filter((opt) => opt.label.toLowerCase().includes(query))
+    const query = searchQuery.toLowerCase().trim()
+    const cleanQuery = query.replace(/^\+/, "")
+    const queryNoDiacritics = removeDiacritics(cleanQuery).replace(/\s+/g, "")
+
+    return options.filter((opt) => {
+      const label = (opt.label || "").toLowerCase()
+      const val = (opt.value || "").toLowerCase()
+      const cleanVal = val.replace(/^\+/, "")
+      const subtitle = (opt.subtitle || "").toLowerCase()
+      const searchTerms = (opt.searchTerms || "").toLowerCase()
+      const cleanSearchTerms = searchTerms.replace(/\+/g, "")
+
+      const matchLabel = removeDiacritics(label)
+        .replace(/\s+/g, "")
+        .includes(queryNoDiacritics)
+      const matchSubtitle = removeDiacritics(subtitle)
+        .replace(/\s+/g, "")
+        .includes(queryNoDiacritics)
+      const matchSearchTerms = removeDiacritics(cleanSearchTerms)
+        .replace(/\s+/g, "")
+        .includes(queryNoDiacritics)
+
+      return (
+        label.includes(query) ||
+        val.includes(query) ||
+        cleanVal.includes(cleanQuery) ||
+        subtitle.includes(query) ||
+        searchTerms.includes(query) ||
+        cleanSearchTerms.includes(cleanQuery) ||
+        matchLabel ||
+        matchSubtitle ||
+        matchSearchTerms
+      )
+    })
   }, [options, enableSearch, searchQuery])
 
   const handleSelect = (option) => {
@@ -105,7 +150,7 @@ const Dropdown = ({
       type="button"
       onClick={() => !disabled && setIsOpen(!isOpen)}
       disabled={disabled}
-      className={`flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white ${
+      className={`flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white text-base ${
         disabled
           ? "opacity-50 cursor-not-allowed bg-gray-100"
           : "hover:bg-[#f0f0f0]"
@@ -115,7 +160,7 @@ const Dropdown = ({
         {selectedOption ? selectedOption.label : placeholder}
       </span>
       <ChevronDown
-        size={14}
+        size={16}
         className={`shrink-0 text-gray-500 transition-transform duration-200 ${
           isOpen ? "rotate-180" : ""
         }`}
@@ -127,7 +172,7 @@ const Dropdown = ({
     const textColor = isSelected ? option.color || activeColor : "inherit"
     return (
       <div
-        className={`w-full h-12 px-4 text-left text-sm rounded-md flex items-center gap-3 ${
+        className={`w-full min-h-[48px] py-2 px-4 text-left text-base rounded-md flex items-center gap-3 ${
           isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
         }`}
         style={isSelected ? { color: textColor } : {}}
@@ -140,11 +185,13 @@ const Dropdown = ({
             {option.icon}
           </div>
         )}
-        <div className="flex flex-col min-w-0">
-          <span className="truncate">{option.label}</span>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="whitespace-normal break-words leading-tight">
+            {option.label}
+          </span>
           {option.subtitle && (
             <span
-              className={`text-xs font-normal truncate ${isSelected ? "" : "text-gray-500"}`}
+              className={`text-xs font-normal whitespace-normal break-words mt-0.5 ${isSelected ? "" : "text-gray-500"}`}
             >
               {option.subtitle}
             </span>
@@ -197,7 +244,7 @@ const Dropdown = ({
                   <FluentAnimation
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
-                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-2 origin-bottom" : "top-full mt-2"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-lg bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-4 origin-bottom" : "top-full mt-4"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-2xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
                   >
                     {enableSearch && (
                       <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-gray-100">
@@ -224,7 +271,13 @@ const Dropdown = ({
                             const isSelected = option.value === value
                             return (
                               <button
-                                key={option.value || idx}
+                                key={
+                                  option.key ||
+                                  option.code ||
+                                  (option.value
+                                    ? `${option.value}-${idx}`
+                                    : idx)
+                                }
                                 type="button"
                                 onClick={() => handleSelect(option)}
                                 className="w-full focus:outline-none"

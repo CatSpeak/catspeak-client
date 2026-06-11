@@ -14,4 +14,10 @@ export default {
     china: "中国",
     english: "英语",
   },
+  logoutWarning: {
+    title: "结束通话并登出",
+    message: "您当前正在通话中。登出将断开您的连接。确定要登出吗？",
+    cancel: "取消",
+    confirm: "登出",
+  },
 }

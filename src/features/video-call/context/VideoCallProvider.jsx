@@ -3,11 +3,13 @@ import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
 import { useGetProfileQuery } from "@/features/auth"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useGetLivekitTokenMutation } from "@/store/api/livekitApi"
 import {
   useGetRoomByIdQuery,
   WaitingScreen,
   useMediaPreview,
+  useDeviceSelection,
 } from "@/features/rooms"
 import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -91,7 +93,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     useVerifyJoinRoomMutation()
 
   // --- User data ---
-  const { data: userData, isLoading: isLoadingUser } = useGetProfileQuery()
+  const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery()
   const user = userData?.data ?? null
 
   // --- Room data (fetched by roomId from URL) ---
@@ -104,6 +106,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     skip: isRoomQuerySkipped,
   })
 
+  // --- Device Selection ---
+  const deviceSelection = useDeviceSelection()
+
   // --- Media Preview (for waiting screen) ---
   const {
     micOn,
@@ -111,7 +116,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     localStream,
     toggleMic: hookToggleMic,
     toggleCamera: hookToggleCamera,
-  } = useMediaPreview()
+  } = useMediaPreview({
+    audioDeviceId: deviceSelection.selectedMic,
+    videoDeviceId: deviceSelection.selectedCamera,
+  })
 
   const toggleMic = async () => {
     await hookToggleMic()
@@ -243,7 +251,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       // Fetch LiveKit token to validate connectivity and join
       const livekitTokenBody = {
         roomId: Number(roomId),
-        participantName: user.username,
+        roomName: room?.name || `room-${roomId}`
       }
       const tokenRes = await getLivekitToken(livekitTokenBody).unwrap()
 
@@ -380,6 +388,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           onJoin={handleJoinClick}
           isFull={isRoomFull}
           maxParticipants={maxParticipants}
+          deviceSelection={deviceSelection}
         />
       </>
     )

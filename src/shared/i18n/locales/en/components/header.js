@@ -14,4 +14,10 @@ export default {
     china: "China",
     english: "English",
   },
+  logoutWarning: {
+    title: "End Call & Log Out",
+    message: "You are currently in a call. Logging out will disconnect you. Are you sure you want to log out?",
+    cancel: "Cancel",
+    confirm: "Log Out",
+  },
 }
