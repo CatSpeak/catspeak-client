@@ -13,8 +13,8 @@ import {
   RoomHeader,
 } from "@/features/video-call"
 import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
-import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
+import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -69,7 +69,9 @@ const VideoCallRoomContent = () => {
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
   const connectionState = useConnectionState()
-  const livekitReady = connectionState === ConnectionState.Connected || connectionState === ConnectionState.Reconnecting
+  const livekitReady =
+    connectionState === ConnectionState.Connected ||
+    connectionState === ConnectionState.Reconnecting
 
   if (!user) {
     return (
@@ -106,7 +108,9 @@ const VideoCallRoomContent = () => {
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
           {/* Non-AI Room subtitles — only show in non-AI rooms when enabled */}
-          {!isAISession && showRoomSubtitles && <SubtitleOverlayNonAI showRoomSubtitles={showRoomSubtitles} />}
+          {!isAISession && showRoomSubtitles && (
+            <SubtitleOverlayNonAI showRoomSubtitles={showRoomSubtitles} />
+          )}
         </div>
 
         {/* Desktop Side Panel */}
