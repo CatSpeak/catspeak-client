@@ -4,7 +4,7 @@ import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import { COLORS } from "@/shared/constants/constants"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
-import { ThumbsUp, Heart, Smile } from "lucide-react"
+import { ThumbsUp, Heart, Smile, MessageCircle } from "lucide-react"
 import { useReactToPostMutation } from "@/store/api/postsApi"
 
 import { getImageUrl } from "@/shared/utils/imageUtils"
@@ -252,6 +252,11 @@ const NewsCard = ({ news }) => {
                   <Smile className="text-yellow-700 fill-yellow-400" />
                 </button>
               </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 px-4 h-12 text-[#606060]">
+              <MessageCircle className="text-[#606060]" />
+              <span className="font-semibold text-base">{news.totalComments || 0}</span>
             </div>
           </div>
         </div>

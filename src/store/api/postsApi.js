@@ -93,8 +93,116 @@ export const postsApi = baseApi.injectEndpoints({
         }
       },
     }),
+    sharePost: builder.mutation({
+      query: (postId) => ({
+        url: `/Post/${postId}/share`,
+        method: "POST",
+      }),
+    }),
+    getPostComments: builder.query({
+      query: ({ postId, page = 1, pageSize = 10 }) => ({
+        url: `/Post/${postId}/comments`,
+        params: { page, pageSize },
+      }),
+      providesTags: (result, error, { postId }) => [
+        { type: "PostComment", id: `LIST-${postId}` },
+      ],
+      serializeQueryArgs: ({ queryArgs }) => {
+        return `getPostComments-${queryArgs.postId}`
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.page === 1) {
+          currentCache.data = newItems.data
+        } else {
+          const newComments = newItems.data.filter(
+            (newComment) => !currentCache.data.some((c) => c.commentId === newComment.commentId)
+          )
+          currentCache.data.push(...newComments)
+        }
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page
+      },
+    }),
+    createPostComment: builder.mutation({
+      query: ({ postId, content, parentCommentId, replyToAccountId }) => ({
+        url: `/Post/${postId}/comments`,
+        method: "POST",
+        body: { content, parentCommentId, replyToAccountId },
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: "PostComment", id: `LIST-${postId}` },
+      ],
+    }),
+    deletePostComment: builder.mutation({
+      query: ({ postId, commentId }) => ({
+        url: `/Post/${postId}/comments/${commentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: "PostComment", id: `LIST-${postId}` },
+      ],
+    }),
+    reactToComment: builder.mutation({
+      query: ({ postId, commentId, type }) => ({
+        url: `/Post/${postId}/comments/${commentId}/react`,
+        method: "POST",
+        params: { type },
+      }),
+      async onQueryStarted({ postId, commentId, type }, { dispatch, getState, queryFulfilled }) {
+        const state = getState()
+        const patches = []
+
+        for (const [key, query] of Object.entries(state.api.queries)) {
+          if (query.endpointName === "getPostComments" && query.status === "fulfilled" && query.originalArgs?.postId === postId) {
+            const patch = dispatch(
+              postsApi.util.updateQueryData("getPostComments", query.originalArgs, (draft) => {
+                const list = draft?.data;
+                if (list) {
+                  let comment = list.find((c) => c.commentId === commentId);
+                  if (!comment) {
+                    for (const topLevel of list) {
+                      if (topLevel.replies) {
+                        comment = topLevel.replies.find((r) => r.commentId === commentId);
+                        if (comment) break;
+                      }
+                    }
+                  }
+                  if (comment) {
+                    if (comment.currentUserReaction === type) {
+                      comment.currentUserReaction = null
+                      comment.totalReactions = Math.max(0, (comment.totalReactions || 0) - 1)
+                    } else {
+                      if (!comment.currentUserReaction) {
+                        comment.totalReactions = (comment.totalReactions || 0) + 1
+                      }
+                      comment.currentUserReaction = type
+                    }
+                  }
+                }
+              })
+            )
+            patches.push(patch)
+          }
+        }
+
+        try {
+          await queryFulfilled
+        } catch {
+          patches.forEach((patch) => patch.undo())
+        }
+      },
+    }),
   }),
 })
 
-export const { useGetPostsQuery, useGetPostByIdQuery, useReactToPostMutation } =
-  postsApi
+export const { 
+  useGetPostsQuery, 
+  useGetPostByIdQuery, 
+  useReactToPostMutation,
+  useSharePostMutation,
+  useGetPostCommentsQuery,
+  useCreatePostCommentMutation,
+  useDeletePostCommentMutation,
+  useReactToCommentMutation
+} = postsApi

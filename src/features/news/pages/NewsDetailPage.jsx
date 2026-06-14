@@ -1,15 +1,18 @@
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ThumbsUp, Heart, Smile } from "lucide-react"
+import { ThumbsUp, Heart, Smile, Share2, MessageCircle } from "lucide-react"
 import {
   useGetPostByIdQuery,
   useReactToPostMutation,
+  useSharePostMutation,
 } from "@/store/api/postsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PostContent from "../components/PostContent"
+import CommentsSection from "../components/CommentsSection"
 
 import Carousel from "@/shared/components/ui/Carousel"
 import BackButton from "@/shared/components/ui/buttons/BackButton"
+import Modal from "@/shared/components/ui/Modal"
 import {
   getTranslatedTimeAgo,
   formatExactDate,
@@ -21,14 +24,32 @@ const NewsDetailPage = () => {
   const { id, lang } = useParams()
   const navigate = useNavigate()
   const { t, language } = useLanguage()
+  const commentsRef = useRef(null)
 
   const { data, isLoading, error } = useGetPostByIdQuery(id)
   const [reactToPost] = useReactToPostMutation()
+  const [sharePost] = useSharePostMutation()
   const newsItem = data?.data
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
   const handleReact = (type) => {
     if (!newsItem?.postId) return
     reactToPost({ postId: newsItem.postId, type })
+  }
+
+  const handleShare = async () => {
+    if (!newsItem?.postId) return
+    try {
+      const result = await sharePost(newsItem.postId).unwrap()
+      const url = typeof result === "string" ? result : result?.url
+      if (url) {
+        await navigator.clipboard.writeText(url)
+        setIsShareModalOpen(true)
+        setTimeout(() => setIsShareModalOpen(false), 3000)
+      }
+    } catch (e) {
+      console.error("Share failed", e)
+    }
   }
 
   if (isLoading) {
@@ -62,7 +83,7 @@ const NewsDetailPage = () => {
             <span>·</span>
             <span>
               {t.news?.newsDetail?.edited}{" "}
-              {formatExactDate(newsItem.lastEdited, language)}
+              {getTranslatedTimeAgo(newsItem.lastEdited, t.news?.newsCard?.timeAgo)}
             </span>
           </>
         )}
@@ -125,7 +146,7 @@ const NewsDetailPage = () => {
             </button>
             <button
               onClick={() => handleReact("Haha")}
-              className={`flex items-center gap-2 h-12 px-4 transition-colors font-medium ${
+              className={`flex items-center gap-2 h-12 px-4 transition-colors font-medium border-r border-[#e5e5e5] ${
                 newsItem.currentUserReaction === "Haha"
                   ? "bg-yellow-50 text-yellow-600"
                   : "bg-white text-[#606060] hover:bg-[#f2f2f2]"
@@ -140,6 +161,20 @@ const NewsDetailPage = () => {
               />
               {t.news?.newsDetail?.haha}
             </button>
+            <button
+              onClick={() => commentsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 h-12 px-4 font-medium border-r border-[#e5e5e5] bg-white text-[#606060] transition-colors hover:bg-[#f2f2f2]"
+            >
+              <MessageCircle className="text-[#606060]" />
+              {newsItem.totalComments || 0}
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 h-12 px-4 transition-colors font-medium bg-white text-[#606060] hover:bg-[#f2f2f2]"
+            >
+              <Share2 className="text-[#606060]" />
+              {t.news?.newsDetail?.share || "Share"}
+            </button>
           </div>
         </div>
 
@@ -147,7 +182,29 @@ const NewsDetailPage = () => {
         <div className="space-y-6 text-gray-700 leading-relaxed my-4 text-base">
           <PostContent html={newsItem.content} />
         </div>
+
+        {/* Comments Section */}
+        <CommentsSection ref={commentsRef} postId={newsItem.postId} totalComments={newsItem.totalComments || 0} />
       </article>
+
+      {/* Share Success Modal */}
+      <Modal 
+        open={isShareModalOpen} 
+        onClose={() => setIsShareModalOpen(false)}
+        title=""
+        showCloseButton={false}
+        className="max-w-sm rounded-xl p-6 text-center shadow-2xl"
+      >
+        <div className="flex flex-col items-center justify-center">
+          <div className="bg-green-100 text-green-600 rounded-full p-3 mb-4">
+            <ThumbsUp size={32} />
+          </div>
+          <h3 className="text-xl font-bold mb-2">Success</h3>
+          <p className="text-gray-600">
+            {t.news?.newsDetail?.linkCopied || "Link copied to clipboard!"}
+          </p>
+        </div>
+      </Modal>
     </div>
   )
 }
