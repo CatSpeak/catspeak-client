@@ -3,6 +3,7 @@ import { MonitorUp, Maximize, Minimize, Volume2, VolumeX } from "lucide-react"
 import Slider from "@/shared/components/ui/Slider"
 
 import { Track } from "livekit-client"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * Renders a shared screen using LiveKit track.attach().
@@ -130,9 +131,11 @@ const ScreenShareTile = ({
     }
   }, [trackRef?.publication?.track])
 
-  const label = isLocal
-    ? `${presenterDisplayName}'s screen (You)`
-    : `${presenterDisplayName}'s screen`
+  const { t } = useLanguage()
+
+  const labelText = isLocal
+    ? t.rooms.videoCall.screenShareLabelYou?.replace("{{name}}", presenterDisplayName) || `${presenterDisplayName}'s screen (You)`
+    : t.rooms.videoCall.screenShareLabel?.replace("{{name}}", presenterDisplayName) || `${presenterDisplayName}'s screen`
 
   const isMuted = volume <= 0.001
 
@@ -157,23 +160,25 @@ const ScreenShareTile = ({
 
       {/* Control Overlay */}
       <div
-        className={`absolute bottom-0 left-0 right-0 flex items-center justify-between bg-gradient-to-t from-black/80 to-transparent px-4 py-4 transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/80 to-transparent px-1 pb-1 pt-12 transition-opacity duration-300 pointer-events-none ${
           isHovered ? "opacity-100" : "opacity-0"
         }`}
-        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-md bg-black/60 px-3 py-1.5 text-sm font-medium text-white">
-            <MonitorUp size={16} />
-            <span>{label}</span>
+        <div 
+          className="flex min-w-0 items-center gap-1.5 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex min-w-0 items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-sm font-medium text-white backdrop-blur-sm">
+            <MonitorUp size={16} className="shrink-0" />
+            <span className="truncate">{labelText}</span>
           </div>
 
           {!isLocal && (
-            <div className="flex items-center gap-2 rounded-md bg-black/60 px-3 py-1.5 text-sm font-medium text-white">
-              <button onClick={handleToggleMute} className="hover:text-gray-300 transition-colors">
+            <div className="flex shrink-0 items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-sm font-medium text-white backdrop-blur-sm">
+              <button onClick={handleToggleMute} className="shrink-0 hover:text-gray-300 transition-colors">
                 {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
-              <div className="w-24">
+              <div className="hidden w-16 md:block md:w-24">
                 <Slider
                   min={0}
                   max={1}
@@ -183,14 +188,14 @@ const ScreenShareTile = ({
                   className="!h-1.5"
                 />
               </div>
-              <span className="w-10 text-xs">{Math.round(volume * 100)}%</span>
+              <span className="hidden w-8 shrink-0 text-xs md:block">{Math.round(volume * 100)}%</span>
             </div>
           )}
         </div>
 
         <button
           onClick={toggleFullscreen}
-          className="rounded-md bg-black/60 p-2 text-white hover:bg-black/80 transition-colors"
+          className="shrink-0 rounded-md bg-black/40 p-1 text-white hover:bg-black/60 backdrop-blur-sm transition-colors pointer-events-auto"
           title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
         >
           {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}

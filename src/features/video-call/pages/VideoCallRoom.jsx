@@ -104,7 +104,9 @@ const VideoCallRoomContent = () => {
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
-          <VideoGrid />
+          <div className="flex-1 relative min-h-0">
+            <VideoGrid />
+          </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
           {/* Non-AI Room subtitles — only show in non-AI rooms when enabled */}

@@ -39,7 +39,12 @@ export const useParticipantList = (allParticipants, localParticipant) => {
       // Filter out the STT agent — check both metadata flag and identity prefix
       // (identity prefix is the fallback for when metadata hasn't been set yet)
       const meta = parseMetadata(p.metadata)
-      if (meta.is_stt_agent === true || p.identity?.startsWith("room-stt-")) return
+      const isAgent = 
+        meta.is_stt_agent === true || 
+        p.identity?.startsWith("agent-")
+        
+      if (isAgent) return
+      
       seenIdentities.add(p.identity)
       list.push(p)
     })

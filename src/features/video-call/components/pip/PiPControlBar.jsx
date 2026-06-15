@@ -14,6 +14,7 @@ import {
  * the drag handler from capturing button clicks.
  */
 const PiPControlBar = ({
+  isNativeWindow,
   micOn,
   cameraOn,
   onToggleMic,
@@ -53,17 +54,19 @@ const PiPControlBar = ({
         {cameraOn ? <Video size={24} /> : <VideoOff size={24} />}
       </button>
 
-      {/* Expand (return to call) */}
-      <button
-        className={`${baseBtnClass} ${expandBtnClass}`}
-        onClick={(e) => {
-          e.stopPropagation()
-          onReturnToCall()
-        }}
-        title="Return to call"
-        >
-        <Maximize2 size={24} />
-      </button>
+      {/* Expand (return to call) - Only needed for fallback widget */}
+      {!isNativeWindow && (
+        <button
+          className={`${baseBtnClass} ${expandBtnClass}`}
+          onClick={(e) => {
+            e.stopPropagation()
+            onReturnToCall()
+          }}
+          title="Return to call"
+          >
+          <Maximize2 size={24} />
+        </button>
+      )}
 
       {/* Leave */}
       <button
