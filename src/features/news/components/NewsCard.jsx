@@ -4,8 +4,19 @@ import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import { COLORS } from "@/shared/constants/constants"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
-import { ThumbsUp, Heart, Smile } from "lucide-react"
-import { useReactToPostMutation } from "@/store/api/postsApi"
+import {
+  ThumbsUp,
+  Heart,
+  Smile,
+  MessageCircle,
+  Share2,
+  Eye,
+} from "lucide-react"
+import {
+  useReactToPostMutation,
+  useSharePostMutation,
+} from "@/store/api/postsApi"
+import ShareModal from "./ShareModal"
 
 import { getImageUrl } from "@/shared/utils/imageUtils"
 
@@ -16,7 +27,27 @@ const NewsCard = ({ news }) => {
   const { t } = useLanguage()
 
   const [reactToPost] = useReactToPostMutation()
+  const [sharePost] = useSharePostMutation()
   const [isPressed, setIsPressed] = useState(false)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [shareUrl, setShareUrl] = useState("")
+
+  const handleShare = async (e) => {
+    e.stopPropagation()
+    if (!news?.postId) return
+    try {
+      const result = await sharePost(news.postId).unwrap()
+      const url =
+        (typeof result === "string" ? result : result?.shareLink) ||
+        window.location.href
+      if (url) {
+        setShareUrl(url)
+        setIsShareModalOpen(true)
+      }
+    } catch (err) {
+      console.error("Share failed", err)
+    }
+  }
 
   const handleReact = (e, type) => {
     e.stopPropagation()
@@ -155,7 +186,15 @@ const NewsCard = ({ news }) => {
             </h3>
 
             {/* Date */}
-            <div className="flex items-center text-sm text-[#606060] mt-1">
+            <div className="flex items-center gap-1.5 text-sm text-[#606060] mt-1">
+              {news.viewCount !== undefined && (
+                <>
+                  <span title={t.news?.newsDetail?.views || "views"}>
+                    {news.viewCount} {t.news?.newsDetail?.views || "views"}
+                  </span>
+                  <span>·</span>
+                </>
+              )}
               <span>
                 {getTranslatedTimeAgo(news.createDate, newsCard?.timeAgo)}
               </span>
@@ -208,7 +247,7 @@ const NewsCard = ({ news }) => {
                     }
                   />
                 )}
-                <span className="font-semibold text-base">
+                <span className="font-semibold text-base whitespace-nowrap">
                   {news.totalReactions || 0}
                 </span>
               </button>
@@ -253,8 +292,34 @@ const NewsCard = ({ news }) => {
                 </button>
               </div>
             </div>
+
+            <button className="flex items-center justify-center gap-2 px-4 h-12 text-[#606060] transition-colors hover:bg-[#f2f2f2]">
+              <MessageCircle className="text-[#606060] shrink-0" />
+              <span className="font-semibold text-base whitespace-nowrap">
+                {news.totalComments || 0}
+              </span>
+            </button>
+
+            <button
+              onClick={handleShare}
+              className="flex items-center justify-center gap-2 px-4 h-12 text-[#606060] transition-colors hover:bg-[#f2f2f2] ml-auto"
+              title={t.news?.newsDetail?.share || "Share"}
+            >
+              <Share2 className="text-[#606060] shrink-0" />
+            </button>
           </div>
         </div>
+      </div>
+
+      <div
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <ShareModal
+          open={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          shareUrl={shareUrl}
+        />
       </div>
 
       <InDevelopmentModal

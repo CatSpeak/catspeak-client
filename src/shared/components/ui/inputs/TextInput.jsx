@@ -22,6 +22,7 @@ const TextInput = ({
   leftContentWidthClass = "pl-14",
   rightContent,
   rightContentWidthClass = "!pr-12",
+  multiline = false,
   ...props
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -32,7 +33,7 @@ const TextInput = ({
       : "password"
     : type
 
-  const variantClasses = variant === "square" ? "rounded-2xl" : "rounded-full"
+  const variantClasses = variant === "square" ? "rounded-2xl" : "rounded-3xl"
 
   const iconPadding = Icon ? "!pl-10" : ""
   const passwordPadding = isPassword ? "!pr-10" : ""
@@ -43,7 +44,15 @@ const TextInput = ({
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
 
-  const finalClassName = `px-4 h-12 w-full border border-[#e5e5e5] outline-none transition-colors focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${className}`
+  const heightClass = multiline ? "min-h-[48px] py-3 px-4" : "h-12 px-4"
+  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-colors focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${className}`
+
+  const handleInput = (e) => {
+    if (multiline) {
+      e.target.style.height = "auto"
+      e.target.style.height = `${e.target.scrollHeight}px`
+    }
+  }
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
@@ -61,21 +70,40 @@ const TextInput = ({
         {Icon && !leftContent && (
           <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7574]" />
         )}
-        <input
-          id={id}
-          type={inputType}
-          autoFocus={autoFocus}
-          style={{
-            "--border-color": colors.border,
-            "--placeholder-color": colors.subtext,
-            "--focus-color": color || "var(--tw-colors-cath-red-700, #8e0000)",
-          }}
-          placeholder={placeholder}
-          className={finalClassName}
-          value={value}
-          onChange={onChange}
-          {...props}
-        />
+        {multiline ? (
+          <textarea
+            id={id}
+            autoFocus={autoFocus}
+            style={{
+              "--border-color": colors.border,
+              "--placeholder-color": colors.subtext,
+              "--focus-color": color || "var(--tw-colors-cath-red-700, #8e0000)",
+            }}
+            placeholder={placeholder}
+            className={`${finalClassName} resize-none overflow-hidden scrollbar-hide`}
+            value={value}
+            onChange={onChange}
+            onInput={handleInput}
+            rows={1}
+            {...props}
+          />
+        ) : (
+          <input
+            id={id}
+            type={inputType}
+            autoFocus={autoFocus}
+            style={{
+              "--border-color": colors.border,
+              "--placeholder-color": colors.subtext,
+              "--focus-color": color || "var(--tw-colors-cath-red-700, #8e0000)",
+            }}
+            placeholder={placeholder}
+            className={finalClassName}
+            value={value}
+            onChange={onChange}
+            {...props}
+          />
+        )}
         {isPassword && (
           <button
             type="button"
