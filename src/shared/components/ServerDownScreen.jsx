@@ -1,57 +1,66 @@
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useEffect, useCallback } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import {
   selectIsServerDown,
   setServerUp,
 } from "@/store/slices/serverStatusSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { ServerCrash } from "lucide-react"
+import toast from "react-hot-toast"
 
-const RETRY_INTERVAL_SECONDS = 60
+const POLLING_INTERVAL_MS = 5000 // 5 seconds
 
 /**
  * Full-page overlay that blocks the app when the API server is unreachable.
- * Auto-pings the health endpoint every 60 seconds and clears the flag on recovery.
+ * Polls the /api/health endpoint every 5 seconds and reloads on recovery.
+ * Respects active video calls by not blocking the screen and avoiding forced reloads.
  */
 const ServerDownScreen = () => {
-  const isServerDown = useSelector(selectIsServerDown)
-  const isInCall = useSelector((s) => s.videoCall.isInCall)
   const dispatch = useDispatch()
+  const isServerDown = useSelector(selectIsServerDown)
+  const isInCall = useSelector((state) => state.videoCall?.isInCall)
   const { t } = useLanguage()
 
-  const [countdown, setCountdown] = useState(RETRY_INTERVAL_SECONDS)
-  const [isRetrying, setIsRetrying] = useState(false)
+  const checkHealth = useCallback(async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api"
+      // Remove trailing slash if necessary to ensure correct /api/health URL
+      const normalizedBaseUrl = baseUrl.endsWith("/")
+        ? baseUrl.slice(0, -1)
+        : baseUrl
+      const url = `${normalizedBaseUrl}/health`
 
-  const healthCheck = useCallback(() => {
-    setIsRetrying(true)
-    window.location.reload()
-  }, [])
+      const response = await fetch(url)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.status === "Healthy") {
+          if (isInCall) {
+            // If in a call, just clear the error state but don't force a reload
+            // to avoid disconnecting the user's ongoing video call.
+            dispatch(setServerUp())
+            toast.success("Server connection restored!", { duration: 4000 })
+          } else {
+            window.location.reload()
+          }
+        }
+      }
+    } catch (error) {
+      // Ignore network errors, server still down
+    }
+  }, [isInCall, dispatch])
 
-  // Countdown timer
+  // Start polling when server is down
   useEffect(() => {
     if (!isServerDown || isInCall) return
 
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          healthCheck()
-          return RETRY_INTERVAL_SECONDS
-        }
-        return prev - 1
-      })
-    }, 1000)
+    // Immediately trigger a health check, then start polling
+    const interval = setInterval(checkHealth, POLLING_INTERVAL_MS)
 
     return () => clearInterval(interval)
-  }, [isServerDown, isInCall, healthCheck])
+  }, [isServerDown, checkHealth])
 
-  // Reset countdown when the overlay mounts
-  useEffect(() => {
-    if (isServerDown) {
-      setCountdown(RETRY_INTERVAL_SECONDS)
-    }
-  }, [isServerDown])
-
+  // Do not block the UI if the user is actively in a video call,
+  // since LiveKit runs on a separate server and the call can continue.
   if (!isServerDown || isInCall) return null
 
   const strings = t?.errors?.serverDown ?? {}
@@ -60,37 +69,25 @@ const ServerDownScreen = () => {
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/85 backdrop-blur-md animate-fadeIn">
       <div className="flex flex-col items-center gap-4 max-w-[400px] px-8 py-12 text-center">
         {/* Icon */}
-        <div className="text-red-600 animate-pulse mb-2">
+        <div className="text-blue-500 animate-pulse mb-2">
           <ServerCrash size={64} strokeWidth={1.5} />
         </div>
 
         {/* Title */}
         <h1 className="text-2xl font-bold text-white leading-tight">
-          {strings.title || "Server Unavailable"}
+          {strings.title || "System Update"}
         </h1>
 
         {/* Message */}
         <p className="text-[15px] text-gray-400 leading-relaxed mb-2">
           {strings.message ||
-            "The server is temporarily down. Our technical team is working on a fix. Please wait while we restore the service."}
+            "The system is currently being updated to a new version. Please wait a moment..."}
         </p>
 
-        {/* Retry button */}
-        <PillButton
-          className="h-10 min-w-[140px] mt-2"
-          onClick={healthCheck}
-          loading={isRetrying}
-        >
-          {strings.retry || "Retry Now"}
-        </PillButton>
-
-        {/* Countdown text */}
-        <p className="text-[13px] text-gray-500 mt-1">
-          {(strings.autoRetry || "Auto-retrying in {{seconds}}s...").replace(
-            "{{seconds}}",
-            countdown,
-          )}
-        </p>
+        {/* Spinner */}
+        <div className="mt-4 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
       </div>
     </div>
   )
