@@ -11,7 +11,10 @@ export const LanguageProvider = ({ children }) => {
       language,
       setLanguage,
       toggleLanguage: () =>
-        setLanguage((prev) => (prev === "vi" ? "en" : "vi")),
+        setLanguage((prev) => {
+          const nextLang = { vi: "en", en: "zh", zh: "vi" }
+          return nextLang[prev] || "vi"
+        }),
       t: translations[language],
       languageName: languageNames[language],
     }),

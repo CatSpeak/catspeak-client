@@ -106,6 +106,15 @@ export default {
       fontFamily: {
         sans: ["var(--font-primary)"],
       },
+      keyframes: {
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-10deg) scale(1.1)' },
+          '50%': { transform: 'rotate(10deg) scale(1.1)' },
+        }
+      },
+      animation: {
+        wiggle: 'wiggle 0.3s ease-in-out infinite',
+      }
     },
   },
   plugins: [scrollbar],
