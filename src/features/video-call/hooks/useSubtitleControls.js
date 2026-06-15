@@ -41,6 +41,13 @@ export const useSubtitleControls = () => {
   const subtitleSupportedLangs =
     roomLangCode === "vi" ? ["vi"] : [roomLangCode, "vi"]
 
+  // Extract community language from URL (e.g., /zh/meet/216 -> "zh")
+  const pathParts = window.location.pathname.split("/")
+  const communityLang = pathParts[1]
+  const defaultDisplayLang = ["en", "vi", "zh"].includes(communityLang)
+    ? communityLang
+    : roomLangCode
+
   // Sync local state when the server reports an active dispatch
   useEffect(() => {
     if (!statusData) return
@@ -48,9 +55,9 @@ export const useSubtitleControls = () => {
       setDispatchId(statusData.dispatchId)
       setIsSubtitleActive(true)
       setShowRoomSubtitles(true)
-      // Default display language to first supported language if not already set
+      // Default display language to community language from URL
       setSubtitleSelectedLanguage((prev) =>
-        prev ?? statusData.supportedLanguages?.[0] ?? roomLangCode
+        prev ?? defaultDisplayLang
       )
     } else if (!statusData.active && isSubtitleActive) {
       // Agent stopped externally (e.g. another user stopped it)
@@ -67,7 +74,7 @@ export const useSubtitleControls = () => {
       const result = await startMutation({ sessionId, language }).unwrap()
       setDispatchId(result.dispatchId)
       setIsSubtitleActive(true)
-      setSubtitleSelectedLanguage(language)
+      setSubtitleSelectedLanguage(defaultDisplayLang)
       setShowRoomSubtitles(true)
     } catch (err) {
       console.error("[useSubtitleControls] Failed to start subtitles:", err)

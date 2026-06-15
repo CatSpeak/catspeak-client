@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { RoomEvent } from "livekit-client"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const AI_SESSION_SPEECH_TOPIC = "ai-session-speech"
 
@@ -14,6 +15,7 @@ const AI_SESSION_SPEECH_TOPIC = "ai-session-speech"
  */
 const SubtitleOverlay = () => {
   const { lkRoom } = useGlobalVideoCall()
+  const { t } = useLanguage()
   const [latestText, setLatestText] = useState(null)
 
   useEffect(() => {
@@ -33,12 +35,16 @@ const SubtitleOverlay = () => {
     return () => lkRoom.off(RoomEvent.DataReceived, handleData)
   }, [lkRoom])
 
-  if (!latestText) return null
-
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-4">
-      <div className="max-w-[80%] rounded-lg bg-black/70 px-4 py-2 text-center text-sm leading-relaxed text-white shadow-lg sm:text-base">
-        {latestText}
+    <div className="w-full shrink-0 flex justify-center p-4 z-20 relative">
+      <div className="w-full max-w-4xl bg-white text-gray-800 rounded-2xl shadow-lg border border-gray-200 px-6 py-4 min-h-[100px] flex items-center justify-center text-center text-sm leading-relaxed sm:text-base md:text-lg">
+        {latestText ? (
+          latestText
+        ) : (
+          <span className="text-gray-400 italic">
+            {t.rooms?.videoCall?.speechWaiting || "Waiting for speech..."}
+          </span>
+        )}
       </div>
     </div>
   )

@@ -8,52 +8,58 @@ import { motion } from "framer-motion"
  * - distance: How far it slides from. Default 20 (px). Can be string e.g. "100%"
  * - exit: boolean (default: false), configures if an exit animation should play
  */
-const FluentAnimation = ({
-  children,
-  animationKey,
-  direction = "up",
-  distance = 20,
-  exit = false,
-  duration = 0.28,
-  className,
-}) => {
-  const getInitialPosition = () => {
-    // Determine negative distance value
-    const negDistance =
-      typeof distance === "number" ? -distance : `-${distance}`
+const FluentAnimation = React.forwardRef(
+  (
+    {
+      children,
+      animationKey,
+      direction = "up",
+      distance = 20,
+      exit = false,
+      duration = 0.28,
+      className,
+    },
+    ref
+  ) => {
+    const getInitialPosition = () => {
+      // Determine negative distance value
+      const negDistance =
+        typeof distance === "number" ? -distance : `-${distance}`
 
-    switch (direction) {
-      case "down":
-        return { y: negDistance, x: 0 }
-      case "left":
-        return { x: distance, y: 0 }
-      case "right":
-        return { x: negDistance, y: 0 }
-      case "none":
-        return { x: 0, y: 0 }
-      case "up":
-      default:
-        return { y: distance, x: 0 }
+      switch (direction) {
+        case "down":
+          return { y: negDistance, x: 0 }
+        case "left":
+          return { x: distance, y: 0 }
+        case "right":
+          return { x: negDistance, y: 0 }
+        case "none":
+          return { x: 0, y: 0 }
+        case "up":
+        default:
+          return { y: distance, x: 0 }
+      }
     }
+
+    const initialPos = getInitialPosition()
+
+    return (
+      <motion.div
+        ref={ref}
+        key={animationKey}
+        initial={{ y: initialPos.y, x: initialPos.x, opacity: 0 }}
+        animate={{ y: 0, x: 0, opacity: 1 }}
+        exit={exit ? { y: initialPos.y, x: initialPos.x, opacity: 0 } : undefined}
+        transition={{
+          duration: duration,
+          ease: [0.16, 1, 0.3, 1], // Strong ease-out (fast → slow)
+        }}
+        className={className || "w-full h-full"}
+      >
+        {children}
+      </motion.div>
+    )
   }
-
-  const initialPos = getInitialPosition()
-
-  return (
-    <motion.div
-      key={animationKey}
-      initial={{ y: initialPos.y, x: initialPos.x, opacity: 0 }}
-      animate={{ y: 0, x: 0, opacity: 1 }}
-      exit={exit ? { y: initialPos.y, x: initialPos.x, opacity: 0 } : undefined}
-      transition={{
-        duration: duration,
-        ease: [0.16, 1, 0.3, 1], // Strong ease-out (fast → slow)
-      }}
-      className={className || "w-full h-full"}
-    >
-      {children}
-    </motion.div>
-  )
-}
+)
 
 export default FluentAnimation

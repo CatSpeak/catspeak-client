@@ -28,22 +28,22 @@ const NormalVideoLayout = ({
 
     // 3, 4 items: 50% width, 50% height to perfectly fill the screen without scrolling
     if (totalItems === 3 || totalItems === 4)
-      return "w-full min-[426px]:w-[calc(50%-2px)] min-[426px]:h-[calc(50%-2px)] min-h-[250px] flex-shrink-0"
+      return "w-full aspect-video min-[426px]:aspect-auto min-[426px]:w-[calc(50%-2px)] min-[426px]:h-[calc(50%-2px)] min-[426px]:min-h-[250px] flex-shrink-0"
 
     // 5, 6 items: 33.3% width, 50% height
     if (totalItems === 5 || totalItems === 6)
-      return "w-full min-[426px]:w-[calc(33.333%-2.66px)] min-[426px]:h-[calc(50%-2px)] min-h-[200px] flex-shrink-0"
+      return "w-full aspect-video min-[426px]:aspect-auto min-[426px]:w-[calc(33.333%-2.66px)] min-[426px]:h-[calc(50%-2px)] min-[426px]:min-h-[200px] flex-shrink-0"
 
-    return "w-full aspect-video"
+    return "w-full aspect-video min-[426px]:aspect-auto min-[426px]:min-h-[200px]"
   }
 
   return (
-    <div className="relative h-full w-full py-5 overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden">
       <div
         className={`
       h-full w-full
       gap-1
-      px-5
+      p-6
       overflow-y-auto
       [align-content:safe_center]
       [justify-content:safe_center]
