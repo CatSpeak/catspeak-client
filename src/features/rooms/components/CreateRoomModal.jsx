@@ -136,7 +136,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col flex-1"
+            className="flex flex-col flex-1 min-h-0"
           >
             <div className="flex items-center justify-between p-6 shrink-0">
               <h2 className="text-[28px] font-medium">
@@ -257,7 +257,7 @@ const ModalFooter = ({
 }) => {
   if (mode === "join") {
     return (
-      <div className="p-6 flex flex-wrap justify-end gap-6">
+      <div className="p-6 flex flex-wrap justify-end gap-6 shrink-0">
         <PillButton
           onClick={() => onSwitchMode("create")}
           variant="outline"
@@ -277,7 +277,7 @@ const ModalFooter = ({
   }
 
   return (
-    <div className="p-6 flex flex-wrap justify-end gap-6">
+    <div className="p-6 flex flex-wrap justify-end gap-6 shrink-0">
       <PillButton
         onClick={() => onSwitchMode("join")}
         variant="secondary"

@@ -15,7 +15,9 @@ import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import { AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
+import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
 
 const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
   const { t } = useLanguage()
@@ -34,7 +36,18 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     setShowAvatarPicker,
     showCC,
     setShowCC,
+    isAISession,
   } = useGlobalVideoCall()
+
+  const {
+    isSubtitleActive,
+    isStarting,
+    subtitleSupportedLangs,
+    startSubtitles,
+    stopSubtitles,
+  } = useSubtitleControls()
+
+  const [showSubtitlePicker, setShowSubtitlePicker] = React.useState(false)
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -58,58 +71,117 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
             duration={0.2}
             className="absolute bottom-[110%] right-0 z-50 mb-2 w-56"
           >
-            <div className="w-full rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
-              {/* Mobile-only menu items */}
-              <div className="min-[426px]:hidden">
-                <div className="p-1">
-                  <button
-                    onClick={() => {
-                      setShowParticipants(!showParticipants)
-                      setShowMoreMenu(false)
-                    }}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                    style={{ textAlign: "left" }}
+            <div className="w-full overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
+              <AnimatePresence mode="wait" initial={false}>
+                {!showSubtitlePicker || isSubtitleActive || isAISession ? (
+                  <FluentAnimation
+                    key="main-menu"
+                    animationKey="main-menu"
+                    direction="right"
+                    distance={20}
+                    exit={true}
+                    duration={0.2}
+                    className="w-full"
                   >
-                    <Users size={20} />
-                    {t.rooms?.videoCall?.controls?.participants ||
-                      "Participants"}
-                  </button>
-                </div>
-                <div className="border-t border-[#E5E5E5]"></div>
-              </div>
+                    {/* Mobile-only menu items */}
+                    <div className="min-[426px]:hidden">
+                      <div className="p-1">
+                        <button
+                          onClick={() => {
+                            setShowParticipants(!showParticipants)
+                            setShowMoreMenu(false)
+                          }}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                          style={{ textAlign: "left" }}
+                        >
+                          <Users size={20} />
+                          {t.rooms?.videoCall?.controls?.participants ||
+                            "Participants"}
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            if (isAISession) {
+                              setShowCC(!showCC)
+                              setShowMoreMenu(false)
+                            } else {
+                              if (isSubtitleActive) {
+                                stopSubtitles()
+                                setShowMoreMenu(false)
+                              } else {
+                                setShowSubtitlePicker((v) => !v)
+                              }
+                            }
+                          }}
+                          disabled={!isAISession && isStarting}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                        >
+                          {(!isAISession && isStarting) ? <Loader2 size={20} className="animate-spin" /> : <Captions size={20} />}
+                          {(isAISession ? showCC : isSubtitleActive) ? (t?.rooms?.videoCall?.controls?.captionsOff || "Turn off captions") : (t?.rooms?.videoCall?.controls?.captionsOn || "Turn on captions")}
+                        </button>
+                      </div>
+                      <div className="border-t border-[#E5E5E5]"></div>
+                    </div>
 
-              <div className="p-1 flex flex-col gap-1">
-                <button
-                  onClick={() => {
-                    setShowAvatarPicker(!showAvatarPicker)
-                    setShowMoreMenu(false)
-                  }}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                >
-                  <UserCircle size={20} />
-                  {t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
-                </button>
+                    <div className="flex flex-col gap-1 p-1">
+                      <button
+                        onClick={() => {
+                          setShowAvatarPicker(!showAvatarPicker)
+                          setShowMoreMenu(false)
+                        }}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                      >
+                        <UserCircle size={20} />
+                        {t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
+                      </button>
 
-                <button
-                  onClick={() => {
-                    setShowVirtualBackground(!showVirtualBackground)
-                    setShowMoreMenu(false)
-                  }}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                >
-                  <Sparkles size={20} />
-                  {t?.rooms?.videoCall?.applyVisualEffects ||
-                    "Apply visual effects"}
-                </button>
+                      <button
+                        onClick={() => {
+                          setShowVirtualBackground(!showVirtualBackground)
+                          setShowMoreMenu(false)
+                        }}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                      >
+                        <Sparkles size={20} />
+                        {t?.rooms?.videoCall?.applyVisualEffects ||
+                          "Apply visual effects"}
+                      </button>
 
-                <button
-                  onClick={handleCopyLink}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                >
-                  <Copy size={20} />
-                  {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
-                </button>
-              </div>
+                      <button
+                        onClick={handleCopyLink}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                      >
+                        <Copy size={20} />
+                        {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+                      </button>
+                    </div>
+                  </FluentAnimation>
+                ) : (
+                  <FluentAnimation
+                    key="subtitle-picker"
+                    animationKey="subtitle-picker"
+                    direction="left"
+                    distance={20}
+                    exit={true}
+                    duration={0.2}
+                    className="flex w-full flex-col"
+                  >
+                    <SubtitleLanguagePicker
+                      languages={subtitleSupportedLangs}
+                      selectedLanguage={null}
+                      onSelect={(lang) => {
+                        startSubtitles(lang)
+                        setShowSubtitlePicker(false)
+                        setShowMoreMenu(false)
+                      }}
+                      onBack={() => setShowSubtitlePicker(false)}
+                      backLabel={t?.rooms?.videoCall?.controls?.back || "Back"}
+                      onClose={() => setShowSubtitlePicker(false)}
+                      className="w-full bg-white"
+                    />
+                  </FluentAnimation>
+                )}
+              </AnimatePresence>
             </div>
           </FluentAnimation>
         </>

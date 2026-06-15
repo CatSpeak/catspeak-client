@@ -6,6 +6,7 @@ import { Track, ParticipantEvent } from "livekit-client"
 import { motion } from "framer-motion"
 
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * Renders a single participant's video tile using LiveKit.
@@ -17,6 +18,7 @@ import { getParticipantTheme } from "@/features/video-call/utils/participantThem
  * @param {{ participant: import('livekit-client').Participant }} props
  */
 const VideoTile = ({ participant, onClick }) => {
+  const { t } = useLanguage()
   const isSpeaking = useIsSpeaking(participant)
 
   // Force re-render whenever tracks change on this participant so that
@@ -56,7 +58,7 @@ const VideoTile = ({ participant, onClick }) => {
     }
   }
   const meta = parseMetadata(participant.metadata)
-  console.log("Participant Metadata [VideoTile]:", meta)
+  // console.log("Participant Metadata [VideoTile]:", meta)
   const isHandRaised = meta.handRaised === true
   const avatarUrl = meta.avatarUrl
 
@@ -141,7 +143,9 @@ const VideoTile = ({ participant, onClick }) => {
             <Hand size={16} className="white" />
           </motion.div>
           <div className="min-w-0 truncate font-medium text-sm text-white">
-            {displayName} {isLocal && "(You)"}
+            {displayName}{" "}
+            {isLocal &&
+              (t.rooms?.videoCall?.participantList?.youSuffix || "(You)")}
           </div>
         </div>
       ) : (
@@ -152,7 +156,9 @@ const VideoTile = ({ participant, onClick }) => {
             {!webcamOn && <VideoOff size={16} />}
           </div>
           <div className="min-w-0 truncate font-medium text-sm">
-            {displayName} {isLocal && "(You)"}
+            {displayName}{" "}
+            {isLocal &&
+              (t.rooms?.videoCall?.participantList?.youSuffix || "(You)")}
           </div>
         </div>
       )}
