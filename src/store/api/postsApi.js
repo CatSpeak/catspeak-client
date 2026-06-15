@@ -143,6 +143,16 @@ export const postsApi = baseApi.injectEndpoints({
         { type: "PostComment", id: `LIST-${postId}` },
       ],
     }),
+    editPostComment: builder.mutation({
+      query: ({ postId, commentId, content }) => ({
+        url: `/Post/${postId}/comments/${commentId}`,
+        method: "PUT",
+        body: { content },
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: "PostComment", id: `LIST-${postId}` },
+      ],
+    }),
     reactToComment: builder.mutation({
       query: ({ postId, commentId, type }) => ({
         url: `/Post/${postId}/comments/${commentId}/react`,
@@ -204,5 +214,6 @@ export const {
   useGetPostCommentsQuery,
   useCreatePostCommentMutation,
   useDeletePostCommentMutation,
+  useEditPostCommentMutation,
   useReactToCommentMutation
 } = postsApi

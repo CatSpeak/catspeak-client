@@ -5,17 +5,31 @@ import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const Popover = ({ trigger, content, placement = "bottom-right", className = "", triggerClassName = "" }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [actualPlacement, setActualPlacement] = useState(placement)
   const containerRef = useRef(null)
 
   useClickOutside(containerRef, () => setIsOpen(false))
 
+  const handleToggle = (e) => {
+    e.stopPropagation()
+    if (!isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      const popoverEstimatedWidth = 220
+      if (placement === "bottom-right" && rect.right < popoverEstimatedWidth) {
+        setActualPlacement("bottom-left")
+      } else if (placement === "bottom-left" && window.innerWidth - rect.left < popoverEstimatedWidth) {
+        setActualPlacement("bottom-right")
+      } else {
+        setActualPlacement(placement)
+      }
+    }
+    setIsOpen(!isOpen)
+  }
+
   return (
     <div className={`relative flex items-center justify-center ${className}`} ref={containerRef}>
       <div 
-        onClick={(e) => {
-          e.stopPropagation()
-          setIsOpen(!isOpen)
-        }} 
+        onClick={handleToggle} 
         className={`cursor-pointer ${triggerClassName || "inline-flex items-center justify-center"}`}
       >
         {trigger}
@@ -27,11 +41,11 @@ const Popover = ({ trigger, content, placement = "bottom-right", className = "",
             distance={10}
             exit={true}
             className={`absolute z-50 mt-2 ${
-              placement === "bottom-right" ? "right-0 top-full" : "left-0 top-full"
+              actualPlacement === "bottom-right" ? "right-0 top-full" : "left-0 top-full"
             }`}
           >
             <div onClick={(e) => e.stopPropagation()}>
-              {content}
+              {typeof content === 'function' ? content(() => setIsOpen(false)) : content}
             </div>
           </FluentAnimation>
         )}

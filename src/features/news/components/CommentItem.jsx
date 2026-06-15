@@ -1,6 +1,11 @@
 import React, { useState } from "react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
-import { ThumbsUp, Heart, Smile, Trash } from "lucide-react"
+import {
+  ThumbsUp,
+  Heart,
+  Smile,
+} from "lucide-react"
+import CommentMoreMenu from "./CommentMoreMenu"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import {
   getTranslatedTimeAgo,
@@ -37,6 +42,7 @@ const CommentItem = ({
   replies,
   onReplySubmit,
   onDelete,
+  onEdit,
   onReact,
   isNested = false,
 }) => {
@@ -47,6 +53,8 @@ const CommentItem = ({
   const [isReplying, setIsReplying] = useState(false)
   const [replyContent, setReplyContent] = useState("")
   const [showReplies, setShowReplies] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editContent, setEditContent] = useState("")
 
   const isOwner = user?.accountId === comment.accountId
 
@@ -76,10 +84,10 @@ const CommentItem = ({
         <div
           className="absolute border-l-2 border-b-2 border-[#E5E5E5] rounded-bl-xl pointer-events-none z-0"
           style={{
-            left: "-40px",
+            left: "-34px",
             top: 0,
-            height: "24px",
-            width: "40px",
+            height: "18px",
+            width: "34px",
           }}
         />
       )}
@@ -96,10 +104,10 @@ const CommentItem = ({
             <div
               className="absolute border-l-2 border-b-2 border-[#E5E5E5] rounded-bl-xl pointer-events-none z-0"
               style={{
-                left: "-36px",
-                top: "48px",
+                left: "-30px",
+                top: "36px",
                 bottom: "24px",
-                width: "36px",
+                width: "30px",
               }}
             />
           )}
@@ -133,124 +141,168 @@ const CommentItem = ({
               )}
           </div>
 
-          {/* Comment Body */}
-          <div className="flex items-center gap-2 group/body mb-3 relative">
-            <div className="bg-[#f0f2f5] rounded-2xl px-4 py-3 inline-block max-w-full relative">
-              <p className="break-words whitespace-pre-wrap">
-                {comment.content}
-              </p>
-
-              {/* Reaction Count (Floating Bottom Right) */}
-              {comment.totalReactions > 0 && (
-                <div className="absolute -bottom-2 -right-3 flex items-center gap-1 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] rounded-full px-1.5 py-0.5 z-10">
-                  <ReactionIcon
-                    size={16}
-                    className={
-                      currentReaction
-                        ? currentReaction.fillClass
-                        : "fill-blue-500 text-blue-500"
+          {/* Comment Body & Action Row */}
+          {isEditing ? (
+            <div className="flex-1 flex flex-col gap-3 mb-3">
+              <TextInput
+                id={`edit-input-${comment.commentId}`}
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                autoFocus
+                multiline
+              />
+              <div className="flex justify-end gap-3">
+                <PillButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsEditing(false)}
+                >
+                  {t.news?.newsDetail?.cancel || "Cancel"}
+                </PillButton>
+                <PillButton
+                  type="button"
+                  variant="primary"
+                  onClick={async () => {
+                    if (onEdit) {
+                      await onEdit(comment.commentId, editContent)
                     }
-                  />
-
-                  <span className="text-[13px] leading-none text-[#65676B]">
-                    {comment.totalReactions}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {isOwner && (
-              <button
-                onClick={() => onDelete(comment.commentId)}
-                className="opacity-0 group-hover/body:opacity-100 text-gray-400 hover:text-red-500 transition-opacity shrink-0"
-                title={t.news?.newsDetail?.deleteComment || "Delete comment"}
-              >
-                <Trash size={16} />
-              </button>
-            )}
-          </div>
-
-          {/* Action Row */}
-          <div className="flex items-center mt-1">
-            <div className="flex items-center gap-4 text-xs font-bold text-[#65676B] pl-2">
-              {/* Reaction Button with Popover */}
-              <div
-                className="group/reactions relative flex items-center"
-                onMouseEnter={() => setShowReactions(true)}
-                onMouseLeave={() => setShowReactions(false)}
-              >
-                <button
-                  onClick={() => {
-                    const type = comment.currentUserReaction
-                      ? comment.currentUserReaction
-                      : 1
-                    onReact(comment.commentId, type)
+                    setIsEditing(false)
                   }}
-                  className={`hover:underline cursor-pointer flex items-center transition-colors ${
-                    currentReaction
-                      ? currentReaction.colorClass
-                      : "text-[#65676B]"
-                  }`}
+                  disabled={
+                    !editContent.trim() || editContent === comment.content
+                  }
                 >
-                  <span className="">
-                    {currentReaction
-                      ? t.news?.newsDetail?.[
-                          currentReaction.label.toLowerCase()
-                        ] || currentReaction.label
-                      : t.news?.newsDetail?.like || "Like"}
-                  </span>
-                </button>
+                  {t.news?.newsDetail?.save || "Save"}
+                </PillButton>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Comment Body */}
+              <div className="flex items-center gap-1 group/body mb-3 relative">
+                <div className="bg-[#f0f2f5] rounded-2xl px-4 py-3 inline-block max-w-full relative">
+                  <p className="break-words whitespace-pre-wrap">
+                    {comment.replyToAccountName && (
+                      <span className="text-blue-600 font-semibold mr-1">
+                        @{comment.replyToAccountName}
+                      </span>
+                    )}
+                    {comment.content}
+                  </p>
 
-                {/* Reactions Popover */}
-                <div
-                  className={`absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
-              ${
-                showReactions
-                  ? "opacity-100 scale-100 visible"
-                  : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"
-              }`}
-                >
-                  {Object.entries(REACTION_TYPES).map(([type, config]) => {
-                    const IconComp = config.icon
-                    return (
-                      <button
-                        key={type}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onReact(comment.commentId, parseInt(type, 10))
-                          setShowReactions(false)
-                        }}
-                        className={`p-2 hover:-translate-y-1 transition-transform rounded-full ${
-                          type === "1"
-                            ? "hover:bg-blue-50"
-                            : type === "2"
-                              ? "hover:bg-red-50"
-                              : "hover:bg-yellow-50"
-                        }`}
-                        title={
-                          t.news?.newsDetail?.[config.label.toLowerCase()] ||
-                          config.label
+                  {/* Reaction Count (Floating Bottom Right) */}
+                  {comment.totalReactions > 0 && (
+                    <div className="absolute -bottom-2 -right-3 flex items-center gap-1 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] rounded-full px-1.5 py-0.5 z-10">
+                      <ReactionIcon
+                        size={16}
+                        className={
+                          currentReaction
+                            ? currentReaction.fillClass
+                            : "fill-blue-500 text-blue-500"
                         }
-                      >
-                        <IconComp
-                          size={24}
-                          className={`${config.colorClass} ${config.fillClass}`}
-                        />
-                      </button>
-                    )
-                  })}
+                      />
+
+                      <span className="text-[13px] leading-none text-[#65676B]">
+                        {comment.totalReactions}
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                {isOwner && !isEditing && (
+                  <CommentMoreMenu
+                    onEdit={() => {
+                      setEditContent(comment.content)
+                      setIsEditing(true)
+                    }}
+                    onDelete={() => onDelete(comment.commentId)}
+                  />
+                )}
               </div>
 
-              {/* Reply Button */}
-              <button
-                onClick={handleReplyClick}
-                className="hover:underline cursor-pointer transition-colors text-[#65676B]"
-              >
-                {t.news?.newsDetail?.reply || "Reply"}
-              </button>
-            </div>
-          </div>
+              {/* Action Row */}
+              <div className="flex items-center mt-1">
+                <div className="flex items-center gap-4 text-xs font-bold text-[#65676B] pl-2">
+                  {/* Reaction Button with Popover */}
+                  <div
+                    className="group/reactions relative flex items-center"
+                    onMouseEnter={() => setShowReactions(true)}
+                    onMouseLeave={() => setShowReactions(false)}
+                  >
+                    <button
+                      onClick={() => {
+                        const type = comment.currentUserReaction
+                          ? comment.currentUserReaction
+                          : 1
+                        onReact(comment.commentId, type)
+                      }}
+                      className={`hover:underline cursor-pointer flex items-center transition-colors ${
+                        currentReaction
+                          ? currentReaction.colorClass
+                          : "text-[#65676B]"
+                      }`}
+                    >
+                      <span className="">
+                        {currentReaction
+                          ? t.news?.newsDetail?.[
+                              currentReaction.label.toLowerCase()
+                            ] || currentReaction.label
+                          : t.news?.newsDetail?.like || "Like"}
+                      </span>
+                    </button>
+
+                    {/* Reactions Popover */}
+                    <div
+                      className={`absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
+                  ${
+                    showReactions
+                      ? "opacity-100 scale-100 visible"
+                      : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"
+                  }`}
+                    >
+                      {Object.entries(REACTION_TYPES).map(([type, config]) => {
+                        const IconComp = config.icon
+                        return (
+                          <button
+                            key={type}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onReact(comment.commentId, parseInt(type, 10))
+                              setShowReactions(false)
+                            }}
+                            className={`p-2 hover:-translate-y-1 transition-transform rounded-full ${
+                              type === "1"
+                                ? "hover:bg-blue-50"
+                                : type === "2"
+                                  ? "hover:bg-red-50"
+                                  : "hover:bg-yellow-50"
+                            }`}
+                            title={
+                              t.news?.newsDetail?.[config.label.toLowerCase()] ||
+                              config.label
+                            }
+                          >
+                            <IconComp
+                              size={24}
+                              className={`${config.colorClass} ${config.fillClass}`}
+                            />
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Reply Button */}
+                  <button
+                    onClick={handleReplyClick}
+                    className="hover:underline cursor-pointer transition-colors text-[#65676B]"
+                  >
+                    {t.news?.newsDetail?.reply || "Reply"}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Inline Reply Form */}
           {isReplying && (
@@ -301,6 +353,7 @@ const CommentItem = ({
                     replies={[]} // Nested replies are flattened into the parent's replies array
                     onReplySubmit={onReplySubmit}
                     onDelete={onDelete}
+                    onEdit={onEdit}
                     onReact={onReact}
                     isNested={true}
                   />
