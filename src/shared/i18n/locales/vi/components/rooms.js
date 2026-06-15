@@ -255,6 +255,8 @@ export default {
     copyLink: "Sao chép liên kết phòng",
     linkCopied: "Đã sao chép!",
     leaveCall: "Rời phòng",
+    leaveCallConfirmText: "Bạn có chắc chắn muốn rời khỏi cuộc gọi này không?",
+    pictureInPicture: "Hình trong Hình (PiP)",
     controls: {
       micOn: "Bật micro",
       micOff: "Tắt micro",

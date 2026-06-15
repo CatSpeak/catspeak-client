@@ -1,5 +1,5 @@
 import React from "react"
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import { MainLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -23,13 +23,11 @@ const RoomHeader = () => {
     <div className="flex items-center justify-between border-b border-[#E5E5E5] bg-white px-5 h-[56px] shrink-0">
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
-          {/* Logo: clicking enters PiP mode instead of navigating away */}
           <button
             type="button"
             onClick={handleLogoClick}
             className="flex items-center gap-4 cursor-pointer bg-transparent border-none p-0"
-            aria-label="Minimize to Picture-in-Picture"
-            title="Continue browsing (call stays active)"
+            aria-label="Back to Community"
           >
             <img
               src={MainLogo}

@@ -20,6 +20,7 @@ import StopRecordingModal from "./StopRecordingModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
+import LeaveCallModal from "./LeaveCallModal"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
@@ -38,6 +39,10 @@ const VideoCallControlBar = () => {
     handleToggleCam,
     handleToggleScreenShare,
     handleLeaveSession,
+    // Leave Call Modal
+    showLeaveModal,
+    promptLeaveCall,
+    cancelLeaveCall,
     // Recording
     isRecording,
     isTogglingRecording,
@@ -190,7 +195,7 @@ const VideoCallControlBar = () => {
 
       <ControlButton
         isActive={true}
-        onClick={handleLeaveSession}
+        onClick={promptLeaveCall}
         title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
         iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
         iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
@@ -202,6 +207,17 @@ const VideoCallControlBar = () => {
           open={showStopModal}
           onClose={cancelStopRecording}
           onConfirm={confirmStopRecording}
+        />
+      )}
+
+      {showLeaveModal && (
+        <LeaveCallModal
+          open={showLeaveModal}
+          onClose={cancelLeaveCall}
+          onConfirm={() => {
+            cancelLeaveCall()
+            handleLeaveSession()
+          }}
         />
       )}
     </div>

@@ -5,6 +5,7 @@ export default {
   getStarted: "开始使用",
   seeMore: "查看更多",
   back: "返回",
+  cancel: "取消",
   toggle: {
     on: "开",
     off: "关",

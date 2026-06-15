@@ -20,8 +20,8 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
     cameraOn,
     handleToggleMic,
     handleToggleCam,
-    handleLeaveSession,
     returnToCall,
+    promptLeaveCall,
     screenShareTracks,
   } = useGlobalVideoCall()
 
@@ -29,7 +29,8 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
   const { formattedElapsed } = useSessionTimer(session)
 
   // Room name
-  const roomName = session?.name || session?.roomName || roomData?.name || "General"
+  const roomName =
+    session?.name || session?.roomName || roomData?.name || "General"
 
   // Screen share takes priority
   const activeScreenShare =
@@ -66,7 +67,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
           onToggleMic={handleToggleMic}
           onToggleCam={handleToggleCam}
           onReturnToCall={returnToCall}
-          onLeave={handleLeaveSession}
+          onLeave={promptLeaveCall}
         />
       </div>
     </div>

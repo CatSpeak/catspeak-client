@@ -277,6 +277,8 @@ export default {
     copyLink: "Copy meeting link",
     linkCopied: "Link copied!",
     leaveCall: "Leave call",
+    leaveCallConfirmText: "Are you sure you want to leave this call?",
+    pictureInPicture: "Picture-in-Picture",
     controls: {
       micOn: "Turn microphone on",
       micOff: "Turn microphone off",

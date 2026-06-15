@@ -37,6 +37,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     showCC,
     setShowCC,
     isAISession,
+    enterPiP,
   } = useGlobalVideoCall()
 
   const {
@@ -146,6 +147,21 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                         {t?.rooms?.videoCall?.applyVisualEffects ||
                           "Apply visual effects"}
                       </button>
+
+                      {/* Hiding PiP button in menu for now
+                      {"documentPictureInPicture" in window && (
+                        <button
+                          onClick={() => {
+                            enterPiP?.()
+                            setShowMoreMenu(false)
+                          }}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                        >
+                          <MonitorUp size={20} />
+                          {t?.rooms?.videoCall?.pictureInPicture || "Picture-in-Picture"}
+                        </button>
+                      )}
+                      */}
 
                       <button
                         onClick={handleCopyLink}

@@ -1,11 +1,4 @@
-import {
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  Maximize2,
-  Phone,
-} from "lucide-react"
+import { Mic, MicOff, Video, VideoOff, Maximize2, Phone } from "lucide-react"
 
 /**
  * Compact control bar for the PiP widget.
@@ -22,7 +15,8 @@ const PiPControlBar = ({
   onReturnToCall,
   onLeave,
 }) => {
-  const baseBtnClass = "flex shrink-0 items-center justify-center w-12 h-12 rounded-full border-none cursor-pointer transition-all duration-150 pointer-events-auto"
+  const baseBtnClass =
+    "flex shrink-0 items-center justify-center w-12 h-12 rounded-full border-none cursor-pointer transition-all duration-150 pointer-events-auto"
   const defaultBtnClass = "bg-gray-100 text-gray-700 hover:bg-gray-200"
   const activeBtnClass = "bg-[#990011] text-white hover:bg-[#b3001b]"
   const leaveBtnClass = "bg-[#d40018] text-white hover:bg-[#e7001a]"
@@ -63,7 +57,7 @@ const PiPControlBar = ({
             onReturnToCall()
           }}
           title="Return to call"
-          >
+        >
           <Maximize2 size={24} />
         </button>
       )}
