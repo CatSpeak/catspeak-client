@@ -131,12 +131,13 @@ const NewsDetailPage = () => {
           <PostContent html={newsItem.content} />
         </div>
 
-        {/* Comments Section */}
+        {/* Temporarily hidden for production as backend is not ready
         <CommentsSection
           ref={commentsRef}
           postId={newsItem.postId}
           totalComments={newsItem.totalComments || 0}
         />
+        */}
       </article>
 
       {/* Share Modal */}

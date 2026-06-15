@@ -293,6 +293,7 @@ const NewsCard = ({ news }) => {
               </div>
             </div>
 
+            {/* Temporarily hidden for production as backend is not ready
             <button className="flex items-center justify-center gap-2 px-4 h-12 text-[#606060] transition-colors hover:bg-[#f2f2f2]">
               <MessageCircle className="text-[#606060] shrink-0" />
               <span className="font-semibold text-base whitespace-nowrap">
@@ -307,6 +308,7 @@ const NewsCard = ({ news }) => {
             >
               <Share2 className="text-[#606060] shrink-0" />
             </button>
+            */}
           </div>
         </div>
       </div>
