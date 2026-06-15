@@ -5,6 +5,7 @@ export default {
   getStarted: "Get started",
   seeMore: "See more",
   back: "Back",
+  cancel: "Cancel",
   toggle: {
     on: "On",
     off: "Off",

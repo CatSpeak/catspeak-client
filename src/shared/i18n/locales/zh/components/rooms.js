@@ -245,6 +245,8 @@ export default {
     copyLink: "复制会议链接",
     linkCopied: "已复制！",
     leaveCall: "离开房间",
+    leaveCallConfirmText: "您确定要离开此通话吗？",
+    pictureInPicture: "画中画 (PiP)",
     controls: {
       micOn: "开启麦克风",
       micOff: "关闭麦克风",

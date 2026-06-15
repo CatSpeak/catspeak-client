@@ -287,6 +287,19 @@ const GlobalCallContent = ({
     setActiveSidePanel: panelState.setActiveSidePanel,
   })
 
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
+
+  const promptLeaveCall = () => {
+    if (isPiP) {
+      actions.returnToCall()
+    }
+    setShowLeaveModal(true)
+  }
+
+  const cancelLeaveCall = () => {
+    setShowLeaveModal(false)
+  }
+
   // ── Context value ──
   const value = {
     // Call lifecycle
@@ -295,6 +308,9 @@ const GlobalCallContent = ({
     enterPiP: actions.enterPiP,
     exitPiP: actions.exitPiP,
     returnToCall: actions.returnToCall,
+    showLeaveModal,
+    promptLeaveCall,
+    cancelLeaveCall,
 
     // Session
     id: callInfo?.roomId,

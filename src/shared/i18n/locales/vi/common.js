@@ -5,6 +5,7 @@ export default {
   getStarted: "Bắt đầu ngay",
   seeMore: "Xem thêm",
   back: "Quay lại",
+  cancel: "Hủy",
   toggle: {
     on: "Bật",
     off: "Tắt",
