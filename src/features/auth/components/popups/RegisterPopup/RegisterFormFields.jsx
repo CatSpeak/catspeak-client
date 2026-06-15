@@ -120,7 +120,9 @@ const RegisterFormFields = ({
             value={formData.phonePrefix}
             onChange={(val) => setFormData({ ...formData, phonePrefix: val })}
             enableSearch={true}
-            searchPlaceholder={authText.searchPhonePlaceholder || "Search phone code..."}
+            searchPlaceholder={
+              authText.searchPhonePlaceholder || "Search phone code..."
+            }
             dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
             trigger={(isOpen, selectedOption, toggleDropdown) => (
               <TextInput
@@ -246,7 +248,9 @@ const RegisterFormFields = ({
             }
             options={countryOptions}
             enableSearch={true}
-            searchPlaceholder={authText.searchCountryPlaceholder || "Search country..."}
+            searchPlaceholder={
+              authText.searchCountryPlaceholder || "Search country..."
+            }
             triggerClassName={errors.country ? "!border-red-600" : ""}
             trigger={(isOpen, selectedOption, toggleDropdown) => (
               <button
@@ -257,22 +261,15 @@ const RegisterFormFields = ({
                 }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
-<<<<<<< HEAD
-                  {
-                    countryOptions.find((c) => c.value === formData.country)
-                      ?.icon
-                  }
-                  <span className="truncate">
-                    {countryOptions.find((c) => c.value === formData.country)
-                      ?.label || authText.countryPlaceholder}
-=======
                   {selectedOption?.icon}
                   <span className="truncate">
                     {selectedOption?.label || authText.countryPlaceholder}
->>>>>>> bugfix/profile-ui
                   </span>
                 </div>
-                <ChevronDown size={14} className={`shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={14}
+                  className={`shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                />
               </button>
             )}
           />
