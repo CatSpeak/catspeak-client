@@ -5,25 +5,34 @@ import FormDatePicker from "../../forms/FormDatePicker"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { countries } from "@/shared/constants/countriesData"
 
-const RegisterFormFields = ({
-  authText,
-  formData,
-  setFormData,
-  errors,
-  setErrors,
-}) => {
+const languageOptions = [
+  { value: "english", label: "English" },
+  { value: "vietnamese", label: "Tiếng Việt" },
+  { value: "chinese", label: "中文" },
+]
 
-  const languageOptions = [
-    { value: "english", label: "English" },
-    { value: "vietnamese", label: "Tiếng Việt" },
-    { value: "chinese", label: "中文" },
-  ]
+const countryOptions = countries.map((c) => ({
+  key: c.code,
+  value: c.value,
+  label: c.label,
+  searchTerms: `${c.code} ${c.value} ${c.label}`,
+  icon: (
+    <img
+      src={`https://flagcdn.com/w40/${c.value}.png`}
+      className="w-[20px] h-[20px] rounded-full object-cover"
+      alt={c.code}
+    />
+  ),
+}))
 
-  const countryOptions = countries.map((c) => ({
+const phonePrefixes = countries
+  .filter((c) => c.dialCode)
+  .map((c) => ({
     key: c.code,
-    value: c.value,
-    label: c.label,
-    searchTerms: `${c.code} ${c.value} ${c.label}`,
+    value: c.dialCode,
+    label: `${c.dialCode} (${c.label})`,
+    subtitle: c.label,
+    searchTerms: `${c.code} ${c.value} ${c.label} ${c.dialCode}`,
     icon: (
       <img
         src={`https://flagcdn.com/w40/${c.value}.png`}
@@ -33,23 +42,13 @@ const RegisterFormFields = ({
     ),
   }))
 
-  const phonePrefixes = countries
-    .filter((c) => c.dialCode)
-    .map((c) => ({
-      key: c.code,
-      value: c.dialCode,
-      label: `${c.dialCode} (${c.label})`,
-      subtitle: c.label,
-      searchTerms: `${c.code} ${c.value} ${c.label} ${c.dialCode}`,
-      icon: (
-        <img
-          src={`https://flagcdn.com/w40/${c.value}.png`}
-          className="w-[20px] h-[20px] rounded-full object-cover"
-          alt={c.code}
-        />
-      ),
-    }))
-
+const RegisterFormFields = ({
+  authText,
+  formData,
+  setFormData,
+  errors,
+  setErrors,
+}) => {
   const prefixLength = formData.phonePrefix?.length || 3
   const plClass = prefixLength <= 2 ? "pl-[80px]"
                 : prefixLength === 3 ? "pl-[90px]"
@@ -116,7 +115,7 @@ const RegisterFormFields = ({
             value={formData.phonePrefix}
             onChange={(val) => setFormData({ ...formData, phonePrefix: val })}
             enableSearch={true}
-            searchPlaceholder="Search phone code..."
+            searchPlaceholder={authText.searchPhonePlaceholder || "Search phone code..."}
             dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
             trigger={(isOpen, selectedOption, toggleDropdown) => (
               <TextInput
@@ -228,24 +227,25 @@ const RegisterFormFields = ({
             onChange={(val) => handleChange("country")({ target: { value: val } })}
             options={countryOptions}
             enableSearch={true}
-            searchPlaceholder="Search country..."
+            searchPlaceholder={authText.searchCountryPlaceholder || "Search country..."}
             triggerClassName={errors.country ? "!border-red-600" : ""}
-            trigger={
+            trigger={(isOpen, selectedOption, toggleDropdown) => (
               <button
                 type="button"
+                onClick={toggleDropdown}
                 className={`text-sm flex items-center justify-between border border-[#C6C6C6] rounded-lg px-4 h-10 shadow-sm w-full bg-white transition-colors hover:bg-gray-50 ${
                   errors.country ? "!border-red-600" : ""
                 }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
-                  {countryOptions.find(c => c.value === formData.country)?.icon}
+                  {selectedOption?.icon}
                   <span className="truncate">
-                    {countryOptions.find(c => c.value === formData.country)?.label || authText.countryPlaceholder}
+                    {selectedOption?.label || authText.countryPlaceholder}
                   </span>
                 </div>
-                <ChevronDown size={14} className="shrink-0 text-gray-500" />
+                <ChevronDown size={14} className={`shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
               </button>
-            }
+            )}
           />
           {errors.country && (
             <p className="mt-1 text-xs text-red-600">{errors.country}</p>

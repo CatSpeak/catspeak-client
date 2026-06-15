@@ -95,14 +95,19 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
   }
 
   return (
-    <Modal open={open} onClose={onClose} className="sm:max-w-2xl">
-      <form onSubmit={handleSubmit} className="pb-6">
-        <h2 className="mb-6 text-center text-3xl font-bold text-[#8f0d15]">
+    <Modal 
+      open={open} 
+      onClose={onClose} 
+      className="flex flex-col sm:max-w-2xl sm:max-h-[90vh]"
+      bodyClassName="px-4 flex-1 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+    >
+      <form onSubmit={handleSubmit} className="pb-12 min-[426px]:pb-6">
+        <h2 className="mb-6 pt-2 text-center text-3xl font-bold text-[#8f0d15] shrink-0">
           {authText.registerTitle}
         </h2>
 
-        {/* Scrollable content */}
-        <div className="max-h-[80vh] overflow-y-auto -mx-3 px-3 scrollbar-app-transparent">
+        {/* Scrollable content now natively handled by Modal body */}
+        <div className="-mx-3 px-3">
           <RegisterFormFields
             authText={authText}
             formData={formData}

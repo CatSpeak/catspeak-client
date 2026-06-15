@@ -69,6 +69,8 @@ export default {
   ipPolicy: "Intellectual Property Rights",
   languagePlaceholder: "Select language you want to learn",
   countryPlaceholder: "Select country you live in",
+  searchCountryPlaceholder: "Search country...",
+  searchPhonePlaceholder: "Search phone code...",
   validationUsernameRequired: "Please input your username!",
   validationEmailRequired: "Please input your email!",
   validationEmailInvalid: "Please enter a valid email!",

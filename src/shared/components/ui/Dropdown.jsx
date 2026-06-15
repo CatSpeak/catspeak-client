@@ -60,11 +60,6 @@ const Dropdown = ({
 
   useEffect(() => {
     const handleClose = () => setIsOpen(false)
-    const handleScroll = (e) => {
-      // Don't close if scrolling inside the dropdown portal itself
-      if (portalRef.current && portalRef.current.contains(e.target)) return
-      handleClose()
-    }
 
     const updateCoords = () => {
       if (isOpen && dropdownRef.current) {
@@ -78,23 +73,48 @@ const Dropdown = ({
         // Check horizontal clipping (assume ~260px width default)
         const forceAlignRight = rect.left + 260 > window.innerWidth
 
-        setPortalCoords({
-          top: rect.top + window.scrollY,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-          height: rect.height,
-          flipUp,
-          forceAlignRight,
+        setPortalCoords((prev) => {
+          const newTop = rect.top + window.scrollY
+          const newLeft = rect.left + window.scrollX
+          
+          if (
+            prev &&
+            prev.top === newTop &&
+            prev.left === newLeft &&
+            prev.width === rect.width &&
+            prev.height === rect.height &&
+            prev.flipUp === flipUp &&
+            prev.forceAlignRight === forceAlignRight
+          ) {
+            return prev
+          }
+
+          return {
+            top: newTop,
+            left: newLeft,
+            width: rect.width,
+            height: rect.height,
+            flipUp,
+            forceAlignRight,
+          }
         })
       }
     }
 
+    const handleScroll = (e) => {
+      // Don't close if scrolling inside the dropdown portal itself
+      if (portalRef.current && portalRef.current.contains(e.target)) return
+      
+      // Update coords instead of closing, keeps it attached when scrolling
+      updateCoords()
+    }
+
     if (isOpen) {
       updateCoords()
-      window.addEventListener("resize", handleClose)
+      window.addEventListener("resize", updateCoords)
       window.addEventListener("scroll", handleScroll, true)
       return () => {
-        window.removeEventListener("resize", handleClose)
+        window.removeEventListener("resize", updateCoords)
         window.removeEventListener("scroll", handleScroll, true)
       }
     }
