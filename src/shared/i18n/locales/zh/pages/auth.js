@@ -67,6 +67,8 @@ export default {
   ipPolicy: "知识产权政策",
   languagePlaceholder: "选择您想学习的语言",
   countryPlaceholder: "选择您所在的国家",
+  searchCountryPlaceholder: "搜索国家...",
+  searchPhonePlaceholder: "搜索电话区号...",
   validationUsernameRequired: "请输入用户名！",
   validationEmailRequired: "请输入邮箱！",
   validationEmailInvalid: "请输入有效的邮箱！",

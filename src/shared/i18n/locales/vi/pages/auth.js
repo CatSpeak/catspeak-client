@@ -69,6 +69,8 @@ export default {
   ipPolicy: "Bản quyền sở hữu trí tuệ",
   languagePlaceholder: "Chọn ngôn ngữ bạn muốn học",
   countryPlaceholder: "Chọn quốc gia bạn đang sinh sống",
+  searchCountryPlaceholder: "Tìm kiếm quốc gia...",
+  searchPhonePlaceholder: "Tìm kiếm mã vùng...",
   validationUsernameRequired: "Vui lòng nhập tên đăng nhập!",
   validationEmailRequired: "Vui lòng nhập email!",
   validationEmailInvalid: "Vui lòng nhập email hợp lệ!",

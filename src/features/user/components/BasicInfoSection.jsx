@@ -1,12 +1,22 @@
 import React from "react"
+import { ChevronDown } from "lucide-react"
 import EditableField from "./EditableField"
 import Dropdown from "@/shared/components/ui/Dropdown"
+import { countries } from "@/shared/constants/countriesData"
 
-const COUNTRIES = [
-  { value: "vietnam", label: "Vietnam" },
-  { value: "usa", label: "United States" },
-  { value: "china", label: "China" },
-]
+const countryOptions = countries.map((c) => ({
+  key: c.code,
+  value: c.value,
+  label: c.label,
+  searchTerms: `${c.code} ${c.value} ${c.label}`,
+  icon: (
+    <img
+      src={`https://flagcdn.com/w40/${c.value}.png`}
+      className="w-[20px] h-[20px] rounded-full object-cover"
+      alt={c.code}
+    />
+  ),
+}))
 
 const BasicInfoSection = ({
   formData,
@@ -54,12 +64,36 @@ const BasicInfoSection = ({
           <span>{t.profile?.personalInfo?.country || "Quốc gia"}</span>
           <div className="w-full">
             <Dropdown
-              options={COUNTRIES}
+              options={countryOptions}
               value={formData.country}
               onChange={onCountryChange}
+              enableSearch={true}
+              searchPlaceholder={t.profile?.personalInfo?.searchCountry || "Search country..."}
               placeholder={
                 t.profile?.personalInfo?.selectCountry || "Chọn quốc gia"
               }
+              trigger={(isOpen, selectedOption, toggleDropdown) => (
+                <button
+                  type="button"
+                  onClick={toggleDropdown}
+                  className="flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white text-base hover:bg-[#f0f0f0]"
+                >
+                  <div className="flex items-center gap-2 truncate mr-2">
+                    {selectedOption?.icon}
+                    <span className="truncate">
+                      {selectedOption?.label ||
+                        t.profile?.personalInfo?.selectCountry ||
+                        "Chọn quốc gia"}
+                    </span>
+                  </div>
+                  <ChevronDown
+                    size={16}
+                    className={`shrink-0 text-gray-500 transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              )}
             />
           </div>
         </div>
