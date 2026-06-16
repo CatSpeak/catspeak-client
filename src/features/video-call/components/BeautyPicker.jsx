@@ -48,7 +48,10 @@ const BeautyPicker = () => {
           <div
             key={key}
             className="flex items-center justify-between px-2 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer"
-            onClick={() => toggle(key)}
+            onClick={(e) => {
+              if (e.target.closest("label")) return
+              toggle(key)
+            }}
           >
             <div className="flex items-center gap-3 text-sm text-gray-700">
               {icon}
