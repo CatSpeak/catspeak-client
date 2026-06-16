@@ -1,7 +1,10 @@
-import React from "react"
+import React, { useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
+import BeautyPicker from "./BeautyPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
+
+const TABS = ["backgrounds", "beauty"]
 
 const VirtualBackgroundModal = ({
   open,
@@ -11,11 +14,19 @@ const VirtualBackgroundModal = ({
   onToggleCam,
 }) => {
   const { t } = useLanguage()
+  const [activeTab, setActiveTab] = useState("backgrounds")
+
   const handleApply = (url) => {
     // Automatically turn on camera if an effect is selected while camera is off
     if (!cameraOn && url !== null && onToggleCam) {
       onToggleCam()
     }
+  }
+
+  const tabLabel = (tab) => {
+    if (tab === "backgrounds")
+      return t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds"
+    return t?.rooms?.beauty?.tabLabel || "Beauty"
   }
 
   return (
@@ -52,9 +63,30 @@ const VirtualBackgroundModal = ({
           )}
         </div>
 
-        {/* Right Column: Picker */}
+        {/* Right Column: Tabbed Picker */}
         <div className="w-full md:w-80 flex-shrink-0 flex flex-col flex-1 md:h-auto">
-          <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
+          {/* Tab strip */}
+          <div className="flex border-b border-[#E5E5E5] mb-3">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  activeTab === tab
+                    ? "border-cath-red-600 text-cath-red-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tabLabel(tab)}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "backgrounds" ? (
+            <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
+          ) : (
+            <BeautyPicker />
+          )}
         </div>
       </div>
     </Modal>

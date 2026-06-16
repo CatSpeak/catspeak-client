@@ -300,6 +300,7 @@ export default {
     displayLanguage: "Display language",
     changeAvatar: "Change meeting avatar",
     backgroundsAndEffects: "Backgrounds and effects",
+    tabBackgrounds: "Backgrounds",
     applyVisualEffects: "Change background",
     cameraOffWarning: "Your camera is turned off. Selecting an effect will turn it on.",
     recording: {
@@ -368,6 +369,14 @@ export default {
     incorrectPassword: "Incorrect password. Please try again.",
     roomNotFound: "Room not found.",
     genericError: "Something went wrong. Please try again.",
+  },
+  beauty: {
+    title: "Beauty",
+    tabLabel: "Beauty",
+    smoothing: "Skin Smoothing",
+    brightness: "Brightness Boost",
+    warmth: "Warm Tone",
+    colorFilter: "Color Filter (Vivid)",
   },
   virtualBackground: {
     title: "Backgrounds",

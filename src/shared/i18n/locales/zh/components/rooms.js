@@ -268,6 +268,7 @@ export default {
     displayLanguage: "显示语言",
     changeAvatar: "更改会议头像",
     backgroundsAndEffects: "背景和效果",
+    tabBackgrounds: "背景",
     applyVisualEffects: "更换背景",
     cameraOffWarning: "您的摄像头已关闭。选择效果将打开它。",
     recording: {
@@ -335,6 +336,14 @@ export default {
     incorrectPassword: "密码不正确，请重试。",
     roomNotFound: "未找到房间。",
     genericError: "发生错误，请重试。",
+  },
+  beauty: {
+    title: "美颜",
+    tabLabel: "美颜",
+    smoothing: "磨皮",
+    brightness: "提亮",
+    warmth: "暖色调",
+    colorFilter: "色彩滤镜（鲜艳）",
   },
   virtualBackground: {
     title: "背景",

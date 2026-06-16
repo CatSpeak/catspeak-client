@@ -62,6 +62,12 @@ const GlobalCallContent = ({
   const [showCC, setShowCC] = useState(false)
   const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
   const [subtitleSelectedLanguage, setSubtitleSelectedLanguage] = useState(null)
+  const [beautyOptions, setBeautyOptions] = useState({
+    smoothing: false,
+    brightness: false,
+    warmth: false,
+    colorFilter: false,
+  })
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -337,6 +343,11 @@ const GlobalCallContent = ({
     isConnected,
     isTogglingMic: videoCallState.isTogglingMic,
     isTogglingCam: videoCallState.isTogglingCam,
+
+    // Beauty
+    beautyOptions,
+    setBeautyOptions,
+    switchBeauty: videoCallState.switchBeauty,
 
     // UI panels
     ...panelState,
