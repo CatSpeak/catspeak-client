@@ -267,6 +267,7 @@ export default {
     },
     changeAvatar: "Thay đổi ảnh đại diện",
     backgroundsAndEffects: "Nền và hiệu ứng",
+    tabBackgrounds: "Phông nền",
     applyVisualEffects: "Thay đổi phông nền",
     cameraOffWarning:
       "Máy ảnh của bạn đang tắt. Việc chọn một hiệu ứng sẽ bật nó lên.",
@@ -337,6 +338,14 @@ export default {
     incorrectPassword: "Mật khẩu không đúng. Vui lòng thử lại.",
     roomNotFound: "Không tìm thấy phòng.",
     genericError: "Đã xảy ra lỗi. Vui lòng thử lại.",
+  },
+  beauty: {
+    title: "Làm đẹp",
+    tabLabel: "Làm đẹp",
+    smoothing: "Làm mịn da",
+    brightness: "Tăng độ sáng",
+    warmth: "Tông màu ấm",
+    colorFilter: "Bộ lọc màu (Sống động)",
   },
   virtualBackground: {
     title: "Phông nền",
