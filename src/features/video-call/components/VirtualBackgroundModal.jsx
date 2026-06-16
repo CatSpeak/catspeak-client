@@ -15,6 +15,16 @@ const VirtualBackgroundModal = ({
 }) => {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState("backgrounds")
+  const [beautyOptions, setBeautyOptions] = useState({
+    smoothing: false,
+    brightness: false,
+    warmth: false,
+    colorFilter: false,
+  })
+
+  const handleBeautyToggle = (key) => {
+    setBeautyOptions((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
 
   const handleApply = (url) => {
     // Automatically turn on camera if an effect is selected while camera is off
@@ -85,7 +95,7 @@ const VirtualBackgroundModal = ({
           {activeTab === "backgrounds" ? (
             <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
           ) : (
-            <BeautyPicker />
+            <BeautyPicker beautyOptions={beautyOptions} onToggle={handleBeautyToggle} />
           )}
         </div>
       </div>

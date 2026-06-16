@@ -5,15 +5,20 @@ import Switch from "@/shared/components/ui/inputs/Switch"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const BeautyPicker = () => {
+const BeautyPicker = ({ beautyOptions: propOptions, onToggle }) => {
   const { t } = useLanguage()
-  const { beautyOptions, setBeautyOptions, switchBeauty } = useGlobalVideoCall()
+  const ctx = useGlobalVideoCall()
 
-  const toggle = (key) => {
-    const next = { ...beautyOptions, [key]: !beautyOptions[key] }
-    setBeautyOptions(next)
-    switchBeauty(next)
-  }
+  // Use prop-driven state when provided (e.g. pre-join modal),
+  // otherwise fall back to global call context (in-call panel).
+  const beautyOptions = propOptions ?? ctx.beautyOptions
+  const toggle = onToggle
+    ? (key) => onToggle(key)
+    : (key) => {
+        const next = { ...ctx.beautyOptions, [key]: !ctx.beautyOptions[key] }
+        ctx.setBeautyOptions(next)
+        ctx.switchBeauty(next)
+      }
 
   const items = [
     {
