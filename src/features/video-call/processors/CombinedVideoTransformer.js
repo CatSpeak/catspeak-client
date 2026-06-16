@@ -16,29 +16,42 @@ export const DEFAULT_BG_OPTIONS = {
 
 /**
  * A single VideoTransformer that handles beauty effects (Canvas 2D filters)
- * as a pre-processing step, then delegates to BackgroundTransformer for
- * background blur / virtual background.
+ * as a pre-processing step, then optionally delegates to BackgroundTransformer
+ * for background blur / virtual background.
  *
- * Both beauty and background can be active simultaneously.
- * When both are off the transform is a cheap passthrough via BackgroundTransformer.
+ * BackgroundTransformer is lazy-initialized only when a background effect is
+ * actually requested, so beauty works independently of WebGL2 / MediaPipe CDN.
  */
 export class CombinedVideoTransformer extends VideoTransformer {
   _beautyOptions = { ...DEFAULT_BEAUTY_OPTIONS }
   _bgOptions = { ...DEFAULT_BG_OPTIONS }
+
+  // BackgroundTransformer is lazy: only created when background is actually needed
   _bgTransformer = null
+  _bgTransformerReady = false
+  _bgInitializing = false
+
+  // Stored from init() so we can lazy-init BackgroundTransformer later
+  _initOpts = null
+
+  // Intermediate canvas for Canvas 2D beauty filters
   _beautyCanvas = null
   _beautyCtx = null
 
   async init(opts) {
     await super.init(opts)
-    this._bgTransformer = new BackgroundTransformer({ backgroundDisabled: true })
-    await this._bgTransformer.init(opts)
+    this._initOpts = opts
     this._initBeautyCanvas()
   }
 
   async restart(opts) {
     await super.restart(opts)
-    await this._bgTransformer?.restart(opts)
+    this._initOpts = opts
+    this._bgTransformerReady = false
+    if (this._bgTransformer) {
+      await this._bgTransformer.restart(opts)
+      this._bgTransformerReady = true
+    }
     this._initBeautyCanvas()
   }
 
@@ -55,12 +68,31 @@ export class CombinedVideoTransformer extends VideoTransformer {
     this._beautyCtx = this._beautyCanvas.getContext("2d")
   }
 
+  /**
+   * Lazy-initializes BackgroundTransformer using current _bgOptions.
+   * Called only when a background effect is actually needed.
+   */
+  async _ensureBgTransformer() {
+    if (this._bgTransformerReady || this._bgInitializing || !this._initOpts) return
+    this._bgInitializing = true
+    try {
+      this._bgTransformer = new BackgroundTransformer({ ...this._bgOptions })
+      await this._bgTransformer.init(this._initOpts)
+      this._bgTransformerReady = true
+    } catch (err) {
+      console.error("[CombinedVideoTransformer] BackgroundTransformer init failed:", err)
+      this._bgTransformer = null
+    } finally {
+      this._bgInitializing = false
+    }
+  }
+
   _buildFilter() {
     const parts = []
-    if (this._beautyOptions.smoothing) parts.push("blur(2px)")
-    if (this._beautyOptions.brightness) parts.push("brightness(1.15)")
-    if (this._beautyOptions.warmth) parts.push("sepia(0.2) saturate(1.15)")
-    if (this._beautyOptions.colorFilter) parts.push("saturate(1.4) contrast(1.05)")
+    if (this._beautyOptions.smoothing)    parts.push("blur(4px)")
+    if (this._beautyOptions.brightness)   parts.push("brightness(1.2)")
+    if (this._beautyOptions.warmth)       parts.push("sepia(0.35) saturate(1.3)")
+    if (this._beautyOptions.colorFilter)  parts.push("saturate(1.5) contrast(1.1)")
     return parts.length ? parts.join(" ") : "none"
   }
 
@@ -68,30 +100,60 @@ export class CombinedVideoTransformer extends VideoTransformer {
     return Object.values(this._beautyOptions).some(Boolean)
   }
 
+  _hasBg() {
+    return (
+      !this._bgOptions.backgroundDisabled &&
+      (typeof this._bgOptions.imagePath === "string" ||
+        typeof this._bgOptions.blurRadius === "number")
+    )
+  }
+
   async transform(frame, controller) {
-    if (!this._hasBeauty()) {
-      // No beauty — delegate entirely to bgTransformer (handles bg-on, bg-off, passthrough)
-      await this._bgTransformer.transform(frame, controller)
+    const hasBeauty = this._hasBeauty()
+    const hasBg = this._hasBg()
+
+    // Passthrough: nothing to do
+    if (!hasBeauty && !hasBg) {
+      controller.enqueue(frame)
       return
     }
 
-    const ts = frame.timestamp
-    const w = frame.displayWidth
-    const h = frame.displayHeight
+    if (hasBeauty) {
+      const ts = frame.timestamp
+      const w = frame.displayWidth
+      const h = frame.displayHeight
 
-    // Resize intermediate canvas if needed
-    if (this._beautyCanvas.width !== w) this._beautyCanvas.width = w
-    if (this._beautyCanvas.height !== h) this._beautyCanvas.height = h
+      if (this._beautyCanvas.width !== w) this._beautyCanvas.width = w
+      if (this._beautyCanvas.height !== h) this._beautyCanvas.height = h
 
-    // Draw frame with beauty filter onto intermediate canvas
-    this._beautyCtx.filter = this._buildFilter()
-    this._beautyCtx.drawImage(frame, 0, 0, w, h)
-    frame.close()
+      this._beautyCtx.filter = this._buildFilter()
+      this._beautyCtx.drawImage(frame, 0, 0, w, h)
+      frame.close()
 
-    // Create beauty-processed VideoFrame and pass to bgTransformer
-    // bgTransformer handles both "bg active" and "bg disabled" (passthrough) cases
-    const beautyFrame = new VideoFrame(this._beautyCanvas, { timestamp: ts })
-    await this._bgTransformer.transform(beautyFrame, controller)
+      if (!hasBg) {
+        // Beauty only — enqueue directly, no MediaPipe needed
+        controller.enqueue(new VideoFrame(this._beautyCanvas, { timestamp: ts }))
+        return
+      }
+
+      // Beauty + background — delegate beauty-processed frame to BackgroundTransformer
+      await this._ensureBgTransformer()
+      const beautyFrame = new VideoFrame(this._beautyCanvas, { timestamp: ts })
+      if (this._bgTransformerReady) {
+        await this._bgTransformer.transform(beautyFrame, controller)
+      } else {
+        controller.enqueue(beautyFrame)
+      }
+      return
+    }
+
+    // Background only (no beauty) — lazy-init and delegate
+    await this._ensureBgTransformer()
+    if (this._bgTransformerReady) {
+      await this._bgTransformer.transform(frame, controller)
+    } else {
+      controller.enqueue(frame)
+    }
   }
 
   update(opts) {
@@ -100,12 +162,17 @@ export class CombinedVideoTransformer extends VideoTransformer {
     }
     if (opts.bgOptions !== undefined) {
       this._bgOptions = { ...this._bgOptions, ...opts.bgOptions }
-      this._bgTransformer?.update(this._bgOptions)
+      if (this._bgTransformerReady) {
+        this._bgTransformer.update(this._bgOptions)
+      }
     }
   }
 
   async destroy() {
-    await this._bgTransformer?.destroy()
+    if (this._bgTransformerReady) {
+      await this._bgTransformer?.destroy().catch(() => {})
+    }
     await super.destroy()
   }
 }
+
