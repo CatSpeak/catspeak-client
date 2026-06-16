@@ -1,6 +1,6 @@
 // src/features/video-call/processors/useCombinedProcessor.js
 import { useRef, useEffect, useCallback } from "react"
-import { supportsBackgroundProcessors, ProcessorWrapper } from "@livekit/track-processors"
+import { ProcessorWrapper } from "@livekit/track-processors"
 import { useRoomContext, useLocalParticipant } from "@livekit/components-react"
 import { Track } from "livekit-client"
 import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
@@ -9,11 +9,11 @@ import { CombinedVideoTransformer } from "./CombinedVideoTransformer"
 /**
  * Owns the single ProcessorWrapper<CombinedVideoTransformer> for the active call.
  *
- * - Attaches the processor to the camera track when it becomes available.
- * - Watches the user's saved background URL (from Redux) and applies it automatically.
- * - Exposes switchBeauty() for the beauty toggle UI.
- *
- * Returns no-op functions on browsers that don't support track processors.
+ * Uses ProcessorWrapper.isSupported (Canvas 2D + stream APIs) rather than
+ * supportsBackgroundProcessors() (which also requires WebGL2 + MediaPipe).
+ * Beauty effects only need Canvas 2D, so they work on a wider range of browsers.
+ * BackgroundTransformer (MediaPipe) is lazy-initialized only when a background
+ * effect is actually requested.
  */
 export const useCombinedProcessor = () => {
   const room = useRoomContext()
@@ -26,7 +26,7 @@ export const useCombinedProcessor = () => {
 
   // Initialize processor once on mount and destroy on unmount
   useEffect(() => {
-    if (supportsBackgroundProcessors()) {
+    if (ProcessorWrapper.isSupported) {
       processorRef.current = new ProcessorWrapper(
         new CombinedVideoTransformer(),
         "combined-video-processor",
