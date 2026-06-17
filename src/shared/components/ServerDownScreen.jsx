@@ -7,6 +7,7 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { ServerCrash } from "lucide-react"
 import toast from "react-hot-toast"
+import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
 
 const POLLING_INTERVAL_MS = 5000 // 5 seconds
 
@@ -22,30 +23,16 @@ const ServerDownScreen = () => {
   const { t } = useLanguage()
 
   const checkHealth = useCallback(async () => {
-    try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api"
-      // Remove trailing slash if necessary to ensure correct /api/health URL
-      const normalizedBaseUrl = baseUrl.endsWith("/")
-        ? baseUrl.slice(0, -1)
-        : baseUrl
-      const url = `${normalizedBaseUrl}/health`
-
-      const response = await fetch(url)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.status === "Healthy") {
-          if (isInCall) {
-            // If in a call, just clear the error state but don't force a reload
-            // to avoid disconnecting the user's ongoing video call.
-            dispatch(setServerUp())
-            toast.success("Server connection restored!", { duration: 4000 })
-          } else {
-            window.location.reload()
-          }
-        }
+    const isHealthy = await checkIsServerHealthy()
+    if (isHealthy) {
+      if (isInCall) {
+        // If in a call, just clear the error state but don't force a reload
+        // to avoid disconnecting the user's ongoing video call.
+        dispatch(setServerUp())
+        toast.success("Server connection restored!", { duration: 4000 })
+      } else {
+        window.location.reload()
       }
-    } catch (error) {
-      // Ignore network errors, server still down
     }
   }, [isInCall, dispatch])
 
