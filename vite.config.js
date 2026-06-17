@@ -41,6 +41,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       rollupOptions: {
+        external: ["@mediapipe/face_mesh"],
         output: {
           manualChunks: {
             "react-vendor": ["react", "react-dom", "react-router-dom"],

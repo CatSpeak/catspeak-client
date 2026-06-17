@@ -5,6 +5,9 @@ import {
   FACE_OVAL,
   LEFT_EYE,
   RIGHT_EYE,
+  LIPS_INNER,
+  supportsCanvasFilter,
+  makeCanvas,
   createFeatheredMask,
 } from "./FaceMeshProcessor"
 
@@ -86,21 +89,11 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _initBeautyCanvas() {
     const w = this.canvas?.width || 1280
     const h = this.canvas?.height || 720
-    const OffCtor =
-      typeof OffscreenCanvas !== "undefined"
-        ? OffscreenCanvas
-        : (w, h) => {
-            const c = document.createElement("canvas")
-            c.width = w
-            c.height = h
-            return c
-          }
-    this._beautyCanvas = new OffCtor(w, h)
+    this._beautyCanvas = makeCanvas(w, h)
     this._beautyCtx = this._beautyCanvas.getContext("2d")
-    // Scratch canvases (same dimensions, allocated once)
-    this._scratchCanvas = new OffCtor(w, h)
+    this._scratchCanvas = makeCanvas(w, h)
     this._scratchCtx = this._scratchCanvas.getContext("2d")
-    this._maskCanvas = new OffCtor(w, h)
+    this._maskCanvas = makeCanvas(w, h)
     this._maskCtx = this._maskCanvas.getContext("2d")
   }
 
@@ -161,12 +154,13 @@ export class CombinedVideoTransformer extends VideoTransformer {
    */
   _buildFilter({ includeSmoothing = true } = {}) {
     const parts = []
-    const { smoothing, brightness, warmth, colorFilter, eyeBrighten, teethWhiten } =
+    const { smoothing, brightness, warmth, colorFilter } =
       this._beautyOptions
 
-    // Skin smoothing: 0→0px, 50→4px, 100→8px  (skip when face mesh already handled it)
+    // Skin smoothing fallback (face mesh unavailable): very subtle global softening.
+    // Max 1.5 px — noticeably different from 0 but not a distracting blur.
     if (includeSmoothing && smoothing > 0) {
-      parts.push(`blur(${Math.round(smoothing / 12.5)}px)`)
+      parts.push(`blur(${(smoothing / 100 * 1.5).toFixed(1)}px)`)
     }
 
     // Brightness boost: 0→1.0, 50→1.5, 100→2.0
@@ -188,19 +182,8 @@ export class CombinedVideoTransformer extends VideoTransformer {
       )
     }
 
-    // Eye brighten: subtle brightness + contrast around the eye region
-    if (eyeBrighten > 0) {
-      parts.push(
-        `brightness(${(1 + eyeBrighten / 300).toFixed(3)}) contrast(${(1 + eyeBrighten / 250).toFixed(3)})`,
-      )
-    }
-
-    // Teeth whiten: shift yellow hues toward white + slight desaturate
-    if (teethWhiten > 0) {
-      parts.push(
-        `hue-rotate(${-teethWhiten / 15}deg) saturate(${(1 - teethWhiten / 300).toFixed(3)})`,
-      )
-    }
+    // eyeBrighten and teethWhiten are handled as face-aware pixel effects
+    // (_applyEyeBrighten / _applyTeethWhiten) — not as global CSS filters.
 
     return parts.length ? parts.join(" ") : "none"
   }
@@ -213,8 +196,9 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _needsFaceMesh() {
     return (
       this._beautyOptions.faceSlim > 0 ||
-      this._beautyOptions.eyeEnlarge > 0
-      // smoothing uses face mesh when available, but isn't a hard requirement
+      this._beautyOptions.eyeEnlarge > 0 ||
+      this._beautyOptions.eyeBrighten > 0 ||
+      this._beautyOptions.teethWhiten > 0
     )
   }
 
@@ -241,11 +225,14 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _applySkinSmoothing(ctx, landmarks, width, height, factor) {
     if (factor <= 0) return
 
+    // blur() requires ctx.filter support; skip entirely on Safari < 18
+    if (!supportsCanvasFilter) return
+
     const blurPx = Math.max(1, Math.round((factor / 100) * 6) + 1) // 1-7 px
     const featherPx = blurPx * 4
 
     if (!landmarks) {
-      // Fallback: global blur (will be handled by _buildFilter later)
+      // No face mesh → global blur handled by _buildFilter
       return
     }
 
@@ -281,15 +268,11 @@ export class CombinedVideoTransformer extends VideoTransformer {
   }
 
   /**
-   * Face slimming: horizontally squeeze the face region toward centre.
-   * Uses face oval + jawline to determine the face bounding box,
-   * then applies a subtle horizontal scale centred on the face.
-   *
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {Array} landmarks
-   * @param {number} width
-   * @param {number} height
-   * @param {number} factor — 0-100
+   * Face slimming via reverse-map warp.
+   * For each destination pixel inside the face oval, we sample from a source
+   * position that is slightly *further* from the face centre horizontally.
+   * This makes the face appear narrower without leaving gaps at the edges.
+   * Works on all browsers — uses getImageData / putImageData, no ctx.filter.
    */
   _applyFaceSlim(ctx, landmarks, width, height, factor) {
     if (factor <= 0 || !landmarks) return
@@ -298,158 +281,377 @@ export class CombinedVideoTransformer extends VideoTransformer {
       x: landmarks[i].x * width,
       y: landmarks[i].y * height,
     }))
-    // Compute centre and radius directly from pixel coords (ovalPx is already in px)
+
     let cx = 0, cy = 0
     for (const p of ovalPx) { cx += p.x; cy += p.y }
     cx /= ovalPx.length
     cy /= ovalPx.length
+
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (const p of ovalPx) {
       if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x
       if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y
     }
-    const radius = Math.max(maxX - minX, maxY - minY) / 2
-    const center = { x: cx, y: cy }
-    const scaleX = 1 - (factor / 100) * 0.08 // squeeze up to 8 %
 
-    if (scaleX >= 0.99) return // negligible effect
+    const halfW = (maxX - minX) / 2
+    const halfH = (maxY - minY) / 2
+    if (halfW < 4 || halfH < 4) return
 
-    // Expanded face oval for the feather mask (covers the whole face + margin)
-    const expand = 1.25
-    const expandedOval = ovalPx.map((p) => ({
-      x: center.x + (p.x - center.x) * expand,
-      y: center.y + (p.y - center.y) * expand,
-    }))
-    const maskCtx = createFeatheredMask(expandedOval, width, height, radius * 0.5)
+    // Expand factor: sample further from centre → face appears narrower.
+    // Max 15 % at factor = 100.
+    const expand = 1 + (factor / 100) * 0.15
 
-    // Save the original canvas content
-    this._scratchCtx.clearRect(0, 0, width, height)
-    this._scratchCtx.globalCompositeOperation = "source-over"
-    this._scratchCtx.drawImage(ctx.canvas, 0, 0)
+    const margin = 8
+    const rx = Math.max(0, Math.floor(minX - margin))
+    const ry = Math.max(0, Math.floor(minY - margin))
+    const rw = Math.min(width - rx, Math.ceil(maxX - minX + margin * 2))
+    const rh = Math.min(height - ry, Math.ceil(maxY - minY + margin * 2))
+    if (rw < 4 || rh < 4) return
 
-    // Draw the slimmed face region into a temp canvas
-    this._maskCtx.clearRect(0, 0, width, height)
-    this._maskCtx.save()
-    this._maskCtx.translate(center.x, center.y)
-    this._maskCtx.scale(scaleX, 1)
-    this._maskCtx.translate(-center.x, -center.y)
-    this._maskCtx.drawImage(this._scratchCanvas, 0, 0)
-    this._maskCtx.restore()
+    const srcData = ctx.getImageData(rx, ry, rw, rh)
+    const src = srcData.data
+    const out = new Uint8ClampedArray(src.length)
 
-    // Apply feathered mask to the slimmed result
-    this._maskCtx.globalCompositeOperation = "destination-in"
-    this._maskCtx.drawImage(maskCtx.canvas, 0, 0)
-    this._maskCtx.globalCompositeOperation = "source-over"
+    const lcx = cx - rx
+    const lcy = cy - ry
 
-    // Composite: original back, then slimmed face on top
-    ctx.clearRect(0, 0, width, height)
-    ctx.drawImage(this._scratchCanvas, 0, 0)
-    ctx.drawImage(this._maskCanvas, 0, 0)
+    for (let y = 0; y < rh; y++) {
+      for (let x = 0; x < rw; x++) {
+        const dx = x - lcx
+        const dy = y - lcy
+        const nx = dx / halfW
+        const ny = dy / halfH
+        const dist = Math.sqrt(nx * nx + ny * ny)
+        const oi = (y * rw + x) * 4
+
+        if (dist < 1.5) {
+          // Smooth falloff: full warp inside the oval, fading to 0 at 1.5× boundary
+          const falloff = dist < 1 ? 1 : Math.max(0, 1 - (dist - 1) / 0.5)
+          const eff = 1 + (expand - 1) * falloff
+
+          // Reverse-map: read from further out in the horizontal axis
+          const sx = lcx + dx * eff
+          const sy = lcy + dy
+
+          const fx = Math.floor(sx)
+          const fy = Math.floor(sy)
+          const wx = sx - fx
+          const wy = sy - fy
+
+          if (fx >= 0 && fx < rw - 1 && fy >= 0 && fy < rh - 1) {
+            for (let c = 0; c < 4; c++) {
+              const i00 = (fy * rw + fx) * 4 + c
+              const i10 = (fy * rw + fx + 1) * 4 + c
+              const i01 = ((fy + 1) * rw + fx) * 4 + c
+              const i11 = ((fy + 1) * rw + fx + 1) * 4 + c
+              out[oi + c] = Math.round(
+                src[i00] * (1 - wx) * (1 - wy) +
+                src[i10] * wx * (1 - wy) +
+                src[i01] * (1 - wx) * wy +
+                src[i11] * wx * wy,
+              )
+            }
+          } else {
+            out[oi] = src[oi]; out[oi + 1] = src[oi + 1]
+            out[oi + 2] = src[oi + 2]; out[oi + 3] = src[oi + 3]
+          }
+        } else {
+          out[oi] = src[oi]; out[oi + 1] = src[oi + 1]
+          out[oi + 2] = src[oi + 2]; out[oi + 3] = src[oi + 3]
+        }
+      }
+    }
+
+    ctx.putImageData(new ImageData(out, rw, rh), rx, ry)
   }
 
   /**
-   * Eye enlargement: scale the eye region around its centre, then
-   * blend with a circular feathered mask.
-   *
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {Array} landmarks
-   * @param {number} width
-   * @param {number} height
-   * @param {number} factor — 0-100
+   * Eye enlargement via reverse-map warp.
+   * For each destination pixel inside the eye warp radius, sample from a source
+   * position closer to the eye centre — creating a magnifying-lens effect that
+   * makes the eye appear larger.  Works without ctx.filter (Safari compatible).
    */
   _applyEyeEnlarge(ctx, landmarks, width, height, factor) {
     if (factor <= 0 || !landmarks) return
 
-    const scale = 1 + (factor / 100) * 0.12 // enlarge up to 12 %
+    const scale = 1 + (factor / 100) * 0.20 // up to 20 % magnification
     if (scale <= 1.001) return
 
-    // Process each eye
     for (const eyeIndices of [LEFT_EYE, RIGHT_EYE]) {
       this._enlargeOneEye(ctx, landmarks, eyeIndices, width, height, scale)
     }
   }
 
-  /**
-   * Enlarge a single eye region.
-   */
   _enlargeOneEye(ctx, landmarks, eyeIndices, width, height, scale) {
-    // Compute bounding box of eye landmarks
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (const i of eyeIndices) {
       const lm = landmarks[i]
       if (!lm) continue
-      const px = lm.x * width
-      const py = lm.y * height
-      if (px < minX) minX = px
-      if (px > maxX) maxX = px
-      if (py < minY) minY = py
-      if (py > maxY) maxY = py
+      const px = lm.x * width, py = lm.y * height
+      if (px < minX) minX = px; if (px > maxX) maxX = px
+      if (py < minY) minY = py; if (py > maxY) maxY = py
     }
     if (!isFinite(minX)) return
 
     const cx = (minX + maxX) / 2
     const cy = (minY + maxY) / 2
-    const eyeW = maxX - minX
-    const eyeH = maxY - minY
+    const eyeSize = Math.max(maxX - minX, maxY - minY)
+    const R = eyeSize * 1.4  // warp radius — slightly larger than the eye
 
-    // Expand region to include margin for scaling
-    const margin = 1.6
-    const regionW = eyeW * margin
-    const regionH = eyeH * margin
-    const rx = cx - regionW / 2
-    const ry = cy - regionH / 2
+    const margin = R + 2
+    const rx = Math.max(0, Math.floor(cx - margin))
+    const ry = Math.max(0, Math.floor(cy - margin))
+    const rw = Math.min(width - rx, Math.ceil(margin * 2))
+    const rh = Math.min(height - ry, Math.ceil(margin * 2))
+    if (rw < 4 || rh < 4) return
 
-    // Clamp to canvas bounds
-    const srcX = Math.max(0, Math.floor(rx))
-    const srcY = Math.max(0, Math.floor(ry))
-    const srcW = Math.min(width - srcX, Math.ceil(regionW))
-    const srcH = Math.min(height - srcY, Math.ceil(regionH))
-    if (srcW < 4 || srcH < 4) return
+    const srcData = ctx.getImageData(rx, ry, rw, rh)
+    const src = srcData.data
+    const out = new Uint8ClampedArray(src.length)
 
-    // Save the eye region from the current canvas into _scratchCanvas
-    this._scratchCtx.clearRect(0, 0, width, height)
-    this._scratchCtx.globalCompositeOperation = "source-over"
-    this._scratchCtx.drawImage(
-      ctx.canvas,
-      srcX, srcY, srcW, srcH,
-      0, 0, srcW, srcH
-    )
+    const lcx = cx - rx
+    const lcy = cy - ry
 
-    // Compute scale parameters
-    const drawW = srcW / scale
-    const drawH = srcH / scale
-    const drawX = (srcW - drawW) / 2
-    const drawY = (srcH - drawH) / 2
-    const maskCenterX = srcW / 2
-    const maskCenterY = srcH / 2
-    const maskRadius = Math.min(srcW, srcH) * 0.55
-    const featherRadius = maskRadius * 0.35
+    for (let y = 0; y < rh; y++) {
+      for (let x = 0; x < rw; x++) {
+        const dx = x - lcx
+        const dy = y - lcy
+        const r = Math.sqrt(dx * dx + dy * dy)
+        const oi = (y * rw + x) * 4
 
-    // Build feathered circular mask into _maskCanvas
-    this._maskCtx.clearRect(0, 0, srcW, srcH)
-    this._maskCtx.fillStyle = "white"
-    this._maskCtx.beginPath()
-    this._maskCtx.arc(maskCenterX, maskCenterY, maskRadius, 0, Math.PI * 2)
-    this._maskCtx.fill()
+        if (r < R) {
+          // Smooth falloff: strong magnification at centre, tapers to 1× at edge R
+          const t = r / R
+          const falloff = 1 - t * t  // quadratic: 1 at centre, 0 at edge
+          const eff = 1 + (scale - 1) * falloff
 
-    if (featherRadius > 0.5) {
-      const temp = typeof OffscreenCanvas !== "undefined"
-        ? new OffscreenCanvas(srcW, srcH)
-        : (() => { const c = document.createElement("canvas"); c.width = srcW; c.height = srcH; return c })()
-      const tempCtx = temp.getContext("2d")
-      tempCtx.filter = `blur(${featherRadius}px)`
-      tempCtx.drawImage(this._maskCanvas, 0, 0, srcW, srcH, 0, 0, srcW, srcH)
-      this._maskCtx.clearRect(0, 0, srcW, srcH)
-      this._maskCtx.drawImage(temp, 0, 0)
+          // Reverse-map: dest pixel reads from source closer to eye centre
+          const sx = lcx + dx / eff
+          const sy = lcy + dy / eff
+
+          const fx = Math.floor(sx)
+          const fy = Math.floor(sy)
+          const wx = sx - fx
+          const wy = sy - fy
+
+          if (fx >= 0 && fx < rw - 1 && fy >= 0 && fy < rh - 1) {
+            for (let c = 0; c < 4; c++) {
+              const i00 = (fy * rw + fx) * 4 + c
+              const i10 = (fy * rw + fx + 1) * 4 + c
+              const i01 = ((fy + 1) * rw + fx) * 4 + c
+              const i11 = ((fy + 1) * rw + fx + 1) * 4 + c
+              out[oi + c] = Math.round(
+                src[i00] * (1 - wx) * (1 - wy) +
+                src[i10] * wx * (1 - wy) +
+                src[i01] * (1 - wx) * wy +
+                src[i11] * wx * wy,
+              )
+            }
+          } else {
+            out[oi] = src[oi]; out[oi + 1] = src[oi + 1]
+            out[oi + 2] = src[oi + 2]; out[oi + 3] = src[oi + 3]
+          }
+        } else {
+          out[oi] = src[oi]; out[oi + 1] = src[oi + 1]
+          out[oi + 2] = src[oi + 2]; out[oi + 3] = src[oi + 3]
+        }
+      }
     }
 
-    // Composite scaled eye region through the mask using source-in
-    this._maskCtx.globalCompositeOperation = "source-in"
-    this._maskCtx.drawImage(this._scratchCanvas, 0, 0, srcW, srcH, drawX, drawY, drawW, drawH)
-    this._maskCtx.globalCompositeOperation = "source-over"
+    ctx.putImageData(new ImageData(out, rw, rh), rx, ry)
+  }
 
-    // Draw the masked enlarged eye back onto the main canvas
-    ctx.drawImage(this._maskCanvas, 0, 0, srcW, srcH, srcX, srcY, srcW, srcH)
+  /**
+   * Eye brightening: boost brightness + contrast in a localised region around
+   * each eye using pixel manipulation (no ctx.filter — Safari compatible).
+   * A radial weight ensures a smooth, natural-looking blend.
+   */
+  _applyEyeBrighten(ctx, landmarks, width, height, factor) {
+    if (factor <= 0 || !landmarks) return
+
+    for (const eyeIndices of [LEFT_EYE, RIGHT_EYE]) {
+      this._brightenEyeRegion(ctx, landmarks, eyeIndices, width, height, factor)
+    }
+  }
+
+  _brightenEyeRegion(ctx, landmarks, eyeIndices, width, height, factor) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const i of eyeIndices) {
+      const lm = landmarks[i]
+      if (!lm) continue
+      const px = lm.x * width, py = lm.y * height
+      if (px < minX) minX = px; if (px > maxX) maxX = px
+      if (py < minY) minY = py; if (py > maxY) maxY = py
+    }
+    if (!isFinite(minX)) return
+
+    const cx = (minX + maxX) / 2
+    const cy = (minY + maxY) / 2
+    const eyeW = (maxX - minX) * 2.5
+    const eyeH = (maxY - minY) * 2.5
+
+    const rx = Math.max(0, Math.floor(cx - eyeW / 2))
+    const ry = Math.max(0, Math.floor(cy - eyeH / 2))
+    const rw = Math.min(width - rx, Math.ceil(eyeW))
+    const rh = Math.min(height - ry, Math.ceil(eyeH))
+    if (rw < 4 || rh < 4) return
+
+    const imageData = ctx.getImageData(rx, ry, rw, rh)
+    const data = imageData.data
+
+    // factor 0→1, 50→1.3, 100→1.5 brightness; contrast scales similarly
+    const brightF = 1 + (factor / 100) * 0.5
+    const contrastF = 1 + (factor / 100) * 0.25
+
+    const halfW = rw / 2
+    const halfH = rh / 2
+
+    for (let y = 0; y < rh; y++) {
+      for (let x = 0; x < rw; x++) {
+        const nx = (x - halfW) / halfW
+        const ny = (y - halfH) / halfH
+        // Radial weight: 1 at centre, 0 at ellipse boundary
+        const weight = Math.max(0, 1 - Math.sqrt(nx * nx + ny * ny))
+        if (weight <= 0) continue
+
+        const i = (y * rw + x) * 4
+        let r = data[i], g = data[i + 1], b = data[i + 2]
+
+        // Apply contrast then brightness
+        r = (r - 127.5) * contrastF + 127.5
+        g = (g - 127.5) * contrastF + 127.5
+        b = (b - 127.5) * contrastF + 127.5
+        r *= brightF; g *= brightF; b *= brightF
+
+        // Blend with original based on radial weight
+        data[i]     = Math.min(255, Math.max(0, data[i]     + (r - data[i])     * weight))
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (g - data[i + 1]) * weight))
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (b - data[i + 2]) * weight))
+      }
+    }
+
+    ctx.putImageData(imageData, rx, ry)
+  }
+
+  /**
+   * Teeth whitening: brighten and desaturate the mouth interior region using
+   * pixel manipulation (no ctx.filter — Safari compatible).
+   */
+  _applyTeethWhiten(ctx, landmarks, width, height, factor) {
+    if (factor <= 0 || !landmarks) return
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const i of LIPS_INNER) {
+      const lm = landmarks[i]
+      if (!lm) continue
+      const px = lm.x * width, py = lm.y * height
+      if (px < minX) minX = px; if (px > maxX) maxX = px
+      if (py < minY) minY = py; if (py > maxY) maxY = py
+    }
+    if (!isFinite(minX)) return
+
+    const cx = (minX + maxX) / 2
+    const cy = (minY + maxY) / 2
+    const mouthW = (maxX - minX) * 2.0
+    const mouthH = (maxY - minY) * 2.2
+
+    const rx = Math.max(0, Math.floor(cx - mouthW / 2))
+    const ry = Math.max(0, Math.floor(cy - mouthH / 2))
+    const rw = Math.min(width - rx, Math.ceil(mouthW))
+    const rh = Math.min(height - ry, Math.ceil(mouthH))
+    if (rw < 4 || rh < 4) return
+
+    const imageData = ctx.getImageData(rx, ry, rw, rh)
+    const data = imageData.data
+
+    // factor 0→1.0, 100→1.35 brightness; desat 0→0, 100→0.5
+    const brightF = 1 + (factor / 100) * 0.35
+    const desat = (factor / 100) * 0.5
+
+    const halfW = rw / 2
+    const halfH = rh / 2
+
+    for (let y = 0; y < rh; y++) {
+      for (let x = 0; x < rw; x++) {
+        const nx = (x - halfW) / halfW
+        const ny = (y - halfH) / halfH
+        const weight = Math.max(0, 1 - Math.sqrt(nx * nx + ny * ny))
+        if (weight <= 0) continue
+
+        const i = (y * rw + x) * 4
+        let r = data[i] * brightF
+        let g = data[i + 1] * brightF
+        let b = data[i + 2] * brightF
+
+        // Desaturate toward luminance (BT.709 weights)
+        const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        r = r + (lum - r) * desat
+        g = g + (lum - g) * desat
+        b = b + (lum - b) * desat
+
+        data[i]     = Math.min(255, Math.max(0, data[i]     + (r - data[i])     * weight))
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (g - data[i + 1]) * weight))
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (b - data[i + 2]) * weight))
+      }
+    }
+
+    ctx.putImageData(imageData, rx, ry)
+  }
+
+  /**
+   * Pixel-level fallback for global filters when ctx.filter is unsupported
+   * (Safari < 18).  Handles brightness, warmth, and colorFilter.
+   */
+  _applyPixelFilters(ctx, width, height) {
+    const { brightness, warmth, colorFilter } = this._beautyOptions
+    if (brightness === 0 && warmth === 0 && colorFilter === 0) return
+
+    const imageData = ctx.getImageData(0, 0, width, height)
+    const data = imageData.data
+
+    const bFactor = brightness > 0 ? 1 + brightness / 100 : 1
+    const wSepia = warmth / 200          // partial sepia factor (0–0.5)
+    const wSat = warmth > 0 ? 1 + warmth / 200 : 1
+    const cSat = colorFilter > 0 ? 1 + colorFilter / 100 : 1
+    const cCon = colorFilter > 0 ? 1 + colorFilter / 200 : 1
+
+    for (let i = 0; i < data.length; i += 4) {
+      let r = data[i], g = data[i + 1], b = data[i + 2]
+
+      // Brightness
+      if (brightness > 0) { r *= bFactor; g *= bFactor; b *= bFactor }
+
+      // Warmth: partial sepia then saturate
+      if (warmth > 0) {
+        const sr = 0.393 * r + 0.769 * g + 0.189 * b
+        const sg = 0.349 * r + 0.686 * g + 0.168 * b
+        const sb = 0.272 * r + 0.534 * g + 0.131 * b
+        r = r + (sr - r) * wSepia
+        g = g + (sg - g) * wSepia
+        b = b + (sb - b) * wSepia
+        const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        r = lum + (r - lum) * wSat
+        g = lum + (g - lum) * wSat
+        b = lum + (b - lum) * wSat
+      }
+
+      // Color filter: saturate + contrast
+      if (colorFilter > 0) {
+        const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        r = lum + (r - lum) * cSat
+        g = lum + (g - lum) * cSat
+        b = lum + (b - lum) * cSat
+        r = (r - 127.5) * cCon + 127.5
+        g = (g - 127.5) * cCon + 127.5
+        b = (b - 127.5) * cCon + 127.5
+      }
+
+      data[i]     = Math.min(255, Math.max(0, Math.round(r)))
+      data[i + 1] = Math.min(255, Math.max(0, Math.round(g)))
+      data[i + 2] = Math.min(255, Math.max(0, Math.round(b)))
+    }
+
+    ctx.putImageData(imageData, 0, 0)
   }
 
   // ── Main transform ─────────────────────────────────────────────────────────
@@ -500,49 +702,46 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
       if (landmarks) {
         // Face mesh is available — apply face-aware effects in order:
-        // 1. Skin smoothing (uses face oval mask)
-        // 2. Face slimming (warps face shape)
-        // 3. Eye enlargement (scales eye regions)
+        // 1. Skin smoothing (face oval blur — skipped if ctx.filter unsupported)
+        // 2. Face slimming (reverse-map warp)
+        // 3. Eye enlargement (reverse-map warp)
+        // 4. Eye brightening (pixel brightness around eyes)
+        // 5. Teeth whitening (pixel brighten/desaturate in mouth region)
         this._applySkinSmoothing(
-          this._beautyCtx,
-          landmarks,
-          w,
-          h,
-          this._beautyOptions.smoothing
+          this._beautyCtx, landmarks, w, h, this._beautyOptions.smoothing
         )
         this._applyFaceSlim(
-          this._beautyCtx,
-          landmarks,
-          w,
-          h,
-          this._beautyOptions.faceSlim
+          this._beautyCtx, landmarks, w, h, this._beautyOptions.faceSlim
         )
         this._applyEyeEnlarge(
-          this._beautyCtx,
-          landmarks,
-          w,
-          h,
-          this._beautyOptions.eyeEnlarge
+          this._beautyCtx, landmarks, w, h, this._beautyOptions.eyeEnlarge
+        )
+        this._applyEyeBrighten(
+          this._beautyCtx, landmarks, w, h, this._beautyOptions.eyeBrighten
+        )
+        this._applyTeethWhiten(
+          this._beautyCtx, landmarks, w, h, this._beautyOptions.teethWhiten
         )
         faceMeshUsed = true
       }
 
-      // ── Step 3: Apply global CSS filters for non-face-aware effects ───────
-      // When face mesh was used for smoothing, skip the global blur.
+      // ── Step 3: Global filters (brightness, warmth, colorFilter) ─────────
+      // When face mesh handled smoothing, skip the global blur fallback.
       const includeSmoothing = !faceMeshUsed || !smoothingOn
       const filter = this._buildFilter({ includeSmoothing })
 
-      if (filter !== "none") {
-        // Apply the filter by drawing the canvas onto itself via a temp copy
+      if (supportsCanvasFilter && filter !== "none") {
+        // Use CSS canvas filter (Chrome, Firefox, Safari 18+)
         this._scratchCtx.clearRect(0, 0, w, h)
         this._scratchCtx.globalCompositeOperation = "source-over"
         this._scratchCtx.filter = filter
         this._scratchCtx.drawImage(this._beautyCanvas, 0, 0, w, h)
         this._scratchCtx.filter = "none"
-
-        // Copy back
         this._beautyCtx.clearRect(0, 0, w, h)
         this._beautyCtx.drawImage(this._scratchCanvas, 0, 0)
+      } else if (!supportsCanvasFilter) {
+        // Safari < 18: use pixel-level fallback for brightness / warmth / colorFilter
+        this._applyPixelFilters(this._beautyCtx, w, h)
       }
 
       // ── Step 4: Background (if requested) ─────────────────────────────────
