@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { setCredentials, logout } from "../slices/authSlice"
 import { setServerDown, setServerUp } from "../slices/serverStatusSlice"
+import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
 
 // ─── Helpers ────────────────────────────────────────────────────────
 const AUTH_LOG = "[Auth]"
@@ -108,6 +109,21 @@ async function ensureRefresh(api, extraOptions, reason) {
       if (refreshResult.error) {
         const status = refreshResult.error.status
         const details = refreshResult.error.data
+
+        if (status === "FETCH_ERROR" || status === 502 || status === 503) {
+          console.warn(
+            AUTH_LOG,
+            `Refresh failed with network error (${status}) — skipping logout`,
+            { reason, fullError: refreshResult.error },
+          )
+
+          const isHealthy = await checkIsServerHealthy()
+          if (!isHealthy) {
+            api.dispatch(setServerDown())
+          }
+          return false
+        }
+
         console.error(
           AUTH_LOG,
           `Refresh failed with status ${status} — logging out`,
@@ -213,11 +229,19 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       result.error?.status === 502 ||
       result.error?.status === 503)
   ) {
-    console.warn(
-      AUTH_LOG,
-      `Server unreachable for ${url} — not an auth issue, skipping logout`,
-    )
-    api.dispatch(setServerDown())
+    const isHealthy = await checkIsServerHealthy()
+    if (!isHealthy) {
+      console.warn(
+        AUTH_LOG,
+        `Server unreachable for ${url} (health check failed) — not an auth issue, skipping logout`,
+      )
+      api.dispatch(setServerDown())
+    } else {
+      console.warn(
+        AUTH_LOG,
+        `Fetch error on ${url} but server is healthy — not setting server down`,
+      )
+    }
   }
 
   // ── Recovery: clear server-down flag when a request succeeds ───
