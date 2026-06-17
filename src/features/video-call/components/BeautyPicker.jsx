@@ -93,8 +93,49 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
     },
   ]
 
+  // ── Status badge variant ────────────────────────────────────────────────
+  const statusBadge = () => {
+    if (!ctx.processorStatus || ctx.processorStatus === "idle") return null
+
+    switch (ctx.processorStatus) {
+      case "attached":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+            Active
+          </span>
+        )
+      case "unsupported":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            Unsupported
+          </span>
+        )
+      case "initializing":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+            <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            Initializing...
+          </span>
+        )
+      case "error":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
+            <span className="w-2 h-2 rounded-full bg-orange-500" />
+            Error
+          </span>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
     <div className="flex flex-col h-full w-full">
+      {/* ── Processor status diagnostic badge ── */}
+      <div className="mb-2">{statusBadge()}</div>
+
       <div className="text-sm font-medium text-gray-900 mb-3">
         {t?.rooms?.beauty?.title || "Beauty"}
       </div>

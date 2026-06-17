@@ -57,6 +57,7 @@ const IDLE_VALUE = {
   beautyOptions: { smoothing: 0, brightness: 0, warmth: 0, colorFilter: 0, faceSlim: 0, eyeEnlarge: 0, eyeBrighten: 0, teethWhiten: 0 },
   setBeautyOptions: () => {},
   switchBeauty: () => {},
+  processorStatus: "idle",
   isAISession: false,
   showCC: false,
   setShowCC: () => {},
