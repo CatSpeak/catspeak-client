@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from "react"
-import { useParams, useLocation, useNavigate } from "react-router-dom"
+import { useParams, useLocation, useNavigate, Navigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
 import { useGetProfileQuery } from "@/features/auth"
@@ -335,8 +335,27 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     return <WebViewBlockScreen appName={webview.appName} />
   }
 
+  // Loading user data
+  if (isLoadingUser) {
+    return <div className="h-screen w-full bg-white"></div>
+  }
+
+  // User not authenticated
+  if (!user) {
+    return (
+      <Navigate
+        to="/"
+        state={{
+          requireLogin: true,
+          redirectTo: location.pathname + location.search + location.hash,
+        }}
+        replace
+      />
+    )
+  }
+
   // Loading room data
-  if (isLoadingUser || isLoadingRoom || isRoomQuerySkipped) {
+  if (isLoadingRoom || isRoomQuerySkipped) {
     return <div className="h-screen w-full bg-white"></div>
   }
 

@@ -9,12 +9,16 @@ export const useParticipantAudioEffect = (participants) => {
 
     // Check for newly joined participants
     const newlyJoined = currentParticipants.filter(
-      (current) => !prevParticipants.find((prev) => prev.identity === current.identity)
+      (current) =>
+        !prevParticipants.find((prev) => prev.identity === current.identity),
     )
 
     // Check for recently left participants
     const recentlyLeft = prevParticipants.filter(
-      (prev) => !currentParticipants.find((current) => current.identity === prev.identity)
+      (prev) =>
+        !currentParticipants.find(
+          (current) => current.identity === prev.identity,
+        ),
     )
 
     if (newlyJoined.length > 0) {
