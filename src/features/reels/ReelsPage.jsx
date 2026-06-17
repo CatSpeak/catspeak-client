@@ -604,14 +604,15 @@ const ReelsPage = () => {
 
                     {/* Section Content */}
                     {reels.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                      <div className="columns-1 sm:columns-2 md:columns-3 xl:columns-4 gap-6">
                         {reels.slice(0, 4).map((reel, idx) => (
-                          <ReelCard
-                            key={reel.id}
-                            reel={reel}
-                            index={idx}
-                            onSelect={handleReelClick}
-                          />
+                          <div key={reel.id} className="break-inside-avoid mb-4 sm:mb-6">
+                            <ReelCard
+                              reel={reel}
+                              index={idx}
+                              onSelect={handleReelClick}
+                            />
+                          </div>
                         ))}
                       </div>
                     ) : (
