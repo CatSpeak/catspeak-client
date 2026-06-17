@@ -21,7 +21,7 @@ export { GlobalVideoCallContext as VideoCallContext }
 // Re-export navigate bridge (used by routesConfig RootLayout)
 export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
-// ─── Idle context (no active call) ──────────────────────────────────────────
+// --- Idle context (no active call) ------------------------------------------
 
 const IDLE_VALUE = {
   isInCall: false,
@@ -57,7 +57,7 @@ const IDLE_VALUE = {
   setShowVirtualBackground: () => {},
   showAvatarPicker: false,
   setShowAvatarPicker: () => {},
-  beautyOptions: { smoothing: false, brightness: false, warmth: false, colorFilter: false },
+  beautyOptions: { smoothing: 0, brightness: 0, warmth: 0, colorFilter: 0, faceSlim: 0, eyeEnlarge: 0, eyeBrighten: 0, teethWhiten: 0 },
   setBeautyOptions: () => {},
   switchBeauty: () => {},
   isAISession: false,
@@ -92,7 +92,7 @@ const IdleCallContent = ({
   </GlobalVideoCallContext.Provider>
 )
 
-// ─── Main Provider ──────────────────────────────────────────────────────────
+// --- Main Provider ----------------------------------------------------------
 
 export const GlobalVideoCallProvider = ({ children }) => {
   const { isInCall, livekitToken, livekitServerUrl, callInfo } = useSelector(

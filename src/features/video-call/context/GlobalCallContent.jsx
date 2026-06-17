@@ -63,10 +63,14 @@ const GlobalCallContent = ({
   const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
   const [subtitleSelectedLanguage, setSubtitleSelectedLanguage] = useState(null)
   const [beautyOptions, setBeautyOptions] = useState({
-    smoothing: false,
-    brightness: false,
-    warmth: false,
-    colorFilter: false,
+    smoothing: 0,
+    brightness: 0,
+    warmth: 0,
+    colorFilter: 0,
+    faceSlim: 0,
+    eyeEnlarge: 0,
+    eyeBrighten: 0,
+    teethWhiten: 0,
   })
 
   // ── LiveKit hooks ──
