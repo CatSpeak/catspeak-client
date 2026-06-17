@@ -266,6 +266,7 @@ export class CombinedVideoTransformer extends VideoTransformer {
     // 3. Apply mask to blurred copy → keep only blurred pixels inside oval
     this._scratchCtx.globalCompositeOperation = "destination-in"
     this._scratchCtx.drawImage(maskCtx.canvas, 0, 0)
+    this._scratchCtx.globalCompositeOperation = "source-over"
 
     // 4. Save original pixels
     const original = ctx.getImageData(0, 0, width, height)
@@ -323,6 +324,7 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
     // Save the original canvas content
     this._scratchCtx.clearRect(0, 0, width, height)
+    this._scratchCtx.globalCompositeOperation = "source-over"
     this._scratchCtx.drawImage(ctx.canvas, 0, 0)
 
     // Draw the slimmed face region into a temp canvas
@@ -406,6 +408,7 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
     // Save the eye region from the current canvas into _scratchCanvas
     this._scratchCtx.clearRect(0, 0, width, height)
+    this._scratchCtx.globalCompositeOperation = "source-over"
     this._scratchCtx.drawImage(
       ctx.canvas,
       srcX, srcY, srcW, srcH,
@@ -532,6 +535,7 @@ export class CombinedVideoTransformer extends VideoTransformer {
       if (filter !== "none") {
         // Apply the filter by drawing the canvas onto itself via a temp copy
         this._scratchCtx.clearRect(0, 0, w, h)
+        this._scratchCtx.globalCompositeOperation = "source-over"
         this._scratchCtx.filter = filter
         this._scratchCtx.drawImage(this._beautyCanvas, 0, 0, w, h)
         this._scratchCtx.filter = "none"

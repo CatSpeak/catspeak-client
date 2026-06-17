@@ -4,6 +4,7 @@ import { ProcessorWrapper } from "@livekit/track-processors"
 import { useRoomContext, useLocalParticipant } from "@livekit/components-react"
 import { Track } from "livekit-client"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
 import { CombinedVideoTransformer, DEFAULT_BEAUTY_OPTIONS } from "./CombinedVideoTransformer"
 
@@ -58,12 +59,17 @@ const persistBeautyOptions = (opts) => {
  * effect is actually requested.
  */
 export const useCombinedProcessor = () => {
+  const { t } = useLanguage()
   const room = useRoomContext()
   const { isCameraEnabled } = useLocalParticipant()
   const processorRef = useRef(null)
   const attachedTrackRef = useRef(null)
-  // Track identity of the currently-attached track so we can detect replacement
+  // Track identity of the currently-attached track so we can detect replacement.
+  // Prefer LiveKit's own track.sid (stable across MediaStreamTrack swaps) over
+  // mediaStreamTrack.id (which can be null during early lifecycle).
   const attachedTrackIdRef = useRef(null)
+  // Prevent concurrent attach attempts (setProcessor is async)
+  const attachingRef = useRef(false)
 
   const { data: bgData } = useGetCurrentBackgroundQuery()
   const activeBackgroundUrl = bgData?.data?.activeBackgroundUrl ?? null
@@ -79,7 +85,8 @@ export const useCombinedProcessor = () => {
     if (processorStatus === "unsupported" && !unsupportedToastedRef.current) {
       unsupportedToastedRef.current = true
       toast.error(
-        "Beauty effects unavailable — your device may not support video processing. Try using Chrome or Edge on desktop.",
+        t.rooms?.beauty?.unsupported ||
+          "Beauty effects unavailable — your device may not support video processing. Try using Chrome or Edge on desktop.",
         { id: "beauty-unsupported", duration: 8000 },
       )
     }
@@ -108,28 +115,40 @@ export const useCombinedProcessor = () => {
 
     const participant = room.localParticipant
 
-    // Helper: try to attach right now. Returns true if it succeeded.
+    // Helper: try to attach right now. Returns true if it found a track to attach to.
+    // The actual attachment is async; we guard against concurrent attempts via attachingRef.
     const tryAttach = () => {
+      // Prevent overlapping attach attempts
+      if (attachingRef.current) return true
+
       const pub = participant.getTrackPublication(Track.Source.Camera)
       const track = pub?.track
       if (!track) return false
 
-      if (attachedTrackIdRef.current === track.mediaStreamTrack?.id) {
+      // Build a stable identity: prefer track.sid (LiveKit internal), fall back to
+      // mediaStreamTrack.id, and guard against both being null (e.g. early lifecycle).
+      const trackId = track.sid ?? track.mediaStreamTrack?.id ?? null
+      if (trackId && attachedTrackIdRef.current === trackId) {
         // Already attached to this exact track — nothing to do
         return true
       }
 
+      attachingRef.current = true
       attachedTrackRef.current = track
-      attachedTrackIdRef.current = track.mediaStreamTrack?.id ?? null
-
+      // Don't set attachedTrackIdRef until setProcessor succeeds — see .then() below.
       setProcessorStatus("initializing")
 
       track
         .setProcessor(processor)
         .then(() => {
           console.log("[useCombinedProcessor] Processor attached to camera track")
+          attachedTrackIdRef.current = track.sid ?? track.mediaStreamTrack?.id ?? null
           setProcessorStatus("attached")
-          toast.success("Beauty effects active", { id: "beauty-attached", duration: 2000 })
+          attachingRef.current = false
+          toast.success(
+            t.rooms?.beauty?.attached || "Beauty effects active",
+            { id: "beauty-attached", duration: 2000 },
+          )
           // Apply any beauty options the user set before joining
           const stored = readStoredBeautyOptions()
           if (stored) {
@@ -140,10 +159,17 @@ export const useCombinedProcessor = () => {
         })
         .catch((err) => {
           console.error("[useCombinedProcessor] Failed to attach processor:", err)
+          // Clear refs so the next camera-enable event will retry instead of
+          // seeing a stale id match and skipping forever.
+          attachedTrackRef.current = null
+          attachedTrackIdRef.current = null
+          attachingRef.current = false
           setProcessorStatus("error")
-          toast.error("Beauty effects unavailable — your device may not support video processing.", {
-            id: "beauty-attach-failed",
-          })
+          toast.error(
+            t.rooms?.beauty?.attachFailed ||
+              "Beauty effects unavailable — your device may not support video processing.",
+            { id: "beauty-attach-failed" },
+          )
         })
 
       return true
@@ -190,9 +216,11 @@ export const useCombinedProcessor = () => {
         if (!attachedTrackRef.current) {
           console.error("[useCombinedProcessor] Timed out waiting for camera track publication")
           setProcessorStatus("error")
-          toast.error("Could not attach beauty effects — camera track not found.", {
-            id: "beauty-track-timeout",
-          })
+          toast.error(
+            t.rooms?.beauty?.trackTimeout ||
+              "Could not attach beauty effects — camera track not found.",
+            { id: "beauty-track-timeout" },
+          )
         }
       }, 10000)
 
@@ -211,6 +239,7 @@ export const useCombinedProcessor = () => {
     }
     attachedTrackRef.current = null
     attachedTrackIdRef.current = null
+    attachingRef.current = false
 
     // Reset status so the next camera-enable re-runs the attach lifecycle
     if (processorRef.current) {

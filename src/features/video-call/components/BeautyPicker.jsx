@@ -102,28 +102,28 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
             <span className="w-2 h-2 rounded-full bg-green-500" />
-            Active
+            {t?.rooms?.beauty?.statusActive || "Active"}
           </span>
         )
       case "unsupported":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
             <span className="w-2 h-2 rounded-full bg-red-500" />
-            Unsupported
+            {t?.rooms?.beauty?.statusUnsupported || "Unsupported"}
           </span>
         )
       case "initializing":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
             <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-            Initializing...
+            {t?.rooms?.beauty?.statusInitializing || "Initializing..."}
           </span>
         )
       case "error":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
             <span className="w-2 h-2 rounded-full bg-orange-500" />
-            Error
+            {t?.rooms?.beauty?.statusError || "Error"}
           </span>
         )
       default:
