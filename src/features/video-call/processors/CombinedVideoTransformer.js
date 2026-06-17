@@ -64,6 +64,11 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _maskCanvas = null
   _maskCtx = null
 
+  // ── Temporal smoothing for FaceMesh landmarks ─────────────────────────────
+  // EMA of landmark positions across frames. Reduces per-frame jitter that
+  // makes effect boundaries flicker and appear as a visible shape on the face.
+  _smoothedLandmarks = null
+
   async init(opts) {
     await super.init(opts)
     this._initOpts = opts
@@ -228,11 +233,15 @@ export class CombinedVideoTransformer extends VideoTransformer {
     // blur() requires ctx.filter support; skip entirely on Safari < 18
     if (!supportsCanvasFilter) return
 
-    const blurPx = Math.max(1, Math.round((factor / 100) * 6) + 1) // 1-7 px
-    const featherPx = blurPx * 4
+    // Reduced radius (max 4 px) — a lighter Gaussian preserves facial edges
+    // while still smoothing fine skin texture.
+    const blurPx = Math.max(1, Math.round((factor / 100) * 4))
+    // Wider feather (min 30px) ensures the mask fades so gradually that the
+    // oval boundary becomes invisible even on high-contrast skin edges.
+    const featherPx = Math.max(30, blurPx * 8)
 
     if (!landmarks) {
-      // No face mesh → global blur handled by _buildFilter
+      // No face mesh → subtle global blur handled by _buildFilter
       return
     }
 
@@ -258,12 +267,17 @@ export class CombinedVideoTransformer extends VideoTransformer {
     // 4. Save original pixels
     const original = ctx.getImageData(0, 0, width, height)
 
-    // 5. Draw the masked-blurred version on top of the original
+    // 5. Draw the masked-blurred version at partial opacity on top of the
+    //    original — frequency-separation style: blurred low-frequencies are
+    //    blended in while some original skin texture (high-freq) is preserved.
+    //    At factor=100 this gives 80% blurred + 20% original = natural result.
     ctx.putImageData(original, 0, 0)
     ctx.globalCompositeOperation = "source-over"
+    ctx.globalAlpha = (factor / 100) * 0.8
     ctx.drawImage(this._scratchCanvas, 0, 0)
 
     // Reset compositing
+    ctx.globalAlpha = 1.0
     ctx.globalCompositeOperation = "source-over"
   }
 
@@ -301,7 +315,10 @@ export class CombinedVideoTransformer extends VideoTransformer {
     // Max 15 % at factor = 100.
     const expand = 1 + (factor / 100) * 0.15
 
-    const margin = 8
+    // The warp zone extends to dist=1.8 of the face ellipse. The rect must be
+    // wide enough to contain all pixels that will be processed (1.8×halfW outside
+    // the oval's bounding box on each side).
+    const margin = Math.ceil(halfW * 0.8) + 8
     const rx = Math.max(0, Math.floor(minX - margin))
     const ry = Math.max(0, Math.floor(minY - margin))
     const rw = Math.min(width - rx, Math.ceil(maxX - minX + margin * 2))
@@ -324,36 +341,35 @@ export class CombinedVideoTransformer extends VideoTransformer {
         const dist = Math.sqrt(nx * nx + ny * ny)
         const oi = (y * rw + x) * 4
 
-        if (dist < 1.5) {
-          // Smooth falloff: full warp inside the oval, fading to 0 at 1.5× boundary
-          const falloff = dist < 1 ? 1 : Math.max(0, 1 - (dist - 1) / 0.5)
+        if (dist < 1.8) {
+          // Smoothstep falloff starting from dist=0.5 to dist=1.8 — the extra-wide
+          // transition zone (vs [0.7,1.5]) gives the warp so many pixels to fade
+          // that the boundary becomes imperceptible, especially after landmark smoothing.
+          const t = Math.max(0, Math.min(1, (dist - 0.5) / 1.3))
+          const falloff = 1 - t * t * (3 - 2 * t)
           const eff = 1 + (expand - 1) * falloff
 
           // Reverse-map: read from further out in the horizontal axis
           const sx = lcx + dx * eff
           const sy = lcy + dy
 
-          const fx = Math.floor(sx)
-          const fy = Math.floor(sy)
-          const wx = sx - fx
-          const wy = sy - fy
-
-          if (fx >= 0 && fx < rw - 1 && fy >= 0 && fy < rh - 1) {
-            for (let c = 0; c < 4; c++) {
-              const i00 = (fy * rw + fx) * 4 + c
-              const i10 = (fy * rw + fx + 1) * 4 + c
-              const i01 = ((fy + 1) * rw + fx) * 4 + c
-              const i11 = ((fy + 1) * rw + fx + 1) * 4 + c
-              out[oi + c] = Math.round(
-                src[i00] * (1 - wx) * (1 - wy) +
-                src[i10] * wx * (1 - wy) +
-                src[i01] * (1 - wx) * wy +
-                src[i11] * wx * wy,
-              )
-            }
-          } else {
-            out[oi] = src[oi]; out[oi + 1] = src[oi + 1]
-            out[oi + 2] = src[oi + 2]; out[oi + 3] = src[oi + 3]
+          // Edge-clamp: prevents out-of-bounds reads from copying wrong pixels
+          const rawFx = Math.floor(sx)
+          const fx = Math.max(0, Math.min(rw - 2, rawFx))
+          const wx = Math.max(0, Math.min(1, sx - rawFx))
+          const fy = Math.max(0, Math.min(rh - 2, Math.floor(sy)))
+          const wy = Math.max(0, Math.min(1, sy - Math.floor(sy)))
+          for (let c = 0; c < 4; c++) {
+            const i00 = (fy * rw + fx) * 4 + c
+            const i10 = (fy * rw + fx + 1) * 4 + c
+            const i01 = ((fy + 1) * rw + fx) * 4 + c
+            const i11 = ((fy + 1) * rw + fx + 1) * 4 + c
+            out[oi + c] = Math.round(
+              src[i00] * (1 - wx) * (1 - wy) +
+              src[i10] * wx * (1 - wy) +
+              src[i01] * (1 - wx) * wy +
+              src[i11] * wx * wy,
+            )
           }
         } else {
           out[oi] = src[oi]; out[oi + 1] = src[oi + 1]
@@ -420,9 +436,10 @@ export class CombinedVideoTransformer extends VideoTransformer {
         const oi = (y * rw + x) * 4
 
         if (r < R) {
-          // Smooth falloff: strong magnification at centre, tapers to 1× at edge R
+          // Smoothstep falloff: full magnification at centre, zero derivative at
+          // edge R — eliminates the visible ring left by the old quadratic falloff.
           const t = r / R
-          const falloff = 1 - t * t  // quadratic: 1 at centre, 0 at edge
+          const falloff = 1 - t * t * (3 - 2 * t) // smoothstep: 1 at t=0, 0 at t=1
           const eff = 1 + (scale - 1) * falloff
 
           // Reverse-map: dest pixel reads from source closer to eye centre
@@ -487,8 +504,8 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
     const cx = (minX + maxX) / 2
     const cy = (minY + maxY) / 2
-    const eyeW = (maxX - minX) * 2.5
-    const eyeH = (maxY - minY) * 2.5
+    const eyeW = (maxX - minX) * 1.8
+    const eyeH = (maxY - minY) * 1.8
 
     const rx = Math.max(0, Math.floor(cx - eyeW / 2))
     const ry = Math.max(0, Math.floor(cy - eyeH / 2))
@@ -499,9 +516,9 @@ export class CombinedVideoTransformer extends VideoTransformer {
     const imageData = ctx.getImageData(rx, ry, rw, rh)
     const data = imageData.data
 
-    // factor 0→1, 50→1.3, 100→1.5 brightness; contrast scales similarly
-    const brightF = 1 + (factor / 100) * 0.5
-    const contrastF = 1 + (factor / 100) * 0.25
+    // factor 0→1, 100→1.3 brightness (reduced from 1.5 — subtler = less visible boundary)
+    const brightF = 1 + (factor / 100) * 0.3
+    const contrastF = 1 + (factor / 100) * 0.1
 
     const halfW = rw / 2
     const halfH = rh / 2
@@ -510,8 +527,10 @@ export class CombinedVideoTransformer extends VideoTransformer {
       for (let x = 0; x < rw; x++) {
         const nx = (x - halfW) / halfW
         const ny = (y - halfH) / halfH
-        // Radial weight: 1 at centre, 0 at ellipse boundary
-        const weight = Math.max(0, 1 - Math.sqrt(nx * nx + ny * ny))
+        // Smoothstep radial weight: 1 at centre, 0 at ellipse boundary with
+        // zero derivative at the boundary — no visible ring
+        const d = Math.sqrt(nx * nx + ny * ny)
+        const weight = d >= 1 ? 0 : (1 - d * d * (3 - 2 * d))
         if (weight <= 0) continue
 
         const i = (y * rw + x) * 4
@@ -552,8 +571,8 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
     const cx = (minX + maxX) / 2
     const cy = (minY + maxY) / 2
-    const mouthW = (maxX - minX) * 2.0
-    const mouthH = (maxY - minY) * 2.2
+    const mouthW = (maxX - minX) * 1.8
+    const mouthH = (maxY - minY) * 1.8
 
     const rx = Math.max(0, Math.floor(cx - mouthW / 2))
     const ry = Math.max(0, Math.floor(cy - mouthH / 2))
@@ -564,9 +583,9 @@ export class CombinedVideoTransformer extends VideoTransformer {
     const imageData = ctx.getImageData(rx, ry, rw, rh)
     const data = imageData.data
 
-    // factor 0→1.0, 100→1.35 brightness; desat 0→0, 100→0.5
-    const brightF = 1 + (factor / 100) * 0.35
-    const desat = (factor / 100) * 0.5
+    // factor 0→1.0, 100→1.25 brightness; desat 0→0, 100→0.3 (subtler = less visible boundary)
+    const brightF = 1 + (factor / 100) * 0.25
+    const desat = (factor / 100) * 0.3
 
     const halfW = rw / 2
     const halfH = rh / 2
@@ -575,7 +594,8 @@ export class CombinedVideoTransformer extends VideoTransformer {
       for (let x = 0; x < rw; x++) {
         const nx = (x - halfW) / halfW
         const ny = (y - halfH) / halfH
-        const weight = Math.max(0, 1 - Math.sqrt(nx * nx + ny * ny))
+        const d = Math.sqrt(nx * nx + ny * ny)
+        const weight = d >= 1 ? 0 : (1 - d * d * (3 - 2 * d))
         if (weight <= 0) continue
 
         const i = (y * rw + x) * 4
@@ -705,7 +725,30 @@ export class CombinedVideoTransformer extends VideoTransformer {
         landmarks = await this._faceMesh.detect(this._beautyCanvas)
       }
 
+      // Temporal EMA smoothing: blend 35% new / 65% previous landmark positions.
+      // This eliminates per-frame jitter that makes effect boundaries flicker as
+      // a visible oval/circle outline. Lower alpha = more stable but slightly
+      // behind fast head movements (0.35 is a good balance).
       if (landmarks) {
+        if (this._smoothedLandmarks && this._smoothedLandmarks.length === landmarks.length) {
+          const alpha = 0.35
+          this._smoothedLandmarks = landmarks.map((lm, i) => {
+            const prev = this._smoothedLandmarks[i]
+            return {
+              x: alpha * lm.x + (1 - alpha) * prev.x,
+              y: alpha * lm.y + (1 - alpha) * prev.y,
+              z: alpha * lm.z + (1 - alpha) * prev.z,
+            }
+          })
+        } else {
+          this._smoothedLandmarks = landmarks
+        }
+      } else {
+        this._smoothedLandmarks = null
+      }
+      const smoothedLandmarks = this._smoothedLandmarks
+
+      if (smoothedLandmarks) {
         // Face mesh is available — apply face-aware effects in order:
         // 1. Skin smoothing (face oval blur — skipped if ctx.filter unsupported)
         // 2. Face slimming (reverse-map warp)
@@ -713,19 +756,19 @@ export class CombinedVideoTransformer extends VideoTransformer {
         // 4. Eye brightening (pixel brightness around eyes)
         // 5. Teeth whitening (pixel brighten/desaturate in mouth region)
         this._applySkinSmoothing(
-          this._beautyCtx, landmarks, w, h, this._beautyOptions.smoothing
+          this._beautyCtx, smoothedLandmarks, w, h, this._beautyOptions.smoothing
         )
         this._applyFaceSlim(
-          this._beautyCtx, landmarks, w, h, this._beautyOptions.faceSlim
+          this._beautyCtx, smoothedLandmarks, w, h, this._beautyOptions.faceSlim
         )
         this._applyEyeEnlarge(
-          this._beautyCtx, landmarks, w, h, this._beautyOptions.eyeEnlarge
+          this._beautyCtx, smoothedLandmarks, w, h, this._beautyOptions.eyeEnlarge
         )
         this._applyEyeBrighten(
-          this._beautyCtx, landmarks, w, h, this._beautyOptions.eyeBrighten
+          this._beautyCtx, smoothedLandmarks, w, h, this._beautyOptions.eyeBrighten
         )
         this._applyTeethWhiten(
-          this._beautyCtx, landmarks, w, h, this._beautyOptions.teethWhiten
+          this._beautyCtx, smoothedLandmarks, w, h, this._beautyOptions.teethWhiten
         )
         faceMeshUsed = true
       }
