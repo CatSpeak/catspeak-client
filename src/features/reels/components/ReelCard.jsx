@@ -5,17 +5,6 @@ import { formatCompactNumber, formatRelativeTime } from "../utils/formatters"
 import styles from "../styles/reels.module.css"
 import colors from "@/shared/utils/colors"
 
-/**
- * Aspect ratios cycled by index for Pinterest-style height variance.
- */
-const ASPECT_RATIOS = [
-  { paddingBottom: "133%" }, // 3:4  portrait
-  { paddingBottom: "125%" }, // 4:5  portrait
-  { paddingBottom: "150%" }, // 2:3  tall portrait
-  { paddingBottom: "100%" }, // 1:1  square
-  { paddingBottom: "115%" }, // ~7:8 short portrait
-  { paddingBottom: "140%" }, // ~5:7 tall
-]
 
 /**
  * Single reel card in the Pinterest masonry grid.
@@ -34,11 +23,6 @@ const ReelCard = React.memo(function ReelCard({ reel, index, onSelect }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused, setIsPaused] = useState(false) // true ONLY after explicit user pause
   const [isMuted, setIsMuted] = useState(true)
-
-  const aspect = useMemo(
-    () => ASPECT_RATIOS[index % ASPECT_RATIOS.length],
-    [index],
-  )
 
   const hasVideo = Boolean(reel.videoUrl)
 
@@ -109,7 +93,7 @@ const ReelCard = React.memo(function ReelCard({ reel, index, onSelect }) {
           setIsPlaying(true)
           setIsPaused(false)
         })
-        .catch(() => { })
+        .catch(() => {})
     } else {
       el.pause()
       setIsPlaying(false)
@@ -133,8 +117,8 @@ const ReelCard = React.memo(function ReelCard({ reel, index, onSelect }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Thumbnail + video area with dynamic aspect ratio */}
-      <div style={{ position: "relative", ...aspect, width: "100%" }}>
+      {/* Thumbnail + video area */}
+      <div style={{ position: "relative", width: "100%", display: "flex" }}>
         {/* Thumbnail image — always visible as poster */}
         {reel.thumbnailUrl ? (
           <img
@@ -146,8 +130,8 @@ const ReelCard = React.memo(function ReelCard({ reel, index, onSelect }) {
         ) : (
           <div
             style={{
-              position: "absolute",
-              inset: 0,
+              width: "100%",
+              aspectRatio: "3/4",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -240,7 +224,9 @@ const ReelCard = React.memo(function ReelCard({ reel, index, onSelect }) {
                 </svg>
               )}
               <span className={styles.dotSeparator}>•</span>
-              <span className={styles.uploadTime}>{formatRelativeTime(reel.createdAt)}</span>
+              <span className={styles.uploadTime}>
+                {formatRelativeTime(reel.createdAt)}
+              </span>
             </div>
 
             <div className={styles.cardFooterStats}>
