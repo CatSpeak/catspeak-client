@@ -123,6 +123,9 @@ export default {
     // First En.
     topicsLabel: "Topics",
     nameLabel: "Room name",
+    thumbnailLabel: "Room Thumbnail",
+    uploadImage: "Upload Image",
+    noFileChosen: "No file chosen",
     requiredLevel: "Required Level",
     privateRoom: "Private Room",
     passwordLabel: "Password",

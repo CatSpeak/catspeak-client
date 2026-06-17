@@ -94,6 +94,14 @@ const VideoCallRoomContent = () => {
     )
   }
 
+  useEffect(() => {
+    // Prevent iOS/macOS swipe-to-go-back gestures during the call
+    document.body.style.overscrollBehaviorX = "none"
+    return () => {
+      document.body.style.overscrollBehaviorX = "auto"
+    }
+  }, [])
+
   return (
     <div className="flex h-full w-full flex-col">
       {/* Top Bar */}

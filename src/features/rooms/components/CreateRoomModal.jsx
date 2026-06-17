@@ -86,6 +86,10 @@ const CreateRoomModal = ({ open, onCancel }) => {
       data.append("Password", formData.password)
     }
 
+    if (formData.thumbnail) {
+      data.append("Thumbnail", formData.thumbnail)
+    }
+
     const topicsList = formData.topics.length > 0 ? formData.topics : ["Other"]
     topicsList.forEach((topic) => data.append("Topics", topic))
 
@@ -213,7 +217,30 @@ const CreateFormInputs = ({ formData, handleChange, t }) => (
       labelClassName="text-base"
       className="!h-12 !text-base !px-4 min-h-[48px]"
     />
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-3">
+      <label>{t.rooms?.createRoom?.thumbnailLabel || "Room Thumbnail"}</label>
+      <div className="flex items-center gap-3">
+        <label className="inline-flex min-h-[48px] h-12 items-center rounded-full px-4 text-base border transition-colors border-[#C6C6C6] hover:bg-[#F2F2F2] cursor-pointer">
+          {t.rooms?.createRoom?.uploadImage || "Upload Image"}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleChange("thumbnail", e.target.files[0])
+              }
+            }}
+          />
+        </label>
+        <span className="text-sm text-[#606060]">
+          {formData.thumbnail
+            ? formData.thumbnail.name
+            : t.rooms?.createRoom?.noFileChosen || "No file chosen"}
+        </span>
+      </div>
+    </div>
+    {/* <div className="flex items-center justify-between">
       <span className="text-base">
         {t.rooms?.createRoom?.privateRoom || "Private Room"}
       </span>
@@ -224,7 +251,7 @@ const CreateFormInputs = ({ formData, handleChange, t }) => (
           if (!e.target.checked) handleChange("password", "")
         }}
       />
-    </div>
+    </div> */}
     {formData.isPrivate && (
       <TextInput
         id="password"
