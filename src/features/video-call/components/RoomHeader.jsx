@@ -9,7 +9,7 @@ const RoomHeader = () => {
   const { t, language } = useLanguage()
   const { lang } = useParams()
   const { room, enterPiP } = useVideoCallContext()
-  const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(room?.duration)
+  const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(room?.createdAt, room?.duration)
 
   const rawRoomName = room?.name || "General"
 

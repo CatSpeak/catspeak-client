@@ -26,7 +26,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
   } = useGlobalVideoCall()
 
   const dominant = useDominantSpeaker(participants, localParticipant)
-  const { formattedElapsed } = useSessionTimer(session)
+  const { formattedElapsed } = useSessionTimer(roomData?.createdAt || session?.createdAt, roomData?.duration)
 
   // Room name
   const roomName =

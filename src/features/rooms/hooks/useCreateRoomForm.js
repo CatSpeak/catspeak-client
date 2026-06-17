@@ -7,7 +7,8 @@ const INITIAL_STATE = {
   topics: [],
   selectedLevel: "",
   isPrivate: false,
-  password: ""
+  password: "",
+  thumbnail: null
 }
 
 export const useCreateRoomForm = () => {

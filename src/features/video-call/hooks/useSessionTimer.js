@@ -7,27 +7,26 @@ import { useEffect, useState, useRef } from "react"
  * @param {number|null} durationMinutes - Room duration in minutes (from room.duration). If null, timer is hidden.
  * @returns {{ elapsedSeconds: number, formattedElapsed: string, formattedMax: string|null, hasDuration: boolean }}
  */
-export const useSessionTimer = (durationMinutes = null) => {
+export const useSessionTimer = (createdAt = null, durationMinutes = null) => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const startTimeRef = useRef(Date.now())
 
-  const hasDuration = durationMinutes != null
+  const hasDuration = typeof durationMinutes === "number"
 
   useEffect(() => {
-    if (!hasDuration) return
-
-    const maxSeconds = durationMinutes * 60
+    // If no createdAt is provided, fallback to when the component mounted
+    const startMs = createdAt ? new Date(createdAt).getTime() : Date.now()
+    const maxSeconds = hasDuration ? durationMinutes * 60 : Infinity
 
     const updateElapsed = () => {
-      const diff = Math.floor((Date.now() - startTimeRef.current) / 1000)
-      // Cap at max duration
-      setElapsedSeconds(diff > maxSeconds ? maxSeconds : diff)
+      const diff = Math.floor((Date.now() - startMs) / 1000)
+      const safeDiff = diff > 0 ? diff : 0
+      setElapsedSeconds(safeDiff > maxSeconds ? maxSeconds : safeDiff)
     }
 
     updateElapsed()
     const intervalId = setInterval(updateElapsed, 1000)
     return () => clearInterval(intervalId)
-  }, [hasDuration, durationMinutes])
+  }, [createdAt, durationMinutes, hasDuration])
 
   const formatDuration = (totalSeconds) => {
     const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0))
@@ -36,12 +35,13 @@ export const useSessionTimer = (durationMinutes = null) => {
     return `${minutes}:${seconds}`
   }
 
-  const maxSeconds = hasDuration ? durationMinutes * 60 : 0
-  const remainingSeconds = Math.max(0, maxSeconds - elapsedSeconds)
+  const maxSeconds = hasDuration ? durationMinutes * 60 : Infinity
+  const remainingSeconds = hasDuration ? Math.max(0, maxSeconds - elapsedSeconds) : null
 
   return {
     elapsedSeconds,
     remainingSeconds,
+    formattedElapsed: formatDuration(elapsedSeconds),
     formattedRemaining: hasDuration ? formatDuration(remainingSeconds) : null,
     formattedMax: hasDuration ? formatDuration(maxSeconds) : null,
     hasDuration,
