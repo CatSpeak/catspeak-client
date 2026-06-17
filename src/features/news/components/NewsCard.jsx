@@ -37,9 +37,15 @@ const NewsCard = ({ news }) => {
     if (!news?.postId) return
     try {
       const result = await sharePost(news.postId).unwrap()
-      const url =
+      let url =
         (typeof result === "string" ? result : result?.shareLink) ||
         window.location.href
+        
+      if (url && !url.startsWith("http")) {
+        url = url.startsWith("/") ? url : `/${url}`
+        url = `${window.location.origin}${url}`
+      }
+      
       if (url) {
         setShareUrl(url)
         setIsShareModalOpen(true)

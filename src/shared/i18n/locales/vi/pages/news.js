@@ -1,6 +1,7 @@
 export default {
   title: "Tin tức",
   description: "Sắp ra mắt: Cập nhật những tin tức mới nhất.",
+  loadMore: "Tải thêm",
   error: {
     notFound: "Không tìm thấy bài viết",
     backToNews: "Quay lại tin tức",

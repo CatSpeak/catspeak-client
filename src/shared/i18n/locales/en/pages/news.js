@@ -1,6 +1,7 @@
 export default {
   title: "News",
   description: "Coming soon: Stay updated with the latest news.",
+  loadMore: "Load More",
   error: {
     notFound: "Post not found",
     backToNews: "Back to News",

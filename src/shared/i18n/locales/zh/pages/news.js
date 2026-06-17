@@ -1,6 +1,7 @@
 export default {
   title: "新闻",
   description: "即将推出：随时了解最新消息。",
+  loadMore: "加载更多",
   error: {
     notFound: "找不到帖子",
     backToNews: "返回新闻",
