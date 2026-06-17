@@ -1,21 +1,49 @@
-// src/features/video-call/components/BeautyPicker.jsx
-import React from "react"
-import { Sparkles, Sun, Thermometer, Palette } from "lucide-react"
-import Switch from "@/shared/components/ui/inputs/Switch"
+import React, { useEffect } from "react"
+import { Sparkles, Sun, Thermometer, Palette, Eye, Smile, Scissors, ZoomIn } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const BeautyPicker = ({ beautyOptions: propOptions, onToggle }) => {
+const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
+
+const readStoredBeautyOptions = () => {
+  try {
+    const raw = localStorage.getItem(BEAUTY_STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch { /* ignore corrupt data */ }
+  return null
+}
+
+const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
   const { t } = useLanguage()
   const ctx = useGlobalVideoCall()
 
   // Use prop-driven state when provided (e.g. pre-join modal),
   // otherwise fall back to global call context (in-call panel).
   const beautyOptions = propOptions ?? ctx.beautyOptions
-  const toggle = onToggle
-    ? (key) => onToggle(key)
-    : (key) => {
-        const next = { ...ctx.beautyOptions, [key]: !ctx.beautyOptions[key] }
+
+  // ── Sync pre-join beauty selections into the in-call context ──────────
+  // When BeautyPicker is used without props (in-call mode), read any
+  // settings the user chose before joining from localStorage and feed
+  // them into the context so the slider UI matches the live effect.
+  //
+  // The processor (useCombinedProcessor) already applies stored options
+  // when it attaches to the camera track; this ensures the UI is in sync.
+  const isInCall = !propOptions && !onChange
+  useEffect(() => {
+    if (!isInCall) return
+    const stored = readStoredBeautyOptions()
+    if (stored) {
+      ctx.setBeautyOptions(stored)
+    }
+    // Run once on mount. Dependencies intentionally excluded so we don't
+    // overwrite subsequent in-call slider adjustments.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleChange = onChange
+    ? (key, value) => onChange(key, value)
+    : (key, value) => {
+        const next = { ...ctx.beautyOptions, [key]: value }
         ctx.setBeautyOptions(next)
         ctx.switchBeauty(next)
       }
@@ -41,6 +69,28 @@ const BeautyPicker = ({ beautyOptions: propOptions, onToggle }) => {
       icon: <Palette size={18} className="text-gray-500" />,
       label: t?.rooms?.beauty?.colorFilter || "Color Filter (Vivid)",
     },
+    {
+      key: "eyeBrighten",
+      icon: <Eye size={18} className="text-gray-500" />,
+      label: t?.rooms?.beauty?.eyeBrighten || "Eye Brighten",
+    },
+    {
+      key: "teethWhiten",
+      icon: <Smile size={18} className="text-gray-500" />,
+      label: t?.rooms?.beauty?.teethWhiten || "Teeth Whiten",
+    },
+    {
+      key: "faceSlim",
+      icon: <Scissors size={18} className="text-gray-500" />,
+      label: t?.rooms?.beauty?.faceSlim || "Face Slim",
+      hint: t?.rooms?.beauty?.faceAwareHint || "Face-aware",
+    },
+    {
+      key: "eyeEnlarge",
+      icon: <ZoomIn size={18} className="text-gray-500" />,
+      label: t?.rooms?.beauty?.eyeEnlarge || "Eye Enlarge",
+      hint: t?.rooms?.beauty?.faceAwareHint || "Face-aware",
+    },
   ]
 
   return (
@@ -48,24 +98,33 @@ const BeautyPicker = ({ beautyOptions: propOptions, onToggle }) => {
       <div className="text-sm font-medium text-gray-900 mb-3">
         {t?.rooms?.beauty?.title || "Beauty"}
       </div>
-      <div className="flex flex-col gap-1">
-        {items.map(({ key, icon, label }) => (
+      <div className="flex flex-col gap-2">
+        {items.map(({ key, icon, label, hint }) => (
           <div
             key={key}
-            className="flex items-center justify-between px-2 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer"
-            onClick={(e) => {
-              if (e.target.closest("label")) return
-              toggle(key)
-            }}
+            className="flex flex-col px-2 py-2 rounded-lg hover:bg-gray-50"
           >
-            <div className="flex items-center gap-3 text-sm text-gray-700">
-              {icon}
-              <span>{label}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 text-sm text-gray-700">
+                {icon}
+                <span>{label}</span>
+                {hint && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-600 font-medium">
+                    {hint}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs text-gray-400 w-8 text-right tabular-nums">
+                {beautyOptions[key] ?? 0}
+              </span>
             </div>
-            <Switch
-              checked={beautyOptions[key]}
-              onChange={() => toggle(key)}
-              colorClass="peer-checked:bg-cath-red-600"
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={beautyOptions[key] ?? 0}
+              onChange={(e) => handleChange(key, Number(e.target.value))}
+              className="w-full h-1.5 mt-1 accent-cath-red-600 cursor-pointer"
             />
           </div>
         ))}

@@ -1,8 +1,24 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
 import BeautyPicker from "./BeautyPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
+
+const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
+
+const readStoredBeautyOptions = () => {
+  try {
+    const raw = localStorage.getItem(BEAUTY_STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch { /* ignore corrupt data */ }
+  return null
+}
+
+const persistBeautyOptions = (opts) => {
+  try {
+    localStorage.setItem(BEAUTY_STORAGE_KEY, JSON.stringify(opts))
+  } catch { /* quota exceeded — silently drop */ }
+}
 
 const TABS = ["backgrounds", "beauty"]
 
@@ -15,15 +31,31 @@ const VirtualBackgroundModal = ({
 }) => {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState("backgrounds")
-  const [beautyOptions, setBeautyOptions] = useState({
-    smoothing: false,
-    brightness: false,
-    warmth: false,
-    colorFilter: false,
+
+  // Initialise beauty options from localStorage so pre-join selections survive
+  // page reloads and carry over into the in-call session.
+  const [beautyOptions, setBeautyOptions] = useState(() => {
+    const stored = readStoredBeautyOptions()
+    return stored ?? {
+      smoothing: 0,
+      brightness: 0,
+      warmth: 0,
+      colorFilter: 0,
+      faceSlim: 0,
+      eyeEnlarge: 0,
+      eyeBrighten: 0,
+      teethWhiten: 0,
+    }
   })
 
-  const handleBeautyToggle = (key) => {
-    setBeautyOptions((prev) => ({ ...prev, [key]: !prev[key] }))
+  // Persist beauty options to localStorage whenever they change so the
+  // in-call processor (useCombinedProcessor) can pick them up on attach.
+  useEffect(() => {
+    persistBeautyOptions(beautyOptions)
+  }, [beautyOptions])
+
+  const handleBeautyChange = (key, value) => {
+    setBeautyOptions((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleApply = (url) => {
@@ -95,7 +127,7 @@ const VirtualBackgroundModal = ({
           {activeTab === "backgrounds" ? (
             <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
           ) : (
-            <BeautyPicker beautyOptions={beautyOptions} onToggle={handleBeautyToggle} />
+            <BeautyPicker beautyOptions={beautyOptions} onChange={handleBeautyChange} />
           )}
         </div>
       </div>
