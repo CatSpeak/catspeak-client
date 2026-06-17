@@ -83,6 +83,14 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["UserProfile"],
     }),
+    updateAvatar: builder.mutation({
+      query: (formData) => ({
+        url: "/Account/profile/avatar",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["UserProfile", "User"],
+    }),
   }),
 })
 
@@ -95,6 +103,7 @@ export const {
   useRequestPhoneUpdateOtpMutation,
   useUpdatePhoneNumberMutation,
   useUpdateMeetingAvatarMutation,
+  useUpdateAvatarMutation,
   useVerifyChangePasswordOtpMutation,
   useGetFollowersQuery,
   useGetFollowingQuery,

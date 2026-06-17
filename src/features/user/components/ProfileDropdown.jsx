@@ -41,6 +41,9 @@ const ProfileDropdown = () => {
 
   const user = userData?.data ?? authUser ?? {}
 
+  console.log(user)
+  console.log(authUser)
+
   const handleToggleMenu = () => {
     setIsOpen((prev) => !prev)
   }
@@ -111,7 +114,6 @@ const ProfileDropdown = () => {
           src={user?.avatarImageUrl}
           alt={user?.username || "User"}
           name={user?.fullName || user?.username}
-          isCurrentUser={true}
         />
 
         <div className="min-w-0">
@@ -189,7 +191,6 @@ const ProfileDropdown = () => {
             src={user?.avatarImageUrl}
             alt={user?.username || "User"}
             name={user?.fullName || user?.username}
-            isCurrentUser={true}
           />
         </button>
       )}
@@ -219,7 +220,10 @@ const ProfileDropdown = () => {
         onClose={() => setShowLogoutWarning(false)}
         onConfirm={executeLogout}
         title={t.header.logoutWarning?.title || "End Call & Log Out"}
-        message={t.header.logoutWarning?.message || "You are currently in a call. Logging out will disconnect you. Are you sure you want to log out?"}
+        message={
+          t.header.logoutWarning?.message ||
+          "You are currently in a call. Logging out will disconnect you. Are you sure you want to log out?"
+        }
         cancelText={t.header.logoutWarning?.cancel || "Cancel"}
         confirmText={t.header.logoutWarning?.confirm || "Log Out"}
         confirmVariant="destructive"

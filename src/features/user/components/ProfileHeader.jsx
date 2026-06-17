@@ -1,21 +1,28 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { Pencil, Check, X } from "lucide-react"
+import { Pencil, Loader2 } from "lucide-react"
 
-const ProfileHeader = ({ avatarImageUrl, onUpdateAvatarUrl, username, t }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [inputUrl, setInputUrl] = useState("")
+const ProfileHeader = ({ avatarImageUrl, onUpdateAvatarFile, username, t }) => {
+  const fileInputRef = useRef(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const handleEditClick = () => {
-    setInputUrl(avatarImageUrl || "")
-    setIsEditing(true)
+    fileInputRef.current?.click()
   }
 
-  const handleSave = () => {
-    if (onUpdateAvatarUrl) {
-      onUpdateAvatarUrl(inputUrl)
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (file && onUpdateAvatarFile) {
+      setIsUploading(true)
+      try {
+        await onUpdateAvatarFile(file)
+      } finally {
+        setIsUploading(false)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
+      }
     }
-    setIsEditing(false)
   }
 
   return (
@@ -38,43 +45,32 @@ const ProfileHeader = ({ avatarImageUrl, onUpdateAvatarUrl, username, t }) => {
               src={avatarImageUrl}
               alt="Avatar"
               name={username}
-              className="border-4 border-white shadow-sm"
+              className={`border-4 border-white shadow-sm transition-opacity ${isUploading ? 'opacity-50' : ''}`}
             />
-            {!isEditing && (
+            {isUploading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-[#990011] animate-spin" />
+              </div>
+            )}
+            {!isUploading && (
               <button
                 onClick={handleEditClick}
+                disabled={isUploading}
                 className="absolute bottom-0 right-0 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm text-gray-600 hover:text-[#990011] hover:bg-gray-50 transition-colors opacity-0 group-hover:opacity-100"
               >
                 <Pencil size={14} />
               </button>
             )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={isUploading}
+            />
           </div>
         </div>
-
-        {isEditing && (
-          <div className="mb-2 flex items-center gap-2 bg-white p-1.5 rounded-lg border border-gray-200 shadow-sm">
-            <input
-              type="text"
-              value={inputUrl}
-              onChange={(e) => setInputUrl(e.target.value)}
-              placeholder="Paste image URL..."
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded outline-none focus:border-[#990011] w-64"
-              autoFocus
-            />
-            <button
-              onClick={handleSave}
-              className="p-1.5 bg-[#990011] text-white rounded hover:bg-[#7a000d]"
-            >
-              <Check size={16} />
-            </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="p-1.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   )
