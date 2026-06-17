@@ -110,10 +110,14 @@ async function ensureRefresh(api, extraOptions, reason) {
         const status = refreshResult.error.status
         const details = refreshResult.error.data
 
-        if (status === "FETCH_ERROR" || status === 502 || status === 503) {
+        const isServerError =
+          status === "FETCH_ERROR" ||
+          (typeof status === "number" && status >= 500)
+
+        if (isServerError) {
           console.warn(
             AUTH_LOG,
-            `Refresh failed with network error (${status}) — skipping logout`,
+            `Refresh failed with server/network error (${status}) — skipping logout`,
             { reason, fullError: refreshResult.error },
           )
 
@@ -223,12 +227,12 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
   // ── Handle server-down / network errors ─────────────────────────
   const isAborted = api.signal.aborted || result.error?.name === "AbortError"
 
-  if (
-    !isAborted &&
-    (result.error?.status === "FETCH_ERROR" ||
-      result.error?.status === 502 ||
-      result.error?.status === 503)
-  ) {
+  const status = result.error?.status
+  const isServerError =
+    status === "FETCH_ERROR" ||
+    (typeof status === "number" && status >= 500)
+
+  if (!isAborted && isServerError) {
     const isHealthy = await checkIsServerHealthy()
     if (!isHealthy) {
       console.warn(
