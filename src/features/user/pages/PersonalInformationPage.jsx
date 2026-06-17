@@ -41,13 +41,13 @@ const PersonalInformationPage = () => {
     handleOtpVerify,
     handleOtpResend,
     handleCountryChange,
-    handleUpdateAvatarUrl,
+    handleUpdateAvatarFile,
   } = mutationHooks
 
   if (isLoading) return <div>Loading...</div>
 
-  // Use meetingAvatarUrl if available, otherwise fallback to avatarImageUrl
-  const displayAvatarUrl = formData.meetingAvatarUrl || formData.avatarImageUrl
+  // Use avatarImageUrl as the primary avatar for the profile
+  const displayAvatarUrl = formData.avatarImageUrl
 
   return (
     <>
@@ -55,7 +55,7 @@ const PersonalInformationPage = () => {
       <div className="w-full flex flex-col gap-6 relative z-10">
         <ProfileHeader
           avatarImageUrl={displayAvatarUrl}
-          onUpdateAvatarUrl={handleUpdateAvatarUrl}
+          onUpdateAvatarFile={handleUpdateAvatarFile}
           username={formData.username}
           t={t}
         />

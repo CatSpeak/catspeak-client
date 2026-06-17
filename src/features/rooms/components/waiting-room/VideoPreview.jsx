@@ -37,8 +37,7 @@ const VideoPreview = ({
           <div className="flex h-full w-full items-center justify-center">
             <Avatar
               size={64}
-              name={user?.username}
-              isCurrentUser={true}
+              name={user?.fullName || user?.username || "User"}
               className="md:!w-24 md:!h-24"
             />
           </div>

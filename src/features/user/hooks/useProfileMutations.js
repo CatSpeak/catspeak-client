@@ -5,6 +5,7 @@ import {
   useUpdateMeetingAvatarMutation,
   useRequestPhoneUpdateOtpMutation,
   useUpdatePhoneNumberMutation,
+  useUpdateAvatarMutation,
 } from "@/store/api/userApi"
 import { validatePhoneInput, buildProfilePayload } from "../utils/profileValidation"
 
@@ -21,6 +22,7 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
 
   const [updateProfile, { isLoading: isUpdatingProfile }] = useUpdateUserProfileMutation()
   const [updateMeetingAvatar] = useUpdateMeetingAvatarMutation()
+  const [updateAvatar] = useUpdateAvatarMutation()
   const [requestUserProfileOtp, { isLoading: isSendingOtp }] = useRequestUserProfileOtpMutation()
   const [requestPhoneUpdateOtp, { isLoading: isSendingPhoneOtp }] = useRequestPhoneUpdateOtpMutation()
   const [updatePhoneNumber, { isLoading: isUpdatingPhone }] = useUpdatePhoneNumberMutation()
@@ -167,9 +169,11 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     }
   }
 
-  const handleUpdateAvatarUrl = async (url) => {
+  const handleUpdateAvatarFile = async (file) => {
     try {
-      await updateMeetingAvatar({ meetingAvatarUrl: url }).unwrap()
+      const formData = new FormData()
+      formData.append("file", file)
+      await updateAvatar(formData).unwrap()
       toast.success(t?.profile?.personalInfo?.avatarUpdated || "Avatar updated successfully")
     } catch (err) {
       console.error("Failed to update avatar", err)
@@ -186,6 +190,6 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     handleOtpVerify,
     handleOtpResend,
     handleCountryChange,
-    handleUpdateAvatarUrl
+    handleUpdateAvatarFile
   }
 }
