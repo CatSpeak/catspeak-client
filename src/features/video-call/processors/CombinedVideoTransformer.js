@@ -154,14 +154,54 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
   /**
    * Build a CSS filter string for global Canvas 2D effects.
+   * All values are intensity-based (0–100), interpolated so higher
+   * values produce stronger effects.
+   *
    * @param {{ includeSmoothing?: boolean }} opts
    */
   _buildFilter({ includeSmoothing = true } = {}) {
     const parts = []
-    if (includeSmoothing && this._beautyOptions.smoothing) parts.push("blur(4px)")
-    if (this._beautyOptions.brightness) parts.push("brightness(1.2)")
-    if (this._beautyOptions.warmth) parts.push("sepia(0.35) saturate(1.3)")
-    if (this._beautyOptions.colorFilter) parts.push("saturate(1.5) contrast(1.1)")
+    const { smoothing, brightness, warmth, colorFilter, eyeBrighten, teethWhiten } =
+      this._beautyOptions
+
+    // Skin smoothing: 0→0px, 50→4px, 100→8px  (skip when face mesh already handled it)
+    if (includeSmoothing && smoothing > 0) {
+      parts.push(`blur(${Math.round(smoothing / 12.5)}px)`)
+    }
+
+    // Brightness boost: 0→1.0, 50→1.5, 100→2.0
+    if (brightness > 0) {
+      parts.push(`brightness(${(1 + brightness / 100).toFixed(2)})`)
+    }
+
+    // Warm tone: mixed sepia + saturate
+    if (warmth > 0) {
+      parts.push(
+        `sepia(${(warmth / 200).toFixed(3)}) saturate(${(1 + warmth / 200).toFixed(2)})`,
+      )
+    }
+
+    // Color filter (vivid): saturate + contrast boost
+    if (colorFilter > 0) {
+      parts.push(
+        `saturate(${(1 + colorFilter / 100).toFixed(2)}) contrast(${(1 + colorFilter / 200).toFixed(2)})`,
+      )
+    }
+
+    // Eye brighten: subtle brightness + contrast around the eye region
+    if (eyeBrighten > 0) {
+      parts.push(
+        `brightness(${(1 + eyeBrighten / 300).toFixed(3)}) contrast(${(1 + eyeBrighten / 250).toFixed(3)})`,
+      )
+    }
+
+    // Teeth whiten: shift yellow hues toward white + slight desaturate
+    if (teethWhiten > 0) {
+      parts.push(
+        `hue-rotate(${-teethWhiten / 15}deg) saturate(${(1 - teethWhiten / 300).toFixed(3)})`,
+      )
+    }
+
     return parts.length ? parts.join(" ") : "none"
   }
 
