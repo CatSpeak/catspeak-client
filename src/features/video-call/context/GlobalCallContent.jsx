@@ -352,6 +352,7 @@ const GlobalCallContent = ({
     beautyOptions,
     setBeautyOptions,
     switchBeauty: videoCallState.switchBeauty,
+    processorStatus: videoCallState.processorStatus,
 
     // UI panels
     ...panelState,
