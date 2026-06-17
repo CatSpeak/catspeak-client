@@ -668,8 +668,13 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
     if (hasBeauty) {
       const ts = frame.timestamp
-      const w = frame.displayWidth
-      const h = frame.displayHeight
+      const w = Math.max(1, Math.round(frame.displayWidth))
+      const h = Math.max(1, Math.round(frame.displayHeight))
+
+      if (!isFinite(w) || !isFinite(h)) {
+        controller.enqueue(frame)
+        return
+      }
 
       // Ensure canvases are the correct size
       if (this._beautyCanvas.width !== w) this._beautyCanvas.width = w

@@ -191,10 +191,14 @@ export class FaceMeshProcessor {
       const w = frame.displayWidth
       const h = frame.displayHeight
 
+      // Guard: dimensions must be positive finite integers (OffscreenCanvas.width
+      // requires an unsigned long; NaN/undefined/float throws a TypeError).
+      if (!w || !h || !isFinite(w) || !isFinite(h)) return null
+
       // Keep the input canvas small for performance.
       // MediaPipe normalises landmarks to 0-1 anyway, so resolution doesn't matter.
-      const iw = Math.min(w, 640)
-      const ih = Math.min(h, 480)
+      const iw = Math.max(1, Math.round(Math.min(w, 640)))
+      const ih = Math.max(1, Math.round(Math.min(h, 480)))
       if (this._inputCanvas.width !== iw) this._inputCanvas.width = iw
       if (this._inputCanvas.height !== ih) this._inputCanvas.height = ih
 
