@@ -1,7 +1,7 @@
 import React from "react"
 import { NavLink } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { Video, Film } from "lucide-react"
+import { Video, Film, CreditCard } from "lucide-react"
 
 const WorkspaceSidebar = ({ onClose, variant = "vertical" }) => {
   const { t } = useLanguage()
@@ -36,6 +36,12 @@ const WorkspaceSidebar = ({ onClose, variant = "vertical" }) => {
       path: "/workspace/reels",
       end: false,
       icon: Film,
+    },
+    {
+      label: "Billing",
+      path: "/workspace/billing",
+      end: false,
+      icon: CreditCard,
     },
   ]
 
