@@ -37,11 +37,11 @@ const ReelGrid = React.memo(function ReelGrid({ reels, onReelClick }) {
   }
 
   return (
-    <div className={styles.masonryGrid}>
+    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
       {reels.map((reel, index) => (
         <div
           key={reel.id}
-          className={styles.masonryItem}
+          className="break-inside-avoid mb-4 sm:mb-6"
         >
           <ReelCard
             reel={reel}
