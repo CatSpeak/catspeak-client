@@ -41,12 +41,21 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       rollupOptions: {
-        external: ["@mediapipe/face_mesh"],
         output: {
           manualChunks: {
             "react-vendor": ["react", "react-dom", "react-router-dom"],
             "redux-vendor": ["@reduxjs/toolkit", "react-redux"],
+            "mediapipe-face": ["@mediapipe/face_mesh"],
           },
+        },
+        onwarn(warning, warn) {
+          // @mediapipe/face_mesh is dynamically imported and large; suppress the
+          // "Can't resolve dynamic import" advisory (it resolves at runtime).
+          if (
+            warning.code === "UNRESOLVED_IMPORT" &&
+            warning.exporter?.includes("face_mesh")
+          ) return
+          warn(warning)
         },
       },
       chunkSizeWarningLimit: 1000,
