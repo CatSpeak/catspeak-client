@@ -71,6 +71,14 @@ const VideoCallRoomContent = () => {
   const connectionState = useConnectionState()
   const livekitReady = connectionState === ConnectionState.Connected
 
+  useEffect(() => {
+    // Prevent iOS/macOS swipe-to-go-back gestures during the call
+    document.body.style.overscrollBehaviorX = "none"
+    return () => {
+      document.body.style.overscrollBehaviorX = "auto"
+    }
+  }, [])
+
   if (!user) {
     return (
       <Navigate

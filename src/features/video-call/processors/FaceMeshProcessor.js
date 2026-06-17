@@ -188,8 +188,9 @@ export class FaceMeshProcessor {
     }
 
     try {
-      const w = frame.displayWidth
-      const h = frame.displayHeight
+      // VideoFrame uses displayWidth/displayHeight; OffscreenCanvas/HTMLCanvasElement use width/height.
+      const w = frame.displayWidth ?? frame.width
+      const h = frame.displayHeight ?? frame.height
 
       // Guard: dimensions must be positive finite integers (OffscreenCanvas.width
       // requires an unsigned long; NaN/undefined/float throws a TypeError).
