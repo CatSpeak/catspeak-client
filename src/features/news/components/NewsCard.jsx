@@ -37,9 +37,15 @@ const NewsCard = ({ news }) => {
     if (!news?.postId) return
     try {
       const result = await sharePost(news.postId).unwrap()
-      const url =
+      let url =
         (typeof result === "string" ? result : result?.shareLink) ||
         window.location.href
+        
+      if (url && !url.startsWith("http")) {
+        url = url.startsWith("/") ? url : `/${url}`
+        url = `${window.location.origin}${url}`
+      }
+      
       if (url) {
         setShareUrl(url)
         setIsShareModalOpen(true)
@@ -293,7 +299,6 @@ const NewsCard = ({ news }) => {
               </div>
             </div>
 
-            {/* Temporarily hidden for production as backend is not ready
             <button className="flex items-center justify-center gap-2 px-4 h-12 text-[#606060] transition-colors hover:bg-[#f2f2f2]">
               <MessageCircle className="text-[#606060] shrink-0" />
               <span className="font-semibold text-base whitespace-nowrap">
@@ -308,7 +313,6 @@ const NewsCard = ({ news }) => {
             >
               <Share2 className="text-[#606060] shrink-0" />
             </button>
-            */}
           </div>
         </div>
       </div>

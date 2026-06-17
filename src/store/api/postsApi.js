@@ -5,7 +5,7 @@ export const postsApi = baseApi.injectEndpoints({
     getPosts: builder.query({
       query: ({ page = 1, pageSize = 10 } = {}) => ({
         url: "/Post",
-        params: { page, pageSize },
+        params: { page, pageSize, sortBy: "createDate", sortDesc: true },
       }),
       providesTags: ["Post"],
       serializeQueryArgs: ({ endpointName }) => {
@@ -29,6 +29,10 @@ export const postsApi = baseApi.injectEndpoints({
     getPostById: builder.query({
       query: (postId) => `/Post/${postId}`,
       providesTags: (result, error, id) => [{ type: "Post", id }],
+    }),
+    getSharedPost: builder.query({
+      query: (shareToken) => `/Post/shared/${shareToken}`,
+      providesTags: (result, error, id) => [{ type: "Post", id: `shared-${id}` }],
     }),
     reactToPost: builder.mutation({
       query: ({ postId, type }) => ({
@@ -209,6 +213,7 @@ export const postsApi = baseApi.injectEndpoints({
 export const { 
   useGetPostsQuery, 
   useGetPostByIdQuery, 
+  useGetSharedPostQuery,
   useReactToPostMutation,
   useSharePostMutation,
   useGetPostCommentsQuery,

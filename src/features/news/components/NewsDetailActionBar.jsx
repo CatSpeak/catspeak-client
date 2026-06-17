@@ -108,7 +108,6 @@ const NewsDetailActionBar = ({
         </div>
       </div>
 
-      {/* Temporarily hidden for production as backend is not ready
       <button
         onClick={onCommentClick}
         className="flex items-center gap-2 h-12 px-4 rounded-full border border-[#e5e5e5] bg-white text-[#606060] transition-colors hover:bg-[#f2f2f2]"
@@ -126,7 +125,6 @@ const NewsDetailActionBar = ({
           {t.news?.newsDetail?.share || "Share"}
         </span>
       </button>
-      */}
     </div>
   )
 }

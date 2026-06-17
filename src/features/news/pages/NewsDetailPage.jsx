@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import NewsDetailActionBar from "../components/NewsDetailActionBar"
 import {
   useGetPostByIdQuery,
+  useGetSharedPostQuery,
   useReactToPostMutation,
   useSharePostMutation,
 } from "@/store/api/postsApi"
@@ -26,7 +27,14 @@ const NewsDetailPage = () => {
   const { t, language } = useLanguage()
   const commentsRef = useRef(null)
 
-  const { data, isLoading, error } = useGetPostByIdQuery(id)
+  const isSharedToken = isNaN(Number(id))
+  
+  const { data: normalData, isLoading: normalLoading, error: normalError } = useGetPostByIdQuery(id, { skip: isSharedToken })
+  const { data: sharedData, isLoading: sharedLoading, error: sharedError } = useGetSharedPostQuery(id, { skip: !isSharedToken })
+  
+  const data = isSharedToken ? sharedData : normalData
+  const isLoading = isSharedToken ? sharedLoading : normalLoading
+  const error = isSharedToken ? sharedError : normalError
   const [reactToPost] = useReactToPostMutation()
   const [sharePost] = useSharePostMutation()
   const newsItem = data?.data
@@ -41,9 +49,15 @@ const NewsDetailPage = () => {
     if (!newsItem?.postId) return
     try {
       const result = await sharePost(newsItem.postId).unwrap()
-      const url =
+      let url =
         (typeof result === "string" ? result : result?.shareLink) ||
         window.location.href
+        
+      if (url && !url.startsWith("http")) {
+        url = url.startsWith("/") ? url : `/${url}`
+        url = `${window.location.origin}${url}`
+      }
+      
       if (url) {
         setShareUrl(url)
         setIsShareModalOpen(true)
@@ -131,13 +145,11 @@ const NewsDetailPage = () => {
           <PostContent html={newsItem.content} />
         </div>
 
-        {/* Temporarily hidden for production as backend is not ready
         <CommentsSection
           ref={commentsRef}
           postId={newsItem.postId}
           totalComments={newsItem.totalComments || 0}
         />
-        */}
       </article>
 
       {/* Share Modal */}
