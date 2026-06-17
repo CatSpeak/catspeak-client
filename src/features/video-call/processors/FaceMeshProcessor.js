@@ -21,8 +21,57 @@ export const LEFT_EYE = [33, 133, 155, 154, 153, 145, 144, 163, 7, 173]
 // Right eye (10 points including center)
 export const RIGHT_EYE = [362, 263, 387, 386, 385, 373, 374, 380, 382, 398]
 
+// Inner lip / mouth interior (closed polygon — used for teeth whitening)
+export const LIPS_INNER = [
+  78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308,
+  324, 318, 402, 317, 14, 87, 178, 88, 95,
+]
+
 // CDN root for WASM + data files
 const MEDIAPIPE_CDN = "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4"
+
+// ── Safari / browser capability checks ──────────────────────────────────────
+
+/**
+ * True when CanvasRenderingContext2D.filter is supported.
+ * Safari < 18 silently ignores `ctx.filter = "…"`, so canvas filter effects
+ * (blur, brightness, etc.) need a pixel-level fallback on those browsers.
+ */
+export const supportsCanvasFilter = (() => {
+  try {
+    let ctx
+    if (typeof OffscreenCanvas !== "undefined") {
+      ctx = new OffscreenCanvas(1, 1).getContext("2d")
+    } else if (typeof document !== "undefined") {
+      ctx = document.createElement("canvas").getContext("2d")
+    } else {
+      return false // Worker without OffscreenCanvas
+    }
+    if (!ctx) return false
+    ctx.filter = "brightness(1.1)"
+    return typeof ctx.filter === "string" && ctx.filter.includes("brightness")
+  } catch {
+    return false
+  }
+})()
+
+/**
+ * Create an OffscreenCanvas when available (Workers / modern browsers),
+ * or fall back to a regular HTMLCanvasElement.
+ * Never calls `new` on an arrow function (the old OffCtor pattern).
+ */
+export function makeCanvas(w, h) {
+  if (typeof OffscreenCanvas !== "undefined") {
+    return new OffscreenCanvas(w, h)
+  }
+  if (typeof document !== "undefined") {
+    const c = document.createElement("canvas")
+    c.width = w
+    c.height = h
+    return c
+  }
+  throw new Error("[makeCanvas] No canvas API available")
+}
 
 export class FaceMeshProcessor {
   constructor() {
@@ -78,13 +127,7 @@ export class FaceMeshProcessor {
 
       // Create a tiny input canvas — MediaPipe resizes internally,
       // but keeping it small reduces the drawImage cost.
-      if (typeof OffscreenCanvas !== "undefined") {
-        this._inputCanvas = new OffscreenCanvas(320, 240)
-      } else {
-        this._inputCanvas = document.createElement("canvas")
-        this._inputCanvas.width = 320
-        this._inputCanvas.height = 240
-      }
+      this._inputCanvas = makeCanvas(320, 240)
       this._inputCtx = this._inputCanvas.getContext("2d")
 
       // Warm-up: send an empty frame to trigger model / WASM download
@@ -257,14 +300,7 @@ export function getFaceRadius(landmarks, width, height) {
  * @returns {CanvasRenderingContext2D} context of the mask canvas
  */
 export function createFeatheredMask(points, width, height, featherRadius = 10) {
-  const OffCtor = typeof OffscreenCanvas !== "undefined" ? OffscreenCanvas : (w, h) => {
-    const c = document.createElement("canvas")
-    c.width = w
-    c.height = h
-    return c
-  }
-
-  const maskCanvas = new OffCtor(width, height)
+  const maskCanvas = makeCanvas(width, height)
   const maskCtx = maskCanvas.getContext("2d")
 
   // Draw filled polygon
@@ -279,14 +315,16 @@ export function createFeatheredMask(points, width, height, featherRadius = 10) {
   maskCtx.closePath()
   maskCtx.fill()
 
-  // Feather via self-blur (works cross-browser because we draw onto a fresh temp canvas)
-  const temp = new OffCtor(width, height)
-  const tempCtx = temp.getContext("2d")
-  tempCtx.filter = `blur(${featherRadius}px)`
-  tempCtx.drawImage(maskCanvas, 0, 0)
-  // Copy blurred result back
-  maskCtx.clearRect(0, 0, width, height)
-  maskCtx.drawImage(temp, 0, 0)
+  // Feather via blur — only when ctx.filter is supported (Safari < 18 silently
+  // ignores it, so we keep the solid mask instead of an unblurred copy).
+  if (supportsCanvasFilter && featherRadius > 0.5) {
+    const temp = makeCanvas(width, height)
+    const tempCtx = temp.getContext("2d")
+    tempCtx.filter = `blur(${featherRadius}px)`
+    tempCtx.drawImage(maskCanvas, 0, 0)
+    maskCtx.clearRect(0, 0, width, height)
+    maskCtx.drawImage(temp, 0, 0)
+  }
 
   return maskCtx
 }
