@@ -115,16 +115,23 @@ async function ensureRefresh(api, extraOptions, reason) {
           (typeof status === "number" && status >= 500)
 
         if (isServerError) {
-          console.warn(
-            AUTH_LOG,
-            `Refresh failed with server/network error (${status}) — skipping logout`,
-            { reason, fullError: refreshResult.error },
-          )
-
           const isHealthy = await checkIsServerHealthy()
           if (!isHealthy) {
+            console.warn(
+              AUTH_LOG,
+              `Refresh failed with server/network error (${status}) — server down, skipping logout`,
+              { reason, fullError: refreshResult.error },
+            )
             api.dispatch(setServerDown())
+            return false
           }
+
+          console.warn(
+            AUTH_LOG,
+            `Refresh failed with server error (${status}) but server is healthy — logging out`,
+            { reason, fullError: refreshResult.error },
+          )
+          api.dispatch(logout())
           return false
         }
 
