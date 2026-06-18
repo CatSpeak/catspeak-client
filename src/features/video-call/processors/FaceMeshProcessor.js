@@ -39,17 +39,38 @@ const MEDIAPIPE_CDN = "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4"
  */
 export const supportsCanvasFilter = (() => {
   try {
+    // Use a plain HTMLCanvasElement (not OffscreenCanvas) for the detection
+    // test.  Safari 16.4–17.x allows setting `ctx.filter` but silently ignores
+    // it during drawImage — a property check alone gives a false positive.
+    // Only a pixel round-trip (draw → read-back) tells us whether the filter
+    // was actually applied.
     let ctx
-    if (typeof OffscreenCanvas !== "undefined") {
+    if (typeof document !== "undefined") {
+      ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true })
+    } else if (typeof OffscreenCanvas !== "undefined") {
       ctx = new OffscreenCanvas(1, 1).getContext("2d")
-    } else if (typeof document !== "undefined") {
-      ctx = document.createElement("canvas").getContext("2d")
     } else {
-      return false // Worker without OffscreenCanvas
+      return false // Worker without any canvas API
     }
     if (!ctx) return false
-    ctx.filter = "brightness(1.1)"
-    return typeof ctx.filter === "string" && ctx.filter.includes("brightness")
+
+    // Paint a white pixel (R = 255)
+    ctx.canvas.width = 2
+    ctx.canvas.height = 2
+    ctx.fillStyle = "white"
+    ctx.fillRect(0, 0, 2, 2)
+
+    // Apply a strong brightness filter that would turn R=255 → R≈51
+    ctx.filter = "brightness(0.2)"
+
+    // Draw a red rectangle over the top-left pixel
+    ctx.fillStyle = "red"
+    ctx.fillRect(0, 0, 1, 1)
+
+    // Read back.  If the filter is actually applied, R < 200.
+    // If Safari silently ignored it, R === 255.
+    const pixel = ctx.getImageData(0, 0, 1, 1).data
+    return pixel[0] < 200
   } catch {
     return false
   }
@@ -61,14 +82,17 @@ export const supportsCanvasFilter = (() => {
  * Never calls `new` on an arrow function (the old OffCtor pattern).
  */
 export function makeCanvas(w, h) {
-  if (typeof OffscreenCanvas !== "undefined") {
-    return new OffscreenCanvas(w, h)
-  }
+  // Prefer HTMLCanvasElement over OffscreenCanvas — Safari's OffscreenCanvas
+  // 2D context has known issues with drawImage(VideoFrame) and
+  // getImageData / putImageData that cause blank frames or frozen previews.
   if (typeof document !== "undefined") {
     const c = document.createElement("canvas")
     c.width = w
     c.height = h
     return c
+  }
+  if (typeof OffscreenCanvas !== "undefined") {
+    return new OffscreenCanvas(w, h)
   }
   throw new Error("[makeCanvas] No canvas API available")
 }
