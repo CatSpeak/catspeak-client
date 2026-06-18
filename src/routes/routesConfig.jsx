@@ -44,6 +44,7 @@ const ReelDetailPage = lazy(() => import("@/features/reels/pages/ReelDetailPage"
 const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceReelsPage"))
 const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
+const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
 
 const routesConfig = [
   {
@@ -218,6 +219,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <BillingFeature />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "billing/result",
+                element: (
+                  <LazyRoute>
+                    <PaymentResultPage />
                   </LazyRoute>
                 ),
               },
