@@ -794,15 +794,41 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
       // ── Step 4: Background (if requested) ─────────────────────────────────
       if (!hasBg) {
-        controller.enqueue(
-          new VideoFrame(this._beautyCanvas, { timestamp: ts })
-        )
+        try {
+          controller.enqueue(
+            new VideoFrame(this._beautyCanvas, { timestamp: ts })
+          )
+        } catch (e) {
+          console.error("[CombinedVideoTransformer] VideoFrame from OffscreenCanvas failed; falling back to HTMLCanvasElement snapshot", e)
+          try {
+            const fb = document.createElement("canvas")
+            fb.width = w; fb.height = h
+            fb.getContext("2d").drawImage(this._beautyCanvas, 0, 0)
+            controller.enqueue(new VideoFrame(fb, { timestamp: ts }))
+          } catch (e2) {
+            console.error("[CombinedVideoTransformer] Fallback VideoFrame also failed, skipping frame", e2)
+          }
+        }
         return
       }
 
       // Beauty + background: delegate the beauty-processed frame to BackgroundTransformer
       await this._ensureBgTransformer()
-      const beautyFrame = new VideoFrame(this._beautyCanvas, { timestamp: ts })
+      let beautyFrame
+      try {
+        beautyFrame = new VideoFrame(this._beautyCanvas, { timestamp: ts })
+      } catch (e) {
+        console.error("[CombinedVideoTransformer] VideoFrame from OffscreenCanvas failed for bg path; falling back to HTMLCanvasElement snapshot", e)
+        try {
+          const fb = document.createElement("canvas")
+          fb.width = w; fb.height = h
+          fb.getContext("2d").drawImage(this._beautyCanvas, 0, 0)
+          beautyFrame = new VideoFrame(fb, { timestamp: ts })
+        } catch (e2) {
+          console.error("[CombinedVideoTransformer] Fallback VideoFrame also failed, skipping frame", e2)
+          return
+        }
+      }
       if (this._bgTransformerReady) {
         await this._bgTransformer.transform(beautyFrame, controller)
       } else {
