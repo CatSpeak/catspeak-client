@@ -85,7 +85,7 @@ export const userApi = baseApi.injectEndpoints({
     }),
     updateAvatar: builder.mutation({
       query: (formData) => ({
-        url: "/Account/profile/avatar",
+        url: "/user-profile/avatar",
         method: "POST",
         body: formData,
       }),
