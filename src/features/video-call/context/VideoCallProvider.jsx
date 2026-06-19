@@ -114,6 +114,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     micOn,
     cameraOn,
     localStream,
+    lkVideoTrack,
     toggleMic: hookToggleMic,
     toggleCamera: hookToggleCamera,
   } = useMediaPreview({
@@ -401,6 +402,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           micOn={micOn}
           cameraOn={cameraOn}
           localStream={localStream}
+          lkVideoTrack={lkVideoTrack}
           onToggleMic={toggleMic}
           onToggleCam={toggleCamera}
           onJoin={handleJoinClick}

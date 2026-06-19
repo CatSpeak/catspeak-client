@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
@@ -12,20 +12,41 @@ const VideoPreview = ({
   onToggleCam,
   onOpenBgModal,
   onOpenSettings,
+  lkVideoTrack,
 }) => {
   const { t } = useLanguage()
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+
+    if (lkVideoTrack) {
+      lkVideoTrack.attach(videoElement)
+      return () => {
+        lkVideoTrack.detach(videoElement)
+      }
+    } else if (localStream) {
+      videoElement.srcObject = localStream
+    } else {
+      videoElement.srcObject = null
+    }
+  }, [lkVideoTrack, localStream])
+
+  // Handle local preview muting
+  useEffect(() => {
+    if (videoRef.current && micOn) {
+      videoRef.current.muted = true
+    }
+  }, [micOn])
+
   return (
     <div className="relative w-full max-w-3xl flex flex-col items-center">
       <div className="mb-3 relative w-full aspect-video overflow-hidden rounded-2xl border border-[#e5e5e5] bg-white">
         {/* Video Preview */}
         {localStream && (
           <video
-            ref={(video) => {
-              if (video) {
-                video.srcObject = localStream
-                if (micOn) video.muted = true // Mute local preview to prevent echo
-              }
-            }}
+            ref={videoRef}
             autoPlay
             playsInline
             muted // Always mute local video preview purely for UI
@@ -45,7 +66,7 @@ const VideoPreview = ({
       </div>
 
       {/* Controls Overlay */}
-      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-6 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0">
+      <div className="flex flex-row gap-3">
         <button
           onClick={onToggleMic}
           className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${
@@ -80,9 +101,7 @@ const VideoPreview = ({
 
         <button
           onClick={onOpenSettings}
-          title={
-            t?.rooms?.waitingScreen?.deviceSettings || "Device Settings"
-          }
+          title={t?.rooms?.waitingScreen?.deviceSettings || "Device Settings"}
           className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
           <Settings />
