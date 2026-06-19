@@ -19,6 +19,10 @@ const MobileNavItem = ({ navKey, onClose }) => {
     href = "/cart"
   } else if (navKey === "connect") {
     href = "/connect"
+  } else if (navKey === "workspace") {
+    href = "/workspace"
+  } else if (navKey === "pricing") {
+    href = "/pricing"
   } else {
     href = "/"
   }
@@ -33,7 +37,7 @@ const MobileNavItem = ({ navKey, onClose }) => {
           : "hover:bg-[#F2F2F2]"
       }`}
     >
-      {t.nav[navKey]}
+      {t.nav?.[navKey] || (navKey === "workspace" ? "My Workspace" : navKey)}
     </NavLink>
   )
 }

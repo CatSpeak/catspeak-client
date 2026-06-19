@@ -20,6 +20,7 @@ export default {
     cart: "Courses",
     connect: "Profile",
     workspace: "My Workspace",
+    pricing: "Pricing",
   },
   comingSoon: {
     badge: "Coming Soon",

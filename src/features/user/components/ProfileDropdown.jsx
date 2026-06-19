@@ -4,7 +4,7 @@ import useClickOutside from "@/shared/hooks/useClickOutside"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
-import { Settings, LogOut, Loader2, User, ArrowLeft } from "lucide-react"
+import { Settings, LogOut, Loader2, User, ArrowLeft, CreditCard } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { AnimatePresence, motion } from "framer-motion"
@@ -74,6 +74,11 @@ const ProfileDropdown = () => {
     navigate("/setting")
   }
 
+  const handleBillingClick = () => {
+    handleCloseMenu()
+    navigate("/billing")
+  }
+
   // Click outside to close (desktop only)
   useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile })
 
@@ -135,6 +140,10 @@ const ProfileDropdown = () => {
         <button onClick={handleSettingsClick} className={menuItemClass}>
           <Settings size={20} />
           <span>{t.header.settings || "Settings"}</span>
+        </button>
+        <button onClick={handleBillingClick} className={menuItemClass}>
+          <CreditCard size={20} />
+          <span>Billing History</span>
         </button>
         <button onClick={handleLogout} className={menuItemClass}>
           <LogOut size={20} />

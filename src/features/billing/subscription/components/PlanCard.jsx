@@ -1,7 +1,9 @@
 import React from "react"
 import { Check, X } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
+  const { t } = useLanguage()
   const { name, price, interval, description, features } = plan
 
   return (
@@ -14,7 +16,7 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
     >
       {isActive && (
         <span className="absolute -top-3 left-6 px-3 py-1 bg-cath-red-700 text-white text-xs font-bold rounded-full">
-          Current Plan
+          {t.billing.pricing.currentPlan}
         </span>
       )}
 
@@ -24,7 +26,9 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
       </div>
 
       <div className="mb-6 flex items-end gap-1">
-        <span className="text-4xl font-extrabold">${price}</span>
+        <span className="text-4xl font-extrabold">
+          {price === 0 ? "0 ₫" : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}
+        </span>
         {price > 0 && (
           <span className="text-[#7A7574] text-sm mb-1">/{interval}</span>
         )}
@@ -41,19 +45,23 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
         ))}
       </ul>
 
-      <button
-        onClick={onAction}
-        disabled={isProcessing || isActive}
-        className={`w-full py-3 rounded-full font-semibold transition-all ${
-          isActive
-            ? "bg-[#E5E5E5] text-[#7A7574] cursor-default"
-            : actionLabel === "Downgrade"
-            ? "bg-white text-cath-red-700 border-2 border-cath-red-700 hover:bg-[#FFF5F5]"
-            : "bg-cath-red-700 text-white hover:brightness-90"
-        } disabled:opacity-70 disabled:cursor-not-allowed`}
-      >
-        {isProcessing ? "Processing..." : isActive ? "Current Plan" : actionLabel}
-      </button>
+      {(!isActive && !onAction) ? (
+        <div className="w-full py-3 rounded-full font-semibold text-center bg-[#F3F3F3] text-[#7A7574]">
+          {t.billing.pricing.included}
+        </div>
+      ) : (
+        <button
+          onClick={onAction}
+          disabled={isProcessing || isActive}
+          className={`w-full py-3 rounded-full font-semibold transition-all ${
+            isActive
+              ? "bg-[#E5E5E5] text-[#7A7574] cursor-default"
+              : "bg-cath-red-700 text-white hover:brightness-90"
+          } disabled:opacity-70 disabled:cursor-not-allowed`}
+        >
+          {isProcessing ? t.billing.pricing.processing : isActive ? t.billing.pricing.currentPlan : actionLabel}
+        </button>
+      )}
     </div>
   )
 }

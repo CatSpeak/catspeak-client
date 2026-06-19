@@ -45,6 +45,7 @@ const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceRe
 const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
 const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
+const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
 
 const routesConfig = [
   {
@@ -67,6 +68,14 @@ const routesConfig = [
           {
             path: "verify-email",
             element: <VerifyEmailPage />,
+          },
+          {
+            path: "pricing",
+            element: (
+              <LazyRoute>
+                <PricingPage />
+              </LazyRoute>
+            ),
           },
           { path: "*", element: <PageNotFound /> },
         ],
@@ -215,22 +224,6 @@ const routesConfig = [
                 element: <RecordingsPage />,
               },
               {
-                path: "billing",
-                element: (
-                  <LazyRoute>
-                    <BillingFeature />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "billing/result",
-                element: (
-                  <LazyRoute>
-                    <PaymentResultPage />
-                  </LazyRoute>
-                ),
-              },
-              {
                 path: "reels",
                 element: (
                   <LazyRoute>
@@ -277,6 +270,22 @@ const routesConfig = [
               {
                 path: "setting",
                 element: <AccountSettingsPage />,
+              },
+              {
+                path: "billing",
+                element: (
+                  <LazyRoute>
+                    <BillingFeature />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "billing/result",
+                element: (
+                  <LazyRoute>
+                    <PaymentResultPage />
+                  </LazyRoute>
+                ),
               },
               { path: "*", element: <PageNotFound /> },
             ],
