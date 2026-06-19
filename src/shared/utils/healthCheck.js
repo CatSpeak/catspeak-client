@@ -5,21 +5,28 @@
  * @returns {Promise<boolean>} True if the server is healthy (Status 200, "Healthy" body).
  *                             False if the server is down, unreachable, or unhealthy (e.g. 502/503).
  */
-export async function checkIsServerHealthy() {
-  try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api"
-    const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
-    const response = await fetch(`${normalizedBaseUrl}/health`)
-    
-    if (response.ok) {
-      const data = await response.json()
-      if (data.status === "Healthy") {
-        return true
+export async function checkIsServerHealthy(retries = 2, delayMs = 1000) {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api"
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(`${normalizedBaseUrl}/health`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.status === "Healthy") {
+          return true
+        }
       }
+    } catch (error) {
+      // Network error, CORS error, or server unreachable
     }
-    return false
-  } catch (error) {
-    // Network error, CORS error, or server unreachable
-    return false
+
+    if (attempt < retries) {
+      await new Promise(resolve => setTimeout(resolve, delayMs))
+    }
   }
+
+  return false
 }

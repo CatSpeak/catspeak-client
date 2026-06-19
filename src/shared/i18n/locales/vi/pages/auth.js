@@ -116,4 +116,6 @@ export default {
   otpResentSuccess: "Mã OTP đã được gửi lại thành công",
   sendingOtp: "Đang gửi OTP...",
   tooManyOtpRequests: "Yêu cầu mã OTP quá nhiều lần. Vui lòng thử lại sau.",
+  loginFailed: "Đăng nhập thất bại. Vui lòng thử lại.",
+  serverConnectionRestored: "Đã khôi phục kết nối máy chủ!",
 }

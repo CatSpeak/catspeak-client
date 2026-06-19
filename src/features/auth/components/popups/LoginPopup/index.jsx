@@ -74,6 +74,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
             ? authText.invalidCredentials
             : errMessage ||
                 t.common?.errorGeneric ||
+                authText.loginFailed ||
                 "Login failed",
         )
         return
@@ -88,6 +89,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         err?.data?.message ||
           err?.message ||
           t.common?.errorGeneric ||
+          authText.loginFailed ||
           "Login failed",
       )
     }
