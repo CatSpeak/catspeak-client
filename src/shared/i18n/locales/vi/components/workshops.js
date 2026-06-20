@@ -119,4 +119,50 @@ export default {
     hashtags: "#CatSpeak #SpeakUpGlobal #LightLearning #BeyondIELTS #ExpertSharing #EnglishLearning #IELTSJourney #FutureReady",
     closeButton: "Đóng",
   },
+  scholarshipWorkshop: {
+    title: "EXPERT SHARING | TỪ VIỆT NAM RA THẾ GIỚI – HÀNH TRÌNH CHINH PHỤC HỌC BỔNG ĐẠI HỌC TRUNG QUỐC",
+    cta: "Đăng ký tham gia",
+    expertSharing: "[[ EXPERT SHARING ]]",
+    introText: "Workshop Expert Sharing đặc biệt lần này cùng diễn giả TS. Nguyễn Quốc Tư – Phó Hiệu trưởng Trường Đại học Intracom, người đã có nhiều năm kinh nghiệm trong lĩnh vực giáo dục, đào tạo ngoại ngữ và hợp tác quốc tế.",
+    contentLabel: "Nội dung nổi bật của workshop:",
+    bulletPoints: [
+      "Các loại học bổng Đại học Trung Quốc dành cho sinh viên Việt Nam",
+      "Điều kiện, hồ sơ và quy trình ứng tuyển học bổng",
+      "Lộ trình học tiếng Trung hiệu quả để chinh phục mục tiêu du học",
+      "Những kinh nghiệm thực tế từ hành trình học tập và nghiên cứu tại Trung Quốc",
+      "Giải đáp trực tiếp mọi thắc mắc về học bổng, du học và định hướng nghề nghiệp"
+    ],
+    specialGiftsIntro: "ĐẶC BIỆT: Tham gia workshop, bạn còn có cơ hội nhận được nhiều phần quà hấp dẫn:",
+    specialGifts: [
+      "Học bổng từ các chương trình đào tạo",
+      "Voucher học tập và quà tặng giá trị dành cho người tham gia",
+      "Các phần quà bí mật sẽ được bật mí ngay trong chương trình"
+    ],
+    speakerLabel: "👨‍🏫 Diễn giả: ",
+    speakerName: "TS. Nguyễn Quốc Tư",
+    speakerTitles: [
+      "Phó Hiệu trưởng, Trưởng khoa Ngoại ngữ Đại học Intracom",
+      "Chủ tịch HĐQT Tiếng Trung QTEDU",
+      "Tiến sĩ Đại học Ngôn ngữ Bắc Kinh, Trung Quốc",
+      "Thạc sĩ Đại học Cát Lâm, Trung Quốc",
+      "Nguyên Trưởng khoa Tiếng Trung Đại học Đông Đô"
+    ],
+    timeLabel: "⏰ Thời gian:",
+    time: "20:00 – Thứ Bảy, 27/06/2026",
+    formatLabel: "💻 Hình thức:",
+    format: "Trực tuyến (online) trên nền tảng Cat Speak",
+    registerLinkLabel: "📌 Đăng ký tham gia ngay:",
+    registerLinkText: "Form đăng ký",
+    registerLinkUrl: "https://forms.gle/XtycWYjWbstJqgtB8",
+    followPrompt: "==============================\nHãy Follow ngay Fanpage Cat Speak và tham gia cộng đồng giao tiếp tiếng Trung để không bỏ lỡ những thông tin thú vị nhé!",
+    websiteLabel: "🌐 Website:",
+    website: "https://www.catspeak.com.vn/",
+    zaloGroupName: "👉 Group Cat Speak – Cộng đồng giao tiếp tiếng Trung:",
+    zaloLink: "https://zalo.me/g/gffkqu214",
+    inboxPrompt: "📩 Inbox trực tiếp fanpage hoặc gửi mail về: ",
+    email: "catspeak.vn@gmail.com",
+    closing: "Mọi thắc mắc, góp ý hoặc nếu bạn muốn đồng hành cùng Cat Speak trong hành trình phát triển cộng đồng, đừng ngần ngại liên hệ với chúng tôi nhé!",
+    hashtags: "#CatSpeak #ExpertSharing #HocBongTrungQuoc #DuHocTrungQuoc #TiengTrung #HocTiengTrung #Scholarship #IntracomUniversity #WilliamsLanternHanNgu #ChinhPhucTiengTrung",
+    closeButton: "Đóng"
+  },
 }

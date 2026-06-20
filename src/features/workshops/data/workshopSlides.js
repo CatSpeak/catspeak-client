@@ -1,6 +1,7 @@
-import workshop1 from "@/shared/assets/images/workshops/workshop1.jpg"
-import workshop2 from "@/shared/assets/images/workshops/workshop2.jpg"
-import workshopen1 from "@/shared/assets/images/workshops/workshopen-1.png"
+import workshop1 from "@/shared/assets/images/workshops/zh/workshop1.jpg"
+import workshop2 from "@/shared/assets/images/workshops/zh/workshop2.jpg"
+import workshop3 from "@/shared/assets/images/workshops/zh/workshop3.png"
+import workshopen1 from "@/shared/assets/images/workshops/en/workshop1.png"
 import logoDefault from "@/shared/assets/images/LogoDefault.png"
 
 /**
@@ -51,6 +52,13 @@ export const getWorkshopSlides = (t, lang, propSlides = []) => {
       cta: t.workshops.chinaWorkshop?.cta,
       image: workshop1,
       modal: "china",
+    },
+    {
+      title: t.workshops.scholarshipWorkshop?.title,
+      subtext: t.workshops.scholarshipWorkshop ? t.workshops.scholarshipWorkshop.introText : "",
+      cta: t.workshops.scholarshipWorkshop?.cta,
+      image: workshop3,
+      modal: "scholarship",
     },
     ...propSlides,
   ]
