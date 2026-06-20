@@ -16,6 +16,13 @@ export const paymentsApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    cancelPayment: builder.mutation({
+      query: (paymentId) => ({
+        url: `v1/Payments/cancel/${paymentId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["PaymentHistory"],
+    }),
     getPaymentHistory: builder.query({
       query: () => "v1/Payments/history",
       // Provide tags so we can invalidate this query after a successful checkout/repay/report
@@ -38,6 +45,7 @@ export const paymentsApi = baseApi.injectEndpoints({
 export const {
   useCheckoutMutation,
   useRepayMutation,
+  useCancelPaymentMutation,
   useGetPaymentHistoryQuery,
   useReportPaymentIssueMutation,
 } = paymentsApi

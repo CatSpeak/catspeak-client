@@ -37,12 +37,6 @@ const WorkspaceSidebar = ({ onClose, variant = "vertical" }) => {
       end: false,
       icon: Film,
     },
-    {
-      label: "Billing",
-      path: "/workspace/billing",
-      end: false,
-      icon: CreditCard,
-    },
   ]
 
   return (

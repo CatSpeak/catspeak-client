@@ -24,6 +24,8 @@ const DesktopNavItem = ({ navKey, noActive }) => {
     href = "/connect"
   } else if (navKey === "workspace") {
     href = "/workspace"
+  } else if (navKey === "pricing") {
+    href = "/pricing"
   } else {
     // Default fallback
     href = "/"

@@ -19,8 +19,9 @@ export default {
     community: "Cộng đồng",
     catSpeak: "Cat Speak",
     cart: "Khóa học",
-    connect: "Cá nhân",
+    connect: "Hồ sơ",
     workspace: "Nhà của bạn",
+    pricing: "Bảng Giá",
   },
   comingSoon: {
     badge: "Sắp ra mắt",
