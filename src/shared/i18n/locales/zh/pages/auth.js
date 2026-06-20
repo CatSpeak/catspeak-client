@@ -112,4 +112,6 @@ export default {
   otpResentSuccess: "OTP 已成功重新发送",
   sendingOtp: "发送 OTP 中...",
   tooManyOtpRequests: "OTP 请求过多。请稍后再试。",
+  loginFailed: "登录失败，请重试。",
+  serverConnectionRestored: "服务器连接已恢复！",
 }

@@ -75,7 +75,10 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         setApiError(
           isInvalidCredentials
             ? authText.invalidCredentials
-            : errMessage || t.common?.errorGeneric || "Login failed",
+            : errMessage ||
+                t.common?.errorGeneric ||
+                authText.loginFailed ||
+                "Login failed",
         )
         return
       }
@@ -89,6 +92,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         err?.data?.message ||
           err?.message ||
           t.common?.errorGeneric ||
+          authText.loginFailed ||
           "Login failed",
       )
     }

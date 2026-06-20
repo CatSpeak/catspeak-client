@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import { useParams, useLocation, useNavigate, Navigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
-import { useGetProfileQuery } from "@/features/auth"
+import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useGetLivekitTokenMutation } from "@/store/api/livekitApi"
 import {
@@ -92,8 +92,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const [verifyJoinRoom, { isLoading: isVerifying }] =
     useVerifyJoinRoomMutation()
 
+  const { isAuthenticated } = useAuth()
+
   // --- User data ---
-  const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery()
+  const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery(undefined, { skip: !isAuthenticated })
   const user = userData?.data ?? null
 
   // --- Room data (fetched by roomId from URL) ---

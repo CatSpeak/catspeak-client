@@ -30,9 +30,9 @@ const useIsMobile = (breakpoint = 425) => {
 const ProfileDropdown = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const { user: authUser } = useAuth()
+  const { user: authUser, isAuthenticated } = useAuth()
   const [logoutApi] = useLogoutMutation()
-  const { data: userData, isLoading } = useGetProfileQuery()
+  const { data: userData, isLoading } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
   const [isOpen, setIsOpen] = useState(false)
   const [showLogoutWarning, setShowLogoutWarning] = useState(false)
   const menuRef = useRef(null)

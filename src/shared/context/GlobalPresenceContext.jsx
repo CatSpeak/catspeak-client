@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetProfileQuery } from "@/features/auth"
+import { useGetProfileQuery, useAuth } from "@/features/auth"
 import {
   useGetPresenceConfigQuery,
   useSendHeartbeatMutation,
@@ -10,7 +10,8 @@ const GlobalPresenceContext = createContext(undefined)
 
 export const GlobalPresenceProvider = ({ children }) => {
   const { language: contextLanguage } = useLanguage()
-  const { data: userData } = useGetProfileQuery()
+  const { isAuthenticated } = useAuth()
+  const { data: userData } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
   const user = userData?.data
 
   const { data: config } = useGetPresenceConfigQuery()
