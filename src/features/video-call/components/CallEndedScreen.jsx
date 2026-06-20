@@ -20,12 +20,12 @@ const CallEndedScreen = () => {
           <PhoneOff size={40} strokeWidth={1.5} />
         </div>
         <h1 className="text-2xl font-bold text-black leading-tight">
-          {isExpired ? "This session has expired" : "You left the meeting"}
+          {isExpired ? t.rooms.callEnded.titleExpired : t.rooms.callEnded.titleLeft}
         </h1>
         <p className="text-[15px] text-gray-500 leading-relaxed mb-6">
           {isExpired
-            ? "The room time limit was reached and the session was automatically closed."
-            : "You can safely close this window or return to the home screen."}
+            ? t.rooms.callEnded.descExpired
+            : t.rooms.callEnded.descLeft}
         </p>
         <div className="flex flex-col gap-3 w-full sm:flex-row sm:justify-center">
           {!isExpired && (
@@ -36,7 +36,7 @@ const CallEndedScreen = () => {
               variant="secondary"
               className="h-11 px-6 min-w-[140px]"
             >
-              Rejoin
+              {t.rooms.callEnded.rejoin}
             </PillButton>
           )}
           <PillButton
@@ -44,7 +44,7 @@ const CallEndedScreen = () => {
             variant="primary"
             className="h-11 px-6 min-w-[140px]"
           >
-            Return to home
+            {t.rooms.callEnded.returnHome}
           </PillButton>
         </div>
       </div>
