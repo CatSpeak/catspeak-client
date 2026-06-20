@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
 import BeautyPicker from "./BeautyPicker"
@@ -10,14 +10,18 @@ const readStoredBeautyOptions = () => {
   try {
     const raw = localStorage.getItem(BEAUTY_STORAGE_KEY)
     if (raw) return JSON.parse(raw)
-  } catch { /* ignore corrupt data */ }
+  } catch {
+    /* ignore corrupt data */
+  }
   return null
 }
 
 const persistBeautyOptions = (opts) => {
   try {
     localStorage.setItem(BEAUTY_STORAGE_KEY, JSON.stringify(opts))
-  } catch { /* quota exceeded — silently drop */ }
+  } catch {
+    /* quota exceeded — silently drop */
+  }
 }
 
 const TABS = ["backgrounds", "beauty"]
@@ -28,6 +32,7 @@ const VirtualBackgroundModal = ({
   localStream,
   cameraOn,
   onToggleCam,
+  lkVideoTrack,
 }) => {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState("backgrounds")
@@ -36,16 +41,18 @@ const VirtualBackgroundModal = ({
   // page reloads and carry over into the in-call session.
   const [beautyOptions, setBeautyOptions] = useState(() => {
     const stored = readStoredBeautyOptions()
-    return stored ?? {
-      smoothing: 0,
-      brightness: 0,
-      warmth: 0,
-      colorFilter: 0,
-      faceSlim: 0,
-      eyeEnlarge: 0,
-      eyeBrighten: 0,
-      teethWhiten: 0,
-    }
+    return (
+      stored ?? {
+        smoothing: 0,
+        brightness: 0,
+        warmth: 0,
+        colorFilter: 0,
+        faceSlim: 0,
+        eyeEnlarge: 0,
+        eyeBrighten: 0,
+        teethWhiten: 0,
+      }
+    )
   })
 
   // Persist beauty options to localStorage whenever they change so the
@@ -57,6 +64,23 @@ const VirtualBackgroundModal = ({
   const handleBeautyChange = (key, value) => {
     setBeautyOptions((prev) => ({ ...prev, [key]: value }))
   }
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+
+    if (lkVideoTrack) {
+      lkVideoTrack.attach(videoElement)
+      return () => {
+        lkVideoTrack.detach(videoElement)
+      }
+    } else if (localStream) {
+      videoElement.srcObject = localStream
+    } else {
+      videoElement.srcObject = null
+    }
+  }, [lkVideoTrack, localStream])
 
   const handleApply = (url) => {
     // Automatically turn on camera if an effect is selected while camera is off
@@ -84,11 +108,7 @@ const VirtualBackgroundModal = ({
         {/* Left Column: Video Preview */}
         <div className="flex-1 min-w-0 flex flex-col bg-[#202124] rounded-xl overflow-hidden relative aspect-video w-full h-full">
           <video
-            ref={(video) => {
-              if (video && localStream) {
-                video.srcObject = localStream
-              }
-            }}
+            ref={videoRef}
             autoPlay
             playsInline
             muted
@@ -127,7 +147,10 @@ const VirtualBackgroundModal = ({
           {activeTab === "backgrounds" ? (
             <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
           ) : (
-            <BeautyPicker beautyOptions={beautyOptions} onChange={handleBeautyChange} />
+            <BeautyPicker
+              beautyOptions={beautyOptions}
+              onChange={handleBeautyChange}
+            />
           )}
         </div>
       </div>

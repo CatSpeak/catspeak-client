@@ -104,8 +104,10 @@ export const useCallActions = ({
     const navigate = getNavigate()
     if (!isPiP && navigate) {
       const pathname = getLocation()?.pathname || ""
-      const lang = pathname.split("/")[1] || language
-      navigate(getCommunityPath(lang))
+      navigate(pathname, {
+        replace: true,
+        state: { callEnded: true, reason: "left" },
+      })
     }
   }, [isPiP, language, leaveMeetingFn, dispatch])
 
@@ -124,14 +126,19 @@ export const useCallActions = ({
   const enterPiP = useCallback(
     (navigateTo) => {
       // Create the PiP window immediately in the click handler to preserve user activation
-      if ("documentPictureInPicture" in window && !window.documentPictureInPicture.window) {
-        window.__pipWindowPromise = window.documentPictureInPicture.requestWindow({
-          width: 400,
-          height: 300,
-        }).catch((err) => {
-          console.error("Failed to request PiP window in click handler", err)
-          return null
-        })
+      if (
+        "documentPictureInPicture" in window &&
+        !window.documentPictureInPicture.window
+      ) {
+        window.__pipWindowPromise = window.documentPictureInPicture
+          .requestWindow({
+            width: 400,
+            height: 300,
+          })
+          .catch((err) => {
+            console.error("Failed to request PiP window in click handler", err)
+            return null
+          })
       }
 
       dispatch(setPiPAction(true))

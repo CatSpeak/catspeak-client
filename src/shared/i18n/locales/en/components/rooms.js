@@ -416,4 +416,12 @@ export default {
   },
   participants: "participants",
   noLimit: "No limit",
+  callEnded: {
+    titleExpired: "This session has expired",
+    titleLeft: "You left the meeting",
+    descExpired: "The room time limit was reached and the session was automatically closed.",
+    descLeft: "You can safely close this window or return to the home screen.",
+    rejoin: "Rejoin",
+    returnHome: "Return to home",
+  },
 }

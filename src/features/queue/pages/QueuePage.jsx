@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react"
+import React, { useEffect, useState, useMemo, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { QueueStatusCard } from "@/features/queue"
@@ -67,7 +67,7 @@ const QueuePage = () => {
     }
   }, [isConnected])
 
-  const joinAttemptedRef = React.useRef(false)
+  const joinAttemptedRef = useRef(false)
 
   useEffect(() => {
     // Connect first (handled by hook mount)

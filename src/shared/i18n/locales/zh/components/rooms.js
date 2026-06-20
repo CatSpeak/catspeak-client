@@ -383,4 +383,12 @@ export default {
   },
   participants: "人",
   noLimit: "无限制",
+  callEnded: {
+    titleExpired: "此会话已过期",
+    titleLeft: "您已离开会议",
+    descExpired: "已达到房间时间限制，会话已自动关闭。",
+    descLeft: "您可以安全地关闭此窗口或返回主屏幕。",
+    rejoin: "重新加入",
+    returnHome: "返回主页",
+  },
 }

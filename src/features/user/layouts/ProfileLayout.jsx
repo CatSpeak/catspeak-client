@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import { Outlet } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ProfileSidebar from "../components/ProfileSidebar"
@@ -7,7 +7,7 @@ import { motion, useAnimation, useMotionValue, useSpring } from "framer-motion"
 const RandomCircle = ({ colorClass, baseSize, delay }) => {
   const controls = useAnimation()
   
-  const initialPosition = React.useMemo(() => ({
+  const initialPosition = useMemo(() => ({
     x: (Math.random() - 0.5) * 120 + "vw",
     y: (Math.random() - 0.5) * 120 + "vh",
     scale: Math.random() * 1.0 + 0.5
