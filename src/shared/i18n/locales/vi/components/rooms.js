@@ -251,6 +251,9 @@ export default {
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
+    roomClosingTitle: "Phòng sắp đóng",
+    roomClosingSubtitle: "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",
+    roomClosingDescription: "Vui lòng kết thúc cuộc trò chuyện. Phòng sẽ tự động đóng khi thời gian kết thúc.",
     screenShareLabel: "Màn hình của {{name}}",
     screenShareLabelYou: "Màn hình của {{name}} (Bạn)",
     moreOptions: "Tùy chọn khác",

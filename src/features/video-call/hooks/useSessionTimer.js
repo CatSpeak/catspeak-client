@@ -7,18 +7,28 @@ import { useEffect, useState, useRef } from "react"
  * @param {number|null} durationMinutes - Room duration in minutes (from room.duration). If null, timer is hidden.
  * @returns {{ elapsedSeconds: number, formattedElapsed: string, formattedMax: string|null, hasDuration: boolean }}
  */
-export const useSessionTimer = (createdAt = null, durationMinutes = null) => {
+export const useSessionTimer = (createdAt = null, durationMinutes = null, serverRemainingSeconds = null) => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
 
   const hasDuration = typeof durationMinutes === "number"
+  const startMsRef = useRef(createdAt ? new Date(createdAt).getTime() : Date.now())
+
+  // If the server provides an authoritative remaining time, adjust our anchor timestamp
+  // so the local timer perfectly aligns with the server and naturally ticks down.
+  useEffect(() => {
+    if (serverRemainingSeconds !== null && hasDuration) {
+      const maxSeconds = durationMinutes * 60
+      const expectedElapsed = Math.max(0, maxSeconds - serverRemainingSeconds)
+      startMsRef.current = Date.now() - expectedElapsed * 1000
+      setElapsedSeconds(expectedElapsed)
+    }
+  }, [serverRemainingSeconds, hasDuration, durationMinutes])
 
   useEffect(() => {
-    // If no createdAt is provided, fallback to when the component mounted
-    const startMs = createdAt ? new Date(createdAt).getTime() : Date.now()
     const maxSeconds = hasDuration ? durationMinutes * 60 : Infinity
 
     const updateElapsed = () => {
-      const diff = Math.floor((Date.now() - startMs) / 1000)
+      const diff = Math.floor((Date.now() - startMsRef.current) / 1000)
       const safeDiff = diff > 0 ? diff : 0
       setElapsedSeconds(safeDiff > maxSeconds ? maxSeconds : safeDiff)
     }
@@ -26,7 +36,7 @@ export const useSessionTimer = (createdAt = null, durationMinutes = null) => {
     updateElapsed()
     const intervalId = setInterval(updateElapsed, 1000)
     return () => clearInterval(intervalId)
-  }, [createdAt, durationMinutes, hasDuration])
+  }, [hasDuration, durationMinutes])
 
   const formatDuration = (totalSeconds) => {
     const safeSeconds = Math.max(0, Math.floor(totalSeconds || 0))

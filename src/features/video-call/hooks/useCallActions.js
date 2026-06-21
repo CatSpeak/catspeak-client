@@ -103,11 +103,7 @@ export const useCallActions = ({
     // Navigate away if on the call page (not in PiP)
     const navigate = getNavigate()
     if (!isPiP && navigate) {
-      const pathname = getLocation()?.pathname || ""
-      navigate(pathname, {
-        replace: true,
-        state: { callEnded: true, reason: "left" },
-      })
+      navigate(getCommunityPath(language), { replace: true })
     }
   }, [isPiP, language, leaveMeetingFn, dispatch])
 

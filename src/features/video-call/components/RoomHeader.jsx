@@ -8,8 +8,8 @@ import { useSessionTimer } from "@/features/video-call"
 const RoomHeader = () => {
   const { t, language } = useLanguage()
   const { lang } = useParams()
-  const { room, enterPiP } = useVideoCallContext()
-  const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(room?.createdAt, room?.duration)
+  const { room, enterPiP, closingRemainingSeconds } = useVideoCallContext()
+  const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(room?.createdAt, room?.duration, closingRemainingSeconds)
 
   const rawRoomName = room?.name || "General"
 
