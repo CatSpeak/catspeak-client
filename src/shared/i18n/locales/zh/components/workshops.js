@@ -110,4 +110,50 @@ export default {
     hashtags: "#CatSpeak #SpeakUpGlobal #LightLearning #BeyondIELTS #ExpertSharing #EnglishLearning #IELTSJourney #FutureReady",
     closeButton: "关闭",
   },
+  scholarshipWorkshop: {
+    title: "EXPERT SHARING | 从越南走向世界——征服中国大学奖学金之旅",
+    cta: "立即注册",
+    expertSharing: "[[ EXPERT SHARING ]]",
+    introText: "本次特别专家分享研讨会邀请了具有多年教育、外语培训和国际合作经验的 Intracom 大学副校长阮国思博士担任演讲嘉宾。",
+    contentLabel: "研讨会亮点：",
+    bulletPoints: [
+      "针对越南学生的各类中国大学奖学金",
+      "奖学金申请条件、材料及流程",
+      "征服留学目标的高效中文学习路线图",
+      "在中国学习和研究的实际经验",
+      "直接解答关于奖学金、留学和职业规划的所有疑问"
+    ],
+    specialGiftsIntro: "特别提示：参加研讨会，您还有机会获得丰厚奖品：",
+    specialGifts: [
+      "培训项目奖学金",
+      "参与者的学习代金券和精美礼品",
+      "更多神秘礼物将在活动中揭晓"
+    ],
+    speakerLabel: "👨‍🏫 演讲嘉宾：",
+    speakerName: "阮国思 博士",
+    speakerTitles: [
+      "Intracom 大学副校长、外语系主任",
+      "QTEDU 汉语董事会主席",
+      "中国北京语言大学博士",
+      "中国吉林大学硕士",
+      "前东都大学中文系主任"
+    ],
+    timeLabel: "⏰ 时间：",
+    time: "20:00 – 2026年6月27日，星期六",
+    formatLabel: "💻 形式：",
+    format: "Cat Speak 平台线上进行",
+    registerLinkLabel: "📌 立即注册：",
+    registerLinkText: "注册表单",
+    registerLinkUrl: "https://forms.gle/XtycWYjWbstJqgtB8",
+    followPrompt: "==============================\n立即关注 Cat Speak 粉丝专页并加入中文交流社区，不要错过有趣的信息！",
+    websiteLabel: "🌐 网站：",
+    website: "https://www.catspeak.com.vn/",
+    zaloGroupName: "👉 Cat Speak 群组 – 中文交流社区：",
+    zaloLink: "https://zalo.me/g/gffkqu214",
+    inboxPrompt: "📩 直接私信粉丝专页或发送邮件至： ",
+    email: "catspeak.vn@gmail.com",
+    closing: "如有任何问题、建议，或想在社区发展历程中与 Cat Speak 同行，请随时联系我们！",
+    hashtags: "#CatSpeak #ExpertSharing #中国奖学金 #留学中国 #学中文 #奖学金",
+    closeButton: "关闭"
+  },
 }
