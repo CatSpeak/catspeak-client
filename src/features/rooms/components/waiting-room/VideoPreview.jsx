@@ -55,12 +55,30 @@ const VideoPreview = ({
         )}
 
         {!cameraOn && (
-          <div className="flex h-full w-full items-center justify-center">
-            <Avatar
-              size={64}
-              name={user?.fullName || user?.username || "User"}
-              className="md:!w-24 md:!h-24"
-            />
+          <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+            {user?.avatarImageUrl && (
+              <>
+                <div className="absolute inset-0 z-0 bg-neutral-900" />
+                <img
+                  src={user.avatarImageUrl}
+                  alt=""
+                  className="absolute inset-0 z-0 h-full w-full object-cover blur-[40px] scale-125 opacity-60"
+                  onError={(e) => {
+                    e.target.style.display = "none"
+                    e.target.previousSibling.style.display = "none"
+                  }}
+                />
+              </>
+            )}
+            <div className="relative z-10 flex items-center justify-center">
+              <Avatar
+                size={64}
+                src={user?.avatarImageUrl}
+                alt={user?.username || "User"}
+                name={user?.fullName || user?.username || "User"}
+                className={`md:!w-24 md:!h-24 ${user?.avatarImageUrl ? "shadow-xl" : ""}`}
+              />
+            </div>
           </div>
         )}
       </div>

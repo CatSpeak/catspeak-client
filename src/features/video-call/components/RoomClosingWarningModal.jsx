@@ -1,15 +1,25 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Clock } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 
 const RoomClosingWarningModal = ({ remainingSeconds, t }) => {
   const [isDismissed, setIsDismissed] = useState(false)
+  const audioPlayedRef = useRef(false)
 
   useEffect(() => {
     if (remainingSeconds === null || remainingSeconds <= 0) {
       setIsDismissed(false)
+      audioPlayedRef.current = false
     }
   }, [remainingSeconds])
+
+  useEffect(() => {
+    if (!isDismissed && remainingSeconds !== null && remainingSeconds > 0 && !audioPlayedRef.current) {
+      audioPlayedRef.current = true
+      const audio = new Audio("/sounds/warning-room-end.mp3")
+      audio.play().catch(e => console.error("Audio play failed:", e))
+    }
+  }, [isDismissed, remainingSeconds])
 
   return (
     <Modal

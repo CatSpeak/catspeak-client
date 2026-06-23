@@ -275,6 +275,7 @@ export default {
   videoCall: {
     roomClosingTitle: "Room Ending Soon",
     roomClosingSubtitle: "This session will end in {{remainingSeconds}} seconds",
+    roomClosingSubtitleStatic: "This session will end soon.",
     roomClosingDescription: "Please wrap up your conversation. The room will automatically close when the timer reaches zero.",
     screenShareLabel: "{{name}}'s screen",
     screenShareLabelYou: "{{name}}'s screen (You)",
@@ -404,5 +405,6 @@ export default {
     descLeft: "You can safely close this window or return to the home screen.",
     rejoin: "Rejoin",
     returnHome: "Return to home",
+    expiredToast: "The session has ended",
   },
 }

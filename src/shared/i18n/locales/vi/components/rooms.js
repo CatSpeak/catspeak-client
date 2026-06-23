@@ -253,6 +253,7 @@ export default {
   videoCall: {
     roomClosingTitle: "Phòng sắp đóng",
     roomClosingSubtitle: "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",
+    roomClosingSubtitleStatic: "Phiên kết nối này sắp kết thúc.",
     roomClosingDescription: "Vui lòng kết thúc cuộc trò chuyện. Phòng sẽ tự động đóng khi thời gian kết thúc.",
     screenShareLabel: "Màn hình của {{name}}",
     screenShareLabelYou: "Màn hình của {{name}} (Bạn)",
@@ -385,5 +386,6 @@ export default {
     descLeft: "Bạn có thể đóng cửa sổ này một cách an toàn hoặc quay lại màn hình chính.",
     rejoin: "Tham gia lại",
     returnHome: "Quay lại trang chủ",
+    expiredToast: "Phiên kết nối đã kết thúc",
   },
 }
