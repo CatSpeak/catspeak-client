@@ -273,6 +273,9 @@ export default {
     unknownDevice: "Unknown Device",
   },
   videoCall: {
+    roomClosingTitle: "Room Ending Soon",
+    roomClosingSubtitle: "This session will end in {{remainingSeconds}} seconds",
+    roomClosingDescription: "Please wrap up your conversation. The room will automatically close when the timer reaches zero.",
     screenShareLabel: "{{name}}'s screen",
     screenShareLabelYou: "{{name}}'s screen (You)",
     moreOptions: "More options",
@@ -394,4 +397,12 @@ export default {
   },
   participants: "participants",
   noLimit: "No limit",
+  callEnded: {
+    titleExpired: "This session has expired",
+    titleLeft: "You left the meeting",
+    descExpired: "The room time limit was reached and the session was automatically closed.",
+    descLeft: "You can safely close this window or return to the home screen.",
+    rejoin: "Rejoin",
+    returnHome: "Return to home",
+  },
 }

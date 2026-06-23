@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Clock, Users, Link, Bookmark, Lock } from "lucide-react"
@@ -57,8 +57,8 @@ const RoomCard = ({ room }) => {
   // Placeholder code simulation
   const roomCode = `room-${room.roomId}`.toLowerCase()
 
-  const [showDevModal, setShowDevModal] = React.useState(false)
-  const [showFullModal, setShowFullModal] = React.useState(false)
+  const [showDevModal, setShowDevModal] = useState(false)
+  const [showFullModal, setShowFullModal] = useState(false)
 
   const handleRoomClick = (e) => {
     if (isRoomFull) {

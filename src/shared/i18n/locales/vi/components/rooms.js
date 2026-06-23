@@ -251,6 +251,9 @@ export default {
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
+    roomClosingTitle: "Phòng sắp đóng",
+    roomClosingSubtitle: "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",
+    roomClosingDescription: "Vui lòng kết thúc cuộc trò chuyện. Phòng sẽ tự động đóng khi thời gian kết thúc.",
     screenShareLabel: "Màn hình của {{name}}",
     screenShareLabelYou: "Màn hình của {{name}} (Bạn)",
     moreOptions: "Tùy chọn khác",
@@ -375,4 +378,12 @@ export default {
   },
   participants: "người",
   noLimit: "Không giới hạn",
+  callEnded: {
+    titleExpired: "Phiên này đã hết hạn",
+    titleLeft: "Bạn đã rời khỏi cuộc họp",
+    descExpired: "Đã đạt đến giới hạn thời gian của phòng và phiên đã tự động đóng.",
+    descLeft: "Bạn có thể đóng cửa sổ này một cách an toàn hoặc quay lại màn hình chính.",
+    rejoin: "Tham gia lại",
+    returnHome: "Quay lại trang chủ",
+  },
 }

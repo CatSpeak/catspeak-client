@@ -241,6 +241,9 @@ export default {
     unknownDevice: "未知设备",
   },
   videoCall: {
+    roomClosingTitle: "房间即将关闭",
+    roomClosingSubtitle: "此会话将在 {{remainingSeconds}} 秒后结束",
+    roomClosingDescription: "请结束您的对话。计时器归零时房间将自动关闭。",
     screenShareLabel: "{{name}} 的屏幕",
     screenShareLabelYou: "{{name}} 的屏幕（你）",
     moreOptions: "更多选项",
@@ -361,4 +364,12 @@ export default {
   },
   participants: "人",
   noLimit: "无限制",
+  callEnded: {
+    titleExpired: "此会话已过期",
+    titleLeft: "您已离开会议",
+    descExpired: "已达到房间时间限制，会话已自动关闭。",
+    descLeft: "您可以安全地关闭此窗口或返回主屏幕。",
+    rejoin: "重新加入",
+    returnHome: "返回主页",
+  },
 }

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
   Video,
   VideoOff,
@@ -77,7 +77,7 @@ const VideoCallControlBar = () => {
   }
 
   const unreadMessages = unreadRoomChat + unreadAiChat
-  const [showMoreMenu, setShowMoreMenu] = React.useState(false)
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
 
   const iconClass = "w-6 h-6"
 

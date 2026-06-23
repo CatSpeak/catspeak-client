@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Captions } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
@@ -14,7 +14,7 @@ const ControlBarSubtitles = ({ className = "" }) => {
     stopSubtitles,
   } = useSubtitleControls()
 
-  const [showSubtitlePicker, setShowSubtitlePicker] = React.useState(false)
+  const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
 
   if (isAISession) {
     return (

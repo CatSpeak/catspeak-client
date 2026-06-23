@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import dayjs from "dayjs"
 import { colors } from "@/shared/utils/colors"
 import CatIcon from "@/shared/assets/icons/logo/icon.svg"
@@ -43,7 +43,7 @@ const Calendar = ({ currentDate }) => {
   })
 
   // Build a day-of-month → totalEvents map from the API response
-  const eventCountsByDay = React.useMemo(() => {
+  const eventCountsByDay = useMemo(() => {
     if (!eventCountsData?.counts) return {}
     return eventCountsData.counts.reduce((acc, item) => {
       const day = dayjs(item.date).date()

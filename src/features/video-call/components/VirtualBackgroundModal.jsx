@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -9,8 +9,27 @@ const VirtualBackgroundModal = ({
   localStream,
   cameraOn,
   onToggleCam,
+  lkVideoTrack,
 }) => {
   const { t } = useLanguage()
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+
+    if (lkVideoTrack) {
+      lkVideoTrack.attach(videoElement)
+      return () => {
+        lkVideoTrack.detach(videoElement)
+      }
+    } else if (localStream) {
+      videoElement.srcObject = localStream
+    } else {
+      videoElement.srcObject = null
+    }
+  }, [lkVideoTrack, localStream])
+
   const handleApply = (url) => {
     // Automatically turn on camera if an effect is selected while camera is off
     if (!cameraOn && url !== null && onToggleCam) {
@@ -31,11 +50,7 @@ const VirtualBackgroundModal = ({
         {/* Left Column: Video Preview */}
         <div className="flex-1 min-w-0 flex flex-col bg-[#202124] rounded-xl overflow-hidden relative aspect-video w-full h-full">
           <video
-            ref={(video) => {
-              if (video && localStream) {
-                video.srcObject = localStream
-              }
-            }}
+            ref={videoRef}
             autoPlay
             playsInline
             muted
