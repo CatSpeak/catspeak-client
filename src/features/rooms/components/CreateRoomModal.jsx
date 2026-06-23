@@ -1,8 +1,6 @@
 import React, { useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
-import Switch from "@/shared/components/ui/inputs/Switch"
 import TopicSelect from "./ui/TopicSelect"
 import LevelSelector from "./ui/LevelSelector"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -17,23 +15,8 @@ import { X } from "lucide-react"
 const scrollbarClasses =
   "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
 
-const getLanguageName = (langCode) => {
-  switch (langCode) {
-    case "zh":
-      return "Chinese"
-    case "vi":
-      return "Vietnamese"
-    case "en":
-      return "English"
-    default:
-      return "English"
-  }
-}
-
 const CreateRoomModal = ({ open, onCancel }) => {
   const { t } = useLanguage()
-  const navigate = useNavigate()
-  const { lang } = useParams()
 
   const {
     formData,
@@ -41,74 +24,29 @@ const CreateRoomModal = ({ open, onCancel }) => {
     handleTopicChange,
     resetForm,
     switchMode,
-    createRoom,
+    submitCreate,
+    submitJoin,
     isCreating,
+    selectedLanguage
   } = useCreateRoomForm()
 
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =
     useCallInterceptor()
 
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
-  const selectedLanguage = getLanguageName(supportedLangCode)
-
   useEffect(() => {
     if (open) resetForm()
   }, [open])
 
-  const proceedJoin = () => {
-    if (!selectedLanguage) return
-    const preferences = {
-      roomType: "Group",
-      topics: formData.topics.length > 0 ? formData.topics : [],
-      languageType: selectedLanguage,
-      requiredLevel: formData.selectedLevel || undefined,
-    }
-    onCancel()
-    navigate("/queue", { state: preferences })
-  }
-
   const handleJoin = (e) => {
     if (e) e.preventDefault()
-    if (!intercept(proceedJoin)) proceedJoin()
-  }
-
-  const proceedCreate = async () => {
-    if (!selectedLanguage) return
-
-    const data = new FormData()
-    data.append("Name", formData.name || "")
-    data.append("RoomType", "Group")
-    data.append("LanguageType", selectedLanguage)
-    data.append("RequiredLevel", formData.selectedLevel || "")
-    data.append("Privacy", formData.isPrivate ? "Private" : "Public")
-
-    if (formData.isPrivate && formData.password) {
-      data.append("Password", formData.password)
-    }
-
-    if (formData.thumbnail) {
-      data.append("Thumbnail", formData.thumbnail)
-    }
-
-    const topicsList = formData.topics.length > 0 ? formData.topics : ["Other"]
-    topicsList.forEach((topic) => data.append("Topics", topic))
-
-    try {
-      const result = await createRoom(data).unwrap()
-      onCancel()
-      if (result.roomId) {
-        const communityLang =
-          lang || localStorage.getItem("communityLanguage") || "en"
-        navigate(`/${communityLang}/meet/${result.roomId}`)
-      }
-    } catch (err) {
-      console.error("Failed to create room:", err)
-    }
+    const proceed = () => submitJoin(onCancel)
+    if (!intercept(proceed)) proceed()
   }
 
   const handleCreate = (e) => {
     if (e) e.preventDefault()
-    if (!intercept(proceedCreate)) proceedCreate()
+    const proceed = () => submitCreate(onCancel)
+    if (!intercept(proceed)) proceed()
   }
 
   const isJoinDisabled = !selectedLanguage
@@ -217,7 +155,7 @@ const CreateFormInputs = ({ formData, handleChange, t }) => (
       labelClassName="text-base"
       className="!h-12 !text-base !px-4 min-h-[48px]"
     />
-    <div className="flex flex-col gap-3">
+    {/* <div className="flex flex-col gap-3">
       <label>{t.rooms?.createRoom?.thumbnailLabel || "Room Thumbnail"}</label>
       <div className="flex items-center gap-3">
         <label className="inline-flex min-h-[48px] h-12 items-center rounded-full px-4 text-base border transition-colors border-[#C6C6C6] hover:bg-[#F2F2F2] cursor-pointer">
@@ -239,7 +177,8 @@ const CreateFormInputs = ({ formData, handleChange, t }) => (
             : t.rooms?.createRoom?.noFileChosen || "No file chosen"}
         </span>
       </div>
-    </div>
+    </div> */}
+
     {/* <div className="flex items-center justify-between">
       <span className="text-base">
         {t.rooms?.createRoom?.privateRoom || "Private Room"}
@@ -252,6 +191,7 @@ const CreateFormInputs = ({ formData, handleChange, t }) => (
         }}
       />
     </div> */}
+
     {formData.isPrivate && (
       <TextInput
         id="password"
