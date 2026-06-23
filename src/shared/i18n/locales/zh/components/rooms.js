@@ -241,6 +241,9 @@ export default {
     unknownDevice: "未知设备",
   },
   videoCall: {
+    roomClosingTitle: "房间即将关闭",
+    roomClosingSubtitle: "此会话将在 {{remainingSeconds}} 秒后结束",
+    roomClosingDescription: "请结束您的对话。计时器归零时房间将自动关闭。",
     screenShareLabel: "{{name}} 的屏幕",
     screenShareLabelYou: "{{name}} 的屏幕（你）",
     moreOptions: "更多选项",

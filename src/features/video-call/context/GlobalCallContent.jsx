@@ -5,7 +5,6 @@ import {
   useRoomContext,
   useParticipants,
   useLocalParticipant,
-  useChat,
   useConnectionState,
   RoomAudioRenderer,
 } from "@livekit/components-react"
@@ -23,8 +22,6 @@ import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
-import { useSystemMessages } from "@/features/video-call/hooks/useSystemMessages"
-import { useAiMessages } from "@/features/video-call/hooks/useAiMessages"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import {
   useParticipantList,
@@ -42,6 +39,10 @@ import {
   getLocation,
 } from "@/features/video-call/hooks/useNavigateRef"
 
+import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
+import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle"
+import { useChatManager } from "@/features/video-call/hooks/useChatManager"
+
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
  *
@@ -57,8 +58,6 @@ const GlobalCallContent = ({
   setReceiveSystemMsgs,
 }) => {
   const { t, language } = useLanguage()
-  const dispatch = useDispatch()
-
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
   const isAISession = callInfo?.isAISession ?? false
@@ -78,7 +77,6 @@ const GlobalCallContent = ({
     eyeBrighten: 0,
     teethWhiten: 0,
   })
-  const [closingRemainingSeconds, setClosingRemainingSeconds] = useState(null)
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -223,10 +221,6 @@ const GlobalCallContent = ({
 
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
-  const chatState = useChat()
-  const baseChatMessages = chatState.chatMessages ?? []
-  const chatSend = chatState.send ?? (() => {})
-
   // ── Participants ──
   const { participants, isHandRaised } = useParticipantList(
     allParticipants,
@@ -247,48 +241,30 @@ const GlobalCallContent = ({
 
   const currentUserId = user?.accountId
 
-  // ── Messages ──
-  const systemMessages = useSystemMessages(lkRoom, receiveSystemMsgs)
-
+  // ── Chat Manager ──
   const {
-    aiMessages,
+    chatSend,
+    chatMessages,
+    combinedAiMessages,
     addOptimisticAiMessage,
     updateAiInteraction,
     isCurrentUserPrompting,
     startNewThread,
     continueThread,
     getConversationThread,
-  } = useAiMessages(lkRoom, currentUserId, participants)
-  const [chatPublicAi] = useChatPublicAiMutation()
-  const [chatPrivateAi] = useChatPrivateAiMutation()
-
-  // Parse reply metadata from chat messages
-  const chatMessages = baseChatMessages.map((msg) => {
-    try {
-      const json = JSON.parse(msg.message)
-      if (json && json.isReply) {
-        return { ...msg, message: json.text, replyTo: json.replyTo }
-      }
-    } catch {
-      // not JSON or not a reply
-    }
-    return msg
+    chatPublicAi,
+    chatPrivateAi,
+    unreadRoomChat,
+    setUnreadRoomChat,
+    unreadAiChat,
+    setUnreadAiChat,
+  } = useChatManager({
+    lkRoom,
+    receiveSystemMsgs,
+    currentUserId,
+    participants,
+    panelState,
   })
-
-  const combinedAiMessages = [...aiMessages, ...systemMessages].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  )
-
-  // ── Unread tracking & hand-raise audio ──
-  const { unreadRoomChat, setUnreadRoomChat, unreadAiChat, setUnreadAiChat } =
-    useUnreadTracking({
-      chatMessages,
-      combinedAiMessages,
-      showChat: panelState.showChat,
-      isChatCollapsed: panelState.isChatCollapsed,
-      isAiCollapsed: panelState.isAiCollapsed,
-      participants,
-    })
 
   // ── Action handlers ──
   const actions = useCallActions({
@@ -317,60 +293,14 @@ const GlobalCallContent = ({
     setShowLeaveModal(false)
   }
 
-  // ── Room Expiration & SignalR ──
-  const handleRoomClosingWarning = useCallback(
-    (warnSessionId, remainingSeconds) => {
-      const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
-      if (activeSessionId && warnSessionId === activeSessionId) {
-        setClosingRemainingSeconds(remainingSeconds)
-      }
-    },
-    [callInfo?.sessionId, localMetadata?.sessionId],
-  )
-
-  const signaling = useVideoCallSignaling({
-    RoomClosingWarning: handleRoomClosingWarning,
-  })
-
+  // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
-  useEffect(() => {
-    if (signaling.isConnected && activeSessionId) {
-      signaling.joinSession(activeSessionId).catch(console.error)
-    }
-  }, [signaling.isConnected, signaling.joinSession, activeSessionId])
-
-  useEffect(() => {
-    if (closingRemainingSeconds === null || closingRemainingSeconds <= 0) return
-    const interval = setInterval(() => {
-      setClosingRemainingSeconds((prev) => (prev > 0 ? prev - 1 : 0))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [closingRemainingSeconds])
-
-  // ── LiveKit Disconnected Event ──
-  useEffect(() => {
-    if (!lkRoom) return
-
-    const handleDisconnected = () => {
-      dispatch(leaveCall())
-      const navigateFn = getNavigate()
-      const locationObj = getLocation()
-      if (locationObj && locationObj.pathname.includes("/meet/")) {
-        navigateFn(locationObj.pathname, {
-          replace: true,
-          state: {
-            callEnded: true,
-            reason: closingRemainingSeconds !== null ? "expired" : "left",
-          },
-        })
-      }
-    }
-
-    lkRoom.on(RoomEvent.Disconnected, handleDisconnected)
-    return () => {
-      lkRoom.off(RoomEvent.Disconnected, handleDisconnected)
-    }
-  }, [lkRoom, dispatch, closingRemainingSeconds])
+  const { closingRemainingSeconds } = useRoomLifecycle({
+    lkRoom,
+    activeSessionId,
+    language,
+    t,
+  })
 
   // ── Context value ──
   const value = {
@@ -387,6 +317,7 @@ const GlobalCallContent = ({
     // Session
     id: callInfo?.roomId,
     sessionId: callInfo?.sessionId || localMetadata?.sessionId,
+    closingRemainingSeconds,
     navigate: getNavigate(),
     location: getLocation(),
     room: roomData,
@@ -477,26 +408,10 @@ const GlobalCallContent = ({
     <ContextProvider value={value}>
       <RoomAudioRenderer />
       {children}
-      <Modal
-        open={closingRemainingSeconds !== null && closingRemainingSeconds > 0}
-        onClose={() => {}} // User cannot dismiss a hard-stop warning
-        title={t?.rooms?.videoCall?.roomClosingTitle ?? "Room Ending Soon"}
-        showCloseButton={false}
-        className="max-w-md w-full"
-      >
-        <div className="flex flex-col items-center justify-center p-4 py-8 text-center">
-          <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
-            <Clock size={32} />
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            This session will end in {closingRemainingSeconds} seconds
-          </h3>
-          <p className="text-gray-500">
-            Please wrap up your conversation. The room will automatically close
-            when the timer reaches zero.
-          </p>
-        </div>
-      </Modal>
+      <RoomClosingWarningModal
+        remainingSeconds={closingRemainingSeconds}
+        t={t}
+      />
     </ContextProvider>
   )
 }
