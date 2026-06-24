@@ -8,7 +8,8 @@ export default {
     limit_used: "/ {{limit}} 已使用",
     quotaExceeded: "存储空间已满 — 请删除一些录音以释放空间",
     warningAlmostFull: "存储空间即将装满。如果超过限制，录制可能会自动停止。",
-    warningLimitReached: "由于超过存储空间限制，录制已自动停止。部分录制已被保存。",
+    warningLimitReached:
+      "由于超过存储空间限制，录制已自动停止。部分录制已被保存。",
   },
   errors: {
     noRoom: "没有活跃的房间 — 无法录制。",
@@ -24,18 +25,24 @@ export default {
     count_other: "{{count}} 个录音",
     fileUnavailable: "文件不可用 — 录音可能仍在处理中",
     error: "加载录音失败。",
-    retry: "重试"
+    retry: "重试",
+    noResults: "没有符合过滤条件的录音。",
+  },
+  filters: {
+    all: "全部",
+    local: "本地",
+    drive: "Google Drive",
   },
   status: {
     completed: "已完成",
     failed: "失败",
-    partialCompleted: "部分完成"
+    partialCompleted: "部分完成",
   },
   player: {
     title: "录音",
     videoNotAvailable: "视频文件不可用。",
     urlExpiry: "链接在 60 分钟后失效",
-    meetingIdFallback: "录音 #{{id}}"
+    meetingIdFallback: "录音 #{{id}}",
   },
   deleteModal: {
     title: "删除录音？",
@@ -43,7 +50,7 @@ export default {
     cannotUndo: "此操作无法撤销。",
     cancel: "取消",
     confirm: "删除",
-    deleting: "正在删除…"
+    deleting: "正在删除…",
   },
   actions: {
     play: "播放录音",
@@ -51,11 +58,13 @@ export default {
     download: "下载录音",
     downloadUnavailable: "文件不可用",
     delete: "删除录音",
+    savedToDrive: "已保存到 Drive",
     startSuccess: "录音已开始",
     stopSuccess: "录音已停止 — 正在上传处理…",
     deleteSuccess: "录音已删除",
     deleteFailed: "无法删除录音。",
     viewRecordings: "查看录音",
-    reconnected: "连接已恢复。录制继续进行。",
-  }
+    uploadingToDrive: "正在上传到 Google Drive...",
+    uploadToDrive: "上传到 Drive",
+  },
 }
