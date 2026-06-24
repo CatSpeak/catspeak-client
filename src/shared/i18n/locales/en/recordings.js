@@ -20,7 +20,13 @@ export default {
     count_other: "{{count}} recordings",
     fileUnavailable: "File unavailable — recording may still be processing",
     error: "Failed to load recordings.",
-    retry: "Retry"
+    retry: "Retry",
+    noResults: "No recordings match the selected filter."
+  },
+  filters: {
+    all: "All",
+    local: "Local",
+    drive: "Google Drive"
   },
   status: {
     completed: "completed",
@@ -46,10 +52,13 @@ export default {
     download: "Download recording",
     downloadUnavailable: "File not available",
     delete: "Delete recording",
+    savedToDrive: "Saved to Drive",
     startSuccess: "Recording started",
     stopSuccess: "Recording stopped — processing upload…",
     deleteSuccess: "Recording deleted",
     deleteFailed: "Failed to delete recording.",
-    viewRecordings: "View Recordings"
+    viewRecordings: "View Recordings",
+    uploadingToDrive: "Uploading to Google Drive...",
+    uploadToDrive: "Upload to Drive"
   }
 }

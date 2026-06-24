@@ -14,6 +14,7 @@ import DeleteRecordingModal from "../components/DeleteRecordingModal"
 import RecordingsEmptyState from "../components/RecordingsEmptyState"
 import RecordingsErrorState from "../components/RecordingsErrorState"
 import RecordingsListSkeleton from "../components/RecordingsListSkeleton"
+import { RECORDING_STATUS } from "../constants/recordingStatus"
 
 const RecordingsPage = () => {
   const { t } = useLanguage()
@@ -98,7 +99,7 @@ const RecordingsPage = () => {
         <RecordingsEmptyState t={t} />
       ) : (
         <div className="flex flex-col gap-1">
-          <p className="text-sm text-[#606060]">
+          <p className="text-sm text-[#606060] mb-2">
             {recordings.length === 1
               ? t?.recordings?.list?.count_one || "1 recording"
               : t?.recordings?.list?.count_other?.replace(
@@ -107,15 +108,17 @@ const RecordingsPage = () => {
                 ) || `${recordings.length} recordings`}
           </p>
 
-          {recordings.map((rec) => (
-            <RecordingCard
-              key={rec.recordingId}
-              recording={rec}
-              onPlay={handlePlay}
-              onDelete={handleDeleteClick}
-              t={t}
-            />
-          ))}
+          <div className="space-y-1">
+            {recordings.map((rec) => (
+              <RecordingCard
+                key={rec.recordingId}
+                recording={rec}
+                onPlay={handlePlay}
+                onDelete={handleDeleteClick}
+                t={t}
+              />
+            ))}
+          </div>
         </div>
       )}
 

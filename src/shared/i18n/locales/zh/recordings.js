@@ -20,7 +20,13 @@ export default {
     count_other: "{{count}} 个录音",
     fileUnavailable: "文件不可用 — 录音可能仍在处理中",
     error: "加载录音失败。",
-    retry: "重试"
+    retry: "重试",
+    noResults: "没有符合过滤条件的录音。"
+  },
+  filters: {
+    all: "全部",
+    local: "本地",
+    drive: "Google Drive"
   },
   status: {
     completed: "已完成",
@@ -46,10 +52,13 @@ export default {
     download: "下载录音",
     downloadUnavailable: "文件不可用",
     delete: "删除录音",
+    savedToDrive: "已保存到 Drive",
     startSuccess: "录音已开始",
     stopSuccess: "录音已停止 — 正在上传处理…",
     deleteSuccess: "录音已删除",
     deleteFailed: "无法删除录音。",
-    viewRecordings: "查看录音"
+    viewRecordings: "查看录音",
+    uploadingToDrive: "正在上传到 Google Drive...",
+    uploadToDrive: "上传到 Drive"
   }
 }

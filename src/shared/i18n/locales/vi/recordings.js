@@ -20,7 +20,13 @@ export default {
     count_other: "{{count}} bản ghi",
     fileUnavailable: "Không có file — bản ghi có thể đang được xử lý",
     error: "Không thể tải danh sách bản ghi.",
-    retry: "Thử lại"
+    retry: "Thử lại",
+    noResults: "Không có bản ghi nào phù hợp với bộ lọc."
+  },
+  filters: {
+    all: "Tất cả",
+    local: "Cục bộ",
+    drive: "Google Drive"
   },
   status: {
     completed: "hoàn thành",
@@ -46,10 +52,13 @@ export default {
     download: "Tải xuống bản ghi",
     downloadUnavailable: "Không có file",
     delete: "Xóa bản ghi",
+    savedToDrive: "Đã lưu trên Drive",
     startSuccess: "Đã bắt đầu ghi hình",
     stopSuccess: "Đã dừng ghi hình — đang tải lên…",
     deleteSuccess: "Đã xóa bản ghi",
     deleteFailed: "Không thể xóa bản ghi.",
-    viewRecordings: "Xem bản ghi"
+    viewRecordings: "Xem bản ghi",
+    uploadingToDrive: "Đang tải lên Google Drive...",
+    uploadToDrive: "Tải lên Drive"
   }
 }
