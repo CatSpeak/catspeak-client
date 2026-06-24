@@ -153,7 +153,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                           "Backgrounds and effects"}
                       </button>
 
-                      {/* Hiding PiP button in menu for now
                       {"documentPictureInPicture" in window && (
                         <button
                           onClick={() => {
@@ -166,7 +165,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                           {t?.rooms?.videoCall?.pictureInPicture || "Picture-in-Picture"}
                         </button>
                       )}
-                      */}
 
                       <button
                         onClick={handleCopyLink}

@@ -22,9 +22,9 @@ const NormalVideoLayout = ({
   const getItemClass = () => {
     if (totalItems === 1) return "h-full w-full"
 
-    // 2 items: 50% width, aspect-video to prevent them from becoming too tall and skinny
+    // 2 items: 50% width, full height on desktop to eliminate empty space
     if (totalItems === 2)
-      return "w-full min-[426px]:w-[calc(50%-2px)] aspect-video flex-shrink-0"
+      return "w-full aspect-video min-[426px]:aspect-auto min-[426px]:w-[calc(50%-2px)] min-[426px]:h-full flex-shrink-0"
 
     // 3, 4 items: 50% width, 50% height to perfectly fill the screen without scrolling
     if (totalItems === 3 || totalItems === 4)

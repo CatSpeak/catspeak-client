@@ -93,15 +93,18 @@ const VideoTile = ({ participant, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl border-solid transition-all duration-200 ease-in-out [container-type:inline-size] ${
-        isVideoVisible ? "border-0 bg-neutral-900" : "border-2"
-      } ${
-        isSpeaking
-          ? "border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
-          : "border-transparent shadow-sm"
+      className={`group relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl transition-all duration-200 ease-in-out [container-type:inline-size] ${
+        isVideoVisible ? "bg-neutral-900" : ""
       } ${onClick ? "cursor-pointer" : ""}`}
-      style={isVideoVisible ? undefined : { background: theme.bg }}
     >
+      {/* Speaking Indicator Overlay */}
+      <div
+        className={`pointer-events-none absolute inset-0 z-50 rounded-2xl transition-all duration-200 ${
+          isSpeaking
+            ? "border-2 border-solid border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
+            : "border-2 border-solid border-transparent shadow-sm"
+        }`}
+      />
       {/* Video element for camera track */}
       <video
         autoPlay
@@ -114,42 +117,45 @@ const VideoTile = ({ participant, onClick }) => {
       />
 
       {/* Avatar fallback when no video */}
-      {!isVideoVisible && (
-        <div className="flex h-full w-full items-center justify-center">
-          <Avatar
-            size={64}
-            name={displayName || "?"}
-            src={avatarUrl}
-            speaking={false}
-            className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${theme.avatarClass}`}
-          />
+      {!webcamOn && (
+        <div
+          className={`flex h-full w-full items-center justify-center ${avatarUrl ? "relative overflow-hidden" : ""}`}
+          style={{ background: theme.bg }}
+        >
+          {avatarUrl && (
+            <>
+              <div className="absolute inset-0 z-0 bg-neutral-900" />
+              <img
+                src={avatarUrl}
+                alt=""
+                className="absolute inset-0 z-0 h-full w-full object-cover blur-[40px] scale-125 opacity-60"
+                onError={(e) => {
+                  e.target.style.display = "none"
+                  e.target.previousSibling.style.display = "none"
+                }}
+              />
+            </>
+          )}
+          <div
+            className={`${avatarUrl ? "relative z-10" : ""} flex items-center justify-center`}
+          >
+            <Avatar
+              size={64}
+              name={displayName || "?"}
+              src={avatarUrl}
+              speaking={false}
+              className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${
+                avatarUrl ? "shadow-xl" : ""
+              } ${theme.avatarClass}`}
+            />
+          </div>
         </div>
       )}
 
-      {/* Status icons and Name */}
-      {isHandRaised ? (
-        <div className="absolute bottom-1 left-1 flex max-w-[90%] items-center gap-2 rounded-md bg-yellow-500/90 px-2 py-1 text-white shadow-md backdrop-blur-sm">
-          <motion.div
-            animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
-            transition={{
-              repeat: Infinity,
-              duration: 1.5,
-              ease: "easeInOut",
-              repeatDelay: 1,
-            }}
-            style={{ originX: 0.7, originY: 0.7 }}
-            className="flex flex-shrink-0 items-center justify-center"
-          >
-            <Hand size={16} className="white" />
-          </motion.div>
-          <div className="min-w-0 truncate font-medium text-sm text-white">
-            {displayName}{" "}
-            {isLocal &&
-              (t.rooms?.videoCall?.participantList?.youSuffix || "(You)")}
-          </div>
-        </div>
-      ) : (
-        <div className="absolute bottom-1 left-1 flex max-w-[90%] items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-white backdrop-blur-sm">
+      {/* Bottom Controls Overlay */}
+      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none">
+        {/* Status icons and Name */}
+        <div className="flex min-w-0 items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-white backdrop-blur-sm pointer-events-auto">
           <div className="flex flex-shrink-0 items-center gap-1">
             {screenShareOn && <MonitorUp size={16} />}
             {!micOn && <MicOff size={16} />}
@@ -161,7 +167,26 @@ const VideoTile = ({ participant, onClick }) => {
               (t.rooms?.videoCall?.participantList?.youSuffix || "(You)")}
           </div>
         </div>
-      )}
+
+        {/* Raised Hand Icon */}
+        {isHandRaised && (
+          <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-full bg-yellow-500/90 text-white shadow-md backdrop-blur-sm pointer-events-auto">
+            <motion.div
+              animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut",
+                repeatDelay: 1,
+              }}
+              style={{ originX: 0.7, originY: 0.7 }}
+              className="flex flex-shrink-0 items-center justify-center"
+            >
+              <Hand size={16} />
+            </motion.div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

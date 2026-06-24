@@ -69,10 +69,12 @@ const DocumentPiPWindow = ({ children }) => {
           document.documentElement.className
 
         // Listen for user closing the OS window
-        newPipWindow.addEventListener("pagehide", () => {
+        const handlePageHide = () => {
+          if (!isMounted) return
           // If the user manually closes the window from OS (X button), return them to call
           returnToCall()
-        })
+        }
+        newPipWindow.addEventListener("pagehide", handlePageHide)
 
         activePipWindow = newPipWindow
         setPipWindow(newPipWindow)

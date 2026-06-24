@@ -37,9 +37,9 @@ const SpotlightLayout = ({
   }
 
   return (
-    <div className="flex h-full w-full flex-col md:flex-row overflow-hidden">
+    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-6">
       {/* Main: spotlighted tile */}
-      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0 pt-5 px-5 pb-1 md:py-5 md:pl-5 md:pr-1">
+      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0">
         {spotlightItem.type === "screen" ? (
           <div className="h-full w-full">
             <ScreenShareTile
@@ -65,13 +65,12 @@ const SpotlightLayout = ({
 
       {/* Sidebar: all other tiles */}
       {hasSidebarItems && (
-        <div className="flex flex-1 min-h-0 min-w-0 pt-0 pb-5 px-5 md:py-5 md:px-0">
+        <div className="flex flex-1 min-h-0 min-w-0">
           <div
             className={`
               flex flex-1 gap-1 min-h-0 min-w-0
               flex-row overflow-x-auto
-              md:flex-col md:overflow-y-auto md:overflow-x-hidden
-              md:pr-5
+              md:flex-col md:overflow-y-auto md:overflow-x-hidden 
               ${scrollbarClasses}
             `}
           >
@@ -96,7 +95,9 @@ const SpotlightLayout = ({
               <div key={participant.identity} className={getSidebarItemClass()}>
                 <VideoTile
                   participant={participant}
-                  onClick={() => handleTileClick({ type: "video", participant })}
+                  onClick={() =>
+                    handleTileClick({ type: "video", participant })
+                  }
                 />
               </div>
             ))}
