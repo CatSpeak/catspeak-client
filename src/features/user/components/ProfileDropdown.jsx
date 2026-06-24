@@ -32,7 +32,9 @@ const ProfileDropdown = () => {
   const navigate = useNavigate()
   const { user: authUser, isAuthenticated } = useAuth()
   const [logoutApi] = useLogoutMutation()
-  const { data: userData, isLoading } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
+  const { data: userData, isLoading } = useGetProfileQuery(undefined, {
+    skip: !isAuthenticated,
+  })
   const [isOpen, setIsOpen] = useState(false)
   const [showLogoutWarning, setShowLogoutWarning] = useState(false)
   const menuRef = useRef(null)
@@ -41,8 +43,8 @@ const ProfileDropdown = () => {
 
   const user = userData?.data ?? authUser ?? {}
 
-  console.log(user)
-  console.log(authUser)
+  // console.log(user)
+  // console.log(authUser)
 
   const handleToggleMenu = () => {
     setIsOpen((prev) => !prev)
