@@ -16,6 +16,7 @@ import RoomFullModal from "./RoomFullModal"
 import meetingFallbackImage from "@/shared/assets/images/rooms/meeting.jpeg"
 import TQThumbnail from "@/shared/assets/images/rooms/TQ - Thumbnail.png"
 import { getTopicIcon } from "../utils/getTopicIcon"
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 
 const RoomCard = ({ room }) => {
   const [searchParams] = useSearchParams()
@@ -79,16 +80,21 @@ const RoomCard = ({ room }) => {
 
   return (
     <>
-      <motion.div
-        onClick={handleRoomClick}
-        style={{
-          fontFamily: "var(--font-primary)",
-          WebkitFontSmoothing: "antialiased",
-        }}
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className="relative flex p-1 h-full w-full flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 cursor-pointer shadow-md hover:shadow-md transition-shadow duration-300"
+      <FluentAnimation
+        animationKey={room.roomId}
+        direction="up"
+        distance={30}
+        duration={0.4}
+        className="h-full w-full"
       >
+        <div
+          onClick={handleRoomClick}
+          style={{
+            fontFamily: "var(--font-primary)",
+            WebkitFontSmoothing: "antialiased",
+          }}
+          className="relative flex p-1 h-full w-full flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 cursor-pointer shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+        >
         {/* Cover Image Section */}
         <div className="relative aspect-[16/10] w-full rounded-2xl shrink-0 overflow-hidden">
           <img
@@ -158,7 +164,8 @@ const RoomCard = ({ room }) => {
             </div>
           </div>
         </div>
-      </motion.div>
+        </div>
+      </FluentAnimation>
 
       <InDevelopmentModal
         open={showDevModal}

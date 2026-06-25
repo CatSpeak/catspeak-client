@@ -98,13 +98,10 @@ const CategoryRoomSection = ({
           className="group w-fit flex h-10 items-center gap-2 rounded-md hover:bg-[#E5E5E5] pr-6 border-none"
         >
           <div className="flex items-center gap-2 transition-transform duration-300 group-hover:translate-x-4">
-            <h6
-              className="text-xl font-bold"
-              style={{ color: colors.headingColor }}
-            >
+            <h6 className="text-xl font-bold text-cath-red-700">
               {title}
             </h6>
-            <ChevronRight color={colors.primaryRed} />
+            <ChevronRight className="text-cath-red-700" strokeWidth={3} size={20} />
           </div>
         </button>
 
