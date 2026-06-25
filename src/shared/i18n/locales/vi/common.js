@@ -16,7 +16,7 @@ export default {
   nav: {
     home: "Trang chủ",
     rooms: "Phòng",
-    community: "Cộng đồng",
+    community: "Trang chủ",
     catSpeak: "Cat Speak",
     catSpeakNews: "Bản tin Cat Speak",
     worldNews: "Bản tin thế giới",

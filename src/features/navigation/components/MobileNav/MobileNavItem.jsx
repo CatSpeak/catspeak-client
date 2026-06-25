@@ -1,39 +1,22 @@
 import React from "react"
-import { NavLink, useParams } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useActiveLink } from "../../hooks/useActiveLink"
+import { NavLink } from "react-router-dom"
 
-const MobileNavItem = ({ navKey, onClose }) => {
-  const { t } = useLanguage()
-  const { lang } = useParams()
-  const isActive = useActiveLink(navKey)
-
-  if (navKey === "cart" || navKey === "connect") return null;
-
-  const currentLang = lang || localStorage.getItem("communityLanguage") || "en"
-
-  let href
-  if (navKey === "catSpeak") {
-    href = `/${currentLang}/cat-speak/news`
-  } else if (navKey === "cart") {
-    href = "/cart"
-  } else if (navKey === "connect") {
-    href = "/connect"
-  } else {
-    href = "/"
-  }
+const MobileNavItem = ({ to, icon: Icon, label, setIsMobileOpen }) => {
+  const getLinkClasses = ({ isActive }) =>
+    `relative flex items-center h-12 rounded-xl transition-colors group px-4 gap-3 ${
+      isActive
+        ? "bg-cath-red-700/10 text-cath-red-700 font-medium"
+        : "text-gray-800 hover:bg-primary2 hover:text-gray-900"
+    }`
 
   return (
-    <NavLink
-      to={href}
-      onClick={onClose}
-      className={`flex items-center px-3 h-10 text-sm rounded-[5px] transition-colors ${
-        isActive
-          ? "text-cath-red-700 bg-[#F2F2F2] hover:bg-[#E6E6E6]"
-          : "hover:bg-[#F2F2F2]"
-      }`}
+    <NavLink 
+      to={to} 
+      className={getLinkClasses} 
+      onClick={() => setIsMobileOpen(false)}
     >
-      {t.nav[navKey]}
+      <Icon size={24} className="shrink-0" />
+      <span className="text-[16px]">{label}</span>
     </NavLink>
   )
 }

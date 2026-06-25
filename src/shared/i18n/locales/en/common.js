@@ -16,7 +16,7 @@ export default {
   nav: {
     home: "Home",
     rooms: "Rooms",
-    community: "Community",
+    community: "Home",
     catSpeak: "Cat Speak",
     catSpeakNews: "Cat Speak News",
     worldNews: "World News",

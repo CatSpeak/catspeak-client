@@ -5,19 +5,17 @@ import {
   useSearchParams,
   ScrollRestoration,
 } from "react-router-dom"
-import HeaderBar from "../../shared/components/Header/HeaderBar"
-import CommunityHeader from "../../shared/components/Header/CommunityHeader"
+import MainHeader from "../../shared/components/Header/MainHeader"
 import Footer from "../../shared/components/Footer"
 import Auth from "@/features/auth/components"
 import AuthModalContext from "@/shared/context/AuthModalContext"
-import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-import SidebarV2 from "./SidebarV2"
+import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
 import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
+import { useSidebar } from "@/shared/context/SidebarContext"
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true)
+  const { isMobileSidebarOpen, setIsMobileSidebarOpen, isSidebarExpanded, setIsSidebarExpanded } = useSidebar()
 
   const [authModal, setAuthModal] = useState({
     isOpen: false,
@@ -112,7 +110,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
 
       <div className="relative flex min-h-screen text-left overflow-x-clip">
         {!isLandingPage && (
-          <SidebarV2 
+          <MainSidebar 
             isMobileOpen={isMobileSidebarOpen} 
             setIsMobileOpen={setIsMobileSidebarOpen} 
             isExpanded={isSidebarExpanded} 
@@ -126,11 +124,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
           }`}
         >
           {showHeader && (
-            isLandingPage ? (
-              <HeaderBar onGetStarted={() => openAuthModal("login")} onMenuClick={() => setIsMobileSidebarOpen(true)} />
-            ) : (
-              <CommunityHeader onGetStarted={() => openAuthModal("login")} onMenuClick={() => setIsMobileSidebarOpen(true)} />
-            )
+            <MainHeader onGetStarted={() => openAuthModal("login")} onMenuClick={() => setIsMobileSidebarOpen(true)} />
           )}
 
           <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">

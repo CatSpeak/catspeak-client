@@ -16,7 +16,7 @@ export default {
   nav: {
     home: "首页",
     rooms: "房间",
-    community: "社区",
+    community: "首页",
     catSpeak: "猫语",
     catSpeakNews: "猫语新闻",
     worldNews: "世界新闻",

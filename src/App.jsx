@@ -11,6 +11,7 @@ import NavigationProgress from "@/shared/components/NavigationProgress"
 import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
 import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
+import { SidebarProvider } from "@/shared/context/SidebarContext"
 
 function App() {
   return (
@@ -18,14 +19,16 @@ function App() {
       <GlobalVideoCallProvider>
         <NavigationProgress />
         <ServerDownScreen />
-        <ConversationSignalRProvider>
-          <GlobalPresenceProvider>
-            <GlobalSignalRHandler />
-            <Toaster position="top-center" limit={1} />
-            <AppRouter />
-            <PiPWidget />
-          </GlobalPresenceProvider>
-        </ConversationSignalRProvider>
+        <SidebarProvider>
+          <ConversationSignalRProvider>
+            <GlobalPresenceProvider>
+              <GlobalSignalRHandler />
+              <Toaster position="top-center" limit={1} />
+              <AppRouter />
+              <PiPWidget />
+            </GlobalPresenceProvider>
+          </ConversationSignalRProvider>
+        </SidebarProvider>
       </GlobalVideoCallProvider>
     </Provider>
   )
