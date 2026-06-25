@@ -45,7 +45,17 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             "react-vendor": ["react", "react-dom", "react-router-dom"],
             "redux-vendor": ["@reduxjs/toolkit", "react-redux"],
+            "mediapipe-face": ["@mediapipe/face_mesh"],
           },
+        },
+        onwarn(warning, warn) {
+          // @mediapipe/face_mesh is dynamically imported and large; suppress the
+          // "Can't resolve dynamic import" advisory (it resolves at runtime).
+          if (
+            warning.code === "UNRESOLVED_IMPORT" &&
+            warning.exporter?.includes("face_mesh")
+          ) return
+          warn(warning)
         },
       },
       chunkSizeWarningLimit: 1000,
@@ -66,8 +76,8 @@ export default defineConfig(({ mode }) => {
         "@context": path.resolve(__dirname, "./src/shared/context"),
       },
     },
-    esbuild: {
-      drop: mode === "production" ? ["console", "debugger"] : [],
-    },
+    // esbuild: {
+    //   drop: mode === "production" ? ["console", "debugger"] : [],
+    // },
   }
 })

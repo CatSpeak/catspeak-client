@@ -17,6 +17,7 @@ import { FaGoogleDrive } from "react-icons/fa"
 import { useGoogleLogin } from "@react-oauth/google"
 import { useUploadRecordingToDriveMutation } from "@/store/api/recordingsApi"
 import toast from "react-hot-toast"
+import { RECORDING_STATUS } from "../constants/recordingStatus"
 
 /**
  * RecordingCard — displays a single recording with metadata and action buttons.
@@ -32,9 +33,11 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
     createdAt,
   } = recording
 
-  const isCompleted = status === "completed"
-  const isFailed = status === "failed"
-  const hasFile = isCompleted && fileUrl
+  const isCompleted =
+    status === RECORDING_STATUS.COMPLETED ||
+    status === RECORDING_STATUS.PARTIAL_COMPLETED
+  const hasFileSizeBytes = fileSizeBytes > 0
+  const hasFile = isCompleted && fileUrl && hasFileSizeBytes
 
   const [uploadToDrive, { isLoading: isUploading }] =
     useUploadRecordingToDriveMutation()
@@ -159,13 +162,15 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
     <div className="group flex flex-col gap-3 rounded-lg border border-[#e5e5e5] bg-white min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Left: metadata */}
       <div className="flex flex-col">
-        {/* Top row: meeting ID */}
-        <span className="text-cath-red-700" title={meetingId}>
-          {meetingId}
-        </span>
+        {/* Top row: meeting ID & potential status badge */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[#990011] font-medium" title={meetingId}>
+            {meetingId}
+          </span>
+        </div>
 
         {/* Meta row: date, duration, size */}
-        <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap">
+        <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap mt-1">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
             {formatDate(createdAt)}
@@ -174,84 +179,100 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
             <Clock className="h-3.5 w-3.5" />
             {formatDuration(durationSeconds)}
           </span>
-          <span className="flex items-center gap-1">
-            <HardDrive className="h-3.5 w-3.5" />
-            {formatFileSize(fileSizeBytes)}
-          </span>
+          {hasFileSizeBytes && (
+            <span className="flex items-center gap-1">
+              <HardDrive className="h-3.5 w-3.5" />
+              {formatFileSize(fileSizeBytes)}
+            </span>
+          )}
         </div>
 
         {/* File unavailable warning */}
-        {isCompleted && !fileUrl && (
-          <div className="flex items-center gap-1.5 text-xs text-amber-600">
-            <AlertCircle className="h-3.5 w-3.5" />
-            <span>
-              {t?.recordings?.list?.fileUnavailable ||
-                "File unavailable — recording may still be processing"}
-            </span>
-          </div>
-        )}
+        {isCompleted &&
+          !fileUrl &&
+          status !== RECORDING_STATUS.UPLOADED_TO_DRIVE && (
+            <div className="flex items-center gap-1.5 text-xs text-amber-600">
+              <AlertCircle className="h-3.5 w-3.5" />
+              <span>
+                {t?.recordings?.list?.fileUnavailable ||
+                  "File unavailable — recording may still be processing"}
+              </span>
+            </div>
+          )}
       </div>
 
       {/* Right: action buttons */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {/* Play */}
-        <button
-          onClick={() => hasFile && onPlay?.(recording)}
-          disabled={!hasFile}
-          title={
-            hasFile
-              ? t?.recordings?.actions?.play || "Play recording"
-              : t?.recordings?.actions?.playUnavailable || "File not available"
-          }
-          className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-            hasFile
-              ? "bg-[#F2F2F2] hover:bg-[#D9D9D9]"
-              : "bg-gray-50 text-gray-300 cursor-not-allowed"
-          }`}
-        >
-          <Play className="h-5 w-5" />
-        </button>
-
-        {/* Download */}
-        <button
-          onClick={handleDownload}
-          disabled={!hasFile}
-          title={
-            hasFile
-              ? t?.recordings?.actions?.download || "Download recording"
-              : t?.recordings?.actions?.downloadUnavailable ||
-                "File not available"
-          }
-          className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-            hasFile
-              ? "bg-[#F2F2F2] hover:bg-[#D9D9D9]"
-              : "bg-gray-50 text-gray-300 cursor-not-allowed"
-          }`}
-        >
-          <Download className="h-5 w-5" />
-        </button>
-
-        {/* Upload to Google Drive */}
-        <button
-          onClick={() => loginWithGoogle()}
-          disabled={!hasFile || isUploading}
-          title={
-            hasFile
-              ? t?.recordings?.actions?.uploadToDrive || "Tải lên Google Drive"
-              : t?.recordings?.actions?.uploadUnavailable || "File không có sẵn"
-          }
-          className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-            hasFile
-              ? "bg-[#F2F2F2] hover:bg-[#D9D9D9] text-gray-700"
-              : "bg-gray-50 text-gray-300 cursor-not-allowed"
-          }`}
-        >
-          {isUploading ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          ) : (
+        {status === RECORDING_STATUS.UPLOADED_TO_DRIVE ? (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#F2F2F2] text-sm">
             <FaGoogleDrive className="h-5 w-5" />
-          )}
-        </button>
+            {t?.recordings?.actions?.savedToDrive || "Saved to Drive"}
+          </div>
+        ) : (
+          <>
+            {/* Play */}
+            <button
+              onClick={() => hasFile && onPlay?.(recording)}
+              disabled={!hasFile}
+              title={
+                hasFile
+                  ? t?.recordings?.actions?.play || "Play recording"
+                  : t?.recordings?.actions?.playUnavailable ||
+                    "File not available"
+              }
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                hasFile
+                  ? "bg-[#F2F2F2] hover:bg-[#D9D9D9]"
+                  : "bg-gray-50 text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              <Play className="h-5 w-5" />
+            </button>
+
+            {/* Download */}
+            <button
+              onClick={handleDownload}
+              disabled={!hasFile}
+              title={
+                hasFile
+                  ? t?.recordings?.actions?.download || "Download recording"
+                  : t?.recordings?.actions?.downloadUnavailable ||
+                    "File not available"
+              }
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                hasFile
+                  ? "bg-[#F2F2F2] hover:bg-[#D9D9D9]"
+                  : "bg-gray-50 text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              <Download className="h-5 w-5" />
+            </button>
+
+            {/* Upload to Google Drive */}
+            <button
+              onClick={() => loginWithGoogle()}
+              disabled={!hasFile || isUploading}
+              title={
+                hasFile
+                  ? t?.recordings?.actions?.uploadToDrive ||
+                    "Tải lên Google Drive"
+                  : t?.recordings?.actions?.uploadUnavailable ||
+                    "File không có sẵn"
+              }
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                hasFile
+                  ? "bg-[#F2F2F2] hover:bg-[#D9D9D9] text-gray-700"
+                  : "bg-gray-50 text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              {isUploading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              ) : (
+                <FaGoogleDrive className="h-5 w-5" />
+              )}
+            </button>
+          </>
+        )}
 
         {/* Delete */}
         <button

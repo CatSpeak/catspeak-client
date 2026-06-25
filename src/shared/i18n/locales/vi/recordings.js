@@ -6,12 +6,22 @@ export default {
     used: "{{used}} / {{limit}} MB",
     percentUsed: "Đã dùng {{percent}}%",
     limit_used: "trong số {{limit}} đã dùng",
-    quotaExceeded: "Đã hết dung lượng — xoá bớt bản ghi để giải phóng không gian",
+    quotaExceeded:
+      "Đã hết dung lượng — xoá bớt bản ghi để giải phóng không gian",
+    warningAlmostFull:
+      "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
+    warningLimitReached:
+      "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
   },
   errors: {
     noRoom: "Không có phòng đang hoạt động — không thể ghi hình.",
-    noEgress: "Đã bắt đầu ghi hình nhưng không nhận được ID nguồn ra — việc dừng có thể không hoạt động.",
-    noMedia: "Vui lòng bật camera, micrô hoặc chia sẻ màn hình trước khi ghi hình.",
+    noEgress:
+      "Đã bắt đầu ghi hình nhưng không nhận được ID nguồn ra — việc dừng có thể không hoạt động.",
+    noMedia:
+      "Vui lòng bật camera, micrô hoặc chia sẻ màn hình trước khi ghi hình.",
+    interrupted:
+      "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
+    disconnected: "Kết nối bị gián đoạn. Recording tạm dừng...",
   },
   list: {
     emptyTitle: "Chưa có bản ghi nào",
@@ -20,17 +30,24 @@ export default {
     count_other: "{{count}} bản ghi",
     fileUnavailable: "Không có file — bản ghi có thể đang được xử lý",
     error: "Không thể tải danh sách bản ghi.",
-    retry: "Thử lại"
+    retry: "Thử lại",
+    noResults: "Không có bản ghi nào phù hợp với bộ lọc.",
+  },
+  filters: {
+    all: "Tất cả",
+    local: "Cục bộ",
+    drive: "Google Drive",
   },
   status: {
     completed: "hoàn thành",
-    failed: "thất bại"
+    failed: "thất bại",
+    partialCompleted: "lưu một phần",
   },
   player: {
     title: "Bản ghi hình",
     videoNotAvailable: "Không có video.",
     urlExpiry: "Liên kết hết hạn sau 60 phút",
-    meetingIdFallback: "Bản ghi #{{id}}"
+    meetingIdFallback: "Bản ghi #{{id}}",
   },
   deleteModal: {
     title: "Xóa bản ghi?",
@@ -38,7 +55,7 @@ export default {
     cannotUndo: "Hành động này không thể hoàn tác.",
     cancel: "Hủy",
     confirm: "Xóa",
-    deleting: "Đang xóa…"
+    deleting: "Đang xóa…",
   },
   actions: {
     play: "Phát bản ghi",
@@ -46,10 +63,13 @@ export default {
     download: "Tải xuống bản ghi",
     downloadUnavailable: "Không có file",
     delete: "Xóa bản ghi",
+    savedToDrive: "Đã lưu trên Drive",
     startSuccess: "Đã bắt đầu ghi hình",
     stopSuccess: "Đã dừng ghi hình — đang tải lên…",
     deleteSuccess: "Đã xóa bản ghi",
     deleteFailed: "Không thể xóa bản ghi.",
-    viewRecordings: "Xem bản ghi"
-  }
+    viewRecordings: "Xem bản ghi",
+    uploadingToDrive: "Đang tải lên Google Drive...",
+    uploadToDrive: "Tải lên Drive",
+  },
 }

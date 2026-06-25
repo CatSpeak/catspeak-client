@@ -35,7 +35,7 @@ const ServerDownScreen = () => {
 
   // Start polling when server is down
   useEffect(() => {
-    if (!isServerDown) return
+    if (!isServerDown || isInCall) return
 
     // Immediately trigger a health check, then start polling
     const interval = setInterval(checkHealth, POLLING_INTERVAL_MS)
