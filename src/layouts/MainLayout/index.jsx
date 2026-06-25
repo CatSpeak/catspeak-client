@@ -6,14 +6,19 @@ import {
   ScrollRestoration,
 } from "react-router-dom"
 import HeaderBar from "../../shared/components/Header/HeaderBar"
+import CommunityHeader from "../../shared/components/Header/CommunityHeader"
 import Footer from "../../shared/components/Footer"
 import Auth from "@/features/auth/components"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-
+import SidebarV2 from "./SidebarV2"
+import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true)
+
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
@@ -92,18 +97,49 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         redirectAfterLogin: authModal.redirectAfterLogin,
       }}
     >
-      <div className="flex flex-col min-h-screen bg-white text-left overflow-x-clip">
-        {showHeader && (
-          <HeaderBar onGetStarted={() => openAuthModal("login")} />
+      {/* Background for Community Page - covers FULL viewport behind everything */}
+      {!isLandingPage && (
+        <div 
+          className="fixed inset-0 pointer-events-none z-0 mt-24"
+          style={{
+            backgroundImage: `url(${BackgroundV2})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      )}
+
+      <div className="relative flex min-h-screen text-left overflow-x-clip">
+        {!isLandingPage && (
+          <SidebarV2 
+            isMobileOpen={isMobileSidebarOpen} 
+            setIsMobileOpen={setIsMobileSidebarOpen} 
+            isExpanded={isSidebarExpanded} 
+            setIsExpanded={setIsSidebarExpanded} 
+          />
         )}
 
-        <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
-          <Outlet />
-        </main>
+        <div 
+          className={`flex flex-col flex-1 min-w-0 transition-all duration-300 relative z-10 ${
+            !isLandingPage ? (isSidebarExpanded ? 'lg:ml-[280px]' : 'lg:ml-[80px]') : ''
+          }`}
+        >
+          {showHeader && (
+            isLandingPage ? (
+              <HeaderBar onGetStarted={() => openAuthModal("login")} onMenuClick={() => setIsMobileSidebarOpen(true)} />
+            ) : (
+              <CommunityHeader onGetStarted={() => openAuthModal("login")} onMenuClick={() => setIsMobileSidebarOpen(true)} />
+            )
+          )}
 
-        {/* Footer full width (bên trong tự giới hạn 1200px) */}
-        {showFooter && isLandingPage && <Footer />}
+          <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
+            <Outlet />
+          </main>
 
+          {/* Footer full width */}
+          {showFooter && isLandingPage && <Footer />}
+        </div>
       </div>
 
       <Auth

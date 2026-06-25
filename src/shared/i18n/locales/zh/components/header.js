@@ -3,6 +3,7 @@ export default {
   settings: "设置",
   logout: "登出",
   soon: "即将推出",
+  searchPlaceholder: "搜索房间或主题",
   languages: {
     vi: "越南语 (国语)",
     viNom: "越南语 (喃字) - 即将推出",

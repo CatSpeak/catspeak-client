@@ -85,7 +85,11 @@ export default {
     teaching: "Teaching",
     group: "Group",
     class: "Class",
+    community: "Community",
+    teachers: "Teachers",
+    forum: "Forum",
   },
+  people: "people",
   badge: {
     live: "LIVE NOW",
   },
@@ -182,9 +186,9 @@ export default {
     reply: "Reply",
   },
   sessionActions: {
-    connect11: "1:1 Connect",
-    connect25: "2:5 Connect",
-    yourAI: "1:1 with AI",
+    connect11: "Connect 1:1",
+    connect25: "Connect 2:5",
+    yourAI: "With AI 1:1",
   },
   aiSettings: {
     title: "AI Session Settings",

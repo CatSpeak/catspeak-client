@@ -2,7 +2,7 @@ export default {
   welcome: {
     greeting: "你好 {{name}},",
     friend: "朋友",
-    title: "万圣节快乐",
+    title: "万圣节 快乐",
     description: {
       part1: "万圣节名义上是一个",
       highlight1: "基督教节日",
@@ -83,7 +83,11 @@ export default {
     teaching: "教学",
     group: "小组",
     class: "班级",
+    community: "社区",
+    teachers: "讲师",
+    forum: "论坛",
   },
+  people: "人",
   badge: {
     live: "直播中",
   },
@@ -154,8 +158,8 @@ export default {
     reply: "回复",
   },
   sessionActions: {
-    connect11: "1:1 连接",
-    connect25: "2:5 连接",
+    connect11: "连接 1:1",
+    connect25: "连接 2:5",
     yourAI: "1:1 AI 对话",
   },
   aiSettings: {

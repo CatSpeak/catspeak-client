@@ -3,6 +3,7 @@ export default {
   settings: "Cài đặt",
   logout: "Đăng xuất",
   soon: "Sắp ra mắt",
+  searchPlaceholder: "Tìm kiếm phòng hoặc chủ đề",
   languages: {
     vi: "Tiếng Việt",
     viNom: "Tiếng Việt (Nôm) - Sắp ra mắt",

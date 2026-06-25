@@ -64,7 +64,7 @@ const CommunicateTab = ({
   }, [t, categoryCounts])
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative px-6">
       <AnimatePresence mode="wait">
         <FadeAnimation
           key={isFilteredView ? "filtered" : "overview"}

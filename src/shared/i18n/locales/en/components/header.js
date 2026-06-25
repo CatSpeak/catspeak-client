@@ -3,6 +3,7 @@ export default {
   settings: "Settings",
   logout: "Log out",
   soon: "Soon",
+  searchPlaceholder: "Search rooms or topics",
   languages: {
     vi: "Vietnamese",
     viNom: "Vietnamese (Nom) - Coming soon",

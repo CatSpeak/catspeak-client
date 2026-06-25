@@ -10,6 +10,7 @@ export { default as RoomsMobileDrawer } from "./components/navigation/RoomsMobil
 export { default as SessionActionButtons } from "./components/SessionActionButtons"
 export { default as AllowConnectSwitch } from "./components/AllowConnectSwitch"
 export { default as RoomFilterSidebar } from "./components/navigation/RoomFilterSidebar"
+export { default as HeroBanner } from "./components/HeroBanner"
 export {
   WaitingScreen,
   ParticipantsPreview,
@@ -21,6 +22,7 @@ export { default as CommunicateTab } from "./components/tabs/CommunicateTab"
 export { default as TeachingTab } from "./components/tabs/TeachingTab"
 export { default as GroupTab } from "./components/tabs/GroupTab"
 export { default as ClassTab } from "./components/tabs/ClassTab"
+export { default as ForumTab } from "./components/tabs/ForumTab"
 
 // Hooks
 export { useRoomsPageLogic } from "./hooks/useRoomsPageLogic"

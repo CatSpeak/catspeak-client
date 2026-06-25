@@ -86,7 +86,11 @@ export default {
     teaching: "Giảng dạy",
     group: "Nhóm",
     class: "Lớp học",
+    community: "Cộng đồng",
+    teachers: "Giảng viên",
+    forum: "Diễn đàn",
   },
+  people: "người",
   badge: {
     live: "ĐANG DIỄN RA",
   },
