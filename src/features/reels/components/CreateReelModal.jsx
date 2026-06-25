@@ -374,10 +374,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
       return
     }
 
-    // Verify size limit (e.g. 50MB)
-    const maxSize = 50 * 1024 * 1024
+    // Verify size limit (e.g. 200MB)
+    const maxSize = 200 * 1024 * 1024
     if (file.size > maxSize) {
-      setValidationErrors((prev) => ({ ...prev, video: "Video file size exceeds 50MB limit." }))
+      setValidationErrors((prev) => ({ ...prev, video: "Video file size exceeds 200MB limit." }))
       return
     }
 
@@ -575,6 +575,17 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     setVideoDuration((currentDuration) =>
       Math.abs((currentDuration || 0) - duration) < 0.01 ? currentDuration : duration
     )
+
+    // Validate duration limit (60s)
+    if (duration > 60) {
+      setValidationErrors((prev) => ({ ...prev, video: "Reels duration cannot exceed 60 seconds." }))
+    } else {
+      setValidationErrors((prev) => {
+        const next = { ...prev }
+        delete next.video
+        return next
+      })
+    }
 
     if (metadataSourceRef.current === sourceKey) return
     metadataSourceRef.current = sourceKey
@@ -902,6 +913,8 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     const errors = {}
     if (!videoFile) {
       errors.video = "A video file is required."
+    } else if (videoDuration > 60) {
+      errors.video = "Reels duration cannot exceed 60 seconds."
     }
     if (!title.trim()) {
       errors.title = "A title is required."
@@ -1103,9 +1116,9 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
               <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 text-[10px] text-gray-400">
                 <span>MP4, WebM or MOV</span>
                 <span>•</span>
-                <span>5 minutes</span>
+                <span>Up to 60 seconds</span>
                 <span>•</span>
-                <span>Up to 150MB</span>
+                <span>Up to 200MB</span>
               </div>
             </div>
 
@@ -1654,7 +1667,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
           <PillButton
             type="submit"
             loading={isLoading}
-            loadingText="Posting..."
+            loadingText="Posting & processing video..."
             disabled={!videoFile || isLoading}
             className="h-10 px-6 font-semibold shadow-sm shadow-red-950/10"
             bgColor="#990011"
