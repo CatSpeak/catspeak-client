@@ -48,7 +48,7 @@ const HeroSection = ({ openAuthModal }) => {
             <img
               src={Screen}
               alt="CatSpeak Platform"
-              className="relative w-full max-w-lg lg:absolute lg:top-1/3 lg:-translate-y-1/2 lg:-right-40 lg:w-[900px] lg:max-w-none"
+              className="relative w-full max-w-xl lg:absolute lg:top-1/3 lg:-translate-y-1/2 lg:-right-40 lg:w-[900px] lg:max-w-none"
             />
           </div>
         </div>
@@ -57,7 +57,7 @@ const HeroSection = ({ openAuthModal }) => {
         src={Element4}
         alt=""
         aria-hidden="true"
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%]  lg:w-full lg:max-w-none pointer-events-none select-none object-contain"
+        className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[100%]  lg:w-full lg:max-w-none pointer-events-none select-none object-contain"
       />
     </div>
   );
