@@ -42,7 +42,7 @@ const LandingHeader = ({ onGetStarted }) => {
         {/* Right Section: Controls */}
         <div className="flex min-w-0 flex-1 items-center justify-end">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden lg:block">
+            <div className="lg:block">
               <LanguageSwitcher />
             </div>
 
