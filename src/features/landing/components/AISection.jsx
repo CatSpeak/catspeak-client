@@ -1,9 +1,23 @@
 import { useLanguage } from "@/shared/context/LanguageContext.jsx";
 import { Check } from "lucide-react";
 import { Map } from "../assets";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
+import { useNavigate } from "react-router-dom";
 
 const AISection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
+  const navigate = useNavigate();
+
+  const handleAction = () => {
+    if (isAuthenticated) {
+      navigate(`/${language}/community`);
+    } else {
+      openAuthModal("login");
+    }
+  };
 
   return (
     <section className="w-full py-16 px-6 bg-white">
@@ -43,7 +57,10 @@ const AISection = () => {
 
           {/* CTA Button */}
           <div className="text-right">
-            <button className="inline-flex ml-auto items-center px-8 py-3 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 shadow-sm hover:border-[#990011] hover:text-[#990011] hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <button
+              onClick={handleAction}
+              className="inline-flex ml-auto items-center px-8 py-3 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 shadow-sm hover:border-[#990011] hover:text-[#990011] hover:shadow-md hover:-translate-y-0.5 transition-all"
+            >
               {t.home?.aiSection?.learnMore}
             </button>
           </div>
