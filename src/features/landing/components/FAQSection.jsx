@@ -1,4 +1,9 @@
-import { Element2, Element3, Element5, Element6 } from "@/features/landing/assets/index.jsx";
+import {
+  Element2,
+  Element3,
+  Element5,
+  Element6,
+} from "@/features/landing/assets/index.jsx";
 import { useLanguage } from "@/shared/context/LanguageContext.jsx";
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
@@ -98,17 +103,29 @@ const FAQSection = () => {
                       </button>
 
                       <div
-                        className={`transition-all overflow-hidden ${isExpanded ? "block mt-4 mb-2" : "hidden"}`}
+                        className={`grid transition-all duration-500 ease-in-out ${
+                          isExpanded
+                            ? "grid-rows-[1fr] opacity-100 mt-4 mb-2"
+                            : "grid-rows-[0fr] opacity-0"
+                        }`}
                       >
-                        <div className="bg-[#990011] rounded-2xl rounded-tr-sm p-5 md:p-6 text-sm md:text-base leading-relaxed text-white text-left shadow-lg">
-                          {item.answer.split("\n").map((line, idx) => (
-                            <span key={idx}>
-                              {line}
-                              {idx < item.answer.split("\n").length - 1 && (
-                                <br />
-                              )}
-                            </span>
-                          ))}
+                        <div className="overflow-hidden">
+                          <div
+                            className={`bg-[#990011] rounded-2xl rounded-tr-sm p-5 md:p-6 text-sm md:text-base leading-relaxed text-white text-left shadow-lg transition-all duration-500 ${
+                              isExpanded
+                                ? "translate-y-0 scale-100"
+                                : "-translate-y-2 scale-[0.98]"
+                            }`}
+                          >
+                            {item.answer.split("\n").map((line, idx) => (
+                              <span key={idx}>
+                                {line}
+                                {idx < item.answer.split("\n").length - 1 && (
+                                  <br />
+                                )}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>

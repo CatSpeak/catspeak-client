@@ -41,15 +41,14 @@ const ResponseSection = () => {
   };
 
   return (
-    <section className="relative w-full   py-40 px-6 overflow-hidden">
+    <section className="relative w-full py-40 px-6 overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <img
-          src={Element5}
-          alt="Values Background"
-          className="w-full h-full object-cover sm:object-contain object-top opacity-90"
-        />
-      </div>
+      <img
+        src={Element5}
+        alt=""
+        aria-hidden="true"
+        className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[100vw] max-w-none "
+      />
       <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10 items-start px-6">
         {" "}
         {/* Left: Title + Navigation */}
