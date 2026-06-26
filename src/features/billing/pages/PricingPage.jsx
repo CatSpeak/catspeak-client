@@ -1,9 +1,9 @@
 import React, { useState } from "react"
-import { PLANS } from "../mock/data"
 import PlanCard from "../subscription/components/PlanCard"
 import CheckoutModal from "../subscription/components/CheckoutModal"
 import { useCheckoutMutation } from "@/store/api/paymentsApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useGetPlansQuery } from "@/store/api/plansApi"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -13,13 +13,17 @@ const PricingPage = () => {
   const { data: profileResponse, isLoading: isProfileLoading } =
     useGetUserProfileQuery(undefined, { skip: !isAuthenticated })
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation()
+  const { data: plansResponse = [], isLoading: isPlansLoading } =
+    useGetPlansQuery()
 
   const userTier = profileResponse?.data?.tier?.toLowerCase()
   const currentPlanId = userTier === "pro" ? "pro" : "free"
 
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState(null)
 
-  const handleUpgradeClick = () => {
+  const handleUpgradeClick = (plan) => {
+    setSelectedPlan(plan)
     setIsCheckoutModalOpen(true)
   }
 
@@ -39,39 +43,60 @@ const PricingPage = () => {
     }
   }
 
-  const isProcessing = isCheckoutLoading || isProfileLoading
+  const isProcessing = isCheckoutLoading || isProfileLoading || isPlansLoading
+
+  const formattedPlans = plansResponse.map((plan) => ({
+    id: plan.planId,
+    name: plan.planName,
+    price: plan.priceVnd,
+    interval: plan.billingCycle,
+    description: plan.description,
+    features: plan.subscriptionFeatures
+      ? plan.subscriptionFeatures.map((f) => f.featureName)
+      : [],
+    applicableRole: plan.applicableRole?.toLowerCase(),
+  }))
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-2">{t.billing.pricing.title}</h2>
-        <p className="text-[#7A7574]">
-          {t.billing.pricing.subtitle}
-        </p>
+        <p className="text-[#7A7574]">{t.billing.pricing.subtitle}</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
-        <PlanCard
-          plan={PLANS.free}
-          isActive={currentPlanId === "free"}
-          isProcessing={isProcessing}
-        />
-        <PlanCard
-          plan={PLANS.pro}
-          isActive={currentPlanId === "pro"}
-          actionLabel="Upgrade to Pro"
-          isProcessing={isProcessing}
-          onAction={handleUpgradeClick}
-        />
-      </div>
+      {isPlansLoading ? (
+        <div className="flex justify-center py-20">
+          <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-cath-red-700 rounded-full animate-spin"></div>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
+          {formattedPlans.map((plan) => {
+            const isActive = currentPlanId === plan.applicableRole
+            return (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                isActive={isActive}
+                actionLabel={`Upgrade to ${plan.name}`}
+                isProcessing={isProcessing}
+                onAction={
+                  plan.price > 0 ? () => handleUpgradeClick(plan) : undefined
+                }
+              />
+            )
+          })}
+        </div>
+      )}
 
-      <CheckoutModal
-        open={isCheckoutModalOpen}
-        onClose={() => setIsCheckoutModalOpen(false)}
-        plan={PLANS.pro}
-        onConfirm={handleUpgradeConfirm}
-        isProcessing={isCheckoutLoading}
-      />
+      {selectedPlan && (
+        <CheckoutModal
+          open={isCheckoutModalOpen}
+          onClose={() => setIsCheckoutModalOpen(false)}
+          plan={selectedPlan}
+          onConfirm={handleUpgradeConfirm}
+          isProcessing={isCheckoutLoading}
+        />
+      )}
     </div>
   )
 }
