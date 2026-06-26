@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Outlet,
   useLocation,
   useSearchParams,
   ScrollRestoration,
-} from "react-router-dom"
-import HeaderBar from "../../shared/components/Header/HeaderBar"
-import Footer from "../../shared/components/Footer"
-import Auth from "@/features/auth/components"
-import AuthModalContext from "@/shared/context/AuthModalContext"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
-
+} from "react-router-dom";
+import HeaderBar from "../../shared/components/Header/HeaderBar";
+import Footer from "../../shared/components/Footer";
+import Auth from "@/features/auth/components";
+import AuthModalContext from "@/shared/context/AuthModalContext";
+import { AnimatePresence } from "framer-motion";
+import { FluentAnimation } from "@/shared/components/ui/animations";
+import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader";
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
   const [authModal, setAuthModal] = useState({
@@ -19,11 +19,11 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     mode: "login",
     email: "",
     redirectAfterLogin: null,
-  })
+  });
 
-  const location = useLocation()
-  const [searchParams] = useSearchParams()
-  const isLandingPage = location.pathname === "/"
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isLandingPage = location.pathname === "/";
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
@@ -35,7 +35,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode: "reset-password",
         email: "",
         redirectAfterLogin: null,
-      })
+      });
     }
     // Alternatively, check for "mode" param in query string if backend link is like /?mode=reset
     else if (searchParams.get("mode") === "resetPassword") {
@@ -44,7 +44,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode: "reset-password",
         email: "",
         redirectAfterLogin: null,
-      })
+      });
     }
     // Check for login required redirect via router state
     else if (location.state?.requireLogin) {
@@ -53,9 +53,9 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode: "login",
         email: "",
         redirectAfterLogin: location.state.redirectTo || null,
-      })
+      });
     }
-  }, [location.pathname, searchParams, location.state])
+  }, [location.pathname, searchParams, location.state]);
 
   const openAuthModal = (mode = "login", secondArg = null) => {
     // When switching to verify-email, the second arg is the email address
@@ -65,16 +65,16 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode,
         email: secondArg || "",
         redirectAfterLogin: null,
-      })
+      });
     } else {
       setAuthModal({
         isOpen: true,
         mode,
         email: "",
         redirectAfterLogin: secondArg,
-      })
+      });
     }
-  }
+  };
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
@@ -82,7 +82,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
       isOpen: false,
       email: "",
       redirectAfterLogin: null,
-    }))
+    }));
 
   return (
     <AuthModalContext.Provider
@@ -93,9 +93,12 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
       }}
     >
       <div className="flex flex-col min-h-screen bg-white text-left overflow-x-clip">
-        {showHeader && (
-          <HeaderBar onGetStarted={() => openAuthModal("login")} />
-        )}
+        {showHeader &&
+          (isLandingPage ? (
+            <LandingHeader onGetStarted={() => openAuthModal("login")} />
+          ) : (
+            <HeaderBar onGetStarted={() => openAuthModal("login")} />
+          ))}
 
         <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
           <Outlet />
@@ -103,7 +106,6 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
 
         {/* Footer full width (bên trong tự giới hạn 1200px) */}
         {showFooter && isLandingPage && <Footer />}
-
       </div>
 
       <Auth
@@ -116,7 +118,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
 
       <ScrollRestoration />
     </AuthModalContext.Provider>
-  )
-}
+  );
+};
 
-export default MainLayout
+export default MainLayout;

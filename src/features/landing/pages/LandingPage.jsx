@@ -1,35 +1,41 @@
-import { useState } from "react"
-import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
-import HeroSection from "@/features/landing/components/HeroSection"
-import LanguageBar from "@/features/landing/components/LanguageBar"
-import ValuesSection from "@/features/landing/components/ValuesSection"
-import AISection from "@/features/landing/components/AISection"
-import FAQSection from "@/features/landing/components/FAQSection"
+import { useState } from "react";
+import {
+  LoginPopup,
+  RegisterPopup,
+  VerifyEmailOtpPopup,
+} from "@/features/auth";
+import HeroSection from "@/features/landing/components/HeroSection";
+import LanguageBar from "@/features/landing/components/LanguageBar";
+import ValuesSection from "@/features/landing/components/ValuesSection";
+import AISection from "@/features/landing/components/AISection";
+import FAQSection from "@/features/landing/components/FAQSection";
+import ResponseSection from "@/features/landing/components/ResponseSection";
+import PartnerSection from "@/features/landing/components/PartnerSection";
 
 const LandingPage = () => {
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
     email: "",
-  })
+  });
 
   const openAuthModal = (mode = "login", email = "") =>
     setAuthModal({
       isOpen: true,
       mode,
       email,
-    })
+    });
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
       ...prev,
       isOpen: false,
-    }))
+    }));
 
-  const switchAuthMode = (mode, email = "") => openAuthModal(mode, email)
+  const switchAuthMode = (mode, email = "") => openAuthModal(mode, email);
 
   const renderAuthPopup = () => {
-    if (!authModal.isOpen) return null
+    if (!authModal.isOpen) return null;
 
     if (authModal.mode === "register") {
       return (
@@ -39,7 +45,7 @@ const LandingPage = () => {
           onClose={closeAuthModal}
           onSwitchMode={switchAuthMode}
         />
-      )
+      );
     }
 
     if (authModal.mode === "verify-email") {
@@ -51,7 +57,7 @@ const LandingPage = () => {
           onClose={closeAuthModal}
           onSwitchMode={switchAuthMode}
         />
-      )
+      );
     }
 
     return (
@@ -61,8 +67,8 @@ const LandingPage = () => {
         onClose={closeAuthModal}
         onSwitchMode={switchAuthMode}
       />
-    )
-  }
+    );
+  };
 
   return (
     <div className="flex flex-col w-full max-w-screen-xl mx-auto">
@@ -71,7 +77,7 @@ const LandingPage = () => {
         <HeroSection openAuthModal={openAuthModal} />
 
         {/* Languages row that overlaps hero bottom - Absolute positioned outside */}
-        <LanguageBar />
+        {/* <LanguageBar /> */}
       </div>
 
       {/* Values Section - Hero1 */}
@@ -80,13 +86,19 @@ const LandingPage = () => {
       {/* AI Technology Section */}
       <AISection />
 
+      {/* Response / Testimonials Section */}
+      <ResponseSection />
+
+      {/* Partners Section */}
+      <PartnerSection />
+
       {/* FAQ Section */}
       <FAQSection />
 
       {/* Auth Modal */}
       {renderAuthPopup()}
     </div>
-  )
-}
+  );
+};
 
-export default LandingPage
+export default LandingPage;
