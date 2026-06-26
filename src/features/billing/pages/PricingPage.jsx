@@ -45,17 +45,19 @@ const PricingPage = () => {
 
   const isProcessing = isCheckoutLoading || isProfileLoading || isPlansLoading
 
-  const formattedPlans = plansResponse.map((plan) => ({
-    id: plan.planId,
-    name: plan.planName,
-    price: plan.priceVnd,
-    interval: plan.billingCycle,
-    description: plan.description,
-    features: plan.subscriptionFeatures
-      ? plan.subscriptionFeatures.map((f) => f.featureName)
-      : [],
-    applicableRole: plan.applicableRole?.toLowerCase(),
-  }))
+  const formattedPlans = plansResponse
+    .filter((plan) => plan.packageStatus === "Published")
+    .map((plan) => ({
+      id: plan.planId,
+      name: plan.planName,
+      price: plan.priceVnd,
+      interval: plan.billingCycle,
+      description: plan.description,
+      features: plan.subscriptionFeatures
+        ? plan.subscriptionFeatures.map((f) => f.featureName)
+        : [],
+      applicableRole: plan.applicableRole?.toLowerCase(),
+    }))
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
