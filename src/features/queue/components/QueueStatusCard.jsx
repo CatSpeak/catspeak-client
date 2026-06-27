@@ -46,16 +46,16 @@ const QueueStatusCard = ({
 
       <div className="flex flex-col items-center pb-8">
         {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-[60px] mb-6">
-          <div className="p-4 rounded-xl bg-[#F5F5F5] flex flex-col items-center w-[200px] h-auto shadow-faq-card">
-            <span className="text-xl font-bold text-black mb-2">
+        <div className="grid grid-cols-2 sm:gap-[60px] gap-6 mb-6">
+          <div className="p-4 rounded-xl bg-[#F5F5F5] flex flex-col items-center sm:w-[200px] w-auto h-auto shadow-faq-card">
+            <span className="sm:text-xl text-lg font-bold text-black mb-2">
               {t.rooms.queue.status}
             </span>
             <div className="flex items-center gap-2">
               <div
                 className={`w-2 h-2 rounded-full shadow-sm ${isConnected ? "bg-green-500" : "bg-orange-500 animate-pulse"}`}
               />
-              <span className="text-lg font-medium text-black">
+              <span className="sm:text-lg text-base font-medium text-black">
                 {isConnected
                   ? t.rooms.queue.connected
                   : t.rooms.queue.connectingStatus}
@@ -63,11 +63,11 @@ const QueueStatusCard = ({
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#F5F5F5] flex flex-col items-center w-[200px] h-auto shadow-faq-card">
-            <span className="text-xl font-bold text-black mb-2">
+          <div className="p-4 rounded-xl bg-[#F5F5F5] flex flex-col items-center sm:w-[200px] w-auto h-auto shadow-faq-card">
+            <span className="sm:text-xl text-lg font-bold text-black mb-2">
               {t.rooms.queue.position}
             </span>
-            <div className="text-[1.25rem] font-bold text-cath-red-700 leading-none">
+            <div className="sm:text-[1.25rem] text-base font-bold text-cath-red-700 leading-none">
               {position > 0 ? `#${position}` : "--"}
             </div>
           </div>

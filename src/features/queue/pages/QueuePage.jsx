@@ -123,7 +123,7 @@ const QueuePage = () => {
         <img
           src={Logo}
           alt="Cat Speak Logo"
-          className="h-12 w-auto object-contain"
+          className="sm:h-12 h-9 w-auto object-contain"
         />
         {/* </div> */}
       </div>
