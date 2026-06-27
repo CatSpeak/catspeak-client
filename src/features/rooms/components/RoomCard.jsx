@@ -17,6 +17,7 @@ import meetingFallbackImage from "@/shared/assets/images/rooms/meeting.jpeg"
 import TQThumbnail from "@/shared/assets/images/rooms/TQ - Thumbnail.png"
 import { getTopicIcon } from "../utils/getTopicIcon"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 
 const RoomCard = ({ room }) => {
   const [searchParams] = useSearchParams()
@@ -80,23 +81,17 @@ const RoomCard = ({ room }) => {
 
   return (
     <>
-      <FluentAnimation
-        animationKey={room.roomId}
-        direction="up"
-        distance={30}
-        duration={0.4}
-        className="h-full w-full"
-      >
-        <div
+        <Animated3DCard
           onClick={handleRoomClick}
           style={{
             fontFamily: "var(--font-primary)",
             WebkitFontSmoothing: "antialiased",
           }}
-          className="relative flex p-1 h-full w-full flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 cursor-pointer shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+          className="h-full w-full"
+          containerClassName="h-full w-full"
         >
         {/* Cover Image Section */}
-        <div className="relative aspect-[16/10] w-full rounded-2xl shrink-0 overflow-hidden">
+        <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden border-b border-[#e5e5e5]">
           <img
             src={room.thumbnailUrl || TQThumbnail}
             alt="Room Cover"
@@ -140,7 +135,7 @@ const RoomCard = ({ room }) => {
           </div>
 
           {/* Footer Info */}
-          <div className="mt-auto flex items-center gap-3 sm:gap-4 flex-wrap">
+          <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">
             {/* Participants */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
@@ -164,9 +159,7 @@ const RoomCard = ({ room }) => {
             </div>
           </div>
         </div>
-        </div>
-      </FluentAnimation>
-
+        </Animated3DCard>
       <InDevelopmentModal
         open={showDevModal}
         onCancel={() => setShowDevModal(false)}

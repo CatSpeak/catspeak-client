@@ -10,7 +10,7 @@ const MobileNavDropdown = ({ icon: Icon, label, isOpen, onToggle, isActive, chil
       <button
         onClick={onToggle}
         className={`relative flex items-center h-12 rounded-xl transition-colors group px-4 justify-between ${
-          isActive ? "bg-cath-red-700/10 text-cath-red-700 font-medium" : "hover:bg-primary2 text-gray-800"
+          isActive ? "text-cath-red-700 font-medium" : "hover:bg-primary2 text-gray-800"
         }`}
       >
         <div className="flex items-center gap-3">

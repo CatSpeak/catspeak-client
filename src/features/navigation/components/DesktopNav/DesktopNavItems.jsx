@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { Home, LayoutDashboard, ShoppingCart, MessageCircle, GraduationCap, Settings, HelpCircle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -21,10 +21,25 @@ const iconMap = {
 
 const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
   const { t } = useLanguage()
-  const { resolvePath, checkIsActive } = useActiveLink()
+  const { resolvePath, checkIsActive, pathname } = useActiveLink()
 
   const [hoveredTooltip, setHoveredTooltip] = useState(null)
-  const [openDropdownKey, setOpenDropdownKey] = useState(null)
+  
+  // Initialize openDropdownKey based on the currently active route
+  const [openDropdownKey, setOpenDropdownKey] = useState(() => {
+    const activeItem = navLinks.find(item => item.hasDropdown && checkIsActive(item))
+    return activeItem ? activeItem.key : null
+  })
+
+  // Keep the open dropdown in sync with the current route
+  useEffect(() => {
+    const activeItem = navLinks.find(item => item.hasDropdown && checkIsActive(item))
+    if (activeItem) {
+      setOpenDropdownKey(activeItem.key)
+    } else {
+      setOpenDropdownKey(null)
+    }
+  }, [pathname])
 
   const handleMouseEnter = (e, label) => {
     if (isExpanded) return

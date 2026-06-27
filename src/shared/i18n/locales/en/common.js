@@ -6,9 +6,25 @@ export default {
   seeMore: "See more",
   back: "Back",
   cancel: "Cancel",
+  scrollToTop: "Scroll to top",
   toggle: {
     on: "On",
     off: "Off",
+  },
+  header: {
+    language: "Language",
+    community: "Community",
+    soon: "Soon",
+    countries: {
+      vietnam: "Vietnam",
+      china: "Chinese",
+      english: "English",
+    },
+    languages: {
+      vi: "Vietnamese",
+      zh: "Chinese",
+      en: "English",
+    }
   },
   pagination: {
     range: "{{start}}-{{end}} of {{total}}",

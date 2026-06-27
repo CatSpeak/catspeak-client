@@ -70,7 +70,7 @@ const RoomFilterModal = ({ open, onClose }) => {
   if (!open) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-0 sm:p-4 md:p-6">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/40 transition-opacity"
@@ -78,7 +78,7 @@ const RoomFilterModal = ({ open, onClose }) => {
       />
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-[640px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full h-full max-h-full rounded-none sm:h-auto sm:max-h-[85vh] sm:max-w-[640px] bg-white sm:rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white shrink-0">
@@ -165,16 +165,16 @@ const RoomFilterModal = ({ open, onClose }) => {
 
         </div>
 
-        <div className="flex items-center justify-between p-5 border-t border-gray-100 bg-gray-50/80 shrink-0">
+        <div className="flex gap-3 sm:gap-0 items-center sm:justify-between p-4 sm:p-5 border-t border-gray-100 bg-gray-50/80 shrink-0 mt-auto">
           <button 
             onClick={handleClear}
-            className="px-4 py-2.5 text-[14px] font-bold text-gray-500 hover:text-cath-red-700 hover:bg-[#FFF0F2] rounded-xl transition-all"
+            className="flex-1 sm:flex-none flex items-center justify-center px-4 py-3.5 sm:py-2.5 text-[15px] sm:text-[14px] font-bold text-gray-700 bg-gray-200/70 sm:bg-transparent sm:text-gray-500 hover:text-cath-red-700 hover:bg-[#FFF0F2] rounded-xl transition-all"
           >
             {t.rooms?.filters?.clear || "Xóa tất cả"}
           </button>
           <button 
             onClick={handleApply}
-            className="flex items-center gap-2 px-8 py-3 bg-cath-red-700 hover:bg-cath-red-800 text-white text-[15px] font-bold rounded-xl shadow-md shadow-cath-red-700/10 transition-all hover:-translate-y-0.5"
+            className="flex-[2] sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 sm:py-3 bg-cath-red-700 hover:bg-cath-red-800 text-white text-[15px] font-bold rounded-xl shadow-md shadow-cath-red-700/10 transition-all hover:-translate-y-0.5"
           >
             <span>{t.rooms?.filters?.apply || "Áp dụng"}</span>
             {totalSelected > 0 && (

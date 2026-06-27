@@ -9,8 +9,16 @@ import {
   useRoomsPageLogic,
   CreateRoomModal,
   AISessionSettingsModal,
-  HeroBanner,
+  RoomsBannerContent,
 } from "@/features/rooms"
+import BannerCarousel from "@/shared/components/ui/BannerCarousel"
+import banner1 from "@/shared/assets/images/communities/banner_1.png"
+
+const bannerImages = [
+  { url: banner1, alt: "Community Banner 1" },
+  { url: banner1, alt: "Community Banner 2" },
+  { url: banner1, alt: "Community Banner 3" },
+]
 import { useCreateAISessionMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { AnimatePresence } from "framer-motion"
@@ -18,7 +26,6 @@ import {
   FadeAnimation,
   FluentAnimation,
 } from "@/shared/components/ui/animations"
-import { ScrollToTopButton } from "@/shared/components/ui/buttons"
 import { useSelector, useDispatch } from "react-redux"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
@@ -158,16 +165,21 @@ const RoomsPage = () => {
           className="w-full h-full flex flex-col"
         >
           <div className="p-5 flex-1 min-w-0 pt-8 px-0">
-            <HeroBanner 
-              sessionProps={{
-                handleCreateOneOnOneSession: proceedCreateOneOnOne,
-                handleCreateStudyGroupSession: proceedCreateStudyGroup,
-                handleCreateAISession: () => setIsSettingsModalOpen(true),
-                isCreatingOneOnOne: state.isCreatingOneOnOne,
-                isCreatingStudyGroup: state.isCreatingStudyGroup,
-                isCreatingAI: state.isCreatingAI,
-                canUseAI: true
-              }}
+            <BannerCarousel 
+              images={bannerImages}
+              leftContent={
+                <RoomsBannerContent 
+                  sessionProps={{
+                    handleCreateOneOnOneSession: proceedCreateOneOnOne,
+                    handleCreateStudyGroupSession: proceedCreateStudyGroup,
+                    handleCreateAISession: () => setIsSettingsModalOpen(true),
+                    isCreatingOneOnOne: state.isCreatingOneOnOne,
+                    isCreatingStudyGroup: state.isCreatingStudyGroup,
+                    isCreatingAI: state.isCreatingAI,
+                    canUseAI: true
+                  }}
+                />
+              }
             />
 
             <div className="w-full flex flex-col pt-6 backdrop-blur-sm border-t border-white shadow-[0_-2px_2px_rgba(0,0,0,0.02)] shaw">
@@ -198,7 +210,6 @@ const RoomsPage = () => {
           </div>
         </FluentAnimation>
       </AnimatePresence>
-      <ScrollToTopButton />
     </>
   )
 }

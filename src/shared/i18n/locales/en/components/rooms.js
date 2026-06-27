@@ -30,6 +30,11 @@ export default {
     comingSoonTitle: "Coming Soon",
     slides: [],
   },
+  pagination: {
+    prev: "Previous",
+    next: "Next",
+    pageOf: "Page {page} of {totalPages}"
+  },
   filters: {
     title: "Rooms",
     room: "room",
@@ -46,12 +51,26 @@ export default {
       forum: "Forum",
     },
     topics: {
-      family: "Family",
-      sports: "Sports",
+      history: "History",
+      science: "Science",
+      philosophy: "Philosophy",
+      psychology: "Psychology",
+      politics: "Politics",
+      space: "Space",
       movies: "Movies",
+      music: "Music",
+      art: "Art",
+      fashion: "Fashion",
+      culture: "Culture",
+      books: "Books",
       travel: "Travel",
-      school: "School",
-      stuff: "Stuff",
+      food: "Food",
+      nature: "Nature",
+      relationships: "Relationships",
+      sports: "Sports",
+      finance: "Finance",
+      startups: "Startups",
+      productivity: "Productivity",
       other: "Other",
     },
     levels: {
@@ -79,6 +98,7 @@ export default {
     noRoomsFoundCategory:
       "No rooms here yet! Feel free to explore other categories.",
     clear: "Clear",
+    apply: "Apply",
   },
   tabs: {
     communicate: "Communicate",

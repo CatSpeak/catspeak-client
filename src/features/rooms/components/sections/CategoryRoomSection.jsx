@@ -78,13 +78,22 @@ const CategoryRoomSection = ({
   const canGoNext = page < totalPages
   const canGoPrev = page > 1
 
+  const tickingRef = useRef(false)
   const handleScroll = () => {
     if (!scrollContainerRef.current) return
-    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
-    if (scrollLeft + clientWidth >= scrollWidth - 50) {
-      if (hasNextPage && !isFetching) {
-        setPage((prev) => prev + 1)
-      }
+    if (!tickingRef.current) {
+      window.requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+          if (scrollLeft + clientWidth >= scrollWidth - 50) {
+            if (hasNextPage && !isFetching) {
+              setPage((prev) => prev + 1)
+            }
+          }
+        }
+        tickingRef.current = false
+      })
+      tickingRef.current = true
     }
   }
 

@@ -6,9 +6,25 @@ export default {
   seeMore: "Xem thêm",
   back: "Quay lại",
   cancel: "Hủy",
+  scrollToTop: "Lên đầu trang",
   toggle: {
     on: "Bật",
     off: "Tắt",
+  },
+  header: {
+    language: "Ngôn ngữ",
+    community: "Cộng đồng",
+    soon: "Sắp có",
+    countries: {
+      vietnam: "Việt Nam",
+      china: "Trung Quốc",
+      english: "Anh",
+    },
+    languages: {
+      vi: "Tiếng Việt",
+      zh: "中文",
+      en: "English",
+    }
   },
   pagination: {
     range: "{{start}}-{{end}} trong số {{total}}",

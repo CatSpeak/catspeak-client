@@ -10,7 +10,7 @@ export { default as RoomsMobileDrawer } from "./components/navigation/RoomsMobil
 export { default as SessionActionButtons } from "./components/SessionActionButtons"
 export { default as AllowConnectSwitch } from "./components/AllowConnectSwitch"
 export { default as RoomFilterSidebar } from "./components/navigation/RoomFilterSidebar"
-export { default as HeroBanner } from "./components/HeroBanner"
+export { default as RoomsBannerContent } from "./components/RoomsBannerContent"
 export {
   WaitingScreen,
   ParticipantsPreview,

@@ -2,7 +2,9 @@ export default {
   profile: "个人信息",
   settings: "设置",
   logout: "登出",
-  soon: "即将推出",
+  soon: "敬请期待",
+  language: "语言",
+  community: "社区",
   searchPlaceholder: "搜索房间或主题",
   languages: {
     vi: "越南语 (国语)",
