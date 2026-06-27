@@ -39,7 +39,7 @@ const WaitingScreen = ({
   const [isBgModalOpen, setIsBgModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-  // const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -52,7 +52,7 @@ const WaitingScreen = ({
       onBack={() => navigate(getCommunityPath(lang || language))}
       backLabel={t.rooms.waitingScreen.backToCommunity}
       maxWidthClass="max-w-[800px]"
-      cardClassName="max-h-[530px] rounded-[12px]"
+      cardClassName="sm:max-h-[530px] rounded-[12px] h-auto"
     >
       <div className="text-center">
         <h4 className="mb-2 font-semibold text-xl md:text-2xl">
@@ -101,7 +101,7 @@ const WaitingScreen = ({
       </div>
 
       <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
-        <div className="flex w-full flex-col sm:flex-row gap-[25px]">
+        <div className="flex w-full flex-col sm:flex-row sm:gap-[25px] gap-4">
           <PillButton
             onClick={handleCopyLink}
             variant="secondary"
@@ -128,7 +128,7 @@ const WaitingScreen = ({
           </p>
         )}
 
-        {/* <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
           <p>
             {t?.rooms?.waitingScreen?.joinedAsNickname || "Joined as nickname"}:{" "}
             <span className="font-medium text-gray-900">
@@ -145,15 +145,15 @@ const WaitingScreen = ({
             <Edit2 size={14} />
             {t?.rooms?.waitingScreen?.editName || "Edit Name"}
           </button>
-        </div> */}
+        </div>
       </div>
 
-      {/* <EditNicknameModal
+      <EditNicknameModal
         open={isEditingName}
         onClose={() => setIsEditingName(false)}
         user={user}
         t={t}
-      /> */}
+      />
 
       <VirtualBackgroundModal
         open={isBgModalOpen}

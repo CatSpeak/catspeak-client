@@ -11,7 +11,7 @@ const VideoPreview = ({
   onToggleMic,
   onToggleCam,
   onOpenBgModal,
-  // onOpenSettings,
+  onOpenSettings,
 }) => {
   const { t } = useLanguage();
   return (
@@ -78,13 +78,13 @@ const VideoPreview = ({
           <Image />
         </button>
 
-        {/* <button
+        <button
           onClick={onOpenSettings}
           title={t?.rooms?.waitingScreen?.deviceSettings || "Device Settings"}
           className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
           <Settings />
-        </button> */}
+        </button>
       </div>
     </div>
   );
