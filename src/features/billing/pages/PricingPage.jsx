@@ -30,7 +30,7 @@ const PricingPage = () => {
   const handleUpgradeConfirm = async (plan) => {
     try {
       const response = await checkout({
-        amountVnd: plan.price,
+        planId: plan.id,
         returnUrl: `${window.location.origin}/billing/result`,
         cancelUrl: `${window.location.origin}/billing/result`,
       }).unwrap()
