@@ -4,16 +4,15 @@ import {
   ThumbsUp,
   Heart,
   Smile,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import CommentMoreMenu from "./CommentMoreMenu"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import {
   getTranslatedTimeAgo,
-  formatExactDate,
 } from "@/features/news/utils/newsUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Avatar from "@/shared/components/ui/Avatar"
 
 export const REACTION_TYPES = {
@@ -37,6 +36,20 @@ export const REACTION_TYPES = {
   },
 }
 
+/**
+ * Check if a comment has actually been edited.
+ * Compares parsed timestamps with a 1-second tolerance to handle
+ * minor precision differences from the API (e.g. trailing Z vs no Z,
+ * millisecond truncation) that would cause false positives on new comments.
+ */
+const hasBeenEdited = (comment) => {
+  if (!comment.lastEdited || !comment.createDate) return false
+  const edited = new Date(comment.lastEdited).getTime()
+  const created = new Date(comment.createDate).getTime()
+  if (isNaN(edited) || isNaN(created)) return false
+  return edited - created > 1000
+}
+
 const CommentItem = ({
   comment,
   replies,
@@ -47,9 +60,8 @@ const CommentItem = ({
   isNested = false,
 }) => {
   const { user } = useAuth()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const [showReactions, setShowReactions] = useState(false)
-
   const [isReplying, setIsReplying] = useState(false)
   const [replyContent, setReplyContent] = useState("")
   const [showReplies, setShowReplies] = useState(false)
@@ -74,311 +86,287 @@ const CommentItem = ({
 
     setReplyContent("")
     setIsReplying(false)
-    setShowReplies(true) // Auto expand replies when adding a new one
+    setShowReplies(true)
   }
 
+  const hasReplies = replies?.length > 0
+
   return (
-    <div className={`flex gap-3 group relative ${isNested ? "" : "mb-4"}`}>
-      {/* Branch curve for nested reply */}
-      {isNested && (
-        <div
-          className="absolute border-l-2 border-b-2 border-[#E5E5E5] rounded-bl-xl pointer-events-none z-0"
-          style={{
-            left: "-34px",
-            top: 0,
-            height: "18px",
-            width: "34px",
-          }}
+    <div
+      className={`flex gap-3.5 group relative ${
+        isNested ? "justify-end" : ""
+      }`}
+    >
+      {/* ── Avatar column ────────────────────────────────────────── */}
+      <div className="flex flex-col items-center shrink-0">
+        <Avatar
+          size={32}
+          src={comment.avatarUrl ? getImageUrl(comment.avatarUrl) : null}
+          name={comment.authorName || "User"}
+          className="shrink-0"
         />
-      )}
-      <Avatar
-        size={36}
-        src={comment.avatarUrl ? getImageUrl(comment.avatarUrl) : null}
-        name={comment.authorName || "User"}
-        className="shrink-0"
-      />
-      <div className="flex-1 min-w-0">
-        <div className="relative">
-          {/* Thread line from avatar */}
-          {replies?.length > 0 && (
-            <div
-              className="absolute border-l-2 border-b-2 border-[#E5E5E5] rounded-bl-xl pointer-events-none z-0"
-              style={{
-                left: "-30px",
-                top: "36px",
-                bottom: "24px",
-                width: "30px",
-              }}
-            />
-          )}
+        {/* L-shaped connector: vertical line down + horizontal turn right */}
+        {hasReplies && showReplies && (
+          <div className="flex flex-col items-center flex-1 mt-3.5">
+            {/* Vertical segment — fills remaining height */}
+            <div className="w-[2px] flex-1 bg-[#e2e2e2] rounded-full" />
+            {/* Horizontal segment — turns right toward toggle area */}
+            <div className="h-[2px] w-4 bg-[#e2e2e2] rounded-full translate-x-[7px]" />
+          </div>
+        )}
+      </div>
 
-          {/* Author & Timestamp */}
-          <div className="flex items-end gap-1 text-xs text-[#606060] mb-3">
-            <span className="font-semibold text-black text-sm">
-              {comment.authorName}
-            </span>
-
-            <span>·</span>
-
-            <span>
-              {getTranslatedTimeAgo(
-                comment.createDate,
-                t.news?.newsCard?.timeAgo,
+      {/* ── Content column ───────────────────────────────────────── */}
+      <div className={`flex-1 min-w-0 ${isNested ? "flex-[1_0_0]" : ""}`}>
+        {/* Author & Timestamp + More menu — Figma: gap-[8px] between header and body */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3.5">
+              <span className="font-nunito font-medium text-lg text-[#7b7979] leading-[1.4]">
+                {comment.authorName}
+              </span>
+              <span className="font-nunito text-base text-[#7b7979] leading-[1.4]">
+                •
+              </span>
+              <span className="font-nunito text-base text-[#7b7979] leading-[1.4]">
+                {getTranslatedTimeAgo(
+                  comment.createDate,
+                  t.news?.newsCard?.timeAgo,
+                )}
+              </span>
+              {hasBeenEdited(comment) && (
+                <>
+                  <span className="font-nunito text-base text-[#7b7979]">•</span>
+                  <span className="font-nunito text-base text-[#7b7979]">
+                    {t.news?.newsDetail?.edited || "Edited"}
+                  </span>
+                </>
               )}
-            </span>
-
-            <span>·</span>
-
-            {comment.lastEdited &&
-              comment.lastEdited !== comment.createDate && (
-                <span>
-                  {t.news?.newsDetail?.edited || "Edited"}{" "}
-                  {getTranslatedTimeAgo(
-                    comment.lastEdited,
-                    t.news?.newsCard?.timeAgo,
-                  )}
-                </span>
-              )}
+            </div>
+            {isOwner && (
+              <CommentMoreMenu
+                onEdit={() => {
+                  setEditContent(comment.content)
+                  setIsEditing(true)
+                }}
+                onDelete={() => onDelete(comment.commentId)}
+              />
+            )}
           </div>
 
-          {/* Comment Body & Action Row */}
+          {/* Comment Body */}
           {isEditing ? (
-            <div className="flex-1 flex flex-col gap-3 mb-3">
-              <TextInput
-                id={`edit-input-${comment.commentId}`}
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 autoFocus
-                multiline
+                className="w-full bg-[#f5f5f5] border border-[#e2e2e2] rounded-2xl px-4 py-3 font-nunito text-base text-black focus:outline-none focus:border-cath-red-700 transition-colors"
               />
-              <div className="flex justify-end gap-3">
-                <PillButton
+              <div className="flex justify-end gap-2">
+                <button
                   type="button"
-                  variant="secondary"
                   onClick={() => setIsEditing(false)}
+                  className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-nunito font-medium text-sm hover:bg-cath-red-50 transition-colors"
                 >
-                  {t.news?.newsDetail?.cancel || "Cancel"}
-                </PillButton>
-                <PillButton
+                  {t.news?.newsDetail?.cancel || "Hủy"}
+                </button>
+                <button
                   type="button"
-                  variant="primary"
                   onClick={async () => {
                     if (onEdit) {
                       await onEdit(comment.commentId, editContent)
                     }
                     setIsEditing(false)
                   }}
-                  disabled={
-                    !editContent.trim() || editContent === comment.content
-                  }
+                  disabled={!editContent.trim() || editContent === comment.content}
+                  className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-nunito font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
                 >
-                  {t.news?.newsDetail?.save || "Save"}
-                </PillButton>
+                  {t.news?.newsDetail?.save || "Gửi"}
+                </button>
               </div>
             </div>
           ) : (
-            <>
-              {/* Comment Body */}
-              <div className="flex items-center gap-1 group/body mb-3 relative">
-                <div className="bg-[#f0f2f5] rounded-2xl px-4 py-3 inline-block max-w-full relative">
-                  <p className="break-words whitespace-pre-wrap">
-                    {comment.replyToAccountName && (
-                      <span className="text-blue-600 font-semibold mr-1">
-                        @{comment.replyToAccountName}
-                      </span>
-                    )}
-                    {comment.content}
-                  </p>
-
-                  {/* Reaction Count (Floating Bottom Right) */}
-                  {comment.totalReactions > 0 && (
-                    <div className="absolute -bottom-2 -right-3 flex items-center gap-1 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] rounded-full px-1.5 py-0.5 z-10">
-                      <ReactionIcon
-                        size={16}
-                        className={
-                          currentReaction
-                            ? currentReaction.fillClass
-                            : "fill-blue-500 text-blue-500"
-                        }
-                      />
-
-                      <span className="text-[13px] leading-none text-[#65676B]">
-                        {comment.totalReactions}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {isOwner && !isEditing && (
-                  <CommentMoreMenu
-                    onEdit={() => {
-                      setEditContent(comment.content)
-                      setIsEditing(true)
-                    }}
-                    onDelete={() => onDelete(comment.commentId)}
-                  />
-                )}
-              </div>
-
-              {/* Action Row */}
-              <div className="flex items-center mt-1">
-                <div className="flex items-center gap-4 text-xs font-bold text-[#65676B] pl-2">
-                  {/* Reaction Button with Popover */}
-                  <div
-                    className="group/reactions relative flex items-center"
-                    onMouseEnter={() => setShowReactions(true)}
-                    onMouseLeave={() => setShowReactions(false)}
-                  >
-                    <button
-                      onClick={() => {
-                        const type = comment.currentUserReaction
-                          ? comment.currentUserReaction
-                          : 1
-                        onReact(comment.commentId, type)
-                      }}
-                      className={`hover:underline cursor-pointer flex items-center transition-colors ${
-                        currentReaction
-                          ? currentReaction.colorClass
-                          : "text-[#65676B]"
-                      }`}
-                    >
-                      <span className="">
-                        {currentReaction
-                          ? t.news?.newsDetail?.[
-                              currentReaction.label.toLowerCase()
-                            ] || currentReaction.label
-                          : t.news?.newsDetail?.like || "Like"}
-                      </span>
-                    </button>
-
-                    {/* Reactions Popover */}
-                    <div
-                      className={`absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
-                  ${
-                    showReactions
-                      ? "opacity-100 scale-100 visible"
-                      : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"
-                  }`}
-                    >
-                      {Object.entries(REACTION_TYPES).map(([type, config]) => {
-                        const IconComp = config.icon
-                        return (
-                          <button
-                            key={type}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onReact(comment.commentId, parseInt(type, 10))
-                              setShowReactions(false)
-                            }}
-                            className={`p-2 hover:-translate-y-1 transition-transform rounded-full ${
-                              type === "1"
-                                ? "hover:bg-blue-50"
-                                : type === "2"
-                                  ? "hover:bg-red-50"
-                                  : "hover:bg-yellow-50"
-                            }`}
-                            title={
-                              t.news?.newsDetail?.[config.label.toLowerCase()] ||
-                              config.label
-                            }
-                          >
-                            <IconComp
-                              size={24}
-                              className={`${config.colorClass} ${config.fillClass}`}
-                            />
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Reply Button */}
-                  <button
-                    onClick={handleReplyClick}
-                    className="hover:underline cursor-pointer transition-colors text-[#65676B]"
-                  >
-                    {t.news?.newsDetail?.reply || "Reply"}
-                  </button>
-                </div>
-              </div>
-            </>
+            <p className="font-nunito text-base text-black leading-[1.4] break-words whitespace-pre-wrap">
+              {comment.replyToAccountName && (
+                <span className="text-blue-600 font-semibold mr-1">
+                  @{comment.replyToAccountName}
+                </span>
+              )}
+              {comment.content}
+            </p>
           )}
+        </div>
 
-          {/* Inline Reply Form */}
-          {isReplying && (
-            <form
-              onSubmit={submitReply}
-              className="mt-2 flex flex-col gap-2 pl-1 relative z-10"
-            >
-              <TextInput
-                id={`reply-input-${comment.commentId}`}
+        {/* ── Actions row — Figma: w-[303px] container, gap-[12px] ── */}
+        {!isEditing && (
+          <div className="flex flex-col items-start w-[303px] mt-2">
+            <div className="flex gap-3 items-center w-full">
+              {/* Reaction button */}
+              <div
+                className="group/reactions relative flex items-center"
+                onMouseEnter={() => setShowReactions(true)}
+                onMouseLeave={() => setShowReactions(false)}
+              >
+                <button
+                  onClick={() => {
+                    const type = comment.currentUserReaction || 1
+                    onReact(comment.commentId, type)
+                  }}
+                  className="flex items-center gap-1 cursor-pointer"
+                >
+                  {currentReaction ? (
+                    <currentReaction.icon
+                      size={16}
+                      strokeWidth={1.5}
+                      className={`${currentReaction.colorClass} ${currentReaction.fillClass}`}
+                    />
+                  ) : (
+                    <ThumbsUp size={16} strokeWidth={1.5} className="text-[#7b7979]" />
+                  )}
+                  {comment.totalReactions > 0 && (
+                    <span className="font-nunito font-medium text-sm text-[#7b7979]">
+                      {comment.totalReactions}
+                    </span>
+                  )}
+                </button>
+
+                {/* Reactions Popover */}
+                <div
+                  className={`absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
+                  ${showReactions ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"}`}
+                >
+                  {Object.entries(REACTION_TYPES).map(([type, config]) => {
+                    const IconComp = config.icon
+                    return (
+                      <button
+                        key={type}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onReact(comment.commentId, parseInt(type, 10))
+                          setShowReactions(false)
+                        }}
+                        className={`p-2 hover:-translate-y-1 transition-transform rounded-full ${
+                          type === "1"
+                            ? "hover:bg-blue-50"
+                            : type === "2"
+                              ? "hover:bg-red-50"
+                              : "hover:bg-yellow-50"
+                        }`}
+                        title={config.label}
+                      >
+                        <IconComp
+                          size={24}
+                          className={`${config.colorClass} ${config.fillClass}`}
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Reply text */}
+              <button
+                onClick={handleReplyClick}
+                className="font-nunito text-sm text-[#7b7979] hover:text-black transition-colors"
+              >
+                {t.news?.newsDetail?.reply || "Phản hồi"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Inline Reply Form */}
+        {isReplying && (
+          <form
+            onSubmit={submitReply}
+            className="mt-3 flex flex-col gap-2 relative z-10"
+          >
+            <div className="flex items-center gap-2">
+              <Avatar
+                size={32}
+                src={user?.avatarImageUrl ? getImageUrl(user.avatarImageUrl) : null}
+                name={user?.fullName || "User"}
+                className="shrink-0"
+              />
+              <input
+                type="text"
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder={`Reply to @${comment.authorName}...`}
                 autoFocus
-                className="!min-h-[40px] text-[14px]"
-                multiline
+                className="flex-1 bg-transparent border-b-2 border-cath-red-700 px-2 py-1 font-nunito text-base text-black focus:outline-none transition-colors"
               />
-              <div className="flex justify-end gap-2">
-                <PillButton
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setIsReplying(false)}
-                  className="!h-8 !text-sm"
-                >
-                  {t.news?.newsDetail?.cancel || "Cancel"}
-                </PillButton>
-                <PillButton
-                  type="submit"
-                  variant="primary"
-                  disabled={!replyContent.trim()}
-                  className="!h-8 !text-sm"
-                >
-                  {t.news?.newsDetail?.reply || "Reply"}
-                </PillButton>
-              </div>
-            </form>
-          )}
-
-          {/* Replies */}
-          {showReplies && replies?.length > 0 && (
-            <div className="mt-3 pl-1 flex flex-col gap-4 mb-2 relative z-10">
-              {replies
-                .slice()
-                .sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
-                .map((reply) => (
-                  <CommentItem
-                    key={reply.commentId}
-                    comment={reply}
-                    replies={[]} // Nested replies are flattened into the parent's replies array
-                    onReplySubmit={onReplySubmit}
-                    onDelete={onDelete}
-                    onEdit={onEdit}
-                    onReact={onReact}
-                    isNested={true}
-                  />
-                ))}
             </div>
-          )}
-
-          {/* Show/Hide Replies Toggle */}
-          {replies?.length > 0 && (
-            <div className="mt-2 relative flex items-center z-10">
-              <PillButton
-                variant="secondary"
-                onClick={() => setShowReplies(!showReplies)}
-                className="!bg-transparent hover:!bg-[#f2f2f2] border-none shadow-none !text-base !text-[#65676B] gap-2 px-4 !h-12"
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                className="p-1 text-[#7b7979] hover:text-black transition-colors"
+                title="Emoji"
               >
-                {showReplies
-                  ? t.news?.newsDetail?.hideReplies || "Hide replies"
-                  : (
-                      t.news?.newsDetail?.viewReplies ||
-                      "View {{count}} replies"
-                    ).replace("{{count}}", replies.length)}
-              </PillButton>
+                <Smile size={24} strokeWidth={1.5} />
+              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsReplying(false)}
+                  className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-nunito font-medium text-sm hover:bg-cath-red-50 transition-colors"
+                >
+                  {t.news?.newsDetail?.cancel || "Hủy"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={!replyContent.trim()}
+                  className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-nunito font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
+                >
+                  {t.news?.newsDetail?.comment || "Gửi"}
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+          </form>
+        )}
+
+        {/* Replies — rendered first so toggle anchors at the bottom */}
+        {showReplies && hasReplies && (
+          <div className="mt-3 flex flex-col gap-3 relative z-10">
+            {replies
+              .slice()
+              .sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
+              .map((reply) => (
+                <CommentItem
+                  key={reply.commentId}
+                  comment={reply}
+                  replies={[]}
+                  onReplySubmit={onReplySubmit}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                  onReact={onReact}
+                  isNested={true}
+                />
+              ))}
+          </div>
+        )}
+
+        {/* Show/Hide Replies Toggle — anchored below all replies */}
+        {hasReplies && (
+          <button
+            onClick={() => setShowReplies(!showReplies)}
+            className="mt-2 flex items-center gap-2 font-nunito font-semibold text-sm text-cath-red-700 hover:text-cath-red-800 transition-colors relative z-10"
+          >
+            {showReplies ? (
+              <>
+                {t.news?.newsDetail?.hideReplies || "Ẩn phản hồi"}
+                <ChevronUp size={16} />
+              </>
+            ) : (
+              <>
+                {t.news?.newsDetail?.viewReplies?.replace("{{count}}", replies.length) || "phản hồi"}
+                <ChevronDown size={16} />
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   )
