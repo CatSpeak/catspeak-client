@@ -200,10 +200,10 @@ export const eventsApi = baseApi.injectEndpoints({
       query: (token) => `/v1/events/shared/${token}`,
     }),
 
-    // POST /api/v1/registrations
+    // POST /api/v1/event/registration
     registerForEvent: builder.mutation({
       query: (body) => ({
-        url: "/v1/registrations",
+        url: "/v1/event/registration",
         method: "POST",
         body,
       }),
@@ -241,10 +241,10 @@ export const eventsApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // DELETE /api/v1/registrations/{registrationId}
+    // DELETE /api/v1/event/registration/{registrationId}
     deleteRegistration: builder.mutation({
       query: ({ registrationId, ...body }) => ({
-        url: `/v1/registrations/${registrationId}`,
+        url: `/v1/event/registration/${registrationId}`,
         method: "DELETE",
         body,
       }),
