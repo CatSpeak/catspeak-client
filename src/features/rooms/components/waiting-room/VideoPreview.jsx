@@ -1,7 +1,7 @@
-import React from "react";
-import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import Avatar from "@/shared/components/ui/Avatar";
+import React from "react"
+import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import Avatar from "@/shared/components/ui/Avatar"
 
 const VideoPreview = ({
   localStream,
@@ -13,7 +13,7 @@ const VideoPreview = ({
   onOpenBgModal,
   onOpenSettings,
 }) => {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
   return (
     <div className="relative w-full max-w-3xl h-[269px] flex flex-col items-center rounded-2xl border border-[#F5F5F5] bg-[#FCFCFC]">
       <div className="py-2 relative w-full h-[190px] aspect-video overflow-hidden mt-4">
@@ -22,8 +22,8 @@ const VideoPreview = ({
           <video
             ref={(video) => {
               if (video) {
-                video.srcObject = localStream;
-                if (micOn) video.muted = true; // Mute local preview to prevent echo
+                video.srcObject = localStream
+                if (micOn) video.muted = true // Mute local preview to prevent echo
               }
             }}
             autoPlay
@@ -87,7 +87,7 @@ const VideoPreview = ({
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default VideoPreview;
+export default VideoPreview

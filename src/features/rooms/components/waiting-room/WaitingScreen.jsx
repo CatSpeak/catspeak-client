@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { Copy, Mic, Video, Volume2, Info, Check, X, Edit2 } from "lucide-react";
-import Dropdown from "@/shared/components/ui/Dropdown";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
-import ParticipantsPreview from "./ParticipantsPreview";
-import VideoPreview from "./VideoPreview";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import meetingFallbackImage from "@/shared/assets/images/LogoDefault.png";
-import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayShell";
-import { getCommunityPath } from "@/shared/utils/navigation";
-import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal";
-import EditNicknameModal from "./EditNicknameModal";
+import React, { useState, useEffect, useRef } from "react"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { toast } from "react-hot-toast"
+import { Copy, Mic, Video, Volume2, Info, Check, X, Edit2 } from "lucide-react"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import ParticipantsPreview from "./ParticipantsPreview"
+import VideoPreview from "./VideoPreview"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import meetingFallbackImage from "@/shared/assets/images/LogoDefault.png"
+import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayShell"
+import { getCommunityPath } from "@/shared/utils/navigation"
+import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal"
+import EditNicknameModal from "./EditNicknameModal"
 
-import DeviceSettingsModal from "./DeviceSettingsModal";
+import DeviceSettingsModal from "./DeviceSettingsModal"
 
 const WaitingScreen = ({
   session,
@@ -30,21 +30,21 @@ const WaitingScreen = ({
   maxParticipants = 5,
   deviceSelection,
 }) => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const participants = room?.currentParticipants || session?.participants || [];
-  const { t, language } = useLanguage();
-  const { lang } = useParams();
-  const effectiveParticipantCount = participantCount ?? participants.length;
-  const [isBgModalOpen, setIsBgModalOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const participants = room?.currentParticipants || session?.participants || []
+  const { t, language } = useLanguage()
+  const { lang } = useParams()
+  const effectiveParticipantCount = participantCount ?? participants.length
+  const [isBgModalOpen, setIsBgModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
 
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false)
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success(t?.rooms?.waitingScreen?.linkCopied || "Link copied!");
-  };
+    navigator.clipboard.writeText(window.location.href)
+    toast.success(t?.rooms?.waitingScreen?.linkCopied || "Link copied!")
+  }
 
   return (
     <FullscreenOverlayShell
@@ -68,7 +68,7 @@ const WaitingScreen = ({
             )}
             {room?.topic &&
               room.topic.split(",").map((t_topic) => {
-                const trimmed = t_topic.trim();
+                const trimmed = t_topic.trim()
                 return (
                   <span
                     key={trimmed}
@@ -77,7 +77,7 @@ const WaitingScreen = ({
                     {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
                       trimmed}
                   </span>
-                );
+                )
               })}
           </div>
         )}
@@ -138,7 +138,7 @@ const WaitingScreen = ({
           <span className="text-gray-300">|</span>
           <button
             onClick={() => {
-              setIsEditingName(true);
+              setIsEditingName(true)
             }}
             className="flex items-center gap-1 text-cath-red-600 hover:text-cath-red-700 font-medium transition-colors"
           >
@@ -175,7 +175,7 @@ const WaitingScreen = ({
         />
       )}
     </FullscreenOverlayShell>
-  );
-};
+  )
+}
 
-export default WaitingScreen;
+export default WaitingScreen

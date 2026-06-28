@@ -1,8 +1,8 @@
-import React from "react";
-import { Loader2 } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
-import { IconLogoOutlined } from "@/shared/assets/icons/logo";
+import React from "react"
+import { Loader2 } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { IconLogoOutlined } from "@/shared/assets/icons/logo"
 
 const QueueStatusCard = ({
   statusText,
@@ -11,12 +11,12 @@ const QueueStatusCard = ({
   onCancel,
   roomType = "OneToOne",
 }) => {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
 
-  const isGroup = roomType === "Group";
+  const isGroup = roomType === "Group"
   const subtitle = isGroup
     ? t.rooms?.queue?.findingGroup || "Looking for a study group…"
-    : t.rooms.queue.findingMatch;
+    : t.rooms.queue.findingMatch
 
   return (
     <div className="max-w-[800px] h-auto w-full rounded-3xl overflow-hidden relative bg-[#FFFEFE]">
@@ -82,7 +82,7 @@ const QueueStatusCard = ({
         </PillButton>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default QueueStatusCard;
+export default QueueStatusCard
