@@ -1,28 +1,10 @@
 import React from "react"
-import { NavLink } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Video, Film } from "lucide-react"
+import SharedSidebar from "@/shared/components/layout/SharedSidebar"
 
 const WorkspaceSidebar = ({ onClose, variant = "vertical" }) => {
   const { t } = useLanguage()
-
-  const isHorizontal = variant === "horizontal"
-
-  const getLinkClasses = ({ isActive }) => {
-    if (isHorizontal) {
-      return `relative flex items-center justify-center gap-2 px-4 h-10 whitespace-nowrap transition-colors flex-1 min-w-fit ${
-        isActive
-          ? "text-cath-red-700 border-b-2 !border-b-cath-red-700 font-medium"
-          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b-2 !border-b-transparent font-medium"
-      }`
-    }
-
-    return `relative flex w-full items-center gap-3 px-4 h-10 rounded-r-lg transition-colors mb-1 overflow-hidden ${
-      isActive
-        ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-cath-red-700 hover:text-cath-red-700 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-full before:w-[3px] before:bg-cath-red-700"
-        : "text-gray-800 hover:text-gray-900 hover:bg-[#F2F2F2]"
-    }`
-  }
 
   const menuItems = [
     {
@@ -39,28 +21,7 @@ const WorkspaceSidebar = ({ onClose, variant = "vertical" }) => {
     },
   ]
 
-  return (
-    <div
-      className={
-        isHorizontal
-          ? "flex overflow-x-auto hide-scrollbar w-full divide-x divide-gray-100"
-          : "flex flex-col h-full text-gray-800"
-      }
-    >
-      {menuItems.map((item) => (
-        <NavLink
-          key={item.path}
-          to={item.path}
-          end={item.end}
-          className={getLinkClasses}
-          onClick={onClose}
-        >
-          <item.icon size={isHorizontal ? 16 : 20} className="flex-shrink-0" />
-          <span className="text-sm">{item.label}</span>
-        </NavLink>
-      ))}
-    </div>
-  )
+  return <SharedSidebar items={menuItems} variant={variant} onClose={onClose} />
 }
 
 export default WorkspaceSidebar

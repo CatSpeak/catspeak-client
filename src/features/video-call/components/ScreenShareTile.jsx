@@ -4,6 +4,7 @@ import Slider from "@/shared/components/ui/Slider"
 
 import { Track } from "livekit-client"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 /**
  * Renders a shared screen using LiveKit track.attach().
@@ -24,6 +25,7 @@ const ScreenShareTile = ({
   const idleTimerRef = useRef(null)
 
   const participant = trackRef?.participant
+  const { isPiP } = useGlobalVideoCall()
 
   // Volume state (0 to 1)
   const [volume, setVolume] = useState(1)
@@ -154,27 +156,32 @@ const ScreenShareTile = ({
         autoPlay
         playsInline
         muted
+        disablePictureInPicture
         ref={videoRef}
         className="h-full w-full object-contain"
       />
 
       {/* Control Overlay */}
       <div
-        className={`absolute bottom-0 left-0 right-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/80 to-transparent px-1 pb-1 pt-12 transition-opacity duration-300 pointer-events-none ${
+        className={`absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 transition-opacity duration-300 pointer-events-none ${
           isHovered ? "opacity-100" : "opacity-0"
         }`}
       >
         <div 
-          className="flex min-w-0 items-center gap-1.5 pointer-events-auto"
+          className="flex min-w-0 items-center gap-2 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex min-w-0 items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-sm font-medium text-white backdrop-blur-sm">
-            <MonitorUp size={16} className="shrink-0" />
-            <span className="truncate">{labelText}</span>
+          <div className="flex max-w-[90%] items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-white backdrop-blur-sm">
+            <div className="flex flex-shrink-0 items-center gap-1">
+              <MonitorUp size={16} />
+            </div>
+            <div className="min-w-0 truncate font-medium text-sm">
+              {labelText}
+            </div>
           </div>
 
           {!isLocal && (
-            <div className="flex shrink-0 items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-sm font-medium text-white backdrop-blur-sm">
+            <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-white backdrop-blur-sm">
               <button onClick={handleToggleMute} className="shrink-0 hover:text-gray-300 transition-colors">
                 {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
@@ -188,18 +195,20 @@ const ScreenShareTile = ({
                   className="!h-1.5"
                 />
               </div>
-              <span className="hidden w-8 shrink-0 text-xs md:block">{Math.round(volume * 100)}%</span>
+              <span className="hidden w-8 shrink-0 text-xs font-medium md:block">{Math.round(volume * 100)}%</span>
             </div>
           )}
         </div>
 
-        <button
-          onClick={toggleFullscreen}
-          className="shrink-0 rounded-md bg-black/40 p-1 text-white hover:bg-black/60 backdrop-blur-sm transition-colors pointer-events-auto"
-          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-        >
-          {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
-        </button>
+        {!isPiP && (
+          <button
+            onClick={toggleFullscreen}
+            className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm transition-colors pointer-events-auto"
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+          </button>
+        )}
       </div>
     </div>
   )

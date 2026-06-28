@@ -8,6 +8,7 @@ import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import ChinaWorkshopModal from "./modals/ChinaWorkshopModal"
 import HskWorkshopModal from "./modals/HskWorkshopModal"
 import EnglishWorkshopModal from "./modals/EnglishWorkshopModal"
+import ScholarshipWorkshopModal from "./modals/ScholarshipWorkshopModal"
 import { getWorkshopSlides } from "../data/workshopSlides"
 import WorkshopCard from "./WorkshopCard"
 import colors from "@/shared/utils/colors"
@@ -103,6 +104,12 @@ const WorkshopCarousel = ({ slides: propSlides = [], hideTitle = false }) => {
 
       <EnglishWorkshopModal
         open={modalType === "english"}
+        onClose={() => setModalType(null)}
+        t={t}
+      />
+
+      <ScholarshipWorkshopModal
+        open={modalType === "scholarship"}
         onClose={() => setModalType(null)}
         t={t}
       />

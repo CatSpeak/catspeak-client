@@ -2,7 +2,10 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
-import { useLoginMutation, useResendEmailOtpMutation } from "@/store/api/authApi"
+import {
+  useLoginMutation,
+  useResendEmailOtpMutation,
+} from "@/store/api/authApi"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import Modal from "@/shared/components/ui/Modal"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
@@ -23,7 +26,8 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const [isNotActivatedError, setIsNotActivatedError] = useState(false)
 
   const [login, { isLoading }] = useLoginMutation()
-  const [resendEmailOtp, { isLoading: isResendingOtp }] = useResendEmailOtpMutation()
+  const [resendEmailOtp, { isLoading: isResendingOtp }] =
+    useResendEmailOtpMutation()
 
   const validateEmail = (value) => {
     if (!value) return authText.validationEmailRequired
@@ -66,14 +70,14 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
           return
         }
 
-        const isInvalidCredentials =
-          errMessage === "Invalid email or password"
+        const isInvalidCredentials = errMessage === "Invalid email or password"
 
         setApiError(
           isInvalidCredentials
             ? authText.invalidCredentials
             : errMessage ||
                 t.common?.errorGeneric ||
+                authText.loginFailed ||
                 "Login failed",
         )
         return
@@ -88,6 +92,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         err?.data?.message ||
           err?.message ||
           t.common?.errorGeneric ||
+          authText.loginFailed ||
           "Login failed",
       )
     }
@@ -140,7 +145,11 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
                 setPassword(e.target.value)
                 setPasswordError("")
               }}
-              className={passwordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}
+              className={
+                passwordError
+                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
+                  : ""
+              }
             />
             {passwordError && (
               <p className="mt-1 text-xs text-red-600">{passwordError}</p>
@@ -181,7 +190,10 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
                       await resendEmailOtp({ email }).unwrap()
                     } catch (err) {
                       const apiMsg = err?.data?.message
-                      if (apiMsg === "Too many OTP requests. Please try again later.") {
+                      if (
+                        apiMsg ===
+                        "Too many OTP requests. Please try again later."
+                      ) {
                         setApiError(authText.tooManyOtpRequests)
                       } else {
                         setApiError(apiMsg || "Failed to resend OTP.")
@@ -191,7 +203,9 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
                     onSwitchMode("verify-email", email)
                   }}
                 >
-                  {isResendingOtp ? authText.sendingOtp || "Sending OTP..." : authText.clickToVerifyEmail}
+                  {isResendingOtp
+                    ? authText.sendingOtp || "Sending OTP..."
+                    : authText.clickToVerifyEmail}
                 </button>
               </span>
             ) : (

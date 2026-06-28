@@ -4,7 +4,7 @@ import useClickOutside from "@/shared/hooks/useClickOutside"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
-import { Settings, LogOut, Loader2, User, ArrowLeft } from "lucide-react"
+import { Settings, LogOut, Loader2, User, ArrowLeft, CreditCard } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { AnimatePresence, motion } from "framer-motion"
@@ -30,9 +30,11 @@ const useIsMobile = (breakpoint = 425) => {
 const ProfileDropdown = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const { user: authUser } = useAuth()
+  const { user: authUser, isAuthenticated } = useAuth()
   const [logoutApi] = useLogoutMutation()
-  const { data: userData, isLoading } = useGetProfileQuery()
+  const { data: userData, isLoading } = useGetProfileQuery(undefined, {
+    skip: !isAuthenticated,
+  })
   const [isOpen, setIsOpen] = useState(false)
   const [showLogoutWarning, setShowLogoutWarning] = useState(false)
   const menuRef = useRef(null)
@@ -41,8 +43,8 @@ const ProfileDropdown = () => {
 
   const user = userData?.data ?? authUser ?? {}
 
-  console.log(user)
-  console.log(authUser)
+  // console.log(user)
+  // console.log(authUser)
 
   const handleToggleMenu = () => {
     setIsOpen((prev) => !prev)
@@ -75,6 +77,11 @@ const ProfileDropdown = () => {
   const handleSettingsClick = () => {
     handleCloseMenu()
     navigate("/setting")
+  }
+
+  const handleBillingClick = () => {
+    handleCloseMenu()
+    navigate("/billing")
   }
 
   // Click outside to close (desktop only)
@@ -137,6 +144,10 @@ const ProfileDropdown = () => {
         <button onClick={handleSettingsClick} className={menuItemClass}>
           <Settings size={20} />
           <span>{t.header.settings || "Settings"}</span>
+        </button>
+        <button onClick={handleBillingClick} className={menuItemClass}>
+          <CreditCard size={20} />
+          <span>Billing History</span>
         </button>
         <button onClick={handleLogout} className={menuItemClass}>
           <LogOut size={20} />

@@ -19,8 +19,9 @@ export default {
     community: "社区",
     catSpeak: "猫语",
     cart: "课程",
-    connect: "个人",
+    connect: "个人资料",
     workspace: "我的工作区",
+    pricing: "价格",
   },
   comingSoon: {
     badge: "即将推出",

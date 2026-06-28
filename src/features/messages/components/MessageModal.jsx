@@ -1,10 +1,10 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 
 const useIsMobile = (breakpoint = 425) => {
-  const [isMobile, setIsMobile] = React.useState(
+  const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= breakpoint,
   )
 

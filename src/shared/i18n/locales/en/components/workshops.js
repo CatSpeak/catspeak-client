@@ -119,4 +119,50 @@ export default {
     hashtags: "#CatSpeak #SpeakUpGlobal #LightLearning #BeyondIELTS #ExpertSharing #EnglishLearning #IELTSJourney #FutureReady",
     closeButton: "Close",
   },
+  scholarshipWorkshop: {
+    title: "EXPERT SHARING | FROM VIETNAM TO THE WORLD – JOURNEY TO CONQUER CHINESE UNIVERSITY SCHOLARSHIPS",
+    cta: "Register Now",
+    expertSharing: "[[ EXPERT SHARING ]]",
+    introText: "This special Expert Sharing Workshop is with speaker Dr. Nguyen Quoc Tu – Vice Principal of Intracom University, who has years of experience in education, foreign language training, and international cooperation.",
+    contentLabel: "Workshop Highlights:",
+    bulletPoints: [
+      "Types of Chinese University scholarships for Vietnamese students",
+      "Conditions, application documents, and scholarship application process",
+      "Effective Chinese learning roadmap to conquer study abroad goals",
+      "Practical experiences from studying and researching in China",
+      "Direct Q&A for all questions about scholarships, studying abroad, and career orientation"
+    ],
+    specialGiftsIntro: "SPECIAL: By participating in the workshop, you also have the chance to receive attractive gifts:",
+    specialGifts: [
+      "Scholarships from training programs",
+      "Study vouchers and valuable gifts for participants",
+      "Secret gifts will be revealed during the program"
+    ],
+    speakerLabel: "👨‍🏫 Speaker: ",
+    speakerName: "Dr. Nguyen Quoc Tu",
+    speakerTitles: [
+      "Vice Principal, Dean of Foreign Languages at Intracom University",
+      "Chairman of the Board of QTEDU Chinese",
+      "PhD from Beijing Language and Culture University, China",
+      "Master's degree from Jilin University, China",
+      "Former Dean of Chinese Department, Dong Do University"
+    ],
+    timeLabel: "⏰ Time:",
+    time: "20:00 – Saturday, June 27, 2026",
+    formatLabel: "💻 Format:",
+    format: "Online on Cat Speak platform",
+    registerLinkLabel: "📌 Register now:",
+    registerLinkText: "Registration form",
+    registerLinkUrl: "https://forms.gle/XtycWYjWbstJqgtB8",
+    followPrompt: "==============================\nFollow Cat Speak Fanpage and join the Chinese communication community so you don't miss out on interesting information!",
+    websiteLabel: "🌐 Website:",
+    website: "https://www.catspeak.com.vn/",
+    zaloGroupName: "👉 Cat Speak Group – Chinese communication community:",
+    zaloLink: "https://zalo.me/g/gffkqu214",
+    inboxPrompt: "📩 Inbox the fanpage directly or email: ",
+    email: "catspeak.vn@gmail.com",
+    closing: "For any questions, suggestions, or if you want to accompany Cat Speak on the journey of community development, don't hesitate to contact us!",
+    hashtags: "#CatSpeak #ExpertSharing #ChineseScholarship #StudyInChina #LearnChinese #Scholarship #IntracomUniversity",
+    closeButton: "Close"
+  },
 }

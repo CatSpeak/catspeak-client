@@ -20,6 +20,7 @@ const WaitingScreen = ({
   room,
   participantCount,
   localStream,
+  lkVideoTrack,
   micOn,
   cameraOn,
   user,
@@ -91,6 +92,7 @@ const WaitingScreen = ({
         <VideoPreview
           user={user}
           localStream={localStream}
+          lkVideoTrack={lkVideoTrack}
           micOn={micOn}
           cameraOn={cameraOn}
           onToggleMic={onToggleMic}
@@ -159,6 +161,7 @@ const WaitingScreen = ({
         open={isBgModalOpen}
         onClose={() => setIsBgModalOpen(false)}
         localStream={localStream}
+        lkVideoTrack={lkVideoTrack}
         cameraOn={cameraOn}
         onToggleCam={onToggleCam}
       />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
 import {
   useGetUserProfileQuery,
   useUpdateMeetingAvatarMutation,
@@ -14,8 +15,9 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 const AvatarUrlPicker = ({ className = "p-4" }) => {
   const { t } = useLanguage()
   const { localParticipant } = useGlobalVideoCall()
+  const { isAuthenticated } = useAuth()
 
-  const { data: profileData } = useGetUserProfileQuery()
+  const { data: profileData } = useGetUserProfileQuery(undefined, { skip: !isAuthenticated })
   const currentAvatarUrl = profileData?.data?.meetingAvatarUrl || ""
 
   const [inputUrl, setInputUrl] = useState("")

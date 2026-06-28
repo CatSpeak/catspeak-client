@@ -1,13 +1,9 @@
 import React, { useState, useRef } from "react"
-import { Check } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, USA } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
-
-const MotionButton = motion.button
-
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
  * Nôm Vietnamese is not listed here — when you add it for development, use e.g.
@@ -36,25 +32,21 @@ const LanguageSwitcher = ({ className = "" }) => {
 
   const current = LANGUAGES.find((l) => l.key === language) || LANGUAGES[0]
   const displayLabel =
-    t.header?.languages?.[language] ||
-    t.header?.languages?.en ||
-    current.label
+    t.header?.languages?.[language] || t.header?.languages?.en || current.label
 
   return (
     <div
       className={`relative flex items-center justify-center ${className}`}
       ref={dropdownRef}
     >
-      <MotionButton
+      <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={displayLabel}
         title={displayLabel}
         onClick={handleToggle}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.94 }}
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-transparent p-0 transition-colors hover:bg-[#FFB400]/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB400]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-transparent p-0 transition-all hover:bg-[#FFB400]/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB400]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <img
           src={current.flag}
@@ -62,7 +54,7 @@ const LanguageSwitcher = ({ className = "" }) => {
           className="pointer-events-none block h-full w-full object-cover"
           draggable={false}
         />
-      </MotionButton>
+      </button>
 
       <AnimatePresence>
         {open && (
@@ -70,9 +62,13 @@ const LanguageSwitcher = ({ className = "" }) => {
             <FluentAnimation
               direction="down"
               exit
-              className="overflow-hidden rounded-2xl border border-[#F0E4C4] bg-white/95 shadow-lg backdrop-blur-md"
+              className="overflow-hidden rounded-2xl border border-[#e5e5e5] bg-white shadow-lg"
             >
-              <div className="p-1.5" role="listbox" aria-label="Language">
+              <div
+                className="p-1 flex flex-col gap-1"
+                role="listbox"
+                aria-label="Language"
+              >
                 {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => {
                   const isActive = language === key
 
@@ -84,19 +80,21 @@ const LanguageSwitcher = ({ className = "" }) => {
                       aria-selected={isActive}
                       disabled={disabled}
                       onClick={() => !disabled && handleLanguageSelect(key)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${disabled
-                        ? "cursor-not-allowed text-lighttextGray"
-                        : isActive
-                          ? "bg-[#FFF4D6] text-[#9A7200] font-semibold"
-                          : "text-headingColor hover:bg-[#FFFAED] hover:text-[#B8860B]"
-                        }`}
+                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm transition-colors ${
+                        disabled
+                          ? "cursor-not-allowed"
+                          : isActive
+                            ? "bg-[#F6F6F6] text-[#990011]"
+                            : "hover:bg-[#F6F6F6]"
+                      }`}
                     >
-                      <span className="flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                      <span className="flex h-5 w-5 shrink-0 overflow-hidden rounded-full">
                         <img
                           src={flag}
                           alt=""
-                          className={`block h-full w-full object-cover ${disabled ? "grayscale opacity-50" : ""
-                            }`}
+                          className={`block h-full w-full object-cover ${
+                            disabled ? "grayscale opacity-50" : ""
+                          }`}
                           draggable={false}
                         />
                       </span>
@@ -108,12 +106,12 @@ const LanguageSwitcher = ({ className = "" }) => {
                           {soonLabel || t.header?.soon || "Soon"}
                         </span>
                       ) : isActive ? (
-                        <Check
-                          className="h-4 w-4 shrink-0 text-[#FFB400]"
-                          strokeWidth={2.5}
-                          aria-hidden
-                        />
-                      ) : null}
+                        <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-[#990011]">
+                          <div className="h-2 w-2 rounded-full bg-[#990011]" />
+                        </div>
+                      ) : (
+                        <div className="h-4 w-4 shrink-0 rounded-full border-2 border-[#D9D9D9]" />
+                      )}
                     </button>
                   )
                 })}

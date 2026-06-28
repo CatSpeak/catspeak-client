@@ -23,22 +23,19 @@ const ServerDownScreen = () => {
   const { t } = useLanguage()
 
   const checkHealth = useCallback(async () => {
-    const isHealthy = await checkIsServerHealthy()
+    // When polling in the background while the screen is shown,
+    // we don't need retries because setInterval handles it.
+    // We pass 0 retries here so it checks quickly.
+    const isHealthy = await checkIsServerHealthy(0)
     if (isHealthy) {
-      if (isInCall) {
-        // If in a call, just clear the error state but don't force a reload
-        // to avoid disconnecting the user's ongoing video call.
-        dispatch(setServerUp())
-        toast.success("Server connection restored!", { duration: 4000 })
-      } else {
-        window.location.reload()
-      }
+      dispatch(setServerUp())
+      toast.success(t?.auth?.serverConnectionRestored || "Server connection restored!", { duration: 4000 })
     }
-  }, [isInCall, dispatch])
+  }, [dispatch, t])
 
   // Start polling when server is down
   useEffect(() => {
-    if (!isServerDown) return
+    if (!isServerDown || isInCall) return
 
     // Immediately trigger a health check, then start polling
     const interval = setInterval(checkHealth, POLLING_INTERVAL_MS)

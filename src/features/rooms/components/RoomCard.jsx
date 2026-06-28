@@ -1,6 +1,6 @@
-import React from "react"
+import React, { useState } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
-import { motion } from "framer-motion"
+import InteractiveCard from "@/shared/components/ui/InteractiveCard"
 import { Clock, Users, Link, Bookmark, Lock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
@@ -57,8 +57,8 @@ const RoomCard = ({ room }) => {
   // Placeholder code simulation
   const roomCode = `room-${room.roomId}`.toLowerCase()
 
-  const [showDevModal, setShowDevModal] = React.useState(false)
-  const [showFullModal, setShowFullModal] = React.useState(false)
+  const [showDevModal, setShowDevModal] = useState(false)
+  const [showFullModal, setShowFullModal] = useState(false)
 
   const handleRoomClick = (e) => {
     if (isRoomFull) {
@@ -77,26 +77,37 @@ const RoomCard = ({ room }) => {
 
   return (
     <>
-      <motion.div
-        onClick={handleRoomClick}
+      <div
         style={{
           fontFamily: "var(--font-primary)",
           WebkitFontSmoothing: "antialiased",
         }}
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white border border-[#E5E5E5] cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300"
+        className="h-full w-full"
       >
-        {/* Cover Image Section */}
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden">
+        <InteractiveCard
+          onClick={handleRoomClick}
+          className="h-full w-full"
+          innerClassName="h-full w-full"
+        >
+          {/* Cover Image Section */}
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-black/5">
+          {/* Blurred Background Image */}
+          <div
+            className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
+            style={{ backgroundImage: `url(${room.thumbnailUrl || meetingFallbackImage})` }}
+          />
+
           <img
             src={room.thumbnailUrl || meetingFallbackImage}
             alt="Room Cover"
-            className="h-full w-full object-contain transition-transform duration-500"
+            className="relative z-10 h-full w-full object-contain transition-transform duration-500"
           />
 
+          {/* Subtle overlay */}
+          <div className="absolute inset-0 z-10 bg-black/5 pointer-events-none" />
+
           {/* Top Overlay: Tags & Bookmark */}
-          <div className="absolute left-4 top-4 right-14 flex flex-wrap gap-2">
+          <div className="absolute z-20 left-4 top-4 right-14 flex flex-wrap gap-2">
             {room.requiredLevel && (
               <span className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                 {room.requiredLevel}
@@ -119,7 +130,7 @@ const RoomCard = ({ room }) => {
 
           {/* Private room lock badge */}
           {isPrivate && (
-            <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
+            <div className="absolute z-20 right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
               <Lock size={14} className="text-white" />
             </div>
           )}
@@ -173,7 +184,8 @@ const RoomCard = ({ room }) => {
             </div>
           </div>
         </div>
-      </motion.div>
+        </InteractiveCard>
+      </div>
 
       <InDevelopmentModal
         open={showDevModal}
