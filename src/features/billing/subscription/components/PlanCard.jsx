@@ -4,7 +4,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
   const { t } = useLanguage()
-  const { name, price, interval, description, features } = plan
+  const { name, price, interval, description, features, iconUrl, brandColor } =
+    plan
 
   return (
     <div
@@ -21,13 +22,27 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
       )}
 
       <div className="mb-6">
-        <h3 className="text-xl font-bold mb-2">{name}</h3>
+        <div className="flex items-center gap-3 mb-2">
+          {iconUrl && (
+            <img
+              src={iconUrl}
+              alt={`${name} icon`}
+              className="w-8 h-8 object-contain rounded-md"
+            />
+          )}
+          <h3 className="text-xl font-bold">{name}</h3>
+        </div>
         <p className="text-[#7A7574] text-sm">{description}</p>
       </div>
 
       <div className="mb-6 flex items-end gap-1">
         <span className="text-4xl font-extrabold">
-          {price === 0 ? "0 ₫" : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}
+          {price === 0
+            ? "0 ₫"
+            : new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(price)}
         </span>
         {price > 0 && (
           <span className="text-[#7A7574] text-sm mb-1">/{interval}</span>
@@ -45,7 +60,7 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
         ))}
       </ul>
 
-      {(!isActive && !onAction) ? (
+      {!isActive && !onAction ? (
         <div className="w-full py-3 rounded-full font-semibold text-center bg-[#F3F3F3] text-[#7A7574]">
           {t.billing.pricing.included}
         </div>
@@ -53,13 +68,18 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
         <button
           onClick={onAction}
           disabled={isProcessing || isActive}
+          style={!isActive && brandColor ? { backgroundColor: brandColor } : {}}
           className={`w-full py-3 rounded-full font-semibold transition-all ${
             isActive
               ? "bg-[#E5E5E5] text-[#7A7574] cursor-default"
               : "bg-cath-red-700 text-white hover:brightness-90"
           } disabled:opacity-70 disabled:cursor-not-allowed`}
         >
-          {isProcessing ? t.billing.pricing.processing : isActive ? t.billing.pricing.currentPlan : actionLabel}
+          {isProcessing
+            ? t.billing.pricing.processing
+            : isActive
+              ? t.billing.pricing.currentPlan
+              : actionLabel}
         </button>
       )}
     </div>

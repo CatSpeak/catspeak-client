@@ -17,7 +17,7 @@ const PricingPage = () => {
     useGetPlansQuery()
 
   const userTier = profileResponse?.data?.tier?.toLowerCase()
-  const currentPlanId = userTier === "pro" ? "pro" : "free"
+  console.log(profileResponse)
 
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
@@ -57,6 +57,8 @@ const PricingPage = () => {
         ? plan.subscriptionFeatures.map((f) => f.featureName)
         : [],
       applicableRole: plan.applicableRole?.toLowerCase(),
+      iconUrl: plan.iconUrl,
+      brandColor: plan.brandColor,
     }))
 
   return (
@@ -73,7 +75,7 @@ const PricingPage = () => {
       ) : (
         <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
           {formattedPlans.map((plan) => {
-            const isActive = currentPlanId === plan.applicableRole
+            const isActive = userTier === plan.name?.toLowerCase()
             return (
               <PlanCard
                 key={plan.id}
