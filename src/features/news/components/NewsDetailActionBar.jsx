@@ -1,6 +1,16 @@
 import React, { useState, useRef } from "react"
-import { ThumbsUp, Heart, Smile, Share2, MessageCircle } from "lucide-react"
+import {
+  ThumbsUp,
+  Heart,
+  Smile,
+  Share,
+  Bookmark,
+  ChevronDown,
+} from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import facebookIcon from "@/shared/assets/images/facebook-icon.svg"
+import googleIcon from "@/shared/assets/images/google-icon.svg"
+import zaloIcon from "@/shared/assets/images/zalo-icon.png"
 
 const NewsDetailActionBar = ({
   newsItem,
@@ -13,9 +23,7 @@ const NewsDetailActionBar = ({
   const holdTimer = useRef(null)
 
   const handleTouchStart = () => {
-    holdTimer.current = setTimeout(() => {
-      setShowReactions(true)
-    }, 400)
+    holdTimer.current = setTimeout(() => setShowReactions(true), 400)
   }
 
   const handleTouchEnd = () => {
@@ -23,108 +31,156 @@ const NewsDetailActionBar = ({
   }
 
   return (
-    <div className="pb-4 border-b border-[#e5e5e5] flex items-center gap-2 flex-wrap text-sm mt-4">
-      <div
-        className="group/reactions relative flex items-center"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchEnd}
-        onMouseLeave={() => setShowReactions(false)}
-        onContextMenu={(e) => {
-          if (window.innerWidth < 1024) e.preventDefault()
-        }}
-      >
-        <button
-          onClick={() => {
-            const type = newsItem.currentUserReaction
-              ? newsItem.currentUserReaction
-              : "Like"
-            handleReact(type)
-          }}
-          className={`flex items-center gap-2 h-12 px-4 rounded-full border border-[#e5e5e5] transition-colors ${
-            newsItem.currentUserReaction === "Love"
-              ? "bg-red-50 text-red-600 border-red-100"
-              : newsItem.currentUserReaction === "Haha"
-                ? "bg-yellow-50 text-yellow-600 border-yellow-100"
-                : newsItem.currentUserReaction === "Like"
-                  ? "bg-blue-50 text-blue-600 border-blue-100"
-                  : "bg-white text-[#606060] hover:bg-[#f2f2f2]"
-          }`}
+    <div className="border-t border-[#e2e2e2] py-4 flex flex-wrap items-center justify-between gap-3">
+      {/* ── Left: Action buttons ─────────────────────────────────── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Like / Reactions */}
+        <div
+          className="group/reactions relative"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchEnd}
+          onMouseLeave={() => setShowReactions(false)}
         >
-          {newsItem.currentUserReaction === "Love" ? (
-            <Heart className="text-red-700 fill-red-400" />
-          ) : newsItem.currentUserReaction === "Haha" ? (
-            <Smile className="text-yellow-700 fill-yellow-400" />
-          ) : (
-            <ThumbsUp
-              className={
-                newsItem.currentUserReaction === "Like"
-                  ? "text-blue-700 fill-blue-400"
-                  : ""
-              }
-            />
-          )}
-          <span className="text-base">{newsItem.totalReactions || 0}</span>
+          <button
+            onClick={() => {
+              const type = newsItem.currentUserReaction || "Like"
+              handleReact(type)
+            }}
+            className={`flex items-center gap-2 px-3 py-2 rounded-full border transition-colors ${
+              newsItem.currentUserReaction === "Love"
+                ? "bg-red-50 text-red-600 border-cath-red-700"
+                : newsItem.currentUserReaction === "Haha"
+                  ? "bg-yellow-50 text-yellow-600 border-cath-red-700"
+                  : newsItem.currentUserReaction === "Like"
+                    ? "bg-blue-50 text-blue-600 border-cath-red-700"
+                    : "bg-white text-cath-red-700 border-cath-red-700 hover:bg-cath-red-50"
+            }`}
+          >
+            {newsItem.currentUserReaction === "Love" ? (
+              <Heart size={16} strokeWidth={1.5} className="text-cath-red-700 fill-red-400" />
+            ) : newsItem.currentUserReaction === "Haha" ? (
+              <Smile size={16} strokeWidth={1.5} className="text-cath-red-700 fill-yellow-400" />
+            ) : (
+              <ThumbsUp
+                size={16}
+                strokeWidth={1.5}
+                className={
+                  newsItem.currentUserReaction === "Like"
+                    ? "text-cath-red-700 fill-blue-400"
+                    : "text-cath-red-700"
+                }
+              />
+            )}
+            <span className="font-nunito font-medium text-base">Thích</span>
+          </button>
+
+          {/* Reactions Popover */}
+          <div
+            className={`absolute bottom-full left-0 mb-2 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
+            ${showReactions ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"}`}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowReactions(false)
+                handleReact("Like")
+              }}
+              className="p-2 hover:-translate-y-1 transition-transform hover:bg-blue-50 rounded-full"
+              title="Like"
+            >
+              <ThumbsUp size={18} className="text-blue-700 fill-blue-400" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowReactions(false)
+                handleReact("Love")
+              }}
+              className="p-2 hover:-translate-y-1 transition-transform hover:bg-red-50 rounded-full"
+              title="Love"
+            >
+              <Heart size={18} className="text-red-700 fill-red-400" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowReactions(false)
+                handleReact("Haha")
+              }}
+              className="p-2 hover:-translate-y-1 transition-transform hover:bg-yellow-50 rounded-full"
+              title="Haha"
+            >
+              <Smile size={18} className="text-yellow-700 fill-yellow-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* Share */}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 px-3 py-2 rounded-full border border-cath-red-700 text-cath-red-700 transition-colors hover:bg-cath-red-50"
+        >
+          <Share size={16} strokeWidth={1.5} />
+          <span className="font-nunito font-medium text-base">
+            {t.news?.newsDetail?.share || "Chia sẻ"}
+          </span>
         </button>
 
-        {/* Reactions Popover */}
-        <div
-          className={`absolute bottom-full left-0 mb-2 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
-          ${showReactions ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"}`}
+        {/* Bookmark */}
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center justify-center p-2 rounded-full border border-cath-red-700 text-cath-red-700 transition-colors hover:bg-cath-red-50"
         >
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowReactions(false)
-              handleReact("Like")
-            }}
-            className="p-2 hover:-translate-y-1 transition-transform hover:bg-blue-50 rounded-full"
-            title={t.news?.newsDetail?.like || "Like"}
-          >
-            <ThumbsUp className="text-blue-700 fill-blue-400" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowReactions(false)
-              handleReact("Love")
-            }}
-            className="p-2 hover:-translate-y-1 transition-transform hover:bg-red-50 rounded-full"
-            title={t.news?.newsDetail?.love || "Love"}
-          >
-            <Heart className="text-red-700 fill-red-400" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowReactions(false)
-              handleReact("Haha")
-            }}
-            className="p-2 hover:-translate-y-1 transition-transform hover:bg-yellow-50 rounded-full"
-            title={t.news?.newsDetail?.haha || "Haha"}
-          >
-            <Smile className="text-yellow-700 fill-yellow-400" />
-          </button>
-        </div>
+          <Bookmark size={16} strokeWidth={1.5} />
+        </button>
       </div>
 
-      <button
-        onClick={onCommentClick}
-        className="flex items-center gap-2 h-12 px-4 rounded-full border border-[#e5e5e5] bg-white text-[#606060] transition-colors hover:bg-[#f2f2f2]"
-      >
-        <MessageCircle className="text-[#606060]" />
-        <span className="text-base">{newsItem.totalComments || 0}</span>
-      </button>
+      {/* ── Right: Social sharing icons (Facebook · Google · Zalo) ── */}
+      <div className="flex items-center gap-5">
+        {/* Facebook */}
+        <button
+          onClick={() => {
+            const url = encodeURIComponent(window.location.href)
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "noopener,noreferrer")
+          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+          title="Share on Facebook"
+        >
+          <img src={facebookIcon} alt="Facebook" className="w-10 h-10 object-contain" />
+        </button>
 
-      <button
-        onClick={handleShare}
-        className="flex items-center gap-2 h-12 px-4 rounded-full border border-[#e5e5e5] transition-colors bg-white text-[#606060] hover:bg-[#f2f2f2]"
-      >
-        <Share2 className="text-[#606060] " />
-        <span className="text-base">
-          {t.news?.newsDetail?.share || "Share"}
-        </span>
-      </button>
+        {/* Google */}
+        <button
+          onClick={() => {
+            const url = encodeURIComponent(window.location.href)
+            window.open(`https://www.google.com/sharer/u/0/?url=${url}`, "_blank", "noopener,noreferrer")
+          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+          title="Share on Google"
+        >
+          <img src={googleIcon} alt="Google" className="w-10 h-10 object-contain" />
+        </button>
+
+        {/* Zalo */}
+        <button
+          onClick={() => {
+            const url = encodeURIComponent(window.location.href)
+            window.open(`https://zalo.me/share/${url}`, "_blank", "noopener,noreferrer")
+          }}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+          title="Share on Zalo"
+        >
+          <span className="relative block w-10 h-10 overflow-hidden rounded-full">
+            <img
+              src={zaloIcon}
+              alt="Zalo"
+              className="absolute h-auto max-w-none"
+              style={{ left: "-35%", top: "-34.55%", width: "169.09%" }}
+            />
+          </span>
+        </button>
+      </div>
     </div>
   )
 }

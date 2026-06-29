@@ -1,45 +1,75 @@
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import NewsDetailActionBar from "../components/NewsDetailActionBar"
 import {
   useGetPostByIdQuery,
+  useGetPostBySlugQuery,
   useGetSharedPostQuery,
   useReactToPostMutation,
   useSharePostMutation,
 } from "@/store/api/postsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { Breadcrumb } from "@/shared/components/ui/navigation"
 import PostContent from "../components/PostContent"
 import CommentsSection from "../components/CommentsSection"
-
 import Carousel from "@/shared/components/ui/Carousel"
-import BackButton from "@/shared/components/ui/buttons/BackButton"
 import ShareModal from "../components/ShareModal"
-import {
-  getTranslatedTimeAgo,
-  formatExactDate,
-} from "@/features/news/utils/newsUtils"
-
+import RelatedNewsSection from "../components/RelatedNewsSection"
+import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 
 const NewsDetailPage = () => {
-  const { id, lang } = useParams()
+  const { slug } = useParams()
   const navigate = useNavigate()
   const { t, language } = useLanguage()
+  const lang = language || "vi"
   const commentsRef = useRef(null)
 
-  const isSharedToken = isNaN(Number(id))
-  
-  const { data: normalData, isLoading: normalLoading, error: normalError } = useGetPostByIdQuery(id, { skip: isSharedToken })
-  const { data: sharedData, isLoading: sharedLoading, error: sharedError } = useGetSharedPostQuery(id, { skip: !isSharedToken })
-  
-  const data = isSharedToken ? sharedData : normalData
-  const isLoading = isSharedToken ? sharedLoading : normalLoading
-  const error = isSharedToken ? sharedError : normalError
+  const [trySharedFallback, setTrySharedFallback] = useState(false)
+
+  const isNumeric = !isNaN(Number(slug))
+  const isSharedTokenInitially = !isNumeric && /^[a-zA-Z0-9]{8,}$/.test(slug) && /[A-Z]/.test(slug)
+  const isSharedToken = isSharedTokenInitially || trySharedFallback
+  const isSlug = !isNumeric && !isSharedToken
+
+  const {
+    data: slugData,
+    isLoading: slugLoading,
+    error: slugError,
+  } = useGetPostBySlugQuery(slug, { skip: !isSlug })
+
+  const {
+    data: normalData,
+    isLoading: normalLoading,
+    error: normalError,
+  } = useGetPostByIdQuery(slug, { skip: !isNumeric })
+
+  const {
+    data: sharedData,
+    isLoading: sharedLoading,
+    error: sharedError,
+  } = useGetSharedPostQuery(slug, { skip: !isSharedToken })
+
+  useEffect(() => {
+    if (slugError && !isNumeric && !isSharedTokenInitially && !trySharedFallback) {
+      if (/^[a-zA-Z0-9]{8,}$/.test(slug)) {
+        const timer = setTimeout(() => {
+          setTrySharedFallback(true)
+        }, 0)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [slugError, slug, isNumeric, isSharedTokenInitially, trySharedFallback])
+
+  const data = isSharedToken ? sharedData : (isNumeric ? normalData : slugData)
+  const isLoading = isSharedToken ? sharedLoading : (isNumeric ? normalLoading : slugLoading)
+  const error = isSharedToken ? sharedError : (isNumeric ? normalError : slugError)
   const [reactToPost] = useReactToPostMutation()
   const [sharePost] = useSharePostMutation()
   const newsItem = data?.data
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
+
   const handleReact = (type) => {
     if (!newsItem?.postId) return
     reactToPost({ postId: newsItem.postId, type })
@@ -52,12 +82,12 @@ const NewsDetailPage = () => {
       let url =
         (typeof result === "string" ? result : result?.shareLink) ||
         window.location.href
-        
+
       if (url && !url.startsWith("http")) {
         url = url.startsWith("/") ? url : `/${url}`
         url = `${window.location.origin}${url}`
       }
-      
+
       if (url) {
         setShareUrl(url)
         setIsShareModalOpen(true)
@@ -68,91 +98,116 @@ const NewsDetailPage = () => {
   }
 
   if (isLoading) {
-    return <div className="min-h-[50vh]"></div>
+    return <div className="min-h-[50vh]" />
   }
 
   if (error || !newsItem || newsItem.privacy !== "Public") {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center">
         <h5 className="mb-4 text-2xl font-bold">{t.news?.error?.notFound}</h5>
-        <BackButton onClick={() => navigate(`/${lang}/cat-speak/news`)}>
+        <button
+          onClick={() => navigate(`/${lang}/cat-speak/news`)}
+          className="rounded-full border border-cath-red-700 px-6 py-2 text-sm font-medium text-cath-red-700 transition-colors hover:bg-cath-red-50"
+        >
           {t.news?.error?.backToNews}
-        </BackButton>
+        </button>
       </div>
     )
   }
 
+  const breadcrumbItems = [
+    { label: "Trang chủ", onClick: () => navigate(`/${lang}/community`) },
+    {
+      label: "Cat Speak",
+      onClick: () => navigate(`/${lang}/cat-speak/news`),
+    },
+    {
+      label: "Bản tin CatSpeak",
+      onClick: () => navigate(`/${lang}/cat-speak/news`),
+    },
+    { label: newsItem.title },
+  ]
+
   return (
-    <div className="w-full">
-      {/* Back Button */}
-      <BackButton to={`/${lang}/cat-speak/news`}>
-        {t.news?.newsDetail?.back}
-      </BackButton>
+    <div className="w-full px-4 md:px-6">
+      {/* ── Two-column layout ─────────────────────────────────── */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* ── Left Column: Article Content ─────────────────────── */}
+        <div className="flex-1 min-w-0 flex flex-col gap-6">
+          {/* ── Breadcrumb ─────────────────────────────────────── */}
+          <Breadcrumb items={breadcrumbItems} />
 
-      {/* Title */}
-      <h1 className="text-2xl mt-4 mb-2 font-semibold">{newsItem.title}</h1>
-      <div className="flex items-center gap-1.5 text-sm text-[#606060] mb-4">
-        {newsItem.viewCount !== undefined && (
-          <>
-            <span title={t.news?.newsDetail?.views || "views"}>
-              {newsItem.viewCount} {t.news?.newsDetail?.views || "views"}
-            </span>
-            <span>·</span>
-          </>
-        )}
-        <span>
-          {getTranslatedTimeAgo(newsItem.createDate, t.news?.newsCard?.timeAgo)}
-        </span>
-        {newsItem.lastEdited && newsItem.lastEdited !== newsItem.createDate && (
-          <>
-            <span>·</span>
-            <span>
-              {t.news?.newsDetail?.edited}{" "}
-              {getTranslatedTimeAgo(
-                newsItem.lastEdited,
-                t.news?.newsCard?.timeAgo,
-              )}
-            </span>
-          </>
-        )}
-      </div>
+          {/* ── Title + Meta ───────────────────────────────────── */}
+          <div className="flex flex-col gap-4 md:gap-6">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 md:gap-4">
+              <h1 className="font-nunito font-semibold text-[28px] md:text-[40px] leading-[1.4] text-black">
+                {newsItem.title}
+              </h1>
+              <div className="flex items-center gap-1 shrink-0">
+                {newsItem.viewCount !== undefined && (
+                  <span className="font-nunito font-medium text-sm text-[#7b7979]">
+                    {newsItem.viewCount} lượt xem
+                  </span>
+                )}
+                <span className="font-nunito font-medium text-sm text-[#7b7979]">
+                  {" "}•{" "}
+                </span>
+                <span className="font-nunito font-medium text-sm text-[#7b7979]">
+                  {getTranslatedTimeAgo(
+                    newsItem.createDate,
+                    t.news?.newsCard?.timeAgo,
+                  )}
+                </span>
+              </div>
+            </div>
 
-      {/* Hero Image / Carousel */}
-      {newsItem.media && newsItem.media.length > 0 && (
-        <Carousel
-          images={newsItem.media.map((item) => ({
-            url: getImageUrl(item.mediaUrl),
-            alt: newsItem.title,
-          }))}
-          className="rounded-2xl mb-3 max-h-[60vh] bg-black/5"
-          objectFit="contain"
-        />
-      )}
+            {/* ── Hero Image / Carousel ────────────────────────── */}
+            {newsItem.media && newsItem.media.length > 0 && (
+              <Carousel
+                images={newsItem.media.map((item) => ({
+                  url: getImageUrl(item.mediaUrl),
+                  alt: newsItem.title,
+                }))}
+                className="rounded-2xl bg-black/5"
+                objectFit="contain"
+              />
+            )}
+          </div>
 
-      <article className="bg-white">
-        {/* Interaction Buttons */}
-        <NewsDetailActionBar
-          newsItem={newsItem}
-          handleReact={handleReact}
-          handleShare={handleShare}
-          onCommentClick={() =>
-            commentsRef.current?.scrollIntoView({ behavior: "smooth" })
-          }
-        />
+          {/* ── Article Body ───────────────────────────────────── */}
+          <article className="bg-white px-4 md:px-6 py-4 md:py-6">
+            <PostContent html={newsItem.content} />
 
-        {/* Body */}
-        <div className="space-y-6 text-gray-700 leading-relaxed my-4 text-base">
-          <PostContent html={newsItem.content} />
+            {/* Action Bar */}
+            <NewsDetailActionBar
+              newsItem={newsItem}
+              handleReact={handleReact}
+              handleShare={handleShare}
+              onCommentClick={() =>
+                commentsRef.current?.scrollIntoView({ behavior: "smooth" })
+              }
+            />
+          </article>
         </div>
 
-        <CommentsSection
-          ref={commentsRef}
-          postId={newsItem.postId}
-          totalComments={newsItem.totalComments || 0}
-        />
-      </article>
+        {/* ── Right Column: Comments Sidebar (desktop) / Below (mobile) */}
+        <div className="w-full lg:w-[424px] lg:shrink-0">
+          <div className="lg:sticky lg:top-[88px]">
+            <div className="bg-white rounded-3xl shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)] p-4 md:p-6">
+              <CommentsSection
+                ref={commentsRef}
+                postId={newsItem.postId}
+                totalComments={newsItem.totalComments || 0}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Share Modal */}
+      {/* ── Related News (full width) ───────────────────────────── */}
+      <RelatedNewsSection currentPostId={newsItem.postId} />
+
+      {/* ── Share Modal ──────────────────────────────────────────── */}
       <ShareModal
         open={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
