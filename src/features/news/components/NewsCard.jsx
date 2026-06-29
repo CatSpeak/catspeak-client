@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react"
+import React, { useState, useMemo, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { COLORS } from "@/shared/constants/constants"
@@ -16,6 +16,7 @@ import {
   useSharePostMutation,
 } from "@/store/api/postsApi"
 import ShareModal from "./ShareModal"
+import Carousel from "@/shared/components/ui/Carousel"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
 
@@ -42,8 +43,6 @@ const NewsCard = ({ news }) => {
   /* ── Local state ───────────────────────────────────────────────── */
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0)
-  const [imageError, setImageError] = useState(false)
   const [showReactions, setShowReactions] = useState(false)
   const holdTimer = useRef(null)
 
@@ -101,15 +100,14 @@ const NewsCard = ({ news }) => {
     if (holdTimer.current) clearTimeout(holdTimer.current)
   }
 
-  /* ── Auto-cycle media ──────────────────────────────────────────── */
-  useEffect(() => {
-    if (hasMedia && news.media.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentMediaIndex((prev) => (prev + 1) % news.media.length)
-      }, 10000)
-      return () => clearInterval(interval)
-    }
-  }, [hasMedia, news.media?.length])
+  /* ── Derived: carousel images ────────────────────────────────────── */
+  const carouselImages = useMemo(() => {
+    if (!hasMedia) return []
+    return news.media.map((item) => ({
+      url: getImageUrl(item.mediaUrl),
+      alt: news.title,
+    }))
+  }, [hasMedia, news.media, news.title])
 
   /* ── Render ────────────────────────────────────────────────────── */
   return (
@@ -119,27 +117,17 @@ const NewsCard = ({ news }) => {
     >
       {/* ── Image area ───────────────────────────────────────────── */}
       <div className="relative flex-1 min-h-0 p-2.5 rounded-t-[20px]">
-        {hasMedia && !imageError ? (
+        {hasMedia ? (
           <div
-            className="flex h-full transition-transform duration-700 ease-out"
-            style={{ transform: `translateX(-${currentMediaIndex * 100}%)` }}
+            className="w-full h-full rounded-t-[20px] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
-            {news.media.map((item) => {
-              const imageUrl = getImageUrl(item.mediaUrl)
-              return (
-                <div
-                  key={item.postMediaId}
-                  className="w-full h-full flex-shrink-0 relative"
-                >
-                  <img
-                    src={imageUrl}
-                    alt={news.title}
-                    className="w-full h-full object-cover rounded-t-[20px]"
-                    onError={() => setImageError(true)}
-                  />
-                </div>
-              )
-            })}
+            <Carousel
+              images={carouselImages}
+              autoPlay
+              interval={5000}
+              className="w-full h-full rounded-t-[20px]"
+            />
           </div>
         ) : (
           <div
@@ -149,13 +137,6 @@ const NewsCard = ({ news }) => {
             <span className="text-white/30 font-bold text-3xl select-none text-center leading-tight">
               {news.title?.substring(0, 20)}
             </span>
-          </div>
-        )}
-
-        {/* Multiple media indicator */}
-        {hasMedia && news.media.length > 1 && (
-          <div className="absolute top-3 right-14 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-md">
-            {currentMediaIndex + 1} / {news.media.length}
           </div>
         )}
 
