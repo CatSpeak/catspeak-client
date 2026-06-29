@@ -9,12 +9,12 @@ import Footer from "../../shared/components/Footer";
 import Auth from "@/features/auth/components";
 import AuthModalContext from "@/shared/context/AuthModalContext";
 import { AnimatePresence } from "framer-motion";
-import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader";
 import MainHeader from "../../shared/components/Header/MainHeader"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
 import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 import { useSidebar } from "@/shared/context/SidebarContext"
+import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader";
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
   const { isMobileSidebarOpen, setIsMobileSidebarOpen, isSidebarExpanded, setIsSidebarExpanded } = useSidebar()

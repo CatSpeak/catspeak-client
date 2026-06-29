@@ -27,14 +27,8 @@ const DesktopNavItem = ({ navKey }) => {
   return (
     <NavLink
       to={href}
-      className={`
-        flex min-w-max h-10 flex-1 items-center justify-center whitespace-nowrap rounded-full px-4 text-base font-bold tracking-wide transition-colors duration-200 no-underline hover:bg-gray-100/50
-        ${
-          navKey === "catSpeak"
-            ? "text-[#990011]"
-            : "text-black hover:text-[#990011]"
-        }
-      `}
+      className="flex min-w-max h-10 flex-1 items-center justify-center whitespace-nowrap rounded-full px-4 text-base font-bold tracking-wide transition-colors duration-200 no-underline hover:bg-gray-100/50
+        text-black hover:text-[#990011]"
     >
       {t.nav?.[navKey] || (navKey === "workspace" ? "My Workspace" : navKey)}
     </NavLink>
