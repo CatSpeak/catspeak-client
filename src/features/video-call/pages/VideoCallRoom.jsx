@@ -16,6 +16,7 @@ import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBac
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
+import RecordingStatusBar from "@/features/video-call/components/RecordingStatusBar"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -51,6 +52,9 @@ const VideoCallRoomContent = () => {
     enterPiP,
     // Room subtitles
     showRoomSubtitles,
+    // Recording
+    isRecording,
+    confirmStopRecording,
   } = useVideoCallContext()
 
   const isSidePanelOpen = activeSidePanel !== null
@@ -112,6 +116,7 @@ const VideoCallRoomContent = () => {
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           <div className="flex-1 relative min-h-0">
             <VideoGrid />
+            <RecordingStatusBar isRecording={isRecording} onStopRecording={confirmStopRecording} />
           </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
