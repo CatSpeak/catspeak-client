@@ -6,16 +6,15 @@ import { useAuth } from "@/features/auth";
 import LandingHeaderLogo from "./LandingHeaderLogo";
 import DesktopNav from "../LandingDesktopNav/DesktopNav";
 import LandingHeaderGuestControls from "./LandingHeaderGuestControls";
-import MobileDrawer from "@/features/navigation/components/MobileNav/MobileDrawer";
 import LandingHeaderUserControls from "./LandingHeaderUserControls";
-
+import MobileDrawer from "@/features/navigation/components/MobileNav/landing/MobileDrawer";
 const LandingHeader = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };
+  };  
 
   return (
     <header className="sticky top-4 z-50 flex justify-center w-full px-4">
