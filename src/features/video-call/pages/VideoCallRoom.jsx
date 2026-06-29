@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react"
 import { Navigate } from "react-router-dom"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Loader2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useConnectionState } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
@@ -12,6 +12,7 @@ import {
   ControlBar as VideoCallControlBar,
   RoomHeader,
 } from "@/features/video-call"
+import TroubleshootPanel from "@/features/video-call/components/TroubleshootPanel"
 import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
@@ -35,6 +36,7 @@ const VideoCallRoomContent = () => {
     setShowAvatarPicker,
     activeSidePanel,
     setActiveSidePanel,
+    showTroubleshoot,
     isAISession,
     showCC,
     // Auth guard
@@ -60,7 +62,9 @@ const VideoCallRoomContent = () => {
       ? t.rooms?.videoCall?.applyVisualEffects || "Backgrounds and effects"
       : showAvatarPicker
         ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
-        : t.rooms.chatBox.title
+        : showTroubleshoot
+          ? t.rooms?.videoCall?.reconnect || "Troubleshoot connection"
+          : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -69,7 +73,16 @@ const VideoCallRoomContent = () => {
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
   const connectionState = useConnectionState()
-  const livekitReady = connectionState === ConnectionState.Connected
+  const [hasConnected, setHasConnected] = useState(false)
+
+  useEffect(() => {
+    if (connectionState === ConnectionState.Connected) {
+      setHasConnected(true)
+    }
+  }, [connectionState])
+
+  const livekitReady = hasConnected || connectionState === ConnectionState.Connected
+  const isReconnecting = connectionState === ConnectionState.Reconnecting
 
   useEffect(() => {
     // Prevent iOS/macOS swipe-to-go-back gestures during the call
@@ -101,7 +114,19 @@ const VideoCallRoomContent = () => {
   }
 
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="flex h-full w-full flex-col relative">
+      {isReconnecting && (
+        <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/50 backdrop-blur-md text-white">
+          <div className="relative flex items-center justify-center h-16 w-16 mb-6">
+            <span className="absolute inline-flex h-full w-full animate-[ping_2s_ease-in-out_infinite] rounded-full bg-white opacity-20"></span>
+            <span className="absolute inline-flex h-12 w-12 animate-[ping_1.5s_ease-in-out_infinite] rounded-full bg-white opacity-30"></span>
+            <span className="relative inline-flex h-5 w-5 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,1)]"></span>
+          </div>
+          <p className="text-lg font-medium tracking-wide animate-pulse">
+            {t.rooms?.videoCall?.provider?.reconnecting ?? "Reconnecting to call..."}
+          </p>
+        </div>
+      )}
       {/* Top Bar */}
       <RoomHeader />
 
@@ -134,6 +159,7 @@ const VideoCallRoomContent = () => {
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <VirtualBackgroundPicker />}
                 {showAvatarPicker && <AvatarUrlPicker />}
+                {showTroubleshoot && <TroubleshootPanel />}
                 {showChat && (
                   <ChatBox
                     messages={messages}
@@ -185,6 +211,7 @@ const VideoCallRoomContent = () => {
                     {showParticipants && <ParticipantList hideTitle />}
                     {showVirtualBackground && <VirtualBackgroundPicker />}
                     {showAvatarPicker && <AvatarUrlPicker />}
+                    {showTroubleshoot && <TroubleshootPanel hideTitle />}
                     {showChat && (
                       <ChatBox
                         messages={messages}

@@ -192,8 +192,9 @@ const GlobalCallContent = ({
     isTogglingMic: videoCallState.isTogglingMic,
     isTogglingCam: videoCallState.isTogglingCam,
 
-    // UI panels
     ...panelState,
+    showTroubleshoot: panelState.showTroubleshoot,
+    setShowTroubleshoot: panelState.setShowTroubleshoot,
     unreadRoomChat,
     setUnreadRoomChat,
     unreadAiChat,

@@ -6,7 +6,7 @@ import { useState } from "react"
  * Only one panel can be active at a time. Opening a new panel
  * automatically closes the previous one.
  *
- * Panel keys: "chat" | "participants" | "virtualBackground" | "avatarPicker"
+ * Panel keys: "chat" | "participants" | "virtualBackground" | "avatarPicker" | "troubleshoot"
  *
  * To add a new panel in the future:
  *   1. Add a derived boolean (e.g. `const showFoo = activeSidePanel === "foo"`)
@@ -21,12 +21,14 @@ export const useSidePanelState = () => {
   const showParticipants = activeSidePanel === "participants"
   const showVirtualBackground = activeSidePanel === "virtualBackground"
   const showAvatarPicker = activeSidePanel === "avatarPicker"
+  const showTroubleshoot = activeSidePanel === "troubleshoot"
 
   // Convenience setters (accept boolean toggle style)
   const setShowChat = (show) => setActiveSidePanel(show ? "chat" : null)
   const setShowParticipants = (show) => setActiveSidePanel(show ? "participants" : null)
   const setShowVirtualBackground = (show) => setActiveSidePanel(show ? "virtualBackground" : null)
   const setShowAvatarPicker = (show) => setActiveSidePanel(show ? "avatarPicker" : null)
+  const setShowTroubleshoot = (show) => setActiveSidePanel(show ? "troubleshoot" : null)
 
   // Chat sub-panel collapse state (tightly coupled to panel visibility)
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
@@ -43,6 +45,8 @@ export const useSidePanelState = () => {
     setShowVirtualBackground,
     showAvatarPicker,
     setShowAvatarPicker,
+    showTroubleshoot,
+    setShowTroubleshoot,
     isChatCollapsed,
     setIsChatCollapsed,
     isAiCollapsed,

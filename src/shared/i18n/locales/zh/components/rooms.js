@@ -249,6 +249,12 @@ export default {
     screenShareLabelYou: "{{name}} 的屏幕（你）",
     moreOptions: "更多选项",
     subtitles: "字幕 (CC)",
+    reconnect: "重新连接",
+    troubleshoot: {
+      havingIssues: "遇到问题？",
+      description: "如果您遇到延迟、视频卡顿或音频中断的情况，请尝试强制重新连接。在重新建立连接期间，您的通话将短暂暂停。",
+      forceReconnect: "强制重新连接",
+    },
     copyLink: "复制会议链接",
     linkCopied: "已复制！",
     leaveCall: "离开房间",
@@ -286,6 +292,7 @@ export default {
     },
     provider: {
       connecting: "正在连接...",
+      reconnecting: "正在重新连接通话...",
       failedToLoad: "无法加载会话",
       unknownError: "发生未知错误",
       retry: "重试",
