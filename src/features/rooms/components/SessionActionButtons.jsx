@@ -55,8 +55,8 @@ const SessionActionButtons = ({
               <Button3D
                 disabled={!isActionable || isLoadingThis}
                 loading={isActionable && isLoadingThis}
-                startIcon={<Icon className="w-5 h-5" />}
                 className="w-full min-[426px]:w-auto min-[426px]:min-w-[140px]"
+                roundedClass="rounded-full"
               >
                 {label}
               </Button3D>

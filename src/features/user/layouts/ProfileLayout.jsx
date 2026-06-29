@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from "react"
 import { Outlet } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import ProfileSidebar from "../components/ProfileSidebar"
 import { motion, useAnimation, useMotionValue, useSpring } from "framer-motion"
 import SharedLayout from "@/shared/components/layout/SharedLayout"
 
@@ -98,17 +97,17 @@ const ProfileLayout = () => {
   const { t } = useLanguage()
 
   return (
-    <SharedLayout
-      background={<BackgroundCircles />}
-      sidebar={<ProfileSidebar />}
-      mobileNav={
-        <div className="w-full">
-          <ProfileSidebar variant="horizontal" />
+    <div className="flex flex-col lg:flex-row w-full flex-1 lg:overflow-hidden relative z-0">
+      <BackgroundCircles />
+
+      {/* Main Content */}
+      <main className="flex-1 h-full overflow-y-auto flex flex-col">
+        {/* Content */}
+        <div className="mx-auto w-full max-w-[1040px] min-w-0 p-5 flex-1">
+          <Outlet />
         </div>
-      }
-    >
-      <Outlet />
-    </SharedLayout>
+      </main>
+    </div>
   )
 }
 

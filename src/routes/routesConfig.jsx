@@ -187,7 +187,7 @@ const routesConfig = [
       {
         element: (
           <AuthGuard>
-            <UserLayout />
+            <MainLayout />
           </AuthGuard>
         ),
         children: [
@@ -248,7 +248,7 @@ const routesConfig = [
       {
         element: (
           <AuthGuard>
-            <UserLayout showFooter={false} />
+            <MainLayout showFooter={false} />
           </AuthGuard>
         ),
         children: [
