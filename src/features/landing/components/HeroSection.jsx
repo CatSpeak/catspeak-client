@@ -1,66 +1,76 @@
-import { HeroImage } from "@/shared/assets/images/home"
-import { useLanguage } from "@/shared/context/LanguageContext.jsx"
-import { LiquidGlassButton } from "@/shared/components"
-import { useAuth } from "@/features/auth"
+import { useLanguage } from "@/shared/context/LanguageContext.jsx";
+import { Element1, Element4, Screen } from "../assets";
+import { useAuth } from "@/features/auth";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = ({ openAuthModal }) => {
-  const { t } = useLanguage()
-  const { isAuthenticated } = useAuth()
+  const { t, language } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleAction = () => {
+    if (isAuthenticated) {
+      navigate(`/${language}/community`);
+    } else {
+      openAuthModal("login");
+    }
+  };
 
   return (
-    <div className="w-full px-6 sm:px-8 md:px-10">
-      <div className="relative mx-auto overflow-visible rounded-[24px] sm:rounded-[32px] bg-gradient-to-b from-cath-red-500 via-cath-red-700 to-[#f08d1d] p-6 sm:p-8 md:p-10 lg:p-12 drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]">
-        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-          {/* Left Side - Banner Image */}
-          <div className="relative">
-            {/* Decorative white frame at bottom left (similar to design) - Moved behind image */}
+    <div className="relative w-full bg-white px-6 sm:px-8 md:px-10 pt-14 pb-32 lg:pt-24 lg:pb-24">
+      {/* Background Element */}
+      <img
+        src={Element1}
+        alt="Background Element"
+        className="absolute top-0 left-0 w-full h-[60%] lg:h-full object-cover object-top opacity-80 pointer-events-none"
+      />
 
-            {/* Image Card */}
-            <div className="relative aspect-video overflow-hidden rounded-[20px] sm:rounded-[28px]">
-              {/* Main Image */}
-              <img
-                src={HeroImage}
-                alt="Hoàn Kiếm Lake"
-                className="w-full h-full object-cover"
-              />
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="flex flex-col-reverse lg:flex-row items-center lg:items-start gap-4 lg:gap-20">
+          {/* Left Side - Text Content */}
+          <div className="flex-1 w-full z-20 flex flex-col justify-center gap-6 text-center lg:text-left">
+            <div className="space-y-4">
+              <h3 className="font-semibold text-cath-red-600 text-base lg:text-sm tracking-wider uppercase">
+                {t.home?.subtitle}
+              </h3>
+              <h1 className="font-bold text-[#910B09] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl leading-tight">
+                <span className="text-black">{t.home?.heroTitle1}</span>
+                <br />
+                <span className="text-[#910B09]">{t.home?.heroTitle2}</span>
+              </h1>
+              <p className="text-gray-600 text-base sm:text-lg max-w-md sm:max-w-2xl mx-auto lg:mx-0">
+                {t.home?.heroSubtitle}
+              </p>
+            </div>
 
-              {/* Action buttons, hide if user is logged in */}
-              {!isAuthenticated && (
-                <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 z-20 flex flex-col gap-2 sm:flex-row-reverse sm:gap-3 md:gap-4">
-                  <LiquidGlassButton
-                    onClick={() => openAuthModal("login")}
-                    variant="default"
-                    className="w-full flex-1 rounded-[999px] px-4 py-2.5 sm:px-6 sm:py-3 text-sm font-semibold text-white sm:max-w-[220px]"
-                  >
-                    {t.auth.loginButton}
-                  </LiquidGlassButton>
-                  <LiquidGlassButton
-                    onClick={() => openAuthModal("register")}
-                    variant="yellow"
-                    className="w-full flex-1 rounded-[999px] px-4 py-2.5 sm:px-6 sm:py-3 text-sm font-semibold text-white sm:max-w-[220px]"
-                  >
-                    {t.auth.registerButton}
-                  </LiquidGlassButton>
-                </div>
-              )}
+            <div className="flex flex-col sm:flex-row gap-4 mt-2 justify-center lg:justify-start">
+              <button
+                onClick={handleAction}
+                className="rounded-full px-8 py-3.5 text-base font-semibold text-white bg-[#910B09] hover:bg-[#7a0907] transition-colors w-full sm:w-auto mx-auto lg:mx-0"
+              >
+                {t.home?.ctaButton}
+              </button>
             </div>
           </div>
 
-          {/* Right Side - Text Content */}
-          <div className="flex h-full">
-            <div className="flex w-full flex-col justify-center gap-4 sm:gap-6 rounded-[20px] sm:rounded-[24px] border-2 border-white p-6 sm:p-8 lg:p-10 xl:p-12 backdrop-blur-sm">
-              <h1 className="font-bold text-[#f4ab1b] text-2xl sm:text-3xl lg:text-4xl xl:text-5xl">
-                {t.home.heroTitle}
-              </h1>
-              <p className="leading-relaxed text-white text-sm sm:text-base lg:text-lg xl:text-xl font-medium">
-                {t.home.heroSubtitle}
-              </p>
-            </div>
+          {/* Right Side - Screen Image */}
+          <div className="w-full lg:flex-1 z-10 relative flex justify-center lg:block lg:min-h-[600px] -mt-10 lg:mt-0">
+            <img
+              src={Screen}
+              alt="CatSpeak Platform"
+              className="relative w-full max-w-xl lg:absolute lg:top-1/3 lg:-translate-y-1/2 lg:-right-40 lg:w-[900px] lg:max-w-none"
+            />
           </div>
         </div>
       </div>
+      <img
+        src={Element4}
+        alt=""
+        aria-hidden="true"
+        className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[100vw] max-w-none "
+      />
     </div>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;
