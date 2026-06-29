@@ -1,7 +1,12 @@
 import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { User, GraduationCap, Building2, Settings } from "lucide-react"
-import SharedSidebar from "@/shared/components/layout/SharedSidebar"
+import {
+  User,
+  GraduationCap,
+  Building2,
+  Settings,
+  CreditCard,
+} from "lucide-react"
 
 const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
   const { t } = useLanguage()
@@ -32,15 +37,15 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
       end: false,
       icon: Settings,
     },
+    {
+      label: t.profile?.sidebar?.billing,
+      path: "/billing",
+      end: false,
+      icon: CreditCard,
+    },
   ].filter((item) => !item.isHidden)
 
-  return (
-    <SharedSidebar
-      items={menuItems}
-      variant={variant}
-      onClose={onClose}
-    />
-  )
+  return <SharedSidebar items={menuItems} variant={variant} onClose={onClose} />
 }
 
 export default ProfileSidebar
