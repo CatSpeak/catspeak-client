@@ -23,14 +23,21 @@ const LiveMessages = ({ languageCommunity }) => {
   const [selectedStory, setSelectedStory] = useState(null)
   const [selectedMyStory, setSelectedMyStory] = useState(null)
 
+  const [sortOrder, setSortOrder] = useState("newest") // "newest" | "oldest"
+  const [displayMode, setDisplayMode] = useState("float") // "grid" | "float"
+
   // Combine stories with isOwn flag
-  const combinedStories = useMemo(
-    () => [
+  const combinedStories = useMemo(() => {
+    const merged = [
       ...stories.map((story) => ({ ...story, isOwn: false })),
       ...myStories.map((story) => ({ ...story, isOwn: true })),
-    ],
-    [stories, myStories],
-  )
+    ]
+    return merged.sort((a, b) => {
+      const tA = new Date(a.createDate ?? 0).getTime()
+      const tB = new Date(b.createDate ?? 0).getTime()
+      return sortOrder === "newest" ? tB - tA : tA - tB
+    })
+  }, [stories, myStories, sortOrder])
 
   const { stageRef, danmakuItems } = useDanmaku(combinedStories)
 
@@ -69,6 +76,10 @@ const LiveMessages = ({ languageCommunity }) => {
         onSend={handleSend}
         myCount={myCount}
         totalCount={totalCount}
+        sortOrder={sortOrder}
+        onSortChange={setSortOrder}
+        displayMode={displayMode}
+        onDisplayModeChange={setDisplayMode}
       />
 
       {isLoading ? (
@@ -94,6 +105,7 @@ const LiveMessages = ({ languageCommunity }) => {
           danmakuItems={danmakuItems}
           stageRef={stageRef}
           onItemClick={handleItemClick}
+          displayMode={displayMode}
         />
       )}
 
