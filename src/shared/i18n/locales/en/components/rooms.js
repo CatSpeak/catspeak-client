@@ -281,6 +281,12 @@ export default {
     screenShareLabelYou: "{{name}}'s screen (You)",
     moreOptions: "More options",
     subtitles: "Subtitles (CC)",
+    reconnect: "Troubleshoot connection",
+    troubleshoot: {
+      havingIssues: "Having issues?",
+      description: "If you're experiencing lag, frozen video, or audio dropouts, try forcing a full reconnection. Your call will pause briefly while we re-establish the connection.",
+      forceReconnect: "Force Reconnect",
+    },
     copyLink: "Copy meeting link",
     linkCopied: "Link copied!",
     leaveCall: "Leave call",
@@ -319,6 +325,7 @@ export default {
     },
     provider: {
       connecting: "Getting your session ready...",
+      reconnecting: "Reconnecting to call...",
       failedToLoad: "Failed to load session",
       unknownError: "Unknown error occurred",
       retry: "Retry",

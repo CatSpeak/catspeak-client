@@ -79,8 +79,14 @@ const IDLE_VALUE = {
   setIsAiCollapsed: () => {},
 }
 
-const IdleCallContent = ({ children, receiveSystemMsgs, setReceiveSystemMsgs }) => (
-  <GlobalVideoCallContext.Provider value={{ ...IDLE_VALUE, receiveSystemMsgs, setReceiveSystemMsgs }}>
+const IdleCallContent = ({
+  children,
+  receiveSystemMsgs,
+  setReceiveSystemMsgs,
+}) => (
+  <GlobalVideoCallContext.Provider
+    value={{ ...IDLE_VALUE, receiveSystemMsgs, setReceiveSystemMsgs }}
+  >
     {children}
   </GlobalVideoCallContext.Provider>
 )
@@ -122,7 +128,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
       className="contents"
       options={{ publishDefaults: { simulcast: true } }}
     >
-      <GlobalCallContent 
+      <GlobalCallContent
         ContextProvider={GlobalVideoCallContext.Provider}
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}

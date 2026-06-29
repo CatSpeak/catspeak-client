@@ -210,6 +210,8 @@ const GlobalCallContent = ({
 
     // UI panels
     ...panelState,
+    showTroubleshoot: panelState.showTroubleshoot,
+    setShowTroubleshoot: panelState.setShowTroubleshoot,
     unreadRoomChat,
     setUnreadRoomChat,
     unreadAiChat,

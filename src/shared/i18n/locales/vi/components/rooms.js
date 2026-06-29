@@ -259,6 +259,12 @@ export default {
     screenShareLabelYou: "Màn hình của {{name}} (Bạn)",
     moreOptions: "Tùy chọn khác",
     subtitles: "Phụ đề (CC)",
+    reconnect: "Khắc phục sự cố kết nối",
+    troubleshoot: {
+      havingIssues: "Gặp sự cố?",
+      description: "Nếu bạn gặp tình trạng giật lag, video bị đóng băng hoặc mất âm thanh, hãy thử buộc kết nối lại. Cuộc gọi của bạn sẽ tạm dừng một chút trong khi chúng tôi thiết lập lại kết nối.",
+      forceReconnect: "Buộc kết nối lại",
+    },
     copyLink: "Sao chép liên kết phòng",
     linkCopied: "Đã sao chép!",
     leaveCall: "Rời phòng",
@@ -298,6 +304,7 @@ export default {
     },
     provider: {
       connecting: "Đang kết nối...",
+      reconnecting: "Đang kết nối lại...",
       failedToLoad: "Không thể tải phiên",
       unknownError: "Đã xảy ra lỗi không xác định",
       retry: "Thử lại",
