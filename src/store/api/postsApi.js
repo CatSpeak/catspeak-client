@@ -30,6 +30,10 @@ export const postsApi = baseApi.injectEndpoints({
       query: (postId) => `/Post/${postId}`,
       providesTags: (result, error, id) => [{ type: "Post", id }],
     }),
+    getPostBySlug: builder.query({
+      query: (slug) => `/Post/slug/${slug}`,
+      providesTags: (result, error, slug) => [{ type: "Post", id: slug }],
+    }),
     getSharedPost: builder.query({
       query: (shareToken) => `/Post/shared/${shareToken}`,
       providesTags: (result, error, id) => [{ type: "Post", id: `shared-${id}` }],
@@ -45,7 +49,7 @@ export const postsApi = baseApi.injectEndpoints({
         const patches = []
 
         // Iterate over all active getPosts queries (for different pages) and optimistically update them
-        for (const [key, query] of Object.entries(state.api.queries)) {
+        for (const [, query] of Object.entries(state.api.queries)) {
           if (query.endpointName === "getPosts" && query.status === "fulfilled") {
             const patch = dispatch(
               postsApi.util.updateQueryData("getPosts", query.originalArgs, (draft) => {
@@ -71,6 +75,42 @@ export const postsApi = baseApi.injectEndpoints({
           } else if (query.endpointName === "getPostById" && query.status === "fulfilled") {
             const patch = dispatch(
               postsApi.util.updateQueryData("getPostById", query.originalArgs, (draft) => {
+                if (draft?.data && draft.data.postId === postId) {
+                  const post = draft.data
+                  if (post.currentUserReaction === type) {
+                    post.currentUserReaction = null
+                    post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
+                  } else {
+                    if (!post.currentUserReaction) {
+                      post.totalReactions = (post.totalReactions || 0) + 1
+                    }
+                    post.currentUserReaction = type
+                  }
+                }
+              })
+            )
+            patches.push(patch)
+          } else if (query.endpointName === "getPostBySlug" && query.status === "fulfilled") {
+            const patch = dispatch(
+              postsApi.util.updateQueryData("getPostBySlug", query.originalArgs, (draft) => {
+                if (draft?.data && draft.data.postId === postId) {
+                  const post = draft.data
+                  if (post.currentUserReaction === type) {
+                    post.currentUserReaction = null
+                    post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
+                  } else {
+                    if (!post.currentUserReaction) {
+                      post.totalReactions = (post.totalReactions || 0) + 1
+                    }
+                    post.currentUserReaction = type
+                  }
+                }
+              })
+            )
+            patches.push(patch)
+          } else if (query.endpointName === "getSharedPost" && query.status === "fulfilled") {
+            const patch = dispatch(
+              postsApi.util.updateQueryData("getSharedPost", query.originalArgs, (draft) => {
                 if (draft?.data && draft.data.postId === postId) {
                   const post = draft.data
                   if (post.currentUserReaction === type) {
@@ -137,6 +177,51 @@ export const postsApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { postId }) => [
         { type: "PostComment", id: `LIST-${postId}` },
       ],
+      async onQueryStarted(
+        { postId, parentCommentId },
+        { dispatch, getState, queryFulfilled },
+      ) {
+        try {
+          const { data: created } = await queryFulfilled
+
+          for (const [, query] of Object.entries(getState().api.queries)) {
+            if (
+              query.endpointName === "getPostComments" &&
+              query.status === "fulfilled" &&
+              query.originalArgs?.postId === postId
+            ) {
+              const patch = dispatch(
+                postsApi.util.updateQueryData(
+                  "getPostComments",
+                  query.originalArgs,
+                  (draft) => {
+                    if (!draft?.data) return
+                    const newComment = created?.data
+                    if (!newComment) return
+
+                    if (parentCommentId) {
+                      // Reply — find parent and push into its replies
+                      const parent = draft.data.find(
+                        (c) => c.commentId === parentCommentId,
+                      )
+                      if (parent) {
+                        if (!parent.replies) parent.replies = []
+                        parent.replies.push(newComment)
+                      }
+                    } else {
+                      // Top-level comment — push to front
+                      draft.data.unshift(newComment)
+                    }
+                  },
+                ),
+              )
+              return patch
+            }
+          }
+        } catch {
+          // Refetch will correct the cache on error
+        }
+      },
     }),
     deletePostComment: builder.mutation({
       query: ({ postId, commentId }) => ({
@@ -167,7 +252,7 @@ export const postsApi = baseApi.injectEndpoints({
         const state = getState()
         const patches = []
 
-        for (const [key, query] of Object.entries(state.api.queries)) {
+        for (const [, query] of Object.entries(state.api.queries)) {
           if (query.endpointName === "getPostComments" && query.status === "fulfilled" && query.originalArgs?.postId === postId) {
             const patch = dispatch(
               postsApi.util.updateQueryData("getPostComments", query.originalArgs, (draft) => {
@@ -213,6 +298,7 @@ export const postsApi = baseApi.injectEndpoints({
 export const { 
   useGetPostsQuery, 
   useGetPostByIdQuery, 
+  useGetPostBySlugQuery,
   useGetSharedPostQuery,
   useReactToPostMutation,
   useSharePostMutation,

@@ -16,6 +16,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
     localParticipant,
     session,
     room: roomData,
+    closingRemainingSeconds,
     micOn,
     cameraOn,
     handleToggleMic,
@@ -26,7 +27,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
   } = useGlobalVideoCall()
 
   const dominant = useDominantSpeaker(participants, localParticipant)
-  const { formattedElapsed } = useSessionTimer(roomData?.createdAt || session?.createdAt, roomData?.duration)
+  const { formattedElapsed, formattedRemaining, hasDuration } = useSessionTimer(roomData?.createDate || session?.createDate, roomData?.duration, closingRemainingSeconds)
 
   // Room name
   const roomName =
@@ -50,9 +51,9 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
           <span className="text-[11px] font-semibold text-white drop-shadow-md max-w-[60%] truncate">
             {roomName}
           </span>
-          {formattedElapsed && formattedElapsed !== "00:00" && (
+          {hasDuration && formattedRemaining && formattedRemaining !== "00:00" && (
             <span className="text-[10px] font-medium text-white/85 bg-black/35 px-1.5 py-0.5 rounded-md tabular-nums">
-              {formattedElapsed}
+              {formattedRemaining}
             </span>
           )}
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { X, ChevronLeft } from "lucide-react"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import Modal from "@/shared/components/ui/Modal"
@@ -20,7 +20,7 @@ const EventDetailModal = ({ event, onClose }) => {
   const [overrideEvent, setOverrideEvent] = useState(null)
 
   // Reset override if the base event changes
-  React.useEffect(() => {
+  useEffect(() => {
     setOverrideEvent(null)
   }, [event])
 

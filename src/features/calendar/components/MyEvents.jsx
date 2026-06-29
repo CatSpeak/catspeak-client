@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { useGetMyEventsQuery } from "@/store/api/eventsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import EventList from "./EventList"
@@ -7,7 +7,7 @@ const MyEvents = () => {
   const { t } = useLanguage()
   const { data, isLoading } = useGetMyEventsQuery()
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("=== MY EVENTS API DATA ===", data)
   }, [data])
 

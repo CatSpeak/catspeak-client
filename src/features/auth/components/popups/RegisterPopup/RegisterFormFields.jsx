@@ -50,11 +50,16 @@ const RegisterFormFields = ({
   setErrors,
 }) => {
   const prefixLength = formData.phonePrefix?.length || 3
-  const plClass = prefixLength <= 2 ? "pl-[80px]"
-                : prefixLength === 3 ? "pl-[90px]"
-                : prefixLength === 4 ? "pl-[100px]"
-                : prefixLength === 5 ? "pl-[110px]"
-                : "pl-[120px]"
+  const plClass =
+    prefixLength <= 2
+      ? "pl-[80px]"
+      : prefixLength === 3
+        ? "pl-[90px]"
+        : prefixLength === 4
+          ? "pl-[100px]"
+          : prefixLength === 5
+            ? "pl-[110px]"
+            : "pl-[120px]"
 
   const handleChange = (field) => (e) => {
     const value =
@@ -115,7 +120,9 @@ const RegisterFormFields = ({
             value={formData.phonePrefix}
             onChange={(val) => setFormData({ ...formData, phonePrefix: val })}
             enableSearch={true}
-            searchPlaceholder={authText.searchPhonePlaceholder || "Search phone code..."}
+            searchPlaceholder={
+              authText.searchPhonePlaceholder || "Search phone code..."
+            }
             dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
             trigger={(isOpen, selectedOption, toggleDropdown) => (
               <TextInput
@@ -141,11 +148,17 @@ const RegisterFormFields = ({
                       className="flex items-center gap-1 pl-0 pr-1 h-full focus:outline-none cursor-pointer"
                     >
                       <span className="text-base leading-none">
-                        {phonePrefixes.find((p) => p.value === formData.phonePrefix)?.icon}
+                        {
+                          phonePrefixes.find(
+                            (p) => p.value === formData.phonePrefix,
+                          )?.icon
+                        }
                       </span>
                       <ChevronDown size={14} className="text-gray-500" />
                     </button>
-                    <span className="text-[#606060] text-sm ml-1">{formData.phonePrefix}</span>
+                    <span className="text-[#606060] text-sm ml-1">
+                      {formData.phonePrefix}
+                    </span>
                   </div>
                 }
               />
@@ -153,7 +166,9 @@ const RegisterFormFields = ({
             renderOption={(option, isSelected) => (
               <div
                 className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${
-                  isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
+                  isSelected
+                    ? "bg-[#F6F6F6] font-semibold"
+                    : "hover:bg-[#F6F6F6]"
                 }`}
               >
                 <span className="text-base shrink-0">{option.icon}</span>
@@ -188,12 +203,16 @@ const RegisterFormFields = ({
           <Dropdown
             placeholder={authText.languagePlaceholder}
             value={formData.preferredLanguage}
-            onChange={(val) => handleChange("preferredLanguage")({ target: { value: val } })}
+            onChange={(val) =>
+              handleChange("preferredLanguage")({ target: { value: val } })
+            }
             options={languageOptions}
             triggerClassName={errors.preferredLanguage ? "!border-red-600" : ""}
           />
           {errors.preferredLanguage && (
-            <p className="mt-1 text-xs text-red-600">{errors.preferredLanguage}</p>
+            <p className="mt-1 text-xs text-red-600">
+              {errors.preferredLanguage}
+            </p>
           )}
         </div>
       </div>
@@ -224,10 +243,14 @@ const RegisterFormFields = ({
           <Dropdown
             placeholder={authText.countryPlaceholder}
             value={formData.country}
-            onChange={(val) => handleChange("country")({ target: { value: val } })}
+            onChange={(val) =>
+              handleChange("country")({ target: { value: val } })
+            }
             options={countryOptions}
             enableSearch={true}
-            searchPlaceholder={authText.searchCountryPlaceholder || "Search country..."}
+            searchPlaceholder={
+              authText.searchCountryPlaceholder || "Search country..."
+            }
             triggerClassName={errors.country ? "!border-red-600" : ""}
             trigger={(isOpen, selectedOption, toggleDropdown) => (
               <button
@@ -243,7 +266,10 @@ const RegisterFormFields = ({
                     {selectedOption?.label || authText.countryPlaceholder}
                   </span>
                 </div>
-                <ChevronDown size={14} className={`shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={14}
+                  className={`shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                />
               </button>
             )}
           />

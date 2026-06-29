@@ -47,14 +47,14 @@ const EditableField = ({
       )}
       {isEditing && error && <p className="text-xs text-red-600">{error}</p>}
 
-      <div className="flex justify-end gap-3">
+      <div className="flex justify-end gap-3 max-[425px]:w-full">
         {isEditing ? (
           <>
             <PillButton
               onClick={onCancel}
               disabled={isUpdating}
               variant="outline"
-              startIcon={<X size={18} />}
+              className="max-[425px]:flex-1"
             >
               {cancelLabel}
             </PillButton>
@@ -64,7 +64,7 @@ const EditableField = ({
               loading={isUpdating}
               variant="primary"
               bgColor="#16a34a"
-              startIcon={!isUpdating && <Check size={18} />}
+              className="max-[425px]:flex-1"
             >
               {saveLabel}
             </PillButton>
@@ -74,6 +74,7 @@ const EditableField = ({
             onClick={() => onEdit(name)}
             variant="outline"
             startIcon={<Pencil size={18} />}
+            className="max-[425px]:w-full"
           >
             {editLabel}
           </PillButton>

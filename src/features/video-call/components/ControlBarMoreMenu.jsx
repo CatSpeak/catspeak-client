@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
   MonitorUp,
   MonitorOff,
@@ -48,7 +48,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     stopSubtitles,
   } = useSubtitleControls()
 
-  const [showSubtitlePicker, setShowSubtitlePicker] = React.useState(false)
+  const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -84,47 +84,51 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                     duration={0.2}
                     className="w-full"
                   >
-                    {/* Mobile-only menu items */}
-                    <div className="min-[426px]:hidden">
-                      <div className="p-1">
-                        <button
-                          onClick={() => {
-                            setShowParticipants(!showParticipants)
+                    <div className="flex flex-col gap-1 p-1">
+                      <button
+                        onClick={() => {
+                          setShowParticipants(!showParticipants)
+                          setShowMoreMenu(false)
+                        }}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                        style={{ textAlign: "left" }}
+                      >
+                        <Users size={20} />
+                        {t.rooms?.videoCall?.controls?.participants ||
+                          "Participants"}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          if (isAISession) {
+                            setShowCC(!showCC)
                             setShowMoreMenu(false)
-                          }}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                          style={{ textAlign: "left" }}
-                        >
-                          <Users size={20} />
-                          {t.rooms?.videoCall?.controls?.participants ||
-                            "Participants"}
-                        </button>
-                        
-                        <button
-                          onClick={() => {
-                            if (isAISession) {
-                              setShowCC(!showCC)
+                          } else {
+                            if (isSubtitleActive) {
+                              stopSubtitles()
                               setShowMoreMenu(false)
                             } else {
-                              if (isSubtitleActive) {
-                                stopSubtitles()
-                                setShowMoreMenu(false)
-                              } else {
-                                setShowSubtitlePicker((v) => !v)
-                              }
+                              setShowSubtitlePicker((v) => !v)
                             }
-                          }}
-                          disabled={!isAISession && isStarting}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                        >
-                          {(!isAISession && isStarting) ? <Loader2 size={20} className="animate-spin" /> : <Captions size={20} />}
-                          {(isAISession ? showCC : isSubtitleActive) ? (t?.rooms?.videoCall?.controls?.captionsOff || "Turn off captions") : (t?.rooms?.videoCall?.controls?.captionsOn || "Turn on captions")}
-                        </button>
-                      </div>
-                      <div className="border-t border-[#E5E5E5]"></div>
-                    </div>
+                          }
+                        }}
+                        disabled={!isAISession && isStarting}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                      >
+                        {!isAISession && isStarting ? (
+                          <Loader2 size={20} className="animate-spin" />
+                        ) : (
+                          <Captions size={20} />
+                        )}
+                        {(isAISession ? showCC : isSubtitleActive)
+                          ? t?.rooms?.videoCall?.controls?.captionsOff ||
+                            "Turn off captions"
+                          : t?.rooms?.videoCall?.controls?.captionsOn ||
+                            "Turn on captions"}
+                      </button>
 
-                    <div className="flex flex-col gap-1 p-1">
+                      <div className="border-t border-[#E5E5E5]"></div>
+
                       <button
                         onClick={() => {
                           setShowAvatarPicker(!showAvatarPicker)
@@ -133,7 +137,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                         className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                       >
                         <UserCircle size={20} />
-                        {t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
+                        {t?.rooms?.videoCall?.changeAvatar ||
+                          "Change meeting avatar"}
                       </button>
 
                       <button
@@ -144,11 +149,10 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                         className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                       >
                         <Sparkles size={20} />
-                        {t?.rooms?.videoCall?.applyVisualEffects ||
-                          "Apply visual effects"}
+                        {t?.rooms?.videoCall?.backgroundsAndEffects ||
+                          "Backgrounds and effects"}
                       </button>
 
-                      {/* Hiding PiP button in menu for now
                       {"documentPictureInPicture" in window && (
                         <button
                           onClick={() => {
@@ -161,7 +165,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                           {t?.rooms?.videoCall?.pictureInPicture || "Picture-in-Picture"}
                         </button>
                       )}
-                      */}
 
                       <button
                         onClick={handleCopyLink}

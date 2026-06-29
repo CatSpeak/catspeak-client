@@ -114,4 +114,6 @@ export default {
   otpResentSuccess: "OTP has been resent successfully",
   sendingOtp: "Sending OTP...",
   tooManyOtpRequests: "Too many OTP requests. Please try again later.",
+  loginFailed: "Login failed. Please try again.",
+  serverConnectionRestored: "Server connection restored!",
 }

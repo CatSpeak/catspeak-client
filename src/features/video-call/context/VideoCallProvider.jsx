@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import { useParams, useLocation, useNavigate, Navigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import { toast } from "react-hot-toast"
-import { useGetProfileQuery } from "@/features/auth"
+import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useGetLivekitTokenMutation } from "@/store/api/livekitApi"
 import {
@@ -20,6 +20,7 @@ import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import WebViewBlockScreen from "../components/WebViewBlockScreen"
 import PasswordScreen from "../components/PasswordScreen"
+import CallEndedScreen from "../components/CallEndedScreen"
 
 /**
  * Phases:
@@ -79,8 +80,22 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   // AI sessions are flagged via navigation state (set in RoomsPage).
   const isAISession = location.state?.isAISession === true
 
-  // Phase state machine — skip waiting if from queue
-  const [phase, setPhase] = useState(fromQueue ? "joining" : "verifying")
+  // Phase state machine — skip waiting if from queue, or go to ended if returned from call
+  const [phase, setPhase] = useState(
+    location.state?.callEnded ? "ended" : fromQueue ? "joining" : "verifying",
+  )
+
+  // Sync phase if location.state updates after initial mount (e.g., when ending a call)
+  // Sync phase if location.state updates after initial mount (e.g., when ending a call)
+  useEffect(() => {
+    if (location.state?.callEnded) {
+      setPhase("ended")
+    } else if (phase === "ended") {
+      verifyTriggered.current = false
+      setPhase(fromQueue ? "joining" : "verifying")
+    }
+  }, [location.state?.callEnded, phase, fromQueue])
+
   const [initMicOn, setInitMicOn] = useState(false)
   const [initCamOn, setInitCamOn] = useState(false)
 
@@ -92,8 +107,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const [verifyJoinRoom, { isLoading: isVerifying }] =
     useVerifyJoinRoomMutation()
 
+  const { isAuthenticated } = useAuth()
+
   // --- User data ---
-  const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery()
+  const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery(undefined, { skip: !isAuthenticated })
   const user = userData?.data ?? null
 
   // --- Room data (fetched by roomId from URL) ---
@@ -114,6 +131,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     micOn,
     cameraOn,
     localStream,
+    lkVideoTrack,
     toggleMic: hookToggleMic,
     toggleCamera: hookToggleCamera,
   } = useMediaPreview({
@@ -149,6 +167,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const verifyTriggered = useRef(false)
   useEffect(() => {
     if (
+      phase !== "verifying" ||
       verifyTriggered.current ||
       !room ||
       !user ||
@@ -179,7 +198,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         setPhase("password-required")
       }
     })()
-  }, [room, user, isLoadingRoom, isLoadingUser, fromQueue, roomId])
+  }, [room, user, isLoadingRoom, isLoadingUser, fromQueue, roomId, phase])
 
   // ── Handle password submission from PasswordScreen ──
   const handlePasswordSubmit = async (password) => {
@@ -251,6 +270,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       // Fetch LiveKit token to validate connectivity and join
       const livekitTokenBody = {
         roomId: Number(roomId),
+        roomName: room?.name || `room-${roomId}`
       }
       const tokenRes = await getLivekitToken(livekitTokenBody).unwrap()
 
@@ -401,6 +421,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           micOn={micOn}
           cameraOn={cameraOn}
           localStream={localStream}
+          lkVideoTrack={lkVideoTrack}
           onToggleMic={toggleMic}
           onToggleCam={toggleCamera}
           onJoin={handleJoinClick}
@@ -420,6 +441,16 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         <VideoCallLoading
           message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
         />
+      </>
+    )
+  }
+
+  // ---- PHASE: ENDED ----
+  if (phase === "ended") {
+    return (
+      <>
+        {switchModal}
+        <CallEndedScreen />
       </>
     )
   }

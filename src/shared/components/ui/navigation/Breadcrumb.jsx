@@ -1,26 +1,29 @@
 import React from "react"
-import colors from "@/shared/utils/colors"
 
 const Breadcrumb = ({ items }) => {
   return (
-    <div className="flex items-center flex-wrap">
+    <div className="flex items-center flex-wrap gap-3 font-nunito text-sm leading-[1.4]">
       {items.map((item, index) => {
         const isLast = index === items.length - 1
 
         return (
           <React.Fragment key={index}>
             {isLast ? (
-              <span style={{ color: colors.headingColor }}>{item.label}</span>
+              <span className="font-semibold text-cath-red-700">
+                {item.label}
+              </span>
             ) : (
               <button
                 onClick={item.onClick}
-                className="text-[#606060] hover:text-black hover:underline"
+                className="font-normal text-[#7b7979] hover:text-black hover:underline transition-colors"
               >
                 {item.label}
               </button>
             )}
 
-            {!isLast && <span className="mx-3 shrink-0 text-[#606060]">/</span>}
+            {!isLast && (
+              <span className="shrink-0 text-[#7b7979]">/</span>
+            )}
           </React.Fragment>
         )
       })}

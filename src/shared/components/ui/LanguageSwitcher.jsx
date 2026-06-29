@@ -1,13 +1,9 @@
 import React, { useState, useRef } from "react"
-import { Check } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, USA } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
-
-const MotionButton = motion.button
-
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
  * Nôm Vietnamese is not listed here — when you add it for development, use e.g.
@@ -36,25 +32,23 @@ const LanguageSwitcher = ({ className = "" }) => {
 
   const current = LANGUAGES.find((l) => l.key === language) || LANGUAGES[0]
   const displayLabel =
-    t.header?.languages?.[language] ||
-    t.header?.languages?.en ||
-    current.label
+    t.header?.languages?.[language] || t.header?.languages?.en || current.label
 
   return (
     <div
       className={`relative flex items-center justify-center ${className}`}
       ref={dropdownRef}
     >
-      <MotionButton
+      <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={displayLabel}
         title={displayLabel}
         onClick={handleToggle}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.94 }}
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-transparent p-0 transition-colors hover:bg-[#FFB400]/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB400]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-transparent p-0 transition-colors hover:ring-4 hover:ring-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-800/40"
       >
         <img
           src={current.flag}
@@ -62,7 +56,7 @@ const LanguageSwitcher = ({ className = "" }) => {
           className="pointer-events-none block h-full w-full object-cover"
           draggable={false}
         />
-      </MotionButton>
+      </button>
 
       <AnimatePresence>
         {open && (
@@ -70,9 +64,9 @@ const LanguageSwitcher = ({ className = "" }) => {
             <FluentAnimation
               direction="down"
               exit
-              className="overflow-hidden rounded-2xl border border-[#F0E4C4] bg-white/95 shadow-lg backdrop-blur-md"
+              className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
             >
-              <div className="p-1.5" role="listbox" aria-label="Language">
+              <div className="p-2 flex flex-col gap-1" role="listbox" aria-label="Language">
                 {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => {
                   const isActive = language === key
 
@@ -84,36 +78,43 @@ const LanguageSwitcher = ({ className = "" }) => {
                       aria-selected={isActive}
                       disabled={disabled}
                       onClick={() => !disabled && handleLanguageSelect(key)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${disabled
-                        ? "cursor-not-allowed text-lighttextGray"
+                      className={`relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${disabled
+                        ? "cursor-not-allowed text-gray-400"
                         : isActive
-                          ? "bg-[#FFF4D6] text-[#9A7200] font-semibold"
-                          : "text-headingColor hover:bg-[#FFFAED] hover:text-[#B8860B]"
+                          ? "text-cath-red-800 font-medium"
+                          : "text-gray-700 hover:bg-gray-50"
                         }`}
                     >
-                      <span className="flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                      {isActive && (
+                        <motion.div 
+                          layoutId="lang-active-indicator"
+                          className="absolute inset-0 rounded-xl bg-gray-500/5 pointer-events-none"
+                        />
+                      )}
+                      <span className="flex h-7 w-7 shrink-0 overflow-hidden rounded-full border border-gray-100">
                         <img
                           src={flag}
                           alt=""
-                          className={`block h-full w-full object-cover ${disabled ? "grayscale opacity-50" : ""
-                            }`}
+                          className={`block h-full w-full object-cover ${
+                            disabled ? "grayscale opacity-50" : ""
+                          }`}
                           draggable={false}
                         />
                       </span>
-                      <span className="min-w-0 flex-1 truncate font-medium">
+                      <span className="min-w-0 flex-1 truncate text-[14px]">
                         {label}
                       </span>
                       {disabled ? (
-                        <span className="shrink-0 rounded-full border border-[#E8D9B8] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#8A7A60]">
+                        <span className="shrink-0 ml-auto rounded-full border border-gray-200 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">
                           {soonLabel || t.header?.soon || "Soon"}
                         </span>
                       ) : isActive ? (
-                        <Check
-                          className="h-4 w-4 shrink-0 text-[#FFB400]"
-                          strokeWidth={2.5}
-                          aria-hidden
-                        />
-                      ) : null}
+                        <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-cath-red-800">
+                          <div className="h-2 w-2 rounded-full bg-cath-red-800" />
+                        </div>
+                      ) : (
+                        <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-gray-200" />
+                      )}
                     </button>
                   )
                 })}

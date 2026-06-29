@@ -1,7 +1,30 @@
-import React from "react"
+import React, { useState, useEffect, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
+import BeautyPicker from "./BeautyPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
+
+const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
+
+const readStoredBeautyOptions = () => {
+  try {
+    const raw = localStorage.getItem(BEAUTY_STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {
+    /* ignore corrupt data */
+  }
+  return null
+}
+
+const persistBeautyOptions = (opts) => {
+  try {
+    localStorage.setItem(BEAUTY_STORAGE_KEY, JSON.stringify(opts))
+  } catch {
+    /* quota exceeded — silently drop */
+  }
+}
+
+const TABS = ["backgrounds", "beauty"]
 
 const VirtualBackgroundModal = ({
   open,
@@ -9,13 +32,67 @@ const VirtualBackgroundModal = ({
   localStream,
   cameraOn,
   onToggleCam,
+  lkVideoTrack,
 }) => {
   const { t } = useLanguage()
+  const [activeTab, setActiveTab] = useState("backgrounds")
+
+  // Initialise beauty options from localStorage so pre-join selections survive
+  // page reloads and carry over into the in-call session.
+  const [beautyOptions, setBeautyOptions] = useState(() => {
+    const stored = readStoredBeautyOptions()
+    return (
+      stored ?? {
+        smoothing: 0,
+        brightness: 0,
+        warmth: 0,
+        colorFilter: 0,
+        faceSlim: 0,
+        eyeEnlarge: 0,
+        eyeBrighten: 0,
+        teethWhiten: 0,
+      }
+    )
+  })
+
+  // Persist beauty options to localStorage whenever they change so the
+  // in-call processor (useCombinedProcessor) can pick them up on attach.
+  useEffect(() => {
+    persistBeautyOptions(beautyOptions)
+  }, [beautyOptions])
+
+  const handleBeautyChange = (key, value) => {
+    setBeautyOptions((prev) => ({ ...prev, [key]: value }))
+  }
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+
+    if (lkVideoTrack) {
+      lkVideoTrack.attach(videoElement)
+      return () => {
+        lkVideoTrack.detach(videoElement)
+      }
+    } else if (localStream) {
+      videoElement.srcObject = localStream
+    } else {
+      videoElement.srcObject = null
+    }
+  }, [lkVideoTrack, localStream])
+
   const handleApply = (url) => {
     // Automatically turn on camera if an effect is selected while camera is off
     if (!cameraOn && url !== null && onToggleCam) {
       onToggleCam()
     }
+  }
+
+  const tabLabel = (tab) => {
+    if (tab === "backgrounds")
+      return t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds"
+    return t?.rooms?.beauty?.tabLabel || "Beauty"
   }
 
   return (
@@ -31,11 +108,7 @@ const VirtualBackgroundModal = ({
         {/* Left Column: Video Preview */}
         <div className="flex-1 min-w-0 flex flex-col bg-[#202124] rounded-xl overflow-hidden relative aspect-video w-full h-full">
           <video
-            ref={(video) => {
-              if (video && localStream) {
-                video.srcObject = localStream
-              }
-            }}
+            ref={videoRef}
             autoPlay
             playsInline
             muted
@@ -52,9 +125,33 @@ const VirtualBackgroundModal = ({
           )}
         </div>
 
-        {/* Right Column: Picker */}
+        {/* Right Column: Tabbed Picker */}
         <div className="w-full md:w-80 flex-shrink-0 flex flex-col flex-1 md:h-auto">
-          <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
+          {/* Tab strip */}
+          <div className="flex border-b border-[#E5E5E5] mb-3">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  activeTab === tab
+                    ? "border-cath-red-600 text-cath-red-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tabLabel(tab)}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "backgrounds" ? (
+            <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
+          ) : (
+            <BeautyPicker
+              beautyOptions={beautyOptions}
+              onChange={handleBeautyChange}
+            />
+          )}
         </div>
       </div>
     </Modal>

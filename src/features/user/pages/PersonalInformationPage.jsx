@@ -64,7 +64,7 @@ const PersonalInformationPage = () => {
           <h2 className="text-xl font-bold text-red-900">
             {t.profile?.personalInfo?.title || "Personal Information"}
           </h2>
-          <FluentCard className="flex flex-col gap-6 !border-white/30 !bg-white/40 !backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+          <FluentCard variant="glass" className="flex flex-col gap-6">
             <BasicInfoSection
               formData={formData}
               editingField={editingField}
@@ -84,7 +84,7 @@ const PersonalInformationPage = () => {
             {t.profile?.personalInfo?.accountAndPrivacy ||
               "Account and Privacy"}
           </h2>
-          <FluentCard className="flex flex-col gap-6 !border-white/30 !bg-white/40 !backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+          <FluentCard variant="glass" className="flex flex-col gap-6">
             <AccountPrivacySection
               formData={formData}
               editingField={editingField}

@@ -8,33 +8,22 @@ import { useSessionTimer } from "@/features/video-call"
 const RoomHeader = () => {
   const { t, language } = useLanguage()
   const { lang } = useParams()
-  const { room, enterPiP } = useVideoCallContext()
-  const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(room?.createdAt, room?.duration)
+  const { room, closingRemainingSeconds } = useVideoCallContext()
+  const { formattedRemaining, formattedMax, hasDuration, formattedElapsed } = useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
 
   const rawRoomName = room?.name || "General"
-
-  const handleLogoClick = (e) => {
-    e.preventDefault()
-    const homePath = `/${lang || language || "en"}/community`
-    enterPiP(homePath)
-  }
 
   return (
     <div className="flex items-center justify-between border-b border-[#E5E5E5] bg-white px-5 h-[56px] shrink-0">
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
-          <button
-            type="button"
-            onClick={handleLogoClick}
-            className="flex items-center gap-4 cursor-pointer bg-transparent border-none p-0"
-            aria-label="Back to Community"
-          >
+          <div className="flex items-center gap-4 p-0">
             <img
               src={MainLogo}
               alt="Cat Speak logo"
               className="h-10 w-auto"
             />
-          </button>
+          </div>
         </div>
         <div>
           <div className="flex items-center gap-2 flex-wrap">

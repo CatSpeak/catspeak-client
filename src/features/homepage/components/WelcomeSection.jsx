@@ -2,7 +2,7 @@ import React from "react"
 import { useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { translations } from "@/shared/i18n"
-import { useGetProfileQuery } from "@/features/auth"
+import { useGetProfileQuery, useAuth } from "@/features/auth"
 import CommunityPresence from "./CommunityPresence"
 
 const WelcomeSection = () => {
@@ -13,7 +13,8 @@ const WelcomeSection = () => {
   // Force Vietnamese for the Fun Fact section
   const dynamicT = translations.vi
 
-  const { data: userData } = useGetProfileQuery()
+  const { isAuthenticated } = useAuth()
+  const { data: userData } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
   const user = userData?.data
 
   return (

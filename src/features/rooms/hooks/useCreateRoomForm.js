@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useCreateRoomMutation } from "@/store/api/roomsApi"
+import { useNavigate, useParams } from "react-router-dom"
 
 const INITIAL_STATE = {
   mode: "join",
@@ -11,9 +12,23 @@ const INITIAL_STATE = {
   thumbnail: null
 }
 
+const getLanguageName = (langCode) => {
+  switch (langCode) {
+    case "zh": return "Chinese"
+    case "vi": return "Vietnamese"
+    case "en": return "English"
+    default: return "English"
+  }
+}
+
 export const useCreateRoomForm = () => {
   const [formData, setFormData] = useState(INITIAL_STATE)
   const [createRoom, { isLoading: isCreating }] = useCreateRoomMutation()
+  const navigate = useNavigate()
+  const { lang } = useParams()
+
+  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const selectedLanguage = getLanguageName(supportedLangCode)
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -38,13 +53,60 @@ export const useCreateRoomForm = () => {
     }
   }
 
+  const submitJoin = (onSuccess) => {
+    if (!selectedLanguage) return
+    const preferences = {
+      roomType: "Group",
+      topics: formData.topics.length > 0 ? formData.topics : [],
+      languageType: selectedLanguage,
+      requiredLevel: formData.selectedLevel || undefined,
+    }
+    if (onSuccess) onSuccess()
+    navigate("/queue", { state: preferences })
+  }
+
+  const submitCreate = async (onSuccess) => {
+    if (!selectedLanguage) return
+
+    const data = new FormData()
+    data.append("Name", formData.name || "")
+    data.append("RoomType", "Group")
+    data.append("LanguageType", selectedLanguage)
+    data.append("RequiredLevel", formData.selectedLevel || "")
+    data.append("Privacy", formData.isPrivate ? "Private" : "Public")
+
+    if (formData.isPrivate && formData.password) {
+      data.append("Password", formData.password)
+    }
+
+    if (formData.thumbnail) {
+      data.append("Thumbnail", formData.thumbnail)
+    }
+
+    const topicsList = formData.topics.length > 0 ? formData.topics : ["Other"]
+    topicsList.forEach((topic) => data.append("Topics", topic))
+
+    try {
+      const result = await createRoom(data).unwrap()
+      if (onSuccess) onSuccess()
+      if (result.roomId) {
+        const communityLang = lang || localStorage.getItem("communityLanguage") || "en"
+        navigate(`/${communityLang}/meet/${result.roomId}`)
+      }
+    } catch (err) {
+      console.error("Failed to create room:", err)
+    }
+  }
+
   return {
     formData,
     handleChange,
     handleTopicChange,
     resetForm,
     switchMode,
-    createRoom,
-    isCreating
+    submitJoin,
+    submitCreate,
+    isCreating,
+    selectedLanguage
   }
 }
