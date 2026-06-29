@@ -13,7 +13,9 @@ const ContactSection = ({ isMobile = false }) => {
   return (
     <>
       <div className="flex-1 w-full flex flex-col items-center lg:items-end z-30">
-        <h2 className={`font-bold tracking-wide uppercase text-center w-full max-w-md text-lg mb-4 ${isMobile ? "text-[#910B09] text-2xl" : ""}`}>
+        <h2
+          className={`font-bold tracking-wide uppercase text-center w-full max-w-md text-lg mb-4 ${isMobile ? "text-[#910B09] text-2xl" : ""}`}
+        >
           {footerText.contactUs}
         </h2>
 
@@ -27,7 +29,7 @@ const ContactSection = ({ isMobile = false }) => {
             <Facebook size={32} />
           </a>
           <a
-            href="https://youtube.com/"
+            href="https://www.youtube.com/@CatSpeak-VN"
             target="_blank"
             rel="noopener noreferrer"
             className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#910B09] shadow-lg transition-all duration-300 hover:bg-[#910B09] hover:text-white"
@@ -85,7 +87,9 @@ const ContactSection = ({ isMobile = false }) => {
             />
           </form>
           <div className="mt-4 flex items-center text-sm">
-            <div className={`flex-1 text-center sm:text-left ${isMobile ? "text-[#910B09]" : "text-white/90"}`}>
+            <div
+              className={`flex-1 text-center sm:text-left ${isMobile ? "text-[#910B09]" : "text-white/90"}`}
+            >
               <span className="font-black italic text-base">Cat Speak </span>
               <span className="text-sm italic">
                 {footerText.contactMessage}
