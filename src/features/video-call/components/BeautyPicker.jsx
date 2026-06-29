@@ -2,6 +2,7 @@ import React, { useEffect } from "react"
 import { Sparkles, Sun, Thermometer, Palette, Eye, Smile, Scissors, ZoomIn } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import Slider from "@/shared/components/ui/Slider"
 
 const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
 
@@ -132,20 +133,22 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col w-full p-4">
       {/* ── Processor status diagnostic badge ── */}
-      <div className="mb-2">{statusBadge()}</div>
+      {ctx.processorStatus && ctx.processorStatus !== "idle" && (
+        <div className="mb-3">{statusBadge()}</div>
+      )}
 
-      <div className="text-sm font-medium text-gray-900 mb-3">
+      <div className="text-sm font-medium text-gray-900 mb-4">
         {t?.rooms?.beauty?.title || "Beauty"}
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-5 pb-6">
         {items.map(({ key, icon, label, hint }) => (
           <div
             key={key}
-            className="flex flex-col px-2 py-2 rounded-lg hover:bg-gray-50"
+            className="flex flex-col"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3 text-sm text-gray-700">
                 {icon}
                 <span>{label}</span>
@@ -159,13 +162,11 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
                 {beautyOptions[key] ?? 0}
               </span>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
+            <Slider
+              min={0}
+              max={100}
               value={beautyOptions[key] ?? 0}
               onChange={(e) => handleChange(key, Number(e.target.value))}
-              className="w-full h-1.5 mt-1 accent-cath-red-600 cursor-pointer"
             />
           </div>
         ))}

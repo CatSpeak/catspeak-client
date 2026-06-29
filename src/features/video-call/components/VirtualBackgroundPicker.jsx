@@ -10,7 +10,7 @@ import {
   useSetActiveBackgroundMutation,
 } from "@/store/api/userApi"
 
-const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
+const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
   const { t } = useLanguage()
 
   // Fetch sample backgrounds
@@ -104,11 +104,11 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-3" }) => {
   }
 
   return (
-    <div className={`flex flex-col h-full w-full ${className}`}>
+    <div className={`flex flex-col w-full ${className}`}>
       <div className="text-sm font-medium text-gray-900 mb-3">
         {t?.rooms?.virtualBackground?.title || "Backgrounds"}
       </div>
-      <div className="grid grid-cols-2 min-[426px]:grid-cols-3 md:grid-cols-2 gap-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-200 auto-rows-max content-start items-start flex-1 min-h-0 pb-2">
+      <div className="grid grid-cols-2 min-[426px]:grid-cols-3 md:grid-cols-2 gap-1 auto-rows-max content-start items-start pb-2">
         {/* None Option */}
         <div
           onClick={() => handleSelect(null)}
