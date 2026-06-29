@@ -1,10 +1,8 @@
-// src/features/video-call/components/BackgroundsAndEffectsPanel.jsx
 import React, { useState } from "react"
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
 import BeautyPicker from "./BeautyPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
-
-const TABS = ["backgrounds", "beauty"]
+import { Tabs } from "@/shared/components/ui/navigation"
 
 /**
  * Tab strip + content panel for Backgrounds / Beauty effects.
@@ -14,33 +12,25 @@ const BackgroundsAndEffectsPanel = () => {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState("backgrounds")
 
-  const tabLabel = (tab) => {
-    if (tab === "backgrounds")
-      return t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds"
-    return t?.rooms?.beauty?.tabLabel || "Beauty"
-  }
+  const tabs = [
+    { id: "backgrounds", label: t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds" },
+    { id: "beauty", label: t?.rooms?.beauty?.tabLabel || "Beauty" }
+  ]
+
+  const scrollbarClasses =
+    "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Tab strip */}
-      <div className="flex border-b border-[#E5E5E5] shrink-0">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === tab
-                ? "border-cath-red-600 text-cath-red-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {tabLabel(tab)}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+      />
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className={`flex-1 overflow-y-auto ${scrollbarClasses}`}>
         {activeTab === "backgrounds" ? (
           <VirtualBackgroundPicker />
         ) : (
