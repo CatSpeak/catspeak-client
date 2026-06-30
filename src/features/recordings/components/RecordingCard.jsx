@@ -7,6 +7,7 @@ import {
   HardDrive,
   Calendar,
   AlertCircle,
+  Loader2,
 } from "lucide-react"
 import {
   formatDuration,
@@ -197,6 +198,17 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
               </span>
             </div>
           )}
+
+        {/* Processing status warning */}
+        {(status === "started" || status === "stopping") && (
+          <div className="flex items-center gap-1.5 text-xs text-blue-600 font-medium mt-1">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span>
+              {t?.recordings?.list?.processing ||
+                "Đang đóng gói và lưu trữ video... (Có thể mất vài phút)"}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right: action buttons */}

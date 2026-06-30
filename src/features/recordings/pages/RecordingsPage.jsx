@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -19,6 +19,8 @@ import { RECORDING_STATUS } from "../constants/recordingStatus"
 const RecordingsPage = () => {
   const { t } = useLanguage()
 
+  const [hasActiveRecordings, setHasActiveRecordings] = useState(false)
+
   // ── API queries ──
   const {
     data: recordings = [],
@@ -26,7 +28,16 @@ const RecordingsPage = () => {
     isFetching: isFetchingRecordings,
     error: recordingsError,
     refetch: refetchRecordings,
-  } = useGetMyRecordingsQuery()
+  } = useGetMyRecordingsQuery(undefined, {
+    pollingInterval: hasActiveRecordings ? 5000 : 0,
+  })
+
+  useEffect(() => {
+    const hasActive = recordings.some(
+      (r) => r.status === "started" || r.status === "stopping"
+    )
+    setHasActiveRecordings(hasActive)
+  }, [recordings])
 
   const { data: storage, isLoading: isLoadingStorage } = useGetStorageQuery()
 
