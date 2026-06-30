@@ -33,10 +33,23 @@ const StoryCardItem = ({ story, onClick }) => {
 
   const relativeCreatedAt = createDate ? dayjs(createDate).fromNow() : null
 
+  const CARD_THEMES = [
+    { bg: "bg-[#FFEEF0]" },
+    { bg: "bg-[#FFFCEB]" },
+    { bg: "bg-[#FFF2EA]" },
+    { bg: "bg-[#F1FFF8]" },
+    { bg: "bg-[#F6F2FF]" },
+    { bg: "bg-[#FDF3FF]" },
+    { bg: "bg-[#FFFBFC]" },
+  ]
+
+  const themeIndex = (story.storyId || 0) % CARD_THEMES.length
+  const theme = CARD_THEMES[themeIndex]
+
   return (
     <div
       onClick={onClick}
-      className={`flex max-w-[230px] max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl bg-white p-4 shadow-faq-card`}
+      className={`flex max-w-[230px] max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all ${theme.bg}`}
     >
       {/* Header: avatar + username */}
       <div className="flex items-center gap-2.5">
@@ -58,7 +71,7 @@ const StoryCardItem = ({ story, onClick }) => {
       </div>
 
       {/* Story content */}
-      <p className="line-clamp-3 flex-1 break-words text-sm leading leading-[1.4] text-[#3d3d3d]">
+      <p className="line-clamp-3 flex-1 break-words text-sm leading-[1.4] text-[#3d3d3d]">
         {storyContent}
       </p>
 
