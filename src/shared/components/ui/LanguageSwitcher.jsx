@@ -39,7 +39,7 @@ const LanguageSwitcher = ({ className = "" }) => {
       className={`relative flex items-center justify-center ${className}`}
       ref={dropdownRef}
     >
-      <button
+      <motion.button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -54,7 +54,7 @@ const LanguageSwitcher = ({ className = "" }) => {
           className="pointer-events-none block h-full w-full object-cover"
           draggable={false}
         />
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {open && (

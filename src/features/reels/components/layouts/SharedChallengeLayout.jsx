@@ -117,7 +117,10 @@ export default function SharedChallengeLayout({
         </div>
         
         {visibleChallenges.length > 0 ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 pb-4 pt-2">
+          <div 
+            className="grid gap-3 sm:gap-5 pb-4 pt-2"
+            style={{ gridTemplateColumns: `repeat(${itemsPerPage}, minmax(0, 1fr))` }}
+          >
             {visibleChallenges.map((challenge, index) => (
               <div key={challenge.challengeId} className="flex h-full">
                 <ChallengeCard
