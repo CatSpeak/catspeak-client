@@ -16,6 +16,7 @@ const DanmakuStage = ({
   danmakuItems,
   stageRef,
   onItemClick,
+  onCommentClick,
   displayMode = "float",
 }) => {
   if (displayMode === "grid") {
@@ -30,6 +31,7 @@ const DanmakuStage = ({
               key={story._idx}
               story={story}
               onClick={() => onItemClick(story)}
+              onCommentClick={onCommentClick}
             />
           ))}
         </div>
