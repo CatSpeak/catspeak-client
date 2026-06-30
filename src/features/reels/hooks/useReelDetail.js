@@ -16,7 +16,8 @@ const useReelDetail = (id) => {
     data: apiResponse, 
     isLoading: isApiLoading,
     isFetching: isApiFetching,
-    error: apiError 
+    error: apiError,
+    refetch,
   } = useGetReelByIdQuery(id, {
     skip: !id,
   })
@@ -41,6 +42,7 @@ const useReelDetail = (id) => {
     reel,
     isLoading,
     notFound,
+    refetch,
   }
 }
 

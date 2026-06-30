@@ -21,6 +21,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import Avatar from "@/shared/components/ui/Avatar"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useCreateReelMutation,
   useSearchReelHashtagsQuery,
@@ -124,6 +125,7 @@ const renderHighlightedDescription = (text, tokenClassName) => {
 }
 
 const CreateReelModal = ({ open, onClose, challenge = null }) => {
+  const { t } = useLanguage()
   // RTK Query Mutation Hook
   const [createReel, { isLoading, isSuccess, error: apiError }] =
     useCreateReelMutation()
@@ -1054,7 +1056,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
           }}
           className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
             isActive
-              ? "bg-red-50 text-[#990011]"
+              ? "bg-red-50 text-cath-red-700"
               : "text-gray-700 hover:bg-gray-50"
           }`}
         >
@@ -1091,7 +1093,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         }}
         className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
           isActive
-            ? "bg-red-50 text-[#990011]"
+            ? "bg-red-50 text-cath-red-700"
             : "text-gray-700 hover:bg-gray-50"
         }`}
       >
@@ -1118,12 +1120,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
       onClose={handleClose}
       title={
         <div className="flex items-center gap-2">
-          <Film size={20} className="text-[#990011]" />
-          <span>Upload Reel</span>
+          <Film size={20} className="text-cath-red-700" />
+          <span>{t.catSpeak?.reels?.uploadReel || "Upload Reel"}</span>
         </div>
       }
       className="max-w-4xl w-full"
-      bodyClassName="p-4 sm:p-6 overflow-y-auto h-[calc(100vh-76px)] min-[426px]:h-auto min-[426px]:max-h-[80vh] scrollbar-thin flex flex-col"
+      bodyClassName="p-4 sm:p-6 overflow-y-auto h-[calc(100vh-76px)] md:h-auto md:max-h-[80vh] scrollbar-thin flex flex-col"
     >
       {/* Dynamic Keyframes Injector */}
       <style
@@ -1195,7 +1197,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
               onClick={() => videoInputRef.current?.click()}
               className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-2xl h-[360px] cursor-pointer transition-all duration-300 ${
                 isVideoDragging
-                  ? "border-[#990011] bg-red-50/30 scale-[0.99] shadow-inner"
+                  ? "border-cath-red-700 bg-red-50/30 scale-[0.99] shadow-inner"
                   : "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
               }`}
             >
@@ -1208,22 +1210,20 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
               />
 
               <div className="p-4 bg-white rounded-full shadow-md text-gray-400 mb-4 transition-transform hover:scale-105">
-                <UploadCloud size={36} className="text-[#990011]" />
+                <UploadCloud size={36} className="text-cath-red-700" />
               </div>
 
               <p className="font-bold text-sm text-gray-700 text-center px-4">
-                Drag and drop your video here to upload
+                {t.catSpeak?.reels?.dragDropVideo || "Drag and drop your video here to upload"}
               </p>
               <p className="text-xs text-gray-400 text-center mt-1 px-4">
-                or click to browse files
+                {t.catSpeak?.reels?.clickToBrowse || "or click to browse files"}
               </p>
 
-              <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 text-[10px] text-gray-400">
-                <span>MP4, WebM or MOV</span>
+              <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2 text-[10px] text-gray-400">
+                <span>{t.catSpeak?.reels?.formatLimit || "MP4, WebM or MOV"}</span>
                 <span>•</span>
-                <span>5 minutes</span>
-                <span>•</span>
-                <span>Up to 150MB</span>
+                <span>{t.catSpeak?.reels?.sizeLimit || "Max 5 mins, 150MB"}</span>
               </div>
             </div>
 
@@ -1250,9 +1250,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                   <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400 font-semibold">
                     <span className="text-emerald-600 flex items-center gap-1 font-bold">
                       <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                      Uploaded
-                    </span>
-                    <span>•</span>
+                      <span className="font-semibold text-emerald-600 truncate max-w-[150px] sm:max-w-[200px]">
+                        {t?.catSpeak?.reels?.createModal?.uploaded || "Uploaded"}
+                      </span>
+                    </span> <span>•</span>
                     <span>
                       {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
                     </span>
@@ -1280,7 +1281,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                Edit Details
+                {t?.catSpeak?.reels?.createModal?.editDetails || "Edit Details"}
               </button>
               <button
                 type="button"
@@ -1291,7 +1292,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                Live Preview
+                {t?.catSpeak?.reels?.createModal?.livePreview || "Live Preview"}
               </button>
             </div>
 
@@ -1302,14 +1303,14 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                 className={`md:col-span-2 flex-col gap-5 text-left ${mobileTab === "details" ? "flex" : "hidden md:flex"}`}
               >
                 <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
-                  Details
+                  {t?.catSpeak?.reels?.createModal?.details || "Details"}
                 </h3>
 
                 {/* Title */}
                 <TextInput
                   id="title"
-                  label="Title"
-                  placeholder="Give your Reel a catchy title..."
+                  label={t?.catSpeak?.reels?.createModal?.title || "Title"}
+                  placeholder={t?.catSpeak?.reels?.createModal?.titlePlaceholder || "Give your Reel a catchy title..."}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   variant="square"
@@ -1326,10 +1327,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     htmlFor="description"
                     className="text-sm font-semibold text-gray-700"
                   >
-                    Description
+                    {t?.catSpeak?.reels?.createModal?.description || "Description"}
                   </label>
                   <div className="relative">
-                    <div className="relative rounded-xl border border-gray-300 bg-white shadow-sm transition-colors hover:border-[#990011] focus-within:border-[#990011] focus-within:ring-1 focus-within:ring-[#990011]">
+                    <div className="relative rounded-xl border border-gray-300 bg-white shadow-sm transition-colors hover:border-cath-red-700 focus-within:border-cath-red-700 focus-within:ring-1 focus-within:ring-cath-red-700">
                       <div
                         ref={descriptionHighlightRef}
                         aria-hidden="true"
@@ -1349,7 +1350,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       <textarea
                         ref={descriptionInputRef}
                         id="description"
-                        placeholder="What's this video about? Add tags like #catspeak..."
+                        placeholder={t?.catSpeak?.reels?.createModal?.descPlaceholder || "What's this video about? Add tags like #catspeak..."}
                         value={description}
                         onChange={(e) => {
                           handleDescriptionChange(e)
@@ -1392,7 +1393,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           <div className="flex items-center gap-2 px-3 py-3 text-sm text-gray-500">
                             <Loader2
                               size={15}
-                              className="animate-spin text-[#990011]"
+                              className="animate-spin text-cath-red-700"
                             />
                             <span>Searching...</span>
                           </div>
@@ -1416,7 +1417,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                 {/* Privacy Badge Selector */}
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    Privacy
+                    {t?.catSpeak?.reels?.createModal?.privacy || "Privacy"}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {PRIVACY_OPTIONS.map((item) => {
@@ -1429,7 +1430,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           onClick={() => setPrivacy(item.value)}
                           className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all duration-200 ${
                             isSelected
-                              ? "border-[#990011] bg-red-50/40 text-[#990011] shadow-sm font-medium scale-[1.01]"
+                              ? "border-cath-red-700 bg-red-50/40 text-cath-red-700 shadow-sm font-medium scale-[1.01]"
                               : "border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50/50"
                           }`}
                         >
@@ -1437,12 +1438,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                             size={14}
                             className={
                               isSelected
-                                ? "text-[#990011] mb-1"
+                                ? "text-cath-red-700 mb-1"
                                 : "text-gray-400 mb-1"
                             }
                           />
                           <span className="text-xs font-semibold">
-                            {item.label}
+                            {t?.catSpeak?.reels?.createModal?.privacyOptions?.[item.value] || item.label}
                           </span>
                         </button>
                       )
@@ -1455,7 +1456,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
                       <Image size={15} className="text-gray-500" />
-                      Cover Thumbnail
+                      {t?.catSpeak?.reels?.createModal?.coverThumbnail || "Cover Thumbnail"}
                     </label>
                     <div className="flex bg-gray-200/85 p-0.5 rounded-lg text-[9px] font-bold shadow-sm">
                       <button
@@ -1463,14 +1464,14 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         onClick={() => setCoverType("frame")}
                         className={`px-2.5 py-0.5 rounded-md transition-all ${coverType === "frame" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                       >
-                        Extract Frame
+                        {t?.catSpeak?.reels?.createModal?.extractFrame || "Extract Frame"}
                       </button>
                       <button
                         type="button"
                         onClick={() => setCoverType("custom")}
                         className={`px-2.5 py-0.5 rounded-md transition-all ${coverType === "custom" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                       >
-                        Custom Image
+                        {t?.catSpeak?.reels?.createModal?.customImage || "Custom Image"}
                       </button>
                     </div>
                   </div>
@@ -1513,8 +1514,8 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                         {/* Title & Scrubbing timeline */}
                         <div className="flex flex-col gap-1.5">
                           <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 tracking-wider">
-                            <span>SCRUB VIDEO TIMELINE</span>
-                            <span className="font-mono text-[#990011]">
+                            <span>{t?.catSpeak?.reels?.createModal?.scrubTimeline || "SCRUB VIDEO TIMELINE"}</span>
+                            <span className="font-mono text-cath-red-700">
                               {formatTime(currentTime)} /{" "}
                               {formatTime(videoDuration)}
                             </span>
@@ -1529,21 +1530,21 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                             onChange={handleSliderChange}
                             onMouseUp={handleSliderRelease}
                             onTouchEnd={handleSliderRelease}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#990011] focus:outline-none shadow-inner cover-slider-range"
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-cath-red-700 focus:outline-none shadow-inner cover-slider-range"
                           />
                         </div>
 
                         {/* Quick Keyframes Filmstrip */}
                         <div className="flex flex-col gap-1.5">
                           <span className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">
-                            Quick Keyframes
+                            {t?.catSpeak?.reels?.createModal?.quickKeyframes || "Quick Keyframes"}
                           </span>
 
                           {isExtractingFilmstrip ? (
                             <div className="flex items-center justify-center h-14 bg-white border border-gray-150 rounded-xl gap-2 shadow-sm">
-                              <div className="w-3.5 h-3.5 border-2 border-[#990011] border-t-transparent rounded-full animate-spin" />
+                              <div className="w-3.5 h-3.5 border-2 border-cath-red-700 border-t-transparent rounded-full animate-spin" />
                               <span className="text-[10px] text-gray-400 font-bold">
-                                Extracting keyframes...
+                                {t?.catSpeak?.reels?.createModal?.extractingKeyframes || "Extracting keyframes..."}
                               </span>
                             </div>
                           ) : filmstripFrames.length > 0 ? (
@@ -1557,7 +1558,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                                   }
                                   className={`relative aspect-[9/16] rounded-md overflow-hidden bg-gray-100 border transition-all duration-200 hover:scale-[1.03] ${
                                     Math.abs(currentTime - frame.time) < 0.15
-                                      ? "border-[#990011] ring-1 ring-[#990011] scale-[1.01]"
+                                      ? "border-cath-red-700 ring-1 ring-cath-red-700 scale-[1.01]"
                                       : "border-transparent hover:border-gray-300"
                                   }`}
                                 >
@@ -1575,16 +1576,14 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           ) : (
                             <div className="flex items-center justify-center h-14 bg-white border border-gray-150 rounded-xl shadow-sm">
                               <span className="text-[10px] text-gray-400 font-bold">
-                                No frames available
+                                {t?.catSpeak?.reels?.createModal?.noFrames || "No frames available"}
                               </span>
                             </div>
                           )}
                         </div>
 
                         <p className="text-[9px] text-gray-400 leading-normal font-medium mt-1">
-                          Scrub the timeline or select a quick keyframe to
-                          auto-update the cover image. Your chosen frame will be
-                          uploaded as the Reel's cover thumbnail.
+                          {t?.catSpeak?.reels?.createModal?.coverInstruction || "Scrub the timeline or select a quick keyframe to auto-update the cover image. Your chosen frame will be uploaded as the Reel's cover thumbnail."}
                         </p>
                       </div>
                     ) : (
@@ -1613,7 +1612,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                               onClick={() => coverInputRef.current?.click()}
                               className={`border border-dashed rounded-xl h-[96px] flex flex-col items-center justify-center cursor-pointer transition-all duration-250 ${
                                 isCoverDragging
-                                  ? "border-[#990011] bg-red-50/30"
+                                  ? "border-cath-red-700 bg-red-50/30"
                                   : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 bg-white"
                               }`}
                             >
@@ -1628,19 +1627,19 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                               />
                               <UploadCloud
                                 size={18}
-                                className="text-[#990011] mb-1"
+                                className="text-cath-red-700 mb-1"
                               />
                               <p className="text-[10px] font-bold text-gray-700">
-                                Upload custom cover
+                                {t?.catSpeak?.reels?.createModal?.uploadCustomCover || "Upload custom cover"}
                               </p>
                               <p className="text-[8px] text-gray-400 mt-0.5">
-                                PNG, JPG up to 5MB
+                                {t?.catSpeak?.reels?.createModal?.coverFormat || "PNG, JPG up to 5MB"}
                               </p>
                             </div>
                           ) : (
                             <div className="flex flex-col gap-1">
-                              <span className="text-[9px] text-[#990011] font-bold uppercase tracking-wider">
-                                Custom Image Uploaded
+                              <span className="text-[9px] text-cath-red-700 font-bold uppercase tracking-wider">
+                                {t?.catSpeak?.reels?.createModal?.customImageUploaded || "Custom Image Uploaded"}
                               </span>
                               <div className="text-xs font-bold text-gray-700 truncate max-w-[200px] mt-0.5">
                                 {coverFile?.name}
@@ -1665,7 +1664,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                                 className="mt-2 self-start px-2.5 py-1 text-[10px] bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold transition-colors flex items-center gap-1 shadow-sm border border-red-100/50 active:scale-95"
                               >
                                 <Trash2 size={11} />
-                                Remove Image
+                                {t?.catSpeak?.reels?.createModal?.removeImage || "Remove Image"}
                               </button>
                             </div>
                           )}
@@ -1682,7 +1681,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
               >
                 <div className="flex flex-col gap-1 border-b border-gray-100 pb-2">
                   <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
-                    Preview
+                    {t?.catSpeak?.reels?.createModal?.preview || "Preview"}
                   </h3>
 
                   {/* Live Feed Mode Tabs selector */}
@@ -1696,7 +1695,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           : "text-gray-500 hover:text-gray-700"
                       }`}
                     >
-                      Video Playback
+                      {t?.catSpeak?.reels?.createModal?.videoPlayback || "Video Playback"}
                     </button>
                     <button
                       type="button"
@@ -1707,7 +1706,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                           : "text-gray-500 hover:text-gray-700"
                       }`}
                     >
-                      Cover Thumbnail
+                      {t?.catSpeak?.reels?.createModal?.coverThumbnailTab || t?.catSpeak?.reels?.createModal?.coverThumbnail || "Cover Thumbnail"}
                     </button>
                   </div>
                 </div>
@@ -1753,7 +1752,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                             size={24}
                           />
                           <span className="text-[9px] text-gray-500">
-                            Thumbnail Previewing
+                            {t?.catSpeak?.reels?.createModal?.thumbnailPreviewing || "Thumbnail Previewing"}
                           </span>
                         </div>
                       )}
@@ -1773,7 +1772,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                     {/* Interaction Icons overlay */}
                     <div className="absolute right-2 bottom-12 flex flex-col items-center gap-3 z-10">
                       <div className="relative mb-1">
-                        <div className="w-7 h-7 rounded-full border border-white bg-[#990011] flex items-center justify-center font-bold text-[9px] text-white">
+                        <div className="w-7 h-7 rounded-full border border-white bg-cath-red-700 flex items-center justify-center font-bold text-[9px] text-white">
                           C
                         </div>
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-600 border border-white text-white rounded-full w-3 h-3 flex items-center justify-center text-[7px] font-bold shadow-sm">
@@ -1829,10 +1828,10 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
                       </span>
 
                       <p className="text-[9px] leading-relaxed font-semibold line-clamp-1">
-                        <span className="text-[#990011] font-bold mr-1">
+                        <span className="text-cath-red-700 font-bold mr-1">
                           #{privacy}
                         </span>
-                        {title || "Untitled Reel"}
+                        {title || t?.catSpeak?.reels?.createModal?.untitledReel || "Untitled Reel"}
                       </p>
 
                       {description && (
@@ -1868,26 +1867,26 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         )}
 
         {/* BOTTOM FORM BUTTONS */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-2 w-full">
           <PillButton
             type="button"
             variant="outline"
             onClick={handleClose}
             disabled={isLoading}
-            className="h-10 px-5 !border-gray-300 hover:!bg-gray-50 !text-gray-600 font-semibold"
+            className="w-full sm:w-auto h-10 px-5 !border-gray-300 hover:!bg-gray-50 !text-gray-600 font-semibold"
           >
-            Discard
+            {t.cancel || "Cancel"}
           </PillButton>
           <PillButton
             type="submit"
             loading={isLoading}
-            loadingText="Posting..."
+            loadingText={t.catSpeak?.reels?.posting || "Posting..."}
             disabled={!videoFile || isLoading}
-            className="h-10 px-6 font-semibold shadow-sm shadow-red-950/10"
+            className="w-full sm:w-auto h-10 px-6 font-semibold shadow-sm shadow-red-950/10"
             bgColor="#990011"
             textColor="#ffffff"
           >
-            Post
+            {t.catSpeak?.reels?.post || "Post"}
           </PillButton>
         </div>
       </form>
