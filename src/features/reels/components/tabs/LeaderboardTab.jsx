@@ -9,7 +9,9 @@ export default function LeaderboardTab({
   setChallengeStatus, 
   challengeId, 
   onSelectChallenge,
-  onReelClick
+  onReelClick,
+  showMobileDetail,
+  onMobileDetailChange
 }) {
   if (challengeStatus === "past") {
     return (
@@ -18,6 +20,8 @@ export default function LeaderboardTab({
         setChallengeStatus={setChallengeStatus}
         challengeId={challengeId}
         onSelectChallenge={onSelectChallenge}
+        showMobileDetail={showMobileDetail}
+        onMobileDetailChange={onMobileDetailChange}
         renderContent={({ challengeId, selectedChallenge, challengeStatus }) => (
           <PastChallengeLeaderboardView
             challengeId={challengeId}

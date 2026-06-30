@@ -4,6 +4,12 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetChallengeLeaderboardQuery } from "@/store/api/reelsApi"
 import LeaderboardInfoPanels from "./LeaderboardInfoPanels"
 import Modal from "@/shared/components/ui/Modal"
+import { useAuth } from "@/features/auth"
+
+const formatCount = (c) => {
+  const num = Math.ceil(Number(c) || 0)
+  return num >= 1000 ? `${(num / 1000).toFixed(1)}K` : String(num)
+}
 
 const RankRow = ({ rank, username, handle, score, coverUrl, onClick }) => {
   const getRankBadge = (r) => {
@@ -12,8 +18,6 @@ const RankRow = ({ rank, username, handle, score, coverUrl, onClick }) => {
     }
     return <div className="w-7 h-7 flex items-center justify-center font-bold text-[15px] text-[#F59E0B]">{r}</div>
   }
-
-  const formatCount = (c) => c >= 1000 ? `${(c/1000).toFixed(1)}K` : String(c)
 
   return (
     <div 
@@ -55,6 +59,7 @@ export default function ChallengeLeaderboardView({
   onReelClick
 }) {
   const { t } = useLanguage()
+  const { user } = useAuth()
   
   const {
     currentData: leaderboardResponse,
@@ -82,6 +87,23 @@ export default function ChallengeLeaderboardView({
     return leaderboardEntries.slice(start, start + itemsPerPage)
   }, [leaderboardEntries, currentPage])
 
+  const currentUserEntry = useMemo(() => {
+    if (!user?.accountId || !leaderboardEntries.length) return null
+    const index = leaderboardEntries.findIndex(
+      entry => String(entry.reel?.accountId) === String(user.accountId) || String(entry.userId) === String(user.accountId)
+    )
+    if (index === -1) return null
+    return {
+      ...leaderboardEntries[index],
+      calculatedRank: leaderboardEntries[index].rank || index + 1
+    }
+  }, [user, leaderboardEntries])
+
+  const isCurrentUserVisible = useMemo(() => {
+    if (!currentUserEntry || !currentEntries.length) return false
+    return currentEntries.some(entry => entry.id === currentUserEntry.id || entry.reelId === currentUserEntry.reelId)
+  }, [currentUserEntry, currentEntries])
+
   // Reset page when challenge changes
   React.useEffect(() => {
     setCurrentPage(1)
@@ -102,12 +124,14 @@ export default function ChallengeLeaderboardView({
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
     
     if (days > 0) {
-      return `Còn ${days} ngày ${hours > 0 ? `${hours} giờ` : ""}`
+      const daysText = t?.catSpeak?.reels?.leaderboard?.daysLeft?.replace("{days}", days).replace("{hours}", hours > 0 ? hours : "") 
+      return daysText || `Còn ${days} ngày ${hours > 0 ? `${hours} giờ` : ""}`
     }
     if (hours > 0) {
-      return `Còn ${hours} giờ`
+      const hoursText = t?.catSpeak?.reels?.leaderboard?.hoursLeft?.replace("{hours}", hours)
+      return hoursText || `Còn ${hours} giờ`
     }
-    return "Sắp kết thúc"
+    return t?.catSpeak?.reels?.leaderboard?.endingSoon || "Sắp kết thúc"
   }
 
   const timeRemaining = calculateTimeRemaining(selectedChallenge.endDate || selectedChallenge.endTime)
@@ -120,7 +144,9 @@ export default function ChallengeLeaderboardView({
           <div className="flex items-center gap-3 min-w-0">
             <div className="text-3xl shrink-0">🏆</div>
             <div className="flex flex-col min-w-0">
-              <h2 className="text-[17px] sm:text-[20px] font-bold text-gray-900 truncate">Bảng xếp hạng</h2>
+              <h2 className="text-[17px] sm:text-[20px] font-bold text-gray-900 truncate">
+                {t?.catSpeak?.reels?.leaderboard?.title || "Bảng xếp hạng"}
+              </h2>
               <span className="text-[13px] sm:text-[14px] text-gray-500 font-medium truncate">
                 {selectedChallenge.hashtag || selectedChallenge.name}
               </span>
@@ -213,34 +239,40 @@ export default function ChallengeLeaderboardView({
           ) : (
             <div className="py-16 flex flex-col items-center justify-center text-gray-500">
               <span className="text-4xl mb-3">👻</span>
-              <p className="font-medium text-[15px]">Chưa có dữ liệu xếp hạng</p>
+              <p className="font-medium text-[15px]">{t?.catSpeak?.reels?.leaderboard?.noData || "Chưa có dữ liệu xếp hạng"}</p>
             </div>
           )}
 
           {/* Sticky Bottom Bar for Current User */}
-          {challengeStatus === "active" && leaderboardEntries.length > 0 && (
+          {challengeStatus === "active" && currentUserEntry && !isCurrentUserVisible && (
             <div className="mt-2 flex flex-col">
                <div className="py-2 px-4 text-gray-400 font-bold text-lg">...</div>
                <div className="bg-[#FFF5F5] border border-red-200 rounded-xl p-3 sm:p-4 flex items-center justify-between mt-1">
                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                 <div className="w-8 flex justify-center shrink-0 font-bold text-cath-red-700 text-[15px]">45</div>
+                 <div className="w-8 flex justify-center shrink-0 font-bold text-cath-red-700 text-[15px]">{currentUserEntry.calculatedRank}</div>
                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-300">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=myuser`} alt="" className="w-full h-full object-cover" />
+                    <img src={currentUserEntry.reel?.coverUrl || currentUserEntry.reel?.thumbnailUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserEntry.reel?.username || "user"}`} alt="" className="w-full h-full object-cover" />
                  </div>
                  <div className="flex flex-col min-w-0">
-                   <span className="font-semibold text-gray-900 text-[14px] truncate">User name</span>
-                   <span className="text-gray-500 text-[12px] truncate">@username</span>
+                   <span className="font-semibold text-gray-900 text-[14px] truncate">{currentUserEntry.reel?.nickname || currentUserEntry.reel?.username || "User name"}</span>
+                   <span className="text-gray-500 text-[12px] truncate">@{currentUserEntry.reel?.username || "username"}</span>
                  </div>
                </div>
                
                <div className="flex items-center gap-4 sm:gap-6 shrink-0 pl-2">
                  <div className="flex flex-col items-end">
-                   <span className="text-[11px] text-cath-red-700 font-medium">Hạng của bạn</span>
+                   <span className="text-[11px] text-cath-red-700 font-medium">{t?.catSpeak?.reels?.leaderboard?.yourRank || "Hạng của bạn"}</span>
                    <span className="font-bold text-[14px] flex items-center gap-1.5">
-                     5.2K <Heart size={14} className="text-cath-red-700 fill-cath-red-700" />
+                     {formatCount(currentUserEntry.score || 0)} <Heart size={14} className="text-cath-red-700 fill-cath-red-700" />
                    </span>
                  </div>
-                 <div className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-gray-200 bg-gray-100">
+                 <div 
+                   className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-gray-200 bg-gray-100 cursor-pointer"
+                   onClick={() => onReelClick && onReelClick(currentUserEntry.reel || currentUserEntry)}
+                 >
+                   {(currentUserEntry.reel?.coverUrl || currentUserEntry.reel?.thumbnailUrl) && (
+                     <img src={currentUserEntry.reel.coverUrl || currentUserEntry.reel.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                   )}
                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                      <Play size={16} className="text-white fill-white" />
                    </div>
@@ -262,7 +294,7 @@ export default function ChallengeLeaderboardView({
     <Modal
       open={isInfoModalOpen}
       onClose={() => setIsInfoModalOpen(false)}
-      title="Thông tin xếp hạng"
+      title={t?.catSpeak?.reels?.leaderboard?.infoTitle || "Thông tin xếp hạng"}
       className="md:max-w-md w-full"
       bodyClassName="p-4"
     >
