@@ -6,9 +6,25 @@ export default {
   seeMore: "See more",
   back: "Back",
   cancel: "Cancel",
+  scrollToTop: "Scroll to top",
   toggle: {
     on: "On",
     off: "Off",
+  },
+  header: {
+    language: "Language",
+    community: "Community",
+    soon: "Soon",
+    countries: {
+      vietnam: "Vietnam",
+      china: "Chinese",
+      english: "English",
+    },
+    languages: {
+      vi: "Vietnamese",
+      zh: "Chinese",
+      en: "English",
+    }
   },
   pagination: {
     range: "{{start}}-{{end}} of {{total}}",
@@ -16,11 +32,23 @@ export default {
   nav: {
     home: "Home",
     rooms: "Rooms",
-    community: "Community",
+    community: "Home",
     catSpeak: "Cat Speak",
-    cart: "Courses",
+    catSpeakNews: "Cat Speak News",
+    worldNews: "World News",
+    reels: "Reels",
+    video: "Video",
+    calendar: "Calendar",
+    cart: "Cart",
+    courses: "Courses",
+    allCourses: "All Courses",
+    myCourses: "My Courses",
+    messages: "Messages",
+    settings: "Settings",
+    help: "Help",
     connect: "Profile",
     workspace: "My Workspace",
+    pricing: "Pricing",
   },
   comingSoon: {
     badge: "Coming Soon",

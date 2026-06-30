@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * A custom-built carousel component with smooth transitions and premium feel.
@@ -15,25 +16,28 @@ const Carousel = ({
   autoPlay = true,
   interval = 5000,
   objectFit = "cover",
+  allowFullscreen = true,
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [page, setPage] = useState(0)
+  const [direction, setDirection] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
+  const currentIndex = ((page % images.length) + images.length) % images.length
+
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1,
-    )
-  }, [images.length])
+    setDirection(1)
+    setPage((prev) => prev + 1)
+  }, [])
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1,
-    )
-  }, [images.length])
+    setDirection(-1)
+    setPage((prev) => prev - 1)
+  }, [])
 
   const goToSlide = (index) => {
-    setCurrentIndex(index)
+    setDirection(index > currentIndex ? 1 : -1)
+    setPage((prev) => prev - currentIndex + index)
   }
 
   useEffect(() => {
@@ -60,8 +64,8 @@ const Carousel = ({
     <div
       className={
         isFullscreen
-          ? "fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm select-none group overflow-hidden"
-          : `relative w-full aspect-video overflow-hidden group select-none ${className}`
+          ? "fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm select-none group flex flex-col overflow-hidden"
+          : "relative w-full flex flex-col select-none group"
       }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -80,66 +84,86 @@ const Carousel = ({
         </button>
       )}
 
-      {/* Slides (Sliding Effect) */}
-      <div
-        className="flex h-full transition-transform duration-700 ease-out"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-      >
-        {images.map((image, index) => (
-          <div key={index} className="w-full h-full flex-shrink-0 relative overflow-hidden">
+      {/* Image Container */}
+      <div className={`relative w-full overflow-hidden ${isFullscreen ? "h-full flex-1" : `aspect-video rounded-2xl ${className}`}`}>
+        {/* Slides (Sliding Effect with Framer Motion) */}
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+          <motion.div
+            key={page}
+            custom={direction}
+            variants={{
+              enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0.9 }),
+              center: { x: 0, opacity: 1, zIndex: 1 },
+              exit: (dir) => ({ x: dir < 0 ? "100%" : "-100%", opacity: 0.9, zIndex: 0 }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+            className="absolute inset-0 w-full h-full flex-shrink-0 relative overflow-hidden"
+          >
             {/* Blurred Background Image */}
             <div
               className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
-              style={{ backgroundImage: `url(${image.url})` }}
+              style={{ backgroundImage: `url(${images[currentIndex].url})` }}
             />
             {/* Main Image */}
             <img
-              src={image.url}
-              alt={image.alt || `Slide ${index}`}
-              onClick={() => !isFullscreen && setIsFullscreen(true)}
+              src={images[currentIndex].url}
+              alt={images[currentIndex].alt || `Slide ${currentIndex}`}
+              onClick={() => allowFullscreen && !isFullscreen && setIsFullscreen(true)}
               className={`relative z-10 w-full h-full transition-all duration-300 ${
                 isFullscreen
                   ? "object-contain cursor-default"
-                  : `cursor-pointer ${objectFit === "contain" ? "object-contain" : "object-cover"}`
+                  : `${allowFullscreen ? "cursor-pointer" : "cursor-default"} ${objectFit === "contain" ? "object-contain" : "object-cover"}`
               }`}
             />
             {/* Subtle overlay */}
             <div className="absolute inset-0 z-20 bg-black/5 pointer-events-none" />
-          </div>
-        ))}
-      </div>
+          </motion.div>
+        </AnimatePresence>
 
       {/* Navigation Arrows */}
       {images.length > 1 && (
         <>
           <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white/40 active:scale-95"
+            onClick={(e) => {
+              e.stopPropagation()
+              prevSlide()
+            }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/60 backdrop-blur-md shadow-md text-cath-red-800 transition-all duration-300 hover:bg-white hover:scale-105 active:scale-95"
             aria-label="Previous slide"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={24} strokeWidth={2.5} className="ml-[-2px]" />
           </button>
           <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white/40 active:scale-95"
+            onClick={(e) => {
+              e.stopPropagation()
+              nextSlide()
+            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/60 backdrop-blur-md shadow-md text-cath-red-800 transition-all duration-300 hover:bg-white hover:scale-105 active:scale-95"
             aria-label="Next slide"
           >
-            <ChevronRight size={28} />
+            <ChevronRight size={24} strokeWidth={2.5} className="mr-[-2px]" />
           </button>
         </>
       )}
+      </div>
 
-      {/* Indicators */}
-      {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+      {/* Desktop Indicators (Under the slide, centered) */}
+      {!isFullscreen && images.length > 1 && (
+        <div className="hidden sm:flex items-center justify-center gap-2 mt-6">
           {images.map((_, index) => (
             <button
               key={index}
-              onClick={() => goToSlide(index)}
-              className={`h-1.5 transition-all duration-300 rounded-full ${
+              onClick={(e) => {
+                e.stopPropagation()
+                goToSlide(index)
+              }}
+              className={`transition-all duration-300 rounded-full ${
                 currentIndex === index
-                  ? "w-8 bg-white"
-                  : "w-2 bg-white/40 hover:bg-white/60"
+                  ? "w-8 h-2.5 bg-cath-red-700"
+                  : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

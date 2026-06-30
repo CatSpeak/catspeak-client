@@ -1,4 +1,4 @@
-import { ValueCardBg } from "@/shared/assets/images/home"
+import { ValueCardBg } from "@/shared/assets/images/home";
 
 const colorConfig = {
   purple: {
@@ -17,7 +17,7 @@ const colorConfig = {
     solid: "from-white to-green-500",
     glass: "from-white/60 to-green-500/20 text-green-600",
   },
-}
+};
 
 const ValueCard = ({
   icon,
@@ -26,26 +26,20 @@ const ValueCard = ({
   color = "orange",
   className = "",
 }) => {
-  const styles = colorConfig[color] || colorConfig.orange
+  const styles = colorConfig[color] || colorConfig.orange;
   return (
     <div
-      className={`relative flex w-full max-w-[280px] h-auto flex-col transition-transform drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] ${className}`}
+      className={`relative flex w-full max-w-[380px] h-auto flex-col transition-transform drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] ${className}`}
     >
-      <img
+      {/* <img
         src={ValueCardBg}
         alt="Background"
         className="absolute inset-0 w-full h-full pointer-events-none"
-      />
+      /> */}
 
       <div className="relative z-10 w-full h-full p-6 flex flex-col gap-4">
         {/* Header: Title + Icon */}
-        <div className="flex justify-between items-start w-full">
-          <h4
-            className="font-bold leading-tight text-cath-red-500 flex-1 pr-4 text-lg"
-          >
-            {title}
-          </h4>
-
+        <div className="flex flex-col  items-center justify-center w-full gap-5">
           <div className="relative h-14 w-14 flex-shrink-0 mr-6">
             {/* Layer 1: Bottom/Back (Top-Left) - Solid Gradient */}
             <div
@@ -59,15 +53,18 @@ const ValueCard = ({
               {icon}
             </div>
           </div>
+          <h4 className="font-bold leading-tight text-black flex-1 pr-4 text-lg">
+            {title}
+          </h4>
         </div>
 
         {/* Description */}
-        <p className="text-gray-600 mt-auto text-sm">
+        <p className="text-gray-600 mt-auto text-sm bg-white shadow-lg rounded-lg p-4">
           {description}
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ValueCard
+export default ValueCard;

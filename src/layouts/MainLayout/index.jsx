@@ -1,29 +1,34 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Outlet,
   useLocation,
   useSearchParams,
   ScrollRestoration,
-} from "react-router-dom"
-import HeaderBar from "../../shared/components/Header/HeaderBar"
-import Footer from "../../shared/components/Footer"
-import Auth from "@/features/auth/components"
-import AuthModalContext from "@/shared/context/AuthModalContext"
-import { AnimatePresence } from "framer-motion"
+} from "react-router-dom";
+import Footer from "../../shared/components/Footer";
+import Auth from "@/features/auth/components";
+import AuthModalContext from "@/shared/context/AuthModalContext";
+import { AnimatePresence } from "framer-motion";
+import MainHeader from "../../shared/components/Header/MainHeader"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-
+import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
+import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
+import { useSidebar } from "@/shared/context/SidebarContext"
+import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader";
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
+  const { isMobileSidebarOpen, setIsMobileSidebarOpen, isSidebarExpanded, setIsSidebarExpanded } = useSidebar()
+
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
     email: "",
     redirectAfterLogin: null,
-  })
+  });
 
-  const location = useLocation()
-  const [searchParams] = useSearchParams()
-  const isLandingPage = location.pathname === "/"
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isLandingPage = location.pathname === "/";
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
@@ -35,7 +40,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode: "reset-password",
         email: "",
         redirectAfterLogin: null,
-      })
+      });
     }
     // Alternatively, check for "mode" param in query string if backend link is like /?mode=reset
     else if (searchParams.get("mode") === "resetPassword") {
@@ -44,7 +49,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode: "reset-password",
         email: "",
         redirectAfterLogin: null,
-      })
+      });
     }
     // Check for login required redirect via router state
     else if (location.state?.requireLogin) {
@@ -53,9 +58,9 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode: "login",
         email: "",
         redirectAfterLogin: location.state.redirectTo || null,
-      })
+      });
     }
-  }, [location.pathname, searchParams, location.state])
+  }, [location.pathname, searchParams, location.state]);
 
   const openAuthModal = (mode = "login", secondArg = null) => {
     // When switching to verify-email, the second arg is the email address
@@ -65,16 +70,16 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode,
         email: secondArg || "",
         redirectAfterLogin: null,
-      })
+      });
     } else {
       setAuthModal({
         isOpen: true,
         mode,
         email: "",
         redirectAfterLogin: secondArg,
-      })
+      });
     }
-  }
+  };
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
@@ -82,7 +87,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
       isOpen: false,
       email: "",
       redirectAfterLogin: null,
-    }))
+    }));
 
   return (
     <AuthModalContext.Provider
@@ -92,18 +97,51 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         redirectAfterLogin: authModal.redirectAfterLogin,
       }}
     >
-      <div className="flex flex-col min-h-screen bg-white text-left overflow-x-clip">
-        {showHeader && (
-          <HeaderBar onGetStarted={() => openAuthModal("login")} />
+      {/* Background for Community Page - covers FULL viewport behind everything */}
+      {!isLandingPage && (
+        <div 
+          className="fixed inset-0 pointer-events-none z-0 mt-24"
+          style={{
+            backgroundImage: `url(${BackgroundV2})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      )}
+
+      <div className="relative flex min-h-screen text-left overflow-x-clip">
+        {!isLandingPage && (
+          <MainSidebar 
+            isMobileOpen={isMobileSidebarOpen} 
+            setIsMobileOpen={setIsMobileSidebarOpen} 
+            isExpanded={isSidebarExpanded} 
+            setIsExpanded={setIsSidebarExpanded} 
+          />
         )}
 
-        <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
-          <Outlet />
-        </main>
+        <div 
+          className={`flex flex-col flex-1 min-w-0 transition-all duration-300 relative z-10 ${
+            !isLandingPage ? (isSidebarExpanded ? 'lg:ml-[280px]' : 'lg:ml-[80px]') : ''
+          }`}
+        >
+        {showHeader &&
+          (isLandingPage ? (
+            <LandingHeader onGetStarted={() => openAuthModal("login")} />
+          ) : (
+            <MainHeader
+              onGetStarted={() => openAuthModal("login")}
+              onMenuClick={() => setIsMobileSidebarOpen(true)}
+            />
+          ))}
 
-        {/* Footer full width (bên trong tự giới hạn 1200px) */}
-        {showFooter && isLandingPage && <Footer />}
+          <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
+            <Outlet />
+          </main>
 
+          {/* Footer full width */}
+          {showFooter && isLandingPage && <Footer />}
+        </div>
       </div>
 
       <Auth
@@ -116,7 +154,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
 
       <ScrollRestoration />
     </AuthModalContext.Provider>
-  )
-}
+  );
+};
 
-export default MainLayout
+export default MainLayout;

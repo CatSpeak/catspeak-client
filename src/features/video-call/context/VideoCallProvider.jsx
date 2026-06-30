@@ -270,6 +270,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       // Fetch LiveKit token to validate connectivity and join
       const livekitTokenBody = {
         roomId: Number(roomId),
+        roomName: room?.name || `room-${roomId}`
       }
       const tokenRes = await getLivekitToken(livekitTokenBody).unwrap()
 

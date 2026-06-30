@@ -163,13 +163,15 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
     <div className="group flex flex-col gap-3 rounded-lg border border-[#e5e5e5] bg-white min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Left: metadata */}
       <div className="flex flex-col">
-        {/* Top row: meeting ID */}
-        <span className="text-cath-red-700" title={meetingId}>
-          {meetingId}
-        </span>
+        {/* Top row: meeting ID & potential status badge */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[#990011] font-medium" title={meetingId}>
+            {meetingId}
+          </span>
+        </div>
 
         {/* Meta row: date, duration, size */}
-        <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap">
+        <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap mt-1">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
             {formatDate(createdAt)}

@@ -12,7 +12,7 @@ import {
   ControlBar as VideoCallControlBar,
   RoomHeader,
 } from "@/features/video-call"
-import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
+import BackgroundsAndEffectsPanel from "@/features/video-call/components/BackgroundsAndEffectsPanel"
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
@@ -32,12 +32,12 @@ const VideoCallRoomContent = () => {
     setShowParticipants,
     showVirtualBackground,
     setShowVirtualBackground,
+    isAISession,
+    showCC,
     showAvatarPicker,
     setShowAvatarPicker,
     activeSidePanel,
     setActiveSidePanel,
-    isAISession,
-    showCC,
     // Auth guard
     user,
     location,
@@ -61,7 +61,7 @@ const VideoCallRoomContent = () => {
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
     : showVirtualBackground
-      ? t.rooms?.videoCall?.applyVisualEffects || "Backgrounds and effects"
+      ? t.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"
       : showAvatarPicker
         ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
         : t.rooms.chatBox.title
@@ -73,7 +73,17 @@ const VideoCallRoomContent = () => {
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
   const connectionState = useConnectionState()
-  const livekitReady = connectionState === ConnectionState.Connected
+  const livekitReady =
+    connectionState === ConnectionState.Connected ||
+    connectionState === ConnectionState.Reconnecting
+
+  useEffect(() => {
+    // Prevent iOS/macOS swipe-to-go-back gestures during the call
+    document.body.style.overscrollBehaviorX = "none"
+    return () => {
+      document.body.style.overscrollBehaviorX = "auto"
+    }
+  }, [])
 
   useEffect(() => {
     // Prevent iOS/macOS swipe-to-go-back gestures during the call
@@ -121,7 +131,9 @@ const VideoCallRoomContent = () => {
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
           {/* Non-AI Room subtitles — only show in non-AI rooms when enabled */}
-          {!isAISession && showRoomSubtitles && <SubtitleOverlayNonAI showRoomSubtitles={showRoomSubtitles} />}
+          {!isAISession && showRoomSubtitles && (
+            <SubtitleOverlayNonAI showRoomSubtitles={showRoomSubtitles} />
+          )}
         </div>
 
         {/* Desktop Side Panel */}
@@ -137,7 +149,7 @@ const VideoCallRoomContent = () => {
             >
               <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
-                {showVirtualBackground && <VirtualBackgroundPicker />}
+                {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
                 {showChat && (
                   <ChatBox
@@ -188,7 +200,7 @@ const VideoCallRoomContent = () => {
 
                   <div className="flex-1 overflow-y-auto">
                     {showParticipants && <ParticipantList hideTitle />}
-                    {showVirtualBackground && <VirtualBackgroundPicker />}
+                    {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                     {showAvatarPicker && <AvatarUrlPicker />}
                     {showChat && (
                       <ChatBox

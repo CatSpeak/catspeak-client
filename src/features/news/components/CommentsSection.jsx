@@ -1,6 +1,7 @@
 import React, { useState, forwardRef } from "react"
 import { useAuth, useGetProfileQuery } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { ChevronDown, ChevronUp } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import {
@@ -11,8 +12,6 @@ import {
   useReactToCommentMutation,
 } from "@/store/api/postsApi"
 import { getImageUrl } from "@/shared/utils/imageUtils"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
 import CommentItem from "./CommentItem"
 
 const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
@@ -20,7 +19,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
   const { user: authUser, isAuthenticated } = useAuth()
   const { data: userData } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
   const user = userData?.data ?? authUser ?? {}
-  
+
   const { data: comments, isLoading } = useGetPostCommentsQuery({ postId })
   const [createComment] = useCreatePostCommentMutation()
   const [deleteComment] = useDeletePostCommentMutation()
@@ -28,6 +27,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
   const [reactToComment] = useReactToCommentMutation()
   const [content, setContent] = useState("")
   const [commentToDelete, setCommentToDelete] = useState(null)
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -99,7 +99,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
 
   if (isLoading)
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-gray-500 font-nunito">
         {t.news?.newsDetail?.loadingComments || "Loading comments..."}
       </div>
     )
@@ -107,74 +107,84 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
   const commentsList = comments?.data || []
 
   return (
-    <div className="mt-6" ref={ref}>
-      {totalComments > 0 && (
-        <div className="font-semibold text-lg mb-4 text-gray-900">
+    <div ref={ref}>
+      {/* ── Header ──────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-nunito font-semibold text-xl text-black leading-[1.4]">
           {t.news?.newsDetail?.totalComments?.replace(
             "{{count}}",
             totalComments,
-          ) || `${totalComments} Comments`}
-        </div>
-      )}
-      {/* Comment Form */}
+          ) || `Bình luận (${totalComments})`}
+        </h3>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="flex items-center justify-center w-6 h-6 text-[#7b7979] hover:text-black transition-colors"
+        >
+          {isCollapsed ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+        </button>
+      </div>
+
+      {/* ── Comment Input ───────────────────────────────────────── */}
       {isAuthenticated && (
-        <div className="flex gap-3">
-          <Avatar
-            size={48}
-            src={user?.avatarImageUrl ? getImageUrl(user.avatarImageUrl) : null}
-            name={user?.fullName || user?.firstName || user?.username || "User"}
-            className="shrink-0"
-          />
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3">
-            <TextInput
-              id="post-comment-input"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder={
-                t.news?.newsDetail?.writeComment || "Write a comment..."
-              }
-              autoFocus={false}
-              multiline
+        <div className="border-b border-[#e2e2e2] pb-4 mb-5">
+          <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <Avatar
+              size={32}
+              src={user?.avatarImageUrl ? getImageUrl(user.avatarImageUrl) : null}
+              name={user?.fullName || user?.firstName || user?.username || "User"}
+              className="shrink-0"
             />
-            {content.length > 0 && (
-              <div className="flex justify-end gap-3">
-                <PillButton
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setContent("")}
-                >
-                  {t.news?.newsDetail?.cancel || "Cancel"}
-                </PillButton>
-                <PillButton
-                  type="submit"
-                  variant="primary"
-                  disabled={!content.trim()}
-                >
-                  {t.news?.newsDetail?.comment || "Comment"}
-                </PillButton>
-              </div>
-            )}
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={t.news?.newsDetail?.writeComment || "Nhập bình luận..."}
+                className="w-full bg-[#f5f5f5] border border-[#e2e2e2] rounded-2xl px-4 py-3 font-nunito text-base text-black placeholder:text-[rgba(123,121,121,0.5)] focus:outline-none focus:border-cath-red-700 transition-colors min-h-[48px]"
+              />
+            </div>
           </form>
+          {content.length > 0 && (
+            <div className="flex justify-end gap-2 mt-2 pl-[40px]">
+              <button
+                type="button"
+                onClick={() => setContent("")}
+                className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-nunito font-medium text-sm hover:bg-cath-red-50 transition-colors"
+              >
+                {t.news?.newsDetail?.cancel || "Hủy"}
+              </button>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={!content.trim()}
+                className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-nunito font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
+              >
+                {t.news?.newsDetail?.comment || "Gửi"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Comments List */}
-      <div className="space-y-6 mt-6">
-        {commentsList
-          .slice()
-          .sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
-          .map((comment) => (
-            <CommentItem
-              key={comment.commentId}
-              comment={comment}
-              replies={comment.replies || []}
-              onReplySubmit={handleReplySubmit}
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-              onReact={handleReact}
-            />
-          ))}
-      </div>
+      {/* ── Comments List ───────────────────────────────────────── */}
+      {!isCollapsed && (
+        <div className="flex flex-col gap-5">
+          {commentsList
+            .slice()
+            .sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
+            .map((comment) => (
+              <CommentItem
+                key={comment.commentId}
+                comment={comment}
+                replies={comment.replies || []}
+                onReplySubmit={handleReplySubmit}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                onReact={handleReact}
+              />
+            ))}
+        </div>
+      )}
 
       <ConfirmationModal
         open={!!commentToDelete}
@@ -189,5 +199,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
     </div>
   )
 })
+
+CommentsSection.displayName = "CommentsSection"
 
 export default CommentsSection
