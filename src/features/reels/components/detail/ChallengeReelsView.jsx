@@ -6,6 +6,7 @@ import ReelGrid from "../grid/ReelGrid"
 import ReelGridSkeleton from "../grid/ReelGridSkeleton"
 import { useGetReelsByChallengeQuery } from "@/store/api/reelsApi"
 import { mapReelDtoToFrontend } from "../../utils/mappers"
+import { formatCompactCount } from "../../utils/formatters"
 
 export default function ChallengeReelsView({ challengeId, selectedChallenge, challengeStatus, onReelClick }) {
   const { t } = useLanguage()
@@ -44,11 +45,7 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
     return reels
   }, [challengeReelsResponse, challengeFilter])
 
-  const formatCount = (count) => {
-    if (!count) return "0"
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
-    return count.toString()
-  }
+
 
   if (!challengeId || !selectedChallenge) return null
 
@@ -78,7 +75,7 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-0.5">
               <span className="text-[12px] sm:text-[14px] font-medium text-gray-500 truncate">{selectedChallenge.hashtag ? selectedChallenge.name : "Thử thách"}</span>
               <span className="text-gray-300 text-[8px] sm:text-[10px] shrink-0">●</span>
-              <span className="text-[12px] sm:text-[14px] text-gray-500 shrink-0">{formatCount(selectedChallenge.participantCount)} {t.catSpeak.reels.entries || "bài dự thi"}</span>
+              <span className="text-[12px] sm:text-[14px] text-gray-500 shrink-0">{formatCompactCount(challengeReels.length)} {t.catSpeak.reels.entries || "bài dự thi"}</span>
             </div>
           </div>
         </div>

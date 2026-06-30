@@ -1,6 +1,8 @@
 import React from "react"
 import { Clock, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { formatCompactCount, formatDaysLeft } from "../../utils/formatters"
+import { useGetReelsByChallengeQuery } from "@/store/api/reelsApi"
 
 export default function ChallengeCard({
   challenge,
@@ -10,25 +12,18 @@ export default function ChallengeCard({
   onJoin,
 }) {
   const { t } = useLanguage()
-  const { name, hashtag, description, bannerUrl, status, participantCount, endDate, endTime } = challenge
+  const { name, hashtag, description, bannerUrl, status, endDate, endTime } = challenge
   const validEndDate = endDate || endTime
 
-  const formatDaysLeft = (dateStr) => {
-    if (!dateStr) return t.catSpeak.reels.noLimit || "Không giới hạn"
-    const end = new Date(dateStr)
-    const now = new Date()
-    const diff = end - now
-    if (diff <= 0) return t.catSpeak.reels.ended || "Đã kết thúc"
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
-    const formatStr = t.catSpeak.reels.daysLeft || "Còn {{days}} ngày"
-    return formatStr.replace("{{days}}", days)
-  }
+  const { data: reelsResponse } = useGetReelsByChallengeQuery(
+    { challengeId: challenge.challengeId, pageSize: 100 },
+    { skip: !challenge.challengeId }
+  )
+  const reelCount = reelsResponse?.data?.length || 0
 
-  const formatCount = (count) => {
-    if (!count) return "0"
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
-    return String(count)
-  }
+
+
+
 
   const participantsStr = t.catSpeak.reels.participants || "{{count}} người tham gia"
   
@@ -67,7 +62,7 @@ export default function ChallengeCard({
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-2.5 sm:p-3 md:p-4">
-        <h3 className="text-[15px] sm:text-lg md:text-xl font-bold text-gray-800 mb-0.5 line-clamp-1">
+        <h3 className="text-[13px] sm:text-[15px] md:text-[17px] font-bold text-gray-800 mb-0.5 line-clamp-1">
           {hashtag ? hashtag : name || "Thử thách mới"}
         </h3>
         <p className="text-[11px] md:text-[13px] text-gray-500 mb-2 sm:mb-3 md:mb-4 line-clamp-1">
@@ -78,11 +73,11 @@ export default function ChallengeCard({
         <div className="flex flex-col gap-1.5 md:gap-2.5 mb-3 md:mb-5">
           <div className="flex items-center gap-1.5 md:gap-2 text-gray-700 text-[11px] md:text-[13px]">
             <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-500" />
-            <span className="truncate">{isPast ? (t.catSpeak.reels.votingClosed || "Đã đóng cổng bình chọn") : formatDaysLeft(validEndDate)}</span>
+            <span className="truncate">{isPast ? (t.catSpeak.reels.votingClosed || "Đã đóng cổng bình chọn") : formatDaysLeft(validEndDate, t)}</span>
           </div>
           <div className="flex items-center gap-1.5 md:gap-2 text-gray-700 text-[11px] md:text-[13px]">
             <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-700" />
-            <span className="truncate">{participantsStr.replace("{{count}}", formatCount(participantCount))}</span>
+            <span className="truncate">{participantsStr.replace("{{count}}", formatCompactCount(reelCount))}</span>
           </div>
         </div>
 
