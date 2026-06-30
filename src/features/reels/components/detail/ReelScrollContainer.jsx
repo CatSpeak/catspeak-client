@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import React, { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect, useImperativeHandle } from "react"
 import { Loader2 } from "lucide-react"
 
 /**
@@ -54,7 +54,7 @@ const SENTINEL_STYLE = {
 const PLACEHOLDER_STYLE = {
   width: "100%",
   height: "100%",
-  background: "#000",
+  background: "transparent",
 }
 
 const getAncestorBottomPadding = (element) => {
@@ -62,7 +62,9 @@ const getAncestorBottomPadding = (element) => {
   let largestPadding = 0
 
   while (current && current !== document.body) {
-    const paddingBottom = parseFloat(window.getComputedStyle(current).paddingBottom)
+    const computedStyle = window.getComputedStyle(current)
+    if (computedStyle.position === 'fixed') break;
+    const paddingBottom = parseFloat(computedStyle.paddingBottom)
     if (Number.isFinite(paddingBottom)) {
       largestPadding = Math.max(largestPadding, paddingBottom)
     }
@@ -77,7 +79,7 @@ const clampIndex = (index, length) => {
   return Math.min(Math.max(index, 0), length - 1)
 }
 
-export default function ReelScrollContainer({
+const ReelScrollContainer = React.forwardRef(function ReelScrollContainer({
   reels = [],
   onLoadMore,
   hasMore = true,
@@ -89,7 +91,8 @@ export default function ReelScrollContainer({
   preloadWindow = DEFAULT_PRELOAD_WINDOW,
   containerHeight = DEFAULT_CONTAINER_HEIGHT,
   bottomGap = DEFAULT_BOTTOM_GAP,
-}) {
+  isMobile = false,
+}, ref) {
   const containerRef = useRef(null)
   const sentinelRef = useRef(null)
   const activeIndexRef = useRef(initialIndex)
@@ -110,7 +113,8 @@ export default function ReelScrollContainer({
   const containerStyle = useMemo(() => ({
     ...CONTAINER_STYLE,
     height: effectiveContainerHeight,
-  }), [effectiveContainerHeight])
+    ...(isMobile ? { borderRadius: 0 } : {})
+  }), [effectiveContainerHeight, isMobile])
 
   const itemStyle = useMemo(() => ({
     ...ITEM_STYLE,
@@ -206,7 +210,7 @@ export default function ReelScrollContainer({
   }, [onActiveIndexChange, reels.length, snapItemCount])
 
   // Sync scroll position to match initialIndex (on mount or browser back/forward)
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = containerRef.current
     if (!container || reels.length === 0) return
 
@@ -223,28 +227,14 @@ export default function ReelScrollContainer({
     activeIndexRef.current = safeInitialIndex
     renderCenterIndexRef.current = safeInitialIndex
 
-    if (syncRafRef.current !== null) {
-      window.cancelAnimationFrame(syncRafRef.current)
-    }
-
-    syncRafRef.current = window.requestAnimationFrame(() => {
-      syncRafRef.current = null
-      setActiveIndex(safeInitialIndex)
-      setRenderCenterIndex(safeInitialIndex)
-    })
+    setActiveIndex(safeInitialIndex)
+    setRenderCenterIndex(safeInitialIndex)
 
     const expectedScrollTop = safeInitialIndex * height
     if (Math.abs(container.scrollTop - expectedScrollTop) > 2) {
       container.scrollTop = expectedScrollTop
     }
     hasSyncedInitialScrollRef.current = true
-
-    return () => {
-      if (syncRafRef.current !== null) {
-        window.cancelAnimationFrame(syncRafRef.current)
-        syncRafRef.current = null
-      }
-    }
   }, [initialIndex, reels.length])
 
   const updateActiveIndexFromScroll = useCallback((container, forceCommit = false) => {
@@ -330,10 +320,32 @@ export default function ReelScrollContainer({
     return () => { if (sentinel) observer.unobserve(sentinel) }
   }, [onLoadMore, hasMore, isLoading, reels.length])
 
+  useImperativeHandle(ref, () => ({
+    scrollToIndex: (index) => {
+      const container = containerRef.current
+      if (!container || reels.length === 0) return
+      const safeIndex = clampIndex(index, reels.length - 1)
+      const expectedScrollTop = safeIndex * container.clientHeight
+      container.scrollTo({ top: expectedScrollTop, behavior: 'smooth' })
+    },
+    scrollToNext: () => {
+      const container = containerRef.current
+      if (!container || reels.length === 0) return
+      const nextIndex = clampIndex(activeIndexRef.current + 1, reels.length - 1)
+      container.scrollTo({ top: nextIndex * container.clientHeight, behavior: 'smooth' })
+    },
+    scrollToPrev: () => {
+      const container = containerRef.current
+      if (!container || reels.length === 0) return
+      const prevIndex = clampIndex(activeIndexRef.current - 1, reels.length - 1)
+      container.scrollTo({ top: prevIndex * container.clientHeight, behavior: 'smooth' })
+    }
+  }), [reels.length])
+
   return (
     <div
       ref={containerRef}
-      className="reel-scroll-container scrollbar-hidden"
+      className="w-full overflow-y-auto snap-y snap-mandatory bg-transparent scrollbar-hidden"
       style={containerStyle}
       onScroll={handleScroll}
     >
@@ -436,4 +448,6 @@ export default function ReelScrollContainer({
       )}
     </div>
   )
-}
+})
+
+export default ReelScrollContainer

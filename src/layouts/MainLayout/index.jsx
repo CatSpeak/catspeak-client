@@ -24,6 +24,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const isLandingPage = location.pathname === "/"
+  const isCommunityPage = location.pathname.includes("/community")
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
@@ -92,9 +93,27 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         redirectAfterLogin: authModal.redirectAfterLogin,
       }}
     >
-      <div className="flex flex-col min-h-screen bg-white text-left overflow-x-clip">
-        {showHeader && (
-          <HeaderBar onGetStarted={() => openAuthModal("login")} />
+      {/* Background for Community Page - covers FULL viewport behind everything */}
+      {isCommunityPage && (
+        <div 
+          className="fixed inset-0 pointer-events-none z-0 mt-24"
+          style={{
+            backgroundImage: `url(${BackgroundV2})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      )}
+
+      <div className="relative flex min-h-screen text-left overflow-x-clip">
+        {!isLandingPage && (
+          <MainSidebar 
+            isMobileOpen={isMobileSidebarOpen} 
+            setIsMobileOpen={setIsMobileSidebarOpen} 
+            isExpanded={isSidebarExpanded} 
+            setIsExpanded={setIsSidebarExpanded} 
+          />
         )}
 
         <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">

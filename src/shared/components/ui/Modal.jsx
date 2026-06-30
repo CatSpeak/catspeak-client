@@ -9,7 +9,7 @@ const Modal = ({
   onClose,
   children,
   className = "",
-  headerClassName = "flex items-center justify-between p-3",
+  headerClassName = "flex items-center justify-between p-3 pl-6",
   title,
   showCloseButton = true,
   footer,
@@ -23,14 +23,14 @@ const Modal = ({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-0 min-[426px]:p-4">
+        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-0 md:p-4">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 "
             onClick={onClose}
           />
 
@@ -40,16 +40,16 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative h-full w-full shadow-xl min-[426px]:h-auto ${
-              /(^|\s)(min-\[[^\]]+\]:|md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
+            className={`relative  h-full w-full shadow-xl md:h-auto ${
+              /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
                 className,
               )
                 ? ""
-                : "min-[426px]:max-w-md"
+                : "md:max-w-md"
             } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
               /(^|\s)rounded/.test(className)
                 ? ""
-                : "rounded-none min-[426px]:rounded-3xl min-[426px]:border min-[426px]:border-[#E5e5e5]"
+                : "rounded-none md:rounded-3xl md:border md:border-[#E5e5e5]"
             } ${className}`}
             role="dialog"
             aria-modal="true"
