@@ -84,12 +84,43 @@ export default {
     description: "快速解答您关于学习路径和社区的疑问。",
     searchPlaceholder: "搜索...",
     questions: [
-      { question: "我如何与同等水平的人联系？", answer: "系统将根据您的资料为您匹配同等水平的用户。" },
-      { question: "我如何与更多人联系？", answer: "加入社区小组并参与公开讨论。" },
+      {
+        question: "我如何与同等水平的人联系？",
+        answer: "系统将根据您的资料为您匹配同等水平的用户。",
+      },
+      {
+        question: "我如何与更多人联系？",
+        answer: "加入社区小组并参与公开讨论。",
+      },
       { question: "一个小组的人数是多少？", answer: "每个小组通常有 4-6 人。" },
-      { question: "我有多少时间见面？", answer: "会议通常持续 30 到 45 分钟。" },
-      { question: "我如何举报发送垃圾信息的人？", answer: "在他们的个人资料或聊天窗口中使用举报按钮。" },
-      { question: "我在哪里可以联系老师？", answer: "By the end of the trial lesson, you will be able to determine for yourself whether this kind of online lesson is right for you or not. In our experience, most students appreciate the benefits of online education and decide to study online." }
-    ]
-  }
+      {
+        question: "我有多少时间见面？",
+        answer: "会议通常持续 30 到 45 分钟。",
+      },
+      {
+        question: "我如何举报发送垃圾信息的人？",
+        answer: "在他们的个人资料或聊天窗口中使用举报按钮。",
+      },
+      {
+        question: "我在哪里可以联系老师？",
+        answer:
+          "By the end of the trial lesson, you will be able to determine for yourself whether this kind of online lesson is right for you or not. In our experience, most students appreciate the benefits of online education and decide to study online.",
+      },
+    ],
+  },
+  footer: {
+    validation: {
+      title: "缺少信息",
+      message: "请在提交前填写所有信息。",
+    },
+    success: {
+      title: "成功",
+      message: "您的信息已成功发送！",
+    },
+    error: {
+      title: "错误",
+      message: "发送信息时出现问题，请稍后再试。",
+    },
+    ok: "确定",
+  },
 };

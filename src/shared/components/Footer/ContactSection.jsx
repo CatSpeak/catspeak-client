@@ -3,12 +3,57 @@ import { Send, Facebook, Youtube } from "lucide-react";
 import { SiZalo } from "react-icons/si";
 import { useLanguage } from "@/shared/context/LanguageContext.jsx";
 import TextInput from "@/shared/components/ui/inputs/TextInput.jsx";
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
+import { useSubmitContactMutation } from "@/store/api/contactApi";
+import Modal from "../ui/Modal";
 
 const ContactSection = ({ isMobile = false }) => {
   const { t } = useLanguage();
   const footerText = t.footer;
-  const [showDevModal, setShowDevModal] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [modal, setModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+  });
+  const [submitContact, { isLoading }] = useSubmitContactMutation();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!email || !message) {
+      setModal({
+        open: true,
+        title: footerText.validation.title,
+        message: footerText.validation.message,
+      });
+      return;
+    }
+
+    try {
+      await submitContact({ email, name, message }).unwrap();
+
+      setModal({
+        open: true,
+        title: footerText.success.title,
+        message: footerText.success.message,
+      });
+
+      setEmail("");
+      setName("");
+      setMessage("");
+    } catch (err) {
+      setModal({
+        open: true,
+        title: footerText.error.title,
+        message: footerText.error.message,
+      });
+
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -47,16 +92,20 @@ const ContactSection = ({ isMobile = false }) => {
         </div>
 
         <div className="w-full max-w-md z-30">
-          <form className="flex flex-col gap-3">
+          <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2 sm:flex-row">
               <TextInput
                 type="email"
                 placeholder={footerText.emailPlaceholder}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 containerClassName="flex-1"
                 className={`text-black ${isMobile ? "shadow-md bg-white border border-gray-100 rounded-full px-6 py-2" : ""}`}
               />
               <TextInput
                 placeholder={footerText.namePlaceholder}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 containerClassName="flex-1"
                 className={`text-black ${isMobile ? "shadow-md bg-white border border-gray-100 rounded-full px-6 py-2" : ""}`}
               />
@@ -64,27 +113,25 @@ const ContactSection = ({ isMobile = false }) => {
             <div className="flex items-center relative gap-5">
               <TextInput
                 placeholder={footerText.contactPlaceholder}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 containerClassName="flex-1"
                 className={`pr-12 text-black ${isMobile ? "shadow-md bg-white border border-gray-100 rounded-full px-6 py-2" : ""}`}
               />
 
               <button
-                type="button"
-                className={`flex h-[43px] w-[43px] shrink-0 items-center justify-center rounded-full transition ${
+                type="submit"
+                disabled={isLoading}
+                className={`flex h-[43px] w-[43px] shrink-0 items-center justify-center rounded-full transition disabled:opacity-50 ${
                   isMobile
                     ? "bg-[#910B09] text-[#FFE66D] hover:bg-[#7a0907]"
                     : "border border-[#FFE66D] text-[#FFE66D] hover:bg-[#b6a13a] hover:text-white"
                 }`}
                 aria-label={footerText.sendContact}
-                onClick={() => setShowDevModal(true)}
               >
                 <Send className="h-4 w-4" />
               </button>
             </div>
-            <InDevelopmentModal
-              open={showDevModal}
-              onCancel={() => setShowDevModal(false)}
-            />
           </form>
           <div className="mt-4 flex items-center text-sm">
             <div
@@ -98,6 +145,36 @@ const ContactSection = ({ isMobile = false }) => {
           </div>
         </div>
       </div>
+
+      {/* Modal Noti */}
+      <Modal
+        open={modal.open}
+        onClose={() =>
+          setModal((prev) => ({
+            ...prev,
+            open: false,
+          }))
+        }
+        title={modal.title}
+      >
+        <div className="py-2">
+          <p className="text-gray-700">{modal.message}</p>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() =>
+                setModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }))
+              }
+              className="rounded-full bg-[#910B09] px-6 py-2 text-white hover:bg-[#7a0907]"
+            >
+              {footerText.ok}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };

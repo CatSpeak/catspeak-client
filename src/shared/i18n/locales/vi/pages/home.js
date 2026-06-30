@@ -82,15 +82,53 @@ export default {
   faq: {
     corner: "FAQ",
     title: "Câu hỏi thường gặp",
-    description: "Giải đáp nhanh những băn khoăn của bạn về lộ trình học và cộng đồng.",
+    description:
+      "Giải đáp nhanh những băn khoăn của bạn về lộ trình học và cộng đồng.",
     searchPlaceholder: "Tìm kiếm...",
     questions: [
-      { question: "Tôi kết nối với người cùng level của tôi thế nào?", answer: "Bạn sẽ được ghép cặp với những người dùng có cùng trình độ dựa trên hồ sơ của bạn." },
-      { question: "Làm sao tôi kết nối được với nhiều người?", answer: "Tham gia các nhóm cộng đồng và thảo luận công khai." },
-      { question: "Số lượng người trong một group là bao nhiêu?", answer: "Thường khoảng 4-6 người một nhóm." },
-      { question: "Tôi có thời gian bao lâu để meet?", answer: "Các cuộc gặp thường kéo dài 30 đến 45 phút." },
-      { question: "Tôi phản ánh về người spam tôi như thế nào?", answer: "Sử dụng nút báo cáo trên hồ sơ của họ hoặc trong cửa sổ chat." },
-      { question: "Tôi kết nối với giáo viên ở đâu?", answer: "By the end of the trial lesson, you will be able to determine for yourself whether this kind of online lesson is right for you or not. In our experience, most students appreciate the benefits of online education and decide to study online." }
-    ]
-  }
+      {
+        question: "Tôi kết nối với người cùng level của tôi thế nào?",
+        answer:
+          "Bạn sẽ được ghép cặp với những người dùng có cùng trình độ dựa trên hồ sơ của bạn.",
+      },
+      {
+        question: "Làm sao tôi kết nối được với nhiều người?",
+        answer: "Tham gia các nhóm cộng đồng và thảo luận công khai.",
+      },
+      {
+        question: "Số lượng người trong một group là bao nhiêu?",
+        answer: "Thường khoảng 4-6 người một nhóm.",
+      },
+      {
+        question: "Tôi có thời gian bao lâu để meet?",
+        answer: "Các cuộc gặp thường kéo dài 30 đến 45 phút.",
+      },
+      {
+        question: "Tôi phản ánh về người spam tôi như thế nào?",
+        answer: "Sử dụng nút báo cáo trên hồ sơ của họ hoặc trong cửa sổ chat.",
+      },
+      {
+        question: "Tôi kết nối với giáo viên ở đâu?",
+        answer:
+          "By the end of the trial lesson, you will be able to determine for yourself whether this kind of online lesson is right for you or not. In our experience, most students appreciate the benefits of online education and decide to study online.",
+      },
+    ],
+  },
+  footer: {
+    validation: {
+      title: "Thiếu thông tin",
+      message: "Vui lòng điền đầy đủ thông tin trước khi gửi.",
+    },
+    success: {
+      title: "Gửi thành công",
+      message:
+        "Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi sớm nhất có thể.",
+    },
+    error: {
+      title: "Gửi thất bại",
+      message: "Đã xảy ra lỗi khi gửi thông tin. Vui lòng thử lại sau.",
+    },
+    contactUs: "Liên hệ với chúng tôi",
+    ok: "OK",
+  },
 };
