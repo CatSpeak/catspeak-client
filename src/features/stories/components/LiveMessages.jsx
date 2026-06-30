@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from "react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { Breadcrumb } from "@/shared/components/ui/navigation"
 import useStories from "../hooks/useStories"
 import useDanmaku from "../hooks/useDanmaku"
 import StoryInputBar from "./StoryInputBar"
@@ -8,6 +10,7 @@ import PassConfirmationModal from "./PassConfirmationModal"
 import MyStoryModal from "./MyStoryModal"
 
 const LiveMessages = ({ languageCommunity }) => {
+  const navigate = useNavigate()
   const {
     stories,
     myStories,
@@ -65,63 +68,85 @@ const LiveMessages = ({ languageCommunity }) => {
     handleInteract(story.storyId, 2)
   }
 
-  return (
-    <div
-      className="relative flex w-full max-w-full flex-col"
-      style={{ height: "calc(100dvh - 180px)", minHeight: "50vh" }}
-    >
-      <StoryInputBar
-        inputValue={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onSend={handleSend}
-        myCount={myCount}
-        totalCount={totalCount}
-        sortOrder={sortOrder}
-        onSortChange={setSortOrder}
-        displayMode={displayMode}
-        onDisplayModeChange={setDisplayMode}
-      />
+  const breadcrumbItems = [
+    {
+      label: t.nav?.community || "Trang chủ",
+      onClick: () => navigate("/community"),
+    },
+    {
+      label: t.nav?.catSpeak || "Cat Speak",
+      onClick: () => navigate("/cat-speak/news"),
+    },
+    {
+      label: t.nav?.mail || "Thư",
+    },
+  ]
 
-      {isLoading ? (
-        <div className="flex-1 min-h-0"></div>
-      ) : isEmpty ? (
-        <div className="relative my-6 flex w-full max-w-full flex-1 items-center justify-center overflow-hidden rounded-3xl bg-white/60 p-6">
-          <div className="flex max-w-sm flex-col items-center gap-4 rounded-2xl bg-white/50 p-8 text-center shadow-sm backdrop-blur-sm">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-3xl shadow-sm">
-              💬
-            </div>
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-medium text-[#404040]">
-                {t.catSpeak?.mail?.noStories}
-              </h3>
-              <p className="text-sm text-[#707070]">
-                {t.catSpeak?.mail?.placeholderEmpty}
-              </p>
+  return (
+    <div className="flex w-full max-w-full flex-col">
+      {/* Breadcrumb */}
+      <div className="px-6 pb-6 text-sm">
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
+
+      {/* Main content */}
+      <div
+        className="relative flex w-full max-w-full flex-col"
+        style={{ height: "calc(100dvh - 210px)", minHeight: "50vh" }}
+      >
+        <StoryInputBar
+          inputValue={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onSend={handleSend}
+          myCount={myCount}
+          totalCount={totalCount}
+          sortOrder={sortOrder}
+          onSortChange={setSortOrder}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+        />
+
+        {isLoading ? (
+          <div className="flex-1 min-h-0"></div>
+        ) : isEmpty ? (
+          <div className="relative my-6 flex w-full max-w-full flex-1 items-center justify-center overflow-hidden rounded-3xl bg-white/60 p-6">
+            <div className="flex max-w-sm flex-col items-center gap-4 rounded-2xl bg-white/50 p-8 text-center shadow-sm backdrop-blur-sm">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-3xl shadow-sm">
+                💬
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-medium text-[#404040]">
+                  {t.catSpeak?.mail?.noStories}
+                </h3>
+                <p className="text-sm text-[#707070]">
+                  {t.catSpeak?.mail?.placeholderEmpty}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <DanmakuStage
-          danmakuItems={danmakuItems}
-          stageRef={stageRef}
-          onItemClick={handleItemClick}
-          displayMode={displayMode}
-        />
-      )}
+        ) : (
+          <DanmakuStage
+            danmakuItems={danmakuItems}
+            stageRef={stageRef}
+            onItemClick={handleItemClick}
+            displayMode={displayMode}
+          />
+        )}
 
-      <PassConfirmationModal
-        open={!!selectedStory}
-        story={selectedStory}
-        onConnect={handleConnect}
-        onPass={handlePass}
-        onClose={() => setSelectedStory(null)}
-      />
-      <MyStoryModal
-        open={!!selectedMyStory}
-        story={selectedMyStory}
-        onClose={() => setSelectedMyStory(null)}
-        onDelete={handleDelete}
-      />
+        <PassConfirmationModal
+          open={!!selectedStory}
+          story={selectedStory}
+          onConnect={handleConnect}
+          onPass={handlePass}
+          onClose={() => setSelectedStory(null)}
+        />
+        <MyStoryModal
+          open={!!selectedMyStory}
+          story={selectedMyStory}
+          onClose={() => setSelectedMyStory(null)}
+          onDelete={handleDelete}
+        />
+      </div>
     </div>
   )
 }

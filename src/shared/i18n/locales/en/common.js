@@ -39,6 +39,7 @@ export default {
     reels: "Reels",
     video: "Video",
     calendar: "Calendar",
+    mail: "Mail",
     cart: "Cart",
     courses: "Courses",
     allCourses: "All Courses",

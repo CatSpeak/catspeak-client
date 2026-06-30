@@ -1,14 +1,15 @@
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true },
-  { 
-    key: "catSpeak", 
+  {
+    key: "catSpeak",
     hasDropdown: true,
     subItems: [
       { key: "catSpeakNews", path: "/cat-speak/news" },
       // { key: "worldNews", path: "/cat-speak/discover" },
       { key: "reels", path: "/cat-speak/reels" },
       // { key: "video", path: "/cat-speak/video" },
-      { key: "calendar", path: "/cat-speak/calendar" }
+      { key: "calendar", path: "/cat-speak/calendar" },
+      { key: "mail", path: "/cat-speak/mail" }
     ]
   },
   // { key: "cart", path: "/cart" },

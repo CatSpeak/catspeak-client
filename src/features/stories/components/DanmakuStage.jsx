@@ -22,15 +22,14 @@ const DanmakuStage = ({
     return (
       <div
         ref={stageRef}
-        className="relative w-full flex-1 min-h-0 overflow-y-auto rounded-xl border border-[#C6C6C6] p-3"
+        className="relative w-full flex-1 min-h-0 overflow-y-auto px-9 py-3"
       >
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-3">
           {danmakuItems.map((story) => (
             <StoryCardItem
               key={story._idx}
               story={story}
               onClick={() => onItemClick(story)}
-              className="w-full max-w-none max-h-none"
             />
           ))}
         </div>
@@ -41,7 +40,7 @@ const DanmakuStage = ({
   return (
     <div
       ref={stageRef}
-      className="relative w-full flex-1 min-h-0 overflow-hidden rounded-xl border border-[#C6C6C6]"
+      className="relative w-full flex-1 min-h-0 overflow-hidden "
     >
       {danmakuItems.map((story) => (
         <DanmakuItem

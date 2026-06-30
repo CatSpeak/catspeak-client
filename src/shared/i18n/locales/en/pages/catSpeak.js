@@ -56,6 +56,10 @@ export default {
     noStories: "No stories yet. Start the conversation!",
     yours: "yours",
     total: "total",
+    sortNewest: "Newest",
+    sortOldest: "Oldest",
+    displayGrid: "Grid",
+    displayFloat: "Floating",
   },
   newsLoginPrompt: "Please log in to see the latest posts from the community.",
   sidebar: {

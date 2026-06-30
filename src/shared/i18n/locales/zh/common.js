@@ -39,6 +39,7 @@ export default {
     reels: "短视频",
     video: "视频",
     calendar: "日历",
+    mail: "邮件",
     cart: "购物车",
     courses: "课程",
     allCourses: "所有课程",

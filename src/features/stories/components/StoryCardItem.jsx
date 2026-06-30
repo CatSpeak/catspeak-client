@@ -56,12 +56,12 @@ const StoryCardItem = ({ story, onClick }) => {
       </div>
 
       {/* Story content */}
-      <p className="line-clamp-3 break-words text-sm leading leading-[1.4] text-[#3d3d3d]">
+      <p className="line-clamp-3 flex-1 break-words text-sm leading leading-[1.4] text-[#3d3d3d]">
         {storyContent}
       </p>
 
       {/* Footer: comment count + time */}
-      <div className="flex items-center gap-4 text-xs text-[#9e9e9e]">
+      <div className="flex items-center gap-4 text-xs text-[#9e9e9e] mt-auto">
         <span className="flex items-center gap-1">
           <MessageSquare size={13} className="shrink-0" />
           {commentCount} phản hồi
