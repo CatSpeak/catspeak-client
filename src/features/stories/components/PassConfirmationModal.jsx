@@ -6,6 +6,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Modal from "@/shared/components/ui/Modal"
+import { MessageSquare } from "lucide-react"
 
 dayjs.extend(relativeTime)
 
@@ -34,38 +35,49 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
 
   if (!story) return null
 
-  const createdAt = dayjs(story.createDate)
-  const expiresAt = dayjs(story.expiresAt)
-  const now = dayjs()
-  const timeRemaining = expiresAt.diff(now, "minute")
-  const hoursRemaining = Math.max(0, Math.floor(timeRemaining / 60))
-  const minutesRemaining = Math.max(0, timeRemaining % 60)
+  // const createdAt = dayjs(story.createDate)
+  // const expiresAt = dayjs(story.expiresAt)
+  // const now = dayjs()
+  // const timeRemaining = expiresAt.diff(now, "minute")
+  // const hoursRemaining = Math.max(0, Math.floor(timeRemaining / 60))
+  // const minutesRemaining = Math.max(0, timeRemaining % 60)
 
   return (
     <Modal
       open={open}
       onClose={handleClose}
       title={t.catSpeak?.story || "Story"}
+      bodyClassName="p-4 md:p-6 md:pt-0"
+      className="md:max-w-[525px]"
     >
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
+        {/* User Info Header */}
+        <div className="flex items-center gap-3 pr-10">
           <Avatar
             src={story.avatarImageUrl}
             name={story.username || t.catSpeak?.anonymous || "Anonymous"}
-            size={40}
+            size={44}
           />
           <div className="flex flex-col">
-            <span className="font-semibold">
+            <span className="font-semibold text-lg text-[#1a1a1a] truncate">
               {story.username || t.catSpeak?.anonymous || "Anonymous"}
             </span>
+            <div className="flex items-center gap-4 text-sm text-[#9e9e9e] mt-1">
+              <span className="flex items-center gap-1">
+                <MessageSquare size={13} className="shrink-0" />
+                {story.commentCount || 0} {t.story?.replies}
+              </span>
+              <span>• {dayjs(story.createDate).fromNow()}</span>
+            </div>
           </div>
         </div>
 
-        <div className="min-h-[40px] w-full break-words rounded-lg bg-[#F2F2F2] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap">
+
+        <div className="min-h-[40px] w-full break-words text-base leading-relaxed whitespace-pre-wrap">
           {story.storyContent}
         </div>
 
-        <div className="space-y-4 text-sm">
+        {/* <div className="space-y-4 text-sm">
           <div>
             <p className="text-[#7A7574]">
               {t.catSpeak?.created || "Created"}:
@@ -86,15 +98,15 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
               <p>{expiresAt.format("MMM D, YYYY h:mm A")}</p>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        <div className="flex justify-end gap-3 py-3">
-          <PillButton variant="secondary" onClick={handlePass} className="h-10">
+        <div className="flex justify-center gap-3 flex-1">
+          <PillButton variant="secondary" onClick={handlePass} className="h-12 w-56 border border-primary text-primary">
             {confirmPass
               ? t.catSpeak?.confirm || "Confirm Pass"
               : t.catSpeak?.pass || "Pass"}
           </PillButton>
-          <PillButton onClick={handleConnect} className="h-10">
+          <PillButton onClick={handleConnect} className="h-12 w-56">
             {t.catSpeak?.connect || "Connect"}
           </PillButton>
         </div>
