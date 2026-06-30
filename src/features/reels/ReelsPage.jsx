@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react"
 import { useNavigate, useSearchParams, Outlet, useParams } from "react-router-dom"
+import { useMediaQuery } from "@/shared/hooks/useMediaQuery"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
@@ -24,6 +25,8 @@ const ReelsPage = () => {
   const [activeTab, setActiveTab] = useState("foryou") // "foryou" | "challenges" | "leaderboard"
   const [challengeStatus, setChallengeStatus] = useState("active") // "active" | "past"
   const [challengeId, setChallengeId] = useState(null)
+  const [showMobileDetail, setShowMobileDetail] = useState(false)
+  const isLg = useMediaQuery("(min-width: 1024px)")
 
   const handleReelClick = useCallback(
     (reel) => {
@@ -56,22 +59,25 @@ const ReelsPage = () => {
       setActiveTab(tabId)
       // Reset challengeId when switching tabs
       setChallengeId(null)
+      setShowMobileDetail(false)
     },
     [],
   )
 
   return (
     <div className="flex flex-col pb-12">
-      {/* Breadcrumbs always visible */}
-      <Breadcrumb 
-        items={[
-          { label: "Cat Speak"},
-          { label: t.catSpeak.reels.title || "Reels" }
-        ]} 
-      />
+      {/* Breadcrumbs always visible unless mobile detail view */}
+      {(!showMobileDetail || isLg) && (
+        <Breadcrumb 
+          items={[
+            { label: "Cat Speak"},
+            { label: t.catSpeak.reels.title || "Reels" }
+          ]} 
+        />
+      )}
 
-      {/* Tabs - Hide when viewing a detail reel */}
-      {!id && (
+      {/* Tabs - Hide when viewing a detail reel or mobile detail view */}
+      {!id && (!showMobileDetail || isLg) && (
         <ReelTagBar
           activeFilter={activeTab}
           onSelectFilter={handleSelectTab}
@@ -107,6 +113,8 @@ const ReelsPage = () => {
               challengeId={challengeId}
               onSelectChallenge={setChallengeId}
               onReelClick={handleReelClick}
+              showMobileDetail={showMobileDetail}
+              onMobileDetailChange={setShowMobileDetail}
             />
           )}
         </div>

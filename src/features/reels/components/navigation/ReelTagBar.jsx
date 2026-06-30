@@ -34,7 +34,7 @@ const ReelTagBar = memo(function ReelTagBar({
       />
       <TabButton
         id="leaderboard"
-        label={t.catSpeak.reels.leaderboard || "Bảng xếp hạng"}
+        label={t.catSpeak.reels.leaderboard?.title || "Bảng xếp hạng"}
         icon={ChartNoAxesColumn}
         isActive={activeFilter === "leaderboard"}
         onClick={handleFilterClick}
