@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Captions } from "lucide-react"
+import { ClosedCaption } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import ControlButton from "./ControlButton"
@@ -22,8 +22,8 @@ const ControlBarSubtitles = ({ className = "" }) => {
         isActive={showCC}
         onClick={() => setShowCC(!showCC)}
         title={showCC ? "Turn captions off" : "Turn captions on"}
-        iconActive={<Captions className="w-6 h-6" />}
-        iconInactive={<Captions className="w-6 h-6" />}
+        iconActive={<ClosedCaption className="w-6 h-6" />}
+        iconInactive={<ClosedCaption className="w-6 h-6" />}
         className={className}
       />
     )
@@ -42,8 +42,8 @@ const ControlBarSubtitles = ({ className = "" }) => {
           }
         }}
         title={isSubtitleActive ? "Turn subtitles off" : "Turn subtitles on"}
-        iconActive={<Captions className="w-6 h-6" />}
-        iconInactive={<Captions className="w-6 h-6" />}
+        iconActive={<ClosedCaption className="w-6 h-6" />}
+        iconInactive={<ClosedCaption className="w-6 h-6" />}
       />
     </div>
   )
