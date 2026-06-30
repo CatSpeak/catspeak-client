@@ -4,9 +4,9 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 import { AnimatePresence } from "framer-motion"
 
 const getAnimationKey = (pathname) => {
-  const reelDetailMatch = pathname.match(/^\/([^/]+)\/cat-speak\/reels\/[^/]+$/)
-  if (reelDetailMatch) {
-    return `/${reelDetailMatch[1]}/cat-speak/reels/:id`
+  const reelMatch = pathname.match(/^\/([^/]+)\/cat-speak\/reels(\/.*)?$/)
+  if (reelMatch) {
+    return `/${reelMatch[1]}/cat-speak/reels`
   }
 
   return pathname
@@ -19,7 +19,7 @@ const CatSpeakLayout = () => {
   return (
     <div className="flex flex-col lg:flex-row w-full items-start">
       {/* Main Content */}
-      <main className="flex-1 min-w-0 w-full">
+      <main className="flex-1 min-w-0 w-full relative h-[calc(100vh-70px)]">
         <AnimatePresence mode="wait">
           <div
             key={animationKey}

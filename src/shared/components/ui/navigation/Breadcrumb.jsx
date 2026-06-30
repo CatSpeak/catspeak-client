@@ -29,6 +29,6 @@ const Breadcrumb = ({ items }) => {
       })}
     </div>
   )
-}
+} 
 
 export default Breadcrumb

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react"
+import React, { useState, useRef, useEffect, useCallback, createElement, memo } from "react"
 import {
   Flag,
   EyeOff,
@@ -8,7 +8,6 @@ import {
   UserRound,
   MoreVertical,
 } from "lucide-react"
-import styles from "../styles/reels.module.css"
 
 const MENU_ITEMS = [
   { icon: Flag, label: "Report" },
@@ -23,7 +22,7 @@ const MENU_ITEMS = [
  * Three-dot "More" dropdown menu.
  * Self-contained: manages its own open/close state and click-outside dismissal.
  */
-const ReelMoreMenu = React.memo(function ReelMoreMenu() {
+const ReelMoreMenu =memo(function ReelMoreMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -59,9 +58,9 @@ const ReelMoreMenu = React.memo(function ReelMoreMenu() {
   }, [isOpen])
 
   return (
-    <div className={styles.moreMenuWrapper} ref={menuRef}>
+    <div className="relative" ref={menuRef}>
       <button
-        className={styles.moreMenuBtn}
+        className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors border-none cursor-pointer outline-none backdrop-blur-sm"
         onClick={toggle}
         aria-label="More options"
         aria-expanded={isOpen}
@@ -70,15 +69,15 @@ const ReelMoreMenu = React.memo(function ReelMoreMenu() {
       </button>
 
       {isOpen && (
-        <div className={styles.moreMenuDropdown} role="menu">
+        <div className="absolute top-10 right-0 w-48 bg-headingColor rounded-lg py-2 z-50 shadow-xl border border-white/10 text-white font-medium animate-in fade-in zoom-in-95 duration-100" role="menu">
           {MENU_ITEMS.map((item) => (
             <button
               key={item.label}
-              className={styles.moreMenuItem}
+              className="w-full text-left px-4 py-3 text-sm hover:bg-white/10 transition-colors flex items-center gap-3 cursor-pointer border-none bg-transparent text-white outline-none"
               role="menuitem"
               onClick={handleItemClick}
             >
-              {React.createElement(item.icon, { size: 18 })}
+              {createElement(item.icon, { size: 18 })}
               <span>{item.label}</span>
             </button>
           ))}
