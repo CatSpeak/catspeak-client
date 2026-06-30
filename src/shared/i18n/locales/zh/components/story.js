@@ -4,5 +4,6 @@ export default {
   expiresIn: "剩余时间",
   deleteStory: "删除故事",
   confirmDelete: "确认删除",
+  replies: "回复"
 }
 

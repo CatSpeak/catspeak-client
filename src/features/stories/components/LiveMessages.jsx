@@ -8,7 +8,6 @@ import StoryInputBar from "./StoryInputBar"
 import DanmakuStage from "./DanmakuStage"
 import PassConfirmationModal from "./PassConfirmationModal"
 import MyStoryModal from "./MyStoryModal"
-import CommentModal from "./CommentModal"
 
 const LiveMessages = ({ languageCommunity }) => {
   const navigate = useNavigate()
@@ -26,7 +25,6 @@ const LiveMessages = ({ languageCommunity }) => {
   const { t } = useLanguage()
   const [selectedStory, setSelectedStory] = useState(null)
   const [selectedMyStory, setSelectedMyStory] = useState(null)
-  const [commentStory, setCommentStory] = useState(null) // story opened in CommentModal
 
   const [sortOrder, setSortOrder] = useState("newest") // "newest" | "oldest"
   const [displayMode, setDisplayMode] = useState("float") // "grid" | "float"
@@ -58,8 +56,7 @@ const LiveMessages = ({ languageCommunity }) => {
     if (story.isOwn) {
       setSelectedMyStory(story)
     } else {
-      // Open comment modal for other people's stories
-      setCommentStory(story)
+      setSelectedStory(story)
     }
   }
 
@@ -132,7 +129,6 @@ const LiveMessages = ({ languageCommunity }) => {
             danmakuItems={danmakuItems}
             stageRef={stageRef}
             onItemClick={handleItemClick}
-            onCommentClick={setCommentStory}
             displayMode={displayMode}
           />
         )}
@@ -149,11 +145,6 @@ const LiveMessages = ({ languageCommunity }) => {
           story={selectedMyStory}
           onClose={() => setSelectedMyStory(null)}
           onDelete={handleDelete}
-        />
-        <CommentModal
-          open={!!commentStory}
-          story={commentStory}
-          onClose={() => setCommentStory(null)}
         />
       </div>
     </div>
