@@ -8,25 +8,30 @@ const Slider = ({
   step = 1,
   onChange,
   className = "",
-  thumbClassName = "accent-cath-red-700",
   ...props
 }) => {
   const percentage = ((value - min) / (max - min)) * 100
 
   return (
-    <input
-      type="range"
-      min={min}
-      max={max}
-      step={step}
-      value={value}
-      onChange={onChange}
-      className={`w-full h-1 rounded-lg appearance-none cursor-pointer ${thumbClassName} ${className}`}
-      style={{
-        background: `linear-gradient(to right, ${colors.primaryRed} ${percentage}%, #868686 ${percentage}%)`,
-      }}
-      {...props}
-    />
+    <div className={`relative flex items-center w-full h-8 ${className}`}>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={onChange}
+        className="absolute w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none z-10 bg-transparent
+          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
+          [&::-webkit-slider-thumb]:bg-cath-red-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md
+          [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-cath-red-600 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:shadow-md
+          [&::-moz-range-thumb]:box-border"
+        style={{
+          background: `linear-gradient(to right, ${colors?.primaryRed || '#b91c1c'} ${percentage}%, #e5e7eb ${percentage}%)`,
+        }}
+        {...props}
+      />
+    </div>
   )
 }
 

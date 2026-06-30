@@ -27,7 +27,9 @@ const QueuePage = () => {
           setTimeout(() => {
             const communityLang =
               localStorage.getItem("communityLanguage") || "en"
-            navigate(`/${communityLang}/meet/${data.roomId}`, { state: { fromQueue: true } })
+            navigate(`/${communityLang}/meet/${data.roomId}`, {
+              state: { fromQueue: true },
+            })
           }, 1000)
         }
       },
@@ -114,16 +116,16 @@ const QueuePage = () => {
   const statusText = getStatusText()
 
   return (
-    <div className="relative flex h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-cath-red-500 via-cath-red-700 to-[#f08d1d] text-textColor px-4">
+    <div className="relative flex h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-white to-[#FFBBC3] text-textColor px-4">
       {/* Logo */}
-      <div className="absolute top-6 left-6 z-10">
-        <div className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg border border-white/50">
-          <img
-            src={Logo}
-            alt="Cat Speak Logo"
-            className="h-8 w-auto object-contain"
-          />
-        </div>
+      <div className="absolute top-4 left-5 z-10">
+        {/* <div className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg border border-white/50"> */}
+        <img
+          src={Logo}
+          alt="Cat Speak Logo"
+          className="sm:h-12 h-9 w-auto object-contain"
+        />
+        {/* </div> */}
       </div>
 
       <QueueStatusCard

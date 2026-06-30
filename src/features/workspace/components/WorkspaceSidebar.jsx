@@ -21,13 +21,7 @@ const WorkspaceSidebar = ({ onClose, variant = "vertical" }) => {
     },
   ]
 
-  return (
-    <SharedSidebar
-      items={menuItems}
-      variant={variant}
-      onClose={onClose}
-    />
-  )
+  return <SharedSidebar items={menuItems} variant={variant} onClose={onClose} />
 }
 
 export default WorkspaceSidebar

@@ -5,6 +5,7 @@
 /* CSS Variables */
 :root {
   --font-primary: "Noto Sans", sans-serif;
+  --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
   --cath-red-50: #100002;
   --cath-red-100: #230004;
@@ -24,6 +25,11 @@
   --cath-warning: #e7001a;
   --cath-success: #4b0008;
   --cath-dusk: #1a1a2e;
+}
+
+
+.font-nunito {
+  font-family: var(--font-nunito) !important;
 }
 
 * {
