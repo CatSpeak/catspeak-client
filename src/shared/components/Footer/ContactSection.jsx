@@ -7,7 +7,7 @@ import { useSubmitContactMutation } from "@/store/api/contactApi";
 import Modal from "../ui/Modal";
 
 const ContactSection = ({ isMobile = false }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const footerText = t.footer;
 
   const [email, setEmail] = useState("");
@@ -22,7 +22,6 @@ const ContactSection = ({ isMobile = false }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!email || !message) {
       setModal({
         open: true,
@@ -33,7 +32,7 @@ const ContactSection = ({ isMobile = false }) => {
     }
 
     try {
-      await submitContact({ email, name, message }).unwrap();
+      await submitContact({ email, name, message, language }).unwrap();
 
       setModal({
         open: true,
