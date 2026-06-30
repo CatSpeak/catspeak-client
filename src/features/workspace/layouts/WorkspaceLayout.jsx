@@ -13,7 +13,7 @@ const WorkspaceLayout = () => {
       {/* Main Content */}
       <main className="flex-1 h-full overflow-y-auto flex flex-col">
         {/* Content */}
-        <div className="mx-auto w-full max-w-[1040px] min-w-0 p-5 flex-1">
+        <div className="mx-auto w-full max-w-[1440px] min-w-0 p-5 flex-1">
           <Outlet />
         </div>
       </main>

@@ -43,6 +43,14 @@ const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
 const ReelDetailPage = lazy(() => import("@/features/reels/pages/ReelDetailPage"))
 const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceReelsPage"))
 const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
+const MyCoursesPage = lazy(() => import("@/features/courses/pages/MyCoursesPage"))
+const CreateCoursePage = lazy(() => import("@/features/courses/pages/CreateCoursePage"))
+const AllCoursesPage = lazy(() => import("@/features/courses/pages/AllCoursesPage"))
+const AllClassesPage = lazy(() => import("@/features/courses/pages/AllClassesPage"))
+const CreateClassPage = lazy(() => import("@/features/courses/pages/CreateClassPage"))
+const ClassDetailPage = lazy(() => import("@/features/courses/pages/ClassDetailPage"))
+const CourseDetailPage = lazy(() => import("@/features/courses/pages/CourseDetailPage"))
+const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
 
 const routesConfig = [
   {
@@ -206,7 +214,87 @@ const routesConfig = [
             children: [
               {
                 index: true,
-                element: <Navigate to="recordings" replace />,
+                element: <Navigate to="courses" replace />,
+              },
+              {
+                path: "courses",
+                element: (
+                  <LazyRoute>
+                    <MyCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/all",
+                element: (
+                  <LazyRoute>
+                    <AllCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/all-classes",
+                element: (
+                  <LazyRoute>
+                    <AllClassesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/create",
+                element: (
+                  <LazyRoute>
+                    <CreateCoursePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/edit/:id",
+                element: (
+                  <LazyRoute>
+                    <CreateCoursePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/create-class",
+                element: (
+                  <LazyRoute>
+                    <CreateClassPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/edit-class/:id",
+                element: (
+                  <LazyRoute>
+                    <CreateClassPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/schedule",
+                element: (
+                  <LazyRoute>
+                    <SchedulePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id",
+                element: (
+                  <LazyRoute>
+                    <ClassDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/details/:id",
+                element: (
+                  <LazyRoute>
+                    <CourseDetailPage />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "recordings",

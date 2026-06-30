@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import { useDispatch } from "react-redux"
 import { UploadCloud, Video, Image, Trash2, Globe, Users, Lock, AlertCircle, Film, Heart, MessageCircle, Share, Music, X, Hash, Loader2 } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import Avatar from "@/shared/components/ui/Avatar"
 import {
-  useCreateReelMutation,
   useSearchReelHashtagsQuery,
   useSearchReelMentionsQuery,
 } from "@/store/api/reelsApi"
+import { uploadReel } from "@/store/slices/reelUploadSlice"
 
 const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
 const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
@@ -107,8 +108,7 @@ const renderHighlightedDescription = (text, tokenClassName) => {
 }
 
 const CreateReelModal = ({ open, onClose, challenge = null }) => {
-  // RTK Query Mutation Hook
-  const [createReel, { isLoading, isSuccess, error: apiError }] = useCreateReelMutation()
+  const dispatch = useDispatch()
   const lockedChallengeHashtag = useMemo(() => normalizeChallengeHashtag(challenge), [challenge])
 
   // Form states
@@ -311,15 +311,7 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     }
   }, [videoPreviewUrl, coverPreviewUrl])
 
-  // Handle modal success reset
-  useEffect(() => {
-    if (isSuccess) {
-      const timer = setTimeout(() => {
-        handleClose()
-      }, 0)
-      return () => clearTimeout(timer)
-    }
-  }, [isSuccess, handleClose])
+
 
   // Discard/Clear video file
   const handleDiscardVideo = () => {
@@ -927,9 +919,19 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         formData.append("CoverFile", coverFile)
       }
 
-      await createReel(formData).unwrap()
+      // Close modal immediately and reset inputs
+      handleClose()
+
+      // Start background upload
+      dispatch(
+        uploadReel({
+          formData,
+          title: title.trim(),
+          challengeId: challenge?.challengeId,
+        })
+      )
     } catch (err) {
-      setGeneralError(err?.data?.message || err?.message || "Failed to upload Reel. Please try again.")
+      setGeneralError("Failed to start background upload. Please try again.")
     }
   }
 
@@ -1057,12 +1059,12 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
         {/* API Error Notification */}
-        {(generalError || apiError) && (
+        {generalError && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-2.5 text-sm animate-shake">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">Upload failed</p>
-              <p className="opacity-90">{generalError || "Something went wrong. Please check your file formats and network."}</p>
+              <p className="opacity-90">{generalError}</p>
             </div>
           </div>
         )}
@@ -1646,16 +1648,13 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
             type="button"
             variant="outline"
             onClick={handleClose}
-            disabled={isLoading}
             className="h-10 px-5 !border-gray-300 hover:!bg-gray-50 !text-gray-600 font-semibold"
           >
             Discard
           </PillButton>
           <PillButton
             type="submit"
-            loading={isLoading}
-            loadingText="Posting..."
-            disabled={!videoFile || isLoading}
+            disabled={!videoFile}
             className="h-10 px-6 font-semibold shadow-sm shadow-red-950/10"
             bgColor="#990011"
             textColor="#ffffff"

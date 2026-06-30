@@ -12,6 +12,7 @@ import {
   useDeviceSelection,
 } from "@/features/rooms"
 import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
+import { useGetClassDetailQuery, useJoinClassRoomMutation } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { enterCall, setPiP, leaveCall } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
@@ -96,15 +97,50 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery()
   const user = userData?.data ?? null
 
-  // --- Room data (fetched by roomId from URL) ---
-  const isRoomQuerySkipped = !roomId || !user
+  const isClassRoom = roomId && roomId.startsWith("class-")
+  const classId = isClassRoom ? roomId.replace("class-", "") : null
+
+  // --- Class room detail ---
   const {
-    data: room,
+    data: classResponse,
+    isLoading: isLoadingClass,
+    error: classError,
+  } = useGetClassDetailQuery(classId, {
+    skip: !isClassRoom || !user,
+  })
+  const classData = classResponse?.data || classResponse
+
+  // --- Room data (fetched by roomId from URL) ---
+  const isRoomQuerySkipped = !roomId || !user || isClassRoom
+  const {
+    data: rawRoom,
     isLoading: isLoadingRoom,
     error: roomError,
   } = useGetRoomByIdQuery(roomId, {
     skip: isRoomQuerySkipped,
   })
+
+  // Map class details to the room structure expected by video call features
+  const room = useMemo(() => {
+    if (isClassRoom) {
+      if (!classData) return null
+      return {
+        id: roomId,
+        name: classData.name || classData.title || "Untitled Class",
+        topic: classData.courseName || classData.courseTitle || "Classroom Session",
+        privacy: "Public",
+        hasPassword: false,
+        maxParticipants: classData.slots || 10,
+        currentParticipantCount: classData.studentCount || 0,
+        isClassRoom: true,
+        classId: classId,
+      }
+    }
+    return rawRoom?.data || rawRoom
+  }, [isClassRoom, classData, rawRoom, roomId, classId])
+
+  const isLoadingRoomData = isClassRoom ? isLoadingClass : isLoadingRoom
+  const errorRoomData = isClassRoom ? classError : roomError
 
   // --- Device Selection ---
   const deviceSelection = useDeviceSelection()
@@ -131,6 +167,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // --- LiveKit token mutation ---
   const [getLivekitToken] = useGetLivekitTokenMutation()
+  const [joinClassRoom] = useJoinClassRoomMutation()
 
   // Room full check
   const currentParticipantCount = room?.currentParticipantCount ?? 0
@@ -152,7 +189,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       verifyTriggered.current ||
       !room ||
       !user ||
-      isLoadingRoom ||
+      isLoadingRoomData ||
       isLoadingUser ||
       fromQueue // Queue-matched users skip password check
     ) {
@@ -168,18 +205,18 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
     // Private room — silent check for existing grant
     verifyTriggered.current = true
-    ;(async () => {
-      try {
-        const result = await verifyJoinRoom({ roomId: Number(roomId) }).unwrap()
-        if (result.authorized) {
-          setPhase("waiting")
+      ; (async () => {
+        try {
+          const result = await verifyJoinRoom({ roomId: Number(roomId) }).unwrap()
+          if (result.authorized) {
+            setPhase("waiting")
+          }
+        } catch {
+          // 403 = no grant yet → show password screen
+          setPhase("password-required")
         }
-      } catch {
-        // 403 = no grant yet → show password screen
-        setPhase("password-required")
-      }
-    })()
-  }, [room, user, isLoadingRoom, isLoadingUser, fromQueue, roomId])
+      })()
+  }, [room, user, isLoadingRoomData, isLoadingUser, fromQueue, roomId])
 
   // ── Handle password submission from PasswordScreen ──
   const handlePasswordSubmit = async (password) => {
@@ -248,15 +285,25 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     setPhase("joining")
 
     try {
-      // Fetch LiveKit token to validate connectivity and join
-      const livekitTokenBody = {
-        roomId: Number(roomId),
-      }
-      const tokenRes = await getLivekitToken(livekitTokenBody).unwrap()
+      let token, serverUrl, sessionId
 
-      const token = tokenRes?.participantToken
-      const serverUrl = tokenRes?.serverUrl
-      const sessionId = tokenRes?.sessionId
+      if (isClassRoom) {
+        // Fetch LiveKit token using the new endpoint: POST /api/teacher/classes/{classId}/join-room
+        const tokenRes = await joinClassRoom(classId).unwrap()
+        token = tokenRes?.token
+        serverUrl = tokenRes?.serverUrl
+        sessionId = tokenRes?.sessionId
+      } else {
+        // Fetch LiveKit token to validate connectivity and join
+        const livekitTokenBody = {
+          roomId: Number(roomId),
+        }
+        const tokenRes = await getLivekitToken(livekitTokenBody).unwrap()
+        token = tokenRes?.participantToken
+        serverUrl = tokenRes?.serverUrl
+        sessionId = tokenRes?.sessionId
+      }
+
       if (!token || typeof token !== "string") {
         throw new Error("Invalid LiveKit token received from backend")
       }
@@ -290,10 +337,34 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       )
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
-      toast.error(
-        t.rooms.videoCall.provider.tokenError ??
-          "Failed to connect to video service. Please try again.",
-      )
+      let errorMsg = t.rooms?.videoCall?.provider?.tokenError || "Failed to connect to video service. Please try again."
+
+      if (isClassRoom && err?.status) {
+        const status = err.status
+        const errorBody = err.data?.message || err.data
+
+        if (status === 404 || errorBody === "CLASS_NOT_FOUND") {
+          errorMsg = language === "vi"
+            ? "Lớp học không tồn tại hoặc đã kết thúc."
+            : "Class not found or has finished."
+        } else if (status === 403) {
+          if (errorBody === "NO_ACTIVE_SESSION") {
+            errorMsg = language === "vi"
+              ? "Không có buổi học nào đang diễn ra. Bạn chỉ có thể vào lớp từ 5 phút trước giờ học cho đến khi buổi học kết thúc."
+              : "No active session. You can only join from 5 minutes before start time until the end of the session."
+          } else {
+            errorMsg = language === "vi"
+              ? "Không phải lớp học của bạn."
+              : "Access denied. This is not your class."
+          }
+        } else if (status === 400 || errorBody === "ROOM_NOT_CREATED") {
+          errorMsg = language === "vi"
+            ? "Lớp học ảo chưa được tạo. Vui lòng liên hệ hỗ trợ."
+            : "Virtual classroom was not created. Please contact support."
+        }
+      }
+
+      toast.error(errorMsg, { duration: 5000 })
       setPhase("waiting")
     }
   }
@@ -335,12 +406,12 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   }
 
   // Loading room data
-  if (isLoadingUser || isLoadingRoom || isRoomQuerySkipped) {
+  if (isLoadingUser || isLoadingRoomData || (!isClassRoom && isRoomQuerySkipped)) {
     return <div className="h-screen w-full bg-white"></div>
   }
 
   // Room not found
-  if (roomError || !room) {
+  if (errorRoomData || !room) {
     return <RoomNotFoundScreen />
   }
 

@@ -10,6 +10,7 @@ import ServerDownScreen from "@/shared/components/ServerDownScreen"
 import NavigationProgress from "@/shared/components/NavigationProgress"
 import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
 import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
+import ReelUploadProgress from "@/features/reels/components/ReelUploadProgress"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Toaster position="top-center" limit={1} />
             <AppRouter />
             <PiPWidget />
+            <ReelUploadProgress />
           </GlobalPresenceProvider>
         </ConversationSignalRProvider>
       </GlobalVideoCallProvider>
