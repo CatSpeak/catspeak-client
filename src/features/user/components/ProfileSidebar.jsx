@@ -7,6 +7,7 @@ import {
   Settings,
   CreditCard,
 } from "lucide-react"
+import SharedSidebar from "@/shared/components/layout/SharedSidebar"
 
 const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
   const { t } = useLanguage()
