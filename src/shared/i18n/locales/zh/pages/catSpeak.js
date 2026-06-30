@@ -73,4 +73,23 @@ export default {
     menu: "菜单",
   },
   story: "故事",
+  comments: {
+    title: "评论",
+    placeholder: "写下你的评论...",
+    loading: "加载中...",
+    empty: "暂无评论。成为第一个评论的人吧！",
+    edited: "(已编辑)",
+    editPlaceholder: "编辑评论...",
+    reply: "回复",
+    replyPlaceholder: "回复 @{name}...",
+    hideReplies: "隐藏回复",
+    showReplies: "{count} 条回复",
+    cancel: "取消",
+    submit: "发送",
+    reactions: {
+      like: "赞",
+      love: "红心",
+      haha: "哈哈"
+    }
+  }
 }

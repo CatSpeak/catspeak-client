@@ -59,7 +59,7 @@ export default {
     sortNewest: "Newest",
     sortOldest: "Oldest",
     displayGrid: "Grid",
-    displayFloat: "Floating",
+    displayFloat: "Float",
   },
   newsLoginPrompt: "Please log in to see the latest posts from the community.",
   sidebar: {
@@ -77,4 +77,23 @@ export default {
   created: "Created",
   expiresIn: "Expires in",
   story: "Story",
+  comments: {
+    title: "Comments",
+    placeholder: "Write a comment...",
+    loading: "Loading...",
+    empty: "No comments yet. Be the first to comment!",
+    edited: "(edited)",
+    editPlaceholder: "Edit comment...",
+    reply: "Reply",
+    replyPlaceholder: "Reply to @{name}...",
+    hideReplies: "Hide replies",
+    showReplies: "{count} replies",
+    cancel: "Cancel",
+    submit: "Send",
+    reactions: {
+      like: "Like",
+      love: "Love",
+      haha: "Haha"
+    }
+  }
 }

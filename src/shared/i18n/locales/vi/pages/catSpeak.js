@@ -78,4 +78,23 @@ export default {
   created: "Đã tạo",
   expiresIn: "Hết hạn trong",
   story: "Câu chuyện",
+  comments: {
+    title: "Bình luận",
+    placeholder: "Nhập bình luận...",
+    loading: "Đang tải...",
+    empty: "Chưa có bình luận nào. Hãy là người đầu tiên!",
+    edited: "(đã sửa)",
+    editPlaceholder: "Chỉnh sửa bình luận...",
+    reply: "Phản hồi",
+    replyPlaceholder: "Phản hồi @{name}...",
+    hideReplies: "Ẩn phản hồi",
+    showReplies: "{count} phản hồi",
+    cancel: "Hủy",
+    submit: "Gửi",
+    reactions: {
+      like: "Thích",
+      love: "Yêu",
+      haha: "Haha"
+    }
+  }
 }

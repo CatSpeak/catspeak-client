@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * A text input used for create comment
@@ -16,6 +17,7 @@ const CommentInput = ({
   onCancel,
   autoFocus = false,
 }) => {
+  const { t } = useLanguage()
   const [value, setValue] = useState(defaultValue)
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef(null)
@@ -72,7 +74,7 @@ const CommentInput = ({
               onClick={handleCancel}
               className="rounded-full border border-[#990011] px-5 py-1.5 text-xs font-semibold text-[#990011] hover:bg-[#990011]/5 transition-colors"
             >
-              Hủy
+              {t.catSpeak?.comments?.cancel}
             </button>
             <button
               type="button"
@@ -81,7 +83,7 @@ const CommentInput = ({
               disabled={!value.trim()}
               className="rounded-full bg-[#990011] px-5 py-1.5 text-xs font-semibold text-white hover:brightness-90 active:brightness-75 transition-all"
             >
-              Gửi
+              {t.catSpeak?.comments?.submit}
             </button>
           </div>
         </div>
