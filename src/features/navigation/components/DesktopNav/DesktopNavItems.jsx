@@ -71,7 +71,7 @@ const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
       <div className={`flex-1 overflow-y-auto overflow-x-hidden py-2 flex flex-col gap-1.5 scrollbar-thin scrollbar-thumb-gray-200 transition-all duration-300 ${
         isExpanded ? "px-2" : "px-[18px]"
       }`}>
-        {navLinks.map((item) => {
+        {navLinks.filter(item => !item.hideInSidebar).map((item) => {
           // Use key mapping for translations, falling back to capitalized key if not found
           const label = t.nav?.[item.key] || item.key
           const IconComponent = iconMap[item.key] || Home

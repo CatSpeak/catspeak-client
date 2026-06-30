@@ -119,7 +119,7 @@ const routesConfig = [
                     element: <NewsPage />,
                   },
                   {
-                    path: "news/:id",
+                    path: "news/:slug",
                     element: <NewsDetailPage />,
                   },
                   {
