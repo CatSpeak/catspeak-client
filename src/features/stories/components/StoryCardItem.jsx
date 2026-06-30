@@ -3,7 +3,6 @@ import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { MessageSquare } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { useLanguage } from "@/shared/context/LanguageContext"
 
 dayjs.extend(relativeTime)
 
@@ -20,7 +19,6 @@ dayjs.extend(relativeTime)
  * @param {Function} [props.onClick]              - Called when the card is clicked
  */
 const StoryCardItem = ({ story, onClick, onCommentClick }) => {
-  const { t } = useLanguage()
   if (!story) return null
 
   const {
@@ -73,7 +71,7 @@ const StoryCardItem = ({ story, onClick, onCommentClick }) => {
           className="flex items-center gap-1 hover:text-[#990011] transition-colors"
         >
           <MessageSquare size={13} className="shrink-0" />
-          {commentCount} {t.catSpeak?.comments?.title}
+          {commentCount} phản hồi
         </button>
 
         {relativeCreatedAt && (

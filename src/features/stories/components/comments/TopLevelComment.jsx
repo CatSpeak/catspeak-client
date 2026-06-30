@@ -1,6 +1,5 @@
 import React, { useState } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
-import { useLanguage } from "@/shared/context/LanguageContext"
 import CommentItem from "./CommentItem"
 
 /**
@@ -11,7 +10,6 @@ import CommentItem from "./CommentItem"
  * @param {number}  [props.currentUserId]
  */
 const TopLevelComment = ({ comment, storyId, currentUserId }) => {
-  const { t } = useLanguage()
   const [showReplies, setShowReplies] = useState(false)
 
   const replies = comment.replies || []
@@ -58,9 +56,9 @@ const TopLevelComment = ({ comment, storyId, currentUserId }) => {
           className="ml-12 flex items-center gap-1 text-xs font-semibold text-[#990011] hover:underline w-fit"
         >
           {showReplies ? (
-            <>{t.catSpeak?.comments?.hideReplies} <ChevronUp size={13} /></>
+            <>Ẩn phản hồi <ChevronUp size={13} /></>
           ) : (
-            <>{(t.catSpeak?.comments?.showReplies).replace("{count}", replies.length)} <ChevronDown size={13} /></>
+            <>{replies.length} phản hồi <ChevronDown size={13} /></>
           )}
         </button>
       )}

@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react"
 import { ThumbsUp } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getImageUrl } from "@/shared/utils/imageUtils"
-import { useLanguage } from "@/shared/context/LanguageContext"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import "dayjs/locale/vi"
@@ -25,7 +24,6 @@ const timeAgo = (date) => (date ? dayjs(date).fromNow() : "")
  * @param {number}   [props.currentUserId] - accountId of the logged-in user
  */
 const CommentItem = ({ comment, storyId, onReply, isNested = false, currentUserId }) => {
-  const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)
   const [isReplying, setIsReplying] = useState(false)
   const [showReactions, setShowReactions] = useState(false)
@@ -70,7 +68,7 @@ const CommentItem = ({ comment, storyId, onReply, isNested = false, currentUserI
           <span className="text-lg text-[#7B7979]">{comment.authorName}</span>
           <span className="text-base text-[#7B7979] ml-2">• {timeAgo(comment.createDate)}</span>
           {comment.lastEdited && comment.lastEdited !== comment.createDate && (
-            <span className="italic">{t.catSpeak?.comments?.edited || "(đã sửa)"}</span>
+            <span className="italic">(đã sửa)</span>
           )}
           <div className="ml-auto">
             {isOwner && (
@@ -85,7 +83,7 @@ const CommentItem = ({ comment, storyId, onReply, isNested = false, currentUserI
         {/* Body: content */}
         {isEditing ? (
           <CommentInput
-            placeholder={t.catSpeak?.comments?.editPlaceholder || "Chỉnh sửa bình luận..."}
+            placeholder="Chỉnh sửa bình luận..."
             defaultValue={comment.content}
             onSubmit={handleEdit}
             onCancel={() => setIsEditing(false)}
@@ -129,7 +127,7 @@ const CommentItem = ({ comment, storyId, onReply, isNested = false, currentUserI
               onClick={() => setIsReplying((v) => !v)}
               className="hover:underline hover:text-[#3d3d3d] transition-colors"
             >
-              {t.catSpeak?.comments?.reply}
+              Phản hồi
             </button>
           </div>
         )}
@@ -138,10 +136,11 @@ const CommentItem = ({ comment, storyId, onReply, isNested = false, currentUserI
         {isReplying && (
           <div className="mt-3">
             <CommentInput
-              placeholder={t.catSpeak?.comments?.replyPlaceholder}
+              placeholder={`Phản hồi @${comment.authorName}...`}
               onSubmit={handleReplySubmit}
               onCancel={() => setIsReplying(false)}
               autoFocus
+              showEmoji
             />
           </div>
         )}

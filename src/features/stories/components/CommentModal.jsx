@@ -47,7 +47,7 @@ const CommentModal = ({ open, story, onClose }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title={`${t.catSpeak?.comments?.title} (${commentsList.length})`}
+      title={`Bình luận (${commentsList.length})`}
     >
       <div className="flex flex-col gap-5">
         {/* Add comment (authenticated users) */}
@@ -56,7 +56,7 @@ const CommentModal = ({ open, story, onClose }) => {
             <Avatar size={34} src={userAvatar} name={userName} className="shrink-0 mt-1" />
             <div className="flex-1">
               <CommentInput
-                placeholder={t.catSpeak?.comments?.placeholder}
+                placeholder="Nhập bình luận..."
                 onSubmit={handleAddComment}
               />
             </div>
@@ -66,12 +66,10 @@ const CommentModal = ({ open, story, onClose }) => {
         {/* Comment list */}
         <div className="flex flex-col gap-4 max-h-[50vh] overflow-y-auto pr-1">
           {isLoading ? (
-            <div className="py-6 text-center text-sm text-[#9e9e9e]">
-              {t.catSpeak?.comments?.loading}
-            </div>
+            <div className="py-6 text-center text-sm text-[#9e9e9e]">Đang tải...</div>
           ) : topLevel.length === 0 ? (
             <div className="py-6 text-center text-sm text-[#9e9e9e]">
-              {t.catSpeak?.comments?.empty}
+              Chưa có bình luận nào. Hãy là người đầu tiên!
             </div>
           ) : (
             topLevel.map((comment) => (
