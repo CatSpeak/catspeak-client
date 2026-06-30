@@ -9,9 +9,9 @@ import {
   Mic,
   MicOff,
   Phone,
-  Circle,
   MoreVertical,
   Hand,
+  Grid3X3,
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -82,125 +82,121 @@ const VideoCallControlBar = () => {
   const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-      <ControlButton
-        isActive={micOn}
-        isLoading={isTogglingMic}
-        onClick={handleToggleMic}
-        title={
-          micOn
-            ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
-            : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
-        }
-        iconActive={<Mic className={iconClass} />}
-        iconInactive={<MicOff className={iconClass} />}
-        className="z-10"
-      />
-
-      <ControlButton
-        isActive={cameraOn}
-        isLoading={isTogglingCam}
-        onClick={handleToggleCam}
-        title={
-          cameraOn
-            ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
-            : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
-        }
-        iconActive={<Video className={iconClass} />}
-        iconInactive={<VideoOff className={iconClass} />}
-      />
-
-      <ControlButton
-        isActive={isLocalScreenShare}
-        isLoading={isTogglingScreenShare}
-        onClick={handleToggleScreenShare}
-        title={
-          isLocalScreenShare
-            ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
-            : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
-        }
-        iconActive={<MonitorOff className={iconClass} />}
-        iconInactive={<MonitorUp className={iconClass} />}
-        className="hidden min-[769px]:flex"
-      />
-
-      <div className="relative hidden min-[769px]:block">
+    <div className="flex w-full items-center justify-between bg-white/40 backdrop-blur-sm px-8 py-2 shadow-[0_1px_4px_0_rgba(12,12,13,0.1),0_1px_4px_0_rgba(12,12,13,0.05)]">
+      {/* Center controls */}
+      <div className="flex items-center gap-[15px]">
         <ControlButton
-          isActive={isRecording}
-          isLoading={isTogglingRecording}
-          onClick={handleToggleRecording}
+          isActive={micOn}
+          isLoading={isTogglingMic}
+          onClick={handleToggleMic}
           title={
-            isRecording
-              ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
-              : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
+            micOn
+              ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
+              : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
           }
-          iconActive={<Circle className={`${iconClass} fill-white`} />}
-          iconInactive={<Circle className={`${iconClass} fill-none`} />}
-          activeClassOverride="bg-red-600 hover:bg-red-700 text-white"
-        >
-          {isRecording && !isTogglingRecording && (
-            <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
+          iconActive={<Mic className={iconClass} />}
+          iconInactive={<MicOff className={iconClass} />}
+          className="z-10"
+        />
+
+        <ControlButton
+          isActive={cameraOn}
+          isLoading={isTogglingCam}
+          onClick={handleToggleCam}
+          title={
+            cameraOn
+              ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
+              : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
+          }
+          iconActive={<Video className={iconClass} />}
+          iconInactive={<VideoOff className={iconClass} />}
+        />
+
+        <ControlButton
+          isActive={isLocalScreenShare}
+          isLoading={isTogglingScreenShare}
+          onClick={handleToggleScreenShare}
+          title={
+            isLocalScreenShare
+              ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
+              : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
+          }
+          iconActive={<MonitorOff className={iconClass} />}
+          iconInactive={<MonitorUp className={iconClass} />}
+          className="hidden min-[769px]:flex"
+        />
+
+        <ControlBarSubtitles className="hidden min-[769px]:flex" />
+
+        <ControlButton
+          isActive={isHandRaised}
+          isLoading={isTogglingHand}
+          onClick={handleToggleHand}
+          title={isHandRaised ? "Lower hand" : "Raise hand"}
+          iconActive={<Hand className={iconClass} />}
+          iconInactive={<Hand className={iconClass} />}
+        />
+
+        <div className="relative">
+          <ControlButton
+            isActive={showMoreMenu}
+            onClick={() => setShowMoreMenu(!showMoreMenu)}
+            title={t?.rooms?.videoCall?.moreOptions || "More options"}
+            iconActive={<MoreVertical className={iconClass} />}
+            iconInactive={<MoreVertical className={iconClass} />}
+          />
+          <ControlBarMoreMenu
+            showMoreMenu={showMoreMenu}
+            setShowMoreMenu={setShowMoreMenu}
+          />
+        </div>
+
+        <ControlButton
+          isActive={true}
+          onClick={promptLeaveCall}
+          title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
+          iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
+          iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
+          activeClassOverride="bg-[#901] text-white hover:bg-[#7a000f]"
+        />
+      </div>
+
+      {/* Right panel toggles */}
+      <div className="flex items-center gap-2">
+        <div className="relative hidden min-[426px]:flex">
+          <ControlButton
+            isActive={showParticipants}
+            onClick={() => setShowParticipants(!showParticipants)}
+            title={t.rooms?.videoCall?.controls?.participants || "Participants"}
+            iconActive={<Users className={iconClass} />}
+            iconInactive={<Users className={iconClass} />}
+          />
+        </div>
+
+        <div className="relative">
+          <ControlButton
+            isActive={showChat}
+            onClick={() => setShowChat(!showChat)}
+            title={t.rooms?.videoCall?.controls?.chat || "Chat"}
+            iconActive={<MessageSquare className={iconClass} />}
+            iconInactive={<MessageSquare className={iconClass} />}
+          />
+          {unreadMessages > 0 && (
+            <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm pointer-events-none z-10">
+              {unreadMessages > 9 ? "9+" : unreadMessages}
+            </div>
           )}
-        </ControlButton>
-      </div>
+        </div>
 
-      <ControlButton
-        isActive={showParticipants}
-        onClick={() => setShowParticipants(!showParticipants)}
-        title={t.rooms?.videoCall?.controls?.participants || "Participants"}
-        iconActive={<Users className={iconClass} />}
-        iconInactive={<Users className={iconClass} />}
-        className="hidden min-[426px]:flex"
-      />
-
-      <ControlButton
-        isActive={isHandRaised}
-        isLoading={isTogglingHand}
-        onClick={handleToggleHand}
-        title={isHandRaised ? "Lower hand" : "Raise hand"}
-        iconActive={<Hand className={iconClass} />}
-        iconInactive={<Hand className={iconClass} />}
-      />
-
-      <ControlBarSubtitles className="hidden min-[426px]:flex" />
-
-      <div className="relative">
         <ControlButton
-          isActive={showChat}
-          onClick={() => setShowChat(!showChat)}
-          title={t.rooms?.videoCall?.controls?.chat || "Chat"}
-          iconActive={<MessageSquare className={iconClass} />}
-          iconInactive={<MessageSquare className={iconClass} />}
-        />
-        {unreadMessages > 0 && (
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm pointer-events-none z-10">
-            {unreadMessages > 9 ? "9+" : unreadMessages}
-          </div>
-        )}
-      </div>
-
-      <div className="relative">
-        <ControlButton
-          isActive={showMoreMenu}
-          onClick={() => setShowMoreMenu(!showMoreMenu)}
-          title={t?.rooms?.videoCall?.moreOptions || "More options"}
-          iconActive={<MoreVertical className={iconClass} />}
-          iconInactive={<MoreVertical className={iconClass} />}
-        />
-        <ControlBarMoreMenu
-          showMoreMenu={showMoreMenu}
-          setShowMoreMenu={setShowMoreMenu}
+          isActive={false}
+          onClick={() => {}}
+          title="Grid view"
+          iconActive={<Grid3X3 className={iconClass} />}
+          iconInactive={<Grid3X3 className={iconClass} />}
+          className="hidden min-[426px]:flex"
         />
       </div>
-
-      <ControlButton
-        isActive={true}
-        onClick={promptLeaveCall}
-        title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
-        iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
-        iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
-        activeClassOverride="bg-[#d40018] text-white hover:bg-[#e7001a]"
-      />
 
       {showStopModal && (
         <StopRecordingModal

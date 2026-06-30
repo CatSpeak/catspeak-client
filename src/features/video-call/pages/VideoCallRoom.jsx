@@ -106,10 +106,9 @@ const VideoCallRoomContent = () => {
       <RoomHeader />
 
       {/* Main Content Area */}
-      <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row bg-[#F3F3F3]">
-        <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
+      <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row bg-[#FCFCFC]">
         {/* Video Area */}
-        <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
+        <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden p-2">
           <div className="flex-1 relative min-h-0">
             <VideoGrid />
           </div>
@@ -124,13 +123,13 @@ const VideoCallRoomContent = () => {
           {isSidePanelOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 336, opacity: 1 }}
+              animate={{ width: 347, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="hidden md:flex flex-col overflow-hidden relative py-5"
-              style={{ width: 336 }}
+              className="hidden md:flex flex-col overflow-hidden relative py-1.5 pr-1.5"
+              style={{ width: 347 }}
             >
-              <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+              <div className="h-full flex flex-col shrink-0 bg-[#FCFCFC] rounded-xl overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <VirtualBackgroundPicker />}
                 {showAvatarPicker && <AvatarUrlPicker />}
