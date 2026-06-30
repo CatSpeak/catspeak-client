@@ -4,10 +4,16 @@ import { toast } from "react-hot-toast"
 import { IconLogo, MainLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useSessionTimer } from "@/features/video-call"
 
 const RoomHeader = () => {
   const { t } = useLanguage()
-  const { room } = useVideoCallContext()
+  const { room, closingRemainingSeconds } = useVideoCallContext()
+  const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(
+    room?.createDate,
+    room?.duration,
+    closingRemainingSeconds,
+  )
 
   const rawRoomName = room?.name || "General"
 
@@ -75,8 +81,13 @@ const RoomHeader = () => {
         </div>
       </div>
 
-      {/* Right: Link Button */}
-      <div className="flex items-center">
+      {/* Right: Duration + Link Button */}
+      <div className="flex items-center gap-3">
+        {hasDuration && (
+          <div className="text-xs font-medium text-[#7A7574]">
+            {formattedRemaining} / {formattedMax}
+          </div>
+        )}
         <button
           onClick={handleCopyLink}
           className="flex items-center justify-center size-[51px] rounded-full"

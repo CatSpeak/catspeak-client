@@ -50,7 +50,9 @@ const ParticipantItem = ({ participant }) => {
       <div className="flex items-center gap-2 flex-1 min-w-0">
         {/* Colored avatar circle with initial */}
         <div
-          className="flex items-center justify-center rounded-full shrink-0"
+          className={`flex items-center justify-center rounded-full shrink-0 transition-all duration-200 ${
+            isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : ""
+          }`}
           style={{
             width: 24,
             height: 24,

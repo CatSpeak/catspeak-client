@@ -9,6 +9,7 @@ import {
   Mic,
   MicOff,
   Phone,
+  Circle,
   MoreVertical,
   Hand,
   Grid3X3,
@@ -127,6 +128,26 @@ const VideoCallControlBar = () => {
         />
 
         <ControlBarSubtitles className="hidden min-[769px]:flex" />
+
+        <div className="relative hidden min-[769px]:block">
+          <ControlButton
+            isActive={isRecording}
+            isLoading={isTogglingRecording}
+            onClick={handleToggleRecording}
+            title={
+              isRecording
+                ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
+                : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
+            }
+            iconActive={<Circle className={`${iconClass} fill-white`} />}
+            iconInactive={<Circle className={`${iconClass} fill-none`} />}
+            activeClassOverride="bg-red-600 hover:bg-red-700 text-white"
+          >
+            {isRecording && !isTogglingRecording && (
+              <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
+            )}
+          </ControlButton>
+        </div>
 
         <ControlButton
           isActive={isHandRaised}
