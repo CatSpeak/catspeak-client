@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react"
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ProfileSidebar from "../components/ProfileSidebar"
 import { motion, useAnimation, useMotionValue, useSpring } from "framer-motion"
@@ -96,6 +96,22 @@ const BackgroundCircles = () => {
 
 const ProfileLayout = () => {
   const { t } = useLanguage()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const tabsConfig = getProfileTabsConfig(t)
+
+  // Determine active tab based on current pathname
+  const activeTab = useMemo(() => {
+    const currentPath = location.pathname
+    // Find the matching tab by checking if current path starts with tab id
+    const matched = tabsConfig.find((tab) => currentPath === tab.id || currentPath.startsWith(tab.id + "/"))
+    return matched?.id || tabsConfig[0]?.id
+  }, [location.pathname, tabsConfig])
+
+  const handleTabChange = (tabId) => {
+    navigate(tabId)
+  }
 
   return (
     <SharedLayout
