@@ -6,6 +6,7 @@ import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useGetPlansQuery } from "@/store/api/plansApi"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getGridClasses } from "../utils/planUtils"
 
 const PricingPage = () => {
   const { t } = useLanguage()
@@ -17,7 +18,6 @@ const PricingPage = () => {
     useGetPlansQuery()
 
   const userTier = profileResponse?.data?.tier?.toLowerCase()
-  console.log(profileResponse)
 
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
@@ -54,7 +54,22 @@ const PricingPage = () => {
       interval: plan.billingCycle,
       description: plan.description,
       features: plan.subscriptionFeatures
-        ? plan.subscriptionFeatures.map((f) => f.featureName)
+        ? plan.subscriptionFeatures
+            .map((f) => ({
+              id: f.id,
+              name: f.featureName,
+              limitValue: f.limitValue,
+              valueType: f.valueType?.toLowerCase(),
+              code: f.featureCode,
+            }))
+            .sort((a, b) => {
+              const aIsFalsy =
+                a.valueType === "boolean" && a.limitValue === "false"
+              const bIsFalsy =
+                b.valueType === "boolean" && b.limitValue === "false"
+              if (aIsFalsy === bIsFalsy) return 0
+              return aIsFalsy ? 1 : -1
+            })
         : [],
       applicableRole: plan.applicableRole?.toLowerCase(),
       iconUrl: plan.iconUrl,
@@ -62,10 +77,10 @@ const PricingPage = () => {
     }))
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-2">{t.billing.pricing.title}</h2>
-        <p className="text-[#7A7574]">{t.billing.pricing.subtitle}</p>
+    <div className="mx-auto p-4 md:p-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl font-bold mb-3">{t.billing.pricing.title}</h2>
+        <p className="text-[#7A7574] text-lg">{t.billing.pricing.subtitle}</p>
       </div>
 
       {isPlansLoading ? (
@@ -73,7 +88,7 @@ const PricingPage = () => {
           <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-cath-red-700 rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
+        <div className={getGridClasses(formattedPlans.length)}>
           {formattedPlans.map((plan) => {
             const isActive = userTier === plan.name?.toLowerCase()
             return (
@@ -81,7 +96,7 @@ const PricingPage = () => {
                 key={plan.id}
                 plan={plan}
                 isActive={isActive}
-                actionLabel={`Upgrade to ${plan.name}`}
+                actionLabel={t.billing.pricing.upgradeTo.replace("{{planName}}", plan.name)}
                 isProcessing={isProcessing}
                 onAction={
                   plan.price > 0 ? () => handleUpgradeClick(plan) : undefined
