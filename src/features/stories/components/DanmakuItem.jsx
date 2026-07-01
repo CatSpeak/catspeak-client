@@ -11,15 +11,48 @@ import colors from "@/shared/utils/colors"
  * @param {(story: Object) => void} props.onClick
  */
 const DanmakuItem = ({ story, onClick }) => {
+  const DANMAKU_THEMES = [
+    {
+      bg: "bg-[#FFF2EA]",
+      text: "text-[#B34700]",
+    },
+    {
+      bg: "bg-[#FFEAED]",
+      text: "text-[#990011]",
+    },
+    {
+      bg: "bg-[#FFF9CC]",
+      text: "text-[#E2B60A]",
+    },
+    {
+      bg: "bg-[#B2FFD6]",
+      text: "text-[#34CE56]",
+    },
+    {
+      bg: "bg-[#E8F2FF]",
+      text: "text-[#1D7DFD]",
+    },
+    {
+      bg: "bg-[#F6F2FF]",
+      text: "text-[#6D49BF]",
+    },
+    {
+      bg: "bg-[#FFFBFC]",
+      text: "text-[#4D373A]",
+    }
+  ]
+
+  const themeIndex = (story.storyId || 0) % DANMAKU_THEMES.length
+  const theme = DANMAKU_THEMES[themeIndex]
+
   return (
     <BubbleButton
       as="div"
       onClick={() => onClick(story)}
-      className={`${styles.item} group relative inline-block rounded-2xl px-3 py-2 text-sm font-semibold text-white shadow cursor-pointer transition-colors ${
-        story.isOwn
-          ? "bg-blue-600 hover:bg-blue-700"
-          : "bg-cath-red-700 hover:bg-[#7a000e]"
-      }`}
+      className={`${styles.item} group relative inline-block rounded-2xl p-4 text-sm font-semibold text-white shadow cursor-pointer transition-colors ${story.isOwn
+        ? "bg-blue-600 hover:bg-blue-700"
+        : `${theme.bg} ${theme.text}`
+        }`}
       style={{
         top: story._top,
         animationDuration: `${story._duration}s`,
@@ -27,8 +60,8 @@ const DanmakuItem = ({ story, onClick }) => {
       }}
       bubbleColor={story.isOwn ? "#2563eb" : colors.primaryRed}
     >
-      <span className="block">{story.storyContent}</span>
-    </BubbleButton>
+      <span className="line-clamp-3 break-words">{story.storyContent}</span>
+    </BubbleButton >
   )
 }
 

@@ -56,6 +56,10 @@ export default {
     noStories: "Chưa có câu chuyện nào. Bắt đầu cuộc trò chuyện!",
     yours: "của bạn",
     total: "tổng cộng",
+    sortNewest: "Mới nhất",
+    sortOldest: "Cũ nhất",
+    displayGrid: "Lưới",
+    displayFloat: "Trôi nổi",
   },
   newsLoginPrompt:
     "Vui lòng đăng nhập để xem những bài viết mới nhất từ cộng đồng.",

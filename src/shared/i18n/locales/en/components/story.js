@@ -4,5 +4,6 @@ export default {
   expiresIn: "Expires in",
   deleteStory: "Delete Story",
   confirmDelete: "Confirm Delete",
+  replies: "replies"
 }
 
