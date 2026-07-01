@@ -4,5 +4,6 @@ export default {
   expiresIn: "Hết hạn sau",
   deleteStory: "Xoá câu chuyện",
   confirmDelete: "Xác nhận xoá",
-}
+  replies: "phản hồi",
+};
 

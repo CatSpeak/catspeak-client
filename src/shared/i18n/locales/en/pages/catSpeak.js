@@ -28,7 +28,8 @@ export default {
     noActiveChallenges: "No active challenges found",
     noPastChallenges: "No past challenges found",
     createOwnReels: "Create your own Reels ✨",
-    shareKnowledge: "Share knowledge and practice roleplay with the Cat Speak community.",
+    shareKnowledge:
+      "Share knowledge and practice roleplay with the Cat Speak community.",
     formatLimit: "Format MP4, MOV",
     sizeLimit: "Max 5 mins, 150MB",
     uploadReel: "Upload Reel",
@@ -37,10 +38,14 @@ export default {
     weeklyEvent: "Weekly Event",
     pastEvents: "Past Events",
     endedEvent: "Ended Event",
-    allActiveChallengesDesc: "Discover and participate in all ongoing challenges from the Cat Speak community.",
-    allPastChallengesDesc: "Review all ended challenges and watch the best submission videos.",
-    joinActiveChallengeDesc: "Join and record your interactive Reels video now!",
-    pastChallengeDesc: "This challenge has ended. Watch outstanding submissions.",
+    allActiveChallengesDesc:
+      "Discover and participate in all ongoing challenges from the Cat Speak community.",
+    allPastChallengesDesc:
+      "Review all ended challenges and watch the best submission videos.",
+    joinActiveChallengeDesc:
+      "Join and record your interactive Reels video now!",
+    pastChallengeDesc:
+      "This challenge has ended. Watch outstanding submissions.",
     learnMore: "Learn More",
     leaderboard: "Leaderboard",
     thisWeek: "This Week",
@@ -48,7 +53,8 @@ export default {
     noRankings: "No rankings available yet",
     viewFullRanking: "View Full Ranking",
     noReelsFound: "No reels found",
-    trySelectingDifferentTag: "Try selecting a different tag or check back later.",
+    trySelectingDifferentTag:
+      "Try selecting a different tag or check back later.",
   },
   mail: {
     placeholderEmpty: "Be the first to say hello...",
@@ -56,6 +62,10 @@ export default {
     noStories: "No stories yet. Start the conversation!",
     yours: "yours",
     total: "total",
+    sortNewest: "Newest",
+    sortOldest: "Oldest",
+    displayGrid: "Grid",
+    displayFloat: "Float",
   },
   newsLoginPrompt: "Please log in to see the latest posts from the community.",
   sidebar: {
@@ -73,4 +83,4 @@ export default {
   created: "Created",
   expiresIn: "Expires in",
   story: "Story",
-}
+};

@@ -28,7 +28,8 @@ export default {
     noActiveChallenges: "Không tìm thấy thử thách nào",
     noPastChallenges: "Không tìm thấy thử thách nào",
     createOwnReels: "Sáng tạo nội dung của riêng bạn ✨",
-    shareKnowledge: "Chia sẻ kiến thức và luyện tập nhập vai cùng cộng đồng Cat Speak.",
+    shareKnowledge:
+      "Chia sẻ kiến thức và luyện tập nhập vai cùng cộng đồng Cat Speak.",
     formatLimit: "Định dạng MP4, MOV",
     sizeLimit: "Tối đa 5 phút, 150MB",
     uploadReel: "Đăng tải Reel",
@@ -37,9 +38,12 @@ export default {
     weeklyEvent: "Sự kiện tuần",
     pastEvents: "Sự kiện đã qua",
     endedEvent: "Sự kiện đã kết thúc",
-    allActiveChallengesDesc: "Khám phá và tham gia tất cả các thử thách đang diễn ra từ cộng đồng Cat Speak.",
-    allPastChallengesDesc: "Xem lại tất cả các thử thách đã kết thúc và những video xuất sắc nhất.",
-    joinActiveChallengeDesc: "Hãy tham gia và quay video Reels tương tác của bạn ngay!",
+    allActiveChallengesDesc:
+      "Khám phá và tham gia tất cả các thử thách đang diễn ra từ cộng đồng Cat Speak.",
+    allPastChallengesDesc:
+      "Xem lại tất cả các thử thách đã kết thúc và những video xuất sắc nhất.",
+    joinActiveChallengeDesc:
+      "Hãy tham gia và quay video Reels tương tác của bạn ngay!",
     pastChallengeDesc: "Thử thách này đã kết thúc. Xem các bài nộp xuất sắc.",
     learnMore: "Tìm hiểu thêm",
     leaderboard: "Bảng xếp hạng",
@@ -56,6 +60,10 @@ export default {
     noStories: "Chưa có câu chuyện nào. Bắt đầu cuộc trò chuyện!",
     yours: "của bạn",
     total: "tổng cộng",
+    sortNewest: "Mới nhất",
+    sortOldest: "Cũ nhất",
+    displayGrid: "Lưới",
+    displayFloat: "Trôi nổi",
   },
   newsLoginPrompt:
     "Vui lòng đăng nhập để xem những bài viết mới nhất từ cộng đồng.",
@@ -74,4 +82,4 @@ export default {
   created: "Đã tạo",
   expiresIn: "Hết hạn trong",
   story: "Câu chuyện",
-}
+};
