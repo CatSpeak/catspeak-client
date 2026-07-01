@@ -20,4 +20,18 @@ export default {
     copyright: "Bản quyền",
   },
   copyright: "Copyright {year} | Cat Speak",
-}
+  validation: {
+    title: "Thiếu thông tin",
+    message: "Vui lòng điền đầy đủ thông tin trước khi gửi.",
+  },
+  success: {
+    title: "Gửi thành công",
+    message:
+      "Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi sớm nhất có thể.",
+  },
+  error: {
+    title: "Gửi thất bại",
+    message: "Đã xảy ra lỗi khi gửi thông tin. Vui lòng thử lại sau.",
+  },
+  ok: "OK",
+};

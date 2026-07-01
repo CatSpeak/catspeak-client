@@ -20,4 +20,18 @@ export default {
     copyright: "版权",
   },
   copyright: "Copyright {year} | Cat Speak",
-}
+
+  validation: {
+    title: "缺少信息",
+    message: "请在提交前填写所有信息。",
+  },
+  success: {
+    title: "成功",
+    message: "您的信息已成功发送！",
+  },
+  error: {
+    title: "错误",
+    message: "发送信息时出现问题，请稍后再试。",
+  },
+  ok: "确定",
+};
