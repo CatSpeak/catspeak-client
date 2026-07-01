@@ -20,8 +20,8 @@ dayjs.extend(relativeTime);
  * @param {Function} [props.onClick]              - Called when the card is clicked
  */
 const StoryCardItem = ({ story, onClick }) => {
+   const { t } = useLanguage();
   if (!story) return null;
-  const { t } = useLanguage();
 
   const {
     storyContent,
