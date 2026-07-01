@@ -65,19 +65,13 @@ const RoomsPage = () => {
         topics: [],
         languageType: langMap[supportedLangCode],
       }
-      navigate(`/${supportedLangCode}/queue`, { state: preferences })
+      navigate("/queue", { state: preferences })
     })
   }
 
   const proceedCreateStudyGroup = () => {
     actions.handleCreateStudyGroupSession(() => {
-      const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
-      const preferences = {
-        roomType: "Group",
-        topics: [],
-        languageType: langMap[supportedLangCode],
-      }
-      navigate(`/${supportedLangCode}/queue`, { state: preferences })
+      setCreateRoomModalOpen(true)
     })
   }
 
