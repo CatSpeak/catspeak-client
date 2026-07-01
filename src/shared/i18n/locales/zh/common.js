@@ -6,9 +6,25 @@ export default {
   seeMore: "查看更多",
   back: "返回",
   cancel: "取消",
+  scrollToTop: "回到顶部",
   toggle: {
     on: "开",
     off: "关",
+  },
+  header: {
+    language: "语言",
+    community: "社区",
+    soon: "敬请期待",
+    countries: {
+      vietnam: "越南",
+      china: "中国",
+      english: "英语",
+    },
+    languages: {
+      vi: "越南语",
+      zh: "中文",
+      en: "英语",
+    }
   },
   pagination: {
     range: "{{start}}-{{end}} 共 {{total}}",
@@ -16,9 +32,20 @@ export default {
   nav: {
     home: "首页",
     rooms: "房间",
-    community: "社区",
+    community: "首页",
     catSpeak: "猫语",
-    cart: "课程",
+    catSpeakNews: "猫语新闻",
+    worldNews: "世界新闻",
+    reels: "短视频",
+    video: "视频",
+    calendar: "日历",
+    cart: "购物车",
+    courses: "课程",
+    allCourses: "所有课程",
+    myCourses: "我的课程",
+    messages: "消息",
+    settings: "设置",
+    help: "帮助",
     connect: "个人",
     workspace: "我的工作区",
   },

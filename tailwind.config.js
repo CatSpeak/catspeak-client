@@ -105,6 +105,7 @@ export default {
       },
       fontFamily: {
         sans: ["var(--font-primary)"],
+        nunito: ["var(--font-nunito)"],
       },
       keyframes: {
         wiggle: {
