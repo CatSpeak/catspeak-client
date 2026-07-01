@@ -56,10 +56,10 @@ const AISection = () => {
           </ul>
 
           {/* CTA Button */}
-          <div className="text-right">
+          <div className="text-left">
             <button
               onClick={handleAction}
-              className="inline-flex ml-auto items-center px-8 py-3 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 shadow-sm hover:border-[#990011] hover:text-[#990011] hover:shadow-md hover:-translate-y-0.5 transition-all"
+              className="flex w-full lg:inline-flex lg:w-auto items-center justify-center px-8 py-3 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 shadow-sm hover:border-[#990011] hover:text-[#990011] hover:shadow-md hover:-translate-y-0.5 transition-all"
             >
               {t.home?.aiSection?.learnMore}
             </button>

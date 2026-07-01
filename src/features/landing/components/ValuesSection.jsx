@@ -19,7 +19,7 @@ const ValuesSection = () => {
   return (
     <div ref={sectionRef} className="w-full py-16 sm:py-24 relative">
       {/* Background Element 2 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0  pointer-events-none">
         <motion.img
           src={Element2}
           alt=""

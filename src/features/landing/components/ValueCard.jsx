@@ -67,7 +67,7 @@ const ValueCard = ({
         </div>
 
         {/* Description */}
-        <p className="text-gray-600 mt-auto text-sm bg-white shadow-lg rounded-lg p-4">
+        <p className="text-gray-600 text-sm bg-white shadow-lg rounded-lg p-4">
           {description}
         </p>
       </div>
