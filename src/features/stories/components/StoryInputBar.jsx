@@ -46,7 +46,7 @@ const StoryInputBar = ({
   const sortLabel = sortOrder === "newest" ? t.catSpeak?.mail?.sortNewest : t.catSpeak?.mail?.sortOldest
 
   return (
-    <div className="mb-2 flex flex-col md:flex-row items-center justify-between gap-3 px-6 pt-1 -mx-1 -mt-1 pb-5">
+    <div className="md:mb-2 flex flex-col md:flex-row items-center justify-between gap-3 md:px-6 pt-1 -mx-1 -mt-1 md:pb-5 pb-2">
       {/* Left: text input + send button */}
       <div className="flex w-full items-start gap-2">
         <TextInput
@@ -54,7 +54,7 @@ const StoryInputBar = ({
           onChange={onChange}
           maxLength={200}
           placeholder={t.catSpeak.mail.placeholder}
-          containerClassName="flex-1 md:w-[640px] md:flex-none"
+          containerClassName="flex-1 lg:max-w-[500px] xl:max-w-[540px] md:max-w-[320px] md:flex-none w-full"
           className="!border-[#c38300]/70 focus:!border-cath-red-700 focus:!ring-cath-red-700 hover:!border-cath-red-700 !h-10"
           showCount
         />

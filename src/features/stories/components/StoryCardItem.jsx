@@ -49,7 +49,7 @@ const StoryCardItem = ({ story, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`flex max-w-[230px] max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all ${theme.bg}`}
+      className={`flex md:max-w-[230px] w-full max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all ${theme.bg}`}
     >
       {/* Header: avatar + username */}
       <div className="flex items-center gap-2.5">

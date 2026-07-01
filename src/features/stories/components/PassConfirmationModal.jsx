@@ -47,10 +47,10 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
       open={open}
       onClose={handleClose}
       title={t.catSpeak?.story || "Story"}
-      bodyClassName="p-4 md:p-6 md:pt-0"
+      bodyClassName="p-4 md:p-6 pt-0"
       className="md:max-w-[525px]"
     >
-      <div className="space-y-6">
+      <div className="md:space-y-6 space-y-4">
         {/* User Info Header */}
         <div className="flex items-center gap-3 pr-10">
           <Avatar
@@ -101,12 +101,12 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
         </div> */}
 
         <div className="flex justify-center gap-3 flex-1">
-          <PillButton variant="secondary" onClick={handlePass} className="h-12 w-56 border border-primary text-primary">
+          <PillButton variant="secondary" onClick={handlePass} className="md:h-12 h-11 w-56 border border-primary text-primary">
             {confirmPass
               ? t.catSpeak?.confirm || "Confirm Pass"
               : t.catSpeak?.pass || "Pass"}
           </PillButton>
-          <PillButton onClick={handleConnect} className="h-12 w-56">
+          <PillButton onClick={handleConnect} className="md:h-12 h-11 w-56">
             {t.catSpeak?.connect || "Connect"}
           </PillButton>
         </div>

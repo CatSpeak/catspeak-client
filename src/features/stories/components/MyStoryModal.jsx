@@ -40,10 +40,10 @@ const MyStoryModal = ({ open, story, onClose, onDelete }) => {
       open={open}
       onClose={handleClose}
       title={t.story?.myStory || "My Story"}
-      bodyClassName="p-4 md:p-6 md:pt-0"
+      bodyClassName="p-4 md:p-6 pt-0"
       className="md:max-w-[525px]"
     >
-      <div className="space-y-6">
+      <div className="md:space-y-6 space-y-4">
         <div className="flex items-center gap-4 text-sm text-[#9e9e9e]">
           <span className="flex items-center gap-1">
             <MessageSquare size={13} className="shrink-0" />
@@ -81,11 +81,11 @@ const MyStoryModal = ({ open, story, onClose, onDelete }) => {
           <PillButton
             variant="secondary"
             onClick={handleClose}
-            className="h-12 w-56 border border-primary text-primary"
+            className="md:h-12 h-11 w-56 border border-primary text-primary"
           >
             {t.messages?.close || "Close"}
           </PillButton>
-          <PillButton onClick={handleDelete} className="h-12 w-56">
+          <PillButton onClick={handleDelete} className="md:h-12 h-11 w-56">
             {confirmDelete
               ? t.story?.confirmDelete || "Confirm Delete"
               : t.story?.deleteStory || "Delete Story"}

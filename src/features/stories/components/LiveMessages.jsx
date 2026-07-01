@@ -85,7 +85,7 @@ const LiveMessages = ({ languageCommunity }) => {
   return (
     <div className="flex w-full max-w-full flex-col">
       {/* Breadcrumb */}
-      <div className="px-6 pb-6 text-sm">
+      <div className="md:px-6 pb-6 text-sm">
         <Breadcrumb items={breadcrumbItems} />
       </div>
 

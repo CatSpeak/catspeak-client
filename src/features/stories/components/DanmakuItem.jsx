@@ -49,7 +49,7 @@ const DanmakuItem = ({ story, onClick }) => {
     <BubbleButton
       as="div"
       onClick={() => onClick(story)}
-      className={`${styles.item} group relative inline-block rounded-2xl p-4 text-sm font-semibold text-white shadow cursor-pointer transition-colors ${!story.isOwn
+      className={`${styles.item} group relative inline-block rounded-2xl p-4 text-sm font-semibold text-white shadow cursor-pointer transition-colors ${story.isOwn
         ? "bg-blue-600 hover:bg-blue-700"
         : `${theme.bg} ${theme.text}`
         }`}
