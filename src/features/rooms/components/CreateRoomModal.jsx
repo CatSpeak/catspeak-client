@@ -90,12 +90,12 @@ const CreateRoomModal = ({ open, onCancel }) => {
                 onClick={onCancel}
                 className="flex shrink-0 items-center justify-center h-12 w-12 hover:bg-[#E5E5E5] rounded-full transition-colors"
               >
-                <X size={24} />
+                <X size={22} strokeWidth={2.5} />
               </button>
             </div>
 
             <div
-              className={`flex flex-col gap-6 max-h-[60vh] overflow-y-auto px-6 pb-6 max-[425px]:max-h-none max-[425px]:flex-1 ${scrollbarClasses}`}
+              className={`flex flex-col gap-8 max-h-[60vh] overflow-y-auto p-6 sm:p-8 max-[425px]:max-h-none max-[425px]:flex-1 ${scrollbarClasses}`}
             >
               {formData.mode === "create" && (
                 <CreateFormInputs
@@ -224,7 +224,7 @@ const ModalFooter = ({
 }) => {
   if (mode === "join") {
     return (
-      <div className="p-6 flex flex-wrap justify-end gap-6 shrink-0">
+      <div className="p-6 sm:px-8 sm:py-6 flex flex-wrap justify-end gap-4 sm:gap-6 shrink-0 border-t border-gray-100 bg-gray-50/50">
         <PillButton
           onClick={() => onSwitchMode("create")}
           variant="outline"
@@ -244,7 +244,7 @@ const ModalFooter = ({
   }
 
   return (
-    <div className="p-6 flex flex-wrap justify-end gap-6 shrink-0">
+    <div className="p-6 sm:px-8 sm:py-6 flex flex-wrap justify-end gap-4 sm:gap-6 shrink-0 border-t border-gray-100 bg-gray-50/50">
       <PillButton
         onClick={() => onSwitchMode("join")}
         variant="secondary"
