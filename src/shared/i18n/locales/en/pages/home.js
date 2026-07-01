@@ -83,15 +83,36 @@ export default {
   faq: {
     corner: "FAQ",
     title: "Frequently Asked Questions",
-    description: "Quickly answer your questions about the learning path and community.",
+    description:
+      "Quickly answer your questions about the learning path and community.",
     searchPlaceholder: "Search...",
     questions: [
-      { question: "How do I connect with people at my level?", answer: "You will be matched with users of a similar level based on your profile." },
-      { question: "How can I connect with more people?", answer: "Join community groups and participate in public discussions." },
-      { question: "What is the number of people in a group?", answer: "Usually 4-6 people per group." },
-      { question: "How much time do I have to meet?", answer: "Meetings typically last 30 to 45 minutes." },
-      { question: "How do I report someone spamming me?", answer: "Use the report button on their profile or in the chat." },
-      { question: "Where do I connect with teachers?", answer: "By the end of the trial lesson, you will be able to determine for yourself whether this kind of online lesson is right for you or not. In our experience, most students appreciate the benefits of online education and decide to study online." }
-    ]
-  }
+      {
+        question: "How do I connect with people at my level?",
+        answer:
+          "You will be matched with users of a similar level based on your profile.",
+      },
+      {
+        question: "How can I connect with more people?",
+        answer: "Join community groups and participate in public discussions.",
+      },
+      {
+        question: "What is the number of people in a group?",
+        answer: "Usually 4-6 people per group.",
+      },
+      {
+        question: "How much time do I have to meet?",
+        answer: "Meetings typically last 30 to 45 minutes.",
+      },
+      {
+        question: "How do I report someone spamming me?",
+        answer: "Use the report button on their profile or in the chat.",
+      },
+      {
+        question: "Where do I connect with teachers?",
+        answer:
+          "By the end of the trial lesson, you will be able to determine for yourself whether this kind of online lesson is right for you or not. In our experience, most students appreciate the benefits of online education and decide to study online.",
+      },
+    ],
+  },
 };

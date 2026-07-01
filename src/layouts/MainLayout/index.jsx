@@ -9,15 +9,20 @@ import Footer from "../../shared/components/Footer";
 import Auth from "@/features/auth/components";
 import AuthModalContext from "@/shared/context/AuthModalContext";
 import { AnimatePresence } from "framer-motion";
-import MainHeader from "../../shared/components/Header/MainHeader"
-import { FluentAnimation } from "@/shared/components/ui/animations"
-import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
-import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
-import { useSidebar } from "@/shared/context/SidebarContext"
+import MainHeader from "../../shared/components/Header/MainHeader";
+import { FluentAnimation } from "@/shared/components/ui/animations";
+import MainSidebar from "../../shared/components/Sidebar/MainSidebar";
+import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png";
+import { useSidebar } from "@/shared/context/SidebarContext";
 import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader";
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
-  const { isMobileSidebarOpen, setIsMobileSidebarOpen, isSidebarExpanded, setIsSidebarExpanded } = useSidebar()
+  const {
+    isMobileSidebarOpen,
+    setIsMobileSidebarOpen,
+    isSidebarExpanded,
+    setIsSidebarExpanded,
+  } = useSidebar();
 
   const [authModal, setAuthModal] = useState({
     isOpen: false,
@@ -26,10 +31,10 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     redirectAfterLogin: null,
   });
 
-  const location = useLocation()
-  const [searchParams] = useSearchParams()
-  const isLandingPage = location.pathname === "/"
-  const isCommunityPage = location.pathname.includes("/community")
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isLandingPage = location.pathname === "/";
+  const isCommunityPage = location.pathname.includes("/community");
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
@@ -100,41 +105,45 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     >
       {/* Background for Community Page - covers FULL viewport behind everything */}
       {isCommunityPage && (
-        <div 
+        <div
           className="fixed inset-0 pointer-events-none z-0 mt-24"
           style={{
             backgroundImage: `url(${BackgroundV2})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center top',
-            backgroundRepeat: 'no-repeat',
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            backgroundRepeat: "no-repeat",
           }}
         />
       )}
 
       <div className="relative flex min-h-screen text-left overflow-x-clip">
         {!isLandingPage && (
-          <MainSidebar 
-            isMobileOpen={isMobileSidebarOpen} 
-            setIsMobileOpen={setIsMobileSidebarOpen} 
-            isExpanded={isSidebarExpanded} 
-            setIsExpanded={setIsSidebarExpanded} 
+          <MainSidebar
+            isMobileOpen={isMobileSidebarOpen}
+            setIsMobileOpen={setIsMobileSidebarOpen}
+            isExpanded={isSidebarExpanded}
+            setIsExpanded={setIsSidebarExpanded}
           />
         )}
 
-        <div 
+        <div
           className={`flex flex-col flex-1 min-w-0 transition-all duration-300 relative z-10 ${
-            !isLandingPage ? (isSidebarExpanded ? 'lg:ml-[280px]' : 'lg:ml-[80px]') : ''
+            !isLandingPage
+              ? isSidebarExpanded
+                ? "lg:ml-[280px]"
+                : "lg:ml-[80px]"
+              : ""
           }`}
         >
-        {showHeader &&
-          (isLandingPage ? (
-            <LandingHeader onGetStarted={() => openAuthModal("login")} />
-          ) : (
-            <MainHeader
-              onGetStarted={() => openAuthModal("login")}
-              onMenuClick={() => setIsMobileSidebarOpen(true)}
-            />
-          ))}
+          {showHeader &&
+            (isLandingPage ? (
+              <LandingHeader onGetStarted={() => openAuthModal("login")} />
+            ) : (
+              <MainHeader
+                onGetStarted={() => openAuthModal("login")}
+                onMenuClick={() => setIsMobileSidebarOpen(true)}
+              />
+            ))}
 
           <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
             <Outlet />

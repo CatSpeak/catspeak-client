@@ -4,18 +4,22 @@ const colorConfig = {
   purple: {
     solid: "from-white to-purple-500",
     glass: "from-white/60 to-purple-500/20 text-purple-700",
+    glow: "bg-purple-500/40",
   },
   blue: {
     solid: "from-white to-blue-400",
     glass: "from-white/60 to-blue-400/20 text-blue-600",
+    glow: "bg-blue-400/40",
   },
   orange: {
     solid: "from-white to-orange-400",
     glass: "from-white/60 to-orange-400/20 text-orange-600",
+    glow: "bg-orange-400/40",
   },
   green: {
     solid: "from-white to-green-500",
     glass: "from-white/60 to-green-500/20 text-green-600",
+    glow: "bg-green-500/40",
   },
 };
 
@@ -41,6 +45,10 @@ const ValueCard = ({
         {/* Header: Title + Icon */}
         <div className="flex flex-col  items-center justify-center w-full gap-5">
           <div className="relative h-14 w-14 flex-shrink-0 mr-6">
+            {/* Glow */}
+            <div
+              className={`absolute inset-0 top-7  m-auto h-14 w-14 rounded-full ${styles.glow} blur-lg`}
+            />
             {/* Layer 1: Bottom/Back (Top-Left) - Solid Gradient */}
             <div
               className={`absolute top-0 left-0 h-12 w-12 rounded-[14px] bg-gradient-to-br ${styles.solid} opacity-80`}
@@ -48,7 +56,7 @@ const ValueCard = ({
 
             {/* Layer 2: Top/Front (Bottom-Right) - Glass Gradient + Icon */}
             <div
-              className={`absolute bottom-0 right-0 flex h-12 w-12 items-center justify-center rounded-[14px] border border-white/40 bg-gradient-to-br ${styles.glass} backdrop-blur-sm shadow-sm`}
+              className={`absolute bottom-0 right-0 flex h-12 w-12 items-center justify-center rounded-[14px] border border-white/40 bg-gradient-to-br ${styles.glass} backdrop-blur-sm`}
             >
               {icon}
             </div>

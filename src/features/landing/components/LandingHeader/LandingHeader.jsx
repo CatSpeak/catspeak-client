@@ -7,7 +7,7 @@ import LandingHeaderLogo from "./LandingHeaderLogo";
 import DesktopNav from "../LandingDesktopNav/DesktopNav";
 import LandingHeaderGuestControls from "./LandingHeaderGuestControls";
 import LandingHeaderUserControls from "./LandingHeaderUserControls";
-import MobileDrawer from "@/features/navigation/components/MobileNav/landing/MobileDrawer";
+import MobileDrawer from "../LandingMobileNav/MobileDrawer";
 const LandingHeader = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);

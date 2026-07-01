@@ -17,10 +17,7 @@ const ValuesSection = () => {
   const clipPercent = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const clipPath = useTransform(clipPercent, (v) => `inset(0 0 0 ${100 - v}%)`);
   return (
-    <div
-      ref={sectionRef}
-      className="w-full py-16 sm:py-24 relative"
-    >
+    <div ref={sectionRef} className="w-full py-16 sm:py-24 relative">
       {/* Background Element 2 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.img
@@ -36,10 +33,10 @@ const ValuesSection = () => {
         {/* Header */}
         <div className="mb-16 flex flex-col items-center justify-center space-y-4 text-center">
           <h3 className="font-semibold text-gray-900 text-sm sm:text-base tracking-wide">
-            {t.home?.whyChooseUs || "Tại sao chọn chúng tôi ?"}
+            {t.home?.whyChooseUs}
           </h3>
           <h2 className="font-bold text-cath-red-700 text-3xl sm:text-4xl md:text-5xl tracking-tight">
-            {t.home?.valuesTitle || "Giá trị của Cat Speak"}
+            {t.home?.valuesTitle}
           </h2>
         </div>
 
