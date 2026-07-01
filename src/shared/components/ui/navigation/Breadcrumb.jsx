@@ -10,7 +10,9 @@ const Breadcrumb = ({ items }) => {
         return (
           <React.Fragment key={index}>
             {isLast ? (
-              <span style={{ color: colors.primaryRed }}>{item.label}</span>
+              <span className="font-semibold text-cath-red-700">
+                {item.label}
+              </span>
             ) : (
               <button
                 onClick={item.onClick}
