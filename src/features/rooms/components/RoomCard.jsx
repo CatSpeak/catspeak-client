@@ -99,30 +99,30 @@ const RoomCard = ({ room }) => {
           />
 
           {/* Top Left: Badges */}
-          <div className="absolute left-3 top-3 flex items-center">
+          <div className="absolute left-2 top-2 max-w-[55%] flex items-center z-10">
             {room.requiredLevel && (
-              <div className="flex items-center justify-center h-7 px-3 bg-cath-red-800 text-xs font-bold text-white rounded-md z-0 shadow-sm">
+              <div className="flex shrink-0 items-center justify-center h-7 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate">
                 {room.requiredLevel}
               </div>
             )}
-            <div className={`flex items-center justify-center h-8 w-8 bg-cath-red-800 rounded-full border-2 border-white shadow-sm z-10 ${room.requiredLevel ? '-ml-2' : ''}`}>
+            <div className={`flex shrink-0 items-center justify-center h-8 w-8 bg-cath-red-800 rounded-full border-2 border-white shadow-sm z-10 ${room.requiredLevel ? '-ml-2' : ''}`}>
               {getTopicIcon(room.topic)}
             </div>
           </div>
 
-          {/* Private room lock badge */}
-          {isPrivate && (
-            <div className="absolute right-14 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
-              <Lock size={14} className="text-white" />
+          {/* Top Right: Actions & Status */}
+          <div className="absolute right-2 top-2 flex items-center gap-1.5 z-10">
+            {isPrivate && (
+              <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm shadow-sm">
+                <Lock size={14} className="text-white" />
+              </div>
+            )}
+            <div
+              className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white/30 backdrop-blur-sm transition-all duration-300 hover:bg-white/50 shadow-sm cursor-pointer"
+              onClick={handleBookmarkClick}
+            >
+              <Bookmark size={16} className="text-cath-red-800 fill-cath-red-800/10" />
             </div>
-          )}
-
-          {/* Bookmark Badge */}
-          <div
-            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 shadow-sm"
-            onClick={handleBookmarkClick}
-          >
-            <Bookmark size={18} className="text-cath-red-800 fill-cath-red-800/10" />
           </div>
         </div>
 

@@ -12,6 +12,10 @@ export const useDeviceSelection = () => {
   const [selectedCamera, setSelectedCamera] = useState("")
 
   const fetchDevices = useCallback(async () => {
+    if (!navigator.mediaDevices) {
+      console.warn("navigator.mediaDevices is undefined. This usually happens in non-secure contexts (HTTP).")
+      return
+    }
     try {
       const allDevices = await navigator.mediaDevices.enumerateDevices()
       
@@ -57,9 +61,11 @@ export const useDeviceSelection = () => {
 
   useEffect(() => {
     fetchDevices()
-    navigator.mediaDevices.addEventListener("devicechange", fetchDevices)
-    return () => {
-      navigator.mediaDevices.removeEventListener("devicechange", fetchDevices)
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.addEventListener("devicechange", fetchDevices)
+      return () => {
+        navigator.mediaDevices.removeEventListener("devicechange", fetchDevices)
+      }
     }
   }, [fetchDevices])
 
