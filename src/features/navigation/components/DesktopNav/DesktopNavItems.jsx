@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { Home, LayoutDashboard, ShoppingCart, MessageCircle, GraduationCap, Settings, HelpCircle } from "lucide-react"
+import { Home, Settings } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "./DesktopNavItem"
 import DesktopNavDropdown from "./DesktopNavDropdown"
@@ -8,16 +8,6 @@ import DesktopNavSubItem from "./DesktopNavSubItem"
 import { navLinks, footerLinks } from "../../config/navigation"
 import { AnimatePresence, motion } from "framer-motion"
 import { useActiveLink } from "../../hooks/useActiveLink"
-
-const iconMap = {
-  community: Home,
-  catSpeak: LayoutDashboard,
-  cart: ShoppingCart,
-  messages: MessageCircle,
-  courses: GraduationCap,
-  settings: Settings,
-  help: HelpCircle
-}
 
 const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
   const { t } = useLanguage()
@@ -74,7 +64,7 @@ const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
         {navLinks.filter(item => !item.hideInSidebar).map((item) => {
           // Use key mapping for translations, falling back to capitalized key if not found
           const label = t.nav?.[item.key] || item.key
-          const IconComponent = iconMap[item.key] || Home
+          const IconComponent = item.icon || Home
 
           if (item.hasDropdown && item.subItems && item.subItems.length > 0) {
             const isDropdownActive = checkIsActive(item)
@@ -124,7 +114,7 @@ const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
       <div className="px-2 py-3 flex flex-col gap-1.5 mt-auto border-t border-gray-100">
         {footerLinks.map((item) => {
           const label = t.nav?.[item.key] || item.key
-          const IconComponent = iconMap[item.key] || Settings
+          const IconComponent = item.icon || Settings
           
           return (
             <DesktopNavItem 
