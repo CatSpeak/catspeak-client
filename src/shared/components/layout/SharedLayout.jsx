@@ -31,7 +31,7 @@ const SharedLayout = ({
       )}
 
       {/* Main Content */}
-      <main className="flex-1 h-full overflow-y-auto flex flex-col min-w-0">
+      <main className="flex-1 h-full overflow-y-auto flex flex-col min-w-0 relative">
         {/* Mobile Tabs */}
         {mobileNav && (
           <div className="lg:hidden sticky top-0 z-20 !bg-white/40 !backdrop-blur-xl overflow-hidden shrink-0 border-b !border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.05)]">

@@ -41,8 +41,8 @@ const VideoPreview = ({
   }, [micOn])
 
   return (
-    <div className="relative w-full max-w-3xl flex flex-col items-center">
-      <div className="mb-3 relative w-full aspect-video overflow-hidden rounded-2xl border border-[#e5e5e5] bg-white">
+    <div className="relative w-full max-w-3xl h-[269px] flex flex-col items-center rounded-2xl border border-[#F5F5F5] bg-[#FCFCFC]">
+      <div className="py-2 relative w-full h-[190px] aspect-video overflow-hidden mt-4">
         {/* Video Preview */}
         {localStream && (
           <video
@@ -84,10 +84,10 @@ const VideoPreview = ({
       </div>
 
       {/* Controls Overlay */}
-      <div className="flex flex-row gap-3">
+      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0">
         <button
           onClick={onToggleMic}
-          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
             micOn
               ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
               : "bg-white hover:bg-[#E5E5E5]"
@@ -98,7 +98,7 @@ const VideoPreview = ({
 
         <button
           onClick={onToggleCam}
-          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
             cameraOn
               ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
               : "bg-white hover:bg-[#E5E5E5]"
@@ -112,7 +112,7 @@ const VideoPreview = ({
           title={
             t?.rooms?.waitingScreen?.changeBackground || "Change Background"
           }
-          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
+          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
           <Image />
         </button>

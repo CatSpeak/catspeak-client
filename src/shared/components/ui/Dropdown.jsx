@@ -134,9 +134,15 @@ const Dropdown = ({
       const searchTerms = (opt.searchTerms || "").toLowerCase()
       const cleanSearchTerms = searchTerms.replace(/\+/g, "")
 
-      const matchLabel = removeDiacritics(label).replace(/\s+/g, "").includes(queryNoDiacritics)
-      const matchSubtitle = removeDiacritics(subtitle).replace(/\s+/g, "").includes(queryNoDiacritics)
-      const matchSearchTerms = removeDiacritics(cleanSearchTerms).replace(/\s+/g, "").includes(queryNoDiacritics)
+      const matchLabel = removeDiacritics(label)
+        .replace(/\s+/g, "")
+        .includes(queryNoDiacritics)
+      const matchSubtitle = removeDiacritics(subtitle)
+        .replace(/\s+/g, "")
+        .includes(queryNoDiacritics)
+      const matchSearchTerms = removeDiacritics(cleanSearchTerms)
+        .replace(/\s+/g, "")
+        .includes(queryNoDiacritics)
 
       return (
         label.includes(query) ||
@@ -200,7 +206,9 @@ const Dropdown = ({
           </div>
         )}
         <div className="flex flex-col min-w-0 flex-1">
-          <span className="whitespace-normal break-words leading-tight">{option.label}</span>
+          <span className="whitespace-normal break-words leading-tight">
+            {option.label}
+          </span>
           {option.subtitle && (
             <span
               className={`text-xs font-normal whitespace-normal break-words mt-0.5 ${isSelected ? "" : "text-gray-500"}`}
@@ -267,7 +275,7 @@ const Dropdown = ({
                           <input
                             ref={searchInputRef}
                             type="text"
-                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-[#990011]"
+                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-cath-red-700"
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -276,14 +284,20 @@ const Dropdown = ({
                         </div>
                       </div>
                     )}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
                       <div className="flex flex-col gap-1 p-1">
                         {filteredOptions.length > 0 ? (
                           filteredOptions.map((option, idx) => {
                             const isSelected = option.value === value
                             return (
                               <button
-                                key={option.key || option.code || (option.value ? `${option.value}-${idx}` : idx)}
+                                key={
+                                  option.key ||
+                                  option.code ||
+                                  (option.value
+                                    ? `${option.value}-${idx}`
+                                    : idx)
+                                }
                                 type="button"
                                 onClick={() => handleSelect(option)}
                                 className="w-full focus:outline-none"
@@ -301,7 +315,6 @@ const Dropdown = ({
                         )}
                       </div>
                     </div>
-
                   </FluentAnimation>
                 </div>
               </div>

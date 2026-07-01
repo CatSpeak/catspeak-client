@@ -10,6 +10,7 @@ const Button3D = ({
   disabled = false,
   loadingText,
   className = "",
+  roundedClass = "rounded-xl",
   ...props
 }) => {
   const isActuallyDisabled = disabled || loading
@@ -30,7 +31,7 @@ const Button3D = ({
     >
       {/* Shadow */}
       <span
-        className={`absolute top-0 left-0 w-full h-full rounded-xl bg-black/25 will-change-transform translate-y-[2px] transition-transform duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] ${
+        className={`absolute top-0 left-0 w-full h-full ${roundedClass} bg-black/25 will-change-transform translate-y-[2px] transition-transform duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] ${
           !isActuallyDisabled
             ? "group-hover:translate-y-[4px] group-hover:duration-[250ms] group-hover:ease-[cubic-bezier(.3,.7,.4,1.5)] group-active:translate-y-[1px] group-active:duration-[34ms]"
             : ""
@@ -39,13 +40,13 @@ const Button3D = ({
       
       {/* Edge */}
       <span
-        className="absolute top-0 left-0 w-full h-full rounded-xl"
+        className={`absolute top-0 left-0 w-full h-full ${roundedClass}`}
         style={{ background: edgeBackground }}
       ></span>
       
       {/* Front */}
       <span
-        className={`block relative py-3 px-6 rounded-xl text-sm sm:text-base font-medium text-white will-change-transform -translate-y-[4px] transition-transform duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] flex items-center justify-center gap-2 ${
+        className={`block relative py-2.5 px-6 ${roundedClass} text-sm sm:text-base font-medium text-white will-change-transform -translate-y-[4px] transition-transform duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] flex items-center justify-center gap-2 ${
           !isActuallyDisabled
             ? "group-hover:-translate-y-[6px] group-hover:duration-[250ms] group-hover:ease-[cubic-bezier(.3,.7,.4,1.5)] group-active:-translate-y-[2px] group-active:duration-[34ms]"
             : ""

@@ -4,10 +4,10 @@ export const recordingsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // ── Recording APIs ──────────────────────────────────────────────────
     startRecording: builder.mutation({
-      query: ({ roomName }) => ({
+      query: ({ roomName, sessionId }) => ({
         url: "/livekit/start-recording",
         method: "POST",
-        body: { roomName },
+        body: { roomName, sessionId },
       }),
       // Storage will change once recording completes (via webhook),
       // but we invalidate proactively so the UI can refetch if needed.
@@ -71,6 +71,10 @@ export const recordingsApi = baseApi.injectEndpoints({
         "Storage",
       ],
     }),
+    getRecordingsBySession: builder.query({
+      query: (sessionId) => `/livekit/recordings/session/${sessionId}`,
+      providesTags: ["Recordings"],
+    }),
   }),
 })
 
@@ -82,4 +86,5 @@ export const {
   useDeleteRecordingMutation,
   useGetStorageQuery,
   useUploadRecordingToDriveMutation,
+  useGetRecordingsBySessionQuery,
 } = recordingsApi

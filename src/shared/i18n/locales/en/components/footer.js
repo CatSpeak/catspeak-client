@@ -20,4 +20,20 @@ export default {
     copyright: "Copyright",
   },
   copyright: "Copyright {year} | Cat Speak",
-}
+  validation: {
+    title: "Missing Information",
+    message: "Please fill in all the information before submitting.",
+  },
+
+  success: {
+    title: "Success",
+    message: "Thanks for contacting us! We'll get back to you soon.",
+  },
+
+  error: {
+    title: "Error",
+    message: "An error occurred while sending your message. Please try again.",
+  },
+
+  ok: "OK",
+};
