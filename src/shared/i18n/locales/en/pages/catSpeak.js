@@ -144,6 +144,16 @@ export default {
       reelNotFoundDesc: "The reel you're looking for doesn't exist or has been removed.",
       backToReels: "← Back to Reels",
       viewComments: "View comments",
+      caughtUp: "You're all caught up",
+      watchedAll: "You've watched all the available reels",
+      moreMenu: {
+        report: "Report",
+        notInterested: "Not Interested",
+        copyLink: "Copy Link",
+        saveReel: "Save Reel",
+        addToPlaylist: "Add to Playlist",
+        aboutAccount: "About this account",
+      },
     },
   },
   mail: {

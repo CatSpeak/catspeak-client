@@ -291,7 +291,7 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   }
 
   return (
-    <div className={`inset-0 w-full h-full overflow-hidden flex flex-col ${isMobile ? "fixed z-[9999] bg-black" : "absolute z-10 bg-[#f8f9fa]"}`}>
+    <div className={`inset-0 w-full h-[100dvh] overflow-hidden flex flex-col ${isMobile ? "fixed z-[9999] bg-black" : "absolute z-10 bg-[#f8f9fa]"}`}>
       {/* Floating Close Button */}
       {!isMobile && (
         <button
@@ -315,6 +315,8 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
         containerHeight="100%"
         isMobile={isMobile}
         bottomGap={isMobile ? 0 : 16}
+        disableScroll={isMobile && showComments}
+        onClose={handleClose}
       >
         {(reel, index, isActive, preloadState = {}) => {
           const SlideComponent = isMobile ? ReelDetailSlideMobile : ReelDetailSlide

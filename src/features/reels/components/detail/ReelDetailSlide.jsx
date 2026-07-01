@@ -6,6 +6,7 @@ import {
 import Avatar from "@/shared/components/ui/Avatar"
 import ReelMoreMenu from "./ReelMoreMenu"
 import useFullscreen from "../../hooks/useFullscreen"
+import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useToggleLikeReelMutation,
@@ -489,12 +490,8 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
 
   const handleBookmarkToggle = useCallback((e) => {
     e.stopPropagation()
-    if (!isAuthenticated) {
-      openAuthModal()
-      return
-    }
-    alert("Bookmark feature coming soon!")
-  }, [isAuthenticated, openAuthModal])
+    toast("This feature is not available yet.", { icon: "🚧" })
+  }, [])
 
   const handleReply = useCallback((target) => {
     setReplyTarget(target)
@@ -713,7 +710,13 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                   <Bookmark size={22} className="text-gray-700" />
                   <span className="text-[12px] font-semibold text-gray-700 group-hover:text-black">{formatCompactNumber(reel.shares || 0, language)}</span>
                 </button>
-                <button className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center group border-none bg-transparent outline-none">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toast("This feature is not available yet.", { icon: "🚧" })
+                  }}
+                  className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center group border-none bg-transparent outline-none"
+                >
                   <Share size={22} className="text-gray-700" />
                 </button>
               </div>

@@ -31,14 +31,22 @@ const ReelsPage = () => {
   const handleReelClick = useCallback(
     (reel) => {
       if (!reel || !reel.id) return
+      
       // Use query string to allow back navigation to the same state
-      const queryString = searchParams.toString()
+      const newSearchParams = new URLSearchParams(searchParams)
+      
+      // If we are viewing a specific challenge, pass it to the detail page
+      if ((activeTab === "challenges" || activeTab === "leaderboard") && challengeId) {
+        newSearchParams.set("challengeId", challengeId)
+      }
+
+      const queryString = newSearchParams.toString()
       navigate({
         pathname: String(reel.id),
         search: queryString ? `?${queryString}` : "",
       })
     },
-    [navigate, searchParams],
+    [navigate, searchParams, activeTab, challengeId],
   )
 
   const handleUploadClick = useCallback(() => {
