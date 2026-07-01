@@ -42,7 +42,7 @@ const VideoPreview = ({
 
   return (
     <div className="relative w-full max-w-3xl flex flex-col items-center rounded-2xl border border-[#F5F5F5] bg-[#FCFCFC]">
-      <div className="relative w-full aspect-video overflow-hidden">
+      <div className="relative w-full aspect-video overflow-hidden rounded-2xl">
         {/* Video Preview */}
         {localStream && (
           <video
@@ -64,8 +64,8 @@ const VideoPreview = ({
                   alt=""
                   className="absolute inset-0 z-0 h-full w-full object-cover blur-[40px] scale-125 opacity-60"
                   onError={(e) => {
-                    e.target.style.display = "none"
-                    e.target.previousSibling.style.display = "none"
+                    e.target.style.display = "none";
+                    e.target.previousSibling.style.display = "none";
                   }}
                 />
               </>
@@ -87,20 +87,22 @@ const VideoPreview = ({
       <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
         <button
           onClick={onToggleMic}
-          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${micOn
-            ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
-            : "bg-white hover:bg-[#E5E5E5]"
-            }`}
+          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
+            micOn
+              ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
+              : "bg-white hover:bg-[#E5E5E5]"
+          }`}
         >
           {micOn ? <Mic /> : <MicOff />}
         </button>
 
         <button
           onClick={onToggleCam}
-          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${cameraOn
-            ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
-            : "bg-white hover:bg-[#E5E5E5]"
-            }`}
+          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
+            cameraOn
+              ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
+              : "bg-white hover:bg-[#E5E5E5]"
+          }`}
         >
           {cameraOn ? <Video /> : <VideoOff />}
         </button>
@@ -124,7 +126,7 @@ const VideoPreview = ({
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 export default VideoPreview
