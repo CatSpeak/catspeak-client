@@ -5,15 +5,18 @@ import {
   useSearchParams,
   ScrollRestoration,
 } from "react-router-dom"
-import HeaderBar from "../../shared/components/Header/HeaderBar"
+import MainHeader from "../../shared/components/Header/MainHeader"
 import Footer from "../../shared/components/Footer"
 import Auth from "@/features/auth/components"
 import AuthModalContext from "@/shared/context/AuthModalContext"
-import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-
+import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
+import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
+import { useSidebar } from "@/shared/context/SidebarContext"
 
 const MainLayout = ({ showHeader = true, showFooter = true }) => {
+  const { isMobileSidebarOpen, setIsMobileSidebarOpen, isSidebarExpanded, setIsSidebarExpanded } = useSidebar()
+
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
@@ -116,13 +119,22 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
           />
         )}
 
-        <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
-          <Outlet />
-        </main>
+        <div 
+          className={`flex flex-col flex-1 min-w-0 transition-all duration-300 relative z-10 ${
+            !isLandingPage ? (isSidebarExpanded ? 'lg:ml-[280px]' : 'lg:ml-[80px]') : ''
+          }`}
+        >
+          {showHeader && (
+            <MainHeader onGetStarted={() => openAuthModal("login")} onMenuClick={() => setIsMobileSidebarOpen(true)} />
+          )}
 
-        {/* Footer full width (bên trong tự giới hạn 1200px) */}
-        {showFooter && isLandingPage && <Footer />}
+          <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
+            <Outlet />
+          </main>
 
+          {/* Footer full width */}
+          {showFooter && isLandingPage && <Footer />}
+        </div>
       </div>
 
       <Auth

@@ -6,9 +6,25 @@ export default {
   seeMore: "Xem thêm",
   back: "Quay lại",
   cancel: "Hủy",
+  scrollToTop: "Lên đầu trang",
   toggle: {
     on: "Bật",
     off: "Tắt",
+  },
+  header: {
+    language: "Ngôn ngữ",
+    community: "Cộng đồng",
+    soon: "Sắp có",
+    countries: {
+      vietnam: "Việt Nam",
+      china: "Trung Quốc",
+      english: "Anh",
+    },
+    languages: {
+      vi: "Tiếng Việt",
+      zh: "中文",
+      en: "English",
+    }
   },
   pagination: {
     range: "{{start}}-{{end}} trong số {{total}}",
@@ -16,9 +32,20 @@ export default {
   nav: {
     home: "Trang chủ",
     rooms: "Phòng",
-    community: "Cộng đồng",
+    community: "Trang chủ",
     catSpeak: "Cat Speak",
-    cart: "Khóa học",
+    catSpeakNews: "Bản tin Cat Speak",
+    worldNews: "Bản tin thế giới",
+    reels: "Reels",
+    video: "Video",
+    calendar: "Lịch",
+    cart: "Giỏ hàng",
+    courses: "Khóa học",
+    allCourses: "Các khóa học",
+    myCourses: "Khóa học của tôi",
+    messages: "Tin nhắn",
+    settings: "Thiết lập",
+    help: "Trợ giúp",
     connect: "Cá nhân",
     workspace: "Nhà của bạn",
   },

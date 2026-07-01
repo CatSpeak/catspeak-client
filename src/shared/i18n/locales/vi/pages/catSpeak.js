@@ -112,7 +112,7 @@ export default {
     endedEvent: "Sự kiện đã kết thúc",
     allActiveChallengesDesc: "Khám phá và tham gia tất cả các thử thách đang diễn ra từ cộng đồng Cat Speak.",
     allPastChallengesDesc: "Xem lại tất cả các thử thách đã kết thúc và những video xuất sắc nhất.",
-    joinActiveChallengeDesc: "Hãy tham gia và quay video Reels tương tác của bạn ngay!",
+    joinActiveChallengeDesc: "Hãy tham gia và quay Thước phim tương tác của bạn ngay!",
     pastChallengeDesc: "Thử thách này đã kết thúc. Xem các bài nộp xuất sắc.",
     learnMore: "Tìm hiểu thêm",
     votingClosed: "Đã đóng cổng bình chọn",
@@ -124,7 +124,7 @@ export default {
     finalRanking: "Bảng chung cuộc",
     noRankings: "Chưa có xếp hạng nào",
     viewFullRanking: "Xem toàn bộ xếp hạng",
-    noReelsFound: "Không tìm thấy Reels nào",
+    noReelsFound: "Không tìm thấy Thước phim nào",
     trySelectingDifferentTag: "Hãy thử chọn một thẻ khác hoặc quay lại sau.",
     detail: {
       commentsTotal: "bình luận",
@@ -158,7 +158,7 @@ export default {
   sidebar: {
     news: "Bản tin Cat Speak",
     discover: "Khám phá thế giới",
-    reels: "Reels",
+    reels: "Thước phim",
     mail: "Thư",
     calendar: "Lịch",
     settings: "Cài đặt",

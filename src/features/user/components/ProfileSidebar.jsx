@@ -18,6 +18,7 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
       path: "/instructor",
       end: false,
       icon: GraduationCap,
+      isHidden: true, // Temporarily hidden as it lacks content
     },
     {
       label: t.profile?.sidebar?.organization,
@@ -31,6 +32,7 @@ const ProfileSidebar = ({ onClose, variant = "vertical" }) => {
       path: "/setting",
       end: false,
       icon: Settings,
+      isHidden: true, // Temporarily hidden as it lacks content
     },
   ].filter((item) => !item.isHidden)
 

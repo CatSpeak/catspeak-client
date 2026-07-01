@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
-import InteractiveCard from "@/shared/components/ui/InteractiveCard"
-import { Clock, Users, Link, Bookmark, Lock } from "lucide-react"
+import { motion } from "framer-motion"
+import { Clock, Users, Link as LinkIcon, Bookmark, Lock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
@@ -14,6 +14,10 @@ import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import Modal from "@/shared/components/ui/Modal"
 import RoomFullModal from "./RoomFullModal"
 import meetingFallbackImage from "@/shared/assets/images/rooms/meeting.jpeg"
+import TQThumbnail from "@/shared/assets/images/rooms/TQ - Thumbnail.png"
+import { getTopicIcon } from "../utils/getTopicIcon"
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 
 const RoomCard = ({ room }) => {
   const [searchParams] = useSearchParams()
@@ -77,116 +81,85 @@ const RoomCard = ({ room }) => {
 
   return (
     <>
-      <div
-        style={{
-          fontFamily: "var(--font-primary)",
-          WebkitFontSmoothing: "antialiased",
-        }}
-        className="h-full w-full"
-      >
-        <InteractiveCard
+        <Animated3DCard
           onClick={handleRoomClick}
+          style={{
+            fontFamily: "var(--font-primary)",
+            WebkitFontSmoothing: "antialiased",
+          }}
           className="h-full w-full"
-          innerClassName="h-full w-full"
+          containerClassName="h-full w-full"
         >
-          {/* Cover Image Section */}
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-black/5">
-          {/* Blurred Background Image */}
-          <div
-            className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
-            style={{ backgroundImage: `url(${room.thumbnailUrl || meetingFallbackImage})` }}
-          />
-
+        {/* Cover Image Section */}
+        <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden border-b border-[#e5e5e5]">
           <img
-            src={room.thumbnailUrl || meetingFallbackImage}
+            src={room.thumbnailUrl || TQThumbnail}
             alt="Room Cover"
-            className="relative z-10 h-full w-full object-contain transition-transform duration-500"
+            className="h-full w-full object-cover"
           />
 
-          {/* Subtle overlay */}
-          <div className="absolute inset-0 z-10 bg-black/5 pointer-events-none" />
-
-          {/* Top Overlay: Tags & Bookmark */}
-          <div className="absolute z-20 left-4 top-4 right-14 flex flex-wrap gap-2">
+          {/* Top Left: Badges */}
+          <div className="absolute left-3 top-3 flex items-center">
             {room.requiredLevel && (
-              <span className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+              <div className="flex items-center justify-center h-7 px-3 bg-cath-red-800 text-xs font-bold text-white rounded-md z-0 shadow-sm">
                 {room.requiredLevel}
-              </span>
+              </div>
             )}
-            {room?.topic &&
-              room.topic.split(",").map((t_topic) => {
-                const trimmed = t_topic.trim()
-                return (
-                  <span
-                    key={trimmed}
-                    className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
-                  >
-                    {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
-                      trimmed}
-                  </span>
-                )
-              })}
+            <div className={`flex items-center justify-center h-8 w-8 bg-cath-red-800 rounded-full border-2 border-white shadow-sm z-10 ${room.requiredLevel ? '-ml-2' : ''}`}>
+              {getTopicIcon(room.topic)}
+            </div>
           </div>
 
           {/* Private room lock badge */}
           {isPrivate && (
-            <div className="absolute z-20 right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
+            <div className="absolute right-14 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
               <Lock size={14} className="text-white" />
             </div>
           )}
 
-          {/* <div
-            className="absolute right-2 top-2 z-20 flex h-10 w-10 flex-col items-center justify-center transition-all duration-300"
+          {/* Bookmark Badge */}
+          <div
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 shadow-sm"
             onClick={handleBookmarkClick}
           >
-            <Bookmark className="drop-shadow-md transition-all duration-200 text-white hover:text-gray-200" />
-          </div> */}
+            <Bookmark size={18} className="text-cath-red-800 fill-cath-red-800/10" />
+          </div>
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-1 flex-col p-3">
-          {/* Title */}
-          <h3 className="text-base font-bold line-clamp-1">{translatedName}</h3>
-          {/* Room Link/Code */}
-          <div className="mb-2 flex items-center gap-2">
-            <Link size={14} className="text-yellow-500" />
-            <span className="text-sm font-medium text-yellow-500">
-              {roomCode}
-            </span>
+        <div className="flex flex-1 flex-col p-4 pb-4">
+          {/* Title & Link */}
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">{translatedName}</h3>
+            <LinkIcon size={20} className="text-cath-red-800 shrink-0 mt-0.5" />
           </div>
 
-          {/* Divider */}
-          <div className="mb-3 h-px w-full bg-[#e5e5e5]" />
-
           {/* Footer Info */}
-          <div className="mt-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+          <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">
             {/* Participants */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-[#E5E5E5]">
-                <Users size={16} className="text-cath-red-700" />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
+                <Users size={14} className="text-[#8B5A2B]" />
               </div>
-              <span className="text-sm whitespace-nowrap">
+              <span className="text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
                 {room.maxParticipants === null
-                  ? `${room.currentParticipantCount || 0} ${t.rooms.participants}`
-                  : `${room.currentParticipantCount || 0}/${room.maxParticipants} ${t.rooms.participants}`}
+                  ? `${room.currentParticipantCount || 0} ${t.rooms.people}`
+                  : `${room.currentParticipantCount || 0}/${room.maxParticipants} ${t.rooms.people}`}
               </span>
             </div>
 
             {/* Date/Time */}
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-[#E5E5E5]">
-                <Clock size={16} className="text-cath-red-700" />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
+                <Clock size={14} className="text-[#8B5A2B]" />
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                {/* <span>{dateStr}</span> */}
+              <div className="flex items-center text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
                 <span>{timeStr}</span>
               </div>
             </div>
           </div>
         </div>
-        </InteractiveCard>
-      </div>
-
+        </Animated3DCard>
       <InDevelopmentModal
         open={showDevModal}
         onCancel={() => setShowDevModal(false)}

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from "react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import ProfileSidebar from "../components/ProfileSidebar"
 import { motion, useAnimation, useMotionValue, useSpring } from "framer-motion"
 import SharedLayout from "@/shared/components/layout/SharedLayout"
 
