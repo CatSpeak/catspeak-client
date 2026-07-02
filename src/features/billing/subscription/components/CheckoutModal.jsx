@@ -4,8 +4,10 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { Clock } from "lucide-react"
 import payosLogo from "@/shared/assets/icons/logo/payos-logo.png"
 import stripeLogo from "@/shared/assets/icons/logo/stripe-logo.png"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const CheckoutModal = ({ open, onClose, plan, onConfirm, isProcessing }) => {
+  const { t } = useLanguage()
   const [selectedMethod, setSelectedMethod] = useState("payos")
 
   if (!plan) return null
@@ -21,13 +23,13 @@ const CheckoutModal = ({ open, onClose, plan, onConfirm, isProcessing }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title="Thanh toán Gói Đăng Ký"
+      title={t.billing.checkoutModal.title}
       className="max-w-md"
     >
       <form onSubmit={handleConfirm} className="pb-4">
         <div className="mb-6 bg-[#F8F8F8] p-4 rounded-xl border border-[#E5E5E5]">
           <h3 className="font-semibold text-lg mb-1">{plan.name}</h3>
-          <p className="text-[#7A7574] text-sm mb-3">Bạn đang chọn nâng cấp lên {plan.name}.</p>
+          <p className="text-[#7A7574] text-sm mb-3">{t.billing.checkoutModal.subtitle.replace("{{planName}}", plan.name)}</p>
           <div className="flex items-end gap-1">
             <span className="text-2xl font-bold text-cath-red-700">{formattedPrice}</span>
             <span className="text-[#7A7574] text-sm mb-1">/{plan.interval}</span>
@@ -35,7 +37,7 @@ const CheckoutModal = ({ open, onClose, plan, onConfirm, isProcessing }) => {
         </div>
 
         <div className="mb-8">
-          <label className="block font-semibold mb-3">Phương thức thanh toán</label>
+          <label className="block font-semibold mb-3">{t.billing.checkoutModal.paymentMethod}</label>
           
           <div className="space-y-3">
             {/* PayOS Method (Active) */}
@@ -54,7 +56,7 @@ const CheckoutModal = ({ open, onClose, plan, onConfirm, isProcessing }) => {
                 </div>
                 <div>
                   <p className="font-semibold">PayOS</p>
-                  <p className="text-xs text-[#7A7574]">Chuyển khoản ngân hàng / QR Code</p>
+                  <p className="text-xs text-[#7A7574]">{t.billing.checkoutModal.payosSub}</p>
                 </div>
               </div>
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
@@ -76,12 +78,12 @@ const CheckoutModal = ({ open, onClose, plan, onConfirm, isProcessing }) => {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-500">Stripe</p>
-                  <p className="text-xs text-gray-400">Thẻ Tín Dụng / Thẻ Ghi Nợ</p>
+                  <p className="text-xs text-gray-400">{t.billing.checkoutModal.stripeSub}</p>
                 </div>
               </div>
               <div className="absolute right-4 flex items-center gap-1.5 px-2.5 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-bold uppercase tracking-wider">
                 <Clock size={10} />
-                Sắp ra mắt
+                {t.billing.checkoutModal.comingSoon}
               </div>
             </button>
           </div>
@@ -95,14 +97,14 @@ const CheckoutModal = ({ open, onClose, plan, onConfirm, isProcessing }) => {
             onClick={onClose}
             disabled={isProcessing}
           >
-            Hủy
+            {t.billing.checkoutModal.cancel}
           </PillButton>
           <PillButton
             className="flex-1"
             type="submit"
             loading={isProcessing}
           >
-            Xác nhận & Thanh toán
+            {t.billing.checkoutModal.confirm}
           </PillButton>
         </div>
       </form>

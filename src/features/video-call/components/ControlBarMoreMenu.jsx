@@ -10,6 +10,7 @@ import {
   UserCircle,
   Captions,
   Check,
+  RefreshCcw,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -38,6 +39,9 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     setShowCC,
     isAISession,
     enterPiP,
+    lkRoom,
+    showTroubleshoot,
+    setShowTroubleshoot,
   } = useGlobalVideoCall()
 
   const {
@@ -129,6 +133,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
 
                       <div className="border-t border-[#E5E5E5]"></div>
 
+
                       <button
                         onClick={() => {
                           setShowAvatarPicker(!showAvatarPicker)
@@ -152,7 +157,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                         {t?.rooms?.videoCall?.backgroundsAndEffects ||
                           "Backgrounds and effects"}
                       </button>
-
                       {"documentPictureInPicture" in window && (
                         <button
                           onClick={() => {
@@ -162,7 +166,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                           className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                         >
                           <MonitorUp size={20} />
-                          {t?.rooms?.videoCall?.pictureInPicture || "Picture-in-Picture"}
+                          {t?.rooms?.videoCall?.pictureInPicture ||
+                            "Picture-in-Picture"}
                         </button>
                       )}
 
@@ -172,6 +177,17 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                       >
                         <Copy size={20} />
                         {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowTroubleshoot(!showTroubleshoot)
+                          setShowMoreMenu(false)
+                        }}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-left"
+                      >
+                        <RefreshCcw size={20} className="shrink-0" />
+                        <span>{t?.rooms?.videoCall?.reconnect || "Troubleshoot connection"}</span>
                       </button>
                     </div>
                   </FluentAnimation>

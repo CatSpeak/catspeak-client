@@ -18,11 +18,13 @@ const RoomHeader = () => {
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
-            <img
-              src={MainLogo}
-              alt="Cat Speak logo"
-              className="h-10 w-auto"
-            />
+            <Link to={`/${lang || 'en'}/community`} target="_blank" rel="noopener noreferrer">
+              <img
+                src={MainLogo}
+                alt="Cat Speak logo"
+                className="h-10 w-auto"
+              />
+            </Link>
           </div>
         </div>
         <div>

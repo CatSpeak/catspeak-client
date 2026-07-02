@@ -82,6 +82,7 @@ const VirtualBackgroundModal = ({
     }
   }, [lkVideoTrack, localStream])
 
+
   const handleApply = (url) => {
     // Automatically turn on camera if an effect is selected while camera is off
     if (!cameraOn && url !== null && onToggleCam) {
