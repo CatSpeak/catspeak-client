@@ -1,29 +1,26 @@
-import React from "react"
-import { useLanguage } from "@/shared/context/LanguageContext.jsx"
-
+import React from "react";
+import { useLanguage } from "@/shared/context/LanguageContext.jsx";
 
 const CommunitySection = ({ languages }) => {
-  const { t } = useLanguage()
-  const footerText = t.footer
+  const { t } = useLanguage();
+  const footerText = t.footer;
 
   return (
-    <div className="flex-1 text-center lg:text-left">
-      <h3
-        className="font-bold uppercase tracking-wide text-lg"
-      >
+    <div className="flex-1 text-left mt-[2px]">
+
+      <h3 className="font-bold uppercase tracking-wide text-base sm:text-lg">
         {footerText.ourCommunity}
       </h3>
-      <ul className="pt-6 text-white/85 flex flex-row flex-wrap justify-center lg:flex-col lg:justify-start lg:items-start gap-4 lg:gap-2">
+
+      <ul className="pt-4 sm:pt-6 text-white/85 flex flex-col justify-start items-start gap-3 lg:gap-2">
         {languages.map((lang) => (
           <li key={lang} className="drop-shadow-md">
-            <span className="text-white font-bold text-base">
-              {lang}
-            </span>
+            <span className="font-bold text-sm sm:text-base">{lang}</span>
           </li>
         ))}
       </ul>
     </div>
-  )
-}
+  );
+};
 
-export default CommunitySection
+export default CommunitySection;

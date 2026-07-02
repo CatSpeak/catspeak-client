@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { VietNam, China, USA } from "@/shared/assets/icons/flags"
-import useClickOutside from "@/shared/hooks/useClickOutside"
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FluentAnimation } from "@/shared/components/ui/animations";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { VietNam, China, USA } from "@/shared/assets/icons/flags";
+import useClickOutside from "@/shared/hooks/useClickOutside";
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
  * Nôm Vietnamese is not listed here — when you add it for development, use e.g.
@@ -14,25 +14,25 @@ const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
   { key: "zh", label: "中文", flag: China },
   { key: "en", label: "English", flag: USA },
-]
+];
 
 const LanguageSwitcher = ({ className = "" }) => {
-  const { language, setLanguage, t } = useLanguage()
-  const [open, setOpen] = useState(false)
-  const dropdownRef = useRef(null)
+  const { language, setLanguage, t } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  useClickOutside(dropdownRef, () => setOpen(false))
+  useClickOutside(dropdownRef, () => setOpen(false));
 
-  const handleToggle = () => setOpen((prev) => !prev)
+  const handleToggle = () => setOpen((prev) => !prev);
 
   const handleLanguageSelect = (lang) => {
-    setLanguage(lang)
-    setOpen(false)
-  }
+    setLanguage(lang);
+    setOpen(false);
+  };
 
-  const current = LANGUAGES.find((l) => l.key === language) || LANGUAGES[0]
+  const current = LANGUAGES.find((l) => l.key === language) || LANGUAGES[0];
   const displayLabel =
-    t.header?.languages?.[language] || t.header?.languages?.en || current.label
+    t.header?.languages?.[language] || t.header?.languages?.en || current.label;
 
   return (
     <div
@@ -68,7 +68,7 @@ const LanguageSwitcher = ({ className = "" }) => {
             >
               <div className="p-2 flex flex-col gap-1" role="listbox" aria-label="Language">
                 {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => {
-                  const isActive = language === key
+                  const isActive = language === key;
 
                   return (
                     <button
@@ -86,7 +86,7 @@ const LanguageSwitcher = ({ className = "" }) => {
                         }`}
                     >
                       {isActive && (
-                        <motion.div 
+                        <motion.div
                           layoutId="lang-active-indicator"
                           className="absolute inset-0 rounded-xl bg-gray-500/5 pointer-events-none"
                         />
@@ -116,7 +116,7 @@ const LanguageSwitcher = ({ className = "" }) => {
                         <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-gray-200" />
                       )}
                     </button>
-                  )
+                  );
                 })}
               </div>
             </FluentAnimation>
@@ -124,7 +124,7 @@ const LanguageSwitcher = ({ className = "" }) => {
         )}
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default LanguageSwitcher
+export default LanguageSwitcher;
