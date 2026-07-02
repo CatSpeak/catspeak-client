@@ -122,13 +122,13 @@ const NewsCard = ({ news }) => {
         {hasMedia ? (
           <div
             className="w-full h-full rounded-t-[20px] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
           >
             <Carousel
               images={carouselImages}
               autoPlay
               interval={5000}
               className="w-full h-full rounded-t-[20px]"
+              disableFullscreen
             />
           </div>
         ) : (

@@ -15,6 +15,7 @@ const Carousel = ({
   autoPlay = true,
   interval = 5000,
   objectFit = "cover",
+  disableFullscreen = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
@@ -96,7 +97,7 @@ const Carousel = ({
             <img
               src={image.url}
               alt={image.alt || `Slide ${index}`}
-              onClick={() => !isFullscreen && setIsFullscreen(true)}
+              onClick={() => !isFullscreen && !disableFullscreen && setIsFullscreen(true)}
               className={`relative z-10 w-full h-full transition-all duration-300 ${
                 isFullscreen
                   ? "object-contain cursor-default"
