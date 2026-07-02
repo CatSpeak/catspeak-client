@@ -19,20 +19,20 @@ const PartnerSection = () => {
   const { t } = useLanguage();
 
   return (
-    <section className="w-full py-20 px-6 bg-white">
+    <section className="w-full py-16 lg:py-20 px-6 bg-white">
       <div className="max-w-7xl mx-auto text-center">
-        <h2 className="text-3xl font-bold text-[#990011] mb-12">
-          {t.home?.partnerSection?.title }
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#990011] mb-8 lg:mb-12">
+          {t.home?.partnerSection?.title}
         </h2>
 
-        <div className="flex flex-wrap items-center justify-center gap-10">
+        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 lg:gap-10">
           {partners.map((partner, i) => (
             <div key={i} className="flex items-center justify-center">
-              <div className="w-[190px] h-[190px] rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-250 hover:-translate-y-2.5 hover:scale-105 hover:shadow-xl overflow-hidden">
+              <div className="w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] md:w-[160px] md:h-[160px] lg:w-[190px] lg:h-[190px] rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 overflow-hidden">
                 <img
                   src={partner.image}
                   alt={partner.alt}
-                  className="w-full h-full object-contain p-3"
+                  className="w-full h-full object-contain p-2 sm:p-3"
                 />
               </div>
             </div>

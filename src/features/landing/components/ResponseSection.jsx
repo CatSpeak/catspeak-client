@@ -53,10 +53,7 @@ const ResponseSection = () => {
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative w-full py-40 px-6 overflow-hidden"
-    >
+    <section ref={sectionRef} className="relative w-full py-40 px-6 ">
       {/* Background decoration — reveal từ trái qua phải theo scroll */}
       <motion.img
         src={Element5}
@@ -95,7 +92,7 @@ const ResponseSection = () => {
         </div>
 
         {/* Right: Sliding cards */}
-        <div className="lg:col-span-2 overflow-hidden">
+        <div className="lg:col-span-2  ">
           <div
             ref={trackRef}
             className="flex gap-6 transition-transform duration-450 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform"

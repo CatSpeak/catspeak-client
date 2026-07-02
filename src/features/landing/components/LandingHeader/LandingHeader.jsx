@@ -28,7 +28,7 @@ const LandingHeader = ({ onGetStarted }) => {
           >
             <Menu />
           </button>
-          <div className="flex min-w-0 shrink-0 items-center lg:w-[160px]">
+          <div className="flex min-w-0 shrink-0 items-center lg:w-[160px] ">
             <LandingHeaderLogo />
           </div>
         </div>

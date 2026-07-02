@@ -3,6 +3,7 @@ import React from "react";
 import { Tower, Mountain, FooterBG } from "@/shared/assets/images/home/footer";
 import { IconLogo } from "@/shared/assets/icons/logo";
 import { useLanguage } from "@/shared/context/LanguageContext.jsx";
+import { LandingPageIcon } from "@/features/landing/assets";
 
 import CommunitySection from "./CommunitySection";
 import ContactSection from "./ContactSection";
@@ -57,10 +58,19 @@ const Footer = () => {
 
             <div className="flex flex-col justify-between w-full lg:col-span-12 gap-8 lg:gap-4">
               <div className="w-full flex flex-col lg:flex-row justify-between items-start lg:items-start gap-0 lg:gap-8 px-0 lg:px-8 text-white pt-4 lg:pt-10">
-                <div className="w-full flex flex-row justify-between items-start gap-4">
-                  <CommunitySection languages={languages} />
-                  <div className="lg:hidden">
-                    <FooterBottom mode="mobile-policies" />
+                <div className="w-full flex flex-col">
+                  <div className="w-full pb-6 lg:pb-8">
+                    <img
+                      src={LandingPageIcon}
+                      alt="logo"
+                      className="w-16 h-16 sm:w-20 sm:h-20 lg:w-[84px] lg:h-[84px]"
+                    />
+                  </div>
+                  <div className="w-full flex flex-row justify-between items-start gap-4">
+                    <CommunitySection languages={languages} />
+                    <div className="lg:hidden w-1/2 pt-[2px]">
+                      <FooterBottom mode="mobile-policies" />
+                    </div>
                   </div>
                 </div>
                 <div className="w-[45%] hidden lg:block">

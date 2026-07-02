@@ -22,31 +22,31 @@ const FooterBottom = ({ mode }) => {
   if (mode === "mobile-policies") {
     return (
       <>
-        <div className="flex flex-col items-end gap-2 text-right pt-4">
+        <div className="flex flex-col items-end gap-2">
           <button
             type="button"
-            className="text-white hover:text-gray-200 transition text-sm whitespace-nowrap"
+            className="text-white text-right hover:text-gray-200 transition text-sm "
             onClick={handleOpenPolicy(footerText.policies.privacy)}
           >
             {footerText.policies.privacy}
           </button>
           <button
             type="button"
-            className="text-white hover:text-gray-200 transition text-sm whitespace-nowrap"
+            className="text-white text-right hover:text-gray-200 transition text-sm "
             onClick={handleOpenPolicy(footerText.policies.terms)}
           >
             {footerText.policies.terms}
           </button>
           <button
             type="button"
-            className="text-white hover:text-gray-200 transition text-sm whitespace-nowrap"
+            className="text-white text-right hover:text-gray-200 transition text-sm "
             onClick={handleOpenPolicy(footerText.policies.copyright)}
           >
             {footerText.policies.copyright}
           </button>
           <button
             type="button"
-            className="text-white hover:text-gray-200 transition text-sm whitespace-nowrap"
+            className="text-white  text-right hover:text-gray-200 transition text-sm "
             onClick={handleOpenPolicy(footerText.policies.payment)}
           >
             {footerText.policies.payment}
@@ -71,18 +71,14 @@ const FooterBottom = ({ mode }) => {
             className="hover:text-gray-100 transition"
             onClick={handleOpenPolicy(footerText.policies.privacy)}
           >
-            <span className="text-sm whitespace-nowrap">
-              {footerText.policies.privacy}
-            </span>
+            <span className="text-sm ">{footerText.policies.privacy}</span>
           </button>
           <button
             type="button"
             className="hover:text-gray-100 transition"
             onClick={handleOpenPolicy(footerText.policies.terms)}
           >
-            <span className="text-sm whitespace-nowrap">
-              {footerText.policies.terms}
-            </span>
+            <span className="text-sm ">{footerText.policies.terms}</span>
           </button>
         </div>
 
@@ -100,18 +96,14 @@ const FooterBottom = ({ mode }) => {
             className="hover:text-gray-100 transition"
             onClick={handleOpenPolicy(footerText.policies.payment)}
           >
-            <span className="text-sm whitespace-nowrap">
-              {footerText.policies.payment}
-            </span>
+            <span className="text-sm ">{footerText.policies.payment}</span>
           </button>
           <button
             type="button"
             className="hover:text-gray-100 transition"
             onClick={handleOpenPolicy(footerText.policies.copyright)}
           >
-            <span className="text-sm whitespace-nowrap">
-              {footerText.policies.copyright}
-            </span>
+            <span className="text-sm ">{footerText.policies.copyright}</span>
           </button>
         </div>
       </div>

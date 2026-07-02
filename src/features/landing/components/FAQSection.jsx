@@ -1,9 +1,5 @@
-import {
-  Element2,
-  Element3,
-  Element5,
-  Element6,
-} from "@/features/landing/assets/index.jsx";
+import { Element3, Element6 } from "@/features/landing/assets/index.jsx";
+import { FluentAnimation } from "@/shared/components/ui/animations";
 import { useLanguage } from "@/shared/context/LanguageContext.jsx";
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
@@ -13,7 +9,6 @@ const FAQSection = () => {
 
   // Handle question expansion - Independent toggle for each question
   const toggleQuestion = (index) => {
-    console.log(Element5);
     setExpandedQuestions((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(index)) {
@@ -26,7 +21,7 @@ const FAQSection = () => {
   };
 
   return (
-    <div className="relative w-full px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24 overflow-visible">
+    <div className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24 overflow-visible">
       <img
         src={Element6}
         alt=""
@@ -35,7 +30,7 @@ const FAQSection = () => {
       />
       <div className="mx-auto max-w-screen-xl relative z-10 px-0 sm:px-4">
         {/* Main Background Container */}
-        <div className="relative rounded-l-[40px] rounded-r-[0px] md:rounded-r-[40px] border border-gray-300 md:border-r-0 lg:border-r bg-[#FFEDEB] overflow-visible min-h-[500px]">
+        <div className="relative rounded-[40px] border border-gray-300 md:border-r-0 lg:border-r bg-[#FFEDEB] overflow-visible min-h-[500px]">
           {/* Inner Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 sm:p-10 md:p-12 lg:p-16 h-full relative z-20">
             {/* Left Column: Titles and Description */}
@@ -102,21 +97,15 @@ const FAQSection = () => {
                         </div>
                       </button>
 
-                      <div
-                        className={`grid transition-all duration-500 ease-in-out ${
-                          isExpanded
-                            ? "grid-rows-[1fr] opacity-100 mt-4 mb-2"
-                            : "grid-rows-[0fr] opacity-0"
-                        }`}
-                      >
-                        <div className="overflow-hidden">
-                          <div
-                            className={`bg-[#990011] rounded-2xl rounded-tr-sm p-5 md:p-6 text-sm md:text-base leading-relaxed text-white text-left shadow-lg transition-all duration-500 ${
-                              isExpanded
-                                ? "translate-y-0 scale-100"
-                                : "-translate-y-2 scale-[0.98]"
-                            }`}
-                          >
+                      {isExpanded && (
+                        <FluentAnimation
+                          animationKey={`faq-answer-${originalIndex}`}
+                          direction="up"
+                          distance={12}
+                          duration={0.24}
+                          className="mt-4 mb-2 w-full"
+                        >
+                          <div className="bg-[#990011] rounded-2xl  p-5 md:p-6 text-sm md:text-base leading-relaxed text-white text-left shadow-lg">
                             {item.answer.split("\n").map((line, idx) => (
                               <span key={idx}>
                                 {line}
@@ -126,8 +115,8 @@ const FAQSection = () => {
                               </span>
                             ))}
                           </div>
-                        </div>
-                      </div>
+                        </FluentAnimation>
+                      )}
                     </div>
                   );
                 })}
