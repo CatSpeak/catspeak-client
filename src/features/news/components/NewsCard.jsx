@@ -1,15 +1,14 @@
-import React, { useState, useMemo, useEffect, useRef } from "react"
+import React, { useState, useMemo, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
-import { COLORS } from "@/shared/constants/constants"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
+import { COLORS } from "@/shared/constants/constants"
 import {
+  Share,
+  Bookmark,
   ThumbsUp,
   Heart,
   Smile,
-  MessageCircle,
-  Share2,
+  MessageSquare,
   Eye,
 } from "lucide-react"
 import {
@@ -17,20 +16,54 @@ import {
   useSharePostMutation,
 } from "@/store/api/postsApi"
 import ShareModal from "./ShareModal"
-
+import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
+import Carousel from "@/shared/components/ui/Carousel"
 import { getImageUrl } from "@/shared/utils/imageUtils"
-import InteractiveCard from "@/shared/components/ui/InteractiveCard"
+import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
 
+/**
+ * NewsCard — Figma "Card_Bản tin Catspeak" layout.
+ *
+ * Structure (top → bottom):
+ *   1. Image area with media carousel + Share / Bookmark overlay
+ *   2. Title + date
+ *   3. Stats row: likes · comments · views
+ *   4. Share modal + reactions popover
+ */
 const NewsCard = ({ news }) => {
   const navigate = useNavigate()
   const { lang } = useParams()
   const currentLang = lang || "en"
   const { t } = useLanguage()
+  const newsCard = t.news?.newsCard
 
+  /* ── API mutations ─────────────────────────────────────────────── */
   const [reactToPost] = useReactToPostMutation()
   const [sharePost] = useSharePostMutation()
+
+  /* ── Local state ───────────────────────────────────────────────── */
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
+  const [showReactions, setShowReactions] = useState(false)
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false)
+  const holdTimer = useRef(null)
+
+  /* ── Derived ───────────────────────────────────────────────────── */
+  const hasMedia = news.media && news.media.length > 0
+
+  const fallbackColor = useMemo(() => {
+    const seed = news.postId || (news.title ? news.title.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0)
+    const index =
+      typeof seed === "number"
+        ? seed % COLORS.length
+        : seed.length % COLORS.length
+    return COLORS[index].value
+  }, [news.postId, news.title])
+
+  /* ── Handlers ──────────────────────────────────────────────────── */
+  const handleCardClick = () => {
+    navigate(`/${currentLang}/cat-speak/news/${news.slug || news.postId}`)
+  }
 
   const handleShare = async (e) => {
     e.stopPropagation()
@@ -61,247 +94,215 @@ const NewsCard = ({ news }) => {
     reactToPost({ postId: news.postId, type })
   }
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0)
-  const [imageError, setImageError] = useState(false)
-  const [showReactions, setShowReactions] = useState(false)
-  const holdTimer = useRef(null)
-
   const handleTouchStart = () => {
-    holdTimer.current = setTimeout(() => {
-      setShowReactions(true)
-    }, 400)
+    holdTimer.current = setTimeout(() => setShowReactions(true), 400)
   }
 
   const handleTouchEnd = () => {
     if (holdTimer.current) clearTimeout(holdTimer.current)
   }
 
-  const newsCard = t.news?.newsCard
+  /* ── Derived: carousel images ────────────────────────────────────── */
+  const carouselImages = useMemo(() => {
+    if (!hasMedia) return []
+    return news.media.map((item) => ({
+      url: getImageUrl(item.mediaUrl),
+      alt: news.title,
+    }))
+  }, [hasMedia, news.media, news.title])
 
-  const handleCardClick = () => {
-    navigate(`/${currentLang}/cat-speak/news/${news.postId}`)
-  }
-
-  const hasMedia = news.media && news.media.length > 0
-
-  useEffect(() => {
-    if (hasMedia && news.media.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentMediaIndex((prev) => (prev + 1) % news.media.length)
-      }, 10000)
-      return () => clearInterval(interval)
-    }
-  }, [hasMedia, news.media?.length])
-
-  const fallbackColor = useMemo(() => {
-    const seed = news.postId || Math.floor(Math.random() * COLORS.length)
-    const index =
-      typeof seed === "number"
-        ? seed % COLORS.length
-        : seed.length % COLORS.length
-    return COLORS[index].value
-  }, [news.postId])
-
+  /* ── Render ────────────────────────────────────────────────────── */
   return (
-    <>
-      <InteractiveCard onClick={handleCardClick} className="mb-2">
-        {/* Thumbnail */}
-        <div className="relative w-full bg-gray-100 overflow-hidden">
-          {hasMedia && !imageError ? (
-            <div
-              className="flex transition-transform duration-700 ease-out"
-              style={{ transform: `translateX(-${currentMediaIndex * 100}%)` }}
-            >
-              {news.media.map((item) => {
-                const imageUrl = getImageUrl(item.mediaUrl)
-                return (
-                  <div
-                    key={item.postMediaId}
-                    className="w-full h-full flex-shrink-0 relative"
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={news.title}
-                      className="w-full h-auto object-cover"
-                      onError={() => setImageError(true)}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <div
-              className="w-full aspect-[4/3] flex flex-col items-center justify-center p-6"
-              style={{ backgroundColor: fallbackColor }}
-            >
-              <span className="text-white/30 font-bold text-3xl select-none mb-4 text-center leading-tight">
-                {news.title.substring(0, 20)}
-              </span>
-            </div>
-          )}
-
-          {/* Media indicator for multiple images */}
-          {hasMedia && news.media.length > 1 && (
-            <div className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-md">
-              {currentMediaIndex + 1} / {news.media.length}
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="flex flex-col">
-          <div className="flex flex-col flex-1 min-w-0 p-3">
-            {/* Title above */}
-            <h3 className="font-medium line-clamp-2 transition-colors">
-              {news.title}
-            </h3>
-
-            {/* Date */}
-            <div className="flex items-center gap-1.5 text-sm text-[#606060] mt-1">
-              {news.viewCount !== undefined && (
-                <>
-                  <span title={t.news?.newsDetail?.views || "views"}>
-                    {news.viewCount} {t.news?.newsDetail?.views || "views"}
-                  </span>
-                  <span>·</span>
-                </>
-              )}
-              <span>
-                {getTranslatedTimeAgo(news.createDate, newsCard?.timeAgo)}
-              </span>
-            </div>
-          </div>
-
-          {/* Below are the rest of the buttons to interact */}
+    <div
+      onClick={handleCardClick}
+      className="flex flex-col bg-white rounded-[20px] shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)] overflow-hidden cursor-pointer"
+    >
+      {/* ── Image area ───────────────────────────────────────────── */}
+      <div className="relative flex-1 min-h-0 p-2.5 rounded-t-[20px]">
+        {hasMedia ? (
           <div
-            className="flex items-center text-[#606060] text-sm border-t border-[#e5e5e5]"
-            onPointerDown={(e) => e.stopPropagation()}
+            className="w-full h-full rounded-t-[20px] overflow-hidden"
           >
-            <div
-              className="group/reactions relative flex items-center"
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              onTouchMove={handleTouchEnd}
-              onMouseLeave={() => setShowReactions(false)}
-              onContextMenu={(e) => {
-                if (window.innerWidth < 1024) e.preventDefault()
-              }}
-            >
-              {/* Main Interactive Button */}
-              <button
-                onClick={(e) => {
-                  const type = news.currentUserReaction
-                    ? news.currentUserReaction
-                    : "Like"
-                  handleReact(e, type)
-                }}
-                className={`flex items-center justify-center gap-2 px-4 h-12 transition-colors hover:bg-[#f2f2f2] ${
-                  news.currentUserReaction === "Love"
-                    ? "text-red-500"
-                    : news.currentUserReaction === "Haha"
-                      ? "text-yellow-500"
-                      : news.currentUserReaction === "Like"
-                        ? "text-blue-600"
-                        : ""
-                }`}
-              >
-                {news.currentUserReaction === "Love" ? (
-                  <Heart className="text-red-700 fill-red-400" />
-                ) : news.currentUserReaction === "Haha" ? (
-                  <Smile className="text-yellow-700 fill-yellow-400" />
-                ) : (
-                  <ThumbsUp
-                    className={
-                      news.currentUserReaction === "Like"
-                        ? "text-blue-700 fill-blue-400"
-                        : ""
-                    }
-                  />
-                )}
-                <span className="font-semibold text-base whitespace-nowrap">
-                  {news.totalReactions || 0}
-                </span>
-              </button>
-
-              {/* Reactions Popover */}
-              <div
-                className={`absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
-                ${showReactions ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"}`}
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowReactions(false)
-                    handleReact(e, "Like")
-                  }}
-                  className="p-2 hover:-translate-y-1 transition-transform hover:bg-blue-50 rounded-full"
-                  title="Like"
-                >
-                  <ThumbsUp className="text-blue-700 fill-blue-400" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowReactions(false)
-                    handleReact(e, "Love")
-                  }}
-                  className="p-2 hover:-translate-y-1 transition-transform hover:bg-red-50 rounded-full"
-                  title="Love"
-                >
-                  <Heart className="text-red-700 fill-red-400" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowReactions(false)
-                    handleReact(e, "Haha")
-                  }}
-                  className="p-2 hover:-translate-y-1 transition-transform hover:bg-yellow-50 rounded-full"
-                  title="Haha"
-                >
-                  <Smile className="text-yellow-700 fill-yellow-400" />
-                </button>
-              </div>
-            </div>
-
-            <button className="flex items-center justify-center gap-2 px-4 h-12 text-[#606060] transition-colors hover:bg-[#f2f2f2]">
-              <MessageCircle className="text-[#606060] shrink-0" />
-              <span className="font-semibold text-base whitespace-nowrap">
-                {news.totalComments || 0}
-              </span>
-            </button>
-
-            <button
-              onClick={handleShare}
-              className="flex items-center justify-center gap-2 px-4 h-12 text-[#606060] transition-colors hover:bg-[#f2f2f2] ml-auto"
-              title={t.news?.newsDetail?.share || "Share"}
-            >
-              <Share2 className="text-[#606060] shrink-0" />
-            </button>
+            <Carousel
+              images={carouselImages}
+              autoPlay
+              interval={5000}
+              className="w-full h-full rounded-t-[20px]"
+              disableFullscreen
+            />
           </div>
-        </div>
-      </InteractiveCard>
+        ) : (
+          <div
+            className="w-full h-full rounded-t-[20px] flex items-center justify-center p-6"
+            style={{ backgroundColor: fallbackColor }}
+          >
+            <span className="text-white/30 font-bold text-3xl select-none text-center leading-tight">
+              {news.title?.substring(0, 20)}
+            </span>
+          </div>
+        )}
 
+        {/* Overlay action buttons — top-right */}
+        <div
+          className="absolute top-4 right-4 flex gap-2.5 z-10"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={handleShare}
+            className="flex items-center justify-center p-1.5 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+            aria-label="Share"
+          >
+            <Share size={22} strokeWidth={1.5} className="text-[#2e2e2e]" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsDevModalOpen(true)
+            }}
+            className="flex items-center justify-center p-1.5 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+            aria-label="Bookmark"
+          >
+            <Bookmark
+              size={22}
+              strokeWidth={1.5}
+              className="text-[#2e2e2e]"
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Content ──────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-2 px-4 pt-3">
+        <h3 className="font-nunito font-bold text-base leading-[1.4] text-[#1a1a1a] truncate">
+          {news.title}
+        </h3>
+        <p className="font-nunito font-medium text-sm leading-[1.4] text-[#7b7979]">
+          {getTranslatedTimeAgo(news.createDate, newsCard)}
+        </p>
+      </div>
+
+      {/* ── Stats row ────────────────────────────────────────────── */}
       <div
-        onClick={(e) => e.stopPropagation()}
+        className="flex items-end gap-1 px-4 pb-2 pt-1"
         onPointerDown={(e) => e.stopPropagation()}
       >
+        {/* Like / Reactions */}
+        <div className="group/reactions relative flex items-center">
+          <button
+            onClick={(e) => {
+              const type = news.currentUserReaction || "Like"
+              handleReact(e, type)
+            }}
+            className={`flex items-center gap-1 px-1 py-1 rounded-full transition-colors hover:bg-gray-100 ${
+              news.currentUserReaction === "Love"
+                ? "text-red-500"
+                : news.currentUserReaction === "Haha"
+                  ? "text-yellow-500"
+                  : news.currentUserReaction === "Like"
+                    ? "text-blue-600"
+                    : ""
+            }`}
+          >
+            {news.currentUserReaction === "Love" ? (
+              <Heart size={16} strokeWidth={1.5} className="text-red-700 fill-red-400" />
+            ) : news.currentUserReaction === "Haha" ? (
+              <Smile size={16} strokeWidth={1.5} className="text-yellow-700 fill-yellow-400" />
+            ) : (
+              <ThumbsUp
+                size={16}
+                strokeWidth={1.5}
+                className={
+                  news.currentUserReaction === "Like"
+                    ? "text-blue-700 fill-blue-400"
+                    : "text-[#7b7979]"
+                }
+              />
+            )}
+            <span className="font-nunito font-medium text-sm text-[#7b7979]">
+              {news.totalReactions || 0}
+            </span>
+          </button>
+
+          {/* Reactions popover */}
+          <div
+            className={`absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
+            ${showReactions ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"}`}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowReactions(false)
+                handleReact(e, "Like")
+              }}
+              className="p-2 hover:-translate-y-1 transition-transform hover:bg-blue-50 rounded-full"
+              title="Like"
+            >
+              <ThumbsUp size={18} className="text-blue-700 fill-blue-400" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowReactions(false)
+                handleReact(e, "Love")
+              }}
+              className="p-2 hover:-translate-y-1 transition-transform hover:bg-red-50 rounded-full"
+              title="Love"
+            >
+              <Heart size={18} className="text-red-700 fill-red-400" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowReactions(false)
+                handleReact(e, "Haha")
+              }}
+              className="p-2 hover:-translate-y-1 transition-transform hover:bg-yellow-50 rounded-full"
+              title="Haha"
+            >
+              <Smile size={18} className="text-yellow-700 fill-yellow-400" />
+            </button>
+          </div>
+
+          {/* Touch hold for mobile reactions */}
+          <div
+            className="hidden"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchMove={handleTouchEnd}
+            onMouseLeave={() => setShowReactions(false)}
+          />
+        </div>
+
+        {/* Comments */}
+        <button className="flex items-center gap-1 px-1 py-1 rounded-full transition-colors hover:bg-gray-100">
+          <MessageSquare size={16} strokeWidth={1.5} className="text-[#7b7979]" />
+          <span className="font-nunito font-medium text-sm text-[#7b7979]">
+            {news.totalComments || 0}
+          </span>
+        </button>
+
+        {/* Views */}
+        <div className="flex items-center gap-1 px-1 py-1">
+          <Eye size={16} strokeWidth={1.5} className="text-[#7b7979]" />
+          <span className="font-nunito font-medium text-sm text-[#7b7979]">
+            {news.viewCount || 0} lượt xem
+          </span>
+        </div>
+      </div>
+
+      {/* ── Modals ───────────────────────────────────────────────── */}
+      <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
         <ShareModal
           open={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
           shareUrl={shareUrl}
         />
+        <InDevelopmentModal
+          open={isDevModalOpen}
+          onCancel={() => setIsDevModalOpen(false)}
+        />
       </div>
-
-      <InDevelopmentModal
-        open={isModalOpen}
-        onCancel={(e) => {
-          if (e) e.stopPropagation()
-          setIsModalOpen(false)
-        }}
-      />
-    </>
+    </div>
   )
 }
 
