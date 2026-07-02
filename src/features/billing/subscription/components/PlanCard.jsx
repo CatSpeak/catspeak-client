@@ -1,6 +1,7 @@
 import React from "react"
 import { Check, X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getFeatureSuffix } from "../../utils/planUtils"
 
 const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
   const { t } = useLanguage()
@@ -9,10 +10,10 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
 
   return (
     <div
-      className={`relative flex flex-col p-6 rounded-3xl border-2 transition-all ${
+      className={`relative flex flex-col p-6 rounded-3xl border ${
         isActive
           ? "border-cath-red-700 bg-[#FFF5F5] shadow-md"
-          : "border-[#E5E5E5] bg-white hover:border-gray-300"
+          : "border-[#E5E5E5] bg-white"
       }`}
     >
       {isActive && (
@@ -27,7 +28,7 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
             <img
               src={iconUrl}
               alt={`${name} icon`}
-              className="w-8 h-8 object-contain rounded-md"
+              className="w-8 h-8 object-cover rounded-md"
             />
           )}
           <h3 className="text-xl font-bold">{name}</h3>
@@ -50,14 +51,42 @@ const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
       </div>
 
       <ul className="flex flex-col gap-3 mb-8 flex-1">
-        {features.map((feature, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm">
-            <div className="mt-0.5 shrink-0 bg-[#E5F7ED] text-green-600 rounded-full p-0.5">
-              <Check size={14} strokeWidth={3} />
-            </div>
-            <span className="text-[#333]">{feature}</span>
-          </li>
-        ))}
+        {features.map((feature, i) => {
+          const isBoolean = feature.valueType === "boolean"
+          const isFalsy = isBoolean && feature.limitValue === "false"
+
+          return (
+            <li
+              key={feature.id || i}
+              className={`flex items-start gap-2 text-sm ${isFalsy ? "opacity-50" : ""}`}
+            >
+              <div
+                className={`mt-0.5 shrink-0 rounded-full p-0.5 ${
+                  isFalsy ? "text-gray-500" : "text-green-600"
+                }`}
+              >
+                {isFalsy ? (
+                  <X size={14} strokeWidth={3} />
+                ) : (
+                  <Check size={14} strokeWidth={3} />
+                )}
+              </div>
+              <span className={`text-[#333] ${isFalsy ? "line-through" : ""}`}>
+                {!isBoolean && feature.limitValue ? (
+                  <>
+                    {feature.name}:{" "}
+                    <span className="font-semibold">
+                      {feature.limitValue}
+                      {getFeatureSuffix(feature.code, t)}
+                    </span>
+                  </>
+                ) : (
+                  feature.name
+                )}
+              </span>
+            </li>
+          )
+        })}
       </ul>
 
       {!isActive && !onAction ? (
