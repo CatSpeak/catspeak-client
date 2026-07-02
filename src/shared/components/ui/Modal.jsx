@@ -40,7 +40,7 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative  h-full w-full shadow-xl md:h-auto ${
+            className={`relative flex flex-col h-full w-full shadow-xl md:h-auto md:max-h-[90vh] ${
               /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
                 className,
               )

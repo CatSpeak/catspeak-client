@@ -15,8 +15,9 @@ import LeaderboardTab from "./components/tabs/LeaderboardTab"
 const ReelsPage = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const [uploadChallenge, setUploadChallenge] = useState(null)
   const { isAuthenticated } = useAuth()
   const { openAuthModal } = useAuthModal()
   const { id } = useParams()
@@ -38,6 +39,9 @@ const ReelsPage = () => {
       // If we are viewing a specific challenge, pass it to the detail page
       if ((activeTab === "challenges" || activeTab === "leaderboard") && challengeId) {
         newSearchParams.set("challengeId", challengeId)
+        if (activeTab === "leaderboard") {
+          newSearchParams.set("source", "leaderboard")
+        }
       }
 
       const queryString = newSearchParams.toString()
@@ -49,17 +53,19 @@ const ReelsPage = () => {
     [navigate, searchParams, activeTab, challengeId],
   )
 
-  const handleUploadClick = useCallback(() => {
+  const handleUploadClick = useCallback((challengeObj = null) => {
     if (!isAuthenticated) {
       toast.error(t.catSpeak.reels.loginRequired || "Please log in to upload a Reel.")
       openAuthModal("login")
       return
     }
+    setUploadChallenge(challengeObj)
     setIsUploadOpen(true)
   }, [isAuthenticated, openAuthModal, t.catSpeak.reels.loginRequired])
 
   const handleUploadClose = useCallback(() => {
     setIsUploadOpen(false)
+    setTimeout(() => setUploadChallenge(null), 300)
   }, [])
 
   const handleSelectTab = useCallback(
@@ -111,6 +117,7 @@ const ReelsPage = () => {
               challengeId={challengeId}
               onSelectChallenge={setChallengeId}
               onReelClick={handleReelClick}
+              onParticipate={handleUploadClick}
             />
           )}
 
@@ -121,6 +128,7 @@ const ReelsPage = () => {
               challengeId={challengeId}
               onSelectChallenge={setChallengeId}
               onReelClick={handleReelClick}
+              onParticipate={handleUploadClick}
               showMobileDetail={showMobileDetail}
               onMobileDetailChange={setShowMobileDetail}
             />
@@ -133,7 +141,7 @@ const ReelsPage = () => {
         <CreateReelModal
           open={isUploadOpen}
           onClose={handleUploadClose}
-          challenge={{ challengeId }}
+          challenge={uploadChallenge}
         />
       )}
     </div>

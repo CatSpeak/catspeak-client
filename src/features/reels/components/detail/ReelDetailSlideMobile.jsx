@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   X,
@@ -26,12 +20,9 @@ import ReelMoreMenu from "./ReelMoreMenu";
 import toast from "react-hot-toast";
 
 import { useLanguage } from "@/shared/context/LanguageContext";
-import {
-  useToggleLikeReelMutation,
-  useGetReelCommentsQuery,
-  useCreateReelCommentMutation,
-  useDeleteReelCommentMutation,
-} from "@/store/api/reelsApi";
+import { useGetReelCommentsQuery } from "@/store/api/reelsApi";
+import { useReelInteractions } from "../../hooks/useReelInteractions";
+import { useVideoPlayback } from "../../hooks/useVideoPlayback";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
 import {
   selectCurrentUser,
@@ -39,173 +30,15 @@ import {
 } from "@/store/slices/authSlice";
 import { formatCompactNumber } from "../../utils/formatters";
 import CommentItemNode from "./CommentItemNode";
+import ReelCaption from "./ReelCaption";
+import CommentsSkeleton from "./CommentsSkeleton";
 import VolumeSlider from "./VolumeSlider";
 
-/**
- * Interactive Reel Caption component overlaying or standing beside the video player.
- * Features description truncation with "Show more/Show less" toggles and premium tags.
- */
-const ReelCaption = React.memo(({ reel }) => {
-  const { t } = useLanguage();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const description = reel.description || "";
-  const DESCRIPTION_CHAR_LIMIT = 90;
-  const shouldTruncate = description.length > DESCRIPTION_CHAR_LIMIT;
-
-  const displayDescription = isExpanded
-    ? description
-    : shouldTruncate
-      ? `${description.slice(0, DESCRIPTION_CHAR_LIMIT)}...`
-      : description;
-
-  return (
-    <div className="p-4 border-b border-gray-200 shrink-0">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <Avatar
-            size={40}
-            src={reel.author?.avatarUrl}
-            name={reel.author?.name}
-            alt={reel.author?.name}
-            className="shadow-sm rounded-full overflow-hidden cursor-pointer"
-          />
-          <div className="flex flex-col">
-            <span className="text-headingColor font-bold text-[15px] flex items-center gap-1 cursor-pointer transition-colors duration-200 hover:text-cath-red-700">
-              {reel.author?.name}
-              {reel.author?.verified && (
-                <svg
-                  className="w-3.5 h-3.5 text-[#3b82f6] drop-shadow-sm"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                </svg>
-              )}
-            </span>
-          </div>
-        </div>
-        <ReelMoreMenu />
-      </div>
-
-      <div className="text-headingColor text-[14px] leading-[1.6]">
-        {reel.title && (
-          <h3 className="font-bold text-[15px] mb-2 text-headingColor">
-            {reel.title}
-          </h3>
-        )}
-        <p className="relative whitespace-pre-wrap break-words mb-3 text-gray-800">
-          {displayDescription}
-          {shouldTruncate && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-              className="text-gray-500 font-bold ml-1 hover:text-gray-700 cursor-pointer bg-transparent border-none outline-none p-0 transition-colors duration-200"
-            >
-              {isExpanded
-                ? t?.catSpeak?.reels?.detail?.showLess || "Show less"
-                : t?.catSpeak?.reels?.detail?.showMore || "Show more"}
-            </button>
-          )}
-        </p>
-      </div>
-
-      {reel.tags && reel.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {reel.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-cath-red-700 font-medium text-[13px] hover:underline cursor-pointer transition-colors duration-200"
-            >
-              {tag.startsWith("#") ? tag : `#${tag}`}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {reel.createdAt && (
-        <div className="text-[12px] text-gray-400 font-medium">
-          {new Date(reel.createdAt).toISOString().split("T")[0]}
-        </div>
-      )}
-      
-    </div>
-  );
-});
-
-/**
- * Premium shimmer skeleton loading block for comments.
- */
-const CommentsSkeleton = () => {
-  return (
-    <div className="flex flex-col gap-4 mt-3" aria-hidden="true">
-      {[1, 2, 3, 4].map((n) => (
-        <div
-          key={n}
-          className="flex gap-2 items-start transition-colors duration-200 rounded-lg hover:bg-black/5"
-          style={{ gap: "12px", padding: "4px 0" }}
-        >
-          {/* Avatar Skeleton */}
-          <div
-            className="rounded-2xl bg-gray-200 animate-pulse"
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              flexShrink: 0,
-            }}
-          />
-          {/* Details Skeleton */}
-          <div
-            className="flex-1 min-w-0 flex flex-col gap-[2px]"
-            style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-          >
-            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-              {/* Nickname Skeleton */}
-              <div
-                className="rounded-2xl bg-gray-200 animate-pulse"
-                style={{
-                  width: "90px",
-                  height: "14px",
-                  borderRadius: "4px",
-                }}
-              />
-              {/* Time Skeleton */}
-              <div
-                className="rounded-2xl bg-gray-200 animate-pulse"
-                style={{
-                  width: "40px",
-                  height: "12px",
-                  borderRadius: "4px",
-                  marginLeft: "auto",
-                }}
-              />
-            </div>
-            {/* Content line 1 Skeleton */}
-            <div
-              className="rounded-2xl bg-gray-200 animate-pulse"
-              style={{
-                width: "90%",
-                height: "14px",
-                borderRadius: "4px",
-                marginTop: "2px",
-              }}
-            />
-            {/* Content line 2 Skeleton */}
-            <div
-              className="rounded-2xl bg-gray-200 animate-pulse"
-              style={{
-                width: "70%",
-                height: "14px",
-                borderRadius: "4px",
-              }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+const formatVideoTime = (seconds) => {
+  if (isNaN(seconds)) return "00:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
 /**
@@ -226,69 +59,42 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   showComments,
   setShowComments,
 }) {
-  /* ── Refs ───────────────────────────────────────── */
-  const videoRef = useRef(null);
-  const progressRef = useRef(null);
   const commentInputRef = useRef(null);
-  const resetTimerRef = useRef(null);
   const longPressTimerRef = useRef(null);
   const hasLongPressedRef = useRef(false);
 
+  const {
+    videoRef,
+    progressRef,
+    isPlaying,
+    setIsPlaying,
+    progress,
+    isSeeking,
+    hasVideo,
+    isEffectivelyMuted,
+    handlePlayPause,
+    handleToggleMute,
+    handleTimeUpdate,
+    handleProgressClick,
+    handleProgressMouseDown,
+  } = useVideoPlayback({
+    reel,
+    isActive,
+    sharedMuted,
+    setSharedMuted,
+    sharedVolume,
+    setSharedVolume,
+    hasUserInteracted,
+    shouldPreload,
+  });
+
   /* ── State ──────────────────────────────────────── */
   const { t, language } = useLanguage();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [isSeeking, setIsSeeking] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [replyTarget, setReplyTarget] = useState(null);
-  const [isPlaybackMuted, setIsPlaybackMuted] = useState(sharedMuted);
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [viewportOffset, setViewportOffset] = useState(0);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
-
-  const hasVideo = Boolean(reel?.videoUrl);
-  const preferredMuted = sharedMuted || sharedVolume === 0;
-  const isEffectivelyMuted = preferredMuted || isPlaybackMuted;
-
-  const duration = videoRef.current?.duration || 0;
-  const currentTime = (progress / 100) * duration;
-  const formatTime = (secs) => {
-    if (isNaN(secs)) return "0:00";
-    const m = Math.floor(secs / 60);
-    const s = Math.floor(secs % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
-
-  /* ── Redux/API Hooks ────────────────────────────── */
-  const currentUser = useSelector(selectCurrentUser);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const { openAuthModal } = useAuthModal();
-
-  const { data: commentsResponse, isLoading: isCommentsLoading } =
-    useGetReelCommentsQuery(reel.id, { skip: !reel.id || !isActive });
-
-  const [toggleLike] = useToggleLikeReelMutation();
-  const [createComment, { isLoading: isPostingComment }] =
-    useCreateReelCommentMutation();
-  const [deleteComment] = useDeleteReelCommentMutation();
-
-  const comments = useMemo(() => {
-    if (!commentsResponse) return [];
-    return commentsResponse.data !== undefined
-      ? commentsResponse.data
-      : Array.isArray(commentsResponse)
-        ? commentsResponse
-        : [];
-  }, [commentsResponse]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !hasVideo || !shouldPreload) return;
-
-    if (video.readyState < video.HAVE_CURRENT_DATA) {
-      video.load();
-    }
-  }, [hasVideo, reel.videoUrl, shouldPreload]);
 
   // Track iOS Safari visual viewport offset to counteract keyboard push-up
   useEffect(() => {
@@ -305,159 +111,69 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
     };
   }, []);
 
-  /* ── Autoplay / Pause isolation ─────────────────── */
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  /* ── Redux/API Hooks ────────────────────────────── */
+  const currentUser = useSelector(selectCurrentUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { openAuthModal } = useAuthModal();
 
-    if (resetTimerRef.current) {
-      window.clearTimeout(resetTimerRef.current);
-      resetTimerRef.current = null;
+  const {
+    handleLike,
+    handleShare,
+    handleCommentSubmit,
+    handleCommentDelete,
+    isPostingComment,
+  } = useReelInteractions({
+    reel,
+    isAuthenticated,
+    openAuthModal,
+    t,
+    currentUser,
+  });
+
+  const { data: commentsResponse, isLoading: isCommentsLoading } =
+    useGetReelCommentsQuery(reel.id, { skip: !reel.id || !isActive });
+
+  const comments = useMemo(() => {
+    if (!commentsResponse) return [];
+    return commentsResponse.data !== undefined
+      ? commentsResponse.data
+      : Array.isArray(commentsResponse)
+        ? commentsResponse
+        : [];
+  }, [commentsResponse]);
+
+  /* ── Actions ─────────────────────────────────────── */
+  const handleLikeToggle = (e) => {
+    e.stopPropagation();
+    handleLike();
+  };
+
+  const handleBookmarkToggle = useCallback((e) => {
+    e.stopPropagation();
+    toast("This feature is not available yet.", { icon: "🚧" });
+  }, []);
+
+  const handleReply = useCallback((target) => {
+    setReplyTarget(target);
+    if (commentInputRef.current) {
+      commentInputRef.current.focus();
     }
+  }, []);
 
-    if (isActive) {
-      // On mobile, browsers block unmuted autoplay until user has interacted.
-      const userHasInteracted = hasUserInteracted?.current === true;
-      const shouldStartMuted = !userHasInteracted && !preferredMuted;
+  const handleDelete = (commentId) => handleCommentDelete(commentId);
 
-      const attemptPlay = (muted) => {
-        video.volume = sharedVolume;
-        video.muted = muted;
-        video
-          .play()
-          .then(() => {
-            setIsPlaying(true);
-            setIsPlaybackMuted(video.muted);
-          })
-          .catch(() => {
-            if (muted) {
-              setIsPlaying(false);
-              return;
-            }
-            video.muted = true;
-            setIsPlaybackMuted(true);
-            video
-              .play()
-              .then(() => setIsPlaying(true))
-              .catch(() => setIsPlaying(false));
-          });
-      };
+  const handlePostComment = (e) => {
+    e.preventDefault();
+    handleCommentSubmit(commentText, replyTarget, () => {
+      setCommentText("");
+      setReplyTarget(null);
+      setIsInputModalOpen(false);
+      setShowComments(true);
+    });
+  };
 
-      const startPlayback = () => {
-        if (shouldStartMuted) {
-          attemptPlay(true);
-
-          const unmuteOnInteraction = () => {
-            const v = videoRef.current;
-            if (v && !v.paused) {
-              v.muted = preferredMuted;
-              setIsPlaybackMuted(preferredMuted);
-            }
-            document.removeEventListener(
-              "touchstart",
-              unmuteOnInteraction,
-              true,
-            );
-            document.removeEventListener("click", unmuteOnInteraction, true);
-            document.removeEventListener("scroll", unmuteOnInteraction, true);
-          };
-
-          document.addEventListener("touchstart", unmuteOnInteraction, {
-            capture: true,
-            once: true,
-          });
-          document.addEventListener("click", unmuteOnInteraction, {
-            capture: true,
-            once: true,
-          });
-          document.addEventListener("scroll", unmuteOnInteraction, {
-            capture: true,
-            once: true,
-            passive: true,
-          });
-
-          video._unmuteCleanup = () => {
-            document.removeEventListener(
-              "touchstart",
-              unmuteOnInteraction,
-              true,
-            );
-            document.removeEventListener("click", unmuteOnInteraction, true);
-            document.removeEventListener("scroll", unmuteOnInteraction, true);
-          };
-        } else {
-          attemptPlay(preferredMuted);
-        }
-      };
-
-      if (video.readyState >= video.HAVE_FUTURE_DATA) {
-        startPlayback();
-      } else {
-        const onCanPlay = () => {
-          video.removeEventListener("canplay", onCanPlay);
-          startPlayback();
-        };
-        video.addEventListener("canplay", onCanPlay);
-        startPlayback();
-
-        return () => {
-          video.removeEventListener("canplay", onCanPlay);
-        };
-      }
-    } else {
-      if (video._unmuteCleanup) {
-        video._unmuteCleanup();
-        video._unmuteCleanup = null;
-      }
-
-      video.pause();
-
-      resetTimerRef.current = window.setTimeout(() => {
-        const currentVideo = videoRef.current;
-        if (currentVideo?.readyState > 0) {
-          currentVideo.currentTime = 0;
-        }
-        setIsPlaying(false);
-        setProgress(0);
-        resetTimerRef.current = null;
-      }, 250);
-    }
-
-    return () => {
-      if (resetTimerRef.current) {
-        window.clearTimeout(resetTimerRef.current);
-        resetTimerRef.current = null;
-      }
-      if (video._unmuteCleanup) {
-        video._unmuteCleanup();
-        video._unmuteCleanup = null;
-      }
-    };
-  }, [
-    isActive,
-    preferredMuted,
-    reel.videoUrl,
-    sharedVolume,
-    hasUserInteracted,
-  ]);
-
-  /* ── Sync shared volume and mute preferences ────── */
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.volume = sharedVolume;
-
-    if (preferredMuted) {
-      video.muted = true;
-    } else if (!isPlaybackMuted) {
-      video.muted = false;
-    }
-  }, [isPlaybackMuted, preferredMuted, sharedVolume]);
-
-  /* ── Playback control ───────────────────────────── */
   const handlePointerDown = useCallback((e) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
     hasLongPressedRef.current = false;
     longPressTimerRef.current = setTimeout(() => {
       hasLongPressedRef.current = true;
@@ -473,162 +189,6 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
     }
   }, []);
 
-  const handlePlayPause = useCallback(
-    (e) => {
-      e?.stopPropagation();
-      if (hasLongPressedRef.current) {
-        hasLongPressedRef.current = false;
-        return;
-      }
-      if (hasUserInteracted) hasUserInteracted.current = true;
-      if (isPlaying) {
-        videoRef.current?.pause();
-      } else {
-        videoRef.current?.play().catch((err) => {
-          console.error("Play failed:", err);
-        });
-      }
-    },
-    [isPlaying, hasUserInteracted],
-  );
-
-  const handleToggleMute = useCallback(
-    (e) => {
-      e.stopPropagation();
-      const video = videoRef.current;
-
-      if (isEffectivelyMuted) {
-        const nextVolume = sharedVolume === 0 ? 1 : sharedVolume;
-        setSharedVolume(nextVolume);
-        setSharedMuted(false);
-        setIsPlaybackMuted(false);
-
-        if (video) {
-          video.volume = nextVolume;
-          video.muted = false;
-
-          if (video.paused) {
-            video
-              .play()
-              .then(() => setIsPlaying(true))
-              .catch(() => {
-                video.muted = true;
-                setIsPlaybackMuted(true);
-                setIsPlaying(false);
-              });
-          }
-        }
-      } else {
-        if (video) {
-          video.muted = true;
-        }
-        setIsPlaybackMuted(true);
-        setSharedMuted(true);
-      }
-    },
-    [isEffectivelyMuted, sharedVolume, setSharedMuted, setSharedVolume],
-  );
-
-  /* ── Volume change disabled / not used on mobile ── */
-
-  /* ── Progress bar ───────────────────────────────── */
-  const handleTimeUpdate = useCallback(() => {
-    if (isSeeking) return;
-    const el = videoRef.current;
-    if (!el || !el.duration) return;
-    setProgress((el.currentTime / el.duration) * 100);
-  }, [isSeeking]);
-
-  const handleProgressClick = useCallback((e) => {
-    const el = videoRef.current;
-    const bar = progressRef.current;
-    if (!el || !bar || !el.duration) return;
-
-    const rect = bar.getBoundingClientRect();
-    const percent = Math.max(
-      0,
-      Math.min(1, (e.clientX - rect.left) / rect.width),
-    );
-    el.currentTime = percent * el.duration;
-    setProgress(percent * 100);
-  }, []);
-
-  const handleProgressMouseDown = useCallback(
-    (e) => {
-      setIsSeeking(true);
-      handleProgressClick(e.nativeEvent || e);
-
-      const handlePointerMove = (ev) => {
-        if (ev.touches && ev.touches.length > 0) {
-          handleProgressClick(ev.touches[0]);
-        } else {
-          handleProgressClick(ev);
-        }
-      };
-      const handlePointerUp = () => {
-        setIsSeeking(false);
-        window.removeEventListener("pointermove", handlePointerMove);
-        window.removeEventListener("pointerup", handlePointerUp);
-        window.removeEventListener("pointercancel", handlePointerUp);
-        window.removeEventListener("touchmove", handlePointerMove);
-        window.removeEventListener("touchend", handlePointerUp);
-      };
-      window.addEventListener("pointermove", handlePointerMove);
-      window.addEventListener("pointerup", handlePointerUp);
-      window.addEventListener("pointercancel", handlePointerUp);
-      window.addEventListener("touchmove", handlePointerMove, {
-        passive: false,
-      });
-      window.addEventListener("touchend", handlePointerUp);
-    },
-    [handleProgressClick],
-  );
-
-  /* ── Fullscreen (unused) ────────────────────────── */
-
-  /* ── Actions ─────────────────────────────────────── */
-  const handleLikeToggle = useCallback(
-    async (e) => {
-      e.stopPropagation();
-      if (!isAuthenticated) {
-        openAuthModal();
-        return;
-      }
-      try {
-        await toggleLike(reel.id).unwrap();
-      } catch (err) {
-        console.error("Failed to toggle like", err);
-      }
-    },
-    [reel.id, isAuthenticated, toggleLike, openAuthModal],
-  );
-
-  const handleBookmarkToggle = useCallback(
-    (e) => {
-      e.stopPropagation();
-      toast("This feature is not available yet.", { icon: "🚧" });
-    },
-    [],
-  );
-
-  const handleReply = useCallback((target) => {
-    setReplyTarget(target);
-    if (commentInputRef.current) {
-      commentInputRef.current.focus();
-    }
-  }, []);
-
-  const handleDelete = useCallback(
-    async (commentId) => {
-      try {
-        await deleteComment({ commentId, reelId: reel.id }).unwrap();
-      } catch (err) {
-        console.error("Failed to delete comment", err);
-      }
-    },
-    [deleteComment, reel.id],
-  );
-
   const handleOpenInput = useCallback(() => {
     if (!isAuthenticated) {
       openAuthModal();
@@ -640,31 +200,10 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
     }
   }, [isAuthenticated, openAuthModal]);
 
-  const handlePostComment = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!isAuthenticated) return;
-      if (!commentText.trim()) return;
-
-      try {
-        await createComment({
-          reelId: reel.id,
-          content: commentText.trim(),
-          parentCommentId: replyTarget ? replyTarget.parentCommentId : null,
-        }).unwrap();
-        setCommentText("");
-        setReplyTarget(null);
-        setIsInputModalOpen(false);
-        // Tự động mở drawer bình luận ra để user thấy bình luận vừa đăng
-        setShowComments(true);
-      } catch (err) {
-        console.error("Failed to post comment", err);
-      }
-    },
-    [commentText, createComment, isAuthenticated, reel.id, replyTarget],
-  );
-
   /* Focus is handled synchronously in handleOpenInput for iOS Safari support */
+
+  const currentTime = videoRef.current?.currentTime || 0;
+  const duration = videoRef.current?.duration || 0;
 
   return (
     <div className="w-full h-full relative bg-black flex flex-col justify-center overflow-hidden select-none">
@@ -736,9 +275,11 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
                   </svg>
                 )}
               </div>
-              <p className="text-white text-[14px] line-clamp-3 break-words mb-2">
-                {reel.description}
-              </p>
+              {reel.description && (
+                <p className="text-white text-[14px] line-clamp-3 break-words mb-2">
+                  {reel.description}
+                </p>
+              )}
               {reel.tags && reel.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-1">
                   {reel.tags.map((tag) => (
@@ -808,7 +349,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
               </span>
             </button>
 
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 toast("This feature is not available yet.", { icon: "🚧" });
@@ -846,7 +387,10 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
             }`}
           >
             <div className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-white font-bold text-[18px] tracking-wide shadow-lg">
-              {formatTime(currentTime)} <span className="text-white/60 text-[15px]">/ {formatTime(duration)}</span>
+              {formatVideoTime(currentTime)}{" "}
+              <span className="text-white/60 text-[15px]">
+                / {formatVideoTime(duration)}
+              </span>
             </div>
           </div>
 
@@ -1017,7 +561,11 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
       </div>
 
       {/* Long Press Modal Menu */}
-      <ReelMoreMenu isMobile showMenu={showMoreMenu} onClose={() => setShowMoreMenu(false)} />
+      <ReelMoreMenu
+        isMobile
+        showMenu={showMoreMenu}
+        onClose={() => setShowMoreMenu(false)}
+      />
     </div>
   );
 });

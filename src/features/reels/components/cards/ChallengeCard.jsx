@@ -10,6 +10,7 @@ export default function ChallengeCard({
   isSelected = false,
   isPast = false,
   onJoin,
+  onParticipate,
 }) {
   const { t } = useLanguage()
   const { name, hashtag, description, bannerUrl, status, endDate, endTime } = challenge
@@ -86,12 +87,17 @@ export default function ChallengeCard({
           <button
             disabled
             className="mt-auto w-full py-2 md:py-2.5 rounded-full text-[12px] md:text-[14px] font-medium transition-all duration-200 bg-gray-500 text-white cursor-not-allowed"
+            onClick={(e) => e.stopPropagation()}
           >
             {t.catSpeak.reels.ended || "Đã kết thúc"}
           </button>
         ) : (
           <button
             className="mt-auto w-full py-2 md:py-2.5 rounded-full text-[12px] md:text-[14px] font-medium transition-all duration-200 bg-cath-red-700 text-white hover:bg-cath-red-800 shadow-sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (onParticipate) onParticipate(challenge)
+            }}
           >
             {t.catSpeak.reels.joinNow || "Tham gia ngay"}
           </button>

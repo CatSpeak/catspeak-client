@@ -80,9 +80,36 @@ export default function PastChallengeLeaderboardView({
           {/* Podium */}
           {top3.length > 0 && (
             <div className="flex items-end justify-center px-4 pt-10 pb-6 gap-3 sm:gap-6 border-b border-gray-100 max-w-md mx-auto w-full">
-              <PodiumItem entry={top3[2]} rank={3} />
-              <PodiumItem entry={top3[1]} rank={2} />
-              <PodiumItem entry={top3[0]} rank={1} />
+              <PodiumItem 
+                entry={top3[2]} 
+                rank={3} 
+                onClick={() => {
+                  const reelData = top3[2]?.reel || top3[2];
+                  if (reelData && (reelData.reelId || reelData.id)) {
+                    onReelClick && onReelClick({ id: reelData.reelId || reelData.id, ...reelData });
+                  }
+                }} 
+              />
+              <PodiumItem 
+                entry={top3[1]} 
+                rank={2} 
+                onClick={() => {
+                  const reelData = top3[1]?.reel || top3[1];
+                  if (reelData && (reelData.reelId || reelData.id)) {
+                    onReelClick && onReelClick({ id: reelData.reelId || reelData.id, ...reelData });
+                  }
+                }} 
+              />
+              <PodiumItem 
+                entry={top3[0]} 
+                rank={1} 
+                onClick={() => {
+                  const reelData = top3[0]?.reel || top3[0];
+                  if (reelData && (reelData.reelId || reelData.id)) {
+                    onReelClick && onReelClick({ id: reelData.reelId || reelData.id, ...reelData });
+                  }
+                }} 
+              />
             </div>
           )}
 

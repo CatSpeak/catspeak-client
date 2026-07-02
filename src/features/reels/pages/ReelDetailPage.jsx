@@ -27,6 +27,7 @@ import {
   useGetReelsFeedQuery,
   useGetUserReelsQuery,
   useGetReelsByChallengeQuery,
+  useGetChallengeLeaderboardQuery,
   useToggleLikeReelMutation,
   useGetReelCommentsQuery,
   useCreateReelCommentMutation,
@@ -88,7 +89,10 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
     refetch: refetchPublic,
   } = useGetReelsFeedQuery(undefined, { skip: isWorkspace || hasChallengeContext })
 
-  // Fetch challenge reels — only when navigated from a challenge tab.
+  const sourceParam = searchParams.get("source") || undefined
+  const isLeaderboard = sourceParam === "leaderboard"
+
+  // Fetch challenge reels — only when navigated from a challenge tab, and NOT leaderboard.
   const {
     data: challengeFeedResponse,
     isLoading: isChallengeFeedLoading,
@@ -101,7 +105,21 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
       page: feedPage,
       pageSize: DETAIL_PAGE_SIZE,
     },
-    { skip: !hasChallengeContext || isWorkspace }
+    { skip: !hasChallengeContext || isWorkspace || isLeaderboard }
+  )
+
+  // Fetch leaderboard reels — only when navigated from the leaderboard tab.
+  const {
+    data: leaderboardResponse,
+    isLoading: isLeaderboardLoading,
+    isFetching: isLeaderboardFetching,
+    refetch: refetchLeaderboard,
+  } = useGetChallengeLeaderboardQuery(
+    {
+      challengeId: challengeIdParam,
+      take: 50,
+    },
+    { skip: !isLeaderboard || !challengeIdParam }
   )
 
   const {
@@ -116,22 +134,36 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
 
   const feedResponse = isWorkspace
     ? workspaceFeedResponse
-    : hasChallengeContext
-      ? challengeFeedResponse
-      : publicFeedResponse
+    : isLeaderboard
+      ? leaderboardResponse
+      : hasChallengeContext
+        ? challengeFeedResponse
+        : publicFeedResponse
   const isFeedLoading = isWorkspace
     ? isWorkspaceFeedLoading
-    : hasChallengeContext
-      ? isChallengeFeedLoading
-      : isPublicFeedLoading
+    : isLeaderboard
+      ? isLeaderboardLoading
+      : hasChallengeContext
+        ? isChallengeFeedLoading
+        : isPublicFeedLoading
 
   // Mapped reels list from the feed query
   const feedReels = useMemo(() => {
+    if (isLeaderboard && feedResponse) {
+        let entries = []
+        if (Array.isArray(feedResponse)) entries = feedResponse
+        else if (Array.isArray(feedResponse.data)) entries = feedResponse.data
+        else if (Array.isArray(feedResponse.data?.entries)) entries = feedResponse.data.entries
+        else if (Array.isArray(feedResponse.entries)) entries = feedResponse.entries
+
+        return entries.filter(e => e.reel).map(e => mapReelDtoToFrontend(e.reel))
+    }
+
     if (feedResponse?.data && feedResponse.data.length > 0) {
       return feedResponse.data.map(mapReelDtoToFrontend)
     }
     return []
-  }, [feedResponse])
+  }, [feedResponse, isLeaderboard])
 
   // Combine feed with the deep-linked currentReel, placing the currentReel at the very start (index 0) to reset the feed order on refresh.
   const combinedReels = useMemo(() => {
