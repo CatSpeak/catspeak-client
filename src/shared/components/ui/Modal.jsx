@@ -23,7 +23,7 @@ const Modal = ({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-0 min-[426px]:p-4">
+        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -40,16 +40,16 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative h-full w-full shadow-xl min-[426px]:h-auto ${
-              /(^|\s)(min-\[[^\]]+\]:|md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
+            className={`relative h-full w-full shadow-xl sm:h-auto ${
+              /(^|\s)(sm:|md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
                 className,
               )
                 ? ""
-                : "min-[426px]:max-w-md"
+                : "sm:max-w-md"
             } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
               /(^|\s)rounded/.test(className)
                 ? ""
-                : "rounded-none min-[426px]:rounded-3xl min-[426px]:border min-[426px]:border-[#E5e5e5]"
+                : "rounded-none sm:rounded-3xl sm:border sm:border-[#E5e5e5]"
             } ${className}`}
             role="dialog"
             aria-modal="true"

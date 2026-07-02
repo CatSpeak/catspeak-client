@@ -11,16 +11,9 @@ import {
   AISessionSettingsModal,
   RoomsBannerContent,
 } from "@/features/rooms"
-import BannerCarousel from "@/shared/components/ui/BannerCarousel"
-import banner1 from "@/shared/assets/images/communities/banner_1.png"
+import { WorkshopCarousel } from "@/features/workshops"
 
-const bannerImages = [
-  { url: banner1, alt: "Community Banner 1" },
-  { url: banner1, alt: "Community Banner 2" },
-  { url: banner1, alt: "Community Banner 3" },
-]
 import { useCreateAISessionMutation } from "@/store/api/roomsApi"
-import { useLanguage } from "@/shared/context/LanguageContext"
 import { AnimatePresence } from "framer-motion"
 import {
   FadeAnimation,
@@ -33,7 +26,6 @@ import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 const RoomsPage = () => {
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
-  const { t } = useLanguage()
 
   const [showSwitchModal, setShowSwitchModal] = useState(false)
   const [pendingAction, setPendingAction] = useState(null)
@@ -118,7 +110,7 @@ const RoomsPage = () => {
   const pageSize = 12
   const shouldFetch = !!categories
 
-  const { data: responseData, isLoading } = useGetRoomsQuery(
+  const { data: responseData } = useGetRoomsQuery(
     {
       page,
       pageSize,
@@ -159,8 +151,8 @@ const RoomsPage = () => {
           className="w-full h-full flex flex-col"
         >
           <div className="p-5 flex-1 min-w-0 pt-8 px-0">
-            <BannerCarousel 
-              images={bannerImages}
+            <WorkshopCarousel 
+              hideTitle={true}
               leftContent={
                 <RoomsBannerContent 
                   sessionProps={{
