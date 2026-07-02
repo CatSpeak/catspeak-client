@@ -16,7 +16,7 @@ const SessionActionButtons = ({
 
   return (
     <div className="relative mt-5">
-      <div className="relative flex flex-col min-[426px]:flex-row min-[426px]:flex-wrap gap-3 sm:gap-4 mt-2">
+      <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mt-2">
         {badges.map((b) => {
           const Icon = b.icon
           const isOneOnOne = b.id === "connect_1_1"
@@ -49,14 +49,14 @@ const SessionActionButtons = ({
           return (
             <motion.div
               key={b.id}
-              className={`flex items-center w-full min-[426px]:w-auto`}
+              className={`flex items-center w-full sm:w-auto`}
               onClick={isActionable ? handleClick : undefined}
             >
               <Button3D
                 disabled={!isActionable || isLoadingThis}
                 loading={isActionable && isLoadingThis}
-                startIcon={<Icon className="w-5 h-5" />}
-                className="w-full min-[426px]:w-auto min-[426px]:min-w-[140px]"
+                className="w-full sm:w-auto sm:min-w-[140px]"
+                roundedClass="rounded-full"
               >
                 {label}
               </Button3D>

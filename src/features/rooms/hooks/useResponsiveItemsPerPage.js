@@ -5,7 +5,7 @@ const DESKTOP_MIN = 1024 // ≥1024px → 4 cards, below → 2 cards
 
 /**
  * Returns the number of visible carousel items per breakpoint.
- * Returns null on mobile (≤425px) to signal touch-scroll mode instead of button carousel.
+ * Returns null on mobile/tablet (≤1024px) to signal touch-scroll mode instead of button carousel.
  * @returns {number | null}
  */
 const useResponsiveItemsPerPage = () => {
@@ -19,8 +19,7 @@ const useResponsiveItemsPerPage = () => {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  if (width <= MOBILE_MAX) return null // mobile: use touch scroll
-  if (width <= DESKTOP_MIN) return 2 // tablet: 2 columns
+  if (width <= DESKTOP_MIN) return null // mobile & tablet: use touch scroll
   return 4 // desktop: 4 columns
 }
 

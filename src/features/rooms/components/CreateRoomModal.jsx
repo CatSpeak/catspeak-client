@@ -68,7 +68,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
         onClose={onCancel}
         title={null}
         showCloseButton={false}
-        className="max-w-sm min-[426px]:max-w-[800px] w-full max-[425px]:max-w-none max-[425px]:h-full max-[425px]:flex max-[425px]:flex-col rounded-none min-[426px]:rounded-3xl"
+        className="max-w-sm sm:max-w-[800px] w-full max-sm:!fixed max-sm:!inset-0 max-sm:!m-0 max-sm:!max-w-none max-sm:!h-full max-sm:!w-full max-sm:!rounded-none max-sm:flex max-sm:flex-col sm:rounded-3xl"
         bodyClassName="flex flex-col flex-1 overflow-hidden"
       >
         <AnimatePresence mode="wait">
@@ -95,7 +95,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
             </div>
 
             <div
-              className={`flex flex-col gap-6 max-h-[60vh] overflow-y-auto px-6 pb-6 max-[425px]:max-h-none max-[425px]:flex-1 ${scrollbarClasses}`}
+              className={`flex flex-col gap-6 max-h-[60vh] overflow-y-auto px-6 pb-6 max-sm:max-h-none max-sm:flex-1 ${scrollbarClasses}`}
             >
               {formData.mode === "create" && (
                 <CreateFormInputs
@@ -228,13 +228,13 @@ const ModalFooter = ({
         <PillButton
           onClick={() => onSwitchMode("create")}
           variant="outline"
-          className="h-12 text-base max-[425px]:flex-1"
+          className="h-12 text-base max-sm:flex-1"
         >
           {t.rooms.createRoom.create}
         </PillButton>
         <PillButton
           onClick={onJoin}
-          className="h-12 text-base max-[425px]:flex-1"
+          className="h-12 text-base max-sm:flex-1"
           disabled={disabledJoin}
         >
           {t.rooms.createRoom.join}
@@ -248,13 +248,13 @@ const ModalFooter = ({
       <PillButton
         onClick={() => onSwitchMode("join")}
         variant="secondary"
-        className="h-12 text-base max-[425px]:flex-1"
+        className="h-12 text-base max-sm:flex-1"
       >
         {t.back || "Back"}
       </PillButton>
       <PillButton
         onClick={onCreate}
-        className="h-12 text-base max-[425px]:flex-1"
+        className="h-12 text-base max-sm:flex-1"
         loading={isCreating}
         loadingText={t.rooms.createRoom.creating}
         disabled={disabledCreate}

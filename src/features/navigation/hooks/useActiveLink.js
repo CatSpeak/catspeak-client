@@ -1,25 +1,34 @@
-import { useLocation } from "react-router-dom"
+import { useLocation, useParams } from "react-router-dom"
 
-/**
- * Which primary desktop nav key matches the current path (first match wins).
- * @param {string} pathname
- * @returns {string|null}
- */
-export const getActiveDesktopNavKey = (pathname) => {
-  if (pathname.includes("/community")) return "community"
-  if (pathname.includes("/cat-speak")) return "catSpeak"
-  if (pathname.includes("/workspace")) return "workspace"
-  if (pathname.startsWith("/cart")) return "cart"
-  if (pathname.startsWith("/connect")) return "connect"
-  return null
-}
-
-/**
- * Custom hook to check if a navigation item is active
- * @param {string} key - The navigation key (e.g., 'community', 'catSpeak')
- * @returns {boolean} - True if the item is active
- */
-export const useActiveLink = (key) => {
+export const useActiveLink = () => {
   const location = useLocation()
-  return getActiveDesktopNavKey(location.pathname) === key
+  const { lang } = useParams()
+  const currentLang = lang || localStorage.getItem("communityLanguage") || "zh"
+
+  // Resolves the path with the current language prefix if needed
+  const resolvePath = (p) => {
+    if (p && (p.startsWith('/community') || p.startsWith('/cat-speak'))) {
+      return `/${currentLang}${p}`
+    }
+    return p
+  }
+
+  // Checks if a navigation item or its dropdown sub-items are active
+  const checkIsActive = (item) => {
+    if (item.hasDropdown && item.subItems && item.subItems.length > 0) {
+      return item.subItems.some(sub => location.pathname.startsWith(resolvePath(sub.path)))
+    }
+    
+    const resolvedPath = resolvePath(item.path)
+    if (!resolvedPath) return false
+    
+    return location.pathname.startsWith(resolvedPath)
+  }
+
+  return {
+    resolvePath,
+    checkIsActive,
+    currentLang,
+    pathname: location.pathname
+  }
 }

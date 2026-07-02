@@ -1,7 +1,6 @@
 import { useState } from "react"
-import { Layout } from "lucide-react" // if needed elsewhere, otherwise just removed
 import { Outlet, ScrollRestoration } from "react-router-dom"
-import HeaderBar from "../../shared/components/Header/HeaderBar"
+import MainHeader from "../../shared/components/Header/MainHeader"
 import Footer from "../../shared/components/Footer"
 import Auth from "@/features/auth/components"
 import AuthModalContext from "@/shared/context/AuthModalContext"
@@ -55,7 +54,7 @@ const UserLayout = ({ showFooter = true }) => {
     >
       <div className="flex flex-col min-h-screen bg-white">
         {/* Header full width */}
-        <HeaderBar onGetStarted={() => openAuthModal("login")} />
+        <MainHeader onGetStarted={() => openAuthModal("login")} onMenuClick={() => {}} />
 
         <main className="w-full flex-1 flex flex-col">
           <Outlet />

@@ -43,8 +43,6 @@ const ProfileDropdown = () => {
 
   const user = userData?.data ?? authUser ?? {}
 
-  // console.log(user)
-  // console.log(authUser)
 
   const handleToggleMenu = () => {
     setIsOpen((prev) => !prev)

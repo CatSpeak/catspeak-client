@@ -1,51 +1,31 @@
 import React from "react"
-import { NavLink, useParams } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useActiveLink } from "../../hooks/useActiveLink"
+import { NavLink } from "react-router-dom"
 
-const DesktopNavItem = ({ navKey, noActive }) => {
-  const { t } = useLanguage()
-  const { lang } = useParams()
-
-  // Active state check
-  const isActive = useActiveLink(navKey)
-
-  if (navKey === "cart" || navKey === "connect") return null
-
-  // Determine href based on key
-  let href
-  if (navKey === "catSpeak") {
-    const currentLang =
-      lang || localStorage.getItem("communityLanguage") || "zh"
-    href = `/${currentLang}/cat-speak/news`
-  } else if (navKey === "cart") {
-    href = "/cart"
-  } else if (navKey === "connect") {
-    href = "/connect"
-  } else if (navKey === "workspace") {
-    href = "/workspace"
-  } else if (navKey === "pricing") {
-    href = "/pricing"
-  } else {
-    // Default fallback
-    href = "/"
-  }
+const DesktopNavItem = ({ to, icon: Icon, label, isExpanded, onMouseEnter, onMouseLeave,  }) => {
+  const getLinkClasses = ({ isActive }) =>
+    `relative flex items-center h-11 rounded-lg transition-all duration-300 group overflow-hidden w-full ${
+      isActive
+        ? "bg-cath-red-700/10 text-cath-red-700 font-medium"
+        : "text-gray-800 hover:bg-primary2 hover:text-gray-900"
+    }`
 
   return (
-    <NavLink
-      to={href}
-      className={`
-        flex min-w-max h-10 flex-1 items-center justify-center whitespace-nowrap rounded-full px-6 text-sm font-semibold tracking-wide transition-colors duration-200 no-underline hover:bg-white/10
-        ${
-          noActive
-            ? "text-white/70 hover:text-white"
-            : isActive
-              ? "text-white hover:text-white"
-              : "text-white/70 hover:text-white"
-        }
-      `}
+    <NavLink 
+      to={to} 
+      className={getLinkClasses} 
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
-      {t.nav?.[navKey] || (navKey === "workspace" ? "My Workspace" : navKey)}
+      <div className={`flex items-center justify-center shrink-0 transition-all duration-300 ${isExpanded ? "w-[64px]" : "w-[44px]"}`}>
+        <Icon size={22} className="shrink-0" />
+      </div>
+      <span 
+        className={`text-[15px] whitespace-nowrap transition-all duration-300 ${
+          isExpanded ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 w-0"
+        }`}
+      >
+        {label}
+      </span>
     </NavLink>
   )
 }
