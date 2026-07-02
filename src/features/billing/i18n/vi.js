@@ -1,0 +1,82 @@
+export default {
+  billing: {
+    planCard: {
+      suffixes: {
+        MAX_ACTIVE_ROOMS: " phòng",
+        MAX_PARTICIPANTS: " người",
+        MAX_STORAGE_MB: " MB",
+        MAX_AI_MESSAGES: " tin nhắn",
+        MAX_REELS_UPLOAD: " video"
+      }
+    },
+    pricing: {
+      title: "Gói Đăng Ký",
+      subtitle: "Chọn gói phù hợp với nhu cầu của bạn.",
+      customPaymentTitle: "Số tiền thanh toán tuỳ chỉnh",
+      customPaymentSubtitle: "Vui lòng nhập số tiền bạn muốn thanh toán cho gói Pro (VND).",
+      amountLabel: "Số tiền (VND)",
+      cancel: "Hủy",
+      proceedToPay: "Tiến hành thanh toán",
+      processing: "Đang xử lý...",
+      currentPlan: "Gói hiện tại",
+      included: "Đã bao gồm trong gói của bạn",
+      upgradeTo: "Nâng cấp lên {{planName}}",
+    },
+    history: {
+      title: "Lịch Sử Thanh Toán",
+      subtitle: "Xem các hóa đơn và lịch sử thanh toán của bạn.",
+      noHistoryTitle: "Chưa có lịch sử thanh toán",
+      noHistorySubtitle: "Bạn chưa có hóa đơn nào. Khi bạn nâng cấp hoặc thanh toán, hóa đơn sẽ xuất hiện ở đây.",
+      columns: {
+        date: "Ngày",
+        orderCode: "Mã Đơn Hàng",
+        method: "Phương Thức",
+        amount: "Số Tiền",
+        status: "Trạng Thái",
+        actions: "Thao Tác",
+      },
+      actions: {
+        report: "Báo lỗi",
+        repay: "Thanh toán lại",
+      },
+      statuses: {
+        success: "Thành công",
+        pending: "Đang chờ",
+        cancelled: "Đã hủy",
+      }
+    },
+    result: {
+      cancelling: "Đang hủy thanh toán...",
+      successTitle: "Thanh toán thành công!",
+      successSubtitle: "Cảm ơn bạn đã mua hàng. Gói của bạn đã được nâng cấp thành công.",
+      redirecting: "Đang chuyển hướng...",
+      processing: "Đang xác minh trạng thái thanh toán...",
+      returnToBilling: "Quay lại Bảng thanh toán",
+    },
+    checkoutModal: {
+      title: "Thanh toán Gói Đăng Ký",
+      subtitle: "Bạn đang chọn nâng cấp lên {{planName}}.",
+      paymentMethod: "Phương thức thanh toán",
+      payosSub: "Chuyển khoản ngân hàng / QR Code",
+      stripeSub: "Thẻ Tín Dụng / Thẻ Ghi Nợ",
+      comingSoon: "Sắp ra mắt",
+      cancel: "Hủy",
+      confirm: "Xác nhận & Thanh toán"
+    },
+    reportIssueModal: {
+      title: "Báo cáo Vấn đề Thanh toán",
+      subtitle: "Nếu bạn gặp sự cố với giao dịch #{{paymentId}}, vui lòng giải thích bên dưới. Bạn cũng có thể tải lên ảnh chụp màn hình giao dịch của mình.",
+      explanationLabel: "Giải thích",
+      explanationPlaceholder: "Vui lòng mô tả vấn đề...",
+      proofImageLabel: "Hình ảnh bằng chứng (Tùy chọn)",
+      uploadFileText: "Nhấp để tải lên một tệp",
+      errorNoExplanation: "Vui lòng cung cấp lời giải thích.",
+      errorSubmitFailed: "Không thể gửi báo cáo. Vui lòng thử lại.",
+      cancel: "Hủy",
+      submit: "Gửi Báo cáo",
+      successTitle: "Đã gửi Báo cáo",
+      successSubtitle: "Chúng tôi đã nhận được báo cáo của bạn và sẽ tiến hành điều tra sự cố.",
+      done: "Xong"
+    }
+  }
+}

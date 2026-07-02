@@ -3,8 +3,10 @@ import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useReportPaymentIssueMutation } from "@/store/api/paymentsApi"
 import { CheckCircle2, UploadCloud } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
+  const { t } = useLanguage()
   const [reportIssue, { isLoading }] = useReportPaymentIssueMutation()
   const [step, setStep] = useState("form") // form | success
   
@@ -15,7 +17,7 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!explanation.trim()) {
-      setError("Please provide an explanation.")
+      setError(t.billing.reportIssueModal.errorNoExplanation)
       return
     }
 
@@ -31,7 +33,7 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
       await reportIssue(formData).unwrap()
       setStep("success")
     } catch (err) {
-      setError("Failed to submit report. Please try again.")
+      setError(t.billing.reportIssueModal.errorSubmitFailed)
       console.error(err)
     }
   }
@@ -51,24 +53,24 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
     <Modal
       open={isOpen}
       onClose={handleClose}
-      title={step === "form" ? "Report Payment Issue" : ""}
+      title={step === "form" ? t.billing.reportIssueModal.title : ""}
       showCloseButton={!isLoading}
       className="max-w-md"
     >
       {step === "form" && (
         <form onSubmit={handleSubmit} className="pb-4 space-y-4">
           <p className="text-sm text-[#7A7574] mb-4">
-            If you experienced an issue with payment #{paymentId}, please explain below. You can also upload a screenshot of your transaction.
+            {t.billing.reportIssueModal.subtitle.replace("{{paymentId}}", paymentId)}
           </p>
 
           <div>
             <label className="block text-sm font-semibold mb-2" htmlFor="explanation">
-              Explanation <span className="text-cath-red-700">*</span>
+              {t.billing.reportIssueModal.explanationLabel} <span className="text-cath-red-700">*</span>
             </label>
             <textarea
               id="explanation"
               className="w-full border border-[#E5E5E5] rounded-xl p-3 outline-none focus:border-[#333] transition-colors resize-none h-32"
-              placeholder="Please describe the issue..."
+              placeholder={t.billing.reportIssueModal.explanationPlaceholder}
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
               disabled={isLoading}
@@ -77,13 +79,13 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
 
           <div>
             <label className="block text-sm font-semibold mb-2">
-              Proof Image (Optional)
+              {t.billing.reportIssueModal.proofImageLabel}
             </label>
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-[#E5E5E5] border-dashed rounded-xl cursor-pointer hover:bg-[#fafafa] transition-colors relative">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <UploadCloud className="w-8 h-8 text-[#7A7574] mb-2" />
                 <p className="text-sm text-[#7A7574]">
-                  {file ? file.name : "Click to upload a file"}
+                  {file ? file.name : t.billing.reportIssueModal.uploadFileText}
                 </p>
               </div>
               <input 
@@ -106,10 +108,10 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
               onClick={handleClose}
               disabled={isLoading}
             >
-              Cancel
+              {t.billing.reportIssueModal.cancel}
             </PillButton>
             <PillButton type="submit" className="flex-1" loading={isLoading}>
-              Submit Report
+              {t.billing.reportIssueModal.submit}
             </PillButton>
           </div>
         </form>
@@ -120,12 +122,12 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
           <div className="w-16 h-16 bg-[#E5F7ED] text-green-600 rounded-full flex items-center justify-center mb-4">
             <CheckCircle2 size={32} />
           </div>
-          <h3 className="text-2xl font-bold mb-2">Report Submitted</h3>
+          <h3 className="text-2xl font-bold mb-2">{t.billing.reportIssueModal.successTitle}</h3>
           <p className="text-[#7A7574] mb-8">
-            We have received your report and will investigate the issue.
+            {t.billing.reportIssueModal.successSubtitle}
           </p>
           <PillButton onClick={handleClose} className="w-full">
-            Done
+            {t.billing.reportIssueModal.done}
           </PillButton>
         </div>
       )}
