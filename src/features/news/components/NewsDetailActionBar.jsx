@@ -11,6 +11,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import facebookIcon from "@/shared/assets/images/facebook-icon.svg"
 import googleIcon from "@/shared/assets/images/google-icon.svg"
 import zaloIcon from "@/shared/assets/images/zalo-icon.png"
+import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 
 const NewsDetailActionBar = ({
   newsItem,
@@ -20,6 +21,7 @@ const NewsDetailActionBar = ({
 }) => {
   const { t } = useLanguage()
   const [showReactions, setShowReactions] = useState(false)
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false)
   const holdTimer = useRef(null)
 
   const handleTouchStart = () => {
@@ -129,7 +131,7 @@ const NewsDetailActionBar = ({
 
         {/* Bookmark */}
         <button
-          onClick={(e) => e.stopPropagation()}
+          onClick={() => setIsDevModalOpen(true)}
           className="flex items-center justify-center p-2 rounded-full border border-cath-red-700 text-cath-red-700 transition-colors hover:bg-cath-red-50"
         >
           <Bookmark size={16} strokeWidth={1.5} />
@@ -140,10 +142,7 @@ const NewsDetailActionBar = ({
       <div className="flex items-center gap-5">
         {/* Facebook */}
         <button
-          onClick={() => {
-            const url = encodeURIComponent(window.location.href)
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "noopener,noreferrer")
-          }}
+          onClick={() => setIsDevModalOpen(true)}
           className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
           title="Share on Facebook"
         >
@@ -152,10 +151,7 @@ const NewsDetailActionBar = ({
 
         {/* Google */}
         <button
-          onClick={() => {
-            const url = encodeURIComponent(window.location.href)
-            window.open(`https://www.google.com/sharer/u/0/?url=${url}`, "_blank", "noopener,noreferrer")
-          }}
+          onClick={() => setIsDevModalOpen(true)}
           className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
           title="Share on Google"
         >
@@ -164,10 +160,7 @@ const NewsDetailActionBar = ({
 
         {/* Zalo */}
         <button
-          onClick={() => {
-            const url = encodeURIComponent(window.location.href)
-            window.open(`https://zalo.me/share/${url}`, "_blank", "noopener,noreferrer")
-          }}
+          onClick={() => setIsDevModalOpen(true)}
           className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
           title="Share on Zalo"
         >
@@ -181,6 +174,11 @@ const NewsDetailActionBar = ({
           </span>
         </button>
       </div>
+
+      <InDevelopmentModal
+        open={isDevModalOpen}
+        onCancel={() => setIsDevModalOpen(false)}
+      />
     </div>
   )
 }
