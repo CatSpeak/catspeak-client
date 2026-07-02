@@ -41,8 +41,8 @@ const VideoPreview = ({
   }, [micOn])
 
   return (
-    <div className="relative w-full max-w-3xl h-[269px] flex flex-col items-center rounded-2xl border border-[#F5F5F5] bg-[#FCFCFC]">
-      <div className="py-2 relative w-full h-[190px] aspect-video overflow-hidden mt-4">
+    <div className="relative w-full max-w-3xl flex flex-col items-center rounded-2xl border border-[#F5F5F5] bg-[#FCFCFC]">
+      <div className="relative w-full aspect-video overflow-hidden rounded-2xl">
         {/* Video Preview */}
         {localStream && (
           <video
@@ -50,7 +50,7 @@ const VideoPreview = ({
             autoPlay
             playsInline
             muted // Always mute local video preview purely for UI
-            className={`h-full w-full object-cover -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
+            className={`h-full w-full rounded-2xl object-cover -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
           />
         )}
 
@@ -64,8 +64,8 @@ const VideoPreview = ({
                   alt=""
                   className="absolute inset-0 z-0 h-full w-full object-cover blur-[40px] scale-125 opacity-60"
                   onError={(e) => {
-                    e.target.style.display = "none"
-                    e.target.previousSibling.style.display = "none"
+                    e.target.style.display = "none";
+                    e.target.previousSibling.style.display = "none";
                   }}
                 />
               </>
@@ -84,7 +84,7 @@ const VideoPreview = ({
       </div>
 
       {/* Controls Overlay */}
-      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0">
+      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
         <button
           onClick={onToggleMic}
           className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
@@ -126,7 +126,7 @@ const VideoPreview = ({
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 export default VideoPreview

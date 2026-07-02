@@ -53,7 +53,7 @@ const WaitingScreen = ({
       onBack={() => navigate(getCommunityPath(lang || language))}
       backLabel={t.rooms.waitingScreen.backToCommunity}
       maxWidthClass="max-w-[800px]"
-      cardClassName="sm:max-h-[580px] rounded-[12px] h-auto"
+      cardClassName="rounded-[12px] h-auto"
     >
       <div className="text-center">
         <h4 className="mb-2 font-semibold text-xl md:text-2xl">
