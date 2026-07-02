@@ -77,7 +77,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose })
       document.removeEventListener("mousedown", handleClickOutside)
       document.removeEventListener("keydown", handleEsc)
     }
-  }, [isOpen])
+  }, [isOpen, onClose, showMenu])
 
   const menuContent = (
     <div className={`w-48 bg-headingColor rounded-lg py-2 z-50 shadow-xl border border-white/10 text-white font-medium animate-in fade-in zoom-in-95 duration-100 ${isMobile ? 'w-full' : 'absolute top-10 right-0'}`} role="menu">

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Globe, Users, Lock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"

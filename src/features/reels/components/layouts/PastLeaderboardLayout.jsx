@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from "react"
+import React, { useMemo, useEffect } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPastChallengesQuery } from "@/store/api/reelsApi"
 import ChallengeStatusPills from "../navigation/ChallengeStatusPills"

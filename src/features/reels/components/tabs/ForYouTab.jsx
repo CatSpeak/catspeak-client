@@ -6,7 +6,7 @@ import ReelGridSkeleton from "../grid/ReelGridSkeleton"
 import { useGetReelsFeedQuery } from "@/store/api/reelsApi"
 import { mapReelDtoToFrontend } from "../../utils/mappers"
 
-export default function ForYouTab({ onReelClick, isAuthenticated, onUploadClick }) {
+export default function ForYouTab({ onReelClick, onUploadClick }) {
   const { t } = useLanguage()
   const { data: feedResponse, isLoading } = useGetReelsFeedQuery({ page: 1, pageSize: 20 })
   
