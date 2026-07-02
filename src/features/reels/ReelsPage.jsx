@@ -20,7 +20,7 @@ const ReelsPage = () => {
   const [uploadChallenge, setUploadChallenge] = useState(null)
   const { isAuthenticated } = useAuth()
   const { openAuthModal } = useAuthModal()
-  const { id } = useParams()
+    const { id } = useParams()
 
   // State for Tabs
   const [activeTab, setActiveTab] = useState("foryou") // "foryou" | "challenges" | "leaderboard"
@@ -84,8 +84,9 @@ const ReelsPage = () => {
       {(!showMobileDetail || isLg) && (
         <Breadcrumb 
           items={[
-            { label: "Cat Speak"},
-            { label: t.catSpeak.reels.title || "Reels" }
+            { label: t?.nav?.home || "Home", onClick: () => navigate("/") },
+            { label: t?.nav?.catSpeak || "Cat Speak"},
+            { label: t.catSpeak?.reels?.title || "Reels" }
           ]} 
         />
       )}
