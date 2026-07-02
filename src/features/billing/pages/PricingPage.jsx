@@ -62,14 +62,6 @@ const PricingPage = () => {
               valueType: f.valueType?.toLowerCase(),
               code: f.featureCode,
             }))
-            .sort((a, b) => {
-              const aIsFalsy =
-                a.valueType === "boolean" && a.limitValue === "false"
-              const bIsFalsy =
-                b.valueType === "boolean" && b.limitValue === "false"
-              if (aIsFalsy === bIsFalsy) return 0
-              return aIsFalsy ? 1 : -1
-            })
         : [],
       applicableRole: plan.applicableRole?.toLowerCase(),
       iconUrl: plan.iconUrl,
