@@ -23,8 +23,13 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: true,
         },
-        "/api/v1/InstructorRooms": {
+        "/api/student": {
           target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
+        "/api/v1/Payments": {
+          target: "https://stagingapi.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },

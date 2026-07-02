@@ -32,12 +32,14 @@ import {
 
 import {
   useGetClassDetailQuery,
+  useGetStudentClassDetailQuery,
   useUpdateClassMutation,
   useDeleteClassMutation,
   useGetClassMaterialsQuery,
   useUploadClassMaterialMutation,
   useDeleteClassMaterialMutation
 } from "@/store/api/coursesApi"
+import { useAuth } from "@/features/auth"
 import { formatCurrency } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
@@ -64,14 +66,20 @@ const ClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { role } = useAuth()
   const c = t.courses || {}
   const cd = c.classDetail || {}
+
+  const isStudent = role !== "Teacher"
 
   // Active Tab: "overview", "members", "feed", "grading", "materials"
   const [activeTab, setActiveTab] = useState("overview")
 
-  // Fetch Class Details via RTK Query
-  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetClassDetailQuery(id)
+  // Fetch Class Details conditionally via RTK Query
+  const teacherDetail = useGetClassDetailQuery(id, { skip: isStudent })
+  const studentDetail = useGetStudentClassDetailQuery(id, { skip: !isStudent })
+
+  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = isStudent ? studentDetail : teacherDetail
   const [updateClass] = useUpdateClassMutation()
   const [deleteClass] = useDeleteClassMutation()
 
@@ -373,14 +381,16 @@ const ClassDetailPage = () => {
             <span>{language === "vi" ? "Trò chuyện" : "Chat"}</span>
           </button>
 
-          {/* Tạo bài + button */}
-          <button
-            onClick={() => setActiveTab("feed")}
-            className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
-          >
-            <span>{language === "vi" ? "Tạo bài" : "Create Post"}</span>
-            <span className="text-sm font-light">+</span>
-          </button>
+          {/* Tạo bài + button (Hidden for students) */}
+          {!isStudent && (
+            <button
+              onClick={() => setActiveTab("feed")}
+              className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
+            >
+              <span>{language === "vi" ? "Tạo bài" : "Create Post"}</span>
+              <span className="text-sm font-light">+</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -403,7 +413,9 @@ const ClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          {language === "vi" ? "Quản lý thành viên" : "Members"}
+          {isStudent
+            ? (language === "vi" ? "Bạn học" : "Classmates")
+            : (language === "vi" ? "Quản lý thành viên" : "Members")}
         </button>
 
         <button
@@ -424,8 +436,14 @@ const ClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          <span>{language === "vi" ? "Chấm điểm & quản lý" : "Grading & Management"}</span>
-          <span className="bg-[#EAB308] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0">12</span>
+          <span>
+            {isStudent
+              ? (language === "vi" ? "Điểm số của tôi" : "My Grades")
+              : (language === "vi" ? "Chấm điểm & quản lý" : "Grading & Management")}
+          </span>
+          {!isStudent && (
+            <span className="bg-[#EAB308] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0">12</span>
+          )}
         </button>
 
         <button
@@ -466,53 +484,55 @@ const ClassDetailPage = () => {
                   {classData.title || "English for newbie 1-0-2"}
                 </h2>
 
-                {/* Actions Trigger / Tùy chỉnh button */}
-                <div className="relative shrink-0">
-                  <button
-                    onClick={() => setShowActionsDropdown(!showActionsDropdown)}
-                    className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
-                  >
-                    <Pencil size={14} />
-                    <span>{language === "vi" ? "Tùy chỉnh" : "Customize"}</span>
-                  </button>
+                {/* Actions Trigger / Tùy chỉnh button (Hidden for students) */}
+                {!isStudent && (
+                  <div className="relative shrink-0">
+                    <button
+                      onClick={() => setShowActionsDropdown(!showActionsDropdown)}
+                      className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
+                    >
+                      <Pencil size={14} />
+                      <span>{language === "vi" ? "Tùy chỉnh" : "Customize"}</span>
+                    </button>
 
-                  {showActionsDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-150 rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700">
-                      <button
-                        onClick={() => {
-                          setShowActionsDropdown(false)
-                          navigate(`/workspace/courses/edit-class/${id}`)
-                        }}
-                        className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
-                      >
-                        {language === "vi" ? "Chỉnh sửa lớp" : "Edit Class"}
-                      </button>
-                      <button
-                        onClick={async () => {
-                          setShowActionsDropdown(false);
-                          try {
-                            await updateClass({ id, data: { status: "COMPLETED" } }).unwrap()
-                            toast.success(cd.toastCompleteSuccess || "Marked class as complete");
-                          } catch {
-                            toast.error("Failed to complete class");
-                          }
-                        }}
-                        className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
-                      >
-                        {language === "vi" ? "Hoàn thành lớp học" : "Complete Class"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowActionsDropdown(false);
-                          setShowCancelClassModal(true);
-                        }}
-                        className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold text-red-600 transition-colors"
-                      >
-                        {language === "vi" ? "Hủy lớp học" : "Cancel Class"}
-                      </button>
-                    </div>
-                  )}
-                </div>
+                    {showActionsDropdown && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-150 rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700">
+                        <button
+                          onClick={() => {
+                            setShowActionsDropdown(false)
+                            navigate(`/workspace/courses/edit-class/${id}`)
+                          }}
+                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
+                        >
+                          {language === "vi" ? "Chỉnh sửa lớp" : "Edit Class"}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            setShowActionsDropdown(false);
+                            try {
+                              await updateClass({ id, data: { status: "COMPLETED" } }).unwrap()
+                              toast.success(cd.toastCompleteSuccess || "Marked class as complete");
+                            } catch {
+                              toast.error("Failed to complete class");
+                            }
+                          }}
+                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
+                        >
+                          {language === "vi" ? "Hoàn thành lớp học" : "Complete Class"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowActionsDropdown(false);
+                            setShowCancelClassModal(true);
+                          }}
+                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold text-red-600 transition-colors"
+                        >
+                          {language === "vi" ? "Hủy lớp học" : "Cancel Class"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -946,13 +966,15 @@ const ClassDetailPage = () => {
                 </div>
               </div>
 
-              <button
-                onClick={() => toast.success(`Send private message to ${mockTeacher.fullName}`)}
-                className="h-8 px-4 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1.5"
-              >
-                <MessageSquare size={13} />
-                <span>{language === "vi" ? "Nhắn tin" : "Message"}</span>
-              </button>
+              {!isStudent && (
+                <button
+                  onClick={() => toast.success(`Send private message to ${mockTeacher.fullName}`)}
+                  className="h-8 px-4 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1.5"
+                >
+                  <MessageSquare size={13} />
+                  <span>{language === "vi" ? "Nhắn tin" : "Message"}</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -961,13 +983,15 @@ const ClassDetailPage = () => {
               <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-widest">
                 {language === "vi" ? `HỌC VIÊN (${studentsList.length} / 30)` : `STUDENTS (${studentsList.length} / 30)`}
               </h3>
-              <button
-                onClick={() => toast.success("Invite code copied to clipboard")}
-                className="text-xs text-[#990011] font-bold flex items-center gap-1 hover:underline"
-              >
-                <Plus size={13} />
-                <span>{language === "vi" ? "Mời học viên" : "Invite Student"}</span>
-              </button>
+              {!isStudent && (
+                <button
+                  onClick={() => toast.success("Invite code copied to clipboard")}
+                  className="text-xs text-[#990011] font-bold flex items-center gap-1 hover:underline"
+                >
+                  <Plus size={13} />
+                  <span>{language === "vi" ? "Mời học viên" : "Invite Student"}</span>
+                </button>
+              )}
             </div>
 
             <div className="flex flex-col divide-y divide-gray-100">
@@ -979,48 +1003,66 @@ const ClassDetailPage = () => {
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xs font-extrabold text-gray-800">{student.fullName}</span>
-                      <span className="text-[10px] text-gray-450 font-semibold">{student.email} • {student.phone}</span>
+                      <span className="text-[10px] text-gray-450 font-semibold">
+                        {isStudent ? "student@catspeak.edu.vn" : `${student.email} • ${student.phone}`}
+                      </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <div className="relative">
-                      <select
-                        value={student.attendance || "PRESENT"}
-                        onChange={(e) => handleUpdateAttendance(student.id, e.target.value)}
-                        className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border focus:outline-none appearance-none cursor-pointer pr-6 transition-all ${student.attendance === "PRESENT" ? "bg-green-50 text-green-700 border-green-200" :
+                      {isStudent ? (
+                        <span className={`text-[10px] font-black px-2.5 py-1.5 rounded-lg border transition-all ${
+                          student.attendance === "PRESENT" ? "bg-green-50 text-green-700 border-green-200" :
                           student.attendance === "ABSENT_EXCUSED" ? "bg-blue-50 text-blue-700 border-blue-200" :
-                            "bg-red-50 text-red-700 border-red-200"
-                          }`}
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                          backgroundRepeat: "no-repeat",
-                          backgroundPosition: "right 6px center",
-                          backgroundSize: "8px"
-                        }}
-                      >
-                        <option value="PRESENT">{language === "vi" ? "Có mặt" : "Present"}</option>
-                        <option value="ABSENT_EXCUSED">{language === "vi" ? "Vắng có phép" : "Absent (Excused)"}</option>
-                        <option value="ABSENT_UNEXCUSED">{language === "vi" ? "Vắng không phép" : "Absent (Unexcused)"}</option>
-                      </select>
+                          "bg-red-50 text-red-700 border-red-200"
+                        }`}>
+                          {student.attendance === "PRESENT" ? (language === "vi" ? "Có mặt" : "Present") :
+                           student.attendance === "ABSENT_EXCUSED" ? (language === "vi" ? "Vắng có phép" : "Absent (Excused)") :
+                           (language === "vi" ? "Vắng không phép" : "Absent (Unexcused)")}
+                        </span>
+                      ) : (
+                        <select
+                          value={student.attendance || "PRESENT"}
+                          onChange={(e) => handleUpdateAttendance(student.id, e.target.value)}
+                          className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border focus:outline-none appearance-none cursor-pointer pr-6 transition-all ${student.attendance === "PRESENT" ? "bg-green-50 text-green-700 border-green-200" :
+                            student.attendance === "ABSENT_EXCUSED" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                              "bg-red-50 text-red-700 border-red-200"
+                            }`}
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "right 6px center",
+                            backgroundSize: "8px"
+                          }}
+                        >
+                          <option value="PRESENT">{language === "vi" ? "Có mặt" : "Present"}</option>
+                          <option value="ABSENT_EXCUSED">{language === "vi" ? "Vắng có phép" : "Absent (Excused)"}</option>
+                          <option value="ABSENT_UNEXCUSED">{language === "vi" ? "Vắng không phép" : "Absent (Unexcused)"}</option>
+                        </select>
+                      )}
                     </div>
 
-                    <button
-                      onClick={() => toast.success(`Messaging ${student.fullName}`)}
-                      className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                    >
-                      <MessageSquare size={14} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setStudentsList(prev => prev.filter(s => s.id !== student.id))
-                        toast.success(`Removed student ${student.fullName}`);
-                      }}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50/50 rounded-lg transition-colors"
-                      title="Remove from class"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {!isStudent && (
+                      <>
+                        <button
+                          onClick={() => toast.success(`Messaging ${student.fullName}`)}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <MessageSquare size={14} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStudentsList(prev => prev.filter(s => s.id !== student.id))
+                            toast.success(`Removed student ${student.fullName}`);
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50/50 rounded-lg transition-colors"
+                          title="Remove from class"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1035,26 +1077,28 @@ const ClassDetailPage = () => {
 
           <div className="lg:col-span-2 flex flex-col gap-4">
 
-            {/* Create Post Form */}
-            <form onSubmit={handleCreatePost} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
-              <textarea
-                rows={3}
-                placeholder={language === "vi" ? "Chia sẻ tin tức, tài liệu học tập với lớp..." : "Share announcements, links, study resources..."}
-                value={newPostText}
-                onChange={(e) => setNewPostText(e.target.value)}
-                className="w-full p-3 bg-gray-50 hover:bg-gray-50 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
-              />
-              <div className="flex justify-between items-center border-t border-gray-50 pt-2">
-                <span className="text-[10px] text-gray-400 font-bold">{language === "vi" ? "Đăng với tư cách giảng viên" : "Posting as Instructor"}</span>
-                <button
-                  type="submit"
-                  className="h-8 px-4 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
-                >
-                  <Send size={12} />
-                  <span>{language === "vi" ? "Đăng bài" : "Publish"}</span>
-                </button>
-              </div>
-            </form>
+            {/* Create Post Form (Hidden for students) */}
+            {!isStudent && (
+              <form onSubmit={handleCreatePost} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
+                <textarea
+                  rows={3}
+                  placeholder={language === "vi" ? "Chia sẻ tin tức, tài liệu học tập với lớp..." : "Share announcements, links, study resources..."}
+                  value={newPostText}
+                  onChange={(e) => setNewPostText(e.target.value)}
+                  className="w-full p-3 bg-gray-50 hover:bg-gray-50 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
+                />
+                <div className="flex justify-between items-center border-t border-gray-50 pt-2">
+                  <span className="text-[10px] text-gray-400 font-bold">{language === "vi" ? "Đăng với tư cách giảng viên" : "Posting as Instructor"}</span>
+                  <button
+                    type="submit"
+                    className="h-8 px-4 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+                  >
+                    <Send size={12} />
+                    <span>{language === "vi" ? "Đăng bài" : "Publish"}</span>
+                  </button>
+                </div>
+              </form>
+            )}
 
             {/* List of feed items */}
             <div className="flex flex-col gap-3">
@@ -1137,7 +1181,9 @@ const ClassDetailPage = () => {
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
               <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
-                {language === "vi" ? "Quản lý & Chấm điểm bài tập" : "Assignment Grading & Submissions"}
+                {isStudent
+                  ? (language === "vi" ? "Kết quả học tập & Bảng điểm" : "My Grades & Submissions")
+                  : (language === "vi" ? "Quản lý & Chấm điểm bài tập" : "Assignment Grading & Submissions")}
               </h3>
             </div>
           </div>
@@ -1146,7 +1192,7 @@ const ClassDetailPage = () => {
             <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 text-gray-700 font-extrabold uppercase tracking-wider">
-                  <th className="p-3">Student</th>
+                  {!isStudent && <th className="p-3">Student</th>}
                   <th className="p-3">Assignment</th>
                   <th className="p-3">Due Status</th>
                   <th className="p-3">Grading Status</th>
@@ -1157,23 +1203,23 @@ const ClassDetailPage = () => {
               <tbody className="divide-y divide-gray-100 text-gray-700">
                 {gradingList.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="p-3 font-extrabold text-gray-800">{item.studentName}</td>
+                    {!isStudent && <td className="p-3 font-extrabold text-gray-800">{item.studentName}</td>}
                     <td className="p-3 font-bold text-gray-650">{item.title}</td>
                     <td className="p-3 text-gray-400 font-semibold">{item.dueDate}</td>
                     <td className="p-3">
                       {item.status === "Ungraded" && (
-                        <span className="bg-red-50 text-red-650 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-100">
-                          Needs Grading
+                        <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-100">
+                          {isStudent ? (language === "vi" ? "Chưa nộp" : "Not Submitted") : (language === "vi" ? "Cần chấm điểm" : "Needs Grading")}
                         </span>
                       )}
                       {item.status === "Resubmitted" && (
                         <span className="bg-orange-50 text-orange-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-100">
-                          Resubmitted
+                          {isStudent ? (language === "vi" ? "Chờ chấm điểm" : "Pending Grading") : (language === "vi" ? "Đã nộp lại" : "Resubmitted")}
                         </span>
                       )}
                       {item.status === "Graded" && (
                         <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-100">
-                          Graded
+                          {language === "vi" ? "Đã chấm điểm" : "Graded"}
                         </span>
                       )}
                     </td>
@@ -1181,20 +1227,47 @@ const ClassDetailPage = () => {
                       {item.grade !== null ? item.grade : "—"}
                     </td>
                     <td className="p-3 text-center">
-                      {item.status !== "Graded" ? (
-                        <button
-                          onClick={() => handleGradeSubmission(item.id)}
-                          className="h-7 px-3 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
-                        >
-                          Grade
-                        </button>
+                      {isStudent ? (
+                        item.status === "Ungraded" ? (
+                          <button
+                            onClick={() => {
+                              toast.success(language === "vi" ? "Đã nộp bài tập thành công!" : "Homework submitted successfully!")
+                            }}
+                            className="h-7 px-3 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
+                          >
+                            {language === "vi" ? "Nộp bài" : "Submit"}
+                          </button>
+                        ) : item.status === "Resubmitted" ? (
+                          <button
+                            onClick={() => toast.success(language === "vi" ? "Đã nộp lại bài tập thành công!" : "Homework resubmitted successfully!")}
+                            className="h-7 px-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
+                          >
+                            {language === "vi" ? "Nộp lại" : "Resubmit"}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => toast.success(language === "vi" ? "Xem nhận xét của giảng viên..." : "Reviewing teacher feedback...")}
+                            className="h-7 px-3 bg-gray-100 hover:bg-gray-150 text-gray-600 font-bold text-[10px] rounded-lg transition-all"
+                          >
+                            {language === "vi" ? "Xem nhận xét" : "View feedback"}
+                          </button>
+                        )
                       ) : (
-                        <button
-                          onClick={() => toast.success("Reviewing feedback details")}
-                          className="h-7 px-3 bg-gray-100 hover:bg-gray-150 text-gray-600 font-bold text-[10px] rounded-lg transition-all"
-                        >
-                          View feedback
-                        </button>
+                        item.status !== "Graded" ? (
+                          <button
+                            onClick={() => handleGradeSubmission(item.id)}
+                            className="h-7 px-3 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
+                          >
+                            Grade
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => toast.success("Reviewing feedback details")}
+                            className="h-7 px-3 bg-gray-100 hover:bg-gray-150 text-gray-600 font-bold text-[10px] rounded-lg transition-all"
+                          >
+                            View feedback
+                          </button>
+                        )
                       )}
                     </td>
                   </tr>
@@ -1209,8 +1282,8 @@ const ClassDetailPage = () => {
       {activeTab === "materials" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
 
-          {/* LEFT/MAIN COLUMN: Materials List */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
+          {/* LEFT/MAIN COLUMN: Materials List (Full width for student) */}
+          <div className={`${isStudent ? "lg:col-span-3" : "lg:col-span-2"} flex flex-col gap-4`}>
 
             {/* Header and Search */}
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1291,15 +1364,17 @@ const ClassDetailPage = () => {
                               <Download size={15} />
                             </a>
                           )}
-                          <button
-                            onClick={() => {
-                              setDeleteMaterialData(file);
-                            }}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                            title="Delete File"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          {!isStudent && (
+                            <button
+                              onClick={() => {
+                                setDeleteMaterialData(file);
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                              title="Delete File"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
                         </div>
                       </div>
                     )
@@ -1310,85 +1385,87 @@ const ClassDetailPage = () => {
 
           </div>
 
-          {/* RIGHT COLUMN: Upload Panel */}
-          <div className="flex flex-col gap-6">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
-              <div className="flex items-center gap-2 border-b border-gray-50 pb-2.5">
-                <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
-                <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
-                  {cd.uploadMaterial || "Tải lên tài liệu"}
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <div
-                  className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragActive
-                    ? "border-[#990011] bg-[#990011]/5"
-                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/55"
-                    }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                  onClick={() => document.getElementById("file-upload-input").click()}
-                >
-                  <input
-                    id="file-upload-input"
-                    type="file"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
-                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] mb-3">
-                    <Upload size={18} />
-                  </div>
-                  <span className="text-xs font-bold text-gray-800">
-                    {cd.selectFile || "Chọn tệp tin hoặc kéo thả"}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-semibold mt-1">
-                    Support PDF, DOCX, XLSX, images (Max 15MB)
-                  </span>
+          {/* RIGHT COLUMN: Upload Panel (Hidden for students) */}
+          {!isStudent && (
+            <div className="flex flex-col gap-6">
+              <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center gap-2 border-b border-gray-50 pb-2.5">
+                  <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
+                  <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
+                    {cd.uploadMaterial || "Tải lên tài liệu"}
+                  </h3>
                 </div>
 
-                {selectedUploadFile && (
-                  <div className="p-3 bg-gray-50/80 rounded-xl border border-gray-100 flex items-center justify-between gap-3 animate-fadeIn">
-                    <div className="flex items-center gap-2.5 overflow-hidden">
-                      {getFileIcon(selectedUploadFile.name)}
-                      <div className="flex flex-col overflow-hidden">
-                        <span className="text-xs font-bold text-gray-850 truncate max-w-[150px]">
-                          {selectedUploadFile.name}
-                        </span>
-                        <span className="text-[9px] text-gray-400 font-bold">
-                          {formatFileSize(selectedUploadFile.size)}
-                        </span>
-                      </div>
+                <div className="flex flex-col gap-3">
+                  <div
+                    className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragActive
+                      ? "border-[#990011] bg-[#990011]/5"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/55"
+                      }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    onClick={() => document.getElementById("file-upload-input").click()}
+                  >
+                    <input
+                      id="file-upload-input"
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] mb-3">
+                      <Upload size={18} />
                     </div>
-                    <button
-                      onClick={() => setSelectedUploadFile(null)}
-                      className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-all"
-                    >
-                      <X size={14} />
-                    </button>
+                    <span className="text-xs font-bold text-gray-800">
+                      {cd.selectFile || "Chọn tệp tin hoặc kéo thả"}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-semibold mt-1">
+                      Support PDF, DOCX, XLSX, images (Max 15MB)
+                    </span>
                   </div>
-                )}
 
-                <button
-                  type="button"
-                  disabled={!selectedUploadFile || isUploading}
-                  onClick={handleUploadSubmit}
-                  className="w-full h-10 bg-[#990011] hover:bg-[#80000e] disabled:bg-gray-200 text-white disabled:text-gray-400 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:cursor-not-allowed"
-                >
-                  {isUploading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                  ) : (
-                    <>
-                      <Upload size={13} />
-                      <span>{cd.uploadNow || "Tải lên ngay"}</span>
-                    </>
+                  {selectedUploadFile && (
+                    <div className="p-3 bg-gray-50/80 rounded-xl border border-gray-100 flex items-center justify-between gap-3 animate-fadeIn">
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        {getFileIcon(selectedUploadFile.name)}
+                        <div className="flex flex-col overflow-hidden">
+                          <span className="text-xs font-bold text-gray-850 truncate max-w-[150px]">
+                            {selectedUploadFile.name}
+                          </span>
+                          <span className="text-[9px] text-gray-400 font-bold">
+                            {formatFileSize(selectedUploadFile.size)}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setSelectedUploadFile(null)}
+                        className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-all"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   )}
-                </button>
+
+                  <button
+                    type="button"
+                    disabled={!selectedUploadFile || isUploading}
+                    onClick={handleUploadSubmit}
+                    className="w-full h-10 bg-[#990011] hover:bg-[#80000e] disabled:bg-gray-200 text-white disabled:text-gray-400 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:cursor-not-allowed"
+                  >
+                    {isUploading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    ) : (
+                      <>
+                        <Upload size={13} />
+                        <span>{cd.uploadNow || "Tải lên ngay"}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
         </div>
       )}

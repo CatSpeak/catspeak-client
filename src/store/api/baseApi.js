@@ -174,7 +174,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
   const url = typeof args === "string" ? args : args?.url
 
   // Choose the query client based on routing prefixes
-  const isInstructorRoute = url && (url.toLowerCase().startsWith("/teacher/") || url.toLowerCase().startsWith("/v1/instructorrooms/"))
+  const isInstructorRoute = url && url.toLowerCase().startsWith("/teacher/")
   const activeQuery = isInstructorRoute ? instructorBaseQuery : baseQuery
 
   // Skip proactive refresh for auth endpoints

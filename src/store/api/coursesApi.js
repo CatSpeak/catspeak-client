@@ -119,7 +119,7 @@ const appendFormValue = (formData, key, value) => {
         Object.entries(item).forEach(([nestedKey, nestedValue]) => {
           const camelKey = nestedKey.charAt(0).toLowerCase() + nestedKey.slice(1)
           const pascalKey = nestedKey.charAt(0).toUpperCase() + nestedKey.slice(1)
-          
+
           appendFormValue(formData, `${key}[${index}].${camelKey}`, nestedValue)
           if (camelKey !== pascalKey) {
             appendFormValue(formData, `${key}[${index}].${pascalKey}`, nestedValue)
@@ -220,6 +220,131 @@ const buildCreateClassFormData = (data) => buildFormData({
 
 export const coursesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Student Endpoints
+    getStudentEnrolledCourses: builder.query({
+      query: (params) => ({
+        url: "/student/classes/my-enrollments",
+        method: "GET",
+        params: {
+          page: params?.page || 1,
+          pageSize: params?.pageSize || 100,
+        },
+      }),
+      transformResponse: (response) => {
+        const rawItems = response?.data || response?.items || (Array.isArray(response) ? response : [])
+        // Map enrolled classes back to course structures for the StudentDashboard
+        return rawItems.map(cls => ({
+          id: cls.courseId?.toString() || "",
+          name: cls.courseName || "Untitled Course",
+          title: cls.courseName || "Untitled Course",
+          language: cls.language || "English",
+          levels: cls.levels || ["A1"],
+          description: cls.courseName ? `Enrolled in class ${cls.name}` : "",
+          totalSessions: cls.progress?.totalSessions || 24,
+          classCount: 1,
+          studentCount: cls.studentCount || 0,
+          status: cls.status || "OPEN",
+          thumbnailUrl: cls.thumbnailUrl || "",
+          enrolledClassId: cls.id?.toString() || "",
+          enrolledClassName: cls.name || "",
+          progress: cls.progress || { completedSessions: 0, totalSessions: 24 }
+        }))
+      },
+      providesTags: ["StudentCourses", "StudentClasses"]
+    }),
+
+    getStudentAvailableCourses: builder.query({
+      query: (params) => ({
+        url: "/student/courses",
+        method: "GET",
+        params: {
+          page: params?.page || 1,
+          pageSize: params?.pageSize || 100,
+          language: params?.language,
+          search: params?.search,
+        },
+      }),
+      transformResponse: (response) => {
+        const paginated = transformPaginatedResponse(response, transformCourse)
+        return paginated.data
+      },
+      providesTags: ["StudentCourses"]
+    }),
+
+    getStudentJoinedClasses: builder.query({
+      query: (params) => ({
+        url: "/student/classes/my-enrollments",
+        method: "GET",
+        params: {
+          page: params?.page || 1,
+          pageSize: params?.pageSize || 100,
+        },
+      }),
+      transformResponse: (response) => {
+        const paginated = transformPaginatedResponse(response, transformClass)
+        return paginated.data
+      },
+      providesTags: ["StudentClasses"]
+    }),
+
+    getStudentCourseDetail: builder.query({
+      query: (id) => ({
+        url: `/student/courses/${id}`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const data = response?.data || response
+        if (!data) return null
+        const transformedCourse = transformCourse(data)
+        const transformedClasses = (data.classes || []).map(cls => ({
+          ...transformClass(cls),
+          isEnrolled: cls.isEnrolled || false,
+          enrolledCount: cls.enrolledCount || 0
+        }))
+        const enrolledClass = transformedClasses.find(cls => cls.isEnrolled)
+        return {
+          ...transformedCourse,
+          enrolledClassId: enrolledClass?.id || null,
+          enrolledClassName: enrolledClass?.name || enrolledClass?.title || null,
+          classes: transformedClasses
+        }
+      },
+      providesTags: (result, error, id) => [{ type: "CourseDetail", id }]
+    }),
+
+    getStudentClassDetail: builder.query({
+      query: (id) => ({
+        url: `/student/classes/${id}`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const data = response?.data || response
+        if (!data) return null
+        return {
+          ...transformClass(data),
+          isEnrolled: data.isEnrolled || false,
+          enrolledCount: data.enrolledCount || 0
+        }
+      },
+      providesTags: (result, error, id) => [{ type: "ClassDetail", id }]
+    }),
+
+    enrollInCourse: builder.mutation({
+      query: ({ classId }) => ({
+        url: "/v1/Payments/checkout",
+        method: "POST",
+        body: {
+          paymentType: "ClassEnrollment",
+          classId: parseInt(classId),
+          pendingClassData: "",
+          returnUrl: window.location.origin + `/workspace/courses/class/${classId}`,
+          cancelUrl: window.location.href,
+          planId: 0,
+        },
+      }),
+      invalidatesTags: ["StudentCourses", "StudentClasses"]
+    }),
+
     // 1. Overview Dashboard
     getMyCoursesOverview: builder.query({
       query: () => ({
@@ -378,15 +503,42 @@ export const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: ["Courses"],
     }),
 
-    // 10. Create Class
+    // 10. Create Class via Payment Checkout (ClassOpeningFee)
+    // The old POST /teacher/classes endpoint is removed.
+    // Class creation now goes through the PayOS payment checkout flow.
+    // - capacity <= 6: free → class created immediately (response has classId)
+    // - capacity > 6: paid → response has checkoutUrl for PayOS redirect
     createClass: builder.mutation({
-      query: (data) => ({
-        url: "/teacher/classes",
-        method: "POST",
-        body: buildCreateClassFormData(data),
-        formData: true,
-      }),
-      transformResponse: (response) => transformClass(response?.data || response),
+      query: (data) => {
+        const schedule = getClassSchedule(data)
+        const pendingClassData = {
+          courseId: data.courseId ? parseInt(data.courseId) : null,
+          name: data.title || data.name,
+          language: data.language ? data.language.toUpperCase() : "",
+          levels: data.levels || [],
+          enrollmentStart: data.enrollmentStart || null,
+          enrollmentEnd: data.enrollmentEnd || null,
+          startDate: data.startDate || null,
+          schedule,
+          capacity: parseInt(data.slots || data.capacity || 10),
+          totalSessions: parseInt(data.totalSessions || 24),
+          price: parseFloat(data.tuitionFee || data.price || 0),
+          description: data.description || "",
+          timezone: data.timezone || "Asia/Ho_Chi_Minh",
+        }
+        return {
+          url: "/v1/Payments/checkout",
+          method: "POST",
+          body: {
+            paymentType: "ClassOpeningFee",
+            pendingClassData: JSON.stringify(pendingClassData),
+            returnUrl: window.location.origin + "/workspace/courses/all-classes",
+            cancelUrl: window.location.href,
+            planId: 0,
+            classId: 0,
+          },
+        }
+      },
       invalidatesTags: ["Classes", "Courses"],
     }),
 
@@ -414,29 +566,11 @@ export const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: ["Classes", "Courses"],
     }),
 
-    // 12a. Join Class Room
+    // 13. Join Class Room
     joinClassRoom: builder.mutation({
       query: (classId) => ({
         url: `/teacher/classes/${classId}/join-room`,
         method: "POST",
-      }),
-    }),
-
-    // 12b. Create Instructor Room
-    createInstructorRoom: builder.mutation({
-      query: ({ accountId, roomName, topic, description }) => ({
-        url: `/v1/InstructorRooms/create/${accountId}`,
-        method: "POST",
-        body: { roomName, topic, description },
-      }),
-    }),
-
-    // 13. Check Schedule Conflict
-    checkScheduleConflict: builder.mutation({
-      query: (schedule) => ({
-        url: "/teacher/schedule/check-conflict",
-        method: "POST",
-        body: schedule,
       }),
     }),
 
@@ -491,10 +625,26 @@ export const coursesApi = baseApi.injectEndpoints({
     // ─── Materials Management ───────────────────────────────────────
 
     getClassMaterials: builder.query({
-      query: (classId) => ({
-        url: `/teacher/classes/${classId}/materials`,
-        method: "GET"
-      }),
+      async queryFn(classId, _queryApi, _extraOptions, baseQuery) {
+        if (typeof classId === "string" && (classId.startsWith("c") || classId.startsWith("mock"))) {
+          const mockFiles = [
+            { id: "m1", name: "Syllabus_Introduction.pdf", size: 1024 * 350, fileUrl: "#", uploadedAt: "2026-06-25T10:00:00Z" },
+            { id: "m2", name: "Vocabulary_Lesson_1_Travel.docx", size: 1024 * 120, fileUrl: "#", uploadedAt: "2026-06-26T12:00:00Z" },
+            { id: "m3", name: "Homework_Reading_Passage.pdf", size: 1024 * 1800, fileUrl: "#", uploadedAt: "2026-06-27T15:30:00Z" }
+          ]
+          return { data: mockFiles }
+        }
+        try {
+          const result = await baseQuery({
+            url: `/teacher/classes/${classId}/materials`,
+            method: "GET"
+          })
+          if (result.error) return { error: result.error }
+          return { data: result.data?.data || result.data }
+        } catch (error) {
+          return { error: { status: 400, message: error.message } }
+        }
+      },
       providesTags: (result, error, classId) => [{ type: "ClassMaterials", id: classId }]
     }),
 
@@ -552,6 +702,12 @@ export const coursesApi = baseApi.injectEndpoints({
 })
 
 export const {
+  useGetStudentEnrolledCoursesQuery,
+  useGetStudentAvailableCoursesQuery,
+  useGetStudentJoinedClassesQuery,
+  useGetStudentCourseDetailQuery,
+  useGetStudentClassDetailQuery,
+  useEnrollInCourseMutation,
   useGetMyCoursesOverviewQuery,
   useGetAllCoursesQuery,
   useGetAllClassesQuery,
@@ -566,7 +722,6 @@ export const {
   useCreateClassMutation,
   useUpdateClassMutation,
   useDeleteClassMutation,
-  useCheckScheduleConflictMutation,
   useGetClassFeedQuery,
   useCreateClassPostMutation,
   useGetClassGradingQuery,
@@ -582,6 +737,5 @@ export const {
   // Commission hooks
   useGetCommissionQuery,
   // Virtual Room hooks
-  useCreateInstructorRoomMutation,
   useJoinClassRoomMutation,
 } = coursesApi

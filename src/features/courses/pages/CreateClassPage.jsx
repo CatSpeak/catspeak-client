@@ -74,7 +74,6 @@ const CreateClassPage = () => {
   const [deleteClass, { isLoading: isDeleting }] = useDeleteClassMutation()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  // const [checkConflict] = useCheckScheduleConflictMutation()
 
   // Static fallback teacher profile since /teacher/profile API does not exist
   const languagesList = FALLBACK_TEACHER_PROFILE.languages || []
@@ -362,10 +361,8 @@ const CreateClassPage = () => {
         return
       }
 
-      const selectedCourse = coursesList.find(c => String(c.id) === String(courseId))
       const payload = {
         courseId,
-        courseTitle: selectedCourse?.title || "",
         title: className,
         language: selectedLanguage,
         levels: [level],
@@ -377,19 +374,43 @@ const CreateClassPage = () => {
         schedule,
         slots: capacity,
         tuitionFee: parseFloat(fee) || 0,
-        thumbnailUrl: thumbnailFile || thumbnailPreview || "",
-        commissionPercent: feeDetails.commissionRate
+        timezone: "Asia/Ho_Chi_Minh",
       }
 
       if (isEditMode) {
-        await updateClass({ id, data: payload }).unwrap()
+        // Edit mode still uses PUT /teacher/classes/{id}
+        const updatePayload = {
+          ...payload,
+          thumbnailUrl: thumbnailFile || thumbnailPreview || "",
+          commissionPercent: feeDetails.commissionRate,
+        }
+        await updateClass({ id, data: updatePayload }).unwrap()
         toast.success(language === "vi" ? "Cập nhật lớp học thành công!" : "Class updated successfully!")
+        navigate("/workspace/courses/all-classes")
       } else {
-        await createClass(payload).unwrap()
-        toast.success(cc.toastCreateSuccess || "Class created successfully!")
+        // Create mode now goes through PayOS payment checkout
+        const result = await createClass(payload).unwrap()
+
+        if (result.checkoutUrl) {
+          // Paid flow (capacity > 6): redirect to PayOS
+          toast.success(
+            language === "vi"
+              ? "Đang chuyển đến trang thanh toán..."
+              : "Redirecting to payment..."
+          )
+          window.location.href = result.checkoutUrl
+        } else if (result.classId) {
+          // Free flow (capacity ≤ 6): class created immediately
+          toast.success(cc.toastCreateSuccess || "Class created successfully!")
+          navigate("/workspace/courses/all-classes")
+        } else {
+          // Fallback: assume success
+          toast.success(cc.toastCreateSuccess || "Class created successfully!")
+          navigate("/workspace/courses/all-classes")
+        }
       }
-      navigate("/workspace/courses/all-classes")
     } catch (err) {
+      console.error("Create/update class error details:", err)
       toast.error(err.data?.message || (isEditMode ? (language === "vi" ? "Lỗi cập nhật lớp học!" : "Failed to update class!") : (language === "vi" ? "Lỗi tạo lớp học!" : "Failed to create class!")))
     }
   }
