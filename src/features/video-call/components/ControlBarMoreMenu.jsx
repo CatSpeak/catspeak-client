@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import {
   MonitorUp,
   MonitorOff,
@@ -11,17 +11,17 @@ import {
   Captions,
   Check,
   RefreshCcw,
-} from "lucide-react"
-import { toast } from "react-hot-toast"
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import { AnimatePresence, motion } from "framer-motion"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
-import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
+} from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
+import { AnimatePresence, motion } from "framer-motion";
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls";
+import SubtitleLanguagePicker from "./SubtitleLanguagePicker";
 
 const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
   const {
     isLocalScreenShare,
     showParticipants,
@@ -42,7 +42,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     lkRoom,
     showTroubleshoot,
     setShowTroubleshoot,
-  } = useGlobalVideoCall()
+  } = useGlobalVideoCall();
 
   const {
     isSubtitleActive,
@@ -50,15 +50,15 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     subtitleSupportedLangs,
     startSubtitles,
     stopSubtitles,
-  } = useSubtitleControls()
+  } = useSubtitleControls();
 
-  const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
+  const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href)
-    toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!")
-    setShowMoreMenu(false)
-  }
+    navigator.clipboard.writeText(window.location.href);
+    toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!");
+    setShowMoreMenu(false);
+  };
 
   return (
     <AnimatePresence>
@@ -91,8 +91,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                     <div className="flex flex-col gap-1 p-1">
                       <button
                         onClick={() => {
-                          setShowParticipants(!showParticipants)
-                          setShowMoreMenu(false)
+                          setShowParticipants(!showParticipants);
+                          setShowMoreMenu(false);
                         }}
                         className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                         style={{ textAlign: "left" }}
@@ -105,14 +105,14 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                       <button
                         onClick={() => {
                           if (isAISession) {
-                            setShowCC(!showCC)
-                            setShowMoreMenu(false)
+                            setShowCC(!showCC);
+                            setShowMoreMenu(false);
                           } else {
                             if (isSubtitleActive) {
-                              stopSubtitles()
-                              setShowMoreMenu(false)
+                              stopSubtitles();
+                              setShowMoreMenu(false);
                             } else {
-                              setShowSubtitlePicker((v) => !v)
+                              setShowSubtitlePicker((v) => !v);
                             }
                           }
                         }}
@@ -134,8 +134,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                       <div className="border-t border-[#E5E5E5]"></div>
                       <button
                         onClick={() => {
-                          setShowVirtualBackground(!showVirtualBackground)
-                          setShowMoreMenu(false)
+                          setShowVirtualBackground(!showVirtualBackground);
+                          setShowMoreMenu(false);
                         }}
                         className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                       >
@@ -146,8 +146,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
 
                       <button
                         onClick={() => {
-                          setShowAvatarPicker(!showAvatarPicker)
-                          setShowMoreMenu(false)
+                          setShowAvatarPicker(!showAvatarPicker);
+                          setShowMoreMenu(false);
                         }}
                         className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                       >
@@ -159,8 +159,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                       {"documentPictureInPicture" in window && (
                         <button
                           onClick={() => {
-                            enterPiP?.()
-                            setShowMoreMenu(false)
+                            enterPiP?.();
+                            setShowMoreMenu(false);
                           }}
                           className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                         >
@@ -180,13 +180,16 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
 
                       <button
                         onClick={() => {
-                          setShowTroubleshoot(!showTroubleshoot)
-                          setShowMoreMenu(false)
+                          setShowTroubleshoot(!showTroubleshoot);
+                          setShowMoreMenu(false);
                         }}
                         className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-left"
                       >
                         <RefreshCcw size={20} className="shrink-0" />
-                        <span>{t?.rooms?.videoCall?.reconnect || "Troubleshoot connection"}</span>
+                        <span>
+                          {t?.rooms?.videoCall?.reconnect ||
+                            "Troubleshoot connection"}
+                        </span>
                       </button>
                     </div>
                   </FluentAnimation>
@@ -204,9 +207,9 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                       languages={subtitleSupportedLangs}
                       selectedLanguage={null}
                       onSelect={(lang) => {
-                        startSubtitles(lang)
-                        setShowSubtitlePicker(false)
-                        setShowMoreMenu(false)
+                        startSubtitles(lang);
+                        setShowSubtitlePicker(false);
+                        setShowMoreMenu(false);
                       }}
                       onBack={() => setShowSubtitlePicker(false)}
                       backLabel={t?.rooms?.videoCall?.controls?.back || "Back"}
@@ -221,7 +224,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
         </>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export default ControlBarMoreMenu
+export default ControlBarMoreMenu;

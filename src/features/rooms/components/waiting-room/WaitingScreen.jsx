@@ -53,16 +53,17 @@ const WaitingScreen = ({
       onBack={() => navigate(getCommunityPath(lang || language))}
       backLabel={t.rooms.waitingScreen.backToCommunity}
       maxWidthClass="max-w-[800px]"
+      cardClassName="rounded-[12px] h-auto"
     >
       <div className="text-center">
-        <h4 className="mb-2 font-semibold text-2xl md:text-3xl">
+        <h4 className="mb-2 font-semibold text-xl md:text-2xl">
           {session?.roomName || t.rooms.waitingScreen.readyToJoin}
         </h4>
 
         {(room?.requiredLevel || room?.topic) && (
-          <div className="flex flex-wrap justify-center gap-2 mb-3 mt-2">
+          <div className="flex flex-wrap justify-center gap-[11px] mb-3 mt-2">
             {room?.requiredLevel && (
-              <span className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="rounded-lg bg-cath-red-700 px-[15px] py-2.5 text-[14px] font-bold uppercase tracking-wider leading-none text-white">
                 {room.requiredLevel}
               </span>
             )}
@@ -72,7 +73,7 @@ const WaitingScreen = ({
                 return (
                   <span
                     key={trimmed}
-                    className="rounded-full bg-cath-red-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
+                    className="rounded-lg bg-cath-red-700 px-[15px] py-2.5 text-[14px] font-bold  tracking-wider leading-none text-white"
                   >
                     {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
                       trimmed}
@@ -83,7 +84,7 @@ const WaitingScreen = ({
         )}
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center gap-6 mb-6">
+      <div className="flex w-full flex-col items-center justify-center gap-4 mb-4">
         <ParticipantsPreview
           participants={participants}
           participantCount={participantCount}
@@ -102,12 +103,12 @@ const WaitingScreen = ({
       </div>
 
       <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
-        <div className="flex w-full flex-col sm:flex-row gap-3">
+        <div className="flex w-full flex-col sm:flex-row sm:gap-[25px] gap-4">
           <PillButton
             onClick={handleCopyLink}
             variant="secondary"
             startIcon={<Copy />}
-            className="h-12 w-full sm:flex-1 shrink-0 bg-white border border-[e5e5e5] shadow-sm hover:bg-gray-50"
+            className="h-12 w-full sm:flex-1 shrink-0 bg-white border border-[#e5e5e5] shadow-sm hover:bg-gray-50 py-2 px-4 text-[18px] rounded-[35px] text-[#7B7979]"
           >
             {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
           </PillButton>
@@ -116,7 +117,7 @@ const WaitingScreen = ({
             disabled={isFull}
             aria-disabled={isFull}
             title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
-            className="h-12 w-full sm:flex-1 shrink-0"
+            className="h-12 w-full sm:flex-1 shrink-0 py-2 px-4 text-[18px] rounded-[35px] text-[#F5F5F5]"
           >
             {t.rooms.waitingScreen.joinNow}
           </PillButton>

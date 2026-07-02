@@ -64,6 +64,8 @@ const IDLE_VALUE = {
   isAISession: false,
   showCC: false,
   setShowCC: () => {},
+  showAvatarPicker: false,
+  setShowAvatarPicker: () => {},
   showRoomSubtitles: false,
   setShowRoomSubtitles: () => {},
   subtitleSelectedLanguage: null,
