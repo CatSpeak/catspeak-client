@@ -1,8 +1,19 @@
+import {
+  Home,
+  LayoutDashboard,
+  ShoppingCart,
+  MessageCircle,
+  GraduationCap,
+  Settings,
+  HelpCircle,
+} from "lucide-react";
+
 export const navLinks = [
-  { key: "community", path: "/community", hasDropdown: true },
+  { key: "community", path: "/community", hasDropdown: true, icon: Home },
   {
     key: "catSpeak",
     hasDropdown: true,
+    icon: LayoutDashboard,
     subItems: [
       { key: "catSpeakNews", path: "/cat-speak/news" },
       // { key: "worldNews", path: "/cat-speak/discover" },
@@ -17,11 +28,12 @@ export const navLinks = [
     hasDropdown: false,
     hideInSidebar: true,
   },
-  // { key: "cart", path: "/cart" },
-  // { key: "messages", path: "/messages" },
+  // { key: "cart", path: "/cart", icon: ShoppingCart },
+  // { key: "messages", path: "/messages", icon: MessageCircle },
   // {
   //   key: "courses",
   //   hasDropdown: true,
+  //   icon: GraduationCap,
   //   subItems: [
   //     { key: "allCourses", path: "/courses" },
   //     { key: "myCourses", path: "/my-courses" }
@@ -30,6 +42,6 @@ export const navLinks = [
 ];
 
 export const footerLinks = [
-  { key: "settings", path: "/setting" }, // Trỏ tới trang Cài đặt tài khoản
-  // { key: "help", path: "/help" }
+  { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
+  // { key: "help", path: "/help", icon: HelpCircle }
 ];
