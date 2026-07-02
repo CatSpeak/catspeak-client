@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FluentAnimation } from "@/shared/components/ui/animations";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { VietNam, China, USA } from "@/shared/assets/icons/flags";
-import useClickOutside from "@/shared/hooks/useClickOutside";
+import React, { useState, useRef } from "react"
+import { AnimatePresence , motion} from "framer-motion"
+import { FluentAnimation } from "@/shared/components/ui/animations"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
  * Nôm Vietnamese is not listed here — when you add it for development, use e.g.
@@ -66,11 +66,7 @@ const LanguageSwitcher = ({ className = "" }) => {
               exit
               className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
             >
-              <div
-                className="p-2 flex flex-col gap-1"
-                role="listbox"
-                aria-label="Language"
-              >
+              <div className="p-2 flex flex-col gap-1" role="listbox" aria-label="Language">
                 {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => {
                   const isActive = language === key;
 
@@ -82,13 +78,12 @@ const LanguageSwitcher = ({ className = "" }) => {
                       aria-selected={isActive}
                       disabled={disabled}
                       onClick={() => !disabled && handleLanguageSelect(key)}
-                      className={`relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${
-                        disabled
-                          ? "cursor-not-allowed text-gray-400"
-                          : isActive
-                            ? "text-cath-red-800 font-medium"
-                            : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                      className={`relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${disabled
+                        ? "cursor-not-allowed text-gray-400"
+                        : isActive
+                          ? "text-cath-red-800 font-medium"
+                          : "text-gray-700 hover:bg-gray-50"
+                        }`}
                     >
                       {isActive && (
                         <motion.div

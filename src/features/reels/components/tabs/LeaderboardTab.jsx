@@ -11,7 +11,8 @@ export default function LeaderboardTab({
   onSelectChallenge,
   onReelClick,
   showMobileDetail,
-  onMobileDetailChange
+  onMobileDetailChange,
+  onParticipate
 }) {
   if (challengeStatus === "past") {
     return (
@@ -40,6 +41,7 @@ export default function LeaderboardTab({
       setChallengeStatus={setChallengeStatus}
       challengeId={challengeId}
       onSelectChallenge={onSelectChallenge}
+      onParticipate={onParticipate}
       renderContent={({ challengeId, selectedChallenge, challengeStatus }) => (
         <ChallengeLeaderboardView
           challengeId={challengeId}

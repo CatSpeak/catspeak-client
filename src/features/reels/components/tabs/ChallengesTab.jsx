@@ -7,7 +7,8 @@ export default function ChallengesTab({
   setChallengeStatus, 
   challengeId, 
   onSelectChallenge,
-  onReelClick 
+  onReelClick,
+  onParticipate
 }) {
   return (
     <SharedChallengeLayout
@@ -15,6 +16,7 @@ export default function ChallengesTab({
       setChallengeStatus={setChallengeStatus}
       challengeId={challengeId}
       onSelectChallenge={onSelectChallenge}
+      onParticipate={onParticipate}
       renderContent={({ challengeId, selectedChallenge, challengeStatus }) => (
         <ChallengeReelsView
           challengeId={challengeId}

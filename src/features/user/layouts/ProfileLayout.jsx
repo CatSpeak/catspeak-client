@@ -114,25 +114,17 @@ const ProfileLayout = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row w-full flex-1 lg:overflow-hidden relative z-0">
-      <BackgroundCircles />
-
-      {/* Main Content */}
-      <main className="flex-1 h-full overflow-y-auto flex flex-col">
-        {/* Content */}
-        <div className="mx-auto w-full max-w-[1040px] min-w-0 p-5 flex-1">
-          {/* Tabs Navigation */}
-          <Tabs
-            tabs={tabsConfig}
-            activeTab={activeTab}
-            onChange={handleTabChange}
-            className="mb-6"
-          />
-
-          <Outlet />
+    <SharedLayout
+      background={<BackgroundCircles />}
+      sidebar={<ProfileSidebar />}
+      mobileNav={
+        <div className="w-full">
+          <ProfileSidebar variant="horizontal" />
         </div>
-      </main>
-    </div>
+      }
+    >
+      <Outlet />
+    </SharedLayout>
   )
 }
 

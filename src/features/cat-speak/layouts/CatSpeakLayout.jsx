@@ -2,6 +2,8 @@ import React from "react"
 import { Outlet, useLocation } from "react-router-dom"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { AnimatePresence } from "framer-motion"
+import CatSpeakSidebar from "../components/CatSpeakSidebar"
+import SharedLayout from "@/shared/components/layout/SharedLayout"
 
 const getAnimationKey = (pathname) => {
   const reelMatch = pathname.match(/^\/([^/]+)\/cat-speak\/reels(\/.*)?$/)

@@ -2,7 +2,7 @@ import React from "react"
 import { Heart } from "lucide-react"
 import { formatScore } from "../../utils/formatters"
 
-export default function PodiumItem({ entry, rank }) {
+export default function PodiumItem({ entry, rank, onClick }) {
   if (!entry) return <div className="flex-1" />
 
   const username = entry.reel?.nickname || entry.reel?.username || "User name"
@@ -25,7 +25,10 @@ export default function PodiumItem({ entry, rank }) {
   const isRank1 = rank === 1
 
   return (
-    <div className={`flex flex-col items-center justify-end flex-1 ${isRank1 ? "z-10" : "z-0"}`}>
+    <div 
+      className={`flex flex-col items-center justify-end flex-1 ${isRank1 ? "z-10" : "z-0"} cursor-pointer hover:opacity-90 transition-opacity`}
+      onClick={onClick}
+    >
       <div className="flex flex-col items-center mb-3 px-1">
         <div className={`${avatarSizes[rank]} rounded-full bg-gray-200 overflow-hidden border-2 ${isRank1 ? "border-[#F59E0B]" : "border-gray-200"} shadow-sm mb-2 relative z-10`}>
           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} alt="" className="w-full h-full object-cover" />

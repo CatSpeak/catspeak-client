@@ -111,13 +111,16 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, index, onSelect }) {
       onMouseLeave={handleMouseLeave}
     >
       {/* Media Container */}
-      <div className="relative w-full rounded-[24px] overflow-hidden bg-gray-100 shadow-sm transition-transform duration-300">
+      <div 
+        className="relative w-full rounded-[24px] overflow-hidden bg-gray-100 shadow-sm transition-transform duration-300"
+        style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)', transform: 'translateZ(0)' }}
+      >
         {/* Thumbnail */}
         {reel.thumbnailUrl ? (
           <img
             src={reel.thumbnailUrl}
             alt={reel.title}
-            className="w-full h-auto block object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="w-full h-auto block object-cover rounded-[24px] transition-transform duration-500 md:group-hover:scale-[1.03]"
             loading="lazy"
           />
         ) : (
@@ -138,7 +141,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, index, onSelect }) {
             loop
             playsInline
             preload="none"
-            className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none transition-opacity duration-300"
+            className="absolute inset-0 w-full h-full object-cover rounded-[24px] z-10 pointer-events-none transition-opacity duration-300"
             style={{ opacity: showVideo ? 1 : 0 }}
           />
         )}
