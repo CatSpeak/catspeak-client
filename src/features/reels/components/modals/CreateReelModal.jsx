@@ -8,7 +8,7 @@ import { VideoUploadStep } from "./CreateReel/VideoUploadStep"
 import { DetailsInputStep } from "./CreateReel/DetailsInputStep"
 import { VideoPreviewStep } from "./CreateReel/VideoPreviewStep"
 
-const CreateReelModalContent = ({ open, onClose }) => {
+const CreateReelModalContent = ({ open }) => {
   const { t } = useLanguage()
   const {
     videoPreviewUrl, videoFile, handleDiscardVideo,

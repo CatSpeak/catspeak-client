@@ -63,17 +63,20 @@ export default function SharedChallengeLayout({
 
   // Reset page when switching tabs or resizing
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0);
   }, [challengeStatus, itemsPerPage]);
 
+  const effectiveChallengeId = challengeId || (challengesList.length > 0 ? challengesList[0].challengeId : null);
+
   const selectedChallenge = useMemo(() => {
-    if (!challengeId) return null;
+    if (!effectiveChallengeId) return null;
     return (
       challengesList.find(
-        (c) => String(c.challengeId) === String(challengeId),
+        (c) => String(c.challengeId) === String(effectiveChallengeId),
       ) || null
     );
-  }, [challengeId, challengesList]);
+  }, [effectiveChallengeId, challengesList]);
 
   // Auto-select first challenge if none is selected
   useEffect(() => {
@@ -139,7 +142,7 @@ export default function SharedChallengeLayout({
                     challengeStatus === "active" && page === 0 && index < 2
                   }
                   isSelected={
-                    String(challengeId) === String(challenge.challengeId)
+                    String(effectiveChallengeId) === String(challenge.challengeId)
                   }
                   isPast={challengeStatus === "past"}
                   onJoin={() => onSelectChallenge(challenge.challengeId)}
@@ -170,7 +173,7 @@ export default function SharedChallengeLayout({
 
       {/* Render Dynamic View */}
       {renderContent &&
-        renderContent({ challengeId, selectedChallenge, challengeStatus })}
+        renderContent({ challengeId: effectiveChallengeId, selectedChallenge, challengeStatus })}
     </div>
   );
 }

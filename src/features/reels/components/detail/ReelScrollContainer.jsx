@@ -273,7 +273,7 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
 
     activeIndexRef.current = safeInitialIndex;
     renderCenterIndexRef.current = safeInitialIndex;
-
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveIndex(safeInitialIndex);
     setRenderCenterIndex(safeInitialIndex);
 
@@ -344,19 +344,23 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
   }, [handleScrollEnd]);
 
   useEffect(() => {
+    const scrollRaf = scrollRafRef.current;
+    const syncRaf = syncRafRef.current;
+    const measureRaf = measureRafRef.current;
+    const scrollEndTimer = scrollEndTimerRef.current;
+
     return () => {
-      if (scrollRafRef.current !== null) {
-        window.cancelAnimationFrame(scrollRafRef.current);
+      if (scrollRaf !== null) {
+        window.cancelAnimationFrame(scrollRaf);
       }
-      if (syncRafRef.current !== null) {
-        window.cancelAnimationFrame(syncRafRef.current);
+      if (syncRaf !== null) {
+        window.cancelAnimationFrame(syncRaf);
       }
-      if (measureRafRef.current !== null) {
-        window.cancelAnimationFrame(measureRafRef.current);
+      if (measureRaf !== null) {
+        window.cancelAnimationFrame(measureRaf);
       }
-      if (scrollEndTimerRef.current !== null) {
-        window.clearTimeout(scrollEndTimerRef.current);
-        scrollEndTimerRef.current = null;
+      if (scrollEndTimer !== null) {
+        window.clearTimeout(scrollEndTimer);
       }
     };
   }, []);

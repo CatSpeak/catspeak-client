@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { useSelector } from "react-redux"
+
 import {
   X,
   Play,
@@ -21,21 +21,16 @@ import {
 import Avatar from "@/shared/components/ui/Avatar"
 import ReelMoreMenu from "../components/detail/ReelMoreMenu"
 import useReelDetail from "../hooks/useReelDetail"
-import useFullscreen from "../hooks/useFullscreen"
+
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetReelsFeedQuery,
   useGetUserReelsQuery,
   useGetReelsByChallengeQuery,
   useGetChallengeLeaderboardQuery,
-  useToggleLikeReelMutation,
-  useGetReelCommentsQuery,
-  useCreateReelCommentMutation,
-  useDeleteReelCommentMutation,
 } from "@/store/api/reelsApi"
 import { useAuth } from "@/features/auth"
-import { useAuthModal } from "@/shared/context/AuthModalContext"
-import { selectCurrentUser, selectIsAuthenticated } from "@/store/slices/authSlice"
+
 import { mapReelDtoToFrontend } from "../utils/mappers"
 import ReelScrollContainer from "../components/detail/ReelScrollContainer"
 import ReelDetailSlide from "../components/detail/ReelDetailSlide"
@@ -112,8 +107,6 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   const {
     data: leaderboardResponse,
     isLoading: isLeaderboardLoading,
-    isFetching: isLeaderboardFetching,
-    refetch: refetchLeaderboard,
   } = useGetChallengeLeaderboardQuery(
     {
       challengeId: challengeIdParam,

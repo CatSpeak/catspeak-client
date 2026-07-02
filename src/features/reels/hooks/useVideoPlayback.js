@@ -8,7 +8,6 @@ export const useVideoPlayback = ({
   sharedVolume,
   setSharedVolume,
   hasUserInteracted,
-  shouldPreload,
 }) => {
   const videoRef = useRef(null)
   const progressRef = useRef(null)
@@ -17,6 +16,8 @@ export const useVideoPlayback = ({
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
   const [isSeeking, setIsSeeking] = useState(false)
   const [isPlaybackMuted, setIsPlaybackMuted] = useState(sharedMuted)
 
@@ -190,6 +191,8 @@ export const useVideoPlayback = ({
     const el = videoRef.current
     if (!el || !el.duration) return
     setProgress((el.currentTime / el.duration) * 100)
+    setCurrentTime(el.currentTime)
+    setDuration(el.duration)
   }, [isSeeking])
 
   const handleProgressClick = useCallback((e) => {
@@ -232,7 +235,8 @@ export const useVideoPlayback = ({
     isPlaying,
     setIsPlaying,
     progress,
-    setProgress,
+    currentTime,
+    duration,
     isSeeking,
     isPlaybackMuted,
     hasVideo,

@@ -52,7 +52,7 @@ export default function ChallengeLeaderboardView({
   const currentEntries = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return leaderboardEntries.slice(start, start + itemsPerPage);
-  }, [leaderboardEntries, currentPage]);
+  }, [leaderboardEntries, currentPage, itemsPerPage]);
 
   const currentUserEntry = useMemo(() => {
     if (!user?.accountId || !leaderboardEntries.length) return null;

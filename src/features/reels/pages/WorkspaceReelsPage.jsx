@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 import { useNavigate, Outlet, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { Calendar, Eye, Film, Heart, Play, Plus, Trash2 } from "lucide-react"

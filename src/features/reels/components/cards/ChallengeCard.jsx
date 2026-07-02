@@ -13,7 +13,7 @@ export default function ChallengeCard({
   onParticipate,
 }) {
   const { t } = useLanguage()
-  const { name, hashtag, description, bannerUrl, status, endDate, endTime } = challenge
+  const { name, hashtag, bannerUrl, endDate, endTime } = challenge
   const validEndDate = endDate || endTime
 
   const { data: reelsResponse } = useGetReelsByChallengeQuery(

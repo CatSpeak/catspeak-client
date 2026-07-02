@@ -10,7 +10,6 @@ import { formatChallengeDate } from "../../utils/formatters"
 export default function PastChallengeLeaderboardView({ 
   challengeId, 
   selectedChallenge, 
-  challengeStatus,
   onReelClick
 }) {
   const { t } = useLanguage()

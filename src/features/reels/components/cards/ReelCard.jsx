@@ -12,14 +12,13 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * - Hover → video auto-plays (muted) over the thumbnail
  * - Leave → video stops, thumbnail returns
  */
-const ReelCardV2 = React.memo(function ReelCardV2({ reel, index, onSelect }) {
+const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
   const { language } = useLanguage()
   const videoRef = useRef(null)
   const hoverIntentRef = useRef(null)
 
   const [showVideo, setShowVideo] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isPaused, setIsPaused] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
 
   const hasVideo = Boolean(reel.videoUrl)
@@ -44,7 +43,6 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, index, onSelect }) {
     if (resetState) {
       setShowVideo(false)
       setIsPlaying(false)
-      setIsPaused(false)
     }
   }, [])
 
@@ -62,7 +60,6 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, index, onSelect }) {
       if (!el) return
 
       setShowVideo(true)
-      setIsPaused(false)
       if (el.readyState > 0) {
         el.currentTime = 0
       }
@@ -85,13 +82,11 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, index, onSelect }) {
       el.play()
         .then(() => {
           setIsPlaying(true)
-          setIsPaused(false)
         })
         .catch(() => {})
     } else {
       el.pause()
       setIsPlaying(false)
-      setIsPaused(true)
     }
   }, [])
 

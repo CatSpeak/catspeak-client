@@ -62,7 +62,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const { openAuthModal } = useAuthModal()
   
-  const { handleLike, handleShare, handleCommentSubmit, handleCommentDelete, isPostingComment } = useReelInteractions({
+  const { handleLike, handleCommentSubmit, handleCommentDelete, isPostingComment } = useReelInteractions({
     reel,
     isAuthenticated,
     openAuthModal,
@@ -87,7 +87,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   const handleFullscreen = useCallback((e) => {
     e.stopPropagation()
     toggleFullscreen(containerRef.current)
-  }, [toggleFullscreen])
+  }, [toggleFullscreen, containerRef])
 
   const handleLikeToggle = (e) => {
     e.stopPropagation()

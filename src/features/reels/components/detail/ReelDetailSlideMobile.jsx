@@ -69,13 +69,14 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
     isPlaying,
     setIsPlaying,
     progress,
+    currentTime,
+    duration,
     isSeeking,
     hasVideo,
     isEffectivelyMuted,
     handlePlayPause,
     handleToggleMute,
     handleTimeUpdate,
-    handleProgressClick,
     handleProgressMouseDown,
   } = useVideoPlayback({
     reel,
@@ -118,7 +119,6 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
 
   const {
     handleLike,
-    handleShare,
     handleCommentSubmit,
     handleCommentDelete,
     isPostingComment,
@@ -201,9 +201,6 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   }, [isAuthenticated, openAuthModal]);
 
   /* Focus is handled synchronously in handleOpenInput for iOS Safari support */
-
-  const currentTime = videoRef.current?.currentTime || 0;
-  const duration = videoRef.current?.duration || 0;
 
   return (
     <div className="w-full h-full relative bg-black flex flex-col justify-center overflow-hidden select-none">

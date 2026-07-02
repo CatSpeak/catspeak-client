@@ -6,7 +6,7 @@ import {
   useDeleteReelCommentMutation,
 } from "@/store/api/reelsApi"
 
-export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t, currentUser }) => {
+export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t }) => {
   const [toggleLike] = useToggleLikeReelMutation()
   const [createComment, { isLoading: isPostingComment }] = useCreateReelCommentMutation()
   const [deleteComment] = useDeleteReelCommentMutation()
@@ -19,10 +19,10 @@ export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t, c
     if (!reel?.id) return
     try {
       await toggleLike(reel.id).unwrap()
-    } catch (err) {
+    } catch {
       toast.error(t?.catSpeak?.reels?.detail?.errorLike || "Failed to like reel.")
     }
-  }, [isAuthenticated, reel?.id, openAuthModal, toggleLike, t])
+  }, [isAuthenticated, reel, openAuthModal, toggleLike, t])
 
   const handleShare = useCallback(async () => {
     if (!reel?.id) return
@@ -61,10 +61,10 @@ export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t, c
       }).unwrap()
 
       resetInput()
-    } catch (err) {
+    } catch {
       toast.error("Failed to post comment.")
     }
-  }, [isAuthenticated, openAuthModal, createComment, reel?.id])
+  }, [isAuthenticated, openAuthModal, createComment, reel])
 
   const handleCommentDelete = useCallback(async (commentId) => {
     if (!isAuthenticated) return
@@ -74,10 +74,10 @@ export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t, c
         commentId,
       }).unwrap()
       toast.success(t?.catSpeak?.reels?.detail?.commentDeleted || "Comment deleted!")
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete comment.")
     }
-  }, [isAuthenticated, deleteComment, reel?.id, t])
+  }, [isAuthenticated, deleteComment, reel, t])
 
   return {
     handleLike,
