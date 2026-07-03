@@ -1,5 +1,78 @@
 import { baseApi } from "./baseApi"
 
+// ─── Helpers for UTC to Local conversion ───────────────────────────────
+const parseToLocalTimeStr = (isoString) => {
+  if (!isoString) return ""
+  // If it's already a simple time format like "18:00", return as-is
+  if (/^\d{2}:\d{2}$/.test(isoString)) {
+    return isoString
+  }
+  const date = new Date(isoString)
+  if (isNaN(date.getTime())) return isoString
+  const hrs = String(date.getHours()).padStart(2, "0")
+  const mins = String(date.getMinutes()).padStart(2, "0")
+  return `${hrs}:${mins}`
+}
+
+const parseToLocalDateStr = (isoString) => {
+  if (!isoString) return ""
+  // If it's already a simple date like "2026-07-02", return as-is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoString)) {
+    return isoString
+  }
+  const date = new Date(isoString)
+  if (isNaN(date.getTime())) return isoString
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const d = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
+}
+
+const transformNextSession = (data) => {
+  let nextSession = null
+  if (data?.nextSession) {
+    const startLocal = new Date(data.nextSession.startTime)
+    const endLocal = new Date(data.nextSession.endTime)
+    if (!isNaN(startLocal.getTime()) && !isNaN(endLocal.getTime())) {
+      // Compute countdown
+      const diffMs = startLocal.getTime() - Date.now()
+      const diffSec = diffMs > 0 ? Math.floor(diffMs / 1000) : 0
+      const days = Math.floor(diffSec / (24 * 3600))
+      const hours = Math.floor((diffSec % (24 * 3600)) / 3600)
+      const minutes = Math.floor((diffSec % 3600) / 60)
+
+      const formattedDate = startLocal.getFullYear() + "-" +
+        String(startLocal.getMonth() + 1).padStart(2, "0") + "-" +
+        String(startLocal.getDate()).padStart(2, "0")
+
+      const formatTimeDigits = (dateObj) => {
+        const h = String(dateObj.getHours()).padStart(2, "0")
+        const m = String(dateObj.getMinutes()).padStart(2, "0")
+        return `${h}:${m}`
+      }
+
+      nextSession = {
+        date: formattedDate,
+        startTime: formatTimeDigits(startLocal),
+        endTime: formatTimeDigits(endLocal),
+        isLive: data.class?.status === "LIVE" || data.status === "LIVE",
+        countdown: { days, hours, minutes }
+      }
+    }
+  }
+
+  if (!nextSession) {
+    nextSession = {
+      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      startTime: data?.schedule?.[0]?.startTime || "19:00",
+      endTime: data?.schedule?.[0]?.endTime || "21:00",
+      isLive: false,
+      countdown: { days: 2, hours: 0, minutes: 0 }
+    }
+  }
+  return nextSession
+}
+
 // ─── Transformers & Data Mappers ──────────────────────────────────────
 
 const transformCourse = (course) => {
@@ -56,17 +129,17 @@ const transformClass = (cls) => {
     endDate: cls.endDate || "",
     schedule: cls.schedule ? {
       days: cls.schedule.map(s => s.dayOfWeek),
-      startTime: cls.schedule[0]?.startTime || "00:00",
-      endTime: cls.schedule[0]?.endTime || "00:00"
+      startTime: parseToLocalTimeStr(cls.schedule[0]?.startTime) || "00:00",
+      endTime: parseToLocalTimeStr(cls.schedule[0]?.endTime) || "00:00"
     } : (cls.nextSession ? {
       days: [],
-      startTime: cls.nextSession.startTime || "00:00",
-      endTime: cls.nextSession.endTime || "00:00"
+      startTime: parseToLocalTimeStr(cls.nextSession.startTime) || "00:00",
+      endTime: parseToLocalTimeStr(cls.nextSession.endTime) || "00:00"
     } : { days: [], startTime: "00:00", endTime: "00:00" }),
     rawSchedule: Array.isArray(cls.schedule) ? cls.schedule.map(s => ({
       dayOfWeek: s.dayOfWeek,
-      startTime: s.startTime || "00:00",
-      endTime: s.endTime || "00:00"
+      startTime: parseToLocalTimeStr(s.startTime) || "00:00",
+      endTime: parseToLocalTimeStr(s.endTime) || "00:00"
     })) : [],
     slots: cls.capacity || cls.slots || 10,
     studentCount: resolvedStudentCount,
@@ -323,7 +396,13 @@ export const coursesApi = baseApi.injectEndpoints({
         return {
           ...transformClass(data),
           isEnrolled: data.isEnrolled || false,
-          enrolledCount: data.enrolledCount || 0
+          enrolledCount: data.enrolledCount || 0,
+          nextSession: transformNextSession(data),
+          teachingProgress: data.teachingProgress || {
+            completed: data.completedSessions || 0,
+            total: data.totalSessions || 24,
+            percentage: Math.round(((data.completedSessions || 0) / (data.totalSessions || 24)) * 100)
+          }
         }
       },
       providesTags: (result, error, id) => [{ type: "ClassDetail", id }]
@@ -416,13 +495,7 @@ export const coursesApi = baseApi.injectEndpoints({
         const data = response?.data || response
         if (!data) return null
 
-        const nextSession = data.nextSession || {
-          date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          startTime: data.schedule?.[0]?.startTime || "19:00",
-          endTime: data.schedule?.[0]?.endTime || "21:00",
-          isLive: false,
-          countdown: { days: 2, hours: 0, minutes: 0 }
-        }
+        const nextSession = transformNextSession(data)
 
         const teachingProgress = data.teachingProgress || {
           completed: data.completedSessions || 0,
@@ -574,6 +647,15 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // 13b. Join Student Class Room
+    joinStudentClassRoom: builder.mutation({
+      query: (classId) => ({
+        url: `/student/classes/${classId}/join-room`,
+        method: "POST",
+      }),
+    }),
+
+
     // 14. Get Class Feed
     getClassFeed: builder.query({
       query: (classId) => ({
@@ -677,6 +759,14 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
         params: { from, to, classId },
       }),
+      transformResponse: (response) => {
+        const rawDates = response?.dates || response?.data?.dates || (Array.isArray(response) ? response : [])
+        const converted = rawDates.map(dStr => parseToLocalDateStr(dStr))
+        return {
+          ...response,
+          dates: converted
+        }
+      },
       providesTags: ["Schedule"],
     }),
 
@@ -686,6 +776,23 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
         params: { from, to, classId, language, status },
       }),
+      transformResponse: (response) => {
+        const rawSessions = response?.data || response?.items || (Array.isArray(response) ? response : [])
+        const converted = rawSessions.map(session => ({
+          ...session,
+          startTime: parseToLocalTimeStr(session.startTime),
+          endTime: parseToLocalTimeStr(session.endTime),
+          date: parseToLocalDateStr(session.startTime),
+          class: session.class ? {
+            ...session.class,
+            id: session.class.id?.toString() || ""
+          } : null
+        }))
+        return {
+          ...response,
+          data: converted
+        }
+      },
       providesTags: ["Schedule"],
     }),
 
@@ -738,4 +845,5 @@ export const {
   useGetCommissionQuery,
   // Virtual Room hooks
   useJoinClassRoomMutation,
+  useJoinStudentClassRoomMutation,
 } = coursesApi

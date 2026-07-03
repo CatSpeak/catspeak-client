@@ -12,7 +12,12 @@ import {
   useDeviceSelection,
 } from "@/features/rooms"
 import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
-import { useGetClassDetailQuery, useJoinClassRoomMutation } from "@/store/api/coursesApi"
+import {
+  useGetClassDetailQuery,
+  useGetStudentClassDetailQuery,
+  useJoinClassRoomMutation,
+  useJoinStudentClassRoomMutation
+} from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { enterCall, setPiP, leaveCall } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
@@ -100,14 +105,28 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const isClassRoom = roomId && roomId.startsWith("class-")
   const classId = isClassRoom ? roomId.replace("class-", "") : null
 
+  const isTeacher = user ? !!user.isTeacher : false
+
   // --- Class room detail ---
   const {
-    data: classResponse,
-    isLoading: isLoadingClass,
-    error: classError,
+    data: teacherClassResponse,
+    isLoading: isLoadingTeacherClass,
+    error: teacherClassError,
   } = useGetClassDetailQuery(classId, {
-    skip: !isClassRoom || !user,
+    skip: !isClassRoom || !user || !isTeacher,
   })
+
+  const {
+    data: studentClassResponse,
+    isLoading: isLoadingStudentClass,
+    error: studentClassError,
+  } = useGetStudentClassDetailQuery(classId, {
+    skip: !isClassRoom || !user || isTeacher,
+  })
+
+  const classResponse = isTeacher ? teacherClassResponse : studentClassResponse
+  const isLoadingClass = isTeacher ? isLoadingTeacherClass : isLoadingStudentClass
+  const classError = isTeacher ? teacherClassError : studentClassError
   const classData = classResponse?.data || classResponse
 
   // --- Room data (fetched by roomId from URL) ---
@@ -168,6 +187,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   // --- LiveKit token mutation ---
   const [getLivekitToken] = useGetLivekitTokenMutation()
   const [joinClassRoom] = useJoinClassRoomMutation()
+  const [joinStudentClassRoom] = useJoinStudentClassRoomMutation()
 
   // Room full check
   const currentParticipantCount = room?.currentParticipantCount ?? 0
@@ -288,8 +308,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       let token, serverUrl, sessionId
 
       if (isClassRoom) {
-        // Fetch LiveKit token using the new endpoint: POST /api/teacher/classes/{classId}/join-room
-        const tokenRes = await joinClassRoom(classId).unwrap()
+        // Fetch LiveKit token using the appropriate endpoint based on user role
+        const tokenRes = isTeacher
+          ? await joinClassRoom(classId).unwrap()
+          : await joinStudentClassRoom(classId).unwrap()
         token = tokenRes?.token
         serverUrl = tokenRes?.serverUrl
         sessionId = tokenRes?.sessionId

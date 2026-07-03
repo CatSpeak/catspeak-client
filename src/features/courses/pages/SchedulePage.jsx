@@ -20,9 +20,8 @@ import {
 import { formatUTCDate } from "../utils/courseUtils"
 
 const SchedulePage = () => {
-  const { t, language } = useLanguage()
+  const { language } = useLanguage()
   const navigate = useNavigate()
-  const c = t.courses || {}
 
   // Local State
   const [selectedDate, setSelectedDate] = useState(new Date())

@@ -34,7 +34,7 @@ const AllCoursesPage = () => {
   // Fetch paginated, filtered courses
   const { data, isLoading, error } = useGetAllCoursesQuery({
     search: searchQuery,
-    status: activeTab === "all" ? "" : activeTab,
+    status: activeTab === "all" ? "" : activeTab.toUpperCase(),
     page: currentPage,
     pageSize: 5
   })

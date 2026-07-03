@@ -3,24 +3,23 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Lock } from "lucide-react"
 
 import {
-  useGetClassDetailQuery,
-  useUpdateClassMutation,
-  useDeleteClassMutation
+  useGetStudentClassDetailQuery,
+  useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
 import { formatCurrency } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 // Import subcomponents for tabs
-import ClassOverviewTab from "../components/detail/ClassOverviewTab"
+import StudentClassOverviewTab from "../components/detail/StudentClassOverviewTab"
 import ClassMembersTab from "../components/detail/ClassMembersTab"
 import ClassFeedTab from "../components/detail/ClassFeedTab"
 import ClassGradingTab from "../components/detail/ClassGradingTab"
 import ClassMaterialsTab from "../components/detail/ClassMaterialsTab"
 
-const ClassDetailPage = () => {
+const StudentClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
@@ -30,39 +29,41 @@ const ClassDetailPage = () => {
   // Active Tab: "overview", "members", "feed", "grading", "materials"
   const [activeTab, setActiveTab] = useState("overview")
 
-  // Fetch Class Details via RTK Query
-  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetClassDetailQuery(id)
-  const [updateClass] = useUpdateClassMutation()
-  const [deleteClass] = useDeleteClassMutation()
+  // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
+  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetStudentClassDetailQuery(id)
+  const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
 
   // Process data for rendering
   const classData = detailResponse?.data || detailResponse || {}
 
+  // Enrollment Status
+  const isEnrolled = !!classData.isEnrolled
+
   // State Management for UI Actions
-  const [showActionsDropdown, setShowActionsDropdown] = useState(false)
-  const [showCancelClassModal, setShowCancelClassModal] = useState(false)
+  const [showEnrollConfirm, setShowEnrollConfirm] = useState(false)
 
-  // Cancel class handler
-  const handleCancelClass = async () => {
+  // Enroll in class handler
+  const handleEnroll = async () => {
     try {
-      await deleteClass(id).unwrap()
-      toast.success(cd.toastCancelSuccess || "Class cancelled successfully")
-      navigate("/workspace/courses")
-    } catch {
-      toast.error("Failed to cancel class")
+      const result = await enrollInCourse({ classId: id }).unwrap()
+      if (result.checkoutUrl) {
+        toast.success(
+          language === "vi"
+            ? "Đang chuyển đến trang thanh toán..."
+            : "Redirecting to payment..."
+        )
+        window.location.href = result.checkoutUrl
+      } else {
+        toast.success(
+          language === "vi"
+            ? `Đăng ký lớp học ${classData.title || ""} thành công!`
+            : `Successfully enrolled in ${classData.title || ""}!`
+        )
+      }
+    } catch (err) {
+      toast.error(err.data?.message || err.message || "Failed to enroll in class.")
     } finally {
-      setShowCancelClassModal(false)
-    }
-  }
-
-  // Complete class handler
-  const handleCompleteClass = async () => {
-    setShowActionsDropdown(false)
-    try {
-      await updateClass({ id, data: { status: "COMPLETED" } }).unwrap()
-      toast.success(cd.toastCompleteSuccess || "Marked class as complete")
-    } catch {
-      toast.error("Failed to complete class")
+      setShowEnrollConfirm(false)
     }
   }
 
@@ -164,23 +165,23 @@ const ClassDetailPage = () => {
         </h1>
 
         <div className="flex items-center gap-3">
-          {/* Trò chuyện button */}
-          <button
-            onClick={() => toast.success("Opening chat...")}
-            className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
-          >
-            <MessageSquare size={14} className="fill-white" />
-            <span>{language === "vi" ? "Trò chuyện" : "Chat"}</span>
-          </button>
-
-          {/* Tạo bài button */}
-          <button
-            onClick={() => setActiveTab("feed")}
-            className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
-          >
-            <span>{language === "vi" ? "Tạo bài" : "Create Post"}</span>
-            <span className="text-sm font-light">+</span>
-          </button>
+          {!isEnrolled ? (
+            <button
+              onClick={() => setShowEnrollConfirm(true)}
+              disabled={isEnrolling}
+              className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
+            >
+              <span>{language === "vi" ? "Đăng ký & Thanh toán học phí" : "Enroll & Pay Tuition"}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => toast.success("Opening chat...")}
+              className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
+            >
+              <MessageSquare size={14} className="fill-white" />
+              <span>{language === "vi" ? "Trò chuyện" : "Chat"}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -197,108 +198,136 @@ const ClassDetailPage = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab("members")}
+          onClick={() => {
+            if (!isEnrolled) {
+              toast.error(
+                language === "vi"
+                  ? "Vui lòng đăng ký và thanh toán học phí để xem bạn học!"
+                  : "Please enroll and pay tuition to view classmates!"
+              )
+              return
+            }
+            setActiveTab("members")
+          }}
           className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "members"
             ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
             : "hover:text-gray-600"
             }`}
         >
-          <span>{language === "vi" ? "Quản lý thành viên" : "Members"}</span>
+          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
+          <span>{language === "vi" ? "Bạn học" : "Classmates"}</span>
         </button>
 
         <button
-          onClick={() => setActiveTab("feed")}
+          onClick={() => {
+            if (!isEnrolled) {
+              toast.error(
+                language === "vi"
+                  ? "Vui lòng đăng ký và thanh toán học phí để xem bảng tin!"
+                  : "Please enroll and pay tuition to view feed!"
+              )
+              return
+            }
+            setActiveTab("feed")
+          }}
           className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "feed"
             ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
             : "hover:text-gray-600"
             }`}
         >
+          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
           <span>{language === "vi" ? "Bảng tin" : "Feed"}</span>
         </button>
 
         <button
-          onClick={() => setActiveTab("grading")}
+          onClick={() => {
+            if (!isEnrolled) {
+              toast.error(
+                language === "vi"
+                  ? "Vui lòng đăng ký và thanh toán học phí để xem điểm số!"
+                  : "Please enroll and pay tuition to view grades!"
+              )
+              return
+            }
+            setActiveTab("grading")
+          }}
           className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "grading"
             ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
             : "hover:text-gray-600"
             }`}
         >
-          <span>{language === "vi" ? "Chấm điểm & quản lý" : "Grading & Management"}</span>
+          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
+          <span>{language === "vi" ? "Điểm số của tôi" : "My Grades"}</span>
         </button>
 
         <button
-          onClick={() => setActiveTab("materials")}
+          onClick={() => {
+            if (!isEnrolled) {
+              toast.error(
+                language === "vi"
+                  ? "Vui lòng đăng ký và thanh toán học phí để xem tài liệu!"
+                  : "Please enroll and pay tuition to view materials!"
+              )
+              return
+            }
+            setActiveTab("materials")
+          }}
           className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "materials"
             ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
             : "hover:text-gray-600"
             }`}
         >
+          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
           <span>{cd.materials || (language === "vi" ? "Tài liệu học tập" : "Materials")}</span>
         </button>
       </div>
 
       {/* ─── Tab Contents ─── */}
       {activeTab === "overview" && (
-        <ClassOverviewTab
+        <StudentClassOverviewTab
           classData={classData}
-          isStudent={false}
-          isEnrolled={true}
+          isEnrolled={isEnrolled}
           language={language}
-          cd={cd}
-          id={id}
-          navigate={navigate}
-          showActionsDropdown={showActionsDropdown}
-          setShowActionsDropdown={setShowActionsDropdown}
-          onCompleteClass={handleCompleteClass}
-          onCancelClassClick={() => setShowCancelClassModal(true)}
           formatCurrency={formatCurrency}
           getWeeklyScheduleText={getWeeklyScheduleText}
-          upcomingSessionLabel={language === "vi" ? "Buổi dạy tiếp theo" : "Upcoming Session"}
+          upcomingSessionLabel={language === "vi" ? "Buổi học tiếp theo" : "Upcoming Session"}
           joinRoomLabel={language === "vi" ? "Vào phòng" : "Join Room"}
-          viewAllLabel={language === "vi" ? "Xem tất cả" : "View All"}
-          noUpcomingLabel={language === "vi" ? "Không có buổi dạy tiếp theo" : "No upcoming sessions"}
-          createClassToScheduleLabel={language === "vi" ? "Tạo lớp học mới để lên lịch cho buổi dạy đầu tiên." : "Create a class to schedule your first session."}
-          teachingTasksLabel={language === "vi" ? "Việc giảng dạy" : "Teaching Tasks"}
-          gradeAssignmentLabel={language === "vi" ? "Chấm bài tập" : "Grade homework"}
-          giveFeedbackLabel={language === "vi" ? "Đưa feedback" : "Give feedback"}
-          prepareLessonLabel={language === "vi" ? "Soạn giáo án" : "Prepare lesson plan"}
+          noUpcomingLabel={language === "vi" ? "Chưa có buổi học nào lên lịch" : "No upcoming sessions"}
           onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
-          onTaskAction={() => navigate("/workspace/courses/schedule")}
-          onViewTasks={() => navigate("/workspace/courses/schedule")}
         />
       )}
 
-      {activeTab === "members" && (
+      {activeTab === "members" && isEnrolled && (
         <ClassMembersTab
           id={id}
-          isStudent={false}
+          isStudent={true}
           language={language}
           cd={cd}
         />
       )}
 
-      {activeTab === "feed" && (
+      {activeTab === "feed" && isEnrolled && (
         <ClassFeedTab
           id={id}
-          isStudent={false}
+          isStudent={true}
           language={language}
           cd={cd}
         />
       )}
 
-      {activeTab === "grading" && (
+      {activeTab === "grading" && isEnrolled && (
         <ClassGradingTab
           id={id}
-          isStudent={false}
+          isStudent={true}
           language={language}
           cd={cd}
         />
       )}
 
-      {activeTab === "materials" && (
+      {activeTab === "materials" && isEnrolled && (
         <ClassMaterialsTab
           id={id}
-          isStudent={false}
+          isStudent={true}
           language={language}
           cd={cd}
           cancelText={c.createClass?.cancel || "Hủy"}
@@ -307,16 +336,20 @@ const ClassDetailPage = () => {
 
       {/* Confirmation Modals */}
       <ConfirmationModal
-        open={showCancelClassModal}
-        onClose={() => setShowCancelClassModal(false)}
-        onConfirm={handleCancelClass}
-        title="Cancel Class"
-        message={cd.confirmCancelClass || "Bạn có chắc chắn muốn hủy lớp học này?"}
-        confirmText="Cancel Class"
-        cancelText={c.createClass?.cancel || "Hủy"}
+        open={showEnrollConfirm}
+        onClose={() => setShowEnrollConfirm(false)}
+        onConfirm={handleEnroll}
+        title={language === "vi" ? "Xác nhận đăng ký lớp học" : "Confirm Class Enrollment"}
+        message={
+          language === "vi"
+            ? `Bạn có chắc chắn muốn đăng ký lớp học ${classData.title || ""}? Bạn sẽ được chuyển hướng sang trang thanh toán học phí.`
+            : `Are you sure you want to enroll in ${classData.title || ""}? You will be redirected to the tuition payment gateway.`
+        }
+        confirmText={language === "vi" ? "Thanh toán" : "Pay & Enroll"}
+        cancelText={language === "vi" ? "Hủy" : "Cancel"}
       />
     </div>
   )
 }
 
-export default ClassDetailPage
+export default StudentClassDetailPage

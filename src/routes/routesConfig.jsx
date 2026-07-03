@@ -50,7 +50,21 @@ const AllClassesPage = lazy(() => import("@/features/courses/pages/AllClassesPag
 const CreateClassPage = lazy(() => import("@/features/courses/pages/CreateClassPage"))
 const ClassDetailPage = lazy(() => import("@/features/courses/pages/ClassDetailPage"))
 const CourseDetailPage = lazy(() => import("@/features/courses/pages/CourseDetailPage"))
+const StudentClassDetailPage = lazy(() => import("@/features/courses/pages/StudentClassDetailPage"))
+const StudentCourseDetailPage = lazy(() => import("@/features/courses/pages/StudentCourseDetailPage"))
 const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
+
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+
+const CourseDetailWrapper = () => {
+  const { isStudent } = useRoleOverride()
+  return isStudent ? <StudentCourseDetailPage /> : <CourseDetailPage />
+}
+
+const ClassDetailWrapper = () => {
+  const { isStudent } = useRoleOverride()
+  return isStudent ? <StudentClassDetailPage /> : <ClassDetailPage />
+}
 
 const routesConfig = [
   {
@@ -284,7 +298,7 @@ const routesConfig = [
                 path: "courses/class/:id",
                 element: (
                   <LazyRoute>
-                    <ClassDetailPage />
+                    <ClassDetailWrapper />
                   </LazyRoute>
                 ),
               },
@@ -292,7 +306,7 @@ const routesConfig = [
                 path: "courses/details/:id",
                 element: (
                   <LazyRoute>
-                    <CourseDetailPage />
+                    <CourseDetailWrapper />
                   </LazyRoute>
                 ),
               },

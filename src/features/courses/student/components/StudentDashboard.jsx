@@ -87,10 +87,12 @@ const StudentDashboard = ({ t }) => {
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-        <span className="cursor-pointer hover:underline">{t.nav?.home || "Home"}</span>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">{sc.dashboardTitle || "My Courses & Learning"}</span>
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
+          <span className="cursor-pointer hover:underline">{t?.nav?.home || "Home"}</span>
+          <span>/</span>
+          <span className="text-[#990011] font-semibold">{sc.dashboardTitle || "My Courses & Learning"}</span>
+        </div>
       </div>
 
       {/* ─── Header Welcome Banner ─── */}
@@ -131,8 +133,8 @@ const StudentDashboard = ({ t }) => {
                 setSearchQuery("")
               }}
               className={`pb-3 transition-all relative ${activeTab === "enrolled"
-                  ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                  : "hover:text-gray-600 font-extrabold"
+                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
+                : "hover:text-gray-600 font-extrabold"
                 }`}
             >
               {sc.enrolledCourses || "My Enrolled Courses"}
@@ -143,8 +145,8 @@ const StudentDashboard = ({ t }) => {
                 setSearchQuery("")
               }}
               className={`pb-3 transition-all relative ${activeTab === "explore"
-                  ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                  : "hover:text-gray-600 font-extrabold"
+                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
+                : "hover:text-gray-600 font-extrabold"
                 }`}
             >
               {sc.exploreCourses || "Explore Available Courses"}
@@ -155,8 +157,8 @@ const StudentDashboard = ({ t }) => {
                 setSearchQuery("")
               }}
               className={`pb-3 transition-all relative ${activeTab === "classes"
-                  ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                  : "hover:text-gray-600 font-extrabold"
+                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
+                : "hover:text-gray-600 font-extrabold"
                 }`}
             >
               {sc.myClasses || "My Joined Classes"}

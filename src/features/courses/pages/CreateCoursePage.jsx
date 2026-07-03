@@ -74,7 +74,7 @@ const CreateCoursePage = () => {
   const labelCourseInfoTitle = isEditMode ? (cc.updateCourseInfo || "Update Course Information") : (c.courseInfoTitle || "Thông tin khóa học")
 
   // Populate data when in edit mode
-  /* eslint-disable react-hooks/set-state-in-effect */
+
   useEffect(() => {
     if (isEditMode && courseDetailResponse) {
       const course = courseDetailResponse.data || courseDetailResponse
@@ -90,7 +90,7 @@ const CreateCoursePage = () => {
       }
     }
   }, [courseDetailResponse, isEditMode])
-  /* eslint-enable react-hooks/set-state-in-effect */
+
 
   const selectedLanguageObj = languagesList.find((l) => l.name === selectedLanguage)
   const levelsList = selectedLanguageObj?.levels || []

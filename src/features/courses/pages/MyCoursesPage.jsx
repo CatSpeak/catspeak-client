@@ -25,15 +25,14 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { useAuth } from "@/features/auth"
 import StudentDashboard from "../student/components/StudentDashboard"
+import { useRoleOverride } from "../components/RoleSwitcher"
 
 const MyCoursesPage = () => {
   const { language, t } = useLanguage()
-  const { role } = useAuth()
   const navigate = useNavigate()
 
-  const isStudent = role !== "Teacher"
+  const { isStudent } = useRoleOverride()
   const c = t.courses || {}
 
   // Local State
@@ -56,8 +55,8 @@ const MyCoursesPage = () => {
   const { data: scheduleData, isLoading: isScheduleLoading } = useGetScheduleSessionsQuery(scheduleParams, { skip: isStudent })
 
   // Fetch real courses and classes data in parallel
-  const { data: coursesData, isLoading: isCoursesLoading, error: coursesError } = useGetAllCoursesQuery({ page: 1, pageSize: 100 }, { skip: isStudent })
-  const { data: classesData, isLoading: isClassesLoading, error: classesError } = useGetAllClassesQuery({ page: 1, pageSize: 100 }, { skip: isStudent })
+  const { data: coursesData, isLoading: isCoursesLoading, error: coursesError } = useGetAllCoursesQuery({ page: 1, pageSize: 6 }, { skip: isStudent })
+  const { data: classesData, isLoading: isClassesLoading, error: classesError } = useGetAllClassesQuery({ page: 1, pageSize: 6 }, { skip: isStudent })
 
   const isLoading = !isStudent && (isCoursesLoading || isClassesLoading || isScheduleLoading)
   const error = !isStudent && (coursesError || classesError)
@@ -252,10 +251,12 @@ const MyCoursesPage = () => {
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
 
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">{c.title || "Khóa học của tôi"}</span>
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
+          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
+          <span>/</span>
+          <span className="text-[#990011] font-semibold">{c.title || "Khóa học của tôi"}</span>
+        </div>
       </div>
 
       {/* ─── Header Section ─── */}

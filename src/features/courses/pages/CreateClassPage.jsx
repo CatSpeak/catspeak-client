@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react"
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -77,7 +77,7 @@ const CreateClassPage = () => {
 
   // Static fallback teacher profile since /teacher/profile API does not exist
   const languagesList = FALLBACK_TEACHER_PROFILE.languages || []
-  const coursesList = coursesData?.data || []
+  const coursesList = useMemo(() => coursesData?.data || [], [coursesData])
 
   // Check navigation state for initial course selection
   const location = useLocation()
@@ -122,7 +122,7 @@ const CreateClassPage = () => {
   const levelsList = selectedLanguageObj?.levels || []
 
   // Handlers
-  const handleCourseChange = (id) => {
+  const handleCourseChange = useCallback((id) => {
     setCourseId(id)
     const selectedCourse = coursesList.find(c => String(c.id) === String(id))
     if (selectedCourse) {
@@ -140,14 +140,14 @@ const CreateClassPage = () => {
       setThumbnailFile(null)
       setThumbnailPreview("")
     }
-  }
+  }, [coursesList])
 
   // Auto-fill course details if navigated from course details page
   useEffect(() => {
     if (initialCourseId && coursesList.length > 0) {
       handleCourseChange(initialCourseId)
     }
-  }, [initialCourseId, coursesList])
+  }, [initialCourseId, coursesList, handleCourseChange])
 
   // Populate data when in edit mode
   useEffect(() => {

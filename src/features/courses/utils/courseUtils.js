@@ -201,3 +201,75 @@ export const ATTENDANCE_STATUS = {
   ABSENT_EXCUSED: { label: "Vắng có phép", color: "#3B82F6" },
   ABSENT_UNEXCUSED: { label: "Vắng không phép", color: "#EF4444" },
 }
+
+// Date range formatter helper (e.g. Jan 15th - Feb 16th)
+export const formatDateRange = (start, end) => {
+  if (!start || !end) return "TBA"
+
+  const parseDate = (dStr) => {
+    const d = new Date(dStr)
+    if (isNaN(d.getTime())) return dStr
+    const day = d.getUTCDate()
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const month = months[d.getUTCMonth()]
+
+    const suffix = (dayNum) => {
+      if (dayNum > 3 && dayNum < 21) return "th"
+      switch (dayNum % 10) {
+        case 1: return "st"
+        case 2: return "nd"
+        case 3: return "rd"
+        default: return "th"
+      }
+    }
+    return `${month} ${day}${suffix(day)}`
+  }
+  return `${parseDate(start)} - ${parseDate(end)}`
+}
+
+export const formatDateDayMonth = (dateStr) => {
+  if (!dateStr) return "31st Jul"
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  const day = d.getUTCDate()
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const month = months[d.getUTCMonth()]
+  const suffix = (dayNum) => {
+    if (dayNum > 3 && dayNum < 21) return "th"
+    switch (dayNum % 10) {
+      case 1: return "st"
+      case 2: return "nd"
+      case 3: return "rd"
+      default: return "th"
+    }
+  }
+  return `${day}${suffix(day)} ${month}`
+}
+
+export const formatTime12h = (timeStr) => {
+  if (!timeStr) return "11:45 AM"
+  if (timeStr.includes("AM") || timeStr.includes("PM")) return timeStr
+  const parts = timeStr.split(":")
+  const hours = parseInt(parts[0])
+  if (isNaN(hours)) return timeStr
+  const ampm = hours >= 12 ? "PM" : "AM"
+  const displayHours = hours % 12 || 12
+  return `${displayHours}:${parts[1] || "00"} ${ampm}`
+}
+
+export const formatFileSize = (bytes) => {
+  if (!bytes) return "0 Bytes"
+  const k = 1024
+  const sizes = ["Bytes", "KB", "MB", "GB"]
+  const i = Math.log(bytes) / Math.log(k)
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+}
+
+export const getFileIconColorClass = (fileName) => {
+  const ext = fileName?.split(".").pop()?.toLowerCase() || ""
+  if (ext === "pdf") return "text-rose-500"
+  if (["doc", "docx"].includes(ext)) return "text-blue-500"
+  if (["xls", "xlsx"].includes(ext)) return "text-emerald-500"
+  if (["png", "jpg", "jpeg", "gif", "svg"].includes(ext)) return "text-violet-500"
+  return "text-gray-500"
+}
