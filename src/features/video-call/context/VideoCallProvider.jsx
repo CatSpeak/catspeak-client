@@ -13,7 +13,7 @@ import {
 } from "@/features/rooms"
 import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { enterCall, setPiP, leaveCall } from "@/store/slices/videoCallSlice"
+import { enterCall, setPiP, leaveCall, enterBreakout } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import VideoCallLoading from "../components/VideoCallLoading"
@@ -307,6 +307,17 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           isAISession,
         }),
       )
+
+      // Auto-restore breakout state if user was in a sub-room before refresh/reconnect
+      if (tokenRes?.cathspeak?.is_breakout_active && tokenRes?.cathspeak?.active_sub_session_id) {
+        dispatch(
+          enterBreakout({
+            subSessionId: tokenRes.cathspeak.active_sub_session_id,
+            roomName: tokenRes.cathspeak.active_sub_session_name || "Phòng thảo luận",
+            token,
+          })
+        )
+      }
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
       toast.error(

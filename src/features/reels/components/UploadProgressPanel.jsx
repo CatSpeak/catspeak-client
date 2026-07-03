@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { X, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, Loader2, Video } from "lucide-react"
+import { motion } from "framer-motion"
 import { cancelReelUpload } from "../utils/uploadManager"
 import { removeUpload } from "@/store/slices/reelUploadSlice"
 import { useGetMyRecordingsQuery } from "@/store/api/recordingsApi"
@@ -13,7 +14,7 @@ import {
 
 const CONSTANT_REC_SIZE = 25 * 1024 * 1024 // 25 MB virtual size for weighting
 
-const UploadProgressPanel = () => {
+const UploadProgressPanel = ({ embedInStack = false }) => {
   const dispatch = useDispatch()
   const uploads = useSelector((state) => state.reelUpload.uploads)
   const recordings = useSelector((state) => state.recordingProcess.recordings)
@@ -59,34 +60,30 @@ const UploadProgressPanel = () => {
     pollingInterval: 5000,
   })
 
+  // Check completions
   useEffect(() => {
     if (activeRecordings.length === 0 || dbRecordings.length === 0) return
 
-    activeRecordings.forEach((activeRec) => {
-      const dbRec = dbRecordings.find((r) => r.egressId === activeRec.egressId)
-      if (dbRec) {
-        if (dbRec.status === "completed" || dbRec.status === "Partial Completed") {
-          dispatch(recordingSuccess({ egressId: activeRec.egressId }))
-        } else if (dbRec.status === "failed") {
-          dispatch(
-            recordingFailed({
-              egressId: activeRec.egressId,
-              error: "Xử lý bản ghi hình thất bại trên máy chủ.",
-            })
-          )
-        }
+    activeRecordings.forEach((rec) => {
+      const match = dbRecordings.find(
+        (dbRec) =>
+          dbRec.egressId === rec.egressId ||
+          (rec.sessionId && dbRec.sessionId === rec.sessionId)
+      )
+      if (match) {
+        dispatch(recordingSuccess({ egressId: rec.egressId }))
       }
     })
   }, [dbRecordings, activeRecordings, dispatch])
 
-  if (uploadItems.length === 0 && recordingItems.length === 0) return null
+  const completedUploads = uploadItems.filter((i) => i.status === "success")
+  const completedRecs = recordingItems.filter((i) => i.status === "success")
+  const isFinished =
+    uploadItems.every((i) => i.status === "success" || i.status === "failed") &&
+    recordingItems.every((i) => i.status === "success" || i.status === "failed")
 
-  const activeUploads = uploadItems.filter((item) => item.status === "uploading")
-  const activeRecs = recordingItems.filter((item) => item.status === "processing")
-  const isFinished = activeUploads.length === 0 && activeRecs.length === 0
-
-  const completedUploads = uploadItems.filter((item) => item.status === "success")
-  const completedRecs = recordingItems.filter((item) => item.status === "success")
+  const hasActiveItems = uploadItems.length > 0 || recordingItems.length > 0
+  if (!hasActiveItems) return null
 
   // Calculate cumulative progress
   const totalUploadedSize =
@@ -123,7 +120,14 @@ const UploadProgressPanel = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-[380px] bg-white border border-gray-200 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-[9999] overflow-hidden flex flex-col transition-all duration-300">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 20, scale: 0.95 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className={`${embedInStack ? "w-[380px] max-w-full pointer-events-auto shadow-xl" : "fixed bottom-6 right-6 z-[9999] w-[380px] pointer-events-auto"} bg-white border border-gray-200 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col transition-all duration-300`}
+    >
       {/* Widget Header */}
       <div
         className="bg-[#1A1A1A] text-white px-4 py-3.5 flex items-center justify-between cursor-pointer select-none"
@@ -310,7 +314,7 @@ const UploadProgressPanel = () => {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

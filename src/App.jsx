@@ -11,7 +11,6 @@ import NavigationProgress from "@/shared/components/NavigationProgress"
 import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
 import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
-import UploadProgressPanel from "@/features/reels/components/UploadProgressPanel"
 
 function App() {
   return (
@@ -25,7 +24,6 @@ function App() {
             <Toaster position="top-center" limit={1} />
             <AppRouter />
             <PiPWidget />
-            <UploadProgressPanel />
           </GlobalPresenceProvider>
         </ConversationSignalRProvider>
       </GlobalVideoCallProvider>

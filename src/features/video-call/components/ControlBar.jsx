@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useSelector } from "react-redux"
 import {
   Video,
   VideoOff,
@@ -12,6 +13,7 @@ import {
   Circle,
   MoreVertical,
   Hand,
+  Split,
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -24,6 +26,7 @@ import LeaveCallModal from "./LeaveCallModal"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
+
   const {
     micOn,
     cameraOn,
@@ -35,6 +38,8 @@ const VideoCallControlBar = () => {
     setShowChat,
     showParticipants,
     setShowParticipants,
+    showBreakout,
+    setShowBreakout,
     handleToggleMic,
     handleToggleCam,
     handleToggleScreenShare,
@@ -54,7 +59,14 @@ const VideoCallControlBar = () => {
     unreadAiChat,
     isHandRaised,
     sessionId,
+    room,
+    user,
+    participants,
+    isAISession,
   } = useVideoCallContext()
+
+  const { isBreakoutActive } = useSelector((s) => s.videoCall)
+  const isHost = room?.creatorId === user?.accountId
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
 
@@ -153,6 +165,16 @@ const VideoCallControlBar = () => {
         className="hidden min-[426px]:flex"
       />
 
+      {!isAISession && (isHost || isBreakoutActive) && (
+        <ControlButton
+          isActive={showBreakout}
+          onClick={() => setShowBreakout(!showBreakout)}
+          title="Breakout Rooms"
+          iconActive={<Split className={iconClass} />}
+          iconInactive={<Split className={iconClass} />}
+        />
+      )}
+
       <ControlButton
         isActive={isHandRaised}
         isLoading={isTogglingHand}
@@ -195,7 +217,13 @@ const VideoCallControlBar = () => {
 
       <ControlButton
         isActive={true}
-        onClick={promptLeaveCall}
+        onClick={() => {
+          if (isHost && isBreakoutActive) {
+            toast.error("Bạn không thể rời phòng khi đang chia nhóm nhỏ. Vui lòng đóng tất cả phòng thảo luận trước.")
+            return
+          }
+          promptLeaveCall()
+        }}
         title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
         iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
         iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
@@ -214,7 +242,13 @@ const VideoCallControlBar = () => {
         <LeaveCallModal
           open={showLeaveModal}
           onClose={cancelLeaveCall}
+          isHost={isHost}
+          isBreakoutActive={isBreakoutActive}
           onConfirm={() => {
+            if (isHost && isBreakoutActive) {
+              toast.error("Vui lòng đóng tất cả phòng nhỏ trước khi rời phòng.")
+              return
+            }
             cancelLeaveCall()
             handleLeaveSession()
           }}

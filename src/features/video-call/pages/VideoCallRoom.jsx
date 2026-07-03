@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from "react"
 import { Navigate } from "react-router-dom"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Clock } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useConnectionState } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
+import { useSelector } from "react-redux"
+import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
 
 import {
   VideoGrid,
@@ -17,6 +19,8 @@ import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
 import RecordingStatusBar from "@/features/video-call/components/RecordingStatusBar"
+import BreakoutTransitionOverlay from "@/features/video-call/components/BreakoutTransitionOverlay"
+import BreakoutSidebarPanel from "@/features/video-call/components/BreakoutSidebarPanel"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -34,6 +38,8 @@ const VideoCallRoomContent = () => {
     setShowVirtualBackground,
     showAvatarPicker,
     setShowAvatarPicker,
+    showBreakout,
+    setShowBreakout,
     activeSidePanel,
     setActiveSidePanel,
     isAISession,
@@ -42,7 +48,7 @@ const VideoCallRoomContent = () => {
     user,
     location,
     // Header info
-    session,
+    sessionId,
     room,
     // ChatBox props (presentational component — keeps props-based API)
     messages,
@@ -55,7 +61,54 @@ const VideoCallRoomContent = () => {
     // Recording
     isRecording,
     confirmStopRecording,
+    participants,
   } = useVideoCallContext()
+
+  const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector((s) => s.videoCall)
+  const isHost = room?.creatorId === user?.accountId
+
+  const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
+    skip: !parentSessionId,
+  })
+
+  // Prevent host from accidentally closing/refreshing tab during active breakout
+  useEffect(() => {
+    if (!isHost || !isBreakoutActive) return
+    const handleBeforeUnload = (e) => {
+      e.preventDefault()
+      e.returnValue = "Đang có các phòng thảo luận nhỏ hoạt động. Bạn có chắc chắn muốn rời khỏi trang?"
+      return e.returnValue
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [isHost, isBreakoutActive])
+
+  const [countdownSeconds, setCountdownSeconds] = useState(null)
+  
+  useEffect(() => {
+    if (isBreakoutActive && breakoutStatus?.remainingSeconds !== null && breakoutStatus?.remainingSeconds !== undefined) {
+      setCountdownSeconds(breakoutStatus.remainingSeconds)
+    } else {
+      setCountdownSeconds(null)
+    }
+  }, [isBreakoutActive, breakoutStatus?.remainingSeconds])
+
+  const isTimerRunning = countdownSeconds !== null && countdownSeconds > 0
+
+  useEffect(() => {
+    if (!isTimerRunning) return
+    const timer = setInterval(() => {
+      setCountdownSeconds((prev) => (prev !== null && prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [isTimerRunning])
+
+  const formatTimer = (seconds) => {
+    if (seconds === null || seconds < 0) return ""
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+  }
 
   const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
@@ -64,6 +117,8 @@ const VideoCallRoomContent = () => {
       ? t.rooms?.videoCall?.applyVisualEffects || "Backgrounds and effects"
       : showAvatarPicker
         ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
+        : showBreakout
+        ? (isBreakoutActive ? "Phòng thảo luận" : "Phòng họp nhóm")
         : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
@@ -74,6 +129,16 @@ const VideoCallRoomContent = () => {
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
   const connectionState = useConnectionState()
   const livekitReady = connectionState === ConnectionState.Connected
+
+  const wasBreakoutActiveRef = useRef(false)
+  useEffect(() => {
+    if (isBreakoutActive) {
+      wasBreakoutActiveRef.current = true
+    }
+    if (livekitReady) {
+      wasBreakoutActiveRef.current = false
+    }
+  }, [isBreakoutActive, livekitReady])
 
   useEffect(() => {
     // Prevent iOS/macOS swipe-to-go-back gestures during the call
@@ -97,6 +162,14 @@ const VideoCallRoomContent = () => {
   }
 
   if (!livekitReady) {
+    if (isBreakoutActive || wasBreakoutActiveRef.current) {
+      return (
+        <BreakoutTransitionOverlay
+          roomName={breakoutRoomName}
+          isReturning={!isBreakoutActive && wasBreakoutActiveRef.current}
+        />
+      )
+    }
     return (
       <VideoCallLoading
         message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
@@ -114,6 +187,22 @@ const VideoCallRoomContent = () => {
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
+          {isBreakoutActive && (
+            <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-2 text-xs font-bold shadow-md z-10 animate-fade-in border-b border-orange-400">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+                <span>
+                  {breakoutRoomName ? `Bạn đang ở phòng thảo luận nhóm: ${breakoutRoomName}` : "Đang kết nối phòng thảo luận..."}
+                </span>
+              </div>
+              {countdownSeconds !== null && (
+                <div className="flex items-center gap-1.5 bg-white/20 px-2.5 py-0.5 rounded-full shadow-inner">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Thời gian còn lại: {formatTimer(countdownSeconds)}</span>
+                </div>
+              )}
+            </div>
+          )}
           <div className="flex-1 relative min-h-0">
             <VideoGrid />
             <RecordingStatusBar isRecording={isRecording} onStopRecording={confirmStopRecording} />
@@ -139,6 +228,12 @@ const VideoCallRoomContent = () => {
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <VirtualBackgroundPicker />}
                 {showAvatarPicker && <AvatarUrlPicker />}
+                {showBreakout && (
+                  <BreakoutSidebarPanel
+                    sessionId={parentSessionId}
+                    onClose={() => setActiveSidePanel(null)}
+                  />
+                )}
                 {showChat && (
                   <ChatBox
                     messages={messages}
@@ -190,6 +285,12 @@ const VideoCallRoomContent = () => {
                     {showParticipants && <ParticipantList hideTitle />}
                     {showVirtualBackground && <VirtualBackgroundPicker />}
                     {showAvatarPicker && <AvatarUrlPicker />}
+                    {showBreakout && (
+                      <BreakoutSidebarPanel
+                        sessionId={parentSessionId}
+                        onClose={() => setActiveSidePanel(null)}
+                      />
+                    )}
                     {showChat && (
                       <ChatBox
                         messages={messages}

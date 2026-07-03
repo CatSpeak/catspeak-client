@@ -287,6 +287,7 @@ export const baseApi = createApi({
     "Locations",
     "Reels",
     "ReelComments",
+    "Breakout",
   ],
   endpoints: () => ({}),
 })

@@ -97,6 +97,78 @@ export const roomsApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+
+    // --- Breakout Rooms ---
+    setupBreakoutGroups: builder.mutation({
+      query: ({ sessionId, groups, timerDuration, allowParticipantChangeRoom, maxParticipantsPerRoom }) => ({
+        url: `/rooms/${sessionId}/breakout/setup`,
+        method: "POST",
+        body: { groups, timerDuration, allowParticipantChangeRoom, maxParticipantsPerRoom },
+      }),
+      invalidatesTags: (result, error, { sessionId }) => [{ type: "Breakout", id: sessionId }],
+    }),
+
+    getBreakoutStatus: builder.query({
+      query: (sessionId) => `/rooms/${sessionId}/breakout/status`,
+      providesTags: (result, error, sessionId) => [{ type: "Breakout", id: sessionId }],
+    }),
+
+    startBreakoutRooms: builder.mutation({
+      query: (sessionId) => ({
+        url: `/rooms/${sessionId}/breakout/start`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, sessionId) => [{ type: "Breakout", id: sessionId }],
+    }),
+
+    stopBreakoutRooms: builder.mutation({
+      query: (sessionId) => ({
+        url: `/rooms/${sessionId}/breakout/stop`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, sessionId) => [{ type: "Breakout", id: sessionId }],
+    }),
+
+    joinBreakoutRoom: builder.mutation({
+      query: ({ sessionId, subSessionId }) => ({
+        url: `/rooms/${sessionId}/breakout/join/${subSessionId}`,
+        method: "POST",
+      }),
+    }),
+
+    moveParticipant: builder.mutation({
+      query: ({ sessionId, accountId, targetSubSessionId }) => ({
+        url: `/rooms/${sessionId}/breakout/move`,
+        method: "POST",
+        body: { accountId, targetSubSessionId },
+      }),
+      invalidatesTags: (result, error, { sessionId }) => [{ type: "Breakout", id: sessionId }],
+    }),
+
+    studentSwitchBreakoutRoom: builder.mutation({
+      query: ({ sessionId, targetSubSessionId }) => ({
+        url: `/rooms/${sessionId}/breakout/switch/${targetSubSessionId}`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { sessionId }) => [{ type: "Breakout", id: sessionId }],
+    }),
+
+    toggleAllowChangeRoom: builder.mutation({
+      query: ({ sessionId, allowParticipantChangeRoom }) => ({
+        url: `/rooms/${sessionId}/breakout/toggle-allow-change`,
+        method: "POST",
+        body: { allowParticipantChangeRoom },
+      }),
+      invalidatesTags: (result, error, { sessionId }) => [{ type: "Breakout", id: sessionId }],
+    }),
+
+    broadcastBreakoutNotification: builder.mutation({
+      query: ({ sessionId, message }) => ({
+        url: `/rooms/${sessionId}/breakout/broadcast`,
+        method: "POST",
+        body: { message },
+      }),
+    }),
   }),
 })
 
@@ -108,4 +180,13 @@ export const {
   useDeleteRoomMutation,
   useVerifyJoinRoomMutation,
   useCreateAISessionMutation,
+  useSetupBreakoutGroupsMutation,
+  useGetBreakoutStatusQuery,
+  useStartBreakoutRoomsMutation,
+  useStopBreakoutRoomsMutation,
+  useJoinBreakoutRoomMutation,
+  useMoveParticipantMutation,
+  useStudentSwitchBreakoutRoomMutation,
+  useToggleAllowChangeRoomMutation,
+  useBroadcastBreakoutNotificationMutation,
 } = roomsApi
