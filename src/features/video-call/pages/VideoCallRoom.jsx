@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react"
-import { Navigate } from "react-router-dom"
-import { ChevronRight, Loader2 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useConnectionState } from "@livekit/components-react"
-import { ConnectionState } from "livekit-client"
+import React, { useState, useRef, useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useConnectionState } from "@livekit/components-react";
+import { ConnectionState } from "livekit-client";
 
 import {
   VideoGrid,
@@ -11,21 +11,21 @@ import {
   ChatBox,
   ControlBar as VideoCallControlBar,
   RoomHeader,
-} from "@/features/video-call"
-import BackgroundsAndEffectsPanel from "@/features/video-call/components/BackgroundsAndEffectsPanel"
-import TroubleshootPanel from "@/features/video-call/components/TroubleshootPanel"
-import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
-import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
-import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
-import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
+} from "@/features/video-call";
+import BackgroundsAndEffectsPanel from "@/features/video-call/components/BackgroundsAndEffectsPanel";
+import TroubleshootPanel from "@/features/video-call/components/TroubleshootPanel";
+import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker";
+import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker";
+import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay";
+import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI";
 
-import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
+import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
+import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import VideoCallLoading from "@/features/video-call/components/VideoCallLoading";
 
 const VideoCallRoomContent = () => {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
   const {
     showChat,
     setShowChat,
@@ -33,13 +33,13 @@ const VideoCallRoomContent = () => {
     setShowParticipants,
     showVirtualBackground,
     setShowVirtualBackground,
-    isAISession,
-    showCC,
     showAvatarPicker,
     setShowAvatarPicker,
     activeSidePanel,
     setActiveSidePanel,
     showTroubleshoot,
+    isAISession,
+    showCC,
     // Auth guard
     user,
     location,
@@ -54,9 +54,9 @@ const VideoCallRoomContent = () => {
     enterPiP,
     // Room subtitles
     showRoomSubtitles,
-  } = useVideoCallContext()
+  } = useVideoCallContext();
 
-  const isSidePanelOpen = activeSidePanel !== null
+  const isSidePanelOpen = activeSidePanel !== null;
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
     : showVirtualBackground
@@ -65,7 +65,7 @@ const VideoCallRoomContent = () => {
         ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
         : showTroubleshoot
           ? t.rooms?.videoCall?.reconnect || "Troubleshoot connection"
-          : t.rooms.chatBox.title
+          : t.rooms.chatBox.title;
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -73,19 +73,26 @@ const VideoCallRoomContent = () => {
   // negotiating the WebSocket at that point.  Keep showing a loader
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
-  const connectionState = useConnectionState()
+  const connectionState = useConnectionState();
+  const [hasConnected, setHasConnected] = useState(false);
+
+  useEffect(() => {
+    if (connectionState === ConnectionState.Connected) {
+      setHasConnected(true);
+    }
+  }, [connectionState]);
+
   const livekitReady =
-    connectionState === ConnectionState.Connected ||
-    connectionState === ConnectionState.Reconnecting
-  const isReconnecting = connectionState === ConnectionState.Reconnecting
+    hasConnected || connectionState === ConnectionState.Connected;
+  const isReconnecting = connectionState === ConnectionState.Reconnecting;
 
   useEffect(() => {
     // Prevent iOS/macOS swipe-to-go-back gestures during the call
-    document.body.style.overscrollBehaviorX = "none"
+    document.body.style.overscrollBehaviorX = "none";
     return () => {
-      document.body.style.overscrollBehaviorX = "auto"
-    }
-  }, [])
+      document.body.style.overscrollBehaviorX = "auto";
+    };
+  }, []);
 
   if (!user) {
     return (
@@ -97,7 +104,7 @@ const VideoCallRoomContent = () => {
         }}
         replace
       />
-    )
+    );
   }
 
   if (!livekitReady) {
@@ -105,7 +112,7 @@ const VideoCallRoomContent = () => {
       <VideoCallLoading
         message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
       />
-    )
+    );
   }
 
   return (
@@ -230,13 +237,13 @@ const VideoCallRoomContent = () => {
 
       <VideoCallControlBar />
     </div>
-  )
-}
+  );
+};
 
 const VideoCallRoom = () => (
   <VideoCallProvider>
     <VideoCallRoomContent />
   </VideoCallProvider>
-)
+);
 
-export default VideoCallRoom
+export default VideoCallRoom;

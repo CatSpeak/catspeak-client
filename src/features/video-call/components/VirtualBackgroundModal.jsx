@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useRef } from "react"
-import Modal from "@/shared/components/ui/Modal"
-import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
-import BeautyPicker from "./BeautyPicker"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import React, { useEffect, useRef, useState } from "react";
+import Modal from "@/shared/components/ui/Modal";
+import VirtualBackgroundPicker from "./VirtualBackgroundPicker";
+import BeautyPicker from "./BeautyPicker";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
-const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
+const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions";
 
 const readStoredBeautyOptions = () => {
   try {
-    const raw = localStorage.getItem(BEAUTY_STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    const raw = localStorage.getItem(BEAUTY_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
   } catch {
     /* ignore corrupt data */
   }
-  return null
-}
+  return null;
+};
 
 const persistBeautyOptions = (opts) => {
   try {
-    localStorage.setItem(BEAUTY_STORAGE_KEY, JSON.stringify(opts))
+    localStorage.setItem(BEAUTY_STORAGE_KEY, JSON.stringify(opts));
   } catch {
     /* quota exceeded — silently drop */
   }
-}
+};
 
-const TABS = ["backgrounds", "beauty"]
+const TABS = ["backgrounds", "beauty"];
 
 const VirtualBackgroundModal = ({
   open,
@@ -34,13 +34,30 @@ const VirtualBackgroundModal = ({
   onToggleCam,
   lkVideoTrack,
 }) => {
-  const { t } = useLanguage()
-  const [activeTab, setActiveTab] = useState("backgrounds")
+  const { t } = useLanguage();
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    if (lkVideoTrack) {
+      lkVideoTrack.attach(videoElement);
+      return () => {
+        lkVideoTrack.detach(videoElement);
+      };
+    } else if (localStream) {
+      videoElement.srcObject = localStream;
+    } else {
+      videoElement.srcObject = null;
+    }
+  }, [lkVideoTrack, localStream]);
+  const [activeTab, setActiveTab] = useState("backgrounds");
 
   // Initialise beauty options from localStorage so pre-join selections survive
   // page reloads and carry over into the in-call session.
   const [beautyOptions, setBeautyOptions] = useState(() => {
-    const stored = readStoredBeautyOptions()
+    const stored = readStoredBeautyOptions();
     return (
       stored ?? {
         smoothing: 0,
@@ -52,49 +69,31 @@ const VirtualBackgroundModal = ({
         eyeBrighten: 0,
         teethWhiten: 0,
       }
-    )
-  })
+    );
+  });
 
   // Persist beauty options to localStorage whenever they change so the
   // in-call processor (useCombinedProcessor) can pick them up on attach.
   useEffect(() => {
-    persistBeautyOptions(beautyOptions)
-  }, [beautyOptions])
+    persistBeautyOptions(beautyOptions);
+  }, [beautyOptions]);
 
   const handleBeautyChange = (key, value) => {
-    setBeautyOptions((prev) => ({ ...prev, [key]: value }))
-  }
-  const videoRef = useRef(null)
-
-  useEffect(() => {
-    const videoElement = videoRef.current
-    if (!videoElement) return
-
-    if (lkVideoTrack) {
-      lkVideoTrack.attach(videoElement)
-      return () => {
-        lkVideoTrack.detach(videoElement)
-      }
-    } else if (localStream) {
-      videoElement.srcObject = localStream
-    } else {
-      videoElement.srcObject = null
-    }
-  }, [lkVideoTrack, localStream])
-
+    setBeautyOptions((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleApply = (url) => {
     // Automatically turn on camera if an effect is selected while camera is off
     if (!cameraOn && url !== null && onToggleCam) {
-      onToggleCam()
+      onToggleCam();
     }
-  }
+  };
 
   const tabLabel = (tab) => {
     if (tab === "backgrounds")
-      return t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds"
-    return t?.rooms?.beauty?.tabLabel || "Beauty"
-  }
+      return t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds";
+    return t?.rooms?.beauty?.tabLabel || "Beauty";
+  };
 
   return (
     <Modal
@@ -156,7 +155,7 @@ const VirtualBackgroundModal = ({
         </div>
       </div>
     </Modal>
-  )
-}
+  );
+};
 
-export default VirtualBackgroundModal
+export default VirtualBackgroundModal;

@@ -25,7 +25,6 @@ export const useVideoCall = (t) => {
   const [isTogglingMic, setIsTogglingMic] = useState(false)
   const [isTogglingCam, setIsTogglingCam] = useState(false)
 
-
   const { switchBeauty, processorStatus } = useCombinedProcessor()
 
   // Toggle mic — probes getUserMedia first to surface permission errors cleanly.

@@ -25,7 +25,6 @@ const persistBeautyOptions = (opts) => {
   } catch { /* quota exceeded — silently drop */ }
 }
 
-
 export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
   const { t } = useLanguage()
   const [micOn, setMicOn] = useState(false)

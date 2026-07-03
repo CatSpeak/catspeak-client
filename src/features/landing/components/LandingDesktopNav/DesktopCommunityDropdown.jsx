@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-import LanguageMenuItem from "./LanguageMenuItem"
+import LanguageMenuItem from "@/shared/components/Header/LanguageMenuItem"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
 
@@ -92,7 +92,9 @@ const DesktopCommunityDropdown = ({ navKey }) => {
     <div className="relative" ref={dropdownRef}>
       <div
         className={`flex items-center justify-center text-base tracking-wide font-bold transition-colors duration-200 ${
-          isOpen || isActive ? "text-[#990011]" : "text-black hover:text-[#990011]"
+          isOpen || isActive
+            ? "text-[#990011]"
+            : "text-black hover:text-[#990011]"
         }`}
       >
         {/* Community navigation */}
@@ -121,7 +123,7 @@ const DesktopCommunityDropdown = ({ navKey }) => {
 
           <AnimatePresence>
             {isOpen && (
-              <div className="absolute top-full right-0 mt-2 min-w-[240px] z-50">
+              <div className="absolute top-full right-0 mt-2 min-w-[220px] z-50">
                 <FluentAnimation
                   direction="down"
                   exit
