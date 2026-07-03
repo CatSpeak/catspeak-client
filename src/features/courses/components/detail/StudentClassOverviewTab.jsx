@@ -14,9 +14,15 @@ const StudentClassOverviewTab = ({
   joinRoomLabel,
   onJoinRoom
 }) => {
-  const completedSessions = classData.completedSessions || 0
-  const totalSessions = classData.totalSessions || 24
-  const progressPercent = totalSessions ? Math.round((completedSessions / totalSessions) * 100) : 0
+  const completedSessions = (classData.progress
+    ? classData.progress.completedSessions
+    : classData.completedSessions) ?? 0
+
+  const totalSessions = (classData.progress
+    ? classData.progress.totalSessions
+    : classData.totalSessions) || 24
+
+  const progressPercent = Math.round((completedSessions / totalSessions) * 100)
 
   const showRightColumn = isEnrolled
 

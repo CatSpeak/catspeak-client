@@ -35,7 +35,7 @@ const AllClassesPage = () => {
   // Fetch paginated, filtered classes
   const { data, isLoading, error } = useGetAllClassesQuery({
     search: searchQuery,
-    status: activeTab === "all" ? "" : activeTab,
+    status: activeTab === "all" ? "" : activeTab.toUpperCase(),
     page: currentPage,
     pageSize: 5
   })

@@ -29,8 +29,16 @@ const ClassOverviewTab = ({
   onTaskAction,
   onViewTasks
 }) => {
-  const progressPercent = classData.teachingProgress?.percentage || 0
-  const progressText = `${classData.teachingProgress?.completed || 0} / ${classData.teachingProgress?.total || 24}`
+  const completed = (classData.progress
+    ? classData.progress.completedSessions
+    : (classData.completedSessions ?? classData.teachingProgress?.completed)) ?? 0
+
+  const total = (classData.progress
+    ? classData.progress.totalSessions
+    : (classData.totalSessions ?? classData.teachingProgress?.total)) || 24
+
+  const progressPercent = Math.round((completed / total) * 100)
+  const progressText = `${completed} / ${total}`
 
   const showRightColumn = !isStudent || isEnrolled
 

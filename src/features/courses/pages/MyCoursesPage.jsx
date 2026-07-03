@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 
 import { useGetAllCoursesQuery, useGetAllClassesQuery, useGetScheduleSessionsQuery } from "@/store/api/coursesApi"
-import { formatCurrencyVND, getCourseGradientAndIcon, formatUTCDate } from "../utils/courseUtils"
+import { formatCurrencyVND, getCourseGradientAndIcon, formatUTCDate, formatTime12h, formatDateDayMonth } from "../utils/courseUtils"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import useClickOutside from "@/shared/hooks/useClickOutside"
@@ -80,33 +80,6 @@ const MyCoursesPage = () => {
     enabled: activeDropdown !== null,
   })
 
-  // Helper to format time "18:00" -> "06:00 PM"
-  const formatTime12h = (timeStr) => {
-    if (!timeStr) return ""
-    const parts = timeStr.split(":")
-    if (parts.length < 2) return timeStr
-    const hrs = parseInt(parts[0], 10)
-    const mins = parts[1]
-    const ampm = hrs >= 12 ? "PM" : "AM"
-    const formattedHrs = hrs % 12 || 12
-    return `${formattedHrs}:${mins} ${ampm}`
-  }
-
-  const formatSessionDate = (dateStr) => {
-    if (!dateStr) return "TBA"
-    const dateObj = new Date(dateStr)
-    if (isNaN(dateObj.getTime())) return dateStr
-    const day = dateObj.getDate()
-    const month = dateObj.toLocaleString("en-US", { month: "short" })
-
-    let suffix = "th"
-    if (day === 1 || day === 21 || day === 31) suffix = "st"
-    else if (day === 2 || day === 22) suffix = "nd"
-    else if (day === 3 || day === 23) suffix = "rd"
-
-    return `${day}${suffix} ${month}`
-  }
-
   // Transform real schedule sessions to upcoming class cards
   const upcomingClasses = useMemo(() => {
     if (rawSessions.length === 0) {
@@ -125,7 +98,7 @@ const MyCoursesPage = () => {
         classId: clsIdStr,
         title: session.class?.name || matchedClass?.title || "Untitled Session",
         time: `${formatTime12h(session.startTime)} - ${formatTime12h(session.endTime)}`,
-        date: formatSessionDate(session.date),
+        date: formatDateDayMonth(session.date),
         status: session.class?.status || matchedClass?.status || "UPCOMING",
         language: languageVal,
         levels: matchedClass?.levels || ["B2"],
