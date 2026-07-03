@@ -16,6 +16,7 @@ import {
   useSharePostMutation,
 } from "@/store/api/postsApi"
 import ShareModal from "./ShareModal"
+import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
 import Carousel from "@/shared/components/ui/Carousel"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
@@ -44,6 +45,7 @@ const NewsCard = ({ news }) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
   const [showReactions, setShowReactions] = useState(false)
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false)
   const holdTimer = useRef(null)
 
   /* ── Derived ───────────────────────────────────────────────────── */
@@ -120,13 +122,13 @@ const NewsCard = ({ news }) => {
         {hasMedia ? (
           <div
             className="w-full h-full rounded-t-[20px] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
           >
             <Carousel
               images={carouselImages}
               autoPlay
               interval={5000}
               className="w-full h-full rounded-t-[20px]"
+              disableFullscreen
             />
           </div>
         ) : (
@@ -142,23 +144,26 @@ const NewsCard = ({ news }) => {
 
         {/* Overlay action buttons — top-right */}
         <div
-          className="absolute top-2.5 right-2.5 flex gap-2.5 z-10"
+          className="absolute top-4 right-4 flex gap-2.5 z-10"
           onPointerDown={(e) => e.stopPropagation()}
         >
           <button
             onClick={handleShare}
-            className="flex items-center justify-center p-1 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+            className="flex items-center justify-center p-1.5 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
             aria-label="Share"
           >
-            <Share size={24} strokeWidth={1.5} className="text-[#2e2e2e]" />
+            <Share size={22} strokeWidth={1.5} className="text-[#2e2e2e]" />
           </button>
           <button
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center p-1 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsDevModalOpen(true)
+            }}
+            className="flex items-center justify-center p-1.5 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
             aria-label="Bookmark"
           >
             <Bookmark
-              size={24}
+              size={22}
               strokeWidth={1.5}
               className="text-[#2e2e2e]"
             />
@@ -291,6 +296,10 @@ const NewsCard = ({ news }) => {
           open={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
           shareUrl={shareUrl}
+        />
+        <InDevelopmentModal
+          open={isDevModalOpen}
+          onCancel={() => setIsDevModalOpen(false)}
         />
       </div>
     </div>

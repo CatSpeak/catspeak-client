@@ -1,59 +1,53 @@
-import React from "react"
-import { motion } from "framer-motion"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
-import colors from "@/shared/utils/colors"
+import React from "react";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
 
 const WorkshopCard = ({ slide, onCtaClick }) => {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   return (
-    <motion.div
-      className="relative flex w-full flex-col overflow-hidden rounded-xl bg-black/5 max-[425px]:bg-white max-[425px]:border max-[425px]:border-[#e5e5e5] max-[425px]:shadow-sm group aspect-video max-[425px]:aspect-auto cursor-pointer"
+    <div
+      className="relative flex w-full flex-col overflow-hidden rounded-xl bg-black/5 group aspect-video cursor-pointer"
       onClick={() => onCtaClick(slide.modal || "development")}
+      style={{ containerType: "inline-size" }}
     >
-      <div className="absolute inset-0 max-[425px]:relative max-[425px]:aspect-video max-[425px]:w-full">
+      <div className="absolute inset-0">
         <img
           src={slide.image}
           alt={slide.title || "Workshop Image"}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        {/* Vertical gradient overlay (darker at bottom) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none max-[425px]:hidden" />
-
-        {/* Horizontal subtle gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none max-[425px]:hidden" />
+        {/* Subtle bottom shadow for text readability without darkening the whole image */}
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
       </div>
 
       {/* Content Section overlaying the image */}
-      <div className="absolute inset-0 max-[425px]:relative flex flex-col justify-center p-4 sm:p-6 text-white max-[425px]:text-gray-900 text-left">
-        <div className="flex flex-col gap-6 max-[425px]:gap-3">
-          <h3 className="text-[32px] max-[425px]:text-base leading-tight font-bold drop-shadow-lg max-[425px]:drop-shadow-none line-clamp-1 max-[425px]:line-clamp-2">
+      <div className="absolute inset-x-0 bottom-[10%] h-[50%] md:h-[58%] max-sm:bottom-auto max-sm:top-[58%] max-sm:-translate-y-1/2 max-sm:h-auto flex flex-col justify-center px-[15%] sm:px-[3%] text-white max-sm:text-center text-left w-full">
+        <div className="flex flex-col gap-1 sm:gap-[1.5cqw]">
+          <h3 className="text-[clamp(15px,4.5cqw,42px)] leading-tight font-bold drop-shadow-lg line-clamp-2">
             {slide.title || t?.workshops?.heroCarousel?.comingSoonTitle}
           </h3>
           {slide.subtext && (
-            <p className="text-[16px] max-[425px]:text-sm text-gray-200 max-[425px]:text-gray-600 drop-shadow-md max-[425px]:drop-shadow-none line-clamp-2">
+            <p className="max-sm:hidden text-[clamp(10px,2cqw,22px)] text-gray-100 drop-shadow-md line-clamp-2 font-medium">
               {slide.subtext}
             </p>
           )}
 
-          <div>
+          <div className="hidden sm:block mt-[1.5cqw]">
             <PillButton
               onClick={(e) => {
-                e.stopPropagation()
-                onCtaClick(slide.modal || "development")
+                e.stopPropagation();
+                onCtaClick(slide.modal || "development");
               }}
-              bgColor="#f5c518"
-              textColor="#990011"
-              className="h-10 px-6"
+              className="!bg-white !text-[#990011] !border-2 !border-transparent transition-transform duration-300 ease-out h-[clamp(36px,5cqw,56px)] px-[clamp(20px,4cqw,40px)] text-xs sm:text-[clamp(14px,2cqw,22px)] font-bold shadow-lg hover:scale-105 active:scale-95"
             >
               {slide.cta}
             </PillButton>
           </div>
         </div>
       </div>
-    </motion.div>
-  )
-}
+    </div>
+  );
+};
 
-export default WorkshopCard
+export default WorkshopCard;

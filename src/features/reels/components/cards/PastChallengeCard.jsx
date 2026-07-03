@@ -40,9 +40,12 @@ export default function PastChallengeCard({ challenge, isSelected, onSelectChall
       {/* Thumbnail */}
       <div className="relative w-full sm:w-[130px] h-[180px] sm:h-[130px] rounded-xl overflow-hidden shrink-0 shadow-sm">
         <img 
-          src={getImageUrl(challenge.bannerUrl || challenge.thumbnailUrl || challenge.coverUrl)} 
+          src={getImageUrl(challenge.bannerUrl || challenge.thumbnailUrl || challenge.coverUrl) || "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"} 
           alt={challenge.hashtag || challenge.name} 
           className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"
+          }}
         />
         <div className="absolute top-2 left-2 bg-gray-400 text-white text-[11px] font-medium px-2.5 py-1 rounded-md">
           {t?.catSpeak?.reels?.ended || "Đã kết thúc"}

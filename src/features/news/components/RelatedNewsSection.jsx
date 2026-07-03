@@ -66,7 +66,7 @@ const RelatedNewsCard = ({ post }) => {
       className="bg-white flex flex-col gap-3 rounded-[20px] shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)] overflow-hidden cursor-pointer w-full"
     >
       {/* ── Image area ─────────────────────────────────────────── */}
-      <div className="relative flex-1 min-h-0 p-[10px] rounded-t-[20px]">
+      <div className="relative flex-1 min-h-[150px] p-[10px] rounded-t-[20px]">
         {hasMedia && !imageError ? (
           <img
             src={getImageUrl(post.media[0].mediaUrl)}

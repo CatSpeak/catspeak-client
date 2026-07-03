@@ -39,16 +39,15 @@ export default function ChallengeCard({
     >
       {/* Thumbnail Container */}
       <div className="relative h-24 sm:h-28 md:h-32 w-full overflow-hidden bg-gray-100">
-        {bannerUrl ? (
-          <img
-            src={bannerUrl}
-            alt={name || hashtag}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
-        )}
+        <img
+          src={bannerUrl || "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"}
+          alt={name || hashtag}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"
+          }}
+        />
         
         {/* HOT Badge */}
         {isHot && (
