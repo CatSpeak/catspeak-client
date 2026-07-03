@@ -49,6 +49,12 @@ export default {
     connect: "Profile",
     workspace: "My Workspace",
     pricing: "Pricing",
+    profile: "Profile",
+    personalInfo: "Personal Info",
+    instructor: "Instructor",
+    organization: "Organization",
+    billing: "Billing",
+    recordings: "Recordings",
   },
   comingSoon: {
     badge: "Coming Soon",

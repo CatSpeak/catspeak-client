@@ -3,6 +3,8 @@ import VirtualBackgroundPicker from "./VirtualBackgroundPicker"
 import BeautyPicker from "./BeautyPicker"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Tabs } from "@/shared/components/ui/navigation"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 
 /**
  * Tab strip + content panel for Backgrounds / Beauty effects.
@@ -11,10 +13,13 @@ import { Tabs } from "@/shared/components/ui/navigation"
 const BackgroundsAndEffectsPanel = () => {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState("backgrounds")
+  const { hasFeature } = usePlanFeatures()
+
+  const hasBeautyFilter = hasFeature(PLAN_FEATURES.BEAUTY_FILTER)
 
   const tabs = [
     { id: "backgrounds", label: t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds" },
-    { id: "beauty", label: t?.rooms?.beauty?.tabLabel || "Beauty" }
+    ...(hasBeautyFilter ? [{ id: "beauty", label: t?.rooms?.beauty?.tabLabel || "Beauty" }] : [])
   ]
 
   const scrollbarClasses =
@@ -34,7 +39,7 @@ const BackgroundsAndEffectsPanel = () => {
         {activeTab === "backgrounds" ? (
           <VirtualBackgroundPicker />
         ) : (
-          <BeautyPicker />
+          hasBeautyFilter && <BeautyPicker />
         )}
       </div>
     </div>

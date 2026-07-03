@@ -49,6 +49,12 @@ export default {
     connect: "个人",
     workspace: "我的工作区",
     pricing: "价格",
+    profile: "个人资料",
+    personalInfo: "个人信息",
+    instructor: "讲师",
+    organization: "组织",
+    billing: "账单",
+    recordings: "录像",
   },
   comingSoon: {
     badge: "即将推出",
@@ -59,4 +65,8 @@ export default {
     thankYou: "感谢您的耐心等待！^^",
   },
   noOptionsFound: "未找到选项",
+  errors: {
+    maxActiveRoomsReached: "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
+    generalFailed: "发生错误，请重试。",
+  }
 }

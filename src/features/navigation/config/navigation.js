@@ -6,6 +6,9 @@ import {
   GraduationCap,
   Settings,
   HelpCircle,
+  Briefcase,
+  User,
+  CreditCard,
 } from "lucide-react";
 
 export const navLinks = [
@@ -24,9 +27,29 @@ export const navLinks = [
   },
   {
     key: "workspace",
-    path: "/workspace",
+    hasDropdown: true,
+    icon: Briefcase,
+    subItems: [
+      { key: "recordings", path: "/workspace/recordings" },
+      { key: "reels", path: "/workspace/reels" },
+    ],
+  },
+  {
+    key: "profile",
+    hasDropdown: true,
+    icon: User,
+    subItems: [
+      { key: "personalInfo", path: "/profile" },
+      { key: "instructor", path: "/instructor" },
+      // { key: "organization", path: "/organization" },
+      { key: "billing", path: "/billing" },
+    ],
+  },
+  {
+    key: "pricing",
+    path: "/pricing",
     hasDropdown: false,
-    hideInSidebar: true,
+    icon: CreditCard,
   },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
   // { key: "messages", path: "/messages", icon: MessageCircle },

@@ -7,6 +7,7 @@ import {
   useDeleteRecordingMutation,
 } from "@/store/api/recordingsApi"
 
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import StorageBar from "../components/StorageBar"
 import RecordingCard from "../components/RecordingCard"
 import RecordingPlayer from "../components/RecordingPlayer"
@@ -18,6 +19,7 @@ import { RECORDING_STATUS } from "../constants/recordingStatus"
 
 const RecordingsPage = () => {
   const { t } = useLanguage()
+  const { limits, isLoading: isPlanLoading } = usePlanFeatures()
 
   // ── API queries ──
   const {
@@ -36,6 +38,12 @@ const RecordingsPage = () => {
   // ── Local state ──
   const [playerRecording, setPlayerRecording] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+
+  // ── Calculated Storage Limits ──
+  const maxStorageMb = limits.maxStorageMb || 200
+  const usedMb = storage?.usedMb ?? 0
+  const usagePercent = maxStorageMb > 0 ? Math.min(100, Math.round((usedMb / maxStorageMb) * 100)) : 0
+  const isQuotaExceeded = usedMb >= maxStorageMb
 
   // ── Handlers ──
   const handlePlay = (recording) => {
@@ -82,11 +90,11 @@ const RecordingsPage = () => {
 
       {/* Storage bar */}
       <StorageBar
-        usedMb={storage?.usedMb ?? 0}
-        limitMb={storage?.limitMb ?? 200}
-        usagePercent={storage?.usagePercent ?? 0}
-        isQuotaExceeded={storage?.isQuotaExceeded ?? false}
-        isLoading={isLoadingStorage}
+        usedMb={usedMb}
+        limitMb={maxStorageMb}
+        usagePercent={usagePercent}
+        isQuotaExceeded={isQuotaExceeded}
+        isLoading={isLoadingStorage || isPlanLoading}
         t={t}
       />
 

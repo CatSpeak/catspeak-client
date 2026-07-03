@@ -49,6 +49,12 @@ export default {
     connect: "Cá nhân",
     workspace: "Nhà của bạn",
     pricing: "Bảng Giá",
+    profile: "Hồ sơ",
+    personalInfo: "Thông tin cá nhân",
+    instructor: "Giảng viên",
+    organization: "Tổ chức",
+    billing: "Thanh toán",
+    recordings: "Bản ghi hình",
   },
   comingSoon: {
     badge: "Sắp ra mắt",
