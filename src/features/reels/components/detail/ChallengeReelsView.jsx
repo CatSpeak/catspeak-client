@@ -55,11 +55,14 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
       <div className="flex items-start sm:items-center justify-between mb-6 pb-2 gap-2">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
-            {selectedChallenge.bannerUrl ? (
-                <img src={selectedChallenge.bannerUrl} alt="" className="w-full h-full object-cover" />
-            ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
-            )}
+            <img 
+              src={selectedChallenge.bannerUrl || "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"} 
+              alt="" 
+              className="w-full h-full object-cover" 
+              onError={(e) => {
+                e.currentTarget.src = "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"
+              }}
+            />
           </div>
           <div className="flex flex-col justify-center min-w-0">
             <div className="flex items-start sm:items-center gap-1.5 sm:gap-2">

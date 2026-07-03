@@ -43,9 +43,12 @@ export default function PastChallengeLeaderboardView({
       <div className="p-4 sm:p-6 border-b border-gray-100 flex items-center gap-4">
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100">
           <img 
-            src={selectedChallenge.bannerUrl || selectedChallenge.thumbnailUrl || selectedChallenge.coverUrl} 
+            src={selectedChallenge.bannerUrl || selectedChallenge.thumbnailUrl || selectedChallenge.coverUrl || "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"} 
             alt={selectedChallenge.hashtag || selectedChallenge.name} 
             className="w-full h-full object-cover" 
+            onError={(e) => {
+              e.currentTarget.src = "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"
+            }}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0 pt-0.5">
