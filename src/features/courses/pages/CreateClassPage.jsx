@@ -70,7 +70,13 @@ const CreateClassPage = () => {
   const { data: coursesData } = useGetAllCoursesQuery({ pageSize: 100 })
   const [createClass, { isLoading: isCreating }] = useCreateClassMutation()
   const [updateClass, { isLoading: isUpdating }] = useUpdateClassMutation()
-  const { data: classDetailResponse, isLoading: isDetailsLoading } = useGetClassDetailQuery(id, { skip: !isEditMode })
+  const location = useLocation()
+  const recoverClassId = location.state?.recoverClassId || new URLSearchParams(location.search).get("recoverClassId") || ""
+  const isRecoverMode = !!recoverClassId
+
+  const { data: classDetailResponse, isLoading: isEditDetailsLoading } = useGetClassDetailQuery(id, { skip: !isEditMode })
+  const { data: recoverClassResponse, isLoading: isRecoverLoading } = useGetClassDetailQuery(recoverClassId, { skip: !isRecoverMode })
+  const isDetailsLoading = isEditMode ? isEditDetailsLoading : (isRecoverMode ? isRecoverLoading : false)
   const [deleteClass, { isLoading: isDeleting }] = useDeleteClassMutation()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -80,7 +86,6 @@ const CreateClassPage = () => {
   const coursesList = useMemo(() => coursesData?.data || [], [coursesData])
 
   // Check navigation state for initial course selection
-  const location = useLocation()
   const initialCourseId = location.state?.courseId || ""
 
   // Form State
@@ -149,10 +154,11 @@ const CreateClassPage = () => {
     }
   }, [initialCourseId, coursesList, handleCourseChange])
 
-  // Populate data when in edit mode
+  // Populate data when in edit or recover mode
   useEffect(() => {
-    if (isEditMode && classDetailResponse) {
-      const cls = classDetailResponse.data || classDetailResponse
+    const responseData = isEditMode ? classDetailResponse : (isRecoverMode ? recoverClassResponse : null)
+    if (responseData) {
+      const cls = responseData.data || responseData
       setCourseId(cls.courseId || "")
       setClassName(cls.name || cls.title || "")
       setSelectedLanguage(cls.language || "English")
@@ -236,7 +242,7 @@ const CreateClassPage = () => {
         setTimeSlots(updatedTimeSlots)
       }
     }
-  }, [classDetailResponse, isEditMode])
+  }, [classDetailResponse, recoverClassResponse, isEditMode, isRecoverMode])
 
   const handleThumbnailClick = () => {
     fileInputRef.current?.click()
@@ -437,11 +443,15 @@ const CreateClassPage = () => {
 
   const pageTitle = isEditMode
     ? (language === "vi" ? "Chỉnh sửa lớp học" : "Edit Class")
-    : (cc.createClass || "Create Class")
+    : isRecoverMode
+      ? (language === "vi" ? "Mở lại lớp học (Khôi phục)" : "Reopen Class (Recover)")
+      : (cc.createClass || "Create Class")
 
   const sectionTitle = isEditMode
     ? (language === "vi" ? "Thông tin lớp học" : "Class Information")
-    : (c.courseInfoTitle || "Thông tin khóa học")
+    : isRecoverMode
+      ? (language === "vi" ? "Khôi phục thông tin lớp" : "Recover Class Information")
+      : (c.courseInfoTitle || "Thông tin khóa học")
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -484,7 +494,7 @@ const CreateClassPage = () => {
                 <select
                   value={courseId}
                   onChange={(e) => handleCourseChange(e.target.value)}
-                  disabled={isEditMode}
+                  disabled={isEditMode || isRecoverMode}
                   className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                 >
                   <option value="">{cc.selectCourseOption || "-- Select Course --"}</option>
@@ -503,8 +513,9 @@ const CreateClassPage = () => {
                 type="text"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
+                disabled={isRecoverMode}
                 placeholder={cc.placeholderClassName || "Enter class name"}
-                className="w-full h-11 px-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400"
+                className="w-full h-11 px-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -519,7 +530,7 @@ const CreateClassPage = () => {
                       setSelectedLanguage(e.target.value)
                       setLevel("")
                     }}
-                    disabled={isProfileLoading}
+                    disabled={isProfileLoading || isRecoverMode}
                     className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
@@ -537,7 +548,7 @@ const CreateClassPage = () => {
                   <select
                     value={level}
                     onChange={(e) => setLevel(e.target.value)}
-                    disabled={isProfileLoading || !selectedLanguage}
+                    disabled={isProfileLoading || !selectedLanguage || isRecoverMode}
                     className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
@@ -741,8 +752,10 @@ const CreateClassPage = () => {
                 {cc.thumbnailLabel || c.avatarLabel || "Thumbnail"}
               </label>
               <div
-                onClick={handleThumbnailClick}
-                className="group relative border border-dashed border-gray-200 hover:border-gray-300 rounded-2xl p-4 bg-[#F8F9FA] hover:bg-[#F2F2F2]/60 flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 text-center min-h-[150px]"
+                onClick={isRecoverMode ? undefined : handleThumbnailClick}
+                className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${
+                  isRecoverMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200"
+                }`}
               >
                 <input
                   ref={fileInputRef}
@@ -754,7 +767,9 @@ const CreateClassPage = () => {
                 {thumbnailPreview ? (
                   <div className="relative w-full max-h-[190px] flex justify-center overflow-hidden rounded-xl">
                     <img src={thumbnailPreview} alt="Class thumbnail preview" className="object-contain max-h-[180px]" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl">
+                    <div className={`absolute inset-0 bg-black/40 opacity-0 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl ${
+                      isRecoverMode ? "" : "group-hover:opacity-100"
+                    }`}>
                       {cc.changeThumbnail || "Change image"}
                     </div>
                   </div>
@@ -778,9 +793,10 @@ const CreateClassPage = () => {
               <textarea
                 rows={5}
                 value={description}
+                disabled={isRecoverMode}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={cc.placeholderDescription || "Enter class description (optional)"}
-                className="w-full p-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
+                className="w-full p-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed"
               />
             </div>
 

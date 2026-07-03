@@ -74,27 +74,41 @@ const ClassOverviewTab = ({
 
                 {showActionsDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-150 rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700">
-                    <button
-                      onClick={() => {
-                        setShowActionsDropdown(false)
-                        navigate(`/workspace/courses/edit-class/${id}`)
-                      }}
-                      className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
-                    >
-                      {language === "vi" ? "Chỉnh sửa lớp" : "Edit Class"}
-                    </button>
-                    <button
-                      onClick={onCompleteClass}
-                      className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
-                    >
-                      {language === "vi" ? "Hoàn thành lớp học" : "Complete Class"}
-                    </button>
-                    <button
-                      onClick={onCancelClassClick}
-                      className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold text-red-600 transition-colors"
-                    >
-                      {language === "vi" ? "Hủy lớp học" : "Cancel Class"}
-                    </button>
+                    {classData.status !== "ARCHIVED" ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            setShowActionsDropdown(false)
+                            navigate(`/workspace/courses/edit-class/${id}`)
+                          }}
+                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
+                        >
+                          {language === "vi" ? "Chỉnh sửa lớp" : "Edit Class"}
+                        </button>
+                        <button
+                          onClick={onCompleteClass}
+                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
+                        >
+                          {language === "vi" ? "Hoàn thành lớp học" : "Complete Class"}
+                        </button>
+                        <button
+                          onClick={onCancelClassClick}
+                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold text-red-600 transition-colors"
+                        >
+                          {language === "vi" ? "Hủy lớp học" : "Cancel Class"}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setShowActionsDropdown(false)
+                          navigate(`/workspace/courses/create-class`, { state: { recoverClassId: id } })
+                        }}
+                        className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold text-[#b20a1c] transition-colors"
+                      >
+                        {language === "vi" ? "Mở lại lớp học (Khôi phục)" : "Reopen Class (Recover)"}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
