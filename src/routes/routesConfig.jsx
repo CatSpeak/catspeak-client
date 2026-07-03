@@ -133,14 +133,16 @@ const routesConfig = [
                         <ReelsPage />
                       </LazyRoute>
                     ),
-                  },
-                  {
-                    path: "reels/:id",
-                    element: (
-                      <LazyRoute>
-                        <ReelDetailPage />
-                      </LazyRoute>
-                    ),
+                    children: [
+                      {
+                        path: ":id",
+                        element: (
+                          <LazyRoute>
+                            <ReelDetailPage />
+                          </LazyRoute>
+                        ),
+                      },
+                    ],
                   },
                   {
                     path: "mail",
@@ -230,14 +232,16 @@ const routesConfig = [
                     <WorkspaceReelsPage />
                   </LazyRoute>
                 ),
-              },
-              {
-                path: "reels/:id",
-                element: (
-                  <LazyRoute>
-                    <WorkspaceReelDetailPage />
-                  </LazyRoute>
-                ),
+                children: [
+                  {
+                    path: ":id",
+                    element: (
+                      <LazyRoute>
+                        <WorkspaceReelDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
               },
               { path: "*", element: <PageNotFound /> },
             ],

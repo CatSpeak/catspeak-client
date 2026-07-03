@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react"
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { motion, useAnimation, useMotionValue, useSpring } from "framer-motion"
 import SharedLayout from "@/shared/components/layout/SharedLayout"
@@ -95,19 +95,35 @@ const BackgroundCircles = () => {
 
 const ProfileLayout = () => {
   const { t } = useLanguage()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const tabsConfig = getProfileTabsConfig(t)
+
+  // Determine active tab based on current pathname
+  const activeTab = useMemo(() => {
+    const currentPath = location.pathname
+    // Find the matching tab by checking if current path starts with tab id
+    const matched = tabsConfig.find((tab) => currentPath === tab.id || currentPath.startsWith(tab.id + "/"))
+    return matched?.id || tabsConfig[0]?.id
+  }, [location.pathname, tabsConfig])
+
+  const handleTabChange = (tabId) => {
+    navigate(tabId)
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row w-full flex-1 lg:overflow-hidden relative z-0">
-      <BackgroundCircles />
-
-      {/* Main Content */}
-      <main className="flex-1 h-full overflow-y-auto flex flex-col">
-        {/* Content */}
-        <div className="mx-auto w-full max-w-[1040px] min-w-0 p-5 flex-1">
-          <Outlet />
+    <SharedLayout
+      background={<BackgroundCircles />}
+      sidebar={<ProfileSidebar />}
+      mobileNav={
+        <div className="w-full">
+          <ProfileSidebar variant="horizontal" />
         </div>
-      </main>
-    </div>
+      }
+    >
+      <Outlet />
+    </SharedLayout>
   )
 }
 
