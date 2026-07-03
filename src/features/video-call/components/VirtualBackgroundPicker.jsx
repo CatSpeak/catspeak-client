@@ -111,7 +111,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
         <div className="text-sm font-medium text-gray-900 mb-3">
           {t?.rooms?.virtualBackground?.title || "Backgrounds"}
         </div>
-        <div className="grid grid-cols-3 min-[426px]:grid-cols-3 md:grid-cols-3 gap-3 auto-rows-max content-start items-start pb-2 border rounded-2xl md:p-4 p-3">
+        <div className="grid grid-cols-2 min-[426px]:grid-cols-3 md:grid-cols-3 gap-3 auto-rows-max content-start items-start pb-2 border rounded-2xl md:p-4 p-3">
           {/* None Option */}
           <div
             onClick={() => handleSelect(null)}
@@ -221,12 +221,11 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
       </div>
 
       {/* Topics */}
-      <div>
+      {/* <div>
         <div className="text-sm font-medium text-gray-900 mb-3">
           {t?.rooms?.topicBackground?.title || "Backgrounds"}
         </div>
         <div className="grid grid-cols-3 min-[426px]:grid-cols-3 md:grid-cols-3 gap-3 auto-rows-max content-start items-start pb-2 border rounded-2xl md:p-4 p-3">
-          {/* None Option */}
           <div
             className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 block`}
           >
@@ -234,15 +233,15 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
               <span className="text-gray-500 font-medium text-sm">
                 {t?.rooms?.topicBackground?.none || "None"}
               </span>
-              {/* {selectedUrl === null && (
+              {selectedUrl === null && (
                 <div className="absolute top-1.5 right-1.5 bg-cath-red-700 text-white rounded-full p-0.5 shadow-sm">
                   <Check size={12} />
                 </div>
-              )} */}
+              )}
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
