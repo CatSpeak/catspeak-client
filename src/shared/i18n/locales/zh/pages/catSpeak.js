@@ -166,6 +166,10 @@ export default {
     noStories: "还没有故事。开始对话！",
     yours: "你的",
     total: "总数",
+    sortNewest: "最新",
+    sortOldest: "最旧",
+    displayGrid: "网格",
+    displayFloat: "漂浮",
   },
   newsLoginPrompt: "请登录后查看社区的最新帖子。",
   sidebar: {
@@ -181,4 +185,4 @@ export default {
     menu: "菜单",
   },
   story: "故事",
-}
+};
