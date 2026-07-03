@@ -12,14 +12,14 @@ const FullscreenOverlayShell = ({
 }) => {
   return (
     <div
-      className="flex h-[100dvh] w-full flex-col bg-contain bg-center bg-no-repeat relative overflow-y-auto"
+      className="flex h-[100dvh] w-full flex-col bg-cover bg-center bg-no-repeat relative overflow-y-auto"
       style={
         backgroundImageUrl
           ? { backgroundImage: `url(${backgroundImageUrl})` }
           : undefined
       }
     >
-      <div className="fixed inset-0 bg-[#111111]/40 backdrop-blur-[20px]" />
+      <div className="fixed inset-0 bg-[#111111]/40 blur-sm" />
 
       <div className="relative z-50 w-full p-5 flex justify-start shrink-0">
         <button

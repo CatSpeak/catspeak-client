@@ -276,9 +276,11 @@ export default {
   },
   videoCall: {
     roomClosingTitle: "Phòng sắp đóng",
-    roomClosingSubtitle: "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",
+    roomClosingSubtitle:
+      "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",
     roomClosingSubtitleStatic: "Phiên kết nối này sắp kết thúc.",
-    roomClosingDescription: "Vui lòng kết thúc cuộc trò chuyện. Phòng sẽ tự động đóng khi thời gian kết thúc.",
+    roomClosingDescription:
+      "Vui lòng kết thúc cuộc trò chuyện. Phòng sẽ tự động đóng khi thời gian kết thúc.",
     screenShareLabel: "Màn hình của {{name}}",
     screenShareLabelYou: "Màn hình của {{name}} (Bạn)",
     moreOptions: "Tùy chọn khác",
@@ -286,7 +288,8 @@ export default {
     reconnect: "Khắc phục sự cố kết nối",
     troubleshoot: {
       havingIssues: "Gặp sự cố?",
-      description: "Nếu bạn gặp tình trạng giật lag, video bị đóng băng hoặc mất âm thanh, hãy thử buộc kết nối lại. Cuộc gọi của bạn sẽ tạm dừng một chút trong khi chúng tôi thiết lập lại kết nối.",
+      description:
+        "Nếu bạn gặp tình trạng giật lag, video bị đóng băng hoặc mất âm thanh, hãy thử buộc kết nối lại. Cuộc gọi của bạn sẽ tạm dừng một chút trong khi chúng tôi thiết lập lại kết nối.",
       forceReconnect: "Buộc kết nối lại",
     },
     copyLink: "Sao chép liên kết phòng",
@@ -405,8 +408,10 @@ export default {
     statusInitializing: "Đang khởi tạo...",
     statusError: "Lỗi",
     attached: "Đã kích hoạt hiệu ứng làm đẹp",
-    unsupported: "Không hỗ trợ hiệu ứng làm đẹp — thiết bị của bạn có thể không hỗ trợ xử lý video. Hãy thử dùng Chrome hoặc Edge trên máy tính.",
-    attachFailed: "Không hỗ trợ hiệu ứng làm đẹp — thiết bị của bạn có thể không hỗ trợ xử lý video.",
+    unsupported:
+      "Không hỗ trợ hiệu ứng làm đẹp — thiết bị của bạn có thể không hỗ trợ xử lý video. Hãy thử dùng Chrome hoặc Edge trên máy tính.",
+    attachFailed:
+      "Không hỗ trợ hiệu ứng làm đẹp — thiết bị của bạn có thể không hỗ trợ xử lý video.",
     trackTimeout: "Không thể gắn hiệu ứng làm đẹp — không tìm thấy camera.",
   },
   virtualBackground: {
@@ -417,6 +422,12 @@ export default {
     uploadSuccess: "Đã tải lên và áp dụng phông nền",
     uploadFailed: "Không thể tải lên phông nền",
     setFailed: "Không thể cài đặt phông nền ảo",
+    loading: "Đang tải...",
+  },
+  topicBackground: {
+    title: "Chủ đề",
+    none: "Không có",
+    upload: "Tải lên",
     loading: "Đang tải...",
   },
   avatarPicker: {
@@ -435,10 +446,12 @@ export default {
   callEnded: {
     titleExpired: "Phiên này đã hết hạn",
     titleLeft: "Bạn đã rời khỏi cuộc họp",
-    descExpired: "Đã đạt đến giới hạn thời gian của phòng và phiên đã tự động đóng.",
-    descLeft: "Bạn có thể đóng cửa sổ này một cách an toàn hoặc quay lại màn hình chính.",
+    descExpired:
+      "Đã đạt đến giới hạn thời gian của phòng và phiên đã tự động đóng.",
+    descLeft:
+      "Bạn có thể đóng cửa sổ này một cách an toàn hoặc quay lại màn hình chính.",
     rejoin: "Tham gia lại",
     returnHome: "Quay lại trang chủ",
     expiredToast: "Phiên kết nối đã kết thúc",
   },
-}
+};

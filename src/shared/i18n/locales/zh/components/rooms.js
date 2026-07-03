@@ -32,7 +32,7 @@ export default {
   pagination: {
     prev: "上一页",
     next: "下一页",
-    pageOf: "第 {page} / {totalPages} 页"
+    pageOf: "第 {page} / {totalPages} 页",
   },
   filters: {
     title: "房间",
@@ -276,7 +276,8 @@ export default {
     reconnect: "重新连接",
     troubleshoot: {
       havingIssues: "遇到问题？",
-      description: "如果您遇到延迟、视频卡顿或音频中断的情况，请尝试强制重新连接。在重新建立连接期间，您的通话将短暂暂停。",
+      description:
+        "如果您遇到延迟、视频卡顿或音频中断的情况，请尝试强制重新连接。在重新建立连接期间，您的通话将短暂暂停。",
       forceReconnect: "强制重新连接",
     },
     copyLink: "复制会议链接",
@@ -322,7 +323,8 @@ export default {
       unknownError: "发生未知错误",
       retry: "重试",
       switchTitle: "切换通话？",
-      switchMessage: "您已经在进行一个通话。您想离开当前通话并加入这个新通话吗？",
+      switchMessage:
+        "您已经在进行一个通话。您想离开当前通话并加入这个新通话吗？",
       switchConfirm: "离开并继续",
       switchCancel: "留在当前通话",
     },
@@ -392,7 +394,8 @@ export default {
     statusInitializing: "初始化中...",
     statusError: "错误",
     attached: "美颜效果已激活",
-    unsupported: "美颜效果不可用 — 您的设备可能不支持视频处理。请尝试在桌面端使用 Chrome 或 Edge。",
+    unsupported:
+      "美颜效果不可用 — 您的设备可能不支持视频处理。请尝试在桌面端使用 Chrome 或 Edge。",
     attachFailed: "美颜效果不可用 — 您的设备可能不支持视频处理。",
     trackTimeout: "无法附加美颜效果 — 未找到摄像头轨道。",
   },
@@ -404,6 +407,12 @@ export default {
     uploadSuccess: "背景已上传并应用",
     uploadFailed: "上传背景失败",
     setFailed: "设置虚拟背景失败",
+    loading: "加载中...",
+  },
+  topicBackground: {
+    title: "話題",
+    none: "无",
+    upload: "上传",
     loading: "加载中...",
   },
   avatarPicker: {
@@ -426,4 +435,4 @@ export default {
     rejoin: "重新加入",
     returnHome: "返回主页",
   },
-}
+};

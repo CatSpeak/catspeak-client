@@ -148,7 +148,7 @@ const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
             key={key}
             className="flex flex-col"
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-3 text-sm text-gray-700">
                 {icon}
                 <span>{label}</span>
