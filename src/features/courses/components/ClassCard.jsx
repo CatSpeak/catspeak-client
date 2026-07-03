@@ -10,10 +10,6 @@ const ClassCard = ({
   onClick,
   onEnroll,
   progressLabel,
-  minPriceLabel,
-  maxPriceLabel,
-  minPrice,
-  maxPrice,
   courseTitle,
   language
 }) => {
@@ -81,6 +77,10 @@ const ClassCard = ({
 
           <div className="mt-4 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+              <Tag size={13} className="text-gray-400" />
+              <span className="text-gray-900 font-extrabold">{formatCurrencyVND(cls.tuitionFee)}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={13} className="text-gray-400" />
               <span>{cls.schedule?.days?.join(" - ") || "TBA"}</span>
             </div>
@@ -106,12 +106,7 @@ const ClassCard = ({
               </div>
             )}
 
-            <div className="flex justify-between items-center gap-4">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-gray-400 font-bold uppercase">Tuition Fee</span>
-                <span className="text-gray-900 font-black text-sm">{formatCurrencyVND(cls.tuitionFee)}</span>
-              </div>
-
+            <div className="flex justify-end items-center gap-4">
               {isClassEnrolled ? (
                 <button
                   onClick={(e) => {
@@ -148,24 +143,6 @@ const ClassCard = ({
               </div>
               <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
                 <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
-              </div>
-            </div>
-
-            {/* Cost footer */}
-            <div className="mt-5 pt-4 border-t border-gray-100 flex flex-col gap-2">
-              <div className="flex justify-between items-center text-xs font-bold">
-                <span className="text-gray-400 flex items-center gap-1.5">
-                  <Tag size={13} />
-                  {minPriceLabel}
-                </span>
-                <span className="text-gray-900 font-black">{formatCurrencyVND(minPrice)}</span>
-              </div>
-              <div className="flex justify-between items-center text-xs font-bold">
-                <span className="text-gray-400 flex items-center gap-1.5">
-                  <Tag size={13} />
-                  {maxPriceLabel}
-                </span>
-                <span className="text-gray-900 font-black">{formatCurrencyVND(maxPrice)}</span>
               </div>
             </div>
           </>

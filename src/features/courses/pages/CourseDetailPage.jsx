@@ -56,10 +56,7 @@ const CourseDetailPage = () => {
     thumbnailUrl: rawCourse.thumbnailUrl || ""
   }
 
-  // Calculate pricing range dynamically based on class tuition fees
-  const tuitionFees = classes.map(cls => cls.tuitionFee).filter(f => f > 0)
-  const minPrice = tuitionFees.length > 0 ? Math.min(...tuitionFees) : 350000
-  const maxPrice = tuitionFees.length > 0 ? Math.max(...tuitionFees) : 1999000
+
 
 
 
@@ -85,8 +82,6 @@ const CourseDetailPage = () => {
   const startByAddingLabel = c.courseDetail?.startByAdding || (language === "vi" ? "Bắt đầu bằng cách thêm lớp học đầu tiên cho khóa học này." : "Start by adding your first class to this course.")
 
   const progressLabel = c.progress || (language === "vi" ? "Tiến độ" : "Progress")
-  const minPriceLabel = language === "vi" ? "Giá thấp nhất" : "Lowest Price"
-  const maxPriceLabel = language === "vi" ? "Giá cao nhất" : "Highest Price"
 
   const upcomingSessionLabel = c.courseDetail?.upcomingSession || (language === "vi" ? "Buổi dạy tiếp theo" : "Upcoming Session")
   const joinRoomLabel = c.classDetail?.joinRoom || (language === "vi" ? "Vào phòng" : "Join Room")
@@ -188,10 +183,6 @@ const CourseDetailPage = () => {
                       isStudent={false}
                       onClick={() => navigate(`/workspace/courses/class/${cls.id}`)}
                       progressLabel={progressLabel}
-                      minPriceLabel={minPriceLabel}
-                      maxPriceLabel={maxPriceLabel}
-                      minPrice={minPrice}
-                      maxPrice={maxPrice}
                       courseTitle={courseData.title}
                       language={language}
                     />

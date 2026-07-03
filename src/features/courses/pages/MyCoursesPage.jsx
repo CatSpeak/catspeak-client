@@ -641,7 +641,12 @@ const MyCoursesPage = () => {
                           <span className="text-xs text-gray-400 font-bold block">
                             {language === "vi" ? `Lớp ${item.title}` : `Class ${item.title}`}
                           </span>
+
                           <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
+                            <div className="flex items-center gap-2">
+                              <Tag size={13} className="text-gray-400" />
+                              <span className="text-gray-900 font-extrabold">{item.price}</span>
+                            </div>
                             <div className="flex items-center gap-2">
                               <Calendar size={13} className="text-gray-400" />
                               <span>{item.schedule}</span>
@@ -669,8 +674,8 @@ const MyCoursesPage = () => {
                     </div>
 
                     {/* Footers for cards */}
-                    <div className="pt-4 border-t border-gray-100 flex flex-col gap-2 text-xs font-bold">
-                      {activeTab === "courses" ? (
+                    {activeTab === "courses" && (
+                      <div className="pt-4 border-t border-gray-100 flex flex-col gap-2 text-xs font-bold">
                         <div className="flex justify-between items-center">
                           <div className="flex flex-col">
                             <span className="text-gray-400 text-[10px] leading-none mb-0.5">Created Date</span>
@@ -678,25 +683,8 @@ const MyCoursesPage = () => {
                           </div>
                           <span className="text-[#b20a1c] hover:underline font-extrabold text-xs">Manage Details &rarr;</span>
                         </div>
-                      ) : (
-                        <>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400 flex items-center gap-1.5">
-                              <Tag size={13} />
-                              Giá thấp nhất
-                            </span>
-                            <span className="text-gray-900 font-black">{item.price}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400 flex items-center gap-1.5">
-                              <Tag size={13} />
-                              Giá cao nhất
-                            </span>
-                            <span className="text-gray-900 font-black">{formatCurrencyVND(1999000)}</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                 </div>
