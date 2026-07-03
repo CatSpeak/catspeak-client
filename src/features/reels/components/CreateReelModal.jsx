@@ -21,6 +21,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import Avatar from "@/shared/components/ui/Avatar"
+import toast from "react-hot-toast"
 import {
   useCreateReelMutation,
   useSearchReelHashtagsQuery,
@@ -1026,12 +1027,15 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
       }
 
       await createReel(formData).unwrap()
+      toast.success("Reel uploaded successfully!")
     } catch (err) {
-      setGeneralError(
+      console.error("Reel upload error:", err)
+      const errorMessage =
         err?.data?.message ||
-          err?.message ||
-          "Failed to upload Reel. Please try again.",
-      )
+        err?.message ||
+        "Failed to upload Reel. Please try again."
+      setGeneralError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 
