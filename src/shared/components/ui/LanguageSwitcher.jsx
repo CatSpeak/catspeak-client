@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FluentAnimation } from "@/shared/components/ui/animations";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { VietNam, China, USA } from "@/shared/assets/icons/flags";
-import useClickOutside from "@/shared/hooks/useClickOutside";
+import React, { useState, useRef } from "react"
+import { AnimatePresence , motion} from "framer-motion"
+import { FluentAnimation } from "@/shared/components/ui/animations"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
  * Nôm Vietnamese is not listed here — when you add it for development, use e.g.

@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo } from "react"
-import { Outlet } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { motion, useAnimation, useMotionValue, useSpring } from "framer-motion"
-import SharedLayout from "@/shared/components/layout/SharedLayout"
+import React, { useEffect, useMemo } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { motion, useAnimation } from "framer-motion";
+import Tabs from "@/shared/components/ui/navigation/Tabs";
+import { getProfileTabsConfig } from "../config/tabs";
+import SharedLayout from "@/shared/components/layout/SharedLayout";
 
 const RandomCircle = ({ colorClass, baseSize, delay }) => {
-  const controls = useAnimation()
+  const controls = useAnimation();
 
   const initialPosition = useMemo(
     () => ({
@@ -14,37 +16,37 @@ const RandomCircle = ({ colorClass, baseSize, delay }) => {
       scale: Math.random() * 1.0 + 0.5,
     }),
     [],
-  )
+  );
 
   useEffect(() => {
-    let isActive = true
+    let isActive = true;
 
     const animateCircle = async () => {
-      if (delay) await new Promise((r) => setTimeout(r, delay * 1000))
+      if (delay) await new Promise((r) => setTimeout(r, delay * 1000));
 
       while (isActive) {
-        const x = (Math.random() - 0.5) * 120 + "vw"
-        const y = (Math.random() - 0.5) * 120 + "vh"
+        const x = (Math.random() - 0.5) * 120 + "vw";
+        const y = (Math.random() - 0.5) * 120 + "vh";
 
         // Smaller circles move faster (shorter duration), larger circles move slower
         // baseSize 150 -> ~15s to 25s
         // baseSize 300 -> ~30s to 40s
-        const duration = baseSize / 10 + Math.random() * 10
+        const duration = baseSize / 10 + Math.random() * 10;
 
-        if (!isActive) break
+        if (!isActive) break;
         await controls.start({
           x,
           y,
           transition: { duration, ease: "easeInOut" },
-        })
+        });
       }
-    }
+    };
 
-    animateCircle()
+    animateCircle();
     return () => {
-      isActive = false
-    }
-  }, [controls, delay])
+      isActive = false;
+    };
+  }, [controls, delay]);
 
   return (
     <motion.div
@@ -58,8 +60,8 @@ const RandomCircle = ({ colorClass, baseSize, delay }) => {
         marginTop: -baseSize / 2,
       }}
     />
-  )
-}
+  );
+};
 
 const BackgroundCircles = () => {
   return (
@@ -90,25 +92,53 @@ const BackgroundCircles = () => {
         delay={3}
       />
     </div>
-  )
-}
+  );
+};
 
 const ProfileLayout = () => {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const tabsConfig = getProfileTabsConfig(t);
+
+  // Determine active tab based on current pathname
+  const activeTab = useMemo(() => {
+    const currentPath = location.pathname;
+    // Find the matching tab by checking if current path starts with tab id
+    const matched = tabsConfig.find(
+      (tab) => currentPath === tab.id || currentPath.startsWith(tab.id + "/"),
+    );
+    return matched?.id || tabsConfig[0]?.id;
+  }, [location.pathname, tabsConfig]);
+
+  const handleTabChange = (tabId) => {
+    navigate(tabId);
+  };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full flex-1 lg:overflow-hidden relative z-0">
-      <BackgroundCircles />
-
-      {/* Main Content */}
-      <main className="flex-1 h-full overflow-y-auto flex flex-col">
-        {/* Content */}
-        <div className="mx-auto w-full max-w-[1040px] min-w-0 p-5 flex-1">
-          <Outlet />
+    <SharedLayout
+      background={<BackgroundCircles />}
+      mobileNav={
+        <div className="w-full  backdrop-blur-md border-b border-white/30">
+          <Tabs
+            tabs={tabsConfig}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+          />
         </div>
-      </main>
-    </div>
-  )
-}
+      }
+    >
+      <div className="hidden lg:block w-full sticky top-0 z-20 mb-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
+        <Tabs
+          tabs={tabsConfig}
+          activeTab={activeTab}
+          onChange={handleTabChange}
+        />
+      </div>
+      <Outlet />
+    </SharedLayout>
+  );
+};
 
-export default ProfileLayout
+export default ProfileLayout;

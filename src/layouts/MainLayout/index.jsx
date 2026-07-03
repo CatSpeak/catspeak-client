@@ -31,10 +31,10 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     redirectAfterLogin: null,
   });
 
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const isLandingPage = location.pathname === "/";
-  const isCommunityPage = location.pathname.includes("/community");
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const isLandingPage = location.pathname === "/"
+  const isCommunityPage = location.pathname.includes("/community")
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
@@ -105,7 +105,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     >
       {/* Background for Community Page - covers FULL viewport behind everything */}
       {isCommunityPage && (
-        <div
+        <div 
           className="fixed inset-0 pointer-events-none z-0 mt-24"
           style={{
             backgroundImage: `url(${BackgroundV2})`,

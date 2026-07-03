@@ -279,12 +279,12 @@ export const reelsApi = baseApi.injectEndpoints({
 
     // Get active challenges currently running
     getActiveChallenges: builder.query({
-      query: () => "/Reels/challenges/active",
+      query: () => "/reels/challenges/active",
     }),
 
     // Get past challenges
     getPastChallenges: builder.query({
-      query: () => "/Reels/challenges/past",
+      query: () => "/reels/challenges/past",
     }),
 
     // Get reels associated with a specific challenge or challenge filter
