@@ -93,7 +93,7 @@ const LiveMessages = ({ languageCommunity }) => {
       {/* Main content */}
       <div
         className="relative flex w-full max-w-full flex-col"
-        style={{ height: "calc(100dvh - 210px)", minHeight: "50vh" }}
+        style={{ minHeight: "78vh", maxHeight: "fit-content" }}
       >
         <StoryInputBar
           inputValue={inputValue}
@@ -127,6 +127,7 @@ const LiveMessages = ({ languageCommunity }) => {
           </div>
         ) : (
           <ShowStory
+            listStories={combinedStories}
             danmakuItems={danmakuItems}
             stageRef={stageRef}
             onItemClick={handleItemClick}

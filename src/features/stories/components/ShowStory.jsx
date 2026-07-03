@@ -13,6 +13,7 @@ import StoryCardItem from "./StoryCardItem";
  * @param {"grid"|"float"} [props.displayMode="float"]
  */
 const ShowStory = ({
+  listStories,
   danmakuItems,
   stageRef,
   onItemClick,
@@ -22,10 +23,10 @@ const ShowStory = ({
     return (
       <div
         ref={stageRef}
-        className="relative w-full flex-1 min-h-0 overflow-y-auto md:px-9 px-0 py-3"
+        className="relative w-full h-full flex-1 overflow-hidden min-h-0 md:px-9 px-0 py-3"
       >
         <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-3">
-          {danmakuItems.map((story) => (
+          {listStories.map((story) => (
             <StoryCardItem
               key={story._idx}
               story={story}

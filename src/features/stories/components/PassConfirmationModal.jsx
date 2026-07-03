@@ -47,7 +47,7 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
       open={open}
       onClose={handleClose}
       title={t.catSpeak?.story || "Story"}
-      bodyClassName="p-4 md:p-6 pt-0"
+      bodyClassName="p-4 md:p-6 pt-0 md:pt-0"
       className="md:max-w-[525px]"
     >
       <div className="md:space-y-6 space-y-4">
@@ -63,11 +63,11 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
               {story.username || t.catSpeak?.anonymous || "Anonymous"}
             </span>
             <div className="flex items-center gap-4 text-sm text-[#9e9e9e] mt-1">
-              <span className="flex items-center gap-1">
+              {/* <span className="flex items-center gap-1">
                 <MessageSquare size={13} className="shrink-0" />
                 {story.commentCount || 0} {t.story?.replies}
-              </span>
-              <span>• {dayjs(story.createDate).fromNow()}</span>
+              </span> */}
+              <span>{dayjs(story.createDate).fromNow()}</span>
             </div>
           </div>
         </div>
