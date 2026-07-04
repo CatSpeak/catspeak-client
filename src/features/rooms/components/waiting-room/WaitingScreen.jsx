@@ -6,6 +6,8 @@ import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ParticipantsPreview from "./ParticipantsPreview"
 import VideoPreview from "./VideoPreview"
+import RoomInformation from "./RoomInformation"
+import EditNickname from "./EditNickName"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import meetingFallbackImage from "@/shared/assets/images/rooms/BackgroundDefault.png"
 import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayShell"
@@ -53,11 +55,19 @@ const WaitingScreen = ({
       onBack={() => navigate(getCommunityPath(lang || language))}
       backLabel={t.rooms.waitingScreen.backToCommunity}
       maxWidthClass="max-w-[85vw]"
-      cardClassName="rounded-[12px] h-auto"
+      cardClassName="rounded-[12px] h-auto min-w-fit"
     >
-      <div className="flex items-center w-full">
+      <div className="flex flex-col lg:flex-row items-center w-full">
         {/* Video Preview & Participants */}
-        <div className="flex w-3/5 flex-col items-center gap-4">
+        <div className="flex w-full lg:w-3/5 flex-col items-center gap-4">
+          <RoomInformation
+            session={session}
+            room={room}
+            participants={participants}
+            participantCount={participantCount}
+            className="block lg:hidden"
+          />
+
           <VideoPreview
             user={user}
             localStream={localStream}
@@ -71,71 +81,32 @@ const WaitingScreen = ({
           />
 
           {/* Edit nickname */}
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <p>
-              {t?.rooms?.waitingScreen?.joinedAsNickname || "Joined as nickname"}:{" "}
-              <span className="font-medium text-gray-900">
-                {user?.nickname || user?.username}
-              </span>
-            </p>
-            <span className="text-gray-300">|</span>
-            <button
-              onClick={() => {
-                setIsEditingName(true)
-              }}
-              className="flex items-center gap-1 text-cath-red-600 hover:text-cath-red-700 font-medium transition-colors"
-            >
-              <Edit2 size={14} />
-              {t?.rooms?.waitingScreen?.editName || "Edit Name"}
-            </button>
-          </div>
+          <EditNickname
+            user={user}
+            onEditName={() => setIsEditingName(true)}
+            className="lg:flex hidden"
+          />
         </div>
 
-        <div className="flex w-2/5 items-center flex-col space-y-6 justify-center">
+        <div className="flex w-full lg:w-2/5 items-center flex-col space-y-6 justify-center">
           {/* Room name, topic & participants preview */}
-          <div className="text-center">
-            <h4 className="mb-2 font-semibold text-xl md:text-2xl">
-              {session?.roomName || t.rooms.waitingScreen.readyToJoin}
-            </h4>
-
-            {(room?.requiredLevel || room?.topic) && (
-              <div className="flex flex-wrap justify-center gap-[11px] mb-3 mt-2">
-                {room?.requiredLevel && (
-                  <span className="rounded-lg bg-cath-red-700 px-[15px] py-2.5 text-[14px] font-bold uppercase tracking-wider leading-none text-white">
-                    {room.requiredLevel}
-                  </span>
-                )}
-                {room?.topic &&
-                  room.topic.split(",").map((t_topic) => {
-                    const trimmed = t_topic.trim()
-                    return (
-                      <span
-                        key={trimmed}
-                        className="rounded-lg bg-cath-red-700 px-[15px] py-2.5 text-[14px] font-bold  tracking-wider leading-none text-white"
-                      >
-                        {t.rooms.createRoom?.topics?.[trimmed.toLowerCase()] ||
-                          trimmed}
-                      </span>
-                    )
-                  })}
-              </div>
-            )}
-
-            <ParticipantsPreview
-              participants={participants}
-              participantCount={participantCount}
-            />
-          </div>
+          <RoomInformation
+            session={session}
+            room={room}
+            participants={participants}
+            participantCount={participantCount}
+            className="hidden lg:block"
+          />
 
           {/* Copy Link, Join Buttons */}
           <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
-            <div className="flex w-full flex-col sm:flex-row sm:gap-[25px] gap-4">
+            <div className="flex w-full flex-col flex-wrap md:flex-row sm:gap-[25px] gap-4 lg:max-w-[240px] md:max-w-full">
               <PillButton
                 onClick={onJoin}
                 disabled={isFull}
                 aria-disabled={isFull}
                 title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
-                className="h-12 w-full min-w-fit max-w-[260px] sm:flex-1 shrink-0 py-2 px-4 text-[18px] rounded-[35px] text-[#F5F5F5]"
+                className="md:h-12 h-10 w-full sm:flex-1 shrink-0 py-2 px-4 text-[18px] rounded-[35px] text-[#F5F5F5]"
               >
                 {t.rooms.waitingScreen.joinNow}
               </PillButton>
@@ -143,7 +114,7 @@ const WaitingScreen = ({
                 onClick={handleCopyLink}
                 variant="secondary"
                 startIcon={<Copy />}
-                className="h-12 w-full min-w-fit max-w-[260px] sm:flex-1 shrink-0 bg-white border border-[#e5e5e5] shadow-sm hover:bg-gray-50 py-2 px-4 text-[18px] rounded-[35px] text-[#7B7979]"
+                className="md:h-12 h-10 w-full sm:flex-1 shrink-0 bg-white border border-[#e5e5e5] shadow-sm hover:bg-gray-50 py-2 px-4 text-[18px] rounded-[35px] text-[#7B7979]"
               >
                 {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
               </PillButton>
@@ -155,6 +126,12 @@ const WaitingScreen = ({
                 {maxParticipants})
               </p>
             )}
+
+            <EditNickname
+              user={user}
+              onEditName={() => setIsEditingName(true)}
+              className="lg:hidden flex"
+            />
           </div>
         </div>
       </div>
