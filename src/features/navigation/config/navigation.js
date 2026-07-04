@@ -9,7 +9,7 @@ import {
   Briefcase,
   User,
   CreditCard,
-} from "lucide-react";
+} from "lucide-react"
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -45,12 +45,12 @@ export const navLinks = [
       // { key: "billing", path: "/billing" },
     ],
   },
-  {
-    key: "pricing",
-    path: "/pricing",
-    hasDropdown: false,
-    icon: CreditCard,
-  },
+  // {
+  //   key: "pricing",
+  //   path: "/pricing",
+  //   hasDropdown: false,
+  //   icon: CreditCard,
+  // },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
   // { key: "messages", path: "/messages", icon: MessageCircle },
   // {
@@ -62,9 +62,9 @@ export const navLinks = [
   //     { key: "myCourses", path: "/my-courses" }
   //   ]
   // },
-];
+]
 
 export const footerLinks = [
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
   // { key: "help", path: "/help", icon: HelpCircle }
-];
+]
