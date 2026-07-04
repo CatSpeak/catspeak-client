@@ -36,14 +36,9 @@ export const navLinks = [
   },
   {
     key: "profile",
-    hasDropdown: true,
+    path: "/profile",
+    hasDropdown: false,
     icon: User,
-    subItems: [
-      { key: "personalInfo", path: "/profile" },
-      { key: "instructor", path: "/instructor" },
-      // { key: "organization", path: "/organization" },
-      // { key: "billing", path: "/billing" },
-    ],
   },
   // {
   //   key: "pricing",

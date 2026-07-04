@@ -33,7 +33,7 @@ export default {
   pagination: {
     prev: "Previous",
     next: "Next",
-    pageOf: "Page {page} of {totalPages}"
+    pageOf: "Page {page} of {totalPages}",
   },
   filters: {
     title: "Rooms",
@@ -298,9 +298,11 @@ export default {
   },
   videoCall: {
     roomClosingTitle: "Room Ending Soon",
-    roomClosingSubtitle: "This session will end in {{remainingSeconds}} seconds",
+    roomClosingSubtitle:
+      "This session will end in {{remainingSeconds}} seconds",
     roomClosingSubtitleStatic: "This session will end soon.",
-    roomClosingDescription: "Please wrap up your conversation. The room will automatically close when the timer reaches zero.",
+    roomClosingDescription:
+      "Please wrap up your conversation. The room will automatically close when the timer reaches zero.",
     screenShareLabel: "{{name}}'s screen",
     screenShareLabelYou: "{{name}}'s screen (You)",
     moreOptions: "More options",
@@ -308,7 +310,8 @@ export default {
     reconnect: "Troubleshoot connection",
     troubleshoot: {
       havingIssues: "Having issues?",
-      description: "If you're experiencing lag, frozen video, or audio dropouts, try forcing a full reconnection. Your call will pause briefly while we re-establish the connection.",
+      description:
+        "If you're experiencing lag, frozen video, or audio dropouts, try forcing a full reconnection. Your call will pause briefly while we re-establish the connection.",
       forceReconnect: "Force Reconnect",
     },
     copyLink: "Copy meeting link",
@@ -339,7 +342,8 @@ export default {
     backgroundsAndEffects: "Backgrounds and effects",
     tabBackgrounds: "Backgrounds",
     applyVisualEffects: "Change background",
-    cameraOffWarning: "Your camera is turned off. Selecting an effect will turn it on.",
+    cameraOffWarning:
+      "Your camera is turned off. Selecting an effect will turn it on.",
     recording: {
       stopTitle: "Stop recording",
       stopDescription:
@@ -354,7 +358,8 @@ export default {
       unknownError: "Unknown error occurred",
       retry: "Retry",
       switchTitle: "Switch Call?",
-      switchMessage: "You are already in an active call. Do you want to leave your current call and join this new one?",
+      switchMessage:
+        "You are already in an active call. Do you want to leave your current call and join this new one?",
       switchConfirm: "Leave & Continue",
       switchCancel: "Stay in Current Call",
     },
@@ -425,8 +430,10 @@ export default {
     statusInitializing: "Initializing...",
     statusError: "Error",
     attached: "Beauty effects active",
-    unsupported: "Beauty effects unavailable — your device may not support video processing. Try using Chrome or Edge on desktop.",
-    attachFailed: "Beauty effects unavailable — your device may not support video processing.",
+    unsupported:
+      "Beauty effects unavailable — your device may not support video processing. Try using Chrome or Edge on desktop.",
+    attachFailed:
+      "Beauty effects unavailable — your device may not support video processing.",
     trackTimeout: "Could not attach beauty effects — camera track not found.",
   },
   virtualBackground: {
@@ -439,13 +446,20 @@ export default {
     setFailed: "Failed to set virtual background",
     loading: "Loading...",
   },
+  topicBackground: {
+    title: "Topics",
+    none: "None",
+    upload: "Upload",
+    loading: "Loading...",
+  },
   avatarPicker: {
     title: "Meeting Avatar",
     success: "Avatar updated successfully",
     error: "Failed to update avatar",
     imageUrl: "Image URL",
     placeholder: "Paste image URL here...",
-    description: "Paste a valid image URL. If invalid, it will fallback to your initial.",
+    description:
+      "Paste a valid image URL. If invalid, it will fallback to your initial.",
     saving: "Saving...",
     saveAvatar: "Save Avatar",
   },
@@ -454,10 +468,11 @@ export default {
   callEnded: {
     titleExpired: "This session has expired",
     titleLeft: "You left the meeting",
-    descExpired: "The room time limit was reached and the session was automatically closed.",
+    descExpired:
+      "The room time limit was reached and the session was automatically closed.",
     descLeft: "You can safely close this window or return to the home screen.",
     rejoin: "Rejoin",
     returnHome: "Return to home",
     expiredToast: "The session has ended",
   },
-}
+};

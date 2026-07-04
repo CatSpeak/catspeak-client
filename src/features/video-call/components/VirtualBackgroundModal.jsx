@@ -102,11 +102,13 @@ const VirtualBackgroundModal = ({
       title={
         t?.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"
       }
-      className="max-w-4xl md:max-w-4xl min-h-[500px]"
+      className="md:max-w-[800px] min-h-[500px] "
+      headerClassName="flex items-center justify-between py-4 px-6"
+      bodyClassName="px-6 pb-6 flex-1 overflow-y-auto"
     >
       <div className="flex flex-col md:flex-row gap-5 h-full min-h-[400px]">
         {/* Left Column: Video Preview */}
-        <div className="flex-1 min-w-0 flex flex-col bg-[#202124] rounded-xl overflow-hidden relative aspect-video w-full h-full">
+        <div className="min-w-0 flex flex-col bg-[#202124] rounded-xl overflow-hidden relative aspect-video md:w-[280px] w-full h-full">
           <video
             ref={videoRef}
             autoPlay

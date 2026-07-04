@@ -7,7 +7,8 @@ import { useUpdateUserProfileMutation } from "@/store/api/userApi"
 
 const EditNicknameModal = ({ open, onClose, user, t }) => {
   const [tempName, setTempName] = useState("")
-  const [updateProfile, { isLoading: isUpdating }] = useUpdateUserProfileMutation()
+  const [updateProfile, { isLoading: isUpdating }] =
+    useUpdateUserProfileMutation()
 
   useEffect(() => {
     if (open) {
@@ -22,10 +23,15 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
     }
     try {
       await updateProfile({ nickname: tempName.trim() }).unwrap()
-      toast.success(t?.rooms?.waitingScreen?.updateNameSuccess || "Nickname updated successfully")
+      toast.success(
+        t?.rooms?.waitingScreen?.updateNameSuccess ||
+          "Nickname updated successfully",
+      )
       onClose()
     } catch (err) {
-      toast.error(t?.rooms?.waitingScreen?.updateNameError || "Failed to update nickname")
+      toast.error(
+        t?.rooms?.waitingScreen?.updateNameError || "Failed to update nickname",
+      )
     }
   }
 
@@ -34,14 +40,18 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
       open={open}
       onClose={onClose}
       title={t?.rooms?.waitingScreen?.editName || "Edit Name"}
-      className="max-w-md"
+      className="md:max-w-[400px]"
+      headerClassName="flex items-center justify-between p-6"
+      bodyClassName="px-6 pb-6 flex-1"
     >
-      <div className="flex flex-col gap-6 pb-4">
+      <div className="flex flex-col gap-3">
         <TextInput
           type="text"
           value={tempName}
           onChange={(e) => setTempName(e.target.value)}
-          placeholder={t?.rooms?.waitingScreen?.namePlaceholder || "Enter nickname"}
+          placeholder={
+            t?.rooms?.waitingScreen?.namePlaceholder || "Enter nickname"
+          }
           autoFocus
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSaveName()
@@ -55,7 +65,7 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
             variant="secondary"
             onClick={onClose}
             disabled={isUpdating}
-            className="flex-1 min-[426px]:flex-none bg-white border border-[#E5E5E5] text-gray-700 hover:bg-gray-50 shadow-sm"
+            className="flex-1 min-[426px]:flex-none bg-white border border-[#E5E5E5] text-gray-700 hover:bg-gray-50 shadow-sm w-20 h-auto !px-3 py-2"
           >
             {t?.rooms?.waitingScreen?.cancelEdit || "Cancel"}
           </PillButton>
@@ -63,7 +73,7 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
             onClick={handleSaveName}
             disabled={isUpdating || !tempName.trim()}
             loading={isUpdating}
-            className="flex-1 min-[426px]:flex-none"
+            className="flex-1 min-[426px]:flex-none w-20 !px-3 py-2 h-auto"
           >
             {t?.rooms?.waitingScreen?.saveName || "Save"}
           </PillButton>
