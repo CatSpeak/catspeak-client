@@ -22,13 +22,13 @@ const WorkshopCard = ({ slide, onCtaClick }) => {
       </div>
 
       {/* Content Section overlaying the image */}
-      <div className="absolute inset-x-0 bottom-[10%] h-[50%] md:h-[58%] max-sm:bottom-auto max-sm:top-[58%] max-sm:-translate-y-1/2 max-sm:h-auto flex flex-col justify-center px-[15%] sm:px-[3%] text-white max-sm:text-center text-left w-full">
+      <div className={`absolute inset-x-0 ${slide.isCompactHeight ? 'bottom-[4%] h-[55%] md:h-[65%]' : 'bottom-[10%] h-[50%] md:h-[58%]'} max-sm:bottom-auto max-sm:top-[58%] max-sm:-translate-y-1/2 max-sm:h-auto flex flex-col justify-center px-[15%] sm:px-[3%] text-white max-sm:text-center text-left w-full`}>
         <div className="flex flex-col gap-1 sm:gap-[1.5cqw]">
-          <h3 className="text-[clamp(15px,4.5cqw,42px)] leading-tight font-bold drop-shadow-lg line-clamp-2">
+          <h3 className={`${slide.isCompactHeight ? 'text-[clamp(14px,4cqw,36px)]' : 'text-[clamp(15px,4.5cqw,42px)]'} leading-tight font-bold drop-shadow-lg line-clamp-2`}>
             {slide.title || t?.workshops?.heroCarousel?.comingSoonTitle}
           </h3>
           {slide.subtext && (
-            <p className="max-sm:hidden text-[clamp(10px,2cqw,22px)] text-gray-100 drop-shadow-md line-clamp-2 font-medium">
+            <p className={`max-sm:hidden ${slide.isCompactHeight ? 'text-[clamp(10px,1.5cqw,18px)] line-clamp-3' : 'text-[clamp(10px,2cqw,22px)] line-clamp-2'} text-gray-100 drop-shadow-md font-medium`}>
               {slide.subtext}
             </p>
           )}

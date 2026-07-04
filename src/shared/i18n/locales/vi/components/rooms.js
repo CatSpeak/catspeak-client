@@ -443,6 +443,8 @@ export default {
   },
   participants: "người",
   noLimit: "Không giới hạn",
+  copySuccess: "Đã sao chép liên kết",
+  copyLinkTooltip: "Sao chép liên kết",
   callEnded: {
     titleExpired: "Phiên này đã hết hạn",
     titleLeft: "Bạn đã rời khỏi cuộc họp",

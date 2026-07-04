@@ -427,6 +427,8 @@ export default {
   },
   participants: "人",
   noLimit: "无限制",
+  copySuccess: "链接已复制",
+  copyLinkTooltip: "复制链接",
   callEnded: {
     titleExpired: "此会话已过期",
     titleLeft: "您已离开会议",

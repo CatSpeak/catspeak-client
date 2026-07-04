@@ -465,6 +465,8 @@ export default {
   },
   participants: "participants",
   noLimit: "No limit",
+  copySuccess: "Link copied",
+  copyLinkTooltip: "Copy link",
   callEnded: {
     titleExpired: "This session has expired",
     titleLeft: "You left the meeting",

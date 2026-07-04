@@ -28,7 +28,7 @@ export const roomsApi = baseApi.injectEndpoints({
         }
         if (categories) {
           if (Array.isArray(categories)) {
-            params.append("categories", categories.join(", "))
+            categories.forEach((cat) => params.append("categories", cat))
           } else {
             params.append("categories", categories)
           }
