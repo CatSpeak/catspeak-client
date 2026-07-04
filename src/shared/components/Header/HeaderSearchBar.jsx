@@ -1,10 +1,39 @@
 import React, { useState } from "react"
 import { Search, ArrowLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSearchParams, useNavigate, useLocation, useParams } from "react-router-dom"
 
 const HeaderSearchBar = () => {
   const { t } = useLanguage()
   const [isExpanded, setIsExpanded] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchValue, setSearchValue] = useState(searchParams.get("search") || "")
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { lang } = useParams()
+
+  // Sync state if URL changes externally
+  React.useEffect(() => {
+    setSearchValue(searchParams.get("search") || "")
+  }, [searchParams])
+
+  const handleSearch = () => {
+    const trimmed = searchValue.trim()
+    const newParams = new URLSearchParams(searchParams)
+    if (trimmed) {
+      newParams.set("search", trimmed)
+    } else {
+      newParams.delete("search")
+    }
+    newParams.set("page", "1")
+
+    const communityPath = `/${lang || "en"}/community`
+    if (!location.pathname.startsWith(communityPath)) {
+      navigate(`${communityPath}?${newParams.toString()}`)
+    } else {
+      setSearchParams(newParams, { preventScrollReset: true })
+    }
+  }
 
   return (
     <>
@@ -27,10 +56,21 @@ const HeaderSearchBar = () => {
            </button>
         )}
         <div className="relative flex-1">
-          <Search className="w-[17px] h-[17px] text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" strokeWidth={2.5} />
+          <Search 
+            className="w-[17px] h-[17px] text-gray-500 absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer" 
+            strokeWidth={2.5} 
+            onClick={handleSearch}
+          />
           <input
             type="text"
             autoFocus={isExpanded}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch()
+              }
+            }}
             placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng hoặc chủ đề"}
             className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[14px] outline-none transition-all placeholder-gray-500"
           />

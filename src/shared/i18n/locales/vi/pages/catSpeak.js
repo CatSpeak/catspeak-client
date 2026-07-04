@@ -45,7 +45,7 @@ export default {
     pastChallenge: "Thử thách đã qua",
     noActiveChallenges: "Không tìm thấy thử thách nào",
     noPastChallenges: "Không tìm thấy thử thách nào",
-    createOwnReels: "Sáng tạo nội dung của riêng bạn ✨",
+    createOwnReels: "Sáng tạo nội dung của riêng bạn",
     shareKnowledge: "Chia sẻ kiến thức và luyện tập nhập vai cùng cộng đồng Cat Speak.",
     formatLimit: "Định dạng MP4, MOV",
     sizeLimit: "Tối đa 5 phút, 50MB",

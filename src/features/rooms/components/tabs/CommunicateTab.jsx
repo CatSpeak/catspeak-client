@@ -39,7 +39,13 @@ const CommunicateTab = ({
     if (setPage) setPage(1);
   };
 
-  const isFilteredView = selectedCategories && selectedCategories.length > 0;
+  const search = searchParams.get("search");
+
+  const isFilteredView =
+    (selectedCategories && selectedCategories.length > 0) ||
+    (topics && topics.length > 0) ||
+    (requiredLevels && requiredLevels.length > 0) ||
+    !!search;
 
   const [categoryCounts, setCategoryCounts] = useState({});
 
