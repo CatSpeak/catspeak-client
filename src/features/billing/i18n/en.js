@@ -1,5 +1,6 @@
 export default {
   billing: {
+    billingHistory: "Billing History",
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " rooms",

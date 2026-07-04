@@ -1,5 +1,6 @@
 export default {
   billing: {
+    billingHistory: "账单历史",
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " 个房间",
