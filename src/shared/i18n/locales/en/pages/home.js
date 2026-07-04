@@ -78,7 +78,7 @@ export default {
     ],
   },
   partnerSection: {
-    title: "Our Partners",
+    title: "Partner Organizations",
   },
   faq: {
     corner: "FAQ",

@@ -20,7 +20,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative overflow-hidden bg-white pt-10">
+    <footer className="relative overflow-hidden bg-white pt-10 z-50">
       <div className="block lg:hidden w-full max-w-screen-xl mx-auto px-6 pb-10">
         <ContactSection isMobile={true} />
       </div>
@@ -67,8 +67,11 @@ const Footer = () => {
                     />
                   </div>
                   <div className="w-full flex flex-row justify-between items-start gap-4">
-                    <CommunitySection languages={languages} />
-                    <div className="lg:hidden w-1/2 pt-[2px]">
+                    <div className="relative z-10">
+                      <CommunitySection languages={languages} />
+                    </div>
+
+                    <div className="relative z-50 lg:hidden w-1/2 pt-[2px]">
                       <FooterBottom mode="mobile-policies" />
                     </div>
                   </div>

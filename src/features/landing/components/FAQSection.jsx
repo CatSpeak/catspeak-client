@@ -26,7 +26,7 @@ const FAQSection = () => {
         src={Element6}
         alt=""
         aria-hidden="true"
-        className="absolute -bottom-5 -left-1 w-[800px] md:w-[1000px] lg:w-[1200px] opacity-70 pointer-events-none select-none z-10"
+        className="absolute -bottom-0 -left-1 w-[800px] md:w-[1000px] lg:w-[1200px] opacity-70 pointer-events-none select-none z-10"
       />
       <div className="mx-auto max-w-screen-xl relative z-10 px-0 sm:px-4">
         {/* Main Background Container */}

@@ -7,14 +7,14 @@ import LandingHeaderLogo from "./LandingHeaderLogo";
 import DesktopNav from "../LandingDesktopNav/DesktopNav";
 import LandingHeaderGuestControls from "./LandingHeaderGuestControls";
 import LandingHeaderUserControls from "./LandingHeaderUserControls";
-import MobileDrawer from "../LandingMobileNav/MobileDrawer";
+import { MobileSidebar } from "@/features/navigation";
 const LandingHeader = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };  
+  };
 
   return (
     <header className="sticky top-4 z-50 flex justify-center w-full px-4">
@@ -54,8 +54,11 @@ const LandingHeader = ({ onGetStarted }) => {
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
-      <MobileDrawer open={mobileOpen} onClose={handleDrawerToggle} />
+      {/* Mobile Navigation Sidebar */}
+      <MobileSidebar
+        isMobileOpen={mobileOpen}
+        setIsMobileOpen={setMobileOpen}
+      />
     </header>
   );
 };

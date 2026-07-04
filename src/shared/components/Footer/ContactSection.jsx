@@ -90,7 +90,7 @@ const ContactSection = ({ isMobile = false }) => {
           </a>
         </div>
 
-        <div className="w-full max-w-md z-30">
+        <div className="w-full max-w-md ">
           <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2 sm:flex-row">
               <TextInput
