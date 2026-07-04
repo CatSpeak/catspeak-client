@@ -9,6 +9,11 @@ import {
   Briefcase,
   User,
   CreditCard,
+  Newspaper,
+  Video,
+  Calendar,
+  Mic,
+  Film
 } from "lucide-react"
 
 export const navLinks = [
@@ -18,11 +23,11 @@ export const navLinks = [
     hasDropdown: true,
     icon: LayoutDashboard,
     subItems: [
-      { key: "catSpeakNews", path: "/cat-speak/news" },
+      { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       // { key: "worldNews", path: "/cat-speak/discover" },
-      { key: "reels", path: "/cat-speak/reels" },
+      { key: "reels", path: "/cat-speak/reels", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
-      { key: "calendar", path: "/cat-speak/calendar" },
+      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
   {
@@ -30,8 +35,8 @@ export const navLinks = [
     hasDropdown: true,
     icon: Briefcase,
     subItems: [
-      { key: "recordings", path: "/workspace/recordings" },
-      { key: "reels", path: "/workspace/reels" },
+      { key: "recordings", path: "/workspace/recordings", icon: Mic },
+      { key: "reels", path: "/workspace/reels", icon: Film },
     ],
   },
   {

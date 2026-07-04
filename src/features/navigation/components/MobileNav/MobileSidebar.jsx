@@ -22,25 +22,29 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
         }`}
       >
         {/* Header/Logo section */}
-        <div className="flex items-center justify-between h-[64px] px-4 border-b border-gray-100 shrink-0">
-          <Link 
-            to="/" 
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => setIsMobileOpen(false)}
-          >
-            <img src={IconLogo} alt="Cat Speak" className="h-7 w-7" />
-            <img src={MainLogo} alt="Cat Speak" className="h-6 w-auto" />
-          </Link>
-          <button 
-            onClick={() => setIsMobileOpen(false)}
-            className="p-2 text-gray-500 hover:bg-primary2 rounded-full transition-colors"
-          >
-            <X size={20} />
-          </button>
+        <div className="flex items-center justify-between h-[64px] mx-2 shrink-0">
+          <div className="flex items-center w-full h-full relative overflow-hidden">
+            <Link 
+              to="/" 
+              className="flex items-center h-full flex-1"
+              onClick={() => setIsMobileOpen(false)}
+            >
+              <div className="flex items-center justify-center shrink-0 w-[64px]">
+                <img src={IconLogo} alt="Cat Speak" className="h-7 w-7 shrink-0" />
+              </div>
+              <img src={MainLogo} alt="Cat Speak" className="h-6 w-auto shrink-0" />
+            </Link>
+            <button 
+              onClick={() => setIsMobileOpen(false)}
+              className="p-2 mr-2 text-gray-500 hover:bg-[#F2F2F2] rounded-full transition-colors shrink-0"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Navigation Items */}
-        <MobileNavItems setIsMobileOpen={setIsMobileOpen} />
+        <MobileNavItems isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       </aside>
     </>
   )
