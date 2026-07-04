@@ -42,7 +42,7 @@ export const navLinks = [
       { key: "personalInfo", path: "/profile" },
       { key: "instructor", path: "/instructor" },
       // { key: "organization", path: "/organization" },
-      { key: "billing", path: "/billing" },
+      // { key: "billing", path: "/billing" },
     ],
   },
   {
