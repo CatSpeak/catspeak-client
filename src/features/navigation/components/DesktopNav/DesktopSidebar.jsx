@@ -1,51 +1,55 @@
 import React from "react"
 import { Link } from "react-router-dom"
-import { PanelRightOpen } from "lucide-react"
-import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
+import { LandingPageLogo } from "@/features/landing/assets"
 import DesktopNavItems from "./DesktopNavItems"
 
-const DesktopSidebar = ({ isExpanded, setIsExpanded }) => {
+import { Menu } from "lucide-react"
+import { useSidebar } from "@/shared/context/SidebarContext"
+
+const DesktopSidebar = () => {
+  const { isDesktopSidebarDocked, setIsDesktopSidebarDocked } = useSidebar()
+
   return (
     <aside
-      className={`hidden lg:flex fixed top-0 left-0 h-screen bg-white border-r border-gray-100 rounded-tr-2xl flex-col transition-all duration-300 z-50 ${
-        isExpanded ? "w-[280px]" : "w-[80px]"
+      className={`hidden lg:flex fixed top-0 left-0 h-screen flex-col transition-all duration-300 z-50 ${
+        isDesktopSidebarDocked
+          ? "w-[80px] bg-cath-red-700 text-white border-none"
+          : "w-[280px] bg-white border-r border-border"
       }`}
     >
       {/* Header/Logo section */}
-      <div className="flex items-center justify-between h-[64px] mx-2  border-gray-100 shrink-0">
-        <div className="flex items-center w-full h-full relative overflow-hidden">
-          <Link to="/" className="flex items-center h-full w-full">
-            <div className="flex items-center justify-center shrink-0 w-[64px]">
-              <img src={IconLogo} alt="Cat Speak" className="h-7 w-7 shrink-0" />
-            </div>
-            <img 
-              src={MainLogo} 
-              alt="Cat Speak" 
-              className={`h-6 w-auto shrink-0 transition-all duration-300 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 w-0'}`} 
-            />
-          </Link>
-          
-          <button
-            onClick={() => setIsExpanded(false)}
-            className={`absolute right-0 p-1.5 rounded-md text-gray-800 hover:bg-gray-100 transition-all duration-300 ${
-              isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none w-0'
-            }`}
-          >
-            <PanelRightOpen size={20} />
-          </button>
+      <div
+        className={`flex items-center h-[64px] shrink-0 transition-all duration-300 ${isDesktopSidebarDocked ? "justify-center" : "px-4 gap-3"}`}
+      >
+        <button
+          onClick={() => setIsDesktopSidebarDocked(!isDesktopSidebarDocked)}
+          className={`p-2 rounded-md shrink-0 transition-colors ${
+            isDesktopSidebarDocked
+              ? "text-white hover:bg-white/20"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          <Menu size={24} />
+        </button>
 
-          {/* Invisible click overlay when collapsed to expand the sidebar */}
-          {!isExpanded && (
-            <div 
-              className="absolute inset-0 z-10 cursor-pointer" 
-              onClick={() => setIsExpanded(true)} 
-            />
-          )}
-        </div>
+        {!isDesktopSidebarDocked && (
+          <div className="flex items-center w-full h-full relative overflow-hidden">
+            <Link to="/" className="flex items-center h-full w-full">
+              <div className="flex items-center shrink-0">
+                <img
+                  src={LandingPageLogo}
+                  alt="Cat Speak"
+                  className="h-10 w-auto shrink-0"
+                  draggable={false}
+                />
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Navigation Items */}
-      <DesktopNavItems isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+      <DesktopNavItems />
     </aside>
   )
 }

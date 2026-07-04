@@ -7,9 +7,6 @@ export { default as DesktopNavSubItem } from "./components/DesktopNav/DesktopNav
 
 export { default as MobileSidebar } from "./components/MobileNav/MobileSidebar"
 export { default as MobileNavItems } from "./components/MobileNav/MobileNavItems"
-export { default as MobileNavItem } from "./components/MobileNav/MobileNavItem"
-export { default as MobileNavDropdown } from "./components/MobileNav/MobileNavDropdown"
-export { default as MobileNavSubItem } from "./components/MobileNav/MobileNavSubItem"
 
 // Configurations
 export * from "./config/languages"

@@ -59,7 +59,7 @@ export const colors = {
   cartItem: "#2e3033",
   cartTotal: "#343739",
   primaryDark: "#131417",
-  secondary: "#1E1F26",
+  secondary: "#606060",
   primaryText: "#868CA0",
   text555: "#555",
   textGray: coreColors.secondaryGray,

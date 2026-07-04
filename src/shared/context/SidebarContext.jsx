@@ -3,15 +3,18 @@ import React, { createContext, useContext, useState } from "react"
 const SidebarContext = createContext()
 
 export const SidebarProvider = ({ children }) => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [isDesktopSidebarDocked, setIsDesktopSidebarDocked] = useState(false)
+  const [openDropdownKeys, setOpenDropdownKeys] = useState([])
 
   return (
     <SidebarContext.Provider value={{
-      isSidebarExpanded,
-      setIsSidebarExpanded,
       isMobileSidebarOpen,
-      setIsMobileSidebarOpen
+      setIsMobileSidebarOpen,
+      isDesktopSidebarDocked,
+      setIsDesktopSidebarDocked,
+      openDropdownKeys,
+      setOpenDropdownKeys
     }}>
       {children}
     </SidebarContext.Provider>
