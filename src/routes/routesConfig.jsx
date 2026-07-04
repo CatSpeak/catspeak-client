@@ -210,7 +210,7 @@ const routesConfig = [
         path: "/workspace",
         element: (
           <AuthGuard>
-            <UserLayout showFooter={false} />
+            <MainLayout showFooter={false} />
           </AuthGuard>
         ),
         children: [

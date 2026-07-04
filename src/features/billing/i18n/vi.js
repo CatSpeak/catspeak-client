@@ -1,5 +1,6 @@
 export default {
   billing: {
+    billingHistory: "Lịch sử thanh toán",
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " phòng",

@@ -77,10 +77,10 @@ const ProfileDropdown = () => {
     navigate("/setting")
   }
 
-  const handleBillingClick = () => {
-    handleCloseMenu()
-    navigate("/billing")
-  }
+  // const handleBillingClick = () => {
+  //   handleCloseMenu()
+  //   navigate("/billing")
+  // }
 
   // Click outside to close (desktop only)
   useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile })
@@ -143,10 +143,10 @@ const ProfileDropdown = () => {
           <Settings size={20} />
           <span>{t.header.settings || "Settings"}</span>
         </button>
-        <button onClick={handleBillingClick} className={menuItemClass}>
+        {/* <button onClick={handleBillingClick} className={menuItemClass}>
           <CreditCard size={20} />
-          <span>Billing History</span>
-        </button>
+          <span>{t.billing?.billingHistory || "Billing History"}</span>
+        </button> */}
         <button onClick={handleLogout} className={menuItemClass}>
           <LogOut size={20} />
           <span>{t.header.logout}</span>

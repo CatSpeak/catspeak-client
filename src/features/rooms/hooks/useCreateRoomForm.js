@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useCreateRoomMutation } from "@/store/api/roomsApi"
 import { useNavigate, useParams } from "react-router-dom"
+import { toast } from "react-hot-toast"
 
 const INITIAL_STATE = {
   mode: "join",
@@ -95,6 +96,15 @@ export const useCreateRoomForm = () => {
       }
     } catch (err) {
       console.error("Failed to create room:", err)
+      const errorCode = err?.data?.errorCode
+      
+      let errorMessage = err?.data?.message || err?.message || t?.errors?.generalFailed || "Failed to create room."
+      
+      if (errorCode === "MAX_ACTIVE_ROOMS_REACHED") {
+        errorMessage = t?.errors?.maxActiveRoomsReached || errorMessage
+      }
+      
+      toast.error(errorMessage, { duration: 4000 })
     }
   }
 
