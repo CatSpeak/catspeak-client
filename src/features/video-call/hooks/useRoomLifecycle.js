@@ -33,6 +33,7 @@ export const useRoomLifecycle = ({
   const handleJoinBreakoutRoom = useCallback(
     (subSessionId, roomName, token) => {
       console.info("[SignalR] JoinBreakoutRoom received:", { subSessionId, roomName })
+      dispatch(roomsApi.util.invalidateTags([{ type: "Breakout" }]))
       if (parentSessionId && subSessionId === parentSessionId) {
         dispatch(exitBreakout())
         dispatch(updateLivekitToken(token))
@@ -48,6 +49,7 @@ export const useRoomLifecycle = ({
   const handleReturnToMainRoom = useCallback(
     (parentSessionIdValue, roomName, token) => {
       console.info("[SignalR] ReturnToMainRoom received:", { parentSessionIdValue, roomName })
+      dispatch(roomsApi.util.invalidateTags([{ type: "Breakout" }]))
       dispatch(exitBreakout())
       if (token) {
         dispatch(updateLivekitToken(token))

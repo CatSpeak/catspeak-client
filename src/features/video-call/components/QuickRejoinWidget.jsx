@@ -35,20 +35,28 @@ export const QuickRejoinWidget = ({ embedInStack = false }) => {
   const roomId = lastRoom?.roomId
   const { data: roomData, isError } = useGetRoomByIdQuery(Number(roomId), {
     skip: !roomId || Boolean(isInCall) || isDismissed,
+    refetchOnMountOrArgChange: true,
   })
 
-  // 3. Auto-cleanup if room no longer exists (404 or ended)
+  // 3. Auto-cleanup if room no longer exists (404, status != 1, or empty ephemeral room)
+  const participantCount = roomData?.currentParticipantCount ?? roomData?.participantCount ?? 0
+  const isRoomInvalid = Boolean(
+    isError ||
+    (roomData && roomData.status !== 1) ||
+    (roomData && roomData.isEphemeral && participantCount === 0)
+  )
+
   useEffect(() => {
-    if (isError) {
-      console.info("[QuickRejoin] Room no longer exists or ended. Clearing last room snapshot.")
+    if (isRoomInvalid) {
+      console.info("[QuickRejoin] Room no longer active or ended. Clearing last room snapshot.")
       localStorage.removeItem(STORAGE_KEY)
       setLastRoom(null)
     }
-  }, [isError])
+  }, [isRoomInvalid])
 
-  // Don't show if user is in call, dismissed, no room saved, or currently on the meeting page
+  // Don't show if user is in call, dismissed, no room saved, currently on meeting page, or room is invalid
   const isOnCallPage = Boolean(location?.pathname?.includes(`/meet/${roomId}`))
-  if (isInCall || isDismissed || !lastRoom || !roomId || isOnCallPage || isError) {
+  if (isInCall || isDismissed || !lastRoom || !roomId || isOnCallPage || isRoomInvalid) {
     return null
   }
 
@@ -64,7 +72,6 @@ export const QuickRejoinWidget = ({ embedInStack = false }) => {
   }
 
   const roomName = roomData?.name || lastRoom.roomTitle || `Phòng #${roomId}`
-  const participantCount = roomData?.currentParticipantCount ?? roomData?.participantCount ?? 0
 
   return (
     <AnimatePresence>

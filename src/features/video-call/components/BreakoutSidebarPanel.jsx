@@ -53,7 +53,14 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
     refetch: refetchStatus,
   } = useGetBreakoutStatusQuery(sessionId, {
     skip: !sessionId,
+    refetchOnMountOrArgChange: true,
   })
+
+  useEffect(() => {
+    if (sessionId) {
+      refetchStatus()
+    }
+  }, [sessionId, refetchStatus])
 
   // Mutations
   const [setupBreakoutGroups, { isLoading: isSaving }] = useSetupBreakoutGroupsMutation()
@@ -757,7 +764,7 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
 
   // Render Student View (For non-host participants)
   const renderStudentView = () => {
-    const isStarted = status?.isBreakoutActive
+    const isStarted = Boolean(status?.isBreakoutActive || isBreakoutActive)
     const allowChange = status?.allowParticipantChangeRoom
     const isInSubRoom = currentSubSessionId && currentSubSessionId !== sessionId
 
