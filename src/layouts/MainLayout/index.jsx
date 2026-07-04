@@ -20,8 +20,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
   const {
     isMobileSidebarOpen,
     setIsMobileSidebarOpen,
-    isSidebarExpanded,
-    setIsSidebarExpanded,
+    isDesktopSidebarDocked,
   } = useSidebar();
 
   const [authModal, setAuthModal] = useState({
@@ -121,17 +120,13 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
           <MainSidebar
             isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
-            isExpanded={isSidebarExpanded}
-            setIsExpanded={setIsSidebarExpanded}
           />
         )}
 
         <div
           className={`flex flex-col flex-1 min-w-0 transition-all duration-300 relative z-10 ${
             !isLandingPage
-              ? isSidebarExpanded
-                ? "lg:ml-[280px]"
-                : "lg:ml-[80px]"
+              ? (isDesktopSidebarDocked ? "lg:ml-[80px]" : "lg:ml-[280px]")
               : ""
           }`}
         >

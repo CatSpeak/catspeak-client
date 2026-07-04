@@ -1,32 +1,34 @@
 import React from "react"
 import { NavLink } from "react-router-dom"
+import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 
-const DesktopNavItem = ({ to, icon: Icon, label, isExpanded, onMouseEnter, onMouseLeave,  }) => {
-  const getLinkClasses = ({ isActive }) =>
-    `relative flex items-center h-11 rounded-lg transition-all duration-300 group overflow-hidden w-full ${
-      isActive
-        ? "bg-cath-red-700/10 text-cath-red-700 font-medium"
-        : "text-gray-800 hover:bg-primary2 hover:text-gray-900"
-    }`
-
+const DesktopNavItem = ({
+  to,
+  icon: Icon,
+  label,
+  onClick,
+  isDocked = false,
+}) => {
   return (
-    <NavLink 
-      to={to} 
-      className={getLinkClasses} 
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      <div className={`flex items-center justify-center shrink-0 transition-all duration-300 ${isExpanded ? "w-[64px]" : "w-[44px]"}`}>
-        <Icon size={22} className="shrink-0" />
-      </div>
-      <span 
-        className={`text-[15px] whitespace-nowrap transition-all duration-300 ${
-          isExpanded ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 w-0"
-        }`}
+    <div className="relative group/navitem w-full">
+      <NavLink
+        to={to}
+        className={({ isActive }) =>
+          getNavItemClasses(isActive, false, isDocked)
+        }
+        onClick={onClick}
       >
-        {label}
-      </span>
-    </NavLink>
+        <Icon size={20} className="shrink-0" />
+        <span className={getNavTextClasses(false, isDocked)}>{label}</span>
+      </NavLink>
+
+      {/* Tooltip when docked */}
+      {isDocked && (
+        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-white border border-gray-200 text-gray-900 text-sm font-medium rounded-lg opacity-0 invisible group-hover/navitem:opacity-100 group-hover/navitem:visible transition-all duration-200 whitespace-nowrap z-[100] shadow-lg pointer-events-none">
+          {label}
+        </div>
+      )}
+    </div>
   )
 }
 

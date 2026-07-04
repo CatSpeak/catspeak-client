@@ -43,10 +43,11 @@ export default {
         cartItem: "#2e3033",
         cartTotal: "#343739",
         primaryDark: "#131417",
-        secondary: "#1E1F26",
         primaryText: "#868CA0",
         text555: "#555",
+        secondary: "#606060",
         dusk: "#1a1a2e",
+        border: "#e5e5e5",
       },
       width: {
         150: "150px",
