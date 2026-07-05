@@ -11,7 +11,7 @@ import {
   useUpdateEventSeriesMutation,
   useUpdateEventOccurrenceMutation,
 } from "@/store/api/eventsApi"
-import { mapFormToPayload } from "../utils/mapFormToPayload"
+import { mapFormToPayload, objectToFormData } from "../utils/mapFormToPayload"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { TIMEZONES } from "../components/ui/TimezoneDropdown"
 
@@ -23,10 +23,11 @@ const DEFAULT_TIMEZONE = {
 
 const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
-export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
+export const useEventForm = (onSuccess, editEvent, onSubmitInterceptor, onError) => {
   const { t } = useLanguage()
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation()
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation()
+  // eslint-disable-next-line no-unused-vars
   const [updateEventSeries, { isLoading: isUpdatingSeries }] =
     useUpdateEventSeriesMutation()
   const [updateEventOccurrence, { isLoading: isUpdatingOccurrence }] =
@@ -51,24 +52,14 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
     editEvent?.recurrenceRule?.timeZone ||
     DEFAULT_TIMEZONE.id
 
-  const getClosest15Min = (dateObj) => {
-    const minutes = dateObj.minute()
-    let roundedMinutes = Math.round(minutes / 15) * 15
-    let newDate = dateObj.minute(roundedMinutes).second(0).millisecond(0)
-    if (roundedMinutes === 60) {
-      newDate = dateObj.minute(0).add(1, "hour").second(0).millisecond(0)
-    }
-    return newDate
-  }
-
   const initialStartTime = editEvent?.startTime
     ? dayjs(
         dayjs(editEvent.startTime).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss"),
       )
-    : getClosest15Min(dayjs())
+    : null
   const initialEndTime = editEvent?.endTime
     ? dayjs(dayjs(editEvent.endTime).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss"))
-    : getClosest15Min(dayjs()).add(1, "hour")
+    : null
 
   let initialTimezone = DEFAULT_TIMEZONE
   const foundTz = TIMEZONES.find((tz) => tz.id === initTzId)
@@ -112,12 +103,14 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
   }
 
   // Basic fields
+  const [thumbnailFile, setThumbnailFile] = useState(null)
   const [title, setTitle] = useState(initialTitle)
   const [description, setDescription] = useState(initialDescription)
   const [eventColor, setEventColor] = useState(initialColor)
   const [eventLocation, setEventLocation] = useState(initialLocation)
   const [countryId, setCountryId] = useState(initialCountryId)
   const [cityId, setCityId] = useState(initialCityId)
+  const [isOnline, setIsOnline] = useState(editEvent?.isOnline ?? null)
   const [maxParticipants, setMaxParticipantsState] = useState(initialParticipants)
 
   const setMaxParticipants = (val) => {
@@ -141,18 +134,20 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
   const [endTime, setEndTime] = useState(initialEndTime)
 
   const setStartTime = (newStartTime) => {
-    const startObj = dayjs(startTime)
-    const endObj = dayjs(endTime)
-    const recurEndObj = dayjs(recurrenceEndDate)
+    const startObj = startTime ? dayjs(startTime) : null
+    const endObj = endTime ? dayjs(endTime) : null
+    const recurEndObj = recurrenceEndDate ? dayjs(recurrenceEndDate) : null
     const newStartObj = dayjs(newStartTime)
 
-    // Calculate how much the start time moved (in milliseconds)
-    const diffMs = newStartObj.diff(startObj)
-
-    // Apply the exact same shift to the end time
     setStartTimeState(newStartTime)
-    setEndTime(endObj.add(diffMs, "ms").toDate())
-    setRecurrenceEndDate(recurEndObj.add(diffMs, "ms").toDate())
+
+    if (startObj) {
+      const diffMs = newStartObj.diff(startObj)
+      if (diffMs !== 0) {
+        if (endObj) setEndTime(endObj.add(diffMs, "ms").toDate())
+        if (recurEndObj) setRecurrenceEndDate(recurEndObj.add(diffMs, "ms").toDate())
+      }
+    }
   }
 
   // Recurrence
@@ -185,15 +180,23 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
     e?.preventDefault()
 
     const newErrors = {}
-    if (!title.trim()) newErrors.title = t.validation.calendar.titleRequired
-    if (!countryId) newErrors.countryId = t.validation.calendar.countryRequired
-    if (!cityId) newErrors.cityId = t.validation.calendar.cityRequired
+    if (!title.trim()) newErrors.title = t.validation?.calendar?.titleRequired || "Thiếu tiêu đề"
+    if (!countryId) newErrors.countryId = t.validation?.calendar?.countryRequired || "Đất nước là bắt buộc"
+    if (!cityId) newErrors.cityId = t.validation?.calendar?.cityRequired || "Thành phố là bắt buộc"
     if (!eventLocation.trim())
-      newErrors.eventLocation = t.validation.calendar.locationRequired
+      newErrors.eventLocation = t.validation?.calendar?.locationRequired || "Địa điểm là bắt buộc"
     if (!description.trim())
-      newErrors.description = t.validation.calendar.descriptionRequired
+      newErrors.description = t.validation?.calendar?.descriptionRequired || "Mô tả là bắt buộc"
     if (!maxParticipants || Number(maxParticipants) <= 0) {
-      newErrors.maxParticipants = t.validation.calendar.maxParticipantsRequired
+      newErrors.maxParticipants = t.validation?.calendar?.maxParticipantsRequired || "Số lượng cần lớn hơn 0"
+    }
+
+    if (!startTime) newErrors.startTime = "Vui lòng chọn thời gian bắt đầu"
+    if (!endTime) newErrors.endTime = "Vui lòng chọn thời gian kết thúc"
+    if (startTime && endTime) {
+      if (dayjs(endTime).isBefore(dayjs(startTime)) || dayjs(endTime).isSame(dayjs(startTime))) {
+        newErrors.endTime = t.calendar?.endTimeBeforeStartTime || "Thời gian kết thúc phải sau thời gian bắt đầu"
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -208,6 +211,7 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
       countryId,
       cityId,
       eventColor,
+      isOnline,
       maxParticipants,
       visibility,
       startTime,
@@ -254,22 +258,33 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
             ...payload,
           }).unwrap()
         } else {
+          const finalFormData = objectToFormData(payload);
+          if (thumbnailFile) {
+            finalFormData.append("Thumbnail", thumbnailFile);
+          }
           await updateEvent({
             eventId: parentId,
-            ...payload,
+            payload: finalFormData,
           }).unwrap()
         }
       } else {
-        await createEvent(payload).unwrap()
+        const finalFormData = objectToFormData(payload);
+        if (thumbnailFile) {
+          finalFormData.append("Thumbnail", thumbnailFile);
+        }
+        await createEvent(finalFormData).unwrap()
       }
-      onClose()
+      onSuccess()
     } catch (err) {
       console.error("Failed to save event:", err)
+      if (onError) onError(err)
     }
   }
 
   return {
     // state
+    thumbnailFile,
+    setThumbnailFile,
     title,
     setTitle,
     description,
@@ -282,6 +297,8 @@ export const useEventForm = (onClose, editEvent, onSubmitInterceptor) => {
     setCountryId,
     cityId,
     setCityId,
+    isOnline,
+    setIsOnline,
     maxParticipants,
     setMaxParticipants,
     visibility,

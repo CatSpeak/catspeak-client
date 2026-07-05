@@ -1,10 +1,10 @@
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import Dropdown from "@/shared/components/ui/Dropdown"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import TextInput from "@/shared/components/ui/inputs/TextInput";
+import Dropdown from "@/shared/components/ui/Dropdown";
+import { useLanguage } from "@/shared/context/LanguageContext";
 import {
   useGetCountriesQuery,
   useGetCitiesByCountryIdQuery,
-} from "@/store/api/locationsApi"
+} from "@/store/api/locationsApi";
 
 const EventDetailsSection = ({
   title,
@@ -24,59 +24,59 @@ const EventDetailsSection = ({
   onConditionsChange,
   errors = {},
 }) => {
-  const { t } = useLanguage()
-  const cal = t.calendar
+  const { t } = useLanguage();
+  const cal = t.calendar;
 
   const { data: countries = [], isLoading: isCountriesLoading } =
-    useGetCountriesQuery()
+    useGetCountriesQuery();
   const {
     data: cities = [],
     isFetching: isCitiesFetching,
     error: citiesError,
   } = useGetCitiesByCountryIdQuery(countryId, {
     skip: !countryId,
-  })
+  });
 
-  const countryOptions = countries.map((c) => ({ label: c.name, value: c.id }))
-  const cityOptions = cities.map((c) => ({ label: c.name, value: c.id }))
+  const countryOptions = countries.map((c) => ({ label: c.name, value: c.id }));
+  const cityOptions = cities.map((c) => ({ label: c.name, value: c.id }));
 
-  let cityPlaceholder = cal.selectCityProvince
-  if (!countryId) cityPlaceholder = cal.selectCountryFirst
-  else if (isCitiesFetching) cityPlaceholder = cal.loadingLocations
-  else if (citiesError) cityPlaceholder = cal.errorLoadingCities
-  else if (cityOptions.length === 0) cityPlaceholder = cal.noCitiesFound
+  let cityPlaceholder = cal.selectCityProvince;
+  if (!countryId) cityPlaceholder = cal.selectCountryFirst;
+  else if (isCitiesFetching) cityPlaceholder = cal.loadingLocations;
+  else if (citiesError) cityPlaceholder = cal.errorLoadingCities;
+  else if (cityOptions.length === 0) cityPlaceholder = cal.noCitiesFound;
 
   const handleOpenMaps = () => {
-    const loc = eventLocation.trim()
-    if (!loc) return
+    const loc = eventLocation.trim();
+    if (!loc) return;
     const isUrl =
       /^https?:\/\//i.test(loc) ||
       loc.includes("google.com/maps") ||
-      loc.includes("maps.app.goo.gl")
+      loc.includes("maps.app.goo.gl");
 
     if (isUrl) {
-      const url = loc.startsWith("http") ? loc : `https://${loc}`
-      window.open(url, "_blank", "noopener,noreferrer")
-      return
+      const url = loc.startsWith("http") ? loc : `https://${loc}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
     }
 
     // Construct the query with location, city, and country
-    let queryParts = [loc]
+    let queryParts = [loc];
 
     if (cityId) {
-      const selectedCity = cities.find((c) => c.id === cityId)
-      if (selectedCity) queryParts.push(selectedCity.name)
+      const selectedCity = cities.find((c) => c.id === cityId);
+      if (selectedCity) queryParts.push(selectedCity.name);
     }
 
     if (countryId) {
-      const selectedCountry = countries.find((c) => c.id === countryId)
-      if (selectedCountry) queryParts.push(selectedCountry.name)
+      const selectedCountry = countries.find((c) => c.id === countryId);
+      if (selectedCountry) queryParts.push(selectedCountry.name);
     }
 
-    const queryStr = queryParts.join(", ")
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
-    window.open(url, "_blank", "noopener,noreferrer")
-  }
+    const queryStr = queryParts.join(", ");
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -173,7 +173,7 @@ const EventDetailsSection = ({
       </div>
 
       {/* Description */}
-      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+      {/* <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
         <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.description}
         </div>
@@ -188,7 +188,7 @@ const EventDetailsSection = ({
             error={errors.description}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Max participants */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
@@ -203,6 +203,7 @@ const EventDetailsSection = ({
               onChange={(e) => onMaxParticipantsChange(e.target.value)}
               variant="square"
               color={eventColor}
+              placeholder={cal.maxParticipantsPlaceholder || "0"}
               className="text-center !px-2"
               containerClassName="w-32"
               error={errors.maxParticipants}
@@ -247,7 +248,7 @@ const EventDetailsSection = ({
       </div>
 
       {/* Ticket price (static / coming soon) */}
-      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:justify-between max-[425px]:gap-1">
+      {/* <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:justify-between max-[425px]:gap-1">
         <div className="w-[150px] shrink-0 max-[425px]:w-full">
           {cal.ticketPrice}
         </div>
@@ -262,9 +263,9 @@ const EventDetailsSection = ({
             {cal.edit}
           </button>
         </div>
-      </div>
+      </div> */}
     </div>
-  )
-}
+  );
+};
 
-export default EventDetailsSection
+export default EventDetailsSection;
