@@ -14,6 +14,7 @@ const LeaveCallModal = ({ open, onClose, onConfirm }) => {
       onClose={onClose}
       title={t.rooms?.videoCall?.leaveCall || "Leave Call"}
       size="sm"
+      fullScreenOnMobile={false}
     >
       <div className="flex flex-col gap-6 pb-6">
         <p className="text-sm text-gray-600">

@@ -33,6 +33,9 @@ const HeaderSearchBar = () => {
     } else {
       setSearchParams(newParams, { preventScrollReset: true })
     }
+    
+    // Close the mobile search bar after searching
+    setIsExpanded(false)
   }
 
   return (
@@ -72,7 +75,7 @@ const HeaderSearchBar = () => {
               }
             }}
             placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng hoặc chủ đề"}
-            className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[14px] outline-none transition-all placeholder-gray-500"
+            className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[16px] md:text-[14px] outline-none transition-all placeholder-gray-500"
           />
         </div>
       </div>

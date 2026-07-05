@@ -45,10 +45,10 @@ const ScrollToTopButton = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 flex items-center justify-center gap-2 rounded-full bg-cath-red-700 px-5 py-2.5 text-white shadow-lg transition-transform hover:scale-105 hover:bg-cath-red-800"
+          className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 flex items-center justify-center gap-2 rounded-full bg-cath-red-700 w-12 h-12 md:w-auto md:h-auto md:px-5 md:py-2.5 text-white shadow-lg transition-transform hover:scale-105 hover:bg-cath-red-800"
         >
-          <ArrowUpFromLine size={16} strokeWidth={2.5} />
-          <span className="font-medium tracking-wide">
+          <ArrowUpFromLine size={22} strokeWidth={2.5} className="md:w-4 md:h-4" />
+          <span className="hidden md:inline font-medium tracking-wide">
             {t.scrollToTop || "Scroll to top"}
           </span>
         </motion.button>
