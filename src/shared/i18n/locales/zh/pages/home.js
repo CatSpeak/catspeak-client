@@ -76,7 +76,7 @@ export default {
     ],
   },
   partnerSection: {
-    title: "我们的合作伙伴",
+    title: "合作机构",
   },
   faq: {
     corner: "FAQ",

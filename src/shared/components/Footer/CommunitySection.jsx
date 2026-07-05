@@ -6,7 +6,7 @@ const CommunitySection = ({ languages }) => {
   const footerText = t.footer;
 
   return (
-    <div className="flex-1 text-left mt-[2px]">
+    <div className="flex-1 text-left mt-[2px] ">
 
       <h3 className="font-bold uppercase tracking-wide text-base sm:text-lg">
         {footerText.ourCommunity}

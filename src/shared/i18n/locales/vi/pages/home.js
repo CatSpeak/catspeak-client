@@ -77,7 +77,7 @@ export default {
     ],
   },
   partnerSection: {
-    title: "Đối tác của chúng tôi",
+    title: "Đơn vị kết nối",
   },
   faq: {
     corner: "FAQ",

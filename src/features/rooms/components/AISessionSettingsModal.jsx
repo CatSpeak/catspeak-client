@@ -228,11 +228,11 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
         </div>
       </div>
 
-      <div className="p-6 flex flex-wrap justify-end gap-2">
-        <PillButton onClick={onCancel} variant="secondary" className="h-10">
+      <div className="p-4 sm:p-6 flex gap-3 sm:gap-2 justify-between sm:justify-end">
+        <PillButton onClick={onCancel} variant="outline" className="h-12 sm:h-10 flex-1 sm:flex-none">
           {s.cancel}
         </PillButton>
-        <PillButton onClick={handleConfirm} className="h-10">
+        <PillButton onClick={handleConfirm} className="h-12 sm:h-10 flex-1 sm:flex-none">
           {s.start}
         </PillButton>
       </div>

@@ -20,6 +20,7 @@ const ConfirmationModal = ({
       open={open}
       onClose={onClose}
       title={title}
+      fullScreenOnMobile={false}
       footer={
         <div className="flex justify-end gap-3">
           <PillButton
