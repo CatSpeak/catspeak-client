@@ -66,6 +66,10 @@ const ClassDetailPage = () => {
     }
   }
 
+  const notifyInDevelopment = () => {
+    toast.success("Tính năng đang phát triển")
+  }
+
   // Helper to format weekly schedule dynamically and defensively
   const getWeeklyScheduleText = () => {
     let schedArray = null
@@ -166,7 +170,7 @@ const ClassDetailPage = () => {
         <div className="flex items-center gap-3">
           {/* Trò chuyện button */}
           <button
-            onClick={() => toast.success("Opening chat...")}
+            onClick={notifyInDevelopment}
             className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
           >
             <MessageSquare size={14} className="fill-white" />
@@ -175,7 +179,7 @@ const ClassDetailPage = () => {
 
           {/* Tạo bài button */}
           <button
-            onClick={() => setActiveTab("feed")}
+            onClick={notifyInDevelopment}
             className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
           >
             <span>{language === "vi" ? "Tạo bài" : "Create Post"}</span>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, LayoutGrid, List, ChevronDown, BookOpen, Users, Calendar, Clock, ArrowRight, Award } from "lucide-react"
+import { Search, LayoutGrid, List, ChevronDown, BookOpen, Calendar, Clock, ArrowRight, Award, Flame, Sparkles, Compass, Video, Play, Globe, X, Info } from "lucide-react"
 import {
   useGetStudentEnrolledCoursesQuery,
   useGetStudentAvailableCoursesQuery,
@@ -8,6 +8,7 @@ import {
 } from "../../../../store/api/coursesApi"
 import StudentCourseCard from "./StudentCourseCard"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { useGetProfileQuery } from "@/features/auth"
 
 const StudentDashboard = ({ t }) => {
   const sc = t?.courses?.student || {}
@@ -21,6 +22,7 @@ const StudentDashboard = ({ t }) => {
   const [langFilter, setLangFilter] = useState("all")
 
   // API Queries
+  const { data: userData } = useGetProfileQuery()
   const { data: enrolledCourses, isLoading: isEnrolledLoading } = useGetStudentEnrolledCoursesQuery()
   const { data: availableCourses, isLoading: isAvailableLoading } = useGetStudentAvailableCoursesQuery()
   const { data: joinedClasses, isLoading: isClassesLoading } = useGetStudentJoinedClassesQuery()
@@ -45,15 +47,19 @@ const StudentDashboard = ({ t }) => {
 
   const filteredCourses = useMemo(() => {
     return currentCourses.filter((course) => {
+      const title = course.title || ""
+      const description = course.description || ""
+      const courseLanguage = course.language || ""
+
       const matchesSearch =
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchQuery.toLowerCase())
+        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        description.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesLevel =
         levelFilter === "all" || (course.levels && course.levels.includes(levelFilter))
 
       const matchesLang =
-        langFilter === "all" || course.language.toLowerCase() === langFilter.toLowerCase()
+        langFilter === "all" || courseLanguage.toLowerCase() === langFilter.toLowerCase()
 
       return matchesSearch && matchesLevel && matchesLang
     })
@@ -62,15 +68,19 @@ const StudentDashboard = ({ t }) => {
   const filteredClasses = useMemo(() => {
     const list = joinedClasses || []
     return list.filter((cls) => {
+      const title = cls.title || ""
+      const courseName = cls.courseName || ""
+      const classLanguage = cls.language || ""
+
       const matchesSearch =
-        cls.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        cls.courseName.toLowerCase().includes(searchQuery.toLowerCase())
+        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        courseName.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesLevel =
         levelFilter === "all" || (cls.levels && cls.levels.includes(levelFilter))
 
       const matchesLang =
-        langFilter === "all" || cls.language.toLowerCase() === langFilter.toLowerCase()
+        langFilter === "all" || classLanguage.toLowerCase() === langFilter.toLowerCase()
 
       return matchesSearch && matchesLevel && matchesLang
     })
@@ -84,315 +94,514 @@ const StudentDashboard = ({ t }) => {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
+  const getGreeting = () => {
+    const hrs = new Date().getHours()
+    if (hrs < 12) return "Good morning"
+    if (hrs < 18) return "Good afternoon"
+    return "Good evening"
+  }
+
+  const activeCourse = enrolledCourses && enrolledCourses.length > 0 ? enrolledCourses[0] : null
+  const activeClass = activeCourse ? (joinedClasses || []).find(cls => cls.id === activeCourse.enrolledClassId || cls.courseId === activeCourse.id) : null
+  const nextSession = activeClass?.sessions && activeClass.sessions.length > 0 ? activeClass.sessions[0] : null
+
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       {/* ─── Breadcrumb ─── */}
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline">{t?.nav?.home || "Home"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t?.nav?.home || "Home"}</span>
           <span>/</span>
           <span className="text-[#990011] font-semibold">{sc.dashboardTitle || "My Courses & Learning"}</span>
         </div>
       </div>
 
-      {/* ─── Header Welcome Banner ─── */}
-      <div className="bg-gradient-to-r from-[#990011] to-[#b20a1c] rounded-3xl p-6 md:p-8 text-white shadow-md relative overflow-hidden shrink-0">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-8 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight">
-              {sc.welcomeTitle || "Welcome back, Learner!"}
+      {/* ─── Coursera-Style Student Profile Welcome Banner ─── */}
+      <div className="bg-white rounded-3xl p-6 border border-gray-150 shadow-xs relative flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 mt-2">
+        <div className="flex items-start gap-4 flex-1">
+          {/* Avatar initial in dark circle */}
+          <div className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center font-black text-xl shadow-xs shrink-0 select-none">
+            {userData?.data?.name?.charAt(0).toUpperCase() || userData?.name?.charAt(0).toUpperCase() || "N"}
+          </div>
+
+          <div className="flex flex-col gap-1.5 mt-0.5">
+            <h1 className="text-2xl font-black text-gray-900 leading-none">
+              {getGreeting()}, {userData?.data?.name || userData?.name || "Learner"}
             </h1>
-            <p className="text-xs md:text-sm text-red-100 font-semibold max-w-lg leading-relaxed">
-              {sc.welcomeSubtitle || "Track your progress, join live classes, and explore new learning paths."}
-            </p>
+            <div className="flex flex-wrap items-center gap-y-1.5 text-xs text-gray-500 font-semibold leading-relaxed mt-0.5">
+              Good day to start learning a new language!
+            </div>
           </div>
+        </div>
 
-          {/* Quick Metrics */}
-          <div className="flex gap-4 self-start md:self-auto">
-            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-4 border border-white/10 flex flex-col min-w-[100px]">
-              <span className="text-[10px] text-red-100 font-bold uppercase">Enrolled</span>
-              <span className="text-2xl font-black mt-1">{(enrolledCourses || []).length}</span>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-4 border border-white/10 flex flex-col min-w-[100px]">
-              <span className="text-[10px] text-red-100 font-bold uppercase">Active Classes</span>
-              <span className="text-2xl font-black mt-1">{(joinedClasses || []).length}</span>
-            </div>
-          </div>
+        {/* Isometric 3D Portal Illustration on the right */}
+        <div className="w-56 h-36 shrink-0 relative overflow-hidden flex items-center justify-center select-none bg-slate-50/50 rounded-2xl border border-gray-100/50">
+          <svg width="220" height="150" viewBox="0 0 220 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="110" cy="115" rx="80" ry="25" fill="#f1f5f9" />
+            <path d="M70 120 L110 80 L130 90 L90 130 Z" fill="#c7d2fe" />
+            <path d="M75 118 L85 110" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M85 110 L95 102" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M95 102 L105 94" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round" />
+
+            <path d="M110 40 L140 25 L170 40 L170 95 L110 95 Z" fill="#fef3c7" />
+            <path d="M170 40 L190 30 L190 85 L170 95 Z" fill="#f59e0b" opacity="0.8" />
+            <path d="M130 95 L130 70 A 15 15 0 0 1 150 70 L150 95 Z" fill="#d97706" />
+            <path d="M110 40 L140 25 L170 40 L140 50 Z" fill="#fbbf24" />
+
+            <g transform="translate(30, 75)">
+              <ellipse cx="15" cy="40" rx="15" ry="6" fill="#cbd5e1" />
+              <path d="M15 10 L25 35 L5 35 Z" fill="#34d399" />
+              <path d="M15 0 L22 25 L8 25 Z" fill="#10b981" />
+              <rect x="13" y="35" width="4" height="8" fill="#78350f" />
+            </g>
+            <g transform="translate(175, 55)">
+              <ellipse cx="10" cy="30" rx="10" ry="4" fill="#cbd5e1" />
+              <path d="M10 5 L17 25 L3 25 Z" fill="#34d399" />
+              <rect x="9" y="25" width="2" height="6" fill="#78350f" />
+            </g>
+          </svg>
         </div>
       </div>
 
-      {/* ─── Navigation Tabs & Filters ─── */}
-      <div className="flex flex-col gap-4 mt-4">
-        {/* Navigation Tabs */}
-        <div className="flex justify-between items-center border-b border-gray-100 pb-px overflow-x-auto whitespace-nowrap scrollbar-none gap-8">
-          <div className="flex gap-8 text-sm font-bold text-gray-400">
-            <button
-              onClick={() => {
-                setActiveTab("enrolled")
-                setSearchQuery("")
-              }}
-              className={`pb-3 transition-all relative ${activeTab === "enrolled"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                : "hover:text-gray-600 font-extrabold"
-                }`}
-            >
-              {sc.enrolledCourses || "My Enrolled Courses"}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab("explore")
-                setSearchQuery("")
-              }}
-              className={`pb-3 transition-all relative ${activeTab === "explore"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                : "hover:text-gray-600 font-extrabold"
-                }`}
-            >
-              {sc.exploreCourses || "Explore Available Courses"}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab("classes")
-                setSearchQuery("")
-              }}
-              className={`pb-3 transition-all relative ${activeTab === "classes"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                : "hover:text-gray-600 font-extrabold"
-                }`}
-            >
-              {sc.myClasses || "My Joined Classes"}
-            </button>
-          </div>
+      {/* Main Layout Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
-          {/* Grid/List Layout toggle controls */}
-          {activeTab !== "classes" && (
-            <div className="flex bg-gray-50 p-0.5 rounded-lg border border-gray-100 self-end sm:self-auto mb-2.5">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400 hover:text-gray-600"
-                  }`}
-              >
-                <LayoutGrid size={13} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400 hover:text-gray-600"
-                  }`}
-              >
-                <List size={13} />
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Left Column: Courses, Tabs, Catalog */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
 
-        {/* Search & Selection Filters bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between">
-          {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder={sc.searchPlaceholder || "Search courses..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-4 pr-10 bg-white hover:bg-gray-50/50 focus:bg-white border border-gray-200 focus:border-gray-300 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 shadow-xs"
-            />
-            <Search size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
+          {/* ─── Active Focus / Resume Learning Card ─── */}
+          {activeTab === "enrolled" && activeCourse && (
+            <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-black text-red-600 uppercase tracking-widest">Active Focus</span>
+                  </div>
+                  {activeClass?.progress && (
+                    <span className="text-xs font-extrabold text-gray-500">
+                      {Math.round((activeClass.progress.completedSessions / activeClass.progress.totalSessions) * 100)}% Completed
+                    </span>
+                  )}
+                </div>
 
-          {/* Selector Dropdowns */}
-          <div className="flex gap-3 items-center">
-            {/* Language filter */}
-            <div className="relative shrink-0">
-              <select
-                value={langFilter}
-                onChange={(e) => setLangFilter(e.target.value)}
-                className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 outline-none appearance-none cursor-pointer hover:border-gray-300"
-              >
-                <option value="all">{sc.allLanguages || "All Languages"}</option>
-                {languagesOptions.map((lang) => (
-                  <option key={lang} value={lang}>{lang}</option>
-                ))}
-              </select>
-              <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg font-black text-gray-950 truncate leading-snug group-hover:text-[#990011] transition-colors">
+                      {activeCourse.title}
+                    </h2>
+                    <p className="text-xs text-gray-400 font-bold uppercase mt-0.5 tracking-wide">
+                      Class: {activeClass?.title || activeCourse.enrolledClassName || "N/A"}
+                    </p>
 
-            {/* Level filter */}
-            <div className="relative shrink-0">
-              <select
-                value={levelFilter}
-                onChange={(e) => setLevelFilter(e.target.value)}
-                className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 outline-none appearance-none cursor-pointer hover:border-gray-300"
-              >
-                <option value="all">{sc.allLevels || "All Levels"}</option>
-                {levelsOptions.map((lvl) => (
-                  <option key={lvl} value={lvl}>{lvl}</option>
-                ))}
-              </select>
-              <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── Main Content Display Area ─── */}
-      <div className="mt-4">
-        {activeTab === "classes" ? (
-          /* Tab 3: Joined Classes Layout */
-          filteredClasses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400 font-bold text-base gap-3 min-h-[300px] bg-white rounded-3xl border border-gray-100 p-6 shadow-xs">
-              <Calendar size={54} className="text-gray-300 stroke-[1.2]" />
-              <h3 className="font-extrabold text-gray-800 text-lg">{sc.noClassesTitle || "No Active Classes"}</h3>
-              <p className="text-sm font-semibold max-w-xs">{sc.noClassesDesc || "You don't have any scheduled sessions right now."}</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6">
-              <div className="grid grid-cols-1 gap-4">
-                {filteredClasses.map((cls) => (
-                  <div
-                    key={cls.id}
-                    onClick={() => handleJoinClassRoom(cls)}
-                    className="bg-white rounded-3xl border border-gray-100 hover:border-gray-200 p-5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 hover:shadow-xs transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="flex-1 flex flex-col gap-2.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase">
-                          {cls.language}
-                        </span>
-                        <span className="bg-gray-100 text-gray-600 font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase">
-                          {cls.levels[0]}
-                        </span>
-                        <span className="bg-green-50 text-green-700 font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase">
-                          Active
-                        </span>
-                      </div>
-
-                      <h3 className="font-black text-lg text-gray-950 leading-snug">
-                        {cls.title}
-                      </h3>
-                      <p className="text-xs text-gray-400 font-bold -mt-1 uppercase tracking-wide">
-                        Course: {cls.courseName}
-                      </p>
-
-                      {/* Class timing details */}
-                      <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-500 mt-1">
-                        <div className="flex items-center gap-1.5">
-                          <Clock size={13} className="text-gray-400" />
-                          <span>{cls.schedule?.days?.join(" - ")} | {cls.schedule?.startTime} - {cls.schedule?.endTime}</span>
+                    {nextSession ? (
+                      <div className="mt-3 p-3 bg-red-50/50 border border-red-100/50 rounded-2xl flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-red-100 text-[#990011] flex items-center justify-center shrink-0">
+                          <Play size={14} className="ml-0.5 fill-[#990011]" />
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar size={13} className="text-gray-400" />
-                          <span>{cls.startDate} - {cls.endDate}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-black text-gray-900 leading-snug">
+                            Next Up: Session {nextSession.number} • {nextSession.topic}
+                          </p>
+                          <p className="text-[11px] text-gray-500 font-semibold mt-0.5 flex items-center gap-1.5">
+                            <Clock size={11} /> {nextSession.startTime} - {nextSession.endTime} ({nextSession.date})
+                          </p>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 mt-2 font-medium">No sessions scheduled currently.</p>
+                    )}
+                  </div>
 
-                    {/* Progress tracking and quick actions */}
-                    <div className="flex items-center justify-between md:justify-end gap-8 border-t md:border-t-0 pt-4 md:pt-0 border-gray-150 shrink-0">
-                      <div className="flex flex-col min-w-[120px] gap-1">
-                        <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-                          <span>{sc.progress || "Progress"}</span>
-                          <span>{cls.progress ? Math.round((cls.progress.completedSessions / cls.progress.totalSessions) * 100) : 0}%</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden mt-0.5">
-                          <div
-                            className="h-full bg-green-500 rounded-full"
-                            style={{ width: `${cls.progress ? (cls.progress.completedSessions / cls.progress.totalSessions) * 100 : 0}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-gray-400 text-right mt-0.5">
-                          {cls.progress?.completedSessions}/{cls.progress?.totalSessions} sessions completed
-                        </span>
-                      </div>
+                  <div className="flex items-center gap-4 shrink-0 self-end md:self-center">
+                    <button
+                      onClick={() => handleJoinClassRoom(activeClass || { id: activeCourse.enrolledClassId })}
+                      className="h-11 px-6 bg-[#990011] hover:bg-[#b20a1c] text-white font-extrabold text-sm rounded-full flex items-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95 group-hover:translate-x-0.5"
+                    >
+                      <span>Resume Learning</span>
+                      <ArrowRight size={15} />
+                    </button>
+                  </div>
+                </div>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleJoinClassRoom(cls)
-                        }}
-                        className="h-9 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
-                      >
-                        <span>Join Room</span>
-                        <ArrowRight size={13} />
-                      </button>
+                {activeClass?.progress && (
+                  <div className="w-full mt-2">
+                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-[#990011] to-[#e7001a] rounded-full transition-all duration-500"
+                        style={{ width: `${(activeClass.progress.completedSessions / activeClass.progress.totalSessions) * 100}%` }}
+                      />
                     </div>
                   </div>
-                ))}
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ─── Navigation Tabs & Layout Toggles ─── */}
+          <div className="flex flex-col gap-4 bg-white rounded-3xl p-5 border border-gray-150 shadow-xs">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-px overflow-x-auto whitespace-nowrap scrollbar-none gap-8">
+              <div className="flex gap-6 text-sm font-bold text-gray-400">
+                <button
+                  onClick={() => {
+                    setActiveTab("enrolled")
+                    setSearchQuery("")
+                  }}
+                  className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "enrolled"
+                    ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
+                    : "hover:text-gray-600 font-extrabold"
+                    }`}
+                >
+                  <BookOpen size={15} />
+                  <span>{sc.enrolledCourses || "My Enrolled Courses"}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("explore")
+                    setSearchQuery("")
+                  }}
+                  className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "explore"
+                    ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
+                    : "hover:text-gray-600 font-extrabold"
+                    }`}
+                >
+                  <Compass size={15} />
+                  <span>{sc.exploreCourses || "Explore Catalog"}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("classes")
+                    setSearchQuery("")
+                  }}
+                  className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "classes"
+                    ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
+                    : "hover:text-gray-600 font-extrabold"
+                    }`}
+                >
+                  <Calendar size={15} />
+                  <span>{sc.myClasses || "Joined Classes"}</span>
+                </button>
               </div>
 
-              {/* Upcoming sessions details list */}
-              <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-4 mt-2">
-                <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-                  <Award size={18} className="text-[#990011]" />
-                  <h3 className="text-sm font-black text-gray-950 uppercase tracking-wider">
-                    {sc.upcomingSessions || "Upcoming Sessions & Schedule"}
-                  </h3>
+              {/* Grid/List Layout toggle controls */}
+              {activeTab !== "classes" && (
+                <div className="flex bg-gray-50 p-0.5 rounded-lg border border-gray-100 self-end sm:self-auto mb-2">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400 hover:text-gray-600"
+                      }`}
+                  >
+                    <LayoutGrid size={13} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400 hover:text-gray-600"
+                      }`}
+                  >
+                    <List size={13} />
+                  </button>
                 </div>
+              )}
+            </div>
+
+            {/* Search & Selection Filters bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between">
+              {/* Search Box */}
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder={sc.searchPlaceholder || "Search courses..."}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-10 pl-4 pr-10 bg-white hover:bg-gray-50/50 focus:bg-white border border-gray-200 focus:border-gray-300 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 shadow-xs"
+                />
+                <Search size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+
+              {/* Selector Dropdowns */}
+              <div className="flex gap-3 items-center">
+                {/* Language filter */}
+                <div className="relative shrink-0">
+                  <select
+                    value={langFilter}
+                    onChange={(e) => setLangFilter(e.target.value)}
+                    className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 outline-none appearance-none cursor-pointer hover:border-gray-300"
+                  >
+                    <option value="all">{sc.allLanguages || "All Languages"}</option>
+                    {languagesOptions.map((lang) => (
+                      <option key={lang} value={lang}>{lang}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+
+                {/* Level filter */}
+                <div className="relative shrink-0">
+                  <select
+                    value={levelFilter}
+                    onChange={(e) => setLevelFilter(e.target.value)}
+                    className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 outline-none appearance-none cursor-pointer hover:border-gray-300"
+                  >
+                    <option value="all">{sc.allLevels || "All Levels"}</option>
+                    {levelsOptions.map((lvl) => (
+                      <option key={lvl} value={lvl}>{lvl}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Cards Display Grid */}
+          <div>
+            {activeTab === "classes" ? (
+              /* Tab 3: Joined Classes Layout */
+              filteredClasses.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400 font-bold text-base gap-3 min-h-[300px] bg-white rounded-3xl border border-gray-150 p-6 shadow-xs">
+                  <Calendar size={54} className="text-gray-300 stroke-[1.2]" />
+                  <h3 className="font-extrabold text-gray-800 text-lg">{sc.noClassesTitle || "No Active Classes"}</h3>
+                  <p className="text-sm font-semibold max-w-xs">{sc.noClassesDesc || "You don't have any scheduled sessions right now."}</p>
+                </div>
+              ) : (
                 <div className="flex flex-col gap-4">
-                  {filteredClasses.flatMap(cls =>
-                    (cls.sessions || []).map(sess => ({ ...sess, classTitle: cls.title }))
-                  ).slice(0, 4).map((sess, idx) => (
-                    <div key={idx} className="flex items-start gap-4 hover:bg-gray-50/50 p-2 rounded-2xl transition-colors">
-                      <div className="w-10 h-10 shrink-0 bg-[#FFE4E6] text-[#E11D48] rounded-full flex flex-col items-center justify-center">
-                        <span className="text-[10px] font-black leading-none uppercase">{new Date(sess.date).toLocaleString('en-US', { month: 'short' })}</span>
-                        <span className="text-sm font-black leading-none mt-0.5">{new Date(sess.date).getDate()}</span>
+                  {filteredClasses.map((cls) => (
+                    <div
+                      key={cls.id}
+                      onClick={() => handleJoinClassRoom(cls)}
+                      className="bg-white rounded-3xl border border-gray-150 hover:border-gray-250 p-5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                    >
+                      <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase">
+                            {cls.language}
+                          </span>
+                          <span className="bg-gray-100 text-gray-600 font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase">
+                            {cls.levels[0]}
+                          </span>
+                          <span className="flex items-center gap-1 bg-green-50 text-green-700 font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Active
+                          </span>
+                        </div>
+
+                        <h3 className="font-black text-lg text-gray-950 leading-snug group-hover:text-[#990011] transition-colors">
+                          {cls.title}
+                        </h3>
+                        <p className="text-xs text-gray-400 font-bold -mt-1 uppercase tracking-wide">
+                          Course: {cls.courseName}
+                        </p>
+
+                        {/* Class timing details */}
+                        <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-500 mt-1">
+                          <div className="flex items-center gap-1.5">
+                            <Clock size={13} className="text-gray-400" />
+                            <span>{cls.schedule?.days?.join(" - ")} | {cls.schedule?.startTime} - {cls.schedule?.endTime}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Calendar size={13} className="text-gray-400" />
+                            <span>{cls.startDate} - {cls.endDate}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Progress tracking and quick actions */}
+                      <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-gray-150 shrink-0">
+                        <div className="flex flex-col min-w-[120px] gap-1">
+                          <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
+                            <span>{sc.progress || "Progress"}</span>
+                            <span>{cls.progress ? Math.round((cls.progress.completedSessions / cls.progress.totalSessions) * 100) : 0}%</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden mt-0.5">
+                            <div
+                              className="h-full bg-green-500 rounded-full"
+                              style={{ width: `${cls.progress ? (cls.progress.completedSessions / cls.progress.totalSessions) * 100 : 0}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-400 text-right mt-0.5">
+                            {cls.progress?.completedSessions}/{cls.progress?.totalSessions} sessions
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleJoinClassRoom(cls)
+                          }}
+                          className="h-9 px-5 bg-[#990011] hover:bg-[#b20a1c] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 group-hover:translate-x-0.5"
+                        >
+                          <span>Join Room</span>
+                          <ArrowRight size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              /* Tab 1 & Tab 2: Courses Layout */
+              filteredCourses.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400 font-bold text-base gap-3 min-h-[300px] bg-white rounded-3xl border border-gray-150 p-6 shadow-xs">
+                  <BookOpen size={54} className="text-gray-300 stroke-[1.2]" />
+                  <h3 className="font-extrabold text-gray-800 text-lg">
+                    {activeTab === "enrolled" ? (sc.noEnrolledTitle || "No Enrolled Courses") : "No Courses Found"}
+                  </h3>
+                  <p className="text-sm font-semibold max-w-xs">
+                    {activeTab === "enrolled"
+                      ? (sc.noEnrolledDesc || "You haven't enrolled in any courses yet. Visit the explore tab to browse!")
+                      : "Try clearing your search query or filters to find other courses."}
+                  </p>
+                  {activeTab === "enrolled" && (
+                    <button
+                      onClick={() => setActiveTab("explore")}
+                      className="mt-2 h-9 px-5 bg-[#990011] hover:bg-[#b20a1c] text-white text-xs font-black rounded-full flex items-center justify-center gap-1 transition-all active:scale-95"
+                    >
+                      <span>{sc.exploreMore || "Explore Courses"}</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                  {filteredCourses.map((course, idx) => (
+                    <StudentCourseCard
+                      key={course.id}
+                      course={course}
+                      isEnrolled={activeTab === "enrolled"}
+                      viewMode={viewMode}
+                      onViewDetails={() => handleOpenDetail(course)}
+                      onJoin={() => handleOpenDetail(course)}
+                      t={t}
+                      index={idx}
+                    />
+                  ))}
+                </div>
+              ))}
+          </div>
+
+        </div>
+
+        {/* Right Column: Sidebar Panels */}
+        <div className="flex flex-col gap-6 lg:col-span-1">
+
+          {/* Stats & Profile Panel */}
+          <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-5">
+            <h3 className="text-base font-black text-gray-950 tracking-tight flex items-center gap-2">
+              <Award size={18} className="text-[#990011]" />
+              <span>Learning Dashboard</span>
+            </h3>
+
+            <div className="flex flex-col gap-4">
+              {/* Daily Streak widget */}
+              <div className="flex items-center justify-between p-3.5 bg-amber-50/50 border border-amber-100 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                    <Flame size={20} className="fill-amber-500 stroke-amber-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-amber-900 uppercase tracking-wide">Study Streak</h4>
+                    <p className="text-sm font-extrabold text-amber-950">3 Days Active</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold text-amber-600 bg-white border border-amber-150 px-2 py-0.5 rounded-full">Keep it up!</span>
+              </div>
+
+              {/* Achievement stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-slate-50 border border-gray-150 rounded-2xl flex flex-col gap-1">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Levels Held</span>
+                  <span className="text-base font-black text-gray-950">B2 / HSK3</span>
+                </div>
+                <div className="p-3 bg-slate-50 border border-gray-150 rounded-2xl flex flex-col gap-1">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Target goal</span>
+                  <span className="text-base font-black text-gray-950">30m / day</span>
+                </div>
+              </div>
+
+              {/* Progress feedback summary */}
+              <div className="p-4 bg-[#5a000a]/5 border border-[#5a000a]/10 rounded-2xl flex flex-col gap-2">
+                <h4 className="text-xs font-extrabold text-[#5a000a] flex items-center gap-1.5">
+                  <Sparkles size={13} className="text-[#990011]" />
+                  <span>Academic Standing</span>
+                </h4>
+                <p className="text-xs text-gray-600 font-semibold leading-relaxed">
+                  Excellent progress this semester! You are maintaining an active schedule and consistently participating in live speech bootcamps.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Timeline of Upcoming Sessions */}
+          <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="text-sm font-black text-gray-950 uppercase tracking-wider flex items-center gap-2">
+                <Calendar size={15} className="text-[#990011]" />
+                <span>Upcoming Sessions</span>
+              </h3>
+              <span className="text-[10px] bg-red-50 text-[#990011] font-black px-2 py-0.5 rounded-full">Live</span>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {filteredClasses.length === 0 ? (
+                <div className="text-center py-6 text-xs text-gray-400 font-bold">
+                  No upcoming sessions scheduled
+                </div>
+              ) : (
+                filteredClasses.flatMap(cls =>
+                  (cls.sessions || []).map(sess => ({ ...sess, classId: cls.id, classTitle: cls.title }))
+                ).slice(0, 3).map((sess, idx) => {
+                  const sessDate = new Date(sess.date)
+                  return (
+                    <div key={idx} className="flex items-start gap-3 hover:bg-slate-50/50 p-2 rounded-2xl transition-colors group cursor-pointer" onClick={() => navigate(`/workspace/courses/class/${sess.classId}`)}>
+                      <div className="w-10 h-10 shrink-0 bg-red-50 text-[#990011] border border-red-100/50 rounded-full flex flex-col items-center justify-center font-sans">
+                        <span className="text-[9px] font-black leading-none uppercase">{sessDate.toLocaleString('en-US', { month: 'short' })}</span>
+                        <span className="text-sm font-black leading-none mt-0.5 font-mono">{sessDate.getDate()}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-gray-400 uppercase truncate">{sess.classTitle}</h4>
-                        <p className="text-sm font-black text-gray-950 truncate mt-0.5">Session {sess.number}: {sess.topic}</p>
-                        <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-400 font-semibold">
+                        <h4 className="text-[10px] font-extrabold text-gray-400 uppercase truncate">{sess.classTitle}</h4>
+                        <p className="text-xs font-black text-gray-950 truncate mt-0.5 group-hover:text-[#990011] transition-colors font-sans">Session {sess.number}: {sess.topic}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-gray-500 font-semibold">
                           <Clock size={11} />
                           <span>{sess.startTime} - {sess.endTime}</span>
                         </div>
                       </div>
-                      <span className="bg-[#EFF6FF] text-[#1D4ED8] font-bold text-[9px] px-2 py-0.5 rounded uppercase self-center shrink-0">
-                        Scheduled
+                      <span className="bg-[#EFF6FF] text-[#1D4ED8] font-bold text-[8px] px-1.5 py-0.5 rounded uppercase self-center shrink-0 tracking-wider">
+                        Join Room
                       </span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )
-        ) : (
-          /* Tab 1 & Tab 2: Courses Layout */
-          filteredCourses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400 font-bold text-base gap-3 min-h-[300px] bg-white rounded-3xl border border-gray-100 p-6 shadow-xs">
-              <BookOpen size={54} className="text-gray-300 stroke-[1.2]" />
-              <h3 className="font-extrabold text-gray-800 text-lg">
-                {activeTab === "enrolled" ? (sc.noEnrolledTitle || "No Enrolled Courses") : "No Courses Found"}
-              </h3>
-              <p className="text-sm font-semibold max-w-xs">
-                {activeTab === "enrolled"
-                  ? (sc.noEnrolledDesc || "You haven't enrolled in any courses yet. Visit the explore tab to browse!")
-                  : "Try clearing your search query or filters to find other courses."}
-              </p>
-              {activeTab === "enrolled" && (
-                <button
-                  onClick={() => setActiveTab("explore")}
-                  className="mt-2 h-9 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1 transition-all active:scale-95"
-                >
-                  <span>{sc.exploreMore || "Explore Courses"}</span>
-                </button>
+                  )
+                })
               )}
             </div>
-          ) : (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-              {filteredCourses.map((course, idx) => (
-                <StudentCourseCard
-                  key={course.id}
-                  course={course}
-                  isEnrolled={activeTab === "enrolled"}
-                  viewMode={viewMode}
-                  onViewDetails={() => handleOpenDetail(course)}
-                  onJoin={() => handleOpenDetail(course)} // View detail drawer to select batch!
-                  t={t}
-                  index={idx}
-                />
-              ))}
+          </div>
+
+          {/* Harvard Language Club Promo Panel */}
+          <div className="bg-gradient-to-br from-[#1a1a2e] to-[#2e1a1a] rounded-3xl p-5 text-white shadow-md relative overflow-hidden flex flex-col gap-4 border border-white/5">
+            <div className="absolute right-0 bottom-0 w-24 h-24 bg-[#990011]/10 rounded-full blur-xl pointer-events-none" />
+            <div className="flex items-center gap-2">
+              <Globe size={18} className="text-amber-400" />
+              <span className="text-[10px] font-black tracking-widest uppercase text-amber-200">Global Communication</span>
             </div>
-          ))}
+
+            <div className="flex flex-col gap-1">
+              <h4 className="text-sm font-black tracking-tight leading-snug">
+                CatSpeak Language Club
+              </h4>
+              <p className="text-xs text-gray-300 font-medium leading-relaxed">
+                Join daily global speaking bootcamps to practice conversational English, Mandarin, and Japanese with real native speakers.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/en/community")}
+              className="mt-1.5 h-8 bg-white hover:bg-gray-100 text-[#1a1a2e] font-black text-xs rounded-full flex items-center justify-center gap-1 transition-all shadow-xs active:scale-95 w-fit px-4"
+            >
+              <span>Browse Speak Rooms</span>
+              <ArrowRight size={12} />
+            </button>
+          </div>
+
+        </div>
+
       </div>
+
     </div>
   )
 }

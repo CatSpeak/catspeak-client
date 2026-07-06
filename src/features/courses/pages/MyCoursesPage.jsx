@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { toast } from "react-hot-toast"
 import {
   Plus,
   Clock,
@@ -72,6 +73,9 @@ const MyCoursesPage = () => {
     navigate("/workspace/courses/create")
   }
 
+  const notifyInDevelopment = () => {
+    toast.success("Tính năng đang phát triển")
+  }
 
   const [activeDropdown, setActiveDropdown] = useState(null)
   const dropdownRef = useRef(null)
@@ -107,7 +111,7 @@ const MyCoursesPage = () => {
           "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=80&h=80",
           "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=80&h=80"
         ],
-        studentCount: matchedClass?.slots || 30
+        studentCount: matchedClass?.slots || 0
       }
     })
   }, [rawSessions, classesRaw])
@@ -160,6 +164,54 @@ const MyCoursesPage = () => {
     }
   ]
 
+  const courseList = useMemo(() => coursesRaw.map((course, index) => {
+    const { gradient, icon } = getCourseGradientAndIcon(index)
+    return {
+      id: course.id,
+      title: course.name,
+      language: course.language || "English",
+      description: course.description || "",
+      classCount: course.classCount || 0,
+      students: `${course.studentCount || 0} student${(course.studentCount || 0) !== 1 ? "s" : ""}`,
+      createdAt: formatUTCDate(course.createdAt, "en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+      status: course.status || "OPEN",
+      icon,
+      gradient,
+      thumbnailUrl: course.thumbnailUrl,
+    }
+  }), [coursesRaw])
+
+  const classList = useMemo(() => classesRaw.map((cls, index) => {
+    const { gradient, icon } = getCourseGradientAndIcon(index)
+    const progressVal = cls.progress ? Math.round((cls.progress.completedSessions / cls.progress.totalSessions) * 100) : 0
+    return {
+      id: cls.id,
+      title: cls.name,
+      courseTitle: cls.courseName || "N/A",
+      language: cls.language || "English",
+      levels: cls.levels || [],
+      schedule: cls.schedule?.days?.join(" - ") || "TBA",
+      time: cls.schedule ? `${cls.schedule.startTime} - ${cls.schedule.endTime}` : "TBA",
+      students: `${cls.studentCount || 0} / ${cls.slots || 10} students`,
+      slots: cls.slots || 0,
+      progress: progressVal,
+      progressText: `${cls.progress?.completedSessions || 0}/${cls.progress?.totalSessions || 24}`,
+      startDate: formatUTCDate(cls.startDate, "en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+      endDate: formatUTCDate(cls.endDate, "en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+      price: formatCurrencyVND(cls.tuitionFee),
+      status: cls.status || "OPEN",
+      icon,
+      gradient,
+      thumbnailUrl: cls.thumbnailUrl,
+    }
+  }), [classesRaw])
+
+  const displayList = activeTab === "courses" ? courseList : classList
+
+  const filteredDisplayList = useMemo(() => (
+    displayList.filter(item => statusFilter === "all" || (item.status && item.status.toLowerCase() === statusFilter))
+  ), [displayList, statusFilter])
+
   if (isStudent) {
     return <StudentDashboard t={t} language={language} />
   }
@@ -175,50 +227,6 @@ const MyCoursesPage = () => {
       </div>
     )
   }
-
-  const courseList = coursesRaw.map((course, index) => {
-    const { gradient, icon } = getCourseGradientAndIcon(index)
-    return {
-      id: course.id,
-      title: course.name,
-      language: course.language || "English",
-      description: course.description || "",
-      classCount: course.classCount || 0,
-      students: `${course.studentCount || 0} student${(course.studentCount || 0) !== 1 ? "s" : ""}`,
-      createdAt: formatUTCDate(course.createdAt, "en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-      status: course.status || "OPEN",
-      icon,
-      gradient,
-      thumbnailUrl: course.thumbnailUrl,
-    }
-  })
-
-  const classList = classesRaw.map((cls, index) => {
-    const { gradient, icon } = getCourseGradientAndIcon(index)
-    const progressVal = cls.progress ? Math.round((cls.progress.completedSessions / cls.progress.totalSessions) * 100) : 0
-    return {
-      id: cls.id,
-      title: cls.name,
-      courseTitle: cls.courseName || "N/A",
-      language: cls.language || "English",
-      levels: cls.levels || [],
-      schedule: cls.schedule?.days?.join(" - ") || "TBA",
-      time: cls.schedule ? `${cls.schedule.startTime} - ${cls.schedule.endTime}` : "TBA",
-      students: `${cls.studentCount || 0} / ${cls.slots || 10} students`,
-      slots: cls.slots || 30,
-      progress: progressVal,
-      progressText: `${cls.progress?.completedSessions || 0}/${cls.progress?.totalSessions || 24}`,
-      startDate: formatUTCDate(cls.startDate, "en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-      endDate: formatUTCDate(cls.endDate, "en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-      price: formatCurrencyVND(cls.tuitionFee),
-      status: cls.status || "OPEN",
-      icon,
-      gradient,
-      thumbnailUrl: cls.thumbnailUrl,
-    }
-  })
-
-  const displayList = activeTab === "courses" ? courseList : classList
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -239,13 +247,13 @@ const MyCoursesPage = () => {
         </h1>
         <div className="flex items-center gap-3">
           {/* Lưu trữ button */}
-          <button
+          {/* <button
             onClick={() => navigate("/workspace/courses/archived")}
             className="h-10 px-5 bg-white border border-gray-250 hover:bg-gray-55/40 text-gray-600 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
           >
             <Archive size={14} />
             <span>{language === "vi" ? "Lưu trữ" : "Archived"}</span>
-          </button>
+          </button> */}
 
           {/* Tạo khóa học + button */}
           <button
@@ -367,7 +375,7 @@ const MyCoursesPage = () => {
                 {language === "vi" ? "Việc giảng dạy" : "Teaching Tasks"}
               </h3>
               <button
-                onClick={() => setActiveTab("classes")}
+                onClick={notifyInDevelopment}
                 className="text-xs font-black text-[#b20a1c] hover:underline"
               >
                 {language === "vi" ? "Xem tất cả" : "View all"}
@@ -403,7 +411,7 @@ const MyCoursesPage = () => {
                       {task.status}
                     </span>
                     <div
-                      onClick={() => navigate(`/workspace/courses`)}
+                      onClick={notifyInDevelopment}
                       className="w-6 h-6 rounded-full border border-[#b20a1c] flex items-center justify-center text-[#b20a1c] hover:bg-red-50/50 cursor-pointer"
                     >
                       <Plus size={12} />
@@ -478,7 +486,7 @@ const MyCoursesPage = () => {
       <div className="flex flex-col gap-8">
 
         {/* Course/Class Cards Container */}
-        {displayList.filter(item => statusFilter === "all" || (item.status && item.status.toLowerCase() === statusFilter)).length === 0 ? (
+        {filteredDisplayList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400 font-bold text-base gap-3 min-h-[260px]">
             <BookOpen size={54} className="text-gray-300 stroke-[1.2]" />
             <span>
@@ -490,183 +498,181 @@ const MyCoursesPage = () => {
         ) : (
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
 
-            {displayList
-              .filter(item => statusFilter === "all" || (item.status && item.status.toLowerCase() === statusFilter))
-              .map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => navigate(activeTab === "courses" ? `/workspace/courses/details/${item.id}` : `/workspace/courses/class/${item.id}`)}
-                  className={`bg-white rounded-3xl border border-gray-100 hover:border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer flex justify-between ${viewMode === "grid" ? "flex-col min-h-[460px]" : "flex-row items-center p-4 gap-6"
-                    }`}
-                >
-                  {/* Thumbnail Header Area */}
-                  <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${viewMode === "grid" ? "h-48 w-full bg-[#D9D9D9]" : "h-20 w-28 bg-[#D9D9D9] rounded-2xl"
-                    }`}>
-                    {item.thumbnailUrl ? (
-                      <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className={`w-full h-full bg-gradient-to-br ${item.gradient} flex items-center justify-center`}>
-                        <item.icon size={viewMode === "grid" ? 48 : 24} className="stroke-[1.5]" />
-                      </div>
-                    )}
+            {filteredDisplayList.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => navigate(activeTab === "courses" ? `/workspace/courses/details/${item.id}` : `/workspace/courses/class/${item.id}`)}
+                className={`bg-white rounded-3xl border border-gray-100 hover:border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer flex justify-between ${viewMode === "grid" ? "flex-col min-h-[460px]" : "flex-row items-center p-4 gap-6"
+                  }`}
+              >
+                {/* Thumbnail Header Area */}
+                <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${viewMode === "grid" ? "h-48 w-full bg-[#D9D9D9]" : "h-20 w-28 bg-[#D9D9D9] rounded-2xl"
+                  }`}>
+                  {item.thumbnailUrl ? (
+                    <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${item.gradient} flex items-center justify-center`}>
+                      <item.icon size={viewMode === "grid" ? 48 : 24} className="stroke-[1.5]" />
+                    </div>
+                  )}
 
-                    {viewMode === "grid" && (
+                  {viewMode === "grid" && (
+                    <>
+                      {/* Top-left capacity badge (for classes only) */}
+                      {activeTab === "classes" && (
+                        <div className="absolute top-3 left-3 bg-[#EAB308]/90 text-white text-[11px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                          <Users size={11} className="fill-white" />
+                          <span>{item.slots}</span>
+                        </div>
+                      )}
+
+                      {/* Top-right status badge */}
+                      {item.status && (
+                        <div className="absolute top-3 right-3">
+                          <span className={`text-[10px] font-black px-3 py-1 rounded-full ${item.status === "TEACHING" ? "bg-[#E8F8F0] text-[#15803D]" :
+                            item.status === "OPEN" || item.status === "OPEN_ENROLLMENT" ? "bg-[#EFF6FF] text-[#1D4ED8]" :
+                              item.status === "LIVE" ? "bg-[#FFE4E6] text-[#E11D48]" :
+                                "bg-[#F3F4F6] text-[#6B7280]"
+                            }`}>
+                            {item.status === "TEACHING" ? "Teaching" : item.status === "OPEN" ? "Open Enrollment" : item.status}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Details Body Area */}
+                <div className="p-6 flex flex-col flex-1 justify-between gap-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-1 hover:text-[#b20a1c] transition-colors" title={item.title}>
+                        {item.title}
+                      </h4>
+
+                      {/* Dropdown Options for Courses */}
+                      {viewMode === "grid" && activeTab === "courses" && (
+                        <div className="relative" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(activeDropdown === item.id ? null : item.id);
+                            }}
+                            className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          {activeDropdown === item.id && (
+                            <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-150 rounded-2xl shadow-lg py-1 z-30 text-left">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveDropdown(null);
+                                  navigate(`/workspace/courses/edit/${item.id}`);
+                                }}
+                                className="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                              >
+                                <PenSquare size={13} className="text-gray-500" />
+                                <span>{c.editCourse || "Edit Course"}</span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveDropdown(null);
+                                  deleteHelper.setTargetId(item.id);
+                                }}
+                                className="w-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-100"
+                              >
+                                <Trash2 size={13} />
+                                <span>{c.courseDetail?.deleteCourse || "Delete Course"}</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Courses Tab Attributes */}
+                    {activeTab === "courses" ? (
                       <>
-                        {/* Top-left capacity badge (for classes only) */}
-                        {activeTab === "classes" && (
-                          <div className="absolute top-3 left-3 bg-[#EAB308]/90 text-white text-[11px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                            <Users size={11} className="fill-white" />
-                            <span>{item.slots || 30}</span>
-                          </div>
+                        <span className="text-xs text-gray-400 font-bold block">
+                          {language === "vi" ? `Khóa học ${item.title}` : `Course ${item.title}`}
+                        </span>
+                        {item.description && (
+                          <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed mt-2" title={item.description}>
+                            {item.description}
+                          </p>
                         )}
+                        <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <BookOpen size={13} className="text-gray-400" />
+                            <span>{item.classCount} class{item.classCount !== 1 ? "es" : ""}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users size={13} className="text-gray-400" />
+                            <span>{item.students}</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      /* Classes Tab Attributes */
+                      <>
+                        <span className="text-xs text-gray-400 font-bold block">
+                          {language === "vi" ? `Lớp ${item.title}` : `Class ${item.title}`}
+                        </span>
 
-                        {/* Top-right status badge */}
-                        {item.status && (
-                          <div className="absolute top-3 right-3">
-                            <span className={`text-[10px] font-black px-3 py-1 rounded-full ${item.status === "TEACHING" ? "bg-[#E8F8F0] text-[#15803D]" :
-                              item.status === "OPEN" || item.status === "OPEN_ENROLLMENT" ? "bg-[#EFF6FF] text-[#1D4ED8]" :
-                                item.status === "LIVE" ? "bg-[#FFE4E6] text-[#E11D48]" :
-                                  "bg-[#F3F4F6] text-[#6B7280]"
-                              }`}>
-                              {item.status === "TEACHING" ? "Teaching" : item.status === "OPEN" ? "Open Enrollment" : item.status}
-                            </span>
+                        <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <Tag size={13} className="text-gray-400" />
+                            <span className="text-gray-900 font-extrabold">{item.price}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar size={13} className="text-gray-400" />
+                            <span>{item.schedule}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock size={13} className="text-gray-400" />
+                            <span>{item.startDate} - {item.endDate}</span>
+                          </div>
+                        </div>
+
+                        {/* Progress */}
+                        {item.status !== "OPEN" && (
+                          <div className="mt-5">
+                            <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                              <span>Progress</span>
+                              <span>{item.progress}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
+                              <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${item.progress}%` }} />
+                            </div>
                           </div>
                         )}
                       </>
                     )}
                   </div>
 
-                  {/* Details Body Area */}
-                  <div className="p-6 flex flex-col flex-1 justify-between gap-4">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-1 hover:text-[#b20a1c] transition-colors" title={item.title}>
-                          {item.title}
-                        </h4>
-
-                        {/* Dropdown Options for Courses */}
-                        {viewMode === "grid" && activeTab === "courses" && (
-                          <div className="relative" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveDropdown(activeDropdown === item.id ? null : item.id);
-                              }}
-                              className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                              <MoreVertical size={16} />
-                            </button>
-                            {activeDropdown === item.id && (
-                              <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-150 rounded-2xl shadow-lg py-1 z-30 text-left">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveDropdown(null);
-                                    navigate(`/workspace/courses/edit/${item.id}`);
-                                  }}
-                                  className="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                  <PenSquare size={13} className="text-gray-500" />
-                                  <span>{c.editCourse || "Edit Course"}</span>
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveDropdown(null);
-                                    deleteHelper.setTargetId(item.id);
-                                  }}
-                                  className="w-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-100"
-                                >
-                                  <Trash2 size={13} />
-                                  <span>{c.courseDetail?.deleteCourse || "Delete Course"}</span>
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Courses Tab Attributes */}
-                      {activeTab === "courses" ? (
-                        <>
-                          <span className="text-xs text-gray-400 font-bold block">
-                            {language === "vi" ? `Khóa học ${item.title}` : `Course ${item.title}`}
-                          </span>
-                          {item.description && (
-                            <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed mt-2" title={item.description}>
-                              {item.description}
-                            </p>
-                          )}
-                          <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <BookOpen size={13} className="text-gray-400" />
-                              <span>{item.classCount} class{item.classCount !== 1 ? "es" : ""}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Users size={13} className="text-gray-400" />
-                              <span>{item.students}</span>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        /* Classes Tab Attributes */
-                        <>
-                          <span className="text-xs text-gray-400 font-bold block">
-                            {language === "vi" ? `Lớp ${item.title}` : `Class ${item.title}`}
-                          </span>
-
-                          <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <Tag size={13} className="text-gray-400" />
-                              <span className="text-gray-900 font-extrabold">{item.price}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar size={13} className="text-gray-400" />
-                              <span>{item.schedule}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar size={13} className="text-gray-400" />
-                              <span>{item.startDate} - {item.endDate}</span>
-                            </div>
-                          </div>
-
-                          {/* Progress */}
-                          {item.status !== "OPEN" && (
-                            <div className="mt-5">
-                              <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                                <span>Progress</span>
-                                <span>{item.progress}%</span>
-                              </div>
-                              <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
-                                <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${item.progress}%` }} />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Footers for cards */}
-                    {activeTab === "courses" && (
-                      <div className="pt-4 border-t border-gray-100 flex flex-col gap-2 text-xs font-bold">
-                        <div className="flex justify-between items-center">
-                          <div className="flex flex-col">
-                            <span className="text-gray-400 text-[10px] leading-none mb-0.5">Created Date</span>
-                            <span className="text-gray-900 font-black">{item.createdAt}</span>
-                          </div>
-                          <span className="text-[#b20a1c] hover:underline font-extrabold text-xs">Manage Details &rarr;</span>
+                  {/* Footers for cards */}
+                  {activeTab === "courses" && (
+                    <div className="pt-4 border-t border-gray-100 flex flex-col gap-2 text-xs font-bold">
+                      <div className="flex justify-between items-center">
+                        <div className="flex flex-col">
+                          <span className="text-gray-400 text-[10px] leading-none mb-0.5">Created Date</span>
+                          <span className="text-gray-900 font-black">{item.createdAt}</span>
                         </div>
+                        <span className="text-[#b20a1c] hover:underline font-extrabold text-xs">Manage Details &rarr;</span>
                       </div>
-                    )}
-                  </div>
-
+                    </div>
+                  )}
                 </div>
-              ))}
+
+              </div>
+            ))}
           </div>
         )}
 
         {/* View all centered button at bottom — hidden when no data */}
-        {displayList.length > 0 && (
+        {filteredDisplayList.length > 0 && (
           <button
             onClick={() => navigate(activeTab === "courses" ? "/workspace/courses/all" : "/workspace/courses/all-classes")}
             className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2"

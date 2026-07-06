@@ -9,6 +9,10 @@ import { MOCK_STUDENTS, MOCK_TEACHER } from "./classMockData"
 const USE_MOCK = true
 
 const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher }) => {
+  const notifyInDevelopment = () => {
+    toast.success("Tính năng đang phát triển")
+  }
+
   const teacher = propMockTeacher || MOCK_TEACHER
   const { data: membersResponse, isLoading, error } = useGetClassMembersQuery({ classId: id }, { skip: USE_MOCK })
   const [updateAttendance] = useUpdateClassMemberAttendanceMutation()
@@ -32,17 +36,16 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
   }, [membersResponse, attendanceOverrides])
 
   const handleUpdateAttendance = async (studentId, newAttendance) => {
+    if (USE_MOCK) {
+      notifyInDevelopment()
+      return
+    }
+
     // Update local state to keep UI interactive
     setAttendanceOverrides(prev => ({
       ...prev,
       [studentId]: newAttendance
     }))
-
-    if (USE_MOCK) {
-      const attendStr = newAttendance === 'PRESENT' ? 'Có mặt' : newAttendance === 'ABSENT_EXCUSED' ? 'Vắng có phép' : 'Vắng không phép'
-      toast.success(language === "vi" ? `Đã điểm danh (Mock): ${attendStr}` : `Attendance updated (Mock): ${newAttendance}`)
-      return
-    }
 
     try {
       await updateAttendance({ classId: id, studentId, attendance: newAttendance }).unwrap()
@@ -86,7 +89,7 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
 
           {!isStudent && (
             <button
-              onClick={() => toast.success(`Send private message to ${teacher.fullName}`)}
+              onClick={notifyInDevelopment}
               className="h-8 px-4 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1.5"
             >
               <MessageSquare size={13} />
@@ -104,7 +107,7 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
           </h3>
           {!isStudent && (
             <button
-              onClick={() => toast.success("Invite code copied to clipboard")}
+              onClick={notifyInDevelopment}
               className="text-xs text-[#990011] font-bold flex items-center gap-1 hover:underline"
             >
               <Plus size={13} />
@@ -169,15 +172,13 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
                   {!isStudent && (
                     <>
                       <button
-                        onClick={() => toast.success(`Messaging ${student.fullName}`)}
+                        onClick={notifyInDevelopment}
                         className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         <MessageSquare size={14} />
                       </button>
                       <button
-                        onClick={() => {
-                          toast.error("Removing students from class is not supported via local edit, please use class settings.")
-                        }}
+                        onClick={notifyInDevelopment}
                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50/50 rounded-lg transition-colors"
                         title="Remove from class"
                       >

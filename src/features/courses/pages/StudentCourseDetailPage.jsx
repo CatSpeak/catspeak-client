@@ -68,6 +68,10 @@ const StudentCourseDetailPage = () => {
     }
   }
 
+  const notifyInDevelopment = () => {
+    toast.success("Tính năng đang phát triển")
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -354,7 +358,7 @@ const StudentCourseDetailPage = () => {
             </p>
 
             <button
-              onClick={() => toast.success("Opening contact messenger...")}
+              onClick={notifyInDevelopment}
               className="w-full h-9 border border-gray-150 hover:border-gray-200 text-gray-700 text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs"
             >
               <Mail size={13} />

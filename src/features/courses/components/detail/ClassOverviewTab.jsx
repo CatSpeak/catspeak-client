@@ -189,7 +189,7 @@ const ClassOverviewTab = ({
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-gray-400 font-bold">{language === "vi" ? "Sĩ số lớp" : "Class Size"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">{classData.slots || 30} {language === "vi" ? "người" : "students"}</span>
+                <span className="text-gray-900 font-extrabold text-sm mt-0.5">{classData.slots || 0} {language === "vi" ? "người" : "students"}</span>
               </div>
             </div>
 

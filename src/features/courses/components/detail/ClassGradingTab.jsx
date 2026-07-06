@@ -8,10 +8,14 @@ import { MOCK_GRADING } from "./classMockData"
 const USE_MOCK = true
 
 const ClassGradingTab = ({ id, isStudent, language }) => {
+  const notifyInDevelopment = () => {
+    toast.success("Tính năng đang phát triển")
+  }
+
   const { data: gradingResponse, isLoading, error } = useGetClassGradingQuery(id, { skip: USE_MOCK })
   const [gradeAssignment] = useGradeAssignmentMutation()
 
-  const [localGrades, setLocalGrades] = useState({}) // { [itemId]: { status, grade } }
+  const [localGrades] = useState({}) // { [itemId]: { status, grade } }
 
   const gradingList = useMemo(() => {
     const baseGrading = USE_MOCK
@@ -27,6 +31,11 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
   }, [gradingResponse, localGrades])
 
   const handleGradeSubmission = async (itemId, studentName) => {
+    if (USE_MOCK) {
+      notifyInDevelopment()
+      return
+    }
+
     const gradeInput = prompt(
       language === "vi"
         ? `Nhập điểm cho ${studentName} (0 - 10):`
@@ -41,15 +50,6 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
           ? "Điểm số không hợp lệ. Vui lòng nhập từ 0 đến 10"
           : "Invalid grade. Please enter between 0 and 10"
       )
-      return
-    }
-
-    if (USE_MOCK) {
-      setLocalGrades(prev => ({
-        ...prev,
-        [itemId]: { status: "Graded", grade: parsedGrade }
-      }))
-      toast.success(language === "vi" ? "Đã chấm điểm thành công (Mock)!" : "Graded successfully (Mock)!")
       return
     }
 
@@ -133,23 +133,21 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
                     {isStudent ? (
                       item.status === "Ungraded" ? (
                         <button
-                          onClick={() => {
-                            toast.success(language === "vi" ? "Đã nộp bài tập thành công!" : "Homework submitted successfully!")
-                          }}
+                          onClick={notifyInDevelopment}
                           className="h-7 px-3 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
                         >
                           {language === "vi" ? "Nộp bài" : "Submit"}
                         </button>
                       ) : item.status === "Resubmitted" ? (
                         <button
-                          onClick={() => toast.success(language === "vi" ? "Đã nộp lại bài tập thành công!" : "Homework resubmitted successfully!")}
+                          onClick={notifyInDevelopment}
                           className="h-7 px-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
                         >
                           {language === "vi" ? "Nộp lại" : "Resubmit"}
                         </button>
                       ) : (
                         <button
-                          onClick={() => toast.success(language === "vi" ? "Xem nhận xét của giảng viên..." : "Reviewing teacher feedback...")}
+                          onClick={notifyInDevelopment}
                           className="h-7 px-3 bg-gray-100 hover:bg-gray-150 text-gray-600 font-bold text-[10px] rounded-lg transition-all"
                         >
                           {language === "vi" ? "Xem nhận xét" : "View feedback"}
@@ -165,7 +163,7 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
                         </button>
                       ) : (
                         <button
-                          onClick={() => toast.success("Reviewing feedback details")}
+                          onClick={notifyInDevelopment}
                           className="h-7 px-3 bg-gray-100 hover:bg-gray-150 text-gray-600 font-bold text-[10px] rounded-lg transition-all"
                         >
                           View feedback

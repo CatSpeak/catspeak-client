@@ -28,8 +28,8 @@ const AllClassesPage = () => {
     navigate("/workspace/courses/create-class")
   }
 
-  const handleAction = (type, title) => {
-    toast.success(`${type} - ${title}`)
+  const handleAction = () => {
+    toast.success("Tính năng đang phát triển")
   }
 
   // Fetch paginated, filtered classes

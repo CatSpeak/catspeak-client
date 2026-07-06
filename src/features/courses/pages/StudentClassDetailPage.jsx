@@ -67,6 +67,10 @@ const StudentClassDetailPage = () => {
     }
   }
 
+  const notifyInDevelopment = () => {
+    toast.success("Tính năng đang phát triển")
+  }
+
   // Helper to format weekly schedule dynamically and defensively
   const getWeeklyScheduleText = () => {
     let schedArray = null
@@ -175,7 +179,7 @@ const StudentClassDetailPage = () => {
             </button>
           ) : (
             <button
-              onClick={() => toast.success("Opening chat...")}
+              onClick={notifyInDevelopment}
               className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
             >
               <MessageSquare size={14} className="fill-white" />

@@ -4,7 +4,6 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import {
   Upload,
-  Clock,
   ChevronDown,
   Trash2
 } from "lucide-react"
@@ -16,7 +15,6 @@ import {
   useDeleteCourseMutation
 } from "@/store/api/coursesApi"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { utcToLocalDateStr } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
   const { t } = useLanguage()
@@ -26,8 +24,6 @@ const CreateCoursePage = () => {
   const isEditMode = !!id
   const fileInputRef = useRef(null)
 
-  // API hooks
-  // const { data: profileData, isLoading: isProfileLoading } = useGetTeacherProfileQuery()
   const isProfileLoading = false
   const [createCourse, { isLoading: isCreating }] = useCreateCourseMutation()
   const [updateCourse, { isLoading: isUpdating }] = useUpdateCourseMutation()
@@ -35,6 +31,7 @@ const CreateCoursePage = () => {
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showClearModal, setShowClearModal] = useState(false)
 
   const handleDeleteCourse = async () => {
     try {
@@ -64,9 +61,6 @@ const CreateCoursePage = () => {
   const [courseName, setCourseName] = useState("")
   const [selectedLanguage, setSelectedLanguage] = useState("")
   const [level, setLevel] = useState("")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [sessions, setSessions] = useState(24)
   const [description, setDescription] = useState("")
 
   const cc = c.createCourse || {}
@@ -81,9 +75,6 @@ const CreateCoursePage = () => {
       setCourseName(course.title || course.name || "")
       setSelectedLanguage(course.language || "")
       setLevel(course.levels?.[0] || "")
-      setStartDate(utcToLocalDateStr(course.startDate))
-      setEndDate(utcToLocalDateStr(course.endDate))
-      setSessions(course.totalSessions || 24)
       setDescription(course.description || "")
       if (course.thumbnailUrl) {
         setAvatarPreview(course.thumbnailUrl)
@@ -121,19 +112,23 @@ const CreateCoursePage = () => {
     }
   }
 
+  const resetFormInputs = () => {
+    setAvatar(null)
+    setAvatarPreview("")
+    setCourseName("")
+    setSelectedLanguage("")
+    setLevel("")
+    setDescription("")
+  }
+
   const handleClear = () => {
-    if (window.confirm(c.deleteConfirm || "Bạn có chắc chắn muốn xóa tất cả thông tin đã điền?")) {
-      setAvatar(null)
-      setAvatarPreview("")
-      setCourseName("")
-      setSelectedLanguage("")
-      setLevel("")
-      setStartDate("")
-      setEndDate("")
-      setSessions(24)
-      setDescription("")
-      toast.success("Cleared form inputs")
-    }
+    setShowClearModal(true)
+  }
+
+  const handleConfirmClear = () => {
+    resetFormInputs()
+    setShowClearModal(false)
+    toast.success("Cleared form inputs")
   }
 
   const handleSubmit = async (e) => {
@@ -158,9 +153,6 @@ const CreateCoursePage = () => {
         title: courseName,
         language: selectedLanguage,
         levels: [level],
-        totalSessions: sessions,
-        enrollmentStart: startDate ? `${startDate}T00:00:00Z` : "",
-        enrollmentEnd: endDate ? `${endDate}T00:00:00Z` : "",
         description,
         thumbnailUrl: avatar || avatarPreview || "",
       }
@@ -303,62 +295,6 @@ const CreateCoursePage = () => {
           </div>
         </div>
 
-        {/* ─── Start Date & End Date ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.startDateLabel || "Thời gian bắt đầu"}</label>
-            <div className="relative">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full h-11 px-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all cursor-pointer"
-              />
-              <Clock size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.endDateLabel || "Thời gian kết thúc"}</label>
-            <div className="relative">
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full h-11 px-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all cursor-pointer"
-              />
-              <Clock size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-
-        {/* ─── Sessions ─── */}
-        {/* <div className="flex flex-col gap-2">
-          <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.sessionsLabel || "Số buổi dạy"} <span className="text-[#990011]">*</span></label>
-          <div className="flex items-center bg-[#F2F2F2]/60 border border-transparent rounded-xl overflow-hidden h-11 focus-within:border-gray-200 focus-within:bg-white transition-all">
-            <button
-              type="button"
-              onClick={() => setSessions(prev => Math.max(1, (parseInt(prev) || 24) - 1))}
-              className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95"
-            >
-              <Minus size={14} />
-            </button>
-            <input
-              type="number"
-              value={sessions}
-              onChange={(e) => setSessions(Math.max(1, parseInt(e.target.value) || 1))}
-              className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
-            />
-            <button
-              type="button"
-              onClick={() => setSessions(prev => (parseInt(prev) || 24) + 1)}
-              className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95"
-            >
-              <Plus size={14} />
-            </button>
-          </div>
-        </div> */}
-
         {/* ─── Description ─── */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.descriptionLabel || "Mô tả khóa học (tùy chọn)"}</label>
@@ -412,6 +348,16 @@ const CreateCoursePage = () => {
         title={c.courseDetail?.deleteCourse || "Delete Course"}
         message={c.courseDetail?.confirmDeleteCourse || "Are you sure you want to delete this course? All associated classes will also be affected."}
         confirmText={c.courseDetail?.deleteCourse || "Delete"}
+        cancelText={c.createClass?.cancel || "Cancel"}
+      />
+
+      <ConfirmationModal
+        open={showClearModal}
+        onClose={() => setShowClearModal(false)}
+        onConfirm={handleConfirmClear}
+        title={c.clearBtn || "Clear"}
+        message={c.deleteConfirm || "Bạn có chắc chắn muốn xóa tất cả thông tin đã điền?"}
+        confirmText={c.clearBtn || "Clear"}
         cancelText={c.createClass?.cancel || "Cancel"}
       />
     </div>

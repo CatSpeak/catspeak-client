@@ -1,5 +1,5 @@
 import React from "react"
-import { Calendar, User, Tag } from "lucide-react"
+import { Calendar, User, Tag, Clock } from "lucide-react"
 import { formatDateRange, formatCurrencyVND } from "../utils/courseUtils"
 
 const ClassCard = ({
@@ -19,10 +19,10 @@ const ClassCard = ({
     <div
       onClick={onClick}
       className={`bg-white border rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between ${isClassEnrolled
-          ? "border-green-300 ring-2 ring-green-50/50"
-          : isLocked
-            ? "border-gray-100 opacity-60 cursor-not-allowed"
-            : "border-gray-100 cursor-pointer"
+        ? "border-green-300 ring-2 ring-green-50/50"
+        : isLocked
+          ? "border-gray-100 opacity-60 cursor-not-allowed"
+          : "border-gray-100 cursor-pointer"
         }`}
     >
       {/* Image Thumbnail Placeholder Area */}
@@ -34,7 +34,7 @@ const ClassCard = ({
         {/* Top-left slots/capacity pill */}
         <div className="absolute top-3 left-3 bg-[#EAB308]/90 text-white text-[11px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
           <User size={11} className="fill-white" />
-          <span>{cls.slots || 30}</span>
+          <span>{cls.slots}</span>
         </div>
 
         {/* Top-right status pill */}
@@ -55,9 +55,9 @@ const ClassCard = ({
             )
           ) : (
             <span className={`text-[10px] font-black px-3 py-1 rounded-full ${cls.status === "TEACHING" ? "bg-[#E8F8F0] text-[#15803D]" :
-                cls.status === "OPEN" || cls.status === "OPEN_ENROLLMENT" ? "bg-[#EFF6FF] text-[#1D4ED8]" :
-                  cls.status === "LIVE" ? "bg-[#FFE4E6] text-[#E11D48]" :
-                    "bg-[#F3F4F6] text-[#6B7280]"
+              cls.status === "OPEN" || cls.status === "OPEN_ENROLLMENT" ? "bg-[#EFF6FF] text-[#1D4ED8]" :
+                cls.status === "LIVE" ? "bg-[#FFE4E6] text-[#E11D48]" :
+                  "bg-[#F3F4F6] text-[#6B7280]"
               }`}>
               {cls.status === "TEACHING" ? "Teaching" : cls.status === "OPEN" ? "Open Enrollment" : cls.status}
             </span>
@@ -85,7 +85,7 @@ const ClassCard = ({
               <span>{cls.schedule?.days?.join(" - ") || "TBA"}</span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Calendar size={13} className="text-gray-400" />
+              <Clock size={13} className="text-gray-400" />
               <span>{formatDateRange(cls.startDate, cls.endDate)}</span>
             </div>
           </div>

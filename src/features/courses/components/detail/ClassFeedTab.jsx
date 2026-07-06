@@ -9,12 +9,16 @@ import { MOCK_FEED } from "./classMockData"
 const USE_MOCK = true
 
 const ClassFeedTab = ({ id, isStudent, language, cd }) => {
+  const notifyInDevelopment = () => {
+    toast.success("Tính năng đang phát triển")
+  }
+
   const { data: feedResponse, isLoading, error } = useGetClassFeedQuery(id, { skip: USE_MOCK })
   const [createPost, { isLoading: isCreatingPost }] = useCreateClassPostMutation()
 
   const [newPostText, setNewPostText] = useState("")
   const [localLikes, setLocalLikes] = useState({}) // { postId: { count, isLiked } }
-  const [localPosts, setLocalPosts] = useState([])
+  const [localPosts] = useState([])
 
   const feedPosts = useMemo(() => {
     const baseFeed = USE_MOCK
@@ -28,19 +32,7 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
     if (!newPostText.trim()) return
 
     if (USE_MOCK) {
-      const newPost = {
-        id: `f_${Date.now()}`,
-        author: "John Doe",
-        role: "Lead Instructor",
-        time: "Just now",
-        content: newPostText,
-        commentsCount: 0,
-        likes: 0,
-        isLiked: false
-      }
-      setLocalPosts(prev => [newPost, ...prev])
-      setNewPostText("")
-      toast.success(cd.postPublished || "Đã đăng bảng tin thành công (Mock)!")
+      notifyInDevelopment()
       return
     }
 
@@ -54,6 +46,11 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
   }
 
   const handleLikeToggle = (item) => {
+    if (USE_MOCK) {
+      notifyInDevelopment()
+      return
+    }
+
     const current = localLikes[item.id] || { count: item.likes || 0, isLiked: item.isLiked || false }
     const newIsLiked = !current.isLiked
     const newCount = newIsLiked ? current.count + 1 : current.count - 1
@@ -139,7 +136,7 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
                       </div>
                     </div>
 
-                    <button className="text-gray-400 hover:text-gray-600">
+                    <button onClick={notifyInDevelopment} className="text-gray-400 hover:text-gray-600">
                       <MoreVertical size={14} />
                     </button>
                   </div>
@@ -157,7 +154,7 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
                     </button>
                     <span>•</span>
                     <button
-                      onClick={() => toast.success("Opening comments...")}
+                      onClick={notifyInDevelopment}
                       className="hover:text-[#990011] transition-colors flex items-center gap-1"
                     >
                       <MessageSquare size={11} />

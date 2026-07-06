@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { Search, FileText, Download, Trash2, Upload, X } from "lucide-react"
 import { useGetClassMaterialsQuery, useUploadClassMaterialMutation, useDeleteClassMaterialMutation } from "@/store/api/coursesApi"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
@@ -6,6 +6,8 @@ import { toast } from "react-hot-toast"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
 
 const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
+  const fileInputRef = useRef(null)
+
   const getFileIcon = (fileName) => {
     const colorClass = getFileIconColorClass(fileName)
     return <FileText className={colorClass} size={18} />
@@ -196,9 +198,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
-                onClick={() => document.getElementById("file-upload-input").click()}
+                onClick={() => fileInputRef.current?.click()}
               >
                 <input
+                  ref={fileInputRef}
                   id="file-upload-input"
                   type="file"
                   className="hidden"

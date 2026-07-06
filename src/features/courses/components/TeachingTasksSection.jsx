@@ -1,5 +1,6 @@
 import React from "react"
 import { BookOpen, MessageSquare, FileText, ChevronRight, Plus, Clock, Calendar } from "lucide-react"
+import { toast } from "react-hot-toast"
 
 const TeachingTasksSection = ({
   teachingTasksLabel,
@@ -9,8 +10,18 @@ const TeachingTasksSection = ({
   prepareLessonLabel,
   onViewAll,
   onTaskAction,
-  actionIcon = "chevron" // "chevron" or "plus"
+  isDevelopment = true,
+  actionIcon = "chevron"
 }) => {
+  const handleDevelopmentAction = (callback, payload) => {
+    if (isDevelopment) {
+      toast.success("Tính năng đang phát triển")
+      return
+    }
+
+    callback?.(payload)
+  }
+
   const tasks = [
     {
       id: "grade",
@@ -65,7 +76,7 @@ const TeachingTasksSection = ({
           {teachingTasksLabel}
         </h3>
         <button
-          onClick={onViewAll}
+          onClick={() => handleDevelopmentAction(onViewAll)}
           className="text-xs font-black text-[#b20a1c] hover:underline"
         >
           {viewAllLabel}
@@ -97,7 +108,7 @@ const TeachingTasksSection = ({
                 {task.due}
               </span>
               <div
-                onClick={() => onTaskAction(task)}
+                onClick={() => handleDevelopmentAction(onTaskAction, task)}
                 className="w-6 h-6 rounded-full border border-gray-150 flex items-center justify-center text-[#b20a1c] hover:bg-red-50/50 cursor-pointer"
               >
                 {actionIcon === "plus" ? <Plus size={12} /> : <ChevronRight size={12} />}
