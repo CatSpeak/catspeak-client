@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { MoreVertical, Calendar, Users, Clock } from "lucide-react"
 import StatusBadge from "./StatusBadge"
 import ProgressBar from "./ProgressBar"
+import CourseThumbnail from "./CourseThumbnail"
 
 const ClassTable = ({ classes, t, handleAction }) => {
   const c = t.courses || {}
@@ -28,13 +29,12 @@ const ClassTable = ({ classes, t, handleAction }) => {
 
               {/* Cover Image cell */}
               <td className="p-4 border-r border-gray-200">
-                <div className={`w-24 h-16 rounded-xl flex items-center justify-center border border-gray-100 flex-shrink-0 overflow-hidden ${!item.thumbnailUrl ? `bg-gradient-to-br ${item.gradient}` : ""}`}>
-                  {item.thumbnailUrl ? (
-                    <img src={item.thumbnailUrl} alt={item.classTitle || item.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <item.icon size={22} className="stroke-[1.5]" />
-                  )}
-                </div>
+                <CourseThumbnail
+                  item={item}
+                  title={item.classTitle || item.title}
+                  iconSize={22}
+                  className="w-24 h-16 rounded-xl border border-gray-100"
+                />
               </td>
 
               {/* Belongs to Course cell */}

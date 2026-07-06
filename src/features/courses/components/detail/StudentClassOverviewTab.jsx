@@ -4,16 +4,20 @@ import CountdownTicker from "../CountdownTicker"
 import { formatDateDayMonth } from "../../utils/courseUtils"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const StudentClassOverviewTab = ({
   classData,
   isEnrolled,
-  language,
   getWeeklyScheduleText,
   upcomingSessionLabel,
   joinRoomLabel,
   onJoinRoom
 }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const cd = c.classDetail || {}
+
   const completedSessions = (classData.progress
     ? classData.progress.completedSessions
     : classData.completedSessions) ?? 0
@@ -24,24 +28,26 @@ const StudentClassOverviewTab = ({
 
   const progressPercent = Math.round((completedSessions / totalSessions) * 100)
 
+  const isEnrolledAndActive = isEnrolled && classData.status !== "COMPLETED"
   const showRightColumn = isEnrolled
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
       {/* ─── LEFT COLUMN: Visual Banner, Schedule & Description ─── */}
-      <div className={`${showRightColumn ? "lg:col-span-2" : "lg:col-span-3"} flex flex-col gap-8`}>
+      <div className={`${isEnrolledAndActive ? "lg:col-span-2" : "lg:col-span-3"} flex flex-col gap-8`}>
         
         {/* Banner Area */}
-        <div className="relative rounded-3xl p-8 min-h-[340px] flex flex-col justify-end shadow-sm text-white">
-          <div
-            className="absolute inset-0 rounded-3xl overflow-hidden z-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `url('${classData.thumbnailUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"}')`
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-900/50 to-transparent" />
-          </div>
+        <div
+          className="relative rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm text-white overflow-hidden"
+          style={{
+            backgroundImage: `url('${classData.thumbnailUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"}')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center"
+          }}
+        >
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
 
           <div className="relative z-10 flex flex-col gap-3">
             <span className="bg-red-500 text-white font-bold text-[9px] px-2.5 py-0.5 rounded-full w-max uppercase tracking-wider">
@@ -56,7 +62,7 @@ const StudentClassOverviewTab = ({
         {/* Schedule & Information Details */}
         <div className="bg-white rounded-3xl border border-gray-100 p-6 md:p-8 shadow-xs flex flex-col gap-6">
           <h3 className="text-lg font-black text-gray-950 tracking-tight">
-            {language === "vi" ? "Thông tin lớp học" : "Class Information"}
+            {cd.classInformation || "Class Information"}
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm font-semibold text-gray-600">
@@ -138,7 +144,7 @@ const StudentClassOverviewTab = ({
           {/* Attendance progress card */}
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col items-center text-center gap-4">
             <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider self-start">
-              {language === "vi" ? "Tiến độ học tập" : "Study Progress"}
+              {c.student?.progress || "Study Progress"}
             </h3>
 
             <div className="w-24 h-24 my-2">

@@ -67,7 +67,7 @@ const ClassDetailPage = () => {
   }
 
   const notifyInDevelopment = () => {
-    toast.success("Tính năng đang phát triển")
+    toast.success(c.devMessage || "Feature in development")
   }
 
   // Helper to format weekly schedule dynamically and defensively
@@ -153,18 +153,18 @@ const ClassDetailPage = () => {
           <span>/</span>
           <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{language === "vi" ? "Toàn bộ khóa học" : "All Courses"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</span>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classData.courseId || ""}`)}>{language === "vi" ? "Chi tiết khóa học" : "Course Details"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classData.courseId || ""}`)}>{c.student?.courseDetails || "Course Details"}</span>
           <span>/</span>
-          <span className="text-[#990011] font-semibold">{language === "vi" ? "Chi tiết lớp học" : "Class Details"}</span>
+          <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
         </div>
       </div>
 
       {/* ─── Page Heading & Header Actions ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-          {language === "vi" ? "Chi tiết lớp học" : "Class Details"}
+          {c.student?.classDetails || "Class Details"}
         </h1>
 
         <div className="flex items-center gap-3">
@@ -174,7 +174,7 @@ const ClassDetailPage = () => {
             className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
           >
             <MessageSquare size={14} className="fill-white" />
-            <span>{language === "vi" ? "Trò chuyện" : "Chat"}</span>
+            <span>{c.student?.chat || "Chat"}</span>
           </button>
 
           {/* Tạo bài button */}
@@ -182,7 +182,7 @@ const ClassDetailPage = () => {
             onClick={notifyInDevelopment}
             className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
           >
-            <span>{language === "vi" ? "Tạo bài" : "Create Post"}</span>
+            <span>{cd.createPost || "Create Post"}</span>
             <span className="text-sm font-light">+</span>
           </button>
         </div>
@@ -197,7 +197,7 @@ const ClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          {language === "vi" ? "Tổng quan" : "Overview"}
+          {cd.overview || "Overview"}
         </button>
 
         <button
@@ -207,7 +207,7 @@ const ClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          <span>{language === "vi" ? "Quản lý thành viên" : "Members"}</span>
+          <span>{cd.members || "Members"}</span>
         </button>
 
         <button
@@ -217,7 +217,7 @@ const ClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          <span>{language === "vi" ? "Bảng tin" : "Feed"}</span>
+          <span>{cd.feed || "Feed"}</span>
         </button>
 
         <button
@@ -227,7 +227,7 @@ const ClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          <span>{language === "vi" ? "Chấm điểm & quản lý" : "Grading & Management"}</span>
+          <span>{cd.grading || "Grading"}</span>
         </button>
 
         <button
@@ -237,7 +237,7 @@ const ClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          <span>{cd.materials || (language === "vi" ? "Tài liệu học tập" : "Materials")}</span>
+          <span>{cd.materials || "Materials"}</span>
         </button>
       </div>
 
@@ -257,15 +257,15 @@ const ClassDetailPage = () => {
           onCancelClassClick={() => setShowCancelClassModal(true)}
           formatCurrency={formatCurrency}
           getWeeklyScheduleText={getWeeklyScheduleText}
-          upcomingSessionLabel={language === "vi" ? "Buổi dạy tiếp theo" : "Upcoming Session"}
-          joinRoomLabel={language === "vi" ? "Vào phòng" : "Join Room"}
-          viewAllLabel={language === "vi" ? "Xem tất cả" : "View All"}
-          noUpcomingLabel={language === "vi" ? "Không có buổi dạy tiếp theo" : "No upcoming sessions"}
-          createClassToScheduleLabel={language === "vi" ? "Tạo lớp học mới để lên lịch cho buổi dạy đầu tiên." : "Create a class to schedule your first session."}
-          teachingTasksLabel={language === "vi" ? "Việc giảng dạy" : "Teaching Tasks"}
-          gradeAssignmentLabel={language === "vi" ? "Chấm bài tập" : "Grade homework"}
-          giveFeedbackLabel={language === "vi" ? "Đưa feedback" : "Give feedback"}
-          prepareLessonLabel={language === "vi" ? "Soạn giáo án" : "Prepare lesson plan"}
+          upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
+          joinRoomLabel={c.joinRoom || "Join Room"}
+          viewAllLabel={c.viewAll || "View All"}
+          noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
+          createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
+          teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
+          gradeAssignmentLabel={c.gradeAssignment || "Grade homework"}
+          giveFeedbackLabel={c.giveFeedback || "Give feedback"}
+          prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
           onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
           onTaskAction={() => navigate("/workspace/courses/schedule")}
           onViewTasks={() => navigate("/workspace/courses/schedule")}
@@ -314,9 +314,9 @@ const ClassDetailPage = () => {
         open={showCancelClassModal}
         onClose={() => setShowCancelClassModal(false)}
         onConfirm={handleCancelClass}
-        title="Cancel Class"
-        message={cd.confirmCancelClass || "Bạn có chắc chắn muốn hủy lớp học này?"}
-        confirmText="Cancel Class"
+        title={cd.cancelClass || "Cancel Class"}
+        message={cd.confirmCancelClass || "Are you sure you want to cancel this class?"}
+        confirmText={cd.cancelClass || "Cancel Class"}
         cancelText={c.createClass?.cancel || "Hủy"}
       />
     </div>

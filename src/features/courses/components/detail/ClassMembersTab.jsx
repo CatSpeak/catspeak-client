@@ -4,13 +4,18 @@ import { useGetClassMembersQuery, useUpdateClassMemberAttendanceMutation } from 
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
 import { MOCK_STUDENTS, MOCK_TEACHER } from "./classMockData"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Toggle switch: set to false to use real API endpoint after backend is ready
 const USE_MOCK = true
 
-const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher }) => {
+const ClassMembersTab = ({ id, isStudent, mockTeacher: propMockTeacher }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const cd = c.classDetail || {}
+
   const notifyInDevelopment = () => {
-    toast.success("Tính năng đang phát triển")
+    toast.success(c.devMessage || "Feature in development")
   }
 
   const teacher = propMockTeacher || MOCK_TEACHER
@@ -49,8 +54,16 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
 
     try {
       await updateAttendance({ classId: id, studentId, attendance: newAttendance }).unwrap()
-      const attendStr = newAttendance === 'PRESENT' ? 'Có mặt' : newAttendance === 'ABSENT_EXCUSED' ? 'Vắng có phép' : 'Vắng không phép'
-      toast.success(language === "vi" ? `Đã điểm danh: ${attendStr}` : `Attendance updated: ${newAttendance}`)
+      const labelMap = {
+        PRESENT: cd.present || "Present",
+        ABSENT_EXCUSED: cd.absentExcused || "Absent (Excused)",
+        ABSENT_UNEXCUSED: cd.absentUnexcused || "Absent (Unexcused)"
+      }
+      const attendStr = labelMap[newAttendance] || newAttendance
+      const successMsg = cd.toastAttendanceSuccess
+        ? cd.toastAttendanceSuccess.replace("{{attendance}}", attendStr)
+        : `Attendance updated: ${attendStr}`
+      toast.success(successMsg)
     } catch (err) {
       toast.error(err.data?.message || err.message || "Failed to update attendance")
     }
@@ -73,7 +86,7 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
       {/* LEAD INSTRUCTOR */}
       <div className="flex flex-col gap-3">
         <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-1.5">
-          {language === "vi" ? "GIẢNG VIÊN CHÍNH" : "LEAD INSTRUCTOR"}
+          {cd.leadInstructor || "LEAD INSTRUCTOR"}
         </h3>
 
         <div className="flex items-center justify-between p-3.5 bg-gray-50/50 rounded-xl border border-gray-50 hover:bg-gray-55 transition-colors">
@@ -83,7 +96,7 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-extrabold text-gray-800">{teacher.fullName}</span>
-              <span className="text-[10px] text-gray-400 font-bold">{language === "vi" ? "Giảng viên chính" : "Lead Instructor"}</span>
+              <span className="text-[10px] text-gray-400 font-bold">{cd.leadInstructorLabel || "Lead Instructor"}</span>
             </div>
           </div>
 
@@ -93,7 +106,7 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
               className="h-8 px-4 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1.5"
             >
               <MessageSquare size={13} />
-              <span>{language === "vi" ? "Nhắn tin" : "Message"}</span>
+              <span>{cd.message || "Message"}</span>
             </button>
           )}
         </div>
@@ -103,7 +116,7 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
       <div className="flex flex-col gap-3">
         <div className="flex justify-between items-center border-b border-gray-50 pb-1.5">
           <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-widest">
-            {language === "vi" ? `HỌC VIÊN (${studentsList.length} / 30)` : `STUDENTS (${studentsList.length} / 30)`}
+            {cd.studentsLabel ? `${cd.studentsLabel.toUpperCase()} (${studentsList.length} / 30)` : `STUDENTS (${studentsList.length} / 30)`}
           </h3>
           {!isStudent && (
             <button
@@ -111,14 +124,14 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
               className="text-xs text-[#990011] font-bold flex items-center gap-1 hover:underline"
             >
               <Plus size={13} />
-              <span>{language === "vi" ? "Mời học viên" : "Invite Student"}</span>
+              <span>{cd.inviteStudent || "Invite Student"}</span>
             </button>
           )}
         </div>
 
         {studentsList.length === 0 ? (
           <div className="text-center py-6 text-xs text-gray-400 font-bold">
-            {language === "vi" ? "Chưa có học viên nào tham gia lớp này." : "No students have joined this class yet."}
+            {cd.noStudents || "No students have joined this class yet."}
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-gray-100">
@@ -143,9 +156,9 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
                         student.attendance === "ABSENT_EXCUSED" ? "bg-blue-50 text-blue-700 border-blue-200" :
                           "bg-red-50 text-red-700 border-red-200"
                         }`}>
-                        {student.attendance === "PRESENT" ? (language === "vi" ? "Có mặt" : "Present") :
-                          student.attendance === "ABSENT_EXCUSED" ? (language === "vi" ? "Vắng có phép" : "Absent (Excused)") :
-                            (language === "vi" ? "Vắng không phép" : "Absent (Unexcused)")}
+                        {student.attendance === "PRESENT" ? (cd.present || "Present") :
+                          student.attendance === "ABSENT_EXCUSED" ? (cd.absentExcused || "Absent (Excused)") :
+                            (cd.absentUnexcused || "Absent (Unexcused)")}
                       </span>
                     ) : (
                       <select
@@ -162,9 +175,9 @@ const ClassMembersTab = ({ id, isStudent, language, mockTeacher: propMockTeacher
                           backgroundSize: "8px"
                         }}
                       >
-                        <option value="PRESENT">{language === "vi" ? "Có mặt" : "Present"}</option>
-                        <option value="ABSENT_EXCUSED">{language === "vi" ? "Vắng có phép" : "Absent (Excused)"}</option>
-                        <option value="ABSENT_UNEXCUSED">{language === "vi" ? "Vắng không phép" : "Absent (Unexcused)"}</option>
+                        <option value="PRESENT">{cd.present || "Present"}</option>
+                        <option value="ABSENT_EXCUSED">{cd.absentExcused || "Absent (Excused)"}</option>
+                        <option value="ABSENT_UNEXCUSED">{cd.absentUnexcused || "Absent (Unexcused)"}</option>
                       </select>
                     )}
                   </div>

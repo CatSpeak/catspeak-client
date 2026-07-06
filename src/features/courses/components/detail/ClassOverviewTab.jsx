@@ -10,7 +10,6 @@ const ClassOverviewTab = ({
   classData,
   isStudent,
   isEnrolled,
-  language,
   id,
   navigate,
   showActionsDropdown,
@@ -27,7 +26,8 @@ const ClassOverviewTab = ({
   prepareLessonLabel,
   onJoinRoom,
   onTaskAction,
-  onViewTasks
+  onViewTasks,
+  cd = {}
 }) => {
   const completed = (classData.progress
     ? classData.progress.completedSessions
@@ -69,7 +69,7 @@ const ClassOverviewTab = ({
                   className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
                 >
                   <Pencil size={14} />
-                  <span>{language === "vi" ? "Tùy chỉnh" : "Customize"}</span>
+                  <span>{cd.customizeClass || "Customize"}</span>
                 </button>
 
                 {showActionsDropdown && (
@@ -81,21 +81,21 @@ const ClassOverviewTab = ({
                             setShowActionsDropdown(false)
                             navigate(`/workspace/courses/edit-class/${id}`)
                           }}
-                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
                         >
-                          {language === "vi" ? "Chỉnh sửa lớp" : "Edit Class"}
+                          {cd.editClass || "Edit Class"}
                         </button>
                         <button
                           onClick={onCompleteClass}
-                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
                         >
-                          {language === "vi" ? "Hoàn thành lớp học" : "Complete Class"}
+                          {cd.completeClass || "Complete Class"}
                         </button>
                         <button
                           onClick={onCancelClassClick}
-                          className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold text-red-600 transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-red-650 transition-colors"
                         >
-                          {language === "vi" ? "Hủy lớp học" : "Cancel Class"}
+                          {cd.cancelClass || "Cancel Class"}
                         </button>
                       </>
                     ) : (
@@ -104,9 +104,9 @@ const ClassOverviewTab = ({
                           setShowActionsDropdown(false)
                           navigate(`/workspace/courses/create-class`, { state: { recoverClassId: id } })
                         }}
-                        className="w-full text-left p-3 hover:bg-gray-50 text-xs font-bold text-[#b20a1c] transition-colors"
+                        className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#b20a1c] transition-colors"
                       >
-                        {language === "vi" ? "Mở lại lớp học (Khôi phục)" : "Reopen Class (Recover)"}
+                        {cd.reopenClass || "Reopen Class (Recover)"}
                       </button>
                     )}
                   </div>
@@ -122,7 +122,7 @@ const ClassOverviewTab = ({
             <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#15803D] flex items-center justify-center font-black text-lg">
               $
             </div>
-            <span className="text-sm font-extrabold text-gray-500">{language === "vi" ? "Phí mở lớp" : "Class Fee"}</span>
+            <span className="text-sm font-extrabold text-gray-500">{cd.classFee || "Class Fee"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xl font-black text-[#990011]">
             <span>{classData.tuitionFee ? `${formatCurrency(classData.tuitionFee)} VNĐ` : "350.000 VNĐ"}</span>
@@ -138,7 +138,7 @@ const ClassOverviewTab = ({
                 <Globe size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{language === "vi" ? "Ngôn ngữ" : "Language"}</span>
+                <span className="text-xs text-gray-400 font-bold">{cd.language || "Language"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">{classData.language || "English"}</span>
               </div>
             </div>
@@ -148,7 +148,7 @@ const ClassOverviewTab = ({
                 <GraduationCap size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{language === "vi" ? "Trình độ" : "Level"}</span>
+                <span className="text-xs text-gray-400 font-bold">{cd.level || "Level"}</span>
                 <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-black text-white bg-[#EAB308] rounded-full w-fit">
                   {classData.levels?.join(", ") || "B2"}
                 </span>
@@ -160,7 +160,7 @@ const ClassOverviewTab = ({
                 <Calendar size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{language === "vi" ? "Thời gian tuyển sinh" : "Admission Period"}</span>
+                <span className="text-xs text-gray-400 font-bold">{cd.enrollmentPeriod || "Admission Period"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
                   {classData.enrollmentStart && classData.enrollmentEnd
                     ? formatDateRange(classData.enrollmentStart, classData.enrollmentEnd)
@@ -174,7 +174,7 @@ const ClassOverviewTab = ({
                 <Calendar size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{language === "vi" ? "Thời gian học" : "Period"}</span>
+                <span className="text-xs text-gray-400 font-bold">{cd.schedulePeriod || "Period"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
                   {classData.startDate && classData.endDate
                     ? formatDateRange(classData.startDate, classData.endDate)
@@ -188,8 +188,8 @@ const ClassOverviewTab = ({
                 <Users size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{language === "vi" ? "Sĩ số lớp" : "Class Size"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">{classData.slots || 0} {language === "vi" ? "người" : "students"}</span>
+                <span className="text-xs text-gray-400 font-bold">{cd.classSize || "Class Size"}</span>
+                <span className="text-gray-900 font-extrabold text-sm mt-0.5">{classData.slots || 0} {cd.studentsLabel || "students"}</span>
               </div>
             </div>
 
@@ -199,7 +199,7 @@ const ClassOverviewTab = ({
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-gray-400 font-bold">
-                  {language === "vi" ? "Lịch học hàng tuần" : language === "zh" ? "每周日程" : "Weekly Schedule"}
+                  {cd.weeklySchedule || "Weekly Schedule"}
                 </span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">{getWeeklyScheduleText()}</span>
               </div>
@@ -211,7 +211,7 @@ const ClassOverviewTab = ({
               <AlignLeft size={18} />
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-400 font-bold">{language === "vi" ? "Mô tả" : "Description"}</span>
+              <span className="text-xs text-gray-400 font-bold">{cd.description || "Description"}</span>
               <p className="text-gray-600 font-medium text-xs leading-relaxed mt-0.5">
                 {classData.description || "No description provided."}
               </p>
@@ -222,7 +222,7 @@ const ClassOverviewTab = ({
         {/* Teaching Progress Circular Chart */}
         <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
           <h3 className="text-xl font-black text-gray-950 tracking-tight">
-            {language === "vi" ? "Tiến độ giảng dạy" : "Teaching Progress"}
+            {cd.teachingProgress || "Teaching Progress"}
           </h3>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-8 py-4 px-2">
@@ -240,7 +240,7 @@ const ClassOverviewTab = ({
                 <span className="text-4xl font-black text-gray-950 leading-none">{progressPercent}%</span>
                 <span className="text-sm font-black text-gray-800 mt-2.5">{progressText}</span>
                 <span className="text-[11px] text-gray-400 font-bold mt-1 uppercase tracking-wider">
-                  {language === "vi" ? "Buổi hoàn thành" : "Session completed"}
+                  {cd.sessionCompleted || "Session completed"}
                 </span>
               </div>
             </div>
@@ -248,11 +248,11 @@ const ClassOverviewTab = ({
             <div className="flex flex-col justify-center gap-4 flex-1 max-w-sm w-full">
               <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
                 <span className="w-3.5 h-3.5 rounded-full bg-[#990011] shrink-0" />
-                <span>{language === "vi" ? "Bài đã hoàn thành" : "Completed sessions"}</span>
+                <span>{cd.completedSessionsLabel || "Completed sessions"}</span>
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
                 <span className="w-3.5 h-3.5 rounded-full bg-[#9CA3AF] shrink-0" />
-                <span>{language === "vi" ? "Bài chưa hoàn thành" : "Uncompleted sessions"}</span>
+                <span>{cd.uncompletedSessionsLabel || "Uncompleted sessions"}</span>
               </div>
             </div>
           </div>
@@ -324,7 +324,7 @@ const ClassOverviewTab = ({
                   onClick={onJoinRoom}
                   className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap"
                 >
-                  <span>{language === "vi" ? "Vào phòng" : "Join room"}</span>
+                  <span>{cd.joinRoom || "Join room"}</span>
                   <span>→</span>
                 </button>
               </div>

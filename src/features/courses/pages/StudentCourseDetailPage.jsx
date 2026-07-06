@@ -14,7 +14,7 @@ import { Calendar, Clock, Star, Award, ShieldCheck, Mail, CheckCircle2 } from "l
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const c = t.courses || {}
 
   // Fetch course details
@@ -41,16 +41,14 @@ const StudentCourseDetailPage = () => {
 
       if (result.checkoutUrl) {
         toast.success(
-          language === "vi"
-            ? "Đang chuyển đến trang thanh toán..."
-            : "Redirecting to payment..."
+          c.createClass?.toastRedirectPayment || "Redirecting to payment..."
         )
         window.location.href = result.checkoutUrl
       } else {
         setEnrollSuccess(true)
         toast.success(
-          language === "vi"
-            ? `Đăng ký lớp ${enrollTarget.class.title} thành công!`
+          c.student?.enrolledSuccess
+            ? c.student.enrolledSuccess.replace("{{className}}", enrollTarget.class.title)
             : `Successfully enrolled in ${enrollTarget.class.title}!`
         )
       }
@@ -152,7 +150,7 @@ const StudentCourseDetailPage = () => {
           {/* About This Course */}
           <div className="flex flex-col gap-4">
             <h2 className="text-2xl font-black text-gray-950 tracking-tight">
-              {language === "vi" ? "Giới thiệu khóa học" : "About This Course"}
+              {c.student?.aboutCourse || "About This Course"}
             </h2>
             <div className="bg-white rounded-3xl border border-gray-100 p-6 md:p-8 shadow-xs leading-relaxed text-sm text-gray-600 font-medium flex flex-col gap-4">
               <p>
@@ -174,7 +172,7 @@ const StudentCourseDetailPage = () => {
           {/* Syllabus Roadmap */}
           <div className="flex flex-col gap-4">
             <h2 className="text-2xl font-black text-gray-950 tracking-tight">
-              {language === "vi" ? "Lộ trình & Nội dung học" : "What You'll Learn"}
+              {c.student?.whatYouLearn || "What You'll Learn"}
             </h2>
             <div className="bg-white rounded-3xl border border-gray-100 p-6 md:p-8 shadow-xs flex flex-col gap-5">
               {(rawCourse.syllabus || [
@@ -199,7 +197,7 @@ const StudentCourseDetailPage = () => {
           {/* Class Selector / Batches */}
           <div className="flex flex-col gap-5">
             <h2 className="text-2xl font-black text-gray-950 tracking-tight">
-              {language === "vi" ? "Lớp học đang tuyển sinh" : "Available Batches"}
+              {c.student?.availableClasses || "Available Batches"}
             </h2>
 
             {classes.length === 0 ? (
@@ -292,7 +290,7 @@ const StudentCourseDetailPage = () => {
           {/* Tuition Box */}
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-md flex flex-col gap-5">
             <div className="flex flex-col">
-              <span className="text-xs text-gray-400 font-bold uppercase">{language === "vi" ? "Học phí trọn gói" : "Full Course Tuition"}</span>
+              <span className="text-xs text-gray-400 font-bold uppercase">{c.student?.tuition || "Full Course Tuition"}</span>
               <div className="flex items-baseline gap-1 mt-1">
                 <span className="text-gray-950 font-black text-3xl">
                   {classes.length > 0 ? formatCurrencyVND(Math.min(...classes.map(c => c.tuitionFee))) : "TBA"}
@@ -338,7 +336,7 @@ const StudentCourseDetailPage = () => {
           {/* Instructor Bio */}
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
             <h3 className="text-base font-black text-gray-950 tracking-tight">
-              {language === "vi" ? "Giảng viên của bạn" : "Meet Your Instructor"}
+              {c.student?.instructor || "Meet Your Instructor"}
             </h3>
 
             <div className="flex items-center gap-3.5">

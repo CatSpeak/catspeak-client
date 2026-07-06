@@ -13,7 +13,7 @@ import TeachingTasksSection from "../components/TeachingTasksSection"
 const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const c = t.courses || {}
 
   // Fetch course details
@@ -65,34 +65,34 @@ const CourseDetailPage = () => {
   const nextClass = activeClasses[0] || classes[0]
 
   // Localized Labels
-  const courseDetailTitle = language === "vi" ? "Chi tiết khóa học" : "Course Details"
-  const allCoursesLabel = t.allCourses?.title || (language === "vi" ? "Toàn bộ khóa học" : "All Courses")
+  const courseDetailTitle = c.student?.courseDetails || "Course Details"
+  const allCoursesLabel = c.allCourses?.title || "All Courses"
 
-  const languageLabel = c.languageLabel || (language === "vi" ? "Ngôn ngữ" : "Language")
-  const levelLabel = c.levelLabel || (language === "vi" ? "Trình độ" : "Level")
-  const admissionPeriodLabel = language === "vi" ? "Thời gian tuyển sinh" : "Admission Period"
-  const durationLabel = language === "vi" ? "Thời lượng" : "Duration"
-  const descriptionLabel = c.courseDetail?.description || (language === "vi" ? "Mô tả" : "Description")
+  const languageLabel = c.languageLabel || "Language"
+  const levelLabel = c.levelLabel || "Level"
+  const admissionPeriodLabel = c.courseDetail?.admission || "Admission Period"
+  const durationLabel = c.courseDetail?.duration || "Duration"
+  const descriptionLabel = c.courseDetail?.description || "Description"
 
-  const customizeLabel = c.editCourse || (language === "vi" ? "Tùy chỉnh" : "Customize")
+  const customizeLabel = c.editCourse || "Customize"
 
-  const currentClassesLabel = c.courseDetail?.currentClasses || (language === "vi" ? "Lớp học hiện tại" : "Current Classes")
-  const addNewClassLabel = c.courseDetail?.addNewClass || (language === "vi" ? "Tạo lớp mới" : "Add New Class")
-  const noClassesYetLabel = c.courseDetail?.noClassesYet || (language === "vi" ? "Chưa có lớp học nào" : "No classes created yet")
-  const startByAddingLabel = c.courseDetail?.startByAdding || (language === "vi" ? "Bắt đầu bằng cách thêm lớp học đầu tiên cho khóa học này." : "Start by adding your first class to this course.")
+  const currentClassesLabel = c.courseDetail?.currentClasses || "Current Classes"
+  const addNewClassLabel = c.courseDetail?.addNewClass || "Add New Class"
+  const noClassesYetLabel = c.courseDetail?.noClassesYet || "No classes created yet"
+  const startByAddingLabel = c.courseDetail?.startByAdding || "Start by adding your first class to this course."
 
-  const progressLabel = c.progress || (language === "vi" ? "Tiến độ" : "Progress")
+  const progressLabel = c.progress || "Progress"
 
-  const upcomingSessionLabel = c.courseDetail?.upcomingSession || (language === "vi" ? "Buổi dạy tiếp theo" : "Upcoming Session")
-  const joinRoomLabel = c.classDetail?.joinRoom || (language === "vi" ? "Vào phòng" : "Join Room")
-  const viewAllLabel = c.viewAll || (language === "vi" ? "Xem tất cả" : "View All")
-  const noUpcomingLabel = c.courseDetail?.noUpcoming || (language === "vi" ? "Không có buổi dạy tiếp theo" : "No upcoming sessions")
-  const createClassToScheduleLabel = c.courseDetail?.createClassToSchedule || (language === "vi" ? "Tạo lớp học mới để lên lịch cho buổi dạy đầu tiên." : "Create a class to schedule your first session.")
+  const upcomingSessionLabel = c.courseDetail?.upcomingSession || "Upcoming Session"
+  const joinRoomLabel = c.joinRoom || "Join Room"
+  const viewAllLabel = c.viewAll || "View All"
+  const noUpcomingLabel = c.courseDetail?.noUpcoming || "No upcoming sessions"
+  const createClassToScheduleLabel = c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."
 
-  const teachingTasksLabel = c.teachingTasks || (language === "vi" ? "Việc giảng dạy" : "Teaching Tasks")
-  const gradeAssignmentLabel = c.gradeAssignment || (language === "vi" ? "Chấm bài tập" : "Grade homework")
-  const giveFeedbackLabel = language === "vi" ? "Đưa feedback" : "Give feedback"
-  const prepareLessonLabel = language === "vi" ? "Soạn giáo án" : "Prepare lesson plan"
+  const teachingTasksLabel = c.teachingTasks || "Teaching Tasks"
+  const gradeAssignmentLabel = c.gradeAssignment || "Grade homework"
+  const giveFeedbackLabel = c.giveFeedback || "Give feedback"
+  const prepareLessonLabel = c.prepareLesson || "Prepare lesson plan"
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -184,7 +184,6 @@ const CourseDetailPage = () => {
                       onClick={() => navigate(`/workspace/courses/class/${cls.id}`)}
                       progressLabel={progressLabel}
                       courseTitle={courseData.title}
-                      language={language}
                     />
                   )
                 })
@@ -227,6 +226,8 @@ const CourseDetailPage = () => {
             gradeAssignmentLabel={gradeAssignmentLabel}
             giveFeedbackLabel={giveFeedbackLabel}
             prepareLessonLabel={prepareLessonLabel}
+            taskSpeakingSubtitle={c.taskSpeakingSubtitle}
+            taskWritingSubtitle={c.taskWritingSubtitle}
             onViewAll={() => navigate("/workspace/courses/schedule")}
             onTaskAction={() => navigate("/workspace/courses/schedule")}
           />

@@ -1,6 +1,8 @@
 import React from "react"
 import { Calendar, User, Tag, Clock } from "lucide-react"
 import { formatDateRange, formatCurrencyVND } from "../utils/courseUtils"
+import CourseStatusPill from "./CourseStatusPill"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ClassCard = ({
   cls,
@@ -10,9 +12,10 @@ const ClassCard = ({
   onClick,
   onEnroll,
   progressLabel,
-  courseTitle,
-  language
+  courseTitle
 }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
   const progress = cls.totalSessions ? Math.round((cls.completedSessions / cls.totalSessions) * 100) : 0
 
   return (
@@ -54,13 +57,7 @@ const ClassCard = ({
               </span>
             )
           ) : (
-            <span className={`text-[10px] font-black px-3 py-1 rounded-full ${cls.status === "TEACHING" ? "bg-[#E8F8F0] text-[#15803D]" :
-              cls.status === "OPEN" || cls.status === "OPEN_ENROLLMENT" ? "bg-[#EFF6FF] text-[#1D4ED8]" :
-                cls.status === "LIVE" ? "bg-[#FFE4E6] text-[#E11D48]" :
-                  "bg-[#F3F4F6] text-[#6B7280]"
-              }`}>
-              {cls.status === "TEACHING" ? "Teaching" : cls.status === "OPEN" ? "Open Enrollment" : cls.status}
-            </span>
+            <CourseStatusPill status={cls.status} />
           )}
         </div>
       </div>
@@ -72,7 +69,7 @@ const ClassCard = ({
             {cls.title}
           </h4>
           <span className="text-xs text-gray-400 font-bold mt-1 block">
-            {language === "vi" ? `Khóa ${courseTitle}` : `Course ${courseTitle}`}
+            {c.course ? `${c.course} ${courseTitle}` : `Course ${courseTitle}`}
           </span>
 
           <div className="mt-4 flex flex-col gap-2">

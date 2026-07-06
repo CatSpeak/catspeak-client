@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -19,6 +20,8 @@ import {
   useUpdateClassMutation,
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
+import ReactDatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { calculateFees, formatCurrency, formatCurrencyVND, formatToYYYYMMDD } from "../utils/courseUtils"
 
@@ -48,7 +51,7 @@ const FALLBACK_TEACHER_PROFILE = {
 }
 
 const CreateClassPage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -58,14 +61,6 @@ const CreateClassPage = () => {
   // Localizations
   const cc = c.createClass || {}
 
-  // const labelCreateNewClass = cc.createNewClass || "Create New Class"
-  // const labelFillDetails = cc.fillDetails || "Fill in the details below to set up a new class."
-  // const labelInvite = cc.inviteStudents || "Invite returning students"
-  // const labelSearchPlaceholder = cc.searchPlaceholder || "Search student name, phone number..."
-  // const labelCancel = cc.cancel || "Cancel"
-
-  // API hooks
-  // const { data: profileData, isLoading: isProfileLoading } = useGetTeacherProfileQuery()
   const isProfileLoading = false
   const { data: coursesData } = useGetAllCoursesQuery({ pageSize: 100 })
   const [createClass, { isLoading: isCreating }] = useCreateClassMutation()
@@ -93,9 +88,9 @@ const CreateClassPage = () => {
   const [className, setClassName] = useState("")
   const [selectedLanguage, setSelectedLanguage] = useState("English")
   const [level, setLevel] = useState("A1")
-  const [admissionStart, setAdmissionStart] = useState("2026-10-15")
-  const [admissionEnd, setAdmissionEnd] = useState("2026-11-15")
-  const [startDate, setStartDate] = useState("2026-11-16")
+  const [admissionStart, setAdmissionStart] = useState("")
+  const [admissionEnd, setAdmissionEnd] = useState("")
+  const [startDate, setStartDate] = useState("")
   const [sessions, setSessions] = useState(24)
   const [capacity, setCapacity] = useState(6)
   const [description, setDescription] = useState("")
@@ -123,6 +118,38 @@ const CreateClassPage = () => {
     saturday: { start: "18:00", end: "19:30" },
     sunday: { start: "18:00", end: "19:30" }
   })
+
+  // Helper functions for date conversion (local timezone safe)
+  const toLocalDateString = (date) => {
+    if (!date) return ""
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, "0")
+    const d = String(date.getDate()).padStart(2, "0")
+    return `${y}-${m}-${d}`
+  }
+
+  const parseLocalDateString = (str) => {
+    if (!str) return null
+    const [y, m, d] = str.split("-").map(Number)
+    if (isNaN(y) || isNaN(m) || isNaN(d)) return null
+    return new Date(y, m - 1, d)
+  }
+
+  // Minimum tuition fee calculation: (50k * slots) + (25k * sessions)
+  const minFee = useMemo(() => {
+    return (50000 * capacity) + (25000 * sessions)
+  }, [capacity, sessions])
+
+  // Automatically set tuition fee to minFee on load or configuration changes (only in Create mode)
+  useEffect(() => {
+    if (isEditMode || isRecoverMode) return
+    const currentFeeNum = parseFloat(fee.replace(/[^0-9]/g, "")) || 0
+    if (currentFeeNum < minFee) {
+      setFee(minFee.toString())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minFee, isEditMode, isRecoverMode])
+
   const selectedLanguageObj = languagesList.find((l) => (l.name || "").toLowerCase() === (selectedLanguage || "").toLowerCase())
   const levelsList = selectedLanguageObj?.levels || []
 
@@ -284,10 +311,11 @@ const CreateClassPage = () => {
   }
 
   // Calculation: Actual amount received & fee details
+  const feeNum = parseFloat(fee.replace(/[^0-9]/g, "")) || 0
+
   const feeDetails = useMemo(() => {
-    const feeNum = parseFloat(fee.replace(/[^0-9]/g, "")) || 0
     return calculateFees(capacity, feeNum, FALLBACK_TEACHER_PROFILE.feeTiers)
-  }, [fee, capacity])
+  }, [feeNum, capacity])
 
   const amountReceived = formatCurrency(feeDetails.netPerStudent)
 
@@ -318,6 +346,47 @@ const CreateClassPage = () => {
       return
     }
 
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const start = parseLocalDateString(startDate)
+    const enrollStart = parseLocalDateString(admissionStart)
+    const enrollEnd = parseLocalDateString(admissionEnd)
+
+    if (!isEditMode) {
+      if (enrollStart && enrollStart < today) {
+        toast.error(cc.toastAdmissionStartPast || "Admission start date cannot be in the past!")
+        return
+      }
+      if (enrollEnd && enrollEnd < today) {
+        toast.error(cc.toastAdmissionEndPast || "Admission end date cannot be in the past!")
+        return
+      }
+      if (start && start < today) {
+        toast.error(cc.toastStartPast || "Start date cannot be in the past!")
+        return
+      }
+    }
+
+    if (enrollStart && enrollEnd && enrollEnd <= enrollStart) {
+      toast.error(cc.toastAdmissionEndLater || "Enrollment end date must be later than enrollment start date!")
+      return
+    }
+
+    if (enrollEnd && start && start < enrollEnd) {
+      toast.error(cc.toastStartLater || "Start date must be later than or equal to enrollment end date!")
+      return
+    }
+
+    const feeNum = parseFloat(fee) || 0
+    if (feeNum < minFee) {
+      toast.error(
+        (cc.minTuitionFeeNote || "Mức học phí tối thiểu cho cấu hình lớp học này là {{minFee}} VNĐ. Vui lòng điều chỉnh lại!")
+          .replace("{{minFee}}", formatCurrency(minFee))
+      )
+      return
+    }
+
     const checkedDaysList = Object.keys(checkedDays).filter(k => checkedDays[k])
     if (checkedDaysList.length === 0) {
       toast.error(cc.toastSelectSchedule || "Please select at least one teaching day!")
@@ -340,28 +409,6 @@ const CreateClassPage = () => {
     }))
 
     try {
-      /* Commented out due to non-existent API:
-      // Check schedule conflict first (BR15)
-      const scheduleToCheck = {
-        days: checkedDaysList.map(k => daysCodeMap[k]),
-        startTime: timeSlots[checkedDaysList[0]].start,
-        endTime: timeSlots[checkedDaysList[0]].end,
-      }
-
-      const conflictRes = await checkConflict(scheduleToCheck).unwrap()
-      if (conflictRes.hasConflict) {
-        const conflict = conflictRes.conflicts[0]
-        toast.error(
-          (cc.toastScheduleConflict || "Schedule conflict with class {{class}} ({{start}} - {{end}})!")
-            .replace("{{class}}", conflict.className)
-            .replace("{{start}}", conflict.startTime)
-            .replace("{{end}}", conflict.endTime)
-        )
-        return
-      }
-      */
-
-      // Check verification status (BR18)
       if (!FALLBACK_TEACHER_PROFILE.isVerified) {
         toast.error(cc.toastVerifyProfile || "Please verify your profile identity to complete the transaction!")
         return
@@ -384,26 +431,19 @@ const CreateClassPage = () => {
       }
 
       if (isEditMode) {
-        // Edit mode still uses PUT /teacher/classes/{id}
         const updatePayload = {
           ...payload,
           thumbnailUrl: thumbnailFile || thumbnailPreview || "",
           commissionPercent: feeDetails.commissionRate,
         }
         await updateClass({ id, data: updatePayload }).unwrap()
-        toast.success(language === "vi" ? "Cập nhật lớp học thành công!" : "Class updated successfully!")
+        toast.success(cc.toastUpdateSuccess || "Class updated successfully!")
         navigate("/workspace/courses/all-classes")
       } else {
-        // Create mode now goes through PayOS payment checkout
         const result = await createClass(payload).unwrap()
 
         if (result.checkoutUrl) {
-          // Paid flow (capacity > 6): redirect to PayOS
-          toast.success(
-            language === "vi"
-              ? "Đang chuyển đến trang thanh toán..."
-              : "Redirecting to payment..."
-          )
+          toast.success(cc.toastRedirectPayment || "Redirecting to payment...")
           window.location.href = result.checkoutUrl
         } else if (result.classId) {
           // Free flow (capacity ≤ 6): class created immediately
@@ -417,17 +457,17 @@ const CreateClassPage = () => {
       }
     } catch (err) {
       console.error("Create/update class error details:", err)
-      toast.error(err.data?.message || (isEditMode ? (language === "vi" ? "Lỗi cập nhật lớp học!" : "Failed to update class!") : (language === "vi" ? "Lỗi tạo lớp học!" : "Failed to create class!")))
+      toast.error(err.data?.message || (isEditMode ? (cc.toastUpdateFail || "Failed to update class!") : (cc.toastCreateFail || "Failed to create class!")))
     }
   }
 
   const handleDeleteClass = async () => {
     try {
       await deleteClass(id).unwrap()
-      toast.success(language === "vi" ? "Xóa lớp học thành công!" : "Class deleted successfully!")
+      toast.success(cc.toastDeleteSuccess || "Class deleted successfully!")
       navigate("/workspace/courses/all-classes")
     } catch (err) {
-      toast.error(err.data?.message || (language === "vi" ? "Lỗi xóa lớp học!" : "Failed to delete class!"))
+      toast.error(err.data?.message || (cc.toastDeleteFail || "Failed to delete class!"))
     } finally {
       setShowDeleteModal(false)
     }
@@ -442,15 +482,15 @@ const CreateClassPage = () => {
   }
 
   const pageTitle = isEditMode
-    ? (language === "vi" ? "Chỉnh sửa lớp học" : "Edit Class")
+    ? (cc.editClass || "Edit Class")
     : isRecoverMode
-      ? (language === "vi" ? "Mở lại lớp học (Khôi phục)" : "Reopen Class (Recover)")
+      ? (cc.reopenClass || "Reopen Class (Recover)")
       : (cc.createClass || "Create Class")
 
   const sectionTitle = isEditMode
-    ? (language === "vi" ? "Thông tin lớp học" : "Class Information")
+    ? (cc.classInformation || "Class Information")
     : isRecoverMode
-      ? (language === "vi" ? "Khôi phục thông tin lớp" : "Recover Class Information")
+      ? (cc.recoverClassInfo || "Recover Class Information")
       : (c.courseInfoTitle || "Thông tin khóa học")
 
   return (
@@ -567,23 +607,29 @@ const CreateClassPage = () => {
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.admissionPeriod} <span className="text-[#990011]">*</span></label>
                 <div className="flex items-center gap-1.5">
                   <div className="relative flex-1">
-                    <input
-                      type="date"
-                      value={admissionStart}
-                      onChange={(e) => setAdmissionStart(e.target.value)}
-                      className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-855 transition-all cursor-pointer"
+                    <ReactDatePicker
+                      selected={parseLocalDateString(admissionStart)}
+                      onChange={(date) => setAdmissionStart(date ? toLocalDateString(date) : "")}
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="DD/MM/YYYY"
+                      minDate={isEditMode ? null : new Date()}
+                      wrapperClassName="w-full"
+                      className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all cursor-pointer"
                     />
-                    <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
                   </div>
                   <span className="text-gray-300 text-xs font-bold">-</span>
                   <div className="relative flex-1">
-                    <input
-                      type="date"
-                      value={admissionEnd}
-                      onChange={(e) => setAdmissionEnd(e.target.value)}
-                      className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-855 transition-all cursor-pointer"
+                    <ReactDatePicker
+                      selected={parseLocalDateString(admissionEnd)}
+                      onChange={(date) => setAdmissionEnd(date ? toLocalDateString(date) : "")}
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="DD/MM/YYYY"
+                      minDate={isEditMode ? null : new Date()}
+                      wrapperClassName="w-full"
+                      className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all cursor-pointer"
                     />
-                    <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
                   </div>
                 </div>
               </div>
@@ -591,13 +637,16 @@ const CreateClassPage = () => {
               <div className="flex flex-col gap-2 md:col-span-1">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.startDate} <span className="text-[#990011]">*</span></label>
                 <div className="relative">
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                  <ReactDatePicker
+                    selected={parseLocalDateString(startDate)}
+                    onChange={(date) => setStartDate(date ? toLocalDateString(date) : "")}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="DD/MM/YYYY"
+                    minDate={isEditMode ? null : new Date()}
+                    wrapperClassName="w-full"
                     className="w-full h-11 px-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all cursor-pointer"
                   />
-                  <Clock size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <Clock size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
                 </div>
               </div>
             </div>
@@ -753,9 +802,8 @@ const CreateClassPage = () => {
               </label>
               <div
                 onClick={isRecoverMode ? undefined : handleThumbnailClick}
-                className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${
-                  isRecoverMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200"
-                }`}
+                className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${isRecoverMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200"
+                  }`}
               >
                 <input
                   ref={fileInputRef}
@@ -767,9 +815,8 @@ const CreateClassPage = () => {
                 {thumbnailPreview ? (
                   <div className="relative w-full max-h-[190px] flex justify-center overflow-hidden rounded-xl">
                     <img src={thumbnailPreview} alt="Class thumbnail preview" className="object-contain max-h-[180px]" />
-                    <div className={`absolute inset-0 bg-black/40 opacity-0 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl ${
-                      isRecoverMode ? "" : "group-hover:opacity-100"
-                    }`}>
+                    <div className={`absolute inset-0 bg-black/40 opacity-0 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl ${isRecoverMode ? "" : "group-hover:opacity-100"
+                      }`}>
                       {cc.changeThumbnail || "Change image"}
                     </div>
                   </div>
@@ -836,77 +883,17 @@ const CreateClassPage = () => {
               <span>{labelCommissionNote}</span>
             </div>
 
-            {/* Commented out due to non-existent API:
-            Invite returning students
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{labelInvite}</label>
-
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={labelSearchPlaceholder}
-                  className="w-full h-11 pl-10 pr-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400"
-                />
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-
-                {filteredStudentsResults.length > 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-150 rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50">
-                    {filteredStudentsResults.map((student) => (
-                      <div
-                        key={student.id}
-                        onClick={() => handleInviteStudent(student)}
-                        className="p-3 hover:bg-gray-50 flex items-center gap-3 cursor-pointer transition-colors"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 overflow-hidden flex items-center justify-center text-xs flex-shrink-0">
-                          {student.avatar ? (
-                            <img className="w-full h-full object-cover" src={student.avatar} alt={student.fullName} />
-                          ) : (
-                            <span>{student.fullName[0]}</span>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-800">{student.fullName}</span>
-                          <span className="text-[10px] text-gray-400 font-semibold">{student.phone || student.email}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+            {/* Minimum Tuition Fee warning message */}
+            {feeNum < minFee && (
+              <div className="flex gap-2 text-[10px] text-[#e11d48] font-bold items-start bg-rose-50/40 p-2.5 rounded-xl border border-[#fda4af]">
+                <Info size={13} className="text-[#e11d48] flex-shrink-0 mt-0.5" />
+                <span>
+                  {(cc.minTuitionFeeNote || "Mức học phí tối thiểu cho cấu hình lớp học này là {{minFee}} VNĐ. Vui lòng điều chỉnh lại!")
+                    .replace("{{minFee}}", formatCurrency(minFee))}
+                </span>
               </div>
-
-              <div className="flex flex-wrap gap-4 mt-2">
-                {invitedStudents.map((student) => (
-                  <div key={student.id} className="flex flex-col items-center gap-1">
-                    <div className="relative">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 border border-white text-gray-700 font-black text-sm flex items-center justify-center shadow-sm overflow-hidden">
-                        {student.avatar ? (
-                          <img className="w-full h-full object-cover" src={student.avatar} alt={student.fullName} />
-                        ) : (
-                          <span>{student.fullName ? student.fullName[0] : "S"}</span>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveStudent(student.id)}
-                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#990011] text-white flex items-center justify-center hover:bg-[#80000e] transition-colors shadow-xs"
-                      >
-                        <X size={10} className="stroke-[2.5]" />
-                      </button>
-                    </div>
-                    <span className="text-[9px] text-gray-500 font-bold max-w-[64px] truncate text-center">
-                      {student.fullName}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-            */}
-
+            )}
           </div>
-
         </div>
 
         {/* BOTTOM ACTION BAR */}
@@ -936,7 +923,7 @@ const CreateClassPage = () => {
                 className="h-11 px-6 bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-1.5 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Trash2 size={13} />
-                <span>{language === "vi" ? "Xóa lớp học" : "Delete Class"}</span>
+                <span>{cc.deleteClass || "Delete Class"}</span>
               </button>
             )}
             <button
@@ -951,7 +938,7 @@ const CreateClassPage = () => {
               disabled={isCreating || isUpdating}
               className="flex-1 sm:flex-initial h-11 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isEditMode ? (language === "vi" ? "Lưu thay đổi" : "Save Changes") : (cc.confirmPay || "Confirm & Pay")}
+              {isEditMode ? (cc.saveChanges || "Save Changes") : (cc.confirmPay || "Confirm & Pay")}
             </button>
           </div>
         </div>
@@ -962,9 +949,9 @@ const CreateClassPage = () => {
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteClass}
-        title={language === "vi" ? "Xóa lớp học" : "Delete Class"}
-        message={language === "vi" ? "Bạn có chắc chắn muốn xóa lớp học này? Hành động này không thể hoàn tác." : "Are you sure you want to delete this class? This action cannot be undone."}
-        confirmText={language === "vi" ? "Xóa" : "Delete"}
+        title={cc.deleteClass || "Delete Class"}
+        message={cc.confirmDeleteClassMsg || "Are you sure you want to delete this class? This action cannot be undone."}
+        confirmText={cc.deleteConfirmButton || "Delete"}
         cancelText={cc.cancel || "Cancel"}
       />
 

@@ -20,7 +20,8 @@ import {
 import { formatUTCDate } from "../utils/courseUtils"
 
 const SchedulePage = () => {
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
+  const c = t.courses || {}
   const navigate = useNavigate()
 
   // Local State
@@ -37,18 +38,12 @@ const SchedulePage = () => {
     return `${y}-${m}-${d}`
   }
 
-  // Helper arrays for calendar
-  const MONTHS_VI = [
-    "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
-  ]
-  const MONTHS_EN = [
+  // Helper arrays for calendar from localization
+  const MONTHS = c.months || [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ]
-  const DAYS_OF_WEEK = language === "vi"
-    ? ["HAI", "BA", "TƯ", "NĂM", "SÁU", "BẢY", "CHỦ NHẬT"]
-    : ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+  const DAYS_OF_WEEK = c.weekdays || ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
   // Calendar Calculations
   const year = currentMonth.getFullYear()
@@ -159,25 +154,25 @@ const SchedulePage = () => {
       {/* ─── Breadcrumbs ─── */}
       <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
         <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-          {language === "vi" ? "Trang chủ" : "Home"}
+          {c.home || "Home"}
         </span>
         <span>/</span>
         <span className="text-[#990011] font-semibold">
-          {language === "vi" ? "Lịch giảng dạy" : "Teaching Schedule"}
+          {c.teachingSchedule || "Teaching Schedule"}
         </span>
       </div>
 
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight text-gray-950">
-          {language === "vi" ? "Lịch giảng dạy" : "Teaching Schedule"}
+          {c.teachingSchedule || "Teaching Schedule"}
         </h1>
         <button
           onClick={() => navigate("/workspace/courses/create-class")}
           className="flex items-center justify-center gap-2 bg-[#990011] hover:bg-[#80000e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 shadow-sm hover:scale-[1.01] active:scale-95"
         >
           <Plus size={16} />
-          <span>{language === "vi" ? "Tạo sự kiện" : "Create Event"}</span>
+          <span>{c.createEvent || "Create Event"}</span>
         </button>
       </div>
 
@@ -187,7 +182,7 @@ const SchedulePage = () => {
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-4 bg-[#990011] rounded-full" />
             <h2 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2">
-              <span>{language === "vi" ? "Lịch sắp tới" : "Upcoming Schedule"}</span>
+              <span>{c.upcomingSchedule || "Upcoming Schedule"}</span>
               <span className="bg-[#F59E0B] text-white text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center">
                 {String(monthClassesCount)}
               </span>
@@ -212,10 +207,7 @@ const SchedulePage = () => {
                     <ChevronLeft size={18} />
                   </button>
                   <span className="text-sm font-extrabold text-gray-800">
-                    {language === "vi"
-                      ? `${MONTHS_VI[month]} ${year}`
-                      : `${MONTHS_EN[month]} ${year}`
-                    }
+                    {`${MONTHS[month]} ${year}`}
                   </span>
                   <button
                     onClick={handleNextMonth}
@@ -287,11 +279,11 @@ const SchedulePage = () => {
               <div className="flex items-center gap-6 pt-4 border-t border-gray-50 text-[10px] font-extrabold text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full border border-[#990011] flex items-center justify-center text-[9px] text-[#990011] font-bold">18</div>
-                  <span>{language === "vi" ? "Ngày hôm nay" : "Today"}</span>
+                  <span>{c.today || "Today"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-[#990011] flex items-center justify-center text-[9px] text-white font-bold">20</div>
-                  <span>{language === "vi" ? "Ngày được chọn" : "Selected Date"}</span>
+                  <span>{c.selectedDate || "Selected Date"}</span>
                 </div>
               </div>
 
@@ -301,7 +293,7 @@ const SchedulePage = () => {
           {/* Right Column: Classes Scheduled (Span 7 of 12) */}
           <div className="lg:col-span-7 flex flex-col gap-5">
             <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2 pb-1 border-b border-gray-100">
-              <span>{language === "vi" ? "Lịch học của tôi" : "My Schedule"}</span>
+              <span>{c.mySchedule || "My Schedule"}</span>
             </h3>
 
             {isLoading ? (
@@ -311,7 +303,7 @@ const SchedulePage = () => {
             ) : selectedDateClasses.length > 0 ? (
               <div className="flex flex-col gap-4">
                 <span className="text-[11px] font-black text-gray-400 uppercase tracking-wider">
-                  {language === "vi" ? "Ngày" : "Date"} {selectedDate.toLocaleDateString(language === "vi" ? "vi-VN" : "en-US", { day: "numeric", month: "numeric" })}
+                  {c.date || "Date"} {selectedDate.toLocaleDateString(language || "en-US", { day: "numeric", month: "numeric" })}
                 </span>
 
                 {selectedDateClasses.map((cls) => {
@@ -371,7 +363,9 @@ const SchedulePage = () => {
                           <Calendar size={13} className="text-gray-400" />
                           <span>
                             {cls.sessionNumber
-                              ? (language === "vi" ? `Buổi ${cls.sessionNumber} / ${cls.totalSessions}` : `Session ${cls.sessionNumber} of ${cls.totalSessions}`)
+                              ? (c.sessionOf
+                                ? c.sessionOf.replace("{{session}}", cls.sessionNumber).replace("{{total}}", cls.totalSessions)
+                                : `Session ${cls.sessionNumber} of ${cls.totalSessions}`)
                               : formatUTCDate(cls.startDate, "en-GB", { day: "2-digit", month: "short", year: "numeric" })
                             }
                           </span>
@@ -398,7 +392,7 @@ const SchedulePage = () => {
                           }}
                           className="bg-[#990011] hover:bg-[#80000e] text-white text-[11px] font-bold px-4 py-1.5 rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
                         >
-                          <span>{language === "vi" ? "Vào phòng" : "View Class"}</span>
+                          <span>{c.viewClass || "View Class"}</span>
                           <ArrowRight size={12} />
                         </button>
                       </div>
@@ -409,7 +403,7 @@ const SchedulePage = () => {
               </div>
             ) : (
               <div className="py-12 text-center text-xs font-semibold text-gray-400 border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
-                {language === "vi" ? "Không có lịch học cho ngày này" : "No classes scheduled for this date"}
+                {c.noClassesOnDate || "No classes scheduled for this date"}
               </div>
             )}
 

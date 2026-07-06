@@ -3,13 +3,18 @@ import { useGetClassGradingQuery, useGradeAssignmentMutation } from "@/store/api
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
 import { MOCK_GRADING } from "./classMockData"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Toggle switch: set to false to use real API endpoint after backend is ready
 const USE_MOCK = true
 
-const ClassGradingTab = ({ id, isStudent, language }) => {
+const ClassGradingTab = ({ id, isStudent }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const cd = c.classDetail || {}
+
   const notifyInDevelopment = () => {
-    toast.success("Tính năng đang phát triển")
+    toast.success(c.devMessage || "Feature in development")
   }
 
   const { data: gradingResponse, isLoading, error } = useGetClassGradingQuery(id, { skip: USE_MOCK })
@@ -37,8 +42,8 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
     }
 
     const gradeInput = prompt(
-      language === "vi"
-        ? `Nhập điểm cho ${studentName} (0 - 10):`
+      cd.promptEnterGrade
+        ? cd.promptEnterGrade.replace("{{student}}", studentName)
         : `Enter grade for ${studentName} (0 - 10):`,
       "10"
     )
@@ -46,16 +51,14 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
     const parsedGrade = parseFloat(gradeInput)
     if (isNaN(parsedGrade) || parsedGrade < 0 || parsedGrade > 10) {
       toast.error(
-        language === "vi"
-          ? "Điểm số không hợp lệ. Vui lòng nhập từ 0 đến 10"
-          : "Invalid grade. Please enter between 0 and 10"
+        cd.toastInvalidGrade || "Invalid grade. Please enter between 0 and 10"
       )
       return
     }
 
     try {
       await gradeAssignment({ classId: id, assignmentId: itemId, grade: parsedGrade }).unwrap()
-      toast.success(language === "vi" ? "Đã chấm điểm thành công!" : "Graded successfully!")
+      toast.success(cd.toastGradedSuccess || "Graded successfully!")
     } catch (err) {
       toast.error(err.data?.message || err.message || "Failed to submit grade")
     }
@@ -80,8 +83,8 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
           <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
           <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
             {isStudent
-              ? (language === "vi" ? "Kết quả học tập & Bảng điểm" : "My Grades & Submissions")
-              : (language === "vi" ? "Quản lý & Chấm điểm bài tập" : "Assignment Grading & Submissions")}
+              ? (cd.myGradesTitle || "My Grades & Submissions")
+              : (cd.gradingTitle || "Assignment Grading & Submissions")}
           </h3>
         </div>
       </div>
@@ -89,7 +92,7 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
       <div className="overflow-x-auto">
         {gradingList.length === 0 ? (
           <div className="text-center py-8 text-xs text-gray-400 font-bold">
-            {language === "vi" ? "Chưa có bài tập hay bài nộp nào." : "No assignments or submissions yet."}
+            {cd.noSubmissions || "No assignments or submissions yet."}
           </div>
         ) : (
           <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
@@ -112,17 +115,17 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
                   <td className="p-3">
                     {item.status === "Ungraded" && (
                       <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-100">
-                        {isStudent ? (language === "vi" ? "Chưa nộp" : "Not Submitted") : (language === "vi" ? "Cần chấm điểm" : "Needs Grading")}
+                        {isStudent ? (cd.statusNotSubmitted || "Not Submitted") : (cd.statusNeedsGrading || "Needs Grading")}
                       </span>
                     )}
                     {item.status === "Resubmitted" && (
                       <span className="bg-orange-50 text-orange-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-100">
-                        {isStudent ? (language === "vi" ? "Chờ chấm điểm" : "Pending Grading") : (language === "vi" ? "Đã nộp lại" : "Resubmitted")}
+                        {isStudent ? (cd.statusPendingGrading || "Pending Grading") : (cd.statusResubmitted || "Resubmitted")}
                       </span>
                     )}
                     {item.status === "Graded" && (
                       <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-100">
-                        {language === "vi" ? "Đã chấm điểm" : "Graded"}
+                        {cd.statusGraded || "Graded"}
                       </span>
                     )}
                   </td>
@@ -136,21 +139,21 @@ const ClassGradingTab = ({ id, isStudent, language }) => {
                           onClick={notifyInDevelopment}
                           className="h-7 px-3 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
                         >
-                          {language === "vi" ? "Nộp bài" : "Submit"}
+                          {cd.submitButton || "Submit"}
                         </button>
                       ) : item.status === "Resubmitted" ? (
                         <button
                           onClick={notifyInDevelopment}
                           className="h-7 px-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold text-[10px] rounded-lg transition-all active:scale-95 shadow-xs"
                         >
-                          {language === "vi" ? "Nộp lại" : "Resubmit"}
+                          {cd.resubmitButton || "Resubmit"}
                         </button>
                       ) : (
                         <button
                           onClick={notifyInDevelopment}
                           className="h-7 px-3 bg-gray-100 hover:bg-gray-150 text-gray-600 font-bold text-[10px] rounded-lg transition-all"
                         >
-                          {language === "vi" ? "Xem nhận xét" : "View feedback"}
+                          {cd.viewFeedbackButton || "View feedback"}
                         </button>
                       )
                     ) : (

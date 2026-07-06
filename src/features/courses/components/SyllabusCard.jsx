@@ -1,10 +1,14 @@
 import React from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
-const SyllabusCard = ({ rawCourse, language }) => {
+const SyllabusCard = ({ rawCourse }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-4">
       <h3 className="text-lg font-black text-gray-950 tracking-tight">
-        {language === "vi" ? "Nội dung học tập" : "What You'll Learn"}
+        {c.student?.whatYouLearn || "What You'll Learn"}
       </h3>
       <div className="flex flex-col gap-3.5">
         {(rawCourse.syllabus || [

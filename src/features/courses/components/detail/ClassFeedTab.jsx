@@ -4,13 +4,18 @@ import { useGetClassFeedQuery, useCreateClassPostMutation } from "@/store/api/co
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
 import { MOCK_FEED } from "./classMockData"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Toggle switch: set to false to use real API endpoint after backend is ready
 const USE_MOCK = true
 
-const ClassFeedTab = ({ id, isStudent, language, cd }) => {
+const ClassFeedTab = ({ id, isStudent }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const cd = c.classDetail || {}
+
   const notifyInDevelopment = () => {
-    toast.success("Tính năng đang phát triển")
+    toast.success(c.devMessage || "Feature in development")
   }
 
   const { data: feedResponse, isLoading, error } = useGetClassFeedQuery(id, { skip: USE_MOCK })
@@ -81,13 +86,13 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
           <form onSubmit={handleCreatePost} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
             <textarea
               rows={3}
-              placeholder={language === "vi" ? "Chia sẻ tin tức, tài liệu học tập với lớp..." : "Share announcements, links, study resources..."}
+              placeholder={cd.feedFormPlaceholder || "Share announcements, links, study resources..."}
               value={newPostText}
               onChange={(e) => setNewPostText(e.target.value)}
               className="w-full p-3 bg-gray-50 hover:bg-gray-50 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
             />
             <div className="flex justify-between items-center border-t border-gray-50 pt-2">
-              <span className="text-[10px] text-gray-400 font-bold">{language === "vi" ? "Đăng với tư cách giảng viên" : "Posting as Instructor"}</span>
+              <span className="text-[10px] text-gray-400 font-bold">{cd.postingAsInstructor || "Posting as Instructor"}</span>
               <button
                 type="submit"
                 disabled={isCreatingPost}
@@ -98,7 +103,7 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
                 ) : (
                   <>
                     <Send size={12} />
-                    <span>{language === "vi" ? "Đăng bài" : "Publish"}</span>
+                    <span>{cd.publishButton || "Publish"}</span>
                   </>
                 )}
               </button>
@@ -110,7 +115,7 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
         <div className="flex flex-col gap-3">
           {feedPosts.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-xs text-gray-400 font-bold">
-              {language === "vi" ? "Chưa có thông báo nào." : "No announcements posted yet."}
+              {cd.noAnnouncements || "No announcements posted yet."}
             </div>
           ) : (
             feedPosts.map((item) => {
@@ -171,7 +176,7 @@ const ClassFeedTab = ({ id, isStudent, language, cd }) => {
       {/* Side Announcements widgets */}
       <div className="flex flex-col gap-4 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm h-fit">
         <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest border-b border-gray-55 pb-1.5">
-          {language === "vi" ? "Thông báo lớp học" : "Class Announcements"}
+          {c.myCourses?.classAnnouncements || "Class Announcements"}
         </h4>
         <div className="flex flex-col gap-3 text-xs font-semibold">
           <div className="p-2.5 bg-yellow-50/40 border border-yellow-100 rounded-xl text-yellow-800">

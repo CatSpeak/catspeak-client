@@ -4,6 +4,7 @@ import { MoreVertical, Layers, Users, Trash2, PenSquare } from "lucide-react"
 import StatusBadge from "./StatusBadge"
 import ProgressBar from "./ProgressBar"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import CourseThumbnail from "./CourseThumbnail"
 
 const CourseTable = ({ courses, t, onDelete }) => {
   const c = t.courses || {}
@@ -34,13 +35,12 @@ const CourseTable = ({ courses, t, onDelete }) => {
 
               {/* Cover Image cell */}
               <td className="p-4 border-r border-gray-200">
-                <div className={`w-32 h-20 rounded-xl flex items-center justify-center border border-gray-100 flex-shrink-0 overflow-hidden ${!item.thumbnailUrl ? `bg-gradient-to-br ${item.gradient}` : ""}`}>
-                  {item.thumbnailUrl ? (
-                    <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <item.icon size={28} className="stroke-[1.5]" />
-                  )}
-                </div>
+                <CourseThumbnail
+                  item={item}
+                  title={item.title}
+                  iconSize={28}
+                  className="w-32 h-20 rounded-xl border border-gray-100"
+                />
               </td>
 
               {/* Course Info cell */}

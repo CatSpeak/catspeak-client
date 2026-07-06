@@ -48,15 +48,13 @@ const StudentClassDetailPage = () => {
       const result = await enrollInCourse({ classId: id }).unwrap()
       if (result.checkoutUrl) {
         toast.success(
-          language === "vi"
-            ? "Đang chuyển đến trang thanh toán..."
-            : "Redirecting to payment..."
+          cd.toastRedirectingToPayment || "Redirecting to payment..."
         )
         window.location.href = result.checkoutUrl
       } else {
         toast.success(
-          language === "vi"
-            ? `Đăng ký lớp học ${classData.title || ""} thành công!`
+          cd.toastEnrollSuccess
+            ? cd.toastEnrollSuccess.replace("{{title}}", classData.title || "")
             : `Successfully enrolled in ${classData.title || ""}!`
         )
       }
@@ -154,18 +152,18 @@ const StudentClassDetailPage = () => {
           <span>/</span>
           <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{language === "vi" ? "Toàn bộ khóa học" : "All Courses"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</span>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classData.courseId || ""}`)}>{language === "vi" ? "Chi tiết khóa học" : "Course Details"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classData.courseId || ""}`)}>{c.student?.courseDetails || "Course Details"}</span>
           <span>/</span>
-          <span className="text-[#990011] font-semibold">{language === "vi" ? "Chi tiết lớp học" : "Class Details"}</span>
+          <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
         </div>
       </div>
 
       {/* ─── Page Heading & Header Actions ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-          {language === "vi" ? "Chi tiết lớp học" : "Class Details"}
+          {c.student?.classDetails || "Class Details"}
         </h1>
 
         <div className="flex items-center gap-3">
@@ -175,7 +173,7 @@ const StudentClassDetailPage = () => {
               disabled={isEnrolling}
               className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
             >
-              <span>{language === "vi" ? "Đăng ký & Thanh toán học phí" : "Enroll & Pay Tuition"}</span>
+              <span>{c.student?.enrollAndPay || "Enroll & Pay Tuition"}</span>
             </button>
           ) : (
             <button
@@ -183,7 +181,7 @@ const StudentClassDetailPage = () => {
               className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
             >
               <MessageSquare size={14} className="fill-white" />
-              <span>{language === "vi" ? "Trò chuyện" : "Chat"}</span>
+              <span>{c.student?.chat || "Chat"}</span>
             </button>
           )}
         </div>
@@ -198,16 +196,14 @@ const StudentClassDetailPage = () => {
             : "hover:text-gray-600"
             }`}
         >
-          {language === "vi" ? "Tổng quan" : "Overview"}
+          {c.student?.overview || "Overview"}
         </button>
 
         <button
           onClick={() => {
             if (!isEnrolled) {
               toast.error(
-                language === "vi"
-                  ? "Vui lòng đăng ký và thanh toán học phí để xem bạn học!"
-                  : "Please enroll and pay tuition to view classmates!"
+                c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!"
               )
               return
             }
@@ -219,16 +215,14 @@ const StudentClassDetailPage = () => {
             }`}
         >
           {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{language === "vi" ? "Bạn học" : "Classmates"}</span>
+          <span>{c.student?.classmates || "Classmates"}</span>
         </button>
 
         <button
           onClick={() => {
             if (!isEnrolled) {
               toast.error(
-                language === "vi"
-                  ? "Vui lòng đăng ký và thanh toán học phí để xem bảng tin!"
-                  : "Please enroll and pay tuition to view feed!"
+                c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view feed!"
               )
               return
             }
@@ -240,16 +234,14 @@ const StudentClassDetailPage = () => {
             }`}
         >
           {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{language === "vi" ? "Bảng tin" : "Feed"}</span>
+          <span>{c.student?.feed || "Feed"}</span>
         </button>
 
         <button
           onClick={() => {
             if (!isEnrolled) {
               toast.error(
-                language === "vi"
-                  ? "Vui lòng đăng ký và thanh toán học phí để xem điểm số!"
-                  : "Please enroll and pay tuition to view grades!"
+                c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!"
               )
               return
             }
@@ -261,16 +253,14 @@ const StudentClassDetailPage = () => {
             }`}
         >
           {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{language === "vi" ? "Điểm số của tôi" : "My Grades"}</span>
+          <span>{c.student?.myGrades || "My Grades"}</span>
         </button>
 
         <button
           onClick={() => {
             if (!isEnrolled) {
               toast.error(
-                language === "vi"
-                  ? "Vui lòng đăng ký và thanh toán học phí để xem tài liệu!"
-                  : "Please enroll and pay tuition to view materials!"
+                c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!"
               )
               return
             }
@@ -282,7 +272,7 @@ const StudentClassDetailPage = () => {
             }`}
         >
           {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{cd.materials || (language === "vi" ? "Tài liệu học tập" : "Materials")}</span>
+          <span>{c.student?.materials || "Materials"}</span>
         </button>
       </div>
 
@@ -294,9 +284,9 @@ const StudentClassDetailPage = () => {
           language={language}
           formatCurrency={formatCurrency}
           getWeeklyScheduleText={getWeeklyScheduleText}
-          upcomingSessionLabel={language === "vi" ? "Buổi học tiếp theo" : "Upcoming Session"}
-          joinRoomLabel={language === "vi" ? "Vào phòng" : "Join Room"}
-          noUpcomingLabel={language === "vi" ? "Chưa có buổi học nào lên lịch" : "No upcoming sessions"}
+          upcomingSessionLabel={c.student?.upcomingSession || "Upcoming Session"}
+          joinRoomLabel={c.joinRoom || "Join Room"}
+          noUpcomingLabel={c.student?.noUpcomingSessions || "No upcoming sessions"}
           onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
         />
       )}
@@ -343,14 +333,14 @@ const StudentClassDetailPage = () => {
         open={showEnrollConfirm}
         onClose={() => setShowEnrollConfirm(false)}
         onConfirm={handleEnroll}
-        title={language === "vi" ? "Xác nhận đăng ký lớp học" : "Confirm Class Enrollment"}
+        title={c.student?.confirmEnrollment || "Confirm Class Enrollment"}
         message={
-          language === "vi"
-            ? `Bạn có chắc chắn muốn đăng ký lớp học ${classData.title || ""}? Bạn sẽ được chuyển hướng sang trang thanh toán học phí.`
+          c.student?.enrollmentConfirmRedirectMsg
+            ? c.student.enrollmentConfirmRedirectMsg.replace("{{className}}", classData.title || "")
             : `Are you sure you want to enroll in ${classData.title || ""}? You will be redirected to the tuition payment gateway.`
         }
-        confirmText={language === "vi" ? "Thanh toán" : "Pay & Enroll"}
-        cancelText={language === "vi" ? "Hủy" : "Cancel"}
+        confirmText={c.student?.payAndEnroll || "Pay & Enroll"}
+        cancelText={c.student?.cancel || "Cancel"}
       />
     </div>
   )

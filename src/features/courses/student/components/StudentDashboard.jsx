@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, LayoutGrid, List, ChevronDown, BookOpen, Calendar, Clock, ArrowRight, Award, Flame, Sparkles, Compass, Video, Play, Globe, X, Info } from "lucide-react"
+import { BookOpen, Calendar, Clock, ArrowRight, Award, Flame, Sparkles, Compass, Play, Globe } from "lucide-react"
 import {
   useGetStudentEnrolledCoursesQuery,
   useGetStudentAvailableCoursesQuery,
@@ -9,6 +9,11 @@ import {
 import StudentCourseCard from "./StudentCourseCard"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useGetProfileQuery } from "@/features/auth"
+import CourseSearchInput from "../../components/CourseSearchInput"
+import CourseSelectFilter from "../../components/CourseSelectFilter"
+import CourseTabs from "../../components/CourseTabs"
+import ViewModeToggle from "../../components/ViewModeToggle"
+import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTransforms"
 
 const StudentDashboard = ({ t }) => {
   const sc = t?.courses?.student || {}
@@ -45,50 +50,36 @@ const StudentDashboard = ({ t }) => {
     return []
   }, [activeTab, enrolledCourses, availableCourses])
 
-  const filteredCourses = useMemo(() => {
-    return currentCourses.filter((course) => {
-      const title = course.title || ""
-      const description = course.description || ""
-      const courseLanguage = course.language || ""
+  const filters = useMemo(() => ({
+    searchQuery,
+    levelFilter,
+    langFilter,
+  }), [searchQuery, levelFilter, langFilter])
 
-      const matchesSearch =
-        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCourses = useMemo(() => (
+    filterStudentCourses(currentCourses, filters)
+  ), [currentCourses, filters])
 
-      const matchesLevel =
-        levelFilter === "all" || (course.levels && course.levels.includes(levelFilter))
-
-      const matchesLang =
-        langFilter === "all" || courseLanguage.toLowerCase() === langFilter.toLowerCase()
-
-      return matchesSearch && matchesLevel && matchesLang
-    })
-  }, [currentCourses, searchQuery, levelFilter, langFilter])
-
-  const filteredClasses = useMemo(() => {
-    const list = joinedClasses || []
-    return list.filter((cls) => {
-      const title = cls.title || ""
-      const courseName = cls.courseName || ""
-      const classLanguage = cls.language || ""
-
-      const matchesSearch =
-        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        courseName.toLowerCase().includes(searchQuery.toLowerCase())
-
-      const matchesLevel =
-        levelFilter === "all" || (cls.levels && cls.levels.includes(levelFilter))
-
-      const matchesLang =
-        langFilter === "all" || classLanguage.toLowerCase() === langFilter.toLowerCase()
-
-      return matchesSearch && matchesLevel && matchesLang
-    })
-  }, [joinedClasses, searchQuery, levelFilter, langFilter])
+  const filteredClasses = useMemo(() => (
+    filterStudentClasses(joinedClasses || [], filters)
+  ), [joinedClasses, filters])
 
   // Extract unique filter dropdown values from all data
   const levelsOptions = ["HSK3", "HSK4", "N5", "B2", "C1", "A1", "A2"]
   const languagesOptions = ["Chinese", "English", "Japanese", "Vietnamese"]
+  const languageFilterOptions = [
+    { value: "all", label: sc.allLanguages || "All Languages" },
+    ...languagesOptions.map((lang) => ({ value: lang, label: lang })),
+  ]
+  const levelFilterOptions = [
+    { value: "all", label: sc.allLevels || "All Levels" },
+    ...levelsOptions.map((level) => ({ value: level, label: level })),
+  ]
+  const studentTabs = [
+    { value: "enrolled", label: sc.enrolledCourses || "My Enrolled Courses", icon: BookOpen },
+    { value: "explore", label: sc.exploreCourses || "Explore Catalog", icon: Compass },
+    { value: "classes", label: sc.myClasses || "Joined Classes", icon: Calendar },
+  ]
 
   if (isLoading) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
@@ -240,114 +231,47 @@ const StudentDashboard = ({ t }) => {
           {/* ─── Navigation Tabs & Layout Toggles ─── */}
           <div className="flex flex-col gap-4 bg-white rounded-3xl p-5 border border-gray-150 shadow-xs">
             <div className="flex justify-between items-center border-b border-gray-100 pb-px overflow-x-auto whitespace-nowrap scrollbar-none gap-8">
-              <div className="flex gap-6 text-sm font-bold text-gray-400">
-                <button
-                  onClick={() => {
-                    setActiveTab("enrolled")
-                    setSearchQuery("")
-                  }}
-                  className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "enrolled"
-                    ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                    : "hover:text-gray-600 font-extrabold"
-                    }`}
-                >
-                  <BookOpen size={15} />
-                  <span>{sc.enrolledCourses || "My Enrolled Courses"}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("explore")
-                    setSearchQuery("")
-                  }}
-                  className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "explore"
-                    ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                    : "hover:text-gray-600 font-extrabold"
-                    }`}
-                >
-                  <Compass size={15} />
-                  <span>{sc.exploreCourses || "Explore Catalog"}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("classes")
-                    setSearchQuery("")
-                  }}
-                  className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "classes"
-                    ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-[#990011] font-black"
-                    : "hover:text-gray-600 font-extrabold"
-                    }`}
-                >
-                  <Calendar size={15} />
-                  <span>{sc.myClasses || "Joined Classes"}</span>
-                </button>
-              </div>
+              <CourseTabs
+                tabs={studentTabs}
+                activeTab={activeTab}
+                onChange={(tab) => {
+                  setActiveTab(tab)
+                  setSearchQuery("")
+                }}
+              />
 
               {/* Grid/List Layout toggle controls */}
               {activeTab !== "classes" && (
-                <div className="flex bg-gray-50 p-0.5 rounded-lg border border-gray-100 self-end sm:self-auto mb-2">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`p-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400 hover:text-gray-600"
-                      }`}
-                  >
-                    <LayoutGrid size={13} />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`p-1.5 rounded-md transition-all ${viewMode === "list" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400 hover:text-gray-600"
-                      }`}
-                  >
-                    <List size={13} />
-                  </button>
-                </div>
+                <ViewModeToggle
+                  value={viewMode}
+                  onChange={setViewMode}
+                  className="self-end sm:self-auto mb-2"
+                />
               )}
             </div>
 
             {/* Search & Selection Filters bar */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between">
               {/* Search Box */}
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  placeholder={sc.searchPlaceholder || "Search courses..."}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-4 pr-10 bg-white hover:bg-gray-50/50 focus:bg-white border border-gray-200 focus:border-gray-300 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 shadow-xs"
-                />
-                <Search size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <CourseSearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder={sc.searchPlaceholder || "Search courses..."}
+                className="flex-1"
+              />
 
               {/* Selector Dropdowns */}
               <div className="flex gap-3 items-center">
-                {/* Language filter */}
-                <div className="relative shrink-0">
-                  <select
-                    value={langFilter}
-                    onChange={(e) => setLangFilter(e.target.value)}
-                    className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 outline-none appearance-none cursor-pointer hover:border-gray-300"
-                  >
-                    <option value="all">{sc.allLanguages || "All Languages"}</option>
-                    {languagesOptions.map((lang) => (
-                      <option key={lang} value={lang}>{lang}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-
-                {/* Level filter */}
-                <div className="relative shrink-0">
-                  <select
-                    value={levelFilter}
-                    onChange={(e) => setLevelFilter(e.target.value)}
-                    className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 outline-none appearance-none cursor-pointer hover:border-gray-300"
-                  >
-                    <option value="all">{sc.allLevels || "All Levels"}</option>
-                    {levelsOptions.map((lvl) => (
-                      <option key={lvl} value={lvl}>{lvl}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
+                <CourseSelectFilter
+                  value={langFilter}
+                  onChange={setLangFilter}
+                  options={languageFilterOptions}
+                />
+                <CourseSelectFilter
+                  value={levelFilter}
+                  onChange={setLevelFilter}
+                  options={levelFilterOptions}
+                />
               </div>
             </div>
           </div>
