@@ -1,0 +1,61 @@
+import React from "react";
+import { useGame } from "../../../context/GameContext";
+import { useLanguage } from "@/shared/context/LanguageContext";
+
+const PuzzleCenter = () => {
+  const { puzzle, gameLanguage } = useGame();
+  const { t } = useLanguage();
+
+  if (!puzzle) return null;
+
+  const hintContent =
+    gameLanguage === "en" ? (
+      puzzle.hint
+    ) : (
+      <div className="flex flex-col gap-2">
+        <div className="text-2xl font-medium text-slate-800">
+          {puzzle.hint}
+        </div>
+        <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
+      </div>
+    );
+
+  const underscores = puzzle.word_mask || Array.from({ length: puzzle.word_count || 1 })
+    .map(() => "-")
+    .join("");
+
+  return (
+    <div className="flex-1 bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
+      {/* Left: Image Container */}
+      <div className="w-full md:w-1/2 flex-1 p-6 md:p-10 flex items-center justify-center min-h-[35vh] md:min-h-0 bg-slate-50/50">
+        <div className="relative w-full max-w-[300px] md:max-w-[420px] aspect-square rounded-3xl overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-gray-100">
+          <img
+            src={puzzle.image_url}
+            alt="Puzzle"
+            className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+          />
+        </div>
+      </div>
+
+      {/* Right: Hint & Word Count */}
+      <div className="w-full md:w-1/2 flex-1 flex flex-col items-center justify-center p-6 md:p-10 text-center gap-6 md:gap-8 overflow-y-auto bg-red-50/50">
+        <div className="flex flex-col items-center gap-2 md:gap-4">
+          <div className="text-xs md:text-sm font-black tracking-[0.3em] text-cath-red-600 uppercase">
+            {t.rooms?.game?.crackIt?.hint || "Gợi ý"}
+          </div>
+          <div className="text-lg md:text-2xl font-semibold text-slate-800 leading-relaxed max-w-lg px-4 md:px-0">
+            {hintContent}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-2 md:gap-4">
+          <div className="text-3xl md:text-4xl font-black text-gray-400 tracking-[0.1em] mt-2">
+            {underscores}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PuzzleCenter;

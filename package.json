@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -29,6 +29,7 @@
     "nprogress": "^0.2.0",
     "pnpm": "^10.34.4",
     "react": "^19.2.0",
+    "react-confetti": "^6.4.0",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.0",
     "react-fast-marquee": "^1.6.5",

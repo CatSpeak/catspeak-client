@@ -437,4 +437,36 @@ export default {
     rejoin: "重新加入",
     returnHome: "返回主页",
   },
+  game: {
+    crackIt: {
+      title: "Crack It",
+      waitingStart: "准备开始...",
+      roundResult: "回合结果",
+      nextRoundIn: "下一回合马上开始...",
+      gameOver: "游戏结束！",
+      finalLeaderboard: "最终排行榜",
+      closeGame: "关闭游戏",
+      round: "回合",
+      hint: "提示",
+      answerLength: "字数",
+      youGotIt: "您猜对了！等待其他玩家...",
+      typeAnswer: "输入您的答案...",
+      gotItRight: "猜对了！",
+      leaderboard: "排行榜",
+      waitingPlayers: "等待玩家...",
+      playGame: "玩游戏 (Crack It)",
+      notEnoughPlayers: "至少需要2名玩家才能开始！",
+      you: "您",
+      playerX: "玩家 {0}",
+      exitGameTooltip: "退出游戏",
+      exitConfirmTitle: "确认退出",
+      exitConfirmDesc1: "您确定要退出此游戏吗？",
+      exitConfirmDesc2: "您将无法重新加入此回合！",
+      cancel: "取消",
+      confirmExit: "确认退出",
+      roundLeaderboard: "本回合排行榜",
+      forceStopNotEnoughPlayers: "玩家人数不足以继续。游戏已取消。",
+      forceStopGeneric: "游戏意外停止。"
+    }
+  }
 };
