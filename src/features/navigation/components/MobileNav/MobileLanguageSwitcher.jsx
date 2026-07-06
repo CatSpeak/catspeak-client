@@ -1,14 +1,14 @@
 import React from "react"
 import { Globe, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import { VietNam, China, UK } from "@/shared/assets/icons/flags"
 import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 import Dropdown from "@/shared/components/ui/Dropdown"
 
 const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
   { key: "zh", label: "中文", flag: China },
-  { key: "en", label: "English", flag: USA },
+  { key: "en", label: "English", flag: UK },
 ]
 
 const MobileLanguageSwitcher = () => {
