@@ -4,11 +4,11 @@ import { useSubtitles } from "@/features/video-call/hooks/useSubtitles"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
-import { VietNam, China, USA } from "@/shared/assets/icons/flags"
+import { VietNam, China, UK } from "@/shared/assets/icons/flags"
 
 const LANG_MAP = { English: "en", Chinese: "zh", Vietnamese: "vi" }
 const DISPLAY_NAMES = { en: "English", vi: "Tiếng Việt", zh: "中文" }
-const LANG_FLAGS = { en: USA, vi: VietNam, zh: China }
+const LANG_FLAGS = { en: UK, vi: VietNam, zh: China }
 
 /**
  * In-call subtitle overlay for non-AI rooms.
