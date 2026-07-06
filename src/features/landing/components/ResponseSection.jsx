@@ -93,37 +93,39 @@ const ResponseSection = () => {
 
         {/* Right: Sliding cards */}
         <div className="lg:col-span-2  ">
-          <div
-            ref={trackRef}
-            className="flex gap-6 transition-transform duration-450 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform"
-            style={{
-              transform: `translateX(calc(-${currentIndex} * (min(360px, 85vw) + 24px)))`,
-            }}
-          >
-            {reviews.map((review, i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-[min(360px,85vw)] bg-white border border-[#990011] rounded-xl p-7 flex flex-col gap-5 shadow-sm transition-all"
-              >
-                <p className="text-sm text-gray-600 leading-relaxed flex-1">
-                  "{review.text}"
-                </p>
-                <div className="flex items-start gap-3">
-                  <AvatarPlaceholder
-                    name={review.name}
-                    color={avatarColors[i % avatarColors.length]}
-                  />
-                  <div>
-                    <span className="text-sm font-semibold text-gray-800 block">
-                      {review.name}
-                      <span className="text-xs font-normal text-gray-500 block">
-                        {review.role}
+          <div className="overflow-visible lg:overflow-hidden">
+            <div
+              ref={trackRef}
+              className="flex gap-6 transition-transform duration-450 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform"
+              style={{
+                transform: `translateX(calc(-${currentIndex} * (min(360px, 85vw) + 24px)))`,
+              }}
+            >
+              {reviews.map((review, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 w-[min(360px,85vw)] bg-white border border-[#990011] rounded-xl p-7 flex flex-col gap-5 shadow-sm transition-all"
+                >
+                  <p className="text-sm text-gray-600 leading-relaxed flex-1">
+                    "{review.text}"
+                  </p>
+                  <div className="flex items-start gap-3">
+                    <AvatarPlaceholder
+                      name={review.name}
+                      color={avatarColors[i % avatarColors.length]}
+                    />
+                    <div>
+                      <span className="text-sm font-semibold text-gray-800 block">
+                        {review.name}
+                        <span className="text-xs font-normal text-gray-500 block">
+                          {review.role}
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -4,11 +4,13 @@ import {
   CulturalRoots,
   FPTU,
   Go4AI,
+  HubNetwork,
   IntracomU,
   ITesol,
   JCITrevi,
   LightLearning,
   MeduEnglish,
+  QTEDU,
   SpeakUpGlobal,
 } from "@/features/landing/assets/index.jsx";
 
@@ -22,6 +24,8 @@ const partners = [
   { image: LightLearning, alt: "LightLearning" },
   { image: MeduEnglish, alt: "MeduEnglish" },
   { image: SpeakUpGlobal, alt: "SpeakUpGlobal" },
+  { image: HubNetwork, alt: "HubNetwork" },
+  { image: QTEDU, alt: "QTEDU" },
 ];
 
 const PartnerSection = () => {

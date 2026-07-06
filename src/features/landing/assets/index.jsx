@@ -22,4 +22,5 @@ export { default as JCITrevi } from "./partners/JCI_Trevi.png";
 export { default as LightLearning } from "./partners/Light_Learning.png";
 export { default as MeduEnglish } from "./partners/Medu_English.png";
 export { default as SpeakUpGlobal } from "./partners/Speak_Up_Global.png";
-
+export { default as HubNetwork } from "./partners/Hub_Network.png";
+export { default as QTEDU } from "./partners/QTEDU.png";
