@@ -281,6 +281,7 @@ const GlobalCallContent = ({
   })
 
   const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const [showGameModal, setShowGameModal] = useState(false);
 
   const promptLeaveCall = () => {
     if (isPiP) {
@@ -358,6 +359,8 @@ const GlobalCallContent = ({
     showCC,
     setShowCC,
     isAISession,
+    showGameModal,
+    setShowGameModal,
 
     // Room subtitles
     showRoomSubtitles,

@@ -53,6 +53,8 @@ const IDLE_VALUE = {
   setShowChat: () => {},
   showParticipants: false,
   setShowParticipants: () => {},
+  showGameModal: false,
+  setShowGameModal: () => {},
   showVirtualBackground: false,
   setShowVirtualBackground: () => {},
   showAvatarPicker: false,

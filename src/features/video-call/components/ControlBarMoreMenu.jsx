@@ -11,6 +11,7 @@ import {
   Captions,
   Check,
   RefreshCcw,
+  Gamepad2,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
@@ -42,6 +43,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     lkRoom,
     showTroubleshoot,
     setShowTroubleshoot,
+    setShowGameModal,
   } = useGlobalVideoCall();
 
   const {
@@ -176,6 +178,17 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                       >
                         <Copy size={20} />
                         {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowGameModal?.(true);
+                          setShowMoreMenu(false)
+                        }}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                      >
+                        <Gamepad2 size={20} />
+                        Play Games
                       </button>
 
                       <button
