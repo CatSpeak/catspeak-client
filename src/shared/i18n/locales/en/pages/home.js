@@ -9,7 +9,7 @@ export default {
     china: "China",
     usa: "English",
   },
-  ctaButton: "Learn more about CatSpeak",
+  ctaButton: "Learn more about Cat Speak",
   whyChooseUs: "Why choose us?",
   valuesTitle: "CORE VALUES CAT SPEAK BRINGS",
   values: {
@@ -53,20 +53,20 @@ export default {
   },
   responseSection: {
     title: "Feedback",
-    subtitle: "See what people are saying about CatSpeak!",
+    subtitle: "See what people are saying about Cat Speak!",
     reviews: [
       {
-        text: "The interface is very cute and friendly! I love how CatSpeak combines learning with AI and making friends worldwide. It helps me feel less shy when communicating in English.",
+        text: "The interface is very cute and friendly! I love how Cat Speak combines learning with AI and making friends worldwide. It helps me feel less shy when communicating in English.",
         name: "Minh Anh",
         role: "Student",
       },
       {
-        text: "CatSpeak has helped me improve my pronunciation a lot. The conversations are diverse and interesting, and the AI support is very enthusiastic!",
+        text: "Cat Speak has helped me improve my pronunciation a lot. The conversations are diverse and interesting, and the AI support is very enthusiastic!",
         name: "Thanh Ha",
         role: "Office worker",
       },
       {
-        text: "I've tried many English learning apps but CatSpeak has the best community. Making friends with native speakers is really exciting!",
+        text: "I've tried many English learning apps but Cat Speak has the best community. Making friends with native speakers is really exciting!",
         name: "Van Duc",
         role: "Teacher",
       },
