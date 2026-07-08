@@ -172,6 +172,7 @@ const VideoCallControlBar = () => {
           title="Breakout Rooms"
           iconActive={<Split className={iconClass} />}
           iconInactive={<Split className={iconClass} />}
+          className="hidden min-[769px]:flex"
         />
       )}
 

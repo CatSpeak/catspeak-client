@@ -19,8 +19,7 @@ import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
 import RecordingStatusBar from "@/features/video-call/components/RecordingStatusBar"
-import BreakoutTransitionOverlay from "@/features/video-call/components/BreakoutTransitionOverlay"
-import BreakoutSidebarPanel from "@/features/video-call/components/BreakoutSidebarPanel"
+import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -64,7 +63,9 @@ const VideoCallRoomContent = () => {
     participants,
   } = useVideoCallContext()
 
-  const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector((s) => s.videoCall)
+  const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
+    (s) => s.videoCall,
+  )
   const isHost = room?.creatorId === user?.accountId
 
   const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
@@ -76,7 +77,8 @@ const VideoCallRoomContent = () => {
     if (!isHost || !isBreakoutActive) return
     const handleBeforeUnload = (e) => {
       e.preventDefault()
-      e.returnValue = "Đang có các phòng thảo luận nhỏ hoạt động. Bạn có chắc chắn muốn rời khỏi trang?"
+      e.returnValue =
+        "Đang có các phòng thảo luận nhỏ hoạt động. Bạn có chắc chắn muốn rời khỏi trang?"
       return e.returnValue
     }
     window.addEventListener("beforeunload", handleBeforeUnload)
@@ -84,9 +86,13 @@ const VideoCallRoomContent = () => {
   }, [isHost, isBreakoutActive])
 
   const [countdownSeconds, setCountdownSeconds] = useState(null)
-  
+
   useEffect(() => {
-    if (isBreakoutActive && breakoutStatus?.remainingSeconds !== null && breakoutStatus?.remainingSeconds !== undefined) {
+    if (
+      isBreakoutActive &&
+      breakoutStatus?.remainingSeconds !== null &&
+      breakoutStatus?.remainingSeconds !== undefined
+    ) {
       setCountdownSeconds(breakoutStatus.remainingSeconds)
     } else {
       setCountdownSeconds(null)
@@ -118,8 +124,10 @@ const VideoCallRoomContent = () => {
       : showAvatarPicker
         ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
         : showBreakout
-        ? (isBreakoutActive ? "Phòng thảo luận" : "Phòng họp nhóm")
-        : t.rooms.chatBox.title
+          ? isBreakoutActive
+            ? "Phòng thảo luận"
+            : "Phòng họp nhóm"
+          : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -163,12 +171,13 @@ const VideoCallRoomContent = () => {
 
   if (!livekitReady) {
     if (isBreakoutActive || wasBreakoutActiveRef.current) {
-      return (
-        <BreakoutTransitionOverlay
-          roomName={breakoutRoomName}
-          isReturning={!isBreakoutActive && wasBreakoutActiveRef.current}
-        />
-      )
+      const isReturning = !isBreakoutActive && wasBreakoutActiveRef.current
+      const message = isReturning
+        ? (t?.rooms?.videoCall?.breakout?.returningTitle ??
+          "Quay lại phòng chính...")
+        : (t?.rooms?.videoCall?.breakout?.movingTitle ??
+          "Di chuyển vào phòng nhóm...")
+      return <VideoCallLoading message={message} />
     }
     return (
       <VideoCallLoading
@@ -188,29 +197,47 @@ const VideoCallRoomContent = () => {
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           {isBreakoutActive && (
-            <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-2 text-xs font-bold shadow-md z-10 animate-fade-in border-b border-orange-400">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
-                <span>
-                  {breakoutRoomName ? `Bạn đang ở phòng thảo luận nhóm: ${breakoutRoomName}` : "Đang kết nối phòng thảo luận..."}
-                </span>
-              </div>
-              {countdownSeconds !== null && (
-                <div className="flex items-center gap-1.5 bg-white/20 px-2.5 py-0.5 rounded-full shadow-inner">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>Thời gian còn lại: {formatTimer(countdownSeconds)}</span>
+            <div className="px-6 pt-6 z-10 animate-fade-in shrink-0">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-2.5 text-xs font-bold shadow-md rounded-xl border border-orange-400">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse flex-shrink-0" />
+                  <span className="truncate">
+                    {breakoutRoomName
+                      ? `Phòng thảo luận: ${breakoutRoomName}`
+                      : "Đang kết nối..."}
+                  </span>
+                  {breakoutStatus && (
+                    <span className="ml-2 px-2 py-0.5 bg-black/10 rounded text-[10px] uppercase tracking-wide whitespace-nowrap flex-shrink-0 border border-white/20">
+                      {breakoutStatus.allowSelfChangeRoom
+                        ? "Tự do chuyển"
+                        : "Phòng cố định"}
+                    </span>
+                  )}
                 </div>
-              )}
+                {countdownSeconds !== null && (
+                  <div className="flex items-center gap-1.5 bg-black/10 px-2.5 py-1 rounded-md shadow-inner flex-shrink-0 border border-white/10">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-mono text-[13px]">
+                      {formatTimer(countdownSeconds)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           <div className="flex-1 relative min-h-0">
             <VideoGrid />
-            <RecordingStatusBar isRecording={isRecording} onStopRecording={confirmStopRecording} />
+            <RecordingStatusBar
+              isRecording={isRecording}
+              onStopRecording={confirmStopRecording}
+            />
           </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
           {/* Non-AI Room subtitles — only show in non-AI rooms when enabled */}
-          {!isAISession && showRoomSubtitles && <SubtitleOverlayNonAI showRoomSubtitles={showRoomSubtitles} />}
+          {!isAISession && showRoomSubtitles && (
+            <SubtitleOverlayNonAI showRoomSubtitles={showRoomSubtitles} />
+          )}
         </div>
 
         {/* Desktop Side Panel */}
@@ -218,13 +245,13 @@ const VideoCallRoomContent = () => {
           {isSidePanelOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 336, opacity: 1 }}
+              animate={{ width: 376, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="hidden md:flex flex-col overflow-hidden relative py-5"
-              style={{ width: 336 }}
+              style={{ width: 376 }}
             >
-              <div className="w-80 h-full flex flex-col shrink-0 bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+              <div className="w-[360px] h-full flex flex-col shrink-0 bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <VirtualBackgroundPicker />}
                 {showAvatarPicker && <AvatarUrlPicker />}

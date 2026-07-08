@@ -4,7 +4,7 @@ import Popover from "@/shared/components/ui/Popover"
 import Slider from "@/shared/components/ui/Slider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const ParticipantVolumeSlider = ({ participant }) => {
+export const ParticipantVolumeSlider = ({ participant, className = "", isInline = false }) => {
   const { t } = useLanguage()
   const pl = t.rooms.videoCall.participantList
 
@@ -67,7 +67,7 @@ const ParticipantVolumeSlider = ({ participant }) => {
   const isMuted = volume <= 0.001
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-[#e5e5e5] p-3 flex flex-col gap-2 w-48 relative">
+    <div className={`flex flex-col gap-2 relative ${isInline ? 'w-full' : 'bg-white rounded-lg shadow-lg border border-[#e5e5e5] p-3 w-48'} ${className}`}>
       <div className="flex items-center justify-between text-xs text-[#606060] mb-1">
         <span>{pl.volume}</span>
         <span>{Math.round(volume * 100)}%</span>

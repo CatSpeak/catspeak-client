@@ -81,17 +81,21 @@ export const useRoomLifecycle = ({
     (parentSessionIdValue, message) => {
       console.info("[SignalR] BroadcastNotification received:", message)
       toast(message, {
-        icon: "📢",
         duration: 8000,
         style: {
-          border: "1px solid #10B981",
-          padding: "16px",
-          color: "#064E3B",
-          background: "#ECFDF5",
-          fontWeight: "600",
-          fontSize: "15px",
+          padding: "8px 16px",
+          color: "#FFFFFF",
+          background: "#1E1F26",
+          fontWeight: "500",
+          fontSize: "14px",
           borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          minHeight: "48px", /* h-12 */
+          maxWidth: "90vw", /* safe on mobile */
+          display: "flex", /* center vertically */
+          alignItems: "center",
+          justifyContent: "flex-start",
+          textAlign: "left",
         },
       })
     },
