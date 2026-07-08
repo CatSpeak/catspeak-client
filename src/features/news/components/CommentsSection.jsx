@@ -109,8 +109,8 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
   return (
     <div ref={ref}>
       {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="font-nunito font-semibold text-xl text-black leading-[1.4]">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="min-w-0 truncate font-nunito text-lg font-semibold leading-[1.35] text-black">
           {t.news?.newsDetail?.totalComments?.replace(
             "{{count}}",
             totalComments,
@@ -118,7 +118,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
         </h3>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center justify-center w-6 h-6 text-[#7b7979] hover:text-black transition-colors"
+          className="flex h-6 w-6 shrink-0 items-center justify-center text-[#7b7979] transition-colors hover:text-black"
         >
           {isCollapsed ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
         </button>
@@ -126,7 +126,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
 
       {/* ── Comment Input ───────────────────────────────────────── */}
       {isAuthenticated && (
-        <div className="border-b border-[#e2e2e2] pb-4 mb-5">
+        <div className="mb-4 border-b border-[#e2e2e2] pb-3">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <Avatar
               size={32}
@@ -140,12 +140,12 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={t.news?.newsDetail?.writeComment || "Nhập bình luận..."}
-                className="w-full bg-[#f5f5f5] border border-[#e2e2e2] rounded-2xl px-4 py-3 font-nunito text-base text-black placeholder:text-[rgba(123,121,121,0.5)] focus:outline-none focus:border-cath-red-700 transition-colors min-h-[48px]"
+                className="min-h-[42px] w-full rounded-2xl border border-[#e2e2e2] bg-[#f5f5f5] px-3 py-2 font-nunito text-sm text-black transition-colors placeholder:text-[rgba(123,121,121,0.5)] focus:border-cath-red-700 focus:outline-none"
               />
             </div>
           </form>
           {content.length > 0 && (
-            <div className="flex justify-end gap-2 mt-2 pl-[40px]">
+            <div className="mt-2 flex justify-end gap-2 pl-[40px]">
               <button
                 type="button"
                 onClick={() => setContent("")}
@@ -168,7 +168,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
 
       {/* ── Comments List ───────────────────────────────────────── */}
       {!isCollapsed && (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           {commentsList
             .slice()
             .sort((a, b) => new Date(a.createDate) - new Date(b.createDate))
