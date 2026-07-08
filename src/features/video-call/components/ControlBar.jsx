@@ -22,6 +22,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
+import PictureITOverlay from "@/features/games/picture-it/components/PictureItOverlay"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
@@ -224,14 +225,21 @@ const VideoCallControlBar = () => {
         />
       )}
 
-      {showGameModal && (
+      {/* {showGameModal && (
         <SelectGameModal
+          open={showGameModal}
+          onClose={() => setShowGameModal(false)}
+        />
+      )} */}
+
+      {showGameModal && (
+        <PictureITOverlay
           open={showGameModal}
           onClose={() => setShowGameModal(false)}
         />
       )}
     </div>
-  )
+  );
 }
 
 export default VideoCallControlBar
