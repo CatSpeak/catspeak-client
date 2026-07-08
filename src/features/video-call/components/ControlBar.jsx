@@ -61,6 +61,9 @@ const VideoCallControlBar = () => {
   } = useVideoCallContext()
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showPictureIT, setShowPictureIT] = useState(false)
+  const [gameConfig, setGameConfig] = useState(null)
 
   const handleToggleHand = async () => {
     console.log(
@@ -80,10 +83,18 @@ const VideoCallControlBar = () => {
     }
   }
 
+  const handleGameStart = ({ gameId, difficulty, language }) => {
+    setGameConfig({ gameId, difficulty, language })
+    if (gameId === "picture-it") {
+      setShowPictureIT(true)
+    }
+    // Add more game handlers here as needed
+  }
+
   const unreadMessages = unreadRoomChat + unreadAiChat
-  const [showMoreMenu, setShowMoreMenu] = useState(false)
 
   const iconClass = "w-6 h-6"
+
 
   return (
     <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
@@ -225,17 +236,19 @@ const VideoCallControlBar = () => {
         />
       )}
 
-      {/* {showGameModal && (
+      {showGameModal && (
         <SelectGameModal
           open={showGameModal}
           onClose={() => setShowGameModal(false)}
+          onGameStart={handleGameStart}
         />
-      )} */}
+      )}
 
-      {showGameModal && (
+      {showPictureIT && (
         <PictureITOverlay
-          open={showGameModal}
-          onClose={() => setShowGameModal(false)}
+          open={showPictureIT}
+          onClose={() => setShowPictureIT(false)}
+          gameConfig={gameConfig}
         />
       )}
     </div>

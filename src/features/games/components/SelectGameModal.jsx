@@ -1,4 +1,4 @@
-import React, {  useState } from "react"
+import React, { useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { CheckCircle2, Clock3, Gamepad2, Globe2, Sparkles, Users2 } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
@@ -6,13 +6,17 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import { DIFFICULTIES, GAME_OPTIONS, LANGUAGES } from "../data/mockInfomationGame"
 
 
-const SelectGameModal = ({ open, onClose }) => {
+const SelectGameModal = ({ open, onClose, onGameStart }) => {
   const [selectedGame, setSelectedGame] = useState(GAME_OPTIONS[0].id)
   const [selectedDifficulty, setSelectedDifficulty] = useState("medium")
   const [selectedLanguage, setSelectedLanguage] = useState("english")
 
   const handleStart = () => {
-    alert("Start game!");
+    onGameStart?.({
+      gameId: selectedGame,
+      difficulty: selectedDifficulty,
+      language: selectedLanguage,
+    })
     onClose?.()
   }
 
@@ -34,11 +38,10 @@ const SelectGameModal = ({ open, onClose }) => {
                 key={game.id}
                 type="button"
                 onClick={() => setSelectedGame(game.id)}
-                className={`group relative flex flex-col items-start gap-4 rounded-[24px] border p-4 text-left transition ${
-                  isActive
+                className={`group relative flex flex-col items-start gap-4 rounded-[24px] border p-4 text-left transition ${isActive
                     ? "border-cath-red-700 bg-white shadow-faq-card"
                     : "border-[#E5E5E5] bg-white/70 hover:border-[#D0D0D0] hover:bg-white"
-                }`}
+                  }`}
               >
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
