@@ -104,16 +104,8 @@ const BreakoutStudentView = ({
     )
   }
 
-  // Calculate main room participants
-  const allSubRoomParticipantIds = new Set(
-    status?.breakoutSessions?.flatMap((r) =>
-      r.participants?.map((p) => String(p.accountId)),
-    ) || [],
-  )
-
-  const mainRoomParticipants = allLiveStudents.filter(
-    (s) => s.accountId && !allSubRoomParticipantIds.has(String(s.accountId)),
-  )
+  // Get main room participants from backend status
+  const mainRoomParticipants = status?.mainRoom?.participants || []
 
   const isUserInMainRoom = String(currentSubSessionId) === String(sessionId)
 
@@ -151,10 +143,14 @@ const BreakoutStudentView = ({
                 mainRoomParticipants.map((p) => {
                   const isThisHost =
                     String(p.accountId) === String(roomCreatorId)
+                  const enrichedStudent =
+                    allLiveStudents.find(
+                      (s) => String(s.accountId) === String(p.accountId),
+                    ) || p
                   return (
                     <StudentRow
                       key={p.accountId}
-                      student={p}
+                      student={enrichedStudent}
                       studentId={p.accountId}
                       isHost={isThisHost}
                       showVolumeSlider={true}

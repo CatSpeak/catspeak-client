@@ -134,6 +134,7 @@ export const roomsApi = baseApi.injectEndpoints({
         url: `/rooms/${sessionId}/breakout/join/${subSessionId}`,
         method: "POST",
       }),
+      invalidatesTags: (result, error, { sessionId }) => [{ type: "Breakout", id: sessionId }],
     }),
 
     moveParticipant: builder.mutation({

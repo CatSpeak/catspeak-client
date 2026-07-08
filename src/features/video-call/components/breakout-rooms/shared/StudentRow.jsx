@@ -20,14 +20,17 @@ const StudentRow = ({
   const hasMoveOptions = !!onMoveStudent && !isHost
   const showPopover = hasVolumeSlider || hasMoveOptions
 
+  const displayName = student?.nickname || student?.username || student?.name || `User #${studentId}`
+  const avatarSrc = student?.meetingAvatarUrl || student?.avatarUrl || student?.avatarImageUrl
+
   return (
     <ListItem
       contentClassName={isHost ? "h-[72px]" : ""}
       leftContent={
         <Avatar
           size={40}
-          name={student?.username || student?.name || `User #${studentId}`}
-          src={student?.avatarUrl || student?.avatarImageUrl}
+          name={displayName}
+          src={avatarSrc}
         />
       }
       rightContent={
@@ -46,15 +49,15 @@ const StudentRow = ({
                     {rooms.map((room) =>
                       room.id === currentRoomId ? null : (
                         <button
-                          key={room.id}
-                          onClick={() => {
-                            if (onMoveStudent) onMoveStudent(studentId, room.id)
-                            close()
-                          }}
-                          className="text-left px-4 py-3 hover:bg-[#F2F2F2] rounded-xl transition-colors"
-                        >
-                          Di chuyển sang {room.name}
-                        </button>
+                           key={room.id}
+                           onClick={() => {
+                             if (onMoveStudent) onMoveStudent(studentId, room.id)
+                             close()
+                           }}
+                           className="text-left px-4 py-3 hover:bg-[#F2F2F2] rounded-xl transition-colors"
+                         >
+                           Di chuyển sang {room.name}
+                         </button>
                       ),
                     )}
                     {currentRoomId !== mainRoomId && (
@@ -92,7 +95,7 @@ const StudentRow = ({
       }
     >
       <span className="truncate max-w-[120px]">
-        {student?.username || student?.name || `User #${studentId}`}
+        {displayName}
       </span>
       {isHost && <span className="text-sm text-[#606060]">Host</span>}
     </ListItem>

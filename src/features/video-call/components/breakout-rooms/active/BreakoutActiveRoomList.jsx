@@ -21,16 +21,8 @@ const BreakoutActiveRoomList = ({
 }) => {
   if (!status) return null
 
-  // Calculate main room participants
-  const allSubRoomParticipantIds = new Set(
-    status.breakoutSessions?.flatMap((r) =>
-      r.participants?.map((p) => String(p.accountId)),
-    ) || [],
-  )
-
-  const mainRoomParticipants = students.filter(
-    (s) => s.accountId && !allSubRoomParticipantIds.has(String(s.accountId)),
-  )
+  // Get main room participants from status
+  const mainRoomParticipants = status.mainRoom?.participants || []
 
   const isHostInMainRoom = String(currentSubSessionId) === String(sessionId)
   const isMainExpanded = expandedRooms["main"] ?? true
@@ -68,10 +60,14 @@ const BreakoutActiveRoomList = ({
                 mainRoomParticipants.map((p) => {
                   const isThisHost =
                     String(p.accountId) === String(roomCreatorId)
+                  const enrichedStudent =
+                    students.find(
+                      (s) => String(s.accountId) === String(p.accountId),
+                    ) || p
                   return (
                     <StudentRow
                       key={p.accountId}
-                      student={p}
+                      student={enrichedStudent}
                       studentId={p.accountId}
                       isHost={isThisHost}
                       rooms={status.breakoutSessions.map((br) => ({
