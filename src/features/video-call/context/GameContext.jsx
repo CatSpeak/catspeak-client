@@ -83,7 +83,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         winnerIds: [],
         leaderboard: []
     });
-    
+
     // Timer ref for Picture It Rating
     const ratingTimerRef = useRef(null);
 
@@ -120,6 +120,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                     leaderboard: []
                 }));
             }
+
+            const gameTitle = payload.game_type === "picture_it" ? "Picture IT" : "Crack IT";
+            toast.success(`Host đang tạo game ${gameTitle}... Chuẩn bị chơi!`);
         },
         GAME_COUNTDOWN: (payload) => {
             setCountdown(payload.seconds);
@@ -134,7 +137,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                 total: payload.total,
                 started_at: payload.started_at
             });
-            
+
             if (gameType === "picture_it") {
                 setPictureItState(prev => ({
                     ...prev,
@@ -193,8 +196,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             setPictureItState(prev => ({ ...prev, describeStarted: true }));
         },
         DESCRIBE_ENDED: (payload) => {
-            setPictureItState(prev => ({ 
-                ...prev, 
+            setPictureItState(prev => ({
+                ...prev,
                 imageUrlFull: payload.image_url_full,
                 imageBlurred: false,
                 imageUrl: payload.image_url_full
@@ -271,14 +274,41 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             setRoundResults(payload);
             if (payload.cumulative_scores) {
                 setScores(payload.cumulative_scores);
-                
+
                 // For Picture IT, build leaderboard
                 if (gameType === "picture_it") {
                     const sortedLeaderboard = Object.entries(payload.cumulative_scores)
-                        .map(([id, score]) => ({ id: Number(id), score }))
-                        .sort((a, b) => b.score - a.score)
+                        .map(([id, score]) => {
+                            const pId = Number(id);
+                            const p = participants.find(part => Number(part.identity) === pId);
+                            let username = p?.name || p?.identity || `Player ${pId}`;
+                            let avatarUrl = null;
+                            if (p?.metadata) {
+                                try {
+                                    const meta = JSON.parse(p.metadata);
+                                    avatarUrl = meta.avatarUrl;
+                                    if (meta.username) username = meta.username;
+                                } catch (e) { }
+                            }
+                            return {
+                                id: pId,
+                                accountId: pId,
+                                name: username,
+                                username: username,
+                                avatar: avatarUrl,
+                                avatarUrl: avatarUrl,
+                                totalScore: score,
+                                score: score
+                            };
+                        })
+                        .sort((a, b) => b.totalScore - a.totalScore)
                         .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
-                    setPictureItState(prev => ({ ...prev, leaderboard: sortedLeaderboard }));
+                    setPictureItState(prev => ({
+                        ...prev,
+                        leaderboard: sortedLeaderboard,
+                        roundAverageRating: payload.average_rating,
+                        roundDescriberId: payload.describer_id
+                    }));
                 }
             }
         },
@@ -287,19 +317,41 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             setFinalResults(payload);
             setCountdown(null);
             if (payload.final_scores) {
-                 setScores(payload.final_scores);
-                 if (gameType === "picture_it") {
+                setScores(payload.final_scores);
+                if (gameType === "picture_it") {
                     const sortedLeaderboard = Object.entries(payload.final_scores)
-                        .map(([id, score]) => ({ id: Number(id), score }))
-                        .sort((a, b) => b.score - a.score)
+                        .map(([id, score]) => {
+                            const pId = Number(id);
+                            const p = participants.find(part => Number(part.identity) === pId);
+                            let username = p?.name || p?.identity || `Player ${pId}`;
+                            let avatarUrl = null;
+                            if (p?.metadata) {
+                                try {
+                                    const meta = JSON.parse(p.metadata);
+                                    avatarUrl = meta.avatarUrl;
+                                    if (meta.username) username = meta.username;
+                                } catch (e) { }
+                            }
+                            return {
+                                id: pId,
+                                accountId: pId,
+                                name: username,
+                                username: username,
+                                avatar: avatarUrl,
+                                avatarUrl: avatarUrl,
+                                totalScore: score,
+                                score: score
+                            };
+                        })
+                        .sort((a, b) => b.totalScore - a.totalScore)
                         .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
-                    setPictureItState(prev => ({ 
-                        ...prev, 
+                    setPictureItState(prev => ({
+                        ...prev,
                         leaderboard: sortedLeaderboard,
                         winnerIds: payload.winner_ids || [],
                         badges: payload.badges || {}
                     }));
-                 }
+                }
             }
         },
         PLAYER_LEFT: (payload) => {
@@ -316,7 +368,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             setLeftPlayers(
                 new Set(payload.left_players?.map((id) => id.toString()) || []),
             );
-            
+
             if (payload.game_type === "picture_it") {
                 setCurrentRound({
                     round: payload.current_round?.round,
@@ -324,7 +376,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                 });
                 const describerId = payload.current_round?.describer_id;
                 const isDescriber = describerId === currentUserId;
-                
+
                 setPictureItState(prev => ({
                     ...prev,
                     describerId: describerId,
@@ -338,13 +390,13 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                     describeStarted: payload.current_round?.describe_started || false,
                     ratingOpen: payload.rating_open || false
                 }));
-                
+
                 const sortedLeaderboard = Object.entries(payload.scores || {})
-                        .map(([id, score]) => ({ id: Number(id), score }))
-                        .sort((a, b) => b.score - a.score)
-                        .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+                    .map(([id, score]) => ({ id: Number(id), score }))
+                    .sort((a, b) => b.score - a.score)
+                    .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
                 setPictureItState(prev => ({ ...prev, leaderboard: sortedLeaderboard }));
-                
+
             } else {
                 setCorrectPlayers(
                     new Set(payload.correct_players?.map((id) => id.toString()) || []),
@@ -394,21 +446,26 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
     const startGame = useCallback(
         (type = "crack_it", level = "easy", language = null) => {
-            const playerCount = Math.max(1, participants?.length || 1);
-            
-            if (type === "crack_it") {
+            const remoteIds = participants?.map(p => Number(p.identity)).filter(id => !isNaN(id)) || [];
+            const localId = Number(currentUserId);
+            const players = !isNaN(localId) ? [localId, ...remoteIds] : remoteIds;
+
+            if (players.length < 2) {
+                toast.error("Không đủ người chơi để bắt đầu trò chơi. Cần ít nhất 2 người!");
+                return;
+            }
+
+            const playerCount = players.length;
+
+            if (type === "crack_it" || type === "crack-it") {
                 connection.send("StartCrackItGame", {
-                    game_type: type,
+                    game_type: "crack_it",
                     level,
                     language: language || roomLanguage,
                     roomId: roomId || "general",
                     player_count: playerCount,
                 });
             } else if (type === "picture-it" || type === "picture_it") {
-                const participantIds = participants?.map(p => Number(p.identity)).filter(id => !isNaN(id)) || [];
-                // If there are less than 2 actual participants, duplicate current user for testing locally
-                const players = participantIds.length >= 2 ? participantIds : (currentUserId ? [currentUserId, currentUserId] : []);
-                
                 connection.send("StartPictureItGame", {
                     RoomId: roomId || "general",
                     Language: language || roomLanguage,
@@ -453,15 +510,15 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     const startPictureItDescribe = useCallback(() => {
         connection.send("PictureItDescribeStart", roomId || "general");
     }, [connection.send, roomId]);
-    
+
     const endPictureItDescribe = useCallback(() => {
         connection.send("PictureItDescribeEnd", roomId || "general");
     }, [connection.send, roomId]);
-    
+
     const submitPictureItFlag = useCallback(() => {
         connection.send("PictureItSubmitFlag", roomId || "general");
     }, [connection.send, roomId]);
-    
+
     const submitPictureItRating = useCallback((score) => {
         connection.send("PictureItSubmitRating", roomId || "general", score);
         setPictureItState(prev => ({ ...prev, myRatingSubmitted: true }));
@@ -485,7 +542,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         finalResults,
         leftPlayers,
         playerNames,
-        
+
         // Crack It specific
         puzzle,
         timer,
@@ -493,7 +550,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         lastCorrectAnswer,
         incorrectAttempts,
         submitAnswer,
-        
+
         // Picture It specific
         pictureIt: pictureItState,
         startPictureItDescribe,
