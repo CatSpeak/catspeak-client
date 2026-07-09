@@ -6,7 +6,6 @@ import messageWidgetReducer from "./slices/messageWidgetSlice"
 import serverStatusReducer from "./slices/serverStatusSlice"
 import videoCallReducer from "./slices/videoCallSlice"
 import notificationReducer from "./slices/notificationSlice"
-import pictureItReducer from "@/features/games/picture-it/store/pictureItSlice"
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
@@ -15,7 +14,6 @@ export const store = configureStore({
     serverStatus: serverStatusReducer,
     videoCall: videoCallReducer,
     notification: notificationReducer,
-    pictureIt: pictureItReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(baseApi.middleware),

@@ -136,13 +136,13 @@ const GlobalCallContent = ({
             if (finishedRec.status === "completed") {
               toast.success(
                 t.recordings?.actions?.stopSuccess ||
-                  "Recording trước đó đã được lưu thành công trong My Workspace.",
+                "Recording trước đó đã được lưu thành công trong My Workspace.",
                 { duration: 6000 },
               )
             } else if (finishedRec.status === "Partial Completed") {
               toast.error(
                 t.recordings?.storage?.warningLimitReached ||
-                  "Recording trước đó đã dừng và được lưu một phần.",
+                "Recording trước đó đã dừng và được lưu một phần.",
                 { duration: 6000 },
               )
             }
@@ -152,7 +152,7 @@ const GlobalCallContent = ({
     }
   }, [sessionRecordings, t])
 
-  const { isConnected: isSignalRConnected, connection: signalRConnection } = useVideoChatSignalR(sessionId, token, (event, data) => {
+  useVideoChatSignalR(sessionId, token, (event, data) => {
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
@@ -163,13 +163,13 @@ const GlobalCallContent = ({
         if (data.reason === "storage_exceeded") {
           toast.error(
             t.recordings?.storage?.warningLimitReached ||
-              "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
+            "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
             { duration: 6000 },
           )
         } else if (data.reason === "reconnect_timeout") {
           toast.error(
             t.recordings?.errors?.interrupted ||
-              "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
+            "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
             { duration: 6000 },
           )
         }
@@ -177,13 +177,9 @@ const GlobalCallContent = ({
     } else if (event === "RecordingWarning") {
       toast.error(
         t.recordings?.storage?.warningAlmostFull ||
-          "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
+        "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
         { icon: "⚠️", duration: 6000 },
       )
-    } else if (event === "OnSyncGameState") {
-      // Handled by usePictureItSync
-    } else if (event === "OnGameAction") {
-      // Handled by usePictureItSync
     }
   })
 
@@ -193,7 +189,7 @@ const GlobalCallContent = ({
       if (connectionState === ConnectionState.Reconnecting) {
         toast.error(
           t.recordings?.errors?.disconnected ||
-            "Kết nối bị gián đoạn. Recording tạm dừng...",
+          "Kết nối bị gián đoạn. Recording tạm dừng...",
           { id: "rec-disconnect", duration: 99999 },
         )
       } else if (
@@ -203,7 +199,7 @@ const GlobalCallContent = ({
         toast.dismiss("rec-disconnect")
         toast.success(
           t.recordings?.actions?.reconnected ||
-            "Kết nối đã được khôi phục. Recording tiếp tục.",
+          "Kết nối đã được khôi phục. Recording tiếp tục.",
           { duration: 3000 },
         )
       }
@@ -285,7 +281,6 @@ const GlobalCallContent = ({
   })
 
   const [showLeaveModal, setShowLeaveModal] = useState(false)
-  const [showGameModal, setShowGameModal] = useState(false);
 
   const promptLeaveCall = () => {
     if (isPiP) {
@@ -363,8 +358,6 @@ const GlobalCallContent = ({
     showCC,
     setShowCC,
     isAISession,
-    showGameModal,
-    setShowGameModal,
 
     // Room subtitles
     showRoomSubtitles,
@@ -411,8 +404,6 @@ const GlobalCallContent = ({
     cancelStopRecording: recordingState.cancelStopRecording,
     egressId: egressId,
     startedByAccountId: startedByAccountId,
-    videoChatConnection: signalRConnection,
-    isSignalRConnected,
   }
 
   return (

@@ -20,8 +20,9 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls";
 import SubtitleLanguagePicker from "./SubtitleLanguagePicker";
+import { useParticipants, useLocalParticipant } from "@livekit/components-react";
 
-const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
+const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu, setShowGameModal }) => {
   const { t } = useLanguage();
   const {
     isLocalScreenShare,
@@ -43,7 +44,6 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     lkRoom,
     showTroubleshoot,
     setShowTroubleshoot,
-    setShowGameModal,
   } = useGlobalVideoCall();
 
   const {
@@ -55,6 +55,17 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
   } = useSubtitleControls();
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
+
+  const allParticipants = useParticipants();
+  const { localParticipant } = useLocalParticipant();
+
+  const hostParticipant = [...allParticipants].sort((a, b) => {
+    const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
+    const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
+    return timeA - timeB;
+  })[0];
+
+  const isHost = hostParticipant && localParticipant && hostParticipant.identity === localParticipant.identity;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -128,9 +139,9 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                         )}
                         {(isAISession ? showCC : isSubtitleActive)
                           ? t?.rooms?.videoCall?.controls?.captionsOff ||
-                            "Turn off captions"
+                          "Turn off captions"
                           : t?.rooms?.videoCall?.controls?.captionsOn ||
-                            "Turn on captions"}
+                          "Turn on captions"}
                       </button>
 
                       <div className="border-t border-[#E5E5E5]"></div>
@@ -185,7 +196,8 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                           setShowGameModal?.(true);
                           setShowMoreMenu(false)
                         }}
-                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                        className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] ${!isHost ? "opacity-50 cursor-not-allowed" : ""}`}
+                        disabled={!isHost}
                       >
                         <Gamepad2 size={20} />
                         Play Games

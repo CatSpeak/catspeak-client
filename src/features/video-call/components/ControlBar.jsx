@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import {
   Video,
   VideoOff,
@@ -22,10 +23,11 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
-import PictureITOverlay from "@/features/games/picture-it/components/PictureItOverlay"
+import { useGame } from "@/features/video-call/context/GameContext"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
+  const { startGame } = useGame()
   const {
     micOn,
     cameraOn,
@@ -37,8 +39,6 @@ const VideoCallControlBar = () => {
     setShowChat,
     showParticipants,
     setShowParticipants,
-    showGameModal,
-    setShowGameModal,
     handleToggleMic,
     handleToggleCam,
     handleToggleScreenShare,
@@ -62,8 +62,7 @@ const VideoCallControlBar = () => {
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
   const [showMoreMenu, setShowMoreMenu] = useState(false)
-  const [showPictureIT, setShowPictureIT] = useState(false)
-  const [gameConfig, setGameConfig] = useState(null)
+  const [showGameModal, setShowGameModal] = useState(false)
 
   const handleToggleHand = async () => {
     console.log(
@@ -84,17 +83,13 @@ const VideoCallControlBar = () => {
   }
 
   const handleGameStart = ({ gameId, difficulty, language }) => {
-    setGameConfig({ gameId, difficulty, language })
-    if (gameId === "picture-it") {
-      setShowPictureIT(true)
-    }
-    // Add more game handlers here as needed
+    startGame(gameId, difficulty, language)
+    setShowGameModal(false)
   }
 
   const unreadMessages = unreadRoomChat + unreadAiChat
 
   const iconClass = "w-6 h-6"
-
 
   return (
     <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
@@ -205,6 +200,7 @@ const VideoCallControlBar = () => {
         <ControlBarMoreMenu
           showMoreMenu={showMoreMenu}
           setShowMoreMenu={setShowMoreMenu}
+          setShowGameModal={setShowGameModal}
         />
       </div>
 
@@ -241,14 +237,6 @@ const VideoCallControlBar = () => {
           open={showGameModal}
           onClose={() => setShowGameModal(false)}
           onGameStart={handleGameStart}
-        />
-      )}
-
-      {showPictureIT && (
-        <PictureITOverlay
-          open={showPictureIT}
-          onClose={() => setShowPictureIT(false)}
-          gameConfig={gameConfig}
         />
       )}
     </div>

@@ -39,8 +39,8 @@ const SelectGameModal = ({ open, onClose, onGameStart }) => {
                 type="button"
                 onClick={() => setSelectedGame(game.id)}
                 className={`group relative flex flex-col items-start gap-4 rounded-[24px] border p-4 text-left transition ${isActive
-                    ? "border-cath-red-700 bg-white shadow-faq-card"
-                    : "border-[#E5E5E5] bg-white/70 hover:border-[#D0D0D0] hover:bg-white"
+                  ? "border-cath-red-700 bg-white shadow-faq-card"
+                  : "border-[#E5E5E5] bg-white/70 hover:border-[#D0D0D0] hover:bg-white"
                   }`}
               >
                 <div className="space-y-2">
