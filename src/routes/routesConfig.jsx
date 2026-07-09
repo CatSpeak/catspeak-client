@@ -46,6 +46,28 @@ const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/Worksp
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
 const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
 const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
+const MyCoursesPage = lazy(() => import("@/features/courses/pages/MyCoursesPage"))
+const CreateCoursePage = lazy(() => import("@/features/courses/pages/CreateCoursePage"))
+const AllCoursesPage = lazy(() => import("@/features/courses/pages/AllCoursesPage"))
+const AllClassesPage = lazy(() => import("@/features/courses/pages/AllClassesPage"))
+const CreateClassPage = lazy(() => import("@/features/courses/pages/CreateClassPage"))
+const ClassDetailPage = lazy(() => import("@/features/courses/pages/ClassDetailPage"))
+const CourseDetailPage = lazy(() => import("@/features/courses/pages/CourseDetailPage"))
+const StudentClassDetailPage = lazy(() => import("@/features/courses/pages/StudentClassDetailPage"))
+const StudentCourseDetailPage = lazy(() => import("@/features/courses/pages/StudentCourseDetailPage"))
+const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
+
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+
+const CourseDetailWrapper = () => {
+  const { isStudent } = useRoleOverride()
+  return isStudent ? <StudentCourseDetailPage /> : <CourseDetailPage />
+}
+
+const ClassDetailWrapper = () => {
+  const { isStudent } = useRoleOverride()
+  return isStudent ? <StudentClassDetailPage /> : <ClassDetailPage />
+}
 
 const routesConfig = [
   {
@@ -219,7 +241,87 @@ const routesConfig = [
             children: [
               {
                 index: true,
-                element: <Navigate to="recordings" replace />,
+                element: <Navigate to="courses" replace />,
+              },
+              {
+                path: "courses",
+                element: (
+                  <LazyRoute>
+                    <MyCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/all",
+                element: (
+                  <LazyRoute>
+                    <AllCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/all-classes",
+                element: (
+                  <LazyRoute>
+                    <AllClassesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/create",
+                element: (
+                  <LazyRoute>
+                    <CreateCoursePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/edit/:id",
+                element: (
+                  <LazyRoute>
+                    <CreateCoursePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/create-class",
+                element: (
+                  <LazyRoute>
+                    <CreateClassPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/edit-class/:id",
+                element: (
+                  <LazyRoute>
+                    <CreateClassPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/schedule",
+                element: (
+                  <LazyRoute>
+                    <SchedulePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id",
+                element: (
+                  <LazyRoute>
+                    <ClassDetailWrapper />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/details/:id",
+                element: (
+                  <LazyRoute>
+                    <CourseDetailWrapper />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "recordings",
