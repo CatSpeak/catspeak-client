@@ -6,7 +6,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import MapView from "./Mapview";
-import "@/shared/utils/testGeoapify";
+// import "@/shared/utils/testGeoapify";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
