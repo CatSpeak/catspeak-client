@@ -6,14 +6,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/features/auth";
 
+import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect";
+
 const AnswerInput = () => {
-  const { submitAnswer, gameState, lastCorrectAnswer, currentUserId, correctPlayers, currentRound } = useGame();
+  const {
+    submitAnswer,
+    gameState,
+    lastCorrectAnswer,
+    currentUserId,
+    correctPlayers,
+    currentRound,
+  } = useGame();
   const { t } = useLanguage();
-  
+
   const [inputValue, setInputValue] = useState("");
   const [shake, setShake] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const [wrongToasts, setWrongToasts] = useState([]);
+  const [myScoreEarned, setMyScoreEarned] = useState(null);
   const inputRef = useRef(null);
 
   const isCorrect = correctPlayers.has(currentUserId.toString());
@@ -23,25 +33,35 @@ const AnswerInput = () => {
   useEffect(() => {
     setInputValue("");
     setWrongToasts([]);
+    setMyScoreEarned(null);
   }, [currentRound?.round]);
 
-  // Lắng nghe event nhập sai
+  // Lắng nghe event nhập sai và đúng
   useEffect(() => {
     const handleWrongAnswer = (e) => {
       const wrongVal = e.detail;
       if (wrongVal) {
         const id = Date.now();
-        setWrongToasts(prev => [...prev, { id, text: wrongVal }]);
+        setWrongToasts((prev) => [...prev, { id, text: wrongVal }]);
         setTimeout(() => {
-          setWrongToasts(prev => prev.filter(t => t.id !== id));
+          setWrongToasts((prev) => prev.filter((t) => t.id !== id));
         }, 3000); // Tự mất đi sau 3 giây như toast
       }
       setInputValue("");
       setShake(true);
       setTimeout(() => setShake(false), 400); // Shake duration
     };
+
+    const handleCorrectAnswer = (e) => {
+      setMyScoreEarned(e.detail);
+    };
+
     window.addEventListener("crackItWrongAnswer", handleWrongAnswer);
-    return () => window.removeEventListener("crackItWrongAnswer", handleWrongAnswer);
+    window.addEventListener("crackItCorrectAnswer", handleCorrectAnswer);
+    return () => {
+      window.removeEventListener("crackItWrongAnswer", handleWrongAnswer);
+      window.removeEventListener("crackItCorrectAnswer", handleCorrectAnswer);
+    };
   }, []);
 
   // Lắng nghe event khi có người đoán đúng (flash cho MỖI người)
@@ -49,12 +69,12 @@ const AnswerInput = () => {
     if (lastCorrectAnswer && lastCorrectAnswer._ts) {
       setShowFlash(true);
       // Play ding sound if available
-      new Audio("/sounds/correct.mp3").play().catch(() => {});
-      
+      playGlobalSound("correct");
+
       const timeout = setTimeout(() => setShowFlash(false), 1500);
       return () => clearTimeout(timeout);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastCorrectAnswer?._ts]);
 
   const handleSubmit = (e) => {
@@ -66,7 +86,6 @@ const AnswerInput = () => {
 
   return (
     <div className="relative shrink-0">
-      
       {/* Cửa sổ nháy flash khi có người trả lời đúng - Đưa lên góc trên bên phải */}
       <AnimatePresence mode="wait">
         {showFlash && lastCorrectAnswer && (
@@ -82,8 +101,12 @@ const AnswerInput = () => {
                 <CheckCircle2 size={20} />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-bold text-sm leading-tight max-w-[150px] truncate">{lastCorrectAnswer.player_name}</span>
-                <span className="text-xs text-slate-500 font-medium mt-0.5">{t.rooms?.game?.crackIt?.gotItRight || "đã đoán chính xác!"}</span>
+                <span className="font-bold text-sm leading-tight max-w-[150px] truncate">
+                  {lastCorrectAnswer.player_name}
+                </span>
+                <span className="text-xs text-slate-500 font-medium mt-0.5">
+                  {t.rooms?.game?.crackIt?.gotItRight || "đã đoán chính xác!"}
+                </span>
               </div>
             </div>
           </motion.div>
@@ -93,9 +116,7 @@ const AnswerInput = () => {
       {/* Lịch sử lần thử sai (Toast tự mất) */}
       <AnimatePresence>
         {wrongToasts.length > 0 && !isCorrect && (
-          <motion.div
-            className="absolute bottom-full mb-3 left-4 flex flex-row-reverse items-center gap-2 z-[10] pointer-events-none"
-          >
+          <motion.div className="absolute bottom-full mb-3 left-4 flex flex-row-reverse items-center gap-2 z-[10] pointer-events-none">
             {wrongToasts.map((toast) => (
               <motion.div
                 key={toast.id}
@@ -104,7 +125,9 @@ const AnswerInput = () => {
                 exit={{ opacity: 0, x: -20, scale: 0.9, filter: "blur(4px)" }}
                 className="bg-white/95 backdrop-blur-md text-slate-700 px-4 py-2 rounded-xl text-sm font-medium shadow-[0_4px_12px_rgb(239,68,68,0.15)] flex items-center gap-2 border border-red-100"
               >
-                <span className="text-red-500 font-bold text-xs flex items-center justify-center bg-red-50 w-5 h-5 rounded-full">✕</span> 
+                <span className="text-red-500 font-bold text-xs flex items-center justify-center bg-red-50 w-5 h-5 rounded-full">
+                  ✕
+                </span>
                 {toast.text}
               </motion.div>
             ))}
@@ -112,12 +135,16 @@ const AnswerInput = () => {
         )}
       </AnimatePresence>
 
-      <motion.form 
+      <motion.form
         onSubmit={handleSubmit}
         animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
         transition={{ duration: 0.4 }}
         className={`flex items-center rounded-full shadow-sm border-2 p-1.5 transition-all ${
-          shake ? "bg-red-50 border-red-500 shadow-red-100" : isCorrect ? "bg-green-50 border-green-500 shadow-green-100" : "bg-white border-gray-300 focus-within:border-cath-red-400 focus-within:shadow-md"
+          shake
+            ? "bg-red-50 border-red-500 shadow-red-100"
+            : isCorrect
+              ? "bg-green-50 border-green-500 shadow-green-100"
+              : "bg-white border-gray-300 focus-within:border-cath-red-400 focus-within:shadow-md"
         }`}
       >
         <input
@@ -126,9 +153,28 @@ const AnswerInput = () => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           disabled={isDisabled}
-          placeholder={t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn..."}
-          className="flex-1 bg-transparent px-6 h-10 outline-none text-lg text-slate-800 disabled:text-slate-500 placeholder-gray-400 font-medium tracking-wide"
+          placeholder={
+            t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn..."
+          }
+          className={`flex-1 min-w-0 bg-transparent px-2 md:px-6 h-10 outline-none text-lg font-medium tracking-wide ${
+            isCorrect ? "text-green-700" : "text-slate-800 disabled:text-slate-500"
+          } placeholder-gray-400`}
         />
+        
+        {/* Score Pop-up for correct answer */}
+        <AnimatePresence>
+          {isCorrect && myScoreEarned !== null && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="mr-3 font-black text-green-600 drop-shadow-sm flex items-center gap-1 shrink-0"
+            >
+              <span className="text-xl">+{myScoreEarned}</span>
+              <span className="text-xs uppercase tracking-wider mt-1">điểm</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button
           type="submit"
           disabled={isDisabled || !inputValue.trim()}

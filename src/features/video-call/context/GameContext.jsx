@@ -111,6 +111,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           }
           return prev;
         });
+        if (payload.player_id === currentUserId) {
+          window.dispatchEvent(
+            new CustomEvent("crackItCorrectAnswer", { detail: payload.score_earned })
+          );
+        }
       } else {
         // custom event for wrong answer shake if it's the current user
         if (payload.player_id === currentUserId) {

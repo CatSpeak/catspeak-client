@@ -4,6 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Check, X, LogOut } from "lucide-react";
+import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect";
 
 const TopBar = ({ onOpenSidebar, onExit }) => {
   const { currentRound, timer: initialTimer, gameState } = useGame();
@@ -28,7 +29,7 @@ const TopBar = ({ onOpenSidebar, onExit }) => {
         setTimeLeft((prev) => {
           if (remaining === 10 && prev > 10) {
             // Play at 10 seconds remaining
-            new Audio("/sounds/ticking.mp3").play().catch(() => {});
+            playGlobalSound("ticking");
           }
           if (remaining <= 0) {
             clearInterval(interval);

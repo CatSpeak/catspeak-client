@@ -16,7 +16,7 @@ import GameOverScreen from "./GameOverScreen";
 import ExitConfirmModal from "./ExitConfirmModal";
 
 const CrackItOverlay = () => {
-  const { gameState, gameType, exitGame, countdown, roundResults, finalResults, currentUserId, playerNames, currentRound } = useGame();
+  const { gameState, gameType, exitGame, countdown, roundResults, finalResults, currentUserId, playerNames, currentRound, leftPlayers } = useGame();
   const { t } = useLanguage();
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
@@ -37,7 +37,9 @@ const CrackItOverlay = () => {
     };
   };
 
-  if (gameState === "idle" || gameType !== "crack_it") {
+  const hasLeft = leftPlayers?.has(currentUserId?.toString());
+
+  if (gameState === "idle" || gameType !== "crack_it" || hasLeft) {
     return null;
   }
 

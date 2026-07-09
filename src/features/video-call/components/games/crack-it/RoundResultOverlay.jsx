@@ -16,7 +16,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t, getPlaye
           <h2 className="text-2xl font-black text-slate-800 uppercase tracking-wider mb-2 drop-shadow-sm text-center">
             {t.rooms?.game?.crackIt?.roundResult || "Đáp án chính xác là"}:
           </h2>
-          <div className="text-6xl font-black text-green-600 mb-10 tracking-widest drop-shadow-md text-center px-4">
+          <div className="text-4xl md:text-5xl lg:text-6xl font-black text-green-600 mb-6 md:mb-10 tracking-widest drop-shadow-md text-center px-4 break-words w-full">
             {roundResults.correct_answer}
           </div>
 

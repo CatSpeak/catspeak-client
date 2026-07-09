@@ -44,6 +44,25 @@ const PuzzleCenter = () => {
 
     if (nonSpaceIndices.length === 0) return;
 
+    // Deterministic random based on puzzle answer string so all clients get the same order
+    let seed = 0;
+    for (let i = 0; i < answer.length; i++) {
+      seed += answer.charCodeAt(i) * (i + 1);
+    }
+    const random = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+
+    // Shuffle nonSpaceIndices deterministically
+    for (let i = nonSpaceIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [nonSpaceIndices[i], nonSpaceIndices[j]] = [
+        nonSpaceIndices[j],
+        nonSpaceIndices[i],
+      ];
+    }
+
     const delayPerChar = 60000 / (nonSpaceIndices.length + 1);
     let step = 0;
 
