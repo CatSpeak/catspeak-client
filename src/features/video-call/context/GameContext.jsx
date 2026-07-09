@@ -19,6 +19,27 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 
 const GameContext = createContext();
 
+const initialPictureItState = {
+    describerId: null,
+    describerOrder: [],
+    imageUrl: null,
+    imageUrlFull: null,
+    imageBlurred: true,
+    category: null,
+    forbiddenWords: [],
+    tags: [],
+    describeStarted: false,
+    ratingOpen: false,
+    ratingCountdownSec: 0,
+    myRatingSubmitted: false,
+    flagCount: 0,
+    raterCount: 0,
+    isSpectator: false,
+    badges: {},
+    winnerIds: [],
+    leaderboard: []
+};
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useGame = () => {
     const context = useContext(GameContext);
@@ -63,29 +84,41 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     const [incorrectAttempts, setIncorrectAttempts] = useState([]); // List of wrong answers the user submitted this round
 
     // --- Picture It specific states ---
-    const [pictureItState, setPictureItState] = useState({
-        describerId: null,
-        describerOrder: [],
-        imageUrl: null,
-        imageUrlFull: null,
-        imageBlurred: true,
-        category: null,
-        forbiddenWords: [],
-        tags: [],
-        describeStarted: false,
-        ratingOpen: false,
-        ratingCountdownSec: 0,
-        myRatingSubmitted: false,
-        flagCount: 0,
-        raterCount: 0,
-        isSpectator: false,
-        badges: {},
-        winnerIds: [],
-        leaderboard: []
-    });
+    const [pictureItState, setPictureItState] = useState(initialPictureItState);
 
     // Timer ref for Picture It Rating
     const ratingTimerRef = useRef(null);
+    const gameOverTimeoutRef = useRef(null);
+
+    const resetGameStates = useCallback(() => {
+        setScores({});
+        setRoundResults(null);
+        setFinalResults(null);
+        setCountdown(null);
+        setCurrentRound(null);
+        setLeftPlayers(new Set());
+        setPuzzle(null);
+        setTimer(0);
+        setCorrectPlayers(new Set());
+        setLastCorrectAnswer(null);
+        setIncorrectAttempts([]);
+        setPictureItState(initialPictureItState);
+        if (gameOverTimeoutRef.current) {
+            clearTimeout(gameOverTimeoutRef.current);
+            gameOverTimeoutRef.current = null;
+        }
+        if (ratingTimerRef.current) {
+            clearInterval(ratingTimerRef.current);
+            ratingTimerRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (gameOverTimeoutRef.current) clearTimeout(gameOverTimeoutRef.current);
+            if (ratingTimerRef.current) clearInterval(ratingTimerRef.current);
+        };
+    }, []);
 
     const startRatingTimer = useCallback((seconds) => {
         if (ratingTimerRef.current) clearInterval(ratingTimerRef.current);
@@ -106,23 +139,13 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             setGameType(payload.game_type);
             setGameLanguage(payload.language);
             setGameState("setup");
-            setScores({});
-            setFinalResults(null);
-            setLeftPlayers(new Set());
+            resetGameStates();
             if (payload.game_type === "picture_it") {
                 setPictureItState(prev => ({
                     ...prev,
-                    describerOrder: payload.describer_order || [],
-                    isSpectator: false,
-                    myRatingSubmitted: false,
-                    flagCount: 0,
-                    raterCount: 0,
-                    leaderboard: []
+                    describerOrder: payload.describer_order || []
                 }));
             }
-
-            const gameTitle = payload.game_type === "picture_it" ? "Picture IT" : "Crack IT";
-            toast.success(`Host đang tạo game ${gameTitle}... Chuẩn bị chơi!`);
         },
         GAME_COUNTDOWN: (payload) => {
             setCountdown(payload.seconds);
@@ -211,13 +234,10 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             }));
         },
         ROUND_FLAGGED: (payload) => {
-            toast.error(payload.message || "Round cancelled due to language violation.");
-            setGameState("idle");
             setPictureItState(prev => ({ ...prev, ratingOpen: false }));
         },
         ROUND_SKIPPED: (payload) => {
             toast.error(payload.reason || "Round skipped.");
-            setGameState("idle");
             setPictureItState(prev => ({ ...prev, ratingOpen: false }));
         },
         RATING_OPEN: (payload) => {
@@ -353,6 +373,12 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                     }));
                 }
             }
+
+            if (gameOverTimeoutRef.current) clearTimeout(gameOverTimeoutRef.current);
+            gameOverTimeoutRef.current = setTimeout(() => {
+                setGameState("idle");
+                resetGameStates();
+            }, 10000);
         },
         PLAYER_LEFT: (payload) => {
             if (payload.player_id) {
@@ -446,9 +472,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
     const startGame = useCallback(
         (type = "crack_it", level = "easy", language = null) => {
+            resetGameStates();
             const remoteIds = participants?.map(p => Number(p.identity)).filter(id => !isNaN(id)) || [];
             const localId = Number(currentUserId);
-            const players = !isNaN(localId) ? [localId, ...remoteIds] : remoteIds;
+            const rawPlayers = !isNaN(localId) ? [localId, ...remoteIds] : remoteIds;
+            const players = [...new Set(rawPlayers)];
 
             if (players.length < 2) {
                 toast.error("Không đủ người chơi để bắt đầu trò chơi. Cần ít nhất 2 người!");
@@ -474,7 +502,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                 });
             }
         },
-        [connection.send, roomLanguage, roomId, participants, currentUserId],
+        [connection.send, roomLanguage, roomId, participants, currentUserId, resetGameStates],
     );
 
     useEffect(() => {
@@ -529,7 +557,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         connection.send("PlayerLeaveGame", roomId || "general");
         setGameState("idle");
         setGameType(null);
-    }, [connection, roomId]);
+        resetGameStates();
+    }, [connection, roomId, resetGameStates]);
 
     const value = {
         gameState,

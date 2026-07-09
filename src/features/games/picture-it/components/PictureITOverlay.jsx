@@ -76,10 +76,10 @@ const PictureITOverlay = () => {
   }, [isDescriber, endPictureItDescribe]);
 
   const handleFlag = useCallback(() => {
-    if (isDescriber || isSpectator || myFlagged) return;
+    if (isDescriber || isSpectator || myFlagged || selectedRating > 0 || pictureIt?.myRatingSubmitted) return;
     setMyFlagged(true);
     submitPictureItFlag();
-  }, [isDescriber, isSpectator, myFlagged, submitPictureItFlag]);
+  }, [isDescriber, isSpectator, myFlagged, selectedRating, pictureIt?.myRatingSubmitted, submitPictureItFlag]);
 
   const handleSubmitRating = useCallback(() => {
     if (selectedRating === 0 || isDescriber || isSpectator) return;
@@ -214,22 +214,22 @@ const PictureITOverlay = () => {
         />
       )}
 
-      {showGameOver && (
-        <GameOverModal
-          open={showGameOver}
-          onClose={handleGameOverClose}
-          onPlayAgain={handleGameOverClose}
-          result={{
-            leaderboard: pictureIt?.leaderboard,
-            totalRounds,
-            language: gameLanguage,
-            difficulty: "easy",
-            badges: pictureIt?.badges,
-            winnerIds: pictureIt?.winnerIds,
-          }}
-          countdown={10}
-        />
-      )}
+
+      <GameOverModal
+        open={showGameOver}
+        onClose={handleGameOverClose}
+        onPlayAgain={handleGameOverClose}
+        result={{
+          leaderboard: pictureIt?.leaderboard,
+          totalRounds,
+          language: gameLanguage,
+          difficulty: "easy",
+          badges: pictureIt?.badges,
+          winnerIds: pictureIt?.winnerIds,
+        }}
+        countdown={10}
+      />
+
 
       {showForceStopped && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-white/95">

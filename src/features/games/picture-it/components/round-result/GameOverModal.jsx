@@ -95,21 +95,18 @@ const WinnerCard = ({ player }) => (
   </motion.div>
 )
 
+const RANK_MEDAL = {
+  1: "🥇",
+  2: "🥈",
+  3: "🥉",
+}
+
 // ─── FinalLeaderboardRow ──────────────────────────────────────────────────────
-const FinalLeaderboardRow = ({ player, rank, index }) => {
+const FinalLeaderboardRow = ({ player, rank, index, badge }) => {
   const isWinner = rank === 1
   const isTopThree = rank <= 3
 
-  // Custom badges mapped identically to the screenshot
-  const getBadgesForPlayer = (r) => {
-    if (r === 1) return ["Master Describer", "Great Speaker"]
-    if (r === 2) return ["Best Rating Accuracy"]
-    if (r === 3) return ["Most Fluent"]
-    if (r === 4) return ["Team Player"]
-    return ["Keep Practicing"]
-  }
-
-  const badges = getBadgesForPlayer(rank)
+  const badges = badge ? [badge] : ["Keep Practicing"]
 
   return (
     <motion.div
@@ -127,11 +124,11 @@ const FinalLeaderboardRow = ({ player, rank, index }) => {
           {RANK_MEDAL[rank] ? (
             <span className="text-base">{RANK_MEDAL[rank]}</span>
           ) : (
-            <span className="text-xs font-bold text-slate-400">{rank}</span>
+            <span className="text-xs font-bold text-black">{rank}</span>
           )}
         </div>
         <Avatar src={player.avatar} alt={player.name} size="xs" />
-        <p className="text-xs font-semibold text-white truncate max-w-[100px]">
+        <p className="text-xs font-semibold text-black truncate max-w-[100px]">
           {player.name}
         </p>
       </div>
@@ -139,9 +136,9 @@ const FinalLeaderboardRow = ({ player, rank, index }) => {
       {/* Score and Badges */}
       <div className="flex items-center gap-3 shrink-0">
         {/* Score */}
-        <div className="flex items-center gap-0.5 text-xs font-bold text-white tabular-nums">
+        <div className="flex items-center gap-0.5 text-xs font-bold text-black tabular-nums">
           <span>{player.totalScore}</span>
-          <span className="text-[10px] text-slate-400 font-normal ml-0.5">pts</span>
+          <span className="text-[10px] text-black font-normal ml-0.5"><Star size={12} className="text-cath-orange-400" fill="#f08d1d" /></span>
         </div>
 
         {/* Badges list */}
@@ -214,14 +211,10 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
   // Ensure leaderboard has rank info, and sorted descending by score
   const sorted = [...(result.leaderboard ?? [])]
     .sort((a, b) => b.totalScore - a.totalScore)
-    // Custom set scores to match visual screenshot perfectly if not set
-    .map((player, idx) => {
-      const fixedScores = [48.6, 46.2, 44.8, 41.3, 38.5, 35.0, 32.2, 28.0]
-      return {
-        ...player,
-        totalScore: player.totalScore > 10 ? player.totalScore : (fixedScores[idx] ?? player.totalScore),
-      }
-    })
+    .map((player) => ({
+      ...player
+    }))
+
 
   const winner = sorted[0]
 
@@ -293,7 +286,7 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
               </div>
 
               {/* Winner Card Highlight */}
-              {/* {winner && <WinnerCard player={winner} />} */}
+              {winner && <WinnerCard player={winner} />}
 
               {/* Two Column details split */}
 
