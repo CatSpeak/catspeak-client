@@ -1,20 +1,20 @@
-import React, { useState, useRef, useEffect, useMemo } from "react"
-import { createPortal } from "react-dom"
-import { ChevronDown, Search } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import useClickOutside from "@/shared/hooks/useClickOutside"
-import colors from "@/shared/utils/colors"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
+import { ChevronDown, Search } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
+import useClickOutside from "@/shared/hooks/useClickOutside";
+import colors from "@/shared/utils/colors";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 const removeDiacritics = (str) => {
-  if (!str) return ""
+  if (!str) return "";
   return str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-}
+    .replace(/Đ/g, "D");
+};
 
 const Dropdown = ({
   options = [],
@@ -33,50 +33,50 @@ const Dropdown = ({
   enableSearch = false,
   searchPlaceholder = "Search...",
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const { t } = useLanguage()
-  const dropdownRef = useRef(null)
-  const searchInputRef = useRef(null)
-  const [portalCoords, setPortalCoords] = useState(null)
-  const portalRef = useRef(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useLanguage();
+  const dropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const [portalCoords, setPortalCoords] = useState(null);
+  const portalRef = useRef(null);
 
   useClickOutside(dropdownRef, (e) => {
     if (portalRef.current && portalRef.current.contains(e.target)) {
-      return
+      return;
     }
-    setIsOpen(false)
-  })
+    setIsOpen(false);
+  });
 
   useEffect(() => {
     if (isOpen && enableSearch) {
       setTimeout(() => {
-        searchInputRef.current?.focus()
-      }, 100)
+        searchInputRef.current?.focus();
+      }, 100);
     } else {
-      setSearchQuery("")
+      setSearchQuery("");
     }
-  }, [isOpen, enableSearch])
+  }, [isOpen, enableSearch]);
 
   useEffect(() => {
-    const handleClose = () => setIsOpen(false)
+    const handleClose = () => setIsOpen(false);
 
     const updateCoords = () => {
       if (isOpen && dropdownRef.current) {
-        const rect = dropdownRef.current.getBoundingClientRect()
-        const spaceBelow = window.innerHeight - rect.bottom
-        const spaceAbove = rect.top
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
 
         // Flip up if there's less than ~300px below and more space above
-        const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow
+        const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow;
 
         // Check horizontal clipping (assume ~260px width default)
-        const forceAlignRight = rect.left + 260 > window.innerWidth
+        const forceAlignRight = rect.left + 260 > window.innerWidth;
 
         setPortalCoords((prev) => {
-          const newTop = rect.top + window.scrollY
-          const newLeft = rect.left + window.scrollX
-          
+          const newTop = rect.top + window.scrollY;
+          const newLeft = rect.left + window.scrollX;
+
           if (
             prev &&
             prev.top === newTop &&
@@ -86,7 +86,7 @@ const Dropdown = ({
             prev.flipUp === flipUp &&
             prev.forceAlignRight === forceAlignRight
           ) {
-            return prev
+            return prev;
           }
 
           return {
@@ -96,53 +96,54 @@ const Dropdown = ({
             height: rect.height,
             flipUp,
             forceAlignRight,
-          }
-        })
+          };
+        });
       }
-    }
+    };
 
     const handleScroll = (e) => {
       // Don't close if scrolling inside the dropdown portal itself
-      if (portalRef.current && portalRef.current.contains(e.target)) return
-      
+      if (portalRef.current && portalRef.current.contains(e.target)) return;
+
       // Update coords instead of closing, keeps it attached when scrolling
-      updateCoords()
-    }
+      updateCoords();
+    };
 
     if (isOpen) {
-      updateCoords()
-      window.addEventListener("resize", updateCoords)
-      window.addEventListener("scroll", handleScroll, true)
+      updateCoords();
+      window.addEventListener("resize", updateCoords);
+      window.addEventListener("scroll", handleScroll, true);
       return () => {
-        window.removeEventListener("resize", updateCoords)
-        window.removeEventListener("scroll", handleScroll, true)
-      }
+        window.removeEventListener("resize", updateCoords);
+        window.removeEventListener("scroll", handleScroll, true);
+      };
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const filteredOptions = useMemo(() => {
-    if (!enableSearch || !searchQuery) return options
-    const query = searchQuery.toLowerCase().trim()
-    const cleanQuery = query.replace(/^\+/, "")
-    const queryNoDiacritics = removeDiacritics(cleanQuery).replace(/\s+/g, "")
+    if (!enableSearch || !searchQuery) return options;
+    const query = searchQuery.toLowerCase().trim();
+    const cleanQuery = query.replace(/^\+/, "");
+    const queryNoDiacritics = removeDiacritics(cleanQuery).replace(/\s+/g, "");
 
     return options.filter((opt) => {
-      const label = (opt.label || "").toLowerCase()
-      const val = (opt.value || "").toLowerCase()
-      const cleanVal = val.replace(/^\+/, "")
-      const subtitle = (opt.subtitle || "").toLowerCase()
-      const searchTerms = (opt.searchTerms || "").toLowerCase()
-      const cleanSearchTerms = searchTerms.replace(/\+/g, "")
+      const label = String(opt.label ?? "").toLowerCase();
+      const val = String(opt.value ?? "").toLowerCase();
+      const subtitle = String(opt.subtitle ?? "").toLowerCase();
+      const searchTerms = String(opt.searchTerms ?? "").toLowerCase();
+
+      const cleanVal = val.replace(/^\+/, "");
+      const cleanSearchTerms = searchTerms.replace(/\+/g, "");
 
       const matchLabel = removeDiacritics(label)
         .replace(/\s+/g, "")
-        .includes(queryNoDiacritics)
+        .includes(queryNoDiacritics);
       const matchSubtitle = removeDiacritics(subtitle)
         .replace(/\s+/g, "")
-        .includes(queryNoDiacritics)
+        .includes(queryNoDiacritics);
       const matchSearchTerms = removeDiacritics(cleanSearchTerms)
         .replace(/\s+/g, "")
-        .includes(queryNoDiacritics)
+        .includes(queryNoDiacritics);
 
       return (
         label.includes(query) ||
@@ -154,16 +155,16 @@ const Dropdown = ({
         matchLabel ||
         matchSubtitle ||
         matchSearchTerms
-      )
-    })
-  }, [options, enableSearch, searchQuery])
+      );
+    });
+  }, [options, enableSearch, searchQuery]);
 
   const handleSelect = (option) => {
-    if (onChange) onChange(option.value, option)
-    setIsOpen(false)
-  }
+    if (onChange) onChange(option.value, option);
+    setIsOpen(false);
+  };
 
-  const selectedOption = options.find((opt) => opt.value === value) || null
+  const selectedOption = options.find((opt) => opt.value === value) || null;
 
   const defaultTrigger = (
     <button
@@ -186,10 +187,10 @@ const Dropdown = ({
         }`}
       />
     </button>
-  )
+  );
 
   const defaultRenderOption = (option, isSelected) => {
-    const textColor = isSelected ? option.color || activeColor : "inherit"
+    const textColor = isSelected ? option.color || activeColor : "inherit";
     return (
       <div
         className={`w-full min-h-[48px] py-2 px-4 text-left text-base rounded-md flex items-center gap-3 ${
@@ -218,8 +219,8 @@ const Dropdown = ({
           )}
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   const alignClass = portalCoords?.forceAlignRight
     ? "right-0 origin-top-right"
@@ -227,7 +228,7 @@ const Dropdown = ({
       ? "right-0 origin-top-right"
       : align === "center"
         ? "-translate-x-1/2 left-1/2 origin-top"
-        : "left-0 origin-top-left"
+        : "left-0 origin-top-left";
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
@@ -288,7 +289,7 @@ const Dropdown = ({
                       <div className="flex flex-col gap-1 p-1">
                         {filteredOptions.length > 0 ? (
                           filteredOptions.map((option, idx) => {
-                            const isSelected = option.value === value
+                            const isSelected = option.value === value;
                             return (
                               <button
                                 key={
@@ -306,7 +307,7 @@ const Dropdown = ({
                                   ? renderOption(option, isSelected)
                                   : defaultRenderOption(option, isSelected)}
                               </button>
-                            )
+                            );
                           })
                         ) : (
                           <div className="px-3 py-4 text-sm text-center text-gray-500">
@@ -323,7 +324,7 @@ const Dropdown = ({
           document.body,
         )}
     </div>
-  )
-}
+  );
+};
 
-export default Dropdown
+export default Dropdown;

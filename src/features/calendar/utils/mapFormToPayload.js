@@ -1,12 +1,12 @@
-import dayjs from "dayjs"
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /** Maps numeric weekday index (0=Mon) → API byWeekDay string */
-const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 /**
  * @param {object} form – shape returned from useEventForm
@@ -19,6 +19,7 @@ export const mapFormToPayload = ({
   countryId,
   cityId,
   eventColor,
+  isOnline,
   maxParticipants,
   visibility,
   startTime,
@@ -33,6 +34,7 @@ export const mapFormToPayload = ({
   recurrenceInterval,
   originalStartTime,
   originalEndTime,
+  ticketPrice,
 }) => {
   /** Split "cond1, cond2" → [{ conditionType:'', category:'', title:'cond1', description:'' }, …] */
   const conditions = (conditionsInput || "")
@@ -40,25 +42,25 @@ export const mapFormToPayload = ({
     .map((s) => s.trim())
     .filter(Boolean)
     .map((title) => ({
-      conditionType: "",
+      conditionType: "GENERAL",
       category: "",
       title,
       description: "",
-    }))
-  const isRecurring = recurrenceOption !== "NONE"
-  const frequency = recurrenceOption === "CUSTOM" ? "WEEKLY" : recurrenceOption
+    }));
+  const isRecurring = recurrenceOption !== "NONE";
+  const frequency = recurrenceOption === "CUSTOM" ? "WEEKLY" : recurrenceOption;
 
-  const timezoneId = selectedTimezone?.id || "Asia/Ho_Chi_Minh"
+  const timezoneId = selectedTimezone?.id || "Asia/Ho_Chi_Minh";
 
   // Helper to convert a local dayjs object to a UTC ISO string, assuming
   // the user's input time was meant for the selected timezone.
   const toUtcInTimezone = (dateObj) => {
-    if (!dateObj) return null
+    if (!dateObj) return null;
     // Get the exact string the user meant (e.g. "2026-05-23T10:17:31")
-    const dateString = dayjs(dateObj).format("YYYY-MM-DDTHH:mm:ss")
+    const dateString = dayjs(dateObj).format("YYYY-MM-DDTHH:mm:ss");
     // Parse that exact string into the selected timezone
-    return dayjs.tz(dateString, timezoneId).toISOString()
-  }
+    return dayjs.tz(dateString, timezoneId).toISOString();
+  };
 
   const payload = {
     title,
@@ -67,6 +69,7 @@ export const mapFormToPayload = ({
     countryId: Number(countryId),
     cityId: Number(cityId),
     color: eventColor,
+    isOnline: !!isOnline,
     maxParticipants: Number(maxParticipants),
     visibilityScope: visibility,
     timezone: timezoneId,
@@ -76,7 +79,8 @@ export const mapFormToPayload = ({
     originalStartTime: toUtcInTimezone(originalStartTime || startTime),
     originalEndTime: toUtcInTimezone(originalEndTime || endTime),
     conditions,
-  }
+    ticketPrice: ticketPrice != null ? Number(ticketPrice) : null,
+  };
 
   if (isRecurring && frequency) {
     payload.recurrenceRule = {
@@ -84,23 +88,68 @@ export const mapFormToPayload = ({
       interval: Number(recurrenceInterval) || 1,
       byWeekDay:
         frequency === "WEEKLY"
-          ? selectedDays.map((d) => WEEKDAY_CODES[d] ?? d)
-          : [],
+          ? JSON.stringify(selectedDays.map((d) => WEEKDAY_CODES[d] ?? d))
+          : undefined,
       ...(frequency === "MONTHLY" && {
-        byMonthDay: [dayjs(startTime).date()],
+        byMonthDay: dayjs(startTime).date(),
       }),
       // Convert the absolute UTC string into a UTC dayjs object and extract its HH:mm:ss
-      startTime: dayjs(toUtcInTimezone(startTime)).utc(),
-      endTime: dayjs(toUtcInTimezone(endTime)).utc(),
+      startTime: toUtcInTimezone(startTime),
+      endTime: toUtcInTimezone(endTime),
       recurrenceStartDate: toUtcInTimezone(startTime),
-      recurrenceEndDate: recurrenceEndType === "DATE" && recurrenceEndDate
-        ? toUtcInTimezone(recurrenceEndDate)
-        : null,
-      endCondition: recurrenceEndType === "COUNT" ? "OCCURRENCE_COUNT" : (recurrenceEndDate ? "UNTIL_DATE" : "NEVER"),
-      occurrenceCount: recurrenceEndType === "COUNT" ? Number(occurrenceCount) : 0,
+      recurrenceEndDate:
+        recurrenceEndType === "DATE" && recurrenceEndDate
+          ? toUtcInTimezone(recurrenceEndDate)
+          : null,
+      endCondition:
+        recurrenceEndType === "COUNT"
+          ? "OCCURRENCE_COUNT"
+          : recurrenceEndDate
+            ? "UNTIL_DATE"
+            : "NEVER",
+      occurrenceCount:
+        recurrenceEndType === "COUNT" ? Number(occurrenceCount) : 0,
       timeZone: timezoneId,
-    }
+    };
   }
 
-  return payload
-}
+  return payload;
+};
+
+export const objectToFormData = (obj, formData = new FormData(), parentKey = "") => {
+  if (obj === null || obj === undefined) {
+    // Skip null/undefined — ASP.NET treats missing keys as null/default
+    return formData;
+  }
+
+  if (obj instanceof Date) {
+    formData.append(parentKey, obj.toISOString());
+  } else if (obj instanceof File || obj instanceof Blob) {
+    formData.append(parentKey, obj);
+  } else if (Array.isArray(obj)) {
+    if (obj.length === 0) {
+      // Signal an empty collection to ASP.NET by appending empty string
+      formData.append(parentKey, "");
+    } else if (typeof obj[0] === "object" && !(obj[0] instanceof File) && !(obj[0] instanceof Blob)) {
+      // Array of objects → use indexed notation for ASP.NET complex binding
+      obj.forEach((item, index) => {
+        objectToFormData(item, formData, `${parentKey}[${index}]`);
+      });
+    } else {
+      // Array of primitives (strings, numbers) → repeat same key (ASP.NET standard)
+      obj.forEach((item) => {
+        formData.append(parentKey, item !== null && item !== undefined ? item.toString() : "");
+      });
+    }
+  } else if (typeof obj === "object") {
+    Object.keys(obj).forEach((key) => {
+      const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+      const formattedKey = parentKey ? `${parentKey}.${capitalizedKey}` : capitalizedKey;
+      objectToFormData(obj[key], formData, formattedKey);
+    });
+  } else {
+    formData.append(parentKey, obj.toString());
+  }
+  return formData;
+};
+
