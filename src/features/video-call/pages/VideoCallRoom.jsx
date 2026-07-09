@@ -7,18 +7,16 @@ import { ConnectionState } from "livekit-client"
 import { useSelector } from "react-redux"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
 
-import {
-  VideoGrid,
-  ParticipantList,
-  ChatBox,
-  ControlBar as VideoCallControlBar,
-  RoomHeader,
-} from "@/features/video-call"
+import VideoGrid from "@/features/video-call/components/VideoGrid"
+import ParticipantList from "@/features/video-call/components/ParticipantList"
+import ChatBox from "@/features/video-call/components/chat/ChatBox"
+import VideoCallControlBar from "@/features/video-call/components/ControlBar"
+import RoomHeader from "@/features/video-call/components/RoomHeader"
 import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
-import RecordingStatusBar from "@/features/video-call/components/RecordingStatusBar"
+
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
@@ -227,10 +225,7 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex-1 relative min-h-0">
             <VideoGrid />
-            <RecordingStatusBar
-              isRecording={isRecording}
-              onStopRecording={confirmStopRecording}
-            />
+
           </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}

@@ -24,6 +24,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
+import RecordingButton from "./RecordingButton"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
@@ -141,24 +142,13 @@ const VideoCallControlBar = () => {
         className="hidden min-[769px]:flex"
       />
 
-      <div className="relative hidden min-[769px]:block">
-        <ControlButton
-          isActive={isRecording}
-          isLoading={isTogglingRecording}
-          onClick={handleToggleRecording}
-          title={
-            isRecording
-              ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
-              : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
-          }
-          iconActive={<Circle className={`${iconClass} fill-white`} />}
-          iconInactive={<Circle className={`${iconClass} fill-none`} />}
-          activeClassOverride="bg-red-600 hover:bg-red-700 text-white"
-        >
-          {isRecording && !isTogglingRecording && (
-            <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
-          )}
-        </ControlButton>
+      <div className="relative hidden min-[769px]:block z-[9999]">
+        <RecordingButton
+          isRecording={isRecording}
+          isTogglingRecording={isTogglingRecording}
+          onToggleRecording={handleToggleRecording}
+          onStopRecording={confirmStopRecording}
+        />
       </div>
 
       <ControlButton

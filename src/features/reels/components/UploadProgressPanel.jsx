@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { X, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, Loader2, Video } from "lucide-react"
-import { motion } from "framer-motion"
+import {
+  X,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  CheckCircle2,
+  Video,
+  Loader2,
+} from "lucide-react"
+
 import { cancelReelUpload } from "../utils/uploadManager"
 import { removeUpload } from "@/store/slices/reelUploadSlice"
 import { useGetMyRecordingsQuery } from "@/store/api/recordingsApi"
@@ -12,21 +21,24 @@ import {
   removeRecording,
 } from "@/store/slices/recordingProcessSlice"
 
-const CONSTANT_REC_SIZE = 25 * 1024 * 1024 // 25 MB virtual size for weighting
+import ListItem from "@/shared/components/ui/ListItem"
+import ProgressBar from "@/shared/components/ui/ProgressBar"
 
 const UploadProgressPanel = ({ embedInStack = false }) => {
   const dispatch = useDispatch()
   const uploads = useSelector((state) => state.reelUpload.uploads)
   const recordings = useSelector((state) => state.recordingProcess.recordings)
 
-  const uploadItems = Object.values(uploads)
-  const recordingItems = Object.values(recordings)
+  const uploadItems = Object.values(uploads).reverse()
+  const recordingItems = Object.values(recordings).reverse()
 
   const [isMinimized, setIsMinimized] = useState(false)
 
   // 1. Auto-increment progress for processing recordings smoothly
   useEffect(() => {
-    const processingItems = recordingItems.filter((r) => r.status === "processing")
+    const processingItems = recordingItems.filter(
+      (r) => r.status === "processing",
+    )
     if (processingItems.length === 0) return
 
     const interval = setInterval(() => {
@@ -45,7 +57,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
           updateRecordingProgress({
             egressId: rec.egressId,
             progress: parseFloat(nextProgress.toFixed(1)),
-          })
+          }),
         )
       })
     }, 1000)
@@ -54,7 +66,9 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
   }, [recordingItems, dispatch])
 
   // 2. Poll DB to verify recording completion when there are active processing tasks
-  const activeRecordings = recordingItems.filter((r) => r.status === "processing")
+  const activeRecordings = recordingItems.filter(
+    (r) => r.status === "processing",
+  )
   const { data: dbRecordings = [] } = useGetMyRecordingsQuery(undefined, {
     skip: activeRecordings.length === 0,
     pollingInterval: 5000,
@@ -68,10 +82,17 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
       const match = dbRecordings.find(
         (dbRec) =>
           dbRec.egressId === rec.egressId ||
-          (rec.sessionId && dbRec.sessionId === rec.sessionId)
+          (rec.sessionId && dbRec.sessionId === rec.sessionId),
       )
       if (match) {
-        dispatch(recordingSuccess({ egressId: rec.egressId }))
+        if (rec.progress < 100) {
+          dispatch(
+            updateRecordingProgress({ egressId: rec.egressId, progress: 100 }),
+          )
+          setTimeout(() => {
+            dispatch(recordingSuccess({ egressId: rec.egressId }))
+          }, 500)
+        }
       }
     })
   }, [dbRecordings, activeRecordings, dispatch])
@@ -84,18 +105,6 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
 
   const hasActiveItems = uploadItems.length > 0 || recordingItems.length > 0
   if (!hasActiveItems) return null
-
-  // Calculate cumulative progress
-  const totalUploadedSize =
-    uploadItems.reduce((sum, item) => sum + (item.progress * item.size) / 100, 0) +
-    recordingItems.reduce((sum, item) => sum + (item.progress * CONSTANT_REC_SIZE) / 100, 0)
-
-  const totalSize =
-    uploadItems.reduce((sum, item) => sum + item.size, 0) +
-    recordingItems.reduce((sum, item) => sum + CONSTANT_REC_SIZE, 0)
-
-  const overallProgress =
-    totalSize > 0 ? Math.round((totalUploadedSize / totalSize) * 100) : 0
 
   const handleClearFinished = () => {
     uploadItems.forEach((item) => {
@@ -113,37 +122,32 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
   // Generate header text
   let headerText = ""
   if (!isFinished) {
-    headerText = `Đang xử lý hoạt động (${overallProgress}%)`
+    const activeCount =
+      uploadItems.filter((i) => i.status === "uploading").length +
+      recordingItems.filter((i) => i.status === "processing").length
+    headerText = `Đang xử lý ${activeCount} tác vụ`
   } else {
     const totalDone = completedUploads.length + completedRecs.length
     headerText = `Hoàn tất ${totalDone} tác vụ`
   }
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className={`${embedInStack ? "w-[380px] max-w-full pointer-events-auto shadow-xl" : "fixed bottom-6 right-6 z-[9999] w-[380px] pointer-events-auto"} bg-white border border-gray-200 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col transition-all duration-300`}
+    <div
+      className={`${embedInStack ? "w-[380px] max-w-full pointer-events-auto shadow-xl" : "fixed bottom-6 right-6 z-[9999] w-[380px] pointer-events-auto"} bg-white border border-[#e5e5e5] rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col transition-all duration-300`}
     >
       {/* Widget Header */}
       <div
-        className="bg-[#1A1A1A] text-white px-4 py-3.5 flex items-center justify-between cursor-pointer select-none"
+        className="bg-white border-b border-[#e5e5e5] px-4 h-14 flex items-center justify-between cursor-pointer select-none"
         onClick={() => setIsMinimized(!isMinimized)}
       >
         <div className="flex items-center gap-2">
-          {!isFinished && (
-            <Loader2 size={16} className="animate-spin text-[#990011]" />
-          )}
-          <span className="font-semibold text-xs tracking-wide uppercase">
-            {headerText}
-          </span>
+          <span className="font-semibold">{headerText}</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="text-gray-400 hover:text-white transition-colors focus:outline-none">
-            {isMinimized ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        <div className="flex items-center">
+          <button className="group flex h-12 w-12 shrink-0 items-center justify-center focus:outline-none">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-[#F2F2F2]">
+              {isMinimized ? <ChevronUp /> : <ChevronDown />}
+            </div>
           </button>
           {isFinished && (
             <button
@@ -151,170 +155,137 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
                 e.stopPropagation()
                 handleClearFinished()
               }}
-              className="text-gray-400 hover:text-white transition-colors focus:outline-none"
+              className="group flex h-12 w-12 shrink-0 items-center justify-center focus:outline-none"
               title="Clear all"
             >
-              <X size={18} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-[#F2F2F2]">
+                <X />
+              </div>
             </button>
           )}
         </div>
       </div>
 
-      {/* Global Progress Bar */}
-      {!isFinished && (
-        <div className="w-full bg-gray-200 h-1">
-          <div
-            className="bg-[#990011] h-1 transition-all duration-300"
-            style={{ width: `${overallProgress}%` }}
-          />
-        </div>
-      )}
-
       {/* Panel List Details */}
       {!isMinimized && (
-        <div className="max-h-[280px] overflow-y-auto divide-y divide-gray-100 bg-[#FAF9F9]">
+        <div className="py-2 max-h-[280px] overflow-y-auto bg-white">
           {/* Reel Upload Items */}
           {uploadItems.map((item) => (
-            <div
+            <ListItem
               key={item.id}
-              className="p-3.5 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
-            >
-              {item.coverUrl && (
-                <img
-                  src={item.coverUrl}
-                  alt="Thumbnail"
-                  className="w-12 h-16 rounded-lg object-cover mr-3 bg-gray-100 border border-gray-100 flex-shrink-0"
-                />
-              )}
-
-              <div className="flex-1 min-w-0 mr-3">
-                <p className="text-xs font-semibold text-gray-800 truncate" title={item.title}>
-                  {item.title}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-gray-500 font-medium">
-                    {(item.size / (1024 * 1024)).toFixed(1)} MB (Reel)
-                  </span>
-                  <span className="text-[10px] font-bold text-gray-700">
-                    {item.status === "uploading" && `${item.progress}%`}
-                    {item.status === "success" && "Đã tải lên"}
-                    {item.status === "failed" && "Thất bại"}
-                  </span>
-                </div>
-
-                {item.status === "uploading" && (
-                  <div className="w-full bg-gray-200 rounded-full h-1 mt-2.5">
-                    <div
-                      className="bg-[#990011] h-1 rounded-full transition-all duration-300"
-                      style={{ width: `${item.progress}%` }}
-                    />
-                  </div>
-                )}
-                {item.status === "failed" && (
-                  <p className="text-[10px] text-red-500 mt-1 font-semibold truncate">
-                    {item.error || "Tải lên thất bại."}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center flex-shrink-0">
-                {item.status === "uploading" ? (
+              hoverEffect={true}
+              lines={
+                item.status === "uploading"
+                  ? 3
+                  : item.status === "failed"
+                    ? 2
+                    : 1
+              }
+              leftContent={
+                item.coverUrl ? (
+                  <img
+                    src={item.coverUrl}
+                    alt="Thumbnail"
+                    className="w-12 h-16 rounded-lg object-cover"
+                  />
+                ) : (
+                  <Video />
+                )
+              }
+              rightContent={
+                item.status === "uploading" ? (
                   <button
                     onClick={() => cancelReelUpload(item.id)}
-                    className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-full transition-colors focus:outline-none"
                     title="Hủy tải lên"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200"
                   >
                     <X size={16} />
                   </button>
-                ) : item.status === "success" ? (
-                  <span className="text-[#990011] bg-red-50 p-1.5 rounded-full">
-                    <CheckCircle2 size={16} />
-                  </span>
-                ) : (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-red-500 bg-red-50 p-1.5 rounded-full">
-                      <AlertCircle size={16} />
-                    </span>
+                ) : item.status === "success" ? null : (
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="text-red-500" />
                     <button
                       onClick={() => dispatch(removeUpload(item.id))}
-                      className="p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full transition-colors focus:outline-none"
                       title="Xóa"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200"
                     >
-                      <X size={14} />
+                      <X />
                     </button>
                   </div>
-                )}
-              </div>
-            </div>
+                )
+              }
+            >
+              <p
+                className="text-xs font-semibold text-gray-800 truncate"
+                title={item.title}
+              >
+                {item.title}
+              </p>
+
+              {item.status !== "success" && (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap">
+                    {(item.size / (1024 * 1024)).toFixed(1)} MB (Reel)
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-700 whitespace-nowrap">
+                    {item.status === "uploading" && `${item.progress}%`}
+                    {item.status === "failed" && "Thất bại"}
+                  </span>
+                </div>
+              )}
+
+              {item.status === "uploading" && (
+                <ProgressBar progress={item.progress} className="mt-2.5" />
+              )}
+
+              {item.status === "failed" && (
+                <p className="text-[10px] text-red-500 mt-1 font-semibold truncate">
+                  {item.error || "Tải lên thất bại."}
+                </p>
+              )}
+            </ListItem>
           ))}
 
           {/* Recording Processing Items */}
           {recordingItems.map((item) => (
-            <div
+            <ListItem
               key={item.egressId}
-              className="p-3.5 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
-            >
-              <div className="w-12 h-16 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <Video className="w-6 h-6 text-[#990011]" />
-              </div>
-
-              <div className="flex-1 min-w-0 mr-3">
-                <p className="text-xs font-semibold text-gray-800 truncate" title={item.meetingId}>
-                  {item.meetingId}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-gray-500 font-medium">
-                    Ghi hình cuộc họp
-                  </span>
-                  <span className="text-[10px] font-bold text-gray-700">
-                    {item.status === "processing" && `${Math.round(item.progress)}%`}
-                    {item.status === "success" && "Đã lưu"}
-                    {item.status === "failed" && "Lỗi"}
-                  </span>
-                </div>
-
-                {item.status === "processing" && (
-                  <div className="w-full bg-gray-200 rounded-full h-1 mt-2.5">
-                    <div
-                      className="bg-[#990011] h-1 rounded-full transition-all duration-300"
-                      style={{ width: `${item.progress}%` }}
-                    />
-                  </div>
-                )}
-                {item.status === "failed" && (
-                  <p className="text-[10px] text-red-500 mt-1 font-semibold truncate">
-                    {item.error || "Xử lý bản ghi thất bại."}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center flex-shrink-0">
-                {item.status === "processing" ? (
-                  <Loader2 size={16} className="animate-spin text-gray-400 m-1.5" />
+              hoverEffect={true}
+              lines={item.status === "failed" ? 2 : 1}
+              leftContent={<Video />}
+              rightContent={
+                item.status === "processing" ? (
+                  <Loader2 className="animate-spin text-gray-400" />
                 ) : item.status === "success" ? (
-                  <span className="text-[#990011] bg-red-50 p-1.5 rounded-full">
-                    <CheckCircle2 size={16} />
-                  </span>
+                  <CheckCircle2 className="fill-emerald-500 text-white" />
                 ) : (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-red-500 bg-red-50 p-1.5 rounded-full">
-                      <AlertCircle size={16} />
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="text-red-500" />
                     <button
                       onClick={() => dispatch(removeRecording(item.egressId))}
-                      className="p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full transition-colors focus:outline-none"
                       title="Xóa"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100 hover:bg-gray-200"
                     >
-                      <X size={14} />
+                      <X />
                     </button>
                   </div>
-                )}
-              </div>
-            </div>
+                )
+              }
+            >
+              <p className="truncate" title={item.meetingId}>
+                {item.meetingId}
+              </p>
+
+              {item.status === "failed" && (
+                <p className="text-[10px] text-red-500 mt-1 font-semibold truncate">
+                  {item.error || "Xử lý bản ghi thất bại."}
+                </p>
+              )}
+            </ListItem>
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   )
 }
 

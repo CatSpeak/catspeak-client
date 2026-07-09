@@ -18,6 +18,7 @@ const reelUploadSlice = createSlice({
         progress: 0,
         status: "uploading", // uploading, success, failed
         error: null,
+        createdAt: Date.now(),
       }
     },
     updateProgress(state, action) {

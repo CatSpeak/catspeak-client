@@ -8,6 +8,7 @@ import React from "react"
  * @param {React.ReactNode} leftContent - Left content (Avatar, icons, or no left content).
  * @param {React.ReactNode} rightContent - Right content (Switch, icon, etc.).
  * @param {string|number|React.ReactNode} rightText - Text for right content (e.g. unassignedStudents.length).
+ * @param {1|2|3} lines - Determines the height based on expected number of text lines: 1 (h-12), 2 (h-[72px]), 3 (h-[88px]).
  */
 const ListItem = ({
   children,
@@ -17,12 +18,20 @@ const ListItem = ({
   leftContent,
   rightContent,
   rightText,
+  lines = 1,
   className = "",
   contentClassName = "",
 }) => {
   const isClickable = !!onClick
 
   const Wrapper = isClickable ? "button" : "div"
+
+  const linesClasses = {
+    1: "h-12",
+    2: "h-[72px]",
+    3: "h-[88px]",
+  }
+  const heightClass = linesClasses[lines] || "h-12"
 
   return (
     <Wrapper
@@ -31,10 +40,8 @@ const ListItem = ({
       disabled={isClickable ? false : undefined}
     >
       <div
-        className={`w-full h-14 px-4 flex items-center justify-between transition ${
-          hoverEffect
-            ? `hover:${hoverBgColor} group-hover:${hoverBgColor}`
-            : ""
+        className={`w-full ${heightClass} px-4 flex items-center justify-between transition ${
+          hoverEffect ? `hover:${hoverBgColor} group-hover:${hoverBgColor}` : ""
         } ${contentClassName}`}
       >
         <div className="flex items-center gap-4 overflow-hidden flex-1">
