@@ -76,14 +76,16 @@ const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
         >
           <Play size={18} className="text-gray-700" />
         </button>
-        <button
-          onClick={handleDeleteClick}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-[#ffdede] hover:text-red-600 text-gray-700 transition-colors"
-          title="Delete Reel"
-          aria-label="Delete reel"
-        >
-          <Trash2 size={18} />
-        </button>
+        {onDeleteClick && (
+          <button
+            onClick={handleDeleteClick}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-[#ffdede] hover:text-red-600 text-gray-700 transition-colors"
+            title="Delete Reel"
+            aria-label="Delete reel"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
       </div>
     </div>
   )

@@ -18,6 +18,7 @@ import {
 import Avatar from "@/shared/components/ui/Avatar";
 import ReelMoreMenu from "./ReelMoreMenu";
 import toast from "react-hot-toast";
+import { BookmarkModal, ShareModal, NotInterestedModal, AboutAccountModal, ReportReelModal } from "../modals/ReelInteractionsModals";
 
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetReelCommentsQuery } from "@/store/api/reelsApi";
@@ -63,6 +64,11 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   const longPressTimerRef = useRef(null);
   const hasLongPressedRef = useRef(false);
 
+  /* ── Redux/API Hooks ────────────────────────────── */
+  const currentUser = useSelector(selectCurrentUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { openAuthModal } = useAuthModal();
+
   const {
     videoRef,
     progressRef,
@@ -97,6 +103,31 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   const [viewportOffset, setViewportOffset] = useState(0);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
+  const [isBookmarkOpen, setIsBookmarkOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isNotInterestedOpen, setIsNotInterestedOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+
+  const handleActionClick = useCallback((actionKey) => {
+    setShowMoreMenu(false);
+    if (actionKey === "copyLink") {
+      navigator.clipboard.writeText(`${window.location.origin}/reels/${reel.id}`);
+      toast.success("Đã sao chép liên kết!");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
+
+    if (actionKey === "report") setIsReportOpen(true);
+    else if (actionKey === "notInterested") setIsNotInterestedOpen(true);
+    else if (actionKey === "addToPlaylist" || actionKey === "saveReel") setIsBookmarkOpen(true);
+    else if (actionKey === "aboutAccount") setIsAboutOpen(true);
+  }, [reel.id, isAuthenticated, openAuthModal]);
+
   // Track iOS Safari visual viewport offset to counteract keyboard push-up
   useEffect(() => {
     const vv = window.visualViewport;
@@ -111,11 +142,6 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
       vv.removeEventListener("scroll", handler);
     };
   }, []);
-
-  /* ── Redux/API Hooks ────────────────────────────── */
-  const currentUser = useSelector(selectCurrentUser);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const { openAuthModal } = useAuthModal();
 
   const {
     handleLike,
@@ -150,8 +176,12 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
 
   const handleBookmarkToggle = useCallback((e) => {
     e.stopPropagation();
-    toast("This feature is not available yet.", { icon: "🚧" });
-  }, []);
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
+    setIsBookmarkOpen(true);
+  }, [isAuthenticated, openAuthModal])
 
   const handleReply = useCallback((target) => {
     setReplyTarget(target);
@@ -349,7 +379,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                toast("This feature is not available yet.", { icon: "🚧" });
+                setIsShareOpen(true);
               }}
               className="flex flex-col items-center gap-1 group bg-transparent border-none"
             >
@@ -562,7 +592,15 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         isMobile
         showMenu={showMoreMenu}
         onClose={() => setShowMoreMenu(false)}
+        onActionClick={handleActionClick}
       />
+
+      {/* Render Reels Modals */}
+      <BookmarkModal isOpen={isBookmarkOpen} onClose={() => setIsBookmarkOpen(false)} reelId={reel.id} />
+      <ShareModal isOpen={isShareOpen} onClose={() => setIsShareOpen(false)} reel={reel} />
+      <NotInterestedModal isOpen={isNotInterestedOpen} onClose={() => setIsNotInterestedOpen(false)} reel={reel} />
+      <AboutAccountModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} accountId={reel.accountId} />
+      <ReportReelModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} reelId={reel.id} />
     </div>
   );
 });

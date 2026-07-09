@@ -24,7 +24,7 @@ const MENU_ITEMS_KEYS = [
  * Three-dot "More" dropdown menu.
  * Self-contained: manages its own open/close state and click-outside dismissal.
  */
-const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose }) {
+const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, onActionClick }) {
   const { t } = useLanguage()
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const menuRef = useRef(null)
@@ -38,15 +38,17 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose })
     }
   }, [showMenu])
 
-  const handleItemClick = useCallback((e) => {
+  const handleItemClick = useCallback((itemKey, e) => {
     e.stopPropagation()
     if (showMenu === undefined) {
       setInternalIsOpen(false)
     } else if (onClose) {
       onClose()
     }
-    toast("This feature is not available yet.", { icon: "🚧" })
-  }, [showMenu, onClose])
+    if (onActionClick) {
+      onActionClick(itemKey)
+    }
+  }, [showMenu, onClose, onActionClick])
 
   /* Close on outside click or Escape */
   useEffect(() => {
@@ -86,7 +88,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose })
           key={item.key}
           className="w-full text-left px-4 py-3 text-sm hover:bg-white/10 transition-colors flex items-center gap-3 cursor-pointer border-none bg-transparent text-white outline-none"
           role="menuitem"
-          onClick={handleItemClick}
+          onClick={(e) => handleItemClick(item.key, e)}
         >
           {createElement(item.icon, { size: 18 })}
           <span>{t?.catSpeak?.reels?.detail?.moreMenu?.[item.key] || item.defaultLabel}</span>
@@ -116,7 +118,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose })
                 key={item.key}
                 className="w-full text-left px-4 py-3.5 text-[15px] font-semibold text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3 cursor-pointer border-none bg-transparent outline-none rounded-xl"
                 role="menuitem"
-                onClick={handleItemClick}
+                onClick={(e) => handleItemClick(item.key, e)}
               >
                 {createElement(item.icon, { size: 22, className: "text-gray-700" })}
                 <span>{t?.catSpeak?.reels?.detail?.moreMenu?.[item.key] || item.defaultLabel}</span>

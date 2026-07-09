@@ -7,7 +7,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * Interactive Reel Caption component overlaying or standing beside the video player.
  * Features description truncation with "Show more/Show less" toggles and premium tags.
  */
-const ReelCaption = React.memo(({ reel, isMobile = false }) => {
+const ReelCaption = React.memo(({ reel, isMobile = false, onActionClick }) => {
   const { t } = useLanguage()
   const [isExpanded, setIsExpanded] = useState(false)
   const description = reel.description || ""
@@ -46,7 +46,7 @@ const ReelCaption = React.memo(({ reel, isMobile = false }) => {
             </span>
           </div>
         </div>
-        {!isMobile && <ReelMoreMenu />}
+        {!isMobile && <ReelMoreMenu onActionClick={onActionClick} />}
       </div>
 
       <div className={`leading-[1.6] ${isMobile ? "text-white text-[13px] drop-shadow-md" : "text-headingColor text-[14px]"}`}>

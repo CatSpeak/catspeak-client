@@ -18,6 +18,7 @@ import CommentItemNode from "./CommentItemNode"
 import VolumeSlider from "./VolumeSlider"
 import ReelCaption from "./ReelCaption"
 import CommentsSkeleton from "./CommentsSkeleton"
+import { BookmarkModal, ShareModal, NotInterestedModal, AboutAccountModal, ReportReelModal } from "../modals/ReelInteractionsModals"
 
 
 
@@ -41,11 +42,40 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   /* ── Refs ───────────────────────────────────────── */
   const commentInputRef = useRef(null)
 
+  /* ── Redux/API Hooks ────────────────────────────── */
+  const currentUser = useSelector(selectCurrentUser)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const { openAuthModal } = useAuthModal()
+
   /* ── State ──────────────────────────────────────── */
   const { t, language } = useLanguage()
   const [commentText, setCommentText] = useState("")
   const [replyTarget, setReplyTarget] = useState(null)
   const { isFullscreen, toggleFullscreen } = useFullscreen()
+
+  const [isBookmarkOpen, setIsBookmarkOpen] = useState(false)
+  const [isShareOpen, setIsShareOpen] = useState(false)
+  const [isNotInterestedOpen, setIsNotInterestedOpen] = useState(false)
+  const [isAboutOpen, setIsAboutOpen] = useState(false)
+  const [isReportOpen, setIsReportOpen] = useState(false)
+
+  const handleActionClick = useCallback((actionKey) => {
+    if (actionKey === "copyLink") {
+      navigator.clipboard.writeText(`${window.location.origin}/reels/${reel.id}`)
+      toast.success("Đã sao chép liên kết!")
+      return
+    }
+
+    if (!isAuthenticated) {
+      openAuthModal()
+      return
+    }
+
+    if (actionKey === "report") setIsReportOpen(true)
+    else if (actionKey === "notInterested") setIsNotInterestedOpen(true)
+    else if (actionKey === "addToPlaylist" || actionKey === "saveReel") setIsBookmarkOpen(true)
+    else if (actionKey === "aboutAccount") setIsAboutOpen(true)
+  }, [reel.id, isAuthenticated, openAuthModal])
 
   const {
     videoRef, progressRef, containerRef, isPlaying, setIsPlaying,
@@ -57,11 +87,6 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     hasUserInteracted, shouldPreload,
   })
 
-  /* ── Redux/API Hooks ────────────────────────────── */
-  const currentUser = useSelector(selectCurrentUser)
-  const isAuthenticated = useSelector(selectIsAuthenticated)
-  const { openAuthModal } = useAuthModal()
-  
   const { handleLike, handleCommentSubmit, handleCommentDelete, isPostingComment } = useReelInteractions({
     reel,
     isAuthenticated,
@@ -96,8 +121,12 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
 
   const handleBookmarkToggle = useCallback((e) => {
     e.stopPropagation()
-    toast("This feature is not available yet.", { icon: "🚧" })
-  }, [])
+    if (!isAuthenticated) {
+      openAuthModal()
+      return
+    }
+    setIsBookmarkOpen(true)
+  }, [isAuthenticated, openAuthModal])
 
   const handleReply = useCallback((target) => {
     setReplyTarget(target)
@@ -218,7 +247,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         {/* Right panel: info + comments */}
         <div className="flex flex-col w-full md:w-[340px] lg:w-[380px] shrink-0 h-auto md:h-full overflow-y-auto border-l-0 md:border-l border-gray-100">
           {/* Top Header & Details (ReelCaption) */}
-          <ReelCaption reel={reel} />
+          <ReelCaption reel={reel} onActionClick={handleActionClick} />
 
           {/* Comments List */}
           <div className={`flex-1 overflow-y-auto px-4 bg-white border-b border-gray-100 ${showComments ? "block" : "hidden md:block"}`}>
@@ -303,7 +332,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    toast("This feature is not available yet.", { icon: "🚧" })
+                    setIsShareOpen(true)
                   }}
                   className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center group border-none bg-transparent outline-none"
                 >
@@ -314,6 +343,13 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
           </div>
         </div>
       </div>
+
+      {/* Render Reels Modals */}
+      <BookmarkModal isOpen={isBookmarkOpen} onClose={() => setIsBookmarkOpen(false)} reelId={reel.id} />
+      <ShareModal isOpen={isShareOpen} onClose={() => setIsShareOpen(false)} reel={reel} />
+      <NotInterestedModal isOpen={isNotInterestedOpen} onClose={() => setIsNotInterestedOpen(false)} reel={reel} />
+      <AboutAccountModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} accountId={reel.accountId} />
+      <ReportReelModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} reelId={reel.id} />
     </div>
   )
 })

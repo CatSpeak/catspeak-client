@@ -27,11 +27,16 @@ const HeaderSearchBar = () => {
     }
     newParams.set("page", "1")
 
-    const communityPath = `/${lang || "en"}/community`
-    if (!location.pathname.startsWith(communityPath)) {
-      navigate(`${communityPath}?${newParams.toString()}`)
-    } else {
+    const isReelsPage = location.pathname.includes("/reels")
+    if (isReelsPage) {
       setSearchParams(newParams, { preventScrollReset: true })
+    } else {
+      const communityPath = `/${lang || "en"}/community`
+      if (!location.pathname.startsWith(communityPath)) {
+        navigate(`${communityPath}?${newParams.toString()}`)
+      } else {
+        setSearchParams(newParams, { preventScrollReset: true })
+      }
     }
     
     // Close the mobile search bar after searching

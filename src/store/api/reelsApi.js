@@ -81,11 +81,12 @@ export const reelsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get Reels feed using decay scoring (perfect for infinite scroll)
     getReelsFeed: builder.query({
-      query: ({ sourceFilter = "All", page = 1, pageSize = 20, excludeReelIds } = {}) => {
+      query: ({ sourceFilter = "All", page = 1, pageSize = 20, excludeReelIds, search } = {}) => {
         const params = new URLSearchParams()
         if (sourceFilter) params.append("sourceFilter", sourceFilter)
         if (page) params.append("page", String(page))
         if (pageSize) params.append("pageSize", String(pageSize))
+        if (search) params.append("search", search)
 
         if (excludeReelIds && Array.isArray(excludeReelIds)) {
           excludeReelIds.forEach((id) => params.append("excludeReelIds", String(id)))
@@ -101,7 +102,8 @@ export const reelsApi = baseApi.injectEndpoints({
       serializeQueryArgs: ({ endpointName, queryArgs = {} }) => {
         const sourceFilter = queryArgs.sourceFilter || "All"
         const pageSize = queryArgs.pageSize || 20
-        return `${endpointName}-${sourceFilter}-${pageSize}`
+        const search = queryArgs.search || ""
+        return `${endpointName}-${sourceFilter}-${pageSize}-${search}`
       },
       merge: (currentCache, incomingResponse, { arg }) => {
         const incomingReels = getReelList(incomingResponse)
@@ -131,7 +133,8 @@ export const reelsApi = baseApi.injectEndpoints({
         return (
           currentArg?.sourceFilter !== previousArg?.sourceFilter ||
           currentArg?.page !== previousArg?.page ||
-          currentArg?.pageSize !== previousArg?.pageSize
+          currentArg?.pageSize !== previousArg?.pageSize ||
+          currentArg?.search !== previousArg?.search
         )
       },
       providesTags: (result) =>
@@ -402,10 +405,67 @@ export const reelsApi = baseApi.injectEndpoints({
         { type: "Reels", id: "USER_REELS" },
       ],
     }),
+
+    getPlaylists: builder.query({
+      query: () => "/Reels/playlists",
+      providesTags: ["ReelPlaylists"],
+    }),
+
+    createPlaylist: builder.mutation({
+      query: (name) => ({
+        url: "/Reels/playlists",
+        method: "POST",
+        body: { name },
+      }),
+      invalidatesTags: ["ReelPlaylists"],
+    }),
+
+    bookmarkReel: builder.mutation({
+      query: ({ reelId, playlistId }) => ({
+        url: `/Reels/${reelId}/bookmark`,
+        method: "POST",
+        body: { playlistId },
+      }),
+      invalidatesTags: (result, error, { reelId }) => [
+        { type: "Reels", id: String(reelId) },
+        "ReelPlaylists",
+        "BookmarkedReels",
+      ],
+    }),
+
+    getBookmarkedReels: builder.query({
+      query: (playlistId) => {
+        const params = new URLSearchParams()
+        if (playlistId) params.append("playlistId", String(playlistId))
+        return `/Reels/bookmarked?${params.toString()}`
+      },
+      providesTags: ["BookmarkedReels"],
+    }),
+
+    hideReelPreference: builder.mutation({
+      query: ({ reelId, type, value }) => ({
+        url: `/Reels/${reelId}/not-interested`,
+        method: "POST",
+        body: { type, value },
+      }),
+      invalidatesTags: ["Reels"],
+    }),
+
+    reportReel: builder.mutation({
+      query: ({ reelId, category, description }) => ({
+        url: `/Reels/${reelId}/report`,
+        method: "POST",
+        body: { category, description },
+      }),
+    }),
+
+    getAboutAccount: builder.query({
+      query: (accountId) => `/Account/${accountId}/about`,
+      transformResponse: (response) => response?.data,
+    }),
   }),
 })
 
-// Export hooks for usage in components
 export const {
   useGetReelsFeedQuery,
   useGetReelByIdQuery,
@@ -422,4 +482,11 @@ export const {
   useGetChallengeLeaderboardQuery,
   useGetUserReelsQuery,
   useDeleteReelMutation,
+  useGetPlaylistsQuery,
+  useCreatePlaylistMutation,
+  useBookmarkReelMutation,
+  useGetBookmarkedReelsQuery,
+  useHideReelPreferenceMutation,
+  useReportReelMutation,
+  useGetAboutAccountQuery,
 } = reelsApi
