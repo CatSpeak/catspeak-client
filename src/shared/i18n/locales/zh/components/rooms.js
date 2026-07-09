@@ -466,7 +466,26 @@ export default {
       confirmExit: "确认退出",
       roundLeaderboard: "本回合排行榜",
       forceStopNotEnoughPlayers: "玩家人数不足以继续。游戏已取消。",
-      forceStopGeneric: "游戏意外停止。"
+      forceStopGeneric: "游戏意外停止。",
+      tallyingFinalResults: "正在统计最终成绩...",
+      gameHistory: "游戏历史",
+      historyTitle: "比赛记录",
+      noHistoryFound: "该房间没有游戏历史记录。",
+      score: "分数",
+      matchDate: "比赛日期",
+      winner: "获胜者"
+    },
+    setup: {
+      title: "游戏设置",
+      selectLanguage: "语言",
+      langEn: "英语",
+      langZh: "中文",
+      selectLevel: "难度",
+      levelEasy: "简单",
+      levelMedium: "中等",
+      levelHard: "困难",
+      cancel: "取消",
+      startNow: "立即开始"
     }
   }
 };

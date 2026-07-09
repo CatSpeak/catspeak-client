@@ -9,7 +9,7 @@ const GameSetupModal = ({ open, onClose }) => {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   const handleStart = () => {
-    const event = new CustomEvent("mockStartGame", {
+    const event = new CustomEvent("hostStartGame", {
       detail: { level: selectedLevel, language: selectedLanguage },
     });
     window.dispatchEvent(event);
@@ -34,8 +34,8 @@ const GameSetupModal = ({ open, onClose }) => {
           </label>
           <Dropdown
             options={[
-              { label: t.rooms?.game?.setup?.langEn || "Tiếng Anh (English)", value: "en" },
-              { label: t.rooms?.game?.setup?.langZh || "Tiếng Trung (中文)", value: "zh" },
+              { label: t.rooms?.game?.setup?.langEn || "Tiếng Anh", value: "en" },
+              { label: t.rooms?.game?.setup?.langZh || "Tiếng Trung", value: "zh" },
             ]}
             value={selectedLanguage}
             onChange={(val) => setSelectedLanguage(val)}
@@ -51,9 +51,9 @@ const GameSetupModal = ({ open, onClose }) => {
           </label>
           <Dropdown
             options={[
-              { label: t.rooms?.game?.setup?.levelEasy || "Dễ (Beginner)", value: "easy" },
-              { label: t.rooms?.game?.setup?.levelMedium || "Trung bình (Intermediate)", value: "medium" },
-              { label: t.rooms?.game?.setup?.levelHard || "Khó (Advanced)", value: "hard" },
+              { label: t.rooms?.game?.setup?.levelEasy || "Dễ", value: "easy" },
+              { label: t.rooms?.game?.setup?.levelMedium || "Trung bình", value: "medium" },
+              { label: t.rooms?.game?.setup?.levelHard || "Khó", value: "hard" },
             ]}
             value={selectedLevel}
             onChange={(val) => setSelectedLevel(val)}
@@ -74,7 +74,7 @@ const GameSetupModal = ({ open, onClose }) => {
           onClick={handleStart}
           className="flex-1 py-3 px-4 rounded-xl font-bold bg-cath-red-500 hover:bg-cath-red-600 text-white shadow-lg shadow-cath-red-500/25 transition-all"
         >
-          {t.rooms?.game?.setup?.start || "Bắt đầu ngay"}
+          {t.rooms?.game?.setup?.startNow || "Bắt đầu ngay"}
         </button>
       </div>
     </Modal>

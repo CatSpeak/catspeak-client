@@ -3,7 +3,7 @@ import { useGame } from "../../../context/GameContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
-import { Send } from "lucide-react";
+import { Send, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/features/auth";
 
 const AnswerInput = () => {
@@ -49,7 +49,7 @@ const AnswerInput = () => {
     if (lastCorrectAnswer && lastCorrectAnswer._ts) {
       setShowFlash(true);
       // Play ding sound if available
-      new Audio("/assets/audio/ding.mp3").play().catch(() => {});
+      new Audio("/sounds/correct.mp3").play().catch(() => {});
       
       const timeout = setTimeout(() => setShowFlash(false), 1500);
       return () => clearTimeout(timeout);
@@ -67,37 +67,44 @@ const AnswerInput = () => {
   return (
     <div className="relative shrink-0">
       
-      {/* Cửa sổ nháy flash khi có người trả lời đúng */}
+      {/* Cửa sổ nháy flash khi có người trả lời đúng - Đưa lên góc trên bên phải */}
       <AnimatePresence mode="wait">
         {showFlash && lastCorrectAnswer && (
           <motion.div
             key={lastCorrectAnswer._ts}
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute bottom-full mb-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex justify-center"
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 50, scale: 0.8 }}
+            className="fixed top-24 md:top-28 right-4 z-[200] pointer-events-none"
           >
-            <div className="bg-white px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl shadow-lg border border-green-200 flex items-center justify-center gap-2 md:gap-3 text-green-600 font-bold text-sm md:text-lg max-w-[90vw] text-center mx-auto">
-              🎉 {lastCorrectAnswer.player_name} {t.rooms?.game?.crackIt?.gotItRight || "đã đoán đúng!"}
+            <div className="bg-white/95 backdrop-blur-md text-slate-800 px-4 py-3 rounded-2xl shadow-xl border border-green-100 flex items-center gap-3 min-w-[200px]">
+              <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                <CheckCircle2 size={20} />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="font-bold text-sm leading-tight max-w-[150px] truncate">{lastCorrectAnswer.player_name}</span>
+                <span className="text-xs text-slate-500 font-medium mt-0.5">{t.rooms?.game?.crackIt?.gotItRight || "đã đoán chính xác!"}</span>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Lịch sử lần thử (Toast tự mất) */}
+      {/* Lịch sử lần thử sai (Toast tự mất) */}
       <AnimatePresence>
         {wrongToasts.length > 0 && !isCorrect && (
           <motion.div
-            className="absolute bottom-full mb-4 left-0 w-full flex flex-col-reverse items-start gap-2"
+            className="absolute bottom-full mb-3 left-4 flex flex-row-reverse items-center gap-2 z-[10] pointer-events-none"
           >
             {wrongToasts.map((toast) => (
               <motion.div
                 key={toast.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-red-500/80 backdrop-blur-sm text-white px-4 py-2 rounded-2xl text-sm font-medium shadow-lg ml-4"
+                initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, scale: 0.9, filter: "blur(4px)" }}
+                className="bg-white/95 backdrop-blur-md text-slate-700 px-4 py-2 rounded-xl text-sm font-medium shadow-[0_4px_12px_rgb(239,68,68,0.15)] flex items-center gap-2 border border-red-100"
               >
+                <span className="text-red-500 font-bold text-xs flex items-center justify-center bg-red-50 w-5 h-5 rounded-full">✕</span> 
                 {toast.text}
               </motion.div>
             ))}

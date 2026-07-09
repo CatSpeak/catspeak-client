@@ -492,7 +492,26 @@ export default {
       confirmExit: "Yes, Exit",
       roundLeaderboard: "Round Leaderboard",
       forceStopNotEnoughPlayers: "Not enough players to continue. Game cancelled.",
-      forceStopGeneric: "Game stopped unexpectedly."
+      forceStopGeneric: "Game stopped unexpectedly.",
+      tallyingFinalResults: "Tallying final results...",
+      gameHistory: "Game History",
+      historyTitle: "Match History",
+      noHistoryFound: "No game history found for this room.",
+      score: "Score",
+      matchDate: "Date Played",
+      winner: "Winner"
+    },
+    setup: {
+      title: "Game Setup",
+      selectLanguage: "Language",
+      langEn: "English",
+      langZh: "Chinese",
+      selectLevel: "Difficulty",
+      levelEasy: "Easy",
+      levelMedium: "Medium",
+      levelHard: "Hard",
+      cancel: "Cancel",
+      startNow: "Start Now"
     }
   },
   participants: "participants",

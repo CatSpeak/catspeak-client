@@ -470,7 +470,27 @@ export default {
       confirmExit: "Đồng ý thoát",
       roundLeaderboard: "Thành tích ván này",
       forceStopNotEnoughPlayers: "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
-      forceStopGeneric: "Trò chơi bị dừng đột ngột."
+      forceStopGeneric: "Trò chơi bị dừng đột ngột.",
+      tallyingFinalResults: "Đang tổng hợp kết quả chung cuộc...",
+      nextRoundIn: "Ván tiếp theo sẽ bắt đầu sau ít giây...",
+      gameHistory: "Lịch sử trò chơi",
+      historyTitle: "Lịch sử thi đấu",
+      noHistoryFound: "Chưa có dữ liệu lịch sử cho phòng này.",
+      score: "Điểm",
+      matchDate: "Ngày chơi",
+      winner: "Người chiến thắng"
+    },
+    setup: {
+      title: "Thiết lập Trò chơi",
+      selectLanguage: "Ngôn ngữ",
+      langEn: "Tiếng Anh",
+      langZh: "Tiếng Trung",
+      selectLevel: "Mức độ",
+      levelEasy: "Dễ",
+      levelMedium: "Trung bình",
+      levelHard: "Khó",
+      cancel: "Hủy",
+      startNow: "Bắt đầu ngay"
     }
   },
   participants: "người",

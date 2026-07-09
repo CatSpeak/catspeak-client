@@ -32,11 +32,12 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const { id: roomId } = useParams();
   const { t } = useLanguage();
 
-  // Create a guest ID if not logged in
-  const guestId = useMemo(() => -Math.floor(Math.random() * 1000000) - 1, []);
+  const localPart = useLocalParticipant();
+  const localParticipantIdentity = localPart?.localParticipant?.identity;
+  const localParticipantName = localPart?.localParticipant?.name;
 
-  // Use user.id, user.accountId, user.userId or fallback to guestId
-  const currentUserId = user?.id || user?.accountId || user?.userId || guestId;
+  // Use user.id, user.accountId, user.userId or fallback to LiveKit identity
+  const currentUserId = user?.id || user?.accountId || user?.userId || localParticipantIdentity;
 
   // Game states: idle | setup | playing | result | game_over
   const [gameState, setGameState] = useState("idle");
@@ -59,9 +60,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const [playerNames, setPlayerNames] = useState({}); // Map of playerId -> playerName
   const [leftPlayers, setLeftPlayers] = useState(new Set()); // IDs of players who have left the game
 
-  const localPart = useLocalParticipant();
-  const localParticipantName = localPart?.localParticipant?.name;
-
   const connection = useGameSignaling({
     GAME_SETUP: (payload) => {
       setGameType(payload.game_type);
@@ -76,13 +74,18 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     },
     ROUND_START: (payload) => {
       setGameState("playing");
-      setCurrentRound({ round: payload.round, total: payload.total });
+      setCurrentRound({ 
+        round: payload.round, 
+        total: payload.total,
+        started_at: payload.started_at 
+      });
       setPuzzle({
         image_url: payload.image_url,
         hint: payload.hint,
         hint_pinyin: payload.hint_pinyin,
         word_count: payload.word_count,
         word_mask: payload.word_mask,
+        correct_answer: payload.correct_answer,
       });
       setTimer(payload.timer);
       setCorrectPlayers(new Set());
@@ -92,7 +95,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     CORRECT_ANSWER: (payload) => {
       if (payload.is_correct) {
         const pid = payload.player_id.toString();
-        console.log("Adding to correctPlayers:", pid);
         setCorrectPlayers((prev) => new Set(prev).add(pid));
         setScores((prev) => ({
           ...prev,
@@ -154,6 +156,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       setCurrentRound({
         round: payload.current_round?.round,
         total: payload.current_round?.total,
+        started_at: payload.current_round?.started_at,
       });
       setPuzzle({
         image_url: payload.current_round?.image_url,
@@ -161,6 +164,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         hint_pinyin: payload.current_round?.hint_pinyin,
         word_count: payload.current_round?.word_count,
         word_mask: payload.current_round?.word_mask,
+        correct_answer: payload.current_round?.correct_answer,
       });
       setTimer(payload.current_round?.timer || 60);
       setGameState("playing");
@@ -208,14 +212,14 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   );
 
   useEffect(() => {
-    const handleMockStart = (e) => {
+    const handleHostStart = (e) => {
       if (gameState === "idle") {
         const detail = e.detail || {};
         startGame("crack_it", detail.level || "easy", detail.language);
       }
     };
-    window.addEventListener("mockStartGame", handleMockStart);
-    return () => window.removeEventListener("mockStartGame", handleMockStart);
+    window.addEventListener("hostStartGame", handleHostStart);
+    return () => window.removeEventListener("hostStartGame", handleHostStart);
   }, [startGame, gameState]);
 
   const submitAnswer = useCallback(

@@ -16,42 +16,48 @@ const TopBar = ({ onOpenSidebar, onExit }) => {
 
   useEffect(() => {
     let interval;
-    if (gameState === "playing") {
+    if (gameState === "playing" && currentRound?.started_at) {
+      const startedAt = new Date(currentRound.started_at).getTime();
+
+      // Run every 200ms for smoother UI updates, though seconds only change once per sec
       interval = setInterval(() => {
+        const now = Date.now();
+        const elapsed = Math.floor((now - startedAt) / 1000);
+        const remaining = Math.max(0, initialTimer - elapsed);
+        
         setTimeLeft((prev) => {
-          if (prev === 11) {
+          if (remaining === 10 && prev > 10) {
             // Play at 10 seconds remaining
             new Audio("/sounds/ticking.mp3").play().catch(() => {});
           }
-          if (prev <= 1) {
+          if (remaining <= 0) {
             clearInterval(interval);
-            return 0;
           }
-          return prev - 1;
+          return remaining;
         });
-      }, 1000);
+      }, 500); 
     }
     return () => clearInterval(interval);
-  }, [gameState, initialTimer]);
+  }, [gameState, currentRound?.started_at]);
 
   if (!currentRound) return null;
 
   const isLowTime = timeLeft <= 10;
 
   return (
-    <div className="flex items-center justify-between bg-white px-4 md:px-10 py-3 md:py-4 rounded-2xl md:rounded-3xl shadow-sm border border-gray-200 shrink-0 w-full relative">
-      <div className="flex items-center gap-2 md:gap-4">
-        <h2 className="text-lg md:text-xl font-black text-cath-red-700 tracking-tight uppercase">
+    <div className="flex items-center justify-between bg-white px-3 md:px-10 py-2.5 md:py-4 rounded-2xl md:rounded-3xl shadow-sm border border-gray-200 shrink-0 w-full gap-2">
+      <div className="flex items-center gap-1.5 md:gap-4 flex-1 overflow-hidden">
+        <h2 className="text-base md:text-xl font-black text-cath-red-700 tracking-tight uppercase truncate hidden sm:block">
           {t.rooms?.game?.crackIt?.title || "Crack It"}
         </h2>
-        <div className="h-5 md:h-6 w-px bg-gray-300"></div>
-        <div className="text-sm md:text-base text-slate-600 font-medium whitespace-nowrap">
+        <div className="h-4 md:h-6 w-px bg-gray-300 shrink-0 hidden sm:block"></div>
+        <div className="text-sm md:text-base text-slate-600 font-medium whitespace-nowrap shrink-0">
           {t.rooms?.game?.crackIt?.round || "Ván"} {currentRound.round}/
           {currentRound.total}
         </div>
       </div>
 
-      <div className="flex items-center justify-center absolute left-1/2 -translate-x-1/2">
+      <div className="flex items-center justify-center shrink-0">
         <motion.div
           transition={isLowTime ? { repeat: Infinity, duration: 1 } : {}}
           className={`text-2xl md:text-3xl font-black tabular-nums ${isLowTime ? "text-cath-red-600 drop-shadow-sm" : "text-slate-800"}`}
@@ -60,7 +66,7 @@ const TopBar = ({ onOpenSidebar, onExit }) => {
         </motion.div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-1 justify-end">
         {/* Mobile Sidebar Toggle Button */}
         {onOpenSidebar && (
           <button 

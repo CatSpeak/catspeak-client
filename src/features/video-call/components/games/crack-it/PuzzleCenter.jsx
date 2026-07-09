@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useGame } from "../../../context/GameContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
@@ -13,16 +13,56 @@ const PuzzleCenter = () => {
       puzzle.hint
     ) : (
       <div className="flex flex-col gap-2">
-        <div className="text-2xl font-medium text-slate-800">
-          {puzzle.hint}
-        </div>
+        <div className="text-2xl font-medium text-slate-800">{puzzle.hint}</div>
         <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
       </div>
     );
 
-  const underscores = puzzle.word_mask || Array.from({ length: puzzle.word_count || 1 })
-    .map(() => "-")
-    .join("");
+  const [displayMask, setDisplayMask] = useState("");
+
+  useEffect(() => {
+    if (!puzzle) return;
+
+    // Initial mask
+    const initialMask =
+      puzzle.word_mask ||
+      Array.from({ length: puzzle.word_count || 1 })
+        .map(() => "-")
+        .join("");
+
+    setDisplayMask(initialMask);
+
+    const answer = puzzle.correct_answer;
+    if (!answer) return;
+
+    const nonSpaceIndices = [];
+    for (let i = 0; i < answer.length; i++) {
+      if (answer[i] !== " ") {
+        nonSpaceIndices.push(i);
+      }
+    }
+
+    if (nonSpaceIndices.length === 0) return;
+
+    const delayPerChar = 60000 / (nonSpaceIndices.length + 1);
+    let step = 0;
+
+    const interval = setInterval(() => {
+      if (step < nonSpaceIndices.length) {
+        const idx = nonSpaceIndices[step];
+        setDisplayMask((prev) => {
+          const arr = prev.split("");
+          arr[idx] = answer[idx];
+          return arr.join("");
+        });
+        step++;
+      } else {
+        clearInterval(interval);
+      }
+    }, delayPerChar);
+
+    return () => clearInterval(interval);
+  }, [puzzle]);
 
   return (
     <div className="flex-1 bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
@@ -50,7 +90,7 @@ const PuzzleCenter = () => {
 
         <div className="flex flex-col items-center gap-2 md:gap-4">
           <div className="text-3xl md:text-4xl font-black text-gray-400 tracking-[0.1em] mt-2">
-            {underscores}
+            {displayMask}
           </div>
         </div>
       </div>

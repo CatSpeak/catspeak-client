@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   MonitorUp,
   MonitorOff,
@@ -12,6 +13,7 @@ import {
   Check,
   RefreshCcw,
   Gamepad2,
+  History,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
@@ -22,8 +24,10 @@ import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleCont
 import SubtitleLanguagePicker from "./SubtitleLanguagePicker";
 import { useParticipants, useLocalParticipant } from "@livekit/components-react";
 import GameSetupModal from "./games/GameSetupModal";
+import GameHistoryModal from "./games/GameHistoryModal";
 
 const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
+  const { id: roomId } = useParams();
   const { t } = useLanguage();
   const {
     isLocalScreenShare,
@@ -48,6 +52,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
   } = useGlobalVideoCall();
 
   const [showGameSetup, setShowGameSetup] = useState(false);
+  const [showGameHistory, setShowGameHistory] = useState(false);
 
   const {
     isSubtitleActive,
@@ -125,6 +130,18 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                           >
                             <Gamepad2 size={20} />
                             {t.rooms?.game?.crackIt?.playGame || "Play Crack It"}
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              setShowMoreMenu(false);
+                              setShowGameHistory(true);
+                            }}
+                            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-slate-700`}
+                            style={{ textAlign: "left" }}
+                          >
+                            <History size={20} />
+                            {t.rooms?.game?.crackIt?.gameHistory || "Game History"}
                           </button>
                           <div className="h-px bg-gray-100 my-1 mx-2" />
                         </>
@@ -270,6 +287,12 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
       <GameSetupModal 
         open={showGameSetup} 
         onClose={() => setShowGameSetup(false)} 
+      />
+
+      <GameHistoryModal
+        open={showGameHistory}
+        onClose={() => setShowGameHistory(false)}
+        roomName={roomId}
       />
     </>
   );
