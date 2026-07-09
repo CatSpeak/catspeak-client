@@ -8,8 +8,11 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import BreakoutSettingsArea from "./BreakoutSettingsArea"
 import BreakoutSetupControls from "./BreakoutSetupControls"
 import BreakoutSetupRoomList from "./BreakoutSetupRoomList"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useDragScroll } from "../../../hooks/useDragScroll"
 
-const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
+const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCreatorId, allLiveStudents }) => {
+  const { t } = useLanguage()
   const [setupBreakoutGroups, { isLoading: isSaving }] =
     useSetupBreakoutGroupsMutation()
   const [startBreakoutRooms, { isLoading: isStarting }] =
@@ -26,11 +29,13 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
   // Allocation State: Array of { roomName, accountIds: [] }
   const [allocations, setAllocations] = useState([])
 
+  const { containerRef, handleDragOverScroll, handleDragLeaveScroll } = useDragScroll()
+
   // Initialize/Reset allocations when roomCount changes
   useEffect(() => {
     if (!status?.isBreakoutActive) {
       const initial = Array.from({ length: roomCount }, (_, i) => ({
-        roomName: `Phòng ${i + 1}`,
+        roomName: `${t.rooms.breakoutRooms.roomPrefix}${i + 1}`,
         accountIds: [],
       }))
       setAllocations(initial)
@@ -40,13 +45,13 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
   // Auto-allocate students to rooms
   const handleShuffle = () => {
     if (students.length === 0) {
-      toast.error("Không có học viên nào hoạt động trong phòng học.")
+      toast.error(t.rooms.breakoutRooms.noActiveStudents)
       return
     }
 
     const shuffled = [...students].sort(() => Math.random() - 0.5)
     const newAllocations = Array.from({ length: roomCount }, (_, i) => ({
-      roomName: `Phòng ${i + 1}`,
+      roomName: `${t.rooms.breakoutRooms.roomPrefix}${i + 1}`,
       accountIds: [],
     }))
 
@@ -61,7 +66,6 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
     })
 
     setAllocations(newAllocations)
-    toast.success("Đã phân bổ ngẫu nhiên học viên!")
   }
 
   // Clear allocations
@@ -72,7 +76,6 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
         accountIds: [],
       })),
     )
-    toast.success("Đã xóa sạch phân phối học viên.")
   }
 
   // Handle single student reallocation in setup phase
@@ -101,7 +104,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
       0,
     )
     if (totalAssigned === 0 && students.length > 0) {
-      toast.error("Vui lòng phân bổ ít nhất một học viên vào phòng con.")
+      toast.error(t.rooms.breakoutRooms.assignAtLeastOne)
       return
     }
 
@@ -113,7 +116,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
           roomName: r.roomName,
           accountIds: r.accountIds,
         })),
-        timerDuration: timerEnabled ? timerDuration * 60 : null,
+        timerDuration: timerEnabled ? timerDuration : null,
         allowParticipantChangeRoom: allowChangeRoom,
         maxParticipantsPerRoom: maxParticipantsEnabled ? maxParticipants : null,
       }
@@ -122,11 +125,10 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
 
       // 2. Start rooms
       await startBreakoutRooms(sessionId).unwrap()
-      toast.success("Bắt đầu các phòng thảo luận nhỏ!")
       refetchStatus()
     } catch (err) {
       console.error(err)
-      toast.error(err?.data?.message || "Lỗi khởi chạy phòng nhỏ.")
+      toast.error(err?.data?.message || t.rooms.breakoutRooms.startError)
     }
   }
 
@@ -139,9 +141,18 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
     (s) => !assignedIds.includes(Number(s.accountId || s.id || s.identity)),
   )
 
+  const hostStudent = allLiveStudents?.find(
+    (s) => String(s.accountId) === String(roomCreatorId)
+  )
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto">
+      <div 
+        ref={containerRef}
+        onDragOver={handleDragOverScroll}
+        onDragLeave={handleDragLeaveScroll}
+        className="flex-1 overflow-y-auto"
+      >
         <div className="border-b border-[#e5e5e5]">
           <BreakoutSettingsArea
             allowChangeRoom={allowChangeRoom}
@@ -172,6 +183,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
             allocations={allocations}
             students={students}
             handleMoveStudentSetup={handleMoveStudentSetup}
+            hostStudent={hostStudent}
           />
         </div>
       </div>
@@ -185,7 +197,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus }) => {
           variant="primary"
           className="w-full text-sm"
         >
-          Mở phòng
+          {t.rooms.breakoutRooms.openRoomsBtn}
         </PillButton>
       </div>
     </div>

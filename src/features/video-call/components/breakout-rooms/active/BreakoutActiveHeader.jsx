@@ -1,6 +1,7 @@
 import React from "react"
 import { Switch } from "@/shared/components/ui/inputs"
 import ListItem from "@/shared/components/ui/ListItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const BreakoutActiveHeader = ({
   status,
@@ -8,6 +9,8 @@ const BreakoutActiveHeader = ({
   isTogglingAllow,
   handleToggleAllowChange,
 }) => {
+  const { t } = useLanguage()
+
   return (
     <div className="py-2 border-b border-[#e5e5e5]">
       <ListItem
@@ -20,7 +23,7 @@ const BreakoutActiveHeader = ({
           />
         }
       >
-        <span>Cho phép đổi phòng</span>
+        <span>{t.rooms.breakoutRooms.allowChangeRoom}</span>
       </ListItem>
     </div>
   )

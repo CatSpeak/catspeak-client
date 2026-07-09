@@ -131,7 +131,7 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                             hoverEffect={true}
                             className="min-[769px]:hidden"
                           >
-                            Breakout Rooms
+                            {t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
                           </ListItem>
                         )}
 

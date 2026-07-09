@@ -21,23 +21,25 @@ const ListItem = ({
   lines = 1,
   className = "",
   contentClassName = "",
+  ...props
 }) => {
   const isClickable = !!onClick
 
   const Wrapper = isClickable ? "button" : "div"
 
   const linesClasses = {
-    1: "h-12",
+    1: "h-14",
     2: "h-[72px]",
     3: "h-[88px]",
   }
-  const heightClass = linesClasses[lines] || "h-12"
+  const heightClass = linesClasses[lines] || "h-14"
 
   return (
     <Wrapper
       onClick={onClick}
       className={`group relative outline-none flex w-full items-center text-left ${className}`}
       disabled={isClickable ? false : undefined}
+      {...props}
     >
       <div
         className={`w-full ${heightClass} px-4 flex items-center justify-between transition ${

@@ -3,6 +3,7 @@ import { MessageSquare } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Modal from "@/shared/components/ui/Modal"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const BreakoutActiveFooter = ({
   broadcastMsg,
@@ -12,6 +13,7 @@ const BreakoutActiveFooter = ({
   handleStopBreakouts,
   isStopping,
 }) => {
+  const { t } = useLanguage()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const onSubmit = async (e) => {
@@ -29,7 +31,7 @@ const BreakoutActiveFooter = ({
         className="w-full"
         startIcon={<MessageSquare />}
       >
-        Gửi thông báo chung
+        {t.rooms.breakoutRooms.broadcastBtn}
       </PillButton>
 
       <PillButton
@@ -39,25 +41,24 @@ const BreakoutActiveFooter = ({
         variant="primary"
         className="w-full"
       >
-        Đóng phòng
+        {t.rooms.breakoutRooms.closeRoomsBtn}
       </PillButton>
 
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Gửi thông báo chung"
+        title={t.rooms.breakoutRooms.broadcastTitle}
       >
         <form onSubmit={onSubmit} className="flex flex-col gap-4 py-4">
           <div className="flex flex-col gap-3">
             <TextInput
-              placeholder="Ví dụ: Các em thảo luận trong 5 phút nữa nhé..."
+              placeholder={t.rooms.breakoutRooms.broadcastPlaceholder}
               value={broadcastMsg}
               onChange={(e) => setBroadcastMsg(e.target.value)}
               autoFocus
             />
             <p className="text-sm text-[#606060]">
-              Tin nhắn này sẽ được gửi đồng thời đến tất cả các phòng thảo luận
-              nhỏ.
+              {t.rooms.breakoutRooms.broadcastDesc}
             </p>
           </div>
 
@@ -69,7 +70,7 @@ const BreakoutActiveFooter = ({
               variant="primary"
               className="w-full sm:w-auto"
             >
-              Gửi
+              {t.rooms.breakoutRooms.sendBtn}
             </PillButton>
           </div>
         </form>

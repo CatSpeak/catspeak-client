@@ -17,6 +17,8 @@ import {
 import BreakoutActiveHeader from "./BreakoutActiveHeader"
 import BreakoutActiveRoomList from "./BreakoutActiveRoomList"
 import BreakoutActiveFooter from "./BreakoutActiveFooter"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useDragScroll } from "../../../hooks/useDragScroll"
 
 const BreakoutActiveView = ({
   sessionId,
@@ -27,6 +29,7 @@ const BreakoutActiveView = ({
   roomCreatorId,
   allLiveStudents,
 }) => {
+  const { t } = useLanguage()
   const dispatch = useDispatch()
 
   const [stopBreakoutRooms, { isLoading: isStopping }] =
@@ -39,6 +42,8 @@ const BreakoutActiveView = ({
     useToggleAllowChangeRoomMutation()
   const [broadcastNotification, { isLoading: isBroadcasting }] =
     useBroadcastBreakoutNotificationMutation()
+
+  const { containerRef, handleDragOverScroll, handleDragLeaveScroll } = useDragScroll()
 
   // Active Phase Accordion State
   const [expandedRooms, setExpandedRooms] = useState({})
@@ -70,11 +75,10 @@ const BreakoutActiveView = ({
     try {
       await stopBreakoutRooms(sessionId).unwrap()
       dispatch(exitBreakout())
-      toast.success("Đã đóng tất cả các phòng thảo luận nhỏ.")
       refetchStatus()
     } catch (err) {
       console.error(err)
-      toast.error("Lỗi đóng các phòng nhỏ.")
+      toast.error(t.rooms.breakoutRooms.closeError)
     }
   }
 
@@ -86,11 +90,10 @@ const BreakoutActiveView = ({
         accountId,
         targetSubSessionId,
       }).unwrap()
-      toast.success("Đã di chuyển học viên sang phòng mới.")
       refetchStatus()
     } catch (err) {
       console.error(err)
-      toast.error(err?.data?.message || "Lỗi di chuyển học viên.")
+      toast.error(err?.data?.message || t.rooms.breakoutRooms.moveError)
     }
   }
 
@@ -99,10 +102,9 @@ const BreakoutActiveView = ({
     try {
       const res = await joinBreakoutRoom({ sessionId, subSessionId }).unwrap()
       dispatch(enterBreakout({ subSessionId, roomName, token: res.token }))
-      toast.success(`Đã tham gia: ${roomName}`)
     } catch (err) {
       console.error(err)
-      toast.error("Lỗi tham gia phòng nhỏ.")
+      toast.error(t.rooms.breakoutRooms.joinError)
     }
   }
 
@@ -115,10 +117,9 @@ const BreakoutActiveView = ({
       }).unwrap()
       dispatch(exitBreakout())
       dispatch(updateLivekitToken(res.token))
-      toast.success("Đã quay trở lại phòng chính.")
     } catch (err) {
       console.error(err)
-      toast.error("Lỗi quay trở lại phòng chính.")
+      toast.error(t.rooms.breakoutRooms.returnMainError)
     }
   }
 
@@ -137,7 +138,7 @@ const BreakoutActiveView = ({
       setBroadcastMsg("")
     } catch (err) {
       console.error(err)
-      toast.error("Lỗi gửi thông báo.")
+      toast.error(t.rooms.breakoutRooms.broadcastError)
     }
   }
 
@@ -148,14 +149,9 @@ const BreakoutActiveView = ({
         sessionId,
         allowParticipantChangeRoom: newVal,
       }).unwrap()
-      toast.success(
-        newVal
-          ? "Đã cho phép học viên tự do đổi phòng."
-          : "Đã cố định danh sách phòng.",
-      )
     } catch (err) {
       console.error(err)
-      toast.error("Không thể thay đổi cài đặt chuyển phòng.")
+      toast.error(t.rooms.breakoutRooms.toggleAllowError)
     }
   }
 
@@ -168,7 +164,12 @@ const BreakoutActiveView = ({
         handleToggleAllowChange={handleToggleAllowChange}
       />
 
-      <div className="flex-1 overflow-y-auto">
+      <div 
+        ref={containerRef}
+        onDragOver={handleDragOverScroll}
+        onDragLeave={handleDragLeaveScroll}
+        className="flex-1 overflow-y-auto"
+      >
         <BreakoutActiveRoomList
           status={status}
           currentSubSessionId={currentSubSessionId}
@@ -180,6 +181,7 @@ const BreakoutActiveView = ({
           handleHostJoin={handleHostJoin}
           students={allLiveStudents}
           handleHostLeave={handleHostLeave}
+          isJoiningRoom={isJoiningRoom}
         />
       </div>
 

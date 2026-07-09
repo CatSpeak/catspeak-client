@@ -2,6 +2,7 @@ import React from "react"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import NumberStepper from "@/shared/components/ui/inputs/NumberStepper"
 import ListItem from "@/shared/components/ui/ListItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const BreakoutSettingsArea = ({
   allowChangeRoom,
@@ -11,6 +12,8 @@ const BreakoutSettingsArea = ({
   timerDuration,
   setTimerDuration,
 }) => {
+  const { t } = useLanguage()
+
   return (
     <div className="py-2">
       {/* Allow participants to change room */}
@@ -23,7 +26,7 @@ const BreakoutSettingsArea = ({
           />
         }
       >
-        <span>Cho phép đổi phòng</span>
+        <span>{t.rooms.breakoutRooms.allowChangeRoom}</span>
       </ListItem>
 
       {/* Timer Switch */}
@@ -37,7 +40,7 @@ const BreakoutSettingsArea = ({
             />
           }
         >
-          <span>Hẹn giờ (phút)</span>
+          <span>{t.rooms.breakoutRooms.timerMinutes}</span>
         </ListItem>
 
         {timerEnabled && (

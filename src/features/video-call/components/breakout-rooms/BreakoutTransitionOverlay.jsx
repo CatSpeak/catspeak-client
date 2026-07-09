@@ -32,15 +32,15 @@ const BreakoutTransitionOverlay = ({ roomName, isReturning }) => {
         {/* Title */}
         <h3 className="text-xl font-bold tracking-tight mb-2">
           {isReturning
-            ? t?.rooms?.videoCall?.breakout?.returningTitle ?? "Quay lại phòng chính"
-            : t?.rooms?.videoCall?.breakout?.movingTitle ?? "Di chuyển vào phòng nhóm"}
+            ? t.rooms.breakoutRooms.returningTitle
+            : t.rooms.breakoutRooms.movingTitle}
         </h3>
 
         {/* Description / Subtitle */}
         <p className="text-sm text-slate-300 mb-4 max-w-xs">
           {isReturning
-            ? t?.rooms?.videoCall?.breakout?.returningDesc ?? "Cuộc thảo luận nhóm đã kết thúc. Bạn đang được tự động chuyển về phòng học chính..."
-            : t?.rooms?.videoCall?.breakout?.movingDesc ?? "Bạn đang được tự động chuyển sang phòng thảo luận nhóm..."}
+            ? t.rooms.breakoutRooms.returningDesc
+            : t.rooms.breakoutRooms.movingDesc}
         </p>
 
         {/* Room Badge */}

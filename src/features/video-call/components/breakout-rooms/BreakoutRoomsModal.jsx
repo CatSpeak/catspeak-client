@@ -28,7 +28,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
   // Initialize/Reset allocations when roomCount changes
   useEffect(() => {
     const initial = Array.from({ length: roomCount }, (_, i) => ({
-      roomName: `Phòng ${i + 1}`,
+      roomName: `${t.rooms.breakoutRooms.roomPrefix}${i + 1}`,
       accountIds: [],
     }))
     setAllocations(initial)
@@ -37,13 +37,13 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
   // Random allocation helper
   const handleRandomAssign = () => {
     if (students.length === 0) {
-      toast.error("Không có học viên nào hoạt động trong phòng học.")
+      toast.error(t.rooms.breakoutRooms.noActiveStudents)
       return
     }
 
     const shuffled = [...students].sort(() => Math.random() - 0.5)
     const newAllocations = Array.from({ length: roomCount }, (_, i) => ({
-      roomName: `Phòng ${i + 1}`,
+      roomName: `${t.rooms.breakoutRooms.roomPrefix}${i + 1}`,
       accountIds: [],
     }))
 
@@ -56,7 +56,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
     })
 
     setAllocations(newAllocations)
-    toast.success("Phân chia ngẫu nhiên thành công!")
+    toast.success(t.rooms.breakoutRooms.randomSuccess)
   }
 
   // Handle single student room relocation
@@ -85,7 +85,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
     // Validate that at least one student is assigned somewhere
     const totalAssigned = allocations.reduce((acc, curr) => acc + curr.accountIds.length, 0)
     if (totalAssigned === 0 && students.length > 0) {
-      toast.error("Vui lòng phân bổ ít nhất một học viên vào phòng nhỏ.")
+      toast.error(t.rooms.breakoutRooms.assignAtLeastOne)
       return
     }
 
@@ -105,14 +105,14 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
 
       if (startImmediately) {
         await startBreakoutRooms(sessionId).unwrap()
-        toast.success("Đã lưu cấu hình và bắt đầu phòng nhỏ thành công!")
+        toast.success(t.rooms.breakoutRooms.saveAndStartSuccess)
         onClose()
       } else {
-        toast.success("Lưu cấu hình chia phòng thành công!")
+        toast.success(t.rooms.breakoutRooms.saveSuccess)
       }
     } catch (err) {
       console.error(err)
-      toast.error(err?.data?.message || "Lỗi lưu cấu hình chia phòng.")
+      toast.error(err?.data?.message || t.rooms.breakoutRooms.saveError)
     }
   }
 
@@ -130,7 +130,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary2" />
-            <h2 className="text-lg font-bold text-slate-900">Thiết lập Breakout Rooms</h2>
+            <h2 className="text-lg font-bold text-slate-900">{t.rooms.breakoutRooms.setupTitle}</h2>
           </div>
           <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-50 hover:text-slate-600">
             <X className="h-5 w-5" />
@@ -142,7 +142,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
           {/* Left Panel: Settings */}
           <div className="w-80 border-r border-slate-100 p-6 overflow-y-auto space-y-6 bg-slate-50/50">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Số lượng phòng</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.rooms.breakoutRooms.roomCount}</label>
               <select
                 value={roomCount}
                 onChange={(e) => setRoomCount(Number(e.target.value))}
@@ -150,7 +150,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
               >
                 {[2, 3, 4, 5, 6].map((num) => (
                   <option key={num} value={num}>
-                    {num} Phòng Nhỏ
+                    {num} {t.rooms.breakoutRooms.breakoutRoomOption}
                   </option>
                 ))}
               </select>
@@ -159,13 +159,13 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
             <div className="h-px bg-slate-100" />
 
             <div className="space-y-4">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Cấu hình phòng nhỏ</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">{t.rooms.breakoutRooms.configTitle}</label>
 
               {/* Timer Config */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <Clock className="h-4 w-4 text-slate-400" /> Hẹn giờ thảo luận
+                    <Clock className="h-4 w-4 text-slate-400" /> {t.rooms.breakoutRooms.timer}
                   </span>
                   <input
                     type="checkbox"
@@ -184,7 +184,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                       onChange={(e) => setTimerDuration(Math.max(1, Number(e.target.value)))}
                       className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm text-center"
                     />
-                    <span className="text-xs text-slate-500">phút</span>
+                    <span className="text-xs text-slate-500">{t.rooms.breakoutRooms.minutes}</span>
                   </div>
                 )}
               </div>
@@ -192,7 +192,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
               {/* Change Room Config */}
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                  <Settings className="h-4 w-4 text-slate-400" /> Cho phép đổi nhóm
+                  <Settings className="h-4 w-4 text-slate-400" /> {t.rooms.breakoutRooms.allowChangeGroup}
                 </span>
                 <input
                   type="checkbox"
@@ -206,7 +206,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <ShieldAlert className="h-4 w-4 text-slate-400" /> Giới hạn thành viên
+                    <ShieldAlert className="h-4 w-4 text-slate-400" /> {t.rooms.breakoutRooms.memberLimit}
                   </span>
                   <input
                     type="checkbox"
@@ -224,7 +224,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                       onChange={(e) => setMaxParticipants(Math.max(1, Number(e.target.value)))}
                       className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm text-center"
                     />
-                    <span className="text-xs text-slate-500">thành viên/phòng</span>
+                    <span className="text-xs text-slate-500">{t.rooms.breakoutRooms.membersPerRoom}</span>
                   </div>
                 )}
               </div>
@@ -239,7 +239,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                 onClick={handleRandomAssign}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 px-4 py-2.5 text-sm font-semibold transition"
               >
-                <RefreshCw className="h-4 w-4" /> Phân bổ ngẫu nhiên
+                <RefreshCw className="h-4 w-4" /> {t.rooms.breakoutRooms.randomAllocationBtn}
               </button>
             </div>
           </div>
@@ -249,7 +249,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
             {students.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center text-slate-400">
                 <AlertCircle className="h-10 w-10 mb-2" />
-                <p className="text-sm">Chưa có học viên nào tham gia phòng học.</p>
+                <p className="text-sm">{t.rooms.breakoutRooms.noStudentsYet}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
@@ -258,14 +258,14 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                     <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-3">
                       <span className="font-bold text-slate-900 text-sm">{room.roomName}</span>
                       <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">
-                        {room.accountIds.length} học viên
+                        {room.accountIds.length} {t.rooms.breakoutRooms.studentsCount}
                       </span>
                     </div>
 
                     {/* Room Students List */}
                     <div className="min-h-[120px] max-h-[160px] overflow-y-auto space-y-2 mb-2 pr-1">
                       {room.accountIds.length === 0 ? (
-                        <div className="text-xs text-slate-400 italic text-center py-6">Kéo học viên vào đây hoặc phân ngẫu nhiên</div>
+                        <div className="text-xs text-slate-400 italic text-center py-6">{t.rooms.breakoutRooms.dragOrRandom}</div>
                       ) : (
                         room.accountIds.map((studentId) => {
                           const student = students.find((s) => s.identity === String(studentId))
@@ -281,7 +281,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                               >
                                 {allocations.map((_, idx) => (
                                   <option key={idx} value={idx}>
-                                    Chuyển: Phòng {idx + 1}
+                                    {t.rooms.breakoutRooms.moveToRoom}{idx + 1}
                                   </option>
                                 ))}
                               </select>
@@ -304,7 +304,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
             variant="secondary"
             className="h-10 text-sm px-5"
           >
-            Hủy
+            {t.rooms.breakoutRooms.cancelBtn}
           </PillButton>
           <PillButton
             onClick={() => handleSave(false)}
@@ -313,7 +313,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
             variant="outline"
             className="h-10 text-sm px-5"
           >
-            Lưu cấu hình
+            {t.rooms.breakoutRooms.saveConfigBtn}
           </PillButton>
           <PillButton
             onClick={() => handleSave(true)}
@@ -322,7 +322,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
             variant="primary"
             className="h-10 text-sm px-5"
           >
-            Bắt đầu nhóm nhỏ
+            {t.rooms.breakoutRooms.startBtn}
           </PillButton>
         </div>
       </motion.div>

@@ -1,11 +1,14 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useCallback } from "react"
 import { Navigate } from "react-router-dom"
 import { ChevronRight, Clock } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useConnectionState } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
-import { useSelector } from "react-redux"
-import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
+import { useSelector, useDispatch } from "react-redux"
+import { useGetBreakoutStatusQuery, useStopBreakoutRoomsMutation } from "@/store/api/roomsApi"
+import { exitBreakout } from "@/store/slices/videoCallSlice"
+import { toast } from "react-hot-toast"
+import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
 
 import VideoGrid from "@/features/video-call/components/VideoGrid"
 import ParticipantList from "@/features/video-call/components/ParticipantList"
@@ -23,6 +26,7 @@ import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
+import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage()
@@ -66,9 +70,22 @@ const VideoCallRoomContent = () => {
   )
   const isHost = room?.creatorId === user?.accountId
 
-  const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
-    skip: !parentSessionId,
-  })
+  const dispatch = useDispatch()
+  const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
+
+  const handleTimerEnd = useCallback(() => {
+    if (isHost && parentSessionId) {
+      stopBreakoutRooms(parentSessionId).unwrap().catch(console.error)
+      dispatch(exitBreakout())
+      toast.success("Hết thời gian! Đã tự động đóng phòng nhóm.")
+    }
+  }, [isHost, parentSessionId, stopBreakoutRooms, dispatch])
+
+  const { countdownSeconds, formattedTime, breakoutStatus, isSessionBreakoutActive } = useBreakoutTimer(
+    parentSessionId,
+    isBreakoutActive,
+    handleTimerEnd
+  )
 
   // Prevent host from accidentally closing/refreshing tab during active breakout
   useEffect(() => {
@@ -82,37 +99,6 @@ const VideoCallRoomContent = () => {
     window.addEventListener("beforeunload", handleBeforeUnload)
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
   }, [isHost, isBreakoutActive])
-
-  const [countdownSeconds, setCountdownSeconds] = useState(null)
-
-  useEffect(() => {
-    if (
-      isBreakoutActive &&
-      breakoutStatus?.remainingSeconds !== null &&
-      breakoutStatus?.remainingSeconds !== undefined
-    ) {
-      setCountdownSeconds(breakoutStatus.remainingSeconds)
-    } else {
-      setCountdownSeconds(null)
-    }
-  }, [isBreakoutActive, breakoutStatus?.remainingSeconds])
-
-  const isTimerRunning = countdownSeconds !== null && countdownSeconds > 0
-
-  useEffect(() => {
-    if (!isTimerRunning) return
-    const timer = setInterval(() => {
-      setCountdownSeconds((prev) => (prev !== null && prev > 0 ? prev - 1 : 0))
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [isTimerRunning])
-
-  const formatTimer = (seconds) => {
-    if (seconds === null || seconds < 0) return ""
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
-  }
 
   const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
@@ -194,34 +180,13 @@ const VideoCallRoomContent = () => {
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
-          {isBreakoutActive && (
-            <div className="px-6 pt-6 z-10 animate-fade-in shrink-0">
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-2.5 text-xs font-bold shadow-md rounded-xl border border-orange-400">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse flex-shrink-0" />
-                  <span className="truncate">
-                    {breakoutRoomName
-                      ? `Phòng thảo luận: ${breakoutRoomName}`
-                      : "Đang kết nối..."}
-                  </span>
-                  {breakoutStatus && (
-                    <span className="ml-2 px-2 py-0.5 bg-black/10 rounded text-[10px] uppercase tracking-wide whitespace-nowrap flex-shrink-0 border border-white/20">
-                      {breakoutStatus.allowSelfChangeRoom
-                        ? "Tự do chuyển"
-                        : "Phòng cố định"}
-                    </span>
-                  )}
-                </div>
-                {countdownSeconds !== null && (
-                  <div className="flex items-center gap-1.5 bg-black/10 px-2.5 py-1 rounded-md shadow-inner flex-shrink-0 border border-white/10">
-                    <Clock className="h-4 w-4" />
-                    <span className="font-mono text-[13px]">
-                      {formatTimer(countdownSeconds)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
+          {isSessionBreakoutActive && (
+            <BreakoutBanner 
+              breakoutRoomName={breakoutRoomName}
+              breakoutStatus={breakoutStatus}
+              countdownSeconds={countdownSeconds}
+              formattedTime={formattedTime}
+            />
           )}
           <div className="flex-1 relative min-h-0">
             <VideoGrid />

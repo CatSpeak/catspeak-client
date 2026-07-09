@@ -14,7 +14,6 @@ import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
 import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
-import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import { useParticipantList } from "@/features/video-call/hooks/useParticipantList"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
@@ -39,6 +38,7 @@ const GlobalCallContent = ({
   ContextProvider,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
+  panelState,
 }) => {
   const { t, language } = useLanguage()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
@@ -46,7 +46,6 @@ const GlobalCallContent = ({
   const isAISession = callInfo?.isAISession ?? false
 
   // ── UI state ──
-  const panelState = useSidePanelState()
   const [showCC, setShowCC] = useState(false)
   const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
   const [subtitleSelectedLanguage, setSubtitleSelectedLanguage] = useState(null)

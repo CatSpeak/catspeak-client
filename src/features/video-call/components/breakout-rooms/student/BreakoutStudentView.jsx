@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Users, ChevronDown, ChevronRight } from "lucide-react"
+import { Users, ChevronDown, ChevronRight, Volume2 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useDispatch } from "react-redux"
 import { useStudentSwitchBreakoutRoomMutation } from "@/store/api/roomsApi"
@@ -8,10 +8,11 @@ import {
   exitBreakout,
   updateLivekitToken,
 } from "@/store/slices/videoCallSlice"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ListItem from "@/shared/components/ui/ListItem"
 import Badge from "@/shared/components/ui/indicators/Badge"
 import StudentRow from "../shared/StudentRow"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const BreakoutStudentView = ({
   sessionId,
@@ -22,6 +23,7 @@ const BreakoutStudentView = ({
   refetchStatus,
   allLiveStudents = [],
 }) => {
+  const { t } = useLanguage()
   const dispatch = useDispatch()
   const [studentSwitchRoom, { isLoading: isSwitching }] =
     useStudentSwitchBreakoutRoomMutation()
@@ -65,12 +67,13 @@ const BreakoutStudentView = ({
         dispatch(updateLivekitToken(res.token))
         if (targetSubSessionId === sessionId || targetSubSessionId === 0) {
           dispatch(exitBreakout())
-          toast.success("Đã quay lại phòng học chính")
         } else {
           const targetRoom = status?.breakoutSessions?.find(
             (r) => r.sessionId === targetSubSessionId,
           )
-          const roomName = targetRoom?.roomName || "Phòng thảo luận"
+          const roomName =
+            targetRoom?.roomName ||
+            t.rooms.breakoutRooms.breakoutRoomDefaultName
           dispatch(
             enterBreakout({
               subSessionId: targetSubSessionId,
@@ -78,13 +81,13 @@ const BreakoutStudentView = ({
               token: res.token,
             }),
           )
-          toast.success(`Đã chuyển sang ${roomName}`)
         }
-        refetchStatus()
       }
     } catch (err) {
       console.error(err)
-      toast.error(err?.data?.message || err?.data || "Không thể chuyển phòng")
+      toast.error(
+        err?.data?.message || err?.data || t.rooms.breakoutRooms.switchError,
+      )
     }
   }
 
@@ -95,10 +98,10 @@ const BreakoutStudentView = ({
           <Users className="h-6 w-6 text-slate-400" />
         </div>
         <h4 className="text-sm font-bold text-slate-700">
-          Chưa bắt đầu chia nhóm
+          {t.rooms.breakoutRooms.notStartedTitle}
         </h4>
         <p className="text-xs text-slate-500 mt-1.5 max-w-[220px] leading-relaxed">
-          Giáo viên chưa mở phòng thảo luận nhóm nhỏ cho buổi học này.
+          {t.rooms.breakoutRooms.notStartedDesc}
         </p>
       </div>
     )
@@ -106,6 +109,9 @@ const BreakoutStudentView = ({
 
   // Get main room participants from backend status
   const mainRoomParticipants = status?.mainRoom?.participants || []
+  const mainRoomStudentCount = mainRoomParticipants.filter(
+    (p) => String(p.accountId) !== String(roomCreatorId),
+  ).length
 
   const isUserInMainRoom = String(currentSubSessionId) === String(sessionId)
 
@@ -118,18 +124,26 @@ const BreakoutStudentView = ({
           <ListItem
             onClick={() => toggleRoomExpand("main")}
             hoverEffect={true}
-            rightText={mainRoomParticipants.length}
+            leftContent={<Volume2 />}
+            rightText={mainRoomStudentCount}
             rightContent={
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100">
+              <div 
+                onClick={(e) => { e.stopPropagation(); toggleRoomExpand("main") }}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 hover:opacity-100 hover:bg-[#E6E6E6] cursor-pointer"
+              >
                 {expandedRooms["main"] ? <ChevronDown /> : <ChevronRight />}
               </div>
             }
           >
             <div className="flex items-center gap-2">
               <span className="truncate max-w-[120px] text-left">
-                Phòng chính
+                {t.rooms.breakoutRooms.mainRoom}
               </span>
-              {isUserInMainRoom && <Badge color="emerald">Bạn ở đây</Badge>}
+              {isUserInMainRoom && (
+                <Badge color="emerald">
+                  {t.rooms.breakoutRooms.youAreHere}
+                </Badge>
+              )}
             </div>
           </ListItem>
 
@@ -137,7 +151,9 @@ const BreakoutStudentView = ({
             <div>
               {mainRoomParticipants.length === 0 ? (
                 <ListItem>
-                  <span className="text-xs text-[#606060]">Phòng trống</span>
+                  <span className="text-xs text-[#606060]">
+                    {t.rooms.breakoutRooms.emptyRoom}
+                  </span>
                 </ListItem>
               ) : (
                 mainRoomParticipants.map((p) => {
@@ -166,9 +182,10 @@ const BreakoutStudentView = ({
                     variant="secondary"
                     className="w-full"
                     disabled={isSwitching || !allowChange}
-                    loading={isSwitching}
                   >
-                    {!allowChange ? "Đã khóa chuyển phòng" : "Tham gia phòng"}
+                    {!allowChange
+                      ? t.rooms.breakoutRooms.changeLocked
+                      : t.rooms.breakoutRooms.joinRoomBtn}
                   </PillButton>
                 </div>
               )}
@@ -181,9 +198,10 @@ const BreakoutStudentView = ({
           const isExpanded = expandedRooms[room.roomName] ?? true
 
           // Filter out the host from the count so it only tracks students against the limit
-          const studentParticipants = room.participants?.filter(
-            (p) => String(p.accountId) !== String(roomCreatorId)
-          ) || []
+          const studentParticipants =
+            room.participants?.filter(
+              (p) => String(p.accountId) !== String(roomCreatorId),
+            ) || []
           const studentCount = studentParticipants.length
           const isFull = status.maxParticipantsPerRoom
             ? studentCount >= status.maxParticipantsPerRoom
@@ -194,13 +212,17 @@ const BreakoutStudentView = ({
               <ListItem
                 onClick={() => toggleRoomExpand(room.roomName)}
                 hoverEffect={true}
+                leftContent={<Volume2 />}
                 rightText={`${studentCount}${
                   status.maxParticipantsPerRoom
                     ? `/${status.maxParticipantsPerRoom}`
                     : ""
                 }`}
                 rightContent={
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 group-hover:opacity-100">
+                  <div 
+                    onClick={(e) => { e.stopPropagation(); toggleRoomExpand(room.roomName) }}
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 hover:opacity-100 hover:bg-[#E6E6E6] cursor-pointer"
+                  >
                     {isExpanded ? <ChevronDown /> : <ChevronRight />}
                   </div>
                 }
@@ -209,7 +231,11 @@ const BreakoutStudentView = ({
                   <span className="truncate max-w-[120px] text-left">
                     {room.roomName}
                   </span>
-                  {isUserInThisRoom && <Badge color="emerald">Bạn ở đây</Badge>}
+                  {isUserInThisRoom && (
+                    <Badge color="emerald">
+                      {t.rooms.breakoutRooms.youAreHere}
+                    </Badge>
+                  )}
                 </div>
               </ListItem>
 
@@ -218,7 +244,7 @@ const BreakoutStudentView = ({
                   {room.participants?.length === 0 ? (
                     <ListItem>
                       <span className="text-xs text-[#606060]">
-                        Phòng trống
+                        {t.rooms.breakoutRooms.emptyRoom}
                       </span>
                     </ListItem>
                   ) : (
@@ -246,15 +272,14 @@ const BreakoutStudentView = ({
                       <PillButton
                         onClick={() => handleStudentSwitchRoom(room.sessionId)}
                         disabled={isSwitching || isFull || !allowChange}
-                        loading={isSwitching}
                         variant="secondary"
                         className="w-full"
                       >
                         {!allowChange
-                          ? "Đã khóa chuyển phòng"
+                          ? t.rooms.breakoutRooms.changeLocked
                           : isFull
-                            ? "Phòng đã đầy"
-                            : "Tham gia phòng"}
+                            ? t.rooms.breakoutRooms.roomFull
+                            : t.rooms.breakoutRooms.joinRoomBtn}
                       </PillButton>
                     </div>
                   )}

@@ -61,7 +61,6 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
       }).unwrap()
       dispatch(exitBreakout())
       dispatch(updateLivekitToken(res.token))
-      toast.success("Đã quay trở lại phòng chính.")
     } catch (err) {
       console.error(err)
       toast.error("Lỗi quay trở lại phòng chính.")
@@ -95,37 +94,7 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
     (s) => s.accountId && String(s.accountId) !== String(roomCreatorId),
   )
 
-  // Timer logic
-  const [countdownSeconds, setCountdownSeconds] = useState(null)
 
-  useEffect(() => {
-    if (
-      status?.isBreakoutActive &&
-      status?.remainingSeconds !== null &&
-      status?.remainingSeconds !== undefined
-    ) {
-      setCountdownSeconds(status.remainingSeconds)
-    } else {
-      setCountdownSeconds(null)
-    }
-  }, [status?.isBreakoutActive, status?.remainingSeconds])
-
-  const isTimerRunning = countdownSeconds !== null && countdownSeconds > 0
-
-  useEffect(() => {
-    if (!isTimerRunning) return
-    const timer = setInterval(() => {
-      setCountdownSeconds((prev) => (prev !== null && prev > 0 ? prev - 1 : 0))
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [isTimerRunning])
-
-  const formatTimer = (seconds) => {
-    if (seconds === null || seconds < 0) return ""
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
-  }
 
   const isStarted = status?.isBreakoutActive
 
@@ -137,12 +106,7 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
           <h3 className="text-black text-sm font-semibold m-0">
             {isStarted ? "Phòng thảo luận" : "Phòng họp nhóm"}
           </h3>
-          {isStarted && countdownSeconds !== null && (
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">
-              <Clock className="h-3 w-3 text-slate-500" />
-              {formatTimer(countdownSeconds)}
-            </div>
-          )}
+
         </div>
       </div>
 
@@ -171,6 +135,8 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
             students={students}
             status={status}
             refetchStatus={refetchStatus}
+            roomCreatorId={roomCreatorId}
+            allLiveStudents={allLiveStudents}
           />
         )
       ) : (

@@ -37,10 +37,8 @@ export const useRoomLifecycle = ({
       if (parentSessionId && subSessionId === parentSessionId) {
         dispatch(exitBreakout())
         dispatch(updateLivekitToken(token))
-        toast.success(t?.rooms?.videoCall?.breakout?.returnedToMain ?? "Quay trở lại phòng học chính.")
       } else {
         dispatch(enterBreakout({ subSessionId, roomName, token }))
-        toast.success(`${t?.rooms?.videoCall?.breakout?.assignedToRoom ?? "Giáo viên chia bạn vào phòng nhỏ:"} ${roomName}`)
       }
     },
     [dispatch, parentSessionId, t]
@@ -64,7 +62,6 @@ export const useRoomLifecycle = ({
             console.error("[SignalR] Failed to fetch main room token:", err)
           })
       }
-      toast.success(t?.rooms?.videoCall?.breakout?.returnedToMain ?? "Quay trở lại phòng học chính.")
     },
     [dispatch, roomId, t]
   )
