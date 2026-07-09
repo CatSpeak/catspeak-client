@@ -223,7 +223,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                 ...prev,
                 imageUrlFull: payload.image_url_full,
                 imageBlurred: false,
-                imageUrl: payload.image_url_full
+                imageUrl: payload.image_url_full,
+                describeStarted: false
             }));
         },
         FLAG_SUBMITTED: (payload) => {
@@ -469,6 +470,23 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     }, [connection.isConnected, roomId]);
 
     const participants = useParticipants();
+    const { localParticipant } = useLocalParticipant();
+
+    useEffect(() => {
+        const isPictureIt = gameType === "picture_it" || gameType === "picture-it";
+        if (isPictureIt && !["idle", "game_over", "force_stopped"].includes(gameState)) {
+            if (gameState === "setup" || gameState === "result") {
+                localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+            } else if (gameState === "playing") {
+                if (pictureItState.describeStarted && !pictureItState.ratingOpen) {
+                    const isLocalDescriber = Number(pictureItState.describerId) === Number(currentUserId);
+                    localParticipant?.setMicrophoneEnabled(isLocalDescriber).catch(() => {});
+                } else {
+                    localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+                }
+            }
+        }
+    }, [gameState, gameType, pictureItState.describeStarted, pictureItState.ratingOpen, pictureItState.describerId, currentUserId, localParticipant]);
 
     const startGame = useCallback(
         (type = "crack_it", level = "easy", language = null) => {
@@ -540,8 +558,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     }, [connection.send, roomId]);
 
     const endPictureItDescribe = useCallback(() => {
+        localParticipant?.setMicrophoneEnabled(false).catch(e => {});
         connection.send("PictureItDescribeEnd", roomId || "general");
-    }, [connection.send, roomId]);
+    }, [connection.send, roomId, localParticipant]);
 
     const submitPictureItFlag = useCallback(() => {
         connection.send("PictureItSubmitFlag", roomId || "general");

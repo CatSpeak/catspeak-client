@@ -87,10 +87,10 @@ const WinnerCard = ({ player }) => (
 
     {/* Right: Large final score */}
     <div className="flex items-baseline gap-1 z-10 pr-2">
-      <span className="text-3xl font-extrabold tabular-nums text-white">
+      <span className="text-3xl font-extrabold tabular-nums text-black">
         {player.totalScore}
       </span>
-      <span className="text-xs font-semibold text-slate-300">pts</span>
+      <span className="text-xs font-semibold text-slate-300"><Star /></span>
     </div>
   </motion.div>
 )
@@ -292,7 +292,7 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
 
               {/* LEFT Column: Final Leaderboard list */}
               <div className="flex flex-col gap-2.5">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                <p className="text-[10px] font-bold text-black uppercase tracking-widest px-1">
                   Final Leaderboard
                 </p>
                 <div className="flex flex-col gap-1.5 overflow-y-auto scrollbar-app-hover max-h-[260px] pr-1">

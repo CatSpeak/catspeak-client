@@ -119,7 +119,7 @@ const PictureITOverlay = () => {
   return (
     <>
       <AnimatePresence>
-        {!['idle', 'result', 'game_over', 'force_stopped'].includes(gameState) && (
+        {!['idle', 'force_stopped'].includes(gameState) && (
           <FluentAnimation
             key="picture-it-overlay"
             direction="up"

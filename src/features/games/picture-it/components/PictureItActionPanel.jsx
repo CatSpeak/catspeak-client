@@ -31,27 +31,28 @@ const PictureItActionPanel = ({
       )}
 
       {/* Describer — Describing phase */}
-      {!isSpectator && isDescriber && isDescribing && !hasDescribeStarted && (
-        <div className="flex items-center gap-4">
-          <PillButton
-            className="h-10 w-48 bg-cath-red-700 text-white"
-            startIcon={<Mic size={16} />}
-            onClick={handleDescribeStart}
-          >
-            Start describing
-          </PillButton>
-        </div>
-      )}
-
-      {!isSpectator && isDescriber && isDescribing && hasDescribeStarted && (
-        <div className="flex items-center gap-4">
-          <PillButton
-            className="h-10 w-48 border-cath-red-700 text-cath-red-700 hover:bg-cath-red-700 hover:text-white transition-colors"
-            startIcon={<CheckCircle2 size={16} />}
-            onClick={handleDescribeEnd}
-          >
-            Finish describing
-          </PillButton>
+      {!isSpectator && isDescriber && isDescribing && (
+        <div className="flex items-center gap-4 animate-fade-in">
+          {!hasDescribeStarted ? (
+            <PillButton
+              className="h-11 px-6 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold transition-all shadow-sm"
+              startIcon={<Mic size={18} className="text-slate-500" />}
+              onClick={handleDescribeStart}
+            >
+              Turn on Mic (Start)
+            </PillButton>
+          ) : (
+            <PillButton
+              className="h-11 px-6 bg-red-600 hover:bg-red-700 text-white font-bold transition-all shadow-md shadow-red-600/20 border border-red-500 relative flex items-center gap-2"
+              onClick={handleDescribeEnd}
+            >
+              <span className="relative flex h-3 w-3 mr-1">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+              </span>
+              Turn off Mic (Finish)
+            </PillButton>
+          )}
         </div>
       )}
 
