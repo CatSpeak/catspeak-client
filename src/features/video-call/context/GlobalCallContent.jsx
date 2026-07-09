@@ -152,7 +152,7 @@ const GlobalCallContent = ({
     }
   }, [sessionRecordings, t])
 
-  useVideoChatSignalR(sessionId, token, (event, data) => {
+  const { isConnected: isSignalRConnected, connection: signalRConnection } = useVideoChatSignalR(sessionId, token, (event, data) => {
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
@@ -180,6 +180,10 @@ const GlobalCallContent = ({
           "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
         { icon: "⚠️", duration: 6000 },
       )
+    } else if (event === "OnSyncGameState") {
+      // Handled by usePictureItSync
+    } else if (event === "OnGameAction") {
+      // Handled by usePictureItSync
     }
   })
 
@@ -407,6 +411,8 @@ const GlobalCallContent = ({
     cancelStopRecording: recordingState.cancelStopRecording,
     egressId: egressId,
     startedByAccountId: startedByAccountId,
+    videoChatConnection: signalRConnection,
+    isSignalRConnected,
   }
 
   return (

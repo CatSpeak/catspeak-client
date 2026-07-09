@@ -85,7 +85,7 @@ const RoundResultModal = ({ open, onClose, result }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <CountdownCircle
-                duration={result.countdown ?? 3}
+                duration={3}
                 onComplete={onClose}
               />
 

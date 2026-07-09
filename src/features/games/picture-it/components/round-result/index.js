@@ -1,4 +1,5 @@
 export { default as RoundResultModal } from "./RoundResultModal"
+export { default as GameOverModal } from "./GameOverModal"
 export { default as RoundImageCard } from "./RoundImageCard"
 export { default as RoundScoreCard } from "./RoundScoreCard"
 export { default as LeaderboardCard } from "./LeaderboardCard"
