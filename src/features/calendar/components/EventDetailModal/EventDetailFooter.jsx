@@ -15,8 +15,8 @@ import { useAuthModal } from "@/shared/context/AuthModalContext";
 import ParticipantListModal from "./ParticipantListModal";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 
-const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
-  const { user, isAdmin } = useAuth();
+const EventDetailFooter = ({ eventId, event, onClose, onEdit, onActionComplete }) => {
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { openAuthModal } = useAuthModal();
@@ -41,7 +41,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
   const isRegistered = event?.isRegistered ?? false;
 
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
-    useEventDelete(eventId, event?.occurrenceId, onClose);
+    useEventDelete(eventId, event?.occurrenceId, onClose, onActionComplete);
 
   const [registerForEvent, { isLoading: isRegistering }] =
     useRegisterForEventMutation();
@@ -92,14 +92,15 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           };
           await cancelRegistration(body).unwrap();
         }
+        if (onActionComplete) onActionComplete('cancel', 'success')
       } catch (err) {
         console.error("Cancel registration failed:", err);
+        if (onActionComplete) onActionComplete('cancel', 'error')
       }
       return;
     }
 
     try {
-      const isRecurring = event?.isRecurring;
       const occurrenceId = event?.occurrenceId;
 
       let body = { eventId };
@@ -112,8 +113,10 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
       console.log("REGISTER PAYLOAD:", body);
 
       await registerForEvent(body).unwrap();
+      if (onActionComplete) onActionComplete('register', 'success');
     } catch (err) {
       console.error("Registration failed:", err);
+      if (onActionComplete) onActionComplete('register', 'error');
     }
   };
 

@@ -14,6 +14,32 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
   const [endTime, setEndTime] = useState(initialFilters.endTime || "");
   const [timeError, setTimeError] = useState("");
 
+  // Price range state (0 - 1,000,000 VND)
+  const PRICE_MAX = 1000000;
+  const [priceMin, setPriceMin] = useState(initialFilters.priceMin ?? 0);
+  const [priceMax, setPriceMax] = useState(initialFilters.priceMax ?? PRICE_MAX);
+
+  const formatPrice = (val) => {
+    if (val >= PRICE_MAX) return "1.000k";
+    if (val === 0) return "0";
+    if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
+    return String(val);
+  };
+
+  const handleMinChange = (e) => {
+    const val = Number(e.target.value);
+    if (val <= priceMax) setPriceMin(val);
+  };
+
+  const handleMaxChange = (e) => {
+    const val = Number(e.target.value);
+    if (val >= priceMin) setPriceMax(val);
+  };
+
+  // Compute fill percentages for slider track
+  const minPct = (priceMin / PRICE_MAX) * 100;
+  const maxPct = (priceMax / PRICE_MAX) * 100;
+
   const validateTimeRange = (nextStartTime, nextEndTime) => {
     if (!nextStartTime || !nextEndTime) {
       setTimeError("");
@@ -39,6 +65,8 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
       eventType,
       startTime: startTime || null,
       endTime: endTime || null,
+      priceMin: priceMin > 0 ? priceMin : null,
+      priceMax: priceMax < PRICE_MAX ? priceMax : null,
     });
 
     setStartTime("");
@@ -104,10 +132,73 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
           </div>
         </div>
 
+        {/* Price Range */}
+        <div className="flex flex-col gap-3">
+          <span className="text-sm font-medium text-black">
+            {cal.filterPrice || "Giá cả"}
+          </span>
+          <div className="relative h-5 flex items-center">
+            {/* Track background */}
+            <div className="absolute w-full h-1 bg-gray-200 rounded-full" />
+            {/* Active track */}
+            <div
+              className="absolute h-1 rounded-full bg-[#990011]"
+              style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
+            />
+            {/* Min slider */}
+            <input
+              type="range"
+              min={0}
+              max={PRICE_MAX}
+              step={10000}
+              value={priceMin}
+              onChange={handleMinChange}
+              className="absolute w-full appearance-none bg-transparent cursor-pointer price-slider"
+              style={{ zIndex: priceMin > PRICE_MAX - 100000 ? 5 : 3 }}
+            />
+            {/* Max slider */}
+            <input
+              type="range"
+              min={0}
+              max={PRICE_MAX}
+              step={10000}
+              value={priceMax}
+              onChange={handleMaxChange}
+              className="absolute w-full appearance-none bg-transparent cursor-pointer price-slider"
+              style={{ zIndex: 4 }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-sm text-black/70 font-medium">
+            <span>{formatPrice(priceMin)}</span>
+            <span>{formatPrice(priceMax)}</span>
+          </div>
+          <style>{`
+            .price-slider::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              height: 18px;
+              width: 18px;
+              border-radius: 50%;
+              background: #990011;
+              border: 2px solid #fff;
+              box-shadow: 0 1px 4px rgba(153,0,17,0.4);
+              cursor: pointer;
+            }
+            .price-slider::-moz-range-thumb {
+              height: 18px;
+              width: 18px;
+              border-radius: 50%;
+              background: #990011;
+              border: 2px solid #fff;
+              box-shadow: 0 1px 4px rgba(153,0,17,0.4);
+              cursor: pointer;
+            }
+          `}</style>
+        </div>
+
         {/* Date filter */}
         <div className="flex flex-col gap-3">
           <span className="text-sm font-medium text-black">
-            {cal.filterTime || "Thời gian"}
+            {cal.filterTime || cal.filterDate || "Thời gian"}
           </span>
 
           <div className="flex w-full gap-3">

@@ -28,6 +28,9 @@ const CalendarPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState({});
   const [viewType, setViewType] = useState("month");
+  
+  const [dayEvents, setDayEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
 
@@ -104,6 +107,16 @@ const CalendarPage = () => {
     });
   }
 
+  if (activeFilters.priceMin != null || activeFilters.priceMax != null) {
+    const min = activeFilters.priceMin ?? 0;
+    const max = activeFilters.priceMax ?? 1000000;
+    const fmt = (v) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v);
+    filterChips.push({
+      key: "priceRange",
+      label: `${cal.filterPrice || "Giá"}: ${fmt(min)} - ${fmt(max)}`,
+    });
+  }
+
   const removeFilter = (key) => {
     setActiveFilters((prev) => {
       const next = { ...prev };
@@ -111,6 +124,9 @@ const CalendarPage = () => {
       if (key === "timeRange") {
         delete next.startTime;
         delete next.endTime;
+      } else if (key === "priceRange") {
+        delete next.priceMin;
+        delete next.priceMax;
       } else {
         delete next[key];
       }
@@ -161,6 +177,8 @@ const CalendarPage = () => {
             onSelectDate={setSelectedDate}
             viewType={viewType}
             onChangeView={setViewType}
+            dayEvents={dayEvents}
+            selectedEvent={selectedEvent}
           />
 
           {/* RIGHT: Day Schedule */}
@@ -169,6 +187,9 @@ const CalendarPage = () => {
               selectedDate={selectedDate}
               currentDate={currentDate}
               activeFilters={activeFilters}
+              selectedEvent={selectedEvent}
+              onEventSelect={setSelectedEvent}
+              onEventsUpdate={setDayEvents}
             />
           </div>
         </div>

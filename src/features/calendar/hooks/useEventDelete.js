@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useDeleteEventMutation, useCancelEventOccurrenceMutation } from "@/store/api/eventsApi"
 
-const useEventDelete = (eventId, occurrenceId, onClose) => {
+const useEventDelete = (eventId, occurrenceId, onClose, onActionComplete) => {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteEvent, { isLoading: isDeletingEvent }] = useDeleteEventMutation()
   const [cancelOccurrence, { isLoading: isCancellingOccurrence }] = useCancelEventOccurrenceMutation()
@@ -16,8 +16,10 @@ const useEventDelete = (eventId, occurrenceId, onClose) => {
         await deleteEvent(eventId).unwrap()
       }
       onClose()
+      if (onActionComplete) onActionComplete('delete', 'success')
     } catch (err) {
       console.error("Failed to delete event:", err)
+      if (onActionComplete) onActionComplete('delete', 'error')
     }
   }
 

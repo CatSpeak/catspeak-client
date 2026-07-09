@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Clock, MapPin, Globe } from "lucide-react";
 import dayjs from "dayjs";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetEventsByDateQuery } from "@/store/api/eventsApi";
-import EventDetailModal from "./EventDetailModal/index";
-import { formatLocation } from "../utils/eventFormatters";
 import { AfternoonIcon, EveningIcon, MorningIcon, NoonIcon } from "../assets";
-
-const DEFAULT_COLOR = "#990011";
+import EventCard from "./EventCard";
+import Modal from "@/shared/components/ui/Modal";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 const getTimeOfDay = (timeStr) => {
   if (!timeStr) return "morning";
@@ -43,82 +42,18 @@ const TimeSectionIcon = ({ section }) => {
   return <img src={icon} alt={section} className="w-4 h-4 object-contain" />;
 };
 
-const EventCard = ({ event, onClick, isSelected }) => {
-  const { t } = useLanguage();
-
-  const startTime = event.startTime
-    ? dayjs(event.startTime).format("HH:mm")
-    : "";
-  const endTime = event.endTime ? dayjs(event.endTime).format("HH:mm") : "";
-  const timeStr =
-    startTime && endTime ? `${startTime} - ${endTime}` : startTime;
-
-  const location =
-    formatLocation(event.location, event.cityName, event.countryName) ||
-    event.address ||
-    "";
-
-  return (
-    <div
-      onClick={() => onClick(event)}
-      className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all border ${
-        isSelected
-          ? "border-[#990011] bg-[#F5F5F5]"
-          : "border-transparent bg-[#F5F5F5] hover:border-[#990011]"
-      }`}
-    >
-      {/* Avatar / Image */}
-      <div
-        className="w-12 h-12 md:w-14 md:h-14 rounded-full shrink-0 flex items-center justify-center overflow-hidden"
-        style={{ backgroundColor: event.color || DEFAULT_COLOR }}
-      >
-        {event.thumbnailUrl ? (
-          <img
-            src={event.thumbnailUrl}
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-white text-sm font-bold uppercase">
-            {(event.title || "E")[0]}
-          </span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex flex-col flex-1 min-w-0 gap-1">
-        <span className="text-[15px] font-semibold text-black truncate leading-tight">
-          {event.title || t.calendar?.event || "Sự kiện"}
-        </span>
-        {timeStr && (
-          <div className="flex items-center gap-2 text-sm text-black/75">
-            <Clock size={14} className="shrink-0 text-black/75" />
-            <span className="leading-none">{timeStr}</span>
-          </div>
-        )}
-        {(location || event.isOnline) && (
-          <div className="flex items-center gap-2 text-sm text-black/75">
-            {event.isOnline ? (
-              <Globe size={14} className="shrink-0 text-black/75" />
-            ) : (
-              <MapPin size={14} className="shrink-0 text-black/75" />
-            )}
-            <span className="truncate leading-none">
-              {event.isOnline ? "Online" : ""}
-              {event.isOnline && location ? ` - ${location}` : location || ""}
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const DaySchedule = ({ selectedDate, currentDate, activeFilters }) => {
+const DaySchedule = ({
+  selectedDate,
+  currentDate,
+  activeFilters,
+  selectedEvent,
+  onEventSelect,
+  onEventsUpdate,
+}) => {
   const { t } = useLanguage();
   const cal = t.calendar || {};
   const [tab, setTab] = useState("unregistered"); // "unregistered" | "registered"
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [actionStatus, setActionStatus] = useState(null);
 
   const displayDate = currentDate.date(selectedDate ?? dayjs().date());
   const displayDateKey = displayDate.format("YYYY-MM-DD");
@@ -185,11 +120,12 @@ const DaySchedule = ({ selectedDate, currentDate, activeFilters }) => {
   );
 
   const visibleEvents = (() => {
-    const seenIds = new Set();
+    const seenEventIds = new Set();
     return allEvents.filter((event) => {
-      const id = event.occurrenceId || event.eventId || event.id;
-      if (seenIds.has(id)) return false;
-      seenIds.add(id);
+      // Use eventId to deduplicate display so overlapping occurrences of the same series show only once
+      const eventId = event.eventId || event.recurringEventId || event.id;
+      if (seenEventIds.has(eventId)) return false;
+      seenEventIds.add(eventId);
       return true;
     });
   })();
@@ -214,6 +150,14 @@ const DaySchedule = ({ selectedDate, currentDate, activeFilters }) => {
       if (activeFilters?.endTime && evStartHs > activeFilters.endTime)
         return false;
     }
+
+    if (activeFilters?.priceMin != null || activeFilters?.priceMax != null) {
+      // ticketPrice is stored in thousands (e.g. 50 = 50k), filter uses full numbers (e.g. 20000 = 20k)
+      const price = Number(ev.ticketPrice ?? 0) * 1000;
+      if (activeFilters.priceMin != null && price < activeFilters.priceMin) return false;
+      if (activeFilters.priceMax != null && price > activeFilters.priceMax) return false;
+    }
+
     return true;
   });
 
@@ -243,16 +187,33 @@ const DaySchedule = ({ selectedDate, currentDate, activeFilters }) => {
     ? `${cal.daySchedule || "Lịch trình sự kiện ngày"} ${displayDate.format("D/M")}`
     : cal.selectDayToView || "Chọn ngày để xem";
 
+  // Notify parent of currently visible events
+  const displayEventIds = displayEvents.map((e) => e.id).join(",");
+  useEffect(() => {
+    if (onEventsUpdate) {
+      onEventsUpdate(displayEvents);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayEventIds, onEventsUpdate]); // Safe to use IDs string to prevent infinite loops
+
   const handleEventClick = (event) => {
-    setSelectedEvent({
-      ...event,
-      eventId: event.eventId ?? event.recurringEventId ?? event.id,
-      occurrenceId: event.isRecurringGroup
-        ? undefined
-        : (event.occurrenceId ?? event.id),
-      isRecurring:
-        event.isRecurring || event.isRecurringGroup || !!event.recurringEventId,
-    });
+    if (selectedEvent?.id === event.id) {
+      onEventSelect && onEventSelect(null);
+      return;
+    }
+
+    onEventSelect &&
+      onEventSelect({
+        ...event,
+        eventId: event.eventId ?? event.recurringEventId ?? event.id,
+        occurrenceId: event.isRecurringGroup
+          ? undefined
+          : (event.occurrenceId ?? event.id),
+        isRecurring:
+          event.isRecurring ||
+          event.isRecurringGroup ||
+          !!event.recurringEventId,
+      });
   };
 
   return (
@@ -328,6 +289,7 @@ const DaySchedule = ({ selectedDate, currentDate, activeFilters }) => {
                     event={event}
                     onClick={handleEventClick}
                     isSelected={selectedEvent?.id === event.id}
+                    onActionComplete={(type, status) => setActionStatus({ type, status })}
                   />
                 ))}
               </div>
@@ -336,13 +298,42 @@ const DaySchedule = ({ selectedDate, currentDate, activeFilters }) => {
         )}
       </div>
 
-      {/* Event Detail Modal */}
-      {selectedEvent && (
-        <EventDetailModal
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-        />
-      )}
+      <Modal
+        open={actionStatus !== null}
+        onClose={() => setActionStatus(null)}
+        showCloseButton={false}
+        className="!max-w-[400px]"
+      >
+        <div className="flex flex-col items-center justify-center p-6 gap-4 text-center">
+          {actionStatus?.status === "success" ? (
+            <CheckCircle2 size={64} className="text-[#00BB38]" />
+          ) : (
+            <XCircle size={64} className="text-[#990011]" />
+          )}
+
+          <h2 className="text-xl font-bold text-black mt-2">
+            {actionStatus?.status === "success"
+              ? actionStatus.type === "register"
+                ? cal.registerSuccess || "Đăng ký thành công!"
+                : actionStatus.type === "cancel"
+                ? cal.cancelRegSuccess || "Đã hủy đăng ký!"
+                : cal.deleteSuccess || "Đã xóa sự kiện!"
+              : actionStatus?.type === "register"
+                ? cal.registerError || "Đăng ký thất bại"
+                : actionStatus?.type === "cancel"
+                ? cal.cancelRegError || "Hủy đăng ký thất bại"
+                : cal.deleteError || "Xóa sự kiện thất bại"}
+          </h2>
+          
+          <button
+            type="button"
+            onClick={() => setActionStatus(null)}
+            className="mt-4 px-8 py-2.5 bg-[#990011] text-white rounded-full font-semibold hover:bg-[#7a000e] transition-colors w-full"
+          >
+            {cal.close || "Đóng"}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -1,44 +1,52 @@
-import React, { useRef, useState } from "react"
-import { useNavigate, useParams, useLocation } from "react-router-dom"
-import { Trash2, Clock, MapPin, ArrowRight, X, AlertTriangle } from "lucide-react"
-import dayjs from "dayjs"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
-import { useEventForm } from "../hooks/useEventForm"
-import EventDateTimeSection from "../components/CreateEventModal/EventDateTimeSection"
-import EventRecurrenceSection from "../components/CreateEventModal/EventRecurrenceSection"
-import EventDetailsSection from "../components/CreateEventModal/EventDetailsSection"
-import EditChoiceModal from "../components/EventDetailModal/EditChoiceModal"
-import Modal from "@/shared/components/ui/Modal"
-import { CheckCircle2, XCircle } from "lucide-react"
-import { useDeleteEventMutation } from "@/store/api/eventsApi"
+import React, { useRef, useState } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import {
+  Trash2,
+  Clock,
+  MapPin,
+  ArrowRight,
+  X,
+  AlertTriangle,
+} from "lucide-react";
+import dayjs from "dayjs";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
+import { useEventForm } from "../hooks/useEventForm";
+import EventDateTimeSection from "../components/CreateEventModal/EventDateTimeSection";
+import EventRecurrenceSection from "../components/CreateEventModal/EventRecurrenceSection";
+import EventDetailsSection from "../components/CreateEventModal/EventDetailsSection";
+import EditChoiceModal from "../components/EventDetailModal/EditChoiceModal";
+import Modal from "@/shared/components/ui/Modal";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { useDeleteEventMutation } from "@/store/api/eventsApi";
+import MapView from "../components/Mapview";
 
 // const DEFAULT_COVER =
 //   "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"
 
 const CreateEventPage = () => {
-  const navigate = useNavigate()
-  const { lang } = useParams()
-  const location = useLocation()
-  const { t } = useLanguage()
-  const cal = t.calendar || {}
+  const navigate = useNavigate();
+  const { lang } = useParams();
+  const location = useLocation();
+  const { t } = useLanguage();
+  const cal = t.calendar || {};
 
   // editEvent injected from EventDetailModal via navigate state
-  const editEvent = location.state?.editEvent || null
-  const isEditing = Boolean(editEvent)
+  const editEvent = location.state?.editEvent || null;
+  const isEditing = Boolean(editEvent);
 
-  const [pendingPayload, setPendingPayload] = useState(null)
-  const [submitStatus, setSubmitStatus] = useState(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const performSaveRef = useRef(null)
+  const [pendingPayload, setPendingPayload] = useState(null);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const performSaveRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(
-    editEvent?.thumbnailUrl || null
-  )
-  const fileInputRef = useRef(null)
+    editEvent?.thumbnailUrl || null,
+  );
+  const fileInputRef = useRef(null);
 
-  const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation()
+  const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation();
 
-  const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar"
+  const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
 
   const breadcrumbItems = [
     {
@@ -61,50 +69,57 @@ const CreateEventPage = () => {
   ];
 
   const handleClose = () => {
-    navigate(basePath)
-  }
+    navigate(basePath);
+  };
 
   const handleSuccess = () => {
-    setSubmitStatus("success")
-  }
-  
-  const handleError = () => {
-    setSubmitStatus("error")
-  }
+    setSubmitStatus("success");
+  };
 
-  const form = useEventForm(handleSuccess, editEvent, (payload, performSave) => {
-    performSave(payload, "series")
-  }, handleError)
+  const handleError = () => {
+    setSubmitStatus("error");
+  };
+
+  const form = useEventForm(
+    handleSuccess,
+    editEvent,
+    (payload, performSave) => {
+      performSave(payload, "series");
+    },
+    handleError,
+    () => setSubmitStatus("validation_error"),
+  );
+  console.log("form.eventColor =", form.eventColor);
 
   const handleDeleteConfirmed = async () => {
     try {
-      const eventId = editEvent?.eventId || editEvent?.id
-      await deleteEvent(eventId).unwrap()
-      navigate(basePath)
+      const eventId = editEvent?.eventId || editEvent?.id;
+      await deleteEvent(eventId).unwrap();
+      navigate(basePath);
     } catch (err) {
-      console.error("Delete failed:", err)
-      setShowDeleteConfirm(false)
+      console.error("Delete failed:", err);
+      setShowDeleteConfirm(false);
     }
-  }
+  };
 
   const handleImageChange = (e) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      form.setThumbnailFile(file)
-      const reader = new FileReader()
-      reader.onload = (ev) => setImagePreview(ev.target.result)
-      reader.readAsDataURL(file)
+      form.setThumbnailFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => setImagePreview(ev.target.result);
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   // Preview data
-  const previewTitle = form.title || (cal.randomEventTitle)
+  const previewTitle = form.title || cal.randomEventTitle;
   const previewStart = form.startTime
     ? dayjs(form.startTime).format("HH:mm")
-    : "hh/mm"
+    : "hh/mm";
   const previewEnd = form.endTime
     ? dayjs(form.endTime).format("HH:mm")
-    : "hh/mm"
+    : "hh/mm";
 
   return (
     <div className="w-full min-h-screen bg-[#fdfdfd]">
@@ -116,7 +131,9 @@ const CreateEventPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between px-5 pb-5">
         <h1 className="text-3xl font-bold text-black">
-          {isEditing ? (cal.editEvent || "Chỉnh sửa sự kiện") : (cal.createEvent || "Tạo sự kiện")}
+          {isEditing
+            ? cal.editEvent || "Chỉnh sửa sự kiện"
+            : cal.createEvent || "Tạo sự kiện"}
         </h1>
         <div className="flex items-center gap-2">
           {isEditing && (
@@ -201,6 +218,57 @@ const CreateEventPage = () => {
               </div>
             </div>
 
+            <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+              <label className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+                {cal.filterEventType || "Loại sự kiện"}
+              </label>
+              <div className="w-full">
+                <div className="relative w-[240px]">
+                  <select
+                    value={
+                      form.isOnline === true
+                        ? "online"
+                        : form.isOnline === false
+                          ? "offline"
+                          : ""
+                    }
+                    onChange={(e) => {
+                      if (e.target.value === "online") form.setIsOnline(true);
+                      else if (e.target.value === "offline")
+                        form.setIsOnline(false);
+                      else form.setIsOnline(null);
+                    }}
+                    className="w-[240px] h-11 rounded-2xl border border-[#e5e5e5] px-4 text-sm text-gray-500 appearance-none bg-white outline-none focus:border-[#990011] transition-colors pr-9"
+                  >
+                    <option value="">
+                      {cal.eventTypePlaceholder || "Online hay offline?"}
+                    </option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                  </select>
+                  <svg
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+                {form.isOnline === true && (
+                  <p className="text-red-500 text-xs mt-1">
+                    Tạo sự kiện online (trực tuyến) hiện tại chưa được hỗ trợ.
+                    Vui lòng chọn lại.
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Form Sections */}
             <EventDateTimeSection
               eventColor={form.eventColor || "#990011"}
@@ -216,46 +284,49 @@ const CreateEventPage = () => {
             <EventDetailsSection
               title={form.title}
               onTitleChange={(val) => {
-                form.setTitle(val)
+                form.setTitle(val);
                 if (form.errors?.title)
-                  form.setErrors((prev) => ({ ...prev, title: undefined }))
+                  form.setErrors((prev) => ({ ...prev, title: undefined }));
               }}
               eventColor={form.eventColor || "#990011"}
               countryId={form.countryId}
               onCountryIdChange={(val) => {
-                form.setCountryId(val)
-                form.setCityId(0)
+                form.setCountryId(val);
+                form.setCityId(0);
                 if (form.errors?.countryId)
-                  form.setErrors((prev) => ({ ...prev, countryId: undefined }))
+                  form.setErrors((prev) => ({ ...prev, countryId: undefined }));
               }}
               cityId={form.cityId}
               onCityIdChange={(val) => {
-                form.setCityId(val)
+                form.setCityId(val);
                 if (form.errors?.cityId)
-                  form.setErrors((prev) => ({ ...prev, cityId: undefined }))
+                  form.setErrors((prev) => ({ ...prev, cityId: undefined }));
               }}
               eventLocation={form.eventLocation}
               onLocationChange={(val) => {
-                form.setEventLocation(val)
+                form.setEventLocation(val);
                 if (form.errors?.eventLocation)
                   form.setErrors((prev) => ({
                     ...prev,
                     eventLocation: undefined,
-                  }))
+                  }));
               }}
               // description={form.description}
               // onDescriptionChange={form.setDescription}
               maxParticipants={form.maxParticipants}
               onMaxParticipantsChange={(val) => {
-                form.setMaxParticipants(val)
+                form.setMaxParticipants(val);
                 if (form.errors?.maxParticipants)
                   form.setErrors((prev) => ({
                     ...prev,
                     maxParticipants: undefined,
-                  }))
+                  }));
               }}
               conditionsInput={form.conditionsInput}
               onConditionsChange={form.setConditionsInput}
+              ticketPrice={form.ticketPrice}
+              onTicketPriceChange={form.setTicketPrice}
+              isOnline={form.isOnline}
               errors={form.errors}
             />
 
@@ -277,39 +348,6 @@ const CreateEventPage = () => {
             />
 
             {/* Event type (online/offline) dropdown note */}
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">
-                {cal.filterEventType || "Loại sự kiện"}
-              </label>
-              <div className="relative">
-                <select
-                  value={form.isOnline === true ? "online" : form.isOnline === false ? "offline" : ""}
-                  onChange={(e) => {
-                    if (e.target.value === "online") form.setIsOnline(true);
-                    else if (e.target.value === "offline") form.setIsOnline(false);
-                    else form.setIsOnline(null);
-                  }}
-                  className="w-full h-11 rounded-xl border border-[#C6C6C6] px-4 text-sm text-gray-500 appearance-none bg-white outline-none focus:border-[#990011] transition-colors pr-9"
-                >
-                  <option value="">{cal.eventTypePlaceholder || "Online hay offline?"}</option>
-                  <option value="online">Online</option>
-                  <option value="offline">Offline</option>
-                </select>
-                <svg
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
 
             {/* Description note */}
             <div className="flex flex-col gap-1">
@@ -333,12 +371,16 @@ const CreateEventPage = () => {
             {/* Submit */}
             <button
               type="submit"
-              disabled={form.isLoading}
+              disabled={form.isLoading || form.isOnline === true}
               className="w-full h-12 rounded-full text-white font-semibold text-base bg-[#990011] hover:bg-[#7a000e] transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {form.isLoading
-                ? (isEditing ? (cal.updatingEvent || "Đang cập nhật...") : (cal.creatingEvent || "Đang tạo..."))
-                : (isEditing ? (cal.updateEvent || "Cập nhật sự kiện") : (cal.createEventBtn || "Tạo sự kiện"))}
+                ? isEditing
+                  ? cal.updatingEvent || "Đang cập nhật..."
+                  : cal.creatingEvent || "Đang tạo..."
+                : isEditing
+                  ? cal.updateEvent || "Cập nhật sự kiện"
+                  : cal.createEventBtn || "Tạo sự kiện"}
             </button>
           </div>
 
@@ -401,6 +443,20 @@ const CreateEventPage = () => {
               {cal.previewNote ||
                 "Thông tin hiển thị trước giúp bạn kiểm tra trước khi tạo sự kiện."}
             </p>
+
+            {/* Map section */}
+            <div className="mt-4">
+              <h2 className="text-lg font-bold text-black mb-4">Bản đồ</h2>
+              <MapView 
+                dayEvents={form.eventLocation && !form.isOnline ? [{
+                  id: 'preview',
+                  title: previewTitle || "Sự kiện được đánh dấu",
+                  location: form.eventLocation,
+                  isOnline: false
+                }] : []}
+                selectedEvent={form.eventLocation && !form.isOnline ? { id: 'preview' } : null}
+              />
+            </div>
           </div>
         </div>
       </form>
@@ -424,11 +480,13 @@ const CreateEventPage = () => {
           </h2>
 
           <p className="text-sm text-gray-500 leading-relaxed">
-            {cal.deleteEventWarning || "Nếu bạn xóa sự kiện thì sự kiện vừa rồi phải tạo lại và hành động này không thể hoàn tác lại được. Bạn có chắc không?"}
+            {cal.deleteEventWarning ||
+              "Nếu bạn xóa sự kiện thì sự kiện vừa rồi phải tạo lại và hành động này không thể hoàn tác lại được. Bạn có chắc không?"}
           </p>
 
           <div className="flex gap-3 w-full mt-3">
             <button
+              type="button"
               onClick={() => setShowDeleteConfirm(false)}
               className="flex-1 h-12 rounded-full border-2 border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-colors flex items-center justify-center gap-2"
             >
@@ -436,11 +494,14 @@ const CreateEventPage = () => {
               <X size={16} />
             </button>
             <button
+              type="button"
               onClick={handleDeleteConfirmed}
               disabled={isDeleting}
               className="flex-1 h-12 rounded-full bg-[#990011] text-white font-semibold text-sm hover:bg-[#7a000e] transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              {isDeleting ? (cal.deleting || "Đang xóa...") : (cal.confirm || "Xác nhận")}
+              {isDeleting
+                ? cal.deleting || "Đang xóa..."
+                : cal.confirm || "Xác nhận"}
               {!isDeleting && <ArrowRight size={16} />}
             </button>
           </div>
@@ -454,9 +515,9 @@ const CreateEventPage = () => {
           onClose={() => setPendingPayload(null)}
           onSelect={(choice) => {
             if (performSaveRef.current) {
-              performSaveRef.current(pendingPayload, choice)
+              performSaveRef.current(pendingPayload, choice);
             }
-            setPendingPayload(null)
+            setPendingPayload(null);
           }}
           headerColor={form.eventColor || "#990011"}
         />
@@ -467,9 +528,9 @@ const CreateEventPage = () => {
         open={submitStatus !== null}
         onClose={() => {
           if (submitStatus === "success") {
-            navigate(basePath)
+            window.location.href = basePath;
           } else {
-            setSubmitStatus(null)
+            setSubmitStatus(null);
           }
         }}
         showCloseButton={false}
@@ -478,28 +539,43 @@ const CreateEventPage = () => {
         <div className="flex flex-col items-center justify-center p-6 gap-4 text-center">
           {submitStatus === "success" ? (
             <CheckCircle2 size={64} className="text-[#00BB38]" />
+          ) : submitStatus === "validation_error" ? (
+            <AlertTriangle size={64} className="text-yellow-500" />
           ) : (
             <XCircle size={64} className="text-[#990011]" />
           )}
 
           <h2 className="text-xl font-bold text-black mt-2">
             {submitStatus === "success"
-              ? cal.createEventSuccess || "Tạo sự kiện thành công!"
-              : cal.createEventFailed || "Tạo sự kiện thất bại"}
+              ? isEditing
+                ? cal.updateEventSuccess || "Cập nhật sự kiện thành công!"
+                : cal.createEventSuccess || "Tạo sự kiện thành công!"
+              : submitStatus === "validation_error"
+                ? cal.validationErrorTitle || "Kiểm tra lại thông tin"
+                : isEditing
+                  ? cal.updateEventFailed || "Cập nhật sự kiện thất bại"
+                  : cal.createEventFailed || "Tạo sự kiện thất bại"}
           </h2>
 
           <p className="text-sm text-gray-500">
             {submitStatus === "success"
-              ? cal.createEventSuccessMsg || "Sự kiện của bạn đã được tạo thành công."
-              : cal.createEventFailedMsg || "Có lỗi xảy ra khi tạo sự kiện, vui lòng thử lại."}
+              ? isEditing
+                ? cal.updateEventSuccessMsg || "Sự kiện của bạn đã được cập nhật thành công."
+                : cal.createEventSuccessMsg || "Sự kiện của bạn đã được tạo thành công."
+              : submitStatus === "validation_error"
+                ? cal.validationErrorMsg || "Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc."
+                : isEditing
+                  ? cal.updateEventFailedMsg || "Có lỗi xảy ra khi cập nhật sự kiện, vui lòng thử lại."
+                  : cal.createEventFailedMsg || "Có lỗi xảy ra khi tạo sự kiện, vui lòng thử lại."}
           </p>
 
           <button
+            type="button"
             onClick={() => {
               if (submitStatus === "success") {
-                navigate(basePath)
+                window.location.href = basePath;
               } else {
-                setSubmitStatus(null)
+                setSubmitStatus(null);
               }
             }}
             className="mt-4 px-8 py-2.5 bg-[#990011] text-white rounded-full font-semibold hover:bg-[#7a000e] transition-colors w-full"
@@ -509,7 +585,7 @@ const CreateEventPage = () => {
         </div>
       </Modal>
     </div>
-  )
-}
+  );
+};
 
-export default CreateEventPage
+export default CreateEventPage;

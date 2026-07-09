@@ -34,6 +34,7 @@ export const mapFormToPayload = ({
   recurrenceInterval,
   originalStartTime,
   originalEndTime,
+  ticketPrice,
 }) => {
   /** Split "cond1, cond2" → [{ conditionType:'', category:'', title:'cond1', description:'' }, …] */
   const conditions = (conditionsInput || "")
@@ -78,6 +79,7 @@ export const mapFormToPayload = ({
     originalStartTime: toUtcInTimezone(originalStartTime || startTime),
     originalEndTime: toUtcInTimezone(originalEndTime || endTime),
     conditions,
+    ticketPrice: ticketPrice != null ? Number(ticketPrice) : null,
   };
 
   if (isRecurring && frequency) {
@@ -86,8 +88,8 @@ export const mapFormToPayload = ({
       interval: Number(recurrenceInterval) || 1,
       byWeekDay:
         frequency === "WEEKLY"
-          ? selectedDays.map((d) => WEEKDAY_CODES[d] ?? d)
-          : [],
+          ? JSON.stringify(selectedDays.map((d) => WEEKDAY_CODES[d] ?? d))
+          : undefined,
       ...(frequency === "MONTHLY" && {
         byMonthDay: dayjs(startTime).date(),
       }),
@@ -115,20 +117,32 @@ export const mapFormToPayload = ({
 };
 
 export const objectToFormData = (obj, formData = new FormData(), parentKey = "") => {
-  if (obj === null || obj === undefined) return formData;
+  if (obj === null || obj === undefined) {
+    // Skip null/undefined — ASP.NET treats missing keys as null/default
+    return formData;
+  }
 
   if (obj instanceof Date) {
     formData.append(parentKey, obj.toISOString());
   } else if (obj instanceof File || obj instanceof Blob) {
     formData.append(parentKey, obj);
   } else if (Array.isArray(obj)) {
-    obj.forEach((item, index) => {
-      objectToFormData(item, formData, `${parentKey}[${index}]`);
-    });
+    if (obj.length === 0) {
+      // Signal an empty collection to ASP.NET by appending empty string
+      formData.append(parentKey, "");
+    } else if (typeof obj[0] === "object" && !(obj[0] instanceof File) && !(obj[0] instanceof Blob)) {
+      // Array of objects → use indexed notation for ASP.NET complex binding
+      obj.forEach((item, index) => {
+        objectToFormData(item, formData, `${parentKey}[${index}]`);
+      });
+    } else {
+      // Array of primitives (strings, numbers) → repeat same key (ASP.NET standard)
+      obj.forEach((item) => {
+        formData.append(parentKey, item !== null && item !== undefined ? item.toString() : "");
+      });
+    }
   } else if (typeof obj === "object") {
     Object.keys(obj).forEach((key) => {
-      // Don't capitalize if it's already a specific C# expectation? Wait, ASP.NET model binding is case-insensitive usually.
-      // But standard is capitalize first letter just in case.
       const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
       const formattedKey = parentKey ? `${parentKey}.${capitalizedKey}` : capitalizedKey;
       objectToFormData(obj[key], formData, formattedKey);
@@ -138,3 +152,4 @@ export const objectToFormData = (obj, formData = new FormData(), parentKey = "")
   }
   return formData;
 };
+

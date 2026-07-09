@@ -5,7 +5,8 @@ import {
   ChevronRight,
   LayoutGrid,
 } from "lucide-react";
-import MapView from "./Mapvie";
+import MapView from "./Mapview";
+import "@/shared/utils/testGeoapify";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
@@ -21,6 +22,8 @@ const CalendarMonthPanel = ({
   onSelectDate,
   viewType = "month",
   onChangeView,
+  dayEvents = [],
+  selectedEvent = null,
 }) => {
   const startDay = (currentDate.startOf("month").day() + 6) % 7;
   const prevDays = currentDate.subtract(1, "month").daysInMonth();
@@ -153,14 +156,16 @@ const CalendarMonthPanel = ({
               </button>
               {eventCount > 0 && !isSelected && (
                 <span className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                  {Array.from({ length: Math.min(eventCount, 3) }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`w-1 h-1 rounded-full ${
-                        isToday ? "bg-[#990011]" : "bg-[#990011]/60"
-                      }`}
-                    />
-                  ))}
+                  {Array.from({ length: Math.min(eventCount, 3) }).map(
+                    (_, i) => (
+                      <span
+                        key={i}
+                        className={`w-1 h-1 rounded-full ${
+                          isToday ? "bg-[#990011]" : "bg-[#990011]/60"
+                        }`}
+                      />
+                    ),
+                  )}
                 </span>
               )}
             </div>
@@ -184,7 +189,7 @@ const CalendarMonthPanel = ({
       </div>
 
       <div className="relative z-0">
-        <MapView />
+        <MapView dayEvents={dayEvents} selectedEvent={selectedEvent} />
       </div>
     </div>
   );
