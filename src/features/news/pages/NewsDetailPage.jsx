@@ -206,7 +206,7 @@ const NewsDetailPage = () => {
         </div>
 
         {/* ── Right Column: Comments Sidebar (desktop) / Below (mobile) */}
-        <div className="w-full min-w-0">
+        <div className="w-full h-full min-w-0">
           <div className="lg:sticky lg:top-[76px]">
             <div className="rounded-2xl bg-white p-3 shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)] md:p-4 lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto">
               <CommentsSection
