@@ -20,6 +20,9 @@ import Modal from "@/shared/components/ui/Modal";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useDeleteEventMutation } from "@/store/api/eventsApi";
 import MapView from "../components/Mapview";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "@/store/slices/authSlice";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
 
 // const DEFAULT_COVER =
 //   "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"
@@ -30,6 +33,9 @@ const CreateEventPage = () => {
   const location = useLocation();
   const { t } = useLanguage();
   const cal = t.calendar || {};
+
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { openAuthModal } = useAuthModal();
 
   // editEvent injected from EventDetailModal via navigate state
   const editEvent = location.state?.editEvent || null;
@@ -158,7 +164,17 @@ const CreateEventPage = () => {
       </div>
 
       {/* Two-column layout */}
-      <form onSubmit={form.handleSubmit} className="px-5 pb-10">
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!isAuthenticated) {
+            openAuthModal("login");
+            return;
+          }
+          form.handleSubmit(e);
+        }} 
+        className="px-5 pb-10"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT - Event Info Form */}
           <div className="bg-white rounded-2xl p-6 flex flex-col gap-6 shadow-sm">
