@@ -45,6 +45,23 @@ const baseQuery = fetchBaseQuery({
   },
 })
 
+const instructorBaseQuery = fetchBaseQuery({
+  baseUrl: import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api",
+  prepareHeaders: (headers, { getState }) => {
+    const token = getState().auth.token
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`)
+    }
+
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
+    if (match) {
+      headers.set("X-Community-Lang", match[1])
+    }
+
+    return headers
+  },
+})
+
 // ─── Refresh logic ──────────────────────────────────────────────────
 let refreshPromise = null
 
@@ -183,6 +200,10 @@ async function ensureRefresh(api, extraOptions, reason) {
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   const url = typeof args === "string" ? args : args?.url
 
+  // Choose the query client based on routing prefixes 
+  const isCoursesRoute = url && (url.toLowerCase().startsWith("/teacher/") || url.toLowerCase().startsWith("/student/"))
+  const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
+
   // Skip proactive refresh for auth endpoints
   const isAuthEndpoint = url === "/Auth/refresh-token" || url === "/Auth/login"
 
@@ -206,7 +227,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
   }
 
   // ── Execute the actual request ────────────────────────────────────
-  let result = await baseQuery(args, api, extraOptions)
+  let result = await activeQuery(args, api, extraOptions)
 
   // ── Handle 401 ────────────────────────────────────────────────────
   if (result.error?.status === 401) {
@@ -221,7 +242,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
     if (success) {
       // Retry the original request with the new token
-      result = await baseQuery(args, api, extraOptions)
+      result = await activeQuery(args, api, extraOptions)
       if (result.error) {
         console.error(
           AUTH_LOG,
@@ -287,6 +308,17 @@ export const baseApi = createApi({
     "Locations",
     "Reels",
     "ReelComments",
+    "Courses",
+    "Classes",
+    "CourseDetail",
+    "ClassDetail",
+    "ClassMembers",
+    "TeacherProfile",
+    "ClassFeed",
+    "ClassGrading",
+    "ClassMaterials",
+    "Schedule",
+    "Commission",
   ],
   endpoints: () => ({}),
 })

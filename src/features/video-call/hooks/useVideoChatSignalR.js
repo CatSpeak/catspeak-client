@@ -56,6 +56,19 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
       }
     })
 
+    // Picture IT Events
+    connection.on("OnSyncGameState", (sessId, senderId, statePayload) => {
+      if (Number(sessId) === Number(sessionId) && onEventReceivedRef.current) {
+        onEventReceivedRef.current("OnSyncGameState", { senderId, statePayload })
+      }
+    })
+
+    connection.on("OnGameAction", (sessId, senderId, actionType, payload) => {
+      if (Number(sessId) === Number(sessionId) && onEventReceivedRef.current) {
+        onEventReceivedRef.current("OnGameAction", { senderId, actionType, payload })
+      }
+    })
+
     connection.start()
       .then(() => {
         setIsConnected(true)
@@ -85,7 +98,7 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
     }
   }, [sessionId, token])
 
-  return isConnected
+  return { isConnected, connection: connectionRef.current }
 }
 
 export default useVideoChatSignalR

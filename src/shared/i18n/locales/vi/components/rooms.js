@@ -1,4 +1,9 @@
 export default {
+  language: {
+    vi: "Tiếng Việt",
+    en: "English",
+    zh: "China",
+  },
   welcome: {
     greeting: "Chào {{name}},",
     friend: "Bạn",
@@ -301,6 +306,7 @@ export default {
       micOn: "Bật micro",
       micOff: "Tắt micro",
       camOn: "Bật camera",
+      playGames: "Trò chơi",
       camOff: "Tắt camera",
       shareOn: "Chia sẻ màn hình",
       shareOff: "Dừng chia sẻ",
@@ -440,6 +446,130 @@ export default {
       "Dán đường dẫn hình ảnh hợp lệ. Nếu không hợp lệ, sẽ hiển thị chữ cái đầu tên bạn.",
     saving: "Đang lưu...",
     saveAvatar: "Lưu ảnh đại diện",
+  },
+  game: {
+    crackIt: {
+      title: "Crack It",
+      close: "Đóng",
+      waitingStart: "Đang chuẩn bị ván đấu...",
+      roundResult: "Đáp án chính xác là",
+      nextRoundIn: "Ván tiếp theo sẽ bắt đầu sau ít giây...",
+      gameOver: "KẾT THÚC!",
+      finalLeaderboard: "Bảng Xếp Hạng Chung Cuộc",
+      closeGame: "Đóng Game",
+      round: "Ván",
+      hint: "Gợi ý",
+      answerLength: "Số từ",
+      youGotIt: "Bạn đã đoán đúng! Đợi người khác...",
+      typeAnswer: "Nhập đáp án của bạn...",
+      gotItRight: "đã đoán đúng!",
+      leaderboard: "Bảng xếp hạng",
+      waitingPlayers: "Đang đợi người chơi...",
+      playGame: "Chơi Crack It",
+      notEnoughPlayers: "Cần ít nhất 2 người để bắt đầu trò chơi!",
+      you: "Bạn",
+      playerX: "Người chơi {0}",
+      exitGameTooltip: "Thoát trò chơi",
+      exitConfirmTitle: "Xác nhận thoát",
+      exitConfirmDesc1: "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?",
+      exitConfirmDesc2: "Bạn sẽ không thể tham gia lại ván chơi này nữa!",
+      cancel: "Hủy",
+      confirmExit: "Đồng ý thoát",
+      roundLeaderboard: "Thành tích ván này",
+      forceStopNotEnoughPlayers: "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
+      forceStopGeneric: "Trò chơi bị dừng đột ngột.",
+      tallyingFinalResults: "Đang tổng hợp kết quả chung cuộc...",
+      nextRoundIn: "Ván tiếp theo sẽ bắt đầu sau ít giây...",
+      gameHistory: "Lịch sử trò chơi",
+      historyTitle: "Lịch sử thi đấu",
+      noHistoryFound: "Chưa có dữ liệu lịch sử cho phòng này.",
+      score: "Điểm",
+      matchDate: "Ngày chơi",
+      winner: "Người chiến thắng"
+    },
+    setup: {
+      title: "Thiết lập Trò chơi",
+      pictureItDesc: "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
+      crackItDesc: "Đoán từ khóa ẩn qua các gợi ý trước những người chơi khác.",
+      difficultyDesc: "Điều chỉnh độ khó phù hợp cho phòng của bạn.",
+      languageDesc: "Chọn ngôn ngữ trò chơi cho phiên này.",
+      selectLanguage: "Ngôn ngữ",
+      langEn: "Tiếng Anh",
+      langZh: "Tiếng Trung",
+      selectLevel: "Mức độ",
+      levelEasy: "Dễ",
+      levelMedium: "Trung bình",
+      levelHard: "Khó",
+      cancel: "Hủy",
+      startNow: "Bắt đầu ngay"
+    },
+    pictureIt: {
+      topBar: {
+        round: "Vòng",
+        describer: "Người mô tả",
+        spectator: "Khán giả",
+        roleDescriber: "Người mô tả",
+        roleRater: "Người đoán"
+      },
+      actionPanel: {
+        watchingAsSpectator: "Bạn đang xem với tư cách khán giả.",
+        turnOnMic: "Bật Mic (Bắt đầu)",
+        turnOffMic: "Tắt Mic (Kết thúc)",
+        ratersAreScoring: "Đang chờ chấm điểm... ({0}s)",
+        yourRating: "Điểm của bạn:",
+        timeLeft: "(Còn {0}s)",
+        submitRating: "Gửi điểm",
+        ratingSubmitted: "Đã gửi! Đang chờ người khác...",
+        waiting: "Đang chờ..."
+      },
+      imageCard: {
+        describeToTeam: "Hãy mô tả bức ảnh này cho đội của bạn",
+        listenAndRate: "Hãy lắng nghe và chuẩn bị chấm điểm",
+        loadingImage: "Đang tải ảnh...",
+        imageUnavailable: "Không tải được ảnh",
+        describerSpeaking: "Người mô tả đang nói...",
+        preparing: "Đang chuẩn bị...",
+        forbiddenWordsTitle: "Từ cấm",
+        forbiddenWordsDesc: "KHÔNG được sử dụng các từ này",
+        flaggedCount: "{0} / {1} người đã báo vi phạm"
+      },
+      modals: {
+        gameEnded: "Kết thúc trò chơi",
+        notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
+        close: "Đóng",
+        waitingStart: "Đang chuẩn bị ván đấu..."
+      },
+      badges: {
+        "Master Describer": "Bậc thầy mô tả",
+        "Great Speaker": "Diễn giả xuất sắc",
+        "Best Rating Accuracy": "Đánh giá chuẩn xác",
+        "Most Fluent": "Trôi chảy nhất",
+        "Team Player": "Tinh thần đồng đội",
+        "Keep Practicing": "Cố gắng hơn nhé",
+        champion: "Nhà vô địch"
+      },
+      gameOver: {
+        title: "Trò chơi kết thúc",
+        thanksForPlaying: "Cảm ơn bạn đã chơi",
+        finalLeaderboard: "Bảng xếp hạng chung cuộc",
+        roundsPlayed: "Số vòng đã chơi",
+        language: "Ngôn ngữ",
+        difficulty: "Độ khó",
+        winningScore: "Điểm chiến thắng",
+        highestRoundScore: "Điểm 1 vòng cao nhất",
+        playAgain: "Chơi lại",
+        backToRoom: "Về phòng",
+        playersCount: "{0} người chơi"
+      },
+      leaderboard: {
+        title: "Bảng xếp hạng",
+        playersCount: "{0} người chơi"
+      },
+      roundResult: {
+        nextRoundStartsIn: "Vòng tiếp theo bắt đầu sau...",
+        averageRating: "Điểm trung bình"
+      }
+    }
   },
   participants: "người",
   noLimit: "Không giới hạn",
