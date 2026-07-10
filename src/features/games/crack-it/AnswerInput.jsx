@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useGame } from "../../../context/GameContext";
+import { useGame } from "@/features/video-call/context/GameContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";

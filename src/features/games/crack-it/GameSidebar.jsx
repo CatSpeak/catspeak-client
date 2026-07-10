@@ -1,5 +1,5 @@
 import React from "react";
-import { useGame } from "../../../context/GameContext";
+import { useGame } from "@/features/video-call/context/GameContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useAuth } from "@/features/auth";
 import { Check, X } from "lucide-react";

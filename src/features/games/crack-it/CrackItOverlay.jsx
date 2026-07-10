@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from "framer-motion";
-import { useGame } from "../../../context/GameContext";
+import { useGame } from "@/features/video-call/context/GameContext";
 import TopBar from "./TopBar";
 import PuzzleCenter from "./PuzzleCenter";
 import AnswerInput from "./AnswerInput";

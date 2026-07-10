@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useGame } from "../../../context/GameContext";
+import { useGame } from "@/features/video-call/context/GameContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
 const PuzzleCenter = () => {

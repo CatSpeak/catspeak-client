@@ -17,7 +17,6 @@ import {
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
-import SelectGameModal from "@/features/games/components/SelectGameModal"
 import StopRecordingModal from "./StopRecordingModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
@@ -232,13 +231,6 @@ const VideoCallControlBar = () => {
         />
       )}
 
-      {showGameModal && (
-        <SelectGameModal
-          open={showGameModal}
-          onClose={() => setShowGameModal(false)}
-          onGameStart={handleGameStart}
-        />
-      )}
     </div>
   );
 }
