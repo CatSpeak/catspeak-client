@@ -1,4 +1,4 @@
-import { China, USA, VietNam } from "@/shared/assets/icons/flags";
+import { China, UK, VietNam } from "@/shared/assets/icons/flags";
 import { MainLogo } from "@/shared/assets/icons/logo";
 
 const languages = [
@@ -14,7 +14,7 @@ const languages = [
   },
   {
     name: "Anh",
-    flag: USA,
+    flag: UK,
     className: "left-[73%] top-[35%]",
   },
 ];

@@ -6,7 +6,6 @@ import messageWidgetReducer from "./slices/messageWidgetSlice"
 import serverStatusReducer from "./slices/serverStatusSlice"
 import videoCallReducer from "./slices/videoCallSlice"
 import notificationReducer from "./slices/notificationSlice"
-
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,

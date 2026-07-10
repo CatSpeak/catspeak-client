@@ -22,9 +22,11 @@ import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverl
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
 import { GameProvider } from "@/features/video-call/context/GameContext";
-import CrackItOverlay from "@/features/video-call/components/games/crack-it/CrackItOverlay";
+// import CrackItOverlay from "@/features/video-call/components/games/crack-it/CrackItOverlay";
+import PictureITOverlay from "@/features/games/picture-it/components/PictureITOverlay";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading";
+import CrackItOverlay from "@/features/games/crack-it/CrackItOverlay";
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage();
@@ -137,6 +139,8 @@ const VideoCallRoomContent = () => {
 
       {/* Game Overlay */}
       <CrackItOverlay />
+
+      <PictureITOverlay />
 
       {/* Main Content Area */}
       <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row bg-[#F3F3F3]">

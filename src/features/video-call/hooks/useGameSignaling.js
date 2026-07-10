@@ -36,7 +36,10 @@ export const useGameSignaling = (handlers = {}) => {
     const events = [
       "GAME_SETUP", "GAME_COUNTDOWN", "ROUND_START",
       "CORRECT_ANSWER", "ROUND_RESULT", "GAME_OVER", "PLAYER_LEFT",
-      "SYNC_GAME_STATE", "GAME_FORCE_STOP"
+      "SYNC_GAME_STATE", "GAME_FORCE_STOP", "GAME_ALREADY_STARTED",
+      "JOINED_AS_SPECTATOR", "ROUND_START_DESCRIBER", "DESCRIBE_STARTED",
+      "DESCRIBE_ENDED", "FLAG_SUBMITTED", "ROUND_FLAGGED",
+      "RATING_OPEN", "ROUND_SKIPPED", "PICTURE_IT_ERROR"
     ];
 
     events.forEach(evt => newConnection.on(evt, safeHandler(evt)));
@@ -46,7 +49,7 @@ export const useGameSignaling = (handlers = {}) => {
       .catch(err => console.error("[GameSignalR] Connection Error:", err));
 
     return () => {
-      newConnection.stop().catch(() => {});
+      newConnection.stop().catch(() => { });
       setIsConnected(false);
     };
   }, [token]);

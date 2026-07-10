@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import {
   Video,
   VideoOff,
@@ -16,14 +17,17 @@ import {
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
+import SelectGameModal from "@/features/games/components/SelectGameModal"
 import StopRecordingModal from "./StopRecordingModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
+import { useGame } from "@/features/video-call/context/GameContext"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
+  const { startGame } = useGame()
   const {
     micOn,
     cameraOn,
@@ -57,6 +61,8 @@ const VideoCallControlBar = () => {
   } = useVideoCallContext()
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showGameModal, setShowGameModal] = useState(false)
 
   const handleToggleHand = async () => {
     console.log(
@@ -76,8 +82,12 @@ const VideoCallControlBar = () => {
     }
   }
 
+  const handleGameStart = ({ gameId, difficulty, language }) => {
+    startGame(gameId, difficulty, language)
+    setShowGameModal(false)
+  }
+
   const unreadMessages = unreadRoomChat + unreadAiChat
-  const [showMoreMenu, setShowMoreMenu] = useState(false)
 
   const iconClass = "w-6 h-6"
 
@@ -190,6 +200,7 @@ const VideoCallControlBar = () => {
         <ControlBarMoreMenu
           showMoreMenu={showMoreMenu}
           setShowMoreMenu={setShowMoreMenu}
+          setShowGameModal={setShowGameModal}
         />
       </div>
 
@@ -220,8 +231,16 @@ const VideoCallControlBar = () => {
           }}
         />
       )}
+
+      {showGameModal && (
+        <SelectGameModal
+          open={showGameModal}
+          onClose={() => setShowGameModal(false)}
+          onGameStart={handleGameStart}
+        />
+      )}
     </div>
-  )
+  );
 }
 
 export default VideoCallControlBar
