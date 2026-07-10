@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, Trophy, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar, Trophy, ChevronDown, ChevronUp, Star } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
@@ -116,10 +116,18 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                         )}
                       </div>
                     </div>
-                    <div className="font-black text-cath-red-500 text-lg">
+                    <div className={`font-black text-cath-red-500 text-lg ${match.gameType === "crack_it"? "" :  "flex items-center"} gap-1`}>
                       {item.totalScore}{" "}
                       <span className="text-xs font-medium text-slate-400 ml-1">
-                        {t.rooms?.game?.crackIt?.score || "pts"}
+                        {match.gameType === "crack_it" ? (
+                          t.rooms?.game?.crackIt?.score
+                        ) : (
+                          <Star
+                            size={20}
+                            className={"text-cath-orange-400"}
+                            fill="#f08d1d"
+                          />
+                        )}
                       </span>
                     </div>
                   </div>
