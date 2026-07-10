@@ -309,11 +309,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       )
 
       // Auto-restore breakout state if user was in a sub-room before refresh/reconnect
-      if (tokenRes?.cathspeak?.is_breakout_active && tokenRes?.cathspeak?.active_sub_session_id) {
+      if (tokenRes?.activeSubSessionId) {
         dispatch(
           enterBreakout({
-            subSessionId: tokenRes.cathspeak.active_sub_session_id,
-            roomName: tokenRes.cathspeak.active_sub_session_name || "Phòng thảo luận",
+            subSessionId: tokenRes.activeSubSessionId,
+            roomName: tokenRes.activeSubSessionName || "Phòng thảo luận",
             token,
           })
         )
