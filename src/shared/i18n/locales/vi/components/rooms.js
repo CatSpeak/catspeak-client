@@ -502,6 +502,73 @@ export default {
       levelHard: "Khó",
       cancel: "Hủy",
       startNow: "Bắt đầu ngay"
+    },
+    pictureIt: {
+      topBar: {
+        round: "Vòng",
+        describer: "Người mô tả",
+        spectator: "Khán giả",
+        roleDescriber: "Người mô tả",
+        roleRater: "Người đoán"
+      },
+      actionPanel: {
+        watchingAsSpectator: "Bạn đang xem với tư cách khán giả.",
+        turnOnMic: "Bật Mic (Bắt đầu)",
+        turnOffMic: "Tắt Mic (Kết thúc)",
+        ratersAreScoring: "Đang chờ chấm điểm... ({0}s)",
+        yourRating: "Điểm của bạn:",
+        timeLeft: "(Còn {0}s)",
+        submitRating: "Gửi điểm",
+        ratingSubmitted: "Đã gửi! Đang chờ người khác...",
+        waiting: "Đang chờ..."
+      },
+      imageCard: {
+        describeToTeam: "Hãy mô tả bức ảnh này cho đội của bạn",
+        listenAndRate: "Hãy lắng nghe và chuẩn bị chấm điểm",
+        loadingImage: "Đang tải ảnh...",
+        imageUnavailable: "Không tải được ảnh",
+        describerSpeaking: "Người mô tả đang nói...",
+        preparing: "Đang chuẩn bị...",
+        forbiddenWordsTitle: "Từ cấm",
+        forbiddenWordsDesc: "KHÔNG được sử dụng các từ này",
+        flaggedCount: "{0} / {1} người đã báo vi phạm"
+      },
+      modals: {
+        gameEnded: "Kết thúc trò chơi",
+        notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
+        close: "Đóng",
+        waitingStart: "Đang chuẩn bị ván đấu..."
+      },
+      badges: {
+        "Master Describer": "Bậc thầy mô tả",
+        "Great Speaker": "Diễn giả xuất sắc",
+        "Best Rating Accuracy": "Đánh giá chuẩn xác",
+        "Most Fluent": "Trôi chảy nhất",
+        "Team Player": "Tinh thần đồng đội",
+        "Keep Practicing": "Cố gắng hơn nhé",
+        champion: "Nhà vô địch"
+      },
+      gameOver: {
+        title: "Trò chơi kết thúc",
+        thanksForPlaying: "Cảm ơn bạn đã chơi",
+        finalLeaderboard: "Bảng xếp hạng chung cuộc",
+        roundsPlayed: "Số vòng đã chơi",
+        language: "Ngôn ngữ",
+        difficulty: "Độ khó",
+        winningScore: "Điểm chiến thắng",
+        highestRoundScore: "Điểm 1 vòng cao nhất",
+        playAgain: "Chơi lại",
+        backToRoom: "Về phòng",
+        playersCount: "{0} người chơi"
+      },
+      leaderboard: {
+        title: "Bảng xếp hạng",
+        playersCount: "{0} người chơi"
+      },
+      roundResult: {
+        nextRoundStartsIn: "Vòng tiếp theo bắt đầu sau...",
+        averageRating: "Điểm trung bình"
+      }
     }
   },
   participants: "người",

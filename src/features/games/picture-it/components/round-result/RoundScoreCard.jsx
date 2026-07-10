@@ -6,6 +6,7 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 import RoleBadge from "./RoleBadge"
 import useCountUp from "./useCountUp"
 import { fluentEaseOut } from "@/shared/utils/animations"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * RoundScoreCard
@@ -14,6 +15,10 @@ import { fluentEaseOut } from "@/shared/utils/animations"
  * @param {number} roundScore    - Score earned this round
  */
 const RoundScoreCard = ({ describer, roundScore }) => {
+  const { t } = useLanguage();
+  const tb = t.rooms?.game?.pictureIt?.topBar || {};
+  const rr = t.rooms?.game?.pictureIt?.roundResult || {};
+
   const animatedScore = useCountUp(roundScore)
 
   // Build 5 stars with partial fill support (rounded to 0.5)
@@ -52,14 +57,14 @@ const RoundScoreCard = ({ describer, roundScore }) => {
               {describer?.name}
             </p>
             <div className="mt-1">
-              <RoleBadge role="Describer" />
+              <RoleBadge role={tb.roleDescriber || "Describer"} />
             </div>
           </div>
         </div>
 
         {/* Average rating */}
         <div className="flex flex-col items-center gap-1.5">
-          <p className="text-base font-medium text-secondary uppercase tracking-widest">Average Rating</p>
+          <p className="text-base font-medium text-secondary uppercase tracking-widest">{rr.averageRating || 'Average Rating'}</p>
           <div className="flex items-center gap-1">{renderStars(roundScore)}</div>
           <p className="text-2xl font-semibold text-headingColor">
             {animatedScore?.toFixed(1)}{" "}

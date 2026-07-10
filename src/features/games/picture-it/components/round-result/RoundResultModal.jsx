@@ -73,7 +73,7 @@ const RoundResultModal = ({ open, onClose, result }) => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="relative w-full max-w-[80vw] max-h-[90vh] overflow-y-auto scrollbar-app-transparent rounded-3xl p-8 flex flex-col gap-6"
+              className="relative w-full max-w-[95vw] md:max-w-[80vw] max-h-[90vh] overflow-y-auto scrollbar-app-transparent rounded-3xl p-4 md:p-8 flex flex-col gap-4 md:gap-6"
               style={{
                 background: "rgba(255, 255, 255, 0.92)",
                 backdropFilter: "blur(24px) saturate(180%)",
@@ -89,10 +89,10 @@ const RoundResultModal = ({ open, onClose, result }) => {
                 onComplete={onClose}
               />
 
-              <div className="flex gap-4 flex-1 min-h-0">
+              <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
                 <RoundImageCard image={result.image} />
 
-                <div className="flex flex-row gap-4 w-full">
+                <div className="flex flex-col md:flex-row gap-4 w-full">
                   <RoundScoreCard
                     describer={result.describer}
                     roundScore={result.roundScore}
