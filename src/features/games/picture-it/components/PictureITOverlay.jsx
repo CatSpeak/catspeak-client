@@ -6,6 +6,7 @@ import { FluentAnimation } from '@/shared/components/ui/animations';
 import { PillButton } from '@/shared/components/ui/buttons';
 import { LeaderboardCard, RoundResultModal, GameOverModal } from './round-result';
 import { useGame } from '@/features/video-call/context/GameContext';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 import PictureItTopBar from './PictureItTopBar';
 import PictureItImageCard from './PictureItImageCard';
@@ -25,6 +26,9 @@ const PictureITOverlay = () => {
     submitPictureItRating,
     exitGame
   } = useGame();
+
+  const { t } = useLanguage();
+  const tm = t.rooms?.game?.pictureIt?.modals || {};
 
   const participants = useParticipants();
 
@@ -129,7 +133,7 @@ const PictureITOverlay = () => {
             <PictureItTopBar
               roundNumber={roundNumber}
               totalRounds={totalRounds}
-              gameLanguage={gameLanguage}
+              describerName={describerUser?.name}
               isSpectator={isSpectator}
               isDescriber={isDescriber}
               onLeaveGame={handleLeaveGame}
@@ -234,9 +238,9 @@ const PictureITOverlay = () => {
       {showForceStopped && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-white/95">
           <div className="text-center space-y-3">
-            <p className="text-2xl font-bold text-cath-red-700">Game Ended</p>
-            <p className="text-secondary">Không đủ người chơi tiếp tục.</p>
-            <PillButton onClick={handleGameOverClose}>Close</PillButton>
+            <p className="text-2xl font-bold text-cath-red-700">{tm.gameEnded || 'Game Ended'}</p>
+            <p className="text-secondary">{tm.notEnoughPlayers || 'Không đủ người chơi tiếp tục.'}</p>
+            <PillButton onClick={handleGameOverClose}>{tm.close || 'Close'}</PillButton>
           </div>
         </div>
       )}

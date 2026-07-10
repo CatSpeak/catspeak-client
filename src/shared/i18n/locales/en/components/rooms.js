@@ -512,6 +512,72 @@ export default {
       levelHard: "Hard",
       cancel: "Cancel",
       startNow: "Start Now"
+    },
+    pictureIt: {
+      topBar: {
+        round: "Round",
+        describer: "Describer",
+        spectator: "Spectator",
+        roleDescriber: "Describer",
+        roleRater: "Rater"
+      },
+      actionPanel: {
+        watchingAsSpectator: "You are watching as a spectator.",
+        turnOnMic: "Turn on Mic (Start)",
+        turnOffMic: "Turn off Mic (Finish)",
+        ratersAreScoring: "Raters are scoring... ({0}s)",
+        yourRating: "Your rating:",
+        timeLeft: "({0}s left)",
+        submitRating: "Submit rating",
+        ratingSubmitted: "Rating submitted! Waiting for others...",
+        waiting: "Waiting..."
+      },
+      imageCard: {
+        describeToTeam: "Describe this image to your team",
+        listenAndRate: "Listen and prepare to rate",
+        loadingImage: "Loading image...",
+        imageUnavailable: "Image unavailable",
+        describerSpeaking: "Describer is speaking...",
+        preparing: "Preparing...",
+        forbiddenWordsTitle: "Forbidden words",
+        forbiddenWordsDesc: "Do NOT use these words",
+        flaggedCount: "{0} / {1} flagged"
+      },
+      modals: {
+        gameEnded: "Game Ended",
+        notEnoughPlayers: "Not enough players to continue.",
+        close: "Close"
+      },
+      badges: {
+        "Master Describer": "Master Describer",
+        "Great Speaker": "Great Speaker",
+        "Best Rating Accuracy": "Best Rating Accuracy",
+        "Most Fluent": "Most Fluent",
+        "Team Player": "Team Player",
+        "Keep Practicing": "Keep Practicing",
+        champion: "Champion"
+      },
+      gameOver: {
+        title: "Game Finished",
+        thanksForPlaying: "Thanks for playing",
+        finalLeaderboard: "Final Leaderboard",
+        roundsPlayed: "Rounds Played",
+        language: "Language",
+        difficulty: "Difficulty",
+        winningScore: "Winning Score",
+        highestRoundScore: "Highest Round Score",
+        playAgain: "Play Again",
+        backToRoom: "Back to Room",
+        playersCount: "{0} players"
+      },
+      leaderboard: {
+        title: "Leaderboard",
+        playersCount: "{0} players"
+      },
+      roundResult: {
+        nextRoundStartsIn: "Next round starts in...",
+        averageRating: "Average Rating"
+      }
     }
   },
   participants: "participants",

@@ -486,6 +486,72 @@ export default {
       levelHard: "困难",
       cancel: "取消",
       startNow: "立即开始"
+    },
+    pictureIt: {
+      topBar: {
+        round: "回合",
+        describer: "描述者",
+        spectator: "观众",
+        roleDescriber: "描述者",
+        roleRater: "评分者"
+      },
+      actionPanel: {
+        watchingAsSpectator: "您正在以观众身份观看。",
+        turnOnMic: "打开麦克风 (开始)",
+        turnOffMic: "关闭麦克风 (结束)",
+        ratersAreScoring: "评分者正在打分... ({0}秒)",
+        yourRating: "您的评分:",
+        timeLeft: "(剩余 {0}秒)",
+        submitRating: "提交评分",
+        ratingSubmitted: "已提交！等待其他玩家...",
+        waiting: "等待中..."
+      },
+      imageCard: {
+        describeToTeam: "向您的团队描述这张图片",
+        listenAndRate: "请聆听并准备评分",
+        loadingImage: "正在加载图片...",
+        imageUnavailable: "图片不可用",
+        describerSpeaking: "描述者正在说话...",
+        preparing: "准备中...",
+        forbiddenWordsTitle: "禁用词",
+        forbiddenWordsDesc: "请勿使用这些词",
+        flaggedCount: "{0} / {1} 人已标记违规"
+      },
+      modals: {
+        gameEnded: "游戏结束",
+        notEnoughPlayers: "玩家人数不足以继续。",
+        close: "关闭"
+      },
+      badges: {
+        "Master Describer": "描述大师",
+        "Great Speaker": "优秀演讲者",
+        "Best Rating Accuracy": "最佳评分准确度",
+        "Most Fluent": "最流利",
+        "Team Player": "团队合作",
+        "Keep Practicing": "继续努力",
+        champion: "冠军"
+      },
+      gameOver: {
+        title: "游戏结束",
+        thanksForPlaying: "感谢您玩",
+        finalLeaderboard: "最终排行榜",
+        roundsPlayed: "已玩回合",
+        language: "语言",
+        difficulty: "难度",
+        winningScore: "获胜分数",
+        highestRoundScore: "最高单回合分数",
+        playAgain: "再玩一次",
+        backToRoom: "返回房间",
+        playersCount: "{0} 名玩家"
+      },
+      leaderboard: {
+        title: "排行榜",
+        playersCount: "{0} 名玩家"
+      },
+      roundResult: {
+        nextRoundStartsIn: "下一回合开始于...",
+        averageRating: "平均评分"
+      }
     }
   }
 };

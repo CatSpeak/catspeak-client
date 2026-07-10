@@ -4,6 +4,7 @@ import { Trophy } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import LeaderboardRow from "./LeaderboardRow"
 import { fluentEaseOut } from "@/shared/utils/animations"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * LeaderboardCard
@@ -13,6 +14,9 @@ import { fluentEaseOut } from "@/shared/utils/animations"
  * @param {Array}  leaderboard     - Array of LeaderboardPlayer objects
  */
 const LeaderboardCard = ({ leaderboard = [] }) => {
+  const { t } = useLanguage();
+  const lb = t.rooms?.game?.pictureIt?.leaderboard || {};
+
   const sorted = [...leaderboard].sort((a, b) => b.totalScore - a.totalScore).slice(0, 8)
 
   return (
@@ -28,9 +32,9 @@ const LeaderboardCard = ({ leaderboard = [] }) => {
           <div className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0 bg-cath-red-700/10">
             <Trophy size={14} className="text-cath-red-700" />
           </div>
-          <p className="text-sm font-semibold text-headingColor">Leaderboard</p>
+          <p className="text-sm font-semibold text-headingColor">{lb.title || 'Leaderboard'}</p>
           <span className="ml-auto text-xs text-secondary tabular-nums">
-            {leaderboard.length} players
+            {(lb.playersCount || '{0} players').replace('{0}', leaderboard.length)}
           </span>
         </div>
 

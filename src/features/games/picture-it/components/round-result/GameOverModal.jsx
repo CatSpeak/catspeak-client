@@ -8,6 +8,7 @@ import useScrollLock from "@/shared/hooks/useScrollLock"
 import ConfettiCanvas from "./ConfettiCanvas"
 import { fluentEaseOut } from "@/shared/utils/animations"
 import { LeaderboardRow } from "."
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const COUNTDOWN_SEC = 3
@@ -43,7 +44,7 @@ const panelVariants = {
   exit: { opacity: 0, scale: 0.96, y: 12, transition: { duration: 0.3, ease: fluentEaseOut } },
 }
 
-const WinnerCard = ({ player }) => (
+const WinnerCard = ({ player, badgeTranslations }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -67,7 +68,7 @@ const WinnerCard = ({ player }) => (
         <Avatar
           src={player.avatar}
           alt={player.name}
-          size="lg"
+          size={32}
           className="ring-2 ring-[#f08d1d] ring-offset-2 ring-offset-[#131926]"
         />
       </div>
@@ -76,11 +77,11 @@ const WinnerCard = ({ player }) => (
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-1.5">
           <Star size={24} className="text-yellow-500 fill-yellow-500" />
-          <p className="text-lg font-bold text-white tracking-tight">{player.name}</p>
+          <p className="text-lg font-bold text-black tracking-tight">{player.name}</p>
         </div>
         <div className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 w-fit">
           <span></span>
-          <span>Champion</span>
+          <span>{badgeTranslations?.champion || 'Champion'}</span>
         </div>
       </div>
     </div>
@@ -102,7 +103,7 @@ const RANK_MEDAL = {
 }
 
 // ─── FinalLeaderboardRow ──────────────────────────────────────────────────────
-const FinalLeaderboardRow = ({ player, rank, index, badge }) => {
+const FinalLeaderboardRow = ({ player, rank, index, badge, badgeTranslations }) => {
   const isWinner = rank === 1
   const isTopThree = rank <= 3
 
@@ -151,7 +152,7 @@ const FinalLeaderboardRow = ({ player, rank, index, badge }) => {
                 className={`flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full border ${style}`}
               >
                 <span>{BADGE_ICONS[badge]}</span>
-                <span>{badge}</span>
+                <span>{badgeTranslations?.[badge] || badge}</span>
               </span>
             )
           })}
@@ -181,8 +182,11 @@ const CountdownBar = ({ seconds, total }) => {
   )
 }
 
-// ─── GameOverModal ─────────────────────────────────────────────────────────────
 const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDOWN_SEC }) => {
+  const { t } = useLanguage();
+  const go = t.rooms?.game?.pictureIt?.gameOver || {};
+  const badges = t.rooms?.game?.pictureIt?.badges || {};
+
   const [secondsLeft, setSecondsLeft] = useState(countdown)
   const intervalRef = useRef(null)
 
@@ -219,11 +223,11 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
   const winner = sorted[0]
 
   const stats = [
-    { label: "Rounds Played", value: result.totalRounds ?? "8", icon: <Swords size={13} className="text-slate-400" /> },
-    { label: "Language", value: result.language ?? "English", icon: <Globe2 size={13} className="text-slate-400" /> },
-    { label: "Difficulty", value: result.difficulty ?? "Medium", icon: <BarChart2 size={13} className="text-slate-400" /> },
-    { label: "Winning Score", value: winner ? `${winner.totalScore}` : "48.6", icon: <Award size={13} className="text-slate-400" /> },
-    { label: "Highest Round Score", value: "9.8", icon: <Zap size={13} className="text-slate-400" /> },
+    { label: go.roundsPlayed || "Rounds Played", value: result.totalRounds ?? "8", icon: <Swords size={13} className="text-slate-400" /> },
+    { label: go.language || "Language", value: result.language ?? "English", icon: <Globe2 size={13} className="text-slate-400" /> },
+    { label: go.difficulty || "Difficulty", value: result.difficulty ?? "Medium", icon: <BarChart2 size={13} className="text-slate-400" /> },
+    { label: go.winningScore || "Winning Score", value: winner ? `${winner.totalScore}` : "48.6", icon: <Award size={13} className="text-slate-400" /> },
+    { label: go.highestRoundScore || "Highest Round Score", value: "9.8", icon: <Zap size={13} className="text-slate-400" /> },
   ]
 
   return createPortal(
@@ -272,7 +276,7 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
                   transition={{ duration: 0.4, ease: fluentEaseOut, delay: 0.1 }}
                   className="text-2xl font-bold  tracking-tight flex items-center gap-2"
                 >
-                  Game Finished
+                  {go.title || 'Game Finished'}
                 </motion.h2>
 
                 <motion.p
@@ -281,19 +285,19 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
                   transition={{ duration: 0.4, ease: fluentEaseOut, delay: 0.18 }}
                   className="text-xs font-medium"
                 >
-                  Thanks for playing <span className="font-semibold ">Picture IT</span>!
+                  {go.thanksForPlaying || 'Thanks for playing'} <span className="font-semibold ">Picture IT</span>!
                 </motion.p>
               </div>
 
               {/* Winner Card Highlight */}
-              {winner && <WinnerCard player={winner} />}
+              {winner && <WinnerCard player={winner} badgeTranslations={badges} />}
 
               {/* Two Column details split */}
 
               {/* LEFT Column: Final Leaderboard list */}
               <div className="flex flex-col gap-2.5">
                 <p className="text-[10px] font-bold text-black uppercase tracking-widest px-1">
-                  Final Leaderboard
+                  {go.finalLeaderboard || 'Final Leaderboard'}
                 </p>
                 <div className="flex flex-col gap-1.5 overflow-y-auto scrollbar-app-hover max-h-[260px] pr-1">
                   {sorted.slice(0, 5).map((player, i) => (
@@ -302,6 +306,7 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
                       player={player}
                       rank={i + 1}
                       index={i}
+                      badgeTranslations={badges}
                     />
                   ))}
                 </div>

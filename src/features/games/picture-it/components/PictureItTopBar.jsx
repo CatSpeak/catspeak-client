@@ -1,15 +1,19 @@
 import React from 'react';
 import { Gamepad2, LogOut } from 'lucide-react';
 import { PillButton } from '@/shared/components/ui/buttons';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const PictureItTopBar = ({
   roundNumber,
   totalRounds,
-  gameLanguage,
+  describerName,
   isSpectator,
   isDescriber,
   onLeaveGame
 }) => {
+  const { t } = useLanguage();
+  const tb = t.rooms?.game?.pictureIt?.topBar || {};
+
   return (
     <div className="flex items-center justify-between border rounded-3xl px-4 py-2 bg-white shadow-sm">
       <div className="flex gap-3 items-center">
@@ -19,18 +23,20 @@ const PictureItTopBar = ({
 
       <div className="flex gap-4">
         <div className="flex gap-2 font-bold border border-cath-red-700 w-fit px-4 py-1.5 rounded-3xl text-sm">
-          Round: <span className="font-semibold text-cath-red-700">{roundNumber}/{totalRounds || '?'}</span>
+          {tb.round || 'Round'}: <span className="font-semibold text-cath-red-700">{roundNumber}/{totalRounds || '?'}</span>
+        </div>
+
+        <div className="flex gap-2 font-bold border border-cath-red-700 w-fit px-4 py-1.5 rounded-3xl text-sm">
+          {tb.describer || 'Describer'}: <span className="font-semibold text-cath-red-700">{describerName || 'Unknown'}</span>
         </div>
       </div>
 
-      <div className="flex gap-2 font-bold border border-cath-red-700 w-fit px-4 py-1.5 rounded-3xl text-sm">
-        Language: <span className="font-semibold text-cath-red-700">{gameLanguage}</span>
-      </div>
+
 
       <div className="flex items-center gap-4">
         {isSpectator ? (
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full border border-gray-400 text-gray-500 bg-gray-50">
-            Spectator
+            {tb.spectator || 'Spectator'}
           </span>
         ) : (
           <span
@@ -39,7 +45,7 @@ const PictureItTopBar = ({
               : 'border-[#f08d1d] text-[#f08d1d] bg-orange-50'
               }`}
           >
-            {isDescriber ? 'Describer' : 'Rater'}
+            {isDescriber ? (tb.roleDescriber || 'Describer') : (tb.roleRater || 'Rater')}
           </span>
         )}
 
@@ -49,7 +55,7 @@ const PictureItTopBar = ({
           onClick={onLeaveGame}
           startIcon={<LogOut size={13} />}
         >
-          Leave Game
+          {/* Leave Game */}
         </PillButton>
       </div>
     </div>
