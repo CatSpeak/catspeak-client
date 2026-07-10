@@ -14,7 +14,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
   const hasWinners = match.winners && match.winners.length > 0;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200" >
       <div
         className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
         onClick={() => onToggle(match.id)}
@@ -35,17 +35,17 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                 : match.language === "en"
                   ? t.rooms?.language?.en || "English"
                   : match.language === "zh"
-                    ? t.rooms?.language?.zh || "中文"
+                    ? t.rooms?.language?.zh || "China"
                     : match.language}
             </span>
             <span>•</span>
             <span className="capitalize">
               {match.level === "easy"
-                ? t.rooms?.game?.crackIt?.levelEasy || "Dễ"
+                ? t.rooms?.game?.setup?.levelEasy || "Dễ"
                 : match.level === "medium"
-                  ? t.rooms?.game?.crackIt?.levelMedium || "Trung bình"
+                  ? t.rooms?.game?.setup?.levelMedium || "Trung bình"
                   : match.level === "hard"
-                    ? t.rooms?.game?.crackIt?.levelHard || "Khó"
+                    ? t.rooms?.game?.setup?.levelHard || "Khó"
                     : match.level}
             </span>
           </div>
@@ -101,15 +101,15 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                         name={item.player.username}
                         size={36}
                       />
-                      <div className="font-semibold text-slate-800">
-                        {item.player.username}
+                      <div className="font-semibold text-slate-800 flex flex-col sm:flex-row sm:items-center">
+                        <span className="truncate max-w-[150px] sm:max-w-[200px]">{item.player.username}</span>
                         {isWinner && (
                           <div
-                            className="ml-2 inline-flex items-center justify-center w-6 h-6 sm:w-auto sm:h-auto sm:px-2 sm:py-0.5 bg-yellow-100 text-yellow-600 rounded-full shrink-0"
+                            className="mt-1 sm:mt-0 sm:ml-2 inline-flex items-center justify-center w-max px-2 py-0.5 bg-yellow-100 text-yellow-600 rounded-full shrink-0"
                             title={t.rooms?.game?.crackIt?.winner || "Winner"}
                           >
-                            <Trophy size={14} className="sm:mr-1" />
-                            <span className="hidden sm:inline text-xs font-bold">
+                            <Trophy size={14} className="mr-1" />
+                            <span className="text-xs font-bold">
                               {t.rooms?.game?.crackIt?.winner || "Winner"}
                             </span>
                           </div>

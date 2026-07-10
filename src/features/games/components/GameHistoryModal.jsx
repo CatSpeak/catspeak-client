@@ -27,7 +27,7 @@ const GameHistoryModal = ({ open, onClose, roomName }) => {
       open={open}
       onClose={onClose}
       title={t.rooms?.game?.crackIt?.historyTitle || "Lịch sử thi đấu"}
-      className="bg-white text-slate-900 max-w-lg w-[90vw] md:rounded-3xl overflow-hidden md:border border-gray-200 md:shadow-2xl max-h-[100vh] md:max-h-[85vh] flex flex-col"
+      className="bg-white text-slate-900 max-w-[625px] w-[100vw] md:rounded-3xl overflow-hidden md:border border-gray-200 md:shadow-2xl max-h-[100vh] md:max-h-[85vh] flex flex-col"
       headerClassName="flex items-center justify-between p-4 pl-6 border-b border-gray-100 shrink-0"
       fullScreenOnMobile={true}
     >

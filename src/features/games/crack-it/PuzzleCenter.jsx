@@ -3,20 +3,30 @@ import { useGame } from "@/features/video-call/context/GameContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
 const PuzzleCenter = () => {
-  const { puzzle, gameLanguage } = useGame();
-  const { t } = useLanguage();
+  const { puzzle } = useGame();
+  const { t, language } = useLanguage();
 
   if (!puzzle) return null;
 
-  const hintContent =
-    gameLanguage === "en" ? (
-      puzzle.hint
-    ) : (
+  const hintContent = (() => {
+    // Nếu ngôn ngữ UI là 'zh', ưu tiên hiển thị tiếng Trung
+    if (language === "zh") {
+      return puzzle.hint_zh ? (
+        <div className="flex flex-col gap-2">
+          <div className="text-2xl font-medium text-slate-800">{puzzle.hint_zh}</div>
+          <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
+        </div>
+      ) : puzzle.hint_en;
+    }
+
+    // Nếu ngôn ngữ UI là 'vi' hoặc 'en' (hoặc khác), ưu tiên hiển thị tiếng Anh
+    return puzzle.hint_en ? puzzle.hint_en : (
       <div className="flex flex-col gap-2">
-        <div className="text-2xl font-medium text-slate-800">{puzzle.hint}</div>
+        <div className="text-2xl font-medium text-slate-800">{puzzle.hint_zh}</div>
         <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
       </div>
     );
+  })();
 
   const [displayMask, setDisplayMask] = useState("");
 

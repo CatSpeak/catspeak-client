@@ -1,4 +1,9 @@
 export default {
+  language: {
+    vi: "Vietnamese",
+    en: "English",
+    zh: "Chinese",
+  },
   welcome: {
     greeting: "Hi {{name}},",
     friend: "Friend",
@@ -323,6 +328,7 @@ export default {
       micOn: "Turn microphone on",
       micOff: "Turn microphone off",
       camOn: "Turn camera on",
+      playGames: "Play Games",
       camOff: "Turn camera off",
       shareOn: "Share screen",
       shareOff: "Stop sharing",
@@ -466,6 +472,7 @@ export default {
   game: {
     crackIt: {
       title: "Crack It",
+      close: "Close",
       waitingStart: "Preparing to start...",
       roundResult: "Round Result",
       nextRoundIn: "Next round will start shortly...",
@@ -503,6 +510,10 @@ export default {
     },
     setup: {
       title: "Game Setup",
+      pictureItDesc: "Describe an image using the room language. Other players will rate your description.",
+      crackItDesc: "Guess hidden words from hints before everyone else.",
+      difficultyDesc: "Adjust the challenge level for your room.",
+      languageDesc: "Choose the language for this session.",
       selectLanguage: "Language",
       langEn: "English",
       langZh: "Chinese",
