@@ -123,13 +123,6 @@ const ControlBarMoreMenu = ({
                           onClick={() => {
                             setShowMoreMenu(false);
                             if (!isHost) return;
-                            if (allParticipants.length < 2) {
-                              toast.error(
-                                t.rooms?.game?.crackIt?.notEnoughPlayers ||
-                                  "Cần ít nhất 2 người để bắt đầu trò chơi!",
-                              );
-                              return;
-                            }
                             setShowGameSetup(true);
                           }}
                           className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] ${!isHost ? "opacity-50 cursor-not-allowed" : ""}`}

@@ -2,15 +2,25 @@ import React, { useState } from "react";
 import Modal from "@/shared/components/ui/Modal";
 import Dropdown from "@/shared/components/ui/Dropdown";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useParticipants } from "@livekit/components-react";
+import { toast } from "react-hot-toast";
 
 const GameSetupModal = ({ open, onClose }) => {
   const { t } = useLanguage();
+  const allParticipants = useParticipants();
   const [selectedLevel, setSelectedLevel] = useState("easy");
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   const [selectedGame, setSelectedGame] = useState("picture_it");
 
   const handleStart = () => {
+    if (allParticipants.length < 2) {
+      toast.error(
+        t.rooms?.game?.crackIt?.notEnoughPlayers ||
+          "Cần ít nhất 2 người để bắt đầu trò chơi!",
+      );
+      return;
+    }
     const event = new CustomEvent("hostStartGame", {
       detail: { gameId: selectedGame, level: selectedLevel, language: selectedLanguage },
     });
