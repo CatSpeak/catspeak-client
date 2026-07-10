@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useParticipants } from '@livekit/components-react';
+import { X } from 'lucide-react';
 
 import { FluentAnimation } from '@/shared/components/ui/animations';
 import { PillButton } from '@/shared/components/ui/buttons';
@@ -18,6 +19,7 @@ const PictureITOverlay = () => {
     gameType,
     gameLanguage,
     currentRound,
+    countdown,
     pictureIt,
     currentUserId,
     startPictureItDescribe,
@@ -37,6 +39,7 @@ const PictureITOverlay = () => {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
   const [myFlagged, setMyFlagged] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   const isPictureIt = gameType === 'picture_it' || gameType === 'picture-it';
   const open = isPictureIt && !['idle'].includes(gameState);
@@ -128,7 +131,7 @@ const PictureITOverlay = () => {
             key="picture-it-overlay"
             direction="up"
             exit
-            className="absolute inset-0 z-[60] w-full h-full bg-white px-6 py-4 flex flex-col gap-4"
+            className="absolute inset-0 z-[60] w-full h-full mx-auto bg-white px-3 py-3 md:px-6 md:py-4 flex flex-col gap-3 md:gap-4 overflow-hidden"
           >
             <PictureItTopBar
               roundNumber={roundNumber}
@@ -137,6 +140,7 @@ const PictureITOverlay = () => {
               isSpectator={isSpectator}
               isDescriber={isDescriber}
               onLeaveGame={handleLeaveGame}
+              onOpenSidebar={() => setShowMobileSidebar(true)}
             />
 
             <AnimatePresence>
@@ -150,16 +154,16 @@ const PictureITOverlay = () => {
                   <h1 className="text-4xl font-bold mb-8 text-cath-red-700">
                     Picture IT
                   </h1>
-                  {pictureIt?.countdown !== null && pictureIt?.countdown !== undefined ? (
+                  {countdown !== null && countdown !== undefined ? (
                     <motion.div
-                      key={pictureIt.countdown}
+                      key={countdown}
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 1.5, opacity: 0 }}
                       transition={{ duration: 0.5 }}
                       className="text-8xl font-black text-cath-red-500"
                     >
-                      {pictureIt.countdown}
+                      {countdown}
                     </motion.div>
                   ) : (
                     <div className="text-xl text-slate-600 font-medium">
@@ -171,7 +175,7 @@ const PictureITOverlay = () => {
             </AnimatePresence>
 
             <div className="flex gap-4 flex-1 min-h-0 h-full overflow-hidden">
-              <div className="flex flex-col flex-1 gap-4 h-full min-h-0 overflow-y-auto pr-1">
+              <div className="flex flex-col flex-1 gap-3 md:gap-4 h-full min-h-0 overflow-y-auto pr-1">
                 <PictureItImageCard
                   isDescriber={isDescriber}
                   imgLoading={imgLoading}
@@ -209,10 +213,34 @@ const PictureITOverlay = () => {
                 />
               </div>
 
-              <LeaderboardCard
-                leaderboard={pictureIt?.leaderboard || []}
-                className="w-1/3 h-auto shrink-0"
-              />
+              {/* Right Sidebar (Desktop) / Slide-out (Mobile) */}
+              <div className={`
+                fixed inset-y-0 right-0 z-[150] w-[85vw] max-w-sm p-0 transform transition-transform duration-300 ease-in-out
+                ${showMobileSidebar ? "translate-x-0" : "translate-x-full"}
+                lg:relative lg:translate-x-0 lg:z-0 lg:w-[320px] lg:p-0 lg:shrink-0 lg:h-full lg:min-h-0
+              `}>
+                <div className="h-full w-full relative">
+                  <button
+                    onClick={() => setShowMobileSidebar(false)}
+                    className="absolute top-4 right-4 p-2 bg-gray-50 hover:bg-red-50 rounded-full text-slate-400 hover:text-cath-red-600 lg:hidden z-10 transition-colors shadow-sm border border-gray-100"
+                  >
+                    <X size={18} />
+                  </button>
+                  <LeaderboardCard
+                    leaderboard={pictureIt?.leaderboard || []}
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+
+              {/* Mobile Sidebar Overlay */}
+              {showMobileSidebar && (
+                <div
+                  className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[140] lg:hidden"
+                  onClick={() => setShowMobileSidebar(false)}
+                />
+              )}
+
             </div>
           </FluentAnimation>
         )}

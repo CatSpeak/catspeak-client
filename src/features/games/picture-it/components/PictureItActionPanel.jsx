@@ -82,12 +82,12 @@ const PictureItActionPanel = ({
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center gap-6"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
         >
           {!myRatingSubmitted ? (
             <>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-headingColor">{ap.yourRating || 'Your rating:'}</span>
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <span className="text-base sm:text-lg font-semibold text-headingColor">{ap.yourRating || 'Your rating:'}</span>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: 5 }, (_, i) => {
                     const filled = i < (hoveredRating || selectedRating);
@@ -105,10 +105,10 @@ const PictureItActionPanel = ({
                     );
                   })}
                 </div>
-                <span className="text-sm text-secondary ml-2">{(ap.timeLeft || '({0}s left)').replace('{0}', ratingCountdownSec)}</span>
+                <span className="text-xs sm:text-sm text-secondary sm:ml-2">{(ap.timeLeft || '({0}s left)').replace('{0}', ratingCountdownSec)}</span>
               </div>
               <PillButton
-                className="h-10 w-36 bg-cath-red-700 text-white"
+                className="h-9 sm:h-10 px-4 bg-cath-red-700 text-white w-full sm:w-auto"
                 disabled={selectedRating === 0 || interactionsDisabled}
                 onClick={handleSubmitRating}
               >
@@ -118,11 +118,11 @@ const PictureItActionPanel = ({
           ) : (
             <div className="flex items-center gap-2 text-green-600">
               <CheckCircle2 size={18} />
-              <span className="font-medium">{ap.ratingSubmitted || 'Rating submitted! Waiting for others...'}</span>
+              <span className="font-medium text-sm sm:text-base text-center">{ap.ratingSubmitted || 'Rating submitted! Waiting for others...'}</span>
             </div>
           )}
 
-          <div className="h-6 w-px bg-[#e5e5e5] mx-2"></div>
+          <div className="hidden sm:block h-6 w-px bg-[#e5e5e5] mx-2"></div>
           {/* <PillButton
             className={`h-10 px-4 ${myFlagged || selectedRating > 0 || myRatingSubmitted ? 'opacity-50 cursor-not-allowed border-gray-300 text-gray-400' : 'border-orange-500 text-orange-600 hover:bg-orange-50'
               }`}

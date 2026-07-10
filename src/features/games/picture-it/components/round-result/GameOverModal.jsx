@@ -256,7 +256,7 @@ const GameOverModal = ({ open, onClose, onPlayAgain, result, countdown = COUNTDO
               animate="visible"
               exit="exit"
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-[50vw] overflow-y-auto scrollbar-app-transparent rounded-3xl p-7 flex flex-col gap-6 bg-white"
+              className="relative w-full max-w-[95vw] md:max-w-[70vw] lg:max-w-[50vw] overflow-y-auto scrollbar-app-transparent rounded-3xl p-4 md:p-7 flex flex-col gap-4 md:gap-6 bg-white"
             >
               {/* Confetti / Trophy header */}
               <div className="flex flex-col items-center gap-1.5 text-center mt-1">
