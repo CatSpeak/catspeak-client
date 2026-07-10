@@ -520,7 +520,8 @@ export default {
       modals: {
         gameEnded: "游戏结束",
         notEnoughPlayers: "玩家人数不足以继续。",
-        close: "关闭"
+        close: "关闭",
+        waitingStart: "正在准备游戏..."
       },
       badges: {
         "Master Describer": "描述大师",

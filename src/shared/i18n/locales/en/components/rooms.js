@@ -546,7 +546,8 @@ export default {
       modals: {
         gameEnded: "Game Ended",
         notEnoughPlayers: "Not enough players to continue.",
-        close: "Close"
+        close: "Close",
+        waitingStart: "Preparing game..."
       },
       badges: {
         "Master Describer": "Master Describer",

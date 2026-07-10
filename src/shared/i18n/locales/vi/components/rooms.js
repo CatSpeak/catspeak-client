@@ -525,7 +525,8 @@ export default {
       modals: {
         gameEnded: "Kết thúc trò chơi",
         notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
-        close: "Đóng"
+        close: "Đóng",
+        waitingStart: "Đang chuẩn bị ván đấu..."
       },
       badges: {
         "Master Describer": "Bậc thầy mô tả",

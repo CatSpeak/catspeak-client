@@ -139,19 +139,36 @@ const PictureITOverlay = () => {
               onLeaveGame={handleLeaveGame}
             />
 
-            {gameState === 'setup' && pictureIt?.countdown > 0 && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/90 animate-fade-in">
+            <AnimatePresence>
+              {gameState === 'setup' && (
                 <motion.div
-                  key={pictureIt.countdown}
-                  initial={{ scale: 1.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
-                  className="text-8xl font-black text-cath-red-700"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 text-slate-900"
                 >
-                  {pictureIt.countdown}
+                  <h1 className="text-4xl font-bold mb-8 text-cath-red-700">
+                    Picture IT
+                  </h1>
+                  {pictureIt?.countdown !== null && pictureIt?.countdown !== undefined ? (
+                    <motion.div
+                      key={pictureIt.countdown}
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 1.5, opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="text-8xl font-black text-cath-red-500"
+                    >
+                      {pictureIt.countdown}
+                    </motion.div>
+                  ) : (
+                    <div className="text-xl text-slate-600 font-medium">
+                      {tm.waitingStart || "Đang chuẩn bị ván đấu..."}
+                    </div>
+                  )}
                 </motion.div>
-              </div>
-            )}
+              )}
+            </AnimatePresence>
 
             <div className="flex gap-4 flex-1 min-h-0 h-full overflow-hidden">
               <div className="flex flex-col flex-1 gap-4 h-full min-h-0 overflow-y-auto pr-1">
