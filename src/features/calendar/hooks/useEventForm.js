@@ -126,10 +126,10 @@ export const useEventForm = (
       setMaxParticipantsState("");
       return;
     }
+
     const num = Number(val);
     if (!isNaN(num)) {
-      if (num > 20) setMaxParticipantsState(20);
-      else if (num < 1) setMaxParticipantsState(1);
+      if (num < 1) setMaxParticipantsState(1);
       else setMaxParticipantsState(num);
     }
   };
