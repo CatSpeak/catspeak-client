@@ -35,6 +35,7 @@ export const navLinks = [
     hasDropdown: true,
     icon: Briefcase,
     subItems: [
+      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
     ],

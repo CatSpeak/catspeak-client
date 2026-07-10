@@ -162,3 +162,17 @@ input[type="password"]::-webkit-reveal {
     display: none;
   }
 }
+
+/* Custom date picker styling to prevent native overlap and make entire input clickable */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
