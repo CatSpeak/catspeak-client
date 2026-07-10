@@ -1,4 +1,9 @@
 export default {
+  language: {
+    vi: "Tiếng Việt",
+    en: "English",
+    zh: "China",
+  },
   welcome: {
     greeting: "Chào {{name}},",
     friend: "Bạn",

@@ -9,7 +9,7 @@ const PuzzleCenter = () => {
   if (!puzzle) return null;
 
   const hintContent = (() => {
-    // If user's interface is Chinese, prioritize Chinese hint. Otherwise prioritize English hint.
+    // Nếu ngôn ngữ UI là 'zh', ưu tiên hiển thị tiếng Trung
     if (language === "zh") {
       return puzzle.hint_zh ? (
         <div className="flex flex-col gap-2">
@@ -19,7 +19,8 @@ const PuzzleCenter = () => {
       ) : puzzle.hint_en;
     }
 
-    return puzzle.hint_en || (
+    // Nếu ngôn ngữ UI là 'vi' hoặc 'en' (hoặc khác), ưu tiên hiển thị tiếng Anh
+    return puzzle.hint_en ? puzzle.hint_en : (
       <div className="flex flex-col gap-2">
         <div className="text-2xl font-medium text-slate-800">{puzzle.hint_zh}</div>
         <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
