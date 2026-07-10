@@ -301,6 +301,7 @@ export default {
       micOn: "Bật micro",
       micOff: "Tắt micro",
       camOn: "Bật camera",
+      playGames: "Trò chơi",
       camOff: "Tắt camera",
       shareOn: "Chia sẻ màn hình",
       shareOff: "Dừng chia sẻ",
@@ -444,6 +445,7 @@ export default {
   game: {
     crackIt: {
       title: "Crack It",
+      close: "Đóng",
       waitingStart: "Đang chuẩn bị ván đấu...",
       roundResult: "Đáp án chính xác là",
       nextRoundIn: "Ván tiếp theo sẽ bắt đầu sau ít giây...",
@@ -482,6 +484,10 @@ export default {
     },
     setup: {
       title: "Thiết lập Trò chơi",
+      pictureItDesc: "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
+      crackItDesc: "Đoán từ khóa ẩn qua các gợi ý trước những người chơi khác.",
+      difficultyDesc: "Điều chỉnh độ khó phù hợp cho phòng của bạn.",
+      languageDesc: "Chọn ngôn ngữ trò chơi cho phiên này.",
       selectLanguage: "Ngôn ngữ",
       langEn: "Tiếng Anh",
       langZh: "Tiếng Trung",

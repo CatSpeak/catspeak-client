@@ -289,6 +289,7 @@ export default {
       micOn: "开启麦克风",
       micOff: "关闭麦克风",
       camOn: "开启摄像头",
+      playGames: "玩游戏",
       camOff: "关闭摄像头",
       shareOn: "共享屏幕",
       shareOff: "停止共享",
@@ -440,6 +441,7 @@ export default {
   game: {
     crackIt: {
       title: "Crack It",
+      close: "关闭",
       waitingStart: "准备开始...",
       roundResult: "回合结果",
       nextRoundIn: "下一回合马上开始...",
@@ -477,6 +479,10 @@ export default {
     },
     setup: {
       title: "游戏设置",
+      pictureItDesc: "使用房间语言描述图片，其他玩家将为您的描述打分。",
+      crackItDesc: "在其他人之前通过提示猜出隐藏的单词。",
+      difficultyDesc: "调整您房间的挑战难度。",
+      languageDesc: "选择本次会话的游戏语言。",
       selectLanguage: "语言",
       langEn: "英语",
       langZh: "中文",

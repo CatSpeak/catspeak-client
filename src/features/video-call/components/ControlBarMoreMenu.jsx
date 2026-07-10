@@ -136,7 +136,7 @@ const ControlBarMoreMenu = ({
                           disabled={!isHost}
                         >
                           <Gamepad2 size={20} />
-                          Play Games
+                          {t?.rooms?.videoCall?.controls?.playGames || "Play Games"}
                         </button>
 
                         <button

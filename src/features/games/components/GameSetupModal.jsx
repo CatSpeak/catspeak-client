@@ -48,7 +48,7 @@ const GameSetupModal = ({ open, onClose }) => {
               )}
             </div>
             <p className="text-sm text-slate-500">
-              Describe an image using the room language. Other players will rate your description.
+              {t.rooms?.game?.setup?.pictureItDesc || "Describe an image using the room language. Other players will rate your description."}
             </p>
           </button>
 
@@ -69,7 +69,7 @@ const GameSetupModal = ({ open, onClose }) => {
               )}
             </div>
             <p className="text-sm text-slate-500">
-              Guess hidden words from hints before everyone else.
+              {t.rooms?.game?.setup?.crackItDesc || "Guess hidden words from hints before everyone else."}
             </p>
           </button>
         </div>
@@ -82,10 +82,10 @@ const GameSetupModal = ({ open, onClose }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
               <label className="font-semibold text-slate-700">
-                Difficulty
+                {t.rooms?.game?.setup?.selectLevel || "Difficulty"}
               </label>
             </div>
-            <p className="text-xs text-slate-500 mb-2">Adjust the challenge level for your room.</p>
+            <p className="text-xs text-slate-500 mb-2">{t.rooms?.game?.setup?.difficultyDesc || "Adjust the challenge level for your room."}</p>
             <Dropdown
               options={[
                 { label: t.rooms?.game?.setup?.levelEasy || "Easy", value: "easy" },
@@ -106,10 +106,10 @@ const GameSetupModal = ({ open, onClose }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
               <label className="font-semibold text-slate-700">
-                Language
+                {t.rooms?.game?.setup?.selectLanguage || "Language"}
               </label>
             </div>
-            <p className="text-xs text-slate-500 mb-2">Choose the language for this session.</p>
+            <p className="text-xs text-slate-500 mb-2">{t.rooms?.game?.setup?.languageDesc || "Choose the language for this session."}</p>
             <Dropdown
               options={[
                 { label: t.rooms?.game?.setup?.langEn || "English", value: "en" },

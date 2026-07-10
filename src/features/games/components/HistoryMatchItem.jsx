@@ -41,11 +41,11 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
             <span>•</span>
             <span className="capitalize">
               {match.level === "easy"
-                ? t.rooms?.game?.crackIt?.levelEasy || "Dễ"
+                ? t.rooms?.game?.setup?.levelEasy || "Dễ"
                 : match.level === "medium"
-                  ? t.rooms?.game?.crackIt?.levelMedium || "Trung bình"
+                  ? t.rooms?.game?.setup?.levelMedium || "Trung bình"
                   : match.level === "hard"
-                    ? t.rooms?.game?.crackIt?.levelHard || "Khó"
+                    ? t.rooms?.game?.setup?.levelHard || "Khó"
                     : match.level}
             </span>
           </div>

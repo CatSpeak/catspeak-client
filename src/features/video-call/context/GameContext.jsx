@@ -182,7 +182,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             } else {
                 setPuzzle({
                     image_url: payload.image_url,
-                    hint: payload.hint,
+                    hint_en: payload.hint_en,
+                    hint_zh: payload.hint_zh,
                     hint_pinyin: payload.hint_pinyin,
                     word_count: payload.word_count,
                     word_mask: payload.word_mask,
@@ -437,7 +438,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                 });
                 setPuzzle({
                     image_url: payload.current_round?.image_url,
-                    hint: payload.current_round?.hint,
+                    hint_en: payload.current_round?.hint_en,
+                    hint_zh: payload.current_round?.hint_zh,
                     hint_pinyin: payload.current_round?.hint_pinyin,
                     word_count: payload.current_round?.word_count,
                     word_mask: payload.current_round?.word_mask,
@@ -585,6 +587,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         gameState,
         gameType,
         gameLanguage,
+        roomLanguage,
         countdown,
         currentRound,
         scores,
