@@ -1,4 +1,9 @@
 export default {
+  language: {
+    vi: "Vietnamese",
+    en: "English",
+    zh: "Chinese",
+  },
   welcome: {
     greeting: "Hi {{name}},",
     friend: "Friend",
@@ -323,6 +328,7 @@ export default {
       micOn: "Turn microphone on",
       micOff: "Turn microphone off",
       camOn: "Turn camera on",
+      playGames: "Play Games",
       camOff: "Turn camera off",
       shareOn: "Share screen",
       shareOff: "Stop sharing",
@@ -462,6 +468,129 @@ export default {
       "Paste a valid image URL. If invalid, it will fallback to your initial.",
     saving: "Saving...",
     saveAvatar: "Save Avatar",
+  },
+  game: {
+    crackIt: {
+      title: "Crack It",
+      close: "Close",
+      waitingStart: "Preparing to start...",
+      roundResult: "Round Result",
+      nextRoundIn: "Next round will start shortly...",
+      gameOver: "GAME OVER!",
+      finalLeaderboard: "Final Leaderboard",
+      closeGame: "Close Game",
+      round: "Round",
+      hint: "Hint",
+      answerLength: "Word Count",
+      youGotIt: "You got it! Waiting for others...",
+      typeAnswer: "Type your answer...",
+      gotItRight: "got it right!",
+      leaderboard: "Leaderboard",
+      waitingPlayers: "Waiting for players...",
+      playGame: "Play Crack It",
+      notEnoughPlayers: "Need at least 2 players to start!",
+      you: "You",
+      playerX: "Player {0}",
+      exitGameTooltip: "Exit Game",
+      exitConfirmTitle: "Confirm Exit",
+      exitConfirmDesc1: "Are you sure you want to exit this game?",
+      exitConfirmDesc2: "You won't be able to rejoin this round!",
+      cancel: "Cancel",
+      confirmExit: "Yes, Exit",
+      roundLeaderboard: "Round Leaderboard",
+      forceStopNotEnoughPlayers: "Not enough players to continue. Game cancelled.",
+      forceStopGeneric: "Game stopped unexpectedly.",
+      tallyingFinalResults: "Tallying final results...",
+      gameHistory: "Game History",
+      historyTitle: "Match History",
+      noHistoryFound: "No game history found for this room.",
+      score: "Score",
+      matchDate: "Date Played",
+      winner: "Winner"
+    },
+    setup: {
+      title: "Game Setup",
+      pictureItDesc: "Describe an image using the room language. Other players will rate your description.",
+      crackItDesc: "Guess hidden words from hints before everyone else.",
+      difficultyDesc: "Adjust the challenge level for your room.",
+      languageDesc: "Choose the language for this session.",
+      selectLanguage: "Language",
+      langEn: "English",
+      langZh: "Chinese",
+      selectLevel: "Difficulty",
+      levelEasy: "Easy",
+      levelMedium: "Medium",
+      levelHard: "Hard",
+      cancel: "Cancel",
+      startNow: "Start Now"
+    },
+    pictureIt: {
+      topBar: {
+        round: "Round",
+        describer: "Describer",
+        spectator: "Spectator",
+        roleDescriber: "Describer",
+        roleRater: "Rater"
+      },
+      actionPanel: {
+        watchingAsSpectator: "You are watching as a spectator.",
+        turnOnMic: "Turn on Mic (Start)",
+        turnOffMic: "Turn off Mic (Finish)",
+        ratersAreScoring: "Raters are scoring... ({0}s)",
+        yourRating: "Your rating:",
+        timeLeft: "({0}s left)",
+        submitRating: "Submit rating",
+        ratingSubmitted: "Rating submitted! Waiting for others...",
+        waiting: "Waiting..."
+      },
+      imageCard: {
+        describeToTeam: "Describe this image to your team",
+        listenAndRate: "Listen and prepare to rate",
+        loadingImage: "Loading image...",
+        imageUnavailable: "Image unavailable",
+        describerSpeaking: "Describer is speaking...",
+        preparing: "Preparing...",
+        forbiddenWordsTitle: "Forbidden words",
+        forbiddenWordsDesc: "Do NOT use these words",
+        flaggedCount: "{0} / {1} flagged"
+      },
+      modals: {
+        gameEnded: "Game Ended",
+        notEnoughPlayers: "Not enough players to continue.",
+        close: "Close",
+        waitingStart: "Preparing game..."
+      },
+      badges: {
+        "Master Describer": "Master Describer",
+        "Great Speaker": "Great Speaker",
+        "Best Rating Accuracy": "Best Rating Accuracy",
+        "Most Fluent": "Most Fluent",
+        "Team Player": "Team Player",
+        "Keep Practicing": "Keep Practicing",
+        champion: "Champion"
+      },
+      gameOver: {
+        title: "Game Finished",
+        thanksForPlaying: "Thanks for playing",
+        finalLeaderboard: "Final Leaderboard",
+        roundsPlayed: "Rounds Played",
+        language: "Language",
+        difficulty: "Difficulty",
+        winningScore: "Winning Score",
+        highestRoundScore: "Highest Round Score",
+        playAgain: "Play Again",
+        backToRoom: "Back to Room",
+        playersCount: "{0} players"
+      },
+      leaderboard: {
+        title: "Leaderboard",
+        playersCount: "{0} players"
+      },
+      roundResult: {
+        nextRoundStartsIn: "Next round starts in...",
+        averageRating: "Average Rating"
+      }
+    }
   },
   participants: "participants",
   noLimit: "No limit",
