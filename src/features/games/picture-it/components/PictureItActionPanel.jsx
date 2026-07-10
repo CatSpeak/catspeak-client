@@ -39,8 +39,9 @@ const PictureItActionPanel = ({
         <div className="flex items-center gap-4 animate-fade-in">
           {!hasDescribeStarted ? (
             <PillButton
-              className="h-11 px-6 bg-[#F7F7F7] hover:bg-[#EDEDED] border border-[#E5E5E5] font-bold transition-all shadow-sm"
-              textColor={"black"}
+              className="h-11 px-6 hover:bg-[#EDEDED] border border-[#E5E5E5] font-bold transition-all shadow-sm"
+              textColor="black"
+              bgColor="#F7F7F7"
               startIcon={<Mic size={18} className="text-black" />}
               onClick={handleDescribeStart}
             >
@@ -59,71 +60,75 @@ const PictureItActionPanel = ({
             </PillButton>
           )}
         </div>
-      )}
+      )
+      }
 
       {/* Describer — waiting for ratings */}
-      {!isSpectator && isWaitingForRatings && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center gap-3"
-        >
-          <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#f3f3f3] border border-[#E5E5E5]">
-            <Loader2 size={16} className="animate-spin text-cath-red-700" />
-            <span className="text-md font-medium text-secondary">
-              {(ap.ratersAreScoring || 'Raters are scoring... ({0}s)').replace('{0}', ratingCountdownSec)}
-            </span>
-          </div>
-        </motion.div>
-      )}
+      {
+        !isSpectator && isWaitingForRatings && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-3"
+          >
+            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#f3f3f3] border border-[#E5E5E5]">
+              <Loader2 size={16} className="animate-spin text-cath-red-700" />
+              <span className="text-md font-medium text-secondary">
+                {(ap.ratersAreScoring || 'Raters are scoring... ({0}s)').replace('{0}', ratingCountdownSec)}
+              </span>
+            </div>
+          </motion.div>
+        )
+      }
 
       {/* Rater — Rating phase */}
-      {!isSpectator && !isDescriber && isRatingPhase && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
-        >
-          {!myRatingSubmitted ? (
-            <>
-              <div className="flex flex-col sm:flex-row items-center gap-2">
-                <span className="text-base sm:text-lg font-semibold text-headingColor">{ap.yourRating || 'Your rating:'}</span>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }, (_, i) => {
-                    const filled = i < (hoveredRating || selectedRating);
-                    return (
-                      <Star
-                        key={i}
-                        size={28}
-                        className={`cursor-pointer transition-colors ${filled ? 'text-cath-orange-400' : 'text-[#E5E5E5]'
-                          }`}
-                        fill={filled ? '#f08d1d' : 'none'}
-                        onMouseEnter={() => setHoveredRating(i + 1)}
-                        onMouseLeave={() => setHoveredRating(0)}
-                        onClick={() => setSelectedRating(i + 1)}
-                      />
-                    );
-                  })}
+      {
+        !isSpectator && !isDescriber && isRatingPhase && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
+          >
+            {!myRatingSubmitted ? (
+              <>
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <span className="text-base sm:text-lg font-semibold text-headingColor">{ap.yourRating || 'Your rating:'}</span>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }, (_, i) => {
+                      const filled = i < (hoveredRating || selectedRating);
+                      return (
+                        <Star
+                          key={i}
+                          size={28}
+                          className={`cursor-pointer transition-colors ${filled ? 'text-cath-orange-400' : 'text-[#E5E5E5]'
+                            }`}
+                          fill={filled ? '#f08d1d' : 'none'}
+                          onMouseEnter={() => setHoveredRating(i + 1)}
+                          onMouseLeave={() => setHoveredRating(0)}
+                          onClick={() => setSelectedRating(i + 1)}
+                        />
+                      );
+                    })}
+                  </div>
+                  <span className="text-xs sm:text-sm text-secondary sm:ml-2">{(ap.timeLeft || '({0}s left)').replace('{0}', ratingCountdownSec)}</span>
                 </div>
-                <span className="text-xs sm:text-sm text-secondary sm:ml-2">{(ap.timeLeft || '({0}s left)').replace('{0}', ratingCountdownSec)}</span>
+                <PillButton
+                  className="h-9 sm:h-10 px-4 bg-cath-red-700 text-white w-full sm:w-auto"
+                  disabled={selectedRating === 0 || interactionsDisabled}
+                  onClick={handleSubmitRating}
+                >
+                  {ap.submitRating || 'Submit rating'}
+                </PillButton>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 size={18} />
+                <span className="font-medium text-sm sm:text-base text-center">{ap.ratingSubmitted || 'Rating submitted! Waiting for others...'}</span>
               </div>
-              <PillButton
-                className="h-9 sm:h-10 px-4 bg-cath-red-700 text-white w-full sm:w-auto"
-                disabled={selectedRating === 0 || interactionsDisabled}
-                onClick={handleSubmitRating}
-              >
-                {ap.submitRating || 'Submit rating'}
-              </PillButton>
-            </>
-          ) : (
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle2 size={18} />
-              <span className="font-medium text-sm sm:text-base text-center">{ap.ratingSubmitted || 'Rating submitted! Waiting for others...'}</span>
-            </div>
-          )}
+            )}
 
-          <div className="hidden sm:block h-6 w-px bg-[#e5e5e5] mx-2"></div>
-          {/* <PillButton
+            <div className="hidden sm:block h-6 w-px bg-[#e5e5e5] mx-2"></div>
+            {/* <PillButton
             className={`h-10 px-4 ${myFlagged || selectedRating > 0 || myRatingSubmitted ? 'opacity-50 cursor-not-allowed border-gray-300 text-gray-400' : 'border-orange-500 text-orange-600 hover:bg-orange-50'
               }`}
             startIcon={<Flag size={16} />}
@@ -133,16 +138,19 @@ const PictureItActionPanel = ({
           >
             {myFlagged ? 'Flagged' : 'Flag'}
           </PillButton> */}
-        </motion.div>
-      )}
+          </motion.div>
+        )
+      }
 
       {/* Generic waiting state */}
-      {!isSpectator && !isDescriber && !isDescribing && !isRatingPhase && (
-        <div className="flex items-center justify-center">
-          <span className="text-sm text-secondary">{ap.waiting || 'Waiting...'}</span>
-        </div>
-      )}
-    </div>
+      {
+        !isSpectator && !isDescriber && !isDescribing && !isRatingPhase && (
+          <div className="flex items-center justify-center">
+            <span className="text-sm text-secondary">{ap.waiting || 'Waiting...'}</span>
+          </div>
+        )
+      }
+    </div >
   );
 };
 
