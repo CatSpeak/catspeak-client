@@ -28,13 +28,13 @@ import {
   useGetUserReelsQuery,
   useGetReelsByChallengeQuery,
   useGetChallengeLeaderboardQuery,
+  useGetBookmarkedReelsQuery,
 } from "@/store/api/reelsApi"
 import { useAuth } from "@/features/auth"
 
 import { mapReelDtoToFrontend } from "../utils/mappers"
 import ReelScrollContainer from "../components/detail/ReelScrollContainer"
 import ReelDetailSlide from "../components/detail/ReelDetailSlide"
-import ReelDetailSlideMobile from "../components/detail/ReelDetailSlideMobile"
 import useMediaQuery from "@/shared/hooks/useMediaQuery"
 import {
   REEL_MUTED_STORAGE_KEY,
@@ -44,6 +44,7 @@ import {
   readStoredReelVolume,
   writeReelPreference
 } from "../utils/preferences"
+import ReelDetailSlideMobile from "../components/detail/ReelDetailSlideMobile"
 
 
 const DETAIL_PAGE_SIZE = 20
@@ -65,10 +66,13 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
 
   const challengeIdParam = searchParams.get("challengeId") || undefined
   const challengeFilterParam = searchParams.get("challengeFilter") || undefined
+  const playlistIdParam = searchParams.get("playlistId") || undefined
 
   const hasChallengeContext = useMemo(() => {
     return Boolean(challengeIdParam || challengeFilterParam)
   }, [challengeIdParam, challengeFilterParam])
+
+  const isPlaylistMode = Boolean(playlistIdParam)
 
   // Track the initial deep-linked ID to keep the prepended list stable
   const [initialId, setInitialId] = useState(id)
@@ -76,13 +80,13 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   // Fetch the current single reel (deep-linked)
   const { reel: currentReel, isLoading: isDetailLoading, notFound, refetch: refetchDetail } = useReelDetail(initialId)
 
-  // Fetch the general "For You" feed — skip when viewing a challenge or workspace.
+  // Fetch the general "For You" feed — skip when viewing a challenge or workspace or playlist.
   const {
     data: publicFeedResponse,
     isLoading: isPublicFeedLoading,
     isFetching: isPublicFeedFetching,
     refetch: refetchPublic,
-  } = useGetReelsFeedQuery(undefined, { skip: isWorkspace || hasChallengeContext })
+  } = useGetReelsFeedQuery(undefined, { skip: isWorkspace || hasChallengeContext || isPlaylistMode })
 
   const sourceParam = searchParams.get("source") || undefined
   const isLeaderboard = sourceParam === "leaderboard"
@@ -125,23 +129,45 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
     { skip: !isWorkspace || !userId }
   )
 
-  const feedResponse = isWorkspace
-    ? workspaceFeedResponse
-    : isLeaderboard
-      ? leaderboardResponse
-      : hasChallengeContext
-        ? challengeFeedResponse
-        : publicFeedResponse
-  const isFeedLoading = isWorkspace
-    ? isWorkspaceFeedLoading
-    : isLeaderboard
-      ? isLeaderboardLoading
-      : hasChallengeContext
-        ? isChallengeFeedLoading
-        : isPublicFeedLoading
+  const {
+    data: playlistFeedResponse,
+    isLoading: isPlaylistFeedLoading,
+    isFetching: isPlaylistFeedFetching,
+    refetch: refetchPlaylist,
+  } = useGetBookmarkedReelsQuery(
+    playlistIdParam,
+    { skip: !isPlaylistMode }
+  )
+
+  const feedResponse = isPlaylistMode
+    ? playlistFeedResponse
+    : isWorkspace
+      ? workspaceFeedResponse
+      : isLeaderboard
+        ? leaderboardResponse
+        : hasChallengeContext
+          ? challengeFeedResponse
+          : publicFeedResponse
+  const isFeedLoading = isPlaylistMode
+    ? isPlaylistFeedLoading
+    : isWorkspace
+      ? isWorkspaceFeedLoading
+      : isLeaderboard
+        ? isLeaderboardLoading
+        : hasChallengeContext
+          ? isChallengeFeedLoading
+          : isPublicFeedLoading
 
   // Mapped reels list from the feed query
   const feedReels = useMemo(() => {
+    if (isPlaylistMode && feedResponse) {
+      // useGetBookmarkedReelsQuery returns an array directly
+      let entries = []
+      if (Array.isArray(feedResponse)) entries = feedResponse
+      else if (Array.isArray(feedResponse.data)) entries = feedResponse.data
+      return entries.map(mapReelDtoToFrontend)
+    }
+
     if (isLeaderboard && feedResponse) {
         let entries = []
         if (Array.isArray(feedResponse)) entries = feedResponse
@@ -156,16 +182,29 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
       return feedResponse.data.map(mapReelDtoToFrontend)
     }
     return []
-  }, [feedResponse, isLeaderboard])
+  }, [feedResponse, isLeaderboard, isPlaylistMode])
 
-  // Combine feed with the deep-linked currentReel, placing the currentReel at the very start (index 0) to reset the feed order on refresh.
+  const [hiddenReelIds, setHiddenReelIds] = useState(new Set())
+  useEffect(() => {
+    const handler = (e) => setHiddenReelIds(prev => new Set([...prev, e.detail]))
+    window.addEventListener('hideReel', handler)
+    return () => window.removeEventListener('hideReel', handler)
+  }, [])
+
+  // Combine feed with the deep-linked currentReel.
+  // If the reel is already in the feed, we replace it to ensure full data without destroying the playlist order.
   const combinedReels = useMemo(() => {
-    if (!currentReel) return feedReels
-
-    // Filter out currentReel from feedReels to prevent duplication
-    const otherReels = feedReels.filter((r) => r.id !== currentReel.id)
-    return [currentReel, ...otherReels]
-  }, [currentReel, feedReels])
+    let list = feedReels
+    if (currentReel) {
+      const existsInFeed = feedReels.some((r) => r.id === currentReel.id)
+      if (!existsInFeed) {
+        list = [currentReel, ...feedReels]
+      } else {
+        list = feedReels.map((r) => (r.id === currentReel.id ? currentReel : r))
+      }
+    }
+    return list.filter(r => !hiddenReelIds.has(r.id))
+  }, [currentReel, feedReels, hiddenReelIds])
 
   // Sync initialId if the URL ID changes to a reel not currently present in the list
   const hasReel = useMemo(() => {
@@ -244,11 +283,11 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
   const handleActiveIndexChange = useCallback((index) => {
     const activeReel = combinedReels[index]
     if (activeReel && activeReel.id !== id) {
-      // Preserve challenge search params when scrolling between reels
-      const challengeSearch = hasChallengeContext ? `?${searchParams.toString()}` : ""
-      navigate(getDetailPath(activeReel.id) + challengeSearch, { replace: true })
+      // Preserve challenge and playlist search params when scrolling between reels
+      const queryStr = (hasChallengeContext || isPlaylistMode) ? `?${searchParams.toString()}` : ""
+      navigate(getDetailPath(activeReel.id) + queryStr, { replace: true })
     }
-  }, [combinedReels, getDetailPath, hasChallengeContext, id, navigate, searchParams])
+  }, [combinedReels, getDetailPath, hasChallengeContext, isPlaylistMode, id, navigate, searchParams])
 
   const isFeedFetching = isWorkspace
     ? isWorkspaceFeedFetching

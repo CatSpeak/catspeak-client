@@ -5,10 +5,11 @@ import {
 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ReelMoreMenu from "./ReelMoreMenu"
+import ReelPlaylistModal from "../modals/ReelPlaylistModal"
 import useFullscreen from "../../hooks/useFullscreen"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetReelCommentsQuery } from "@/store/api/reelsApi"
+import { useGetReelCommentsQuery, useGetAllBookmarkedReelsQuery, useBookmarkReelMutation } from "@/store/api/reelsApi"
 import { useReelInteractions } from "../../hooks/useReelInteractions"
 import { useVideoPlayback } from "../../hooks/useVideoPlayback"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
@@ -44,6 +45,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   /* ── State ──────────────────────────────────────── */
   const { t, language } = useLanguage()
   const [commentText, setCommentText] = useState("")
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false)
   const [replyTarget, setReplyTarget] = useState(null)
   const { isFullscreen, toggleFullscreen } = useFullscreen()
 
@@ -62,7 +64,10 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const { openAuthModal } = useAuthModal()
   
-  const { handleLike, handleCommentSubmit, handleCommentDelete, isPostingComment } = useReelInteractions({
+  const { data: bookmarkedReels } = useGetAllBookmarkedReelsQuery(undefined, { skip: !isAuthenticated })
+  const isBookmarked = reel.isBookmarked || (bookmarkedReels?.some(b => String(b.reelId) === String(reel.id)) ?? false)
+
+  const { handleLike, handleShare, handleCommentSubmit, handleCommentDelete, isPostingComment } = useReelInteractions({
     reel,
     isAuthenticated,
     openAuthModal,
@@ -94,10 +99,35 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     handleLike()
   }
 
-  const handleBookmarkToggle = useCallback((e) => {
+  const [bookmarkReel] = useBookmarkReelMutation()
+
+  const handleBookmarkToggle = async (e) => {
     e.stopPropagation()
-    toast("This feature is not available yet.", { icon: "🚧" })
-  }, [])
+    if (!isAuthenticated) return openAuthModal()
+    
+    if (isBookmarked) {
+      // Find the reel in bookmarkedReels to get its playlist IDs
+      const bookmarkedItem = bookmarkedReels?.find(b => String(b.reelId) === String(reel.id))
+      if (bookmarkedItem && bookmarkedItem.__playlistIds) {
+        try {
+          const promises = bookmarkedItem.__playlistIds.map(pid => 
+            bookmarkReel({ reelId: reel.id, playlistId: pid }).unwrap()
+          )
+          await Promise.all(promises)
+          toast.success(t?.catSpeak?.reels?.detail?.moreMenu?.removedFromPlaylist || "Đã gỡ khỏi Bookmark")
+        } catch {
+          toast.error(t?.catSpeak?.reels?.detail?.errorBookmark || "Có lỗi xảy ra")
+        }
+      } else {
+        // Fallback: just unbookmark from default
+        try {
+          await bookmarkReel({ reelId: reel.id }).unwrap()
+        } catch {}
+      }
+    } else {
+      setShowPlaylistModal(true)
+    }
+  }
 
   const handleReply = useCallback((target) => {
     setReplyTarget(target)
@@ -297,13 +327,16 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
                   onClick={handleBookmarkToggle}
                   className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center gap-1 group border-none bg-transparent outline-none"
                 >
-                  <Bookmark size={22} className="text-gray-700" />
-                  <span className="text-[12px] font-semibold text-gray-700 group-hover:text-black">{formatCompactNumber(reel.shares || 0, language)}</span>
+                  <Bookmark 
+                    size={22} 
+                    className={isBookmarked ? "text-[#fbbf24]" : "text-gray-700"}
+                    fill={isBookmarked ? "currentColor" : "none"}
+                  />
                 </button>
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    toast("This feature is not available yet.", { icon: "🚧" })
+                    handleShare()
                   }}
                   className="p-2 cursor-pointer rounded-full hover:bg-gray-100 flex items-center group border-none bg-transparent outline-none"
                 >
@@ -314,6 +347,13 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
           </div>
         </div>
       </div>
+      
+      {showPlaylistModal && (
+        <ReelPlaylistModal
+          reelId={reel.id}
+          onClose={() => setShowPlaylistModal(false)}
+        />
+      )}
     </div>
   )
 })
