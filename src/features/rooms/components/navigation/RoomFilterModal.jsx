@@ -134,7 +134,7 @@ const RoomFilterModal = ({ open, onClose }) => {
                         : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                     }`}
                   >
-                    {level.label}
+                    {level.labelKey ? t.rooms?.filters?.levels?.[level.labelKey] || level.label : level.label}
                   </button>
                 )
               })}

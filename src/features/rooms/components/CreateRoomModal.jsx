@@ -73,7 +73,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
         onClose={onCancel}
         title={null}
         showCloseButton={false}
-        className="max-w-sm sm:max-w-[800px] w-full max-sm:!fixed max-sm:!inset-0 max-sm:!m-0 max-sm:!max-w-none max-sm:!h-full max-sm:!w-full max-sm:!rounded-none max-sm:flex max-sm:flex-col sm:rounded-3xl"
+        className="max-w-sm sm:max-w-[850px] w-full max-sm:!fixed max-sm:!inset-0 max-sm:!m-0 max-sm:!max-w-none max-sm:!h-full max-sm:!w-full max-sm:!rounded-none max-sm:flex max-sm:flex-col sm:rounded-3xl"
         bodyClassName="flex flex-col flex-1 overflow-hidden"
       >
         <AnimatePresence mode="wait">

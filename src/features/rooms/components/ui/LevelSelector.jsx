@@ -19,7 +19,7 @@ const LevelSelector = ({ selectedLevel, onSelect, levels, t }) => {
                   : "border-[#C6C6C6] hover:bg-[#F2F2F2]"
               }`}
             >
-              {level.label}
+              {level.labelKey ? t.rooms?.filters?.levels?.[level.labelKey] || level.label : level.label}
             </button>
           )
         })}
