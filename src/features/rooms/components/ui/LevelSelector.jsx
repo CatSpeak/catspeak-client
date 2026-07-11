@@ -19,7 +19,7 @@ const LevelSelector = ({ selectedLevel, onSelect, levels, t }) => {
                   : "bg-white border-gray-200 text-gray-700 hover:border-cath-red-300 hover:bg-red-50 hover:text-cath-red-700 hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
               }`}
             >
-              {level.label}
+              {level.labelKey ? t.rooms?.filters?.levels?.[level.labelKey] || level.label : level.label}
             </button>
           )
         })}

@@ -23,7 +23,7 @@ const SessionActionButtons = ({
           const isStudyGroup = b.id === "connect_2_5"
           const isAI = b.id === "your_ai"
 
-          if (isAI && !canUseAI) return null
+          if (isAI) return null
 
           const isActionable = isOneOnOne || isStudyGroup || isAI
 

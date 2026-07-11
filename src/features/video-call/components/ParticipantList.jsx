@@ -1,44 +1,44 @@
-import React from "react"
-import { Mic, MicOff, Video, VideoOff, Hand } from "lucide-react"
-import { useIsSpeaking } from "@livekit/components-react"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import Avatar from "@/shared/components/ui/Avatar"
-import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
+import React from "react";
+import { Mic, MicOff, Video, VideoOff, Hand } from "lucide-react";
+import { useIsSpeaking } from "@livekit/components-react";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import Avatar from "@/shared/components/ui/Avatar";
+import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
+import { ParticipantVolumePopover } from "./ParticipantVolumePopover";
 
 /**
  * A single row in the participant list.
  * Uses LiveKit Participant object properties directly.
  */
 const ParticipantItem = ({ participant }) => {
-  const { t } = useLanguage()
-  const { micOn: localMicOn, cameraOn: localCameraOn } = useVideoCallContext()
-  const isSpeaking = useIsSpeaking(participant)
-  const pl = t.rooms.videoCall.participantList
+  const { t } = useLanguage();
+  const { micOn: localMicOn, cameraOn: localCameraOn } = useVideoCallContext();
+  const isSpeaking = useIsSpeaking(participant);
+  const pl = t.rooms.videoCall.participantList;
 
-  const isLocal = participant.isLocal
+  const isLocal = participant.isLocal;
   const isMicOn = isLocal
     ? localMicOn
-    : (participant.isMicrophoneEnabled ?? false)
+    : (participant.isMicrophoneEnabled ?? false);
   const isCameraOn = isLocal
     ? localCameraOn
-    : (participant.isCameraEnabled ?? false)
+    : (participant.isCameraEnabled ?? false);
 
   const parseMetadata = (metadata) => {
-    if (!metadata) return {}
+    if (!metadata) return {};
     try {
-      return JSON.parse(metadata)
+      return JSON.parse(metadata);
     } catch {
-      return {}
+      return {};
     }
-  }
-  const meta = parseMetadata(participant.metadata)
+  };
+  const meta = parseMetadata(participant.metadata);
   // console.log("Participant Metadata [ParticipantList]:", meta)
-  const isHandRaised = meta.handRaised === true
-  const avatarUrl = meta.avatarUrl
+  const isHandRaised = meta.handRaised === true;
+  const avatarUrl = meta.avatarUrl;
 
   const name =
-    participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
+    participant.name || participant.identity || (isLocal ? pl.you : pl.guest);
 
   return (
     <div className="flex items-center justify-between gap-3 pl-1.5 pr-2 py-2 rounded w-full">
@@ -90,36 +90,36 @@ const ParticipantItem = ({ participant }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 /**
  * Participant list panel.
  * Reads participants and local media state from VideoCallContext.
  */
 const ParticipantList = ({ hideTitle }) => {
-  const { t } = useLanguage()
-  const { participants } = useVideoCallContext()
-  const pl = t.rooms.videoCall.participantList
+  const { t } = useLanguage();
+  const { participants } = useVideoCallContext();
+  const pl = t.rooms.videoCall.participantList;
 
   const parseMetadata = (metadata) => {
-    if (!metadata) return {}
+    if (!metadata) return {};
     try {
-      return JSON.parse(metadata)
+      return JSON.parse(metadata);
     } catch {
-      return {}
+      return {};
     }
-  }
+  };
 
   const raisedHandParticipants = participants.filter((p) => {
-    const meta = parseMetadata(p.metadata)
-    return meta.handRaised === true
-  })
+    const meta = parseMetadata(p.metadata);
+    return meta.handRaised === true;
+  });
 
   const otherParticipants = participants.filter((p) => {
-    const meta = parseMetadata(p.metadata)
-    return meta.handRaised !== true
-  })
+    const meta = parseMetadata(p.metadata);
+    return meta.handRaised !== true;
+  });
 
   return (
     <div className="flex flex-col h-full w-full bg-white">
@@ -160,7 +160,7 @@ const ParticipantList = ({ hideTitle }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ParticipantList
+export default ParticipantList;

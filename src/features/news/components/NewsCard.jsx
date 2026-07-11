@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useRef } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { COLORS } from "@/shared/constants/constants"
+import React, { useState, useMemo, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { COLORS } from "@/shared/constants/constants";
 import {
   Share,
   Bookmark,
@@ -10,16 +10,16 @@ import {
   Smile,
   MessageSquare,
   Eye,
-} from "lucide-react"
+} from "lucide-react";
 import {
   useReactToPostMutation,
   useSharePostMutation,
-} from "@/store/api/postsApi"
-import ShareModal from "./ShareModal"
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
-import Carousel from "@/shared/components/ui/Carousel"
-import { getImageUrl } from "@/shared/utils/imageUtils"
-import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
+} from "@/store/api/postsApi";
+import ShareModal from "./ShareModal";
+import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
+import Carousel from "@/shared/components/ui/Carousel";
+import { getImageUrl } from "@/shared/utils/imageUtils";
+import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 
 /**
  * NewsCard — Figma "Card_Bản tin Catspeak" layout.
@@ -31,85 +31,91 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
  *   4. Share modal + reactions popover
  */
 const NewsCard = ({ news }) => {
-  const navigate = useNavigate()
-  const { lang } = useParams()
-  const currentLang = lang || "en"
-  const { t } = useLanguage()
-  const newsCard = t.news?.newsCard
+  const navigate = useNavigate();
+  const { lang } = useParams();
+  const currentLang = lang || "en";
+  const { t } = useLanguage();
+  const newsCard = t.news?.newsCard;
 
   /* ── API mutations ─────────────────────────────────────────────── */
-  const [reactToPost] = useReactToPostMutation()
-  const [sharePost] = useSharePostMutation()
+  const [reactToPost] = useReactToPostMutation();
+  const [sharePost] = useSharePostMutation();
 
   /* ── Local state ───────────────────────────────────────────────── */
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
-  const [shareUrl, setShareUrl] = useState("")
-  const [showReactions, setShowReactions] = useState(false)
-  const [isDevModalOpen, setIsDevModalOpen] = useState(false)
-  const holdTimer = useRef(null)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [showReactions, setShowReactions] = useState(false);
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
+  const holdTimer = useRef(null);
 
   /* ── Derived ───────────────────────────────────────────────────── */
-  const hasMedia = news.media && news.media.length > 0
+  const hasMedia = news.media && news.media.length > 0;
 
   const fallbackColor = useMemo(() => {
-    const seed = news.postId || (news.title ? news.title.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0)
+    const seed =
+      news.postId ||
+      (news.title
+        ? news.title
+            .split("")
+            .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        : 0);
     const index =
       typeof seed === "number"
         ? seed % COLORS.length
-        : seed.length % COLORS.length
-    return COLORS[index].value
-  }, [news.postId, news.title])
+        : seed.length % COLORS.length;
+    return COLORS[index].value;
+  }, [news.postId, news.title]);
 
   /* ── Handlers ──────────────────────────────────────────────────── */
   const handleCardClick = () => {
-    navigate(`/${currentLang}/cat-speak/news/${news.slug || news.postId}`)
-  }
+    navigate(`/${currentLang}/cat-speak/news/${news.slug || news.postId}`);
+  };
 
   const handleShare = async (e) => {
-    e.stopPropagation()
-    if (!news?.postId) return
+    e.stopPropagation();
+    if (!news?.postId) return;
     try {
-      const result = await sharePost(news.postId).unwrap()
+      const result = await sharePost(news.postId).unwrap();
       let url =
         (typeof result === "string" ? result : result?.shareLink) ||
-        window.location.href
+        window.location.href;
 
       if (url && !url.startsWith("http")) {
-        url = url.startsWith("/") ? url : `/${url}`
-        url = `${window.location.origin}${url}`
+        url = url.startsWith("/") ? url : `/${url}`;
+        url = `${window.location.origin}${url}`;
       }
 
       if (url) {
-        setShareUrl(url)
-        setIsShareModalOpen(true)
+        setShareUrl(url);
+        setIsShareModalOpen(true);
       }
     } catch (err) {
-      console.error("Share failed", err)
+      console.error("Share failed", err);
     }
-  }
+  };
 
   const handleReact = (e, type) => {
-    e.stopPropagation()
-    if (!news?.postId) return
-    reactToPost({ postId: news.postId, type })
-  }
+    e.stopPropagation();
+    if (!news?.postId) return;
+    reactToPost({ postId: news.postId, type });
+  };
 
   const handleTouchStart = () => {
-    holdTimer.current = setTimeout(() => setShowReactions(true), 400)
-  }
+    holdTimer.current = setTimeout(() => setShowReactions(true), 400);
+  };
 
   const handleTouchEnd = () => {
-    if (holdTimer.current) clearTimeout(holdTimer.current)
-  }
+    if (holdTimer.current) clearTimeout(holdTimer.current);
+  };
 
   /* ── Derived: carousel images ────────────────────────────────────── */
   const carouselImages = useMemo(() => {
-    if (!hasMedia) return []
+    if (!hasMedia) return [];
     return news.media.map((item) => ({
       url: getImageUrl(item.mediaUrl),
       alt: news.title,
-    }))
-  }, [hasMedia, news.media, news.title])
+    }));
+  }, [hasMedia, news.media, news.title]);
 
   /* ── Render ────────────────────────────────────────────────────── */
   return (
@@ -120,9 +126,7 @@ const NewsCard = ({ news }) => {
       {/* ── Image area ───────────────────────────────────────────── */}
       <div className="relative flex-1 min-h-0 p-2.5 rounded-t-[20px]">
         {hasMedia ? (
-          <div
-            className="w-full h-full rounded-t-[20px] overflow-hidden"
-          >
+          <div className="w-full h-full rounded-t-[20px] overflow-hidden">
             <Carousel
               images={carouselImages}
               autoPlay
@@ -156,24 +160,20 @@ const NewsCard = ({ news }) => {
           </button>
           <button
             onClick={(e) => {
-              e.stopPropagation()
-              setIsDevModalOpen(true)
+              e.stopPropagation();
+              setIsDevModalOpen(true);
             }}
             className="flex items-center justify-center p-1.5 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
             aria-label="Bookmark"
           >
-            <Bookmark
-              size={22}
-              strokeWidth={1.5}
-              className="text-[#2e2e2e]"
-            />
+            <Bookmark size={22} strokeWidth={1.5} className="text-[#2e2e2e]" />
           </button>
         </div>
       </div>
 
       {/* ── Content ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-2 px-4 pt-3">
-        <h3 className="font-nunito font-bold text-base leading-[1.4] text-[#1a1a1a] truncate">
+        <h3 className="font-nunito font-bold text-base leading-[1.4] text-[#1a1a1a] text-justify">
           {news.title}
         </h3>
         <p className="font-nunito font-medium text-sm leading-[1.4] text-[#7b7979]">
@@ -190,8 +190,8 @@ const NewsCard = ({ news }) => {
         <div className="group/reactions relative flex items-center">
           <button
             onClick={(e) => {
-              const type = news.currentUserReaction || "Like"
-              handleReact(e, type)
+              const type = news.currentUserReaction || "Like";
+              handleReact(e, type);
             }}
             className={`flex items-center gap-1 px-1 py-1 rounded-full transition-colors hover:bg-gray-100 ${
               news.currentUserReaction === "Love"
@@ -204,9 +204,17 @@ const NewsCard = ({ news }) => {
             }`}
           >
             {news.currentUserReaction === "Love" ? (
-              <Heart size={16} strokeWidth={1.5} className="text-red-700 fill-red-400" />
+              <Heart
+                size={16}
+                strokeWidth={1.5}
+                className="text-red-700 fill-red-400"
+              />
             ) : news.currentUserReaction === "Haha" ? (
-              <Smile size={16} strokeWidth={1.5} className="text-yellow-700 fill-yellow-400" />
+              <Smile
+                size={16}
+                strokeWidth={1.5}
+                className="text-yellow-700 fill-yellow-400"
+              />
             ) : (
               <ThumbsUp
                 size={16}
@@ -230,9 +238,9 @@ const NewsCard = ({ news }) => {
           >
             <button
               onClick={(e) => {
-                e.stopPropagation()
-                setShowReactions(false)
-                handleReact(e, "Like")
+                e.stopPropagation();
+                setShowReactions(false);
+                handleReact(e, "Like");
               }}
               className="p-2 hover:-translate-y-1 transition-transform hover:bg-blue-50 rounded-full"
               title="Like"
@@ -241,9 +249,9 @@ const NewsCard = ({ news }) => {
             </button>
             <button
               onClick={(e) => {
-                e.stopPropagation()
-                setShowReactions(false)
-                handleReact(e, "Love")
+                e.stopPropagation();
+                setShowReactions(false);
+                handleReact(e, "Love");
               }}
               className="p-2 hover:-translate-y-1 transition-transform hover:bg-red-50 rounded-full"
               title="Love"
@@ -252,9 +260,9 @@ const NewsCard = ({ news }) => {
             </button>
             <button
               onClick={(e) => {
-                e.stopPropagation()
-                setShowReactions(false)
-                handleReact(e, "Haha")
+                e.stopPropagation();
+                setShowReactions(false);
+                handleReact(e, "Haha");
               }}
               className="p-2 hover:-translate-y-1 transition-transform hover:bg-yellow-50 rounded-full"
               title="Haha"
@@ -275,7 +283,11 @@ const NewsCard = ({ news }) => {
 
         {/* Comments */}
         <button className="flex items-center gap-1 px-1 py-1 rounded-full transition-colors hover:bg-gray-100">
-          <MessageSquare size={16} strokeWidth={1.5} className="text-[#7b7979]" />
+          <MessageSquare
+            size={16}
+            strokeWidth={1.5}
+            className="text-[#7b7979]"
+          />
           <span className="font-nunito font-medium text-sm text-[#7b7979]">
             {news.totalComments || 0}
           </span>
@@ -291,7 +303,10 @@ const NewsCard = ({ news }) => {
       </div>
 
       {/* ── Modals ───────────────────────────────────────────────── */}
-      <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <ShareModal
           open={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
@@ -303,7 +318,7 @@ const NewsCard = ({ news }) => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default NewsCard
+export default NewsCard;

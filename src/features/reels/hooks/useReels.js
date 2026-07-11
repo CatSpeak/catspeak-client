@@ -16,11 +16,13 @@ import { mapReelDtoToFrontend } from "../utils/mappers"
  *   setActiveTag: (tag: string|null) => void,
  * }}
  */
-const useReels = () => {
+const useReels = (searchQuery = "") => {
   const [activeTag, setActiveTag] = useState(null)
 
   // Fetch live Reels feed from staging API
-  const { data: feedResponse, isLoading: isApiLoading } = useGetReelsFeedQuery()
+  const { data: feedResponse, isLoading: isApiLoading } = useGetReelsFeedQuery({
+    search: searchQuery
+  })
 
   // Map API data to UI structure, default to empty array if empty or loading
   const reels = useMemo(() => {

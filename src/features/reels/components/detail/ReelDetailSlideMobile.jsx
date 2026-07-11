@@ -8,10 +8,7 @@ import {
   Share,
   Bookmark,
   VolumeX,
-  Volume1,
   Volume2,
-  Maximize,
-  Minimize,
   Loader2,
   ChevronLeft,
 } from "lucide-react";
@@ -20,7 +17,7 @@ import ReelMoreMenu from "./ReelMoreMenu";
 import toast from "react-hot-toast";
 
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { useGetReelCommentsQuery } from "@/store/api/reelsApi";
+import { useGetReelCommentsQuery, useGetAllBookmarkedReelsQuery, useBookmarkReelMutation } from "@/store/api/reelsApi";
 import { useReelInteractions } from "../../hooks/useReelInteractions";
 import { useVideoPlayback } from "../../hooks/useVideoPlayback";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
@@ -30,9 +27,8 @@ import {
 } from "@/store/slices/authSlice";
 import { formatCompactNumber } from "../../utils/formatters";
 import CommentItemNode from "./CommentItemNode";
-import ReelCaption from "./ReelCaption";
 import CommentsSkeleton from "./CommentsSkeleton";
-import VolumeSlider from "./VolumeSlider";
+import ReelPlaylistModal from "../modals/ReelPlaylistModal";
 
 const formatVideoTime = (seconds) => {
   if (isNaN(seconds)) return "00:00";
@@ -95,7 +91,9 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   const [replyTarget, setReplyTarget] = useState(null);
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [viewportOffset, setViewportOffset] = useState(0);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
   // Track iOS Safari visual viewport offset to counteract keyboard push-up
   useEffect(() => {
@@ -116,9 +114,14 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
   const currentUser = useSelector(selectCurrentUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { openAuthModal } = useAuthModal();
+  
+  const { data: bookmarkedReels } = useGetAllBookmarkedReelsQuery(undefined, { skip: !isAuthenticated })
+  const isBookmarked = reel.isBookmarked || (bookmarkedReels?.some(b => String(b.reelId) === String(reel.id)) ?? false)
 
   const {
     handleLike,
+    handleShare,
+    handleBookmark,
     handleCommentSubmit,
     handleCommentDelete,
     isPostingComment,
@@ -148,10 +151,35 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
     handleLike();
   };
 
-  const handleBookmarkToggle = useCallback((e) => {
-    e.stopPropagation();
-    toast("This feature is not available yet.", { icon: "🚧" });
-  }, []);
+  const [bookmarkReel] = useBookmarkReelMutation()
+
+  const handleBookmarkToggle = async (e) => {
+    e.stopPropagation()
+    if (!isAuthenticated) return openAuthModal()
+    
+    if (isBookmarked) {
+      // Find the reel in bookmarkedReels to get its playlist IDs
+      const bookmarkedItem = bookmarkedReels?.find(b => String(b.reelId) === String(reel.id))
+      if (bookmarkedItem && bookmarkedItem.__playlistIds) {
+        try {
+          const promises = bookmarkedItem.__playlistIds.map(pid => 
+            bookmarkReel({ reelId: reel.id, playlistId: pid }).unwrap()
+          )
+          await Promise.all(promises)
+          toast.success(t?.catSpeak?.reels?.detail?.moreMenu?.removedFromPlaylist || "Đã gỡ khỏi Bookmark")
+        } catch {
+          toast.error(t?.catSpeak?.reels?.detail?.errorBookmark || "Có lỗi xảy ra")
+        }
+      } else {
+        // Fallback: just unbookmark from default
+        try {
+          await bookmarkReel({ reelId: reel.id }).unwrap()
+        } catch {}
+      }
+    } else {
+      setShowPlaylistModal(true)
+    }
+  }
 
   const handleReply = useCallback((target) => {
     setReplyTarget(target);
@@ -339,23 +367,30 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
               className="flex flex-col items-center gap-1 group bg-transparent border-none"
             >
               <div className="w-[45px] h-[45px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
-                <Bookmark size={24} className="text-white" />
+                <Bookmark 
+                  size={24} 
+                  fill={isBookmarked ? "#fbbf24" : "none"}
+                  color={isBookmarked ? "#fbbf24" : "white"} 
+                />
               </div>
-              <span className="text-white text-[12px] font-semibold drop-shadow-md">
-                {formatCompactNumber(reel.shares || 0, language)}
+              <span className="text-white text-xs font-semibold drop-shadow-md">
+                {isBookmarked ? (language?.saved || "Saved") : (language?.save || "Save")}
               </span>
             </button>
 
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                toast("This feature is not available yet.", { icon: "🚧" });
+                handleShare();
               }}
               className="flex flex-col items-center gap-1 group bg-transparent border-none"
             >
               <div className="w-[45px] h-[45px] rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
                 <Share size={24} className="text-white" />
               </div>
+              <span className="text-white text-[12px] font-semibold drop-shadow-md">
+                {formatCompactNumber(reel.shares || 0, language)}
+              </span>
             </button>
           </div>
 
@@ -563,6 +598,13 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         showMenu={showMoreMenu}
         onClose={() => setShowMoreMenu(false)}
       />
+
+      {showPlaylistModal && (
+        <ReelPlaylistModal
+          reelId={reel.id}
+          onClose={() => setShowPlaylistModal(false)}
+        />
+      )}
     </div>
   );
 });

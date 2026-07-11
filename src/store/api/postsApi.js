@@ -1,4 +1,4 @@
-import { baseApi } from "./baseApi"
+import { baseApi } from "./baseApi";
 
 export const postsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,21 +9,22 @@ export const postsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Post"],
       serializeQueryArgs: ({ endpointName }) => {
-        return endpointName
+        return endpointName;
       },
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) {
-          currentCache.data = newItems.data
+          currentCache.data = newItems.data;
         } else {
           const newPosts = newItems.data.filter(
-            (newPost) => !currentCache.data.some((p) => p.postId === newPost.postId)
-          )
-          currentCache.data.push(...newPosts)
+            (newPost) =>
+              !currentCache.data.some((p) => p.postId === newPost.postId),
+          );
+          currentCache.data.push(...newPosts);
         }
-        currentCache.hasMore = newItems.data.length === arg.pageSize
+        currentCache.hasMore = newItems.data.length === arg.pageSize;
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.page !== previousArg?.page
+        return currentArg?.page !== previousArg?.page;
       },
     }),
     getPostById: builder.query({
@@ -36,7 +37,9 @@ export const postsApi = baseApi.injectEndpoints({
     }),
     getSharedPost: builder.query({
       query: (shareToken) => `/Post/shared/${shareToken}`,
-      providesTags: (result, error, id) => [{ type: "Post", id: `shared-${id}` }],
+      providesTags: (result, error, id) => [
+        { type: "Post", id: `shared-${id}` },
+      ],
     }),
     reactToPost: builder.mutation({
       query: ({ postId, type }) => ({
@@ -44,96 +47,139 @@ export const postsApi = baseApi.injectEndpoints({
         method: "POST",
         params: { type },
       }),
-      async onQueryStarted({ postId, type }, { dispatch, getState, queryFulfilled }) {
-        const state = getState()
-        const patches = []
+      async onQueryStarted(
+        { postId, type },
+        { dispatch, getState, queryFulfilled },
+      ) {
+        const state = getState();
+        const patches = [];
 
         // Iterate over all active getPosts queries (for different pages) and optimistically update them
         for (const [, query] of Object.entries(state.api.queries)) {
-          if (query.endpointName === "getPosts" && query.status === "fulfilled") {
+          if (
+            query.endpointName === "getPosts" &&
+            query.status === "fulfilled"
+          ) {
             const patch = dispatch(
-              postsApi.util.updateQueryData("getPosts", query.originalArgs, (draft) => {
-                if (draft?.data) {
-                  const post = draft.data.find((p) => p.postId === postId)
-                  if (post) {
-                    if (post.currentUserReaction === type) {
-                      // Toggle off
-                      post.currentUserReaction = null
-                      post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
-                    } else {
-                      // Switch or add reaction
-                      if (!post.currentUserReaction) {
-                        post.totalReactions = (post.totalReactions || 0) + 1
+              postsApi.util.updateQueryData(
+                "getPosts",
+                query.originalArgs,
+                (draft) => {
+                  if (draft?.data) {
+                    const post = draft.data.find((p) => p.postId === postId);
+                    if (post) {
+                      if (post.currentUserReaction === type) {
+                        // Toggle off
+                        post.currentUserReaction = null;
+                        post.totalReactions = Math.max(
+                          0,
+                          (post.totalReactions || 0) - 1,
+                        );
+                      } else {
+                        // Switch or add reaction
+                        if (!post.currentUserReaction) {
+                          post.totalReactions = (post.totalReactions || 0) + 1;
+                        }
+                        post.currentUserReaction = type;
                       }
-                      post.currentUserReaction = type
                     }
                   }
-                }
-              })
-            )
-            patches.push(patch)
-          } else if (query.endpointName === "getPostById" && query.status === "fulfilled") {
+                },
+              ),
+            );
+            patches.push(patch);
+          } else if (
+            query.endpointName === "getPostById" &&
+            query.status === "fulfilled"
+          ) {
             const patch = dispatch(
-              postsApi.util.updateQueryData("getPostById", query.originalArgs, (draft) => {
-                if (draft?.data && draft.data.postId === postId) {
-                  const post = draft.data
-                  if (post.currentUserReaction === type) {
-                    post.currentUserReaction = null
-                    post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
-                  } else {
-                    if (!post.currentUserReaction) {
-                      post.totalReactions = (post.totalReactions || 0) + 1
+              postsApi.util.updateQueryData(
+                "getPostById",
+                query.originalArgs,
+                (draft) => {
+                  if (draft?.data && draft.data.postId === postId) {
+                    const post = draft.data;
+                    if (post.currentUserReaction === type) {
+                      post.currentUserReaction = null;
+                      post.totalReactions = Math.max(
+                        0,
+                        (post.totalReactions || 0) - 1,
+                      );
+                    } else {
+                      if (!post.currentUserReaction) {
+                        post.totalReactions = (post.totalReactions || 0) + 1;
+                      }
+                      post.currentUserReaction = type;
                     }
-                    post.currentUserReaction = type
                   }
-                }
-              })
-            )
-            patches.push(patch)
-          } else if (query.endpointName === "getPostBySlug" && query.status === "fulfilled") {
+                },
+              ),
+            );
+            patches.push(patch);
+          } else if (
+            query.endpointName === "getPostBySlug" &&
+            query.status === "fulfilled"
+          ) {
             const patch = dispatch(
-              postsApi.util.updateQueryData("getPostBySlug", query.originalArgs, (draft) => {
-                if (draft?.data && draft.data.postId === postId) {
-                  const post = draft.data
-                  if (post.currentUserReaction === type) {
-                    post.currentUserReaction = null
-                    post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
-                  } else {
-                    if (!post.currentUserReaction) {
-                      post.totalReactions = (post.totalReactions || 0) + 1
+              postsApi.util.updateQueryData(
+                "getPostBySlug",
+                query.originalArgs,
+                (draft) => {
+                  if (draft?.data && draft.data.postId === postId) {
+                    const post = draft.data;
+                    if (post.currentUserReaction === type) {
+                      post.currentUserReaction = null;
+                      post.totalReactions = Math.max(
+                        0,
+                        (post.totalReactions || 0) - 1,
+                      );
+                    } else {
+                      if (!post.currentUserReaction) {
+                        post.totalReactions = (post.totalReactions || 0) + 1;
+                      }
+                      post.currentUserReaction = type;
                     }
-                    post.currentUserReaction = type
                   }
-                }
-              })
-            )
-            patches.push(patch)
-          } else if (query.endpointName === "getSharedPost" && query.status === "fulfilled") {
+                },
+              ),
+            );
+            patches.push(patch);
+          } else if (
+            query.endpointName === "getSharedPost" &&
+            query.status === "fulfilled"
+          ) {
             const patch = dispatch(
-              postsApi.util.updateQueryData("getSharedPost", query.originalArgs, (draft) => {
-                if (draft?.data && draft.data.postId === postId) {
-                  const post = draft.data
-                  if (post.currentUserReaction === type) {
-                    post.currentUserReaction = null
-                    post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
-                  } else {
-                    if (!post.currentUserReaction) {
-                      post.totalReactions = (post.totalReactions || 0) + 1
+              postsApi.util.updateQueryData(
+                "getSharedPost",
+                query.originalArgs,
+                (draft) => {
+                  if (draft?.data && draft.data.postId === postId) {
+                    const post = draft.data;
+                    if (post.currentUserReaction === type) {
+                      post.currentUserReaction = null;
+                      post.totalReactions = Math.max(
+                        0,
+                        (post.totalReactions || 0) - 1,
+                      );
+                    } else {
+                      if (!post.currentUserReaction) {
+                        post.totalReactions = (post.totalReactions || 0) + 1;
+                      }
+                      post.currentUserReaction = type;
                     }
-                    post.currentUserReaction = type
                   }
-                }
-              })
-            )
-            patches.push(patch)
+                },
+              ),
+            );
+            patches.push(patch);
           }
         }
 
         try {
-          await queryFulfilled
+          await queryFulfilled;
         } catch {
           // If the request fails, revert all optimistic updates
-          patches.forEach((patch) => patch.undo())
+          patches.forEach((patch) => patch.undo());
         }
       },
     }),
@@ -152,20 +198,23 @@ export const postsApi = baseApi.injectEndpoints({
         { type: "PostComment", id: `LIST-${postId}` },
       ],
       serializeQueryArgs: ({ queryArgs }) => {
-        return `getPostComments-${queryArgs.postId}`
+        return `getPostComments-${queryArgs.postId}`;
       },
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) {
-          currentCache.data = newItems.data
+          currentCache.data = newItems.data;
         } else {
           const newComments = newItems.data.filter(
-            (newComment) => !currentCache.data.some((c) => c.commentId === newComment.commentId)
-          )
-          currentCache.data.push(...newComments)
+            (newComment) =>
+              !currentCache.data.some(
+                (c) => c.commentId === newComment.commentId,
+              ),
+          );
+          currentCache.data.push(...newComments);
         }
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.page !== previousArg?.page
+        return currentArg?.page !== previousArg?.page;
       },
     }),
     createPostComment: builder.mutation({
@@ -182,7 +231,7 @@ export const postsApi = baseApi.injectEndpoints({
         { dispatch, getState, queryFulfilled },
       ) {
         try {
-          const { data: created } = await queryFulfilled
+          const { data: created } = await queryFulfilled;
 
           for (const [, query] of Object.entries(getState().api.queries)) {
             if (
@@ -195,27 +244,27 @@ export const postsApi = baseApi.injectEndpoints({
                   "getPostComments",
                   query.originalArgs,
                   (draft) => {
-                    if (!draft?.data) return
-                    const newComment = created?.data
-                    if (!newComment) return
+                    if (!draft?.data) return;
+                    const newComment = created?.data;
+                    if (!newComment) return;
 
                     if (parentCommentId) {
                       // Reply — find parent and push into its replies
                       const parent = draft.data.find(
                         (c) => c.commentId === parentCommentId,
-                      )
+                      );
                       if (parent) {
-                        if (!parent.replies) parent.replies = []
-                        parent.replies.push(newComment)
+                        if (!parent.replies) parent.replies = [];
+                        parent.replies.push(newComment);
                       }
                     } else {
                       // Top-level comment — push to front
-                      draft.data.unshift(newComment)
+                      draft.data.unshift(newComment);
                     }
                   },
                 ),
-              )
-              return patch
+              );
+              return patch;
             }
           }
         } catch {
@@ -248,56 +297,73 @@ export const postsApi = baseApi.injectEndpoints({
         method: "POST",
         params: { type },
       }),
-      async onQueryStarted({ postId, commentId, type }, { dispatch, getState, queryFulfilled }) {
-        const state = getState()
-        const patches = []
+      async onQueryStarted(
+        { postId, commentId, type },
+        { dispatch, getState, queryFulfilled },
+      ) {
+        const state = getState();
+        const patches = [];
 
         for (const [, query] of Object.entries(state.api.queries)) {
-          if (query.endpointName === "getPostComments" && query.status === "fulfilled" && query.originalArgs?.postId === postId) {
+          if (
+            query.endpointName === "getPostComments" &&
+            query.status === "fulfilled" &&
+            query.originalArgs?.postId === postId
+          ) {
             const patch = dispatch(
-              postsApi.util.updateQueryData("getPostComments", query.originalArgs, (draft) => {
-                const list = draft?.data;
-                if (list) {
-                  let comment = list.find((c) => c.commentId === commentId);
-                  if (!comment) {
-                    for (const topLevel of list) {
-                      if (topLevel.replies) {
-                        comment = topLevel.replies.find((r) => r.commentId === commentId);
-                        if (comment) break;
+              postsApi.util.updateQueryData(
+                "getPostComments",
+                query.originalArgs,
+                (draft) => {
+                  const list = draft?.data;
+                  if (list) {
+                    let comment = list.find((c) => c.commentId === commentId);
+                    if (!comment) {
+                      for (const topLevel of list) {
+                        if (topLevel.replies) {
+                          comment = topLevel.replies.find(
+                            (r) => r.commentId === commentId,
+                          );
+                          if (comment) break;
+                        }
+                      }
+                    }
+                    if (comment) {
+                      if (comment.currentUserReaction === type) {
+                        comment.currentUserReaction = null;
+                        comment.totalReactions = Math.max(
+                          0,
+                          (comment.totalReactions || 0) - 1,
+                        );
+                      } else {
+                        if (!comment.currentUserReaction) {
+                          comment.totalReactions =
+                            (comment.totalReactions || 0) + 1;
+                        }
+                        comment.currentUserReaction = type;
                       }
                     }
                   }
-                  if (comment) {
-                    if (comment.currentUserReaction === type) {
-                      comment.currentUserReaction = null
-                      comment.totalReactions = Math.max(0, (comment.totalReactions || 0) - 1)
-                    } else {
-                      if (!comment.currentUserReaction) {
-                        comment.totalReactions = (comment.totalReactions || 0) + 1
-                      }
-                      comment.currentUserReaction = type
-                    }
-                  }
-                }
-              })
-            )
-            patches.push(patch)
+                },
+              ),
+            );
+            patches.push(patch);
           }
         }
 
         try {
-          await queryFulfilled
+          await queryFulfilled;
         } catch {
-          patches.forEach((patch) => patch.undo())
+          patches.forEach((patch) => patch.undo());
         }
       },
     }),
   }),
-})
+});
 
-export const { 
-  useGetPostsQuery, 
-  useGetPostByIdQuery, 
+export const {
+  useGetPostsQuery,
+  useGetPostByIdQuery,
   useGetPostBySlugQuery,
   useGetSharedPostQuery,
   useReactToPostMutation,
@@ -306,5 +372,5 @@ export const {
   useCreatePostCommentMutation,
   useDeletePostCommentMutation,
   useEditPostCommentMutation,
-  useReactToCommentMutation
-} = postsApi
+  useReactToCommentMutation,
+} = postsApi;

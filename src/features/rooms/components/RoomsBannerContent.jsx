@@ -30,7 +30,7 @@ const RoomsBannerContent = ({ sessionProps }) => {
       
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 font-nunito leading-tight md:leading-relaxed w-full">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 font-nunito leading-tight md:leading-relaxed w-full">
             {renderTitle()}
           </h1>
           <p className="text-gray-600 text-base md:text-lg mt-3 md:mt-4 leading-relaxed max-w-full font-nunito">

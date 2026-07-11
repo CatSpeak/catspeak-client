@@ -40,10 +40,12 @@ export const useCreateRoomForm = () => {
   }
 
   const switchMode = (newMode) => {
-    setFormData({
+    setFormData((prev) => ({
       ...INITIAL_STATE,
-      mode: newMode
-    })
+      mode: newMode,
+      topics: prev.topics,
+      selectedLevel: prev.selectedLevel
+    }))
   }
 
   const handleTopicChange = (event) => {

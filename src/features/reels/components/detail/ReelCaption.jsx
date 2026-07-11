@@ -46,7 +46,7 @@ const ReelCaption = React.memo(({ reel, isMobile = false }) => {
             </span>
           </div>
         </div>
-        {!isMobile && <ReelMoreMenu />}
+        {!isMobile && <ReelMoreMenu reel={reel} />}
       </div>
 
       <div className={`leading-[1.6] ${isMobile ? "text-white text-[13px] drop-shadow-md" : "text-headingColor text-[14px]"}`}>

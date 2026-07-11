@@ -302,6 +302,7 @@ export const baseApi = createApi({
     "Messages",
     "Events",
     "Post",
+    "PostComment",
     "Recordings",
     "Storage",
     "InstructorProfile",
