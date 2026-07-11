@@ -10,7 +10,6 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetPostsQuery } from "@/store/api/postsApi";
 import { Breadcrumb } from "@/shared/components/ui/navigation";
 import NewsCard from "../components/NewsCard";
-import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner";
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
 import EmptyState from "@/shared/components/ui/indicators/EmptyState";
 
@@ -77,9 +76,9 @@ const NewsPage = () => {
 
   const [page, setPage] = useState(1);
   const [activeFilter, setActiveFilter] = useState("all");
-  const pageSize = 24;
+  const pageSize = 26;
 
-  const { data, isFetching, error } = useGetPostsQuery({
+  const { data, error } = useGetPostsQuery({
     page,
     pageSize,
   });
@@ -100,23 +99,23 @@ const NewsPage = () => {
     return colsArray;
   }, [publicPosts, columnsCount]);
 
-  const hasMore = data?.hasMore ?? false;
-
-  // Infinite scroll observer
-  const observer = useRef();
-  const lastPostElementRef = useCallback(
-    (node) => {
-      if (isFetching) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prev) => prev + 1);
+  // Infinite scroll observer — trigger fetch when the second-to-last post appears
+  const secondLastPostElementRef = useRef(null);
+  useEffect(() => {
+    if (!secondLastPostElementRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setPage((p) => p + 1);
         }
-      });
-      if (node) observer.current.observe(node);
-    },
-    [isFetching, hasMore],
-  );
+      },
+      {
+        rootMargin: "200px",
+      },
+    );
+    observer.observe(secondLastPostElementRef.current);
+    return () => observer.disconnect();
+  }, [publicPosts]);
 
   // ── Error states ──────────────────────────────────────────────────
   if (error && page === 1) {
@@ -139,8 +138,10 @@ const NewsPage = () => {
     { label: "Bản tin CatSpeak" },
   ];
 
-  const lastPostId = publicPosts[publicPosts.length - 1]?.postId;
-  console.log("Post list: ", data);
+  const secondLastPostId =
+    publicPosts[publicPosts.length - 2]?.postId ??
+    publicPosts[publicPosts.length - 1]?.postId;
+
   // ── Render ────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col w-full gap-7">
@@ -157,9 +158,12 @@ const NewsPage = () => {
         {columns.map((col, colIndex) => (
           <div key={colIndex} className="flex flex-col flex-1 gap-9 min-w-0">
             {col.map((post) => {
-              const isLast = post.postId === lastPostId;
+              const isSecondLast = post.postId === secondLastPostId;
               return (
-                <div ref={isLast ? lastPostElementRef : null} key={post.postId}>
+                <div
+                  ref={isSecondLast ? secondLastPostElementRef : null}
+                  key={post.postId}
+                >
                   <NewsCard news={post} />
                 </div>
               );
@@ -167,25 +171,6 @@ const NewsPage = () => {
           </div>
         ))}
       </div>
-
-      {/* Infinite scroll loading indicator */}
-      {isFetching && page > 1 && (
-        <div className="flex justify-center py-6">
-          <LoadingSpinner />
-        </div>
-      )}
-
-      {/* Load More fallback */}
-      {hasMore && !isFetching && (
-        <div className="flex justify-center pb-8">
-          <button
-            onClick={() => setPage((p) => p + 1)}
-            className="rounded-full bg-blue-50 px-6 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
-          >
-            {t.news?.loadMore || "Load More"}
-          </button>
-        </div>
-      )}
     </div>
   );
 };
