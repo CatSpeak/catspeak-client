@@ -79,22 +79,15 @@ const NewsPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const pageSize = 24;
 
-  // const { data, isFetching, error } = useGetPostsQuery({
-  //   page,
-  //   pageSize,
-  // });
-
   const { data, isFetching, error } = useGetPostsQuery({
     page,
     pageSize,
   });
 
-  const publicPosts = data?.data ?? [];
-
   // Only public posts
-  // const publicPosts = useMemo(() => {
-  //   return data?.data?.filter((post) => post.privacy === "Public") || [];
-  // }, [data?.data]);
+  const publicPosts = useMemo(() => {
+    return data?.data?.filter((post) => post.privacy === "Public") || [];
+  }, [data?.data]);
 
   const columnsCount = useColumnCount();
 
@@ -116,7 +109,7 @@ const NewsPage = () => {
       if (isFetching) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore && !isFetching) {
+        if (entries[0].isIntersecting && hasMore) {
           setPage((prev) => prev + 1);
         }
       });
@@ -124,19 +117,6 @@ const NewsPage = () => {
     },
     [isFetching, hasMore],
   );
-  // const lastPostElementRef = useCallback(
-  //   (node) => {
-  //     if (isFetching) return;
-  //     if (observer.current) observer.current.disconnect();
-  //     observer.current = new IntersectionObserver((entries) => {
-  //       if (entries[0].isIntersecting && hasMore) {
-  //         setPage((prev) => prev + 1);
-  //       }
-  //     });
-  //     if (node) observer.current.observe(node);
-  //   },
-  //   [isFetching, hasMore],
-  // );
 
   // ── Error states ──────────────────────────────────────────────────
   if (error && page === 1) {

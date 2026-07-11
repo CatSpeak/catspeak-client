@@ -3,85 +3,30 @@ import { baseApi } from "./baseApi";
 export const postsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getPosts: builder.query({
-      query: ({ page = 1, pageSize = 10, privacy } = {}) => ({
+      query: ({ page = 1, pageSize = 10 } = {}) => ({
         url: "/Post",
-        params: {
-          page,
-          pageSize,
-          sortBy: "createDate",
-          sortDesc: true,
-          // đẩy filter xuống server thay vì filter ở client sau khi đã phân trang
-          ...(privacy ? { privacy } : {}),
-        },
+        params: { page, pageSize, sortBy: "createDate", sortDesc: true },
       }),
-      serializeQueryArgs: ({ endpointName, queryArgs }) => {
-        return `${endpointName}-${queryArgs?.privacy ?? "all"}`;
+      providesTags: ["Post"],
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
       },
-      providesTags: (result) =>
-        result?.data
-          ? [
-              ...result.data.map(({ postId }) => ({
-                type: "Post",
-                id: postId,
-              })),
-              { type: "Post", id: "LIST" },
-            ]
-          : [{ type: "Post", id: "LIST" }],
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) {
-          // page 1 luôn là "nguồn sự thật" mới nhất -> reset sạch, tránh lẫn data cũ
           currentCache.data = newItems.data;
-          currentCache.hasMore = newItems.data.length === arg.pageSize;
-          currentCache.pagesLoaded = { 1: true };
-          return;
+        } else {
+          const newPosts = newItems.data.filter(
+            (newPost) =>
+              !currentCache.data.some((p) => p.postId === newPost.postId),
+          );
+          currentCache.data.push(...newPosts);
         }
-
-        if (currentCache.pagesLoaded?.[arg.page]) return;
-
-        const existingIds = new Set(currentCache.data.map((p) => p.postId));
-        const newPosts = newItems.data.filter(
-          (p) => !existingIds.has(p.postId),
-        );
-
-        currentCache.data.push(...newPosts);
         currentCache.hasMore = newItems.data.length === arg.pageSize;
-        currentCache.pagesLoaded = {
-          ...(currentCache.pagesLoaded || {}),
-          [arg.page]: true,
-        };
       },
-
       forceRefetch({ currentArg, previousArg }) {
-        return (
-          currentArg?.page !== previousArg?.page ||
-          currentArg?.privacy !== previousArg?.privacy
-        );
+        return currentArg?.page !== previousArg?.page;
       },
     }),
-    // getPosts: builder.query({
-    //   query: ({ page = 1, pageSize = 10 } = {}) => ({
-    //     url: "/Post",
-    //     params: { page, pageSize, sortBy: "createDate", sortDesc: true },
-    //   }),
-    //   providesTags: ["Post"],
-    //   serializeQueryArgs: ({ endpointName }) => {
-    //     return endpointName
-    //   },
-    //   merge: (currentCache, newItems, { arg }) => {
-    //     if (arg.page === 1) {
-    //       currentCache.data = newItems.data
-    //     } else {
-    //       const newPosts = newItems.data.filter(
-    //         (newPost) => !currentCache.data.some((p) => p.postId === newPost.postId)
-    //       )
-    //       currentCache.data.push(...newPosts)
-    //     }
-    //     currentCache.hasMore = newItems.data.length === arg.pageSize
-    //   },
-    //   forceRefetch({ currentArg, previousArg }) {
-    //     return currentArg?.page !== previousArg?.page
-    //   },
-    // }),
     getPostById: builder.query({
       query: (postId) => `/Post/${postId}`,
       providesTags: (result, error, id) => [{ type: "Post", id }],
