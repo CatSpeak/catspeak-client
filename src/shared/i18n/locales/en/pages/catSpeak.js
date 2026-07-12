@@ -172,7 +172,7 @@ export default {
         saveReel: "Save Reel",
         addToPlaylist: "Add to Playlist",
         aboutAccount: "About this account",
-        notInterestedSuccess: "We will show fewer reels like this.",
+        notInterestedSuccess: "You won't see similar content anymore.",
         copySuccess: "Link copied to clipboard.",
         addToPlaylistSuccess: "Added to playlist.",
         accountIdMissing: "Account ID missing for this reel.",

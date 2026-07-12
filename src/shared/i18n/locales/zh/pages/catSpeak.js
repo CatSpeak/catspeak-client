@@ -157,7 +157,7 @@ export default {
         saveReel: "保存视频",
         addToPlaylist: "添加到播放列表",
         aboutAccount: "关于此账号",
-        notInterestedSuccess: "我们将减少显示此类短视频。",
+        notInterestedSuccess: "您将不会再看到类似的内容。",
         copySuccess: "链接已复制到剪贴板。",
         addToPlaylistSuccess: "已添加到播放列表。",
         accountIdMissing: "找不到此视频的账号 ID。",

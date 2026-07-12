@@ -128,16 +128,6 @@ const RoomsPage = () => {
 
   let rooms = responseData?.data ?? [];
 
-  // Local filtering for topics to bypass backend 500 crash
-  if (topicsArg && topicsArg.length > 0) {
-    rooms = rooms.filter((room) => {
-      if (!room.topic) return false;
-      const roomTopics = room.topic.split(",").map((t) => t.trim());
-      return topicsArg.some((selectedTopic) =>
-        roomTopics.includes(selectedTopic),
-      );
-    });
-  }
 
   if (searchArg) {
     const lowerSearch = searchArg.toLowerCase();

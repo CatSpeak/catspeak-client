@@ -5,7 +5,7 @@ export default {
   soon: "Soon",
   language: "Language",
   community: "Community",
-  searchPlaceholder: "Search rooms or topics",
+  searchPlaceholder: "Search rooms",
   languages: {
     vi: "Vietnamese",
     viNom: "Vietnamese (Nom) - Coming soon",
