@@ -508,12 +508,13 @@ export const reelsApi = baseApi.injectEndpoints({
 
     // Mark reel as not interested
     notInterestedReel: builder.mutation({
-      query: (reelId) => ({
+      query: ({ reelId, ...body }) => ({
         url: `/Reels/${reelId}/not-interested`,
         method: "POST",
+        body,
       }),
       // Optimistic update
-      async onQueryStarted(reelId, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted({ reelId }, { dispatch, getState, queryFulfilled }) {
         const patchResults = patchCachedReelLists(dispatch, getState, reelId, (reel) => {
           // If we had a way to mark it hidden, we could do it here
           // But usually we just remove it from the list

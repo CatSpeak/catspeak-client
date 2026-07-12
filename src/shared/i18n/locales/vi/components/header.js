@@ -5,7 +5,7 @@ export default {
   soon: "Sắp ra mắt",
   language: "Ngôn ngữ",
   community: "Cộng đồng",
-  searchPlaceholder: "Tìm kiếm phòng hoặc chủ đề",
+  searchPlaceholder: "Tìm kiếm phòng",
   languages: {
     vi: "Tiếng Việt",
     viNom: "Tiếng Việt (Nôm) - Sắp ra mắt",

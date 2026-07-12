@@ -64,7 +64,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
       report: () => setShowReport(true),
 
       notInterested: async () => {
-        await notInterestedReel({ reelId: reel.id, hideCreator: false, hideTags: [] }).unwrap()
+        await notInterestedReel({ reelId: reel.id, type: "Video", value: "" }).unwrap()
         window.dispatchEvent(new CustomEvent('hideReel', { detail: reel.id }))
         toast.success(t?.catSpeak?.reels?.detail?.moreMenu?.notInterestedSuccess || "We will show fewer reels like this.")
       },

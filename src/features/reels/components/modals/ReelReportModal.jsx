@@ -34,7 +34,7 @@ export default function ReelReportModal({ reel, onClose }) {
     }
 
     try {
-      await reportReel({ reelId: reel.id, reason: lang.reasons?.[reason] || reason, description }).unwrap()
+      await reportReel({ reelId: reel.id, category: lang.reasons?.[reason] || reason, description }).unwrap()
       toast.success(lang.success || "Thank you. We've received your report.")
       onClose()
     } catch (err) {

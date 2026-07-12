@@ -130,7 +130,7 @@ export default {
         saveReel: "Lưu Thước phim",
         addToPlaylist: "Thêm vào danh sách phát",
         aboutAccount: "Về tài khoản này",
-        notInterestedSuccess: "Chúng tôi sẽ ít hiển thị các Thước phim tương tự.",
+        notInterestedSuccess: "Bạn sẽ không thấy nội dung tương tự nữa.",
         copySuccess: "Đã sao chép liên kết vào khay nhớ tạm.",
         addToPlaylistSuccess: "Đã thêm vào danh sách phát.",
         accountIdMissing: "Không tìm thấy ID tài khoản cho Thước phim này.",
