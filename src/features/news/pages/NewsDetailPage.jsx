@@ -154,7 +154,10 @@ const NewsDetailPage = () => {
           {/* ── Title + Meta ───────────────────────────────────── */}
           <div className="flex flex-col gap-3 md:gap-4">
             <div className="flex flex-col">
-              <h1 className="font-nunito text-[24px] font-semibold leading-[1.35] text-black md:text-[32px]">
+              <h1
+                className="font-nunito text-[24px] font-semibold leading-[1.35] text-black md:text-[32px] line-clamp-2"
+                title={newsItem.title}
+              >
                 {newsItem.title}
               </h1>
               <div className="flex items-center gap-1 shrink-0">
