@@ -90,9 +90,11 @@ const RoundResultModal = ({ open, onClose, result }) => {
               />
 
               <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-                <RoundImageCard image={result.image} />
+                <div className="hidden md:block">
+                  <RoundImageCard image={result.image} />
+                </div>
 
-                <div className="flex flex-col md:flex-row gap-4 w-full">
+                <div className="flex flex-row gap-4 justify-center w-full">
                   <RoundScoreCard
                     describer={result.describer}
                     roundScore={result.roundScore}
