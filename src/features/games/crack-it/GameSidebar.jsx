@@ -2,7 +2,7 @@ import React from "react";
 import { useGame } from "@/features/video-call/context/GameContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useAuth } from "@/features/auth";
-import { Check, X } from "lucide-react";
+import { Check, X, TrendingUp } from "lucide-react";
 import { useParticipants } from "@livekit/components-react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
@@ -98,7 +98,9 @@ const GameSidebar = () => {
             {gameState === "result" && (
                <div className="shrink-0 ml-2">
                {player.isCorrect && (
-                 <div className="text-green-500 font-bold text-sm">+ Điểm</div>
+                 <div className="text-green-500 flex items-center justify-center" title="+ Điểm">
+                    <TrendingUp size={20} strokeWidth={2.5} />
+                 </div>
                )}
              </div>
             )}

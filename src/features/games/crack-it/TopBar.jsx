@@ -18,12 +18,23 @@ const TopBar = ({ onOpenSidebar, onExit }) => {
   useEffect(() => {
     let interval;
     if (gameState === "playing" && currentRound?.started_at) {
-      const startedAt = new Date(currentRound.started_at).getTime();
+      const actualStartedAt = new Date(currentRound.started_at).getTime();
+      const storageKey = `crackit_timer_${actualStartedAt}`;
+      
+      let startedAt;
+      const storedStartedAt = sessionStorage.getItem(storageKey);
+      
+      if (storedStartedAt) {
+        startedAt = parseInt(storedStartedAt, 10);
+      } else {
+        // Prevent startedAt from being in the future due to server-client clock drift
+        startedAt = Math.min(Date.now(), actualStartedAt);
+        sessionStorage.setItem(storageKey, startedAt.toString());
+      }
 
       // Run every 200ms for smoother UI updates, though seconds only change once per sec
       interval = setInterval(() => {
-        const now = Date.now();
-        const elapsed = Math.floor((now - startedAt) / 1000);
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
         const remaining = Math.max(0, initialTimer - elapsed);
         
         setTimeLeft((prev) => {
@@ -36,10 +47,13 @@ const TopBar = ({ onOpenSidebar, onExit }) => {
           }
           return remaining;
         });
-      }, 500); 
+      }, 200); 
+    } else if (gameState !== "playing") {
+      // If the round ends and the timer is at 1 or 2 seconds, snap it to 0
+      setTimeLeft(prev => (prev > 0 && prev <= 2) ? 0 : prev);
     }
     return () => clearInterval(interval);
-  }, [gameState, currentRound?.started_at]);
+  }, [gameState, currentRound?.started_at, initialTimer]);
 
   if (!currentRound) return null;
 
