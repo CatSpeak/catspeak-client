@@ -19,10 +19,10 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import { getImageUrl } from "@/shared/utils/imageUtils";
 
 const NewsDetailPage = () => {
-  const { slug } = useParams();
+  const { lang: paramLang, slug } = useParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const lang = language || "vi";
+  const lang = paramLang || language || "vi";
   const commentsRef = useRef(null);
 
   const [trySharedFallback, setTrySharedFallback] = useState(false);
