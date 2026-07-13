@@ -5,6 +5,8 @@ export default {
   soon: "敬请期待",
   language: "语言",
   community: "社区",
+  notifications: "通知",
+  noNewNotifications: "没有新通知",
   searchPlaceholder: "搜索房间或主题",
   languages: {
     vi: "越南语 (国语)",
