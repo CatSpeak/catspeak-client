@@ -24,14 +24,8 @@ import { ComingSoonPage } from "@/shared/pages"
 
 // User & Admin Pages
 import UserDashboard from "@/features/user/pages/UserDashboard"
-import ProfileLayout from "@/features/user/layouts/ProfileLayout"
-import PersonalInformationPage from "@/features/user/pages/PersonalInformationPage"
-import RecordingsPage from "@/features/recordings/pages/RecordingsPage"
-import WorkspaceLayout from "@/features/workspace/layouts/WorkspaceLayout"
-import InstructorPage from "@/features/user/pages/InstructorPage"
-import OrganizationPage from "@/features/user/pages/OrganizationPage"
-import AccountSettingsPage from "@/features/user/pages/AccountSettingsPage"
 
+import UserPagesLayout from "@/features/user/layouts/UserPagesLayout"
 // Language routing components
 import LanguageLayout from "./LanguageLayout"
 import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
@@ -39,22 +33,67 @@ import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
 import { Navigate } from "react-router-dom"
 import { AuthGuard } from "@/shared/components"
 
+const Profile = lazy(() => import("@/features/profile/pages/Profile"))
+const RecordingsPage = lazy(
+  () => import("@/features/recordings/pages/RecordingsPage"),
+)
+const WorkspaceLayout = lazy(
+  () => import("@/features/workspace/layouts/WorkspaceLayout"),
+)
+const InstructorPage = lazy(
+  () => import("@/features/user/pages/InstructorPage"),
+)
+const OrganizationPage = lazy(
+  () => import("@/features/user/pages/OrganizationPage"),
+)
+const AccountSettingsPage = lazy(
+  () => import("@/features/user/pages/AccountSettingsPage"),
+)
+
 const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
-const ReelDetailPage = lazy(() => import("@/features/reels/pages/ReelDetailPage"))
-const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceReelsPage"))
-const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
+const ReelDetailPage = lazy(
+  () => import("@/features/reels/pages/ReelDetailPage"),
+)
+const WorkspaceReelsPage = lazy(
+  () => import("@/features/reels/pages/WorkspaceReelsPage"),
+)
+const WorkspaceReelDetailPage = lazy(
+  () => import("@/features/reels/pages/WorkspaceReelDetailPage"),
+)
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
-const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
-const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
-const MyCoursesPage = lazy(() => import("@/features/courses/pages/MyCoursesPage"))
-const CreateCoursePage = lazy(() => import("@/features/courses/pages/CreateCoursePage"))
-const AllCoursesPage = lazy(() => import("@/features/courses/pages/AllCoursesPage"))
-const AllClassesPage = lazy(() => import("@/features/courses/pages/AllClassesPage"))
-const CreateClassPage = lazy(() => import("@/features/courses/pages/CreateClassPage"))
-const ClassDetailPage = lazy(() => import("@/features/courses/pages/ClassDetailPage"))
-const CourseDetailPage = lazy(() => import("@/features/courses/pages/CourseDetailPage"))
-const StudentClassDetailPage = lazy(() => import("@/features/courses/pages/StudentClassDetailPage"))
-const StudentCourseDetailPage = lazy(() => import("@/features/courses/pages/StudentCourseDetailPage"))
+const PaymentResultPage = lazy(
+  () => import("@/features/billing/pages/PaymentResultPage.jsx"),
+)
+const PricingPage = lazy(
+  () => import("@/features/billing/pages/PricingPage.jsx"),
+)
+const MyCoursesPage = lazy(
+  () => import("@/features/courses/pages/MyCoursesPage"),
+)
+const CreateCoursePage = lazy(
+  () => import("@/features/courses/pages/CreateCoursePage"),
+)
+const AllCoursesPage = lazy(
+  () => import("@/features/courses/pages/AllCoursesPage"),
+)
+const AllClassesPage = lazy(
+  () => import("@/features/courses/pages/AllClassesPage"),
+)
+const CreateClassPage = lazy(
+  () => import("@/features/courses/pages/CreateClassPage"),
+)
+const ClassDetailPage = lazy(
+  () => import("@/features/courses/pages/ClassDetailPage"),
+)
+const CourseDetailPage = lazy(
+  () => import("@/features/courses/pages/CourseDetailPage"),
+)
+const StudentClassDetailPage = lazy(
+  () => import("@/features/courses/pages/StudentClassDetailPage"),
+)
+const StudentCourseDetailPage = lazy(
+  () => import("@/features/courses/pages/StudentCourseDetailPage"),
+)
 const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
 
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
@@ -359,23 +398,39 @@ const routesConfig = [
         ),
         children: [
           {
-            element: <ProfileLayout />,
+            path: "profile/:accountId?",
+            element: (
+              <LazyRoute>
+                <Profile />
+              </LazyRoute>
+            ),
+          },
+          {
+            element: <UserPagesLayout />,
             children: [
               {
-                path: "profile",
-                element: <PersonalInformationPage />,
+                path: "setting",
+                element: (
+                  <LazyRoute>
+                    <AccountSettingsPage />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "instructor",
-                element: <InstructorPage />,
+                element: (
+                  <LazyRoute>
+                    <InstructorPage />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "organization",
-                element: <OrganizationPage />,
-              },
-              {
-                path: "setting",
-                element: <AccountSettingsPage />,
+                element: (
+                  <LazyRoute>
+                    <OrganizationPage />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "billing",

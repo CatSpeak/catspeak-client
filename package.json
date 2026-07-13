@@ -19,6 +19,7 @@
     "@microsoft/signalr": "^10.0.0",
     "@react-oauth/google": "^0.13.5",
     "@reduxjs/toolkit": "^2.11.0",
+    "@tinymce/tinymce-react": "^6.3.0",
     "@videosdk.live/react-sdk": "^0.6.7",
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.2",

@@ -48,11 +48,14 @@ export const postsApi = baseApi.injectEndpoints({
         const state = getState()
         const patches = []
 
-        // Iterate over all active getPosts queries (for different pages) and optimistically update them
+        // Iterate over all active getPosts and getUserTimelinePosts queries
         for (const [, query] of Object.entries(state.api.queries)) {
-          if (query.endpointName === "getPosts" && query.status === "fulfilled") {
+          if (
+            (query.endpointName === "getPosts" || query.endpointName === "getUserTimelinePosts") && 
+            query.status === "fulfilled"
+          ) {
             const patch = dispatch(
-              postsApi.util.updateQueryData("getPosts", query.originalArgs, (draft) => {
+              baseApi.util.updateQueryData(query.endpointName, query.originalArgs, (draft) => {
                 if (draft?.data) {
                   const post = draft.data.find((p) => p.postId === postId)
                   if (post) {

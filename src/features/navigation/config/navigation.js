@@ -40,12 +40,7 @@ export const navLinks = [
       { key: "reels", path: "/workspace/reels", icon: Film },
     ],
   },
-  {
-    key: "profile",
-    path: "/profile",
-    hasDropdown: false,
-    icon: User,
-  },
+
   // {
   //   key: "pricing",
   //   path: "/pricing",
