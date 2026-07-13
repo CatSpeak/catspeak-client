@@ -341,8 +341,6 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
     }
   }, [videoPreviewUrl, coverPreviewUrl])
 
-
-
   // Discard/Clear video file
   const handleDiscardVideo = () => {
     setTitle("")

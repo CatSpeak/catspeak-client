@@ -35,11 +35,13 @@ const WorkshopCard = ({ slide, onCtaClick }) => {
 
           <div className="hidden sm:block mt-[1.5cqw]">
             <PillButton
+              bgColor="#FFD700"
+              textColor="#990011"
+              className="[&>div]:font-bold"
               onClick={(e) => {
                 e.stopPropagation();
                 onCtaClick(slide.modal || "development");
               }}
-              className="!bg-white !text-[#990011] !border-2 !border-transparent transition-transform duration-300 ease-out h-[clamp(36px,5cqw,56px)] px-[clamp(20px,4cqw,40px)] text-xs sm:text-[clamp(14px,2cqw,22px)] font-bold shadow-lg hover:scale-105 active:scale-95"
             >
               {slide.cta}
             </PillButton>

@@ -26,10 +26,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
 import ListItem from "@/shared/components/ui/ListItem"
-import {
-  useParticipants,
-  useLocalParticipant,
-} from "@livekit/components-react"
+import { useParticipants, useLocalParticipant } from "@livekit/components-react"
 import GameSetupModal from "@/features/games/components/GameSetupModal"
 import GameHistoryModal from "@/features/games/components/GameHistoryModal"
 
@@ -87,7 +84,7 @@ const ControlBarMoreMenu = ({
     const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER
     return timeA - timeB
   })[0]
-  
+
   const isHost =
     (hostParticipant &&
       localParticipant &&
@@ -152,9 +149,12 @@ const ControlBarMoreMenu = ({
                             }}
                             leftContent={<Gamepad2 />}
                             hoverEffect={true}
-                            className={!isHost ? "opacity-50 cursor-not-allowed" : ""}
+                            className={
+                              !isHost ? "opacity-50 cursor-not-allowed" : ""
+                            }
                           >
-                            {t?.rooms?.videoCall?.controls?.playGames || "Play Games"}
+                            {t?.rooms?.videoCall?.controls?.playGames ||
+                              "Play Games"}
                           </ListItem>
 
                           <ListItem
@@ -165,7 +165,8 @@ const ControlBarMoreMenu = ({
                             leftContent={<History />}
                             hoverEffect={true}
                           >
-                            {t.rooms?.game?.crackIt?.gameHistory || "Game History"}
+                            {t.rooms?.game?.crackIt?.gameHistory ||
+                              "Game History"}
                           </ListItem>
 
                           <div className="my-1 border-t border-[#E5E5E5]"></div>
@@ -192,7 +193,8 @@ const ControlBarMoreMenu = ({
                               hoverEffect={true}
                               className="min-[769px]:hidden"
                             >
-                              {t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
+                              {t?.rooms?.breakoutRooms?.breakoutRoomOption ||
+                                "Breakout Rooms"}
                             </ListItem>
                           )}
 
@@ -275,7 +277,8 @@ const ControlBarMoreMenu = ({
                             leftContent={<Copy />}
                             hoverEffect={true}
                           >
-                            {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+                            {t?.rooms?.videoCall?.copyLink ||
+                              "Copy meeting link"}
                           </ListItem>
 
                           <ListItem
@@ -287,9 +290,8 @@ const ControlBarMoreMenu = ({
                             hoverEffect={true}
                           >
                             {t?.rooms?.videoCall?.reconnect ||
-                                "Troubleshoot connection"}
+                              "Troubleshoot connection"}
                           </ListItem>
-
                         </div>
                       </FluentAnimation>
                     ) : (

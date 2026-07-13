@@ -5,7 +5,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useConnectionState } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
 import { useSelector, useDispatch } from "react-redux"
-import { useGetBreakoutStatusQuery, useStopBreakoutRoomsMutation } from "@/store/api/roomsApi"
+import {
+  useGetBreakoutStatusQuery,
+  useStopBreakoutRoomsMutation,
+} from "@/store/api/roomsApi"
 import { exitBreakout } from "@/store/slices/videoCallSlice"
 import { toast } from "react-hot-toast"
 
@@ -35,7 +38,7 @@ import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
 
 const VideoCallRoomContent = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
   const {
     showChat,
     setShowChat,
@@ -70,7 +73,7 @@ const VideoCallRoomContent = () => {
     isRecording,
     confirmStopRecording,
     participants,
-  } = useVideoCallContext();
+  } = useVideoCallContext()
 
   const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
     (s) => s.videoCall,
@@ -88,11 +91,12 @@ const VideoCallRoomContent = () => {
     }
   }, [isHost, parentSessionId, stopBreakoutRooms, dispatch])
 
-  const { countdownSeconds, formattedTime, breakoutStatus, isSessionBreakoutActive } = useBreakoutTimer(
-    parentSessionId,
-    isBreakoutActive,
-    handleTimerEnd
-  )
+  const {
+    countdownSeconds,
+    formattedTime,
+    breakoutStatus,
+    isSessionBreakoutActive,
+  } = useBreakoutTimer(parentSessionId, isBreakoutActive, handleTimerEnd)
 
   // Prevent host from accidentally closing/refreshing tab during active breakout
   useEffect(() => {
@@ -107,7 +111,7 @@ const VideoCallRoomContent = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
   }, [isHost, isBreakoutActive])
 
-  const isSidePanelOpen = activeSidePanel !== null;
+  const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
     : showVirtualBackground
@@ -120,7 +124,7 @@ const VideoCallRoomContent = () => {
             ? isBreakoutActive
               ? "Phòng thảo luận"
               : "Phòng họp nhóm"
-            : t.rooms.chatBox.title;
+            : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -128,18 +132,18 @@ const VideoCallRoomContent = () => {
   // negotiating the WebSocket at that point.  Keep showing a loader
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
-  const connectionState = useConnectionState();
-  const [hasConnected, setHasConnected] = useState(false);
+  const connectionState = useConnectionState()
+  const [hasConnected, setHasConnected] = useState(false)
 
   useEffect(() => {
     if (connectionState === ConnectionState.Connected) {
-      setHasConnected(true);
+      setHasConnected(true)
     }
-  }, [connectionState]);
+  }, [connectionState])
 
   const livekitReady =
-    hasConnected || connectionState === ConnectionState.Connected;
-  const isReconnecting = connectionState === ConnectionState.Reconnecting;
+    hasConnected || connectionState === ConnectionState.Connected
+  const isReconnecting = connectionState === ConnectionState.Reconnecting
 
   const wasBreakoutActiveRef = useRef(false)
   useEffect(() => {
@@ -153,11 +157,11 @@ const VideoCallRoomContent = () => {
 
   useEffect(() => {
     // Prevent iOS/macOS swipe-to-go-back gestures during the call
-    document.body.style.overscrollBehaviorX = "none";
+    document.body.style.overscrollBehaviorX = "none"
     return () => {
-      document.body.style.overscrollBehaviorX = "auto";
-    };
-  }, []);
+      document.body.style.overscrollBehaviorX = "auto"
+    }
+  }, [])
 
   if (!user) {
     return (
@@ -169,7 +173,7 @@ const VideoCallRoomContent = () => {
         }}
         replace
       />
-    );
+    )
   }
 
   if (!livekitReady) {
@@ -186,7 +190,7 @@ const VideoCallRoomContent = () => {
       <VideoCallLoading
         message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
       />
-    );
+    )
   }
 
   return (
@@ -218,7 +222,7 @@ const VideoCallRoomContent = () => {
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           {isSessionBreakoutActive && (
-            <BreakoutBanner 
+            <BreakoutBanner
               breakoutRoomName={breakoutRoomName}
               breakoutStatus={breakoutStatus}
               countdownSeconds={countdownSeconds}
@@ -227,7 +231,6 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex-1 relative min-h-0">
             <VideoGrid />
-
           </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
@@ -337,18 +340,18 @@ const VideoCallRoomContent = () => {
 
       <VideoCallControlBar />
     </div>
-  );
-};
+  )
+}
 
 const VideoCallRoomWrapper = () => {
-  const { lang } = useParams();
+  const { lang } = useParams()
   return (
     <VideoCallProvider>
       <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>
-  );
-};
+  )
+}
 
-export default VideoCallRoomWrapper;
+export default VideoCallRoomWrapper

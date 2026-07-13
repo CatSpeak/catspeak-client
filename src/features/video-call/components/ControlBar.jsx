@@ -149,7 +149,7 @@ const VideoCallControlBar = () => {
         className="hidden min-[769px]:flex"
       />
 
-      <div className="relative hidden min-[769px]:block z-[9999]">
+      <div className="relative hidden min-[769px]:block z-50">
         <RecordingButton
           isRecording={isRecording}
           isTogglingRecording={isTogglingRecording}

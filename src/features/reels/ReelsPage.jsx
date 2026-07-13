@@ -13,7 +13,7 @@ import ChallengesTab from "./components/tabs/ChallengesTab"
 import LeaderboardTab from "./components/tabs/LeaderboardTab"
 
 const ReelsPage = () => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
@@ -21,7 +21,8 @@ const ReelsPage = () => {
   const [uploadChallenge, setUploadChallenge] = useState(null)
   const { isAuthenticated } = useAuth()
   const { openAuthModal } = useAuthModal()
-    const { id } = useParams()
+    const { id, lang: paramLang } = useParams()
+    const lang = paramLang || language || "vi"
 
   // State for Tabs
   const [activeTab, setActiveTab] = useState("foryou") // "foryou" | "challenges" | "leaderboard"
@@ -87,7 +88,7 @@ const ReelsPage = () => {
       {(!showMobileDetail || isLg) && (
         <Breadcrumb 
           items={[
-            { label: t?.nav?.home || "Home", onClick: () => navigate("/") },
+            { label: t?.nav?.home || "Home", onClick: () => navigate(`/${lang}/community`) },
             { label: t?.nav?.catSpeak || "Cat Speak"},
             { label: t.catSpeak?.reels?.title || "Reels" }
           ]} 
