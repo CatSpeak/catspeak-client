@@ -22,7 +22,7 @@ const NewsDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const lang = language || "vi";
+  const lang = paramLang || language || "vi";
   const commentsRef = useRef(null);
 
   const [trySharedFallback, setTrySharedFallback] = useState(false);
