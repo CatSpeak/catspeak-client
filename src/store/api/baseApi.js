@@ -200,8 +200,11 @@ async function ensureRefresh(api, extraOptions, reason) {
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   const url = typeof args === "string" ? args : args?.url
 
-  // Choose the query client based on routing prefixes 
-  const isCoursesRoute = url && (url.toLowerCase().startsWith("/teacher/") || url.toLowerCase().startsWith("/student/"))
+  // Choose the query client based on routing prefixes
+  const isCoursesRoute =
+    url &&
+    (url.toLowerCase().startsWith("/teacher/") ||
+      url.toLowerCase().startsWith("/student/"))
   const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
 
   // Skip proactive refresh for auth endpoints
@@ -257,8 +260,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
   const status = result.error?.status
   const isServerError =
-    status === "FETCH_ERROR" ||
-    (typeof status === "number" && status >= 500)
+    status === "FETCH_ERROR" || (typeof status === "number" && status >= 500)
 
   if (!isAborted && isServerError) {
     const isHealthy = await checkIsServerHealthy()
@@ -320,6 +322,7 @@ export const baseApi = createApi({
     "ClassMaterials",
     "Schedule",
     "Commission",
+    "Breakout",
   ],
   endpoints: () => ({}),
 })

@@ -476,7 +476,8 @@ export default {
       cancel: "Hủy",
       confirmExit: "Đồng ý thoát",
       roundLeaderboard: "Thành tích ván này",
-      forceStopNotEnoughPlayers: "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
+      forceStopNotEnoughPlayers:
+        "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
       forceStopGeneric: "Trò chơi bị dừng đột ngột.",
       tallyingFinalResults: "Đang tổng hợp kết quả chung cuộc...",
       nextRoundIn: "Ván tiếp theo sẽ bắt đầu sau ít giây...",
@@ -485,11 +486,12 @@ export default {
       noHistoryFound: "Chưa có dữ liệu lịch sử cho phòng này.",
       score: "Điểm",
       matchDate: "Ngày chơi",
-      winner: "Người chiến thắng"
+      winner: "Người chiến thắng",
     },
     setup: {
       title: "Thiết lập Trò chơi",
-      pictureItDesc: "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
+      pictureItDesc:
+        "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
       crackItDesc: "Đoán từ khóa ẩn qua các gợi ý trước những người chơi khác.",
       difficultyDesc: "Điều chỉnh độ khó phù hợp cho phòng của bạn.",
       languageDesc: "Chọn ngôn ngữ trò chơi cho phiên này.",
@@ -501,7 +503,7 @@ export default {
       levelMedium: "Trung bình",
       levelHard: "Khó",
       cancel: "Hủy",
-      startNow: "Bắt đầu ngay"
+      startNow: "Bắt đầu ngay",
     },
     pictureIt: {
       topBar: {
@@ -509,7 +511,7 @@ export default {
         describer: "Người mô tả",
         spectator: "Khán giả",
         roleDescriber: "Người mô tả",
-        roleRater: "Người đoán"
+        roleRater: "Người đoán",
       },
       actionPanel: {
         watchingAsSpectator: "Bạn đang xem với tư cách khán giả.",
@@ -520,7 +522,7 @@ export default {
         timeLeft: "(Còn {0}s)",
         submitRating: "Gửi điểm",
         ratingSubmitted: "Đã gửi! Đang chờ người khác...",
-        waiting: "Đang chờ..."
+        waiting: "Đang chờ...",
       },
       imageCard: {
         describeToTeam: "Hãy mô tả bức ảnh này cho đội của bạn",
@@ -531,13 +533,13 @@ export default {
         preparing: "Đang chuẩn bị...",
         forbiddenWordsTitle: "Từ cấm",
         forbiddenWordsDesc: "KHÔNG được sử dụng các từ này",
-        flaggedCount: "{0} / {1} người đã báo vi phạm"
+        flaggedCount: "{0} / {1} người đã báo vi phạm",
       },
       modals: {
         gameEnded: "Kết thúc trò chơi",
         notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
         close: "Đóng",
-        waitingStart: "Đang chuẩn bị ván đấu..."
+        waitingStart: "Đang chuẩn bị ván đấu...",
       },
       badges: {
         "Master Describer": "Bậc thầy mô tả",
@@ -546,7 +548,7 @@ export default {
         "Most Fluent": "Trôi chảy nhất",
         "Team Player": "Tinh thần đồng đội",
         "Keep Practicing": "Cố gắng hơn nhé",
-        champion: "Nhà vô địch"
+        champion: "Nhà vô địch",
       },
       gameOver: {
         title: "Trò chơi kết thúc",
@@ -559,17 +561,17 @@ export default {
         highestRoundScore: "Điểm 1 vòng cao nhất",
         playAgain: "Chơi lại",
         backToRoom: "Về phòng",
-        playersCount: "{0} người chơi"
+        playersCount: "{0} người chơi",
       },
       leaderboard: {
         title: "Bảng xếp hạng",
-        playersCount: "{0} người chơi"
+        playersCount: "{0} người chơi",
       },
       roundResult: {
         nextRoundStartsIn: "Vòng tiếp theo bắt đầu sau...",
-        averageRating: "Điểm trung bình"
-      }
-    }
+        averageRating: "Điểm trung bình",
+      },
+    },
   },
   participants: "người",
   noLimit: "Không giới hạn",
@@ -586,4 +588,75 @@ export default {
     returnHome: "Quay lại trang chủ",
     expiredToast: "Phiên kết nối đã kết thúc",
   },
-};
+  breakoutRooms: {
+    mainRoom: "Phòng chính",
+    youAreHere: "Bạn ở đây",
+    emptyRoom: "Phòng trống",
+    joinRoomBtn: "Tham gia phòng",
+    allAssigned: "Tất cả học viên đã được phân phối",
+    noActiveStudents: "Không có học viên nào hoạt động trong phòng học.",
+    randomSuccess: "Phân chia ngẫu nhiên thành công!",
+    assignAtLeastOne: "Vui lòng phân bổ ít nhất một học viên vào phòng nhỏ.",
+    saveAndStartSuccess: "Đã lưu cấu hình và bắt đầu phòng nhỏ thành công!",
+    saveSuccess: "Lưu cấu hình chia phòng thành công!",
+    saveError: "Lỗi lưu cấu hình chia phòng.",
+    setupTitle: "Thiết lập Breakout Rooms",
+    roomCount: "Số lượng phòng",
+    breakoutRoomOption: "Phòng Nhỏ",
+    configTitle: "Cấu hình phòng nhỏ",
+    timer: "Hẹn giờ thảo luận",
+    minutes: "phút",
+    timerMinutes: "Hẹn giờ (phút)",
+    allowChangeGroup: "Cho phép đổi nhóm",
+    allowChangeRoom: "Cho phép đổi phòng",
+    memberLimit: "Giới hạn thành viên",
+    membersPerRoom: "thành viên/phòng",
+    randomAllocationBtn: "Phân bổ ngẫu nhiên",
+    noStudentsYet: "Chưa có học viên nào tham gia phòng học.",
+    studentsCount: "học viên",
+    dragOrRandom: "Kéo học viên vào đây hoặc phân ngẫu nhiên",
+    moveToRoom: "Chuyển: Phòng ",
+    cancelBtn: "Hủy",
+    saveConfigBtn: "Lưu cấu hình",
+    startBtn: "Bắt đầu nhóm nhỏ",
+    broadcastBtn: "Gửi thông báo chung",
+    broadcastTitle: "Gửi thông báo chung",
+    closeRoomsBtn: "Đóng phòng",
+    broadcastPlaceholder: "Ví dụ: Các em thảo luận trong 5 phút nữa nhé...",
+    broadcastDesc:
+      "Tin nhắn này sẽ được gửi đồng thời đến tất cả các phòng thảo luận nhỏ.",
+    sendBtn: "Gửi",
+    closeError: "Lỗi đóng các phòng nhỏ.",
+    moveError: "Lỗi di chuyển học viên.",
+    joinError: "Lỗi tham gia phòng nhỏ.",
+    returnMainError: "Lỗi quay trở lại phòng chính.",
+    broadcastError: "Lỗi gửi thông báo.",
+    toggleAllowError: "Không thể thay đổi cài đặt chuyển phòng.",
+    breakoutRoomPrefix: "Phòng thảo luận: ",
+    freeToChange: "Tự do chuyển",
+    fixedRoom: "Phòng cố định",
+    shuffleBtn: "Trộn",
+    resetBtn: "Đặt lại",
+    startError: "Lỗi khởi chạy phòng nhỏ.",
+    openRoomsBtn: "Mở phòng",
+    moveTo: "Di chuyển sang",
+    moveToMain: "Di chuyển về phòng chính",
+    isFull: "(Đã đầy)",
+    host: "Host",
+    userPrefix: "User #",
+    breakoutRoomDefaultName: "Phòng thảo luận",
+    switchError: "Không thể chuyển phòng",
+    notStartedTitle: "Chưa bắt đầu chia nhóm",
+    notStartedDesc:
+      "Giáo viên chưa mở phòng thảo luận nhóm nhỏ cho buổi học này.",
+    changeLocked: "Đã khóa chuyển phòng",
+    roomFull: "Phòng đã đầy",
+    roomPrefix: "Phòng ",
+    returningTitle: "Quay lại phòng chính",
+    movingTitle: "Di chuyển vào phòng nhóm",
+    returningDesc:
+      "Cuộc thảo luận nhóm đã kết thúc. Bạn đang được tự động chuyển về phòng học chính...",
+    movingDesc: "Bạn đang được tự động chuyển sang phòng thảo luận nhóm...",
+    roomFullError: "Không thể di chuyển vì phòng đã đầy.",
+  },
+}

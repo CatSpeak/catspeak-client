@@ -19,7 +19,7 @@ import {
   useJoinStudentClassRoomMutation
 } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { enterCall, setPiP, leaveCall } from "@/store/slices/videoCallSlice"
+import { enterCall, setPiP, leaveCall, enterBreakout } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import VideoCallLoading from "../components/VideoCallLoading"
@@ -376,6 +376,17 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           isAISession,
         }),
       )
+
+      // Auto-restore breakout state if user was in a sub-room before refresh/reconnect
+      if (tokenRes?.activeSubSessionId) {
+        dispatch(
+          enterBreakout({
+            subSessionId: tokenRes.activeSubSessionId,
+            roomName: tokenRes.activeSubSessionName || "Phòng thảo luận",
+            token,
+          })
+        )
+      }
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
       let errorMsg = t.rooms?.videoCall?.provider?.tokenError || "Failed to connect to video service. Please try again."

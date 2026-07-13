@@ -498,7 +498,8 @@ export default {
       cancel: "Cancel",
       confirmExit: "Yes, Exit",
       roundLeaderboard: "Round Leaderboard",
-      forceStopNotEnoughPlayers: "Not enough players to continue. Game cancelled.",
+      forceStopNotEnoughPlayers:
+        "Not enough players to continue. Game cancelled.",
       forceStopGeneric: "Game stopped unexpectedly.",
       tallyingFinalResults: "Tallying final results...",
       gameHistory: "Game History",
@@ -506,11 +507,12 @@ export default {
       noHistoryFound: "No game history found for this room.",
       score: "Score",
       matchDate: "Date Played",
-      winner: "Winner"
+      winner: "Winner",
     },
     setup: {
       title: "Game Setup",
-      pictureItDesc: "Describe an image using the room language. Other players will rate your description.",
+      pictureItDesc:
+        "Describe an image using the room language. Other players will rate your description.",
       crackItDesc: "Guess hidden words from hints before everyone else.",
       difficultyDesc: "Adjust the challenge level for your room.",
       languageDesc: "Choose the language for this session.",
@@ -522,7 +524,7 @@ export default {
       levelMedium: "Medium",
       levelHard: "Hard",
       cancel: "Cancel",
-      startNow: "Start Now"
+      startNow: "Start Now",
     },
     pictureIt: {
       topBar: {
@@ -530,7 +532,7 @@ export default {
         describer: "Describer",
         spectator: "Spectator",
         roleDescriber: "Describer",
-        roleRater: "Rater"
+        roleRater: "Rater",
       },
       actionPanel: {
         watchingAsSpectator: "You are watching as a spectator.",
@@ -541,7 +543,7 @@ export default {
         timeLeft: "({0}s left)",
         submitRating: "Submit rating",
         ratingSubmitted: "Rating submitted! Waiting for others...",
-        waiting: "Waiting..."
+        waiting: "Waiting...",
       },
       imageCard: {
         describeToTeam: "Describe this image to your team",
@@ -552,13 +554,13 @@ export default {
         preparing: "Preparing...",
         forbiddenWordsTitle: "Forbidden words",
         forbiddenWordsDesc: "Do NOT use these words",
-        flaggedCount: "{0} / {1} flagged"
+        flaggedCount: "{0} / {1} flagged",
       },
       modals: {
         gameEnded: "Game Ended",
         notEnoughPlayers: "Not enough players to continue.",
         close: "Close",
-        waitingStart: "Preparing game..."
+        waitingStart: "Preparing game...",
       },
       badges: {
         "Master Describer": "Master Describer",
@@ -567,7 +569,7 @@ export default {
         "Most Fluent": "Most Fluent",
         "Team Player": "Team Player",
         "Keep Practicing": "Keep Practicing",
-        champion: "Champion"
+        champion: "Champion",
       },
       gameOver: {
         title: "Game Finished",
@@ -580,17 +582,17 @@ export default {
         highestRoundScore: "Highest Round Score",
         playAgain: "Play Again",
         backToRoom: "Back to Room",
-        playersCount: "{0} players"
+        playersCount: "{0} players",
       },
       leaderboard: {
         title: "Leaderboard",
-        playersCount: "{0} players"
+        playersCount: "{0} players",
       },
       roundResult: {
         nextRoundStartsIn: "Next round starts in...",
-        averageRating: "Average Rating"
-      }
-    }
+        averageRating: "Average Rating",
+      },
+    },
   },
   participants: "participants",
   noLimit: "No limit",
@@ -606,4 +608,76 @@ export default {
     returnHome: "Return to home",
     expiredToast: "The session has ended",
   },
-};
+  breakoutRooms: {
+    mainRoom: "Main Room",
+    youAreHere: "You are here",
+    emptyRoom: "Empty room",
+    joinRoomBtn: "Join room",
+    allAssigned: "All students have been assigned",
+    noActiveStudents: "No active students in the room.",
+    randomSuccess: "Random assignment successful!",
+    assignAtLeastOne: "Please assign at least one student to a breakout room.",
+    saveAndStartSuccess:
+      "Saved configuration and started breakout rooms successfully!",
+    saveSuccess: "Saved breakout configuration successfully!",
+    saveError: "Error saving configuration.",
+    setupTitle: "Setup Breakout Rooms",
+    roomCount: "Number of rooms",
+    breakoutRoomOption: "Breakout Rooms",
+    configTitle: "Breakout Room Configuration",
+    timer: "Discussion timer",
+    minutes: "minutes",
+    timerMinutes: "Timer (minutes)",
+    allowChangeGroup: "Allow changing groups",
+    allowChangeRoom: "Allow changing room",
+    memberLimit: "Member limit",
+    membersPerRoom: "members/room",
+    randomAllocationBtn: "Random allocation",
+    noStudentsYet: "No students have joined the room yet.",
+    studentsCount: "students",
+    dragOrRandom: "Drag students here or randomly assign",
+    moveToRoom: "Move to: Room ",
+    cancelBtn: "Cancel",
+    saveConfigBtn: "Save configuration",
+    startBtn: "Start breakout rooms",
+    broadcastBtn: "Send broadcast message",
+    broadcastTitle: "Send broadcast message",
+    closeRoomsBtn: "Close rooms",
+    broadcastPlaceholder: "Example: Let's discuss for 5 more minutes...",
+    broadcastDesc:
+      "This message will be sent simultaneously to all breakout rooms.",
+    sendBtn: "Send",
+    closeError: "Error closing rooms.",
+    moveError: "Error moving student.",
+    joinError: "Error joining breakout room.",
+    returnMainError: "Error returning to main room.",
+    broadcastError: "Error sending broadcast.",
+    toggleAllowError: "Cannot change room change settings.",
+    breakoutRoomPrefix: "Breakout room: ",
+    freeToChange: "Free to move",
+    fixedRoom: "Fixed room",
+    shuffleBtn: "Shuffle",
+    resetBtn: "Reset",
+    startError: "Error starting breakout rooms.",
+    openRoomsBtn: "Open rooms",
+    moveTo: "Move to",
+    moveToMain: "Move to main room",
+    isFull: "(Full)",
+    host: "Host",
+    userPrefix: "User #",
+    breakoutRoomDefaultName: "Breakout Room",
+    switchError: "Cannot switch room",
+    notStartedTitle: "Breakout not started yet",
+    notStartedDesc:
+      "The teacher has not opened breakout rooms for this session yet.",
+    changeLocked: "Room change locked",
+    roomFull: "Room is full",
+    roomPrefix: "Room ",
+    returningTitle: "Returning to Main Room",
+    movingTitle: "Moving to Breakout Room",
+    returningDesc:
+      "The breakout session has ended. You are being automatically moved back to the main room...",
+    movingDesc: "You are being automatically moved to the breakout room...",
+    roomFullError: "Cannot move because the room is full.",
+  },
+}

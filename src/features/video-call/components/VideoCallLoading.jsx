@@ -1,4 +1,5 @@
 import React from "react"
+import { Loader2 } from "lucide-react"
 
 /**
  * Full-screen loading overlay shown while the video call session is being prepared.
@@ -6,8 +7,9 @@ import React from "react"
  */
 const VideoCallLoading = ({ message }) => {
   return (
-    <div className="flex items-center justify-center h-screen bg-neutral-950 text-white">
-      <p>{message}</p>
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-neutral-950 text-white">
+      <Loader2 className="w-8 h-8 animate-spin text-red-500 mb-4" />
+      <p className="text-sm font-medium">{message}</p>
     </div>
   )
 }
