@@ -109,13 +109,17 @@ const NewsCard = ({ news }) => {
   };
 
   /* ── Derived: carousel images ────────────────────────────────────── */
-  const carouselImages = useMemo(() => {
-    if (!hasMedia) return [];
-    return news.media.map((item) => ({
-      url: getImageUrl(item.mediaUrl),
-      alt: news.title,
-    }));
-  }, [hasMedia, news.media, news.title]);
+  // const carouselImages = useMemo(() => {
+  //   if (!hasMedia) return [];
+  //   return news.media.map((item) => ({
+  //     url: getImageUrl(item.mediaUrl),
+  //     alt: news.title,
+  //   }));
+  // }, [hasMedia, news.media, news.title]);
+  const carouselImages = (news.media ?? []).map((item) => ({
+    url: getImageUrl(item.mediaUrl),
+    alt: news.title,
+  }));
 
   /* ── Render ────────────────────────────────────────────────────── */
   return (

@@ -88,6 +88,8 @@ const NewsPage = () => {
     return data?.data?.filter((post) => post.privacy === "Public") || [];
   }, [data?.data]);
 
+  // console.log(publicPosts);
+
   const columnsCount = useColumnCount();
 
   // Distribute posts into masonry columns
