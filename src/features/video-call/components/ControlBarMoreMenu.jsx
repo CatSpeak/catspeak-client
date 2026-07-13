@@ -28,6 +28,7 @@ import {
 } from "@livekit/components-react";
 import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
 import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
+import { useGame } from "@/features/games/context/GameContext";
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
@@ -36,6 +37,7 @@ const ControlBarMoreMenu = ({
 }) => {
   const { id: roomId } = useParams();
   const { t } = useLanguage();
+  const { ongoingGame, spectateGame } = useGame();
   const {
     showParticipants,
     setShowParticipants,
@@ -116,14 +118,18 @@ const ControlBarMoreMenu = ({
                         <button
                           onClick={() => {
                             setShowMoreMenu(false);
-                            if (!isHost) return;
-                            setShowGameSetup(true);
+                            if (ongoingGame) {
+                              spectateGame();
+                            } else {
+                              if (!isHost) return;
+                              setShowGameSetup(true);
+                            }
                           }}
-                          className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] ${!isHost ? "opacity-50 cursor-not-allowed" : ""}`}
-                          disabled={!isHost}
+                          className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] ${(!isHost && !ongoingGame) ? "opacity-50 cursor-not-allowed" : ""}`}
+                          disabled={!isHost && !ongoingGame}
                         >
                           <Gamepad2 size={20} />
-                          {t?.rooms?.videoCall?.controls?.playGames || "Play Games"}
+                          {ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
                         </button>
 
                         <button

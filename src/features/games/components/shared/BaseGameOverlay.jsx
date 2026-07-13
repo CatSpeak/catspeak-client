@@ -13,7 +13,7 @@ const BaseGameOverlay = ({
   useFluentAnimation = false,
   animationKey = "game-overlay"
 }) => {
-  const { gameState, gameType, countdown, currentUserId, leftPlayers } = useGame();
+  const { gameState, gameType, countdown, currentUserId, leftPlayers, isSpectator } = useGame();
   
   const hasLeft = leftPlayers?.has(currentUserId?.toString())
 
@@ -21,7 +21,7 @@ const BaseGameOverlay = ({
     ? expectedGameType.includes(gameType) 
     : gameType === expectedGameType;
 
-  if (!matchesGameType || hasLeft) {
+  if (!matchesGameType || (hasLeft && !isSpectator)) {
     return null
   }
 

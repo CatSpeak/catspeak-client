@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import CountdownCircle from "./CountdownCircle"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, getPlayerName, image, title, children, maxWidthClass = "max-w-2xl" }) => {
+const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, getPlayerName, image, title, children, maxWidthClass = "max-w-2xl", countdownDuration = 5 }) => {
   const { t: contextT } = useLanguage()
   const t = propT || contextT
   
@@ -37,7 +37,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
           >
             <div className="flex justify-center mb-2">
               <CountdownCircle 
-                duration={3} 
+                duration={countdownDuration} 
                 label={isFinalRound 
                   ? (t.rooms?.game?.crackIt?.tallyingFinalResults || "Đang tổng hợp kết quả chung cuộc...") 
                   : (t.rooms?.game?.crackIt?.nextRoundIn || "Ván tiếp theo sẽ bắt đầu sau...")}

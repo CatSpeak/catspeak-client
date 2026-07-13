@@ -21,6 +21,7 @@ const PictureITOverlay = () => {
     countdown,
     pictureIt,
     currentUserId,
+    isSpectator,
     startPictureItDescribe,
     endPictureItDescribe,
     submitPictureItFlag,
@@ -40,7 +41,6 @@ const PictureITOverlay = () => {
   const isPictureIt = gameType === 'picture_it' || gameType === 'picture-it'
   const open = isPictureIt && !['idle'].includes(gameState)
 
-  const isSpectator = pictureIt?.isSpectator
   const isDescriber = pictureIt?.describerId === currentUserId
   const isDescribing = gameState === 'playing' && !pictureIt?.ratingOpen
   const isRatingPhase = gameState === 'playing' && pictureIt?.ratingOpen
