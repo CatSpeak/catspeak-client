@@ -19,7 +19,7 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import { getImageUrl } from "@/shared/utils/imageUtils";
 
 const NewsDetailPage = () => {
-  const { slug } = useParams();
+  const { lang: paramLang, slug } = useParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const lang = paramLang || language || "vi";
