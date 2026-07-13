@@ -6,9 +6,9 @@ import { X } from 'lucide-react'
 import { FluentAnimation } from '@/shared/components/ui/animations'
 import { PillButton } from '@/shared/components/ui/buttons'
 import { LeaderboardCard, RoundResultModal, GameOverModal } from './round-result'
-import { useGame } from '@/features/video-call/context/GameContext'
+import { useGame } from '@/features/games/context/GameContext'
 import { useLanguage } from '@/shared/context/LanguageContext'
-import GameLayoutOverlay from '@/features/games/components/GameLayoutOverlay'
+import BaseGameOverlay from '@/features/games/components/shared/BaseGameOverlay'
 import PictureItImageCard from './PictureItImageCard'
 import PictureItActionPanel from './PictureItActionPanel'
 
@@ -116,87 +116,53 @@ const PictureITOverlay = () => {
   const interactionsDisabled = isSpectator
 
   return (
-    <AnimatePresence>
-      {!['idle', 'force_stopped'].includes(gameState) && (
-        <FluentAnimation
-          key="picture-it-overlay"
-          direction="up"
-          exit
-          className="fixed inset-0 z-[100] w-full h-[100dvh]"
-        >
-          <GameLayoutOverlay
-            gameContentComponent={
-              <div className="flex flex-col flex-1 gap-3 md:gap-4 h-full min-h-0 overflow-y-auto pr-1">
-                <PictureItImageCard
-                  isDescriber={isDescriber}
-                  imgLoading={imgLoading}
-                  imgError={imgError}
-                  setImgLoading={setImgLoading}
-                  setImgError={setImgError}
-                  displayImageUrl={displayImageUrl}
-                  imageBlurred={imageBlurred}
-                  hasDescribeStarted={hasDescribeStarted}
-                  category={pictureIt?.category}
-                  forbiddenWords={forbiddenWords}
-                  flagCount={pictureIt?.flagCount || 0}
-                  raterCount={pictureIt?.raterCount || 0}
-                />
-                <PictureItActionPanel
-                  isSpectator={isSpectator}
-                  isDescriber={isDescriber}
-                  isDescribing={isDescribing}
-                  isRatingPhase={isRatingPhase}
-                  isWaitingForRatings={isWaitingForRatings}
-                  hasDescribeStarted={hasDescribeStarted}
-                  myFlagged={myFlagged}
-                  ratingCountdownSec={pictureIt?.ratingCountdownSec || 0}
-                  selectedRating={selectedRating}
-                  setSelectedRating={setSelectedRating}
-                  hoveredRating={hoveredRating}
-                  setHoveredRating={setHoveredRating}
-                  myRatingSubmitted={pictureIt?.myRatingSubmitted}
-                  handleDescribeStart={handleDescribeStart}
-                  handleDescribeEnd={handleDescribeEnd}
-                  handleFlag={handleFlag}
-                  handleSubmitRating={handleSubmitRating}
-                  interactionsDisabled={interactionsDisabled}
-                />
-              </div>
-            }
-            overlays={
-              <>
-                <AnimatePresence>
-                  {gameState === 'setup' && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 text-slate-900"
-                    >
-                      <h1 className="text-4xl font-bold mb-8 text-cath-red-700">
-                        Picture IT
-                      </h1>
-                      {countdown !== null && countdown !== undefined ? (
-                        <motion.div
-                          key={countdown}
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 1.5, opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="text-8xl font-black text-cath-red-500"
-                        >
-                          {countdown}
-                        </motion.div>
-                      ) : (
-                        <div className="text-xl text-slate-600 font-medium">
-                          {t.rooms?.game?.pictureIt?.modals?.waitingStart || "Đang chuẩn bị ván đấu..."}
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {showResultModal && (
+    <BaseGameOverlay
+      expectedGameType={['picture_it', 'picture-it']}
+      title="Picture IT"
+      waitingText={t.rooms?.game?.pictureIt?.modals?.waitingStart || "Đang chuẩn bị ván đấu..."}
+      useFluentAnimation={true}
+      animationKey="picture-it-overlay"
+      gameContent={
+        <div className="flex flex-col flex-1 gap-3 md:gap-4 h-full min-h-0 overflow-y-auto pr-1">
+          <PictureItImageCard
+            isDescriber={isDescriber}
+            imgLoading={imgLoading}
+            imgError={imgError}
+            setImgLoading={setImgLoading}
+            setImgError={setImgError}
+            displayImageUrl={displayImageUrl}
+            imageBlurred={imageBlurred}
+            hasDescribeStarted={hasDescribeStarted}
+            category={pictureIt?.category}
+            forbiddenWords={forbiddenWords}
+            flagCount={pictureIt?.flagCount || 0}
+            raterCount={pictureIt?.raterCount || 0}
+          />
+          <PictureItActionPanel
+            isSpectator={isSpectator}
+            isDescriber={isDescriber}
+            isDescribing={isDescribing}
+            isRatingPhase={isRatingPhase}
+            isWaitingForRatings={isWaitingForRatings}
+            hasDescribeStarted={hasDescribeStarted}
+            myFlagged={myFlagged}
+            ratingCountdownSec={pictureIt?.ratingCountdownSec || 0}
+            selectedRating={selectedRating}
+            setSelectedRating={setSelectedRating}
+            hoveredRating={hoveredRating}
+            setHoveredRating={setHoveredRating}
+            myRatingSubmitted={pictureIt?.myRatingSubmitted}
+            handleDescribeStart={handleDescribeStart}
+            handleDescribeEnd={handleDescribeEnd}
+            handleFlag={handleFlag}
+            handleSubmitRating={handleSubmitRating}
+            interactionsDisabled={interactionsDisabled}
+          />
+        </div>
+      }
+      overlays={
+        <>
+          {showResultModal && (
                   <RoundResultModal
                     open={showResultModal}
                     onClose={() => { }}
@@ -228,21 +194,18 @@ const PictureITOverlay = () => {
                   countdown={10}
                 />
 
-                {showForceStopped && (
-                  <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-white/95">
-                    <div className="text-center space-y-3">
-                      <p className="text-2xl font-bold text-cath-red-700">{t.rooms?.game?.pictureIt?.modals?.gameEnded || 'Game Ended'}</p>
-                      <p className="text-secondary">{t.rooms?.game?.pictureIt?.modals?.notEnoughPlayers || 'Không đủ người chơi tiếp tục.'}</p>
-                      <PillButton onClick={handleGameOverClose}>{t.rooms?.game?.pictureIt?.modals?.close || 'Close'}</PillButton>
-                    </div>
-                  </div>
-                )}
-              </>
-            }
-          />
-        </FluentAnimation>
-      )}
-    </AnimatePresence>
+          {showForceStopped && (
+            <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-white/95">
+              <div className="text-center space-y-3">
+                <p className="text-2xl font-bold text-cath-red-700">{t.rooms?.game?.pictureIt?.modals?.gameEnded || 'Game Ended'}</p>
+                <p className="text-secondary">{t.rooms?.game?.pictureIt?.modals?.notEnoughPlayers || 'Không đủ người chơi tiếp tục.'}</p>
+                <PillButton onClick={handleGameOverClose}>{t.rooms?.game?.pictureIt?.modals?.close || 'Close'}</PillButton>
+              </div>
+            </div>
+          )}
+        </>
+      }
+    />
   )
 }
 

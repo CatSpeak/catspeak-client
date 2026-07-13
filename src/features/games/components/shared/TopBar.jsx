@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useGame } from "@/features/video-call/context/GameContext"
+import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { motion } from "framer-motion"
 import { Gamepad2, LogOut, Menu, MessageSquare } from "lucide-react"

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react"
-import { useGame } from "@/features/video-call/context/GameContext"
+import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, CheckCircle2 } from "lucide-react"
-import { useAuth } from "@/features/auth"
 
 import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect"
 

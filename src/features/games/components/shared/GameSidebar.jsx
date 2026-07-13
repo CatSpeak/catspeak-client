@@ -1,5 +1,5 @@
 import React from "react"
-import { useGame } from "@/features/video-call/context/GameContext"
+import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { Check, TrendingUp } from "lucide-react"
@@ -68,7 +68,7 @@ const GameSidebar = () => {
 
             {/* Avatar placeholder */}
             <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0">
-              {player.name.charAt(0).toUpperCase()}
+              {(player.name || "?").charAt(0).toUpperCase()}
             </div>
 
             {/* Info */}

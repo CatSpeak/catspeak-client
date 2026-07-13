@@ -1,7 +1,7 @@
 import React from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGame } from "@/features/video-call/context/GameContext"
+import { useGame } from "@/features/games/context/GameContext"
 
 const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
   const { t } = useLanguage()

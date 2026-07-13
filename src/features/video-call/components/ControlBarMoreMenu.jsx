@@ -26,8 +26,8 @@ import {
   useParticipants,
   useLocalParticipant,
 } from "@livekit/components-react";
-import GameSetupModal from "@/features/games/components/GameSetupModal";
-import GameHistoryModal from "@/features/games/components/GameHistoryModal";
+import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
+import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
@@ -37,14 +37,8 @@ const ControlBarMoreMenu = ({
   const { id: roomId } = useParams();
   const { t } = useLanguage();
   const {
-    isLocalScreenShare,
     showParticipants,
     setShowParticipants,
-    setShowChat,
-    handleToggleScreenShare,
-    isRecording,
-    isTogglingRecording,
-    handleToggleRecording,
     showVirtualBackground,
     setShowVirtualBackground,
     showAvatarPicker,

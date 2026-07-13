@@ -21,7 +21,7 @@ import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverl
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
-import { GameProvider } from "@/features/video-call/context/GameContext";
+import { GameProvider } from "@/features/games/context/GameContext";
 // import CrackItOverlay from "@/features/video-call/components/games/crack-it/CrackItOverlay";
 import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay";
 import { useLanguage } from "@/shared/context/LanguageContext";

@@ -22,7 +22,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
-import { useGame } from "@/features/video-call/context/GameContext"
+import { useGame } from "@/features/games/context/GameContext"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
