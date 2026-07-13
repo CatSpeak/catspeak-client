@@ -28,7 +28,7 @@ const PictureItActionPanel = ({
   const ap = t.rooms?.game?.pictureIt?.actionPanel || {}
 
   return (
-    <div className="shrink-0 border-t border-t-[#E5E5E5] px-5 py-3 flex items-center justify-center min-h-[64px] bg-white">
+    <div className="shrink-0 border-t border-t-[#E5E5E5] px-5 py-3 flex items-center justify-center min-h-[64px] bg-white rounded-[24px]">
       {/* Spectator — no actions */}
       {isSpectator && (
         <span className="text-sm text-secondary italic">{ap.watchingAsSpectator || 'You are watching as a spectator.'}</span>
@@ -127,7 +127,7 @@ const PictureItActionPanel = ({
               </div>
             )}
 
-            <div className="hidden sm:block h-6 w-px bg-[#e5e5e5] mx-2"></div>
+            {/* <div className="hidden sm:block h-6 w-px bg-[#e5e5e5] mx-2"></div> */}
             {/* <PillButton
             className={`h-10 px-4 ${myFlagged || selectedRating > 0 || myRatingSubmitted ? 'opacity-50 cursor-not-allowed border-gray-300 text-gray-400' : 'border-orange-500 text-orange-600 hover:bg-orange-50'
               }`}
