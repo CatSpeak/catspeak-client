@@ -2,6 +2,7 @@ import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import GameOverScreen from "@/features/games/components/shared/GameOverScreen"
 import { useGame } from "@/features/games/context/GameContext"
+import { Star } from "lucide-react"
 
 const GameOverModal = ({ open, onClose, result }) => {
   const { t } = useLanguage();
@@ -31,7 +32,7 @@ const GameOverModal = ({ open, onClose, result }) => {
       title={go.title || "Game Finished"}
       finalResults={{ final_scores }}
       getPlayerName={getPlayerName}
-      scoreUnit="sao"
+      scoreUnit={<Star size={18} fill="currentColor" className="inline-block mb-1 text-yellow-500" />}
     />
   )
 }

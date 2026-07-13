@@ -17,7 +17,7 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
         >
           <Confetti width={window.innerWidth} height={window.innerHeight} />
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.94, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -49,41 +49,41 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
                   {Object.entries(finalResults.final_scores)
                     .sort(([, a], [, b]) => b - a)
                     .map(([id, score], index) => {
-                  const player = getPlayerName(id)
-                  const isWinner = index === 0
-                  
-                  return (
-                    <motion.div 
-                      key={id} 
-                      initial={{ opacity: 0, x: 16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.35, delay: 0.2 + index * 0.05 }}
-                      className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
-                        isWinner 
-                          ? "bg-yellow-50 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.2)]" 
-                          : "bg-gray-50 border-gray-100"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                        <div className={`font-bold text-lg md:text-xl w-6 md:w-8 shrink-0 text-center ${isWinner ? 'text-yellow-600' : 'text-slate-400'}`}>
-                          {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
-                        </div>
-                        <div className="font-semibold text-slate-800 text-base md:text-lg flex items-center flex-1 min-w-0 gap-2">
-                          <span className="truncate min-w-0 max-w-full">{player.name}</span>
-                          {player.isYou && (
-                            <span className="font-normal text-slate-500 text-xs bg-slate-200/60 px-2 py-0.5 rounded-full shrink-0 ml-auto">
-                              {t.rooms?.game?.crackIt?.you || "Bạn"}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className={`font-bold text-xl md:text-2xl shrink-0 ml-2 ${isWinner ? 'text-yellow-600' : 'text-cath-red-600'}`}>
-                        {score} <span className="text-xs md:text-sm font-semibold opacity-70">{scoreUnit || "pts"}</span>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-            </div>
+                      const player = getPlayerName(id)
+                      const isWinner = index === 0
+
+                      return (
+                        <motion.div
+                          key={id}
+                          initial={{ opacity: 0, x: 16 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.35, delay: 0.2 + index * 0.05 }}
+                          className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${isWinner
+                            ? "bg-yellow-50 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.2)]"
+                            : "bg-gray-50 border-gray-100"
+                            }`}
+                        >
+                          <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                            <div className={`font-bold text-lg md:text-xl w-6 md:w-8 shrink-0 text-center ${isWinner ? 'text-yellow-600' : 'text-slate-400'}`}>
+                              {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
+                            </div>
+                            <div className="font-semibold text-slate-800 text-base md:text-lg flex items-center flex-1 min-w-0 gap-2">
+                              <span className="truncate min-w-0 max-w-full">{player.name}</span>
+                              {player.isYou && (
+                                <span className="font-normal text-slate-500 text-xs bg-slate-200/60 px-2 py-0.5 rounded-full shrink-0 ml-auto">
+                                  {t.rooms?.game?.crackIt?.you || "Bạn"}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className={`font-bold flex items-center gap-2 text-xl md:text-2xl shrink-0 ml-2 ${isWinner ? 'text-yellow-600' : 'text-cath-red-600'}`}>
+                            <span>{score}</span>
+                            <span className="text-xs md:text-sm font-semibold opacity-70">{scoreUnit || "pts"}</span>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                </div>
               </>
             )}
 
