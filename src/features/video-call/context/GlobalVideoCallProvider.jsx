@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
+import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 
 import GlobalCallContent from "./GlobalCallContent"
 
@@ -100,6 +101,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
     (s) => s.videoCall,
   )
 
+  const panelState = useSidePanelState()
+
   const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(() => {
     const saved = localStorage.getItem("receiveSystemMsgs")
     return saved !== null ? JSON.parse(saved) : true
@@ -122,6 +125,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
 
   return (
     <LiveKitRoom
+      key={livekitToken}
       serverUrl={livekitServerUrl}
       token={livekitToken}
       connect={true}
@@ -134,6 +138,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
         ContextProvider={GlobalVideoCallContext.Provider}
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        panelState={panelState}
       >
         {children}
       </GlobalCallContent>
