@@ -176,7 +176,7 @@ export default {
     news: "Cat Speak 的动态",
     discover: "探索世界",
     reels: "短视频",
-    mail: "信件",
+    letters: "信",
     calendar: "日程表",
     settings: "设置",
     report: "报告日志",

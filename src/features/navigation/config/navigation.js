@@ -28,7 +28,7 @@ export const navLinks = [
       // { key: "worldNews", path: "/cat-speak/discover" },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
-      { key: "mail", path: "/cat-speak/mail", icon: Mail },
+      { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },

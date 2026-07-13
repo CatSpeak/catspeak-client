@@ -150,7 +150,7 @@ export default {
     news: "Bản tin Cat Speak",
     discover: "Khám phá thế giới",
     reels: "Thước phim",
-    mail: "Thư",
+    letters: "Thư",
     calendar: "Lịch",
     settings: "Cài đặt",
     report: "Nhật ký báo cáo",

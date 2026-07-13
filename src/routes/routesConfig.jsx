@@ -167,7 +167,7 @@ const routesConfig = [
                     ],
                   },
                   {
-                    path: "mail",
+                    path: "letters",
                     element: <MailPage />,
                   },
                   {

@@ -38,7 +38,7 @@ export default {
     worldNews: "世界新闻",
     reels: "短视频",
     video: "视频",
-    mail: "信件",
+    letters: "信",
     calendar: "日历",
     cart: "购物车",
     courses: "课程",
