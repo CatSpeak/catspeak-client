@@ -1,9 +1,10 @@
 import React, { useState, useRef, useCallback } from "react"
-import { Send, X } from "lucide-react"
+import { Send, X, Plus } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { colors } from "@/shared/utils/colors"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
-import Switch from "@/shared/components/ui/inputs/Switch"
+import Popover from "@/shared/components/ui/Popover"
+import ListItem from "@/shared/components/ui/ListItem"
 import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 
 const ChatInput = ({
@@ -116,12 +117,15 @@ const ChatInput = ({
             isConnected
               ? isAiInput
                 ? isAiBlocked
-                  ? t.rooms?.chatBox?.aiGeneratingPlaceholder || "AI is typing..."
+                  ? t.rooms?.chatBox?.aiGeneratingPlaceholder ||
+                    "AI is typing..."
                   : replyTarget?.from?.isSystem
                     ? "Reply to system..."
                     : isPrivateAi
-                      ? t.rooms?.chatBox?.privateAiPlaceholder || "Ask AI (Private)"
-                      : t.rooms?.chatBox?.publicAiPlaceholder || "Ask AI (Public)"
+                      ? t.rooms?.chatBox?.privateAiPlaceholder ||
+                        "Ask AI (Private)"
+                      : t.rooms?.chatBox?.publicAiPlaceholder ||
+                        "Ask AI (Public)"
                 : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
               : t.rooms?.chatBox?.connectingPlaceholder || "Connecting..."
           }
@@ -129,23 +133,54 @@ const ChatInput = ({
           className="disabled:opacity-50"
           leftContent={
             isAiInput ? (
-              <div
-                title={isPrivateAi ? "Private AI Prompt" : "Public AI Prompt"}
-                className="flex items-center justify-center"
-              >
-                <Switch
-                  checked={isPrivateAi}
-                  onChange={() => setIsPrivateAi(!isPrivateAi)}
-                  colorClass="peer-checked:bg-green-500"
-                />
-              </div>
+              <Popover
+                placement="top-left"
+                trigger={
+                  <button
+                    type="button"
+                    className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
+                    title={
+                      isPrivateAi
+                        ? t.rooms?.chatBox?.privatePrompt || "Private Prompt"
+                        : t.rooms?.chatBox?.publicPrompt || "Public Prompt"
+                    }
+                  >
+                    <Plus size={20} className="text-gray-500" />
+                  </button>
+                }
+                content={(close) => (
+                  <div className="bg-white rounded-lg shadow-lg border border-[#E5E5E5] py-1 min-w-[180px] flex flex-col z-50">
+                    <ListItem
+                      onClick={() => {
+                        setIsPrivateAi(false)
+                        close()
+                      }}
+                      hoverEffect={true}
+                      className={`${!isPrivateAi ? "font-semibold text-red-700" : "text-gray-700"}`}
+                    >
+                      {t.rooms?.chatBox?.publicPrompt || "Public Prompt"}
+                    </ListItem>
+                    <ListItem
+                      onClick={() => {
+                        setIsPrivateAi(true)
+                        close()
+                      }}
+                      hoverEffect={true}
+                      className={`${isPrivateAi ? "font-semibold text-red-700" : "text-gray-700"}`}
+                    >
+                      {t.rooms?.chatBox?.privatePrompt || "Private Prompt"}
+                    </ListItem>
+                  </div>
+                )}
+              />
             ) : undefined
           }
-          leftContentWidthClass="!pl-[3.75rem]"
           rightContent={
             <button
               type="submit"
-              disabled={!isConnected || !message.trim() || (isAiInput && isAiBlocked)}
+              disabled={
+                !isConnected || !message.trim() || (isAiInput && isAiBlocked)
+              }
               className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-colors disabled:bg-black/10 disabled:text-black/25 disabled:cursor-not-allowed hover:opacity-90"
               style={
                 isConnected && message.trim()
@@ -153,7 +188,7 @@ const ChatInput = ({
                   : {}
               }
             >
-              <Send size={16} className="ml-[-1px] mt-[1px]" />
+              <Send size={16} />
             </button>
           }
         />

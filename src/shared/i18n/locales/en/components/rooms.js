@@ -199,6 +199,8 @@ export default {
     aiEmptyText: "Type your question below to ask Cat Speak.",
     publicAiPlaceholder: "Ask AI (Public)",
     privateAiPlaceholder: "Ask AI (Private)",
+    publicPrompt: "Public Prompt",
+    privatePrompt: "Private Prompt",
     systemName: "Cat Speak Suggestion",
     systemMessages: "System Messages",
     systemMessagesDesc: "Show automatic system messages",

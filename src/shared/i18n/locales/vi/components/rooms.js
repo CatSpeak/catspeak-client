@@ -174,6 +174,8 @@ export default {
     aiEmptyText: "Nhập câu hỏi của bạn bên dưới để hỏi Trợ lý Cat Speak.",
     publicAiPlaceholder: "Hỏi công khai",
     privateAiPlaceholder: "Hỏi riêng tư",
+    publicPrompt: "Hỏi công khai",
+    privatePrompt: "Hỏi riêng tư",
     systemName: "Cat Speak gợi ý",
     systemMessages: "Tin nhắn hệ thống",
     systemMessagesDesc: "Hiển thị các tin nhắn hệ thống tự động",
