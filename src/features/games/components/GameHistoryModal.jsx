@@ -1,24 +1,24 @@
-import React, { useState } from "react";
-import Modal from "@/shared/components/ui/Modal";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { useGetGameHistoryQuery } from "@/store/api/roomsApi";
-import { Loader2, Trophy } from "lucide-react";
-import HistoryMatchItem from "./HistoryMatchItem";
+import React, { useState } from "react"
+import Modal from "@/shared/components/ui/Modal"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useGetGameHistoryQuery } from "@/store/api/roomsApi"
+import { Loader2, Trophy } from "lucide-react"
+import HistoryMatchItem from "./HistoryMatchItem"
 
 const GameHistoryModal = ({ open, onClose, roomName }) => {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
   const { data: historyData = [], isLoading: loading } = useGetGameHistoryQuery(
     roomName,
     {
       skip: !open || !roomName,
       refetchOnMountOrArgChange: true,
     },
-  );
-  const [expandedMatch, setExpandedMatch] = useState(null);
+  )
+  const [expandedMatch, setExpandedMatch] = useState(null)
 
   const toggleMatch = (matchId) => {
-    setExpandedMatch((prev) => (prev === matchId ? null : matchId));
-  };
+    setExpandedMatch((prev) => (prev === matchId ? null : matchId))
+  }
 
 
 
@@ -67,7 +67,7 @@ const GameHistoryModal = ({ open, onClose, roomName }) => {
         </button>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default GameHistoryModal;
+export default GameHistoryModal

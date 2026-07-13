@@ -23,10 +23,10 @@ import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
 import { GameProvider } from "@/features/video-call/context/GameContext";
 // import CrackItOverlay from "@/features/video-call/components/games/crack-it/CrackItOverlay";
-import PictureITOverlay from "@/features/games/picture-it/components/PictureITOverlay";
+import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading";
-import CrackItOverlay from "@/features/games/crack-it/CrackItOverlay";
+import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay";
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage();

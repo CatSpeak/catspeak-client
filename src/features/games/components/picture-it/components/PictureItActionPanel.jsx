@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2, Flag, Loader2, Mic, Star } from 'lucide-react';
-import { PillButton } from '@/shared/components/ui/buttons';
-import { useLanguage } from '@/shared/context/LanguageContext';
+import React from 'react'
+import { motion } from 'framer-motion'
+import { CheckCircle2, Flag, Loader2, Mic, Star } from 'lucide-react'
+import { PillButton } from '@/shared/components/ui/buttons'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const PictureItActionPanel = ({
   isSpectator,
@@ -24,8 +24,8 @@ const PictureItActionPanel = ({
   handleSubmitRating,
   interactionsDisabled
 }) => {
-  const { t } = useLanguage();
-  const ap = t.rooms?.game?.pictureIt?.actionPanel || {};
+  const { t } = useLanguage()
+  const ap = t.rooms?.game?.pictureIt?.actionPanel || {}
 
   return (
     <div className="shrink-0 border-t border-t-[#E5E5E5] px-5 py-3 flex items-center justify-center min-h-[64px] bg-white">
@@ -95,7 +95,7 @@ const PictureItActionPanel = ({
                   <span className="text-base sm:text-lg font-semibold text-headingColor">{ap.yourRating || 'Your rating:'}</span>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: 5 }, (_, i) => {
-                      const filled = i < (hoveredRating || selectedRating);
+                      const filled = i < (hoveredRating || selectedRating)
                       return (
                         <Star
                           key={i}
@@ -107,7 +107,7 @@ const PictureItActionPanel = ({
                           onMouseLeave={() => setHoveredRating(0)}
                           onClick={() => setSelectedRating(i + 1)}
                         />
-                      );
+                      )
                     })}
                   </div>
                   <span className="text-xs sm:text-sm text-secondary sm:ml-2">{(ap.timeLeft || '({0}s left)').replace('{0}', ratingCountdownSec)}</span>
@@ -151,7 +151,7 @@ const PictureItActionPanel = ({
         )
       }
     </div >
-  );
-};
+  )
+}
 
-export default PictureItActionPanel;
+export default PictureItActionPanel

@@ -1,9 +1,9 @@
-import React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import React from "react"
+import { AnimatePresence, motion } from "framer-motion"
 
 const RoundResultOverlay = ({ gameState, roundResults, currentRound, t, getPlayerName }) => {
-  const isFinalRound = currentRound?.round === currentRound?.total;
-  
+  const isFinalRound = currentRound?.round === currentRound?.total
+
   return (
     <AnimatePresence>
       {gameState === "result" && roundResults && (
@@ -29,8 +29,8 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t, getPlaye
               {Object.keys(roundResults.cumulative_scores || {})
                 .sort((a, b) => roundResults.cumulative_scores[b] - roundResults.cumulative_scores[a])
                 .map((id, index) => {
-                  const score = roundResults.cumulative_scores[id];
-                  const delta = roundResults.scores_delta?.[id] || 0;
+                  const score = roundResults.cumulative_scores[id]
+                  const delta = roundResults.scores_delta?.[id] || 0
                   return (
                     <div key={id} className="flex items-center justify-between bg-white shadow-sm border border-gray-100 px-4 py-3 rounded-2xl">
                       <div className="flex items-center gap-3">
@@ -57,20 +57,20 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t, getPlaye
                         </div>
                       </div>
                     </div>
-                  );
+                  )
                 })}
             </div>
           </div>
 
           <p className="text-slate-500 font-medium animate-pulse mt-4">
-            {isFinalRound 
+            {isFinalRound
               ? (t.rooms?.game?.crackIt?.tallyingFinalResults || "Đang tổng hợp kết quả chung cuộc...")
               : (t.rooms?.game?.crackIt?.nextRoundIn || "Ván tiếp theo sẽ bắt đầu sau ít giây...")}
           </p>
         </motion.div>
       )}
     </AnimatePresence>
-  );
-};
+  )
+}
 
-export default RoundResultOverlay;
+export default RoundResultOverlay

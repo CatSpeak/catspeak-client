@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Flag, ImageOff, Loader2, Mic } from 'lucide-react';
-import { CategoryBadge } from './round-result';
-import { useLanguage } from '@/shared/context/LanguageContext';
+import React from 'react'
+import { motion } from 'framer-motion'
+import { Flag, ImageOff, Loader2, Mic } from 'lucide-react'
+import { CategoryBadge } from './round-result'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const PictureItImageCard = ({
   isDescriber,
@@ -18,8 +18,8 @@ const PictureItImageCard = ({
   flagCount,
   raterCount
 }) => {
-  const { t } = useLanguage();
-  const ic = t.rooms?.game?.pictureIt?.imageCard || {};
+  const { t } = useLanguage()
+  const ic = t.rooms?.game?.pictureIt?.imageCard || {}
 
   return (
     <div className="rounded-[24px] border border-[#E5E5E5] bg-white p-3 md:p-4 flex flex-col gap-2 md:gap-3 flex-1 min-h-0">
@@ -49,8 +49,8 @@ const PictureItImageCard = ({
               }`}
             onLoad={() => setImgLoading(false)}
             onError={() => {
-              setImgLoading(false);
-              setImgError(true);
+              setImgLoading(false)
+              setImgError(true)
             }}
           />
         )}
@@ -125,7 +125,7 @@ const PictureItImageCard = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default PictureItImageCard;
+export default PictureItImageCard

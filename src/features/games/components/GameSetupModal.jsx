@@ -1,32 +1,32 @@
-import React, { useState } from "react";
-import Modal from "@/shared/components/ui/Modal";
-import Dropdown from "@/shared/components/ui/Dropdown";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { useParticipants } from "@livekit/components-react";
-import { toast } from "react-hot-toast";
+import React, { useState } from "react"
+import Modal from "@/shared/components/ui/Modal"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useParticipants } from "@livekit/components-react"
+import { toast } from "react-hot-toast"
 
 const GameSetupModal = ({ open, onClose }) => {
-  const { t } = useLanguage();
-  const allParticipants = useParticipants();
-  const [selectedLevel, setSelectedLevel] = useState("easy");
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const { t } = useLanguage()
+  const allParticipants = useParticipants()
+  const [selectedLevel, setSelectedLevel] = useState("easy")
+  const [selectedLanguage, setSelectedLanguage] = useState("en")
 
-  const [selectedGame, setSelectedGame] = useState("picture_it");
+  const [selectedGame, setSelectedGame] = useState("picture_it")
 
   const handleStart = () => {
     if (allParticipants.length < 2) {
       toast.error(
         t.rooms?.game?.crackIt?.notEnoughPlayers ||
-          "Cần ít nhất 2 người để bắt đầu trò chơi!",
-      );
-      return;
+        "Cần ít nhất 2 người để bắt đầu trò chơi!",
+      )
+      return
     }
     const event = new CustomEvent("hostStartGame", {
       detail: { gameId: selectedGame, level: selectedLevel, language: selectedLanguage },
-    });
-    window.dispatchEvent(event);
-    onClose();
-  };
+    })
+    window.dispatchEvent(event)
+    onClose()
+  }
 
   return (
     <Modal
@@ -43,11 +43,10 @@ const GameSetupModal = ({ open, onClose }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
             onClick={() => setSelectedGame("picture_it")}
-            className={`flex flex-col text-left p-4 rounded-2xl border-2 transition-all ${
-              selectedGame === "picture_it"
+            className={`flex flex-col text-left p-4 rounded-2xl border-2 transition-all ${selectedGame === "picture_it"
                 ? "border-cath-red-600 bg-red-50"
                 : "border-gray-200 bg-white hover:border-gray-300"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="font-bold text-slate-800 text-lg">Picture IT</span>
@@ -64,11 +63,10 @@ const GameSetupModal = ({ open, onClose }) => {
 
           <button
             onClick={() => setSelectedGame("crack_it")}
-            className={`flex flex-col text-left p-4 rounded-2xl border-2 transition-all ${
-              selectedGame === "crack_it"
+            className={`flex flex-col text-left p-4 rounded-2xl border-2 transition-all ${selectedGame === "crack_it"
                 ? "border-cath-red-600 bg-red-50"
                 : "border-gray-200 bg-white hover:border-gray-300"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="font-bold text-slate-800 text-lg">Crack IT</span>
@@ -133,7 +131,7 @@ const GameSetupModal = ({ open, onClose }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="flex gap-3 p-4 border-t border-gray-100 bg-gray-50">
         <button
           onClick={onClose}
@@ -149,7 +147,7 @@ const GameSetupModal = ({ open, onClose }) => {
         </button>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default GameSetupModal;
+export default GameSetupModal

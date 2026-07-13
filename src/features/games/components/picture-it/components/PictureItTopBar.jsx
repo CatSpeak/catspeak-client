@@ -1,7 +1,7 @@
-import React from 'react';
-import { Gamepad2, LogOut, Menu } from 'lucide-react';
-import { PillButton } from '@/shared/components/ui/buttons';
-import { useLanguage } from '@/shared/context/LanguageContext';
+import React from 'react'
+import { Gamepad2, LogOut, Menu } from 'lucide-react'
+import { PillButton } from '@/shared/components/ui/buttons'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const PictureItTopBar = ({
   roundNumber,
@@ -12,8 +12,8 @@ const PictureItTopBar = ({
   onLeaveGame,
   onOpenSidebar
 }) => {
-  const { t } = useLanguage();
-  const tb = t.rooms?.game?.pictureIt?.topBar || {};
+  const { t } = useLanguage()
+  const tb = t.rooms?.game?.pictureIt?.topBar || {}
 
   return (
     <div className="flex items-center justify-between border rounded-3xl px-2 py-2 md:px-4 md:py-2 bg-white shadow-sm gap-2">
@@ -66,7 +66,7 @@ const PictureItTopBar = ({
         </PillButton>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PictureItTopBar;
+export default PictureItTopBar
