@@ -324,7 +324,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     setPhase("joining")
 
     try {
-      let token, serverUrl, sessionId
+      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName
 
       if (isClassRoom) {
         // Fetch LiveKit token using the appropriate endpoint based on user role
@@ -334,6 +334,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         token = tokenRes?.token
         serverUrl = tokenRes?.serverUrl
         sessionId = tokenRes?.sessionId
+        activeSubSessionId = tokenRes?.activeSubSessionId
+        activeSubSessionName = tokenRes?.activeSubSessionName
       } else {
         // Fetch LiveKit token to validate connectivity and join
         const livekitTokenBody = {
@@ -343,6 +345,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         token = tokenRes?.participantToken
         serverUrl = tokenRes?.serverUrl
         sessionId = tokenRes?.sessionId
+        activeSubSessionId = tokenRes?.activeSubSessionId
+        activeSubSessionName = tokenRes?.activeSubSessionName
       }
 
       if (!token || typeof token !== "string") {
@@ -378,11 +382,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       )
 
       // Auto-restore breakout state if user was in a sub-room before refresh/reconnect
-      if (tokenRes?.activeSubSessionId) {
+      if (activeSubSessionId) {
         dispatch(
           enterBreakout({
-            subSessionId: tokenRes.activeSubSessionId,
-            roomName: tokenRes.activeSubSessionName || "Phòng thảo luận",
+            subSessionId: activeSubSessionId,
+            roomName: activeSubSessionName || "Phòng thảo luận",
             token,
           })
         )

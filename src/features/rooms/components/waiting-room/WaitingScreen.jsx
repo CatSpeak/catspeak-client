@@ -100,13 +100,13 @@ const WaitingScreen = ({
 
           {/* Copy Link, Join Buttons */}
           <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
-            <div className="flex w-full flex-col flex-wrap md:flex-row sm:gap-[25px] gap-4 lg:max-w-[240px] md:max-w-full">
+            <div className="flex w-full flex-col flex-wrap md:flex-row gap-2 lg:max-w-[240px] md:max-w-full">
               <PillButton
                 onClick={onJoin}
                 disabled={isFull}
                 aria-disabled={isFull}
                 title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
-                className="md:h-12 h-10 w-full sm:flex-1 shrink-0 py-2 px-4 text-[18px] rounded-[35px] text-[#F5F5F5]"
+                className="w-full sm:flex-1"
               >
                 {t.rooms.waitingScreen.joinNow}
               </PillButton>
@@ -114,7 +114,7 @@ const WaitingScreen = ({
                 onClick={handleCopyLink}
                 variant="secondary"
                 startIcon={<Copy />}
-                className="md:h-12 h-10 w-full sm:flex-1 shrink-0 bg-white border border-[#e5e5e5] shadow-sm hover:bg-gray-50 py-2 px-4 text-[18px] rounded-[35px] text-[#7B7979]"
+                className="w-full sm:flex-1"
               >
                 {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
               </PillButton>
@@ -152,20 +152,18 @@ const WaitingScreen = ({
         onToggleCam={onToggleCam}
       />
 
-      {
-        deviceSelection && (
-          <DeviceSettingsModal
-            open={isSettingsModalOpen}
-            onClose={() => setIsSettingsModalOpen(false)}
-            deviceSelection={deviceSelection}
-            localStream={localStream}
-            micOn={micOn}
-            onToggleMic={onToggleMic}
-            t={t}
-          />
-        )
-      }
-    </FullscreenOverlayShell >
+      {deviceSelection && (
+        <DeviceSettingsModal
+          open={isSettingsModalOpen}
+          onClose={() => setIsSettingsModalOpen(false)}
+          deviceSelection={deviceSelection}
+          localStream={localStream}
+          micOn={micOn}
+          onToggleMic={onToggleMic}
+          t={t}
+        />
+      )}
+    </FullscreenOverlayShell>
   )
 }
 

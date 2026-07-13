@@ -21,7 +21,6 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import Avatar from "@/shared/components/ui/Avatar"
-import toast from "react-hot-toast"
 import { toast } from "react-hot-toast"
 import { uploadReelInBackground } from "../utils/uploadManager"
 import {
