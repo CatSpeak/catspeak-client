@@ -16,7 +16,7 @@ const RoundResultModal = ({ open, onClose, result }) => {
       maxWidthClass="max-w-[95vw] lg:max-w-[1080px]"
       currentRound={{ round: result.roundNumber, total: result.totalRounds }}
     >
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 justify-center items-center lg:items-stretch min-h-0 mt-4 w-full lg:h-[280px]">
+      <div className="flex flex-col md:flex-row gap-4 lg:gap-6 justify-center items-center md:items-stretch min-h-0 w-full lg:h-[280px]">
         <div className="hidden md:block flex-1 w-full max-w-[380px] h-full">
           <RoundImageCard image={result.image} />
         </div>

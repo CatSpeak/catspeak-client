@@ -9,7 +9,6 @@ const SIZE = 80 // SVG viewport size
 
 const CountdownCircle = ({ duration = 3, onComplete, label }) => {
   const { t } = useLanguage();
-  
   const [remaining, setRemaining] = useState(duration)
   const intervalRef = useRef(null)
   const startTimeRef = useRef(Date.now())
@@ -35,7 +34,7 @@ const CountdownCircle = ({ duration = 3, onComplete, label }) => {
   const dashOffset = CIRCUMFERENCE * (1 - progress)
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className="flex flex-col items-center">
       <div className="relative flex items-center justify-center">
         <svg
           width={SIZE}

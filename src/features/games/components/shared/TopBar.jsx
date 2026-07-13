@@ -109,7 +109,7 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
         )}
 
         {describerName && (
-          <div className="flex gap-1 md:gap-2 font-bold border border-cath-red-700 w-fit px-2 py-1 md:px-4 md:py-1.5 rounded-3xl text-xs md:text-sm whitespace-nowrap truncate max-w-[120px] md:max-w-fit">
+          <div className="flex gap-1 md:gap-2 font-bold border border-cath-red-700 w-fit px-2 py-1 md:px-4 md:py-1.5 rounded-3xl text-xs md:text-sm whitespace-nowrap truncate max-w-[280px] md:max-w-fit">
             <span className="hidden sm:inline">{topBar.describer || 'Describer'}: </span>
             <span className="font-semibold text-cath-red-700 truncate">{describerName}</span>
           </div>

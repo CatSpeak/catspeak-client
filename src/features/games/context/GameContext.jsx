@@ -54,9 +54,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const { id: roomId } = useParams();
   const { t } = useLanguage();
 
-  const localPart = useLocalParticipant();
-  const localParticipantIdentity = localPart?.localParticipant?.identity;
-  const localParticipantName = localPart?.localParticipant?.name;
+  const { localParticipant } = useLocalParticipant();
+  const participants = useParticipants();
+
+  const localParticipantIdentity = localParticipant?.identity;
+  const localParticipantName = localParticipant?.name;
 
   // Use user.id, user.accountId, user.userId or fallback to LiveKit identity
   const currentUserId =
@@ -184,7 +186,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           imageBlurred: true,
           category: payload.category,
           tags: payload.tags || [],
-          forbiddenWords: [],
+          forbiddenWords: payload.forbidden_words || [],
           describeStarted: false,
           ratingOpen: false,
           myRatingSubmitted: false,
@@ -320,7 +322,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
         // For Picture IT, build leaderboard
         if (gameType === "picture_it") {
-          const participants = []; // Mock to allow compilation
           const sortedLeaderboard = Object.entries(payload.cumulative_scores)
             .map(([id, score]) => {
               const pId = Number(id);
@@ -334,7 +335,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
-                } catch (e) {}
+                } catch (e) { }
               }
               return {
                 id: pId,
@@ -365,7 +366,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       if (payload.final_scores) {
         setScores(payload.final_scores);
         if (gameType === "picture_it") {
-          const participants = []; // Mock to allow compilation
           const sortedLeaderboard = Object.entries(payload.final_scores)
             .map(([id, score]) => {
               const pId = Number(id);
@@ -379,7 +379,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
-                } catch (e) {}
+                } catch (e) { }
               }
               return {
                 id: pId,
@@ -462,9 +462,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           imageUrl: payload.current_round?.image_url,
           imageUrlFull: isDescriber ? payload.current_round?.image_url : null,
           imageBlurred: !isDescriber,
-          forbiddenWords: isDescriber
-            ? payload.current_round?.forbidden_words || []
-            : [],
+          forbiddenWords: payload.current_round?.forbidden_words || [],
           category: payload.current_round?.category,
           describeStarted: payload.current_round?.describe_started || false,
           ratingOpen: payload.rating_open || false,
@@ -504,9 +502,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       toast.error(
         payload.reason === "NOT_ENOUGH_PLAYERS"
           ? t.rooms?.game?.crackIt?.forceStopNotEnoughPlayers ||
-              "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
+          "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
           : t.rooms?.game?.crackIt?.forceStopGeneric ||
-              "Trò chơi bị dừng đột ngột.",
+          "Trò chơi bị dừng đột ngột.",
       );
       setGameState("idle");
       setGameType(null);
@@ -528,8 +526,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connection.isConnected, roomId]);
 
-  const participants = useParticipants();
-  const { localParticipant } = useLocalParticipant();
+
 
   useEffect(() => {
     const isPictureIt = gameType === "picture_it" || gameType === "picture-it";
@@ -538,16 +535,16 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       !["idle", "game_over", "force_stopped"].includes(gameState)
     ) {
       if (gameState === "setup" || gameState === "result") {
-        localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+        localParticipant?.setMicrophoneEnabled(false).catch(() => { });
       } else if (gameState === "playing") {
         if (pictureItState.describeStarted && !pictureItState.ratingOpen) {
           const isLocalDescriber =
             Number(pictureItState.describerId) === Number(currentUserId);
           localParticipant
             ?.setMicrophoneEnabled(isLocalDescriber)
-            .catch(() => {});
+            .catch(() => { });
         } else {
-          localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+          localParticipant?.setMicrophoneEnabled(false).catch(() => { });
         }
       }
     }
@@ -656,7 +653,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   }, [connection.send, roomId]);
 
   const endPictureItDescribe = useCallback(() => {
-    localParticipant?.setMicrophoneEnabled(false).catch((e) => {});
+    localParticipant?.setMicrophoneEnabled(false).catch((e) => { });
     connection.send("PictureItDescribeEnd", roomId || "general");
   }, [connection.send, roomId, localParticipant]);
 
@@ -675,14 +672,14 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   // General Exit
   const exitGame = useCallback(() => {
     connection.send("PlayerLeaveGame", roomId || "general");
-    
+
     // Keep track of the current game type before resetting
     const lastGameType = gameType;
-    
+
     setGameState("idle");
     setGameType(null);
     resetGameStates();
-    
+
     // Allow the player to spectate the game they just left (unless GAME_OVER is received)
     if (lastGameType) {
       setOngoingGame(true);

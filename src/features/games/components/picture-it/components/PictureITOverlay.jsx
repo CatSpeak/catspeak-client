@@ -163,36 +163,36 @@ const PictureITOverlay = () => {
       overlays={
         <>
           {showResultModal && (
-                  <RoundResultModal
-                    open={showResultModal}
-                    onClose={() => { }}
-                    result={{
-                      leaderboard: pictureIt?.leaderboard,
-                      roundNumber,
-                      totalRounds,
-                      language: gameLanguage,
-                      difficulty: "easy",
-                      image: { url: pictureIt?.imageUrlFull, category: pictureIt?.category },
-                      describer: describerUser,
-                      roundScore: pictureIt?.roundAverageRating || 0,
-                    }}
-                  />
-                )}
+            <RoundResultModal
+              open={showResultModal}
+              onClose={() => { }}
+              result={{
+                leaderboard: pictureIt?.leaderboard,
+                roundNumber,
+                totalRounds,
+                language: gameLanguage,
+                difficulty: "easy",
+                image: { url: pictureIt?.imageUrlFull, category: pictureIt?.category },
+                describer: describerUser,
+                roundScore: pictureIt?.roundAverageRating || 0,
+              }}
+            />
+          )}
 
-                <GameOverModal
-                  open={showGameOver}
-                  onClose={handleGameOverClose}
-                  onPlayAgain={handleGameOverClose}
-                  result={{
-                    leaderboard: pictureIt?.leaderboard,
-                    totalRounds,
-                    language: gameLanguage,
-                    difficulty: "easy",
-                    badges: pictureIt?.badges,
-                    winnerIds: pictureIt?.winnerIds,
-                  }}
-                  countdown={10}
-                />
+          <GameOverModal
+            open={showGameOver}
+            onClose={handleGameOverClose}
+            onPlayAgain={handleGameOverClose}
+            result={{
+              leaderboard: pictureIt?.leaderboard,
+              totalRounds,
+              language: gameLanguage,
+              difficulty: "easy",
+              badges: pictureIt?.badges,
+              winnerIds: pictureIt?.winnerIds,
+            }}
+            countdown={10}
+          />
 
           {showForceStopped && (
             <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-white/95">

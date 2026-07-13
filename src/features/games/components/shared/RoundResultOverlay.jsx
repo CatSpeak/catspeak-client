@@ -6,12 +6,12 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, getPlayerName, image, title, children, maxWidthClass = "max-w-2xl", countdownDuration = 5 }) => {
   const { t: contextT } = useLanguage()
   const t = propT || contextT
-  
+
   const isFinalRound = currentRound?.round === currentRound?.total
 
   // Allow custom title or fallback to "Đáp án chính xác là"
   const displayTitle = title || t.rooms?.game?.crackIt?.roundResult || "Kết quả"
-  
+
   return (
     <AnimatePresence>
       {gameState === "result" && (
@@ -35,11 +35,11 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-center mb-2">
-              <CountdownCircle 
-                duration={countdownDuration} 
-                label={isFinalRound 
-                  ? (t.rooms?.game?.crackIt?.tallyingFinalResults || "Đang tổng hợp kết quả chung cuộc...") 
+            <div className="flex justify-center">
+              <CountdownCircle
+                duration={countdownDuration}
+                label={isFinalRound
+                  ? (t.rooms?.game?.crackIt?.tallyingFinalResults || "Đang tổng hợp kết quả chung cuộc...")
                   : (t.rooms?.game?.crackIt?.nextRoundIn || "Ván tiếp theo sẽ bắt đầu sau...")}
               />
             </div>
@@ -60,7 +60,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
                 </div>
               </div>
             )}
-            
+
             {children}
 
             {/* Bảng xếp hạng thu nhỏ của Round */}
@@ -81,7 +81,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
                           <div className="w-6 h-6 md:w-7 md:h-7 shrink-0 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs md:text-sm text-slate-500">
                             #{index + 1}
                           </div>
-                          
+
                           <div className="font-semibold text-sm md:text-base text-slate-800 flex items-center gap-1 flex-1 min-w-0">
                             <span className="truncate">{player.name}</span>
                             {player.isYou && (
@@ -90,7 +90,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
                               </span>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center justify-end gap-1.5 md:gap-3 shrink-0 ml-1">
                             {delta > 0 && (
                               <div className="text-green-600 font-bold text-sm md:text-base bg-green-50 px-1.5 md:px-2 py-0.5 rounded-md">
