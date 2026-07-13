@@ -7,6 +7,7 @@ import NotificationDropdown from "./NotificationDropdown"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -29,6 +30,7 @@ const NotificationWidget = () => {
   const { isAuthenticated } = useAuth()
   const { openAuthModal } = useContext(AuthModalContext)
   const isMobile = useIsMobile(425)
+  const { t } = useLanguage()
 
   useClickOutside(dropdownRef, () => setIsOpen(false), { enabled: isOpen && !isMobile })
 
@@ -87,15 +89,14 @@ const NotificationWidget = () => {
     document.body,
   )
 
-  return null;
   return (
     <div className="relative flex items-center" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-[#E5E5E5] ${isOpen ? "" : ""}`}
-        aria-label="Notifications"
+        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        aria-label={t.header?.notifications || "Notifications"}
       >
-        <Bell />
+        <Bell size={20} />
       </button>
 
       {/* Desktop: dropdown */}

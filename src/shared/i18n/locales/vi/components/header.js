@@ -5,6 +5,8 @@ export default {
   soon: "Sắp ra mắt",
   language: "Ngôn ngữ",
   community: "Cộng đồng",
+  notifications: "Thông báo",
+  noNewNotifications: "Không có thông báo mới",
   searchPlaceholder: "Tìm kiếm phòng hoặc chủ đề",
   languages: {
     vi: "Tiếng Việt",
