@@ -66,11 +66,11 @@ const PuzzleCenter = () => {
 
     // Shuffle nonSpaceIndices deterministically
     for (let i = nonSpaceIndices.length - 1; i > 0; i--) {
-      const j = Math.floor(random() * (i + 1))
+      const j = Math.floor(random() * (i + 1));
       [nonSpaceIndices[i], nonSpaceIndices[j]] = [
-          nonSpaceIndices[j],
-          nonSpaceIndices[i],
-        ]
+        nonSpaceIndices[j],
+        nonSpaceIndices[i],
+      ]
     }
 
     const delayPerChar = 60000 / (nonSpaceIndices.length + 1)
