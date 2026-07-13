@@ -82,10 +82,10 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
                             #{index + 1}
                           </div>
                           
-                          <div className="font-semibold text-sm md:text-base text-slate-800 flex items-center gap-1 flex-1 min-w-0">
-                            <span className="truncate">{player.name}</span>
+                          <div className="font-semibold text-sm md:text-base text-slate-800 flex items-center gap-2 flex-1 min-w-0">
+                            <span className="truncate min-w-0 max-w-full">{player.name}</span>
                             {player.isYou && (
-                              <span className="font-normal text-slate-500 text-[10px] md:text-xs shrink-0 bg-slate-100 px-1.5 md:px-2 py-0.5 rounded-full ml-0.5">
+                              <span className="font-normal text-slate-500 text-[10px] md:text-xs shrink-0 bg-slate-100 px-1.5 md:px-2 py-0.5 rounded-full ml-auto">
                                 {t.rooms?.game?.crackIt?.you || "Bạn"}
                               </span>
                             )}

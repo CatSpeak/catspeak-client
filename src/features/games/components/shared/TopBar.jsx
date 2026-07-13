@@ -2,16 +2,18 @@ import React, { useState, useEffect } from "react"
 import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { motion } from "framer-motion"
-import { Gamepad2, LogOut, Menu, MessageSquare } from "lucide-react"
+import { Gamepad2, LogOut, Menu, MessageSquare, Mic, MicOff } from "lucide-react"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import { useParticipants } from "@livekit/components-react"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
   const { currentRound, timer: initialTimer, gameState, gameType, pictureIt, currentUserId } = useGame()
   const { t } = useLanguage()
   const [timeLeft, setTimeLeft] = useState(0)
   const participants = useParticipants()
+  const { micOn, handleToggleMic } = useGlobalVideoCall()
 
   useEffect(() => {
     setTimeLeft(initialTimer)
@@ -144,6 +146,14 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
             </span>
           )
         )} */}
+
+        <button
+          className={`p-1.5 rounded-xl border border-gray-200 shadow-sm transition-colors ${micOn ? 'text-cath-red-700 bg-red-50 hover:bg-red-100' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+          onClick={handleToggleMic}
+          title={micOn ? "Tắt mic" : "Bật mic"}
+        >
+          {micOn ? <Mic size={20} /> : <MicOff size={20} />}
+        </button>
 
         {onOpenMobileChat && (
           <button

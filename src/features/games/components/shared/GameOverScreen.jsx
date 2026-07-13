@@ -68,12 +68,10 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
                         <div className={`font-bold text-lg md:text-xl w-6 md:w-8 shrink-0 text-center ${isWinner ? 'text-yellow-600' : 'text-slate-400'}`}>
                           {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
                         </div>
-                        <div className="font-semibold text-slate-800 text-base md:text-lg flex flex-col items-start flex-1 min-w-0">
-                          <div className="flex items-center gap-2 w-full">
-                            <span className="truncate">{player.name}</span>
-                          </div>
+                        <div className="font-semibold text-slate-800 text-base md:text-lg flex items-center flex-1 min-w-0 gap-2">
+                          <span className="truncate min-w-0 max-w-full">{player.name}</span>
                           {player.isYou && (
-                            <span className="font-normal text-slate-500 text-xs mt-0.5 bg-slate-200/60 px-2 py-0.5 rounded-full">
+                            <span className="font-normal text-slate-500 text-xs bg-slate-200/60 px-2 py-0.5 rounded-full shrink-0 ml-auto">
                               {t.rooms?.game?.crackIt?.you || "Bạn"}
                             </span>
                           )}

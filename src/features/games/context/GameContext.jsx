@@ -268,6 +268,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     PICTURE_IT_ERROR: (payload) => {
       toast.error(payload.message || "An error occurred.");
       setGameState("idle");
+      resetGameStates();
     },
     JOINED_AS_SPECTATOR: () => {
       setIsSpectator(true);
@@ -510,6 +511,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       );
       setGameState("idle");
       setGameType(null);
+      resetGameStates();
     },
     GAME_ALREADY_STARTED: (payload) => {
       setOngoingGame(true);

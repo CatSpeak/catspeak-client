@@ -33,9 +33,9 @@ const GameSetupModal = ({ open, onClose }) => {
       open={open}
       onClose={onClose}
       title={t.rooms?.game?.setup?.title || "Start a game"}
-      className="bg-white text-slate-900 w-full max-w-3xl rounded-3xl overflow-hidden border border-gray-200 shadow-2xl"
+      className="bg-white text-slate-900 w-full max-w-3xl md:rounded-3xl overflow-hidden md:border border-gray-200 shadow-2xl"
       headerClassName="flex items-center justify-between p-4 pl-6 border-b border-gray-100"
-      fullScreenOnMobile={false}
+      fullScreenOnMobile={true}
     >
       <div className="py-6 px-6 text-slate-600 flex flex-col gap-6">
 
