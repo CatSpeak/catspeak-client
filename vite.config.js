@@ -19,14 +19,14 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://staging-api.catspeak.com.vn",
           // target: "http://localhost:5001",
           changeOrigin: true,
           // secure: true,
           secure: false,
         },
         "/hubs": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://staging-api.catspeak.com.vn",
           // target: "http://localhost:5001",
           changeOrigin: true,
           // secure: true,
