@@ -5,7 +5,7 @@ import { useGame } from "@/features/games/context/GameContext"
 
 const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
   const { t } = useLanguage()
-  const { exitGame, gameType } = useGame()
+  const { exitGame, gameType, isSpectator } = useGame()
 
   const isPictureIt = gameType === 'picture_it' || gameType === 'picture-it'
   const tm = isPictureIt ? (t.rooms?.game?.pictureIt?.modals || {}) : (t.rooms?.game?.crackIt || {})
@@ -21,7 +21,9 @@ const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
     >
       <div className="py-6 px-6 text-center text-slate-600">
         <p>{tm.exitConfirmDesc1 || "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?"}</p>
-        <p className="text-cath-red-600 font-semibold mt-2">{tm.exitConfirmDesc2 || "Bạn sẽ không thể tham gia lại ván chơi này nữa!"}</p>
+        {!isSpectator && (
+          <p className="text-cath-red-600 font-semibold mt-2">{tm.exitConfirmDesc2 || "Bạn sẽ không thể tham gia lại ván chơi này nữa!"}</p>
+        )}
       </div>
       <div className="flex gap-3 p-4 border-t border-gray-100 bg-gray-50">
         <button

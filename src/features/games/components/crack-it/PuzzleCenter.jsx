@@ -3,7 +3,7 @@ import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PuzzleCenter = () => {
-  const { puzzle } = useGame()
+  const { puzzle, currentRound } = useGame()
   const { t, language } = useLanguage()
 
   if (!puzzle) return null
@@ -33,17 +33,18 @@ const PuzzleCenter = () => {
   useEffect(() => {
     if (!puzzle) return
 
-    // Initial mask
     const initialMask =
       puzzle.word_mask ||
       Array.from({ length: puzzle.word_count || 1 })
         .map(() => "-")
         .join("")
 
-    setDisplayMask(initialMask)
-
     const answer = puzzle.correct_answer
-    if (!answer) return
+
+    if (!answer || !currentRound?.started_at) {
+      setDisplayMask(initialMask)
+      return
+    }
 
     const nonSpaceIndices = []
     for (let i = 0; i < answer.length; i++) {
@@ -52,7 +53,10 @@ const PuzzleCenter = () => {
       }
     }
 
-    if (nonSpaceIndices.length === 0) return
+    if (nonSpaceIndices.length === 0) {
+      setDisplayMask(initialMask)
+      return
+    }
 
     // Deterministic random based on puzzle answer string so all clients get the same order
     let seed = 0
@@ -74,24 +78,29 @@ const PuzzleCenter = () => {
     }
 
     const delayPerChar = 60000 / (nonSpaceIndices.length + 1)
-    let step = 0
+    const startedAtTime = new Date(currentRound.started_at).getTime()
 
-    const interval = setInterval(() => {
-      if (step < nonSpaceIndices.length) {
-        const idx = nonSpaceIndices[step]
-        setDisplayMask((prev) => {
-          const arr = prev.split("")
-          arr[idx] = answer[idx]
-          return arr.join("")
-        })
-        step++
-      } else {
+    const updateMask = () => {
+      const elapsedMs = Math.max(0, Date.now() - startedAtTime)
+      const stepsElapsed = Math.min(Math.floor(elapsedMs / delayPerChar), nonSpaceIndices.length)
+
+      let currentMaskArr = initialMask.split("")
+      for (let i = 0; i < stepsElapsed; i++) {
+        const idx = nonSpaceIndices[i]
+        currentMaskArr[idx] = answer[idx]
+      }
+      setDisplayMask(currentMaskArr.join(""))
+
+      if (stepsElapsed >= nonSpaceIndices.length) {
         clearInterval(interval)
       }
-    }, delayPerChar)
+    }
+
+    updateMask() // Initial update
+    const interval = setInterval(updateMask, 200) // check 5 times a second
 
     return () => clearInterval(interval)
-  }, [puzzle])
+  }, [puzzle, currentRound?.started_at])
 
   return (
     <div className="flex-1 bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
