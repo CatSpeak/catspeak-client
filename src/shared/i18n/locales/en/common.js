@@ -38,6 +38,7 @@ export default {
     worldNews: "World News",
     reels: "Reels",
     video: "Video",
+    mail: "Mail",
     calendar: "Calendar",
     cart: "Cart",
     courses: "Courses",

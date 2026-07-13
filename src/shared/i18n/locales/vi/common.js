@@ -38,6 +38,7 @@ export default {
     worldNews: "Bản tin thế giới",
     reels: "Reels",
     video: "Video",
+    mail: "Thư",
     calendar: "Lịch",
     cart: "Giỏ hàng",
     courses: "Khóa học",
