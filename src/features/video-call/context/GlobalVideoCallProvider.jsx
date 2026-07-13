@@ -79,15 +79,25 @@ const IDLE_VALUE = {
   setUnreadAiChat: () => {},
   setIsChatCollapsed: () => {},
   setIsAiCollapsed: () => {},
+  speakingAssistantEnabled: false,
+  setSpeakingAssistantEnabled: () => {},
 }
 
 const IdleCallContent = ({
   children,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
+  speakingAssistantEnabled,
+  setSpeakingAssistantEnabled,
 }) => (
   <GlobalVideoCallContext.Provider
-    value={{ ...IDLE_VALUE, receiveSystemMsgs, setReceiveSystemMsgs }}
+    value={{
+      ...IDLE_VALUE,
+      receiveSystemMsgs,
+      setReceiveSystemMsgs,
+      speakingAssistantEnabled,
+      setSpeakingAssistantEnabled,
+    }}
   >
     {children}
   </GlobalVideoCallContext.Provider>
@@ -105,15 +115,29 @@ export const GlobalVideoCallProvider = ({ children }) => {
     return saved !== null ? JSON.parse(saved) : true
   })
 
+  const [speakingAssistantEnabled, setSpeakingAssistantEnabled] = useState(() => {
+    const saved = localStorage.getItem("speakingAssistantEnabled")
+    return saved !== null ? JSON.parse(saved) : false
+  })
+
   useEffect(() => {
     localStorage.setItem("receiveSystemMsgs", JSON.stringify(receiveSystemMsgs))
   }, [receiveSystemMsgs])
+
+  useEffect(() => {
+    localStorage.setItem(
+      "speakingAssistantEnabled",
+      JSON.stringify(speakingAssistantEnabled),
+    )
+  }, [speakingAssistantEnabled])
 
   if (!isInCall || !livekitToken) {
     return (
       <IdleCallContent
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        speakingAssistantEnabled={speakingAssistantEnabled}
+        setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
       >
         {children}
       </IdleCallContent>
@@ -134,6 +158,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
         ContextProvider={GlobalVideoCallContext.Provider}
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        speakingAssistantEnabled={speakingAssistantEnabled}
+        setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
       >
         {children}
       </GlobalCallContent>

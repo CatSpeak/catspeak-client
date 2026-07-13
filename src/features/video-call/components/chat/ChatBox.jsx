@@ -25,6 +25,8 @@ const ChatBox = ({
     aiMessages = [],
     receiveSystemMsgs,
     setReceiveSystemMsgs,
+    speakingAssistantEnabled,
+    setSpeakingAssistantEnabled,
     isChatCollapsed,
     setIsChatCollapsed,
     isAiCollapsed,
@@ -90,7 +92,7 @@ const ChatBox = ({
     : { flex: `${100 - aiSplit} 0 0%`, minHeight: 0 }
 
   const settingsPopoverContent = (
-    <div className="bg-white rounded-lg shadow-lg border border-[#E5E5E5] p-3 w-max">
+    <div className="bg-white rounded-lg shadow-lg border border-[#E5E5E5] p-3 w-max flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
         <span className="text-sm whitespace-nowrap">
           {t.rooms?.chatBox?.showSystemMessages ||
@@ -99,6 +101,17 @@ const ChatBox = ({
         <Switch
           checked={receiveSystemMsgs}
           onChange={(e) => setReceiveSystemMsgs(e.target.checked)}
+          colorClass="peer-checked:bg-green-500"
+        />
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-sm whitespace-nowrap">
+          {t.rooms?.chatBox?.speakingAssistant ||
+            "Speaking Assistant Suggestions"}
+        </span>
+        <Switch
+          checked={speakingAssistantEnabled}
+          onChange={(e) => setSpeakingAssistantEnabled(e.target.checked)}
           colorClass="peer-checked:bg-green-500"
         />
       </div>
