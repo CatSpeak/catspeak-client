@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion'
 import { Flag, ImageOff, Loader2, Mic } from 'lucide-react'
 import { CategoryBadge } from './round-result'
@@ -20,6 +21,24 @@ const PictureItImageCard = ({
 }) => {
   const { t } = useLanguage()
   const ic = t.rooms?.game?.pictureIt?.imageCard || {}
+
+  useEffect(() => {
+    if (!displayImageUrl) {
+      setImgLoading(true)
+      return
+    }
+    setImgLoading(true)
+    setImgError(false)
+    const img = new Image()
+    img.src = displayImageUrl
+    if (img.complete) {
+      setImgLoading(false)
+      setImgError(false)
+    } else {
+      img.onload = () => { setImgLoading(false); setImgError(false); }
+      img.onerror = () => { setImgLoading(false); setImgError(true); }
+    }
+  }, [displayImageUrl, setImgLoading, setImgError])
 
   return (
     <div className="rounded-[24px] border border-[#E5E5E5] bg-white p-3 md:p-4 flex flex-col gap-2 md:gap-3 flex-1 min-h-0">
@@ -47,11 +66,6 @@ const PictureItImageCard = ({
             className={`h-full w-full object-cover transition-all duration-500 ${imgLoading ? 'opacity-0' : 'opacity-100'
               } ${!isDescriber && imageBlurred ? 'blur-xl scale-110' : 'blur-0 scale-100'
               }`}
-            onLoad={() => setImgLoading(false)}
-            onError={() => {
-              setImgLoading(false)
-              setImgError(true)
-            }}
           />
         )}
 

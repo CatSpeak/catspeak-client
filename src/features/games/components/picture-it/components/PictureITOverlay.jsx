@@ -38,11 +38,7 @@ const PictureITOverlay = () => {
   const roundNumber = currentRound?.round || 0
 
   useEffect(() => {
-    setImgLoading(true);
-    setImgError(false);
-  }, [displayImageUrl]);
-
-  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedRating(0);
     setHoveredRating(0);
     setMyFlagged(false);
@@ -51,7 +47,7 @@ const PictureITOverlay = () => {
   const isPictureIt = gameType === 'picture_it' || gameType === 'picture-it'
   const open = isPictureIt && !['idle'].includes(gameState)
 
-  const isDescriber = pictureIt?.describerId === currentUserId
+  const isDescriber = Number(pictureIt?.describerId) === Number(currentUserId)
   const isDescribing = gameState === 'playing' && !pictureIt?.ratingOpen
   const isRatingPhase = gameState === 'playing' && pictureIt?.ratingOpen
   const showResultModal = gameState === 'result'
@@ -103,6 +99,7 @@ const PictureITOverlay = () => {
         const meta = JSON.parse(p.metadata)
         avatar = meta.avatarUrl
         if (meta.username) name = meta.username
+        // eslint-disable-next-line no-unused-vars
       } catch (_error) { /* ignore */ }
     }
     return { id: descId, name, avatar }

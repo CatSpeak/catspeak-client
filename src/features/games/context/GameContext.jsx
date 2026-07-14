@@ -233,8 +233,12 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         raterCount: 0,
       }));
     },
-    DESCRIBE_STARTED: () => {
-      setPictureItState((prev) => ({ ...prev, describeStarted: true }));
+    DESCRIBE_STARTED: (payload) => {
+      setPictureItState((prev) => ({ 
+        ...prev, 
+        describeStarted: true,
+        describeStartTime: payload?.describe_start_time
+      }));
     },
     DESCRIBE_ENDED: (payload) => {
       setPictureItState((prev) => ({
@@ -337,7 +341,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
-                } catch (e) { }
+                  // eslint-disable-next-line no-unused-vars
+                } catch (e) { /* empty */ }
               }
               return {
                 id: pId,
@@ -381,6 +386,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
+                  // eslint-disable-next-line no-empty, no-unused-vars
                 } catch (e) { }
               }
               return {
@@ -455,22 +461,32 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           total: payload.current_round?.total,
         });
         const describerId = payload.current_round?.describer_id;
-        const isDescriber = describerId === currentUserId;
+        const isDescriber = Number(describerId) === Number(currentUserId);
+        const isRatingOpen = payload.rating_open || false;
 
         setPictureItState((prev) => ({
           ...prev,
           describerId: describerId,
           describerOrder: payload.describer_order || [],
           imageUrl: payload.current_round?.image_url,
-          imageUrlFull: isDescriber ? payload.current_round?.image_url : null,
-          imageBlurred: !isDescriber,
+          imageUrlFull: (isDescriber || isRatingOpen) ? payload.current_round?.image_url : null,
+          imageBlurred: !(isDescriber || isRatingOpen),
           forbiddenWords: payload.current_round?.forbidden_words || [],
           category: payload.current_round?.category,
-          describeStarted: payload.current_round?.describe_started || false,
-          ratingOpen: payload.rating_open || false,
+          describeStarted: isRatingOpen ? false : (payload.current_round?.describe_started || false),
+          describeStartTime: payload.current_round?.describe_start_time,
+          ratingOpen: isRatingOpen,
+          ratingCountdownSec: payload.current_round?.rating_countdown_sec || 0,
+          myRatingSubmitted: payload.current_round?.my_rating_submitted || false,
+          flagCount: payload.current_round?.flag_count || 0,
+          raterCount: payload.current_round?.rater_count || 0,
           roundAverageRating: null,
           roundDescriberId: null,
         }));
+
+        if (payload.rating_open && payload.current_round?.rating_countdown_sec > 0) {
+          startRatingTimer(payload.current_round.rating_countdown_sec);
+        }
 
         const sortedLeaderboard = Object.entries(payload.scores || {})
           .map(([id, score]) => ({ id: Number(id), score }))
