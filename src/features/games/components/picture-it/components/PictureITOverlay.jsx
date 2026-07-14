@@ -34,16 +34,19 @@ const PictureITOverlay = () => {
   const [selectedRating, setSelectedRating] = useState(0)
   const [myFlagged, setMyFlagged] = useState(false)
 
-    useEffect(() => {
-      setImgLoading(true);
-      setImgError(false);
-    }, [displayImageUrl]);
+  const displayImageUrl = pictureIt?.imageUrlFull || pictureIt?.imageUrl
+  const roundNumber = currentRound?.round || 0
 
-    useEffect(() => {
-      setSelectedRating(0);
-      setHoveredRating(0);
-      setMyFlagged(false);
-    }, [roundNumber]);
+  useEffect(() => {
+    setImgLoading(true);
+    setImgError(false);
+  }, [displayImageUrl]);
+
+  useEffect(() => {
+    setSelectedRating(0);
+    setHoveredRating(0);
+    setMyFlagged(false);
+  }, [roundNumber]);
 
   const isPictureIt = gameType === 'picture_it' || gameType === 'picture-it'
   const open = isPictureIt && !['idle'].includes(gameState)
@@ -58,11 +61,8 @@ const PictureITOverlay = () => {
   const hasDescribeStarted = pictureIt?.describeStarted
 
   const totalRounds = currentRound?.total || 0
-  const roundNumber = currentRound?.round || 0
   const forbiddenWords = pictureIt?.forbiddenWords || []
   const imageBlurred = pictureIt?.imageBlurred
-
-  const displayImageUrl = pictureIt?.imageUrlFull || pictureIt?.imageUrl
 
   const handleDescribeStart = useCallback(() => {
     if (!isDescriber) return
@@ -83,6 +83,7 @@ const PictureITOverlay = () => {
   const handleSubmitRating = useCallback(() => {
     if (selectedRating === 0 || isDescriber || isSpectator) return
     submitPictureItRating(selectedRating)
+
     setSelectedRating(0)
   }, [selectedRating, isDescriber, isSpectator, submitPictureItRating])
 
@@ -102,7 +103,7 @@ const PictureITOverlay = () => {
         const meta = JSON.parse(p.metadata)
         avatar = meta.avatarUrl
         if (meta.username) name = meta.username
-      } catch (e) { }
+      } catch (_error) { /* ignore */ }
     }
     return { id: descId, name, avatar }
   })()
