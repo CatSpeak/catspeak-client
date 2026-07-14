@@ -236,6 +236,10 @@ export default {
       noPlaylistsDesc: "保存视频到播放列表以整理并重温你喜欢的内容！",
       createFirst: "创建第一个播放列表",
       createdOn: "创建于",
+      noVideosInPlaylist: "此播放列表中没有视频。",
+      removingFromPlaylist: "正在移除...",
+      removedFromPlaylist: "已从播放列表中移除。",
+      removeFailed: "移除失败。",
     },
   },
   mail: {

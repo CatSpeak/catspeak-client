@@ -73,7 +73,7 @@ const WorkspaceReelsContent = ({ userId }) => {
               fullWidth={false}
               className="border-none mb-0"
             />
-            {!id && (
+            {!id && activeTab === "myReels" && (
               <button
                 onClick={() => setIsUploadOpen(true)}
                 className="bg-cath-red-700 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-cath-red-600 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center space-x-1 text-sm shrink-0 mb-3 ml-4"

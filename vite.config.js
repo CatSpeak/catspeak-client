@@ -29,17 +29,17 @@ export default defineConfig(({ mode }) => {
           secure: true,
         },
         "/api/v1/Payments": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
         "/api": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
         "/hubs": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
           ws: true,

@@ -249,8 +249,12 @@ export default {
       totalSaved: "Total Saved",
       noPlaylists: "No playlists yet",
       noPlaylistsDesc: "Save reels to playlists to organize and revisit your favorite content!",
-      createFirst: "Create First Playlist",
+      createFirst: "Create your first playlist",
       createdOn: "Created on",
+      noVideosInPlaylist: "No videos in this playlist.",
+      removingFromPlaylist: "Removing...",
+      removedFromPlaylist: "Removed from playlist.",
+      removeFailed: "Failed to remove.",
     },
   },
   mail: {

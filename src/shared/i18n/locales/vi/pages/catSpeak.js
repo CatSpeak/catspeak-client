@@ -209,6 +209,10 @@ export default {
       noPlaylistsDesc: "Lưu Reels vào danh sách phát để sắp xếp và xem lại nội dung yêu thích!",
       createFirst: "Tạo danh sách phát đầu tiên",
       createdOn: "Tạo ngày",
+      noVideosInPlaylist: "Không có video nào trong danh sách phát này.",
+      removingFromPlaylist: "Đang xóa...",
+      removedFromPlaylist: "Đã xóa khỏi danh sách phát.",
+      removeFailed: "Xóa thất bại.",
     },
   },
   mail: {
