@@ -70,7 +70,7 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
                             <div className="font-semibold text-slate-800 text-base md:text-lg flex items-center flex-1 min-w-0 gap-2">
                               <span className="truncate min-w-0 max-w-full">{player.name}</span>
                               {player.isYou && (
-                                <span className="font-normal text-slate-500 text-xs bg-slate-200/60 px-2 py-0.5 rounded-full shrink-0 ml-auto">
+                                <span className="font-normal text-slate-500 text-xs bg-slate-200/60 px-2 py-0.5 rounded-full shrink-0">
                                   {t.rooms?.game?.crackIt?.you || "Bạn"}
                                 </span>
                               )}

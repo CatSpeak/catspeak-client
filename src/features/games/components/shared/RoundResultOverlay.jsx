@@ -52,7 +52,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
 
             {roundResults?.correct_answer && (
               <div className="flex flex-col items-center mb-2">
-                <h2 className="text-xl font-black text-slate-800 uppercase tracking-wider mb-2 drop-shadow-sm text-center">
+                <h2 className="text-base md:text-xl font-black text-slate-800 uppercase tracking-wider mb-2 drop-shadow-sm text-center">
                   {displayTitle}:
                 </h2>
                 <div className="text-4xl md:text-5xl font-black text-green-600 mb-2 tracking-widest drop-shadow-md text-center px-4 break-words w-full">
@@ -85,7 +85,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
                           <div className="font-semibold text-sm md:text-base text-slate-800 flex items-center gap-2 flex-1 min-w-0">
                             <span className="truncate min-w-0 max-w-full">{player.name}</span>
                             {player.isYou && (
-                              <span className="font-normal text-slate-500 text-[10px] md:text-xs shrink-0 bg-slate-100 px-1.5 md:px-2 py-0.5 rounded-full ml-auto">
+                              <span className="font-normal text-slate-500 text-[10px] md:text-xs shrink-0 bg-slate-100 px-1.5 md:px-2 py-0.5 rounded-full">
                                 {t.rooms?.game?.crackIt?.you || "Bạn"}
                               </span>
                             )}

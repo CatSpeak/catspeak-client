@@ -67,7 +67,7 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
         <div className="font-semibold text-slate-800 text-sm flex items-center gap-1 min-w-0">
           <span className="truncate min-w-0 max-w-full">{player.name}</span>
           {player.isYou && (
-            <span className="font-normal text-slate-500 text-xs shrink-0 ml-auto">
+            <span className="font-normal text-slate-500 text-xs shrink-0">
               ({t.rooms?.game?.crackIt?.you || "Bạn"})
             </span>
           )}
@@ -96,7 +96,7 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
       {player.hasLeft && (
         <div className="shrink-0 ml-2">
           <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-            Out
+            {t.rooms?.game?.crackIt?.out || "Thoát"}
           </span>
         </div>
       )}
@@ -207,7 +207,7 @@ const GameSidebar = () => {
         <div className="flex flex-col overflow-y-auto flex-1 min-h-0 relative">
           <AnimatePresence mode="popLayout">
             {players.map((player, index) => {
-              const participant = participants.find(p => String(p.identity) === player.id)
+              const participant = player.hasLeft ? undefined : participants.find(p => String(p.identity) === player.id)
 
               const innerContent = (
                 <PlayerItemContent
@@ -230,7 +230,7 @@ const GameSidebar = () => {
                   key={player.id} 
                   className="w-full"
                 >
-                  {participant && !player.isYou ? (
+                  {participant && !player.isYou && !player.hasLeft ? (
                     <ParticipantVolumePopover participant={participant}>
                       <div className="group flex items-center gap-3 py-3 px-3 md:px-4 border-b border-transparent last:border-0 w-full h-full cursor-pointer transition-colors border-b-gray-100 hover:border-transparent relative rounded-xl">
                         {innerContent}
@@ -264,26 +264,56 @@ const GameSidebar = () => {
       {spectators.length > 0 && (
         <div className="shrink-0 max-h-[35%] bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-100 p-4 md:p-6 flex flex-col">
           <h4 className="text-xs font-black text-gray-400 mb-3 uppercase tracking-wider pl-2 shrink-0">
-            Người xem ({spectators.length})
+            {t.rooms?.game?.crackIt?.spectators || "Người xem"} ({spectators.length})
           </h4>
           <div className="flex flex-col gap-2 overflow-y-auto pr-2 min-h-0">
-            {spectators.map(spectator => (
-              <div key={spectator.id} className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50">
-                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold shrink-0 text-sm">
-                  {(spectator.name || "?").charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-gray-600 truncate text-sm flex items-center gap-1">
-                    <span className="truncate">{spectator.name}</span>
-                    {spectator.isYou && (
-                      <span className="font-normal text-gray-400 text-xs shrink-0">
-                        ({t.rooms?.game?.crackIt?.you || "Bạn"})
-                      </span>
-                    )}
+            {spectators.map(spectator => {
+              const participant = participants.find(p => String(p.identity) === spectator.id)
+
+              const innerContent = (
+                <>
+                  {participant ? (
+                    <SpeakingAvatar participant={participant} name={spectator.name} />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold shrink-0 text-sm">
+                      {(spectator.name || "?").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-gray-600 text-sm flex items-center gap-1 min-w-0">
+                      <span className="truncate min-w-0 max-w-full">{spectator.name}</span>
+                      {spectator.isYou && (
+                        <span className="font-normal text-gray-400 text-xs shrink-0">
+                          ({t.rooms?.game?.crackIt?.you || "Bạn"})
+                        </span>
+                      )}
+                    </div>
                   </div>
+                </>
+              )
+
+              return (
+                <div key={spectator.id}>
+                  {participant && !spectator.isYou ? (
+                    <ParticipantVolumePopover participant={participant}>
+                      <div className="group flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 cursor-pointer relative">
+                        {innerContent}
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center pointer-events-none">
+                          <div className="w-4 h-8 bg-gradient-to-r from-transparent to-[#F9FAFB]"></div>
+                          <div className="bg-[#F9FAFB] h-8 flex items-center text-gray-400 pr-1">
+                            <SlidersHorizontal size={14} />
+                          </div>
+                        </div>
+                      </div>
+                    </ParticipantVolumePopover>
+                  ) : (
+                    <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 relative">
+                      {innerContent}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

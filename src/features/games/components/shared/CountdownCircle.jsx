@@ -81,7 +81,7 @@ const CountdownCircle = ({ duration = 3, onComplete, label }) => {
         </div>
       </div>
 
-      <p className="text-2xl font-bold text-slate-800 tracking-tight text-center">
+      <p className="text-lg md:text-2xl font-bold text-slate-800 tracking-tight text-center">
         {label || "Vòng tiếp theo bắt đầu sau..."}
       </p>
     </div>
