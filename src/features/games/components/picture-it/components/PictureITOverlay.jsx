@@ -1,11 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useParticipants } from '@livekit/components-react'
-import { X } from 'lucide-react'
 
-import { FluentAnimation } from '@/shared/components/ui/animations'
 import { PillButton } from '@/shared/components/ui/buttons'
-import { LeaderboardCard, RoundResultModal, GameOverModal } from './round-result'
+import { RoundResultModal, GameOverModal } from './round-result'
 import { useGame } from '@/features/games/context/GameContext'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import BaseGameOverlay from '@/features/games/components/shared/BaseGameOverlay'
@@ -18,7 +15,6 @@ const PictureITOverlay = () => {
     gameType,
     gameLanguage,
     currentRound,
-    countdown,
     pictureIt,
     currentUserId,
     isSpectator,

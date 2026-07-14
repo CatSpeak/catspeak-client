@@ -146,9 +146,10 @@ const GameSidebar = () => {
     let score = 0
     const isYou = idStr === currentUserId?.toString()
 
+    score = scores[idStr] || 0
+
     if (isPictureIt && pictureIt?.leaderboard) {
       const pData = pictureIt.leaderboard.find(p => p.id.toString() === idStr)
-      score = pData ? pData.totalScore : 0
       
       if (pData && pData.name) {
         name = pData.name
@@ -157,7 +158,6 @@ const GameSidebar = () => {
         name = p?.name || `Người chơi ${idStr}`
       }
     } else {
-      score = scores[idStr] || 0
       
       if (playerNames[idStr]) {
         name = playerNames[idStr]

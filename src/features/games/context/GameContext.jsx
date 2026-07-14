@@ -192,6 +192,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           myRatingSubmitted: false,
           flagCount: 0,
           raterCount: 0,
+          roundAverageRating: null,
+          roundDescriberId: null,
         }));
       } else {
         setPuzzle({
@@ -467,6 +469,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           category: payload.current_round?.category,
           describeStarted: payload.current_round?.describe_started || false,
           ratingOpen: payload.rating_open || false,
+          roundAverageRating: null,
+          roundDescriberId: null,
         }));
 
         const sortedLeaderboard = Object.entries(payload.scores || {})
