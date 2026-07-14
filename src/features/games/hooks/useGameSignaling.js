@@ -39,7 +39,8 @@ export const useGameSignaling = (handlers = {}) => {
       "SYNC_GAME_STATE", "GAME_FORCE_STOP", "GAME_ALREADY_STARTED",
       "JOINED_AS_SPECTATOR", "ROUND_START_DESCRIBER", "DESCRIBE_STARTED",
       "DESCRIBE_ENDED", "FLAG_SUBMITTED", "ROUND_FLAGGED",
-      "RATING_OPEN", "ROUND_SKIPPED", "PICTURE_IT_ERROR"
+      "RATING_OPEN", "ROUND_SKIPPED", "PICTURE_IT_ERROR", "PLAYER_SPECTATING",
+      "SPECTATOR_LEFT"
     ];
 
     events.forEach(evt => newConnection.on(evt, safeHandler(evt)));

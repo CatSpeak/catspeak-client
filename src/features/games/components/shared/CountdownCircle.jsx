@@ -3,20 +3,12 @@ import { motion, AnimatePresence } from "framer-motion"
 import { fluentEaseOut } from "@/shared/utils/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-/**
- * CountdownCircle
- * @param {number}   duration    - Total countdown seconds (default: 3)
- * @param {Function} onComplete  - Called when countdown reaches 0
- */
 const RADIUS = 28
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const SIZE = 80 // SVG viewport size
 
-
-const CountdownCircle = ({ duration = 3, onComplete }) => {
+const CountdownCircle = ({ duration = 3, onComplete, label }) => {
   const { t } = useLanguage();
-  const rr = t.rooms?.game?.pictureIt?.roundResult || {};
-
   const [remaining, setRemaining] = useState(duration)
   const intervalRef = useRef(null)
   const startTimeRef = useRef(Date.now())
@@ -33,18 +25,16 @@ const CountdownCircle = ({ duration = 3, onComplete }) => {
         clearInterval(intervalRef.current)
         onComplete?.()
       }
-    }, 200) // poll at 200ms for precision
+    }, 200)
 
     return () => clearInterval(intervalRef.current)
-  }, [duration])
+  }, [duration, onComplete])
 
-  // Progress: 1 = full ring, 0 = empty ring
   const progress = remaining / duration
   const dashOffset = CIRCUMFERENCE * (1 - progress)
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      {/* SVG ring */}
+    <div className="flex flex-col items-center">
       <div className="relative flex items-center justify-center">
         <svg
           width={SIZE}
@@ -53,7 +43,6 @@ const CountdownCircle = ({ duration = 3, onComplete }) => {
           className="-rotate-90"
           aria-hidden="true"
         >
-          {/* Track */}
           <circle
             cx={SIZE / 2}
             cy={SIZE / 2}
@@ -62,7 +51,6 @@ const CountdownCircle = ({ duration = 3, onComplete }) => {
             stroke="#E5E5E5"
             strokeWidth={4}
           />
-          {/* Animated progress ring */}
           <circle
             cx={SIZE / 2}
             cy={SIZE / 2}
@@ -77,7 +65,6 @@ const CountdownCircle = ({ duration = 3, onComplete }) => {
           />
         </svg>
 
-        {/* Center countdown number */}
         <div className="absolute inset-0 flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.span
@@ -94,9 +81,8 @@ const CountdownCircle = ({ duration = 3, onComplete }) => {
         </div>
       </div>
 
-      {/* Label */}
-      <p className="text-2xl font-bold text-headingColor tracking-tight">
-        {rr.nextRoundStartsIn || 'Next round starts in...'}
+      <p className="text-lg md:text-2xl font-bold text-slate-800 tracking-tight text-center">
+        {label || "Vòng tiếp theo bắt đầu sau..."}
       </p>
     </div>
   )

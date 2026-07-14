@@ -1,17 +1,17 @@
-import React from "react";
-import { Calendar, Trophy, ChevronDown, ChevronUp, Star } from "lucide-react";
-import Avatar from "@/shared/components/ui/Avatar";
-import { useLanguage } from "@/shared/context/LanguageContext";
+import React from "react"
+import { Calendar, Trophy, ChevronDown, ChevronUp, Star } from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
+    const date = new Date(dateString)
+    return date.toLocaleString()
+  }
 
-  const hasWinners = match.winners && match.winners.length > 0;
+  const hasWinners = match.winners && match.winners.length > 0
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200" >
@@ -80,16 +80,15 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
           {match.leaderboard && match.leaderboard.length > 0 ? (
             <div className="flex flex-col gap-2">
               {match.leaderboard.map((item, idx) => {
-                const isWinner = idx === 0 && item.totalScore > 0;
+                const isWinner = idx === 0 && item.totalScore > 0
 
                 return (
                   <div
                     key={item.player.userId}
-                    className={`flex items-center justify-between p-3 rounded-xl ${
-                      idx === 0
+                    className={`flex items-center justify-between p-3 rounded-xl ${idx === 0
                         ? "bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200/50"
                         : "bg-white border border-gray-100"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-6 text-center font-bold text-slate-400">
@@ -116,7 +115,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                         )}
                       </div>
                     </div>
-                    <div className={`font-black text-cath-red-500 text-lg ${match.gameType === "crack_it"? "" :  "flex items-center"} gap-1`}>
+                    <div className={`font-black text-cath-red-500 text-lg ${match.gameType === "crack_it" ? "" : "flex items-center"} gap-1`}>
                       {item.totalScore}{" "}
                       <span className="text-xs font-medium text-slate-400 ml-1">
                         {match.gameType === "crack_it" ? (
@@ -131,7 +130,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                       </span>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           ) : (
@@ -142,7 +141,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default HistoryMatchItem;
+export default HistoryMatchItem

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useGame } from "@/features/video-call/context/GameContext";
-import { useLanguage } from "@/shared/context/LanguageContext";
+import React, { useState, useEffect } from "react"
+import { useGame } from "@/features/games/context/GameContext"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PuzzleCenter = () => {
-  const { puzzle } = useGame();
-  const { t, language } = useLanguage();
+  const { puzzle, currentRound } = useGame()
+  const { t, language } = useLanguage()
 
-  if (!puzzle) return null;
+  if (!puzzle) return null
 
   const hintContent = (() => {
     // Nếu ngôn ngữ UI là 'zh', ưu tiên hiển thị tiếng Trung
@@ -16,7 +16,7 @@ const PuzzleCenter = () => {
           <div className="text-2xl font-medium text-slate-800">{puzzle.hint_zh}</div>
           <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
         </div>
-      ) : puzzle.hint_en;
+      ) : puzzle.hint_en
     }
 
     // Nếu ngôn ngữ UI là 'vi' hoặc 'en' (hoặc khác), ưu tiên hiển thị tiếng Anh
@@ -25,44 +25,48 @@ const PuzzleCenter = () => {
         <div className="text-2xl font-medium text-slate-800">{puzzle.hint_zh}</div>
         <div className="text-lg text-slate-500">{puzzle.hint_pinyin}</div>
       </div>
-    );
-  })();
+    )
+  })()
 
-  const [displayMask, setDisplayMask] = useState("");
+  const [displayMask, setDisplayMask] = useState("")
 
   useEffect(() => {
-    if (!puzzle) return;
+    if (!puzzle) return
 
-    // Initial mask
     const initialMask =
       puzzle.word_mask ||
       Array.from({ length: puzzle.word_count || 1 })
         .map(() => "-")
-        .join("");
+        .join("")
 
-    setDisplayMask(initialMask);
+    const answer = puzzle.correct_answer
 
-    const answer = puzzle.correct_answer;
-    if (!answer) return;
+    if (!answer || !currentRound?.started_at) {
+      setDisplayMask(initialMask)
+      return
+    }
 
-    const nonSpaceIndices = [];
+    const nonSpaceIndices = []
     for (let i = 0; i < answer.length; i++) {
       if (answer[i] !== " ") {
-        nonSpaceIndices.push(i);
+        nonSpaceIndices.push(i)
       }
     }
 
-    if (nonSpaceIndices.length === 0) return;
+    if (nonSpaceIndices.length === 0) {
+      setDisplayMask(initialMask)
+      return
+    }
 
     // Deterministic random based on puzzle answer string so all clients get the same order
-    let seed = 0;
+    let seed = 0
     for (let i = 0; i < answer.length; i++) {
-      seed += answer.charCodeAt(i) * (i + 1);
+      seed += answer.charCodeAt(i) * (i + 1)
     }
     const random = () => {
-      seed = (seed * 9301 + 49297) % 233280;
-      return seed / 233280;
-    };
+      seed = (seed * 9301 + 49297) % 233280
+      return seed / 233280
+    }
 
     // Shuffle nonSpaceIndices deterministically
     for (let i = nonSpaceIndices.length - 1; i > 0; i--) {
@@ -70,28 +74,33 @@ const PuzzleCenter = () => {
       [nonSpaceIndices[i], nonSpaceIndices[j]] = [
         nonSpaceIndices[j],
         nonSpaceIndices[i],
-      ];
+      ]
     }
 
-    const delayPerChar = 60000 / (nonSpaceIndices.length + 1);
-    let step = 0;
+    const delayPerChar = 60000 / (nonSpaceIndices.length + 1)
+    const startedAtTime = new Date(currentRound.started_at).getTime()
 
-    const interval = setInterval(() => {
-      if (step < nonSpaceIndices.length) {
-        const idx = nonSpaceIndices[step];
-        setDisplayMask((prev) => {
-          const arr = prev.split("");
-          arr[idx] = answer[idx];
-          return arr.join("");
-        });
-        step++;
-      } else {
-        clearInterval(interval);
+    const updateMask = () => {
+      const elapsedMs = Math.max(0, Date.now() - startedAtTime)
+      const stepsElapsed = Math.min(Math.floor(elapsedMs / delayPerChar), nonSpaceIndices.length)
+
+      let currentMaskArr = initialMask.split("")
+      for (let i = 0; i < stepsElapsed; i++) {
+        const idx = nonSpaceIndices[i]
+        currentMaskArr[idx] = answer[idx]
       }
-    }, delayPerChar);
+      setDisplayMask(currentMaskArr.join(""))
 
-    return () => clearInterval(interval);
-  }, [puzzle]);
+      if (stepsElapsed >= nonSpaceIndices.length) {
+        clearInterval(interval)
+      }
+    }
+
+    updateMask() // Initial update
+    const interval = setInterval(updateMask, 200) // check 5 times a second
+
+    return () => clearInterval(interval)
+  }, [puzzle, currentRound?.started_at])
 
   return (
     <div className="flex-1 bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
@@ -124,7 +133,7 @@ const PuzzleCenter = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PuzzleCenter;
+export default PuzzleCenter

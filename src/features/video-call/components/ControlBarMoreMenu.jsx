@@ -15,37 +15,35 @@ import {
   Gamepad2,
   History,
   Split,
-  X,
-} from "lucide-react"
-import { toast } from "react-hot-toast"
-import { useSelector } from "react-redux"
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import { AnimatePresence, motion } from "framer-motion"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
-import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
-import ListItem from "@/shared/components/ui/ListItem"
-import { useParticipants, useLocalParticipant } from "@livekit/components-react"
-import GameSetupModal from "@/features/games/components/GameSetupModal"
-import GameHistoryModal from "@/features/games/components/GameHistoryModal"
+} from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
+import { AnimatePresence, motion } from "framer-motion";
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls";
+import SubtitleLanguagePicker from "./SubtitleLanguagePicker";
+import {
+  useParticipants,
+  useLocalParticipant,
+} from "@livekit/components-react";
+import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
+import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
+import { useGame } from "@/features/games/context/GameContext";
+import { useSelector } from "react-redux";
+import ListItem from "@/shared/components/ui/ListItem";
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
   setShowMoreMenu,
   setShowGameModal,
 }) => {
-  const { id: roomId } = useParams()
-  const { t } = useLanguage()
+  const { id: roomId } = useParams();
+  const { t } = useLanguage();
+  const { ongoingGame, spectateGame } = useGame();
   const {
-    isLocalScreenShare,
     showParticipants,
     setShowParticipants,
-    setShowChat,
-    handleToggleScreenShare,
-    isRecording,
-    isTogglingRecording,
-    handleToggleRecording,
     showVirtualBackground,
     setShowVirtualBackground,
     showAvatarPicker,
@@ -114,20 +112,7 @@ const ControlBarMoreMenu = ({
               duration={0.2}
               className="fixed inset-0 z-50 w-full min-[426px]:absolute min-[426px]:inset-auto min-[426px]:bottom-[110%] min-[426px]:right-0 min-[426px]:mb-2 min-[426px]:w-72"
             >
-              <div className="flex h-full w-full flex-col overflow-hidden bg-white min-[426px]:h-auto min-[426px]:max-h-none min-[426px]:rounded-xl min-[426px]:border min-[426px]:border-[#E5E5E5] min-[426px]:shadow-lg">
-                {/* Mobile Header */}
-                <div className="flex w-full items-center justify-between border-b border-[#E5E5E5] px-4 py-3 min-[426px]:hidden">
-                  <span className="text-lg font-semibold">
-                    {t?.rooms?.videoCall?.moreOptions || "More options"}
-                  </span>
-                  <button
-                    onClick={() => setShowMoreMenu(false)}
-                    className="rounded-full bg-gray-100 p-2 text-gray-600 hover:bg-gray-200"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
+              <div className="w-full overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
                 <div className="flex-1 overflow-y-auto">
                   <AnimatePresence mode="wait" initial={false}>
                     {!showSubtitlePicker || isSubtitleActive || isAISession ? (
@@ -144,17 +129,20 @@ const ControlBarMoreMenu = ({
                           <ListItem
                             onClick={() => {
                               setShowMoreMenu(false)
-                              if (!isHost) return
-                              setShowGameSetup(true)
+                              if (ongoingGame) {
+                                spectateGame()
+                              } else {
+                                if (!isHost) return
+                                setShowGameSetup(true)
+                              }
                             }}
                             leftContent={<Gamepad2 />}
                             hoverEffect={true}
                             className={
-                              !isHost ? "opacity-50 cursor-not-allowed" : ""
+                              (!isHost && !ongoingGame) ? "opacity-50 cursor-not-allowed" : ""
                             }
                           >
-                            {t?.rooms?.videoCall?.controls?.playGames ||
-                              "Play Games"}
+                            {ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
                           </ListItem>
 
                           <ListItem

@@ -29,7 +29,7 @@ const useCountUp = (target, duration = 1.5, enabled = true) => {
     const controls = animate(0, target, {
       duration,
       ease: [0.16, 1, 0.3, 1], // fluentEaseOut
-      onUpdate: (latest) => setValue(Math.round(latest)),
+      onUpdate: (latest) => setValue(latest),
     })
 
     controlsRef.current = controls

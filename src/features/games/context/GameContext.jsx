@@ -54,9 +54,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const { id: roomId } = useParams();
   const { t } = useLanguage();
 
-  const localPart = useLocalParticipant();
-  const localParticipantIdentity = localPart?.localParticipant?.identity;
-  const localParticipantName = localPart?.localParticipant?.name;
+  const { localParticipant } = useLocalParticipant();
+  const participants = useParticipants();
+
+  const localParticipantIdentity = localParticipant?.identity;
+  const localParticipantName = localParticipant?.name;
 
   // Use user.id, user.accountId, user.userId or fallback to LiveKit identity
   const currentUserId =
@@ -76,6 +78,13 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const [finalResults, setFinalResults] = useState(null);
   const [playerNames, setPlayerNames] = useState({}); // Map of playerId -> playerName
   const [leftPlayers, setLeftPlayers] = useState(new Set()); // IDs of players who have left the game
+
+  // --- Spectator & Ongoing Mode ---
+  const [ongoingGame, setOngoingGame] = useState(false);
+  const [ongoingGameType, setOngoingGameType] = useState(null);
+  const [isSpectator, setIsSpectator] = useState(false);
+  const [gamePlayers, setGamePlayers] = useState(new Set());
+  const [spectatorIds, setSpectatorIds] = useState(new Set());
 
   // --- Crack It specific states ---
   const [puzzle, setPuzzle] = useState(null);
@@ -97,6 +106,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     setFinalResults(null);
     setCountdown(null);
     setCurrentRound(null);
+    setOngoingGame(false);
+    setOngoingGameType(null);
+    setIsSpectator(false);
+    setGamePlayers(new Set());
+    setSpectatorIds(new Set());
     setLeftPlayers(new Set());
     setPuzzle(null);
     setTimer(0);
@@ -141,6 +155,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       setGameLanguage(payload.language);
       setGameState("setup");
       resetGameStates();
+      setGamePlayers(new Set(payload.original_players?.map(id => id.toString()) || []));
       if (payload.game_type === "picture_it") {
         setPictureItState((prev) => ({
           ...prev,
@@ -171,12 +186,14 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           imageBlurred: true,
           category: payload.category,
           tags: payload.tags || [],
-          forbiddenWords: [],
+          forbiddenWords: payload.forbidden_words || [],
           describeStarted: false,
           ratingOpen: false,
           myRatingSubmitted: false,
           flagCount: 0,
           raterCount: 0,
+          roundAverageRating: null,
+          roundDescriberId: null,
         }));
       } else {
         setPuzzle({
@@ -255,8 +272,10 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     PICTURE_IT_ERROR: (payload) => {
       toast.error(payload.message || "An error occurred.");
       setGameState("idle");
+      resetGameStates();
     },
     JOINED_AS_SPECTATOR: () => {
+      setIsSpectator(true);
       setPictureItState((prev) => ({ ...prev, isSpectator: true }));
     },
     CORRECT_ANSWER: (payload) => {
@@ -319,7 +338,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
-                } catch (e) {}
+                } catch (e) { }
               }
               return {
                 id: pId,
@@ -363,7 +382,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
-                } catch (e) {}
+                } catch (e) { }
               }
               return {
                 id: pId,
@@ -400,12 +419,35 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         );
       }
     },
+    PLAYER_SPECTATING: (payload) => {
+      if (payload.player_id) {
+        setSpectatorIds((prev) =>
+          new Set(prev).add(payload.player_id.toString()),
+        );
+      }
+    },
+    SPECTATOR_LEFT: (payload) => {
+      if (payload.player_id) {
+        setSpectatorIds((prev) => {
+          const next = new Set(prev);
+          next.delete(payload.player_id.toString());
+          return next;
+        });
+      }
+    },
     SYNC_GAME_STATE: (payload) => {
       setGameType(payload.game_type);
       setGameLanguage(payload.language);
       setScores(payload.scores || {});
+      setIsSpectator(payload.is_spectator || false);
+      setGamePlayers(new Set(payload.original_players?.map(id => id.toString()) || []));
+      setOngoingGame(false);
+      setOngoingGameType(null);
       setLeftPlayers(
         new Set(payload.left_players?.map((id) => id.toString()) || []),
+      );
+      setSpectatorIds(
+        new Set(payload.spectators?.map((id) => id.toString()) || []),
       );
 
       if (payload.game_type === "picture_it") {
@@ -420,16 +462,15 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           ...prev,
           describerId: describerId,
           describerOrder: payload.describer_order || [],
-          isSpectator: payload.is_spectator || false,
           imageUrl: payload.current_round?.image_url,
           imageUrlFull: isDescriber ? payload.current_round?.image_url : null,
           imageBlurred: !isDescriber,
-          forbiddenWords: isDescriber
-            ? payload.current_round?.forbidden_words || []
-            : [],
+          forbiddenWords: payload.current_round?.forbidden_words || [],
           category: payload.current_round?.category,
           describeStarted: payload.current_round?.describe_started || false,
           ratingOpen: payload.rating_open || false,
+          roundAverageRating: null,
+          roundDescriberId: null,
         }));
 
         const sortedLeaderboard = Object.entries(payload.scores || {})
@@ -466,12 +507,17 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       toast.error(
         payload.reason === "NOT_ENOUGH_PLAYERS"
           ? t.rooms?.game?.crackIt?.forceStopNotEnoughPlayers ||
-              "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
+          "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
           : t.rooms?.game?.crackIt?.forceStopGeneric ||
-              "Trò chơi bị dừng đột ngột.",
+          "Trò chơi bị dừng đột ngột.",
       );
       setGameState("idle");
       setGameType(null);
+      resetGameStates();
+    },
+    GAME_ALREADY_STARTED: (payload) => {
+      setOngoingGame(true);
+      setOngoingGameType(payload.game_type);
     },
   });
 
@@ -486,8 +532,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connection.isConnected, roomId]);
 
-  const participants = useParticipants();
-  const { localParticipant } = useLocalParticipant();
+
 
   useEffect(() => {
     const isPictureIt = gameType === "picture_it" || gameType === "picture-it";
@@ -496,16 +541,16 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       !["idle", "game_over", "force_stopped"].includes(gameState)
     ) {
       if (gameState === "setup" || gameState === "result") {
-        localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+        localParticipant?.setMicrophoneEnabled(false).catch(() => { });
       } else if (gameState === "playing") {
         if (pictureItState.describeStarted && !pictureItState.ratingOpen) {
           const isLocalDescriber =
             Number(pictureItState.describerId) === Number(currentUserId);
           localParticipant
             ?.setMicrophoneEnabled(isLocalDescriber)
-            .catch(() => {});
+            .catch(() => { });
         } else {
-          localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+          localParticipant?.setMicrophoneEnabled(false).catch(() => { });
         }
       }
     }
@@ -539,24 +584,27 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
       const playerCount = players.length;
 
-      if (type === "crack_it" || type === "crack-it") {
-        connection.send("StartCrackItGame", {
-          game_type: "crack_it",
-          level,
-          language: language || roomLanguage,
-          roomId: roomId || "general",
-          player_count: playerCount,
-        });
-      } else if (type === "picture-it" || type === "picture_it") {
-        connection.send("StartPictureItGame", {
-          RoomId: roomId || "general",
-          Language: language || roomLanguage,
-          Level: level,
-          Players: players,
-        });
+      if (connection.isConnected && roomId) {
+        if (type === "picture-it" || type === "picture_it") {
+          connection.send("StartPictureItGame", {
+            RoomId: roomId || "general",
+            Language: language || roomLanguage,
+            Level: level,
+            Players: players,
+          });
+        } else {
+          connection.send("StartCrackItGame", {
+            game_type: "crack_it",
+            level,
+            language: language || roomLanguage,
+            roomId: roomId || "general",
+            player_count: playerCount,
+          });
+        }
       }
     },
     [
+      connection.isConnected,
       connection.send,
       roomLanguage,
       roomId,
@@ -565,6 +613,12 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       resetGameStates,
     ],
   );
+
+  const spectateGame = useCallback(() => {
+    if (connection.isConnected && roomId) {
+      connection.send("SpectateGame", roomId);
+    }
+  }, [connection.isConnected, connection.send, roomId]);
 
   useEffect(() => {
     const handleHostStart = (e) => {
@@ -605,7 +659,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   }, [connection.send, roomId]);
 
   const endPictureItDescribe = useCallback(() => {
-    localParticipant?.setMicrophoneEnabled(false).catch((e) => {});
+    localParticipant?.setMicrophoneEnabled(false).catch((e) => { });
     connection.send("PictureItDescribeEnd", roomId || "general");
   }, [connection.send, roomId, localParticipant]);
 
@@ -624,10 +678,20 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   // General Exit
   const exitGame = useCallback(() => {
     connection.send("PlayerLeaveGame", roomId || "general");
+
+    // Keep track of the current game type before resetting
+    const lastGameType = gameType;
+
     setGameState("idle");
     setGameType(null);
     resetGameStates();
-  }, [connection, roomId, resetGameStates]);
+
+    // Allow the player to spectate the game they just left (unless GAME_OVER is received)
+    if (lastGameType) {
+      setOngoingGame(true);
+      setOngoingGameType(lastGameType);
+    }
+  }, [connection, roomId, resetGameStates, gameType]);
 
   const value = {
     gameState,
@@ -641,6 +705,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     finalResults,
     leftPlayers,
     playerNames,
+    spectatorIds,
 
     // Crack It specific
     puzzle,
@@ -658,6 +723,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     submitPictureItRating,
 
     // Actions
+    ongoingGame,
+    ongoingGameType,
+    isSpectator,
+    gamePlayers,
+    spectateGame,
     startGame,
     exitGame,
     currentUserId,
