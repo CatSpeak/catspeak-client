@@ -32,6 +32,11 @@ import {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
 } from "@/store/api/conversationsApi"
+import {
+  useStartAssistantMutation,
+  useStopAssistantMutation,
+  useGetAssistantStatusQuery,
+} from "@/store/api/assistantApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
@@ -57,6 +62,8 @@ const GlobalCallContent = ({
   receiveSystemMsgs,
   setReceiveSystemMsgs,
   panelState,
+  speakingAssistantEnabled,
+  setSpeakingAssistantEnabled,
 }) => {
   const { t, language } = useLanguage()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
@@ -78,6 +85,7 @@ const GlobalCallContent = ({
     teethWhiten: 0,
   })
 
+
   // ── LiveKit hooks ──
   let lkRoom = null
   try {
@@ -97,6 +105,60 @@ const GlobalCallContent = ({
   const sessionId =
     callInfo?.sessionId || parseMetadata(localParticipant?.metadata)?.sessionId
   const token = useSelector(selectCurrentToken)
+
+  // ── Speaking Assistant Integration ──
+  const [activeDispatchId, setActiveDispatchId] = useState(null)
+  const [startAssistant] = useStartAssistantMutation()
+  const [stopAssistant] = useStopAssistantMutation()
+
+  const { data: assistantStatus } = useGetAssistantStatusQuery(sessionId, {
+    skip: !sessionId || !isConnected,
+  })
+
+  useEffect(() => {
+    if (assistantStatus?.dispatchId) {
+      setActiveDispatchId(assistantStatus.dispatchId)
+    }
+  }, [assistantStatus])
+
+  const hasTriggeredInitial = useRef(false)
+  const prevEnabled = useRef(speakingAssistantEnabled)
+
+  useEffect(() => {
+    if (!sessionId || !isConnected) return
+
+    const triggerToggle = async () => {
+      if (speakingAssistantEnabled) {
+        try {
+          const res = await startAssistant({ sessionId }).unwrap()
+          if (res?.dispatchId) {
+            setActiveDispatchId(res.dispatchId)
+          }
+        } catch (err) {
+          console.error("Failed to start speaking assistant:", err)
+          toast.error(err?.data?.message || "Failed to start speaking assistant")
+        }
+      } else {
+        const dispatchIdToStop = activeDispatchId || assistantStatus?.dispatchId
+        if (dispatchIdToStop) {
+          try {
+            await stopAssistant({ sessionId, dispatchId: dispatchIdToStop }).unwrap()
+            setActiveDispatchId(null)
+          } catch (err) {
+            console.error("Failed to stop speaking assistant:", err)
+            toast.error(err?.data?.message || "Failed to stop speaking assistant")
+          }
+        }
+      }
+    }
+
+    const isInitialRun = !hasTriggeredInitial.current
+    if (isInitialRun || speakingAssistantEnabled !== prevEnabled.current) {
+      hasTriggeredInitial.current = true
+      prevEnabled.current = speakingAssistantEnabled
+      triggerToggle()
+    }
+  }, [speakingAssistantEnabled, isConnected, sessionId, activeDispatchId, assistantStatus, startAssistant, stopAssistant])
 
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState(null)
@@ -373,6 +435,8 @@ const GlobalCallContent = ({
     chatPrivateAi,
     receiveSystemMsgs,
     setReceiveSystemMsgs,
+    speakingAssistantEnabled,
+    setSpeakingAssistantEnabled,
     updateAiInteraction,
     isCurrentUserPrompting,
     startNewThread,

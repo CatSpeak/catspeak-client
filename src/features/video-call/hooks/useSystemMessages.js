@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from "react"
 import { RoomEvent } from "livekit-client"
 
+const VOCAB_MESSAGES = [
+  "Need a little help with words? Try some of these friendly suggestions:",
+  "Here are some simple and useful words to keep your chat going:",
+  "Here is a list of friendly words that might help you express yourself:",
+  "Want to try some new words? Here are a few simple choices:",
+  "Here are some easy and helpful words you can use in your conversation:"
+]
+
 export const useSystemMessages = (lkRoom, receiveSystemMessages = true) => {
   const [systemMessages, setSystemMessages] = useState([])
   const receiveRef = useRef(receiveSystemMessages)
@@ -38,7 +46,7 @@ export const useSystemMessages = (lkRoom, receiveSystemMessages = true) => {
         try {
           const parsed = JSON.parse(decoded)
           console.log("Parsed JSON:", parsed)
-        } catch (e) {
+        } catch {
           // Not a JSON payload, ignore
         }
       }
@@ -54,19 +62,23 @@ export const useSystemMessages = (lkRoom, receiveSystemMessages = true) => {
         let messageText = decoded
         let messageId = `sys-${Date.now()}-${Math.random()}`
         let timestamp = Date.now()
-        let isJson = false
         let translatedMessage = null
+        let vocabulary = null
+        let suggestedSentences = null
 
         try {
           const json = JSON.parse(decoded)
           // If it's a standard user chat message that `useChat` will naturally handle, ignore it here
           if (participant && topic === "lk-chat") return
 
-          isJson = true
+          if (json.vocabulary || json.suggested_sentences) {
+            vocabulary = json.vocabulary || null
+            suggestedSentences = json.suggested_sentences || null
+          }
+
           if (json.message !== undefined && json.message !== null) {
             messageText = json.message
           } else {
-            // It's a JSON payload but has no 'message' field; skip displaying raw JSON
             messageText = ""
           }
           if (json.id) messageId = json.id
@@ -76,16 +88,25 @@ export const useSystemMessages = (lkRoom, receiveSystemMessages = true) => {
           // It's a string payload, we just use decoded
         }
 
-        // Do not display empty messages
-        if (!messageText || messageText.trim() === "") return
+        // Do not display empty messages unless there is suggestion data
+        if (!vocabulary && !suggestedSentences && (!messageText || messageText.trim() === "")) return
 
         const newSysMsg = {
           id: messageId,
           timestamp,
           message: messageText,
-          translatedMessage,
           from: { name: "Cat Speak gợi ý", isSystem: true },
         }
+
+        let introMessage = null
+        if (vocabulary) {
+          introMessage = VOCAB_MESSAGES[Math.floor(Math.random() * VOCAB_MESSAGES.length)]
+        }
+
+        if (introMessage) newSysMsg.introMessage = introMessage
+        if (translatedMessage) newSysMsg.translatedMessage = translatedMessage
+        if (vocabulary) newSysMsg.vocabulary = vocabulary
+        if (suggestedSentences) newSysMsg.suggestedSentences = suggestedSentences
 
         if (receiveRef.current) {
           setSystemMessages((prev) => [...prev, newSysMsg])
