@@ -445,20 +445,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
       if (!hasInitialSyncRef.current) {
         hasInitialSyncRef.current = true;
-
+        
         if (isActuallySpectating && connection && roomId) {
-          // Hack: Backend PlayerLeaveGame might only check ConnectionId.
-          // Since we just reconnected, we have a new ConnectionId.
-          // We must send SpectateGame first to update our ConnectionId on the backend,
-          // then send PlayerLeaveGame to successfully remove the ghost spectator.
-          connection.send("SpectateGame", roomId);
-          setTimeout(() => {
-            if (connection) {
-              connection.send("PlayerLeaveGame", roomId);
-            }
-          }, 1000);
-
-          // Treat as newcomer so they stay in "idle" state and can manually spectate later
+          // Note: The backend keeps the old connection alive for ~30s due to SignalR reconnect window.
+          // We cannot force kill it from the frontend if PlayerLeaveGame doesn't work for spectators.
+          // Just return early so the local UI doesn't force them into the game.
           setOngoingGame(true);
           setOngoingGameType(payload.game_type);
           return;
