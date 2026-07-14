@@ -29,20 +29,18 @@ export default defineConfig(({ mode }) => {
           secure: true,
         },
         "/api/v1/Payments": {
-          target: "https://stagingapi.catspeak.com.vn",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
         "/api": {
-          target: "https://stagingapi.catspeak.com.vn",
-          // target: "http://localhost:5001",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           // secure: true,
           secure: false,
         },
         "/hubs": {
-          target: "https://stagingapi.catspeak.com.vn",
-          // target: "http://localhost:5001",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           // secure: true,
           secure: false,
@@ -74,8 +72,8 @@ export default defineConfig(({ mode }) => {
             warning.code === "UNRESOLVED_IMPORT" &&
             warning.exporter?.includes("face_mesh")
           )
-            return;
-          warn(warning);
+            return
+          warn(warning)
         },
       },
       chunkSizeWarningLimit: 1000,

@@ -5,7 +5,9 @@ export default {
   soon: "Soon",
   language: "Language",
   community: "Community",
-  searchPlaceholder: "Search rooms",
+  notifications: "Notifications",
+  noNewNotifications: "No new notifications",
+  searchPlaceholder: "Search rooms or topics",
   languages: {
     vi: "Vietnamese",
     viNom: "Vietnamese (Nom) - Coming soon",

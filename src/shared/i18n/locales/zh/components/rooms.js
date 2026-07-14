@@ -176,6 +176,8 @@ export default {
     aiEmptyText: "在下方输入您的问题以向 Cat Speak 提问。",
     publicAiPlaceholder: "公开提问",
     privateAiPlaceholder: "私密提问",
+    publicPrompt: "公开提问",
+    privatePrompt: "私密提问",
     systemName: "Cat Speak 提示",
     systemMessages: "系统消息",
     systemMessagesDesc: "显示自动系统消息",
