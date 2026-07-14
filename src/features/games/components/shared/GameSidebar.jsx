@@ -8,11 +8,12 @@ import { motion, animate, AnimatePresence } from "framer-motion"
 import { ParticipantVolumePopover } from "@/features/video-call/components/ParticipantVolumePopover"
 
 const AnimatedScore = ({ value, suffix }) => {
-  const [displayValue, setDisplayValue] = React.useState(value)
-  const prevValueRef = React.useRef(value)
+  const safeValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+  const [displayValue, setDisplayValue] = React.useState(safeValue)
+  const prevValueRef = React.useRef(safeValue)
 
   React.useEffect(() => {
-    const controls = animate(prevValueRef.current, value, {
+    const controls = animate(prevValueRef.current, safeValue, {
       duration: 1.5,
       ease: "easeOut",
       onUpdate(v) {
@@ -21,7 +22,7 @@ const AnimatedScore = ({ value, suffix }) => {
       }
     })
     return () => controls.stop()
-  }, [value])
+  }, [safeValue])
 
   return (
     <span>{displayValue} {suffix}</span>
