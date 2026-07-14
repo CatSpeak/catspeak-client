@@ -236,8 +236,12 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         raterCount: 0,
       }));
     },
-    DESCRIBE_STARTED: () => {
-      setPictureItState((prev) => ({ ...prev, describeStarted: true }));
+    DESCRIBE_STARTED: (payload) => {
+      setPictureItState((prev) => ({
+        ...prev,
+        describeStarted: true,
+        describeStartTime: payload?.describe_start_time
+      }));
     },
     DESCRIBE_ENDED: (payload) => {
       setPictureItState((prev) => ({
@@ -340,7 +344,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
-                } catch (e) {}
+                  // eslint-disable-next-line no-unused-vars
+                } catch (e) { /* empty */ }
               }
               return {
                 id: pId,
@@ -384,7 +389,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   const meta = JSON.parse(p.metadata);
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
-                } catch (e) {}
+                  // eslint-disable-next-line no-empty, no-unused-vars
+                } catch (e) { }
               }
               return {
                 id: pId,
@@ -445,7 +451,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
       if (!hasInitialSyncRef.current) {
         hasInitialSyncRef.current = true;
-        
+
         if (isActuallySpectating && connection && roomId) {
           // Note: The backend keeps the old connection alive for ~30s due to SignalR reconnect window.
           // We cannot force kill it from the frontend if PlayerLeaveGame doesn't work for spectators.
@@ -481,22 +487,32 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           total: payload.current_round?.total,
         });
         const describerId = payload.current_round?.describer_id;
-        const isDescriber = describerId === currentUserId;
+        const isDescriber = Number(describerId) === Number(currentUserId);
+        const isRatingOpen = payload.rating_open || false;
 
         setPictureItState((prev) => ({
           ...prev,
           describerId: describerId,
           describerOrder: payload.describer_order || [],
           imageUrl: payload.current_round?.image_url,
-          imageUrlFull: isDescriber ? payload.current_round?.image_url : null,
-          imageBlurred: !isDescriber,
+          imageUrlFull: (isDescriber || isRatingOpen) ? payload.current_round?.image_url : null,
+          imageBlurred: !(isDescriber || isRatingOpen),
           forbiddenWords: payload.current_round?.forbidden_words || [],
           category: payload.current_round?.category,
-          describeStarted: payload.current_round?.describe_started || false,
-          ratingOpen: payload.rating_open || false,
+          describeStarted: isRatingOpen ? false : (payload.current_round?.describe_started || false),
+          describeStartTime: payload.current_round?.describe_start_time,
+          ratingOpen: isRatingOpen,
+          ratingCountdownSec: payload.current_round?.rating_countdown_sec || 0,
+          myRatingSubmitted: payload.current_round?.my_rating_submitted || false,
+          flagCount: payload.current_round?.flag_count || 0,
+          raterCount: payload.current_round?.rater_count || 0,
           roundAverageRating: null,
           roundDescriberId: null,
         }));
+
+        if (payload.rating_open && payload.current_round?.rating_countdown_sec > 0) {
+          startRatingTimer(payload.current_round.rating_countdown_sec);
+        }
 
         const sortedLeaderboard = Object.entries(payload.scores || {})
           .map(([id, score]) => ({ id: Number(id), score }))
@@ -532,9 +548,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       toast.error(
         payload.reason === "NOT_ENOUGH_PLAYERS"
           ? t.rooms?.game?.crackIt?.forceStopNotEnoughPlayers ||
-              "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
+          "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
           : t.rooms?.game?.crackIt?.forceStopGeneric ||
-              "Trò chơi bị dừng đột ngột.",
+          "Trò chơi bị dừng đột ngột.",
       );
       setGameState("idle");
       setGameType(null);
@@ -564,16 +580,16 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       !["idle", "game_over", "force_stopped"].includes(gameState)
     ) {
       if (gameState === "setup" || gameState === "result") {
-        localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+        localParticipant?.setMicrophoneEnabled(false).catch(() => { });
       } else if (gameState === "playing") {
         if (pictureItState.describeStarted && !pictureItState.ratingOpen) {
           const isLocalDescriber =
             Number(pictureItState.describerId) === Number(currentUserId);
           localParticipant
             ?.setMicrophoneEnabled(isLocalDescriber)
-            .catch(() => {});
+            .catch(() => { });
         } else {
-          localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+          localParticipant?.setMicrophoneEnabled(false).catch(() => { });
         }
       }
     }
@@ -692,7 +708,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   }, [connection.send, roomId]);
 
   const endPictureItDescribe = useCallback(() => {
-    localParticipant?.setMicrophoneEnabled(false).catch(() => {});
+    localParticipant?.setMicrophoneEnabled(false).catch(() => { });
     connection.send("PictureItDescribeEnd", roomId || "general");
   }, [connection.send, roomId, localParticipant]);
 
