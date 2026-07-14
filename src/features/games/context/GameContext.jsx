@@ -98,6 +98,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   // Timer ref for Picture It Rating
   const ratingTimerRef = useRef(null);
   const gameOverTimeoutRef = useRef(null);
+  const hasInitialSyncRef = useRef(false);
 
   const resetGameStates = useCallback(() => {
     setScores({});
@@ -154,7 +155,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       setGameLanguage(payload.language);
       setGameState("setup");
       resetGameStates();
-      setGamePlayers(new Set(payload.original_players?.map(id => id.toString()) || []));
+      setGamePlayers(
+        new Set(payload.original_players?.map((id) => id.toString()) || []),
+      );
       if (payload.game_type === "picture_it") {
         setPictureItState((prev) => ({
           ...prev,
@@ -234,8 +237,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       }));
     },
     DESCRIBE_STARTED: (payload) => {
-      setPictureItState((prev) => ({ 
-        ...prev, 
+      setPictureItState((prev) => ({
+        ...prev,
         describeStarted: true,
         describeStartTime: payload?.describe_start_time
       }));
@@ -441,13 +444,36 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       }
     },
     SYNC_GAME_STATE: (payload) => {
+      // If we just loaded the component (e.g., after F5 or re-entering the room)
+      // and the backend still thinks we are a spectator (ghost connection),
+      // we immediately leave the game to clear ourselves from the spectator list.
+      let isActuallySpectating = payload.is_spectator || false;
+
+      if (!hasInitialSyncRef.current) {
+        hasInitialSyncRef.current = true;
+
+        if (isActuallySpectating && connection && roomId) {
+          // Note: The backend keeps the old connection alive for ~30s due to SignalR reconnect window.
+          // We cannot force kill it from the frontend if PlayerLeaveGame doesn't work for spectators.
+          // Just return early so the local UI doesn't force them into the game.
+          setOngoingGame(true);
+          setOngoingGameType(payload.game_type);
+          return;
+        }
+      }
+
       setGameType(payload.game_type);
       setGameLanguage(payload.language);
       setScores(payload.scores || {});
-      setIsSpectator(payload.is_spectator || false);
-      setGamePlayers(new Set(payload.original_players?.map(id => id.toString()) || []));
-      setOngoingGame(false);
-      setOngoingGameType(null);
+      setIsSpectator(isActuallySpectating);
+      setGamePlayers(
+        new Set(payload.original_players?.map((id) => id.toString()) || []),
+      );
+
+      // If we receive SYNC_GAME_STATE, a game is running!
+      setOngoingGame(true);
+      setOngoingGameType(payload.game_type);
+
       setLeftPlayers(
         new Set(payload.left_players?.map((id) => id.toString()) || []),
       );
@@ -547,8 +573,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connection.isConnected, roomId]);
 
-
-
   useEffect(() => {
     const isPictureIt = gameType === "picture_it" || gameType === "picture-it";
     if (
@@ -628,6 +652,16 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       resetGameStates,
     ],
   );
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (connection?.isConnected && roomId && isSpectator) {
+        connection.send("PlayerLeaveGame", roomId);
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [connection, roomId, isSpectator]);
 
   const spectateGame = useCallback(() => {
     if (connection.isConnected && roomId) {
