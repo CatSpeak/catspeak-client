@@ -14,9 +14,7 @@ import EmptyCoursesState from "../components/EmptyCoursesState"
 import TeachingTasksSection from "../components/TeachingTasksSection"
 import UpcomingSessionsPanel from "../components/UpcomingSessionsPanel"
 import ViewModeToggle from "../components/ViewModeToggle"
-import { useRoleOverride } from "../components/RoleSwitcher"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
-import StudentDashboard from "../student/components/StudentDashboard"
 import {
   filterByStatus,
   getScheduleRange,
@@ -35,7 +33,6 @@ const STATUS_OPTIONS = [
 const MyCoursesPage = () => {
   const { language, t } = useLanguage()
   const navigate = useNavigate()
-  const { isStudent } = useRoleOverride()
   const c = t.courses || {}
   const mc = c.myCourses || {}
 
@@ -46,16 +43,16 @@ const MyCoursesPage = () => {
   const deleteHelper = useDeleteCourse(t)
   const scheduleParams = useMemo(() => getScheduleRange(180), [])
 
-  const { data: scheduleData, isLoading: isScheduleLoading } = useGetScheduleSessionsQuery(scheduleParams, { skip: isStudent })
-  const { data: coursesData, isLoading: isCoursesLoading, error: coursesError } = useGetAllCoursesQuery({ page: 1, pageSize: 6 }, { skip: isStudent })
-  const { data: classesData, isLoading: isClassesLoading, error: classesError } = useGetAllClassesQuery({ page: 1, pageSize: 6 }, { skip: isStudent })
+  const { data: scheduleData, isLoading: isScheduleLoading } = useGetScheduleSessionsQuery(scheduleParams)
+  const { data: coursesData, isLoading: isCoursesLoading, error: coursesError } = useGetAllCoursesQuery({ page: 1, pageSize: 6 })
+  const { data: classesData, isLoading: isClassesLoading, error: classesError } = useGetAllClassesQuery({ page: 1, pageSize: 6 })
 
   const rawSessions = useMemo(() => scheduleData?.data || [], [scheduleData])
   const coursesRaw = useMemo(() => coursesData?.data || [], [coursesData])
   const classesRaw = useMemo(() => classesData?.data || [], [classesData])
 
-  const isLoading = !isStudent && (isCoursesLoading || isClassesLoading || isScheduleLoading)
-  const error = !isStudent && (coursesError || classesError)
+  const isLoading = isCoursesLoading || isClassesLoading || isScheduleLoading
+  const error = coursesError || classesError
 
   const upcomingClasses = useMemo(() => mapUpcomingSessions(rawSessions, classesRaw, 3), [rawSessions, classesRaw])
   const courseList = useMemo(() => coursesRaw.map(mapTeacherCourseSummary), [coursesRaw])
@@ -79,9 +76,7 @@ const MyCoursesPage = () => {
     classLabel: c.class || "Class",
   }
 
-  if (isStudent) {
-    return <StudentDashboard t={t} language={language} />
-  }
+
 
   if (isLoading) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />

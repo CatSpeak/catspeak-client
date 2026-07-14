@@ -7,6 +7,7 @@ import {
   useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
 import StudentJoinModal from "../student/components/StudentJoinModal"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { formatCurrencyVND, formatDateDayMonth } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { Calendar, Clock, Star, Award, ShieldCheck, Mail, CheckCircle2 } from "lucide-react"
@@ -20,6 +21,9 @@ const StudentCourseDetailPage = () => {
   // Fetch course details
   const { data: courseDetail, isLoading, error } = useGetStudentCourseDetailQuery(id)
   const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
+  const { data: profileResponse } = useGetUserProfileQuery()
+  const profile = profileResponse?.data || profileResponse || {}
+  const currentUserId = profile.id?.toString() || ""
 
   // Modal State
   const [enrollTarget, setEnrollTarget] = useState(null)
@@ -27,6 +31,10 @@ const StudentCourseDetailPage = () => {
   const [enrollSuccess, setEnrollSuccess] = useState(false)
 
   const handleOpenEnroll = (course, cls) => {
+    if (isOwner) {
+      toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
+      return
+    }
     setEnrollTarget({ course, class: cls })
     setEnrollSuccess(false)
     setIsJoinOpen(true)
@@ -62,7 +70,7 @@ const StudentCourseDetailPage = () => {
     const targetClassId = enrollTarget?.class?.id
     setEnrollTarget(null)
     if (targetClassId) {
-      navigate(`/workspace/courses/class/${targetClassId}`)
+      navigate(`/workspace/learning/class/${targetClassId}`)
     }
   }
 
@@ -71,11 +79,7 @@ const StudentCourseDetailPage = () => {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <LoadingSpinner className="h-8 w-8 border-b-2 border-[#990011]" />
-      </div>
-    )
+    return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
   if (error) {
@@ -89,6 +93,7 @@ const StudentCourseDetailPage = () => {
   const rawCourse = courseDetail || {}
   const classes = rawCourse.classes || []
   const hasEnrolledClass = !!rawCourse.enrolledClassId
+  const isOwner = currentUserId && (rawCourse.instructorId === currentUserId || rawCourse.instructor?.id === currentUserId || rawCourse.teacherId === currentUserId)
 
   // Labels
   const languageLabel = rawCourse.language || "English"
@@ -102,7 +107,7 @@ const StudentCourseDetailPage = () => {
       <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
         <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Home"}</span>
         <span>/</span>
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "My Courses"}</span>
+        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle || "My Learning"}</span>
         <span>/</span>
         <span className="text-[#990011] font-semibold">{rawCourse.title}</span>
       </div>
@@ -124,11 +129,11 @@ const StudentCourseDetailPage = () => {
             <span className="bg-red-500 text-white font-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">
               {levelLabel}
             </span>
-            <div className="flex items-center gap-1 text-[#FBBF24] ml-2">
+            {/* <div className="flex items-center gap-1 text-[#FBBF24] ml-2">
               <Star size={14} className="fill-[#FBBF24]" />
               <span className="text-xs font-black">4.9</span>
               <span className="text-gray-300 text-[10px] font-bold">(120 reviews)</span>
-            </div>
+            </div> */}
           </div>
 
           <h1 className="text-3xl md:text-5xl font-black leading-tight tracking-tight text-white drop-shadow-sm">
@@ -259,7 +264,7 @@ const StudentCourseDetailPage = () => {
 
                         {isClassEnrolled ? (
                           <button
-                            onClick={() => navigate(`/workspace/courses/class/${cls.id}`)}
+                            onClick={() => navigate(`/workspace/learning/class/${cls.id}`)}
                             className="h-9 px-5 bg-green-600 hover:bg-green-700 text-white text-xs font-black rounded-full flex items-center gap-1 transition-all active:scale-95 shadow-sm"
                           >
                             <span>Go to Workspace</span>
@@ -319,7 +324,7 @@ const StudentCourseDetailPage = () => {
                 if (classes.length > 0) {
                   const firstClass = classes[0]
                   if (rawCourse.enrolledClassId === firstClass.id) {
-                    navigate(`/workspace/courses/class/${firstClass.id}`)
+                    navigate(`/workspace/learning/class/${firstClass.id}`)
                   } else {
                     handleOpenEnroll(rawCourse, firstClass)
                   }

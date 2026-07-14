@@ -44,6 +44,7 @@ export default {
     courses: "Khóa học",
     allCourses: "Các khóa học",
     myCourses: "Khóa học của tôi",
+    myLearning: "Góc học tập",
     messages: "Tin nhắn",
     settings: "Thiết lập",
     help: "Trợ giúp",

@@ -14,7 +14,8 @@ import {
   Calendar,
   Mic,
   Film,
-  Mail
+  Mail,
+  BookOpen
 } from "lucide-react"
 
 export const navLinks = [
@@ -38,6 +39,7 @@ export const navLinks = [
     icon: Briefcase,
     subItems: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
     ],

@@ -44,6 +44,7 @@ export default {
     courses: "Courses",
     allCourses: "All Courses",
     myCourses: "My Courses",
+    myLearning: "My Learning",
     messages: "Messages",
     settings: "Settings",
     help: "Help",

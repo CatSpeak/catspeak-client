@@ -79,6 +79,12 @@ const CreateClassPage = () => {
   // Static fallback teacher profile since /teacher/profile API does not exist
   const languagesList = FALLBACK_TEACHER_PROFILE.languages || []
   const coursesList = useMemo(() => coursesData?.data || [], [coursesData])
+  const tomorrow = useMemo(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
 
   // Check navigation state for initial course selection
   const initialCourseId = location.state?.courseId || ""
@@ -346,24 +352,21 @@ const CreateClassPage = () => {
       return
     }
 
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
     const start = parseLocalDateString(startDate)
     const enrollStart = parseLocalDateString(admissionStart)
     const enrollEnd = parseLocalDateString(admissionEnd)
 
     if (!isEditMode) {
-      if (enrollStart && enrollStart < today) {
-        toast.error(cc.toastAdmissionStartPast || "Admission start date cannot be in the past!")
+      if (enrollStart && enrollStart < tomorrow) {
+        toast.error(cc.toastAdmissionStartPast || "Admission start date must be from tomorrow onwards!")
         return
       }
-      if (enrollEnd && enrollEnd < today) {
-        toast.error(cc.toastAdmissionEndPast || "Admission end date cannot be in the past!")
+      if (enrollEnd && enrollEnd < tomorrow) {
+        toast.error(cc.toastAdmissionEndPast || "Admission end date must be from tomorrow onwards!")
         return
       }
-      if (start && start < today) {
-        toast.error(cc.toastStartPast || "Start date cannot be in the past!")
+      if (start && start < tomorrow) {
+        toast.error(cc.toastStartPast || "Start date must be from tomorrow onwards!")
         return
       }
     }
@@ -612,7 +615,7 @@ const CreateClassPage = () => {
                       onChange={(date) => setAdmissionStart(date ? toLocalDateString(date) : "")}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="DD/MM/YYYY"
-                      minDate={isEditMode ? null : new Date()}
+                      minDate={isEditMode ? null : tomorrow}
                       wrapperClassName="w-full"
                       className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all cursor-pointer"
                     />
@@ -625,7 +628,7 @@ const CreateClassPage = () => {
                       onChange={(date) => setAdmissionEnd(date ? toLocalDateString(date) : "")}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="DD/MM/YYYY"
-                      minDate={isEditMode ? null : new Date()}
+                      minDate={isEditMode ? null : tomorrow}
                       wrapperClassName="w-full"
                       className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all cursor-pointer"
                     />
@@ -642,7 +645,7 @@ const CreateClassPage = () => {
                     onChange={(date) => setStartDate(date ? toLocalDateString(date) : "")}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="DD/MM/YYYY"
-                    minDate={isEditMode ? null : new Date()}
+                    minDate={isEditMode ? null : tomorrow}
                     wrapperClassName="w-full"
                     className="w-full h-11 px-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all cursor-pointer"
                   />

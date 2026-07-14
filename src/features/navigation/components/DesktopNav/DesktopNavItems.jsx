@@ -8,9 +8,11 @@ import DesktopNavSubItem from "./DesktopNavSubItem"
 import { navLinks, footerLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useSidebar } from "@/shared/context/SidebarContext"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
 const DesktopNavItems = () => {
   const { t } = useLanguage()
+  const { isStudent } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname } = useActiveLink()
 
   const { openDropdownKeys, setOpenDropdownKeys, isDesktopSidebarDocked } =
@@ -56,19 +58,24 @@ const DesktopNavItems = () => {
                   }}
                   isDocked={isDesktopSidebarDocked}
                 >
-                  {(item.subItems || []).map((sub, idx) => {
-                    const subLabel = t.nav?.[sub.key] || sub.key
-                    const SubIconComponent = sub.icon || Home
-                    return (
-                      <DesktopNavSubItem
-                        key={sub.key}
-                        to={resolvePath(sub.path)}
-                        icon={SubIconComponent}
-                        label={subLabel}
-                        isFlyout={isDesktopSidebarDocked}
-                      />
-                    )
-                  })}
+                  {(item.subItems || [])
+                    .filter((sub) => {
+                      if (sub.key === "myCourses" && isStudent) return false
+                      return true
+                    })
+                    .map((sub, idx) => {
+                      const subLabel = t.nav?.[sub.key] || sub.key
+                      const SubIconComponent = sub.icon || Home
+                      return (
+                        <DesktopNavSubItem
+                          key={sub.key}
+                          to={resolvePath(sub.path)}
+                          icon={SubIconComponent}
+                          label={subLabel}
+                          isFlyout={isDesktopSidebarDocked}
+                        />
+                      )
+                    })}
                 </DesktopNavDropdown>
               )
             }

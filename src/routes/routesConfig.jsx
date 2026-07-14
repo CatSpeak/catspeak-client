@@ -47,6 +47,7 @@ const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
 const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
 const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
 const MyCoursesPage = lazy(() => import("@/features/courses/pages/MyCoursesPage"))
+const MyLearningPage = lazy(() => import("@/features/courses/pages/MyLearningPage"))
 const CreateCoursePage = lazy(() => import("@/features/courses/pages/CreateCoursePage"))
 const AllCoursesPage = lazy(() => import("@/features/courses/pages/AllCoursesPage"))
 const AllClassesPage = lazy(() => import("@/features/courses/pages/AllClassesPage"))
@@ -59,14 +60,9 @@ const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
 
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
-const CourseDetailWrapper = () => {
+const WorkspaceIndex = () => {
   const { isStudent } = useRoleOverride()
-  return isStudent ? <StudentCourseDetailPage /> : <CourseDetailPage />
-}
-
-const ClassDetailWrapper = () => {
-  const { isStudent } = useRoleOverride()
-  return isStudent ? <StudentClassDetailPage /> : <ClassDetailPage />
+  return <Navigate to={isStudent ? "learning" : "courses"} replace />
 }
 
 const routesConfig = [
@@ -241,7 +237,7 @@ const routesConfig = [
             children: [
               {
                 index: true,
-                element: <Navigate to="courses" replace />,
+                element: <WorkspaceIndex />,
               },
               {
                 path: "courses",
@@ -311,7 +307,7 @@ const routesConfig = [
                 path: "courses/class/:id",
                 element: (
                   <LazyRoute>
-                    <ClassDetailWrapper />
+                    <ClassDetailPage />
                   </LazyRoute>
                 ),
               },
@@ -319,7 +315,31 @@ const routesConfig = [
                 path: "courses/details/:id",
                 element: (
                   <LazyRoute>
-                    <CourseDetailWrapper />
+                    <CourseDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning",
+                element: (
+                  <LazyRoute>
+                    <MyLearningPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/details/:id",
+                element: (
+                  <LazyRoute>
+                    <StudentCourseDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id",
+                element: (
+                  <LazyRoute>
+                    <StudentClassDetailPage />
                   </LazyRoute>
                 ),
               },

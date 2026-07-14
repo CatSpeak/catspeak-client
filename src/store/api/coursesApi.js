@@ -97,7 +97,11 @@ const transformCourse = (course) => {
     endDate: course.endDate || "",
     priceRange: course.priceRange || { min: 0, max: 0 },
     thumbnailUrl: course.thumbnailUrl || "",
-    createdAt: course.createdAt || ""
+    createdAt: course.createdAt || "",
+    instructorId: course.instructorId?.toString() || course.instructor?.id?.toString() || course.teacherId?.toString() || course.creatorId?.toString() || course.createdById?.toString() || "",
+    instructorName: course.instructorName || course.instructor?.fullName || "",
+    instructor: course.instructor || null,
+    teacherId: course.teacherId?.toString() || ""
   }
 }
 
@@ -148,7 +152,9 @@ const transformClass = (cls) => {
     status: cls.status || "OPEN",
     roomId: cls.roomId?.toString() || "",
     roomName: cls.roomName || "",
-    thumbnailUrl: cls.thumbnailUrl || ""
+    thumbnailUrl: cls.thumbnailUrl || "",
+    instructorId: cls.instructorId?.toString() || cls.instructor?.id?.toString() || cls.teacherId?.toString() || cls.creatorId?.toString() || cls.createdById?.toString() || "",
+    teacherId: cls.teacherId?.toString() || ""
   }
 }
 
