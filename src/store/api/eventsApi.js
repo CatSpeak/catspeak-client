@@ -1,58 +1,58 @@
-import { baseApi } from "./baseApi"
+import { baseApi } from "./baseApi";
 
 const getOccurrenceTags = (result) => {
-  const tags = ["Events"]
+  const tags = ["Events"];
   if (result?.occurrences) {
     result.occurrences.forEach((occ) => {
       if (occ.id != null)
-        tags.push({ type: "Events", id: `occurrence-${occ.id}` })
+        tags.push({ type: "Events", id: `occurrence-${occ.id}` });
       if (occ.recurringEventId != null)
-        tags.push({ type: "Events", id: occ.recurringEventId })
-      if (occ.eventId != null) tags.push({ type: "Events", id: occ.eventId })
+        tags.push({ type: "Events", id: occ.recurringEventId });
+      if (occ.eventId != null) tags.push({ type: "Events", id: occ.eventId });
       if (occ.subOccurrences) {
         occ.subOccurrences.forEach((sub) => {
           if (sub.id != null)
-            tags.push({ type: "Events", id: `occurrence-${sub.id}` })
-        })
+            tags.push({ type: "Events", id: `occurrence-${sub.id}` });
+        });
       }
-    })
+    });
   }
-  return tags
-}
+  return tags;
+};
 
 const fixOvernightEvents = (response) => {
-  if (!response) return response
+  if (!response) return response;
 
-  const clone = JSON.parse(JSON.stringify(response))
+  const clone = JSON.parse(JSON.stringify(response));
 
   const fix = (ev) => {
-    if (!ev || !ev.startTime || !ev.endTime) return
-    const start = new Date(ev.startTime)
-    const end = new Date(ev.endTime)
+    if (!ev || !ev.startTime || !ev.endTime) return;
+    const start = new Date(ev.startTime);
+    const end = new Date(ev.endTime);
     if (end < start) {
-      end.setTime(end.getTime() + 24 * 60 * 60 * 1000)
-      const isZ = ev.endTime.endsWith("Z")
-      const newStr = end.toISOString().split(".")[0]
-      ev.endTime = isZ ? newStr + "Z" : newStr
+      end.setTime(end.getTime() + 24 * 60 * 60 * 1000);
+      const isZ = ev.endTime.endsWith("Z");
+      const newStr = end.toISOString().split(".")[0];
+      ev.endTime = isZ ? newStr + "Z" : newStr;
     }
 
     if (ev.subOccurrences) {
-      ev.subOccurrences.forEach(fix)
+      ev.subOccurrences.forEach(fix);
     }
-  }
+  };
 
   if (Array.isArray(clone)) {
-    clone.forEach(fix)
+    clone.forEach(fix);
   } else if (clone.events) {
-    clone.events.forEach(fix)
+    clone.events.forEach(fix);
   } else if (clone.items) {
-    clone.items.forEach(fix)
+    clone.items.forEach(fix);
   } else {
-    fix(clone)
+    fix(clone);
   }
 
-  return clone
-}
+  return clone;
+};
 
 export const eventsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -76,10 +76,10 @@ export const eventsApi = baseApi.injectEndpoints({
 
     // PUT /api/v1/Events/{eventId}
     updateEvent: builder.mutation({
-      query: ({ eventId, ...data }) => ({
+      query: ({ eventId, payload }) => ({
         url: `/v1/Events/${eventId}`,
         method: "PUT",
-        body: data,
+        body: payload,
       }),
       invalidatesTags: (result, error, { eventId }) => [
         { type: "Events", id: eventId },
@@ -98,12 +98,11 @@ export const eventsApi = baseApi.injectEndpoints({
 
     // POST /api/v1/Events
     createEvent: builder.mutation({
-      query: (data) => ({
+      query: (formData) => ({
         url: "/v1/Events",
         method: "POST",
-        body: data,
+        body: formData,
       }),
-      invalidatesTags: ["Events"],
     }),
 
     // PUT /api/v1/Events/{eventId}/occurrences/{occurrenceId}
@@ -162,7 +161,7 @@ export const eventsApi = baseApi.injectEndpoints({
         url: "/v1/Events/by-date",
         params,
       }),
-      transformResponse: fixOvernightEvents,
+      // transformResponse: fixOvernightEvents,
       providesTags: ["Events"],
     }),
 
@@ -208,11 +207,11 @@ export const eventsApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: (result, error, { eventId, occurrenceId }) => {
-        const tags = [{ type: "Events", id: eventId }, "Events"]
+        const tags = [{ type: "Events", id: eventId }, "Events"];
         if (occurrenceId) {
-          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
+          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` });
         }
-        return tags
+        return tags;
       },
     }),
 
@@ -224,11 +223,11 @@ export const eventsApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: (result, error, { eventId, occurrenceId }) => {
-        const tags = [{ type: "Events", id: eventId }, "Events"]
+        const tags = [{ type: "Events", id: eventId }, "Events"];
         if (occurrenceId) {
-          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` })
+          tags.push({ type: "Events", id: `occurrence-${occurrenceId}` });
         }
-        return tags
+        return tags;
       },
     }),
 
@@ -251,7 +250,7 @@ export const eventsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Events"],
     }),
   }),
-})
+});
 
 export const {
   useGetEventByIdQuery,
@@ -272,4 +271,4 @@ export const {
   useUpdateEventSeriesMutation,
   useCancelEventOccurrenceMutation,
   useDeleteRegistrationMutation,
-} = eventsApi
+} = eventsApi;

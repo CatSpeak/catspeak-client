@@ -1,59 +1,60 @@
-import React, { useState } from "react"
-import { Trash2, Pencil } from "lucide-react"
-import SharePopover from "./SharePopover"
-import useEventDelete from "../../hooks/useEventDelete"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useAuth } from "@/features/auth/hooks/useAuth"
+import React, { useState } from "react";
+import { Trash2, Pencil } from "lucide-react";
+import SharePopover from "./SharePopover";
+import useEventDelete from "../../hooks/useEventDelete";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
   useDeleteRegistrationMutation,
-} from "@/store/api/eventsApi"
-import { useLocation, useNavigate } from "react-router-dom"
-import { useAuthModal } from "@/shared/context/AuthModalContext"
+} from "@/store/api/eventsApi";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
 
-import ParticipantListModal from "./ParticipantListModal"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+import ParticipantListModal from "./ParticipantListModal";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
 
-const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
-  const { user, isAdmin } = useAuth()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { openAuthModal } = useAuthModal()
-  const { t } = useLanguage()
-  const cal = t.calendar || {}
-  const [showParticipants, setShowParticipants] = useState(false)
+const EventDetailFooter = ({ eventId, event, onClose, onEdit, onActionComplete }) => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { openAuthModal } = useAuthModal();
+  const { t } = useLanguage();
+  const cal = t.calendar || {};
+  const [showParticipants, setShowParticipants] = useState(false);
 
   const isCreator = Boolean(
     user &&
     event &&
-    ((user.id != null &&
+    ((user.accountId != null &&
       event.creatorId != null &&
-      user.id === event.creatorId) ||
+      user.accountId === event.creatorId) ||
       (user.username != null &&
         event.creatorName != null &&
         user.username === event.creatorName) ||
       (user.fullName != null &&
         event.creatorName != null &&
         user.fullName === event.creatorName)),
-  )
+  );
 
-  const isRegistered = event?.isRegistered ?? false
+  const isRegistered = event?.isRegistered ?? false;
 
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
-    useEventDelete(eventId, event?.occurrenceId, onClose)
+    useEventDelete(eventId, event?.occurrenceId, onClose, onActionComplete);
 
   const [registerForEvent, { isLoading: isRegistering }] =
-    useRegisterForEventMutation()
+    useRegisterForEventMutation();
   const [cancelRegistration, { isLoading: isCancelling }] =
-    useCancelRegistrationMutation()
+    useCancelRegistrationMutation();
   const [deleteRegistration, { isLoading: isDeletingReg }] =
-    useDeleteRegistrationMutation()
+    useDeleteRegistrationMutation();
 
-  const isProcessing = isRegistering || isCancelling || isDeletingReg
+  const isProcessing = isRegistering || isCancelling || isDeletingReg;
 
   const handleRegister = async () => {
-    if (!user || !user.id) {
+
+    if (!user || !user.accountId) {
       if (location.pathname.includes("/events/shared/")) {
         navigate("/", {
           replace: true,
@@ -61,11 +62,11 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             requireLogin: true,
             redirectTo: location.pathname + location.search,
           },
-        })
+        });
       } else {
-        openAuthModal("login", location.pathname + location.search)
+        openAuthModal("login", location.pathname + location.search);
       }
-      return
+      return;
     }
 
     if (isRegistered) {
@@ -75,7 +76,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           await deleteRegistration({
             registrationId: event.registrationId,
             cancellationReason: "User cancelled",
-          }).unwrap()
+          }).unwrap();
         } else {
           const body = {
             eventId,
@@ -88,33 +89,36 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             !event?.occurrenceId
               ? { registrationDate: event.originalStartTime }
               : {}),
-          }
-          await cancelRegistration(body).unwrap()
+          };
+          await cancelRegistration(body).unwrap();
         }
+        if (onActionComplete) onActionComplete('cancel', 'success')
       } catch (err) {
-        console.error("Cancel registration failed:", err)
+        console.error("Cancel registration failed:", err);
+        if (onActionComplete) onActionComplete('cancel', 'error')
       }
-      return
+      return;
     }
 
     try {
-      const isRecurring = event?.isRecurring
-      const occurrenceId = event?.occurrenceId
+      const occurrenceId = event?.occurrenceId;
 
-      let body = { eventId }
+      let body = { eventId };
       if (occurrenceId) {
-        body = { eventId, occurrenceId, registrationType: "SINGLE_OCCURRENCE" }
+        body = { eventId, occurrenceId, registrationType: "SINGLE_OCCURRENCE" };
       } else if (event?.isRecurring) {
-        body = { eventId, registrationType: "ENTIRE_SERIES" }
+        body = { eventId, registrationType: "ENTIRE_SERIES" };
       }
 
-      console.log("REGISTER PAYLOAD:", body)
+      console.log("REGISTER PAYLOAD:", body);
 
-      await registerForEvent(body).unwrap()
+      await registerForEvent(body).unwrap();
+      if (onActionComplete) onActionComplete('register', 'success');
     } catch (err) {
-      console.error("Registration failed:", err)
+      console.error("Registration failed:", err);
+      if (onActionComplete) onActionComplete('register', 'error');
     }
-  }
+  };
 
   return (
     <>
@@ -124,7 +128,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           (isCreator ? (
             <PillButton
               onClick={() => setShowParticipants(true)}
-              bgColor="#B91264"
+              bgColor="#990011"
               className="w-full min-[426px]:flex-1"
             >
               {cal.viewParticipants || "Xem danh sách người đăng ký"}
@@ -222,7 +226,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         />
       )}
     </>
-  )
-}
+  );
+};
 
-export default EventDetailFooter
+export default EventDetailFooter;

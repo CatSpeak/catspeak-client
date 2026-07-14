@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
+import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 
 import GlobalCallContent from "./GlobalCallContent"
 
@@ -26,20 +27,20 @@ export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 const IDLE_VALUE = {
   isInCall: false,
   isPiP: false,
-  enterPiP: () => {},
-  exitPiP: () => {},
-  returnToCall: () => {},
+  enterPiP: () => { },
+  exitPiP: () => { },
+  returnToCall: () => { },
   showLeaveModal: false,
-  promptLeaveCall: () => {},
-  cancelLeaveCall: () => {},
+  promptLeaveCall: () => { },
+  cancelLeaveCall: () => { },
   participants: [],
   messages: [],
   aiMessages: [],
-  addOptimisticAiMessage: () => {},
-  chatPublicAi: async () => {},
-  chatPrivateAi: async () => {},
-  startNewThread: () => {},
-  continueThread: () => {},
+  addOptimisticAiMessage: () => { },
+  chatPublicAi: async () => { },
+  chatPrivateAi: async () => { },
+  startNewThread: () => { },
+  continueThread: () => { },
   getConversationThread: () => [],
   isConnected: false,
   micOn: false,
@@ -48,33 +49,35 @@ const IDLE_VALUE = {
   isTogglingCam: false,
   isTogglingScreenShare: false,
   activeSidePanel: null,
-  setActiveSidePanel: () => {},
+  setActiveSidePanel: () => { },
   showChat: false,
-  setShowChat: () => {},
+  setShowChat: () => { },
   showParticipants: false,
-  setShowParticipants: () => {},
+  setShowParticipants: () => { },
   showVirtualBackground: false,
-  setShowVirtualBackground: () => {},
+  setShowVirtualBackground: () => { },
   showAvatarPicker: false,
-  setShowAvatarPicker: () => {},
+  setShowAvatarPicker: () => { },
   beautyOptions: { smoothing: 0, brightness: 0, warmth: 0, colorFilter: 0, faceSlim: 0, eyeEnlarge: 0, eyeBrighten: 0, teethWhiten: 0 },
-  setBeautyOptions: () => {},
-  switchBeauty: () => {},
+  setBeautyOptions: () => { },
+  switchBeauty: () => { },
   processorStatus: "idle",
   isAISession: false,
   showCC: false,
   setShowCC: () => {},
-  showAvatarPicker: false,
-  setShowAvatarPicker: () => {},
   showRoomSubtitles: false,
-  setShowRoomSubtitles: () => {},
+  setShowRoomSubtitles: () => { },
   subtitleSelectedLanguage: null,
-  setSubtitleSelectedLanguage: () => {},
+  setSubtitleSelectedLanguage: () => { },
   lkRoomName: null,
   unreadRoomChat: 0,
   unreadAiChat: 0,
   isChatCollapsed: false,
   isAiCollapsed: false,
+  setUnreadRoomChat: () => { },
+  setUnreadAiChat: () => { },
+  setIsChatCollapsed: () => { },
+  setIsAiCollapsed: () => { },
   setUnreadRoomChat: () => {},
   setUnreadAiChat: () => {},
   setIsChatCollapsed: () => {},
@@ -109,6 +112,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
   const { isInCall, livekitToken, livekitServerUrl, callInfo } = useSelector(
     (s) => s.videoCall,
   )
+
+  const panelState = useSidePanelState()
 
   const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(() => {
     const saved = localStorage.getItem("receiveSystemMsgs")
@@ -146,6 +151,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
 
   return (
     <LiveKitRoom
+      key={livekitToken}
       serverUrl={livekitServerUrl}
       token={livekitToken}
       connect={true}
@@ -158,6 +164,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
         ContextProvider={GlobalVideoCallContext.Provider}
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        panelState={panelState}
         speakingAssistantEnabled={speakingAssistantEnabled}
         setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
       >

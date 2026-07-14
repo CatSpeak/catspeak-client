@@ -18,6 +18,7 @@ import DiscoverPage from "@/features/discover/DiscoverPage"
 import MailPage from "@/features/mail/pages/MailPage"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
 import CalendarPage from "@/features/calendar/pages/CalendarPage"
+import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
 
 // Shared Pages
 import { ComingSoonPage } from "@/shared/pages"
@@ -173,6 +174,10 @@ const routesConfig = [
                   {
                     path: "calendar",
                     element: <CalendarPage />,
+                  },
+                  {
+                    path: "calendar/create",
+                    element: <CreateEventPage />,
                   },
                   { path: "*", element: <PageNotFound /> },
                 ],

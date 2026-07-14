@@ -52,7 +52,13 @@ export const useVideoCallSignaling = (handlers = {}) => {
       }
 
     // Bind Hub Events
-    const events = ["RoomClosingWarning"]
+    const events = [
+      "RoomClosingWarning",
+      "JoinBreakoutRoom",
+      "ReturnToMainRoom",
+      "BreakoutStatusChanged",
+      "BroadcastNotification"
+    ]
     events.forEach((evt) => {
       newConnection.on(evt, safeHandler(evt))
     })

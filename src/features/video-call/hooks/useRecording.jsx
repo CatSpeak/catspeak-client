@@ -6,6 +6,7 @@ import {
   useStopRecordingMutation,
 } from "@/store/api/recordingsApi"
 import { setPiP } from "@/store/slices/videoCallSlice"
+import { addRecording } from "@/store/slices/recordingProcessSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
@@ -154,6 +155,14 @@ export function useRecording(lkRoom = null, syncState = {}) {
       if (egressId) {
         const result = await stopRecording(egressId).unwrap()
         console.log("[Recording Debug] Stop response:", JSON.stringify(result))
+        if (result && result.egressId) {
+          dispatch(
+            addRecording({
+              egressId: result.egressId,
+              meetingId: result.meetingId || "Room Recording",
+            })
+          )
+        }
       }
       if (setEgressId) setEgressId(null)
       if (setIsRecording) setIsRecording(false)

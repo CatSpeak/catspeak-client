@@ -19,7 +19,7 @@ import {
   useJoinStudentClassRoomMutation
 } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { enterCall, setPiP, leaveCall } from "@/store/slices/videoCallSlice"
+import { enterCall, setPiP, leaveCall, enterBreakout } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import VideoCallLoading from "../components/VideoCallLoading"
@@ -324,7 +324,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     setPhase("joining")
 
     try {
-      let token, serverUrl, sessionId
+      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName
 
       if (isClassRoom) {
         // Fetch LiveKit token using the appropriate endpoint based on user role
@@ -334,6 +334,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         token = tokenRes?.token
         serverUrl = tokenRes?.serverUrl
         sessionId = tokenRes?.sessionId
+        activeSubSessionId = tokenRes?.activeSubSessionId
+        activeSubSessionName = tokenRes?.activeSubSessionName
       } else {
         // Fetch LiveKit token to validate connectivity and join
         const livekitTokenBody = {
@@ -343,6 +345,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         token = tokenRes?.participantToken
         serverUrl = tokenRes?.serverUrl
         sessionId = tokenRes?.sessionId
+        activeSubSessionId = tokenRes?.activeSubSessionId
+        activeSubSessionName = tokenRes?.activeSubSessionName
       }
 
       if (!token || typeof token !== "string") {
@@ -376,6 +380,17 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           isAISession,
         }),
       )
+
+      // Auto-restore breakout state if user was in a sub-room before refresh/reconnect
+      if (activeSubSessionId) {
+        dispatch(
+          enterBreakout({
+            subSessionId: activeSubSessionId,
+            roomName: activeSubSessionName || "Phòng thảo luận",
+            token,
+          })
+        )
+      }
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
       let errorMsg = t.rooms?.videoCall?.provider?.tokenError || "Failed to connect to video service. Please try again."

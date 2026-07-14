@@ -23,6 +23,11 @@ const initialState = {
     isAISession: false,
     showRoomSubtitles: false,
   },
+  /** Breakout Rooms State */
+  isBreakoutActive: false,
+  breakoutRoomName: null,
+  mainRoomCache: null, // caches { sessionId, livekitToken }
+  parentSessionId: null,
 }
 
 const videoCallSlice = createSlice({
@@ -62,6 +67,22 @@ const videoCallSlice = createSlice({
         isAISession: isAISession ?? false,
         showRoomSubtitles: false,
       }
+      state.isBreakoutActive = false
+      state.breakoutRoomName = null
+      state.mainRoomCache = null
+      state.parentSessionId = sessionId
+
+      try {
+        const roomSnapshot = {
+          roomId,
+          roomTitle: roomData?.name || roomData?.title || `Phòng #${roomId}`,
+          callPath: callPath || `/zh/meet/${roomId}`,
+          joinedAt: Date.now(),
+        }
+        localStorage.setItem("catspeak_last_room", JSON.stringify(roomSnapshot))
+      } catch (err) {
+        /* Ignored */
+      }
     },
 
     /**
@@ -87,6 +108,47 @@ const videoCallSlice = createSlice({
         state.callInfo.showRoomSubtitles = !state.callInfo.showRoomSubtitles
       }
     },
+
+    /**
+     * Enter a breakout room and cache main room info.
+     */
+    enterBreakout(state, action) {
+      const { subSessionId, roomName, token } = action.payload
+      if (!state.mainRoomCache && state.callInfo) {
+        state.mainRoomCache = {
+          livekitToken: state.livekitToken,
+          sessionId: state.callInfo.sessionId,
+        }
+      }
+      state.isBreakoutActive = true
+      state.breakoutRoomName = roomName
+      state.livekitToken = token
+      if (state.callInfo) {
+        state.callInfo.sessionId = subSessionId
+      }
+    },
+
+    /**
+     * Exit breakout rooms and restore main room info.
+     */
+    exitBreakout(state) {
+      if (state.mainRoomCache) {
+        state.livekitToken = state.mainRoomCache.livekitToken
+        if (state.callInfo) {
+          state.callInfo.sessionId = state.mainRoomCache.sessionId
+        }
+        state.mainRoomCache = null
+      }
+      state.isBreakoutActive = false
+      state.breakoutRoomName = null
+    },
+
+    /**
+     * Manually update the active LiveKit token.
+     */
+    updateLivekitToken(state, action) {
+      state.livekitToken = action.payload
+    },
   },
   extraReducers: (builder) => {
     // Automatically leave the call and clear state when the user logs out
@@ -96,7 +158,14 @@ const videoCallSlice = createSlice({
   },
 })
 
-export const { enterCall, setPiP, leaveCall, toggleRoomSubtitles } =
-  videoCallSlice.actions
+export const {
+  enterCall,
+  setPiP,
+  leaveCall,
+  toggleRoomSubtitles,
+  enterBreakout,
+  exitBreakout,
+  updateLivekitToken,
+} = videoCallSlice.actions
 
 export default videoCallSlice.reducer

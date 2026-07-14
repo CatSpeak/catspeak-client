@@ -21,7 +21,8 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import Avatar from "@/shared/components/ui/Avatar"
-import toast from "react-hot-toast"
+import { toast } from "react-hot-toast"
+import { uploadReelInBackground } from "../utils/uploadManager"
 import {
   useSearchReelHashtagsQuery,
   useSearchReelMentionsQuery,
@@ -339,8 +340,6 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
       }
     }
   }, [videoPreviewUrl, coverPreviewUrl])
-
-
 
   // Discard/Clear video file
   const handleDiscardVideo = () => {
@@ -1018,16 +1017,11 @@ const CreateReelModal = ({ open, onClose, challenge = null }) => {
         formData.append("CoverFile", coverFile)
       }
 
-      await createReel(formData).unwrap()
-      toast.success("Reel uploaded successfully!")
+      uploadReelInBackground(formData, videoFile, coverFile)
+      toast.success("Upload started in background", { icon: "📤" })
+      handleClose()
     } catch (err) {
-      console.error("Reel upload error:", err)
-      const errorMessage =
-        err?.data?.message ||
-        err?.message ||
-        "Failed to upload Reel. Please try again."
-      setGeneralError(errorMessage)
-      toast.error(errorMessage)
+      setGeneralError("Failed to initiate background upload. Please try again.")
     }
   }
 

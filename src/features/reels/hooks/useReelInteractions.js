@@ -4,12 +4,14 @@ import {
   useToggleLikeReelMutation,
   useCreateReelCommentMutation,
   useDeleteReelCommentMutation,
+  useBookmarkReelMutation,
 } from "@/store/api/reelsApi"
 
 export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t }) => {
   const [toggleLike] = useToggleLikeReelMutation()
   const [createComment, { isLoading: isPostingComment }] = useCreateReelCommentMutation()
   const [deleteComment] = useDeleteReelCommentMutation()
+  const [bookmarkReel] = useBookmarkReelMutation()
 
   const handleLike = useCallback(async () => {
     if (!isAuthenticated) {
@@ -23,6 +25,22 @@ export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t })
       toast.error(t?.catSpeak?.reels?.detail?.errorLike || "Failed to like reel.")
     }
   }, [isAuthenticated, reel, openAuthModal, toggleLike, t])
+
+  const handleBookmark = useCallback(async () => {
+    if (!isAuthenticated) {
+      openAuthModal()
+      return
+    }
+    if (!reel?.id) return
+    try {
+      await bookmarkReel({ reelId: reel.id }).unwrap()
+      if (!reel.isBookmarked) {
+        toast.success(t?.catSpeak?.reels?.detail?.moreMenu?.addToPlaylistSuccess || "Added to playlist.")
+      }
+    } catch {
+      toast.error(t?.catSpeak?.reels?.detail?.errorBookmark || "Failed to bookmark reel.")
+    }
+  }, [isAuthenticated, reel, openAuthModal, bookmarkReel, t])
 
   const handleShare = useCallback(async () => {
     if (!reel?.id) return
@@ -81,6 +99,7 @@ export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t })
 
   return {
     handleLike,
+    handleBookmark,
     handleShare,
     handleCommentSubmit,
     handleCommentDelete,

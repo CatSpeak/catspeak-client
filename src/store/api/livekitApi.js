@@ -12,6 +12,8 @@ export const livekitApi = baseApi.injectEndpoints({
         serverUrl: response.server_url,
         participantToken: response.participant_token,
         sessionId: response.cathspeak?.session_id,
+        activeSubSessionId: response.cathspeak?.active_sub_session_id,
+        activeSubSessionName: response.cathspeak?.active_sub_session_name,
       }),
     }),
     raiseHand: builder.mutation({

@@ -4,6 +4,8 @@ import { MainLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useSessionTimer } from "@/features/video-call"
+import { useParticipants, useLocalParticipant } from "@livekit/components-react"
+import { toast } from "react-hot-toast"
 
 const RoomHeader = () => {
   const { t, language } = useLanguage()
@@ -12,6 +14,18 @@ const RoomHeader = () => {
   const { formattedRemaining, formattedMax, hasDuration, formattedElapsed } = useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
 
   const rawRoomName = room?.name || "General"
+
+  const allParticipants = useParticipants();
+  const { localParticipant } = useLocalParticipant();
+  
+  // Whoever joined first is the host
+  const hostParticipant = [...allParticipants].sort((a, b) => {
+    const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
+    const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
+    return timeA - timeB;
+  })[0];
+  
+  const isHost = hostParticipant && localParticipant && hostParticipant.identity === localParticipant.identity;
 
   return (
     <div className="flex items-center justify-between border-b border-[#E5E5E5] bg-white px-5 h-[56px] shrink-0">
@@ -56,6 +70,7 @@ const RoomHeader = () => {
           {formattedRemaining} / {formattedMax}
         </div>
       )}
+
     </div>
   )
 }

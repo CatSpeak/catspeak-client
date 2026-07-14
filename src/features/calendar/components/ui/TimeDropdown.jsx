@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-import colors from "@/shared/utils/colors"
-import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const TimeDropdown = ({
   value,
@@ -15,23 +13,7 @@ const TimeDropdown = ({
   const dropdownRef = useRef(null)
   const portalRef = useRef(null)
 
-  const getClosestTime = () => {
-    const now = new Date()
-    const minutes = now.getMinutes()
-    const hours = now.getHours()
-
-    let roundedMinutes = Math.round(minutes / 15) * 15
-    let finalHours = hours
-
-    if (roundedMinutes === 60) {
-      roundedMinutes = 0
-      finalHours = (finalHours + 1) % 24
-    }
-
-    return `${finalHours.toString().padStart(2, "0")}:${roundedMinutes.toString().padStart(2, "0")}`
-  }
-
-  const [selectedTime, setSelectedTime] = useState(value || getClosestTime())
+  const [selectedTime, setSelectedTime] = useState(value !== undefined ? value : "")
 
   useEffect(() => {
     if (value !== undefined) {
@@ -146,7 +128,9 @@ const TimeDropdown = ({
         }`}
         style={isOpen ? { borderColor: color } : {}}
       >
-        <span className="text-base">{selectedTime}</span>
+        <span className={`text-base ${!selectedTime ? "text-[#7A7574]" : ""}`}>
+          {selectedTime || "Chọn giờ"}
+        </span>
       </button>
 
       {typeof document !== "undefined" &&
@@ -188,7 +172,7 @@ const TimeDropdown = ({
                       >
                         <div className="flex flex-col gap-1 p-1">
                           {displayTimes.map((time) => {
-                            const isSelected = selectedTime === time
+                            const isSelected = selectedTime === time;
                             return (
                               <div
                                 key={time}
@@ -202,7 +186,7 @@ const TimeDropdown = ({
                               >
                                 {time}
                               </div>
-                            )
+                            );
                           })}
                         </div>
                       </div>
@@ -215,7 +199,7 @@ const TimeDropdown = ({
           document.body,
         )}
     </div>
-  )
+  );
 }
 
 export default TimeDropdown

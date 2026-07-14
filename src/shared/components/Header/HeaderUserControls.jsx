@@ -8,9 +8,9 @@ const HeaderUserControls = () => {
   const { isAuthenticated } = useAuth()
   return (
     <div className="flex items-center gap-2">
-      {isAuthenticated && <MessageWidget />}
-
       <NotificationWidget />
+
+      {isAuthenticated && <MessageWidget />}
 
       <ProfileDropdown />
     </div>

@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { Search, ArrowLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSearchParams, useNavigate, useLocation, useParams } from "react-router-dom"
+import HeaderFilter from "./HeaderFilter"
 
 const HeaderSearchBar = () => {
   const { t } = useLanguage()
@@ -50,11 +51,11 @@ const HeaderSearchBar = () => {
 
       {/* Expanded Search for Mobile (Absolute Overlay) or Desktop (Relative) */}
       <div className={`
-        ${isExpanded ? "absolute inset-y-0 left-0 right-0 z-[100] bg-white px-4 flex items-center" : "hidden md:flex relative"} 
+        ${isExpanded ? "absolute inset-y-0 left-0 right-0 z-[100] bg-white px-4 flex items-center gap-3" : "hidden md:flex relative"} 
         items-center w-full md:w-[260px]
       `}>
         {isExpanded && (
-           <button onClick={() => setIsExpanded(false)} className="mr-3 p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full shrink-0">
+           <button onClick={() => setIsExpanded(false)} className="mr-0 p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full shrink-0">
              <ArrowLeft size={22} strokeWidth={2} />
            </button>
         )}
@@ -74,10 +75,17 @@ const HeaderSearchBar = () => {
                 handleSearch()
               }
             }}
-            placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng hoặc chủ đề"}
+            placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
             className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[16px] md:text-[14px] outline-none transition-all placeholder-gray-500"
           />
         </div>
+        
+        {/* Render HeaderFilter on mobile when expanded */}
+        {isExpanded && (
+           <div className="md:hidden shrink-0">
+             <HeaderFilter />
+           </div>
+        )}
       </div>
     </>
   )

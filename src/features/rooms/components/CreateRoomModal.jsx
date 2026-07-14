@@ -95,7 +95,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
                 onClick={onCancel}
                 className="flex shrink-0 items-center justify-center h-12 w-12 hover:bg-[#E5E5E5] rounded-full transition-colors"
               >
-                <X size={24} />
+                <X size={22} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -232,7 +232,7 @@ const ModalFooter = ({
 }) => {
   if (mode === "join") {
     return (
-      <div className="p-6 flex flex-wrap justify-end gap-6 shrink-0">
+      <div className="p-6 sm:px-8 sm:py-6 flex flex-wrap justify-end gap-4 sm:gap-6 shrink-0 border-t border-gray-100 bg-gray-50/50">
         <PillButton
           onClick={() => onSwitchMode("create")}
           variant="outline"
@@ -252,7 +252,7 @@ const ModalFooter = ({
   }
 
   return (
-    <div className="p-6 flex flex-wrap justify-end gap-6 shrink-0">
+    <div className="p-6 sm:px-8 sm:py-6 flex flex-wrap justify-end gap-4 sm:gap-6 shrink-0 border-t border-gray-100 bg-gray-50/50">
       <PillButton
         onClick={() => onSwitchMode("join")}
         variant="secondary"

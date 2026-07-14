@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Globe, Users, Lock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import toast from "react-hot-toast"
 import {
   useCreateReelMutation,
   useSearchReelHashtagsQuery,
@@ -929,8 +930,12 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
       }
 
       await createReel(formData).unwrap()
+      toast.success("Reel uploaded successfully!")
     } catch (err) {
-      setGeneralError(err?.data?.message || err?.message || "Failed to upload Reel. Please try again.")
+      console.error("Reel upload error:", err)
+      const errorMessage = err?.data?.message || err?.message || "Failed to upload Reel. Please try again."
+      setGeneralError(errorMessage)
+      toast.error(errorMessage)
     }
   }
 

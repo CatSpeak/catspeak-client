@@ -72,6 +72,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                 onEndTimeChange={form.setEndTime}
                 selectedTimezone={form.selectedTimezone}
                 onTimezoneChange={form.setSelectedTimezone}
+                errors={form.errors}
               />
 
               <EventRecurrenceSection

@@ -1,7 +1,10 @@
 import React from "react"
 import { ArrowLeft } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const NotificationDropdown = ({ onClose, isMobile }) => {
+  const { t } = useLanguage()
+
   return (
     <div
       className={`flex flex-col bg-white p-4 ${
@@ -19,14 +22,14 @@ const NotificationDropdown = ({ onClose, isMobile }) => {
             <ArrowLeft className="h-5 w-5 text-gray-700" />
           </button>
         )}
-        <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t.header?.notifications || "Notifications"}</h3>
       </div>
       <div
         className={`flex flex-1 flex-col items-center justify-center text-center text-gray-500 ${
           isMobile ? "" : "h-64 flex-none"
         }`}
       >
-        <p>No new notifications</p>
+        <p>{t.header?.noNewNotifications || "No new notifications"}</p>
       </div>
     </div>
   )

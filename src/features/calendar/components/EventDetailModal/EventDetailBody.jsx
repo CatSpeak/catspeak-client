@@ -14,7 +14,7 @@ import { TIMEZONES } from "../ui/TimezoneDropdown"
 const EventDetailBody = ({
   ev,
   event,
-  headerColor,
+  // headerColor,
   isLoading,
   onSelectOccurrence,
 }) => {
@@ -51,8 +51,41 @@ const EventDetailBody = ({
   const tzOffsetLabel = eventTzObj ? `(${eventTzObj.offset})` : `(${eventTzId})`
 
   return (
-    <div className="relative bg-white text-base overflow-y-auto max-h-[60vh] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+    <div className="relative bg-white text-base  max-h-[60vh] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+      {/* Thumbnail banner */}
+      {ev.thumbnailUrl && (
+        <div className="w-full h-40 overflow-hidden">
+          <img
+            src={ev.thumbnailUrl}
+            alt={ev.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 p-6">
+        {/* Online / Offline badge */}
+        {!ev.isRecurringGroup && ev.isOnline !== undefined && (
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                ev.isOnline
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  ev.isOnline ? "bg-green-500" : "bg-gray-400"
+                }`}
+              />
+              {ev.isOnline
+                ? t.calendar?.online || "Online"
+                : t.calendar?.offline || "Offline"}
+            </span>
+          </div>
+        )}
+
         {/* Time */}
         {!ev.isRecurringGroup && (
           <div className="flex items-baseline gap-2">
@@ -70,9 +103,9 @@ const EventDetailBody = ({
         {!ev.isRecurringGroup && (
           <div className="flex flex-col gap-3">
             {(() => {
-              const locationStr = ev.location?.trim() || ""
-              const cityStr = ev.cityName?.trim() || ""
-              const countryStr = ev.countryName?.trim() || ""
+              const locationStr = ev.location?.trim() || "";
+              const cityStr = ev.cityName?.trim() || "";
+              const countryStr = ev.countryName?.trim() || "";
 
               if (!locationStr && !cityStr && !countryStr) {
                 return (
@@ -84,24 +117,24 @@ const EventDetailBody = ({
                       {t.calendar?.notAssigned || "Not assigned"}
                     </span>
                   </div>
-                )
+                );
               }
 
               const queryParts = [locationStr, cityStr, countryStr].filter(
                 Boolean,
-              )
-              const queryStr = queryParts.join(", ")
+              );
+              const queryStr = queryParts.join(", ");
 
               const isUrl =
                 /^https?:\/\//i.test(locationStr) ||
                 locationStr.includes("google.com/maps") ||
-                locationStr.includes("maps.app.goo.gl")
+                locationStr.includes("maps.app.goo.gl");
 
               const mapUrl = isUrl
                 ? locationStr.startsWith("http")
                   ? locationStr
                   : `https://${locationStr}`
-                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
+                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`;
 
               return (
                 <div className="flex items-start gap-2">
@@ -112,8 +145,8 @@ const EventDetailBody = ({
                     href={mapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col hover:opacity-80 transition-opacity"
-                    style={{ color: headerColor }}
+                    className="flex flex-col hover:opacity-80 transition-opacity text-[#990011]"
+                    // style={{ color: headerColor }}
                   >
                     {locationStr && (
                       <span className="font-medium">{locationStr}</span>
@@ -127,18 +160,20 @@ const EventDetailBody = ({
                     )}
                   </a>
                 </div>
-              )
+              );
             })()}
           </div>
         )}
 
         {/* Description */}
         {!ev.isRecurringGroup && ev.description && (
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold min-w-max">
+          <div className="flex flex-col gap-1">
+            <span className="font-bold">
               {t.calendar?.description || "Description"}:
             </span>
-            <span className="text-[#60060]">{ev.description}</span>
+            <p className="text-[#60060] whitespace-pre-wrap leading-relaxed">
+              {ev.description}
+            </p>
           </div>
         )}
 
@@ -166,8 +201,8 @@ const EventDetailBody = ({
                 <span
                   key={c.id || `cond-${index}`}
                   title={c.description || undefined}
-                  className="px-3 py-1 rounded-full text-white text-sm flex items-center justify-center"
-                  style={{ backgroundColor: headerColor }}
+                  className="px-3 py-1 rounded-full text-[#990011] text-sm flex items-center justify-center"
+                  // style={{ backgroundColor: headerColor }}
                 >
                   {c.title || c.conditionType || c.category || `#${c.id}`}
                 </span>
@@ -285,7 +320,7 @@ const EventDetailBody = ({
         </div>
       </Modal>
     </div>
-  )
+  );
 }
 
 export default EventDetailBody

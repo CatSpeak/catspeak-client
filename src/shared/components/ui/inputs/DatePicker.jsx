@@ -4,8 +4,6 @@ import dayjs from "dayjs"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-import colors from "@/shared/utils/colors"
-import useClickOutside from "@/shared/hooks/useClickOutside"
 
 const DatePicker = ({
   value,
@@ -18,7 +16,7 @@ const DatePicker = ({
   const dropdownRef = useRef(null)
   const portalRef = useRef(null)
 
-  const [date, setDate] = useState(value ? dayjs(value) : dayjs())
+  const [date, setDate] = useState(value ? dayjs(value) : null)
   const [currentViewDate, setCurrentViewDate] = useState(
     value ? dayjs(value).startOf("month") : dayjs().startOf("month"),
   )
@@ -42,6 +40,8 @@ const DatePicker = ({
       const newDate = dayjs(value)
       setDate(newDate)
       setCurrentViewDate(newDate.startOf("month"))
+    } else {
+      setDate(null)
     }
   }, [value])
 
@@ -152,12 +152,14 @@ const DatePicker = ({
       <button
         type="button"
         onClick={() => {
-          if (!disabled) setIsOpen(!isOpen)
+          if (!disabled) setIsOpen(!isOpen);
         }}
         disabled={disabled}
         className={`hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-2xl whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
       >
-        <span>{formatVietnameseDate(date)}</span>
+        <span className={!date ? "text-[#7A7574] font-normal" : ""}>
+          {date ? formatVietnameseDate(date) : "Chọn ngày"}
+        </span>
       </button>
 
       {typeof document !== "undefined" &&
@@ -222,20 +224,21 @@ const DatePicker = ({
                       <div className="grid grid-cols-7 gap-y-2 gap-x-1">
                         {days.map((item) => {
                           if (item.isEmpty) {
-                            return <div key={item.key} />
+                            return <div key={item.key} />;
                           }
 
                           const isSelected =
+                            date &&
                             item.day === date.date() &&
                             currentViewDate.month() === date.month() &&
-                            currentViewDate.year() === date.year()
+                            currentViewDate.year() === date.year();
 
                           // Highlight today optionally
-                          const today = dayjs()
+                          const today = dayjs();
                           const isToday =
                             item.day === today.date() &&
                             currentViewDate.month() === today.month() &&
-                            currentViewDate.year() === today.year()
+                            currentViewDate.year() === today.year();
 
                           return (
                             <button
@@ -260,7 +263,7 @@ const DatePicker = ({
                             >
                               {item.day}
                             </button>
-                          )
+                          );
                         })}
                       </div>
                     </FluentAnimation>
@@ -272,7 +275,7 @@ const DatePicker = ({
           document.body,
         )}
     </div>
-  )
+  );
 }
 
 export default DatePicker
