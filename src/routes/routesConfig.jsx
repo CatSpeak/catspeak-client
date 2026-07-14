@@ -46,6 +46,7 @@ const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/Worksp
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
 const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
 const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
+const CheckoutPage = lazy(() => import("@/features/billing/pages/CheckoutPage.jsx"))
 const MyCoursesPage = lazy(() => import("@/features/courses/pages/MyCoursesPage"))
 const CreateCoursePage = lazy(() => import("@/features/courses/pages/CreateCoursePage"))
 const AllCoursesPage = lazy(() => import("@/features/courses/pages/AllCoursesPage"))
@@ -97,6 +98,16 @@ const routesConfig = [
               <LazyRoute>
                 <PricingPage />
               </LazyRoute>
+            ),
+          },
+          {
+            path: "checkout",
+            element: (
+              <AuthGuard>
+                <LazyRoute>
+                  <CheckoutPage />
+                </LazyRoute>
+              </AuthGuard>
             ),
           },
           { path: "*", element: <PageNotFound /> },

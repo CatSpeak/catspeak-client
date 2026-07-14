@@ -59,6 +59,7 @@ export default {
       subtitle: "您正在选择升级到 {{planName}}。",
       paymentMethod: "付款方式",
       payosSub: "银行转账 / QR 码",
+      momoSub: "使用 MoMo 电子钱包支付",
       stripeSub: "信用卡 / 借记卡",
       comingSoon: "即将推出",
       cancel: "取消",

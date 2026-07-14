@@ -59,6 +59,7 @@ export default {
       subtitle: "Bạn đang chọn nâng cấp lên {{planName}}.",
       paymentMethod: "Phương thức thanh toán",
       payosSub: "Chuyển khoản ngân hàng / QR Code",
+      momoSub: "Thanh toán bằng ví điện tử MoMo",
       stripeSub: "Thẻ Tín Dụng / Thẻ Ghi Nợ",
       comingSoon: "Sắp ra mắt",
       cancel: "Hủy",

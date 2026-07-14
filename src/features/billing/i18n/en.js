@@ -59,6 +59,7 @@ export default {
       subtitle: "You are choosing to upgrade to {{planName}}.",
       paymentMethod: "Payment Method",
       payosSub: "Bank Transfer / QR Code",
+      momoSub: "Pay with MoMo e-wallet",
       stripeSub: "Credit / Debit Card",
       comingSoon: "Coming soon",
       cancel: "Cancel",
