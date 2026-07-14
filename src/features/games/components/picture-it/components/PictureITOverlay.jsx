@@ -34,6 +34,17 @@ const PictureITOverlay = () => {
   const [selectedRating, setSelectedRating] = useState(0)
   const [myFlagged, setMyFlagged] = useState(false)
 
+    useEffect(() => {
+      setImgLoading(true);
+      setImgError(false);
+    }, [displayImageUrl]);
+
+    useEffect(() => {
+      setSelectedRating(0);
+      setHoveredRating(0);
+      setMyFlagged(false);
+    }, [roundNumber]);
+
   const isPictureIt = gameType === 'picture_it' || gameType === 'picture-it'
   const open = isPictureIt && !['idle'].includes(gameState)
 
@@ -52,17 +63,6 @@ const PictureITOverlay = () => {
   const imageBlurred = pictureIt?.imageBlurred
 
   const displayImageUrl = pictureIt?.imageUrlFull || pictureIt?.imageUrl
-
-  useEffect(() => {
-    setImgLoading(true)
-    setImgError(false)
-  }, [displayImageUrl])
-
-  useEffect(() => {
-    setSelectedRating(0)
-    setHoveredRating(0)
-    setMyFlagged(false)
-  }, [roundNumber])
 
   const handleDescribeStart = useCallback(() => {
     if (!isDescriber) return

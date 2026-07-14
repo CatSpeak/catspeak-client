@@ -6,6 +6,83 @@ const PuzzleCenter = () => {
   const { puzzle, currentRound } = useGame()
   const { t, language } = useLanguage()
 
+  const [displayMask, setDisplayMask] = useState("");
+
+   useEffect(() => {
+     if (!puzzle) return;
+
+     const initialMask =
+       puzzle.word_mask ||
+       Array.from({ length: puzzle.word_count || 1 })
+         .map(() => "-")
+         .join("");
+
+     const answer = puzzle.correct_answer;
+
+     if (!answer || !currentRound?.started_at) {
+       setDisplayMask(initialMask);
+       return;
+     }
+
+     const nonSpaceIndices = [];
+     for (let i = 0; i < answer.length; i++) {
+       if (answer[i] !== " ") {
+         nonSpaceIndices.push(i);
+       }
+     }
+
+     if (nonSpaceIndices.length === 0) {
+       setDisplayMask(initialMask);
+       return;
+     }
+
+     // Deterministic random based on puzzle answer string so all clients get the same order
+     let seed = 0;
+     for (let i = 0; i < answer.length; i++) {
+       seed += answer.charCodeAt(i) * (i + 1);
+     }
+     const random = () => {
+       seed = (seed * 9301 + 49297) % 233280;
+       return seed / 233280;
+     };
+
+     // Shuffle nonSpaceIndices deterministically
+     for (let i = nonSpaceIndices.length - 1; i > 0; i--) {
+       const j = Math.floor(random() * (i + 1));
+       [nonSpaceIndices[i], nonSpaceIndices[j]] = [
+         nonSpaceIndices[j],
+         nonSpaceIndices[i],
+       ];
+     }
+
+     const delayPerChar = 60000 / (nonSpaceIndices.length + 1);
+     const startedAtTime = new Date(currentRound.started_at).getTime();
+
+     const updateMask = () => {
+       const elapsedMs = Math.max(0, Date.now() - startedAtTime);
+       const stepsElapsed = Math.min(
+         Math.floor(elapsedMs / delayPerChar),
+         nonSpaceIndices.length,
+       );
+
+       let currentMaskArr = initialMask.split("");
+       for (let i = 0; i < stepsElapsed; i++) {
+         const idx = nonSpaceIndices[i];
+         currentMaskArr[idx] = answer[idx];
+       }
+       setDisplayMask(currentMaskArr.join(""));
+
+       if (stepsElapsed >= nonSpaceIndices.length) {
+         clearInterval(interval);
+       }
+     };
+
+     updateMask(); // Initial update
+     const interval = setInterval(updateMask, 200); // check 5 times a second
+
+     return () => clearInterval(interval);
+   }, [puzzle, currentRound?.started_at]);
+
   if (!puzzle) return null
 
   const hintContent = (() => {
@@ -27,80 +104,6 @@ const PuzzleCenter = () => {
       </div>
     )
   })()
-
-  const [displayMask, setDisplayMask] = useState("")
-
-  useEffect(() => {
-    if (!puzzle) return
-
-    const initialMask =
-      puzzle.word_mask ||
-      Array.from({ length: puzzle.word_count || 1 })
-        .map(() => "-")
-        .join("")
-
-    const answer = puzzle.correct_answer
-
-    if (!answer || !currentRound?.started_at) {
-      setDisplayMask(initialMask)
-      return
-    }
-
-    const nonSpaceIndices = []
-    for (let i = 0; i < answer.length; i++) {
-      if (answer[i] !== " ") {
-        nonSpaceIndices.push(i)
-      }
-    }
-
-    if (nonSpaceIndices.length === 0) {
-      setDisplayMask(initialMask)
-      return
-    }
-
-    // Deterministic random based on puzzle answer string so all clients get the same order
-    let seed = 0
-    for (let i = 0; i < answer.length; i++) {
-      seed += answer.charCodeAt(i) * (i + 1)
-    }
-    const random = () => {
-      seed = (seed * 9301 + 49297) % 233280
-      return seed / 233280
-    }
-
-    // Shuffle nonSpaceIndices deterministically
-    for (let i = nonSpaceIndices.length - 1; i > 0; i--) {
-      const j = Math.floor(random() * (i + 1));
-      [nonSpaceIndices[i], nonSpaceIndices[j]] = [
-        nonSpaceIndices[j],
-        nonSpaceIndices[i],
-      ]
-    }
-
-    const delayPerChar = 60000 / (nonSpaceIndices.length + 1)
-    const startedAtTime = new Date(currentRound.started_at).getTime()
-
-    const updateMask = () => {
-      const elapsedMs = Math.max(0, Date.now() - startedAtTime)
-      const stepsElapsed = Math.min(Math.floor(elapsedMs / delayPerChar), nonSpaceIndices.length)
-
-      let currentMaskArr = initialMask.split("")
-      for (let i = 0; i < stepsElapsed; i++) {
-        const idx = nonSpaceIndices[i]
-        currentMaskArr[idx] = answer[idx]
-      }
-      setDisplayMask(currentMaskArr.join(""))
-
-      if (stepsElapsed >= nonSpaceIndices.length) {
-        clearInterval(interval)
-      }
-    }
-
-    updateMask() // Initial update
-    const interval = setInterval(updateMask, 200) // check 5 times a second
-
-    return () => clearInterval(interval)
-  }, [puzzle, currentRound?.started_at])
 
   return (
     <div className="flex-1 bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">

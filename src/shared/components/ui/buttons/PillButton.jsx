@@ -19,58 +19,66 @@ const PillButton = ({
   const isOutline = variant === "outline"
   const isActuallyDisabled = disabled || loading
 
-  const heightClass = className && className.match(/\bh-\S+/) ? "" : "h-12"
-  const textClass = className && className.match(/\btext-(xs|sm|base|lg|xl|2xl|3xl|4xl)\b/) ? "" : "text-base"
-  const baseStyles = `${heightClass} ${textClass} px-4 rounded-full font-medium flex items-center justify-center gap-2 transition whitespace-nowrap`
-
-  // Default variant styles
+  // Default variant styles applied to inner div
   const variantStyles = isOutline
-    ? "bg-transparent hover:bg-[#f3f3f3] active:bg-[#e5e5e5]"
+    ? "bg-transparent group-hover:bg-[#f3f3f3] group-active:bg-[#e5e5e5]"
     : isSecondary
-    ? "bg-white text-black hover:bg-[#E5E5E5] active:bg-[#e0e0e0]"
-    : "bg-cath-red-700 text-white hover:brightness-90 active:brightness-75"
+      ? "bg-white border border-[#C6c6c6] text-black group-hover:bg-[#E5E5E5] group-active:bg-[#e0e0e0]"
+      : "bg-cath-red-700 text-white group-hover:brightness-90 group-active:brightness-75"
 
   const disabledStyles =
-    "disabled:bg-[#BFBFBF] disabled:text-white disabled:brightness-100 disabled:border-transparent"
+    "group-disabled:bg-[#BFBFBF] group-disabled:text-white group-disabled:brightness-100 group-disabled:border-transparent"
 
-  // Inline styles for custom colors, but only when not disabled
   const variantCustomStyle = isOutline
     ? {
-        color: colors.primaryRed,
-        borderColor: colors.primaryRed,
-        borderWidth: "1.5px",
-        borderStyle: "solid",
-      }
+      color: colors.primaryRed,
+      borderColor: colors.primaryRed,
+      borderWidth: "1.5px",
+      borderStyle: "solid",
+    }
     : {}
 
   const customStyle = !isActuallyDisabled
     ? {
-        ...variantCustomStyle,
-        ...(bgColor ? { backgroundColor: bgColor } : {}),
-        ...(textColor ? { color: textColor } : {}),
-      }
+      ...variantCustomStyle,
+      ...(bgColor ? { backgroundColor: bgColor } : {}),
+      ...(textColor ? { color: textColor } : {}),
+    }
     : {}
+
+  const renderIcon = (icon) => {
+    if (!icon) return null
+    return (
+      <span className="w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full shrink-0">
+        {icon}
+      </span>
+    )
+  }
 
   return (
     <button
       onClick={onClick}
       disabled={isActuallyDisabled}
-      style={customStyle}
-      className={`${baseStyles} ${variantStyles} ${disabledStyles} ${className}`}
+      className={`group relative outline-none flex items-center justify-center h-12 ${className}`}
       {...props}
     >
-      {loading ? (
-        <>
-          <Loader2 className="animate-spin w-4 h-4" />
-          <span>{loadingText || children}</span>
-        </>
-      ) : (
-        <>
-          {startIcon}
-          {children}
-          {endIcon}
-        </>
-      )}
+      <div
+        style={customStyle}
+        className={`w-full h-10 px-4 text-sm rounded-full font-medium flex items-center justify-center gap-2 transition whitespace-nowrap ${variantStyles} ${disabledStyles}`}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="animate-spin w-5 h-5" />
+            <span>{loadingText || children}</span>
+          </>
+        ) : (
+          <>
+            {renderIcon(startIcon)}
+            {children}
+            {renderIcon(endIcon)}
+          </>
+        )}
+      </div>
     </button>
   )
 }
