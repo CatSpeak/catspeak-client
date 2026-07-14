@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useRef, useEffect } from "react"
 import { Calendar, ChevronDown, ChevronUp, ListPlus, Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -12,6 +12,72 @@ const getLocale = (lang) => {
   return "en-US"
 }
 
+const PlaylistAvatar = ({ covers }) => {
+  if (!covers || covers.length === 0) {
+    return (
+      <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden">
+        <ListPlus size={20} className="text-red-600" />
+      </div>
+    )
+  }
+
+  if (covers.length === 1) {
+    return (
+      <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100">
+        <img src={covers[0]} className="w-full h-full object-cover" alt="" />
+      </div>
+    )
+  }
+
+  if (covers.length === 2) {
+    return (
+      <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
+        <div className="w-1/2 h-full border-r border-white/50">
+          <img src={covers[0]} className="w-full h-full object-cover" alt="" />
+        </div>
+        <div className="w-1/2 h-full">
+          <img src={covers[1]} className="w-full h-full object-cover" alt="" />
+        </div>
+      </div>
+    )
+  }
+
+  if (covers.length === 3) {
+    return (
+      <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
+        <div className="w-1/2 h-full border-r border-white/50">
+          <img src={covers[0]} className="w-full h-full object-cover" alt="" />
+        </div>
+        <div className="w-1/2 h-full flex flex-col">
+          <div className="w-full h-1/2 border-b border-white/50">
+            <img src={covers[1]} className="w-full h-full object-cover" alt="" />
+          </div>
+          <div className="w-full h-1/2">
+            <img src={covers[2]} className="w-full h-full object-cover" alt="" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex flex-wrap">
+      <div className="w-1/2 h-1/2 border-r border-b border-white/50">
+        <img src={covers[0]} className="w-full h-full object-cover" alt="" />
+      </div>
+      <div className="w-1/2 h-1/2 border-b border-white/50">
+        <img src={covers[1]} className="w-full h-full object-cover" alt="" />
+      </div>
+      <div className="w-1/2 h-1/2 border-r border-white/50">
+        <img src={covers[2]} className="w-full h-full object-cover" alt="" />
+      </div>
+      <div className="w-1/2 h-1/2">
+        <img src={covers[3]} className="w-full h-full object-cover" alt="" />
+      </div>
+    </div>
+  )
+}
+
 const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, lang, dateFormatter, formatNumber, navigate }) => {
   const isExpanded = expandedPlaylistId === playlist.playlistId
   // Fetch bookmarked reels to get accurate live count
@@ -21,6 +87,8 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   const label = count === 1
     ? (lang?.itemCountSingular || "1 video")
     : (lang?.itemCount || "{{count}} videos").replace("{{count}}", count)
+
+  const covers = bookmarkedReels?.map(r => r.coverUrl).filter(Boolean) || []
 
   const handleFeatureInDev = (e) => {
     e.stopPropagation()
@@ -33,9 +101,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
         onClick={() => setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)}
         className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left cursor-pointer"
       >
-        <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shrink-0">
-          <ListPlus size={20} className="text-red-600" />
-        </div>
+        <PlaylistAvatar covers={covers} />
         
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-gray-800 text-sm truncate">{playlist.name}</div>
@@ -88,6 +154,13 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate, navigate }) => {
   const [newPlaylistName, setNewPlaylistName] = useState("")
   const [showCreateInput, setShowCreateInput] = useState(false)
   const [expandedPlaylistId, setExpandedPlaylistId] = useState(null)
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    if (showCreateInput && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [showCreateInput])
 
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(locale, { year: "numeric", month: "2-digit", day: "2-digit" }),
@@ -162,18 +235,23 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate, navigate }) => {
         <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showCreateInput ? 'max-h-24 opacity-100 mb-2' : 'max-h-0 opacity-0 mb-0'}`}>
           <div className="flex gap-2 items-center">
             <input
+              ref={inputRef}
               type="text"
               placeholder={t?.catSpeak?.reels?.detail?.playlistModal?.placeholder || "Enter playlist name..."}
               className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-cath-red-500 focus:ring-0"
               value={newPlaylistName}
               onChange={(e) => setNewPlaylistName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-              autoFocus={showCreateInput}
+              onBlur={(e) => {
+                if (!newPlaylistName.trim() && !e.relatedTarget?.closest('.create-playlist-btn')) {
+                  setShowCreateInput(false)
+                }
+              }}
             />
             <button
               onClick={handleCreate}
               disabled={!newPlaylistName.trim() || isCreating}
-              className="px-4 py-2.5 bg-cath-red-700 text-white rounded-xl text-sm font-semibold hover:bg-cath-red-600 transition-colors disabled:opacity-50 flex items-center gap-2 h-[42px]"
+              className="create-playlist-btn px-4 py-2.5 bg-cath-red-700 text-white rounded-xl text-sm font-semibold hover:bg-cath-red-600 transition-colors disabled:opacity-50 flex items-center gap-2 h-[42px]"
             >
               {isCreating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
             </button>

@@ -11,12 +11,12 @@ const PlaylistReelList = ({ playlistId, formatNumber, navigate }) => {
 
   const handleRemove = useCallback(async (reelId, e) => {
     e.stopPropagation()
-    const loadingToastId = toast.loading(t?.catSpeak?.reels?.detail?.moreMenu?.savingReel || "Removing...")
+    const loadingToastId = toast.loading(t?.catSpeak?.reels?.workspace?.removingFromPlaylist || "Removing...")
     try {
       await toggleBookmark({ reelId, playlistId }).unwrap()
-      toast.success(t?.catSpeak?.reels?.detail?.moreMenu?.saveSuccess || "Removed from playlist", { id: loadingToastId })
+      toast.success(t?.catSpeak?.reels?.workspace?.removedFromPlaylist || "Removed from playlist", { id: loadingToastId })
     } catch (err) {
-      toast.error(t?.catSpeak?.reels?.detail?.moreMenu?.saveFailed || "Failed to remove", { id: loadingToastId })
+      toast.error(t?.catSpeak?.reels?.workspace?.removeFailed || "Failed to remove", { id: loadingToastId })
     }
   }, [playlistId, toggleBookmark, t])
 
@@ -31,7 +31,7 @@ const PlaylistReelList = ({ playlistId, formatNumber, navigate }) => {
   if (!reels || reels.length === 0) {
     return (
       <div className="text-center py-4 text-sm text-gray-400">
-        No videos in this playlist.
+        {t?.catSpeak?.reels?.workspace?.noVideosInPlaylist || "No videos in this playlist."}
       </div>
     )
   }
