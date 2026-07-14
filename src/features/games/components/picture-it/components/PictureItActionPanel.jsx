@@ -39,7 +39,7 @@ const PictureItActionPanel = ({
         <div className="flex items-center gap-4 animate-fade-in">
           {!hasDescribeStarted ? (
             <PillButton
-              className="h-11 px-6 hover:bg-[#EDEDED] border border-[#E5E5E5] font-bold transition-all shadow-sm"
+              className="h-11 px-6 font-bold transition-all shadow-sm"
               textColor="black"
               bgColor="#F7F7F7"
               startIcon={<Mic size={18} className="text-black" />}
@@ -49,7 +49,7 @@ const PictureItActionPanel = ({
             </PillButton>
           ) : (
             <PillButton
-              className="h-11 px-6 bg-cath-red-600 hover:bg-cath-red-700 text-white font-bold transition-all shadow-md shadow-red-600/20 border border-red-500 relative flex items-center gap-2"
+              className="h-11 px-6 text-white font-bold transition-all relative flex items-center gap-2"
               onClick={handleDescribeEnd}
             >
               <span className="relative flex h-3 w-3 mr-1">
@@ -71,7 +71,7 @@ const PictureItActionPanel = ({
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-center gap-3"
           >
-            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#f3f3f3] border border-[#E5E5E5]">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl">
               <Loader2 size={16} className="animate-spin text-cath-red-700" />
               <span className="text-md font-medium text-secondary">
                 {(ap.ratersAreScoring || 'Raters are scoring... ({0}s)').replace('{0}', ratingCountdownSec)}
@@ -113,7 +113,7 @@ const PictureItActionPanel = ({
                   <span className="text-xs sm:text-sm text-secondary sm:ml-2">{(ap.timeLeft || '({0}s left)').replace('{0}', ratingCountdownSec)}</span>
                 </div>
                 <PillButton
-                  className="h-9 sm:h-10 px-4 bg-cath-red-700 text-white w-full sm:w-auto"
+                  className="h-9 sm:h-10 px-4 w-full sm:w-auto"
                   disabled={selectedRating === 0 || interactionsDisabled}
                   onClick={handleSubmitRating}
                 >

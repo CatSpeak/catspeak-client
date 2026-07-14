@@ -4,7 +4,6 @@ import React, {
   useState,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
 } from "react";
 import { useGameSignaling } from "../hooks/useGameSignaling";
@@ -253,7 +252,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         raterCount: payload.rater_count,
       }));
     },
-    ROUND_FLAGGED: (payload) => {
+    ROUND_FLAGGED: () => {
       setPictureItState((prev) => ({ ...prev, ratingOpen: false }));
     },
     ROUND_SKIPPED: (payload) => {
@@ -659,7 +658,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   }, [connection.send, roomId]);
 
   const endPictureItDescribe = useCallback(() => {
-    localParticipant?.setMicrophoneEnabled(false).catch((e) => { });
+    localParticipant?.setMicrophoneEnabled(false).catch(() => { });
     connection.send("PictureItDescribeEnd", roomId || "general");
   }, [connection.send, roomId, localParticipant]);
 

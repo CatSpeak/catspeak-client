@@ -197,13 +197,12 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
         )}
 
         {onLeaveGame && (
-          <PillButton
-            variant="outline"
-            className="h-7 px-2 md:h-8 md:px-3 border-red-500 text-red-500 hover:bg-red-50 flex items-center justify-center font-bold"
+          <button
+            className="h-7 px-2 md:h-8 md:px-3 py-4 w-full border border-red-500 text-red-500 hover:bg-red-50 flex items-center justify-center font-bold rounded-xl shadow-sm"
             onClick={onLeaveGame}
           >
-            <LogOut size={16} />
-          </PillButton>
+            <LogOut size={20} />
+          </button>
         )}
       </div>
     </div>
