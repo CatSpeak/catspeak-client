@@ -75,7 +75,7 @@ const HeaderSearchBar = () => {
                 handleSearch()
               }
             }}
-            placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng hoặc chủ đề"}
+            placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
             className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[16px] md:text-[14px] outline-none transition-all placeholder-gray-500"
           />
         </div>

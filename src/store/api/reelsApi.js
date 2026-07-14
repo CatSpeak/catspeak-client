@@ -6,6 +6,10 @@ const REEL_LIST_ENDPOINTS = new Set([
   "getUserReels",
 ])
 
+const updateBookmarkFields = (reel) => {
+  reel.isBookmarked = !reel.isBookmarked
+}
+
 const getReelList = (response) => {
   if (Array.isArray(response?.data)) return response.data
   if (Array.isArray(response)) return response
@@ -402,10 +406,131 @@ export const reelsApi = baseApi.injectEndpoints({
         { type: "Reels", id: "USER_REELS" },
       ],
     }),
+
+    // Get user's custom playlists
+    getPlaylists: builder.query({
+      query: () => `/Reels/playlists`,
+      providesTags: ["Playlists"],
+    }),
+    
+    // Get bookmarked reels (optionally filtered by playlist)
+    getBookmarkedReels: builder.query({
+      query: (playlistId) => playlistId ? `/Reels/bookmarked?playlistId=${playlistId}` : `/Reels/bookmarked`,
+      providesTags: (result, error, playlistId) => [{ type: "Playlists", id: playlistId || "ALL" }],
+    }),
+
+    // Get ALL bookmarked reels (including those in custom playlists) to accurately compute isBookmarked
+    getAllBookmarkedReels: builder.query({
+      async queryFn(_arg, _queryApi, _extraOptions, fetchWithBQ) {
+        try {
+          // 1. Fetch default bookmarks (no playlist)
+          const defaultResult = await fetchWithBQ('/Reels/bookmarked')
+          if (defaultResult.error) return { error: defaultResult.error }
+          
+          const bookmarksMap = new Map()
+          if (defaultResult.data) {
+            defaultResult.data.forEach(item => {
+              bookmarksMap.set(String(item.reelId), { ...item, __playlistIds: [null] })
+            })
+          }
+
+          // 2. Fetch all playlists
+          const playlistsResult = await fetchWithBQ('/Reels/playlists')
+          if (playlistsResult.error) return { error: playlistsResult.error }
+          
+          // 3. Fetch bookmarks for each playlist
+          const playlists = playlistsResult.data || []
+          const playlistPromises = playlists.map(p => fetchWithBQ(`/Reels/bookmarked?playlistId=${p.playlistId}`))
+          const playlistResults = await Promise.all(playlistPromises)
+          
+          playlistResults.forEach((result, i) => {
+            if (result.data) {
+              const playlistId = playlists[i].playlistId
+              result.data.forEach(item => {
+                const key = String(item.reelId)
+                if (bookmarksMap.has(key)) {
+                  bookmarksMap.get(key).__playlistIds.push(playlistId)
+                } else {
+                  bookmarksMap.set(key, { ...item, __playlistIds: [playlistId] })
+                }
+              })
+            }
+          })
+          
+          return { data: Array.from(bookmarksMap.values()) }
+        } catch (error) {
+          return { error: { status: 'CUSTOM_ERROR', error: error.message } }
+        }
+      },
+      providesTags: ["Playlists"],
+    }),
+
+    // Create a new playlist
+    createPlaylist: builder.mutation({
+      query: (data) => ({
+        url: `/Reels/playlists`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Playlists"],
+    }),
+
+    // Bookmark a reel
+    bookmarkReel: builder.mutation({
+      query: ({ reelId, playlistId }) => ({
+        url: `/Reels/${reelId}/bookmark`,
+        method: "POST",
+        body: playlistId ? { playlistId } : {},
+      }),
+      // Optimistic update
+      async onQueryStarted({ reelId }, { dispatch, getState, queryFulfilled }) {
+        const patchResults = [
+          patchCachedReelById(dispatch, reelId, updateBookmarkFields),
+          ...patchCachedReelLists(dispatch, getState, reelId, updateBookmarkFields),
+        ]
+        try {
+          await queryFulfilled
+        } catch {
+          patchResults.forEach((patchResult) => patchResult.undo())
+        }
+      },
+      invalidatesTags: ["Playlists"],
+    }),
+
+    // Report a reel
+    reportReel: builder.mutation({
+      query: ({ reelId, ...body }) => ({
+        url: `/Reels/${reelId}/report`,
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // Mark reel as not interested
+    notInterestedReel: builder.mutation({
+      query: ({ reelId, ...body }) => ({
+        url: `/Reels/${reelId}/not-interested`,
+        method: "POST",
+        body,
+      }),
+      // Optimistic update
+      async onQueryStarted({ reelId }, { dispatch, getState, queryFulfilled }) {
+        const patchResults = patchCachedReelLists(dispatch, getState, reelId, (reel) => {
+          // If we had a way to mark it hidden, we could do it here
+          // But usually we just remove it from the list
+          // This requires removing it from the array, which patchCachedReelLists doesn't support easily yet
+          // So we might just let the UI handle it or refetch
+        })
+        try {
+          await queryFulfilled
+        } catch {
+          patchResults.forEach((patchResult) => patchResult.undo())
+        }
+      },
+    }),
   }),
 })
 
-// Export hooks for usage in components
 export const {
   useGetReelsFeedQuery,
   useGetReelByIdQuery,
@@ -422,4 +547,11 @@ export const {
   useGetChallengeLeaderboardQuery,
   useGetUserReelsQuery,
   useDeleteReelMutation,
+  useGetPlaylistsQuery,
+  useGetBookmarkedReelsQuery,
+  useGetAllBookmarkedReelsQuery,
+  useCreatePlaylistMutation,
+  useBookmarkReelMutation,
+  useReportReelMutation,
+  useNotInterestedReelMutation,
 } = reelsApi

@@ -16,6 +16,7 @@ const ReelsPage = () => {
   const { t, language } = useLanguage()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState("")
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [uploadChallenge, setUploadChallenge] = useState(null)
   const { isAuthenticated } = useAuth()
@@ -107,11 +108,26 @@ const ReelsPage = () => {
       ) : (
         <div className="flex flex-col w-full relative items-start">
           {activeTab === "foryou" && (
-            <ForYouTab 
-              onReelClick={handleReelClick} 
-              isAuthenticated={isAuthenticated}
-              onUploadClick={handleUploadClick}
-            />
+            <div className="w-full flex flex-col">
+              {/* <div className="w-full max-w-md mb-6 self-end relative">
+                <input
+                  type="text"
+                  placeholder={t.catSpeak?.reels?.searchPlaceholder || "Tìm kiếm Reels..."}
+                  className="w-full h-10 pl-4 pr-10 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-cath-red-700 transition-colors bg-white shadow-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <div className="absolute right-3 top-2.5 text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+              </div> */}
+              <ForYouTab 
+                searchQuery={searchQuery}
+                onReelClick={handleReelClick} 
+                isAuthenticated={isAuthenticated}
+                onUploadClick={handleUploadClick}
+              />
+            </div>
           )}
 
           {activeTab === "challenges" && (
