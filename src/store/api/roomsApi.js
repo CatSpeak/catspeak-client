@@ -177,6 +177,13 @@ export const roomsApi = baseApi.injectEndpoints({
         body: { message },
       }),
     }),
+    
+    // Get game history for a specific room
+    getGameHistory: builder.query({
+      query: (roomId) => ({
+        url: `/games/${roomId}/history`,
+      }),
+    }),
   }),
 })
 
@@ -188,7 +195,6 @@ export const {
   useDeleteRoomMutation,
   useVerifyJoinRoomMutation,
   useCreateAISessionMutation,
-  useGetGameHistoryQuery,
   useSetupBreakoutGroupsMutation,
   useGetBreakoutStatusQuery,
   useStartBreakoutRoomsMutation,
@@ -198,4 +204,5 @@ export const {
   useStudentSwitchBreakoutRoomMutation,
   useToggleAllowChangeRoomMutation,
   useBroadcastBreakoutNotificationMutation,
+  useGetGameHistoryQuery,
 } = roomsApi

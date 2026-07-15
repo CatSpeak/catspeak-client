@@ -81,7 +81,7 @@ const MyStoryModal = ({ open, story, onClose, onDelete }) => {
           <PillButton
             variant="secondary"
             onClick={handleClose}
-            className="md:h-12 h-11 w-56 border border-primary text-primary"
+            className="md:h-12 h-11 w-56"
           >
             {t.messages?.close || "Close"}
           </PillButton>

@@ -273,7 +273,7 @@ export default {
     news: "Cat Speak News",
     discover: "Discover World",
     reels: "Reels",
-    mail: "Mail",
+    letters: "Letters",
     calendar: "Calendar",
     settings: "Settings",
     report: "Report Log",

@@ -9,6 +9,7 @@ import {
   useGetStudentClassDetailQuery,
   useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { formatCurrency } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
@@ -32,9 +33,13 @@ const StudentClassDetailPage = () => {
   // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
   const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetStudentClassDetailQuery(id)
   const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
+  const { data: profileResponse } = useGetUserProfileQuery()
+  const profile = profileResponse?.data || profileResponse || {}
+  const currentUserId = profile.id?.toString() || ""
 
   // Process data for rendering
   const classData = detailResponse?.data || detailResponse || {}
+  const isOwner = currentUserId && (classData.instructorId === currentUserId || classData.instructor?.id === currentUserId || classData.teacherId === currentUserId)
 
   // Enrollment Status
   const isEnrolled = !!classData.isEnrolled
@@ -44,6 +49,10 @@ const StudentClassDetailPage = () => {
 
   // Enroll in class handler
   const handleEnroll = async () => {
+    if (isOwner) {
+      toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
+      return
+    }
     try {
       const result = await enrollInCourse({ classId: id }).unwrap()
       if (result.checkoutUrl) {
@@ -150,11 +159,11 @@ const StudentClassDetailPage = () => {
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
           <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle}</span>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.allCourses?.title || "All Courses"}</span>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classData.courseId || ""}`)}>{c.student?.courseDetails || "Course Details"}</span>
+          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/learning/details/${classData.courseId || ""}`)}>{c.student?.courseDetails || "Course Details"}</span>
           <span>/</span>
           <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
         </div>
@@ -169,7 +178,13 @@ const StudentClassDetailPage = () => {
         <div className="flex items-center gap-3">
           {!isEnrolled ? (
             <button
-              onClick={() => setShowEnrollConfirm(true)}
+              onClick={() => {
+                if (isOwner) {
+                  toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
+                  return
+                }
+                setShowEnrollConfirm(true)
+              }}
               disabled={isEnrolling}
               className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
             >

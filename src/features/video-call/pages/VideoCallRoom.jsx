@@ -1,16 +1,13 @@
-import React, { useState, useRef, useEffect, useCallback } from "react"
-import { Navigate, useParams } from "react-router-dom"
-import { ChevronRight, Clock, Loader2 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useConnectionState } from "@livekit/components-react"
-import { ConnectionState } from "livekit-client"
-import { useSelector, useDispatch } from "react-redux"
-import {
-  useGetBreakoutStatusQuery,
-  useStopBreakoutRoomsMutation,
-} from "@/store/api/roomsApi"
-import { exitBreakout } from "@/store/slices/videoCallSlice"
-import { toast } from "react-hot-toast"
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Navigate, useParams } from "react-router-dom";
+import { ChevronRight, Loader2, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useConnectionState } from "@livekit/components-react";
+import { ConnectionState } from "livekit-client";
+import { useSelector, useDispatch } from "react-redux";
+import { useGetBreakoutStatusQuery, useStopBreakoutRoomsMutation } from "@/store/api/roomsApi";
+import { exitBreakout } from "@/store/slices/videoCallSlice";
+import { toast } from "react-hot-toast";
 
 import {
   VideoGrid,
@@ -31,7 +28,6 @@ import BreakoutSidebarPanel from "@/features/video-call/components/breakout-room
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
 import { GameProvider } from "@/features/games/context/GameContext";
-// import CrackItOverlay from "@/features/video-call/components/games/crack-it/CrackItOverlay";
 import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading";
@@ -345,14 +341,14 @@ const VideoCallRoomContent = () => {
 }
 
 const VideoCallRoomWrapper = () => {
-  const { lang } = useParams()
+  const { lang } = useParams();
   return (
     <VideoCallProvider>
       <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>
-  )
-}
+  );
+};
 
-export default VideoCallRoomWrapper
+export default VideoCallRoomWrapper;

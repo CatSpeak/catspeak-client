@@ -5,12 +5,14 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "../DesktopNav/DesktopNavItem"
 import { navLinks, footerLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
 import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
 import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 
 const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
   const { t } = useLanguage()
+  const { isStudent } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname } = useActiveLink()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
 
@@ -128,19 +130,24 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
 
         {/* Drilldown Links */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 flex flex-col gap-1 scrollbar-none">
-          {activeDrilldownItem?.subItems?.map((sub) => {
-            const subLabel = t.nav?.[sub.key] || sub.key
-            const SubIconComponent = sub.icon || Home
-            return (
-              <DesktopNavItem
-                key={sub.key}
-                to={resolvePath(sub.path)}
-                icon={SubIconComponent}
-                label={subLabel}
-                onClick={() => setIsMobileOpen?.(false)}
-              />
-            )
-          })}
+          {(activeDrilldownItem?.subItems || [])
+            .filter((sub) => {
+              if (sub.key === "myCourses" && isStudent) return false
+              return true
+            })
+            .map((sub) => {
+              const subLabel = t.nav?.[sub.key] || sub.key
+              const SubIconComponent = sub.icon || Home
+              return (
+                <DesktopNavItem
+                  key={sub.key}
+                  to={resolvePath(sub.path)}
+                  icon={SubIconComponent}
+                  label={subLabel}
+                  onClick={() => setIsMobileOpen?.(false)}
+                />
+              )
+            })}
         </div>
       </div>
     </div>

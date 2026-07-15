@@ -14,7 +14,9 @@ import {
   Calendar,
   Mic,
   Film,
-} from "lucide-react";
+  Mail,
+  BookOpen
+} from "lucide-react"
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -27,6 +29,7 @@ export const navLinks = [
       // { key: "worldNews", path: "/cat-speak/discover" },
       { key: "reels", path: " ", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
+      { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
@@ -36,6 +39,7 @@ export const navLinks = [
     icon: Briefcase,
     subItems: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },

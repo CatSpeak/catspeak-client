@@ -103,7 +103,7 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
           <PillButton
             variant="secondary"
             onClick={handlePass}
-            className="md:h-12 h-11 w-56 border border-primary text-primary"
+            className="md:h-12 h-11 w-56"
           >
             {confirmPass
               ? t.catSpeak?.confirm || "Confirm Pass"

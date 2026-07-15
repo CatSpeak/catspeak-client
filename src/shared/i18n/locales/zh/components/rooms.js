@@ -513,4 +513,127 @@ export default {
     movingDesc: "您将被自动移至分组房间...",
     roomFullError: "由于房间已满，无法移动。",
   },
+  game: {
+    crackIt: {
+      title: "Crack It",
+      close: "关闭",
+      waitingStart: "准备开始...",
+      roundResult: "回合结果",
+      nextRoundIn: "下一回合马上开始...",
+      gameOver: "游戏结束！",
+      finalLeaderboard: "最终排行榜",
+      closeGame: "关闭游戏",
+      round: "回合",
+      hint: "提示",
+      answerLength: "字数",
+      youGotIt: "您猜对了！等待其他玩家...",
+      typeAnswer: "输入您的答案...",
+      gotItRight: "猜对了！",
+      leaderboard: "排行榜",
+      waitingPlayers: "等待玩家...",
+      playGame: "玩游戏 (Crack It)",
+      notEnoughPlayers: "至少需要2名玩家才能开始！",
+      you: "您",
+      playerX: "玩家 {0}",
+      exitGameTooltip: "退出游戏",
+      exitConfirmTitle: "确认退出",
+      exitConfirmDesc1: "您确定要退出此游戏吗？",
+      exitConfirmDesc2: "您将无法重新加入此回合！",
+      cancel: "取消",
+      confirmExit: "确认退出",
+      roundLeaderboard: "本回合排行榜",
+      forceStopNotEnoughPlayers: "玩家人数不足以继续。游戏已取消。",
+      forceStopGeneric: "游戏意外停止。",
+      tallyingFinalResults: "正在统计最终成绩...",
+      gameHistory: "游戏历史",
+      historyTitle: "比赛记录",
+      noHistoryFound: "该房间没有游戏历史记录。",
+      score: "分数",
+      matchDate: "比赛日期",
+      winner: "获胜者"
+    },
+    setup: {
+      title: "游戏设置",
+      pictureItDesc: "使用房间语言描述图片，其他玩家将为您的描述打分。",
+      crackItDesc: "在其他人之前通过提示猜出隐藏的单词。",
+      difficultyDesc: "调整您房间的挑战难度。",
+      languageDesc: "选择本次会话的游戏语言。",
+      selectLanguage: "语言",
+      langEn: "英语",
+      langZh: "中文",
+      selectLevel: "难度",
+      levelEasy: "简单",
+      levelMedium: "中等",
+      levelHard: "困难",
+      cancel: "取消",
+      startNow: "立即开始"
+    },
+    pictureIt: {
+      topBar: {
+        round: "回合",
+        describer: "描述者",
+        spectator: "观众",
+        roleDescriber: "描述者",
+        roleRater: "评分者"
+      },
+      actionPanel: {
+        watchingAsSpectator: "您正在以观众身份观看。",
+        turnOnMic: "打开麦克风 (开始)",
+        turnOffMic: "关闭麦克风 (结束)",
+        ratersAreScoring: "评分者正在打分... ({0}秒)",
+        yourRating: "您的评分:",
+        timeLeft: "(剩余 {0}秒)",
+        submitRating: "提交评分",
+        ratingSubmitted: "已提交！等待其他玩家...",
+        waiting: "等待中..."
+      },
+      imageCard: {
+        describeToTeam: "向您的团队描述这张图片",
+        listenAndRate: "请聆听并准备评分",
+        loadingImage: "正在加载图片...",
+        imageUnavailable: "图片不可用",
+        describerSpeaking: "描述者正在说话...",
+        preparing: "准备中...",
+        forbiddenWordsTitle: "禁用词",
+        forbiddenWordsDesc: "请勿使用这些词",
+        flaggedCount: "{0} / {1} 人已标记违规"
+      },
+      modals: {
+        gameEnded: "游戏结束",
+        notEnoughPlayers: "玩家人数不足以继续。",
+        close: "关闭",
+        waitingStart: "正在准备游戏..."
+      },
+      badges: {
+        "Master Describer": "描述大师",
+        "Great Speaker": "优秀演讲者",
+        "Best Rating Accuracy": "最佳评分准确度",
+        "Most Fluent": "最流利",
+        "Team Player": "团队合作",
+        "Keep Practicing": "继续努力",
+        champion: "冠军"
+      },
+      gameOver: {
+        title: "游戏结束",
+        thanksForPlaying: "感谢您玩",
+        finalLeaderboard: "最终排行榜",
+        roundsPlayed: "已玩回合",
+        language: "语言",
+        difficulty: "难度",
+        winningScore: "获胜分数",
+        highestRoundScore: "最高单回合分数",
+        playAgain: "再玩一次",
+        backToRoom: "返回房间",
+        playersCount: "{0} 名玩家"
+      },
+      leaderboard: {
+        title: "排行榜",
+        playersCount: "{0} 名玩家"
+      },
+      roundResult: {
+        nextRoundStartsIn: "下一回合开始于...",
+        averageRating: "平均评分"
+      }
+    }
+  }
 }

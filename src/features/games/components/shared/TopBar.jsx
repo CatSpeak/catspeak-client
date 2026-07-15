@@ -1,106 +1,86 @@
-import React, { useState, useEffect } from "react";
-import { useGame } from "@/features/games/context/GameContext";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { motion } from "framer-motion";
-import {
-  Gamepad2,
-  LogOut,
-  Menu,
-  MessageSquare,
-  Mic,
-  MicOff,
-} from "lucide-react";
-import { PillButton } from "@/shared/components/ui/buttons";
-import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect";
-import { useParticipants } from "@livekit/components-react";
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
+import React, { useState, useEffect } from "react"
+import { useGame } from "@/features/games/context/GameContext"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { motion } from "framer-motion"
+import { Gamepad2, LogOut, Menu, MessageSquare, Mic, MicOff } from "lucide-react"
+import { PillButton } from "@/shared/components/ui/buttons"
+import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect"
+import { useParticipants } from "@livekit/components-react"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
-  const {
-    currentRound,
-    timer: initialTimer,
-    gameState,
-    gameType,
-    pictureIt,
-    currentUserId,
-  } = useGame();
-  const { t } = useLanguage();
-  const [timeLeft, setTimeLeft] = useState(0);
-  const participants = useParticipants();
-  const { micOn, handleToggleMic } = useGlobalVideoCall();
+  const { currentRound, timer: initialTimer, gameState, gameType, pictureIt, currentUserId } = useGame()
+  const { t } = useLanguage()
+  const [timeLeft, setTimeLeft] = useState(0)
+  const participants = useParticipants()
+  const { micOn, handleToggleMic } = useGlobalVideoCall()
 
   useEffect(() => {
-    setTimeLeft(initialTimer);
-  }, [initialTimer, currentRound]); // Reset when new round starts
+    setTimeLeft(initialTimer)
+  }, [initialTimer, currentRound]) // Reset when new round starts
 
   useEffect(() => {
-    let interval;
-    if (
-      gameState === "playing" &&
-      currentRound?.started_at &&
-      gameType === "crack_it"
-    ) {
-      const actualStartedAt = new Date(currentRound.started_at).getTime();
-      const storageKey = `crackit_timer_${actualStartedAt}`;
+    let interval
+    if (gameState === "playing" && currentRound?.started_at && gameType === "crack_it") {
+      const actualStartedAt = new Date(currentRound.started_at).getTime()
+      const storageKey = `crackit_timer_${actualStartedAt}`
 
-      let startedAt;
-      const storedStartedAt = sessionStorage.getItem(storageKey);
+      let startedAt
+      const storedStartedAt = sessionStorage.getItem(storageKey)
 
       if (storedStartedAt) {
-        startedAt = parseInt(storedStartedAt, 10);
+        startedAt = parseInt(storedStartedAt, 10)
       } else {
         // Prevent startedAt from being in the future due to server-client clock drift
-        startedAt = Math.min(Date.now(), actualStartedAt);
-        sessionStorage.setItem(storageKey, startedAt.toString());
+        startedAt = Math.min(Date.now(), actualStartedAt)
+        sessionStorage.setItem(storageKey, startedAt.toString())
       }
 
       // Run every 200ms for smoother UI updates, though seconds only change once per sec
       interval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-        const remaining = Math.max(0, initialTimer - elapsed);
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000)
+        const remaining = Math.max(0, initialTimer - elapsed)
 
         setTimeLeft((prev) => {
           if (remaining === 10 && prev > 10) {
             // Play at 10 seconds remaining
-            playGlobalSound("ticking");
+            playGlobalSound("ticking")
           }
           if (remaining <= 0) {
-            clearInterval(interval);
+            clearInterval(interval)
           }
-          return remaining;
-        });
-      }, 200);
+          return remaining
+        })
+      }, 200)
     } else if (gameState !== "playing" && gameType === "crack_it") {
       // If the round ends and the timer is at 1 or 2 seconds, snap it to 0
-      setTimeLeft((prev) => (prev > 0 && prev <= 2 ? 0 : prev));
+      setTimeLeft(prev => (prev > 0 && prev <= 2) ? 0 : prev)
     }
-    return () => clearInterval(interval);
-  }, [gameState, currentRound?.started_at, initialTimer, gameType]);
+    return () => clearInterval(interval)
+  }, [gameState, currentRound?.started_at, initialTimer, gameType])
 
-  const isPictureIt = gameType === "picture_it" || gameType === "picture-it";
-  const gameName = isPictureIt
-    ? "Picture IT"
-    : t.rooms?.game?.crackIt?.title || "Crack It";
+  const isPictureIt = gameType === "picture_it" || gameType === "picture-it"
+  const gameName = isPictureIt ? "Picture IT" : (t.rooms?.game?.crackIt?.title || "Crack It")
 
-  const isSpectator = pictureIt?.isSpectator;
-  const isDescriber = pictureIt?.describerId === currentUserId;
-  const topBar = isPictureIt ? t.rooms?.game?.pictureIt?.topBar || {} : {};
+  const isSpectator = pictureIt?.isSpectator
+  const isDescriber = pictureIt?.describerId === currentUserId
+  const topBar = isPictureIt ? (t.rooms?.game?.pictureIt?.topBar || {}) : {}
 
   // Describer User
-  let describerName = null;
+  let describerName = null
   if (isPictureIt && (pictureIt?.roundDescriberId || pictureIt?.describerId)) {
-    const descId = pictureIt?.roundDescriberId || pictureIt?.describerId;
-    const p = participants?.find((part) => Number(part.identity) === descId);
-    describerName = p?.name || p?.identity || `Player ${descId}`;
+    const descId = pictureIt?.roundDescriberId || pictureIt?.describerId
+    const p = participants?.find(part => Number(part.identity) === descId)
+    describerName = p?.name || p?.identity || `Player ${descId}`
     if (p?.metadata) {
       try {
-        const meta = JSON.parse(p.metadata);
-        if (meta.username) describerName = meta.username;
-      } catch (e) {}
+        const meta = JSON.parse(p.metadata)
+        if (meta.username) describerName = meta.username
+      } catch (e) { }
     }
   }
 
-  const isLowTime = timeLeft <= 10;
+  const isLowTime = timeLeft <= 10
 
   return (
     <div className="flex items-center justify-between border border-gray-200 rounded-2xl md:rounded-3xl px-3 py-2 md:px-4 md:py-3 bg-white shadow-sm gap-2 shrink-0">
@@ -125,26 +105,15 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
 
         {currentRound && (
           <div className="flex gap-1 md:gap-2 font-bold border border-cath-red-700 w-fit px-2 py-1 md:px-4 md:py-1.5 rounded-3xl text-xs md:text-sm whitespace-nowrap">
-            <span className="hidden sm:inline">
-              {isPictureIt
-                ? topBar.round || "Round"
-                : t.rooms?.game?.crackIt?.round || "Ván"}
-              :{" "}
-            </span>
-            <span className="font-semibold text-cath-red-700">
-              {currentRound.round}/{currentRound.total}
-            </span>
+            <span className="hidden sm:inline">{isPictureIt ? (topBar.round || 'Round') : (t.rooms?.game?.crackIt?.round || "Ván")}: </span>
+            <span className="font-semibold text-cath-red-700">{currentRound.round}/{currentRound.total}</span>
           </div>
         )}
 
         {describerName && (
           <div className="flex gap-1 md:gap-2 font-bold border border-cath-red-700 w-fit px-2 py-1 md:px-4 md:py-1.5 rounded-3xl text-xs md:text-sm whitespace-nowrap truncate max-w-[280px] md:max-w-fit">
-            <span className="hidden sm:inline">
-              {topBar.describer || "Describer"}:{" "}
-            </span>
-            <span className="font-semibold text-cath-red-700 truncate">
-              {describerName}
-            </span>
+            <span className="hidden sm:inline">{topBar.describer || 'Describer'}: </span>
+            <span className="font-semibold text-cath-red-700 truncate">{describerName}</span>
           </div>
         )}
 
@@ -179,7 +148,7 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
         )} */}
 
         <button
-          className={`p-1.5 rounded-xl border border-gray-200 shadow-sm transition-colors ${micOn ? "text-cath-red-700 bg-red-50 hover:bg-red-100" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}
+          className={`p-1.5 rounded-xl border border-gray-200 shadow-sm transition-colors ${micOn ? 'text-cath-red-700 bg-red-50 hover:bg-red-100' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
           onClick={handleToggleMic}
           title={micOn ? "Tắt mic" : "Bật mic"}
         >
@@ -206,6 +175,6 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
         )}
       </div>
     </div>
-  );
-};
-export default TopBar;
+  )
+}
+export default TopBar
