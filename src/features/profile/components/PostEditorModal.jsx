@@ -17,16 +17,20 @@ import Modal from "@/shared/components/ui/Modal"
 import PostEditorPreviews from "./PostEditorPreviews"
 
 const PRIVACY_OPTIONS = [
-  { value: "Public", label: "Công khai", icon: <Globe className="w-4 h-4" /> },
+  {
+    value: "Public",
+    label: "Công khai",
+    icon: <Globe />,
+  },
   {
     value: "FriendsOnly",
     label: "Bạn bè",
-    icon: <Users className="w-4 h-4" />,
+    icon: <Users />,
   },
   {
     value: "Private",
     label: "Chỉ mình tôi",
-    icon: <Lock className="w-4 h-4" />,
+    icon: <Lock />,
   },
 ]
 
@@ -211,7 +215,7 @@ const PostEditorModal = ({
         />
         <PillButton
           onClick={() => imageInputRef.current?.click()}
-          variant="secondary"
+          variant="secondary-no-outline"
           textColor="#16a34a"
           startIcon={<Image className="w-5 h-5 text-[#16a34a]" />}
           disabled={isSubmitting}
@@ -299,33 +303,13 @@ const PostEditorModal = ({
             options={PRIVACY_OPTIONS}
             value={privacy}
             onChange={(val) => setPrivacy(val)}
-            dropdownClassName="min-w-[150px] max-w-[150px]"
-            renderOption={(option, isSelected) => (
-              <div
-                className={`w-full h-9 px-3 text-xs rounded-lg flex items-center gap-2.5 transition-colors ${
-                  isSelected
-                    ? "bg-red-50 text-cath-red-700 font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <span
-                  className={`shrink-0 ${isSelected ? "text-cath-red-700" : "text-gray-500"}`}
-                >
-                  {option.icon}
-                </span>
-                <span className="truncate text-left flex-1">
-                  {option.label}
-                </span>
-              </div>
-            )}
+            dropdownClassName="w-max max-w-[300px]"
             trigger={(isOpen, selectedOption, toggleOpen) => (
               <PillButton
                 type="button"
                 onClick={toggleOpen}
-                variant="outline"
-                startIcon={
-                  selectedOption ? <span>{selectedOption.icon}</span> : null
-                }
+                variant="secondary"
+                startIcon={selectedOption?.icon}
                 endIcon={
                   <ChevronDown
                     className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}

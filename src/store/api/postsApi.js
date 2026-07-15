@@ -62,7 +62,7 @@ export const postsApi = baseApi.injectEndpoints({
             query.status === "fulfilled"
           ) {
             const patch = dispatch(
-              baseApi.util.updateQueryData(
+              postsApi.util.updateQueryData(
                 query.endpointName,
                 query.originalArgs,
                 (draft) => {

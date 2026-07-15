@@ -577,25 +577,80 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connection.isConnected, roomId]);
 
+  // Picture IT Audio Ducking
+  const previousVolumesRef = useRef(new Map());
+  const participantsRef = useRef(participants);
+
+  // Keep ref in sync for unmount cleanup
+  useEffect(() => {
+    participantsRef.current = participants;
+  }, [participants]);
+
+  const restoreVolumes = useCallback((participantList) => {
+    if (previousVolumesRef.current.size > 0) {
+      participantList.forEach(p => {
+        if (previousVolumesRef.current.has(p.identity)) {
+          const originalVol = previousVolumesRef.current.get(p.identity);
+          
+          if (typeof p.setVolume === "function") p.setVolume(originalVol);
+          else if (p.audioTrackPublications) {
+            p.audioTrackPublications.forEach(pub => {
+              if (pub.track && typeof pub.track.setVolume === "function") pub.track.setVolume(originalVol);
+            });
+          }
+        }
+      });
+      previousVolumesRef.current.clear();
+    }
+  }, []);
+
+  // Unmount cleanup
+  useEffect(() => {
+    return () => {
+      restoreVolumes(participantsRef.current);
+    };
+  }, [restoreVolumes]);
+
   useEffect(() => {
     const isPictureIt = gameType === "picture_it" || gameType === "picture-it";
-    if (
-      isPictureIt &&
-      !["idle", "game_over", "force_stopped"].includes(gameState)
-    ) {
-      if (gameState === "setup" || gameState === "result") {
-        localParticipant?.setMicrophoneEnabled(false).catch(() => { });
-      } else if (gameState === "playing") {
-        if (pictureItState.describeStarted && !pictureItState.ratingOpen) {
-          const isLocalDescriber =
-            Number(pictureItState.describerId) === Number(currentUserId);
-          localParticipant
-            ?.setMicrophoneEnabled(isLocalDescriber)
-            .catch(() => { });
-        } else {
-          localParticipant?.setMicrophoneEnabled(false).catch(() => { });
-        }
+    const isDescribing = isPictureIt && gameState === "playing" && pictureItState.describeStarted && !pictureItState.ratingOpen;
+    
+    // Cleanup disconnected participants from the ref to prevent bugs if they rejoin
+    const currentIdentities = new Set(participants.map(p => p.identity));
+    for (const identity of previousVolumesRef.current.keys()) {
+      if (!currentIdentities.has(identity)) {
+        previousVolumesRef.current.delete(identity);
       }
+    }
+
+    if (isDescribing) {
+      participants.forEach(p => {
+        if (p.isLocal) return;
+        const isDescriber = Number(p.identity) === Number(pictureItState.describerId);
+        
+        if (!isDescriber) {
+          // Backup original volume and duck only ONCE per participant connection
+          if (!previousVolumesRef.current.has(p.identity)) {
+            let originalVol = 1.0;
+            if (typeof p.getVolume === "function") {
+              let vol = p.getVolume();
+              if (typeof vol === "number" && !isNaN(vol)) originalVol = vol;
+            }
+            previousVolumesRef.current.set(p.identity, originalVol);
+
+            // Duck the volume
+            if (typeof p.setVolume === "function") p.setVolume(0.3);
+            else if (p.audioTrackPublications) {
+              p.audioTrackPublications.forEach(pub => {
+                if (pub.track && typeof pub.track.setVolume === "function") pub.track.setVolume(0.3);
+              });
+            }
+          }
+        }
+      });
+    } else {
+      // Restore volumes when description ends or game exits
+      restoreVolumes(participants);
     }
   }, [
     gameState,
@@ -603,8 +658,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     pictureItState.describeStarted,
     pictureItState.ratingOpen,
     pictureItState.describerId,
-    currentUserId,
-    localParticipant,
+    participants,
+    restoreVolumes
   ]);
 
   const startGame = useCallback(
@@ -708,13 +763,13 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   // Picture IT Actions
   const startPictureItDescribe = useCallback(() => {
+    localParticipant?.setMicrophoneEnabled(true).catch(() => { });
     connection.send("PictureItDescribeStart", roomId || "general");
-  }, [connection.send, roomId]);
+  }, [connection.send, roomId, localParticipant]);
 
   const endPictureItDescribe = useCallback(() => {
-    localParticipant?.setMicrophoneEnabled(false).catch(() => { });
     connection.send("PictureItDescribeEnd", roomId || "general");
-  }, [connection.send, roomId, localParticipant]);
+  }, [connection.send, roomId]);
 
   const submitPictureItFlag = useCallback(() => {
     connection.send("PictureItSubmitFlag", roomId || "general");
@@ -734,17 +789,18 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
     // Keep track of the current game type before resetting
     const lastGameType = gameType;
+    const isGameOver = gameState === "game_over" || gameState === "force_stopped";
 
     setGameState("idle");
     setGameType(null);
     resetGameStates();
 
     // Allow the player to spectate the game they just left (unless GAME_OVER is received)
-    if (lastGameType) {
+    if (lastGameType && !isGameOver) {
       setOngoingGame(true);
       setOngoingGameType(lastGameType);
     }
-  }, [connection, roomId, resetGameStates, gameType]);
+  }, [connection, roomId, resetGameStates, gameType, gameState]);
 
   const value = {
     gameState,
