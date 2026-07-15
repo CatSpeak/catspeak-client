@@ -1,68 +1,73 @@
-import React, { useState, useMemo } from "react"
-import dayjs from "dayjs"
-import { colors } from "@/shared/utils/colors"
-import CatIcon from "@/shared/assets/icons/logo/icon.svg"
-import CalendarDetail from "./CalendarDetail"
-import { motion } from "framer-motion"
-import { useGetEventCountsQuery } from "@/store/api/eventsApi"
+import React, { useState, useMemo } from "react";
+import dayjs from "dayjs";
+import { colors } from "@/shared/utils/colors";
+import CatIcon from "@/shared/assets/icons/logo/icon.svg";
+import CalendarDetail from "./CalendarDetail";
+import { motion } from "framer-motion";
+import { useGetEventCountsQuery } from "@/store/api/eventsApi";
 
 const Calendar = ({ currentDate }) => {
-  const [selectedDate, setSelectedDate] = useState(null)
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  const [selectedDate, setSelectedDate] = useState(null);
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   // Create a calendar view layout for the current month (Monday-first)
   // dayjs .day() returns 0=Sun,1=Mon,...,6=Sat
   // For a Mon-first grid, offset = (dayOfWeek + 6) % 7
-  const startDay = (currentDate.startOf("month").day() + 6) % 7
-  const daysInMonth = currentDate.daysInMonth()
-  const prevMonthDays = currentDate.subtract(1, "month").daysInMonth()
+  const startDay = (currentDate.startOf("month").day() + 6) % 7;
+  const daysInMonth = currentDate.daysInMonth();
+  const prevMonthDays = currentDate.subtract(1, "month").daysInMonth();
 
   const dates = Array.from({ length: 42 }, (_, i) => {
-    const dayValue = i - startDay + 1
+    const dayValue = i - startDay + 1;
     if (dayValue < 1) {
       return {
         day: prevMonthDays + dayValue,
         isCurrentMonth: false,
         originalDate: null,
-      }
+      };
     }
     if (dayValue > daysInMonth) {
       return {
         day: dayValue - daysInMonth,
         isCurrentMonth: false,
         originalDate: null,
-      }
+      };
     }
-    return { day: dayValue, isCurrentMonth: true, originalDate: dayValue }
-  })
+    return { day: dayValue, isCurrentMonth: true, originalDate: dayValue };
+  });
 
   // Fetch event counts from the API for the current month
+  // Send browser UTC offset so backend groups events by local day, not UTC day.
+  const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
-  })
+    timezoneOffsetMinutes,
+  });
 
   // Build a day-of-month → totalEvents map from the API response
   const eventCountsByDay = useMemo(() => {
-    if (!eventCountsData?.counts) return {}
+    if (!eventCountsData?.counts) return {};
     return eventCountsData.counts.reduce((acc, item) => {
-      const day = dayjs(item.date).date()
-      acc[day] = (acc[day] ?? 0) + item.totalEvents
-      return acc
-    }, {})
-  }, [eventCountsData])
+      // Backend already applied our timezone offset, so item.date is a
+      // plain "YYYY-MM-DD" representing the correct LOCAL date.
+      const day = parseInt(item.date.split("-")[2], 10);
+      acc[day] = (acc[day] ?? 0) + item.totalEvents;
+      return acc;
+    }, {});
+  }, [eventCountsData]);
 
   const selectedIndex = dates.findIndex(
     (d) => d.isCurrentMonth && d.day === selectedDate,
-  )
+  );
   const endOfRowIdx =
-    selectedIndex !== -1 ? (Math.floor(selectedIndex / 7) + 1) * 7 - 1 : -1
+    selectedIndex !== -1 ? (Math.floor(selectedIndex / 7) + 1) * 7 - 1 : -1;
 
   // Look up event count for a given day from API data
   const getEventCountForDate = (date) => {
-    if (!date) return 0
-    return eventCountsByDay[date] ?? 0
-  }
+    if (!date) return 0;
+    return eventCountsByDay[date] ?? 0;
+  };
 
   return (
     <div className="flex-1 flex flex-col w-full min-h-[350px]">
@@ -79,28 +84,28 @@ const Calendar = ({ currentDate }) => {
 
       <div className="grid grid-cols-7 gap-x-1 sm:gap-x-2 gap-y-3 flex-1">
         {dates.map((dateObj, idx) => {
-          const { day, isCurrentMonth, originalDate } = dateObj
-          const date = originalDate // integer or null
+          const { day, isCurrentMonth, originalDate } = dateObj;
+          const date = originalDate; // integer or null
 
           const isToday =
             isCurrentMonth &&
             day === dayjs().date() &&
-            currentDate.isSame(dayjs(), "month")
-          const eventCount = isCurrentMonth ? getEventCountForDate(day) : 0
+            currentDate.isSame(dayjs(), "month");
+          const eventCount = isCurrentMonth ? getEventCountForDate(day) : 0;
 
           // Logic for gradient bars based on event count
-          let numBars = 0
-          if (eventCount >= 50) numBars = 4
-          else if (eventCount >= 20) numBars = 3
-          else if (eventCount >= 5) numBars = 2
-          else if (eventCount > 0) numBars = 1
+          let numBars = 0;
+          if (eventCount >= 50) numBars = 4;
+          else if (eventCount >= 20) numBars = 3;
+          else if (eventCount >= 5) numBars = 2;
+          else if (eventCount > 0) numBars = 1;
 
           const barColors = [
             colors.red[500], // bottom, lightest
             colors.red[700],
             colors.red[800],
             colors.red[900], // top, darkest
-          ]
+          ];
 
           const renderExpandedDetail = () => {
             if (selectedDate !== null && idx === endOfRowIdx) {
@@ -110,10 +115,10 @@ const Calendar = ({ currentDate }) => {
                   selectedDate={selectedDate}
                   currentDate={currentDate}
                 />
-              )
+              );
             }
-            return null
-          }
+            return null;
+          };
 
           if (!isCurrentMonth) {
             return (
@@ -125,7 +130,7 @@ const Calendar = ({ currentDate }) => {
                 </div>
                 {renderExpandedDetail()}
               </React.Fragment>
-            )
+            );
           }
 
           return (
@@ -191,11 +196,11 @@ const Calendar = ({ currentDate }) => {
               </motion.div>
               {renderExpandedDetail()}
             </React.Fragment>
-          )
+          );
         })}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Calendar
+export default Calendar;
