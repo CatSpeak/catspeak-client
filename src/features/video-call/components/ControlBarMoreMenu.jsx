@@ -214,12 +214,13 @@ const ControlBarMoreMenu = ({
                             setShowVirtualBackground(!showVirtualBackground);
                             setShowMoreMenu(false);
                           }}
-                          leftContent={<Users />}
-                          hoverEffect={true}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-left"
                         >
-                          <Sparkles size={20} />
-                          {t?.rooms?.videoCall?.backgroundsAndEffects ||
-                            "Backgrounds and effects"}
+                          <Sparkles size={20} className="shrink-0" />
+                          <span>
+                            {t?.rooms?.videoCall?.backgroundsAndEffects ||
+                              "Backgrounds and effects"}
+                          </span>
                         </button>
 
                         <button

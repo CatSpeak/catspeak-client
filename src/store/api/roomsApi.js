@@ -174,7 +174,7 @@ export const roomsApi = baseApi.injectEndpoints({
     // Get game history for a specific room
     getGameHistory: builder.query({
       query: (roomId) => ({
-        url: `/rooms/${roomId}/game-history`,
+        url: `/games/${roomId}/history`,
       }),
     }),
   }),
