@@ -55,13 +55,13 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     // Determine if sensitive fields are modified
     let isSensitiveChange = false
     if (field === "email") {
-      const origEmail = (profileData?.data?.email || "").toLowerCase()
+      const origEmail = (profileData?.email || "").toLowerCase()
       const newEmail = (formData.email || "").toLowerCase()
       if (origEmail !== newEmail) {
         isSensitiveChange = true
       }
     } else if (field === "phoneNumber") {
-      const { phoneNumber: strippedOrigPhone } = parsePhoneData(profileData?.data?.phoneNumber)
+      const { phoneNumber: strippedOrigPhone } = parsePhoneData(profileData?.phoneNumber)
       const cleanPhone = formData.phoneNumber || ""
       if (strippedOrigPhone !== cleanPhone) {
         isSensitiveChange = true

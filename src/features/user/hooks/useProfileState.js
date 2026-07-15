@@ -37,20 +37,20 @@ export const useProfileState = (profileData) => {
   }
 
   useEffect(() => {
-    if (profileData?.data) {
-      const { phonePrefix, phoneNumber } = parsePhoneData(profileData.data.phoneNumber)
+    if (profileData) {
+      const { phonePrefix, phoneNumber } = parsePhoneData(profileData.phoneNumber)
       setFormData({
-        username: profileData.data.username || "",
-        nickname: profileData.data.nickname || "",
-        email: profileData.data.email || "",
-        accountType: profileData.data.roleName || "Student",
-        level: profileData.data.level || "HSK3",
-        address: profileData.data.address || "",
+        username: profileData.username || "",
+        nickname: profileData.nickname || "",
+        email: profileData.email || "",
+        accountType: profileData.roleName || "Student",
+        level: profileData.level || "HSK3",
+        address: profileData.address || "",
         phoneNumber: phoneNumber,
         phonePrefix: phonePrefix,
-        country: profileData.data.country || "",
-        avatarImageUrl: profileData.data.avatarImageUrl || "",
-        meetingAvatarUrl: profileData.data.meetingAvatarUrl || "",
+        country: profileData.country || "",
+        avatarImageUrl: profileData.avatarImageUrl || "",
+        meetingAvatarUrl: profileData.meetingAvatarUrl || "",
       })
     }
   }, [profileData])
@@ -63,17 +63,17 @@ export const useProfileState = (profileData) => {
   const handleCancel = () => {
     setEditingField(null)
     setErrors({})
-    if (profileData?.data) {
-      const { phonePrefix, phoneNumber } = parsePhoneData(profileData.data.phoneNumber)
+    if (profileData) {
+      const { phonePrefix, phoneNumber } = parsePhoneData(profileData.phoneNumber)
       setFormData((prev) => ({
         ...prev,
-        username: profileData.data.username || "",
-        nickname: profileData.data.nickname || "",
-        email: profileData.data.email || "",
-        address: profileData.data.address || "",
+        username: profileData.username || "",
+        nickname: profileData.nickname || "",
+        email: profileData.email || "",
+        address: profileData.address || "",
         phoneNumber: phoneNumber,
         phonePrefix: phonePrefix,
-        country: profileData.data.country || "",
+        country: profileData.country || "",
       }))
     }
   }

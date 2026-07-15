@@ -45,12 +45,7 @@ export const navLinks = [
       { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
-  {
-    key: "profile",
-    path: "/profile",
-    hasDropdown: false,
-    icon: User,
-  },
+
   // {
   //   key: "pricing",
   //   path: "/pricing",
