@@ -44,6 +44,7 @@ const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
 const ReelDetailPage = lazy(() => import("@/features/reels/pages/ReelDetailPage"))
 const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceReelsPage"))
 const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
+const WorkspaceEventsPage = lazy(() => import("@/features/calendar/pages/WorkspaceEventsPage"))
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
 const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
 const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
@@ -349,6 +350,14 @@ const routesConfig = [
                     ),
                   },
                 ],
+              },
+              {
+                path: "events",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceEventsPage />
+                  </LazyRoute>
+                ),
               },
               { path: "*", element: <PageNotFound /> },
             ],

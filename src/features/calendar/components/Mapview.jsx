@@ -144,7 +144,7 @@ export default function MapView({ dayEvents = [], selectedEvent = null }) {
   }, [selectedEvent, markers]);
 
   return (
-    <div className="relative w-full h-[600px] rounded-[32px] overflow-hidden">
+    <div className="relative w-full h-[600px] rounded-3xl overflow-hidden">
       <MapContainer
         center={activeCenter}
         zoom={15}

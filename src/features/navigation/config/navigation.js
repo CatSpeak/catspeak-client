@@ -13,8 +13,8 @@ import {
   Video,
   Calendar,
   Mic,
-  Film
-} from "lucide-react"
+  Film,
+} from "lucide-react";
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -25,7 +25,7 @@ export const navLinks = [
     subItems: [
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       // { key: "worldNews", path: "/cat-speak/discover" },
-      { key: "reels", path: "/cat-speak/reels", icon: Film },
+      { key: "reels", path: " ", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
@@ -38,6 +38,7 @@ export const navLinks = [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
+      { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
   {

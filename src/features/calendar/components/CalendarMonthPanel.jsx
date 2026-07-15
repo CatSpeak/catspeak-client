@@ -5,10 +5,11 @@ import {
   ChevronRight,
   LayoutGrid,
 } from "lucide-react";
-import MapView from "./Mapview";
 // import "@/shared/utils/testGeoapify";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 const CalendarMonthPanel = ({
   currentDate,
@@ -22,9 +23,9 @@ const CalendarMonthPanel = ({
   onSelectDate,
   viewType = "month",
   onChangeView,
-  dayEvents = [],
-  selectedEvent = null,
 }) => {
+  const { t } = useLanguage();
+  
   const startDay = (currentDate.startOf("month").day() + 6) % 7;
   const prevDays = currentDate.subtract(1, "month").daysInMonth();
   const daysInMonth = currentDate.daysInMonth();
@@ -59,7 +60,7 @@ const CalendarMonthPanel = ({
   const datesToRender = viewType === "month" ? calendarDates : getWeekDates();
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 bg-white p-5 md:p-6 rounded-3xl shadow-sm">
       <div className="flex items-center justify-between   ">
         <div className="flex items-center gap-2">
           <button
@@ -138,7 +139,7 @@ const CalendarMonthPanel = ({
               <button
                 onClick={() => onSelectDate(day)}
                 className={`
-                  w-14 h-14
+                  w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14
                   flex items-center justify-center
                   rounded-full
                   text-md font-medium
@@ -147,7 +148,7 @@ const CalendarMonthPanel = ({
                     isSelected
                       ? "bg-[#990011] text-white shadow-md"
                       : isToday
-                        ? "text-[#990011] font-bold hover:bg-gray-100"
+                        ? "border border-[#990011] text-[#990011] font-bold hover:bg-[#990011] hover:text-white hover:border-[#990011]"
                         : "text-gray-700 hover:border hover:border-[#990011] hover:text-[#990011]"
                   }
                 `}
@@ -155,42 +156,37 @@ const CalendarMonthPanel = ({
                 {day}
               </button>
               {eventCount > 0 && !isSelected && (
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                  {Array.from({ length: Math.min(eventCount, 3) }).map(
-                    (_, i) => (
-                      <span
-                        key={i}
-                        className={`w-1 h-1 rounded-full ${
-                          isToday ? "bg-[#990011]" : "bg-[#990011]/60"
-                        }`}
-                      />
-                    ),
-                  )}
-                </span>
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#990011]"></span>
               )}
             </div>
           );
         })}
       </div>
 
-      <div className="flex items-center justify-between gap-5 px-1 mt-1">
+      <div className="flex items-center justify-between px-1 mt-1">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full border border-[#990011] flex items-center justify-center">
             <span className="text-[10px] text-[#990011] font-semibold">01</span>
           </div>
-          <span className="text-sm text-gray-500">{todayLegend}</span>
+          <span className="text-[12px] text-gray-500">{todayLegend}</span>
         </div>
+        
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 flex items-center justify-center relative">
+            <span className="text-[10px] text-gray-700 font-semibold">01</span>
+            <span className="absolute bottom-[2px] w-4 h-[2px] bg-[#990011]"></span>
+          </div>
+          <span className="text-[12px] text-gray-500">{t.calendar?.eventDayLegend || "Ngày sự kiện"}</span>
+        </div>
+
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-[#990011] flex items-center justify-center">
             <span className="text-[10px] text-white font-semibold">01</span>
           </div>
-          <span className="text-sm text-gray-500">{selectedDayLegend}</span>
+          <span className="text-[12px] text-gray-500">{selectedDayLegend}</span>
         </div>
       </div>
 
-      <div className="relative z-0">
-        <MapView dayEvents={dayEvents} selectedEvent={selectedEvent} />
-      </div>
     </div>
   );
 };

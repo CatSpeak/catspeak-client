@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Trash2, Pencil } from "lucide-react";
+import dayjs from "dayjs";
 import SharePopover from "./SharePopover";
 import useEventDelete from "../../hooks/useEventDelete";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -15,7 +16,15 @@ import { useAuthModal } from "@/shared/context/AuthModalContext";
 import ParticipantListModal from "./ParticipantListModal";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 
-const EventDetailFooter = ({ eventId, event, onClose, onEdit, onActionComplete }) => {
+const EventDetailFooter = ({
+  eventId,
+  event,
+  onClose,
+  onEdit,
+  onActionComplete,
+  hideAdminControls = false,
+  isCreatorOverride,
+}) => {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -24,21 +33,28 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit, onActionComplete }
   const cal = t.calendar || {};
   const [showParticipants, setShowParticipants] = useState(false);
 
-  const isCreator = Boolean(
-    user &&
-    event &&
-    ((user.accountId != null &&
-      event.creatorId != null &&
-      user.accountId === event.creatorId) ||
-      (user.username != null &&
-        event.creatorName != null &&
-        user.username === event.creatorName) ||
-      (user.fullName != null &&
-        event.creatorName != null &&
-        user.fullName === event.creatorName)),
-  );
+  const isCreator =
+    isCreatorOverride !== undefined
+      ? isCreatorOverride
+      : Boolean(
+          user &&
+            event &&
+            ((user.id != null &&
+              event.creatorId != null &&
+              user.id === event.creatorId) ||
+              (user.accountId != null &&
+                event.creatorId != null &&
+                user.accountId === event.creatorId) ||
+              (user.username != null &&
+                event.creatorName != null &&
+                user.username === event.creatorName) ||
+              (user.fullName != null &&
+                event.creatorName != null &&
+                user.fullName === event.creatorName)),
+        );
 
   const isRegistered = event?.isRegistered ?? false;
+  const isPast = event?.startTime && dayjs(event.startTime).isBefore(dayjs());
 
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
     useEventDelete(eventId, event?.occurrenceId, onClose, onActionComplete);
@@ -126,24 +142,27 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit, onActionComplete }
         {/* Register / Unregister */}
         {!confirmDelete &&
           (isCreator ? (
-            <PillButton
-              onClick={() => setShowParticipants(true)}
-              bgColor="#990011"
-              className="w-full min-[426px]:flex-1"
-            >
-              {cal.viewParticipants || "Xem danh sách người đăng ký"}
-            </PillButton>
+            !hideAdminControls && (
+              <PillButton
+                onClick={() => setShowParticipants(true)}
+                bgColor="#990011"
+                className="w-full min-[426px]:flex-1"
+              >
+                {cal.viewParticipants || "Xem danh sách người đăng ký"}
+              </PillButton>
+            )
           ) : (
             <PillButton
               onClick={handleRegister}
+              disabled={isPast}
               loading={isProcessing}
               loadingText={cal.processing || "Đang xử lý..."}
-              bgColor={isRegistered ? undefined : "#06AA3B"}
-              className={`w-full min-[426px]:flex-1 ${isRegistered ? "bg-cath-red-700 hover:bg-cath-red-800" : ""}`}
+              bgColor={isPast ? "#d1d5db" : (isRegistered ? undefined : "#06AA3B")}
+              className={`w-full min-[426px]:flex-1 ${!isPast && isRegistered ? "bg-cath-red-700 hover:bg-cath-red-800" : ""} ${isPast ? "cursor-not-allowed opacity-80" : ""}`}
             >
-              {isRegistered
-                ? cal.cancelRegistration || "Hủy đăng kí"
-                : cal.register || "Đăng kí"}
+              {isPast 
+                ? (isRegistered ? "Đã tham gia" : "Đã kết thúc") 
+                : (isRegistered ? (cal.cancelRegistration || "Hủy đăng kí") : (cal.register || "Đăng kí"))}
             </PillButton>
           ))}
 
@@ -193,11 +212,13 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit, onActionComplete }
           </div>
         ) : (
           <div className="relative flex items-center justify-center min-[426px]:justify-end gap-2 w-full min-[426px]:w-auto">
-            {isCreator && (
+            {isCreator && !hideAdminControls && (
               <>
                 <button
                   onClick={onEdit}
-                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
+                  disabled={isPast}
+                  title={isPast ? "Không thể sửa sự kiện đã qua" : undefined}
+                  className={`transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 ${isPast ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#F2F2F2] hover:bg-[#D9D9D9] text-[#111111]'}`}
                 >
                   <Pencil />
                 </button>

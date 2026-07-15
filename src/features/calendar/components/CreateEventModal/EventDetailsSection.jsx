@@ -74,9 +74,9 @@ const EventDetailsSection = ({
           <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
             {cal.location}
           </div>
-          <div className="flex-1 flex flex-col gap-6 w-full relative">
+          <div className="flex-1 flex flex-col gap-6 w-full relative min-w-0">
             <div className="flex flex-col min-[426px]:flex-row items-start gap-6 w-full">
-              <div className="flex-1 flex flex-col w-full">
+              <div className="flex-1 flex flex-col w-full min-w-0">
                 <Dropdown
                   options={countryOptions}
                   value={countryId}
@@ -99,7 +99,7 @@ const EventDetailsSection = ({
                 )}
               </div>
 
-              <div className="flex-1 flex flex-col w-full">
+              <div className="flex-1 flex flex-col w-full min-w-0">
                 <Dropdown
                   options={cityOptions}
                   value={cityId}
@@ -167,20 +167,41 @@ const EventDetailsSection = ({
         <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.maxParticipants}
         </div>
-        <div className="flex items-start w-full">
-          <div className="flex items-start flex-1">
-            <TextInput
-              type="number"
-              value={maxParticipants}
-              onChange={(e) => onMaxParticipantsChange(e.target.value)}
-              variant="square"
-              color={eventColor}
-              placeholder={cal.maxParticipantsPlaceholder || "0"}
-              className="text-center !px-2"
-              containerClassName="w-32"
-              error={errors.maxParticipants}
-            />
-            <span className="text-[#606060] ml-3 mt-[10px]">{cal.guest}</span>
+        <div className="flex items-start w-full min-w-0">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3">
+              <TextInput
+                type="text"
+                inputMode="numeric"
+                value={maxParticipants}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || /^\d+$/.test(val)) {
+                    onMaxParticipantsChange(val);
+                    if (errors.maxParticipants)
+                      onMaxParticipantsChange(val);
+                  }
+                }}
+                onBlur={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && !/^\d+$/.test(val)) {
+                    onMaxParticipantsChange("");
+                  }
+                }}
+                variant="square"
+                color={eventColor}
+                placeholder={cal.maxParticipantsPlaceholder || "0"}
+                className="text-center !px-2"
+                containerClassName="w-24"
+                error={errors.maxParticipants}
+              />
+              <span className="text-[#606060] mt-[10px]">{cal.guest}</span>
+            </div>
+            {errors.maxParticipants && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.maxParticipants}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -220,29 +241,34 @@ const EventDetailsSection = ({
       </div>
 
       {/* Ticket price */}
-      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:justify-between max-[425px]:gap-1">
-        <div className="w-[150px] shrink-0 max-[425px]:w-full">
+      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+        <div className="w-[150px] shrink-0 max-[425px]:w-full pt-[10px] max-[425px]:pt-0">
           {cal.ticketPrice}
         </div>
-        <div className="flex-1 flex items-center gap-3 w-full">
-          <TextInput
-            type="number"
-            value={ticketPrice ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              onTicketPriceChange(val === "" ? null : Number(val));
-            }}
-            variant="square"
-            color={eventColor}
-            placeholder={"0"}
-            className="text-center !px-2"
-            containerClassName="w-32"
-          />
-          <span className="text-[#606060] text-sm">
-            {ticketPrice == null || ticketPrice === 0
-              ? `(${cal.free || "Miễn phí"})`
-              : "k"}
-          </span>
+        <div className="flex flex-col w-full min-w-0">
+          <div className="flex items-center gap-3">
+            <TextInput
+              type="text"
+              inputMode="numeric"
+              value={ticketPrice ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "" || /^\d+$/.test(val)) {
+                  onTicketPriceChange(val === "" ? null : Number(val));
+                }
+              }}
+              variant="square"
+              color={eventColor}
+              placeholder={"0"}
+              className="text-center !px-2"
+              containerClassName="w-24"
+            />
+            <span className="text-[#606060] text-sm">
+              {ticketPrice == null || ticketPrice === 0
+                ? `(${cal.free || "Miễn phí"})`
+                : "k"}
+            </span>
+          </div>
         </div>
       </div>
     </div>

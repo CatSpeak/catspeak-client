@@ -191,7 +191,7 @@ export const useEventForm = (
 
   const [errors, setErrors] = useState({});
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, isDraft = false) => {
     console.log("Submit clicked");
     e?.preventDefault();
     console.log({
@@ -205,7 +205,9 @@ export const useEventForm = (
       endTime,
     });
     const newErrors = {};
-    if (!title.trim())
+
+    if (!isDraft) {
+      if (!title.trim())
       newErrors.title =
         t.validation?.calendar?.titleRequired || "Thiếu tiêu đề";
     if (!countryId)
@@ -220,14 +222,22 @@ export const useEventForm = (
     // if (!description.trim())
     //   newErrors.description =
     //     t.validation?.calendar?.descriptionRequired || "Mô tả là bắt buộc";
-    if (!maxParticipants || Number(maxParticipants) <= 0) {
-      newErrors.maxParticipants =
-        t.validation?.calendar?.maxParticipantsRequired ||
-        "Số lượng cần lớn hơn 0";
+      if (!maxParticipants || Number(maxParticipants) <= 0) {
+        newErrors.maxParticipants =
+          t.validation?.calendar?.maxParticipantsRequired ||
+          "Số lượng cần lớn hơn 0";
+      }
+
+      if (!startTime) newErrors.startTime = "Vui lòng chọn thời gian bắt đầu";
+      if (!endTime) newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
     }
 
-    if (!startTime) newErrors.startTime = "Vui lòng chọn thời gian bắt đầu";
-    if (!endTime) newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
+    if (startTime) {
+      if (dayjs(startTime).isBefore(dayjs())) {
+        newErrors.startTime = t.validation?.calendar?.startTimeInPast || "Thời gian bắt đầu phải sau hiện tại";
+      }
+    }
+
     if (startTime && endTime) {
       if (
         dayjs(endTime).isBefore(dayjs(startTime)) ||
@@ -270,6 +280,7 @@ export const useEventForm = (
       ticketPrice,
       originalStartTime: editEvent?.startTime,
       originalEndTime: editEvent?.endTime,
+      isDraft,
     });
 
     console.log(

@@ -7,6 +7,7 @@ import {
   ArrowRight,
   X,
   AlertTriangle,
+  BookmarkCheck,
 } from "lucide-react";
 import dayjs from "dayjs";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -18,7 +19,10 @@ import EventDetailsSection from "../components/CreateEventModal/EventDetailsSect
 import EditChoiceModal from "../components/EventDetailModal/EditChoiceModal";
 import Modal from "@/shared/components/ui/Modal";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { useDeleteEventMutation } from "@/store/api/eventsApi";
+import {
+  useDeleteEventMutation,
+  useGetEventDraftsQuery,
+} from "@/store/api/eventsApi";
 import MapView from "../components/Mapview";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "@/store/slices/authSlice";
@@ -50,9 +54,95 @@ const CreateEventPage = () => {
   );
   const fileInputRef = useRef(null);
 
+  // Draft state
+  const { data: draftsData = [] } = useGetEventDraftsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  const drafts = draftsData;
+  const [mobileTab, setMobileTab] = useState("create"); // "create" | "draft"
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [showDeleteDraftConfirm, setShowDeleteDraftConfirm] = useState(null); // draft id
+
+  const handleSaveDraft = async () => {
+    try {
+      await form.handleSubmit(null, true);
+      setDraftSaved(true);
+      setTimeout(() => setDraftSaved(false), 2000);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleLoadDraft = (draft) => {
+    form.setTitle(draft.title || "");
+    form.setStartTime(draft.startTime || null);
+    form.setEndTime(draft.endTime || null);
+    form.setEventLocation(draft.location || "");
+    form.setCountryId(draft.countryId || 0);
+    form.setCityId(draft.cityId || 0);
+    form.setDescription(draft.description || "");
+    form.setTicketPrice(draft.ticketPrice ?? null);
+    form.setIsOnline(draft.isOnline ?? null);
+    if (draft.thumbnailUrl) {
+      setImagePreview(draft.thumbnailUrl);
+    }
+    form.setEventColor(draft.color || "#990011");
+    form.setMaxParticipants(draft.maxParticipants || "");
+    form.setVisibility(draft.visibilityScope || "PUBLIC");
+    form.setConditionsInput(
+      draft.conditions && draft.conditions.length > 0
+        ? draft.conditions.map((c) => c.title).join(", ")
+        : "",
+    );
+
+    if (draft.recurrenceRule) {
+      form.setRecurrenceOption(draft.recurrenceRule.frequency || "NONE");
+      form.setRecurrenceInterval(draft.recurrenceRule.interval || 1);
+      if (
+        draft.recurrenceRule.byWeekDay &&
+        draft.recurrenceRule.byWeekDay.length > 0
+      ) {
+        const codes = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+        const days = draft.recurrenceRule.byWeekDay
+          .map((d) => codes.indexOf(d))
+          .filter((d) => d !== -1);
+        form.setSelectedDays(days.length ? days : [1, 4]);
+      }
+      form.setRecurrenceEndDate(draft.recurrenceRule.recurrenceEndDate || "");
+
+      let endType = "NONE";
+      if (draft.recurrenceRule.endCondition === "UNTIL_DATE") endType = "DATE";
+      else if (draft.recurrenceRule.endCondition === "OCCURRENCE_COUNT")
+        endType = "COUNT";
+
+      form.setRecurrenceEndType(endType);
+      form.setOccurrenceCount(draft.recurrenceRule.occurrenceCount || 10);
+    } else {
+      form.setRecurrenceOption("NONE");
+    }
+
+    if (draft.timezone)
+      form.setSelectedTimezone({ id: draft.timezone, name: draft.timezone });
+
+    // IMPORTANT: Inject draft state so hook knows we are editing this draft
+    navigate(location.pathname, { state: { editEvent: draft }, replace: true });
+
+    setMobileTab("create");
+  };
+
   const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation();
 
+  const handleDeleteDraft = async (id) => {
+    try {
+      await deleteEvent(id).unwrap();
+      setShowDeleteDraftConfirm(null);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
+  const returnPath = location.state?.from || basePath;
 
   const breadcrumbItems = [
     {
@@ -75,7 +165,7 @@ const CreateEventPage = () => {
   ];
 
   const handleClose = () => {
-    navigate(basePath);
+    navigate(returnPath);
   };
 
   const handleSuccess = () => {
@@ -101,7 +191,7 @@ const CreateEventPage = () => {
     try {
       const eventId = editEvent?.eventId || editEvent?.id;
       await deleteEvent(eventId).unwrap();
-      navigate(basePath);
+      navigate(returnPath);
     } catch (err) {
       console.error("Delete failed:", err);
       setShowDeleteConfirm(false);
@@ -163,8 +253,129 @@ const CreateEventPage = () => {
         </div>
       </div>
 
-      {/* Two-column layout */}
-      <form 
+      {/* ===== MOBILE TAB SWITCHER (hidden on lg+) ===== */}
+      <div className="lg:hidden px-5 mb-0">
+        <div
+          className="bg-white shadow-sm overflow-hidden"
+          style={{ borderRadius: "16px 16px 0 0" }}
+        >
+          <div className="flex">
+            <button
+              type="button"
+              onClick={() => setMobileTab("create")}
+              className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
+                mobileTab === "create"
+                  ? "text-[#990011] border-b-2 border-[#990011]"
+                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600"
+              }`}
+            >
+              {cal.createEventBtn || "Tạo sự kiện"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileTab("draft")}
+              className={`flex-1 py-3.5 text-sm font-semibold transition-colors relative ${
+                mobileTab === "draft"
+                  ? "text-[#990011] border-b-2 border-[#990011]"
+                  : "text-gray-400 border-b-2 border-transparent hover:text-gray-600"
+              }`}
+            >
+              {cal.draftTab || "Bản nháp"}
+              {drafts.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#990011] text-white text-[10px] font-bold">
+                  {drafts.length}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== MOBILE DRAFT LIST (hidden on lg+) ===== */}
+      {mobileTab === "draft" && (
+        <div className="lg:hidden px-5 pb-10">
+          <div
+            className="bg-white shadow-sm overflow-hidden"
+            style={{ borderRadius: "0 0 16px 16px" }}
+          >
+            {drafts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                <BookmarkCheck size={40} className="mb-3 opacity-30" />
+                <p className="text-sm">
+                  {cal.noDrafts || "Chưa có bản nháp nào"}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-[#F0F0F0]">
+                {drafts.map((draft) => (
+                  <div
+                    key={draft.id}
+                    className="flex items-start gap-3 p-4 hover:bg-[#FFF5F5] transition-colors cursor-pointer"
+                    onClick={() => handleLoadDraft(draft)}
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-12 h-12 rounded-full shrink-0 overflow-hidden flex items-center justify-center bg-[#990011]">
+                      {draft.thumbnailUrl ? (
+                        <img
+                          src={draft.thumbnailUrl}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-base font-bold">
+                          {(draft.title || "E")[0].toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-black truncate">
+                        {draft.title ||
+                          cal.randomEventTitle ||
+                          "Tên Event ngẫu nhiên"}
+                      </p>
+                      {(draft.startTime || draft.endTime) && (
+                        <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                          <Clock size={11} />
+                          <span>
+                            {draft.startTime
+                              ? dayjs(draft.startTime).format("HH:mm")
+                              : "--:--"}
+                            {" - "}
+                            {draft.endTime
+                              ? dayjs(draft.endTime).format("HH:mm")
+                              : "--:--"}
+                          </span>
+                        </div>
+                      )}
+                      {draft.location && (
+                        <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                          <MapPin size={11} />
+                          <span className="truncate">{draft.location}</span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Price tag */}
+                    <div className="shrink-0 text-right">
+                      <span className="text-xs text-gray-400">
+                        {cal.filterPrice || "Giá cả"}
+                      </span>
+                      <p className="text-sm font-bold text-[#990011]">
+                        {draft.ticketPrice && Number(draft.ticketPrice) > 0
+                          ? `${Number(draft.ticketPrice).toLocaleString()}đ`
+                          : cal.free || "Miễn Phí"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Two-column layout — on mobile shows only when mobileTab === "create" */}
+      <form
         onSubmit={(e) => {
           e.preventDefault();
           if (!isAuthenticated) {
@@ -172,8 +383,10 @@ const CreateEventPage = () => {
             return;
           }
           form.handleSubmit(e);
-        }} 
-        className="px-5 pb-10"
+        }}
+        className={`px-5 pb-10 ${
+          mobileTab === "draft" ? "hidden lg:block" : ""
+        }`}
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT - Event Info Form */}
@@ -238,8 +451,8 @@ const CreateEventPage = () => {
               <label className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
                 {cal.filterEventType || "Loại sự kiện"}
               </label>
-              <div className="w-full">
-                <div className="relative w-[240px]">
+              <div className="w-full min-w-0">
+                <div className="relative w-full max-w-[240px]">
                   <select
                     value={
                       form.isOnline === true
@@ -254,7 +467,7 @@ const CreateEventPage = () => {
                         form.setIsOnline(false);
                       else form.setIsOnline(null);
                     }}
-                    className="w-[240px] h-11 rounded-2xl border border-[#e5e5e5] px-4 text-sm text-gray-500 appearance-none bg-white outline-none focus:border-[#990011] transition-colors pr-9"
+                    className="w-full h-11 rounded-2xl border border-[#e5e5e5] px-4 text-sm text-gray-500 appearance-none bg-white outline-none focus:border-[#990011] transition-colors pr-9"
                   >
                     <option value="">
                       {cal.eventTypePlaceholder || "Online hay offline?"}
@@ -384,23 +597,42 @@ const CreateEventPage = () => {
               </span>
             </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={form.isLoading || form.isOnline === true}
-              className="w-full h-12 rounded-full text-white font-semibold text-base bg-[#990011] hover:bg-[#7a000e] transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {form.isLoading
-                ? isEditing
-                  ? cal.updatingEvent || "Đang cập nhật..."
-                  : cal.creatingEvent || "Đang tạo..."
-                : isEditing
-                  ? cal.updateEvent || "Cập nhật sự kiện"
-                  : cal.createEventBtn || "Tạo sự kiện"}
-            </button>
+            {/* Submit buttons row */}
+            <div className="flex gap-3">
+              {/* Save draft button */}
+              {(!isEditing || editEvent?.isDraft) && (
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  className="flex-1 h-12 rounded-full border-2 border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-colors flex items-center justify-center gap-2"
+                >
+                  {draftSaved ? (
+                    <>
+                      <BookmarkCheck size={16} />
+                      {cal.draftSaved || "Đã lưu!"}
+                    </>
+                  ) : (
+                    <>{cal.saveDraft || "Lưu nháp"}</>
+                  )}
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={form.isLoading || form.isOnline === true}
+                className="flex-1 h-12 rounded-full text-white font-semibold text-base bg-[#990011] hover:bg-[#7a000e] transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {form.isLoading
+                  ? isEditing
+                    ? cal.updatingEvent || "Đang cập nhật..."
+                    : cal.creatingEvent || "Đang tạo..."
+                  : isEditing
+                    ? cal.updateEvent || "Cập nhật sự kiện"
+                    : cal.createEventBtn || "Tạo sự kiện"}
+              </button>
+            </div>
           </div>
 
-          {/* RIGHT - Preview */}
+          {/* RIGHT - Preview + Desktop Drafts */}
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-bold text-black">
               {cal.previewInfo || "Xem trước thông tin"}
@@ -460,17 +692,135 @@ const CreateEventPage = () => {
                 "Thông tin hiển thị trước giúp bạn kiểm tra trước khi tạo sự kiện."}
             </p>
 
+            {/* Desktop Draft list */}
+            {(!isEditing || editEvent?.isDraft) && (
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-bold text-black">
+                    {cal.draftTab || "Bản nháp"}
+                    {drafts.length > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#990011] text-white text-[10px] font-bold">
+                        {drafts.length}
+                      </span>
+                    )}
+                  </h2>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+                  {drafts.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                      <BookmarkCheck size={32} className="mb-2 opacity-30" />
+                      <p className="text-sm">
+                        {cal.noDrafts || "Chưa có bản nháp nào"}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[#F0F0F0]">
+                      {drafts.map((draft) => (
+                        <div
+                          key={draft.id}
+                          className="flex items-start gap-3 p-4 hover:bg-[#FFF5F5] transition-colors group"
+                        >
+                          {/* Thumbnail */}
+                          <div
+                            className="w-12 h-12 rounded-full shrink-0 overflow-hidden flex items-center justify-center bg-[#990011] cursor-pointer"
+                            onClick={() => handleLoadDraft(draft)}
+                          >
+                            {draft.thumbnailUrl ? (
+                              <img
+                                src={draft.thumbnailUrl}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-white text-base font-bold">
+                                {(draft.title || "E")[0].toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          {/* Info */}
+                          <div
+                            className="flex-1 min-w-0 cursor-pointer"
+                            onClick={() => handleLoadDraft(draft)}
+                          >
+                            <p className="font-semibold text-sm text-black truncate">
+                              {draft.title ||
+                                cal.randomEventTitle ||
+                                "Tên Event ngẫu nhiên"}
+                            </p>
+                            {(draft.startTime || draft.endTime) && (
+                              <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                                <Clock size={11} />
+                                <span>
+                                  {draft.startTime
+                                    ? dayjs(draft.startTime).format("HH:mm")
+                                    : "--:--"}
+                                  {" - "}
+                                  {draft.endTime
+                                    ? dayjs(draft.endTime).format("HH:mm")
+                                    : "--:--"}
+                                </span>
+                              </div>
+                            )}
+                            {draft.location && (
+                              <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                                <MapPin size={11} />
+                                <span className="truncate">
+                                  {draft.location}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {/* Right: price + delete */}
+                          <div className="shrink-0 text-right flex flex-col items-end gap-1">
+                            <span className="text-xs text-gray-400">
+                              {cal.filterPrice || "Giá cả"}
+                            </span>
+                            <p className="text-sm font-bold text-[#990011]">
+                              {draft.ticketPrice &&
+                              Number(draft.ticketPrice) > 0
+                                ? `${Number(draft.ticketPrice).toLocaleString()}đ`
+                                : cal.free || "Miễn Phí"}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowDeleteDraftConfirm(draft.id)
+                              }
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-[#990011]"
+                              title="Xóa bản nháp"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Map section */}
             <div className="mt-4">
               <h2 className="text-lg font-bold text-black mb-4">Bản đồ</h2>
-              <MapView 
-                dayEvents={form.eventLocation && !form.isOnline ? [{
-                  id: 'preview',
-                  title: previewTitle || "Sự kiện được đánh dấu",
-                  location: form.eventLocation,
-                  isOnline: false
-                }] : []}
-                selectedEvent={form.eventLocation && !form.isOnline ? { id: 'preview' } : null}
+              <MapView
+                dayEvents={
+                  form.eventLocation && !form.isOnline
+                    ? [
+                        {
+                          id: "preview",
+                          title: previewTitle || "Sự kiện được đánh dấu",
+                          location: form.eventLocation,
+                          isOnline: false,
+                        },
+                      ]
+                    : []
+                }
+                selectedEvent={
+                  form.eventLocation && !form.isOnline
+                    ? { id: "preview" }
+                    : null
+                }
               />
             </div>
           </div>
@@ -524,6 +874,43 @@ const CreateEventPage = () => {
         </div>
       </Modal>
 
+      {/* Delete Draft Confirm Modal */}
+      <Modal
+        open={showDeleteDraftConfirm !== null}
+        onClose={() => setShowDeleteDraftConfirm(null)}
+        showCloseButton={false}
+        className="!max-w-[400px]"
+        bodyClassName="px-6 pb-6 pt-2"
+      >
+        <div className="flex flex-col items-center text-center gap-3 pt-4">
+          <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
+            <AlertTriangle size={32} className="text-yellow-500" />
+          </div>
+          <h2 className="text-xl font-bold text-black">
+            {cal.deleteDraftTitle || "Xóa bản nháp?"}
+          </h2>
+          <p className="text-sm text-gray-500 leading-relaxed">
+            {cal.deleteDraftMsg || "Bản nháp này sẽ bị xóa vĩnh viễn."}
+          </p>
+          <div className="flex gap-3 w-full mt-2">
+            <button
+              type="button"
+              onClick={() => setShowDeleteDraftConfirm(null)}
+              className="flex-1 h-11 rounded-full border-2 border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-colors"
+            >
+              {cal.cancel || "Hủy"}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeleteDraft(showDeleteDraftConfirm)}
+              className="flex-1 h-11 rounded-full bg-[#990011] text-white font-semibold text-sm hover:bg-[#7a000e] transition-colors"
+            >
+              {cal.confirm || "Xác nhận"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Edit Choice Modal (for recurring) */}
       {pendingPayload && (
         <EditChoiceModal
@@ -544,7 +931,7 @@ const CreateEventPage = () => {
         open={submitStatus !== null}
         onClose={() => {
           if (submitStatus === "success") {
-            window.location.href = basePath;
+            window.location.href = returnPath;
           } else {
             setSubmitStatus(null);
           }
@@ -576,20 +963,25 @@ const CreateEventPage = () => {
           <p className="text-sm text-gray-500">
             {submitStatus === "success"
               ? isEditing
-                ? cal.updateEventSuccessMsg || "Sự kiện của bạn đã được cập nhật thành công."
-                : cal.createEventSuccessMsg || "Sự kiện của bạn đã được tạo thành công."
+                ? cal.updateEventSuccessMsg ||
+                  "Sự kiện của bạn đã được cập nhật thành công."
+                : cal.createEventSuccessMsg ||
+                  "Sự kiện của bạn đã được tạo thành công."
               : submitStatus === "validation_error"
-                ? cal.validationErrorMsg || "Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc."
+                ? cal.validationErrorMsg ||
+                  "Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc."
                 : isEditing
-                  ? cal.updateEventFailedMsg || "Có lỗi xảy ra khi cập nhật sự kiện, vui lòng thử lại."
-                  : cal.createEventFailedMsg || "Có lỗi xảy ra khi tạo sự kiện, vui lòng thử lại."}
+                  ? cal.updateEventFailedMsg ||
+                    "Có lỗi xảy ra khi cập nhật sự kiện, vui lòng thử lại."
+                  : cal.createEventFailedMsg ||
+                    "Có lỗi xảy ra khi tạo sự kiện, vui lòng thử lại."}
           </p>
 
           <button
             type="button"
             onClick={() => {
               if (submitStatus === "success") {
-                window.location.href = basePath;
+                window.location.href = returnPath;
               } else {
                 setSubmitStatus(null);
               }
