@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { ChevronRight, Loader2, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useConnectionState } from "@livekit/components-react";
@@ -28,9 +28,13 @@ import BreakoutSidebarPanel from "@/features/video-call/components/breakout-room
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
+import { GameProvider } from "@/features/games/context/GameContext";
+// import CrackItOverlay from "@/features/video-call/components/games/crack-it/CrackItOverlay";
+import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading";
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer";
+import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay";
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage();
@@ -205,6 +209,11 @@ const VideoCallRoomContent = () => {
       {/* Top Bar */}
       <RoomHeader />
 
+      {/* Game Overlay */}
+      <CrackItOverlay />
+
+      <PictureITOverlay />
+
       {/* Main Content Area */}
       <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row bg-[#F3F3F3]">
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
@@ -333,10 +342,15 @@ const VideoCallRoomContent = () => {
   );
 };
 
-const VideoCallRoom = () => (
-  <VideoCallProvider>
-    <VideoCallRoomContent />
-  </VideoCallProvider>
-);
+const VideoCallRoomWrapper = () => {
+  const { lang } = useParams();
+  return (
+    <VideoCallProvider>
+      <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
+        <VideoCallRoomContent />
+      </GameProvider>
+    </VideoCallProvider>
+  );
+};
 
-export default VideoCallRoom;
+export default VideoCallRoomWrapper;

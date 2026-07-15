@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import {
   Video,
   VideoOff,
@@ -24,11 +24,12 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
+import { useGame } from "@/features/games/context/GameContext"
 import RecordingButton from "./RecordingButton"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
-
+  const { startGame } = useGame()
   const {
     micOn,
     cameraOn,
@@ -75,6 +76,8 @@ const VideoCallControlBar = () => {
   })
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showGameModal, setShowGameModal] = useState(false)
 
   const handleToggleHand = async () => {
     console.log(
@@ -94,8 +97,12 @@ const VideoCallControlBar = () => {
     }
   }
 
+  const handleGameStart = ({ gameId, difficulty, language }) => {
+    startGame(gameId, difficulty, language)
+    setShowGameModal(false)
+  }
+
   const unreadMessages = unreadRoomChat + unreadAiChat
-  const [showMoreMenu, setShowMoreMenu] = useState(false)
 
   const iconClass = "w-6 h-6"
 
@@ -208,6 +215,7 @@ const VideoCallControlBar = () => {
         <ControlBarMoreMenu
           showMoreMenu={showMoreMenu}
           setShowMoreMenu={setShowMoreMenu}
+          setShowGameModal={setShowGameModal}
         />
       </div>
 
@@ -250,8 +258,9 @@ const VideoCallControlBar = () => {
           }}
         />
       )}
+
     </div>
-  )
+  );
 }
 
 export default VideoCallControlBar

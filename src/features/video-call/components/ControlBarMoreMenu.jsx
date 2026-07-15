@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   MonitorUp,
   MonitorOff,
@@ -11,8 +12,9 @@ import {
   Captions,
   Check,
   RefreshCcw,
+  Gamepad2,
+  History,
   Split,
-  X,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
@@ -22,19 +24,25 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls";
 import SubtitleLanguagePicker from "./SubtitleLanguagePicker";
-import ListItem from "@/shared/components/ui/ListItem";
+import {
+  useParticipants,
+  useLocalParticipant,
+} from "@livekit/components-react";
+import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
+import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
+import { useGame } from "@/features/games/context/GameContext";
 
-const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
+const ControlBarMoreMenu = ({
+  showMoreMenu,
+  setShowMoreMenu,
+  setShowGameModal,
+}) => {
+  const { id: roomId } = useParams();
   const { t } = useLanguage();
+  const { ongoingGame, spectateGame } = useGame();
   const {
-    isLocalScreenShare,
     showParticipants,
     setShowParticipants,
-    setShowChat,
-    handleToggleScreenShare,
-    isRecording,
-    isTogglingRecording,
-    handleToggleRecording,
     showVirtualBackground,
     setShowVirtualBackground,
     showAvatarPicker,
@@ -51,8 +59,10 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
     setShowBreakout,
   } = useGlobalVideoCall();
 
+  const [showGameSetup, setShowGameSetup] = useState(false);
+  const [showGameHistory, setShowGameHistory] = useState(false);
+  
   const { isBreakoutActive } = useSelector((s) => s.videoCall);
-  const isHost = room?.creatorId === user?.accountId;
 
   const {
     isSubtitleActive,
@@ -64,6 +74,18 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
 
+  const allParticipants = useParticipants();
+  const { localParticipant } = useLocalParticipant();
+  const hostParticipant = [...allParticipants].sort((a, b) => {
+    const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
+    const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
+    return timeA - timeB;
+  })[0];
+  const isHost =
+    hostParticipant &&
+    localParticipant &&
+    hostParticipant.identity === localParticipant.identity;
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!");
@@ -71,36 +93,23 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
   };
 
   return (
-    <AnimatePresence>
-      {showMoreMenu && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowMoreMenu(false)}
-          />
-          <FluentAnimation
-            animationKey="more-menu"
-            direction="up"
-            distance={15}
-            exit={true}
-            duration={0.2}
-            className="fixed inset-0 z-50 w-full min-[426px]:absolute min-[426px]:inset-auto min-[426px]:bottom-[110%] min-[426px]:right-0 min-[426px]:mb-2 min-[426px]:w-72"
-          >
-            <div className="flex h-full w-full flex-col overflow-hidden bg-white min-[426px]:h-auto min-[426px]:max-h-none min-[426px]:rounded-xl min-[426px]:border min-[426px]:border-[#E5E5E5] min-[426px]:shadow-lg">
-              {/* Mobile Header */}
-              <div className="flex w-full items-center justify-between border-b border-[#E5E5E5] px-4 py-3 min-[426px]:hidden">
-                <span className="text-lg font-semibold">
-                  {t?.rooms?.videoCall?.moreOptions || "More options"}
-                </span>
-                <button
-                  onClick={() => setShowMoreMenu(false)}
-                  className="rounded-full bg-gray-100 p-2 text-gray-600 hover:bg-gray-200"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto">
+    <>
+      <AnimatePresence>
+        {showMoreMenu && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setShowMoreMenu(false)}
+            />
+            <FluentAnimation
+              animationKey="more-menu"
+              direction="up"
+              distance={15}
+              exit={true}
+              duration={0.2}
+              className="absolute bottom-[110%] right-0 z-50 mb-2 w-56"
+            >
+              <div className="w-full overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
                 <AnimatePresence mode="wait" initial={false}>
                   {!showSubtitlePicker || isSubtitleActive || isAISession ? (
                     <FluentAnimation
@@ -112,36 +121,66 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                       duration={0.2}
                       className="w-full"
                     >
-                      <div className="flex flex-col py-2">
-                        <ListItem
+                      <div className="flex flex-col gap-1 p-1">
+                        <button
+                          onClick={() => {
+                            setShowMoreMenu(false);
+                            if (ongoingGame) {
+                              spectateGame();
+                            } else {
+                              if (!isHost) return;
+                              setShowGameSetup(true);
+                            }
+                          }}
+                          className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] ${(!isHost && !ongoingGame) ? "opacity-50 cursor-not-allowed" : ""}`}
+                          disabled={!isHost && !ongoingGame}
+                        >
+                          <Gamepad2 size={20} />
+                          {ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                              setShowMoreMenu(false);
+                              setShowGameHistory(true);
+                            }}
+                            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-slate-700`}
+                            style={{ textAlign: "left" }}
+                          >
+                            <History size={20} />
+                            {t.rooms?.game?.crackIt?.gameHistory || "Game History"}
+                          </button>
+
+                        <div className="border-t border-[#E5E5E5]"></div>
+                        <button
                           onClick={() => {
                             setShowParticipants(!showParticipants);
                             setShowMoreMenu(false);
                           }}
-                          leftContent={<Users />}
-                          hoverEffect={true}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                          style={{ textAlign: "left" }}
                         >
+                          <Users size={20} />
                           {t.rooms?.videoCall?.controls?.participants ||
                             "Participants"}
-                        </ListItem>
+                        </button>
 
                         {!isAISession && (isHost || isBreakoutActive) && (
-                          <ListItem
+                          <button
                             onClick={() => {
                               setShowBreakout(!showBreakout);
                               setShowMoreMenu(false);
                             }}
-                            leftContent={<Split />}
-                            hoverEffect={true}
-                            className="min-[769px]:hidden"
+                            className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] min-[769px]:hidden"
+                            style={{ textAlign: "left" }}
                           >
+                            <Split size={20} />
                             {t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
-                          </ListItem>
+                          </button>
                         )}
 
-                        <ListItem
+                        <button
                           onClick={() => {
-                            if (!isAISession && isStarting) return;
                             if (isAISession) {
                               setShowCC(!showCC);
                               setShowMoreMenu(false);
@@ -154,84 +193,82 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                               }
                             }
                           }}
-                          leftContent={
-                            !isAISession && isStarting ? (
-                              <Loader2 className="animate-spin" />
-                            ) : (
-                              <Captions />
-                            )
-                          }
-                          hoverEffect={!(!isAISession && isStarting)}
-                          className={`min-[426px]:hidden ${
-                            !isAISession && isStarting
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
+                          disabled={!isAISession && isStarting}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                         >
+                          {!isAISession && isStarting ? (
+                            <Loader2 size={20} className="animate-spin" />
+                          ) : (
+                            <Captions size={20} />
+                          )}
                           {(isAISession ? showCC : isSubtitleActive)
                             ? t?.rooms?.videoCall?.controls?.captionsOff ||
                               "Turn off captions"
                             : t?.rooms?.videoCall?.controls?.captionsOn ||
                               "Turn on captions"}
-                        </ListItem>
+                        </button>
 
-                        <ListItem
+                        <div className="border-t border-[#E5E5E5]"></div>
+                        <button
                           onClick={() => {
                             setShowVirtualBackground(!showVirtualBackground);
                             setShowMoreMenu(false);
                           }}
-                          leftContent={<Sparkles />}
+                          leftContent={<Users />}
                           hoverEffect={true}
                         >
+                          <Sparkles size={20} />
                           {t?.rooms?.videoCall?.backgroundsAndEffects ||
                             "Backgrounds and effects"}
-                        </ListItem>
+                        </button>
 
-                        <ListItem
+                        <button
                           onClick={() => {
                             setShowAvatarPicker(!showAvatarPicker);
                             setShowMoreMenu(false);
                           }}
-                          leftContent={<UserCircle />}
-                          hoverEffect={true}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                         >
+                          <UserCircle size={20} />
                           {t?.rooms?.videoCall?.changeAvatar ||
                             "Change meeting avatar"}
-                        </ListItem>
+                        </button>
 
                         {"documentPictureInPicture" in window && (
-                          <ListItem
+                          <button
                             onClick={() => {
                               enterPiP?.();
                               setShowMoreMenu(false);
                             }}
-                            leftContent={<MonitorUp />}
-                            hoverEffect={true}
+                            className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                           >
+                            <MonitorUp size={20} />
                             {t?.rooms?.videoCall?.pictureInPicture ||
                               "Picture-in-Picture"}
-                          </ListItem>
+                          </button>
                         )}
 
-                        <ListItem
+                        <button
                           onClick={handleCopyLink}
-                          leftContent={<Copy />}
-                          hoverEffect={true}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
                         >
+                          <Copy size={20} />
                           {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
-                        </ListItem>
+                        </button>
 
-                        <ListItem
+                        <button
                           onClick={() => {
                             setShowTroubleshoot(!showTroubleshoot);
                             setShowMoreMenu(false);
                           }}
-                          leftContent={<RefreshCcw />}
-                          hoverEffect={true}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-left"
                         >
-                          {t?.rooms?.videoCall?.reconnect ||
-                            "Troubleshoot connection"}
-                        </ListItem>
+                          <RefreshCcw size={20} className="shrink-0" />
+                          <span>
+                            {t?.rooms?.videoCall?.reconnect ||
+                              "Troubleshoot connection"}
+                          </span>
+                        </button>
                       </div>
                     </FluentAnimation>
                   ) : (
@@ -263,11 +300,23 @@ const ControlBarMoreMenu = ({ showMoreMenu, setShowMoreMenu }) => {
                   )}
                 </AnimatePresence>
               </div>
-            </div>
-          </FluentAnimation>
-        </>
-      )}
-    </AnimatePresence>
+            </FluentAnimation>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Game Setup Modal */}
+      <GameSetupModal
+        open={showGameSetup}
+        onClose={() => setShowGameSetup(false)}
+      />
+
+      <GameHistoryModal
+        open={showGameHistory}
+        onClose={() => setShowGameHistory(false)}
+        roomName={roomId}
+      />
+    </>
   );
 };
 

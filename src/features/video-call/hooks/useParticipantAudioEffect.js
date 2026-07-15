@@ -1,5 +1,43 @@
 import { useEffect, useRef } from "react"
 
+export const globalSounds = {
+  correct: new Audio("/sounds/correct.mp3"),
+  ticking: new Audio("/sounds/ticking.mp3"),
+  join: new Audio("/sounds/join.mp3"),
+  leave: new Audio("/sounds/leave.mp3"),
+};
+
+// Preload
+Object.values(globalSounds).forEach(audio => {
+  audio.preload = "auto";
+});
+
+let isUnlocked = false;
+const unlockAudio = () => {
+  if (isUnlocked) return;
+  isUnlocked = true;
+  Object.values(globalSounds).forEach(audio => {
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }).catch(() => {});
+  });
+  window.removeEventListener("touchstart", unlockAudio);
+  window.removeEventListener("click", unlockAudio);
+};
+
+if (typeof window !== "undefined") {
+  window.addEventListener("touchstart", unlockAudio);
+  window.addEventListener("click", unlockAudio);
+}
+
+export const playGlobalSound = (name) => {
+  const audio = globalSounds[name];
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }
+};
 export const useParticipantAudioEffect = (participants) => {
   const prevParticipantsRef = useRef(participants)
 
@@ -23,16 +61,10 @@ export const useParticipantAudioEffect = (participants) => {
 
     if (newlyJoined.length > 0) {
       // Play join audio
-      const audio = new Audio("/sounds/join.mp3")
-      audio.play().catch((err) => {
-        console.warn("Could not play join audio", err)
-      })
+      playGlobalSound("join")
     } else if (recentlyLeft.length > 0) {
       // Play leave audio
-      const audio = new Audio("/sounds/leave.mp3")
-      audio.play().catch((err) => {
-        console.warn("Could not play leave audio", err)
-      })
+      playGlobalSound("leave")
     }
 
     prevParticipantsRef.current = currentParticipants
