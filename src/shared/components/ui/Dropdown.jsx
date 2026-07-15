@@ -6,6 +6,8 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import MenuItem from "@/shared/components/ui/MenuItem"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const removeDiacritics = (str) => {
   if (!str) return ""
@@ -76,7 +78,7 @@ const Dropdown = ({
         setPortalCoords((prev) => {
           const newTop = rect.top + window.scrollY
           const newLeft = rect.left + window.scrollX
-          
+
           if (
             prev &&
             prev.top === newTop &&
@@ -104,7 +106,7 @@ const Dropdown = ({
     const handleScroll = (e) => {
       // Don't close if scrolling inside the dropdown portal itself
       if (portalRef.current && portalRef.current.contains(e.target)) return
-      
+
       // Update coords instead of closing, keeps it attached when scrolling
       updateCoords()
     }
@@ -166,58 +168,35 @@ const Dropdown = ({
   const selectedOption = options.find((opt) => opt.value === value) || null
 
   const defaultTrigger = (
-    <button
+    <PillButton
       type="button"
       onClick={() => !disabled && setIsOpen(!isOpen)}
       disabled={disabled}
-      className={`flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white text-base ${
-        disabled
-          ? "opacity-50 cursor-not-allowed bg-gray-100"
-          : "hover:bg-[#f0f0f0]"
-      } ${triggerClassName}`}
+      variant="secondary"
+      startIcon={selectedOption?.icon}
+      endIcon={
+        <ChevronDown
+          className={`shrink-0 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      }
+      className={`w-full ${triggerClassName}`}
     >
-      <span className="truncate mr-2">
-        {selectedOption ? selectedOption.label : placeholder}
-      </span>
-      <ChevronDown
-        size={16}
-        className={`shrink-0 text-gray-500 transition-transform duration-200 ${
-          isOpen ? "rotate-180" : ""
-        }`}
-      />
-    </button>
+      {selectedOption ? selectedOption.label : placeholder}
+    </PillButton>
   )
 
   const defaultRenderOption = (option, isSelected) => {
-    const textColor = isSelected ? option.color || activeColor : "inherit"
     return (
-      <div
-        className={`w-full min-h-[48px] py-2 px-4 text-left text-base rounded-md flex items-center gap-3 ${
-          isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
-        }`}
-        style={isSelected ? { color: textColor } : {}}
-      >
-        {option.icon && (
-          <div
-            className="shrink-0"
-            style={isSelected ? { color: textColor } : { color: "#6B7280" }}
-          >
-            {option.icon}
-          </div>
-        )}
-        <div className="flex flex-col min-w-0 flex-1">
-          <span className="whitespace-normal break-words leading-tight">
-            {option.label}
-          </span>
-          {option.subtitle && (
-            <span
-              className={`text-xs font-normal whitespace-normal break-words mt-0.5 ${isSelected ? "" : "text-gray-500"}`}
-            >
-              {option.subtitle}
-            </span>
-          )}
-        </div>
-      </div>
+      <MenuItem
+        isSelected={isSelected}
+        activeColor={option.color || activeColor}
+        icon={option.icon}
+        label={option.label}
+        rightText={option.rightText}
+        rightContent={option.rightContent}
+      />
     )
   }
 
@@ -264,7 +243,7 @@ const Dropdown = ({
                   <FluentAnimation
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
-                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-4 origin-bottom" : "top-full mt-4"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-2xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-2 origin-bottom" : "top-full mt-2"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
                   >
                     {enableSearch && (
                       <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-gray-100">
@@ -284,36 +263,42 @@ const Dropdown = ({
                         </div>
                       </div>
                     )}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
-                      <div className="flex flex-col gap-1 p-1">
-                        {filteredOptions.length > 0 ? (
-                          filteredOptions.map((option, idx) => {
-                            const isSelected = option.value === value
-                            return (
-                              <button
-                                key={
-                                  option.key ||
-                                  option.code ||
-                                  (option.value
-                                    ? `${option.value}-${idx}`
-                                    : idx)
-                                }
-                                type="button"
-                                onClick={() => handleSelect(option)}
-                                className="w-full focus:outline-none"
-                              >
-                                {renderOption
-                                  ? renderOption(option, isSelected)
-                                  : defaultRenderOption(option, isSelected)}
-                              </button>
-                            )
-                          })
-                        ) : (
-                          <div className="px-3 py-4 text-sm text-center text-gray-500">
-                            {t?.noOptionsFound || "No options found"}
-                          </div>
-                        )}
-                      </div>
+                    <div className="flex-1 py-[2px] overflow-y-auto overflow-x-hidden">
+                      {filteredOptions.length > 0 ? (
+                        filteredOptions.map((option, idx) => {
+                          const isSelected = option.value === value
+                          const optionKey =
+                            option.key ||
+                            option.code ||
+                            (option.value ? `${option.value}-${idx}` : idx)
+
+                          return renderOption ? (
+                            <button
+                              key={optionKey}
+                              type="button"
+                              onClick={() => handleSelect(option)}
+                              className="group w-full flex items-center focus:outline-none px-1 h-12"
+                            >
+                              {renderOption(option, isSelected)}
+                            </button>
+                          ) : (
+                            <MenuItem
+                              key={optionKey}
+                              onClick={() => handleSelect(option)}
+                              isSelected={isSelected}
+                              activeColor={option.color || activeColor}
+                              icon={option.icon}
+                              label={option.label}
+                              rightText={option.rightText}
+                              rightContent={option.rightContent}
+                            />
+                          )
+                        })
+                      ) : (
+                        <div className="px-3 py-4 text-sm text-center text-gray-500">
+                          {t?.noOptionsFound || "No options found"}
+                        </div>
+                      )}
                     </div>
                   </FluentAnimation>
                 </div>

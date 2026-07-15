@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { MoreHorizontal, User, Check, X } from "lucide-react"
+import { MoreHorizontal, User, UserCheck, UserX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import toast from "react-hot-toast"
 import {
@@ -22,6 +22,7 @@ import {
 } from "@/shared/components/ui/indicators"
 import Popover from "@/shared/components/ui/Popover"
 import { PillButton, IconButton } from "@/shared/components/ui/buttons"
+import MenuItem from "@/shared/components/ui/MenuItem"
 
 const ProfileFriendsTab = ({
   targetAccountId,
@@ -50,6 +51,18 @@ const ProfileFriendsTab = ({
     isFetching: fetchingRecs,
   } = useGetFriendRecommendationsQuery(limit)
   const [respondFriendRequest] = useRespondFriendRequestMutation()
+
+  const handleRespondRequest = (friendshipId, action, closePopover) => {
+    closePopover()
+    respondFriendRequest({ friendshipId, action })
+      .unwrap()
+      .then(() => {
+        toast.success(
+          action === "accept" ? "Đã chấp nhận kết bạn!" : "Đã từ chối kết bạn",
+        )
+      })
+      .catch(() => toast.error("Có lỗi xảy ra"))
+  }
 
   const getArray = (res) => (Array.isArray(res) ? res : res?.data || [])
 
@@ -176,43 +189,32 @@ const ProfileFriendsTab = ({
                       </IconButton>
                     }
                     content={(close) => (
-                      <div className="bg-white border border-gray-100 rounded-xl shadow-lg p-1.5 min-w-[140px] flex flex-col gap-1 border-slate-200/60 backdrop-blur-md">
-                        <button
+                      <div className="bg-white border border-[#e5e5e5] rounded-xl shadow-lg py-[2px] min-w-[140px] flex flex-col">
+                        <MenuItem
                           onClick={(e) => {
                             e.stopPropagation()
-                            close()
-                            respondFriendRequest({
-                              friendshipId: user.friendshipId,
-                              action: "accept",
-                            })
-                              .unwrap()
-                              .then(() =>
-                                toast.success("Đã chấp nhận kết bạn!"),
-                              )
-                              .catch(() => toast.error("Có lỗi xảy ra"))
+                            handleRespondRequest(
+                              user.friendshipId,
+                              "accept",
+                              close,
+                            )
                           }}
-                          className="w-full flex items-center justify-start gap-2 px-3 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                        >
-                          <Check size={16} />
-                          Chấp nhận
-                        </button>
-                        <button
+                          icon={<UserCheck />}
+                          label="Chấp nhận"
+                        />
+                        <MenuItem
                           onClick={(e) => {
                             e.stopPropagation()
-                            close()
-                            respondFriendRequest({
-                              friendshipId: user.friendshipId,
-                              action: "decline",
-                            })
-                              .unwrap()
-                              .then(() => toast.success("Đã từ chối kết bạn"))
-                              .catch(() => toast.error("Có lỗi xảy ra"))
+                            handleRespondRequest(
+                              user.friendshipId,
+                              "decline",
+                              close,
+                            )
                           }}
-                          className="w-full flex items-center justify-start gap-2 px-3 py-2 text-sm font-semibold text-[#990011] hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <X size={16} />
-                          Từ chối
-                        </button>
+                          icon={<UserX />}
+                          label="Từ chối"
+                          className="text-red-600"
+                        />
                       </div>
                     )}
                   />
