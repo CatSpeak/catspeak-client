@@ -7,7 +7,7 @@ const Checkbox = ({ checked, onChange, id, className = "" }) => {
       id={id}
       checked={checked}
       onChange={onChange}
-      className={`h-4 w-4 cursor-pointer rounded border-gray-300 text-[#B91264] accent-[#B91264] focus:ring-[#B91264] ${className}`}
+      className={`h-4 w-4 cursor-pointer rounded border-gray-300 text-cath-red-700 accent-cath-red-700 focus:ring-cath-red-700 ${className}`}
     />
   )
 }

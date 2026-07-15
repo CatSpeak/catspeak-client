@@ -42,6 +42,8 @@ const InstructorStatusBanner = ({
   banUntil,
   editRequestNote,
   t,
+  onReapply,
+  isReapplying,
 }) => {
   const ins = t.profile?.instructor || {};
   const config = STATUS_CONFIG[status];
@@ -109,6 +111,16 @@ const InstructorStatusBanner = ({
               {ins.bannedUntil}:{" "}
               <span className="font-semibold">{formatDate(banUntil)}</span>
             </p>
+          )}
+          {(!banUntil || new Date(banUntil) <= new Date()) && onReapply && !isReapplying && (
+            <div className="pt-2">
+              <button
+                onClick={onReapply}
+                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+              >
+                {ins.resubmit || "Gửi lại đơn"}
+              </button>
+            </div>
           )}
         </div>
       )}
