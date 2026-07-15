@@ -74,8 +74,10 @@ const CalendarPage = () => {
   const eventCountsByDay = useMemo(() => {
     if (!eventCountsData?.counts) return {};
     return eventCountsData.counts.reduce((acc, item) => {
-      // Parse as local date string (YYYY-MM-DD) to avoid UTC offset shifting the day
-      const day = dayjs(item.date.slice(0, 10)).date();
+      // Parse full ISO string (dayjs converts to local time automatically)
+      // Using .slice(0,10) is wrong when API returns UTC timestamps like
+      // "2026-07-15T17:00:00Z" which is actually 2026-07-16 00:00 in UTC+7
+      const day = dayjs(item.date).date();
       acc[day] = (acc[day] ?? 0) + item.totalEvents;
       return acc;
     }, {});
