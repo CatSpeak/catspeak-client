@@ -191,7 +191,7 @@ const CalendarPage = () => {
           </div>
 
           {/* RIGHT: Day Schedule */}
-          <div className="order-2 lg:order-none flex flex-col min-h-[500px]">
+          <div className="order-2 lg:order-none flex flex-col">
             <DaySchedule
               selectedDate={selectedDate}
               currentDate={currentDate}
