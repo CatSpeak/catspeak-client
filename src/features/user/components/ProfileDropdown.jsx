@@ -4,7 +4,7 @@ import useClickOutside from "@/shared/hooks/useClickOutside"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
-import { Settings, LogOut, Loader2, User, ArrowLeft, CreditCard } from "lucide-react"
+import { Settings, LogOut, Loader2, User, ArrowLeft, CreditCard, GraduationCap } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { AnimatePresence, motion } from "framer-motion"
@@ -77,10 +77,15 @@ const ProfileDropdown = () => {
     navigate("/setting")
   }
 
-  // const handleBillingClick = () => {
-  //   handleCloseMenu()
-  //   navigate("/billing")
-  // }
+  const handleInstructorClick = () => {
+    handleCloseMenu()
+    navigate("/instructor")
+  }
+
+  const handleBillingClick = () => {
+    handleCloseMenu()
+    navigate("/billing")
+  }
 
   // Click outside to close (desktop only)
   useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile })
@@ -143,10 +148,16 @@ const ProfileDropdown = () => {
           <Settings size={20} />
           <span>{t.header.settings || "Settings"}</span>
         </button>
-        {/* <button onClick={handleBillingClick} className={menuItemClass}>
+
+        <button onClick={handleInstructorClick} className={menuItemClass}>
+          <GraduationCap size={20} />
+          <span>{t.profile?.sidebar?.instructor || "Giảng viên"}</span>
+        </button>
+
+        <button onClick={handleBillingClick} className={menuItemClass}>
           <CreditCard size={20} />
-          <span>{t.billing?.billingHistory || "Billing History"}</span>
-        </button> */}
+          <span>{t.profile?.sidebar?.billing || "Thanh toán"}</span>
+        </button>
         <button onClick={handleLogout} className={menuItemClass}>
           <LogOut size={20} />
           <span>{t.header.logout}</span>
