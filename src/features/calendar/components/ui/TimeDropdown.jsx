@@ -123,7 +123,7 @@ const TimeDropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`hover:bg-[#f0f0f0] flex items-center justify-center rounded-2xl px-4 h-12 outline-none bg-white min-w-[90px] transition-all border ${
+        className={`hover:bg-[#f0f0f0] flex items-center justify-center rounded-md px-4 h-12 outline-none bg-white min-w-[90px] transition-all border ${
           isOpen ? "border-2" : "border-[#e5e5e5]"
         }`}
         style={isOpen ? { borderColor: color } : {}}

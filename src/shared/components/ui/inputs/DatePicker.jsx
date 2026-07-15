@@ -155,7 +155,7 @@ const DatePicker = ({
           if (!disabled) setIsOpen(!isOpen);
         }}
         disabled={disabled}
-        className={`hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-2xl whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
+        className={`hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-md whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
       >
         <span className={!date ? "text-[#7A7574] font-normal" : ""}>
           {date ? formatVietnameseDate(date) : "Chọn ngày"}
@@ -185,14 +185,14 @@ const DatePicker = ({
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto bg-white border border-[#E5E5E5] rounded-2xl shadow-lg p-4 flex flex-col"
+                      className="pointer-events-auto bg-white border border-[#E5E5E5] rounded-md shadow-lg p-4 flex flex-col"
                     >
                       {/* Header with Month Selection and Chevrons */}
                       <div className="flex items-center justify-between mb-4">
                         <button
                           type="button"
                           onClick={handlePreviousMonth}
-                          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
                         >
                           <ChevronLeft size={18} className="text-gray-600" />
                         </button>
@@ -202,7 +202,7 @@ const DatePicker = ({
                         <button
                           type="button"
                           onClick={handleNextMonth}
-                          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
                         >
                           <ChevronRight size={18} className="text-gray-600" />
                         </button>
@@ -246,7 +246,7 @@ const DatePicker = ({
                               key={item.key}
                               onClick={() => handleSelectDate(item.day)}
                               className={`
-                          w-8 h-8 flex items-center justify-center text-[13px] rounded-full mx-auto transition-colors font-medium
+                          w-8 h-8 flex items-center justify-center text-[13px] rounded-md mx-auto transition-colors font-medium
                           ${isSelected ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}
                         `}
                               style={{
