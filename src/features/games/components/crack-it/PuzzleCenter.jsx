@@ -58,6 +58,7 @@ const PuzzleCenter = () => {
      const delayPerChar = 60000 / (nonSpaceIndices.length + 1);
      const startedAtTime = new Date(currentRound.started_at).getTime();
 
+     let interval;
      const updateMask = () => {
        const elapsedMs = Math.max(0, Date.now() - startedAtTime);
        const stepsElapsed = Math.min(
@@ -73,14 +74,16 @@ const PuzzleCenter = () => {
        setDisplayMask(currentMaskArr.join(""));
 
        if (stepsElapsed >= nonSpaceIndices.length) {
-         clearInterval(interval);
+         if (interval) clearInterval(interval);
        }
      };
 
      updateMask(); // Initial update
-     const interval = setInterval(updateMask, 200); // check 5 times a second
+     interval = setInterval(updateMask, 200); // check 5 times a second
 
-     return () => clearInterval(interval);
+     return () => {
+       if (interval) clearInterval(interval);
+     };
    }, [puzzle, currentRound?.started_at]);
 
   if (!puzzle) return null
