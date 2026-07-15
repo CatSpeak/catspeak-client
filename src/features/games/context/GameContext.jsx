@@ -557,6 +557,10 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       resetGameStates();
     },
     GAME_ALREADY_STARTED: (payload) => {
+      // Clean up ghost spectator state on backend if we just reconnected
+      if (connection && roomId) {
+        connection.send("PlayerLeaveGame", roomId);
+      }
       setOngoingGame(true);
       setOngoingGameType(payload.game_type);
     },
