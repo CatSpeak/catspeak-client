@@ -197,11 +197,7 @@ const EventDetailsSection = ({
               />
               <span className="text-[#606060] mt-[10px]">{cal.guest}</span>
             </div>
-            {errors.maxParticipants && (
-              <span className="text-red-500 text-xs mt-1">
-                {errors.maxParticipants}
-              </span>
-            )}
+
           </div>
         </div>
       </div>
