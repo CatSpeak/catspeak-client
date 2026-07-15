@@ -27,7 +27,7 @@ export const navLinks = [
     subItems: [
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       // { key: "worldNews", path: "/cat-speak/discover" },
-      { key: "reels", path: " ", icon: Film },
+      { key: "reels", path: "/cat-speak/reels", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
