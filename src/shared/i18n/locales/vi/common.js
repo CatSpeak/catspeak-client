@@ -39,6 +39,7 @@ export default {
     reels: "Reels",
     video: "Video",
     calendar: "Lịch",
+    events: "Sự kiện",
     cart: "Giỏ hàng",
     courses: "Khóa học",
     allCourses: "Các khóa học",

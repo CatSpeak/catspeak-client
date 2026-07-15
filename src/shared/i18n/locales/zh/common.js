@@ -24,7 +24,7 @@ export default {
       vi: "越南语",
       zh: "中文",
       en: "英语",
-    }
+    },
   },
   pagination: {
     range: "{{start}}-{{end}} 共 {{total}}",
@@ -39,6 +39,7 @@ export default {
     reels: "短视频",
     video: "视频",
     calendar: "日历",
+    events: "活动",
     cart: "购物车",
     courses: "课程",
     allCourses: "所有课程",
@@ -59,4 +60,4 @@ export default {
     thankYou: "感谢您的耐心等待！^^",
   },
   noOptionsFound: "未找到选项",
-}
+};
