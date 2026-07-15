@@ -103,6 +103,7 @@ export const eventsApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
+      invalidatesTags: ["Events"],
     }),
 
     // PUT /api/v1/Events/{eventId}/occurrences/{occurrenceId}
@@ -152,6 +153,12 @@ export const eventsApi = baseApi.injectEndpoints({
         url: "/v1/Events/counts",
         params,
       }),
+      providesTags: ["Events"],
+    }),
+
+    // GET /api/v1/Events/drafts
+    getEventDrafts: builder.query({
+      query: () => "/v1/Events/drafts",
       providesTags: ["Events"],
     }),
 
@@ -259,6 +266,7 @@ export const {
   useDeleteEventMutation,
   useCreateEventMutation,
   useUpdateEventOccurrenceMutation,
+  useGetEventDraftsQuery,
   useGetEventCountsQuery,
   useGetEventsByDateQuery,
   useGetRegisteredEventsQuery,

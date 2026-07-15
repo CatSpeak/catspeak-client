@@ -6,6 +6,14 @@ import {
   GraduationCap,
   Settings,
   HelpCircle,
+  Briefcase,
+  User,
+  CreditCard,
+  Newspaper,
+  Video,
+  Calendar,
+  Mic,
+  Film,
 } from "lucide-react";
 
 export const navLinks = [
@@ -15,19 +23,36 @@ export const navLinks = [
     hasDropdown: true,
     icon: LayoutDashboard,
     subItems: [
-      { key: "catSpeakNews", path: "/cat-speak/news" },
+      { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       // { key: "worldNews", path: "/cat-speak/discover" },
-      { key: "reels", path: "/cat-speak/reels" },
+      { key: "reels", path: " ", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
-      { key: "calendar", path: "/cat-speak/calendar" },
+      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
   {
     key: "workspace",
-    path: "/workspace",
-    hasDropdown: false,
-    hideInSidebar: true,
+    hasDropdown: true,
+    icon: Briefcase,
+    subItems: [
+      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "recordings", path: "/workspace/recordings", icon: Mic },
+      { key: "reels", path: "/workspace/reels", icon: Film },
+      { key: "events", path: "/workspace/events", icon: Calendar },
+    ],
   },
+  {
+    key: "profile",
+    path: "/profile",
+    hasDropdown: false,
+    icon: User,
+  },
+  // {
+  //   key: "pricing",
+  //   path: "/pricing",
+  //   hasDropdown: false,
+  //   icon: CreditCard,
+  // },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
   // { key: "messages", path: "/messages", icon: MessageCircle },
   // {

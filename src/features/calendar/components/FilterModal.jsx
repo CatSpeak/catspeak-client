@@ -80,10 +80,10 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
       open={open}
       onClose={onClose}
       showCloseButton={false}
-      className="flex flex-col p-0 !max-w-[560px] w-full bg-white rounded-2xl overflow-hidden"
-      bodyClassName="flex-1 flex flex-col"
+      className="flex flex-col p-0 w-[92vw] max-w-[560px] max-h-[85vh] bg-white rounded-[32px] lg:rounded-2xl overflow-hidden shadow-2xl mx-auto my-auto"
+      bodyClassName="flex-1 flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden"
     >
-      <div className="flex flex-col p-8 gap-7">
+      <div className="flex flex-col p-6 lg:p-8 gap-7 shrink-0">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-black">

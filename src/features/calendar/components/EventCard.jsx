@@ -18,9 +18,9 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
   const { t } = useLanguage();
 
   const startTime = event.startTime
-    ? dayjs(event.startTime).format("HH:mm")
+    ? dayjs(event.startTime).format("HH:mm (DD/MM/YYYY)")
     : "";
-  const endTime = event.endTime ? dayjs(event.endTime).format("HH:mm") : "";
+  const endTime = event.endTime ? dayjs(event.endTime).format("HH:mm (DD/MM/YYYY)") : "";
   const timeStr =
     startTime && endTime ? `${startTime} - ${endTime}` : startTime;
 
@@ -61,7 +61,7 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
         </div>
 
         {/* Info */}
-        <div className="flex flex-col flex-1 min-w-0 gap-1">
+        <div className="flex flex-col flex-1 min-w-0 gap-2">
           <span className="text-[15px] font-semibold text-black truncate leading-tight">
             {event.title || t.calendar?.event || "Sự kiện"}
           </span>

@@ -10,6 +10,7 @@ import CalendarPageHeader from "../components/CalendarPageHeader";
 import CalendarFilterChips from "../components/CalendarFilterChips";
 import CalendarMonthPanel from "../components/CalendarMonthPanel.jsx";
 import EventDetailModal from "../components/EventDetailModal/index";
+import MapView from "../components/Mapview";
 import { HeaderImage } from "../assets";
 
 const CalendarPage = () => {
@@ -24,7 +25,7 @@ const CalendarPage = () => {
   const tokenFromUrl = searchParams.get("token");
 
   const [currentDate, setCurrentDate] = useState(dayjs());
-  const [selectedDate, setSelectedDate] = useState(dayjs().date());
+  const [selectedDate, setSelectedDate] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState({});
   const [viewType, setViewType] = useState("month");
@@ -140,11 +141,11 @@ const CalendarPage = () => {
   const localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
 
   return (
-    <div className="w-full flex flex-col gap-4  overflow-hidden">
-      <div className="px-6">
+    <div className="w-full flex flex-col gap-4 overflow-hidden bg-[#F3F3F3] min-h-screen">
+      <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
-      <div className="relative w-full overflow-hidden aspect-[16/5]">
+      <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
         <img
           src={HeaderImage}
           alt="Calendar Banner"
@@ -155,34 +156,42 @@ const CalendarPage = () => {
       <div className="px-6 pt-5 pb-8">
         <CalendarPageHeader
           title={cal.schedule || "Thời gian biểu"}
-          createLabel={cal.createEvent || "Tạo sự kiện"}
           onOpenFilters={() => setIsFilterOpen(true)}
-          onCreate={() => navigate(`${basePath}/create`)}
         />
 
         {/* Active filter chips */}
         <CalendarFilterChips chips={filterChips} onRemove={removeFilter} />
 
         {/* Calendar + Schedule grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
-          <CalendarMonthPanel
-            currentDate={currentDate}
-            selectedDate={selectedDate}
-            eventCountsByDay={eventCountsByDay}
-            localizedMonth={localizedMonth}
-            todayLegend={cal.todayLegend || "Ngày hôm nay"}
-            selectedDayLegend={cal.selectedDayLegend || "Ngày được chọn"}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            onSelectDate={setSelectedDate}
-            viewType={viewType}
-            onChangeView={setViewType}
-            dayEvents={dayEvents}
-            selectedEvent={selectedEvent}
-          />
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 mt-10 lg:items-start">
+          {/* LEFT: Calendar & Map */}
+          <div className="contents lg:flex lg:flex-col lg:gap-6">
+            <div className="order-1 lg:order-none">
+              <CalendarMonthPanel
+                currentDate={currentDate}
+                selectedDate={selectedDate}
+                eventCountsByDay={eventCountsByDay}
+                localizedMonth={localizedMonth}
+                todayLegend={cal.todayLegend || "Ngày hôm nay"}
+                selectedDayLegend={cal.selectedDayLegend || "Ngày được chọn"}
+                onPrevMonth={handlePrevMonth}
+                onNextMonth={handleNextMonth}
+                onSelectDate={(d) => {
+                  setSelectedDate(d);
+                  setSelectedEvent(null);
+                }}
+                viewType={viewType}
+                onChangeView={setViewType}
+              />
+            </div>
+            {/* Desktop only Map, or both, but Image shows it below the calendar */}
+            <div className="order-3 lg:order-none relative z-0 rounded-3xl overflow-hidden bg-white p-3 shadow-sm w-full h-full">
+              <MapView dayEvents={dayEvents} selectedEvent={selectedEvent} />
+            </div>
+          </div>
 
           {/* RIGHT: Day Schedule */}
-          <div className="flex flex-col min-h-[500px]">
+          <div className="order-2 lg:order-none flex flex-col min-h-[500px]">
             <DaySchedule
               selectedDate={selectedDate}
               currentDate={currentDate}
@@ -190,6 +199,11 @@ const CalendarPage = () => {
               selectedEvent={selectedEvent}
               onEventSelect={setSelectedEvent}
               onEventsUpdate={setDayEvents}
+              eventCountsByDay={eventCountsByDay}
+              onSelectDate={(d) => {
+                setSelectedDate(d);
+                setSelectedEvent(null);
+              }}
             />
           </div>
         </div>

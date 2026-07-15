@@ -35,6 +35,7 @@ export const mapFormToPayload = ({
   originalStartTime,
   originalEndTime,
   ticketPrice,
+  isDraft,
 }) => {
   /** Split "cond1, cond2" → [{ conditionType:'', category:'', title:'cond1', description:'' }, …] */
   const conditions = (conditionsInput || "")
@@ -80,6 +81,7 @@ export const mapFormToPayload = ({
     originalEndTime: toUtcInTimezone(originalEndTime || endTime),
     conditions,
     ticketPrice: ticketPrice != null ? Number(ticketPrice) : null,
+    isDraft: !!isDraft,
   };
 
   if (isRecurring && frequency) {
