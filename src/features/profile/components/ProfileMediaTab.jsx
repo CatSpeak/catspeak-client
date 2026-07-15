@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
 import { Image as ImageIcon, X, ZoomIn, ZoomOut, Play } from "lucide-react"
 import { useGetUserWallMediaQuery } from "../api/profilePostsApi"
+import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
+import { IconButton } from "@/shared/components/ui/buttons"
+import FluentCard from "@/shared/components/ui/FluentCard"
 
 const useColumnCount = () => {
   const [cols, setCols] = useState(3)
@@ -111,30 +114,39 @@ const ProfileMediaTab = ({ targetAccountId }) => {
   }
 
   return (
-    <div className="w-full pb-20">
+    <div className="w-full">
       <div className="w-full min-h-[500px]">
         {/* Masonry Media Grid */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin"></div>
+          <div className="flex flex-row w-full gap-3 items-start">
+            {Array.from({ length: columnsCount }).map((_, colIndex) => (
+              <div key={colIndex} className="flex flex-col flex-1 gap-3">
+                {[220, 320, 260].map((height, i) => (
+                  <Skeleton
+                    key={i}
+                    className="w-full rounded-xl"
+                    style={{ height: `${height}px` }}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
         ) : medias.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-            <ImageIcon className="w-16 h-16 mb-4 text-gray-200" />
-            <p className="font-medium text-gray-500">Chưa có phương tiện nào</p>
-          </div>
+          <FluentCard>
+            <EmptyState message="Chưa có phương tiện nào" icon={ImageIcon} />
+          </FluentCard>
         ) : (
-          <div className="flex flex-row w-full gap-4 items-start">
+          <div className="flex flex-row w-full gap-3 items-start">
             {columns.map((col, colIndex) => (
               <div
                 key={colIndex}
-                className="flex flex-col flex-1 gap-4 min-w-0"
+                className="flex flex-col flex-1 gap-3 min-w-0"
               >
                 {col.map((media) => (
                   <div
                     key={media.postMediaId}
                     onClick={() => setFullscreenMedia(media)}
-                    className="relative group cursor-pointer rounded-xl overflow-hidden bg-gray-100 border border-gray-100"
+                    className="relative group cursor-pointer rounded-xl overflow-hidden bg-gray-100 border border-[#e5e5e5]"
                   >
                     {media.mediaType === "Image" ? (
                       <img
@@ -177,42 +189,42 @@ const ProfileMediaTab = ({ targetAccountId }) => {
             }}
           >
             {/* Controls */}
-            <div className="absolute top-4 right-4 flex items-center gap-3 z-50">
+            <div className="absolute top-4 right-4 flex items-center z-50">
               {fullscreenMedia.mediaType === "Image" && (
                 <>
-                  <button
+                  <IconButton
                     onClick={(e) => {
                       e.stopPropagation()
                       setScale((s) => Math.max(s - 0.5, 0.5))
                     }}
-                    className="p-2 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all"
                     title="Zoom Out"
+                    variant="overlay"
                   >
-                    <ZoomOut className="w-5 h-5" />
-                  </button>
-                  <button
+                    <ZoomOut />
+                  </IconButton>
+                  <IconButton
                     onClick={(e) => {
                       e.stopPropagation()
                       setScale((s) => Math.min(s + 0.5, 5))
                     }}
-                    className="p-2 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all"
                     title="Zoom In"
+                    variant="overlay"
                   >
-                    <ZoomIn className="w-5 h-5" />
-                  </button>
+                    <ZoomIn />
+                  </IconButton>
                 </>
               )}
-              <button
+              <IconButton
                 onClick={(e) => {
                   e.stopPropagation()
                   setFullscreenMedia(null)
                   resetZoom()
                 }}
-                className="p-2 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all ml-2"
                 title="Close"
+                variant="overlay"
               >
-                <X className="w-6 h-6" />
-              </button>
+                <X />
+              </IconButton>
             </div>
 
             {fullscreenMedia.mediaType === "Image" ? (

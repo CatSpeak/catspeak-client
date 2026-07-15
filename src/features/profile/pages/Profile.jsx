@@ -15,14 +15,13 @@ import {
 } from "../api/friendshipApi"
 
 import SocialProfileHeader from "../components/SocialProfileHeader"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
 import ProfileHomeTab from "../components/ProfileHomeTab"
 import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileDocumentsTab from "../components/ProfileDocumentsTab"
-import BasicInfoSection from "../../user/components/BasicInfoSection"
-import AccountPrivacySection from "../../user/components/AccountPrivacySection"
 import PageTitle from "@/shared/components/ui/PageTitle"
-import FluentCard from "@/shared/components/ui/FluentCard"
+import ProfileAboutTab from "../components/ProfileAboutTab"
 import ProfileOtpModal from "../../user/components/ProfileOtpModal"
 import { countries } from "@/shared/constants/countriesData"
 
@@ -44,9 +43,7 @@ const Profile = () => {
   const { data: publicProfileResponse, isLoading: loadingPublic } =
     useGetPublicProfileQuery(targetAccountId, { skip: isOwnProfile })
 
-  const profileData = isOwnProfile
-    ? privateProfileData
-    : publicProfileResponse?.data
+  const profileData = isOwnProfile ? privateProfileData : publicProfileResponse
   const isLoading = isOwnProfile ? loadingPrivate : loadingPublic
 
   // Fetch Friendship Data
@@ -118,47 +115,31 @@ const Profile = () => {
   ]
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] bg-[#F5F6F8]">
-      <div className="w-full max-w-[1200px] mx-auto flex flex-col pt-6 relative z-10 px-4 md:px-0">
+    <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-[#f5f6f7]">
+      <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Top Header Section */}
         <SocialProfileHeader
-          user={isOwnProfile ? user : profileData}
-          formData={isOwnProfile ? formData : profileData}
+          user={profileData?.data}
+          formData={isOwnProfile ? formData : profileData?.data}
           t={t}
           targetAccountId={targetAccountId}
           isOwnProfile={isOwnProfile}
+          onEditClick={() => {
+            setActiveTab("about")
+          }}
         />
 
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200 mb-6 flex gap-8 overflow-x-auto hide-scrollbar px-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`pb-4 text-[15px] font-semibold whitespace-nowrap border-b-[3px] transition-colors flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? "border-[#990011] text-[#990011]"
-                  : "border-transparent text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              {tab.label}
-              {tab.badge && (
-                <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                    activeTab === tab.id
-                      ? "bg-[#990011] text-white"
-                      : "bg-[#F0F0F0] text-gray-700"
-                  }`}
-                >
-                  {tab.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          fullWidth={false}
+          className="overflow-x-auto scrollbar-hidden mb-6"
+        />
 
         {/* Tab Content */}
-        <div className="w-full mt-6">
+        <div className="w-full">
           {activeTab === "home" && (
             <ProfileHomeTab
               targetAccountId={targetAccountId}
@@ -170,9 +151,9 @@ const Profile = () => {
             />
           )}
           {activeTab === "media" && (
-            <ProfileMediaTab 
-              targetAccountId={targetAccountId} 
-              isOwnProfile={isOwnProfile} 
+            <ProfileMediaTab
+              targetAccountId={targetAccountId}
+              isOwnProfile={isOwnProfile}
             />
           )}
           {activeTab === "friends" && (
@@ -184,52 +165,24 @@ const Profile = () => {
           )}
 
           {activeTab === "about" && (
-            <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto pb-20">
-              <div className="flex flex-col gap-3">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {t.profile?.personalInfo?.title || "Personal Information"}
-                </h2>
-                <FluentCard variant="glass" className="flex flex-col gap-6">
-                  <BasicInfoSection
-                    formData={formData}
-                    editingField={editingField}
-                    isUpdating={isUpdating}
-                    onEdit={handleEdit}
-                    onCancel={handleCancel}
-                    onSave={handleSave}
-                    onChange={handleChange}
-                    onCountryChange={handleCountryChange}
-                    t={t}
-                  />
-                </FluentCard>
-              </div>
-
-              <div className="flex flex-col gap-3 mt-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {t.profile?.personalInfo?.accountAndPrivacy ||
-                    "Account and Privacy"}
-                </h2>
-                <FluentCard variant="glass" className="flex flex-col gap-6">
-                  <AccountPrivacySection
-                    formData={formData}
-                    editingField={editingField}
-                    isUpdating={isUpdating}
-                    onEdit={handleEdit}
-                    onCancel={handleCancel}
-                    onSave={handleSave}
-                    onChange={handleChange}
-                    t={t}
-                    errors={errors}
-                  />
-                </FluentCard>
-              </div>
-            </div>
+            <ProfileAboutTab
+              formData={formData}
+              editingField={editingField}
+              isUpdating={isUpdating}
+              handleEdit={handleEdit}
+              handleCancel={handleCancel}
+              handleSave={handleSave}
+              handleChange={handleChange}
+              handleCountryChange={handleCountryChange}
+              t={t}
+              errors={errors}
+            />
           )}
 
           {activeTab === "documents" && (
-            <ProfileDocumentsTab 
-              targetAccountId={targetAccountId} 
-              isOwnProfile={isOwnProfile} 
+            <ProfileDocumentsTab
+              targetAccountId={targetAccountId}
+              isOwnProfile={isOwnProfile}
             />
           )}
         </div>

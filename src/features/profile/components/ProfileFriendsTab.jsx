@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Search, MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, User, Check, X } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import toast from "react-hot-toast"
 import {
@@ -11,8 +11,23 @@ import {
   useRespondFriendRequestMutation,
 } from "../api/friendshipApi"
 import { useNavigate } from "react-router-dom"
+import FluentCard from "@/shared/components/ui/FluentCard"
+import HorizontalCard from "@/shared/components/ui/HorizontalCard"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import {
+  LoadingSpinner,
+  Skeleton,
+  EmptyState,
+} from "@/shared/components/ui/indicators"
+import Popover from "@/shared/components/ui/Popover"
+import { PillButton, IconButton } from "@/shared/components/ui/buttons"
 
-const ProfileFriendsTab = ({ targetAccountId, isOwnProfile, defaultSubTab }) => {
+const ProfileFriendsTab = ({
+  targetAccountId,
+  isOwnProfile,
+  defaultSubTab,
+}) => {
   const navigate = useNavigate()
   const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -29,16 +44,17 @@ const ProfileFriendsTab = ({ targetAccountId, isOwnProfile, defaultSubTab }) => 
   // Only fetch pending requests if viewing own profile
   const { data: pendingResponse, isLoading: loadingPending } =
     useGetPendingFriendRequestsQuery(undefined, { skip: !isOwnProfile })
-  const { data: recResponse, isLoading: loadingRecs, isFetching: fetchingRecs } =
-    useGetFriendRecommendationsQuery(limit)
+  const {
+    data: recResponse,
+    isLoading: loadingRecs,
+    isFetching: fetchingRecs,
+  } = useGetFriendRecommendationsQuery(limit)
   const [respondFriendRequest] = useRespondFriendRequestMutation()
 
   const getArray = (res) => (Array.isArray(res) ? res : res?.data || [])
 
   // The backend might return the array directly or wrap it in a data property
   const pendingRequests = getArray(pendingResponse)
-
-  console.log(pendingRequests)
 
   const subTabs = [
     { id: "all", label: "Tất cả bạn bè" },
@@ -59,7 +75,10 @@ const ProfileFriendsTab = ({ targetAccountId, isOwnProfile, defaultSubTab }) => 
 
   // Reset activeSubTab to 'all' if navigating to another user's profile while on a restricted tab
   React.useEffect(() => {
-    if (!isOwnProfile && (activeSubTab === "pending" || activeSubTab === "find")) {
+    if (
+      !isOwnProfile &&
+      (activeSubTab === "pending" || activeSubTab === "find")
+    ) {
       setActiveSubTab("all")
     }
   }, [isOwnProfile, activeSubTab])
@@ -104,144 +123,154 @@ const ProfileFriendsTab = ({ targetAccountId, isOwnProfile, defaultSubTab }) => 
     }
 
     if (isLoading) {
-      return <div className="text-gray-500 py-10 text-center">Đang tải...</div>
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <FluentCard
+              key={i}
+              padding="p-0"
+              className="min-h-[80px] flex items-center justify-center"
+            >
+              <div className="flex items-center gap-4 px-4 w-full">
+                <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              </div>
+            </FluentCard>
+          ))}
+        </div>
+      )
     }
 
     if (list.length === 0) {
       return (
-        <div className="text-gray-500 py-10 text-center">{emptyMessage}</div>
+        <FluentCard>
+          <EmptyState message={emptyMessage} icon={User} />
+        </FluentCard>
       )
     }
 
     return (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {list.map((user) => (
-          <div
-            key={user.accountId}
-            onClick={() => navigate(`/profile/${user.accountId}`)}
-            className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:shadow-sm transition-shadow bg-white cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <Avatar
-                size={48}
-                src={user.avatarImageUrl}
-                name={user.nickname || user.username}
-                className="w-12 h-12 bg-blue-100 text-blue-600 font-bold"
-              />
-              <div>
-                <h3 className="font-semibold text-gray-900 text-[15px] leading-tight">
-                  {user.nickname || user.username}
-                </h3>
-                {/* Placeholder for mutual friends if that data becomes available */}
-                <p className="text-xs text-gray-500 mt-1">
-                  {user.level || "Member"}
-                </p>
-              </div>
-            </div>
-            {user.isPendingRequest ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    respondFriendRequest({
-                      friendshipId: user.friendshipId,
-                      action: "accept",
-                    })
-                      .unwrap()
-                      .then(() => toast.success("Đã chấp nhận kết bạn!"))
-                      .catch(() => toast.error("Có lỗi xảy ra"))
-                  }}
-                  className="px-4 py-1.5 bg-[#990011] text-white text-sm font-medium rounded-full hover:bg-red-900 transition-colors"
-                >
-                  Chấp nhận
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    respondFriendRequest({
-                      friendshipId: user.friendshipId,
-                      action: "decline",
-                    })
-                      .unwrap()
-                      .then(() => toast.success("Đã từ chối kết bạn"))
-                      .catch(() => toast.error("Có lỗi xảy ra"))
-                  }}
-                  className="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-200 transition-colors"
-                >
-                  Từ chối
-                </button>
-              </div>
-            ) : (
-              <button 
-                onClick={(e) => e.stopPropagation()}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 transition-colors"
-              >
-                <MoreHorizontal className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-      {activeSubTab === "find" && list.length >= limit && (
-        <div className="w-full flex justify-center mt-6">
-          <button 
-            onClick={() => setLimit(prev => prev + 10)}
-            disabled={fetchingRecs}
-            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-full transition-colors disabled:opacity-50"
-          >
-            {fetchingRecs ? "Đang tải..." : "Tải thêm"}
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {list.map((user) => (
+            <HorizontalCard
+              key={user.accountId}
+              onClick={() => navigate(`/profile/${user.accountId}`)}
+              leftContent={
+                <Avatar
+                  size={40}
+                  src={user.avatarImageUrl}
+                  name={user.nickname || user.username}
+                />
+              }
+              rightContent={
+                user.isPendingRequest ? (
+                  <Popover
+                    placement="bottom-right"
+                    trigger={
+                      <IconButton variant="ghost">
+                        <MoreHorizontal />
+                      </IconButton>
+                    }
+                    content={(close) => (
+                      <div className="bg-white border border-gray-100 rounded-xl shadow-lg p-1.5 min-w-[140px] flex flex-col gap-1 border-slate-200/60 backdrop-blur-md">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            close()
+                            respondFriendRequest({
+                              friendshipId: user.friendshipId,
+                              action: "accept",
+                            })
+                              .unwrap()
+                              .then(() =>
+                                toast.success("Đã chấp nhận kết bạn!"),
+                              )
+                              .catch(() => toast.error("Có lỗi xảy ra"))
+                          }}
+                          className="w-full flex items-center justify-start gap-2 px-3 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        >
+                          <Check size={16} />
+                          Chấp nhận
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            close()
+                            respondFriendRequest({
+                              friendshipId: user.friendshipId,
+                              action: "decline",
+                            })
+                              .unwrap()
+                              .then(() => toast.success("Đã từ chối kết bạn"))
+                              .catch(() => toast.error("Có lỗi xảy ra"))
+                          }}
+                          className="w-full flex items-center justify-start gap-2 px-3 py-2 text-sm font-semibold text-[#990011] hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <X size={16} />
+                          Từ chối
+                        </button>
+                      </div>
+                    )}
+                  />
+                ) : null
+              }
+            >
+              <h3 className="font-semibold">
+                {user.nickname || user.username}
+              </h3>
+
+              <p className="text-sm text-[#606060]">{user.level || "Member"}</p>
+            </HorizontalCard>
+          ))}
         </div>
-      )}
-    </>
+
+        {activeSubTab === "find" && list.length >= limit && (
+          <div className="w-full flex justify-center mt-6">
+            <PillButton
+              onClick={() => setLimit((prev) => prev + 10)}
+              loading={fetchingRecs}
+              loadingText="Đang tải..."
+              variant="secondary"
+            >
+              Tải thêm
+            </PillButton>
+          </div>
+        )}
+      </>
     )
   }
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] p-6 pb-12 min-h-[500px]">
-      {/* Search Bar */}
-      <div className="mb-6 relative w-full">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
-          <Search className="w-4 h-4 text-gray-400" />
+    <div className="w-full flex flex-col gap-3 min-h-[500px]">
+      {/* Top Header Card containing Tabs and Search */}
+      <FluentCard padding="p-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e5e5e5] p-4 sm:p-6">
+          <h2 className="text-xl font-bold">Bạn bè</h2>
+          {/* Search Bar */}
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Tìm kiếm bạn bè..."
+            className="md:w-[360px]"
+          />
         </div>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Tìm kiếm"
-          className="w-full h-11 pl-11 pr-4 bg-[#F5F6F8] border-none rounded-lg text-[15px] focus:outline-none focus:ring-1 focus:ring-gray-200"
-        />
-      </div>
 
-      {/* Sub Tabs Navigation */}
-      <div className="flex items-center gap-6 border-b border-gray-100 mb-8 overflow-x-auto hide-scrollbar">
-        {subTabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveSubTab(tab.id)}
-            className={`pb-3 text-[15px] font-semibold flex items-center gap-2 whitespace-nowrap transition-colors ${
-              activeSubTab === tab.id
-                ? "text-[#990011] border-b-2 border-[#990011]"
-                : "text-gray-500 hover:text-gray-900"
-            }`}
-          >
-            {tab.label}
-            {tab.badge && (
-              <span className="bg-[#990011] text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                {tab.badge}
-              </span>
-            )}
-          </button>
-        ))}
-        <div className="flex-grow"></div>
-        <button className="pb-3 text-gray-400 hover:text-gray-600">
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
-      </div>
+        {/* Sub Tabs Navigation */}
+        <Tabs
+          tabs={subTabs}
+          activeTab={activeSubTab}
+          onChange={setActiveSubTab}
+          fullWidth={false}
+          className="border-none"
+        />
+      </FluentCard>
 
       {/* Grid Content */}
-      {renderGridList()}
+      <div className="w-full">{renderGridList()}</div>
     </div>
   )
 }

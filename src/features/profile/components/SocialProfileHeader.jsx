@@ -1,26 +1,57 @@
 import React, { useRef } from "react"
 import toast from "react-hot-toast"
-import { MapPin, Edit2, BadgeCheck, UserPlus, Check, UserMinus, Camera } from "lucide-react"
+import {
+  MapPin,
+  Edit2,
+  BadgeCheck,
+  UserPlus,
+  Check,
+  UserMinus,
+  Camera,
+  AtSign,
+} from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { useGetConnectionStatusQuery, useFollowUserMutation, useUnfollowUserMutation, useSendFriendRequestMutation, useDeleteFriendshipMutation } from "../api/friendshipApi"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import {
+  useGetConnectionStatusQuery,
+  useFollowUserMutation,
+  useUnfollowUserMutation,
+  useSendFriendRequestMutation,
+  useDeleteFriendshipMutation,
+} from "../api/friendshipApi"
 import { useUpdateAvatarMutation } from "@/store/api/userApi"
 
-const SocialProfileHeader = ({ user, formData, t, targetAccountId, isOwnProfile }) => {
+const SocialProfileHeader = ({
+  user,
+  formData,
+  t,
+  targetAccountId,
+  isOwnProfile,
+  onEditClick,
+}) => {
   // Use avatarImageUrl as the primary avatar for the profile
   const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl
-  const username = formData?.username || user?.username || "Lorem Ipsum"
+  const nickname = formData?.nickname || user?.nickname
+  const username = formData?.username || user?.username
+  const displayName = nickname || username || "Lorem Ipsum"
+  const handle = nickname ? username : null
   const bio = "Bio description" // Mocked for now
-  const location = "Location" // Mocked for now
+  const location = formData?.location || user?.location
 
   // API Hooks
-  const { data: statusResponse } = useGetConnectionStatusQuery(targetAccountId, { skip: isOwnProfile || !targetAccountId })
-  const status = statusResponse?.data !== undefined ? statusResponse.data : statusResponse
+  const { data: statusResponse } = useGetConnectionStatusQuery(
+    targetAccountId,
+    { skip: isOwnProfile || !targetAccountId },
+  )
+  const status =
+    statusResponse?.data !== undefined ? statusResponse.data : statusResponse
 
   const [followUser] = useFollowUserMutation()
   const [unfollowUser] = useUnfollowUserMutation()
   const [sendFriendRequest] = useSendFriendRequestMutation()
   const [deleteFriendship] = useDeleteFriendshipMutation()
-  const [updateAvatar, { isLoading: isUpdatingAvatar }] = useUpdateAvatarMutation()
+  const [updateAvatar, { isLoading: isUpdatingAvatar }] =
+    useUpdateAvatarMutation()
   const fileInputRef = useRef(null)
 
   const handleFollowToggle = () => {
@@ -50,135 +81,178 @@ const SocialProfileHeader = ({ user, formData, t, targetAccountId, isOwnProfile 
     }
   }
 
+  const isFriendOrPending =
+    status?.isFriend ||
+    status?.friendshipStatus === 1 ||
+    status?.friendshipStatus === "Pending"
+
+  const handleFriendshipToggle = () => {
+    if (isFriendOrPending) {
+      if (status?.friendshipId) {
+        deleteFriendship(status.friendshipId)
+          .unwrap()
+          .then(() =>
+            toast.success(
+              status?.isFriend
+                ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
+                : t.profile?.social?.cancelRequestSuccess ||
+                    "Đã hủy yêu cầu kết bạn",
+            ),
+          )
+          .catch(() =>
+            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra"),
+          )
+      }
+    } else {
+      sendFriendRequest(targetAccountId)
+        .unwrap()
+        .then(() =>
+          toast.success(
+            t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+          ),
+        )
+        .catch((err) => {
+          if (err?.status === 422) {
+            toast.error(
+              t.profile?.social?.requestPending ||
+                "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+            )
+          } else {
+            toast.error(
+              t.profile?.social?.requestError ||
+                "Không thể gửi yêu cầu kết bạn",
+            )
+          }
+        })
+    }
+  }
+
+  const friendshipVariant = status?.isFriend
+    ? "outline"
+    : isFriendOrPending
+      ? "secondary"
+      : "outline"
+
+  const friendshipIcon = isFriendOrPending ? <UserMinus /> : <UserPlus />
+
+  const friendshipLabel = status?.isFriend
+    ? t.profile?.social?.unfriend || "Hủy kết bạn"
+    : isFriendOrPending
+      ? t.profile?.social?.cancelRequest || "Hủy yêu cầu"
+      : t.profile?.social?.addFriend || "Kết bạn"
+
+  const actionButtons = isOwnProfile
+    ? [
+        {
+          key: "edit",
+          variant: "outline",
+          startIcon: <Edit2 />,
+          label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
+          onClick: onEditClick,
+        },
+      ]
+    : [
+        {
+          key: "follow",
+          variant: status?.isFollowing ? "secondary" : "primary",
+          startIcon: status?.isFollowing ? <Check /> : <UserPlus />,
+          label: status?.isFollowing
+            ? t.profile?.social?.following || "Đang theo dõi"
+            : t.profile?.social?.follow || "Theo dõi",
+          onClick: handleFollowToggle,
+        },
+        {
+          key: "friendship",
+          variant: friendshipVariant,
+          startIcon: friendshipIcon,
+          label: friendshipLabel,
+          onClick: handleFriendshipToggle,
+        },
+      ]
+
   return (
-    <div className="w-full bg-white rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.04)] mb-6">
+    <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}
       <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group">
         {/* Placeholder for cover photo edit button */}
       </div>
 
       {/* Profile Info Area */}
-      <div className="px-6 pb-6 pt-4 relative flex flex-col md:flex-row items-center md:items-end md:justify-between gap-4 border-b border-gray-100">
-        {/* Left side: Avatar + Info */}
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 w-full">
-          {/* Avatar floating above the bottom border of the cover photo */}
-          <div className="-mt-24 md:-mt-28 relative z-10 p-1 bg-white rounded-full group">
-            <div 
-              className={`relative rounded-full overflow-hidden ${isOwnProfile ? "cursor-pointer" : ""}`}
-              onClick={() => {
-                if (isOwnProfile && fileInputRef.current && !isUpdatingAvatar) {
-                  fileInputRef.current.click()
-                }
-              }}
-            >
-              <Avatar
-                size={140}
-                src={displayAvatarUrl}
-                alt={username}
-                name={username}
-                className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
-              />
-              {isOwnProfile && (
-                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isUpdatingAvatar ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                  {isUpdatingAvatar ? (
-                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    <Camera className="w-8 h-8 text-white" />
-                  )}
-                </div>
-              )}
-            </div>
+      <div className="p-4 sm:p-6 relative border-b border-gray-100 min-[426px]:grid min-[426px]:grid-cols-[auto_1fr] min-[426px]:gap-x-4">
+        {/* Avatar floating above the bottom border of the cover photo */}
+        <div className="-mt-24 md:-mt-28 relative z-10 p-1 bg-white rounded-full group min-[426px]:col-start-1 min-[426px]:row-start-1 w-fit">
+          <div
+            className={`relative rounded-full overflow-hidden ${isOwnProfile ? "cursor-pointer" : ""}`}
+            onClick={() => {
+              if (isOwnProfile && fileInputRef.current && !isUpdatingAvatar) {
+                fileInputRef.current.click()
+              }
+            }}
+          >
+            <Avatar
+              size={140}
+              src={displayAvatarUrl}
+              alt={displayName}
+              name={displayName}
+              className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
+            />
             {isOwnProfile && (
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
-                accept="image/*" 
-                onChange={handleAvatarChange} 
-              />
+              <div
+                className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isUpdatingAvatar ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+              >
+                {isUpdatingAvatar ? (
+                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <Camera className="w-8 h-8 text-white" />
+                )}
+              </div>
             )}
           </div>
+          {isOwnProfile && (
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleAvatarChange}
+            />
+          )}
+        </div>
 
-          <div className="flex flex-col items-center md:items-start pt-2">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl md:text-[28px] font-bold text-gray-900 leading-none">
-                {username}
-              </h1>
-              <BadgeCheck className="text-blue-500 w-6 h-6" />
-            </div>
-            <p className="text-[#7A7574] text-[15px] mt-2">{bio}</p>
-            <div className="flex items-center gap-1.5 text-[#7A7574] text-[15px] mt-1">
-              <MapPin className="w-4 h-4" />
-              <span>{location}</span>
-            </div>
+        {/* Text Info */}
+        <div className="flex flex-col items-start gap-1 min-[426px]:col-start-1 min-[426px]:col-span-2 min-[426px]:row-start-2">
+          <h1 className="text-2xl md:text-[28px] font-bold text-gray-900">
+            {displayName}
+          </h1>
+          <div className="flex flex-col gap-1">
+            {handle && (
+              <div className="flex items-center gap-2 text-sm text-[#606060]">
+                <AtSign size={16} />
+                <span>{handle}</span>
+              </div>
+            )}
+            {location && (
+              <div className="flex items-center gap-2 text-sm text-[#606060]">
+                <MapPin size={16} />
+                <span>{location}</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Right side: Actions */}
-        <div className="mt-4 md:mt-0 md:pb-6 shrink-0 flex items-center gap-2">
-          {isOwnProfile ? (
-            <button className="flex items-center gap-2 px-5 py-2 border border-[#990011] text-[#990011] rounded-full hover:bg-red-50 font-medium text-sm transition-colors">
-              Chỉnh sửa
-              <Edit2 className="w-3.5 h-3.5" />
-            </button>
-          ) : (
-            <>
-              {/* Theo dõi Button */}
-              <button 
-                onClick={handleFollowToggle}
-                className={`flex items-center gap-2 px-5 py-2 rounded-full font-medium text-sm transition-colors ${
-                  status?.isFollowing 
-                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200" 
-                    : "bg-[#990011] text-white hover:bg-red-900"
-                }`}
-              >
-                {status?.isFollowing ? (
-                  <>Đang theo dõi <Check className="w-3.5 h-3.5" /></>
-                ) : (
-                  <>Theo dõi <UserPlus className="w-3.5 h-3.5" /></>
-                )}
-              </button>
-
-              {/* Kết bạn Button */}
-              <button 
-                onClick={() => {
-                  if (status?.isFriend || status?.friendshipStatus === 1 || status?.friendshipStatus === "Pending") {
-                    if (status?.friendshipId) {
-                      deleteFriendship(status.friendshipId)
-                        .unwrap()
-                        .then(() => toast.success(status?.isFriend ? "Đã hủy kết bạn" : "Đã hủy yêu cầu kết bạn"))
-                        .catch(() => toast.error("Có lỗi xảy ra"))
-                    }
-                  } else if (!status?.isFriend && status?.friendshipStatus !== 1 && status?.friendshipStatus !== "Pending") {
-                    sendFriendRequest(targetAccountId)
-                      .unwrap()
-                      .then(() => toast.success("Đã gửi yêu cầu kết bạn"))
-                      .catch((err) => {
-                        if (err?.status === 422) {
-                          toast.error("Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý")
-                        } else {
-                          toast.error("Không thể gửi yêu cầu kết bạn")
-                        }
-                      })
-                  }
-                }}
-                className={`flex items-center gap-2 px-5 py-2 rounded-full font-medium text-sm transition-colors ${
-                status?.isFriend 
-                  ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200" 
-                  : (status?.friendshipStatus === 1 || status?.friendshipStatus === "Pending")
-                  ? "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  : "border border-[#990011] text-[#990011] hover:bg-red-50"
-              }`}>
-                {status?.isFriend ? (
-                  <>Hủy kết bạn <UserMinus className="w-3.5 h-3.5" /></>
-                ) : (status?.friendshipStatus === 1 || status?.friendshipStatus === "Pending") ? (
-                  <>Hủy yêu cầu <UserMinus className="w-3.5 h-3.5" /></>
-                ) : (
-                  <>Kết bạn <UserPlus className="w-3.5 h-3.5" /></>
-                )}
-              </button>
-            </>
-          )}
+        <div className="w-full min-[426px]:w-auto flex justify-end gap-2 min-[426px]:col-start-2 min-[426px]:row-start-1 min-[426px]:justify-self-end min-[426px]:self-end max-[425px]:mt-4">
+          {actionButtons.map(({ key, variant, startIcon, label, onClick }) => (
+            <PillButton
+              key={key}
+              variant={variant}
+              onClick={onClick}
+              startIcon={startIcon}
+              className="max-[425px]:flex-1"
+            >
+              {label}
+            </PillButton>
+          ))}
         </div>
       </div>
     </div>
