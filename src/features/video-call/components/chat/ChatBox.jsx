@@ -21,6 +21,7 @@ const ChatBox = ({
   hideTitle,
 }) => {
   const { t } = useLanguage()
+  const globalCallContext = useGlobalVideoCall()
   const {
     aiMessages = [],
     receiveSystemMsgs,
@@ -33,7 +34,15 @@ const ChatBox = ({
     setIsAiCollapsed,
     unreadRoomChat,
     unreadAiChat,
-  } = useGlobalVideoCall()
+  } = globalCallContext
+
+  console.log("[ChatBox Debug] useGlobalVideoCall context values:", {
+    receiveSystemMsgs,
+    setReceiveSystemMsgsType: typeof setReceiveSystemMsgs,
+    speakingAssistantEnabled,
+    setSpeakingAssistantEnabledType: typeof setSpeakingAssistantEnabled,
+    hasContextObject: !!globalCallContext,
+  })
 
   const [aiReplyTarget, setAiReplyTarget] = useState(null)
   const [roomReplyTarget, setRoomReplyTarget] = useState(null)
