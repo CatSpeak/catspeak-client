@@ -29,7 +29,7 @@ const CalendarPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState({});
   const [viewType, setViewType] = useState("month");
-  
+
   const [dayEvents, setDayEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
@@ -66,18 +66,21 @@ const CalendarPage = () => {
   };
 
   // Fetch event counts for current month
+  // Send browser UTC offset so backend groups events by local day, not UTC day.
+  const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
+    timezoneOffsetMinutes,
   });
 
   const eventCountsByDay = useMemo(() => {
     if (!eventCountsData?.counts) return {};
     return eventCountsData.counts.reduce((acc, item) => {
-      // Parse full ISO string (dayjs converts to local time automatically)
-      // Using .slice(0,10) is wrong when API returns UTC timestamps like
-      // "2026-07-15T17:00:00Z" which is actually 2026-07-16 00:00 in UTC+7
-      const day = dayjs(item.date).date();
+      // Backend already applied our timezone offset, so item.date is a
+      // plain "YYYY-MM-DD" representing the correct LOCAL date.
+      // Just parse the day number directly.
+      const day = parseInt(item.date.split("-")[2], 10);
       acc[day] = (acc[day] ?? 0) + item.totalEvents;
       return acc;
     }, {});
@@ -113,7 +116,7 @@ const CalendarPage = () => {
   if (activeFilters.priceMin != null || activeFilters.priceMax != null) {
     const min = activeFilters.priceMin ?? 0;
     const max = activeFilters.priceMax ?? 1000000;
-    const fmt = (v) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v);
+    const fmt = (v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : String(v));
     filterChips.push({
       key: "priceRange",
       label: `${cal.filterPrice || "Giá"}: ${fmt(min)} - ${fmt(max)}`,
