@@ -90,7 +90,7 @@ const WorkspaceEventsContent = ({ userId }) => {
     const toastId = toast.loading(cal.workspaceDeleting || "Deleting...")
     try {
 
-      const idToDelete = deleteTarget.recurringEventId ?? deleteTarget.id
+      const idToDelete = deleteTarget.eventId ?? deleteTarget.recurringEventId ?? deleteTarget.id
       await deleteEvent(idToDelete).unwrap()
       toast.success(cal.deleteSuccess || "Event deleted!", { id: toastId })
       setDeleteTarget(null)

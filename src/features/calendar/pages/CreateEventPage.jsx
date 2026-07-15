@@ -142,7 +142,10 @@ const CreateEventPage = () => {
   };
 
   const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
-  const returnPath = location.state?.from || basePath;
+  const workspaceEventsPath = "/workspace/events";
+  const returnPath = isEditing
+    ? (location.state?.from || workspaceEventsPath)
+    : (location.state?.from || basePath);
 
   const breadcrumbItems = [
     {
@@ -931,7 +934,7 @@ const CreateEventPage = () => {
         open={submitStatus !== null}
         onClose={() => {
           if (submitStatus === "success") {
-            window.location.href = returnPath;
+            navigate(returnPath);
           } else {
             setSubmitStatus(null);
           }
@@ -981,7 +984,7 @@ const CreateEventPage = () => {
             type="button"
             onClick={() => {
               if (submitStatus === "success") {
-                window.location.href = returnPath;
+                navigate(returnPath);
               } else {
                 setSubmitStatus(null);
               }
