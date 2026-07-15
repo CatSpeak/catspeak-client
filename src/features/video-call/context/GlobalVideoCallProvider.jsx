@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
-
 import GlobalCallContent from "./GlobalCallContent"
 
 const GlobalVideoCallContext = createContext(null)
@@ -30,9 +29,11 @@ const IDLE_VALUE = {
   enterPiP: () => { },
   exitPiP: () => { },
   returnToCall: () => { },
+
   showLeaveModal: false,
   promptLeaveCall: () => { },
   cancelLeaveCall: () => { },
+
   participants: [],
   messages: [],
   aiMessages: [],
@@ -42,14 +43,17 @@ const IDLE_VALUE = {
   startNewThread: () => { },
   continueThread: () => { },
   getConversationThread: () => [],
+
   isConnected: false,
   micOn: false,
   cameraOn: false,
   isTogglingMic: false,
   isTogglingCam: false,
   isTogglingScreenShare: false,
+
   activeSidePanel: null,
   setActiveSidePanel: () => { },
+
   showChat: false,
   setShowChat: () => { },
   showParticipants: false,
@@ -58,17 +62,29 @@ const IDLE_VALUE = {
   setShowVirtualBackground: () => { },
   showAvatarPicker: false,
   setShowAvatarPicker: () => { },
-  beautyOptions: { smoothing: 0, brightness: 0, warmth: 0, colorFilter: 0, faceSlim: 0, eyeEnlarge: 0, eyeBrighten: 0, teethWhiten: 0 },
+
+  beautyOptions: {
+    smoothing: 0,
+    brightness: 0,
+    warmth: 0,
+    colorFilter: 0,
+    faceSlim: 0,
+    eyeEnlarge: 0,
+    eyeBrighten: 0,
+    teethWhiten: 0,
+  },
   setBeautyOptions: () => { },
   switchBeauty: () => { },
   processorStatus: "idle",
+
   isAISession: false,
   showCC: false,
-  setShowCC: () => {},
+  setShowCC: () => { },
   showRoomSubtitles: false,
   setShowRoomSubtitles: () => { },
   subtitleSelectedLanguage: null,
   setSubtitleSelectedLanguage: () => { },
+
   lkRoomName: null,
   unreadRoomChat: 0,
   unreadAiChat: 0,

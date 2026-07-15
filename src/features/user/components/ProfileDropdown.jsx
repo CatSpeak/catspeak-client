@@ -72,6 +72,11 @@ const ProfileDropdown = () => {
     navigate("/profile")
   }
 
+  const handlePricingClick = () => {
+    handleCloseMenu()
+    navigate("/pricing")
+  }
+
   const handleSettingsClick = () => {
     handleCloseMenu()
     navigate("/setting")
@@ -143,7 +148,10 @@ const ProfileDropdown = () => {
           <User size={20} />
           <span>{t.header.profile}</span>
         </button>
-
+        <button onClick={handlePricingClick} className={menuItemClass}>
+          <CreditCard size={20} />
+          <span>{t.billing?.pricing.tabTitle || "Pricing"}</span>
+        </button>
         <button onClick={handleSettingsClick} className={menuItemClass}>
           <Settings size={20} />
           <span>{t.header.settings || "Settings"}</span>
