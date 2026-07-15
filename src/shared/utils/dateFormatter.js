@@ -61,6 +61,28 @@ export const formatDateTime = (date, locale = getUserLocale()) => {
 }
 
 /**
+ * Format a date to DD/MM/YYYY, HH:MM AM/PM
+ * @param {Date|string|number} dateStr - Date string or object
+ * @returns {string} Formatted date string
+ */
+export const formatDateTime12Hour = (dateStr) => {
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return ""
+  
+  const dd = String(d.getDate()).padStart(2, "0")
+  const mm = String(d.getMonth() + 1).padStart(2, "0")
+  const yyyy = d.getFullYear()
+  
+  let hours = d.getHours()
+  const minutes = String(d.getMinutes()).padStart(2, "0")
+  const ampm = hours >= 12 ? "PM" : "AM"
+  hours = hours % 12
+  hours = hours ? hours : 12 // the hour '0' should be '12'
+  
+  return `${dd}/${mm}/${yyyy}, ${String(hours).padStart(2, "0")}:${minutes} ${ampm}`
+}
+
+/**
  * Format a time range (start - end)
  * @param {Date|string|number} startDate - Start date object, ISO string, or timestamp
  * @param {Date|string|number} endDate - End date object, ISO string, or timestamp
