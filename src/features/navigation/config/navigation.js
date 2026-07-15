@@ -1,16 +1,12 @@
 import {
   Home,
   LayoutDashboard,
-  ShoppingCart,
-  MessageCircle,
   GraduationCap,
   Settings,
-  HelpCircle,
   Briefcase,
   User,
   CreditCard,
   Newspaper,
-  Video,
   Calendar,
   Mic,
   Film,
@@ -68,6 +64,7 @@ export const navLinks = [
 ]
 
 export const footerLinks = [
+  { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
   // { key: "help", path: "/help", icon: HelpCircle }
 ]

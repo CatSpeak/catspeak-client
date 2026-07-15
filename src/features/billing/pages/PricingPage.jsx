@@ -7,6 +7,7 @@ import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 import { getGridClasses } from "../utils/planUtils"
+import { History } from "lucide-react"
 
 const PricingPage = () => {
   const navigate = useNavigate()
@@ -54,22 +55,32 @@ const PricingPage = () => {
       onClick: () => navigate(`/${language}/community`),
     },
     {
-      label: t.nav?.pricing || "Pricing",
+      label: t.billing.pricing.title,
     },
   ]
 
   return (
-    <div className="mx-auto px-12 pt-6 pb-16 w-full font-nunito animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="mx-auto px-12 pt-6 pb-16 w-full font-nunito animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl">
       <div className="mb-8">
         <Breadcrumb items={breadcrumbItems} />
       </div>
-      <div className="mb-12 text-center">
-        <h1 className="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight text-gray-900">
-          {t.billing.pricing.title}
-        </h1>
-        <p className="text-gray-500 text-sm md:text-base max-w-md mx-auto leading-relaxed">
-          {t.billing.pricing.subtitle}
-        </p>
+
+      {/* Title & History Header row */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 w-full">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+            {t.billing.pricing.title}
+          </h1>
+        </div>
+
+        {/* Billing History Button */}
+        <button
+          onClick={() => navigate("/billing")}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-cath-red-700 text-cath-red-700 font-semibold text-sm hover:bg-[#990011]/5 transition-all w-fit cursor-pointer active:scale-95 shadow-sm hover:shadow"
+        >
+          <span>{t.billing.billingHistory || "Lịch sử thanh toán"}</span>
+          <History size={16} />
+        </button>
       </div>
 
       {isPlansLoading ? (
@@ -94,22 +105,24 @@ const PricingPage = () => {
           ))}
         </div>
       ) : (
-        <div className={getGridClasses(formattedPlans.length)}>
-          {formattedPlans.map((plan) => {
-            const isActive = userTier === plan.name?.toLowerCase()
-            return (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                isActive={isActive}
-                actionLabel={t.billing.pricing.upgradeTo.replace("{{planName}}", plan.name)}
-                isProcessing={isProcessing}
-                onAction={
-                  plan.price > 0 ? () => handleUpgradeClick(plan) : undefined
-                }
-              />
-            )
-          })}
+        <div className="relative">
+          <div className={getGridClasses(formattedPlans.length)}>
+            {formattedPlans.map((plan) => {
+              const isActive = userTier === plan.name?.toLowerCase()
+              return (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  isActive={isActive}
+                  actionLabel={t.billing.pricing.upgradeTo.replace("{{planName}}", plan.name)}
+                  isProcessing={isProcessing}
+                  onAction={
+                    plan.price > 0 ? () => handleUpgradeClick(plan) : undefined
+                  }
+                />
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

@@ -49,7 +49,7 @@ export default {
     help: "Trợ giúp",
     connect: "Cá nhân",
     workspace: "Nhà của bạn",
-    pricing: "Bảng Giá",
+    pricing: "Nâng cấp gói",
     profile: "Hồ sơ",
     personalInfo: "Thông tin cá nhân",
     instructor: "Giảng viên",

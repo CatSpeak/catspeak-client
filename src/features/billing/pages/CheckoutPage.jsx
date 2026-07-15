@@ -43,10 +43,17 @@ const CheckoutPage = () => {
       setFullName(user.username || user.nickname || "")
       setEmail(user.email || "")
       setPhone(user.phoneNumber || "")
-      setMemo(`${user.username || "User"} thanh toan ${plan?.name || "Cat Speak"}`)
+      
+      const userIdentifier = user.username || user.nickname || "User"
+      const localizedMemo = language === "vi"
+        ? `${userIdentifier} thanh toan ${plan?.name || "Cat Speak"}`
+        : language === "zh"
+          ? `${userIdentifier} 支付 ${plan?.name || "Cat Speak"}`
+          : `${userIdentifier} payment for ${plan?.name || "Cat Speak"}`
+      setMemo(localizedMemo)
       /* eslint-enable react-hooks/set-state-in-effect */
     }
-  }, [profileResponse, plan])
+  }, [profileResponse, plan, language])
 
   if (!plan) return null
 

@@ -12,6 +12,19 @@ const getLocalizedInterval = (interval, lang) => {
   }
 }
 
+const hexToRgbA = (hex, alpha = 0.15) => {
+  if (!hex || typeof hex !== 'string') return `rgba(255, 255, 255, ${alpha})`;
+  let c = hex.replace('#', '');
+  if (c.length === 3) {
+    c = c.split('').map(x => x + x).join('');
+  }
+  if (c.length !== 6) return `rgba(255, 255, 255, ${alpha})`;
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 const PaymentSummaryBox = ({
   t,
   language,
@@ -21,6 +34,7 @@ const PaymentSummaryBox = ({
 }) => {
   const [agreed, setAgreed] = useState(false)
 
+  const cardColor = plan.brandColor || "#7C3AED"
   const formattedPrice = `${new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US").format(plan.price)}₫`
 
   const formattedTotal = `${new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US").format(plan.price)}₫` // VAT 0% makes total equal to price
@@ -32,7 +46,13 @@ const PaymentSummaryBox = ({
       </h2>
 
       {/* Package Banner */}
-      <div className="bg-sky-100 text-sky-800 rounded-2xl p-4 flex items-center justify-between">
+      <div 
+        className="rounded-2xl p-4 flex items-center justify-between font-nunito"
+        style={{
+          backgroundColor: hexToRgbA(cardColor, 0.1),
+          color: cardColor,
+        }}
+      >
         <span className="font-bold text-sm md:text-base">{plan.name}</span>
         <span className="text-xs md:text-sm font-semibold bg-white/60 px-2.5 py-1 rounded-lg">
           {getLocalizedInterval(plan.interval, language)}
@@ -73,33 +93,33 @@ const PaymentSummaryBox = ({
             <>
               Tôi đồng ý với{" "}
               <a href="/policy" target="_blank" rel="noreferrer" className="text-[#BE0015] font-semibold hover:underline">
-                Điều khoản dịch vụ
+                {t.billing?.checkout?.termsOfService || "Điều khoản dịch vụ"}
               </a>{" "}
               và{" "}
               <a href="/policy" target="_blank" rel="noreferrer" className="text-[#BE0015] font-semibold hover:underline">
-                Chính sách bảo mật
+                {t.billing?.checkout?.privacyPolicy || "Chính sách bảo mật"}
               </a>
             </>
           ) : language === "zh" ? (
             <>
               我同意{" "}
               <a href="/policy" target="_blank" rel="noreferrer" className="text-[#BE0015] font-semibold hover:underline">
-                服务条款
+                {t.billing?.checkout?.termsOfService || "服务条款"}
               </a>{" "}
               和{" "}
               <a href="/policy" target="_blank" rel="noreferrer" className="text-[#BE0015] font-semibold hover:underline">
-                隐私政策
+                {t.billing?.checkout?.privacyPolicy || "隐私政策"}
               </a>
             </>
           ) : (
             <>
               I agree to the{" "}
               <a href="/policy" target="_blank" rel="noreferrer" className="text-[#BE0015] font-semibold hover:underline">
-                Terms of Service
+                {t.billing?.checkout?.termsOfService || "Terms of Service"}
               </a>{" "}
               and{" "}
               <a href="/policy" target="_blank" rel="noreferrer" className="text-[#BE0015] font-semibold hover:underline">
-                Privacy Policy
+                {t.billing?.checkout?.privacyPolicy || "Privacy Policy"}
               </a>
             </>
           )}

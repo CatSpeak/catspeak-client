@@ -51,8 +51,6 @@ const PaymentResultPage = () => {
     )
   }
 
-  const paymentRecord = invoices.find((inv) => inv.orderCode === orderCode)
-
   if (!isCancelled) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in zoom-in duration-500">
