@@ -681,24 +681,151 @@ export const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { classId }) => [{ type: "ClassFeed", id: classId }],
     }),
 
-    // 16. Get Class Grading
-    getClassGrading: builder.query({
-      query: (classId) => ({
-        url: `/teacher/classes/${classId}/grading`,
+    // 16. Get Teacher Assignments
+    getTeacherAssignments: builder.query({
+      query: ({ classId, status, search }) => ({
+        url: `/teacher/classes/${classId}/assignments`,
         method: "GET",
+        params: { status, search },
       }),
-      providesTags: (result, error, classId) => [{ type: "ClassGrading", id: classId }],
+      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
     }),
 
-    // 17. Grade Assignment
-    gradeAssignment: builder.mutation({
-      query: ({ classId, assignmentId, grade }) => ({
-        url: `/teacher/assignments/${assignmentId}/grade`,
+    // 17. Get Student Assignments
+    getStudentAssignments: builder.query({
+      query: ({ classId }) => ({
+        url: `/student/classes/${classId}/assignments`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `student-${classId}` }],
+    }),
+
+    // 18. Get Student Assignment By ID
+    getStudentAssignmentById: builder.query({
+      query: ({ classId, assignmentId }) => ({
+        url: `/student/classes/${classId}/assignments/${assignmentId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `student-assignment-${assignmentId}` }],
+    }),
+
+    // 19. Get Current Student Submission
+    getMyAssignmentSubmission: builder.query({
+      query: ({ classId, assignmentId }) => ({
+        url: `/student/classes/${classId}/assignments/${assignmentId}/my-submission`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `my-submission-${assignmentId}` }],
+    }),
+
+    // 20. Submit / Resubmit Assignment
+    submitAssignment: builder.mutation({
+      query: ({ classId, assignmentId, formData }) => ({
+        url: `/student/classes/${classId}/assignments/${assignmentId}/submit`,
         method: "POST",
-        body: { classId, grade },
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { classId, assignmentId }) => [
+        { type: "ClassGrading", id: `student-${classId}` },
+        { type: "ClassGrading", id: `my-submission-${assignmentId}` },
+      ],
+    }),
+
+    // 21. Get Assignment By ID
+    getAssignmentById: builder.query({
+      query: ({ classId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: assignmentId }],
+    }),
+
+    // 22. Create Assignment (multipart/form-data)
+    createAssignment: builder.mutation({
+      query: ({ classId, formData }) => ({
+        url: `/teacher/classes/${classId}/assignments`,
+        method: "POST",
+        body: formData,
       }),
       invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
     }),
+
+    // 23. Update Assignment (multipart/form-data)
+    updateAssignment: builder.mutation({
+      query: ({ classId, assignmentId, formData }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}`,
+        method: "PUT",
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+    }),
+
+    // 24. Close Assignment
+    closeAssignment: builder.mutation({
+      query: ({ classId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}/close`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+    }),
+
+    // 25. Open/Reopen Assignment
+    openAssignment: builder.mutation({
+      query: ({ classId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}/open`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+    }),
+
+    // 26. Get Assignment Submissions
+    getAssignmentSubmissions: builder.query({
+      query: ({ classId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}/submissions`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { assignmentId }) => [
+        { type: "ClassGrading", id: assignmentId },
+        { type: "ClassGrading", id: "submissions" }
+      ],
+    }),
+
+    // 27. Grade Submission
+    gradeSubmission: builder.mutation({
+      query: ({ classId, assignmentId, submissionId, grade, comment }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}/submissions/${submissionId}/grade`,
+        method: "POST",
+        body: { grade, comment },
+      }),
+      invalidatesTags: (result, error, { assignmentId }) => [
+        { type: "ClassGrading", id: assignmentId },
+        { type: "ClassGrading", id: "submissions" }
+      ],
+    }),
+
+    // 28. Return Submission
+    returnSubmission: builder.mutation({
+      query: ({ classId, assignmentId, submissionId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}/submissions/${submissionId}/return`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { assignmentId }) => [
+        { type: "ClassGrading", id: assignmentId },
+        { type: "ClassGrading", id: "submissions" }
+      ],
+    }),
+
+    // 29. Bulk Return Submissions
+    bulkReturnSubmissions: builder.mutation({
+      query: ({ classId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}/bulk-return`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { assignmentId }) => [
+        { type: "ClassGrading", id: assignmentId },
+        { type: "ClassGrading", id: "submissions" }
+      ],
+    }) ,
 
     // 18. Update Attendance
     updateClassMemberAttendance: builder.mutation({
@@ -837,8 +964,20 @@ export const {
   useDeleteClassMutation,
   useGetClassFeedQuery,
   useCreateClassPostMutation,
-  useGetClassGradingQuery,
-  useGradeAssignmentMutation,
+  useGetTeacherAssignmentsQuery,
+  useGetStudentAssignmentsQuery,
+  useGetStudentAssignmentByIdQuery,
+  useGetMyAssignmentSubmissionQuery,
+  useSubmitAssignmentMutation,
+  useGetAssignmentByIdQuery,
+  useCreateAssignmentMutation,
+  useUpdateAssignmentMutation,
+  useCloseAssignmentMutation,
+  useOpenAssignmentMutation,
+  useGetAssignmentSubmissionsQuery,
+  useGradeSubmissionMutation,
+  useReturnSubmissionMutation,
+  useBulkReturnSubmissionsMutation,
   useUpdateClassMemberAttendanceMutation,
   // Materials hooks
   useGetClassMaterialsQuery,

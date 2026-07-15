@@ -93,7 +93,7 @@ const ClassOverviewTab = ({
                         </button>
                         <button
                           onClick={onCancelClassClick}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-red-650 transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#BA021C] transition-colors"
                         >
                           {cd.cancelClass || "Cancel Class"}
                         </button>

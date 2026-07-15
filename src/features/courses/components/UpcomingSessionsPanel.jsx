@@ -34,7 +34,7 @@ const UpcomingSessionsPanel = ({
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 flex-1 justify-center">
+      <div className="flex flex-col gap-4 flex-1">
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400 font-bold text-base gap-3 h-full min-h-[220px]">
             <Calendar size={54} className="text-gray-300 stroke-[1.2]" />

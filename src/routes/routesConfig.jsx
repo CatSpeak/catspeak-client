@@ -98,6 +98,9 @@ const StudentCourseDetailPage = lazy(
   () => import("@/features/courses/pages/StudentCourseDetailPage"),
 )
 const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
+const CreateAssignmentPage = lazy(
+  () => import("@/features/courses/pages/CreateAssignmentPage"),
+)
 
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
@@ -349,6 +352,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <ClassDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/create-assignment",
+                element: (
+                  <LazyRoute>
+                    <CreateAssignmentPage />
                   </LazyRoute>
                 ),
               },

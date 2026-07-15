@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -21,7 +20,7 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import ReactDatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
+import "@/shared/styles/react-datepicker.css"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { calculateFees, formatCurrency, formatCurrencyVND, formatToYYYYMMDD } from "../utils/courseUtils"
 
