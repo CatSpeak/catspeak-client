@@ -763,8 +763,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   // Picture IT Actions
   const startPictureItDescribe = useCallback(() => {
+    localParticipant?.setMicrophoneEnabled(true).catch(() => { });
     connection.send("PictureItDescribeStart", roomId || "general");
-  }, [connection.send, roomId]);
+  }, [connection.send, roomId, localParticipant]);
 
   const endPictureItDescribe = useCallback(() => {
     connection.send("PictureItDescribeEnd", roomId || "general");
