@@ -49,27 +49,38 @@ const BreakoutActiveFooter = ({
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={t.rooms.breakoutRooms.broadcastTitle}
+        className="max-w-[800px]"
       >
-        <form onSubmit={onSubmit} className="flex flex-col gap-4 py-4">
-          <div className="flex flex-col gap-3">
+        <form onSubmit={onSubmit} className="flex flex-col gap-3 py-4">
+          <div className="flex flex-col gap-1.5">
             <TextInput
               placeholder={t.rooms.breakoutRooms.broadcastPlaceholder}
               value={broadcastMsg}
               onChange={(e) => setBroadcastMsg(e.target.value)}
               autoFocus
+              multiline
+              rows={3}
+              className="p-3 rounded-xl min-h-12 max-h-[144px] overflow-y-auto"
             />
             <p className="text-sm text-[#606060]">
               {t.rooms.breakoutRooms.broadcastDesc}
             </p>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            <PillButton
+              variant="secondary"
+              className="w-full sm:w-auto min-w-20"
+              onClick={() => setIsModalOpen(false)}
+            >
+              {"Cancel"}
+            </PillButton>
             <PillButton
               type="submit"
               disabled={isBroadcasting || !broadcastMsg.trim()}
               loading={isBroadcasting}
               variant="primary"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto min-w-20"
             >
               {t.rooms.breakoutRooms.sendBtn}
             </PillButton>

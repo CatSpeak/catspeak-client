@@ -524,6 +524,7 @@ export default {
     joinError: "Error joining breakout room.",
     returnMainError: "Error returning to main room.",
     broadcastError: "Error sending broadcast.",
+    broadcastToastTitle: "Announcement from Host",
     toggleAllowError: "Cannot change room change settings.",
     breakoutRoomPrefix: "Breakout room: ",
     freeToChange: "Free to move",
