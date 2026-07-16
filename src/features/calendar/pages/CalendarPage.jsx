@@ -67,24 +67,28 @@ const CalendarPage = () => {
 
   // Fetch event counts for current month
   // Send browser UTC offset so backend groups events by local day, not UTC day.
-  const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
+  // const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
-    timezoneOffsetMinutes,
+    // timezoneOffsetMinutes,
   });
 
   const eventCountsByDay = useMemo(() => {
     if (!eventCountsData?.counts) return {};
+
+    const displayMonth = currentDate.month(); // 0-indexed (0 = January)
+    const displayYear = currentDate.year();
+
     return eventCountsData.counts.reduce((acc, item) => {
-      // Backend already applied our timezone offset, so item.date is a
-      // plain "YYYY-MM-DD" representing the correct LOCAL date.
-      // Just parse the day number directly.
-      const day = parseInt(item.date.split("-")[2], 10);
+      const d = dayjs(item.date); // parse as local "YYYY-MM-DD"
+      if (d.month() !== displayMonth || d.year() !== displayYear) return acc;
+
+      const day = d.date();
       acc[day] = (acc[day] ?? 0) + item.totalEvents;
       return acc;
     }, {});
-  }, [eventCountsData]);
+  }, [eventCountsData, currentDate]);
 
   // Active filter chips
   const filterChips = [];
