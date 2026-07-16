@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { MessageSquare } from "lucide-react"
+import { CircleStop, MessageSquare, Volume2 } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Modal from "@/shared/components/ui/Modal"
@@ -29,7 +29,7 @@ const BreakoutActiveFooter = ({
         onClick={() => setIsModalOpen(true)}
         variant="secondary"
         className="w-full"
-        startIcon={<MessageSquare />}
+        startIcon={<Volume2 />}
       >
         {t.rooms.breakoutRooms.broadcastBtn}
       </PillButton>
@@ -40,6 +40,7 @@ const BreakoutActiveFooter = ({
         loading={isStopping}
         variant="primary"
         className="w-full"
+        startIcon={<CircleStop />}
       >
         {t.rooms.breakoutRooms.closeRoomsBtn}
       </PillButton>

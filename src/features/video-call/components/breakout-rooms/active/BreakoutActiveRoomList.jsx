@@ -115,7 +115,7 @@ const BreakoutActiveRoomList = ({
     }) || []
 
   return (
-    <div className="py-2 px-1 space-y-2.5">
+    <div className="py-2 px-1 space-y-3">
       {/* Main Room */}
       <div
         onDragOver={(e) => handleDragOver(e, sessionId)}
@@ -125,7 +125,7 @@ const BreakoutActiveRoomList = ({
         className={
           dragOverRoomId === sessionId
             ? "relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10"
-            : "relative shadow-faq-card-expanded rounded-xl"
+            : "relative shadow-faq-card rounded-xl"
         }
       >
         <ListItem
@@ -200,6 +200,7 @@ const BreakoutActiveRoomList = ({
                   variant="secondary"
                   className="w-full"
                   disabled={isJoiningRoom}
+                  bgColor={"#F4AB1B"}
                 >
                   {t.rooms.breakoutRooms.joinRoomBtn}
                 </PillButton>
@@ -233,7 +234,7 @@ const BreakoutActiveRoomList = ({
             className={
               dragOverRoomId === room.sessionId
                 ? "relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10"
-                : "relative shadow-faq-card-expanded rounded-xl"
+                : "relative shadow-faq-card rounded-xl"
             }
           >
             <ListItem
@@ -318,6 +319,7 @@ const BreakoutActiveRoomList = ({
                       variant="secondary"
                       className="w-full"
                       disabled={isJoiningRoom}
+                      bgColor={"#F4AB1B"}
                     >
                       {t.rooms.breakoutRooms.joinRoomBtn}
                     </PillButton>

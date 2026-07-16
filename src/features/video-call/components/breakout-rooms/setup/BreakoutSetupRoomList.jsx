@@ -93,10 +93,10 @@ const BreakoutSetupRoomList = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 py-2 px-1">
+    <div className="flex flex-col gap-3 py-2 px-1">
       {/* Main Room / Unassigned List */}
       <div
-        className={dragOverRoomId === -1 ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative shadow-faq-card-expanded rounded-xl'}
+        className={dragOverRoomId === -1 ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative shadow-faq-card rounded-xl'}
         onDragOver={(e) => handleDragOver(e, -1)}
         onDragEnter={handleDragEnter}
         onDragLeave={(e) => handleDragLeave(e, -1)}
@@ -171,7 +171,7 @@ const BreakoutSetupRoomList = ({
         return (
           <div
             key={roomIndex}
-            className={dragOverRoomId === roomIndex ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative shadow-faq-card-expanded rounded-xl'}
+            className={dragOverRoomId === roomIndex ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative shadow-faq-card rounded-xl'}
             onDragOver={(e) => handleDragOver(e, roomIndex)}
             onDragEnter={handleDragEnter}
             onDragLeave={(e) => handleDragLeave(e, roomIndex)}
