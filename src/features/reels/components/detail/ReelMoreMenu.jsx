@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, createElement, memo } from "react"
+import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useBookmarkReelMutation, useNotInterestedReelMutation } from "@/store/api/reelsApi"
@@ -31,6 +32,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
   const { t } = useLanguage()
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const menuRef = useRef(null)
+  const navigate = useNavigate()
 
   const [bookmarkReel] = useBookmarkReelMutation()
   const [notInterestedReel] = useNotInterestedReelMutation()
@@ -97,8 +99,13 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
 
       addToPlaylist: () => setShowPlaylist(true),
 
-      aboutAccount: () =>
-        toast(t?.catSpeak?.reels?.detail?.moreMenu?.featureNotAvailable || "This feature is not available yet.", { icon: "🚧" }),
+      aboutAccount: () => {
+        if (reel?.author?.id) {
+          navigate(`/profile/${reel.author.id}`)
+        } else {
+          toast(t?.catSpeak?.reels?.detail?.moreMenu?.featureNotAvailable || "This feature is not available yet.", { icon: "🚧" })
+        }
+      },
     }
 
     try {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 const STATUS_CONFIG = {
   Pending: {
@@ -45,6 +46,7 @@ const InstructorStatusBanner = ({
   onReapply,
   isReapplying,
 }) => {
+  const { language } = useLanguage();
   const ins = t.profile?.instructor || {};
   const config = STATUS_CONFIG[status];
   if (!config) return null;
@@ -68,7 +70,8 @@ const InstructorStatusBanner = ({
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     try {
-      return new Date(dateStr).toLocaleDateString(undefined, {
+      const locale = language === "zh" ? "zh-CN" : language === "vi" ? "vi-VN" : "en-US";
+      return new Date(dateStr).toLocaleDateString(locale, {
         year: "numeric",
         month: "long",
         day: "numeric",
