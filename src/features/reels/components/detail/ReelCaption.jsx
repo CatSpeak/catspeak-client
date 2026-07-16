@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import Avatar from "@/shared/components/ui/Avatar"
 import ReelMoreMenu from "./ReelMoreMenu"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -9,6 +10,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  */
 const ReelCaption = React.memo(({ reel, isMobile = false }) => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const [isExpanded, setIsExpanded] = useState(false)
   const description = reel.description || ""
   const DESCRIPTION_CHAR_LIMIT = 90
@@ -29,10 +31,20 @@ const ReelCaption = React.memo(({ reel, isMobile = false }) => {
             src={reel.author?.avatarUrl}
             name={reel.author?.name}
             alt={reel.author?.name}
-            className="shadow-sm rounded-full overflow-hidden cursor-pointer"
+            className="shadow-sm rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (reel.author?.id) navigate(`/profile/${reel.author.id}`)
+            }}
           />
           <div className="flex flex-col">
-            <span className={`font-bold flex items-center gap-1 cursor-pointer transition-colors duration-200 ${isMobile ? "text-white text-[14px] drop-shadow-md" : "text-headingColor text-[15px] hover:text-cath-red-700"}`}>
+            <span 
+              className={`font-bold flex items-center gap-1 cursor-pointer transition-colors duration-200 ${isMobile ? "text-white text-[14px] drop-shadow-md hover:text-gray-200" : "text-headingColor text-[15px] hover:text-cath-red-700"}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (reel.author?.id) navigate(`/profile/${reel.author.id}`)
+              }}
+            >
               {reel.author?.name}
               {reel.author?.verified && (
                 <svg
