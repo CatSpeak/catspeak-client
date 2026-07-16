@@ -158,7 +158,7 @@ const EventDetailFooter = ({
               loading={isProcessing}
               loadingText={cal.processing || "Đang xử lý..."}
               bgColor={isPast ? "#d1d5db" : (isRegistered ? undefined : "#06AA3B")}
-              className={`w-full min-[426px]:flex-1 ${!isPast && isRegistered ? "bg-cath-red-700 hover:bg-cath-red-800" : ""} ${isPast ? "cursor-not-allowed opacity-80" : ""}`}
+              className={`w-full min-[426px]:flex-1 ${!isPast && isRegistered ? "bg-cath-red-700 rounded-full " : ""} ${isPast ? "cursor-not-allowed opacity-80" : ""}`}
             >
               {isPast 
                 ? (isRegistered ? "Đã tham gia" : "Đã kết thúc") 
