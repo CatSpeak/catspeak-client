@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Trash2,
   Clock,
@@ -45,7 +45,6 @@ const eventTypeOptions = [
 
 const CreateEventPage = () => {
   const navigate = useNavigate();
-  const { lang } = useParams();
   const location = useLocation();
   const { t } = useLanguage();
   const cal = t.calendar || {};
@@ -153,11 +152,9 @@ const CreateEventPage = () => {
     }
   };
 
-  const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
   const workspaceEventsPath = "/workspace/events";
-  const returnPath = isEditing
-    ? location.state?.from || workspaceEventsPath
-    : location.state?.from || basePath;
+  // the return path should go back to workspace events or wherever it came from
+  const returnPath = location.state?.from || workspaceEventsPath;
 
   const breadcrumbItems = [
     {
@@ -165,12 +162,12 @@ const CreateEventPage = () => {
       onClick: () => navigate("/"),
     },
     {
-      label: "Cat Speak",
-      onClick: () => navigate(`/${lang}/community`),
+      label: t.nav?.workspace || "Không gian làm việc",
+      onClick: () => navigate("/workspace"),
     },
     {
-      label: cal.schedule || "Thời gian biểu",
-      onClick: () => navigate(basePath),
+      label: cal.workspaceEventsTitle || "Sự kiện",
+      onClick: () => navigate(workspaceEventsPath),
     },
     {
       label: isEditing
