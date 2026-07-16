@@ -1,10 +1,11 @@
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import Dropdown from "@/shared/components/ui/Dropdown"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import TextInput from "@/shared/components/ui/inputs/TextInput";
+import Dropdown from "@/shared/components/ui/Dropdown";
+import AddressAutocomplete from "./AddressAutocomplete";
+import { useLanguage } from "@/shared/context/LanguageContext";
 import {
   useGetCountriesQuery,
   useGetCitiesByCountryIdQuery,
-} from "@/store/api/locationsApi"
+} from "@/store/api/locationsApi";
 
 const EventDetailsSection = ({
   title,
@@ -16,67 +17,36 @@ const EventDetailsSection = ({
   onCityIdChange,
   eventLocation,
   onLocationChange,
-  description,
-  onDescriptionChange,
   maxParticipants,
   onMaxParticipantsChange,
   conditionsInput,
   onConditionsChange,
+  ticketPrice,
+  onTicketPriceChange,
+  isOnline,
   errors = {},
 }) => {
-  const { t } = useLanguage()
-  const cal = t.calendar
+  const { t } = useLanguage();
+  const cal = t.calendar;
 
   const { data: countries = [], isLoading: isCountriesLoading } =
-    useGetCountriesQuery()
+    useGetCountriesQuery();
   const {
     data: cities = [],
     isFetching: isCitiesFetching,
     error: citiesError,
   } = useGetCitiesByCountryIdQuery(countryId, {
     skip: !countryId,
-  })
+  });
 
-  const countryOptions = countries.map((c) => ({ label: c.name, value: c.id }))
-  const cityOptions = cities.map((c) => ({ label: c.name, value: c.id }))
+  const countryOptions = countries.map((c) => ({ label: c.name, value: c.id }));
+  const cityOptions = cities.map((c) => ({ label: c.name, value: c.id }));
 
-  let cityPlaceholder = cal.selectCityProvince
-  if (!countryId) cityPlaceholder = cal.selectCountryFirst
-  else if (isCitiesFetching) cityPlaceholder = cal.loadingLocations
-  else if (citiesError) cityPlaceholder = cal.errorLoadingCities
-  else if (cityOptions.length === 0) cityPlaceholder = cal.noCitiesFound
-
-  const handleOpenMaps = () => {
-    const loc = eventLocation.trim()
-    if (!loc) return
-    const isUrl =
-      /^https?:\/\//i.test(loc) ||
-      loc.includes("google.com/maps") ||
-      loc.includes("maps.app.goo.gl")
-
-    if (isUrl) {
-      const url = loc.startsWith("http") ? loc : `https://${loc}`
-      window.open(url, "_blank", "noopener,noreferrer")
-      return
-    }
-
-    // Construct the query with location, city, and country
-    let queryParts = [loc]
-
-    if (cityId) {
-      const selectedCity = cities.find((c) => c.id === cityId)
-      if (selectedCity) queryParts.push(selectedCity.name)
-    }
-
-    if (countryId) {
-      const selectedCountry = countries.find((c) => c.id === countryId)
-      if (selectedCountry) queryParts.push(selectedCountry.name)
-    }
-
-    const queryStr = queryParts.join(", ")
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
-    window.open(url, "_blank", "noopener,noreferrer")
-  }
+  let cityPlaceholder = cal.selectCityProvince;
+  if (!countryId) cityPlaceholder = cal.selectCountryFirst;
+  else if (isCitiesFetching) cityPlaceholder = cal.loadingLocations;
+  else if (citiesError) cityPlaceholder = cal.errorLoadingCities;
+  else if (cityOptions.length === 0) cityPlaceholder = cal.noCitiesFound;
 
   return (
     <div className="flex flex-col gap-6">
@@ -99,81 +69,83 @@ const EventDetailsSection = ({
       </div>
 
       {/* Location (Country, City, Address) */}
-      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
-        <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
-          {cal.location}
-        </div>
-        <div className="flex-1 flex flex-col gap-6 w-full relative">
-          <div className="flex flex-col min-[426px]:flex-row items-start gap-6 w-full">
-            <div className="flex-1 flex flex-col w-full">
-              <Dropdown
-                options={countryOptions}
-                value={countryId}
-                onChange={(val) => onCountryIdChange(val)}
-                placeholder={
-                  isCountriesLoading ? cal.loadingLocations : cal.selectCountry
-                }
-                disabled={isCountriesLoading}
-                activeColor={eventColor}
-                className="w-full"
-                triggerClassName={`border ${errors.countryId ? "border-red-500" : "border-[#C6C6C6]"}`}
-                enableSearch
-              />
-              {errors.countryId && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.countryId}
-                </span>
-              )}
-            </div>
+      {!isOnline && (
+        <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+          <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+            {cal.location}
+          </div>
+          <div className="flex-1 flex flex-col gap-6 w-full relative min-w-0">
+            <div className="flex flex-col min-[426px]:flex-row items-start gap-6 w-full">
+              <div className="flex-[4] flex flex-col w-full min-w-0">
+                <Dropdown
+                  options={countryOptions}
+                  value={countryId}
+                  onChange={(val) => onCountryIdChange(val)}
+                  placeholder={
+                    isCountriesLoading
+                      ? cal.loadingLocations
+                      : cal.selectCountry
+                  }
+                  disabled={isCountriesLoading}
+                  activeColor={eventColor}
+                  className="w-full"
+                  // triggerClassName={`border ${errors.count ryId ? "border-red-500" : ""}`}
+                  enableSearch
+                />
+                {errors.countryId && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.countryId}
+                  </span>
+                )}
+              </div>
 
-            <div className="flex-1 flex flex-col w-full">
-              <Dropdown
-                options={cityOptions}
-                value={cityId}
-                onChange={(val) => onCityIdChange(val)}
-                placeholder={cityPlaceholder}
-                disabled={
-                  !countryId || isCitiesFetching || cityOptions.length === 0
-                }
-                activeColor={eventColor}
-                className="w-full"
-                triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
-                enableSearch
+              <div className="flex-[6] flex flex-col w-full min-w-0">
+                <Dropdown
+                  options={cityOptions}
+                  value={cityId}
+                  onChange={(val) => onCityIdChange(val)}
+                  placeholder={cityPlaceholder}
+                  disabled={
+                    !countryId || isCitiesFetching || cityOptions.length === 0
+                  }
+                  activeColor={eventColor}
+                  className="w-full"
+                  // triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                  enableSearch
+                />
+                {errors.cityId && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.cityId}
+                  </span>
+                )}
+              </div>
+            </div>
+            {/* Address */}
+            <div className="flex flex-col w-full">
+              <AddressAutocomplete
+                value={eventLocation}
+                onChange={(val) => onLocationChange(val)}
+                placeholder={cal.locationPlaceholder}
+                eventColor={eventColor}
+                error={errors.eventLocation}
               />
-              {errors.cityId && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.cityId}
-                </span>
-              )}
+              {/* {eventLocation.trim() && (
+                <button
+                  type="button"
+                  onClick={handleOpenMaps}
+                  className="text-sm mt-1.5 self-start hover:opacity-80 transition-opacity font-medium"
+                  style={{ color: eventColor }}
+                >
+                  {cal.openMaps}
+                </button>
+              )} */}
             </div>
           </div>
-
-          <div className="flex flex-col w-full">
-            <TextInput
-              value={eventLocation}
-              onChange={(e) => onLocationChange(e.target.value)}
-              placeholder={cal.locationPlaceholder}
-              variant="square"
-              color={eventColor}
-              containerClassName="w-full"
-              error={errors.eventLocation}
-            />
-            {eventLocation.trim() && (
-              <button
-                type="button"
-                onClick={handleOpenMaps}
-                className="text-sm mt-1.5 self-start hover:opacity-80 transition-opacity font-medium"
-                style={{ color: eventColor }}
-              >
-                {cal.openMaps}
-              </button>
-            )}
-          </div>
         </div>
-      </div>
+      )}
 
       {/* Description */}
-      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+      {/* <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
         <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.description}
         </div>
@@ -188,26 +160,42 @@ const EventDetailsSection = ({
             error={errors.description}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Max participants */}
       <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
         <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
           {cal.maxParticipants}
         </div>
-        <div className="flex items-start w-full">
-          <div className="flex items-start flex-1">
-            <TextInput
-              type="number"
-              value={maxParticipants}
-              onChange={(e) => onMaxParticipantsChange(e.target.value)}
-              variant="square"
-              color={eventColor}
-              className="text-center !px-2"
-              containerClassName="w-32"
-              error={errors.maxParticipants}
-            />
-            <span className="text-[#606060] ml-3 mt-[10px]">{cal.guest}</span>
+        <div className="flex items-start w-full min-w-0">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3">
+              <TextInput
+                type="text"
+                inputMode="numeric"
+                value={maxParticipants}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || /^\d+$/.test(val)) {
+                    onMaxParticipantsChange(val);
+                    if (errors.maxParticipants) onMaxParticipantsChange(val);
+                  }
+                }}
+                onBlur={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && !/^\d+$/.test(val)) {
+                    onMaxParticipantsChange("");
+                  }
+                }}
+                variant="square"
+                color={eventColor}
+                placeholder={cal.maxParticipantsPlaceholder || "0"}
+                className="text-center !px-2"
+                containerClassName="w-24"
+                error={errors.maxParticipants}
+              />
+              <span className="text-[#606060] mt-[10px]">{cal.guest}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -246,25 +234,39 @@ const EventDetailsSection = ({
         </div>
       </div>
 
-      {/* Ticket price (static / coming soon) */}
-      <div className="flex items-center max-[425px]:flex-col max-[425px]:items-start max-[425px]:justify-between max-[425px]:gap-1">
-        <div className="w-[150px] shrink-0 max-[425px]:w-full">
+      {/* Ticket price */}
+      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+        <div className="w-[150px] shrink-0 max-[425px]:w-full pt-[10px] max-[425px]:pt-0">
           {cal.ticketPrice}
         </div>
-        <div className="flex-1 flex items-center justify-between w-full h-10 border border-transparent max-[425px]:p-0">
-          <span className="text-[#606060] text-base">{cal.free}</span>
-          <button
-            type="button"
-            disabled
-            className="font-bold text-base transition-opacity duration-300 opacity-50 cursor-not-allowed"
-            style={{ color: eventColor }}
-          >
-            {cal.edit}
-          </button>
+        <div className="flex flex-col w-full min-w-0">
+          <div className="flex items-center gap-3">
+            <TextInput
+              type="text"
+              inputMode="numeric"
+              value={ticketPrice ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "" || /^\d+$/.test(val)) {
+                  onTicketPriceChange(val === "" ? null : Number(val));
+                }
+              }}
+              variant="square"
+              color={eventColor}
+              placeholder={"0"}
+              className="text-center !px-2"
+              containerClassName="w-24"
+            />
+            <span className="text-[#606060] text-sm">
+              {ticketPrice == null || ticketPrice === 0
+                ? `(${cal.free || "Miễn phí"})`
+                : "k"}
+            </span>
+          </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EventDetailsSection
+export default EventDetailsSection;

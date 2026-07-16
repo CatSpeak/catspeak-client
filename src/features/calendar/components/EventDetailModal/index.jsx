@@ -1,34 +1,35 @@
-import React, { useState, useEffect } from "react"
-import { X, ChevronLeft } from "lucide-react"
-import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
-import Modal from "@/shared/components/ui/Modal"
+import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner";
+import Modal from "@/shared/components/ui/Modal";
 import {
   useGetEventByIdQuery,
   useGetEventOccurrenceByIdQuery,
   useGetSharedEventQuery,
-} from "@/store/api/eventsApi"
-import EventDetailHeader from "./EventDetailHeader"
-import EventDetailBody from "./EventDetailBody"
-import EventDetailFooter from "./EventDetailFooter"
-import CreateEventModal from "../CreateEventModal"
-import { useLanguage } from "@/shared/context/LanguageContext"
+} from "@/store/api/eventsApi";
+import EventDetailHeader from "./EventDetailHeader";
+import EventDetailBody from "./EventDetailBody";
+import EventDetailFooter from "./EventDetailFooter";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useNavigate, useParams } from "react-router-dom";
 
 const EventDetailModal = ({ event, onClose }) => {
-  const { t } = useLanguage()
-  const cal = t.calendar || {}
-  const [editMode, setEditMode] = useState("none") // "none" | "choice" | "series" | "occurrence"
-  const [overrideEvent, setOverrideEvent] = useState(null)
+  const { t } = useLanguage();
+  const cal = t.calendar || {};
+  const navigate = useNavigate();
+  const { lang } = useParams();
+  const [overrideEvent, setOverrideEvent] = useState(null);
 
   // Reset override if the base event changes
   useEffect(() => {
-    setOverrideEvent(null)
-  }, [event])
+    setOverrideEvent(null);
+  }, [event]);
 
-  const currentEvent = overrideEvent || event
+  const currentEvent = overrideEvent || event;
 
-  const eventId = currentEvent?.eventId ?? currentEvent?.id
-  const occurrenceId = currentEvent?.occurrenceId
-  const token = currentEvent?.token
+  const eventId = currentEvent?.eventId ?? currentEvent?.id;
+  const occurrenceId = currentEvent?.occurrenceId;
+  const token = currentEvent?.token;
 
   const {
     data: sharedData,
@@ -36,7 +37,7 @@ const EventDetailModal = ({ event, onClose }) => {
     isFetching: isFetchingShared,
   } = useGetSharedEventQuery(token, {
     skip: !token,
-  })
+  });
 
   const {
     data: occurrenceDetail,
@@ -44,15 +45,15 @@ const EventDetailModal = ({ event, onClose }) => {
     isFetching: isFetchingOccurrence,
   } = useGetEventOccurrenceByIdQuery(occurrenceId, {
     skip: !occurrenceId,
-  })
+  });
 
   // Prevent 404 GET errors if eventId is accidentally an occurrenceId (e.g. from an old shared link)
-  let actualEventId = eventId
+  let actualEventId = eventId;
   if (occurrenceDetail?.eventId) {
-    actualEventId = occurrenceDetail.eventId
+    actualEventId = occurrenceDetail.eventId;
   } else if (occurrenceId && eventId === occurrenceId) {
     // Wait for occurrenceDetail to give us the real eventId
-    actualEventId = null
+    actualEventId = null;
   }
 
   const {
@@ -61,7 +62,7 @@ const EventDetailModal = ({ event, onClose }) => {
     isFetching: isFetchingEvent,
   } = useGetEventByIdQuery(actualEventId, {
     skip: !actualEventId,
-  })
+  });
 
   const isLoading =
     isLoadingEvent ||
@@ -69,11 +70,11 @@ const EventDetailModal = ({ event, onClose }) => {
     isLoadingShared ||
     isFetchingEvent ||
     isFetchingOccurrence ||
-    isFetchingShared
+    isFetchingShared;
 
-  if (!event) return null
+  if (!event) return null;
 
-  let ev
+  let ev;
   if (occurrenceId) {
     ev = {
       ...currentEvent,
@@ -92,24 +93,19 @@ const EventDetailModal = ({ event, onClose }) => {
         occurrenceDetail?.timezone || detail?.timezone || event?.timezone,
       isRecurringGroup: false,
       subOccurrences: undefined,
-    }
+    };
   } else {
     ev = {
       ...currentEvent,
       ...detail,
-    }
+    };
   }
-  
-  if (sharedData?.shareLink) {
-    ev.shareLink = sharedData.shareLink
-  }
-  const headerColor = ev.color || "#B91264"
 
-  if (editMode === "series" || editMode === "occurrence") {
-    return (
-      <CreateEventModal editEvent={ev} onClose={() => setEditMode("none")} />
-    )
+  if (sharedData?.shareLink) {
+    ev.shareLink = sharedData.shareLink;
   }
+  // const headerColor = ev.color || "#B91264"
+
 
   return (
     <Modal
@@ -135,32 +131,36 @@ const EventDetailModal = ({ event, onClose }) => {
             text={cal.loadingDetails || "Loading details..."}
           />
         ) : (
-          <>
-            <div
-              className={`flex-1 overflow-y-auto ${!occurrenceId && ev?.isRecurringGroup ? "min-[426px]:rounded-b-[24px]" : ""}`}
-            >
-              <EventDetailHeader
-                ev={ev}
-                headerColor={headerColor}
-                onClose={onClose}
-                onBack={
-                  overrideEvent ? () => setOverrideEvent(null) : undefined
+          <div className="flex flex-1 min-h-0 flex-col">
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div
+                className={
+                  !occurrenceId && ev?.isRecurringGroup
+                    ? "min-[426px]:rounded-b-[24px]"
+                    : ""
                 }
-              />
+              >
+                <EventDetailHeader
+                  ev={ev}
+                  onClose={onClose}
+                  onBack={
+                    overrideEvent ? () => setOverrideEvent(null) : undefined
+                  }
+                />
 
-              <EventDetailBody
-                ev={ev}
-                event={currentEvent}
-                headerColor={headerColor}
-                isLoading={isLoading}
-                onSelectOccurrence={(sub) => {
-                  setOverrideEvent({
-                    eventId: actualEventId || eventId,
-                    occurrenceId: sub.id,
-                    ...sub,
-                  })
-                }}
-              />
+                <EventDetailBody
+                  ev={ev}
+                  event={currentEvent}
+                  isLoading={isLoading}
+                  onSelectOccurrence={(sub) => {
+                    setOverrideEvent({
+                      eventId: actualEventId || eventId,
+                      occurrenceId: sub.id,
+                      ...sub,
+                    });
+                  }}
+                />
+              </div>
             </div>
 
             {!(!occurrenceId && ev?.isRecurringGroup) && (
@@ -170,20 +170,20 @@ const EventDetailModal = ({ event, onClose }) => {
                   event={ev}
                   onClose={onClose}
                   onEdit={() => {
-                    if (ev?.isRecurring && ev?.occurrenceId) {
-                      setEditMode("occurrence")
-                    } else {
-                      setEditMode("series")
-                    }
+                    const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
+                    navigate(`${basePath}/create`, {
+                      state: { editEvent: ev },
+                    });
+                    onClose();
                   }}
                 />
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </Modal>
-  )
-}
+  );
+};
 
-export default EventDetailModal
+export default EventDetailModal;

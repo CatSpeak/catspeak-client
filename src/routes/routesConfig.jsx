@@ -18,6 +18,7 @@ import DiscoverPage from "@/features/discover/DiscoverPage"
 import MailPage from "@/features/mail/pages/MailPage"
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
 import CalendarPage from "@/features/calendar/pages/CalendarPage"
+import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
 
 // Shared Pages
 import { ComingSoonPage } from "@/shared/pages"
@@ -60,6 +61,8 @@ const WorkspaceReelsPage = lazy(
 const WorkspaceReelDetailPage = lazy(
   () => import("@/features/reels/pages/WorkspaceReelDetailPage"),
 )
+
+const WorkspaceEventsPage = lazy(() => import("@/features/calendar/pages/WorkspaceEventsPage"))
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
 const MyLearningPage = lazy(() => import("@/features/courses/pages/MyLearningPage"))
 const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
@@ -197,6 +200,10 @@ const routesConfig = [
                   {
                     path: "calendar",
                     element: <CalendarPage />,
+                  },
+                  {
+                    path: "calendar/create",
+                    element: <CreateEventPage />,
                   },
                   { path: "*", element: <PageNotFound /> },
                 ],
@@ -392,6 +399,14 @@ const routesConfig = [
                     ),
                   },
                 ],
+              },
+              {
+                path: "events",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceEventsPage />
+                  </LazyRoute>
+                ),
               },
               { path: "*", element: <PageNotFound /> },
             ],

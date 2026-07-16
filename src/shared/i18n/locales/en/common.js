@@ -24,7 +24,7 @@ export default {
       vi: "Vietnamese",
       zh: "Chinese",
       en: "English",
-    }
+    },
   },
   pagination: {
     range: "{{start}}-{{end}} of {{total}}",
@@ -40,6 +40,7 @@ export default {
     video: "Video",
     letters: "Letters",
     calendar: "Calendar",
+    events: "Events",
     cart: "Cart",
     courses: "Courses",
     allCourses: "All Courses",
@@ -68,4 +69,4 @@ export default {
     thankYou: "Thank you for your patience! ^^",
   },
   noOptionsFound: "No options found",
-}
+};

@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   GraduationCap,
   Settings,
+  HelpCircle,
   Briefcase,
   User,
   CreditCard,
@@ -11,8 +12,9 @@ import {
   Mic,
   Film,
   Mail,
-  BookOpen
-} from "lucide-react"
+  BookOpen,
+  Video,
+} from "lucide-react";
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -38,9 +40,17 @@ export const navLinks = [
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
+      { key: "recordings", path: "/workspace/recordings", icon: Mic },
+      { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
 
+  {
+    key: "profile",
+    path: "/profile",
+    hasDropdown: false,
+    icon: User,
+  },
   // {
   //   key: "pricing",
   //   path: "/pricing",
@@ -58,10 +68,10 @@ export const navLinks = [
   //     { key: "myCourses", path: "/my-courses" }
   //   ]
   // },
-]
+];
 
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
   // { key: "help", path: "/help", icon: HelpCircle }
-]
+];

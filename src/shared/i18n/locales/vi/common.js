@@ -40,6 +40,7 @@ export default {
     video: "Video",
     letters: "Thư",
     calendar: "Lịch",
+    events: "Sự kiện",
     cart: "Giỏ hàng",
     courses: "Khóa học",
     allCourses: "Các khóa học",
