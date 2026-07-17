@@ -52,15 +52,23 @@ const AccountSettingsPage = lazy(
 )
 
 const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
-const ReelDetailPage = lazy(() => import("@/features/reels/pages/ReelDetailPage"))
-const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceReelsPage"))
-const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
+const ReelDetailPage = lazy(
+  () => import("@/features/reels/pages/ReelDetailPage"),
+)
+const WorkspaceReelsPage = lazy(
+  () => import("@/features/reels/pages/WorkspaceReelsPage"),
+)
+const WorkspaceReelDetailPage = lazy(
+  () => import("@/features/reels/pages/WorkspaceReelDetailPage"),
+)
+
 const WorkspaceEventsPage = lazy(() => import("@/features/calendar/pages/WorkspaceEventsPage"))
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
+const MyLearningPage = lazy(() => import("@/features/courses/pages/MyLearningPage"))
 const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
 const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
+const CheckoutPage = lazy(() => import("@/features/billing/pages/CheckoutPage.jsx"))
 const MyCoursesPage = lazy(() => import("@/features/courses/pages/MyCoursesPage"))
-const MyLearningPage = lazy(() => import("@/features/courses/pages/MyLearningPage"))
 const CreateCoursePage = lazy(() => import("@/features/courses/pages/CreateCoursePage"))
 const AllCoursesPage = lazy(() => import("@/features/courses/pages/AllCoursesPage"))
 const AllClassesPage = lazy(() => import("@/features/courses/pages/AllClassesPage"))
@@ -106,6 +114,16 @@ const routesConfig = [
               <LazyRoute>
                 <PricingPage />
               </LazyRoute>
+            ),
+          },
+          {
+            path: "checkout",
+            element: (
+              <AuthGuard>
+                <LazyRoute>
+                  <CheckoutPage />
+                </LazyRoute>
+              </AuthGuard>
             ),
           },
           { path: "*", element: <PageNotFound /> },

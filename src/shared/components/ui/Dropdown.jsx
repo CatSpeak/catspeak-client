@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
-import { createPortal } from "react-dom";
-import { ChevronDown, Search } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
-import useClickOutside from "@/shared/hooks/useClickOutside";
-import colors from "@/shared/utils/colors";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import MenuItem from "@/shared/components/ui/MenuItem";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
+import React, { useState, useRef, useEffect, useMemo } from "react"
+import { createPortal } from "react-dom"
+import { ChevronDown, Search } from "lucide-react"
+import { AnimatePresence } from "framer-motion"
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import useClickOutside from "@/shared/hooks/useClickOutside"
+import colors from "@/shared/utils/colors"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import MenuItem from "@/shared/components/ui/MenuItem"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const removeDiacritics = (str) => {
   if (!str) return "";
@@ -76,8 +76,8 @@ const Dropdown = ({
         const forceAlignRight = rect.left + 260 > window.innerWidth;
 
         setPortalCoords((prev) => {
-          const newTop = rect.top + window.scrollY;
-          const newLeft = rect.left + window.scrollX;
+          const newTop = rect.top + window.scrollY
+          const newLeft = rect.left + window.scrollX
 
           if (
             prev &&
@@ -105,7 +105,7 @@ const Dropdown = ({
 
     const handleScroll = (e) => {
       // Don't close if scrolling inside the dropdown portal itself
-      if (portalRef.current && portalRef.current.contains(e.target)) return;
+      if (portalRef.current && portalRef.current.contains(e.target)) return
 
       // Update coords instead of closing, keeps it attached when scrolling
       updateCoords();
@@ -200,8 +200,8 @@ const Dropdown = ({
         rightText={option.rightText}
         rightContent={option.rightContent}
       />
-    );
-  };
+    )
+  }
 
   const alignClass = portalCoords?.forceAlignRight
     ? "right-0 origin-top-right"

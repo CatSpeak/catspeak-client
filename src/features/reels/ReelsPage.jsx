@@ -83,7 +83,7 @@ const ReelsPage = () => {
   )
 
   return (
-    <div className="flex flex-col pb-12 p-5">
+    <div className="flex flex-col p-6 pb-12">
       {/* Breadcrumbs always visible unless mobile detail view */}
       {(!showMobileDetail || isLg) && (
         <Breadcrumb 
