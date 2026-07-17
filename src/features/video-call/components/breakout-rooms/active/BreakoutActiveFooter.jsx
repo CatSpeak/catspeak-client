@@ -69,11 +69,12 @@ const BreakoutActiveFooter = ({
 
           <div className="flex justify-end gap-3">
             <PillButton
+              type="button"
               variant="secondary"
               className="w-full sm:w-auto min-w-20"
               onClick={() => setIsModalOpen(false)}
             >
-              {"Cancel"}
+              {t.rooms.breakoutRooms.cancelBtn}
             </PillButton>
             <PillButton
               type="submit"
