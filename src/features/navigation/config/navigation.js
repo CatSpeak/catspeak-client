@@ -41,6 +41,7 @@ export const navLinks = [
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
+      { key: "profile", path: "/profile", icon: User },
     ],
   },
   // {

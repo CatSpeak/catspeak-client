@@ -157,10 +157,10 @@ const CreateReelModalContent = ({ open }) => {
         <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-2 w-full">
           <PillButton
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={handleClose}
             disabled={isLoading}
-            className="w-full sm:w-auto h-10 px-5 !border-gray-300 hover:!bg-gray-50 !text-gray-600 font-semibold"
+            className="w-full sm:w-auto min-w-[120px] h-10 font-semibold"
           >
             {t.cancel || "Cancel"}
           </PillButton>
@@ -169,7 +169,7 @@ const CreateReelModalContent = ({ open }) => {
             loading={isLoading}
             loadingText={t.catSpeak?.reels?.posting || "Posting..."}
             disabled={!videoFile || isLoading}
-            className="w-full sm:w-auto h-10 px-6 font-semibold shadow-sm shadow-red-950/10"
+            className="w-full sm:w-auto min-w-[120px] h-10 font-semibold"
             bgColor="#990011"
             textColor="#ffffff"
           >
