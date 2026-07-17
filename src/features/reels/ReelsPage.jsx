@@ -161,7 +161,7 @@ const ReelsPage = () => {
         <CreateReelModal
           open={isUploadOpen}
           onClose={handleUploadClose}
-          challenge={{ challengeId }}
+          challenge={uploadChallenge}
         />
       )}
     </div>
