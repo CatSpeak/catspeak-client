@@ -4,7 +4,7 @@ const IconButton = ({
   children,
   onClick,
   disabled = false,
-  variant = "filled", // "filled" | "ghost"
+  variant = "filled", // "filled" | "ghost" | "outline"
   size = "sm", // "sm" | "md"
   className = "",
   ...props
@@ -25,6 +25,7 @@ const IconButton = ({
     ghost: "bg-transparent group-hover:bg-[#CCCCCC]",
     transparent: "bg-transparent",
     overlay: "bg-black/50 group-hover:bg-black/80 text-white/70 group-hover:text-white transition-all",
+    outline: "bg-transparent group-hover:bg-[#f3f3f3] group-active:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm

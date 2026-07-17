@@ -22,6 +22,7 @@ const BreakoutSetupControls = ({
     <div>
       <div className="py-2">
         <ListItem
+          contentClassName="!h-10"
           rightContent={
             <Switch
               checked={maxParticipantsEnabled}
@@ -39,12 +40,12 @@ const BreakoutSetupControls = ({
               value={maxParticipants}
               onChange={setMaxParticipants}
               min={1}
-              className="w-full"
+              className="w-full !h-11"
             />
           </div>
         )}
 
-        <ListItem>
+        <ListItem contentClassName="!h-10">
           <span>{t.rooms.breakoutRooms.roomCount}</span>
         </ListItem>
 
@@ -54,7 +55,7 @@ const BreakoutSetupControls = ({
             onChange={setRoomCount}
             min={2}
             max={6}
-            className="w-full"
+            className="w-full !h-11"
           />
         </div>
       </div>

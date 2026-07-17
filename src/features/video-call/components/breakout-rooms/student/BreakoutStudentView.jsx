@@ -118,16 +118,17 @@ const BreakoutStudentView = ({
   return (
     <div className="flex flex-col h-full overflow-hidden bg-white">
       {/* List of Breakout Rooms */}
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 overflow-y-auto py-2 px-1 space-y-3">
         {/* Main Room */}
-        <div>
+        <div className="shadow-faq-card rounded-xl">
           <ListItem
+            contentClassName="!h-12"
             onClick={() => toggleRoomExpand("main")}
             hoverEffect={true}
             leftContent={<Volume2 />}
             rightText={mainRoomStudentCount}
             rightContent={
-              <div 
+              <div
                 onClick={(e) => { e.stopPropagation(); toggleRoomExpand("main") }}
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 hover:opacity-100 hover:bg-[#E6E6E6] cursor-pointer"
               >
@@ -182,6 +183,7 @@ const BreakoutStudentView = ({
                     variant="secondary"
                     className="w-full"
                     disabled={isSwitching || !allowChange}
+                    bgColor={"#F4AB1B"}
                   >
                     {!allowChange
                       ? t.rooms.breakoutRooms.changeLocked
@@ -208,18 +210,18 @@ const BreakoutStudentView = ({
             : false
 
           return (
-            <div key={room.sessionId}>
+            <div key={room.sessionId} className="shadow-faq-card rounded-xl">
               <ListItem
+                contentClassName="!h-12"
                 onClick={() => toggleRoomExpand(room.roomName)}
                 hoverEffect={true}
                 leftContent={<Volume2 />}
-                rightText={`${studentCount}${
-                  status.maxParticipantsPerRoom
-                    ? `/${status.maxParticipantsPerRoom}`
-                    : ""
-                }`}
+                rightText={`${studentCount}${status.maxParticipantsPerRoom
+                  ? `/${status.maxParticipantsPerRoom}`
+                  : ""
+                  }`}
                 rightContent={
-                  <div 
+                  <div
                     onClick={(e) => { e.stopPropagation(); toggleRoomExpand(room.roomName) }}
                     className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 hover:opacity-100 hover:bg-[#E6E6E6] cursor-pointer"
                   >
@@ -274,6 +276,7 @@ const BreakoutStudentView = ({
                         disabled={isSwitching || isFull || !allowChange}
                         variant="secondary"
                         className="w-full"
+                        bgColor={"#F4AB1B"}
                       >
                         {!allowChange
                           ? t.rooms.breakoutRooms.changeLocked

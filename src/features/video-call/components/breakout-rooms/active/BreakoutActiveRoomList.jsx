@@ -115,7 +115,7 @@ const BreakoutActiveRoomList = ({
     }) || []
 
   return (
-    <div className="py-2">
+    <div className="py-2 px-1 space-y-3">
       {/* Main Room */}
       <div
         onDragOver={(e) => handleDragOver(e, sessionId)}
@@ -125,10 +125,11 @@ const BreakoutActiveRoomList = ({
         className={
           dragOverRoomId === sessionId
             ? "relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10"
-            : "relative"
+            : "relative shadow-faq-card rounded-xl"
         }
       >
         <ListItem
+          contentClassName="!h-12"
           onClick={() => {
             if (isHostInMainRoom) return
             handleHostLeave()
@@ -163,7 +164,7 @@ const BreakoutActiveRoomList = ({
             <div>
               {mainRoomParticipants.length === 0 ? (
                 <ListItem>
-                  <span className="text-xs text-[#606060]">
+                  <span className="text-sm text-[#606060]">
                     {t.rooms.breakoutRooms.emptyRoom}
                   </span>
                 </ListItem>
@@ -199,6 +200,7 @@ const BreakoutActiveRoomList = ({
                   variant="secondary"
                   className="w-full"
                   disabled={isJoiningRoom}
+                  bgColor={"#F4AB1B"}
                 >
                   {t.rooms.breakoutRooms.joinRoomBtn}
                 </PillButton>
@@ -232,21 +234,21 @@ const BreakoutActiveRoomList = ({
             className={
               dragOverRoomId === room.sessionId
                 ? "relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10"
-                : "relative"
+                : "relative shadow-faq-card rounded-xl"
             }
           >
             <ListItem
+              contentClassName="!h-12"
               onClick={() => {
                 if (isHostInThisRoom) return
                 handleHostJoin(room.sessionId, room.roomName)
               }}
               hoverEffect={true}
               leftContent={<Volume2 />}
-              rightText={`${studentCount}${
-                status.maxParticipantsPerRoom
-                  ? `/${status.maxParticipantsPerRoom}`
-                  : ""
-              }`}
+              rightText={`${studentCount}${status.maxParticipantsPerRoom
+                ? `/${status.maxParticipantsPerRoom}`
+                : ""
+                }`}
               rightContent={
                 <div
                   onClick={(e) => {
@@ -317,6 +319,7 @@ const BreakoutActiveRoomList = ({
                       variant="secondary"
                       className="w-full"
                       disabled={isJoiningRoom}
+                      bgColor={"#F4AB1B"}
                     >
                       {t.rooms.breakoutRooms.joinRoomBtn}
                     </PillButton>
