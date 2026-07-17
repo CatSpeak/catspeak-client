@@ -60,7 +60,7 @@ const VideoTile = ({ participant, onClick }) => {
   const meta = parseMetadata(participant.metadata)
   // console.log("Participant Metadata [VideoTile]:", meta)
   const isHandRaised = meta.handRaised === true
-  const avatarUrl = meta.avatarUrl
+  const avatarUrl = meta.avatarImageUrl
 
   const theme = useMemo(
     () => getParticipantTheme(participant.identity),
@@ -93,17 +93,15 @@ const VideoTile = ({ participant, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`group relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl transition-all duration-200 ease-in-out [container-type:inline-size] ${
-        isVideoVisible ? "bg-neutral-900" : ""
-      } ${onClick ? "cursor-pointer" : ""}`}
+      className={`group relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl transition-all duration-200 ease-in-out [container-type:inline-size] ${isVideoVisible ? "bg-neutral-900" : ""
+        } ${onClick ? "cursor-pointer" : ""}`}
     >
       {/* Speaking Indicator Overlay */}
       <div
-        className={`pointer-events-none absolute inset-0 z-50 rounded-2xl transition-all duration-200 ${
-          isSpeaking
-            ? "border-2 border-solid border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
-            : "border-2 border-solid border-transparent shadow-sm"
-        }`}
+        className={`pointer-events-none absolute inset-0 z-10 rounded-2xl transition-all duration-200 ${isSpeaking
+          ? "border-2 border-solid border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
+          : "border-2 border-solid border-transparent shadow-sm"
+          }`}
       />
       {/* Video element for camera track */}
       <video
@@ -111,9 +109,8 @@ const VideoTile = ({ participant, onClick }) => {
         playsInline
         muted={isLocal}
         ref={videoRef}
-        className={`h-full w-full object-contain ${
-          isVideoVisible ? "block" : "hidden"
-        }`}
+        className={`h-full w-full object-contain ${isVideoVisible ? "block" : "hidden"
+          }`}
       />
 
       {/* Avatar fallback when no video */}
@@ -144,9 +141,8 @@ const VideoTile = ({ participant, onClick }) => {
               name={displayName || "?"}
               src={avatarUrl}
               speaking={false}
-              className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${
-                avatarUrl ? "shadow-xl" : ""
-              } ${theme.avatarClass}`}
+              className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${avatarUrl ? "shadow-xl" : ""
+                } ${theme.avatarClass}`}
             />
           </div>
         </div>

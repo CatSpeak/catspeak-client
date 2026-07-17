@@ -85,7 +85,7 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
         (p.isLocal ? Number(callInfo?.user?.accountId) : null),
       username: p.name || meta.name || p.identity,
       identity: p.identity,
-      avatarUrl: meta.avatarUrl,
+      avatarUrl: meta.avatarImageUrl,
       participant: p,
     }
   })
