@@ -22,24 +22,16 @@ import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
-import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import {
   useParticipantList,
   parseMetadata,
 } from "@/features/video-call/hooks/useParticipantList"
-import { useUnreadTracking } from "@/features/video-call/hooks/useUnreadTracking"
-import {
-  useChatPublicAiMutation,
-  useChatPrivateAiMutation,
-} from "@/store/api/social/conversationsApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
-
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
   getNavigate,
   getLocation,
 } from "@/features/video-call/hooks/useNavigateRef"
-
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"

@@ -92,11 +92,7 @@ const ChatPage = () => {
   const EmptyState = () => (
     <div className="flex-1 hidden md:flex flex-col items-center justify-center bg-[#FAFAFA]">
       <div className="w-20 h-20 rounded-full bg-[#990011]/5 flex items-center justify-center mb-4">
-        <MessageCircle
-          size={36}
-          className="text-[#990011]"
-          strokeWidth={1.5}
-        />
+        <MessageCircle size={36} className="text-[#990011]" strokeWidth={1.5} />
       </div>
       <h2 className="text-[18px] font-semibold text-[#1A1A1A]">
         Your Messages
@@ -111,9 +107,7 @@ const ChatPage = () => {
     <div className="flex h-[calc(100dvh-64px)] overflow-hidden bg-white">
       {/* ── Sidebar ──────────────────────────────────── */}
       <div
-        className={`${
-          selectedId ? "hidden md:flex" : "flex"
-        } w-full md:w-auto`}
+        className={`${selectedId ? "hidden md:flex" : "flex"} w-full md:w-auto`}
       >
         <ChatSidebar
           conversations={initialConversations}

@@ -9,12 +9,32 @@ export const conversationsApi = socialApi.injectEndpoints({
       providesTags: ["Conversations"],
     }),
 
-    // Create a new conversation
+    // Create a new conversation (legacy)
     createConversation: builder.mutation({
       query: (conversationData) => ({
         url: "/conversations",
         method: "POST",
         body: conversationData,
+      }),
+      invalidatesTags: ["Conversations"],
+    }),
+
+    // Create a private conversation
+    createPrivateConversation: builder.mutation({
+      query: (targetAccountId) => ({
+        url: "/conversations/private",
+        method: "POST",
+        params: { targetAccountId },
+      }),
+      invalidatesTags: ["Conversations"],
+    }),
+
+    // Create a group conversation
+    createGroupConversation: builder.mutation({
+      query: (groupData) => ({
+        url: "/conversations/group",
+        method: "POST",
+        body: groupData,
       }),
       invalidatesTags: ["Conversations"],
     }),
@@ -39,24 +59,6 @@ export const conversationsApi = socialApi.injectEndpoints({
       ],
     }),
 
-    // Send a message to public AI
-    chatPublicAi: builder.mutation({
-      query: (data) => ({
-        url: "/conversations/ai/public-ai",
-        method: "POST",
-        body: data,
-      }),
-    }),
-
-    // Send a message to private AI
-    chatPrivateAi: builder.mutation({
-      query: (data) => ({
-        url: "/conversations/ai/private-ai",
-        method: "POST",
-        body: data,
-      }),
-    }),
-
     // Mark a conversation as read
     markConversationAsRead: builder.mutation({
       query: (conversationId) => ({
@@ -71,9 +73,9 @@ export const conversationsApi = socialApi.injectEndpoints({
 export const {
   useGetConversationsQuery,
   useCreateConversationMutation,
+  useCreatePrivateConversationMutation,
+  useCreateGroupConversationMutation,
   useGetConversationMessagesQuery,
   useSendMessageMutation,
-  useChatPublicAiMutation,
-  useChatPrivateAiMutation,
   useMarkConversationAsReadMutation,
 } = conversationsApi

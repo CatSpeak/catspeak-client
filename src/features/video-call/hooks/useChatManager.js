@@ -5,7 +5,7 @@ import { useUnreadTracking } from "./useUnreadTracking"
 import {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
-} from "@/store/api/social/conversationsApi"
+} from "@/store/api/aiApi"
 
 export const useChatManager = ({
   lkRoom,
