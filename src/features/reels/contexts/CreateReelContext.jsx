@@ -916,7 +916,7 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
     try {
       const formData = new FormData()
       formData.append("Title", title.trim())
-      formData.append("Description", buildChallengeDescription(lockedChallengeHashtag, description).trim())
+      formData.append("Description", description.trim())
       formData.append("Privacy", privacy)
       formData.append("VideoFile", videoFile)
 

@@ -122,19 +122,13 @@ const RoomsPage = () => {
       languageType,
       requiredLevels: requiredLevelsArg,
       categories,
+      topics: topicsArg,
+      roomName: searchArg,
     },
     { skip: !shouldFetch },
   );
 
   let rooms = responseData?.data ?? [];
-
-
-  if (searchArg) {
-    const lowerSearch = searchArg.toLowerCase();
-    rooms = rooms.filter((room) =>
-      room.name && room.name.toLowerCase().includes(lowerSearch)
-    );
-  }
 
   // Local pagination
   const totalFilteredCount = rooms.length;

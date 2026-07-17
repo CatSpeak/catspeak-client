@@ -40,16 +40,8 @@ export const navLinks = [
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
-      { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "events", path: "/workspace/events", icon: Calendar },
     ],
-  },
-
-  {
-    key: "profile",
-    path: "/profile",
-    hasDropdown: false,
-    icon: User,
   },
   // {
   //   key: "pricing",
