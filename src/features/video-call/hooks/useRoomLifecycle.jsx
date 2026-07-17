@@ -8,6 +8,8 @@ import { getCommunityPath } from "@/shared/utils/navigation"
 import { useVideoCallSignaling } from "@/features/video-call/hooks/useVideoCallSignaling"
 import { roomsApi } from "@/store/api/roomsApi"
 import { livekitApi } from "@/store/api/livekitApi"
+import { Megaphone, X } from "lucide-react"
+import { IconButton, PillButton } from "@/shared/components/ui/buttons"
 
 export const useRoomLifecycle = ({
   lkRoom,
@@ -77,26 +79,37 @@ export const useRoomLifecycle = ({
   const handleBroadcastNotification = useCallback(
     (parentSessionIdValue, message) => {
       console.info("[SignalR] BroadcastNotification received:", message)
-      toast(message, {
-        duration: 8000,
-        style: {
-          padding: "8px 16px",
-          color: "#FFFFFF",
-          background: "#1E1F26",
-          fontWeight: "500",
-          fontSize: "14px",
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-          minHeight: "48px", /* h-12 */
-          maxWidth: "90vw", /* safe on mobile */
-          display: "flex", /* center vertically */
-          alignItems: "center",
-          justifyContent: "flex-start",
-          textAlign: "left",
-        },
-      })
+      const title = t?.rooms?.breakoutRooms?.broadcastToastTitle ?? "Thông báo từ Host"
+      toast.custom(
+        (toastInstance) => (
+          <div
+            className={`${toastInstance.visible ? "animate-enter" : "animate-leave"
+              } flex items-center gap-4 w-[90vw] max-w-[480px] rounded-xl bg-white p-3 shadow-faq-card font-nunito`}
+          >
+            <div className="bg-[#FEF5C7] border rounded-full w-10 h-10 flex items-center justify-center">
+              <Megaphone color="#F4AB1B" size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium md:text-lg text-base text-[#F4AB1B] leading-tight">
+                {title}
+              </p>
+              <p className="md:text-base text-sm text-[#7B7979] mt-0.5 break-words">
+                &ldquo;{message}&rdquo;
+              </p>
+            </div>
+            <IconButton
+              onClick={() => toast.dismiss(toastInstance.id)}
+              size="sm"
+              variant="filled"
+            >
+              <X size={16} color="#6B7280" />
+            </IconButton>
+          </div>
+        ),
+        { duration: 10000 }
+      )
     },
-    []
+    [t]
   )
 
   const signaling = useVideoCallSignaling({

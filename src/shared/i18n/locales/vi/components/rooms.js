@@ -634,6 +634,7 @@ export default {
     joinError: "Lỗi tham gia phòng nhỏ.",
     returnMainError: "Lỗi quay trở lại phòng chính.",
     broadcastError: "Lỗi gửi thông báo.",
+    broadcastToastTitle: "Thông báo từ Host",
     toggleAllowError: "Không thể thay đổi cài đặt chuyển phòng.",
     breakoutRoomPrefix: "Phòng thảo luận: ",
     freeToChange: "Tự do chuyển",

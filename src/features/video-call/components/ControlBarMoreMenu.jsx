@@ -31,6 +31,7 @@ import {
 import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
 import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
 import { useGame } from "@/features/games/context/GameContext";
+import MenuItem from "@/shared/components/ui/MenuItem";
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
@@ -61,7 +62,7 @@ const ControlBarMoreMenu = ({
 
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [showGameHistory, setShowGameHistory] = useState(false);
-  
+
   const { isBreakoutActive } = useSelector((s) => s.videoCall);
 
   const {
@@ -107,7 +108,7 @@ const ControlBarMoreMenu = ({
               distance={15}
               exit={true}
               duration={0.2}
-              className="absolute bottom-[110%] right-0 z-50 mb-2 w-56"
+              className="absolute bottom-[110%] right-0 z-50 mb-2 min-w-56 max-w-72 w-full"
             >
               <div className="w-full overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
                 <AnimatePresence mode="wait" initial={false}>
@@ -121,8 +122,8 @@ const ControlBarMoreMenu = ({
                       duration={0.2}
                       className="w-full"
                     >
-                      <div className="flex flex-col gap-1 p-1">
-                        <button
+                      <div className="flex flex-col">
+                        <MenuItem
                           onClick={() => {
                             setShowMoreMenu(false);
                             if (ongoingGame) {
@@ -132,54 +133,43 @@ const ControlBarMoreMenu = ({
                               setShowGameSetup(true);
                             }
                           }}
-                          className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] ${(!isHost && !ongoingGame) ? "opacity-50 cursor-not-allowed" : ""}`}
                           disabled={!isHost && !ongoingGame}
-                        >
-                          <Gamepad2 size={20} />
-                          {ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
-                        </button>
+                          icon={<Gamepad2 size={20} />}
+                          label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
+                        />
 
-                        <button
-                            onClick={() => {
-                              setShowMoreMenu(false);
-                              setShowGameHistory(true);
-                            }}
-                            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-slate-700`}
-                            style={{ textAlign: "left" }}
-                          >
-                            <History size={20} />
-                            {t.rooms?.game?.crackIt?.gameHistory || "Game History"}
-                          </button>
+                        <MenuItem
+                          onClick={() => {
+                            setShowMoreMenu(false);
+                            setShowGameHistory(true);
+                          }}
+                          icon={<History size={20} />}
+                          label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
+                        />
 
                         <div className="border-t border-[#E5E5E5]"></div>
-                        <button
+                        <MenuItem
                           onClick={() => {
                             setShowParticipants(!showParticipants);
                             setShowMoreMenu(false);
                           }}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                          style={{ textAlign: "left" }}
-                        >
-                          <Users size={20} />
-                          {t.rooms?.videoCall?.controls?.participants ||
-                            "Participants"}
-                        </button>
+                          icon={<Users size={20} />}
+                          label={t.rooms?.videoCall?.controls?.participants || "Participants"}
+                        />
 
                         {!isAISession && (isHost || isBreakoutActive) && (
-                          <button
+                          <MenuItem
                             onClick={() => {
                               setShowBreakout(!showBreakout);
                               setShowMoreMenu(false);
                             }}
-                            className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] min-[769px]:hidden"
-                            style={{ textAlign: "left" }}
-                          >
-                            <Split size={20} />
-                            {t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
-                          </button>
+                            icon={<Split size={20} />}
+                            label={t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
+                            className="min-[769px]:hidden"
+                          />
                         )}
 
-                        <button
+                        <MenuItem
                           onClick={() => {
                             if (isAISession) {
                               setShowCC(!showCC);
@@ -194,82 +184,70 @@ const ControlBarMoreMenu = ({
                             }
                           }}
                           disabled={!isAISession && isStarting}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                        >
-                          {!isAISession && isStarting ? (
+                          icon={!isAISession && isStarting ? (
                             <Loader2 size={20} className="animate-spin" />
                           ) : (
                             <Captions size={20} />
                           )}
-                          {(isAISession ? showCC : isSubtitleActive)
+                          label={(isAISession ? showCC : isSubtitleActive)
                             ? t?.rooms?.videoCall?.controls?.captionsOff ||
-                              "Turn off captions"
+                            "Turn off captions"
                             : t?.rooms?.videoCall?.controls?.captionsOn ||
-                              "Turn on captions"}
-                        </button>
+                            "Turn on captions"}
+                        />
 
                         <div className="border-t border-[#E5E5E5]"></div>
-                        <button
+                        <MenuItem
                           onClick={() => {
                             setShowVirtualBackground(!showVirtualBackground);
                             setShowMoreMenu(false);
                           }}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-left"
-                        >
-                          <Sparkles size={20} className="shrink-0" />
-                          <span>
-                            {t?.rooms?.videoCall?.backgroundsAndEffects ||
-                              "Backgrounds and effects"}
-                          </span>
-                        </button>
+                          icon={<Sparkles size={20} className="shrink-0" />}
+                          label={
+                            t?.rooms?.videoCall?.backgroundsAndEffects ||
+                            "Backgrounds and effects"}
+                        />
 
-                        <button
+                        <MenuItem
                           onClick={() => {
                             setShowAvatarPicker(!showAvatarPicker);
                             setShowMoreMenu(false);
                           }}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                        >
-                          <UserCircle size={20} />
-                          {t?.rooms?.videoCall?.changeAvatar ||
+                          icon={<UserCircle size={20} />}
+                          label={
+                            t?.rooms?.videoCall?.changeAvatar ||
                             "Change meeting avatar"}
-                        </button>
+                        />
 
                         {"documentPictureInPicture" in window && (
-                          <button
+                          <MenuItem
                             onClick={() => {
                               enterPiP?.();
                               setShowMoreMenu(false);
                             }}
-                            className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                          >
-                            <MonitorUp size={20} />
-                            {t?.rooms?.videoCall?.pictureInPicture ||
+                            icon={<MonitorUp size={20} />}
+                            label={t?.rooms?.videoCall?.pictureInPicture ||
                               "Picture-in-Picture"}
-                          </button>
+                          />
                         )}
 
-                        <button
+                        <MenuItem
                           onClick={handleCopyLink}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
-                        >
-                          <Copy size={20} />
-                          {t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
-                        </button>
+                          icon={<Copy size={20} />}
+                          label={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+                        />
 
-                        <button
+                        <MenuItem
                           onClick={() => {
                             setShowTroubleshoot(!showTroubleshoot);
                             setShowMoreMenu(false);
                           }}
-                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6] text-left"
-                        >
-                          <RefreshCcw size={20} className="shrink-0" />
-                          <span>
-                            {t?.rooms?.videoCall?.reconnect ||
-                              "Troubleshoot connection"}
-                          </span>
-                        </button>
+                          icon={<RefreshCcw size={20} className="shrink-0" />}
+                          label={
+                            t?.rooms?.videoCall?.reconnect ||
+                            "Troubleshoot connection"
+                          }
+                        />
                       </div>
                     </FluentAnimation>
                   ) : (

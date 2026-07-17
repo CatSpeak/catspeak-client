@@ -18,6 +18,7 @@ const BreakoutSettingsArea = ({
     <div className="py-2">
       {/* Allow participants to change room */}
       <ListItem
+        contentClassName="!h-10"
         rightContent={
           <Switch
             checked={allowChangeRoom}
@@ -32,6 +33,7 @@ const BreakoutSettingsArea = ({
       {/* Timer Switch */}
       <div>
         <ListItem
+          contentClassName="!h-10"
           rightContent={
             <Switch
               checked={timerEnabled}
@@ -50,7 +52,7 @@ const BreakoutSettingsArea = ({
               onChange={setTimerDuration}
               min={1}
               max={120}
-              className="w-full"
+              className="w-full !h-11"
             />
           </div>
         )}

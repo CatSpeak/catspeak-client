@@ -34,7 +34,7 @@ const DominantVideo = ({ participant }) => {
 
   const meta = parseMetadata(participant?.metadata)
   console.log("Participant Metadata [PiPVideoContent]:", meta)
-  const avatarUrl = meta?.avatarUrl
+  const avatarUrl = meta?.avatarImageUrl
 
   const theme = useMemo(
     () => getParticipantTheme(participant?.identity, displayName),

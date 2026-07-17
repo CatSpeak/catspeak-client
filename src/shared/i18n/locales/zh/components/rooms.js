@@ -487,6 +487,7 @@ export default {
     joinError: "加入分组房间出错。",
     returnMainError: "返回主房间出错。",
     broadcastError: "发送广播出错。",
+    broadcastToastTitle: "来自主持人的通知",
     toggleAllowError: "无法更改房间更换设置。",
     breakoutRoomPrefix: "分组房间: ",
     freeToChange: "自由移动",

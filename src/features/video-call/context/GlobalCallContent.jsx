@@ -45,7 +45,7 @@ import {
 } from "@/features/video-call/hooks/useNavigateRef"
 
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
-import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle"
+import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 
 /**

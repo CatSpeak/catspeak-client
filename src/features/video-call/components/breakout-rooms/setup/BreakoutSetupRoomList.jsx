@@ -93,25 +93,26 @@ const BreakoutSetupRoomList = ({
   }
 
   return (
-    <div className="flex flex-col py-2">
+    <div className="flex flex-col gap-3 py-2 px-1">
       {/* Main Room / Unassigned List */}
-      <div 
-        className={dragOverRoomId === -1 ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative'}
+      <div
+        className={dragOverRoomId === -1 ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative shadow-faq-card rounded-xl'}
         onDragOver={(e) => handleDragOver(e, -1)}
         onDragEnter={handleDragEnter}
         onDragLeave={(e) => handleDragLeave(e, -1)}
         onDrop={(e) => handleDrop(e, -1)}
       >
         <ListItem
+          contentClassName="!h-12"
           onClick={() => toggleRoomExpand("main")}
           hoverEffect={true}
           rightText={unassignedStudents.length}
           rightContent={
-            <div 
+            <div
               onClick={(e) => { e.stopPropagation(); toggleRoomExpand("main") }}
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 hover:opacity-100 hover:bg-[#E6E6E6] cursor-pointer"
             >
-              {expandedRooms["main"] ? <ChevronDown /> : <ChevronRight />}
+              {expandedRooms["main"] ? <ChevronDown size={28} /> : <ChevronRight size={28} />}
             </div>
           }
         >
@@ -168,24 +169,25 @@ const BreakoutSetupRoomList = ({
       {allocations.map((room, roomIndex) => {
         const isExpanded = expandedRooms[room.roomName]
         return (
-          <div 
-            key={roomIndex} 
-            className={dragOverRoomId === roomIndex ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative'}
+          <div
+            key={roomIndex}
+            className={dragOverRoomId === roomIndex ? 'relative after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-[#990011] after:bg-[#990011]/10 after:pointer-events-none after:z-10' : 'relative shadow-faq-card rounded-xl'}
             onDragOver={(e) => handleDragOver(e, roomIndex)}
             onDragEnter={handleDragEnter}
             onDragLeave={(e) => handleDragLeave(e, roomIndex)}
             onDrop={(e) => handleDrop(e, roomIndex)}
           >
             <ListItem
+              contentClassName="!h-12"
               onClick={() => toggleRoomExpand(room.roomName)}
               hoverEffect={true}
               rightText={room.accountIds.length}
               rightContent={
-                <div 
+                <div
                   onClick={(e) => { e.stopPropagation(); toggleRoomExpand(room.roomName) }}
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors opacity-70 hover:opacity-100 hover:bg-[#E6E6E6] cursor-pointer"
                 >
-                  {isExpanded ? <ChevronDown /> : <ChevronRight />}
+                  {isExpanded ? <ChevronDown size={28} /> : <ChevronRight size={28} />}
                 </div>
               }
             >
