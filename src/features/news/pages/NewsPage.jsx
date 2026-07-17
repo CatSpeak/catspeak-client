@@ -12,6 +12,7 @@ import { Breadcrumb } from "@/shared/components/ui/navigation";
 import NewsCard from "../components/NewsCard";
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
 import EmptyState from "@/shared/components/ui/indicators/EmptyState";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
 
 /* ------------------------------------------------------------------ */
 /*  Filter Tabs                                                        */
@@ -20,21 +21,17 @@ import EmptyState from "@/shared/components/ui/indicators/EmptyState";
 const FILTER_TABS = [{ key: "all", label: "Tất cả" }];
 
 const FilterTabs = ({ active, onChange }) => (
-  <div className="flex items-center gap-3 px-6">
+  <div className="flex items-center gap-3">
     {FILTER_TABS.map((tab) => {
       const isActive = active === tab.key;
       return (
-        <button
+        <PillButton
           key={tab.key}
           onClick={() => onChange(tab.key)}
-          className={`flex items-center justify-center gap-2 px-4 py-2 rounded-full font-nunito font-medium text-base transition-all ${
-            isActive
-              ? "bg-[#ffeef0] text-[#be0015] shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)]"
-              : "bg-white text-[#7b7979] hover:bg-gray-50"
-          }`}
+          variant={isActive ? "primary" : "secondary"}
         >
           {tab.label}
-        </button>
+        </PillButton>
       );
     })}
   </div>
@@ -146,9 +143,9 @@ const NewsPage = () => {
 
   // ── Render ────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col w-full gap-7">
+    <div className="flex flex-col w-full gap-6 p-4 sm:p-6">
       {/* Breadcrumb */}
-      <div className="px-6">
+      <div>
         <Breadcrumb items={breadcrumbItems} />
       </div>
 
@@ -156,9 +153,9 @@ const NewsPage = () => {
       <FilterTabs active={activeFilter} onChange={setActiveFilter} />
 
       {/* Masonry Card Grid */}
-      <div className="flex flex-row w-full gap-5 px-6 items-start">
+      <div className="flex flex-row w-full gap-3 items-start">
         {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex flex-col flex-1 gap-9 min-w-0">
+          <div key={colIndex} className="flex flex-col flex-1 gap-3 min-w-0">
             {col.map((post) => {
               const isSecondLast = post.postId === secondLastPostId;
               return (
