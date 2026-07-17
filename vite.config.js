@@ -37,8 +37,6 @@ export default defineConfig(({ mode }) => {
           target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: false,
-          timeout: 300000,
-          proxyTimeout: 300000,
         },
         "/hubs": {
           target: "https://staging-api.catspeak.com.vn",

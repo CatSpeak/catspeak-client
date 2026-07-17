@@ -5,6 +5,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPlaylistsQuery, useCreatePlaylistMutation, useUpdatePlaylistMutation, useDeletePlaylistMutation, useGetBookmarkedReelsQuery } from "@/store/api/reelsApi"
 
 import PlaylistReelList from "./PlaylistReelList"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 
 const getLocale = (lang) => {
   if (lang === "zh") return "zh-CN"
@@ -88,6 +89,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   const [editName, setEditName] = useState(playlist.name)
   const [updatePlaylist, { isLoading: isUpdating }] = useUpdatePlaylistMutation()
   const [deletePlaylist, { isLoading: isDeleting }] = useDeletePlaylistMutation()
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
 
   const label = count === 1
     ? (lang?.itemCountSingular || "1 video")
@@ -111,14 +113,19 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
     }
   }
 
-  const handleDelete = async (e) => {
+  const handleDeleteClick = (e) => {
     e.stopPropagation()
-    if (!window.confirm(lang?.deleteConfirm || "Bạn có chắc chắn muốn xóa playlist này?")) return
+    setIsConfirmDeleteOpen(true)
+  }
+
+  const confirmDelete = async () => {
     try {
       await deletePlaylist(playlist.playlistId).unwrap()
       toast.success(lang?.deleted || "Đã xóa playlist")
     } catch (err) {
       toast.error(lang?.deleteFailed || "Xóa thất bại")
+    } finally {
+      setIsConfirmDeleteOpen(false)
     }
   }
 
@@ -138,7 +145,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
         
         <div className="flex-1 min-w-0">
           {isEditing ? (
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
               <input
                 type="text"
                 autoFocus
@@ -148,13 +155,13 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
                   if (e.key === "Enter") handleUpdate(e)
                   if (e.key === "Escape") handleCancelEdit(e)
                 }}
-                className="flex-1 px-3 py-1 text-sm border border-cath-red-200 rounded focus:outline-none focus:ring-1 focus:ring-cath-red-700 bg-white"
+                className="flex-1 px-3 py-1.5 text-sm font-medium text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cath-red-500/20 focus:border-cath-red-500 bg-white shadow-inner transition-all"
               />
-              <button onClick={handleUpdate} disabled={isUpdating} className="p-1 bg-cath-red-700 text-white rounded hover:bg-cath-red-600">
-                {isUpdating ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+              <button onClick={handleUpdate} disabled={isUpdating} className="p-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors" title="Lưu">
+                {isUpdating ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={2.5} />}
               </button>
-              <button onClick={handleCancelEdit} disabled={isUpdating} className="p-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300">
-                <X size={16} />
+              <button onClick={handleCancelEdit} disabled={isUpdating} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 hover:text-gray-700 transition-colors" title="Hủy">
+                <X size={16} strokeWidth={2.5} />
               </button>
             </div>
           ) : (
@@ -176,7 +183,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
             <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="p-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit name">
               <Pencil size={16} />
             </button>
-            <button onClick={handleDelete} disabled={isDeleting} className="p-1.5 bg-gray-100 text-gray-600 hover:text-red-600 rounded-lg hover:bg-[#ffdede] transition-colors" title="Delete playlist">
+            <button onClick={handleDeleteClick} disabled={isDeleting} className="p-1.5 bg-gray-100 text-gray-600 hover:text-red-600 rounded-lg hover:bg-[#ffdede] transition-colors" title="Delete playlist">
               {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
             </button>
           </div>
@@ -196,6 +203,16 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
           />
         </div>
       )}
+
+      <ConfirmationModal
+        open={isConfirmDeleteOpen}
+        onClose={() => setIsConfirmDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        title={lang?.deletePlaylistTitle || "Xóa Playlist"}
+        message={lang?.deleteConfirm || "Bạn có chắc chắn muốn xóa playlist này?"}
+        confirmText={lang?.delete || "Xóa"}
+        cancelText={lang?.cancel || "Hủy"}
+      />
     </div>
   )
 }
