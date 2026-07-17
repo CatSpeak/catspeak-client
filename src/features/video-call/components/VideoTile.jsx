@@ -149,7 +149,7 @@ const VideoTile = ({ participant, onClick }) => {
       )}
 
       {/* Bottom Controls Overlay */}
-      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none">
+      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none z-20">
         {/* Status icons and Name */}
         <div className="flex min-w-0 items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-white backdrop-blur-sm pointer-events-auto">
           <div className="flex flex-shrink-0 items-center gap-1">
