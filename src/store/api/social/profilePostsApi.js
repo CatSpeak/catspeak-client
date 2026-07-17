@@ -1,6 +1,6 @@
-import { baseApi } from "@/store/api/baseApi"
+import { socialApi } from "./socialApi"
 
-export const profilePostsApi = baseApi.injectEndpoints({
+export const profilePostsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     getUserTimelinePosts: builder.query({
       query: ({ accountId, page = 1, pageSize = 10 }) => ({

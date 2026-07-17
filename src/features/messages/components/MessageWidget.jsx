@@ -8,7 +8,7 @@ import {
   useSendMessageMutation,
   useMarkConversationAsReadMutation,
   conversationsApi,
-} from "@/store/api/conversationsApi"
+} from "@/store/api/social/conversationsApi"
 import useMessageSignalR from "../hooks/useMessageSignalR"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import {
@@ -22,7 +22,8 @@ import {
   selectTotalUnread,
   clearUnread,
 } from "@/store/slices/notificationSlice"
-import { MessageCircle } from "lucide-react"
+import { MessageCircle, ExternalLink } from "lucide-react"
+import { Link } from "react-router-dom"
 import MessageModal from "./MessageModal"
 import ConversationListHeader from "./headers/ConversationListHeader"
 import ConversationDetailHeader from "./headers/ConversationDetailHeader"
@@ -171,12 +172,23 @@ const MessageWidget = () => {
 
         {/* Content Area */}
         {view === "list" ? (
-          <ConversationList
-            conversations={conversations}
-            isLoading={isLoading}
-            isError={isError}
-            onSelectConversation={handleSelectConversation}
-          />
+          <>
+            <ConversationList
+              conversations={conversations}
+              isLoading={isLoading}
+              isError={isError}
+              onSelectConversation={handleSelectConversation}
+            />
+            {/* Link to full chat page */}
+            <Link
+              to="/chat"
+              onClick={() => dispatch(closeWidget())}
+              className="flex items-center justify-center gap-1.5 border-t border-[#e5e5e5] px-3 py-2.5 text-[13px] font-medium text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
+            >
+              See all in Chat
+              <ExternalLink size={13} />
+            </Link>
+          </>
         ) : (
           <ConversationDetail
             conversation={selected}

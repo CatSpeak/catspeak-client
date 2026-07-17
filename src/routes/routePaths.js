@@ -14,6 +14,9 @@ export const ROUTE_PATHS = {
   APP_SESSIONS: "/app/sessions",
   APP_PROFILE: "/profile",
 
+  // Chat
+  CHAT: "/chat",
+
   // Admin routes
   ADMIN: "/admin",
 

@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react"
 import {
   useGetUserTimelinePostsQuery,
   useCreatePostMutation,
-} from "../api/profilePostsApi"
+} from "../../../store/api/social/profilePostsApi"
 import PostEditorModal from "./PostEditorModal"
 import ProfilePostCard from "./ProfilePostCard"
 import ProfileSidebar from "./ProfileSidebar"

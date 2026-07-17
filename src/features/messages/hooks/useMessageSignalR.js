@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { useDispatch } from "react-redux"
-import { conversationsApi } from "@/store/api/conversationsApi"
+import { conversationsApi } from "@/store/api/social/conversationsApi"
 import { useConversationSignalRContext } from "../context/ConversationSignalRContext"
 import useConversationSignalR from "./useConversationSignalR"
 
@@ -53,8 +53,11 @@ export const useMessageSignalR = ({ activeConversationId }) => {
       },
       NewConversation: (conversation) => {
         if (invoke && conversation?.conversationId) {
-          invoke("JoinConversation", conversation.conversationId.toString()).catch(
-            (err) => console.error("Failed to join new conversation", err)
+          invoke(
+            "JoinConversation",
+            conversation.conversationId.toString(),
+          ).catch((err) =>
+            console.error("Failed to join new conversation", err),
           )
         }
       },

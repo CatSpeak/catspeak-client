@@ -9,7 +9,7 @@ import {
   useGetPendingFriendRequestsQuery,
   useGetFriendRecommendationsQuery,
   useRespondFriendRequestMutation,
-} from "../api/friendshipApi"
+} from "../../../store/api/social/friendshipApi"
 import { useNavigate } from "react-router-dom"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import HorizontalCard from "@/shared/components/ui/HorizontalCard"

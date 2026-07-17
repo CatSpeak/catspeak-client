@@ -52,7 +52,7 @@ export const navLinks = [
   //   icon: CreditCard,
   // },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
-  // { key: "messages", path: "/messages", icon: MessageCircle },
+  { key: "messages", path: "/chat", icon: MessageCircle },
   // {
   //   key: "courses",
   //   hasDropdown: true,

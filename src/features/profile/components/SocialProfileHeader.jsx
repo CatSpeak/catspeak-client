@@ -18,7 +18,7 @@ import {
   useUnfollowUserMutation,
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
-} from "../api/friendshipApi"
+} from "../../../store/api/social/friendshipApi"
 import { useUpdateAvatarMutation } from "@/store/api/userApi"
 
 const SocialProfileHeader = ({

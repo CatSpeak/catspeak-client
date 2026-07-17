@@ -12,7 +12,7 @@ import {
   useGetFriendsQuery,
   useGetFollowersQuery,
   useGetPendingFriendRequestsQuery,
-} from "../api/friendshipApi"
+} from "../../../store/api/social/friendshipApi"
 
 import SocialProfileHeader from "../components/SocialProfileHeader"
 import Tabs from "@/shared/components/ui/navigation/Tabs"

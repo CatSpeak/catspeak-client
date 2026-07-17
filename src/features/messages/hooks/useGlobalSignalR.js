@@ -1,6 +1,9 @@
 import { useMemo, useRef, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { conversationsApi, useMarkConversationAsReadMutation } from "@/store/api/conversationsApi"
+import {
+  conversationsApi,
+  useMarkConversationAsReadMutation,
+} from "@/store/api/social/conversationsApi"
 import {
   incrementUnread,
   setFriendOnlineStatus,
@@ -53,12 +56,14 @@ export const useGlobalSignalR = () => {
         if (!isViewingConversation) {
           dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
           if (conversationId) {
-             dispatch(incrementUnread(conversationId))
-             
-             // Ensure the user is in the SignalR group for this conversation
-             if (invokeRef.current) {
-               invokeRef.current("JoinConversation", Number(conversationId)).catch(console.warn)
-             }
+            dispatch(incrementUnread(conversationId))
+
+            // Ensure the user is in the SignalR group for this conversation
+            if (invokeRef.current) {
+              invokeRef
+                .current("JoinConversation", Number(conversationId))
+                .catch(console.warn)
+            }
           }
         } else {
           if (conversationId) {
@@ -69,30 +74,35 @@ export const useGlobalSignalR = () => {
                 undefined,
                 (draft) => {
                   const cachedConv = draft.find(
-                    (c) => c.conversationId === Number(conversationId) || c.conversationId === String(conversationId)
+                    (c) =>
+                      c.conversationId === Number(conversationId) ||
+                      c.conversationId === String(conversationId),
                   )
                   if (cachedConv) {
                     cachedConv.unreadCount = 0
                   }
-                }
-              )
+                },
+              ),
             )
-            
+
             // Mark as read on the backend
             markConversationAsRead(conversationId)
               .unwrap()
               .then(() => {
-                dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+                dispatch(
+                  conversationsApi.util.invalidateTags(["Conversations"]),
+                )
               })
               .catch((err) => {
                 console.error("Failed to mark conversation as read:", err)
-                dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+                dispatch(
+                  conversationsApi.util.invalidateTags(["Conversations"]),
+                )
               })
           } else {
             dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
           }
         }
-
       },
 
       ChatUpdated: () => {
@@ -116,33 +126,35 @@ export const useGlobalSignalR = () => {
     [dispatch, activeConversationId, isWidgetOpen],
   )
 
-  // Define the helper here and assign it so we cover multiple possible event names 
+  // Define the helper here and assign it so we cover multiple possible event names
   // the backend developer might have used. Delay reconnects so the DB commits.
-  const handleNewConversationEvent = useMemo(() => (conversation) => {
-    setTimeout(() => {
-      dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-    }, 500)
+  const handleNewConversationEvent = useMemo(
+    () => (conversation) => {
+      setTimeout(() => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+      }, 500)
 
-    const convId = typeof conversation === 'object' 
-      ? (conversation?.conversationId ?? conversation?.ConversationId) 
-      : conversation
-      
-    if (convId && invokeRef.current) {
-      invokeRef.current("JoinConversation", Number(convId)).catch((err) => {
-        console.warn(
-          "[GlobalSignalR] Failed to join conversation group, falling back to reconnect:",
-          err,
-        )
-        if (reconnectRef.current) {
-          setTimeout(() => reconnectRef.current(), 500)
-        }
-      })
-    } else if (reconnectRef.current) {
-      setTimeout(() => reconnectRef.current(), 500)
-    }
+      const convId =
+        typeof conversation === "object"
+          ? (conversation?.conversationId ?? conversation?.ConversationId)
+          : conversation
 
-
-  }, [dispatch])
+      if (convId && invokeRef.current) {
+        invokeRef.current("JoinConversation", Number(convId)).catch((err) => {
+          console.warn(
+            "[GlobalSignalR] Failed to join conversation group, falling back to reconnect:",
+            err,
+          )
+          if (reconnectRef.current) {
+            setTimeout(() => reconnectRef.current(), 500)
+          }
+        })
+      } else if (reconnectRef.current) {
+        setTimeout(() => reconnectRef.current(), 500)
+      }
+    },
+    [dispatch],
+  )
 
   // Attach to handlers object
   useEffect(() => {

@@ -1,8 +1,18 @@
 import React, { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { ArrowRight, Share, Bookmark, ThumbsUp, MessageSquare, Eye } from "lucide-react"
-import { useGetPostsQuery, useSharePostMutation } from "@/store/api/postsApi"
+import {
+  ArrowRight,
+  Share,
+  Bookmark,
+  ThumbsUp,
+  MessageSquare,
+  Eye,
+} from "lucide-react"
+import {
+  useGetPostsQuery,
+  useSharePostMutation,
+} from "@/store/api/social/postsApi"
 import ShareModal from "./ShareModal"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
@@ -28,7 +38,14 @@ const RelatedNewsCard = ({ post }) => {
   const [imageError, setImageError] = useState(false)
 
   const fallbackColor = (() => {
-    const COLORS = ["#c0392b", "#8e44ad", "#2980b9", "#27ae60", "#f39c12", "#1abc9c"]
+    const COLORS = [
+      "#c0392b",
+      "#8e44ad",
+      "#2980b9",
+      "#27ae60",
+      "#f39c12",
+      "#1abc9c",
+    ]
     const seed = post.postId || 0
     return COLORS[typeof seed === "number" ? seed % COLORS.length : 0]
   })()
@@ -126,7 +143,11 @@ const RelatedNewsCard = ({ post }) => {
           </span>
         </div>
         <div className="flex items-center gap-1 px-1 py-1">
-          <MessageSquare size={16} strokeWidth={1.5} className="text-[#7b7979]" />
+          <MessageSquare
+            size={16}
+            strokeWidth={1.5}
+            className="text-[#7b7979]"
+          />
           <span className="font-nunito font-medium text-sm text-[#7b7979]">
             {post.totalComments || 0}
           </span>
@@ -140,7 +161,10 @@ const RelatedNewsCard = ({ post }) => {
       </div>
 
       {/* ── Modals ─────────────────────────────────────────────── */}
-      <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <ShareModal
           open={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
@@ -168,8 +192,7 @@ const RelatedNewsSection = ({ currentPostId }) => {
 
   const relatedPosts = (data?.data || [])
     .filter(
-      (post) =>
-        post.postId !== currentPostId && post.privacy === "Public",
+      (post) => post.postId !== currentPostId && post.privacy === "Public",
     )
     .slice(0, RELATED_COUNT)
 

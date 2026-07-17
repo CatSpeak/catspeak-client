@@ -1,6 +1,6 @@
-import { baseApi } from "@/store/api/baseApi"
+import { socialApi } from "./socialApi"
 
-export const friendshipApi = baseApi.injectEndpoints({
+export const friendshipApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     getConnectionStatus: builder.query({
       query: (targetAccountId) => `/friendships/status/${targetAccountId}`,
@@ -39,7 +39,7 @@ export const friendshipApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, targetAccountId) => [
         { type: "Friendship", id: targetAccountId },
-        "Recommendation"
+        "Recommendation",
       ],
     }),
     unfollowUser: builder.mutation({
@@ -48,7 +48,7 @@ export const friendshipApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, targetAccountId) => [
-        { type: "Friendship", id: targetAccountId }
+        { type: "Friendship", id: targetAccountId },
       ],
     }),
     getPendingFriendRequests: builder.query({
@@ -63,7 +63,7 @@ export const friendshipApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, targetAccountId) => [
         { type: "Friendship", id: targetAccountId },
-        "FriendRequest"
+        "FriendRequest",
       ],
     }),
     deleteFriendship: builder.mutation({
@@ -79,7 +79,11 @@ export const friendshipApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { action },
       }),
-      invalidatesTags: ["FriendRequest", "Friendship", { type: "Friend", id: "LIST-undefined" }],
+      invalidatesTags: [
+        "FriendRequest",
+        "Friendship",
+        { type: "Friend", id: "LIST-undefined" },
+      ],
     }),
   }),
   overrideExisting: false,

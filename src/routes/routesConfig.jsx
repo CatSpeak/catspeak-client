@@ -51,6 +51,7 @@ const AccountSettingsPage = lazy(
 )
 
 const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
+const ChatPage = lazy(() => import("@/features/chat/pages/ChatPage"))
 const ReelDetailPage = lazy(
   () => import("@/features/reels/pages/ReelDetailPage"),
 )
@@ -493,6 +494,24 @@ const routesConfig = [
             element: <ComingSoonPage />,
           },
           { path: "*", element: <PageNotFound /> },
+        ],
+      },
+      {
+        path: "/chat",
+        element: (
+          <AuthGuard>
+            <MainLayout showFooter={false} />
+          </AuthGuard>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <LazyRoute>
+                <ChatPage />
+              </LazyRoute>
+            ),
+          },
         ],
       },
       {

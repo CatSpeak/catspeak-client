@@ -1,7 +1,7 @@
-import { baseApi } from "./baseApi"
+import { socialApi } from "./socialApi"
 
 // Conversations API slice
-export const conversationsApi = baseApi.injectEndpoints({
+export const conversationsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all conversations for current user
     getConversations: builder.query({
