@@ -17,6 +17,7 @@ import ShareModal from "../components/ShareModal";
 import RelatedNewsSection from "../components/RelatedNewsSection";
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import { getImageUrl } from "@/shared/utils/imageUtils";
+import FluentCard from "@/shared/components/ui/FluentCard";
 
 const NewsDetailPage = () => {
   const { lang: paramLang, slug } = useParams();
@@ -143,7 +144,7 @@ const NewsDetailPage = () => {
   ];
 
   return (
-    <div className="w-full px-3 md:px-4">
+    <div className="w-full p-4 sm:p-6">
       {/* ── Two-column layout ─────────────────────────────────── */}
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-5">
         {/* ── Left Column: Article Content ─────────────────────── */}
@@ -160,16 +161,14 @@ const NewsDetailPage = () => {
               >
                 {newsItem.title}
               </h1>
-              <div className="flex items-center gap-1 shrink-0">
+              {/* Inline dot-separated metadata row */}
+              <div className="flex items-center gap-1.5 flex-wrap">
                 {newsItem.viewCount !== undefined && (
                   <span className="font-nunito font-medium text-sm text-[#7b7979]">
                     {newsItem.viewCount} lượt xem
                   </span>
                 )}
-                <span className="font-nunito font-medium text-sm text-[#7b7979]">
-                  {" "}
-                  •{" "}
-                </span>
+                <span className="w-1 h-1 rounded-full bg-[#7b7979] inline-block shrink-0" />
                 <span className="font-nunito font-medium text-sm text-[#7b7979]">
                   {getTranslatedTimeAgo(
                     newsItem.createDate,
@@ -192,8 +191,8 @@ const NewsDetailPage = () => {
             )}
           </div>
 
-          {/* ── Article Body ───────────────────────────────────── */}
-          <article className="bg-white py-4 md:py-5">
+          {/* ── Article Body ───────────────────────────────────────── */}
+          <article className="bg-white py-6">
             <PostContent html={newsItem.content} />
 
             {/* Action Bar */}
@@ -211,13 +210,16 @@ const NewsDetailPage = () => {
         {/* ── Right Column: Comments Sidebar (desktop) / Below (mobile) */}
         <div className="w-full h-full min-w-0">
           <div className="lg:sticky lg:top-[76px]">
-            <div className="rounded-2xl bg-white p-3 shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)] md:p-4 lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto">
+            <FluentCard
+              padding="p-3 md:p-4"
+              className="lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto"
+            >
               <CommentsSection
                 ref={commentsRef}
                 postId={newsItem.postId}
                 totalComments={newsItem.totalComments || 0}
               />
-            </div>
+            </FluentCard>
           </div>
         </div>
       </div>

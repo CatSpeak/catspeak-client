@@ -125,10 +125,10 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="flex flex-col bg-white rounded-[20px] shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)] overflow-hidden cursor-pointer"
+      className="group flex flex-col bg-white rounded-[20px] shadow-[0_1px_4px_rgba(12,12,13,0.1),0_1px_2px_rgba(12,12,13,0.05)] overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
     >
       {/* ── Image area ───────────────────────────────────────────── */}
-      <div className="relative flex-1 min-h-0 p-2.5 rounded-t-[20px]">
+      <div className="relative flex-1 min-h-0 rounded-t-[20px]">
         {hasMedia ? (
           <div className="w-full h-full rounded-t-[20px] overflow-hidden">
             <Carousel
@@ -137,6 +137,7 @@ const NewsCard = ({ news }) => {
               interval={5000}
               className="w-full h-full rounded-t-[20px]"
               objectFit="contain"
+              showIndicators={false}
               // disableFullscreen
             />
           </div>
@@ -151,44 +152,52 @@ const NewsCard = ({ news }) => {
           </div>
         )}
 
-        {/* Overlay action buttons — top-right */}
+        {/* Overlay action buttons — top-right, shown on hover */}
         <div
-          className="absolute top-4 right-4 flex gap-2.5 z-10"
+          className="absolute top-4 right-4 flex gap-2.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto"
           onPointerDown={(e) => e.stopPropagation()}
         >
           <button
             onClick={handleShare}
-            className="flex items-center justify-center p-1.5 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+            className="flex items-center justify-center p-1.5 bg-black/40 backdrop-blur-sm rounded-full hover:bg-black/60 transition-colors"
             aria-label="Share"
           >
-            <Share size={22} strokeWidth={1.5} className="text-[#2e2e2e]" />
+            <Share size={22} strokeWidth={1.5} className="text-white" />
           </button>
-          <button
+          {/* <button
             onClick={(e) => {
               e.stopPropagation();
               setIsDevModalOpen(true);
             }}
-            className="flex items-center justify-center p-1.5 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+            className="flex items-center justify-center p-1.5 bg-black/40 backdrop-blur-sm rounded-full hover:bg-black/60 transition-colors"
             aria-label="Bookmark"
           >
-            <Bookmark size={22} strokeWidth={1.5} className="text-[#2e2e2e]" />
-          </button>
+            <Bookmark size={22} strokeWidth={1.5} className="text-white" />
+          </button> */}
         </div>
       </div>
 
       {/* ── Content ──────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-2 px-4 pt-3">
-        <h3 className="font-nunito font-bold text-base leading-[1.4] text-[#1a1a1a] text-justify">
+      <div className="flex flex-col gap-1.5 p-3">
+        <h3 className="font-nunito font-bold text-base line-clamp-2">
           {news.title}
         </h3>
-        <p className="font-nunito font-medium text-sm leading-[1.4] text-[#7b7979]">
-          {getTranslatedTimeAgo(news.createDate, newsCard)}
-        </p>
+        {/* Inline dot-separated metadata row */}
+        <div className="flex items-center gap-1.5 text-sm text-[#7b7979]">
+          <span className="font-nunito font-medium">
+            {getTranslatedTimeAgo(news.createDate, newsCard)}
+          </span>
+          <span className="w-1 h-1 rounded-full bg-[#7b7979] inline-block shrink-0" />
+          <span className="font-nunito font-medium flex items-center gap-1">
+            <Eye size={13} strokeWidth={1.5} />
+            {news.viewCount || 0}
+          </span>
+        </div>
       </div>
 
       {/* ── Stats row ────────────────────────────────────────────── */}
       <div
-        className="flex items-end gap-1 px-4 pb-2 pt-1"
+        className="flex items-center gap-1 px-3 pb-3"
         onPointerDown={(e) => e.stopPropagation()}
       >
         {/* Like / Reactions */}
@@ -298,13 +307,6 @@ const NewsCard = ({ news }) => {
           </span>
         </button>
 
-        {/* Views */}
-        <div className="flex items-center gap-1 px-1 py-1">
-          <Eye size={16} strokeWidth={1.5} className="text-[#7b7979]" />
-          <span className="font-nunito font-medium text-sm text-[#7b7979]">
-            {news.viewCount || 0} lượt xem
-          </span>
-        </div>
       </div>
 
       {/* ── Modals ───────────────────────────────────────────────── */}
