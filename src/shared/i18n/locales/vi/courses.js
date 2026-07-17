@@ -374,7 +374,7 @@ export default {
     members: "Quản lý thành viên",
     feed: "Bảng tin",
     grading: "Chấm điểm & quản lý",
-    myGrades: "Điểm số của tôi",
+    myGrades: "Bài tập & Điểm số",
     materials: "Tài liệu học tập",
     toastEnrollToViewClassmates: "Vui lòng đăng ký và thanh toán học phí để xem bạn học!",
     toastEnrollToViewFeed: "Vui lòng đăng ký và thanh toán học phí để xem bảng tin!",

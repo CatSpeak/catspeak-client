@@ -128,7 +128,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
       const sub = submissionsData.find((submission) => (
         submission.studentId?.toString() === memberStudentIdText
       ))
-      
+
       if (sub) {
         let parsedFiles = []
         try {
@@ -294,7 +294,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
     try {
       const baseUrl = import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api"
       const url = `${baseUrl}/teacher/classes/${classId}/assignments/${assignment.id}/grade-sheet`
-      
+
       const token = localStorage.getItem("token")
       const response = await fetch(url, {
         method: "GET",
@@ -642,7 +642,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
           <div className="flex items-center gap-3 self-end md:self-start">
             <button
               type="button"
-              onClick={() => navigate(`/workspace/courses/class/${classId}/create-assignment`)}
+              onClick={() => navigate(`/workspace/courses/class/${classId}/create-assignment?assignmentId=${assignment.id}`)}
               className="h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
             >
               <Edit size={14} className="text-gray-500" />
@@ -856,7 +856,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
                               className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-2xs"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 text-xs font-extrabold uppercase shadow-2xs font-sans font-extrabold">
+                            <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 text-xs font-extrabold uppercase shadow-2xs font-sans">
                               {getInitials(student.name)}
                             </div>
                           )}

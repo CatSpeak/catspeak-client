@@ -1,8 +1,14 @@
-import React, { useState, useRef } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import React, { useState, useRef, useEffect } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
-import { useGetClassDetailQuery, useCreateAssignmentMutation } from "@/store/api/coursesApi"
+import { 
+  useGetClassDetailQuery, 
+  useCreateAssignmentMutation,
+  useGetAssignmentByIdQuery,
+  useUpdateAssignmentMutation
+} from "@/store/api/coursesApi"
+import { formatFileSize } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ReactDatePicker from "react-datepicker"
 import "@/shared/styles/react-datepicker.css"
@@ -28,7 +34,10 @@ import {
 const CreateAssignmentPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const [searchParams] = useSearchParams()
+  const assignmentId = searchParams.get("assignmentId")
+  
+  const { language, t } = useLanguage()
   const c = t.courses || {}
   const ca = c.createAssignment || {}
 
@@ -36,7 +45,14 @@ const CreateAssignmentPage = () => {
   const { data: detailResponse, isLoading: isClassLoading } = useGetClassDetailQuery(id)
   const classData = detailResponse?.data || detailResponse || {}
 
+  // Fetch assignment detail if editing
+  const { data: assignmentResponse, isLoading: isAssignmentLoading } = useGetAssignmentByIdQuery(
+    { classId: id, assignmentId },
+    { skip: !id || !assignmentId }
+  )
+
   const [createAssignment] = useCreateAssignmentMutation()
+  const [updateAssignment] = useUpdateAssignmentMutation()
 
   // Editor mock state
   const [editorText, setEditorText] = useState("")
@@ -80,21 +96,26 @@ const CreateAssignmentPage = () => {
     const formData = new FormData()
     const dueDateIso = toDueDateIso()
 
-    formData.append("name", title.trim() || "Bài tập chưa đặt tên")
-    formData.append("description", editorText || "")
+    formData.append("Name", title.trim() || "Bài tập chưa đặt tên")
+    formData.append("Description", editorText || "")
     if (dueDateIso) {
-      formData.append("dueDate", dueDateIso)
+      formData.append("DueDate", dueDateIso)
     }
-    formData.append("allowLateSubmission", allowLateSubmission)
-    formData.append("allowFileSubmission", submissionTypeFile)
-    formData.append("allowTextSubmission", submissionTypeText)
-    formData.append("allowedFileTypes", allowedFileTypes.map(t => `.${t.toLowerCase()}`).join(","))
-    formData.append("maxFiles", clampMaxFiles(maxFiles))
-    formData.append("hasGrading", enableGrading)
-    formData.append("maxScore", gradeScale === "scale100" ? 100 : 10)
-    formData.append("releaseMode", resultRelease === "automatic" ? "Auto" : "Manual")
-    formData.append("postToBulletinBoard", postToFeed)
-    formData.append("status", status)
+    formData.append("AllowLateSubmission", String(allowLateSubmission))
+    formData.append("AllowFileSubmission", String(submissionTypeFile))
+    formData.append("AllowTextSubmission", String(submissionTypeText))
+    formData.append("AllowedFileTypes", allowedFileTypes.map(t => `.${t.toLowerCase()}`).join(","))
+    formData.append("MaxFiles", String(clampMaxFiles(maxFiles)))
+    formData.append("HasGrading", String(enableGrading))
+    formData.append("MaxScore", String(gradeScale === "scale100" ? 100 : 10))
+    formData.append("ReleaseMode", resultRelease === "automatic" ? "Automatic" : "Manual")
+    formData.append("PostToBulletinBoard", String(postToFeed))
+    formData.append("Status", status)
+
+    // Append existing files to keep
+    existingAttachments.forEach((f) => {
+      formData.append("KeepAttachments", typeof f === "string" ? f : f.url || f.path || JSON.stringify(f))
+    })
 
     attachedFiles.forEach((f) => {
       if (f.file) {
@@ -119,6 +140,67 @@ const CreateAssignmentPage = () => {
   const [resultRelease, setResultRelease] = useState("manual") // manual, automatic
   const [publishStatus, setPublishStatus] = useState("now") // now, draft
   const [postToFeed, setPostToFeed] = useState(true)
+
+  // State for existing attachments to keep
+  const [existingAttachments, setExistingAttachments] = useState([])
+
+  // Load existing assignment data if editing
+  useEffect(() => {
+    if (assignmentResponse) {
+      const assignment = assignmentResponse.data || assignmentResponse
+      setTitle(assignment.name || assignment.title || "")
+      setEditorText(assignment.description || "")
+      
+      if (assignment.dueDate) {
+        const d = new Date(assignment.dueDate)
+        const y = d.getFullYear()
+        const m = String(d.getMonth() + 1).padStart(2, "0")
+        const day = String(d.getDate()).padStart(2, "0")
+        const hh = String(d.getHours()).padStart(2, "0")
+        const mm = String(d.getMinutes()).padStart(2, "0")
+        setDueDate(`${y}-${m}-${day}`)
+        setDueTime(`${hh}:${mm}`)
+      } else {
+        setDueDate("")
+        setDueTime("23:59")
+      }
+      
+      setAllowLateSubmission(assignment.allowLateSubmission ?? true)
+      setSubmissionTypeFile(assignment.allowFileSubmission ?? true)
+      setSubmissionTypeText(assignment.allowTextSubmission ?? false)
+      
+      // Parse file types
+      if (assignment.allowedFileTypes) {
+        const types = assignment.allowedFileTypes
+          .split(",")
+          .map(t => t.replace(".", "").trim().toUpperCase())
+          .filter(Boolean)
+        setAllowedFileTypes(types)
+      } else {
+        setAllowedFileTypes(["PDF", "DOCX"])
+      }
+      
+      setMaxFiles(assignment.maxFiles || 1)
+      setEnableGrading(assignment.hasGrading ?? false)
+      setGradeScale(Number(assignment.maxScore) === 100 ? "scale100" : "scale10")
+      setResultRelease(assignment.releaseMode?.toLowerCase() === "automatic" ? "automatic" : "manual")
+      setPublishStatus(assignment.status?.toLowerCase() === "draft" ? "draft" : "now")
+      
+      // Parse and set existing attachments
+      if (assignment.attachments || assignment.files) {
+        let files = []
+        try {
+          const raw = assignment.attachments || assignment.files
+          files = typeof raw === "string" ? JSON.parse(raw) : raw
+        } catch (e) {
+          console.error(e)
+        }
+        if (Array.isArray(files)) {
+          setExistingAttachments(files)
+        }
+      }
+    }
+  }, [assignmentResponse])
 
   // Handle Drag & Drop Upload Mocking
   const handleDragOver = (e) => {
@@ -175,12 +257,21 @@ const CreateAssignmentPage = () => {
 
   const handleSaveDraft = async () => {
     try {
-      await createAssignment({ classId: id, formData: buildAssignmentFormData("Draft") }).unwrap()
-      toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
+      if (assignmentId) {
+        await updateAssignment({
+          classId: id,
+          assignmentId,
+          formData: buildAssignmentFormData("Draft")
+        }).unwrap()
+        toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
+      } else {
+        await createAssignment({ classId: id, formData: buildAssignmentFormData("Draft") }).unwrap()
+        toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
+      }
       navigate(`/workspace/courses/class/${id}`)
     } catch (err) {
       console.error(err)
-      toast.error(err?.data?.error?.message || "Lỗi khi lưu bản nháp bài nộp")
+      toast.error(getAssignmentErrorMessage(err, "Lỗi khi lưu bản nháp bài nộp"))
     }
   }
 
@@ -207,19 +298,28 @@ const CreateAssignmentPage = () => {
     }
 
     try {
-      await createAssignment({ classId: id, formData: buildAssignmentFormData(targetStatus) }).unwrap()
-      toast.success(targetStatus === "Draft"
-        ? (ca.successDraft || "Đã lưu bản nháp bài nộp")
-        : (ca.successCreate || "Tạo bài nộp thành công!")
-      )
+      if (assignmentId) {
+        await updateAssignment({
+          classId: id,
+          assignmentId,
+          formData: buildAssignmentFormData(targetStatus)
+        }).unwrap()
+        toast.success(ca.successUpdate || "Cập nhật bài nộp thành công!")
+      } else {
+        await createAssignment({ classId: id, formData: buildAssignmentFormData(targetStatus) }).unwrap()
+        toast.success(targetStatus === "Draft"
+          ? (ca.successDraft || "Đã lưu bản nháp bài nộp")
+          : (ca.successCreate || "Tạo bài nộp thành công!")
+        )
+      }
       navigate(`/workspace/courses/class/${id}`)
     } catch (err) {
       console.error(err)
-      toast.error(err?.data?.error?.message || "Lỗi khi tạo bài nộp")
+      toast.error(getAssignmentErrorMessage(err, assignmentId ? "Lỗi khi cập nhật bài nộp" : "Lỗi khi tạo bài nộp"))
     }
   }
 
-  if (isClassLoading) {
+  if (isClassLoading || (assignmentId && isAssignmentLoading)) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
@@ -249,12 +349,12 @@ const CreateAssignmentPage = () => {
             {classData.name || c.student?.classDetails || "Chi tiết lớp học"}
           </span>
           <ChevronRight size={12} className="text-gray-300" />
-          <span className="text-[#990011] font-semibold">{ca.pageTitle || "Tạo bài nộp"}</span>
+          <span className="text-[#990011] font-semibold">{assignmentId ? (language === "vi" ? "Chỉnh sửa bài nộp" : "Edit Assignment") : (ca.pageTitle || "Tạo bài nộp")}</span>
         </div>
       </div>
 
       {/* ─── Heading ─── */}
-      <h1 className="text-3xl font-black text-gray-950 tracking-tight">{ca.pageTitle || "Tạo bài nộp"}</h1>
+      <h1 className="text-3xl font-black text-gray-950 tracking-tight">{assignmentId ? (language === "vi" ? "Chỉnh sửa bài nộp" : "Edit Assignment") : (ca.pageTitle || "Tạo bài nộp")}</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
@@ -353,8 +453,46 @@ const CreateAssignmentPage = () => {
               </div>
 
               {/* Attached file list */}
-              {attachedFiles.length > 0 && (
+              {(existingAttachments.length > 0 || attachedFiles.length > 0) && (
                 <div className="flex flex-col gap-2 mt-2">
+                  {/* Existing attachments */}
+                  {existingAttachments.map((file, idx) => {
+                    const name = file.name || file.fileName || (typeof file === "string" ? file.split("/").pop() : "Unnamed file")
+                    const size = file.size || file.fileSize || 0
+                    const fileId = file.id || `existing-${idx}`
+                    return (
+                      <div
+                        key={fileId}
+                        className="bg-gray-50 border border-gray-150 rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-red-50 border border-red-100 rounded-lg flex items-center justify-center text-red-500">
+                            <FileText size={18} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-gray-800 leading-tight truncate max-w-[200px] md:max-w-md">
+                              {name}
+                            </span>
+                            {size > 0 && (
+                              <span className="text-[10px] text-gray-400 font-semibold">
+                                {formatFileSize(size)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setExistingAttachments(prev => prev.filter((_, i) => i !== idx))}
+                          className="p-1.5 text-gray-400 hover:text-red-655 hover:bg-red-50 rounded-lg transition-all"
+                          title="Delete file"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )
+                  })}
+
+                  {/* New attachments */}
                   {attachedFiles.map((file) => (
                     <div
                       key={file.id}
@@ -365,7 +503,7 @@ const CreateAssignmentPage = () => {
                           <FileText size={18} />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-800 leading-tight">
+                          <span className="text-xs font-bold text-gray-800 leading-tight truncate max-w-[200px] md:max-w-md">
                             {file.name}
                           </span>
                           <span className="text-[10px] text-gray-400 font-semibold">
@@ -707,7 +845,7 @@ const CreateAssignmentPage = () => {
               type="submit"
               className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md"
             >
-              {ca.btnCreate || "Tạo bài nộp"}
+              {assignmentId ? (language === "vi" ? "Lưu thay đổi" : "Save Changes") : (ca.btnCreate || "Tạo bài nộp")}
             </button>
           </div>
         </div>

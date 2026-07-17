@@ -374,7 +374,7 @@ export default {
     members: "Members",
     feed: "Feed",
     grading: "Grading & Management",
-    myGrades: "My Grades",
+    myGrades: "Assignments & Grades",
     materials: "Materials",
     toastEnrollToViewClassmates: "Please enroll and pay tuition to view classmates!",
     toastEnrollToViewFeed: "Please enroll and pay tuition to view feed!",

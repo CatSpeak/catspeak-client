@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import AssignmentSubmissionsView from "./AssignmentSubmissionsView"
+import StudentAssignmentDetailView from "./StudentAssignmentDetailView"
 import {
   Search,
   ChevronDown,
@@ -45,7 +46,7 @@ const getSubmissionStatus = (submission) => {
   return String(submission.status || "submitted").toLowerCase()
 }
 
-const StudentAssignmentRow = ({ assignment, classId, cd, cg, language }) => {
+const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect }) => {
   const { data: submissionResponse, isLoading } = useGetMyAssignmentSubmissionQuery(
     { classId, assignmentId: assignment.id },
     { skip: !classId || !assignment?.id },
@@ -61,7 +62,10 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language }) => {
     : "—"
 
   return (
-    <tr className="hover:bg-gray-50/50 transition-colors">
+    <tr
+      onClick={() => onSelect(assignment.id)}
+      className="hover:bg-gray-50/50 transition-colors cursor-pointer"
+    >
       <td className="p-4 pl-6 font-extrabold text-gray-850">{getAssignmentTitle(assignment)}</td>
       <td className="p-4 text-gray-400">{dueLabel}</td>
       <td className="p-4">
@@ -191,11 +195,25 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
     )
   }
 
+  // ─── Sub-View: Student Submission Drill-down (Student View) ───
+  if (isStudent && assignmentId) {
+    const activeStudentAssignment = assignments.find((a) => a.id?.toString() === assignmentId) || null
+    if (activeStudentAssignment) {
+      return (
+        <StudentAssignmentDetailView
+          assignment={activeStudentAssignment}
+          classId={classId}
+          onBack={() => setSearchParams({})}
+        />
+      )
+    }
+  }
+
   // ─── Sub-View: Student personal grades view ───
   if (isStudent) {
     return (
       <div className="bg-white border border-gray-150 rounded-2xl overflow-hidden shadow-xs p-6">
-        <h3 className="text-sm font-extrabold text-gray-900 mb-4">{cg.myGrades || "Điểm số của tôi"}</h3>
+        <h3 className="text-sm font-extrabold text-gray-900 mb-4">{c.student?.myGrades || "Bài tập & Điểm số"}</h3>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
             <thead>
@@ -222,6 +240,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                     cd={cd}
                     cg={cg}
                     language={language}
+                    onSelect={(id) => setSearchParams({ assignmentId: id })}
                   />
                 ))
               )}
@@ -317,7 +336,9 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             const notSubmittedCount = Math.max(enrolledCount - submittedCount, 0)
             const { isExpired, isUpcoming } = getAssignmentTimeline(assignment)
             const title = getAssignmentTitle(assignment)
-            const dueDate = assignment.dueDate || "—"
+            const dueDate = assignment.dueDate
+              ? new Date(assignment.dueDate).toLocaleString(language === "vi" ? "vi-VN" : "en-US")
+              : "—"
 
             return (
               <div
@@ -445,7 +466,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                   {isDraft ? (
                     <button
                       type="button"
-                      onClick={() => navigate(`/workspace/courses/class/${classId}/create-assignment`)}
+                      onClick={() => navigate(`/workspace/courses/class/${classId}/create-assignment?assignmentId=${assignment.id}`)}
                       className="w-full py-2 border border-[#990011] hover:bg-red-50/50 text-[#990011] font-extrabold text-[11px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider"
                     >
                       {cg.btnContinueEditing || "Tiếp tục chỉnh sửa"}

@@ -374,7 +374,7 @@ export default {
     members: "成员管理",
     feed: "班级动态",
     grading: "打分与管理",
-    myGrades: "我的成绩",
+    myGrades: "作业与成绩",
     materials: "课程材料",
     toastEnrollToViewClassmates: "请注册并支付学费以查看同学！",
     toastEnrollToViewFeed: "请注册并支付学费以查看动态！",
