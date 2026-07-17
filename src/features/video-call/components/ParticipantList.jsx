@@ -45,7 +45,7 @@ const ParticipantItem = ({ participant }) => {
     <ListItem
       leftContent={
         <div
-          className={`rounded-full transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}
+          className={`rounded-full my-1 ml-1 transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}
         >
           <Avatar size={36} name={name} src={avatarUrl} />
         </div>

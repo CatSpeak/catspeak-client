@@ -134,6 +134,8 @@ const ControlBarMoreMenu = ({
                             }
                           }}
                           disabled={!isHost && !ongoingGame}
+                          hoverBg={!isHost && !ongoingGame ? "hover:bg-transparent" : "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2]"}
+                          className={!isHost && !ongoingGame ? "!text-[#8F8F8F]" : ""}
                           icon={<Gamepad2 size={20} />}
                           label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
                         />
