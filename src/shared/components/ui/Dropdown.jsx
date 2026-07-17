@@ -184,7 +184,9 @@ const Dropdown = ({
       }
       className={`w-full ${triggerClassName}`}
     >
-      {selectedOption ? selectedOption.label : placeholder}
+      <span className="flex-1 text-left truncate min-w-0">
+        {selectedOption ? selectedOption.label : placeholder}
+      </span>
     </PillButton>
   )
 
