@@ -118,4 +118,5 @@ export default {
   tooManyOtpRequests: "Yêu cầu mã OTP quá nhiều lần. Vui lòng thử lại sau.",
   loginFailed: "Đăng nhập thất bại. Vui lòng thử lại.",
   serverConnectionRestored: "Đã khôi phục kết nối máy chủ!",
-}
+  
+};

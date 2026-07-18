@@ -97,7 +97,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
   }
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} className="md:max-w-[650px]">
       <div className="pb-6 px-2">
         {/* Back to register link (optional) */}
         {onSwitchMode && (
@@ -105,7 +105,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
             <button
               type="button"
               onClick={() => onSwitchMode("register")}
-              className="flex items-center text-sm font-semibold text-[#606060] transition-colors hover:text-gray-800"
+              className="flex items-center text-sm font-semibold text-[#990011] transition-colors hover:text-[#7a000d]"
             >
               <ArrowLeft className="mr-1 h-4 w-4" />
               {authText.back || "Quay lại"}
@@ -120,16 +120,16 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
         {!isEditingEmail ? (
           <div className="mb-6 text-center text-sm text-[#7A7574]">
             {authText.verifyEmailSubtitle || "Chúng tôi đã gửi mã 6 chữ số đến"}{" "}
-            <strong className="text-[#990011]">{currentEmail}</strong>
+            <strong className="text-[#F4AB1B]">{currentEmail}</strong>
             <button
               type="button"
               onClick={() => {
-                setNewEmail(currentEmail)
-                setIsEditingEmail(true)
-                setApiError("")
-                setSuccessMsg("")
+                setNewEmail(currentEmail);
+                setIsEditingEmail(true);
+                setApiError("");
+                setSuccessMsg("");
               }}
-              className="ml-2 inline-flex items-center text-[#990011] hover:underline"
+              className="ml-2 inline-flex items-center text-[#F4AB1B] hover:underline"
             >
               <Edit2 className="h-3 w-3 mr-1" />
               {authText.editEmail || "Edit"}
@@ -154,7 +154,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
                 disabled={isResending}
                 className="px-3 py-2 bg-[#990011] text-white rounded-full text-sm font-semibold disabled:opacity-50"
               >
-                {isResending ? "..." : (authText.updateEmail || "Update")}
+                {isResending ? "..." : authText.updateEmail || "Update"}
               </button>
               <button
                 type="button"
@@ -176,12 +176,14 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
               maxLength={6}
               value={otp}
               onChange={(e) => {
-                setOtp(e.target.value)
-                setValidationError("")
-                setApiError("")
+                setOtp(e.target.value);
+                setValidationError("");
+                setApiError("");
               }}
               className={`text-center text-lg tracking-widest ${
-                validationError || apiError ? "!border-red-600 focus:!border-red-600" : ""
+                validationError || apiError
+                  ? "!border-red-600 focus:!border-red-600"
+                  : ""
               }`}
             />
             {validationError && (
@@ -201,7 +203,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
           <AuthButton
             type="submit"
             disabled={isVerifying || isEditingEmail}
-            className="w-full rounded-full mb-4"
+            className=" rounded-full mb-4"
           >
             {isVerifying
               ? authText.verifying || "ĐANG XÁC MINH..."
@@ -218,14 +220,16 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
               disabled={isResending}
               className="font-semibold text-[#990011] hover:underline disabled:opacity-50 inline-flex items-center"
             >
-              {isResending ? <RefreshCw className="h-3 w-3 mr-1 animate-spin" /> : null}
+              {isResending ? (
+                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+              ) : null}
               {authText.resendOtp || "Resend OTP"}
             </button>
           </div>
         </form>
       </div>
     </Modal>
-  )
+  );
 }
 
 export default VerifyEmailOtpPopup
