@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, Hash } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
@@ -51,53 +51,51 @@ const VerifyOtpStep = ({ email, onSuccess, onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center text-sm font-semibold text-gray-500 transition-colors hover:text-gray-800"
+          className="flex items-center text-sm font-semibold text-[#990011] transition-colors hover:text-[#7a000d]"
         >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          {authText.back || "Back"}
+          <ArrowLeft className="mr-1 h-4 w-4 " />
+          {authText.back || "Quay lại"}
         </button>
       </div>
 
-      <h2 className="mb-1 text-center text-3xl font-bold text-[#8f0d15]">
-        {authText.forgotStep2Title || "Verify OTP"}
+      <h2 className="mb-1 text-center text-[28px] font-bold text-[#990011]">
+        {authText.forgotStep2Title || "Xác minh OTP"}
       </h2>
-      <p className="mb-6 text-center text-sm text-[#7A7574]">
-        {authText.forgotStep2Subtitle || "Enter the 6-digit code sent to"}{" "}
-        <strong className="text-black">{email}</strong>
+      <p className="mb-6 text-center text-sm text-[#7A7574] flex flex-col">
+        {authText.forgotStep2Subtitle || "Chúng tôi đã gửi mã 6 chữ số đến"}{" "}
+        <strong className="text-[#F4AB1B]">{email}</strong>
       </p>
 
       <form onSubmit={handleVerifyOtp}>
         <div className="mb-6">
-          <div className="relative">
-            <Hash className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <TextInput
-              type="text"
-              variant="square"
-              placeholder={authText.otpPlaceholder || "Enter 6-digit OTP"}
-              maxLength={6}
-              value={otp}
-              onChange={(e) => {
-                setOtp(e.target.value)
-                setError("")
-              }}
-              className={`pl-10 text-center text-lg tracking-widest ${error ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}`}
-            />
-          </div>
-          {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+          <TextInput
+            type="text"
+            variant="round"
+            placeholder={authText.otpPlaceholder || "Nhập mã OTP 6 chữ số"}
+            maxLength={6}
+            value={otp}
+            onChange={(e) => {
+              const numericValue = e.target.value.replace(/\D/g, "");
+              setOtp(numericValue);
+              setError("");
+            }}
+            className={`text-center text-lg tracking-widest ${error ? "!border-red-600 focus:!border-red-600" : ""}`}
+            error={error}
+          />
         </div>
 
         <AuthButton
           type="submit"
           disabled={isVerifyingOtp}
-          className="w-full rounded-lg"
+          className="w-1/2 rounded-full"
         >
           {isVerifyingOtp
-            ? authText.verifying || "VERIFYING..."
-            : authText.verifyOtpButton?.toUpperCase() || "VERIFY CODE"}
+            ? authText.verifying || "ĐANG XÁC MINH..."
+            : authText.verifyOtpButton || "Xác minh OTP"}
         </AuthButton>
       </form>
     </div>
-  )
+  );
 }
 
 export default VerifyOtpStep

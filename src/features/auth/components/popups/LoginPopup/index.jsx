@@ -54,7 +54,6 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
     try {
       const result = await login({ email, password })
 
-      // Check for errors in the result (RTK Query shape)
       const err = result?.error
       if (err) {
         const errData = err?.data
@@ -83,7 +82,6 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         return
       }
 
-      // Success — close modal and redirect
       onClose()
       if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
     } catch (err) {
@@ -99,19 +97,22 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   }
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="pb-6">
-        <h2 className="text-center text-3xl font-bold text-[#8f0d15] mb-6">
+    <Modal open={open} onClose={onClose} showCloseButton={true} className="md:max-w-[650px]">
+      <form onSubmit={handleSubmit} className="pb-6 px-2">
+        {/* Title */}
+        <h2 className="text-center text-[28px] font-bold text-[#990011] mb-6">
           {authText.loginTitle}
         </h2>
 
-        <div className="space-y-4 mb-2">
+        <div className="flex flex-col gap-4 mb-3">
           {/* Email */}
           <div>
-            <label className="block text-sm mb-1">{authText.emailLabel}</label>
+            <label className="block text-xs text-[#606060] mb-1">
+              {authText.emailLabel}
+            </label>
             <TextInput
               type="email"
-              variant="square"
+              variant="round"
               autoComplete="email"
               placeholder={authText.emailPlaceholder}
               value={email}
@@ -119,25 +120,18 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
                 setEmail(e.target.value)
                 setEmailError("")
               }}
-              className={
-                emailError
-                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                  : ""
-              }
+              error={emailError}
             />
-            {emailError && (
-              <p className="mt-1 text-xs text-red-600">{emailError}</p>
-            )}
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm mb-1">
+            <label className="block text-xs text-[#606060] mb-1">
               {authText.passwordLabel}
             </label>
             <TextInput
               type="password"
-              variant="square"
+              variant="round"
               autoComplete="current-password"
               placeholder={authText.passwordPlaceholder}
               value={password}
@@ -145,30 +139,23 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
                 setPassword(e.target.value)
                 setPasswordError("")
               }}
-              className={
-                passwordError
-                  ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                  : ""
-              }
+              error={passwordError}
             />
-            {passwordError && (
-              <p className="mt-1 text-xs text-red-600">{passwordError}</p>
-            )}
           </div>
         </div>
 
         {/* Remember & Forgot */}
-        <div className="flex items-center justify-between text-sm mb-6">
-          <label className="inline-flex items-center">
+        <div className="flex items-center justify-between text-sm mb-5">
+          <label className="inline-flex items-center cursor-pointer">
             <Checkbox
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
             />
-            <span className="ml-2">{authText.rememberMe}</span>
+            <span className="ml-2 text-xs text-[#606060]">{authText.rememberMe}</span>
           </label>
           <button
             type="button"
-            className="font-semibold text-cath-red-700 hover:underline"
+            className="text-xs font-semibold text-[#990011] hover:underline"
             onClick={() => onSwitchMode("forgot")}
           >
             {authText.forgotLink}
@@ -177,7 +164,7 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
 
         {/* API Error */}
         {apiError && (
-          <div className="mb-2 rounded-lg bg-red-100 min-h-10 py-2 flex items-center px-3 text-sm text-red-700">
+          <div className="mb-4 rounded-lg bg-red-50 py-2 px-3 text-sm text-red-700">
             {isNotActivatedError ? (
               <span>
                 {authText.accountNotActivated}{" "}
@@ -217,18 +204,18 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         {/* Submit */}
         <AuthButton
           type="submit"
-          className="w-full rounded-lg mb-6"
+          className="mb-5"
           disabled={isLoading}
         >
-          {isLoading ? "..." : authText.loginButton.toUpperCase()}
+          {isLoading ? "..." : authText.loginButton}
         </AuthButton>
 
         {/* Register link */}
-        <p className="text-center text-sm text-[#7A7574]">
+        <p className="text-center text-xs text-[#7A7574]">
           {authText.dontHaveAccount}{" "}
           <button
             type="button"
-            className="font-semibold text-cath-red-700 hover:underline"
+            className="font-semibold text-[#990011] hover:underline"
             onClick={() => onSwitchMode("register")}
           >
             {authText.registerLink}

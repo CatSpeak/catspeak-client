@@ -16,7 +16,7 @@ const AgreementSection = ({ authText, formData, onChange }) => {
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         {/* Terms and Privacy */}
         <label className="inline-flex items-center gap-2 cursor-pointer">
           <Checkbox

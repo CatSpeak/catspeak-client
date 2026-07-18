@@ -1,178 +1,145 @@
-import { useState } from "react"
-import { Lock, Eye, EyeOff } from "lucide-react"
-import { useLanguage } from "@/shared/context/LanguageContext.jsx"
-import AuthButton from "../../ui/AuthButton"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import { useResetPasswordMutation } from "@/store/api/authApi"
+import { useState } from "react";
+import { useLanguage } from "@/shared/context/LanguageContext.jsx";
+import AuthButton from "../../ui/AuthButton";
+import TextInput from "@/shared/components/ui/inputs/TextInput";
+import { useResetPasswordMutation } from "@/store/api/authApi";
 
 const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
-  const { t } = useLanguage()
-  const authText = t.auth || {}
+  const { t } = useLanguage();
+  const authText = t.auth || {};
 
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [newPasswordError, setNewPasswordError] = useState("")
-  const [confirmPasswordError, setConfirmPasswordError] = useState("")
-  const [apiError, setApiError] = useState("")
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [apiError, setApiError] = useState("");
 
-  const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation()
+  const [resetPassword, { isLoading: isResetting }] =
+    useResetPasswordMutation();
 
   const validateNewPassword = (value) => {
     if (!value)
       return (
         authText.validationNewPasswordRequired ||
         "Please input your new password!"
-      )
+      );
     if (value.length < 6)
       return (
         authText.validationPasswordMin ||
         "Password must be at least 6 characters!"
-      )
-    return ""
-  }
+      );
+    return "";
+  };
 
   const validateConfirmPassword = (newPass, confirmPass) => {
     if (!confirmPass)
       return (
         authText.validationConfirmPasswordRequired ||
         "Please confirm your password!"
-      )
+      );
     if (newPass !== confirmPass)
       return (
         authText.validationPasswordMatch || "The two passwords do not match!"
-      )
-    return ""
-  }
+      );
+    return "";
+  };
 
   const handleResetPassword = async (e) => {
-    e.preventDefault()
-    setApiError("")
+    e.preventDefault();
+    setApiError("");
 
-    const newPassErr = validateNewPassword(newPassword)
-    const confirmPassErr = validateConfirmPassword(newPassword, confirmPassword)
+    const newPassErr = validateNewPassword(newPassword);
+    const confirmPassErr = validateConfirmPassword(
+      newPassword,
+      confirmPassword,
+    );
 
-    setNewPasswordError(newPassErr)
-    setConfirmPasswordError(confirmPassErr)
+    setNewPasswordError(newPassErr);
+    setConfirmPasswordError(confirmPassErr);
 
-    if (newPassErr || confirmPassErr) return
+    if (newPassErr || confirmPassErr) return;
 
     try {
       await resetPassword({
         email,
         resetToken: token,
         newPassword: newPassword,
-      }).unwrap()
+      }).unwrap();
 
-      onSuccess()
+      onSuccess();
     } catch (err) {
-      console.error("Reset password failed:", err)
+      console.error("Reset password failed:", err);
       setApiError(
         err?.data?.message ||
           authText.resetPasswordFailed ||
           "Failed to reset password.",
-      )
+      );
     }
-  }
+  };
 
   return (
     <div>
-      <h2 className="mb-1 text-center text-3xl font-bold text-[#8f0d15]">
-        {authText.forgotStep3Title || "Reset Password"}
+      <h2 className="mb-1 text-center text-[28px] font-bold text-[#990011]">
+        {authText.forgotStep3Title || "Đặt mật khẩu mới"}
       </h2>
-      <p className="mb-6 text-center text-sm text-[#7A7574]">
-        {authText.forgotStep3Subtitle ||
-          "Create a new password for your account."}
-      </p>
 
-      <form onSubmit={handleResetPassword}>
-        <div className="space-y-4 mb-6">
+      <form onSubmit={handleResetPassword} className="mt-6">
+        <div className="flex flex-col gap-4 mb-6">
+          {/* New Password */}
           <div>
-            <label className="mb-2 block text-sm">
-              {authText.newPasswordLabel || "New Password"}
+            <label className="mb-1 block text-xs text-[#606060]">
+              {authText.newPasswordLabel || "Mật khẩu mới"}
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <TextInput
-                variant="square"
-                type={showNewPassword ? "text" : "password"}
-                autoComplete="new-password"
-                placeholder={
-                  authText.newPasswordPlaceholder || "Enter new password"
-                }
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value)
-                  setNewPasswordError("")
-                }}
-                className={`pl-10 pr-12 ${newPasswordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}`}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-            {newPasswordError && (
-              <p className="mt-1 text-xs text-red-600">{newPasswordError}</p>
-            )}
+            <TextInput
+              variant="round"
+              type="password"
+              autoComplete="new-password"
+              placeholder={
+                authText.newPasswordPlaceholder || "Nhập mật khẩu mới"
+              }
+              value={newPassword}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                setNewPasswordError("");
+              }}
+              error={newPasswordError}
+            />
           </div>
 
+          {/* Confirm Password */}
           <div>
-            <label className="mb-2 block text-sm">
-              {authText.confirmPasswordLabel || "Confirm Password"}
+            <label className="mb-1 block text-xs text-[#606060]">
+              {authText.confirmPasswordLabel || "Xác nhận mật khẩu"}
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <TextInput
-                variant="square"
-                type={showConfirmPassword ? "text" : "password"}
-                autoComplete="new-password"
-                placeholder={
-                  authText.confirmPasswordPlaceholder || "Confirm new password"
-                }
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value)
-                  setConfirmPasswordError("")
-                }}
-                className={`pl-10 pr-12 ${confirmPasswordError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""}`}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-            {confirmPasswordError && (
-              <p className="mt-1 text-xs text-red-600">
-                {confirmPasswordError}
-              </p>
-            )}
+            <TextInput
+              variant="round"
+              type="password"
+              autoComplete="new-password"
+              placeholder={
+                authText.confirmPasswordPlaceholder || "Xác nhận lại mật khẩu"
+              }
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setConfirmPasswordError("");
+              }}
+              error={confirmPasswordError}
+            />
           </div>
         </div>
 
         {apiError && (
-          <p className="mb-2 rounded-lg bg-red-100 h-10 flex items-center px-3 text-sm text-red-700">
+          <p className="mb-4 rounded-lg bg-red-50 py-2 px-3 text-sm text-red-700">
             {apiError}
           </p>
         )}
 
-        <AuthButton
-          type="submit"
-          disabled={isResetting}
-          className="w-full rounded-lg"
-        >
-          {authText.resetPasswordButton || "Reset Password"}
+        <AuthButton type="submit" disabled={isResetting}>
+          {authText.resetPasswordButton || "Đặt lại mật khẩu"}
         </AuthButton>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default ResetPasswordFormStep
+export default ResetPasswordFormStep;
