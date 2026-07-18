@@ -185,7 +185,7 @@ const NewsDetailPage = () => {
                   url: getImageUrl(item.mediaUrl),
                   alt: newsItem.title,
                 }))}
-                className="rounded-2xl bg-black/5"
+                className="rounded-2xl bg-black/5 aspect-video"
                 objectFit="contain"
               />
             )}

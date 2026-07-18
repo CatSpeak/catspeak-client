@@ -135,7 +135,7 @@ const NewsCard = ({ news }) => {
               images={carouselImages}
               autoPlay
               interval={5000}
-              className="w-full h-full rounded-t-[20px]"
+              className="w-full h-full rounded-t-[20px] aspect-video!"
               objectFit="contain"
               showIndicators={false}
               // disableFullscreen
@@ -185,12 +185,7 @@ const NewsCard = ({ news }) => {
         {/* Inline dot-separated metadata row */}
         <div className="flex items-center gap-1.5 text-sm text-[#7b7979]">
           <span className="font-nunito font-medium">
-            {getTranslatedTimeAgo(news.createDate, newsCard)}
-          </span>
-          <span className="w-1 h-1 rounded-full bg-[#7b7979] inline-block shrink-0" />
-          <span className="font-nunito font-medium flex items-center gap-1">
-            <Eye size={13} strokeWidth={1.5} />
-            {news.viewCount || 0}
+            {getTranslatedTimeAgo(news.createDate, newsCard?.timeAgo)}
           </span>
         </div>
       </div>
@@ -307,6 +302,17 @@ const NewsCard = ({ news }) => {
           </span>
         </button>
 
+        {/* Views */}
+        <button className="flex items-center gap-1 px-1 py-1 rounded-full transition-colors hover:bg-gray-100">
+          <Eye
+            size={16}
+            strokeWidth={1.5}
+            className="text-[#7b7979]"
+          />
+          <span className="font-nunito font-medium text-sm text-[#7b7979]">
+            {news.viewCount || 0}
+          </span>
+        </button>
       </div>
 
       {/* ── Modals ───────────────────────────────────────────────── */}
