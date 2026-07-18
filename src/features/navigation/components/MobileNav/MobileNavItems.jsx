@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import { Home, Settings, ChevronRight, ChevronLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "../DesktopNav/DesktopNavItem"
-import { navLinks, footerLinks } from "../../config/navigation"
+import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
@@ -19,7 +19,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
   // Sync drilldown state when drawer opens or when navigating
   useEffect(() => {
     if (isMobileOpen) {
-      const activeItem = navLinks.find(
+      const activeLinks = pathname.startsWith("/setting") ? settingNavLinks : navLinks
+      const activeItem = activeLinks.find(
         (item) =>
           item.hasDropdown && item.subItems?.length > 0 && checkIsActive(item),
       )
@@ -27,7 +28,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
     } else {
       // Optional: Wait for drawer close animation before resetting to prevent layout jump
       const timer = setTimeout(() => {
-        const activeItem = navLinks.find(
+        const activeLinks = pathname.startsWith("/setting") ? settingNavLinks : navLinks
+        const activeItem = activeLinks.find(
           (item) =>
             item.hasDropdown &&
             item.subItems?.length > 0 &&
@@ -50,7 +52,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-1 scrollbar-none">
-          {navLinks
+          {(pathname.startsWith("/setting") ? settingNavLinks : navLinks)
             .filter((item) => !item.hideInSidebar)
             .map((item) => {
               const label = t.nav?.[item.key] || item.key

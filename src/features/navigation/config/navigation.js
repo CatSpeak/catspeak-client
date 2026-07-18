@@ -63,6 +63,12 @@ export const navLinks = [
   // },
 ];
 
+export const settingNavLinks = [
+  { key: "accountInfo", path: "/setting/account", icon: User },
+  { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
+  { key: "systemConfig", path: "/setting/system", icon: Settings }
+];
+
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản

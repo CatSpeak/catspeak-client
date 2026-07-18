@@ -58,6 +58,9 @@ export default {
     organization: "Organization",
     billing: "Billing",
     recordings: "Recordings",
+    back: "Back",
+    accountInfo: "Account Info",
+    systemConfig: "System Settings",
   },
   comingSoon: {
     badge: "Coming Soon",

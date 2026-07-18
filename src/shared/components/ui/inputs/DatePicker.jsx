@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from "react"
-import { createPortal } from "react-dom"
-import dayjs from "dayjs"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import dayjs from "dayjs";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { FluentAnimation } from "@/shared/components/ui/animations";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 const DatePicker = ({
   value,
@@ -12,14 +13,15 @@ const DatePicker = ({
   className = "",
   disabled = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef(null)
-  const portalRef = useRef(null)
+  const { language } = useLanguage() || { language: "vi" };
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const portalRef = useRef(null);
 
-  const [date, setDate] = useState(value ? dayjs(value) : null)
+  const [date, setDate] = useState(value ? dayjs(value) : null);
   const [currentViewDate, setCurrentViewDate] = useState(
     value ? dayjs(value).startOf("month") : dayjs().startOf("month"),
-  )
+  );
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -28,43 +30,43 @@ const DatePicker = ({
         !dropdownRef.current.contains(event.target) &&
         (!portalRef.current || !portalRef.current.contains(event.target))
       ) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (value) {
-      const newDate = dayjs(value)
-      setDate(newDate)
-      setCurrentViewDate(newDate.startOf("month"))
+      const newDate = dayjs(value);
+      setDate(newDate);
+      setCurrentViewDate(newDate.startOf("month"));
     } else {
-      setDate(null)
+      setDate(null);
     }
-  }, [value])
+  }, [value]);
 
-  const [portalCoords, setPortalCoords] = useState(null)
+  const [portalCoords, setPortalCoords] = useState(null);
 
   useEffect(() => {
-    const handleClose = () => setIsOpen(false)
+    const handleClose = () => setIsOpen(false);
     const handleScroll = (e) => {
-      if (portalRef.current && portalRef.current.contains(e.target)) return
-      handleClose()
-    }
+      if (portalRef.current && portalRef.current.contains(e.target)) return;
+      handleClose();
+    };
 
     const updateCoords = () => {
       if (isOpen && dropdownRef.current) {
-        const rect = dropdownRef.current.getBoundingClientRect()
-        const spaceBelow = window.innerHeight - rect.bottom
-        const spaceAbove = rect.top
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
 
         // DatePicker is relatively tall (~360px)
-        const flipUp = spaceBelow < 360 && spaceAbove > spaceBelow
+        const flipUp = spaceBelow < 360 && spaceAbove > spaceBelow;
 
         // Datepicker is fixed 280px wide
-        const forceAlignRight = rect.left + 280 > window.innerWidth
+        const forceAlignRight = rect.left + 280 > window.innerWidth;
 
         setPortalCoords({
           top: rect.top + window.scrollY,
@@ -73,65 +75,66 @@ const DatePicker = ({
           height: rect.height,
           flipUp,
           forceAlignRight,
-        })
+        });
       }
-    }
+    };
 
     if (isOpen) {
-      updateCoords()
-      window.addEventListener("resize", handleClose)
-      window.addEventListener("scroll", handleScroll, true)
+      updateCoords();
+      window.addEventListener("resize", handleClose);
+      window.addEventListener("scroll", handleScroll, true);
       return () => {
-        window.removeEventListener("resize", handleClose)
-        window.removeEventListener("scroll", handleScroll, true)
-      }
+        window.removeEventListener("resize", handleClose);
+        window.removeEventListener("scroll", handleScroll, true);
+      };
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const handleSelectDate = (dayNumber) => {
-    const selectedDate = currentViewDate.date(dayNumber)
-    setDate(selectedDate)
-    setIsOpen(false)
-    if (onChange) onChange(selectedDate.toDate())
-  }
+    const selectedDate = currentViewDate.date(dayNumber);
+    setDate(selectedDate);
+    setIsOpen(false);
+    if (onChange) onChange(selectedDate.toDate());
+  };
 
   const handlePreviousMonth = (e) => {
-    e.stopPropagation()
-    setCurrentViewDate(currentViewDate.subtract(1, "month"))
-  }
+    e.stopPropagation();
+    setCurrentViewDate(currentViewDate.subtract(1, "month"));
+  };
 
   const handleNextMonth = (e) => {
-    e.stopPropagation()
-    setCurrentViewDate(currentViewDate.add(1, "month"))
-  }
+    e.stopPropagation();
+    setCurrentViewDate(currentViewDate.add(1, "month"));
+  };
 
-  const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
+  const weekDays =
+    language === "en"
+      ? ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+      : language === "zh"
+        ? ["一", "二", "三", "四", "五", "六", "日"]
+        : ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-  const formatVietnameseDate = (d) => {
-    const dayOfWeek = d.day()
-    const dayNames = [
-      "Chủ nhật",
-      "Thứ 2",
-      "Thứ 3",
-      "Thứ 4",
-      "Thứ 5",
-      "Thứ 6",
-      "Thứ 7",
-    ]
-    return `${dayNames[dayOfWeek]}, ${d.format("DD/MM/YYYY")}`
-  }
+  const formatDate = (d) => {
+    if (language === "en") {
+      return d.format("MM/DD/YYYY");
+    } else if (language === "zh") {
+      return d.format("YYYY年MM月DD日");
+    } else {
+      return d.format("DD/MM/YYYY");
+    }
+  };
 
   const generateDays = () => {
-    const days = []
-    const startDay = currentViewDate.startOf("month").day()
-    const adjustedStartDay = startDay === 0 ? 6 : startDay - 1
-    const daysInMonth = currentViewDate.daysInMonth()
+    const days = [];
+    const startDay = currentViewDate.startOf("month").day();
+    const adjustedStartDay = startDay === 0 ? 6 : startDay - 1;
+    const daysInMonth = currentViewDate.daysInMonth();
 
     for (let i = 0; i < adjustedStartDay; i++) {
       days.push({
         isEmpty: true,
         key: `empty-${i}`,
-      })
+      });
     }
 
     for (let i = 1; i <= daysInMonth; i++) {
@@ -139,13 +142,13 @@ const DatePicker = ({
         isEmpty: false,
         day: i,
         key: `day-${i}`,
-      })
+      });
     }
 
-    return days
-  }
+    return days;
+  };
 
-  const days = generateDays()
+  const days = generateDays();
 
   return (
     <div ref={dropdownRef} className={`relative inline-block ${className}`}>
@@ -158,7 +161,13 @@ const DatePicker = ({
         className={`hover:bg-[#f0f0f0] flex items-center justify-center border border-[#e5e5e5] rounded-md whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none ${disabled ? "cursor-not-allowed opacity-80" : "hover:bg-gray-50"}`}
       >
         <span className={!date ? "text-[#7A7574] font-normal" : ""}>
-          {date ? formatVietnameseDate(date) : "Chọn ngày"}
+          {date
+            ? formatDate(date)
+            : language === "en"
+              ? "Select date"
+              : language === "zh"
+                ? "选择日期"
+                : "Chọn ngày"}
         </span>
       </button>
 
@@ -197,7 +206,11 @@ const DatePicker = ({
                           <ChevronLeft size={18} className="text-gray-600" />
                         </button>
                         <div className="font-bold text-gray-800 text-[14px]">
-                          Tháng {currentViewDate.format("M, YYYY")}
+                          {language === "en"
+                            ? currentViewDate.format("MMMM YYYY")
+                            : language === "zh"
+                              ? currentViewDate.format("YYYY年 M月")
+                              : `Tháng ${currentViewDate.format("M, YYYY")}`}
                         </div>
                         <button
                           type="button"
@@ -276,6 +289,6 @@ const DatePicker = ({
         )}
     </div>
   );
-}
+};
 
-export default DatePicker
+export default DatePicker;

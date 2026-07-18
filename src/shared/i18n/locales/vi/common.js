@@ -47,7 +47,7 @@ export default {
     myCourses: "Khóa học của tôi",
     myLearning: "Góc học tập",
     messages: "Tin nhắn",
-    settings: "Thiết lập",
+    settings: "Cài đặt",
     help: "Trợ giúp",
     connect: "Cá nhân",
     workspace: "Nhà của bạn",
@@ -58,6 +58,9 @@ export default {
     organization: "Tổ chức",
     billing: "Thanh toán",
     recordings: "Bản ghi hình",
+    back: "Quay lại",
+    accountInfo: "Thông tin tài khoản",
+    systemConfig: "Thiết lập hệ thống",
   },
   comingSoon: {
     badge: "Sắp ra mắt",

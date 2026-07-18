@@ -1,13 +1,13 @@
 import React, { useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetUserProfileQuery,
   useGetPublicProfileQuery,
 } from "@/store/api/userApi"
-import { useProfileState } from "../../user/hooks/useProfileState"
-import { useProfileMutations } from "../../user/hooks/useProfileMutations"
+import { useProfileState } from "@/features/settings/hooks/useProfileState"
+import { useProfileMutations } from "@/features/settings/hooks/useProfileMutations"
 import {
   useGetFriendsQuery,
   useGetFollowersQuery,
@@ -20,14 +20,12 @@ import ProfileHomeTab from "../components/ProfileHomeTab"
 import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileDocumentsTab from "../components/ProfileDocumentsTab"
-import PageTitle from "@/shared/components/ui/PageTitle"
-import ProfileAboutTab from "../components/ProfileAboutTab"
-import ProfileOtpModal from "../../user/components/ProfileOtpModal"
-import { countries } from "@/shared/constants/countriesData"
+import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
 
 const Profile = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const { accountId: urlAccountId } = useParams()
   // Since URL params are strings, ensure we convert accountId to number for comparison
   const targetAccountId = urlAccountId
@@ -111,11 +109,10 @@ const Profile = () => {
     },
     { id: "media", label: "Video/Ảnh" },
     { id: "documents", label: "Tài liệu" },
-    { id: "about", label: "Giới thiệu" },
   ]
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-[#f5f6f7]">
+    <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-main-bg">
       <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Top Header Section */}
         <SocialProfileHeader
@@ -124,9 +121,6 @@ const Profile = () => {
           t={t}
           targetAccountId={targetAccountId}
           isOwnProfile={isOwnProfile}
-          onEditClick={() => {
-            setActiveTab("about")
-          }}
         />
 
         {/* Tab Navigation */}
@@ -163,22 +157,6 @@ const Profile = () => {
               defaultSubTab={friendsSubTab}
             />
           )}
-
-          {activeTab === "about" && (
-            <ProfileAboutTab
-              formData={formData}
-              editingField={editingField}
-              isUpdating={isUpdating}
-              handleEdit={handleEdit}
-              handleCancel={handleCancel}
-              handleSave={handleSave}
-              handleChange={handleChange}
-              handleCountryChange={handleCountryChange}
-              t={t}
-              errors={errors}
-            />
-          )}
-
           {activeTab === "documents" && (
             <ProfileDocumentsTab
               targetAccountId={targetAccountId}

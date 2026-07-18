@@ -33,8 +33,8 @@ import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
 
 import { Navigate } from "react-router-dom"
 import { AuthGuard } from "@/shared/components"
-
 const Profile = lazy(() => import("@/features/profile/pages/Profile"))
+const AccountInfoPage = lazy(() => import("@/features/settings/pages/AccountInfoPage"))
 const RecordingsPage = lazy(
   () => import("@/features/recordings/pages/RecordingsPage"),
 )
@@ -47,8 +47,8 @@ const InstructorPage = lazy(
 const OrganizationPage = lazy(
   () => import("@/features/user/pages/OrganizationPage"),
 )
-const AccountSettingsPage = lazy(
-  () => import("@/features/user/pages/AccountSettingsPage"),
+const SystemSettingsPage = lazy(
+  () => import("@/features/settings/pages/SystemSettingsPage"),
 )
 
 const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
@@ -434,19 +434,36 @@ const routesConfig = [
             children: [
               {
                 path: "setting",
-                element: (
-                  <LazyRoute>
-                    <AccountSettingsPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "instructor",
-                element: (
-                  <LazyRoute>
-                    <InstructorPage />
-                  </LazyRoute>
-                ),
+                children: [
+                  {
+                    index: true,
+                    element: <Navigate to="account" replace />
+                  },
+                  {
+                    path: "account",
+                    element: (
+                      <LazyRoute>
+                        <AccountInfoPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "instructor",
+                    element: (
+                      <LazyRoute>
+                        <InstructorPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "system",
+                    element: (
+                      <LazyRoute>
+                        <SystemSettingsPage />
+                      </LazyRoute>
+                    ),
+                  }
+                ]
               },
               {
                 path: "organization",
