@@ -56,7 +56,7 @@ export default {
     personalInfo: "Thông tin cá nhân",
     instructor: "Giảng viên",
     organization: "Tổ chức",
-    billing: "Thanh toán",
+    billing: "Lịch sử thanh toán",
     recordings: "Bản ghi hình",
     back: "Quay lại",
     accountInfo: "Thông tin tài khoản",
@@ -72,4 +72,10 @@ export default {
     thankYou: "Cảm ơn bạn đã kiên nhẫn chờ đợi! ^^",
   },
   noOptionsFound: "Không tìm thấy lựa chọn nào",
+  pagination: {
+    page: "Trang",
+    of: "trên",
+    prevPage: "Trang trước",
+    nextPage: "Trang tiếp",
+  },
 }

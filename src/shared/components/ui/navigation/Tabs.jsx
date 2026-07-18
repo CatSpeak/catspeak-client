@@ -23,7 +23,7 @@ const Tabs = memo(
   }) => {
     return (
       <div
-        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-[#e5e5e5] ${className}`}
+        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-[#e5e5e5] ${!fullWidth ? 'gap-6' : ''} ${className}`}
       >
         {tabs.map((tab) => {
           const Icon = tab.icon

@@ -5,7 +5,7 @@ export default {
     lecturer: "Lecturer",
     organization: "Organization",
     setting: "Setting",
-    billing: "Billing",
+    billing: "Payment History",
     menu: "Profile Menu",
   },
   personalInfo: {

@@ -56,7 +56,7 @@ export default {
     personalInfo: "个人信息",
     instructor: "讲师",
     organization: "组织",
-    billing: "账单",
+    billing: "支付历史",
     recordings: "录像",
     back: "返回",
     accountInfo: "账户信息",
@@ -71,6 +71,12 @@ export default {
     thankYou: "感谢您的耐心等待！^^",
   },
   noOptionsFound: "未找到选项",
+  pagination: {
+    page: "第",
+    of: "页，共",
+    prevPage: "上一页",
+    nextPage: "下一页",
+  },
   errors: {
     maxActiveRoomsReached: "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
     generalFailed: "发生错误，请重试。",

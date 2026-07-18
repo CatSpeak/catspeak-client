@@ -5,7 +5,7 @@ export default {
     lecturer: "讲师",
     organization: "组织",
     setting: "设置",
-    billing: "账单",
+    billing: "支付历史",
     menu: "个人资料菜单",
   },
   personalInfo: {
