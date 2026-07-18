@@ -136,9 +136,9 @@ const NewsCard = ({ news }) => {
               autoPlay
               interval={5000}
               className="w-full h-full rounded-t-[20px]"
-              objectFit="contain"
+              // objectFit="contain"
               showIndicators={false}
-              // disableFullscreen
+              disableFullscreen
             />
           </div>
         ) : (
@@ -306,7 +306,6 @@ const NewsCard = ({ news }) => {
             {news.totalComments || 0}
           </span>
         </button>
-
       </div>
 
       {/* ── Modals ───────────────────────────────────────────────── */}
