@@ -82,6 +82,7 @@ const BillingPage = () => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 bg-white min-h-[calc(100vh-70px)]">
       {/* Header */}
       <div className="mb-8">
+
         <h2 className="text-2xl font-bold text-cath-red-700 mb-1">
           {hist.title || "Payment History"}
         </h2>
@@ -90,7 +91,7 @@ const BillingPage = () => {
         </p>
       </div>
 
-      <FluentCard className="!p-6 !justify-start gap-6 min-h-[500px]">
+      <div className=" !justify-start gap-6 min-h-[500px]">
         {/* Filters */}
         <BillingFilters
           searchQuery={searchQuery}
@@ -117,7 +118,7 @@ const BillingPage = () => {
             onChangePage={setCurrentPage}
           />
         )}
-      </FluentCard>
+      </div>
     </div>
   )
 }

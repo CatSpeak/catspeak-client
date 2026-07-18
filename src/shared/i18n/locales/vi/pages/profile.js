@@ -5,7 +5,7 @@ export default {
     lecturer: "Giảng viên",
     organization: "Tổ chức",
     setting: "Cài đặt",
-    billing: "Thanh toán",
+    billing: "Lịch sử thanh toán",
     menu: "Menu cá nhân",
   },
   personalInfo: {

@@ -24,6 +24,7 @@ const ReelTagBar = memo(function ReelTagBar({
       activeTab={activeFilter}
       onChange={handleFilterClick}
       className="mb-8"
+      fullWidth={false}
     />
   )
 })
