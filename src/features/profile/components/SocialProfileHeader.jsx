@@ -1,5 +1,5 @@
-import React, { useRef } from "react"
-import toast from "react-hot-toast"
+import React, { useRef } from "react";
+import toast from "react-hot-toast";
 import {
   MapPin,
   Edit2,
@@ -9,17 +9,21 @@ import {
   UserMinus,
   Camera,
   AtSign,
-} from "lucide-react"
-import Avatar from "@/shared/components/ui/Avatar"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+} from "lucide-react";
+import Avatar from "@/shared/components/ui/Avatar";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
   useGetConnectionStatusQuery,
   useFollowUserMutation,
   useUnfollowUserMutation,
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
-} from "../api/friendshipApi"
-import { useUpdateAvatarMutation } from "@/store/api/userApi"
+} from "../api/friendshipApi";
+import {
+  useUpdateAvatarMutation,
+  useGetCurrentBackgroundQuery,
+} from "@/store/api/userApi";
+import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
 
 const SocialProfileHeader = ({
   user,
@@ -30,61 +34,74 @@ const SocialProfileHeader = ({
   onEditClick,
 }) => {
   // Use avatarImageUrl as the primary avatar for the profile
-  const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl
-  const nickname = formData?.nickname || user?.nickname
-  const username = formData?.username || user?.username
-  const displayName = nickname || username || "Lorem Ipsum"
-  const handle = nickname ? username : null
-  const bio = "Bio description" // Mocked for now
-  const location = formData?.location || user?.location
+  const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl;
+  const nickname = formData?.nickname || user?.nickname;
+  const username = formData?.username || user?.username;
+  const displayName = nickname || username || "Lorem Ipsum";
+  const handle = nickname ? username : null;
+  const bio = "Bio description"; // Mocked for now
+  const location = formData?.location || user?.location;
 
   // API Hooks
   const { data: statusResponse } = useGetConnectionStatusQuery(
     targetAccountId,
     { skip: isOwnProfile || !targetAccountId },
-  )
+  );
   const status =
-    statusResponse?.data !== undefined ? statusResponse.data : statusResponse
+    statusResponse?.data !== undefined ? statusResponse.data : statusResponse;
 
-  const [followUser] = useFollowUserMutation()
-  const [unfollowUser] = useUnfollowUserMutation()
-  const [sendFriendRequest] = useSendFriendRequestMutation()
-  const [deleteFriendship] = useDeleteFriendshipMutation()
+  const [followUser] = useFollowUserMutation();
+  const [unfollowUser] = useUnfollowUserMutation();
+  const [sendFriendRequest] = useSendFriendRequestMutation();
+  const [deleteFriendship] = useDeleteFriendshipMutation();
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
-    useUpdateAvatarMutation()
-  const fileInputRef = useRef(null)
+    useUpdateAvatarMutation();
+
+  const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } = useGetCurrentBackgroundQuery(
+    undefined,
+    {
+      skip: !isOwnProfile,
+    },
+  );
+  const fetchedCoverUrl = isOwnProfile
+    ? currentBackgroundResponse?.data?.activeBackgroundUrl
+    : null;
+
+  const fileInputRef = useRef(null);
 
   const handleFollowToggle = () => {
     if (status?.isFollowing) {
-      unfollowUser(targetAccountId)
+      unfollowUser(targetAccountId);
     } else {
-      followUser(targetAccountId)
+      followUser(targetAccountId);
     }
-  }
+  };
 
   const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const avatarData = new FormData()
-    avatarData.append("file", file)
+    const avatarData = new FormData();
+    avatarData.append("file", file);
 
     try {
-      toast.loading("Đang cập nhật...", { id: "avatar-update" })
-      await updateAvatar(avatarData).unwrap()
-      toast.success("Cập nhật ảnh đại diện thành công", { id: "avatar-update" })
+      toast.loading("Đang cập nhật...", { id: "avatar-update" });
+      await updateAvatar(avatarData).unwrap();
+      toast.success("Cập nhật ảnh đại diện thành công", {
+        id: "avatar-update",
+      });
     } catch (error) {
-      toast.error("Không thể cập nhật ảnh đại diện", { id: "avatar-update" })
-      console.error(error)
+      toast.error("Không thể cập nhật ảnh đại diện", { id: "avatar-update" });
+      console.error(error);
     } finally {
-      if (fileInputRef.current) fileInputRef.current.value = ""
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-  }
+  };
 
   const isFriendOrPending =
     status?.isFriend ||
     status?.friendshipStatus === 1 ||
-    status?.friendshipStatus === "Pending"
+    status?.friendshipStatus === "Pending";
 
   const handleFriendshipToggle = () => {
     if (isFriendOrPending) {
@@ -101,7 +118,7 @@ const SocialProfileHeader = ({
           )
           .catch(() =>
             toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra"),
-          )
+          );
       }
     } else {
       sendFriendRequest(targetAccountId)
@@ -116,41 +133,43 @@ const SocialProfileHeader = ({
             toast.error(
               t.profile?.social?.requestPending ||
                 "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-            )
+            );
           } else {
             toast.error(
               t.profile?.social?.requestError ||
                 "Không thể gửi yêu cầu kết bạn",
-            )
+            );
           }
-        })
+        });
     }
-  }
+  };
 
   const friendshipVariant = status?.isFriend
     ? "outline"
     : isFriendOrPending
       ? "secondary"
-      : "outline"
+      : "outline";
 
-  const friendshipIcon = isFriendOrPending ? <UserMinus /> : <UserPlus />
+  const friendshipIcon = isFriendOrPending ? <UserMinus /> : <UserPlus />;
 
   const friendshipLabel = status?.isFriend
     ? t.profile?.social?.unfriend || "Hủy kết bạn"
     : isFriendOrPending
       ? t.profile?.social?.cancelRequest || "Hủy yêu cầu"
-      : t.profile?.social?.addFriend || "Kết bạn"
+      : t.profile?.social?.addFriend || "Kết bạn";
 
   const actionButtons = isOwnProfile
-    ? [
-        {
-          key: "edit",
-          variant: "outline",
-          startIcon: <Edit2 />,
-          label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
-          onClick: onEditClick,
-        },
-      ]
+    ? onEditClick
+      ? [
+          {
+            key: "edit",
+            variant: "outline",
+            startIcon: <Edit2 />,
+            label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
+            onClick: onEditClick,
+          },
+        ]
+      : []
     : [
         {
           key: "follow",
@@ -168,13 +187,25 @@ const SocialProfileHeader = ({
           label: friendshipLabel,
           onClick: handleFriendshipToggle,
         },
-      ]
+      ];
 
   return (
     <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}
-      <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group">
-        {/* Placeholder for cover photo edit button */}
+      <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group overflow-hidden">
+        {isBackgroundLoading ? (
+          <div className="w-full h-full bg-gray-300 animate-pulse"></div>
+        ) : (
+          <img
+            src={fetchedCoverUrl || backgroundAccount}
+            alt="Cover fallback"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null; // prevent infinite loop
+              e.target.src = backgroundAccount;
+            }}
+          />
+        )}
       </div>
 
       {/* Profile Info Area */}
@@ -185,7 +216,7 @@ const SocialProfileHeader = ({
             className={`relative rounded-full overflow-hidden ${isOwnProfile ? "cursor-pointer" : ""}`}
             onClick={() => {
               if (isOwnProfile && fileInputRef.current && !isUpdatingAvatar) {
-                fileInputRef.current.click()
+                fileInputRef.current.click();
               }
             }}
           >
@@ -256,7 +287,7 @@ const SocialProfileHeader = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SocialProfileHeader
+export default SocialProfileHeader;

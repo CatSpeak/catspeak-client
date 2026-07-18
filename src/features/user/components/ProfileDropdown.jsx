@@ -84,7 +84,7 @@ const ProfileDropdown = () => {
 
   const handleInstructorClick = () => {
     handleCloseMenu()
-    navigate("/instructor")
+    navigate("/setting/instructor")
   }
 
   const handleBillingClick = () => {
@@ -135,18 +135,16 @@ const ProfileDropdown = () => {
           <p className="m-0 truncate text-base font-medium">
             {user?.username || "User"}
           </p>
-          <p className="m-0 truncate text-sm text-[#7A7574]">
-            {user?.email || ""}
-          </p>
         </div>
       </div>
 
       <div className="border-t border-[#e5e5e5]" />
 
       <div className="flex flex-col gap-1 p-1">
+
         <button onClick={handleProfileClick} className={menuItemClass}>
           <User size={20} />
-          <span>{t.header.profile}</span>
+          <span>{t.header?.personalPage || "Trang cá nhân"}</span>
         </button>
         <button onClick={handlePricingClick} className={menuItemClass}>
           <CreditCard size={20} />

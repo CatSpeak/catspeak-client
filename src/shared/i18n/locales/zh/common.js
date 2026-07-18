@@ -58,6 +58,9 @@ export default {
     organization: "组织",
     billing: "账单",
     recordings: "录像",
+    back: "返回",
+    accountInfo: "账户信息",
+    systemConfig: "系统设置",
   },
   comingSoon: {
     badge: "即将推出",
