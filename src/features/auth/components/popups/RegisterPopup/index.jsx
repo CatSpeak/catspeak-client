@@ -2,7 +2,6 @@ import { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
 import { useRegisterMutation } from "@/store/api/authApi"
-import { useNavigate } from "react-router-dom"
 import RegisterFormFields from "./RegisterFormFields"
 import AgreementSection from "./AgreementSection"
 import Modal from "@/shared/components/ui/Modal"
@@ -11,8 +10,6 @@ import { parseRegisterError } from "@/features/auth/utils/registerErrors"
 const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
   const { t } = useLanguage()
   const authText = t.auth
-  const navigate = useNavigate()
-
   const [register, { isLoading }] = useRegisterMutation()
   const [apiError, setApiError] = useState(null)
 
@@ -34,7 +31,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
 
   const validatePhoneInput = (phoneNumber, prefix) => {
     if (!phoneNumber) return true
-    const clean = phoneNumber.replace(/[\s\-\(\)]/g, "")
+    const clean = phoneNumber.replace(/[\s\-()/]/g, "")
     if (!/^[0-9]+$/.test(clean)) return false
 
     if (prefix === "+84") {
@@ -98,11 +95,11 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     <Modal 
       open={open} 
       onClose={onClose} 
-      className="flex flex-col sm:max-w-2xl sm:max-h-[90vh]"
+      className="flex flex-col md:max-w-[650px] sm:max-h-[90vh]"
       bodyClassName="px-4 flex-1 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
     >
       <form onSubmit={handleSubmit} className="pb-12 min-[426px]:pb-6">
-        <h2 className="mb-6 pt-2 text-center text-3xl font-bold text-[#8f0d15] shrink-0">
+        <h2 className="mb-6 pt-2 text-center text-[28px] font-bold text-[#990011] shrink-0">
           {authText.registerTitle}
         </h2>
 
@@ -140,12 +137,12 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
           {/* Submit */}
           <AuthButton
             type="submit"
-            className="w-full rounded-lg mb-6"
+            className="mb-5"
             disabled={isLoading}
           >
             {isLoading
               ? authText.registering
-              : authText.registerButton.toUpperCase()}
+              : authText.registerButton}
           </AuthButton>
 
           {/* Switch to login */}
@@ -155,7 +152,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
               {authText.or}
             </span>
           </div>
-          <p className="text-center text-sm text-[#7A7574]">
+          <p className="text-center text-xs text-[#7A7574]">
             {authText.haveAccount}{" "}
             <button
               type="button"

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Hash, Edit2, X, RefreshCw } from "lucide-react"
+import { ArrowLeft, Edit2, X, RefreshCw } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import AuthButton from "../../ui/AuthButton"
 import Modal from "@/shared/components/ui/Modal"
@@ -25,11 +25,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
   const [successMsg, setSuccessMsg] = useState("")
   const [validationError, setValidationError] = useState("")
 
-  useEffect(() => {
-    if (initialEmail && open) {
-      setEmail(initialEmail)
-    }
-  }, [initialEmail, open])
+  const currentEmail = email || initialEmail || ""
 
   const [verifyEmailOtp, { isLoading: isVerifying }] =
     useVerifyEmailOtpMutation()
@@ -53,7 +49,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
     }
 
     try {
-      await verifyEmailOtp({ email, otp: otpValue }).unwrap()
+      await verifyEmailOtp({ email: currentEmail, otp: otpValue }).unwrap()
       onClose()
       if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
     } catch (err) {
@@ -70,7 +66,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
     setApiError("")
     setSuccessMsg("")
     try {
-      await resendEmailOtp({ email }).unwrap()
+      await resendEmailOtp({ email: currentEmail }).unwrap()
       setSuccessMsg(authText.otpResentSuccess || "OTP has been resent successfully")
     } catch (err) {
       const apiMsg = err?.data?.message
@@ -85,13 +81,13 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
   const handleUpdateEmail = async () => {
     setApiError("")
     setSuccessMsg("")
-    if (!newEmail || newEmail === email) {
+    if (!newEmail || newEmail === currentEmail) {
       setIsEditingEmail(false)
       return
     }
 
     try {
-      await resendEmailOtp({ email, newEmail }).unwrap()
+      await resendEmailOtp({ email: currentEmail, newEmail }).unwrap()
       setEmail(newEmail)
       setIsEditingEmail(false)
       setSuccessMsg("Email updated and new OTP sent")
@@ -102,19 +98,33 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="pb-6">
-        <h2 className="mb-2 text-center text-3xl font-bold text-[#8f0d15]">
-          {authText.verifyEmailTitle || "Verify Your Email"}
+      <div className="pb-6 px-2">
+        {/* Back to register link (optional) */}
+        {onSwitchMode && (
+          <div className="mb-2 flex items-center">
+            <button
+              type="button"
+              onClick={() => onSwitchMode("register")}
+              className="flex items-center text-sm font-semibold text-[#606060] transition-colors hover:text-gray-800"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              {authText.back || "Quay lại"}
+            </button>
+          </div>
+        )}
+
+        <h2 className="mb-2 text-center text-[28px] font-bold text-[#990011]">
+          {authText.verifyEmailTitle || "Xác minh OTP"}
         </h2>
-        
+
         {!isEditingEmail ? (
           <div className="mb-6 text-center text-sm text-[#7A7574]">
-            {authText.verifyEmailSubtitle || "We've sent a 6-digit code to"}{" "}
-            <strong className="text-black">{email}</strong>
+            {authText.verifyEmailSubtitle || "Chúng tôi đã gửi mã 6 chữ số đến"}{" "}
+            <strong className="text-[#990011]">{currentEmail}</strong>
             <button
               type="button"
               onClick={() => {
-                setNewEmail(email)
+                setNewEmail(currentEmail)
                 setIsEditingEmail(true)
                 setApiError("")
                 setSuccessMsg("")
@@ -126,14 +136,14 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
             </button>
           </div>
         ) : (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="mb-6 p-4 bg-gray-50 rounded-xl">
             <label className="block text-xs mb-1 text-gray-600">
-              {authText.newEmailPlaceholder || "Enter correct email"}
+              {authText.newEmailPlaceholder || "Nhập email đúng"}
             </label>
             <div className="flex gap-2">
               <TextInput
                 type="email"
-                variant="square"
+                variant="round"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 className="flex-1"
@@ -142,7 +152,7 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
                 type="button"
                 onClick={handleUpdateEmail}
                 disabled={isResending}
-                className="px-3 py-2 bg-[#990011] text-white rounded text-sm font-semibold disabled:opacity-50"
+                className="px-3 py-2 bg-[#990011] text-white rounded-full text-sm font-semibold disabled:opacity-50"
               >
                 {isResending ? "..." : (authText.updateEmail || "Update")}
               </button>
@@ -159,34 +169,31 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
 
         <form onSubmit={handleVerifyOtp}>
           <div className="mb-4">
-            <div className="relative">
-              <Hash className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <TextInput
-                type="text"
-                variant="square"
-                placeholder={authText.otpPlaceholder || "Enter 6-digit OTP"}
-                maxLength={6}
-                value={otp}
-                onChange={(e) => {
-                  setOtp(e.target.value)
-                  setValidationError("")
-                  setApiError("")
-                }}
-                className={`pl-10 text-center text-lg tracking-widest ${
-                  validationError ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600" : ""
-                }`}
-              />
-            </div>
-            {validationError && <p className="mt-1 text-xs text-red-600">{validationError}</p>}
+            <TextInput
+              type="text"
+              variant="round"
+              placeholder={authText.otpPlaceholder || "Nhập mã OTP 6 chữ số"}
+              maxLength={6}
+              value={otp}
+              onChange={(e) => {
+                setOtp(e.target.value)
+                setValidationError("")
+                setApiError("")
+              }}
+              className={`text-center text-lg tracking-widest ${
+                validationError || apiError ? "!border-red-600 focus:!border-red-600" : ""
+              }`}
+            />
+            {validationError && (
+              <p className="mt-1 text-xs text-red-600">{validationError}</p>
+            )}
+            {apiError && (
+              <p className="mt-1 text-xs text-red-600">{apiError}</p>
+            )}
           </div>
 
-          {apiError && (
-            <p className="mb-4 rounded-lg bg-red-100 py-2 px-3 text-sm text-red-700">
-              {apiError}
-            </p>
-          )}
           {successMsg && (
-            <p className="mb-4 rounded-lg bg-green-100 py-2 px-3 text-sm text-green-700">
+            <p className="mb-4 rounded-xl bg-green-50 py-2 px-3 text-sm text-green-700">
               {successMsg}
             </p>
           )}
@@ -194,11 +201,11 @@ const VerifyEmailOtpPopup = ({ open, onClose, email: initialEmail, onSwitchMode 
           <AuthButton
             type="submit"
             disabled={isVerifying || isEditingEmail}
-            className="w-full rounded-lg mb-4"
+            className="w-full rounded-full mb-4"
           >
             {isVerifying
-              ? authText.verifying || "VERIFYING..."
-              : authText.verifyOtpButton?.toUpperCase() || "VERIFY OTP"}
+              ? authText.verifying || "ĐANG XÁC MINH..."
+              : authText.verifyOtpButton || "Xác minh OTP"}
           </AuthButton>
 
           <div className="text-center text-sm">
