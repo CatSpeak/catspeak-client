@@ -1,11 +1,19 @@
 import {
   Home,
   LayoutDashboard,
-  ShoppingCart,
-  MessageCircle,
   GraduationCap,
   Settings,
   HelpCircle,
+  Briefcase,
+  User,
+  CreditCard,
+  Newspaper,
+  Calendar,
+  Mic,
+  Film,
+  Mail,
+  BookOpen,
+  Video,
 } from "lucide-react";
 
 export const navLinks = [
@@ -15,19 +23,33 @@ export const navLinks = [
     hasDropdown: true,
     icon: LayoutDashboard,
     subItems: [
-      { key: "catSpeakNews", path: "/cat-speak/news" },
+      { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       // { key: "worldNews", path: "/cat-speak/discover" },
-      { key: "reels", path: "/cat-speak/reels" },
+      { key: "reels", path: "/cat-speak/reels", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
-      { key: "calendar", path: "/cat-speak/calendar" },
+      { key: "letters", path: "/cat-speak/letters", icon: Mail },
+      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
   {
     key: "workspace",
-    path: "/workspace",
-    hasDropdown: false,
-    hideInSidebar: true,
+    hasDropdown: true,
+    icon: Briefcase,
+    subItems: [
+      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+      { key: "recordings", path: "/workspace/recordings", icon: Mic },
+      { key: "reels", path: "/workspace/reels", icon: Film },
+      { key: "events", path: "/workspace/events", icon: Calendar },
+      { key: "profile", path: "/profile", icon: User },
+    ],
   },
+  // {
+  //   key: "pricing",
+  //   path: "/pricing",
+  //   hasDropdown: false,
+  //   icon: CreditCard,
+  // },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
   // { key: "messages", path: "/messages", icon: MessageCircle },
   // {
@@ -42,6 +64,7 @@ export const navLinks = [
 ];
 
 export const footerLinks = [
+  { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
   // { key: "help", path: "/help", icon: HelpCircle }
 ];

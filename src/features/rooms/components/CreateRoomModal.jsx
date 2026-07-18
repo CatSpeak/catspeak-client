@@ -11,12 +11,17 @@ import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import { useCreateRoomForm } from "../hooks/useCreateRoomForm"
 import { useCallInterceptor } from "@/features/video-call/hooks/useCallInterceptor"
 import { X } from "lucide-react"
-
+import Switch from "@/shared/components/ui/inputs/Switch"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 const scrollbarClasses =
   "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
 
 const CreateRoomModal = ({ open, onCancel }) => {
   const { t } = useLanguage()
+  const { hasFeature } = usePlanFeatures()
+  
+  const canCreatePrivateRoom = hasFeature(PLAN_FEATURES.ALLOW_PRIVATE_ROOMS)
 
   const {
     formData,
@@ -54,7 +59,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
     !selectedLanguage ||
     isCreating ||
     !formData.name.trim() ||
-    (formData.isPrivate && !formData.password.trim())
+    (formData.isPrivate && canCreatePrivateRoom && !formData.password.trim())
 
   return (
     <>
@@ -68,7 +73,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
         onClose={onCancel}
         title={null}
         showCloseButton={false}
-        className="max-w-sm sm:max-w-[800px] w-full max-sm:!fixed max-sm:!inset-0 max-sm:!m-0 max-sm:!max-w-none max-sm:!h-full max-sm:!w-full max-sm:!rounded-none max-sm:flex max-sm:flex-col sm:rounded-3xl"
+        className="max-w-sm sm:max-w-[850px] w-full max-sm:!fixed max-sm:!inset-0 max-sm:!m-0 max-sm:!max-w-none max-sm:!h-full max-sm:!w-full max-sm:!rounded-none max-sm:flex max-sm:flex-col sm:rounded-3xl"
         bodyClassName="flex flex-col flex-1 overflow-hidden"
       >
         <AnimatePresence mode="wait">
@@ -101,6 +106,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
                 <CreateFormInputs
                   formData={formData}
                   handleChange={handleChange}
+                  canCreatePrivateRoom={canCreatePrivateRoom}
                   t={t}
                 />
               )}
@@ -139,7 +145,7 @@ const CreateRoomModal = ({ open, onCancel }) => {
 }
 
 // --- Sub Components ---
-const CreateFormInputs = ({ formData, handleChange, t }) => (
+const CreateFormInputs = ({ formData, handleChange, canCreatePrivateRoom, t }) => (
   <div className="flex flex-col gap-6">
     <TextInput
       id="name"
@@ -179,20 +185,22 @@ const CreateFormInputs = ({ formData, handleChange, t }) => (
       </div>
     </div> */}
 
-    {/* <div className="flex items-center justify-between">
-      <span className="text-base">
-        {t.rooms?.createRoom?.privateRoom || "Private Room"}
-      </span>
-      <Switch
-        checked={formData.isPrivate}
-        onChange={(e) => {
-          handleChange("isPrivate", e.target.checked)
-          if (!e.target.checked) handleChange("password", "")
-        }}
-      />
-    </div> */}
+    {canCreatePrivateRoom && (
+      <div className="flex items-center justify-between">
+        <span className="text-base">
+          {t.rooms?.createRoom?.privateRoom || "Private Room"}
+        </span>
+        <Switch
+          checked={formData.isPrivate}
+          onChange={(e) => {
+            handleChange("isPrivate", e.target.checked)
+            if (!e.target.checked) handleChange("password", "")
+          }}
+        />
+      </div>
+    )}
 
-    {formData.isPrivate && (
+    {formData.isPrivate && canCreatePrivateRoom && (
       <TextInput
         id="password"
         type="password"

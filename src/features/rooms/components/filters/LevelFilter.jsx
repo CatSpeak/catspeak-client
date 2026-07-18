@@ -99,7 +99,9 @@ const LevelFilter = () => {
                   }
                   className="w-4 h-4 text-cath-red-700 bg-white accent-cath-red-700 cursor-pointer"
                 />
-                <span className="text-sm">{levelObj.label}</span>
+                <span className="text-sm">
+                  {levelObj.labelKey ? t.rooms?.filters?.levels?.[levelObj.labelKey] || levelObj.label : levelObj.label}
+                </span>
               </label>
             )
           })}

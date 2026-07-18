@@ -9,7 +9,7 @@ export default {
     china: "Trung Quốc",
     usa: "Anh",
   },
-  ctaButton: "Tìm hiểu thêm về CatSpeak",
+  ctaButton: "Tìm hiểu thêm về Cat Speak",
   whyChooseUs: "Tại sao chọn chúng tôi ?",
   valuesTitle: "GIÁ TRỊ CỐT LÕI CAT SPEAK MANG LẠI",
   values: {
@@ -52,20 +52,20 @@ export default {
   },
   responseSection: {
     title: "Phản hồi",
-    subtitle: "Hãy xem mọi người đang nói gì về CatSpeak!",
+    subtitle: "Hãy xem mọi người đang nói gì về Cat Speak!",
     reviews: [
       {
-        text: "Giao diện rất dễ thương và thân thiện! Mình thích cách CatSpeak kết hợp giữa việc học với AI và kết bạn bốn phương. Nó giúp mình bớt ngại khi giao tiếp tiếng Anh.",
+        text: "Giao diện rất dễ thương và thân thiện! Mình thích cách Cat Speak kết hợp giữa việc học với AI và kết bạn bốn phương. Nó giúp mình bớt ngại khi giao tiếp tiếng Anh.",
         name: "Minh Anh",
         role: "Sinh viên",
       },
       {
-        text: "CatSpeak giúp mình cải thiện phát âm rất nhiều. Các bài hội thoại đa dạng và thú vị, AI hỗ trợ nhiệt tình!",
+        text: "Cat Speak giúp mình cải thiện phát âm rất nhiều. Các bài hội thoại đa dạng và thú vị, AI hỗ trợ nhiệt tình!",
         name: "Thanh Hà",
         role: "Nhân viên văn phòng",
       },
       {
-        text: "Tôi đã thử nhiều app học tiếng Anh nhưng CatSpeak có cộng đồng tốt nhất. Được kết bạn với người bản xứ thật sự rất thú vị!",
+        text: "Tôi đã thử nhiều app học tiếng Anh nhưng Cat Speak có cộng đồng tốt nhất. Được kết bạn với người bản xứ thật sự rất thú vị!",
         name: "Văn Đức",
         role: "Giáo viên",
       },
@@ -77,7 +77,7 @@ export default {
     ],
   },
   partnerSection: {
-    title: "Đối tác của chúng tôi",
+    title: "Đơn vị kết nối",
   },
   faq: {
     corner: "FAQ",

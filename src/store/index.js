@@ -6,6 +6,8 @@ import messageWidgetReducer from "./slices/messageWidgetSlice"
 import serverStatusReducer from "./slices/serverStatusSlice"
 import videoCallReducer from "./slices/videoCallSlice"
 import notificationReducer from "./slices/notificationSlice"
+import reelUploadReducer from "./slices/reelUploadSlice"
+import recordingProcessReducer from "./slices/recordingProcessSlice"
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +17,8 @@ export const store = configureStore({
     serverStatus: serverStatusReducer,
     videoCall: videoCallReducer,
     notification: notificationReducer,
+    reelUpload: reelUploadReducer,
+    recordingProcess: recordingProcessReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(baseApi.middleware),

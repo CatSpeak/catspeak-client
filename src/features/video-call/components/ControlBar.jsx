@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import {
   Video,
   VideoOff,
@@ -12,8 +13,10 @@ import {
   Circle,
   MoreVertical,
   Hand,
+  Split,
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
+import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -21,9 +24,12 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
+import { useGame } from "@/features/games/context/GameContext"
+import RecordingButton from "./RecordingButton"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
+  const { startGame } = useGame()
   const {
     micOn,
     cameraOn,
@@ -35,6 +41,8 @@ const VideoCallControlBar = () => {
     setShowChat,
     showParticipants,
     setShowParticipants,
+    showBreakout,
+    setShowBreakout,
     handleToggleMic,
     handleToggleCam,
     handleToggleScreenShare,
@@ -54,9 +62,22 @@ const VideoCallControlBar = () => {
     unreadAiChat,
     isHandRaised,
     sessionId,
+    room,
+    user,
+    participants,
+    isAISession,
   } = useVideoCallContext()
 
+  const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall)
+  const isHost = room?.creatorId === user?.accountId
+
+  const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
+    skip: !parentSessionId,
+  })
+
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showGameModal, setShowGameModal] = useState(false)
 
   const handleToggleHand = async () => {
     console.log(
@@ -76,8 +97,12 @@ const VideoCallControlBar = () => {
     }
   }
 
+  const handleGameStart = ({ gameId, difficulty, language }) => {
+    startGame(gameId, difficulty, language)
+    setShowGameModal(false)
+  }
+
   const unreadMessages = unreadRoomChat + unreadAiChat
-  const [showMoreMenu, setShowMoreMenu] = useState(false)
 
   const iconClass = "w-6 h-6"
 
@@ -124,24 +149,13 @@ const VideoCallControlBar = () => {
         className="hidden min-[769px]:flex"
       />
 
-      <div className="relative hidden min-[769px]:block">
-        <ControlButton
-          isActive={isRecording}
-          isLoading={isTogglingRecording}
-          onClick={handleToggleRecording}
-          title={
-            isRecording
-              ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
-              : t.rooms?.videoCall?.controls?.recordOn || "Start recording"
-          }
-          iconActive={<Circle className={`${iconClass} fill-white`} />}
-          iconInactive={<Circle className={`${iconClass} fill-none`} />}
-          activeClassOverride="bg-red-600 hover:bg-red-700 text-white"
-        >
-          {isRecording && !isTogglingRecording && (
-            <span className="pointer-events-none absolute inset-0 rounded-full animate-ping bg-red-500 opacity-30" />
-          )}
-        </ControlButton>
+      <div className="relative hidden min-[769px]:block z-50">
+        <RecordingButton
+          isRecording={isRecording}
+          isTogglingRecording={isTogglingRecording}
+          onToggleRecording={handleToggleRecording}
+          onStopRecording={confirmStopRecording}
+        />
       </div>
 
       <ControlButton
@@ -152,6 +166,17 @@ const VideoCallControlBar = () => {
         iconInactive={<Users className={iconClass} />}
         className="hidden min-[426px]:flex"
       />
+
+      {!isAISession && (isHost || isBreakoutActive || breakoutStatus?.isBreakoutActive) && (
+        <ControlButton
+          isActive={showBreakout}
+          onClick={() => setShowBreakout(!showBreakout)}
+          title="Breakout Rooms"
+          iconActive={<Split className={iconClass} />}
+          iconInactive={<Split className={iconClass} />}
+          className="hidden min-[769px]:flex"
+        />
+      )}
 
       <ControlButton
         isActive={isHandRaised}
@@ -190,12 +215,19 @@ const VideoCallControlBar = () => {
         <ControlBarMoreMenu
           showMoreMenu={showMoreMenu}
           setShowMoreMenu={setShowMoreMenu}
+          setShowGameModal={setShowGameModal}
         />
       </div>
 
       <ControlButton
         isActive={true}
-        onClick={promptLeaveCall}
+        onClick={() => {
+          if (isHost && isBreakoutActive) {
+            toast.error("Bạn không thể rời phòng khi đang chia nhóm nhỏ. Vui lòng đóng tất cả phòng thảo luận trước.")
+            return
+          }
+          promptLeaveCall()
+        }}
         title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
         iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
         iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
@@ -214,14 +246,21 @@ const VideoCallControlBar = () => {
         <LeaveCallModal
           open={showLeaveModal}
           onClose={cancelLeaveCall}
+          isHost={isHost}
+          isBreakoutActive={isBreakoutActive}
           onConfirm={() => {
+            if (isHost && isBreakoutActive) {
+              toast.error("Vui lòng đóng tất cả phòng nhỏ trước khi rời phòng.")
+              return
+            }
             cancelLeaveCall()
             handleLeaveSession()
           }}
         />
       )}
+
     </div>
-  )
+  );
 }
 
 export default VideoCallControlBar

@@ -6,14 +6,15 @@ import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useNavigate } from "react-router-dom";
 
 const AISection = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
   const { openAuthModal } = useAuthModal();
   const navigate = useNavigate();
 
   const handleAction = () => {
+    const community = localStorage.getItem("communityLanguage");
     if (isAuthenticated) {
-      navigate(`/${language}/community`);
+      navigate(`/${community}/community`);
     } else {
       openAuthModal("login");
     }

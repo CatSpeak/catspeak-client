@@ -1,30 +1,29 @@
 import React from "react"
-import { GraduationCap } from "lucide-react"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const InstructorEmptyState = ({ onApply, t }) => {
   const ins = t.profile?.instructor || {}
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-      <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-6">
-        <GraduationCap className="w-10 h-10 text-cath-red-700" />
+    <div className="flex flex-col items-center justify-center p-10 bg-white rounded-2xl shadow-sm border border-gray-100 text-center mt-4">
+      <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cath-red-700">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 Z"></path>
+        </svg>
       </div>
 
       <h2 className="text-xl font-bold text-gray-900 mb-2">
-        {ins.notAppliedTitle}
+        {ins.notAppliedTitle || "Bạn chưa đăng ký"}
       </h2>
 
-      <p className="text-sm text-gray-500 max-w-md mb-8">
-        {ins.notAppliedDescription}
+      <p className="text-sm text-gray-500 max-w-md mb-8 leading-relaxed">
+        {ins.notAppliedDescription || "Chia sẻ chuyên môn của bạn với học viên trên toàn thế giới. Đăng ký trở thành giảng viên và bắt đầu giảng dạy ngay hôm nay."}
       </p>
 
-      <button
-        type="button"
-        onClick={onApply}
-        className="px-8 py-2.5 bg-cath-red-700 text-white text-sm font-semibold rounded-lg hover:bg-[#7a000d] transition-colors"
-      >
-        {ins.applyNow}
-      </button>
+      <PillButton onClick={onApply} className="px-8">
+        {ins.applyNow || "Đăng ký ngay"}
+      </PillButton>
     </div>
   )
 }

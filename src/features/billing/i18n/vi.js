@@ -1,5 +1,6 @@
 export default {
   billing: {
+    billingHistory: "Lịch sử thanh toán",
     planCard: {
       suffixes: {
         MAX_ACTIVE_ROOMS: " phòng",
@@ -10,7 +11,7 @@ export default {
       }
     },
     pricing: {
-      title: "Gói Đăng Ký",
+      title: "Gói đăng ký",
       subtitle: "Chọn gói phù hợp với nhu cầu của bạn.",
       customPaymentTitle: "Số tiền thanh toán tuỳ chỉnh",
       customPaymentSubtitle: "Vui lòng nhập số tiền bạn muốn thanh toán cho gói Pro (VND).",
@@ -21,12 +22,69 @@ export default {
       currentPlan: "Gói hiện tại",
       included: "Đã bao gồm trong gói của bạn",
       upgradeTo: "Nâng cấp lên {{planName}}",
+      planFree: "Gói Free",
+      planPro: "Gói Room Pro",
+      activated: "Đã kích hoạt",
+      popular: "Phổ biến",
+      featuresFree: [
+        "Tham gia room meeting (tối đa 1 room cùng lúc)",
+        "Tối đa 50 người trong room",
+        "Thời lượng meeting tối đa 60 phút",
+        "Quyền riêng tư cơ bản",
+        "Sử dụng công cụ AI hỗ trợ học tập cơ bản",
+        "Tham gia cộng đồng & sự kiện miễn phí",
+        "Hỗ trợ cơ bản"
+      ],
+      featuresPro: [
+        "Tạo tối đa 3 room hoạt động cùng lúc và host phòng",
+        "Không giới hạn thời lượng meeting",
+        "Tối đa 100 người trong room",
+        "Thiết lập quyền riêng tư nâng cao",
+        "Tùy chỉnh thumbnail cho room",
+        "Công cụ AI hỗ trợ học tập nâng cao",
+        "Tham gia workshop, talkshow, challenges",
+        "Hỗ trợ ưu tiên"
+      ],
+      tabTitle: "Nâng cấp gói",
+    },
+    checkout: {
+      title: "Thanh toán dịch vụ",
+      transferInfo: "Thông tin chuyển khoản",
+      recipientInfo: "Thông tin bên nhận",
+      bank: "Ngân hàng",
+      accountNo: "Số tài khoản",
+      accountOwner: "Chủ tài khoản",
+      memo: "Nội dung chuyển khoản (tùy chọn)",
+      buyerInfo: "Thông tin người mua",
+      fullName: "Họ và tên",
+      email: "Email",
+      phone: "SĐT",
+      paymentDetails: "Thông tin thanh toán",
+      price: "Giá",
+      vat: "VAT (0%)",
+      total: "Tổng thanh toán",
+      submit: "Thanh toán",
+      secure: "Thông tin của bạn được bảo mật tuyệt đối",
+      agreeTerms: "Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật",
+      termsOfService: "Điều khoản dịch vụ",
+      privacyPolicy: "Chính sách bảo mật"
     },
     history: {
       title: "Lịch Sử Thanh Toán",
       subtitle: "Xem các hóa đơn và lịch sử thanh toán của bạn.",
       noHistoryTitle: "Chưa có lịch sử thanh toán",
       noHistorySubtitle: "Bạn chưa có hóa đơn nào. Khi bạn nâng cấp hoặc thanh toán, hóa đơn sẽ xuất hiện ở đây.",
+      searchPlaceholder: "Nhập ID hóa đơn...",
+      dateFilterAll: "Mọi lúc",
+      dateFilterWeek: "7 ngày qua",
+      dateFilterMonth: "30 ngày qua",
+      statusFilterAll: "Tất cả trạng thái",
+      statusFilterSuccess: "Thành công",
+      statusFilterPending: "Đang chờ xử lý",
+      statusFilterCancelled: "Đã hủy",
+      noResults: "Không tìm thấy kết quả",
+      noResultsHint: "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm của bạn.",
+      showingResults: "Hiển thị {{count}} kết quả",
       columns: {
         date: "Ngày",
         orderCode: "Mã Đơn Hàng",
@@ -58,6 +116,7 @@ export default {
       subtitle: "Bạn đang chọn nâng cấp lên {{planName}}.",
       paymentMethod: "Phương thức thanh toán",
       payosSub: "Chuyển khoản ngân hàng / QR Code",
+      momoSub: "Thanh toán bằng ví điện tử MoMo",
       stripeSub: "Thẻ Tín Dụng / Thẻ Ghi Nợ",
       comingSoon: "Sắp ra mắt",
       cancel: "Hủy",

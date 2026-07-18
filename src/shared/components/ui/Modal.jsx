@@ -14,6 +14,7 @@ const Modal = ({
   showCloseButton = true,
   footer,
   bodyClassName = "px-4 flex-1 overflow-y-auto",
+  fullScreenOnMobile = true,
 }) => {
   useScrollLock(open)
 
@@ -23,7 +24,7 @@ const Modal = ({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-0 md:p-4">
+        <div className={`fixed inset-0 z-[1300] flex items-center justify-center ${fullScreenOnMobile ? "p-0 md:p-4" : "p-4"}`}>
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -40,7 +41,11 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative flex flex-col h-full w-full shadow-xl md:h-auto md:max-h-[90vh] ${
+            className={`relative flex flex-col w-full shadow-xl ${
+              fullScreenOnMobile 
+                ? "h-full md:h-auto md:max-h-[90vh]" 
+                : "h-auto max-h-[90vh]"
+            } ${
               /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
                 className,
               )
@@ -49,7 +54,7 @@ const Modal = ({
             } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
               /(^|\s)rounded/.test(className)
                 ? ""
-                : "rounded-none md:rounded-3xl md:border md:border-[#E5e5e5]"
+                : fullScreenOnMobile ? "rounded-none md:rounded-3xl md:border md:border-[#E5e5e5]" : "rounded-3xl border border-[#E5e5e5]"
             } ${className}`}
             role="dialog"
             aria-modal="true"

@@ -30,6 +30,9 @@ export const LEVELS = {
     { label: "B2", value: "B2" },
     { label: "C1", value: "C1" },
     { label: "C2", value: "C2" },
+    { labelKey: "beginner", label: "Beginner", value: "Beginner" },
+    { labelKey: "intermediate", label: "Intermediate", value: "Intermediate" },
+    { labelKey: "advanced", label: "Advanced", value: "Advanced" },
   ],
   Chinese: [
     { label: "HSK 1", value: "HSK1" },
@@ -38,10 +41,13 @@ export const LEVELS = {
     { label: "HSK 4", value: "HSK4" },
     { label: "HSK 5", value: "HSK5" },
     { label: "HSK 6", value: "HSK6" },
+    { labelKey: "beginner", label: "Beginner", value: "Beginner" },
+    { labelKey: "intermediate", label: "Intermediate", value: "Intermediate" },
+    { labelKey: "advanced", label: "Advanced", value: "Advanced" },
   ],
   Vietnamese: [
-    { label: "Beginner", value: "Beginner" },
-    { label: "Intermediate", value: "Intermediate" },
-    { label: "Advanced", value: "Advanced" },
+    { labelKey: "beginner", label: "Beginner", value: "Beginner" },
+    { labelKey: "intermediate", label: "Intermediate", value: "Intermediate" },
+    { labelKey: "advanced", label: "Advanced", value: "Advanced" },
   ],
 }

@@ -1,59 +1,76 @@
-import React, { useState } from "react"
-import { Trash2, Pencil } from "lucide-react"
-import SharePopover from "./SharePopover"
-import useEventDelete from "../../hooks/useEventDelete"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useAuth } from "@/features/auth/hooks/useAuth"
+import React, { useState } from "react";
+import { Trash2, Pencil } from "lucide-react";
+import dayjs from "dayjs";
+import SharePopover from "./SharePopover";
+import useEventDelete from "../../hooks/useEventDelete";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   useRegisterForEventMutation,
   useCancelRegistrationMutation,
   useDeleteRegistrationMutation,
-} from "@/store/api/eventsApi"
-import { useLocation, useNavigate } from "react-router-dom"
-import { useAuthModal } from "@/shared/context/AuthModalContext"
+} from "@/store/api/eventsApi";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
 
-import ParticipantListModal from "./ParticipantListModal"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+import ParticipantListModal from "./ParticipantListModal";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
 
-const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
-  const { user, isAdmin } = useAuth()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { openAuthModal } = useAuthModal()
-  const { t } = useLanguage()
-  const cal = t.calendar || {}
-  const [showParticipants, setShowParticipants] = useState(false)
+const EventDetailFooter = ({
+  eventId,
+  event,
+  onClose,
+  onEdit,
+  onActionComplete,
+  hideAdminControls = false,
+  isCreatorOverride,
+}) => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { openAuthModal } = useAuthModal();
+  const { t } = useLanguage();
+  const cal = t.calendar || {};
+  const [showParticipants, setShowParticipants] = useState(false);
 
-  const isCreator = Boolean(
-    user &&
-    event &&
-    ((user.id != null &&
-      event.creatorId != null &&
-      user.id === event.creatorId) ||
-      (user.username != null &&
-        event.creatorName != null &&
-        user.username === event.creatorName) ||
-      (user.fullName != null &&
-        event.creatorName != null &&
-        user.fullName === event.creatorName)),
-  )
+  const isCreator =
+    isCreatorOverride !== undefined
+      ? isCreatorOverride
+      : Boolean(
+          user &&
+            event &&
+            ((user.id != null &&
+              event.creatorId != null &&
+              user.id === event.creatorId) ||
+              (user.accountId != null &&
+                event.creatorId != null &&
+                user.accountId === event.creatorId) ||
+              (user.username != null &&
+                event.creatorName != null &&
+                user.username === event.creatorName) ||
+              (user.fullName != null &&
+                event.creatorName != null &&
+                user.fullName === event.creatorName)),
+        );
 
-  const isRegistered = event?.isRegistered ?? false
+  const isRegistered = event?.isRegistered ?? false;
+  const isPast = event?.startTime && dayjs(event.startTime).isBefore(dayjs());
 
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
-    useEventDelete(eventId, event?.occurrenceId, onClose)
+    useEventDelete(eventId, event?.occurrenceId, onClose, onActionComplete);
 
   const [registerForEvent, { isLoading: isRegistering }] =
-    useRegisterForEventMutation()
+    useRegisterForEventMutation();
   const [cancelRegistration, { isLoading: isCancelling }] =
-    useCancelRegistrationMutation()
+    useCancelRegistrationMutation();
   const [deleteRegistration, { isLoading: isDeletingReg }] =
-    useDeleteRegistrationMutation()
+    useDeleteRegistrationMutation();
 
-  const isProcessing = isRegistering || isCancelling || isDeletingReg
+  const isProcessing = isRegistering || isCancelling || isDeletingReg;
 
   const handleRegister = async () => {
-    if (!user || !user.id) {
+
+    if (!user || !user.accountId) {
       if (location.pathname.includes("/events/shared/")) {
         navigate("/", {
           replace: true,
@@ -61,11 +78,11 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             requireLogin: true,
             redirectTo: location.pathname + location.search,
           },
-        })
+        });
       } else {
-        openAuthModal("login", location.pathname + location.search)
+        openAuthModal("login", location.pathname + location.search);
       }
-      return
+      return;
     }
 
     if (isRegistered) {
@@ -75,7 +92,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           await deleteRegistration({
             registrationId: event.registrationId,
             cancellationReason: "User cancelled",
-          }).unwrap()
+          }).unwrap();
         } else {
           const body = {
             eventId,
@@ -88,33 +105,36 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
             !event?.occurrenceId
               ? { registrationDate: event.originalStartTime }
               : {}),
-          }
-          await cancelRegistration(body).unwrap()
+          };
+          await cancelRegistration(body).unwrap();
         }
+        if (onActionComplete) onActionComplete('cancel', 'success')
       } catch (err) {
-        console.error("Cancel registration failed:", err)
+        console.error("Cancel registration failed:", err);
+        if (onActionComplete) onActionComplete('cancel', 'error')
       }
-      return
+      return;
     }
 
     try {
-      const isRecurring = event?.isRecurring
-      const occurrenceId = event?.occurrenceId
+      const occurrenceId = event?.occurrenceId;
 
-      let body = { eventId }
+      let body = { eventId };
       if (occurrenceId) {
-        body = { eventId, occurrenceId, registrationType: "SINGLE_OCCURRENCE" }
+        body = { eventId, occurrenceId, registrationType: "SINGLE_OCCURRENCE" };
       } else if (event?.isRecurring) {
-        body = { eventId, registrationType: "ENTIRE_SERIES" }
+        body = { eventId, registrationType: "ENTIRE_SERIES" };
       }
 
-      console.log("REGISTER PAYLOAD:", body)
+      console.log("REGISTER PAYLOAD:", body);
 
-      await registerForEvent(body).unwrap()
+      await registerForEvent(body).unwrap();
+      if (onActionComplete) onActionComplete('register', 'success');
     } catch (err) {
-      console.error("Registration failed:", err)
+      console.error("Registration failed:", err);
+      if (onActionComplete) onActionComplete('register', 'error');
     }
-  }
+  };
 
   return (
     <>
@@ -122,24 +142,27 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         {/* Register / Unregister */}
         {!confirmDelete &&
           (isCreator ? (
-            <PillButton
-              onClick={() => setShowParticipants(true)}
-              bgColor="#B91264"
-              className="w-full min-[426px]:flex-1"
-            >
-              {cal.viewParticipants || "Xem danh sách người đăng ký"}
-            </PillButton>
+            !hideAdminControls && (
+              <PillButton
+                onClick={() => setShowParticipants(true)}
+                bgColor="#990011"
+                className="w-full min-[426px]:flex-1"
+              >
+                {cal.viewParticipants || "Xem danh sách người đăng ký"}
+              </PillButton>
+            )
           ) : (
             <PillButton
               onClick={handleRegister}
+              disabled={isPast}
               loading={isProcessing}
               loadingText={cal.processing || "Đang xử lý..."}
-              bgColor={isRegistered ? undefined : "#06AA3B"}
-              className={`w-full min-[426px]:flex-1 ${isRegistered ? "bg-cath-red-700 hover:bg-cath-red-800" : ""}`}
+              bgColor={isPast ? "#d1d5db" : (isRegistered ? undefined : "#06AA3B")}
+              className={`w-full min-[426px]:flex-1 ${!isPast && isRegistered ? "bg-cath-red-700 rounded-full " : ""} ${isPast ? "cursor-not-allowed opacity-80" : ""}`}
             >
-              {isRegistered
-                ? cal.cancelRegistration || "Hủy đăng kí"
-                : cal.register || "Đăng kí"}
+              {isPast 
+                ? (isRegistered ? "Đã tham gia" : "Đã kết thúc") 
+                : (isRegistered ? (cal.cancelRegistration || "Hủy đăng kí") : (cal.register || "Đăng kí"))}
             </PillButton>
           ))}
 
@@ -189,11 +212,13 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
           </div>
         ) : (
           <div className="relative flex items-center justify-center min-[426px]:justify-end gap-2 w-full min-[426px]:w-auto">
-            {isCreator && (
+            {isCreator && !hideAdminControls && (
               <>
                 <button
                   onClick={onEdit}
-                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
+                  disabled={isPast}
+                  title={isPast ? "Không thể sửa sự kiện đã qua" : undefined}
+                  className={`transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 ${isPast ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#F2F2F2] hover:bg-[#D9D9D9] text-[#111111]'}`}
                 >
                   <Pencil />
                 </button>
@@ -222,7 +247,7 @@ const EventDetailFooter = ({ eventId, event, onClose, onEdit }) => {
         />
       )}
     </>
-  )
-}
+  );
+};
 
-export default EventDetailFooter
+export default EventDetailFooter;

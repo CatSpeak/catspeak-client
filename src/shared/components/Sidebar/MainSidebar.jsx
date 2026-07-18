@@ -1,13 +1,10 @@
 import React from "react"
 import { DesktopSidebar, MobileSidebar } from "@/features/navigation"
 
-const MainSidebar = ({ isMobileOpen, setIsMobileOpen, isExpanded, setIsExpanded }) => {
+const MainSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
   return (
     <>
-      <DesktopSidebar 
-        isExpanded={isExpanded} 
-        setIsExpanded={setIsExpanded} 
-      />
+      <DesktopSidebar />
       <MobileSidebar 
         isMobileOpen={isMobileOpen} 
         setIsMobileOpen={setIsMobileOpen} 

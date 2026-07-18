@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom"
 import { X, SlidersHorizontal } from "lucide-react"
 import { TOPICS, LEVELS } from "../../config/constants"
 
@@ -9,6 +9,8 @@ const RoomFilterModal = ({ open, onClose }) => {
   const { t } = useLanguage()
   const { lang } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const [localTopics, setLocalTopics] = useState([])
   const [localLevels, setLocalLevels] = useState([])
@@ -16,7 +18,9 @@ const RoomFilterModal = ({ open, onClose }) => {
   // Sync state from URL when modal opens
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalTopics(searchParams.getAll("topics"))
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalLevels(searchParams.getAll("requiredLevels"))
     }
   }, [open, searchParams])
@@ -56,7 +60,13 @@ const RoomFilterModal = ({ open, onClose }) => {
       newParams.set("page", "1")
     }
     
-    setSearchParams(newParams, { preventScrollReset: true })
+    const communityPath = `/${lang || "en"}/community`
+    if (!location.pathname.startsWith(communityPath)) {
+      navigate(`${communityPath}?${newParams.toString()}`)
+    } else {
+      setSearchParams(newParams, { preventScrollReset: true })
+    }
+    
     onClose()
   }
 
@@ -124,7 +134,7 @@ const RoomFilterModal = ({ open, onClose }) => {
                         : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                     }`}
                   >
-                    {level.label}
+                    {level.labelKey ? t.rooms?.filters?.levels?.[level.labelKey] || level.label : level.label}
                   </button>
                 )
               })}

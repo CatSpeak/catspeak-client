@@ -73,7 +73,7 @@ const CommunitySwitcher = () => {
             >
               <div className="flex flex-col gap-0.5 p-1.5">
                 {LANGUAGE_CONFIG.map((config) => {
-                  if (config.code === "vi") return null
+                  // if (config.code === "vi") return null
                   return (
                     <LanguageMenuItem
                       key={config.code}

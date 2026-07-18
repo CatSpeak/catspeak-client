@@ -1,10 +1,43 @@
 import React, { useState } from "react"
 import { Search, ArrowLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSearchParams, useNavigate, useLocation, useParams } from "react-router-dom"
+import HeaderFilter from "./HeaderFilter"
 
 const HeaderSearchBar = () => {
   const { t } = useLanguage()
   const [isExpanded, setIsExpanded] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchValue, setSearchValue] = useState(searchParams.get("search") || "")
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { lang } = useParams()
+
+  // Sync state if URL changes externally
+  React.useEffect(() => {
+    setSearchValue(searchParams.get("search") || "")
+  }, [searchParams])
+
+  const handleSearch = () => {
+    const trimmed = searchValue.trim()
+    const newParams = new URLSearchParams(searchParams)
+    if (trimmed) {
+      newParams.set("search", trimmed)
+    } else {
+      newParams.delete("search")
+    }
+    newParams.set("page", "1")
+
+    const communityPath = `/${lang || "en"}/community`
+    if (!location.pathname.startsWith(communityPath)) {
+      navigate(`${communityPath}?${newParams.toString()}`)
+    } else {
+      setSearchParams(newParams, { preventScrollReset: true })
+    }
+    
+    // Close the mobile search bar after searching
+    setIsExpanded(false)
+  }
 
   return (
     <>
@@ -18,23 +51,41 @@ const HeaderSearchBar = () => {
 
       {/* Expanded Search for Mobile (Absolute Overlay) or Desktop (Relative) */}
       <div className={`
-        ${isExpanded ? "absolute inset-y-0 left-0 right-0 z-[100] bg-white px-4 flex items-center" : "hidden md:flex relative"} 
+        ${isExpanded ? "absolute inset-y-0 left-0 right-0 z-[100] bg-white px-4 flex items-center gap-3" : "hidden md:flex relative"} 
         items-center w-full md:w-[260px]
       `}>
         {isExpanded && (
-           <button onClick={() => setIsExpanded(false)} className="mr-3 p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full shrink-0">
+           <button onClick={() => setIsExpanded(false)} className="mr-0 p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full shrink-0">
              <ArrowLeft size={22} strokeWidth={2} />
            </button>
         )}
         <div className="relative flex-1">
-          <Search className="w-[17px] h-[17px] text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" strokeWidth={2.5} />
+          <Search 
+            className="w-[17px] h-[17px] text-gray-500 absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer" 
+            strokeWidth={2.5} 
+            onClick={handleSearch}
+          />
           <input
             type="text"
             autoFocus={isExpanded}
-            placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng hoặc chủ đề"}
-            className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[14px] outline-none transition-all placeholder-gray-500"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch()
+              }
+            }}
+            placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
+            className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[16px] md:text-[14px] outline-none transition-all placeholder-gray-500"
           />
         </div>
+        
+        {/* Render HeaderFilter on mobile when expanded */}
+        {isExpanded && (
+           <div className="md:hidden shrink-0">
+             <HeaderFilter />
+           </div>
+        )}
       </div>
     </>
   )

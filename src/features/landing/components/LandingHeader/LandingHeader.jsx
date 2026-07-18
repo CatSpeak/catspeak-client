@@ -7,17 +7,17 @@ import LandingHeaderLogo from "./LandingHeaderLogo";
 import DesktopNav from "../LandingDesktopNav/DesktopNav";
 import LandingHeaderGuestControls from "./LandingHeaderGuestControls";
 import LandingHeaderUserControls from "./LandingHeaderUserControls";
-import MobileDrawer from "../LandingMobileNav/MobileDrawer";
+import { MobileSidebar } from "@/features/navigation";
 const LandingHeader = ({ onGetStarted }) => {
   const { isAuthenticated: isLoggedIn } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };  
+  };
 
   return (
-    <header className="sticky top-4 z-50 flex justify-center w-full px-4">
+    <header className="sticky top-4 z-[60] flex justify-center w-full px-4">
       <div className="mx-auto flex w-full max-w-[1400px] min-h-[60px] items-center justify-between gap-3 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 py-2 px-4 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:gap-4 lg:min-h-[72px] lg:py-2 lg:px-6 rounded-full border border-white/40">
         {/* Left Section: Burger (Mobile) + Logo */}
         <div className="flex min-w-0 flex-1 items-center justify-start gap-2">
@@ -54,8 +54,11 @@ const LandingHeader = ({ onGetStarted }) => {
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
-      <MobileDrawer open={mobileOpen} onClose={handleDrawerToggle} />
+      {/* Mobile Navigation Sidebar */}
+      <MobileSidebar
+        isMobileOpen={mobileOpen}
+        setIsMobileOpen={setMobileOpen}
+      />
     </header>
   );
 };

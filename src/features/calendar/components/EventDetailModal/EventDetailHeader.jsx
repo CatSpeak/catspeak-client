@@ -2,17 +2,14 @@ import React from "react"
 import { Globe, Lock, RefreshCw, X, User, ChevronLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const EventDetailHeader = ({ ev, headerColor, onClose, onBack }) => {
+const EventDetailHeader = ({ ev, onClose, onBack }) => {
   const { t } = useLanguage()
 
   return (
-    <div
-      className="text-white p-6 rounded-none min-[426px]:rounded-t-[24px] z-10 relative overflow-hidden flex flex-col"
-      style={{ backgroundColor: headerColor }}
-    >
+    <div className="text-white p-6 rounded-none min-[426px]:rounded-t-[24px] z-10 relative overflow-hidden flex flex-col bg-[#990011]">
       {/* Mobile Close Button */}
       {onClose && (
-        <div className="flex justify-end w-full mb-2 max-[425px]:flex hidden -mt-2 -mr-2">
+        <div className=" justify-end w-full mb-2 max-[425px]:flex hidden -mt-2 -mr-2">
           <button
             type="button"
             onClick={onClose}
@@ -69,7 +66,7 @@ const EventDetailHeader = ({ ev, headerColor, onClose, onBack }) => {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default EventDetailHeader

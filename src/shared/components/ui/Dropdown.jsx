@@ -6,15 +6,17 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import MenuItem from "@/shared/components/ui/MenuItem"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const removeDiacritics = (str) => {
-  if (!str) return ""
+  if (!str) return "";
   return str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-}
+    .replace(/Đ/g, "D");
+};
 
 const Dropdown = ({
   options = [],
@@ -33,50 +35,50 @@ const Dropdown = ({
   enableSearch = false,
   searchPlaceholder = "Search...",
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const { t } = useLanguage()
-  const dropdownRef = useRef(null)
-  const searchInputRef = useRef(null)
-  const [portalCoords, setPortalCoords] = useState(null)
-  const portalRef = useRef(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useLanguage();
+  const dropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const [portalCoords, setPortalCoords] = useState(null);
+  const portalRef = useRef(null);
 
   useClickOutside(dropdownRef, (e) => {
     if (portalRef.current && portalRef.current.contains(e.target)) {
-      return
+      return;
     }
-    setIsOpen(false)
-  })
+    setIsOpen(false);
+  });
 
   useEffect(() => {
     if (isOpen && enableSearch) {
       setTimeout(() => {
-        searchInputRef.current?.focus()
-      }, 100)
+        searchInputRef.current?.focus();
+      }, 100);
     } else {
-      setSearchQuery("")
+      setSearchQuery("");
     }
-  }, [isOpen, enableSearch])
+  }, [isOpen, enableSearch]);
 
   useEffect(() => {
-    const handleClose = () => setIsOpen(false)
+    const handleClose = () => setIsOpen(false);
 
     const updateCoords = () => {
       if (isOpen && dropdownRef.current) {
-        const rect = dropdownRef.current.getBoundingClientRect()
-        const spaceBelow = window.innerHeight - rect.bottom
-        const spaceAbove = rect.top
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
 
         // Flip up if there's less than ~300px below and more space above
-        const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow
+        const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow;
 
         // Check horizontal clipping (assume ~260px width default)
-        const forceAlignRight = rect.left + 260 > window.innerWidth
+        const forceAlignRight = rect.left + 260 > window.innerWidth;
 
         setPortalCoords((prev) => {
           const newTop = rect.top + window.scrollY
           const newLeft = rect.left + window.scrollX
-          
+
           if (
             prev &&
             prev.top === newTop &&
@@ -86,7 +88,7 @@ const Dropdown = ({
             prev.flipUp === flipUp &&
             prev.forceAlignRight === forceAlignRight
           ) {
-            return prev
+            return prev;
           }
 
           return {
@@ -96,53 +98,54 @@ const Dropdown = ({
             height: rect.height,
             flipUp,
             forceAlignRight,
-          }
-        })
+          };
+        });
       }
-    }
+    };
 
     const handleScroll = (e) => {
       // Don't close if scrolling inside the dropdown portal itself
       if (portalRef.current && portalRef.current.contains(e.target)) return
-      
+
       // Update coords instead of closing, keeps it attached when scrolling
-      updateCoords()
-    }
+      updateCoords();
+    };
 
     if (isOpen) {
-      updateCoords()
-      window.addEventListener("resize", updateCoords)
-      window.addEventListener("scroll", handleScroll, true)
+      updateCoords();
+      window.addEventListener("resize", updateCoords);
+      window.addEventListener("scroll", handleScroll, true);
       return () => {
-        window.removeEventListener("resize", updateCoords)
-        window.removeEventListener("scroll", handleScroll, true)
-      }
+        window.removeEventListener("resize", updateCoords);
+        window.removeEventListener("scroll", handleScroll, true);
+      };
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const filteredOptions = useMemo(() => {
-    if (!enableSearch || !searchQuery) return options
-    const query = searchQuery.toLowerCase().trim()
-    const cleanQuery = query.replace(/^\+/, "")
-    const queryNoDiacritics = removeDiacritics(cleanQuery).replace(/\s+/g, "")
+    if (!enableSearch || !searchQuery) return options;
+    const query = searchQuery.toLowerCase().trim();
+    const cleanQuery = query.replace(/^\+/, "");
+    const queryNoDiacritics = removeDiacritics(cleanQuery).replace(/\s+/g, "");
 
     return options.filter((opt) => {
-      const label = (opt.label || "").toLowerCase()
-      const val = (opt.value || "").toLowerCase()
-      const cleanVal = val.replace(/^\+/, "")
-      const subtitle = (opt.subtitle || "").toLowerCase()
-      const searchTerms = (opt.searchTerms || "").toLowerCase()
-      const cleanSearchTerms = searchTerms.replace(/\+/g, "")
+      const label = String(opt.label ?? "").toLowerCase();
+      const val = String(opt.value ?? "").toLowerCase();
+      const subtitle = String(opt.subtitle ?? "").toLowerCase();
+      const searchTerms = String(opt.searchTerms ?? "").toLowerCase();
+
+      const cleanVal = val.replace(/^\+/, "");
+      const cleanSearchTerms = searchTerms.replace(/\+/g, "");
 
       const matchLabel = removeDiacritics(label)
         .replace(/\s+/g, "")
-        .includes(queryNoDiacritics)
+        .includes(queryNoDiacritics);
       const matchSubtitle = removeDiacritics(subtitle)
         .replace(/\s+/g, "")
-        .includes(queryNoDiacritics)
+        .includes(queryNoDiacritics);
       const matchSearchTerms = removeDiacritics(cleanSearchTerms)
         .replace(/\s+/g, "")
-        .includes(queryNoDiacritics)
+        .includes(queryNoDiacritics);
 
       return (
         label.includes(query) ||
@@ -154,70 +157,49 @@ const Dropdown = ({
         matchLabel ||
         matchSubtitle ||
         matchSearchTerms
-      )
-    })
-  }, [options, enableSearch, searchQuery])
+      );
+    });
+  }, [options, enableSearch, searchQuery]);
 
   const handleSelect = (option) => {
-    if (onChange) onChange(option.value, option)
-    setIsOpen(false)
-  }
+    if (onChange) onChange(option.value, option);
+    setIsOpen(false);
+  };
 
-  const selectedOption = options.find((opt) => opt.value === value) || null
+  const selectedOption = options.find((opt) => opt.value === value) || null;
 
   const defaultTrigger = (
-    <button
+    <PillButton
       type="button"
       onClick={() => !disabled && setIsOpen(!isOpen)}
       disabled={disabled}
-      className={`flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white text-base ${
-        disabled
-          ? "opacity-50 cursor-not-allowed bg-gray-100"
-          : "hover:bg-[#f0f0f0]"
-      } ${triggerClassName}`}
+      variant="secondary"
+      startIcon={selectedOption?.icon}
+      endIcon={
+        <ChevronDown
+          className={`shrink-0 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      }
+      className={`w-full ${triggerClassName}`}
     >
-      <span className="truncate mr-2">
+      <span className="flex-1 text-left truncate min-w-0">
         {selectedOption ? selectedOption.label : placeholder}
       </span>
-      <ChevronDown
-        size={16}
-        className={`shrink-0 text-gray-500 transition-transform duration-200 ${
-          isOpen ? "rotate-180" : ""
-        }`}
-      />
-    </button>
+    </PillButton>
   )
 
   const defaultRenderOption = (option, isSelected) => {
-    const textColor = isSelected ? option.color || activeColor : "inherit"
     return (
-      <div
-        className={`w-full min-h-[48px] py-2 px-4 text-left text-base rounded-md flex items-center gap-3 ${
-          isSelected ? "bg-[#F6F6F6] font-semibold" : "hover:bg-[#F6F6F6]"
-        }`}
-        style={isSelected ? { color: textColor } : {}}
-      >
-        {option.icon && (
-          <div
-            className="shrink-0"
-            style={isSelected ? { color: textColor } : { color: "#6B7280" }}
-          >
-            {option.icon}
-          </div>
-        )}
-        <div className="flex flex-col min-w-0 flex-1">
-          <span className="whitespace-normal break-words leading-tight">
-            {option.label}
-          </span>
-          {option.subtitle && (
-            <span
-              className={`text-xs font-normal whitespace-normal break-words mt-0.5 ${isSelected ? "" : "text-gray-500"}`}
-            >
-              {option.subtitle}
-            </span>
-          )}
-        </div>
-      </div>
+      <MenuItem
+        isSelected={isSelected}
+        activeColor={option.color || activeColor}
+        icon={option.icon}
+        label={option.label}
+        rightText={option.rightText}
+        rightContent={option.rightContent}
+      />
     )
   }
 
@@ -227,7 +209,7 @@ const Dropdown = ({
       ? "right-0 origin-top-right"
       : align === "center"
         ? "-translate-x-1/2 left-1/2 origin-top"
-        : "left-0 origin-top-left"
+        : "left-0 origin-top-left";
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
@@ -264,7 +246,7 @@ const Dropdown = ({
                   <FluentAnimation
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
-                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-4 origin-bottom" : "top-full mt-4"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-2xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-2 origin-bottom" : "top-full mt-2"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
                   >
                     {enableSearch && (
                       <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-gray-100">
@@ -284,36 +266,42 @@ const Dropdown = ({
                         </div>
                       </div>
                     )}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
-                      <div className="flex flex-col gap-1 p-1">
-                        {filteredOptions.length > 0 ? (
-                          filteredOptions.map((option, idx) => {
-                            const isSelected = option.value === value
-                            return (
-                              <button
-                                key={
-                                  option.key ||
-                                  option.code ||
-                                  (option.value
-                                    ? `${option.value}-${idx}`
-                                    : idx)
-                                }
-                                type="button"
-                                onClick={() => handleSelect(option)}
-                                className="w-full focus:outline-none"
-                              >
-                                {renderOption
-                                  ? renderOption(option, isSelected)
-                                  : defaultRenderOption(option, isSelected)}
-                              </button>
-                            )
-                          })
-                        ) : (
-                          <div className="px-3 py-4 text-sm text-center text-gray-500">
-                            {t?.noOptionsFound || "No options found"}
-                          </div>
-                        )}
-                      </div>
+                    <div className="flex-1 py-[2px] overflow-y-auto overflow-x-hidden">
+                      {filteredOptions.length > 0 ? (
+                        filteredOptions.map((option, idx) => {
+                          const isSelected = option.value === value
+                          const optionKey =
+                            option.key ||
+                            option.code ||
+                            (option.value ? `${option.value}-${idx}` : idx)
+
+                          return renderOption ? (
+                            <button
+                              key={optionKey}
+                              type="button"
+                              onClick={() => handleSelect(option)}
+                              className="group w-full flex items-center focus:outline-none px-1 h-12"
+                            >
+                              {renderOption(option, isSelected)}
+                            </button>
+                          ) : (
+                            <MenuItem
+                              key={optionKey}
+                              onClick={() => handleSelect(option)}
+                              isSelected={isSelected}
+                              activeColor={option.color || activeColor}
+                              icon={option.icon}
+                              label={option.label}
+                              rightText={option.rightText}
+                              rightContent={option.rightContent}
+                            />
+                          )
+                        })
+                      ) : (
+                        <div className="px-3 py-4 text-sm text-center text-gray-500">
+                          {t?.noOptionsFound || "No options found"}
+                        </div>
+                      )}
                     </div>
                   </FluentAnimation>
                 </div>
@@ -323,7 +311,7 @@ const Dropdown = ({
           document.body,
         )}
     </div>
-  )
-}
+  );
+};
 
-export default Dropdown
+export default Dropdown;

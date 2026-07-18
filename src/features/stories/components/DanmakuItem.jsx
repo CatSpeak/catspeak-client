@@ -1,7 +1,7 @@
-import React from "react";
-import { BubbleButton } from "@/shared/components/ui/buttons";
-import styles from "../styles/danmaku.module.css";
-import colors from "@/shared/utils/colors";
+import React from "react"
+import { BubbleButton } from "@/shared/components/ui/buttons"
+import styles from "../styles/danmaku.module.css"
+import colors from "@/shared/utils/colors"
 
 /**
  * A single floating danmaku message pill with glassmorphism effect.
@@ -48,22 +48,22 @@ const DanmakuItem = ({ story, onClick }) => {
       text: "text-[#6D49BF]",
       border: "border-[#F6F2FF]/40",
     },
-    {
-      bg: "bg-[#FFFBFC]/60",
-      bgHover: "bg-[#FFFBFC]/80",
-      text: "text-[#4D373A]",
-      border: "border-[#FFFBFC]/40",
-    },
-  ];
+    // {
+    //   bg: "bg-[#FFFBFC]/60",
+    //   bgHover: "bg-[#FFFBFC]/80",
+    //   text: "text-[#4D373A]",
+    //   border: "border-[#FFFBFC]/40",
+    // },
+  ]
 
-  const themeIndex = (story.storyId || 0) % DANMAKU_THEMES.length;
-  const theme = DANMAKU_THEMES[themeIndex];
+  const themeIndex = (story.storyId || 0) % DANMAKU_THEMES.length
+  const theme = DANMAKU_THEMES[themeIndex]
 
-  const isOwn = story.isOwn;
-  const textColorClass = isOwn ? theme.text : "text-white";
-  const bgClass = isOwn ? theme.bg : "bg-blue-600/60";
-  const bgHoverClass = isOwn ? theme.bgHover : "hover:bg-blue-600/80";
-  const borderClass = isOwn ? theme.border : "border-blue-400/30";
+  const isOwn = story.isOwn
+  const textColorClass = isOwn ? "text-white" : theme.text
+  const bgClass = isOwn ? "bg-blue-600/60" : theme.bg
+  const bgHoverClass = isOwn ? "hover:bg-blue-600/80" : theme.bgHover
+  const borderClass = isOwn ? "border-blue-400/30" : theme.border
 
   return (
     <BubbleButton
@@ -79,7 +79,7 @@ const DanmakuItem = ({ story, onClick }) => {
     >
       <span className="line-clamp-3 break-words">{story.storyContent}</span>
     </BubbleButton>
-  );
-};
+  )
+}
 
-export default DanmakuItem;
+export default DanmakuItem

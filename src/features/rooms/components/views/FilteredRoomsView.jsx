@@ -25,19 +25,23 @@ const FilteredRoomsView = ({
               label: t.rooms.filters.breadcrumb,
               onClick: onBackToOverview,
             },
-            {
-              label: selectedCategories
-                .map((catKey) => {
-                  const lowerKey = catKey.toLowerCase()
-                  return (
-                    t.rooms.filters.categories?.[lowerKey] ||
-                    t.rooms.filters.categories?.others ||
-                    categoryFriendlyNames[catKey] ||
-                    catKey
-                  )
-                })
-                .join(", "),
-            },
+            ...(selectedCategories && selectedCategories.length > 0
+              ? [
+                  {
+                    label: selectedCategories
+                      .map((catKey) => {
+                        const lowerKey = catKey.toLowerCase()
+                        return (
+                          t.rooms.filters.categories?.[lowerKey] ||
+                          t.rooms.filters.categories?.others ||
+                          categoryFriendlyNames[catKey] ||
+                          catKey
+                        )
+                      })
+                      .join(", "),
+                  },
+                ]
+              : []),
           ]}
         />
       </div>

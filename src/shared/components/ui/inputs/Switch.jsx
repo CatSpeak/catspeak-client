@@ -16,6 +16,7 @@ const Switch = ({
   className = "",
   colorClass = "peer-checked:bg-[#eab308]",
   showLabel = false,
+  disabled = false,
 }) => {
   const { t } = useLanguage()
 
@@ -24,7 +25,7 @@ const Switch = ({
 
   return (
     <label
-      className={`relative inline-flex items-center cursor-pointer ${className}`}
+      className={`relative inline-flex items-center justify-center min-h-[48px] min-w-[48px] ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"} ${className}`}
     >
       {showLabel && (
         <span className="mr-3 text-sm select-none">
@@ -36,9 +37,10 @@ const Switch = ({
         className="sr-only peer"
         checked={checked}
         onChange={onChange}
+        disabled={disabled}
       />
       <div
-        className={`relative w-10 h-5 shrink-0 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:shadow-sm after:rounded-full after:h-3 after:w-3 after:transition-all ${colorClass}`}
+        className={`relative w-[52px] h-8 shrink-0 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-2 after:left-2 after:bg-white after:shadow-sm after:rounded-full after:h-4 after:w-4 after:transition-all ${colorClass}`}
       ></div>
     </label>
   )

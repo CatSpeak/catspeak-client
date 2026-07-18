@@ -56,7 +56,9 @@ const NavigationProgress = () => {
         query?.endpointName === "getSampleBackgrounds" ||
         query?.endpointName === "getReelsFeed" ||
         query?.endpointName === "getReelById" ||
-        query?.endpointName === "getReelComments"
+        query?.endpointName === "getReelComments" ||
+        query?.endpointName === "getBreakoutStatus" ||
+        query?.endpointName === "getPostComments"
       ) {
         return false
       }

@@ -2,7 +2,6 @@ import React from "react"
 import { Outlet, useLocation } from "react-router-dom"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { AnimatePresence } from "framer-motion"
-import CatSpeakSidebar from "../components/CatSpeakSidebar"
 import SharedLayout from "@/shared/components/layout/SharedLayout"
 
 const getAnimationKey = (pathname) => {
@@ -25,7 +24,7 @@ const CatSpeakLayout = () => {
         <AnimatePresence mode="wait">
           <div
             key={animationKey}
-            className="mx-auto w-full p-5 h-full"
+            className="mx-auto w-full  h-full"
           >
             <FluentAnimation animationKey={animationKey}>
               <Outlet />

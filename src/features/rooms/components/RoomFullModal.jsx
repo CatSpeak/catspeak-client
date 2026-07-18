@@ -7,7 +7,7 @@ const RoomFullModal = ({ open, onClose }) => {
   const { t } = useLanguage()
 
   return (
-    <Modal open={open} onClose={onClose} title={t.rooms.roomFullModal.title}>
+    <Modal open={open} onClose={onClose} title={t.rooms.roomFullModal.title} fullScreenOnMobile={false}>
       <div className="flex flex-col items-center gap-4 text-center pb-6">
         <div className="flex flex-col gap-2">
           <p className="m-0 text-base">{t.rooms.roomFullModal.message}</p>

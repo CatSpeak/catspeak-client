@@ -9,7 +9,7 @@ export default {
     china: "中国",
     usa: "英国",
   },
-  ctaButton: "了解更多关于 CatSpeak 的信息",
+  ctaButton: "了解更多关于 Cat Speak 的信息",
   whyChooseUs: "为什么选择我们？",
   valuesTitle: "CAT SPEAK 带来的核心价值",
   values: {
@@ -51,15 +51,15 @@ export default {
   },
   responseSection: {
     title: "反馈",
-    subtitle: "看看大家在说什么 CatSpeak！",
+    subtitle: "看看大家在说什么 Cat Speak！",
     reviews: [
       {
-        text: "界面非常可爱且友好！我喜欢 CatSpeak 将 AI 学习与结交世界各地朋友相结合的方式。它帮我减少了用英语沟通时的胆怯。",
+        text: "界面非常可爱且友好！我喜欢 Cat Speak 将 AI 学习与结交世界各地朋友相结合的方式。它帮我减少了用英语沟通时的胆怯。",
         name: "Minh Anh",
         role: "大学生",
       },
       {
-        text: "CatSpeak 帮我大大提高了发音。对话多样且有趣，AI 支持非常结！",
+        text: "Cat Speak 帮我大大提高了发音。对话多样且有趣，AI 支持非常结！",
         name: "Thanh Ha",
         role: "办公室员工",
       },
@@ -76,7 +76,7 @@ export default {
     ],
   },
   partnerSection: {
-    title: "我们的合作伙伴",
+    title: "合作机构",
   },
   faq: {
     corner: "FAQ",

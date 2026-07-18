@@ -1,117 +1,144 @@
-import React, { useState } from "react"
-import { useSearchParams, useNavigate } from "react-router-dom"
-import { motion } from "framer-motion"
-import { Clock, Users, Link as LinkIcon, Bookmark, Lock } from "lucide-react"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useAuth } from "@/features/auth"
-import { useAuthModal } from "@/shared/context/AuthModalContext"
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Clock, Users, Link as LinkIcon, Bookmark, Lock } from "lucide-react";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useAuth } from "@/features/auth";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
 import {
   formatDate,
   formatTimeRange,
   calculateEndDate,
-} from "@/shared/utils/dateFormatter"
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
-import Modal from "@/shared/components/ui/Modal"
-import RoomFullModal from "./RoomFullModal"
-import meetingFallbackImage from "@/shared/assets/images/rooms/meeting.jpeg"
-import TQThumbnail from "@/shared/assets/images/rooms/TQ - Thumbnail.png"
-import { getTopicIcon } from "../utils/getTopicIcon"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
+} from "@/shared/utils/dateFormatter";
+import toast from "react-hot-toast";
+import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
+import Modal from "@/shared/components/ui/Modal";
+import RoomFullModal from "./RoomFullModal";
+import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png";
+import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png";
+import { getTopicIcon } from "../utils/getTopicIcon";
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
+import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
 
 const RoomCard = ({ room }) => {
-  const [searchParams] = useSearchParams()
-  const { language, t } = useLanguage()
-  const { isAuthenticated } = useAuth()
-  const { openAuthModal } = useAuthModal()
-  const navigate = useNavigate()
+  const [searchParams] = useSearchParams();
+  const { language, t } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
+  const navigate = useNavigate();
+  const { lang } = useParams();
 
-  const translatedName = room.name
+  const currentLang = lang || (typeof window !== 'undefined' ? localStorage.getItem("communityLanguage") : null) || "en";
+  const fallbackThumbnail = currentLang === "zh" ? ZHThumbnail : ENThumbnail;
+
+  const translatedName = room.name;
   const isRoomFull =
     room.maxParticipants !== null &&
-    (room.currentParticipantCount || 0) >= room.maxParticipants
+    (room.currentParticipantCount || 0) >= room.maxParticipants;
 
-  const isPrivate = room.privacy === "Private" && room.hasPassword
+  const isPrivate = room.privacy === "Private" && room.hasPassword;
 
   const handleJoinRoom = (e) => {
-    e.stopPropagation()
+    e.stopPropagation();
 
     // If user is not authenticated, open login modal instead of navigating
     if (!isAuthenticated) {
-      openAuthModal("login")
-      return
+      openAuthModal("login");
+      return;
     }
 
     // If authenticated, navigate to the unified meet page
-    const communityLang = localStorage.getItem("communityLanguage") || "en"
-    navigate(`/${communityLang}/meet/${room.roomId}`)
-  }
+    const communityLang = localStorage.getItem("communityLanguage") || "en";
+    navigate(`/${communityLang}/meet/${room.roomId}`);
+  };
 
   // Date and time formatting using locale-aware utilities
-  const createDate = new Date(room.createDate)
-  const dateStr = formatDate(createDate)
+  const createDate = new Date(room.createDate);
+  const dateStr = formatDate(createDate);
 
-  const isInfiniteDuration = room.duration === null
-  const durationMinutes = room.duration || 20 // fallback to 20 if not null
-  const endDate = calculateEndDate(createDate, durationMinutes)
+  const isInfiniteDuration = room.duration === null;
+  const durationMinutes = room.duration || 20; // fallback to 20 if not null
+  const endDate = calculateEndDate(createDate, durationMinutes);
   const timeStr = isInfiniteDuration
     ? t.rooms.noLimit
-    : formatTimeRange(createDate, endDate)
+    : formatTimeRange(createDate, endDate);
 
   // Placeholder code simulation
-  const roomCode = `room-${room.roomId}`.toLowerCase()
+  const roomCode = `room-${room.roomId}`.toLowerCase();
 
-  const [showDevModal, setShowDevModal] = useState(false)
-  const [showFullModal, setShowFullModal] = useState(false)
+  const [showDevModal, setShowDevModal] = useState(false);
+  const [showFullModal, setShowFullModal] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
 
   const handleRoomClick = (e) => {
     if (isRoomFull) {
-      e.stopPropagation()
-      setShowFullModal(true)
-      return
+      e.stopPropagation();
+      setShowFullModal(true);
+      return;
     }
 
-    handleJoinRoom(e)
-  }
+    handleJoinRoom(e);
+  };
 
   const handleBookmarkClick = (e) => {
-    e.stopPropagation()
-    setShowDevModal(true)
-  }
+    e.stopPropagation();
+    setShowDevModal(true);
+  };
+
+  const handleCopyLink = (e) => {
+    e.stopPropagation();
+    const communityLang = localStorage.getItem("communityLanguage") || "en";
+    const link = `${window.location.origin}/${communityLang}/meet/${room.roomId}`;
+    navigator.clipboard
+      .writeText(link)
+      .then(() => {
+        setShowCopied(true);
+        setTimeout(() => setShowCopied(false), 2000);
+      })
+      .catch(() => {
+        toast.error("Không thể sao chép liên kết", { position: "top-center" });
+      });
+  };
 
   return (
     <>
-        <Animated3DCard
-          onClick={handleRoomClick}
-          style={{
-            fontFamily: "var(--font-primary)",
-            WebkitFontSmoothing: "antialiased",
-          }}
-          className="h-full w-full"
-          containerClassName="h-full w-full"
-        >
-        {/* Cover Image Section */}
-        <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden border-b border-[#e5e5e5]">
+      <Animated3DCard
+        onClick={handleRoomClick}
+        style={{
+          fontFamily: "var(--font-primary)",
+          WebkitFontSmoothing: "antialiased",
+        }}
+        className="h-full w-full"
+        containerClassName="h-full w-full"
+      >
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-[#e5e5e5]">
+          {/* Blurred Background Image */}
+          <div
+            className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
+            style={{ backgroundImage: `url(${room.thumbnailUrl || fallbackThumbnail})` }}
+          />
+          {/* Main Image */}
           <img
-            src={room.thumbnailUrl || TQThumbnail}
+            src={room.thumbnailUrl || fallbackThumbnail}
             alt="Room Cover"
-            className="h-full w-full object-cover"
+            className={`relative z-10 h-full w-full ${room.thumbnailUrl ? "object-contain" : "object-cover"}`}
           />
 
           {/* Top Left: Badges */}
-          <div className="absolute left-2 top-2 max-w-[55%] flex items-center z-10">
+          <div className="absolute left-2 top-2 max-w-[55%] flex items-center gap-1.5 z-10 p-1">
             {room.requiredLevel && (
-              <div className="flex shrink-0 items-center justify-center h-7 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate">
+              <div className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate">
                 {room.requiredLevel}
               </div>
             )}
-            <div className={`flex shrink-0 items-center justify-center h-8 w-8 bg-cath-red-800 rounded-full border-2 border-white shadow-sm z-10 ${room.requiredLevel ? '-ml-2' : ''}`}>
+            <div className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10">
               {getTopicIcon(room.topic)}
             </div>
           </div>
 
           {/* Top Right: Actions & Status */}
-          <div className="absolute right-2 top-2 flex items-center gap-1.5 z-10">
+          <div className="absolute right-2 top-2 flex items-center gap-1.5 z-10 p-1">
             {isPrivate && (
               <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm shadow-sm">
                 <Lock size={14} className="text-white" />
@@ -121,7 +148,10 @@ const RoomCard = ({ room }) => {
               className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white/30 backdrop-blur-sm transition-all duration-300 hover:bg-white/50 shadow-sm cursor-pointer"
               onClick={handleBookmarkClick}
             >
-              <Bookmark size={16} className="text-cath-red-800 fill-cath-red-800/10" />
+              <Bookmark
+                size={16}
+                className="text-cath-red-800 fill-cath-red-800/10"
+              />
             </div>
           </div>
         </div>
@@ -130,8 +160,16 @@ const RoomCard = ({ room }) => {
         <div className="flex flex-1 flex-col p-4 pb-4">
           {/* Title & Link */}
           <div className="flex items-start justify-between gap-3 mb-4">
-            <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">{translatedName}</h3>
-            <LinkIcon size={20} className="text-cath-red-800 shrink-0 mt-0.5" />
+            <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">
+              {translatedName}
+            </h3>
+            <div
+              onClick={handleCopyLink}
+              title={t?.rooms?.copyLinkTooltip || "Sao chép liên kết"}
+              className="flex items-center justify-center text-cath-red-800 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50"
+            >
+              <LinkIcon size={18} />
+            </div>
           </div>
 
           {/* Footer Info */}
@@ -159,7 +197,7 @@ const RoomCard = ({ room }) => {
             </div>
           </div>
         </div>
-        </Animated3DCard>
+      </Animated3DCard>
       <InDevelopmentModal
         open={showDevModal}
         onCancel={() => setShowDevModal(false)}
@@ -169,8 +207,17 @@ const RoomCard = ({ room }) => {
         open={showFullModal}
         onClose={() => setShowFullModal(false)}
       />
-    </>
-  )
-}
 
-export default RoomCard
+      {showCopied &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[99999] px-4 py-2 bg-black/75 text-white rounded-full text-[15px] font-medium pointer-events-none shadow-lg whitespace-nowrap">
+            {t?.rooms?.copySuccess || "Đã sao chép liên kết!"}
+          </div>,
+          document.body,
+        )}
+    </>
+  );
+};
+
+export default RoomCard;

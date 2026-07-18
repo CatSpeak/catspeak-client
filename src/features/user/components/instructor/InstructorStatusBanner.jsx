@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 const STATUS_CONFIG = {
   Pending: {
@@ -42,7 +43,10 @@ const InstructorStatusBanner = ({
   banUntil,
   editRequestNote,
   t,
+  onReapply,
+  isReapplying,
 }) => {
+  const { language } = useLanguage();
   const ins = t.profile?.instructor || {};
   const config = STATUS_CONFIG[status];
   if (!config) return null;
@@ -66,7 +70,8 @@ const InstructorStatusBanner = ({
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     try {
-      return new Date(dateStr).toLocaleDateString(undefined, {
+      const locale = language === "zh" ? "zh-CN" : language === "vi" ? "vi-VN" : "en-US";
+      return new Date(dateStr).toLocaleDateString(locale, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -109,6 +114,16 @@ const InstructorStatusBanner = ({
               {ins.bannedUntil}:{" "}
               <span className="font-semibold">{formatDate(banUntil)}</span>
             </p>
+          )}
+          {(!banUntil || new Date(banUntil) <= new Date()) && onReapply && !isReapplying && (
+            <div className="pt-2">
+              <button
+                onClick={onReapply}
+                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+              >
+                {ins.resubmit || "Gửi lại đơn"}
+              </button>
+            </div>
           )}
         </div>
       )}

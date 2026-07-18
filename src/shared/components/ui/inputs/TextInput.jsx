@@ -23,6 +23,7 @@ const TextInput = ({
   rightContent,
   rightContentWidthClass = "!pr-12",
   multiline = false,
+  floatingLabel = false,
   ...props
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -33,7 +34,7 @@ const TextInput = ({
       : "password"
     : type
 
-  const variantClasses = variant === "square" ? "rounded-2xl" : "rounded-3xl"
+  const variantClasses = variant === "square" ? "rounded-md" : "rounded-3xl"
 
   const iconPadding = Icon ? "!pl-10" : ""
   const passwordPadding = isPassword ? "!pr-10" : ""
@@ -44,8 +45,8 @@ const TextInput = ({
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
 
-  const heightClass = multiline ? "min-h-[48px] py-3 px-4" : "h-12 px-4"
-  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-colors focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${className}`
+  const heightClass = multiline ? "min-h-[56px] px-4" : "h-[56px] px-4"
+  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {
@@ -56,8 +57,11 @@ const TextInput = ({
 
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
-      {label && (
-        <label htmlFor={id} className={labelClassName || "text-sm"}>
+      {label && !floatingLabel && (
+        <label
+          htmlFor={id}
+          className={labelClassName || "text-sm text-[#606060] font-medium"}
+        >
           {label}
         </label>
       )}
@@ -77,9 +81,10 @@ const TextInput = ({
             style={{
               "--border-color": colors.border,
               "--placeholder-color": colors.subtext,
-              "--focus-color": color || "var(--tw-colors-cath-red-700, #8e0000)",
+              "--focus-color":
+                color || "var(--tw-colors-cath-red-700, #8e0000)",
             }}
-            placeholder={placeholder}
+            placeholder={floatingLabel ? placeholder || " " : placeholder}
             className={`${finalClassName} resize-none overflow-hidden scrollbar-hide`}
             value={value}
             onChange={onChange}
@@ -95,9 +100,10 @@ const TextInput = ({
             style={{
               "--border-color": colors.border,
               "--placeholder-color": colors.subtext,
-              "--focus-color": color || "var(--tw-colors-cath-red-700, #8e0000)",
+              "--focus-color":
+                color || "var(--tw-colors-cath-red-700, #8e0000)",
             }}
-            placeholder={placeholder}
+            placeholder={floatingLabel ? placeholder || " " : placeholder}
             className={finalClassName}
             value={value}
             onChange={onChange}
@@ -118,6 +124,26 @@ const TextInput = ({
           <div className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex items-center">
             {rightContent}
           </div>
+        )}
+
+        {label && floatingLabel && (
+          <label
+            htmlFor={id}
+            style={{
+              "--focus-color":
+                color || "var(--tw-colors-cath-red-700, #8e0000)",
+            }}
+            className={`absolute transition-all duration-200 pointer-events-none origin-left scale-100
+              top-1/2 -translate-y-1/2 text-[#7A7574]
+              peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:scale-75 peer-focus:text-[var(--focus-color)] peer-focus:bg-white peer-focus:px-1
+              peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1
+              ${Icon || leftContent ? "left-10" : "left-4"}
+              peer-focus:left-3 peer-[:not(:placeholder-shown)]:left-3
+              ${labelClassName}
+            `}
+          >
+            {label}
+          </label>
         )}
       </div>
       {showCount && props.maxLength && (

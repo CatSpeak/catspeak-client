@@ -1,110 +1,83 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { Home, Settings } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import DesktopNavItem from "./DesktopNavItem";
-import DesktopNavDropdown from "./DesktopNavDropdown";
-import DesktopNavSubItem from "./DesktopNavSubItem";
-import { navLinks, footerLinks } from "../../config/navigation";
-import { AnimatePresence, motion } from "framer-motion";
-import { useActiveLink } from "../../hooks/useActiveLink";
+import React, { useEffect } from "react"
+import { useParams } from "react-router-dom"
+import { Home, Settings } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import DesktopNavItem from "./DesktopNavItem"
+import DesktopNavDropdown from "./DesktopNavDropdown"
+import DesktopNavSubItem from "./DesktopNavSubItem"
+import { navLinks, footerLinks } from "../../config/navigation"
+import { useActiveLink } from "../../hooks/useActiveLink"
+import { useSidebar } from "@/shared/context/SidebarContext"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
-const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
-  const { t } = useLanguage();
-  const { resolvePath, checkIsActive, pathname } = useActiveLink();
+const DesktopNavItems = () => {
+  const { t } = useLanguage()
+  const { isStudent } = useRoleOverride()
+  const { resolvePath, checkIsActive, pathname } = useActiveLink()
 
-  const [hoveredTooltip, setHoveredTooltip] = useState(null);
+  const { openDropdownKeys, setOpenDropdownKeys, isDesktopSidebarDocked } =
+    useSidebar()
 
-  // Initialize openDropdownKey based on the currently active route
-  const [openDropdownKey, setOpenDropdownKey] = useState(() => {
-    const activeItem = navLinks.find(
-      (item) => item.hasDropdown && checkIsActive(item),
-    );
-    return activeItem ? activeItem.key : null;
-  });
-
-  // Keep the open dropdown in sync with the current route
+  // Keep the active dropdown open when navigating via other means
   useEffect(() => {
     const activeItem = navLinks.find(
       (item) => item.hasDropdown && checkIsActive(item),
-    );
+    )
     if (activeItem) {
-      setOpenDropdownKey(activeItem.key);
-    } else {
-      setOpenDropdownKey(null);
+      setOpenDropdownKeys((prev) =>
+        prev.includes(activeItem.key) ? prev : [...prev, activeItem.key],
+      )
     }
-  }, [pathname]);
-
-  const handleMouseEnter = (e, label) => {
-    if (isExpanded) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    setHoveredTooltip({ label, top: rect.top + rect.height / 2 });
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredTooltip(null);
-  };
+  }, [pathname])
 
   return (
     <>
-      <AnimatePresence>
-        {hoveredTooltip && !isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, x: -5, y: "-50%" }}
-            animate={{ opacity: 1, x: 0, y: "-50%" }}
-            exit={{ opacity: 0, x: -5, y: "-50%" }}
-            transition={{ duration: 0.15 }}
-            className="fixed z-[100] left-[90px] px-3 py-1.5 bg-cath-red-700 text-white text-sm rounded shadow-md pointer-events-none whitespace-nowrap"
-            style={{ top: `${hoveredTooltip.top}px` }}
-          >
-            {hoveredTooltip.label}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div
-        className={`flex-1 overflow-y-auto overflow-x-hidden py-2 flex flex-col gap-1.5 scrollbar-thin scrollbar-thumb-gray-200 transition-all duration-300 ${
-          isExpanded ? "px-2" : "px-[18px]"
-        }`}
+        className={`flex-1 flex flex-col gap-1 px-4 ${isDesktopSidebarDocked ? "overflow-visible" : "overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200"}`}
       >
         {navLinks
           .filter((item) => !item.hideInSidebar)
           .map((item) => {
             // Use key mapping for translations, falling back to capitalized key if not found
-            const label = t.nav?.[item.key] || item.key;
-            const IconComponent = item.icon || Home;
+            const label = t.nav?.[item.key] || item.key
+            const IconComponent = item.icon || Home
 
             if (item.hasDropdown && item.subItems && item.subItems.length > 0) {
-              const isDropdownActive = checkIsActive(item);
               return (
                 <DesktopNavDropdown
                   key={item.key}
                   icon={IconComponent}
                   label={label}
-                  isActive={isDropdownActive}
-                  isExpanded={isExpanded}
-                  isOpen={openDropdownKey === item.key}
+                  isOpen={openDropdownKeys.includes(item.key)}
                   onToggle={() => {
-                    if (!isExpanded && setIsExpanded) {
-                      setIsExpanded(true);
-                    }
-                    setOpenDropdownKey((prev) =>
-                      prev === item.key ? null : item.key,
-                    );
+                    setOpenDropdownKeys((prev) =>
+                      prev.includes(item.key)
+                        ? prev.filter((key) => key !== item.key)
+                        : [...prev, item.key],
+                    )
                   }}
-                  onMouseEnter={(e) => handleMouseEnter(e, label)}
-                  onMouseLeave={handleMouseLeave}
+                  isDocked={isDesktopSidebarDocked}
                 >
-                  {(item.subItems || []).map((sub, idx) => (
-                    <DesktopNavSubItem
-                      key={sub.key}
-                      to={resolvePath(sub.path)}
-                      label={t.nav?.[sub.key] || sub.key}
-                      isLast={idx === (item.subItems || []).length - 1}
-                    />
-                  ))}
+                  {(item.subItems || [])
+                    .filter((sub) => {
+                      if (sub.key === "myCourses" && isStudent) return false
+                      return true
+                    })
+                    .map((sub, idx) => {
+                      const subLabel = t.nav?.[sub.key] || sub.key
+                      const SubIconComponent = sub.icon || Home
+                      return (
+                        <DesktopNavSubItem
+                          key={sub.key}
+                          to={resolvePath(sub.path)}
+                          icon={SubIconComponent}
+                          label={subLabel}
+                          isFlyout={isDesktopSidebarDocked}
+                        />
+                      )
+                    })}
                 </DesktopNavDropdown>
-              );
+              )
             }
 
             return (
@@ -113,18 +86,16 @@ const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
                 to={resolvePath(item.path)}
                 icon={IconComponent}
                 label={label}
-                isExpanded={isExpanded}
-                onMouseEnter={(e) => handleMouseEnter(e, label)}
-                onMouseLeave={handleMouseLeave}
+                isDocked={isDesktopSidebarDocked}
               />
-            );
+            )
           })}
       </div>
 
-      <div className="px-2 py-3 flex flex-col gap-1.5 mt-auto border-t border-gray-100">
+      <div className="p-3 flex flex-col gap-1 mt-auto border-t border-border">
         {footerLinks.map((item) => {
-          const label = t.nav?.[item.key] || item.key;
-          const IconComponent = item.icon || Settings;
+          const label = t.nav?.[item.key] || item.key
+          const IconComponent = item.icon || Settings
 
           return (
             <DesktopNavItem
@@ -132,15 +103,13 @@ const DesktopNavItems = ({ isExpanded, setIsExpanded }) => {
               to={resolvePath(item.path)}
               icon={IconComponent}
               label={label}
-              isExpanded={isExpanded}
-              onMouseEnter={(e) => handleMouseEnter(e, label)}
-              onMouseLeave={handleMouseLeave}
+              isDocked={isDesktopSidebarDocked}
             />
-          );
+          )
         })}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default DesktopNavItems;
+export default DesktopNavItems

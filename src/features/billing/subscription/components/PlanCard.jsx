@@ -1,117 +1,303 @@
 import React from "react"
-import { Check, X } from "lucide-react"
+import {
+  ArrowRight,
+  BadgeCheck,
+  Check,
+  Loader2,
+  Star,
+  X,
+} from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getFeatureSuffix } from "../../utils/planUtils"
 
+const hexToRgbA = (hex, alpha = 0.15) => {
+  if (!hex || typeof hex !== "string") return `rgba(255, 255, 255, ${alpha})`
+
+  let color = hex.replace("#", "")
+  if (color.length === 3) {
+    color = color
+      .split("")
+      .map((value) => value + value)
+      .join("")
+  }
+
+  if (color.length !== 6) return `rgba(255, 255, 255, ${alpha})`
+
+  const r = parseInt(color.substring(0, 2), 16)
+  const g = parseInt(color.substring(2, 4), 16)
+  const b = parseInt(color.substring(4, 6), 16)
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+const getContrastColor = (hex) => {
+  if (!hex || typeof hex !== "string") return "text-gray-900"
+
+  let color = hex.replace("#", "")
+  if (color.length === 3) {
+    color = color
+      .split("")
+      .map((value) => value + value)
+      .join("")
+  }
+
+  if (color.length !== 6) return "text-gray-900"
+
+  const r = parseInt(color.substring(0, 2), 16)
+  const g = parseInt(color.substring(2, 4), 16)
+  const b = parseInt(color.substring(4, 6), 16)
+  const perceivedBrightness = Math.sqrt(
+    0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b)
+  )
+
+  return perceivedBrightness > 175 ? "text-gray-900" : "text-white"
+}
+
+const getIntervalLabel = (interval, language) => {
+  const normalizedInterval = String(interval || "").toLowerCase()
+  const isYearly =
+    normalizedInterval.includes("year") ||
+    normalizedInterval.includes("annual") ||
+    normalizedInterval.includes("nam")
+
+  if (language === "vi") return isYearly ? "n\u0103m" : "th\u00e1ng"
+  if (language === "zh") return isYearly ? "\u5e74" : "\u6708"
+  if (isYearly) return "year"
+  if (normalizedInterval.includes("month")) return "month"
+
+  return interval || "month"
+}
+
+const renderFeatureText = (text, highlightColor) => {
+  if (typeof text !== "string") return text
+
+  const parts = text.split(/(\d+\s*[a-zA-Z\u00C0-\u1EF9]+)/)
+  return parts.map((part, index) => {
+    const isMatch = part.match(/^\d+\s*[a-zA-Z\u00C0-\u1EF9]+/)
+
+    if (!isMatch) return part
+
+    return (
+      <strong
+        key={`${part}-${index}`}
+        className="font-extrabold"
+        style={{ color: highlightColor }}
+      >
+        {part}
+      </strong>
+    )
+  })
+}
+
 const PlanCard = ({ plan, isActive, onAction, actionLabel, isProcessing }) => {
-  const { t } = useLanguage()
-  const { name, price, interval, description, features, iconUrl, brandColor } =
-    plan
+  const { t, language } = useLanguage()
+  const {
+    name,
+    price,
+    interval,
+    description,
+    features = [],
+    brandColor,
+  } = plan
+
+  const numericPrice = Number(price) || 0
+  const isPaidPlan = numericPrice > 0
+
+  const cardColor = brandColor || (isPaidPlan ? "#990011" : "#0F9F6E")
+  const buttonTextColor = getContrastColor(cardColor)
+  const priceLabel =
+    numericPrice === 0
+      ? "0\u20ab"
+      : `${new Intl.NumberFormat("vi-VN").format(numericPrice)}\u20ab`
+  const intervalLabel = getIntervalLabel(interval, language)
+
+  let buttonText = actionLabel
+  if (isActive) {
+    buttonText = t.billing.pricing.currentPlan || "Current plan"
+  } else if (!onAction) {
+    buttonText = t.billing.pricing.included || "Included"
+  }
+
+  const badge = isActive
+    ? {
+      icon: BadgeCheck,
+      label: t.billing.pricing.activated || "Activated",
+    }
+    : isPaidPlan
+      ? {
+        icon: Star,
+        label: t.billing.pricing.popular || "Popular",
+      }
+      : null
+
+  const BadgeIcon = badge?.icon
+  const cardShadow = isActive
+    ? `0 22px 48px ${hexToRgbA(cardColor, 0.18)}`
+    : "0 18px 40px rgba(15, 23, 42, 0.08)"
 
   return (
-    <div
-      className={`relative flex flex-col p-6 rounded-3xl border ${
-        isActive
-          ? "border-cath-red-700 bg-[#FFF5F5] shadow-md"
-          : "border-[#E5E5E5] bg-white"
-      }`}
+    <article
+      className="group relative flex h-full min-h-[560px] flex-col overflow-hidden rounded-xl border bg-white"
+      style={{
+        background: `linear-gradient(180deg, ${hexToRgbA(
+          cardColor,
+          0.1
+        )} 0%, rgba(255, 255, 255, 0) 34%), #fff`,
+        borderColor: isActive ? cardColor : hexToRgbA(cardColor, 0.22),
+        boxShadow: cardShadow,
+      }}
     >
-      {isActive && (
-        <span className="absolute -top-3 left-6 px-3 py-1 bg-cath-red-700 text-white text-xs font-bold rounded-full">
-          {t.billing.pricing.currentPlan}
-        </span>
-      )}
+      <div className="h-1.5 w-full" style={{ backgroundColor: cardColor }} />
 
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          {iconUrl && (
-            <img
-              src={iconUrl}
-              alt={`${name} icon`}
-              className="w-8 h-8 object-cover rounded-md"
-            />
-          )}
-          <h3 className="text-xl font-bold">{name}</h3>
-        </div>
-        <p className="text-[#7A7574] text-sm">{description}</p>
-      </div>
+      <div className="flex flex-1 flex-col p-6 sm:p-7">
+        <header className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="min-w-0">
+              <h3 className="break-words text-xl font-extrabold leading-tight tracking-tight text-gray-950 sm:text-2xl">
+                {name}
+              </h3>
 
-      <div className="mb-6 flex items-end gap-1">
-        <span className="text-4xl font-extrabold">
-          {price === 0
-            ? "0 ₫"
-            : new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(price)}
-        </span>
-        {price > 0 && (
-          <span className="text-[#7A7574] text-sm mb-1">/{interval}</span>
-        )}
-      </div>
+            </div>
+          </div>
 
-      <ul className="flex flex-col gap-3 mb-8 flex-1">
-        {features.map((feature, i) => {
-          const isBoolean = feature.valueType === "boolean"
-          const isFalsy = isBoolean && feature.limitValue === "false"
-
-          return (
-            <li
-              key={feature.id || i}
-              className={`flex items-start gap-2 text-sm ${isFalsy ? "opacity-50" : ""}`}
+          {badge && (
+            <span
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-extrabold uppercase leading-none tracking-[0.12em]"
+              style={{
+                backgroundColor: hexToRgbA(cardColor, 0.11),
+                borderColor: hexToRgbA(cardColor, 0.24),
+                color: cardColor,
+              }}
             >
-              <div
-                className={`mt-0.5 shrink-0 rounded-full p-0.5 ${
-                  isFalsy ? "text-gray-500" : "text-green-600"
-                }`}
-              >
-                {isFalsy ? (
-                  <X size={14} strokeWidth={3} />
-                ) : (
-                  <Check size={14} strokeWidth={3} />
+              <BadgeIcon size={12} className={isPaidPlan ? "fill-current" : ""} />
+              {badge.label}
+            </span>
+          )}
+        </header>
+        <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500">
+          {description}
+        </p>
+
+        <section className="mt-7 border-b border-gray-100 pb-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <span className="break-words text-4xl font-black leading-none tracking-tight text-gray-950">
+                  {priceLabel}
+                </span>
+                {isPaidPlan && (
+                  <span className="text-sm font-bold text-gray-400">
+                    / {intervalLabel}
+                  </span>
                 )}
               </div>
-              <span className={`text-[#333] ${isFalsy ? "line-through" : ""}`}>
-                {!isBoolean && feature.limitValue ? (
-                  <>
-                    {feature.name}:{" "}
-                    <span className="font-semibold">
-                      {feature.limitValue}
-                      {getFeatureSuffix(feature.code, t)}
-                    </span>
-                  </>
-                ) : (
-                  feature.name
-                )}
-              </span>
-            </li>
-          )
-        })}
-      </ul>
+            </div>
+          </div>
+        </section>
 
-      {!isActive && !onAction ? (
-        <div className="w-full py-3 rounded-full font-semibold text-center bg-[#F3F3F3] text-[#7A7574]">
-          {t.billing.pricing.included}
-        </div>
-      ) : (
-        <button
-          onClick={onAction}
-          disabled={isProcessing || isActive}
-          style={!isActive && brandColor ? { backgroundColor: brandColor } : {}}
-          className={`w-full py-3 rounded-full font-semibold transition-all ${
-            isActive
-              ? "bg-[#E5E5E5] text-[#7A7574] cursor-default"
-              : "bg-cath-red-700 text-white hover:brightness-90"
-          } disabled:opacity-70 disabled:cursor-not-allowed`}
-        >
-          {isProcessing
-            ? t.billing.pricing.processing
-            : isActive
-              ? t.billing.pricing.currentPlan
-              : actionLabel}
-        </button>
-      )}
-    </div>
+        <section className="mt-6 flex flex-1 flex-col">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-gray-400">
+              {t.billing.pricing.included || "Included"}
+            </span>
+            <span className="h-px flex-1 bg-gray-100" />
+          </div>
+
+          <ul className="flex flex-1 flex-col gap-3.5">
+            {features.map((feature, index) => {
+              const isString = typeof feature === "string"
+              const isBoolean = !isString && feature.valueType === "boolean"
+              const isFalsy = isBoolean && feature.limitValue === "false"
+              const featureKey = isString ? `${feature}-${index}` : feature.id || index
+
+              return (
+                <li
+                  key={featureKey}
+                  className={`grid grid-cols-[20px_1fr] gap-3 text-sm leading-relaxed ${isFalsy ? "text-gray-400" : "text-gray-700"
+                    }`}
+                >
+                  <span
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
+                    style={
+                      isFalsy
+                        ? undefined
+                        : {
+                          color: cardColor,
+                        }
+                    }
+                  >
+                    {isFalsy ? (
+                      <X size={13} strokeWidth={3} />
+                    ) : (
+                      <Check size={13} strokeWidth={3} />
+                    )}
+                  </span>
+
+                  <span
+                    className={`min-w-0 font-semibold ${isFalsy ? "line-through decoration-gray-300" : ""
+                      }`}
+                  >
+                    {isString ? (
+                      renderFeatureText(feature, cardColor)
+                    ) : !isBoolean && feature.limitValue ? (
+                      <>
+                        {feature.name}:{" "}
+                        <strong className="font-extrabold text-gray-900">
+                          {feature.limitValue}
+                          {getFeatureSuffix(feature.code, t)}
+                        </strong>
+                      </>
+                    ) : (
+                      feature.name
+                    )}
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+
+        <footer className="mt-7 border-t border-gray-100 pt-5">
+          {isActive ? (
+            <div
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-center text-sm font-extrabold"
+              style={{
+                backgroundColor: hexToRgbA(cardColor, 0.08),
+                borderColor: hexToRgbA(cardColor, 0.22),
+                color: cardColor,
+              }}
+            >
+              <BadgeCheck size={17} strokeWidth={2.4} />
+              <span className="leading-snug">{buttonText}</span>
+            </div>
+          ) : !onAction ? (
+            <div className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm font-extrabold text-gray-400">
+              <Check size={17} strokeWidth={2.4} />
+              <span className="leading-snug">{buttonText}</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onAction}
+              disabled={isProcessing}
+              className={`flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-center text-sm font-extrabold ${buttonTextColor} shadow-sm transition-all duration-150 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70`}
+              style={{
+                backgroundColor: cardColor
+              }}
+            >
+              {isProcessing ? (
+                <Loader2 size={17} className="shrink-0 animate-spin" />
+              ) : (
+                <ArrowRight size={17} className="shrink-0" strokeWidth={2.5} />
+              )}
+              <span className="leading-snug">
+                {isProcessing ? t.billing.pricing.processing : buttonText}
+              </span>
+            </button>
+          )}
+        </footer>
+      </div>
+    </article>
   )
 }
 

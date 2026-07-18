@@ -79,7 +79,9 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
           <HeaderSearchBar />
 
           {/* Filter */}
-          <HeaderFilter />
+          <div className="hidden md:block">
+            <HeaderFilter />
+          </div>
 
           {/* Language flag */}
           <div className="hidden lg:block">

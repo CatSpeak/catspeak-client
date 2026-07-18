@@ -1,32 +1,48 @@
 /* global process */
-import { defineConfig, loadEnv } from "vite"
-import react from "@vitejs/plugin-react"
-import path from "path"
-import { fileURLToPath } from "url"
-import livekitDevToken from "./plugins/livekitDevToken.js"
+import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { fileURLToPath } from "url";
+import livekitDevToken from "./plugins/livekitDevToken.js";
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // Load .env.development.local vars into process.env (for server-side plugins)
-  const env = loadEnv(mode, process.cwd(), "")
-  Object.assign(process.env, env)
+  const env = loadEnv(mode, process.cwd(), "");
+  Object.assign(process.env, env);
 
   return {
     plugins: [react()],
     server: {
       proxy: {
-        "/api": {
-          target: "https://stagingapi.catspeak.com.vn",
+        "/api/teacher": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
-        "/hubs": {
-          target: "https://stagingapi.catspeak.com.vn",
+        "/api/student": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
+        },
+        "/api/v1/Payments": {
+          target: "https://staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
+        "/api": {
+          target: "https://staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: false,
+        },
+        "/hubs": {
+          target: "https://staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          // secure: true,
+          secure: false,
           ws: true,
         },
         "/r2": {
@@ -54,8 +70,9 @@ export default defineConfig(({ mode }) => {
           if (
             warning.code === "UNRESOLVED_IMPORT" &&
             warning.exporter?.includes("face_mesh")
-          ) return
-          warn(warning)
+          )
+            return;
+          warn(warning);
         },
       },
       chunkSizeWarningLimit: 1000,
@@ -79,5 +96,5 @@ export default defineConfig(({ mode }) => {
     // esbuild: {
     //   drop: mode === "production" ? ["console", "debugger"] : [],
     // },
-  }
-})
+  };
+});

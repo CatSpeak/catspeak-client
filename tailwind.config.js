@@ -43,10 +43,11 @@ export default {
         cartItem: "#2e3033",
         cartTotal: "#343739",
         primaryDark: "#131417",
-        secondary: "#1E1F26",
         primaryText: "#868CA0",
         text555: "#555",
+        secondary: "#606060",
         dusk: "#1a1a2e",
+        border: "#e5e5e5",
       },
       width: {
         150: "150px",
@@ -111,10 +112,20 @@ export default {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-10deg) scale(1.1)' },
           '50%': { transform: 'rotate(10deg) scale(1.1)' },
-        }
+        },
+        enter: {
+          '0%': { transform: 'scale(0.9)', opacity: 0 },
+          '100%': { transform: 'scale(1)', opacity: 1 },
+        },
+        leave: {
+          '0%': { transform: 'scale(1)', opacity: 1 },
+          '100%': { transform: 'scale(0.9)', opacity: 0 },
+        },
       },
       animation: {
         wiggle: 'wiggle 0.3s ease-in-out infinite',
+        enter: 'enter 200ms ease-out',
+        leave: 'leave 150ms ease-in forwards',
       }
     },
   },

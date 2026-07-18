@@ -24,7 +24,7 @@ export default {
       vi: "越南语",
       zh: "中文",
       en: "英语",
-    }
+    },
   },
   pagination: {
     range: "{{start}}-{{end}} 共 {{total}}",
@@ -38,17 +38,26 @@ export default {
     worldNews: "世界新闻",
     reels: "短视频",
     video: "视频",
+    letters: "信",
     calendar: "日历",
+    events: "活动",
     cart: "购物车",
     courses: "课程",
     allCourses: "所有课程",
     myCourses: "我的课程",
+    myLearning: "我的学习",
     messages: "消息",
     settings: "设置",
     help: "帮助",
     connect: "个人",
     workspace: "我的工作区",
     pricing: "价格",
+    profile: "个人资料",
+    personalInfo: "个人信息",
+    instructor: "讲师",
+    organization: "组织",
+    billing: "账单",
+    recordings: "录像",
   },
   comingSoon: {
     badge: "即将推出",
@@ -59,4 +68,8 @@ export default {
     thankYou: "感谢您的耐心等待！^^",
   },
   noOptionsFound: "未找到选项",
+  errors: {
+    maxActiveRoomsReached: "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
+    generalFailed: "发生错误，请重试。",
+  }
 }

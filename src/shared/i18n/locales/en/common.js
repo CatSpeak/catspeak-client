@@ -24,7 +24,7 @@ export default {
       vi: "Vietnamese",
       zh: "Chinese",
       en: "English",
-    }
+    },
   },
   pagination: {
     range: "{{start}}-{{end}} of {{total}}",
@@ -38,17 +38,26 @@ export default {
     worldNews: "World News",
     reels: "Reels",
     video: "Video",
+    letters: "Letters",
     calendar: "Calendar",
+    events: "Events",
     cart: "Cart",
     courses: "Courses",
     allCourses: "All Courses",
     myCourses: "My Courses",
+    myLearning: "My Learning",
     messages: "Messages",
     settings: "Settings",
     help: "Help",
     connect: "Profile",
     workspace: "My Workspace",
     pricing: "Pricing",
+    profile: "Profile",
+    personalInfo: "Personal Info",
+    instructor: "Instructor",
+    organization: "Organization",
+    billing: "Billing",
+    recordings: "Recordings",
   },
   comingSoon: {
     badge: "Coming Soon",
@@ -60,4 +69,4 @@ export default {
     thankYou: "Thank you for your patience! ^^",
   },
   noOptionsFound: "No options found",
-}
+};

@@ -79,7 +79,7 @@ const LiveMessages = ({ languageCommunity }) => {
       onClick: () => navigate("/en/cat-speak/news"),
     },
     {
-      label: t.nav?.mail || "Thư",
+      label: t.nav?.letters || "Thư",
     },
   ];
 

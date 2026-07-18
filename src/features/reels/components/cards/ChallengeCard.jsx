@@ -2,7 +2,6 @@ import React from "react"
 import { Clock, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { formatCompactCount, formatDaysLeft } from "../../utils/formatters"
-import { useGetReelsByChallengeQuery } from "@/store/api/reelsApi"
 
 export default function ChallengeCard({
   challenge,
@@ -16,11 +15,7 @@ export default function ChallengeCard({
   const { name, hashtag, bannerUrl, endDate, endTime } = challenge
   const validEndDate = endDate || endTime
 
-  const { data: reelsResponse } = useGetReelsByChallengeQuery(
-    { challengeId: challenge.challengeId, pageSize: 100 },
-    { skip: !challenge.challengeId }
-  )
-  const reelCount = reelsResponse?.data?.length || 0
+  const participantCount = challenge.participantCount || 0
 
 
 
@@ -77,7 +72,7 @@ export default function ChallengeCard({
           </div>
           <div className="flex items-center gap-1.5 md:gap-2 text-gray-700 text-[11px] md:text-[13px]">
             <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-700" />
-            <span className="truncate">{participantsStr.replace("{{count}}", formatCompactCount(reelCount))}</span>
+            <span className="truncate">{participantsStr.replace("{{count}}", formatCompactCount(participantCount))}</span>
           </div>
         </div>
 

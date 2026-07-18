@@ -50,7 +50,7 @@ const Footer = () => {
       <div className="relative w-full bg-[#990011]">
         {/* Mobile: Gradient BG, Desktop: Transparent (uses FooterBG image inside) */}
         <div className="relative w-full max-w-screen-xl mx-auto min-h-0 justify-center flex flex-col lg:block p-6 lg:p-0 lg:py-10">
-          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-4 z-20 h-full p-6 pb-16 lg:p-0">
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-4 h-full p-6 pb-16 lg:p-0">
             {/* Logo - Hidden on mobile or centered? Let's hide on mobile to save space or stack it up */}
             {/* <div className="hidden lg:block col-span-1 w-full pb-4 pr-4">
               <img src={IconLogo} alt="logo" className="w-full" />
@@ -67,8 +67,11 @@ const Footer = () => {
                     />
                   </div>
                   <div className="w-full flex flex-row justify-between items-start gap-4">
-                    <CommunitySection languages={languages} />
-                    <div className="lg:hidden w-1/2 pt-[2px]">
+                    <div className="relative">
+                      <CommunitySection languages={languages} />
+                    </div>
+
+                    <div className="relative lg:hidden w-1/2 pt-[2px]">
                       <FooterBottom mode="mobile-policies" />
                     </div>
                   </div>

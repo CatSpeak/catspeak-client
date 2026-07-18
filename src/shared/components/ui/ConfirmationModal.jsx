@@ -20,12 +20,15 @@ const ConfirmationModal = ({
       open={open}
       onClose={onClose}
       title={title}
+      fullScreenOnMobile={false}
       footer={
         <div className="flex justify-end gap-3">
           <PillButton
             variant="secondary"
             onClick={onClose}
-            className="h-10 text-sm !bg-[#F6F6F6] text-[#7A7574]"
+            className="h-10 text-sm"
+            bgColor="#F6F6F6"
+            textColor="#7A7574"
           >
             {cancelText}
           </PillButton>
