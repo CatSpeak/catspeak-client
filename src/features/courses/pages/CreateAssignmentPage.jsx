@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -9,6 +9,13 @@ import {
   useUpdateAssignmentMutation
 } from "@/store/api/coursesApi"
 import { formatFileSize } from "../utils/courseUtils"
+import { parseLocalDateString, toDueDateIso, toLocalDateString } from "../utils/dateUtils"
+import {
+  clampMaxFiles,
+  getAssignmentErrorMessage,
+  getAssignmentFormDefaults,
+  getFileMeta,
+} from "../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ReactDatePicker from "react-datepicker"
 import "@/shared/styles/react-datepicker.css"
@@ -31,70 +38,27 @@ import {
   ChevronRight
 } from "lucide-react"
 
-const CreateAssignmentPage = () => {
-  const { id } = useParams()
+const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, language, t }) => {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const assignmentId = searchParams.get("assignmentId")
-  
-  const { language, t } = useLanguage()
   const c = t.courses || {}
   const ca = c.createAssignment || {}
-
-  // Fetch class details for dynamic breadcrumbs
-  const { data: detailResponse, isLoading: isClassLoading } = useGetClassDetailQuery(id)
-  const classData = detailResponse?.data || detailResponse || {}
-
-  // Fetch assignment detail if editing
-  const { data: assignmentResponse, isLoading: isAssignmentLoading } = useGetAssignmentByIdQuery(
-    { classId: id, assignmentId },
-    { skip: !id || !assignmentId }
-  )
+  const defaults = getAssignmentFormDefaults(initialAssignment)
 
   const [createAssignment] = useCreateAssignmentMutation()
   const [updateAssignment] = useUpdateAssignmentMutation()
 
   // Editor mock state
-  const [editorText, setEditorText] = useState("")
+  const [editorText, setEditorText] = useState(() => defaults.editorText)
 
   // Form States
-  const [title, setTitle] = useState("")
-  const [dueDate, setDueDate] = useState("")
-  const [dueTime, setDueTime] = useState("23:59")
-  const [allowLateSubmission, setAllowLateSubmission] = useState(true)
-
-  // Date Parsing Helpers
-  const toLocalDateString = (date) => {
-    if (!date) return ""
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    return `${y}-${m}-${d}`
-  }
-
-  const parseLocalDateString = (str) => {
-    if (!str) return null
-    const [y, m, d] = str.split("-").map(Number)
-    if (isNaN(y) || isNaN(m) || isNaN(d)) return null
-    return new Date(y, m - 1, d)
-  }
-
-  const toDueDateIso = () => {
-    const date = parseLocalDateString(dueDate)
-    if (!date || !dueTime) return null
-
-    const [hours, minutes] = dueTime.split(":").map(Number)
-    if (isNaN(hours) || isNaN(minutes)) return null
-
-    date.setHours(hours, minutes, 0, 0)
-    return date.toISOString()
-  }
-
-  const clampMaxFiles = (value) => Math.min(5, Math.max(1, Number(value) || 1))
+  const [title, setTitle] = useState(() => defaults.title)
+  const [dueDate, setDueDate] = useState(() => defaults.dueDate)
+  const [dueTime, setDueTime] = useState(() => defaults.dueTime)
+  const [allowLateSubmission, setAllowLateSubmission] = useState(() => defaults.allowLateSubmission)
 
   const buildAssignmentFormData = (status) => {
     const formData = new FormData()
-    const dueDateIso = toDueDateIso()
+    const dueDateIso = toDueDateIso(dueDate, dueTime)
 
     formData.append("Name", title.trim() || "Bài tập chưa đặt tên")
     formData.append("Description", editorText || "")
@@ -114,7 +78,7 @@ const CreateAssignmentPage = () => {
 
     // Append existing files to keep
     existingAttachments.forEach((f) => {
-      formData.append("KeepAttachments", typeof f === "string" ? f : f.url || f.path || JSON.stringify(f))
+      formData.append("KeepAttachments", getFileMeta(f).url || f.path || JSON.stringify(f))
     })
 
     attachedFiles.forEach((f) => {
@@ -131,76 +95,18 @@ const CreateAssignmentPage = () => {
   const fileInputRef = useRef(null)
 
   // Sidebar Config States
-  const [submissionTypeFile, setSubmissionTypeFile] = useState(true)
-  const [submissionTypeText, setSubmissionTypeText] = useState(false)
-  const [allowedFileTypes, setAllowedFileTypes] = useState(["PDF", "DOCX"])
-  const [maxFiles, setMaxFiles] = useState(1)
-  const [enableGrading, setEnableGrading] = useState(false)
-  const [gradeScale, setGradeScale] = useState("scale10") // scale10, scale100
-  const [resultRelease, setResultRelease] = useState("manual") // manual, automatic
-  const [publishStatus, setPublishStatus] = useState("now") // now, draft
+  const [submissionTypeFile, setSubmissionTypeFile] = useState(() => defaults.submissionTypeFile)
+  const [submissionTypeText, setSubmissionTypeText] = useState(() => defaults.submissionTypeText)
+  const [allowedFileTypes, setAllowedFileTypes] = useState(() => defaults.allowedFileTypes)
+  const [maxFiles, setMaxFiles] = useState(() => defaults.maxFiles)
+  const [enableGrading, setEnableGrading] = useState(() => defaults.enableGrading)
+  const [gradeScale, setGradeScale] = useState(() => defaults.gradeScale) // scale10, scale100
+  const [resultRelease, setResultRelease] = useState(() => defaults.resultRelease) // manual, automatic
+  const [publishStatus, setPublishStatus] = useState(() => defaults.publishStatus) // now, draft
   const [postToFeed, setPostToFeed] = useState(true)
 
   // State for existing attachments to keep
-  const [existingAttachments, setExistingAttachments] = useState([])
-
-  // Load existing assignment data if editing
-  useEffect(() => {
-    if (assignmentResponse) {
-      const assignment = assignmentResponse.data || assignmentResponse
-      setTitle(assignment.name || assignment.title || "")
-      setEditorText(assignment.description || "")
-      
-      if (assignment.dueDate) {
-        const d = new Date(assignment.dueDate)
-        const y = d.getFullYear()
-        const m = String(d.getMonth() + 1).padStart(2, "0")
-        const day = String(d.getDate()).padStart(2, "0")
-        const hh = String(d.getHours()).padStart(2, "0")
-        const mm = String(d.getMinutes()).padStart(2, "0")
-        setDueDate(`${y}-${m}-${day}`)
-        setDueTime(`${hh}:${mm}`)
-      } else {
-        setDueDate("")
-        setDueTime("23:59")
-      }
-      
-      setAllowLateSubmission(assignment.allowLateSubmission ?? true)
-      setSubmissionTypeFile(assignment.allowFileSubmission ?? true)
-      setSubmissionTypeText(assignment.allowTextSubmission ?? false)
-      
-      // Parse file types
-      if (assignment.allowedFileTypes) {
-        const types = assignment.allowedFileTypes
-          .split(",")
-          .map(t => t.replace(".", "").trim().toUpperCase())
-          .filter(Boolean)
-        setAllowedFileTypes(types)
-      } else {
-        setAllowedFileTypes(["PDF", "DOCX"])
-      }
-      
-      setMaxFiles(assignment.maxFiles || 1)
-      setEnableGrading(assignment.hasGrading ?? false)
-      setGradeScale(Number(assignment.maxScore) === 100 ? "scale100" : "scale10")
-      setResultRelease(assignment.releaseMode?.toLowerCase() === "automatic" ? "automatic" : "manual")
-      setPublishStatus(assignment.status?.toLowerCase() === "draft" ? "draft" : "now")
-      
-      // Parse and set existing attachments
-      if (assignment.attachments || assignment.files) {
-        let files = []
-        try {
-          const raw = assignment.attachments || assignment.files
-          files = typeof raw === "string" ? JSON.parse(raw) : raw
-        } catch (e) {
-          console.error(e)
-        }
-        if (Array.isArray(files)) {
-          setExistingAttachments(files)
-        }
-      }
-    }
-  }, [assignmentResponse])
+  const [existingAttachments, setExistingAttachments] = useState(() => defaults.existingAttachments)
 
   // Handle Drag & Drop Upload Mocking
   const handleDragOver = (e) => {
@@ -317,10 +223,6 @@ const CreateAssignmentPage = () => {
       console.error(err)
       toast.error(getAssignmentErrorMessage(err, assignmentId ? "Lỗi khi cập nhật bài nộp" : "Lỗi khi tạo bài nộp"))
     }
-  }
-
-  if (isClassLoading || (assignmentId && isAssignmentLoading)) {
-    return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
   return (
@@ -457,8 +359,7 @@ const CreateAssignmentPage = () => {
                 <div className="flex flex-col gap-2 mt-2">
                   {/* Existing attachments */}
                   {existingAttachments.map((file, idx) => {
-                    const name = file.name || file.fileName || (typeof file === "string" ? file.split("/").pop() : "Unnamed file")
-                    const size = file.size || file.fileSize || 0
+                    const { name, size } = getFileMeta(file)
                     const fileId = file.id || `existing-${idx}`
                     return (
                       <div
@@ -853,6 +754,38 @@ const CreateAssignmentPage = () => {
       </form>
 
     </div>
+  )
+}
+
+const CreateAssignmentPage = () => {
+  const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const assignmentId = searchParams.get("assignmentId")
+  const { language, t } = useLanguage()
+
+  const { data: detailResponse, isLoading: isClassLoading } = useGetClassDetailQuery(id)
+  const { data: assignmentResponse, isLoading: isAssignmentLoading } = useGetAssignmentByIdQuery(
+    { classId: id, assignmentId },
+    { skip: !id || !assignmentId }
+  )
+
+  if (isClassLoading || (assignmentId && isAssignmentLoading)) {
+    return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
+  }
+
+  const classData = detailResponse?.data || detailResponse || {}
+  const assignmentData = assignmentResponse?.data || assignmentResponse || null
+
+  return (
+    <CreateAssignmentForm
+      key={`${id}-${assignmentId || "new"}`}
+      id={id}
+      assignmentId={assignmentId}
+      classData={classData}
+      initialAssignment={assignmentData}
+      language={language}
+      t={t}
+    />
   )
 }
 

@@ -3,7 +3,7 @@ import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users } from 
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
-import TeachingTasksSection from "../TeachingTasksSection"
+import TeachingTasksSection from "../assignments/TeachingTasksSection"
 import { formatDateRange, formatDateDayMonth } from "../../utils/courseUtils"
 
 const ClassOverviewTab = ({

@@ -1,6 +1,6 @@
 import React from "react"
 import { Calendar, Clock, Users } from "lucide-react"
-import CourseStatusPill from "./CourseStatusPill"
+import CourseStatusPill from "../CourseStatusPill"
 
 const UpcomingSessionsPanel = ({
   title,

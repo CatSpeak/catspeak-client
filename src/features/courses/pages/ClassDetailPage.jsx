@@ -11,14 +11,15 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import { formatCurrency } from "../utils/courseUtils"
+import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 // Import subcomponents for tabs
-import ClassOverviewTab from "../components/detail/ClassOverviewTab"
-import ClassMembersTab from "../components/detail/ClassMembersTab"
-import ClassFeedTab from "../components/detail/ClassFeedTab"
-import ClassGradingTab from "../components/detail/ClassGradingTab"
-import ClassMaterialsTab from "../components/detail/ClassMaterialsTab"
+import ClassFeedTab from "../components/grading/ClassFeedTab"
+import ClassGradingTab from "../components/grading/ClassGradingTab"
+import ClassMaterialsTab from "../components/materials/ClassMaterialsTab"
+import ClassMembersTab from "../components/members/ClassMembersTab"
+import ClassOverviewTab from "../components/overview/ClassOverviewTab"
 
 const ClassDetailPage = () => {
   const { id } = useParams()
@@ -80,66 +81,7 @@ const ClassDetailPage = () => {
     toast.success(c.devMessage || "Feature in development")
   }
 
-  // Helper to format weekly schedule dynamically and defensively
-  const getWeeklyScheduleText = () => {
-    let schedArray = null
-    if (Array.isArray(classData.rawSchedule) && classData.rawSchedule.length > 0) {
-      schedArray = classData.rawSchedule
-    } else if (Array.isArray(classData.schedule)) {
-      schedArray = classData.schedule
-    }
-
-    const dayNames = {
-      vi: { "MON": "Thứ 2", "TUE": "Thứ 3", "WED": "Thứ 4", "THU": "Thứ 5", "FRI": "Thứ 6", "SAT": "Thứ 7", "SUN": "Chủ nhật" },
-      zh: { "MON": "周一", "TUE": "周二", "WED": "周三", "THU": "周四", "FRI": "周五", "SAT": "周六", "SUN": "周日" },
-      en: { "MON": "Mon", "TUE": "Tue", "WED": "Wed", "THU": "Thu", "FRI": "Fri", "SAT": "Sat", "SUN": "Sun" }
-    }
-    const currentLang = language || "en"
-    const langDayNames = dayNames[currentLang] || dayNames.en
-
-    // If we have an array of individual schedule items (e.g. raw / detailed schedule)
-    if (schedArray && schedArray.length > 0) {
-      // Group by time slot "startTime - endTime"
-      const groups = {}
-      schedArray.forEach(item => {
-        const start = item.startTime || "00:00"
-        const end = item.endTime || "00:00"
-        const timeKey = `${start} - ${end}`
-        const day = String(item.dayOfWeek || "").toUpperCase()
-        const dayStr = langDayNames[day] || day
-
-        if (!groups[timeKey]) {
-          groups[timeKey] = []
-        }
-        groups[timeKey].push(dayStr)
-      })
-
-      // Construct formatted strings: "Day 1, Day 2 (Time Slot)"
-      const groupStrings = Object.entries(groups).map(([timeKey, daysList]) => {
-        const daysJoined = daysList.join(", ")
-        return `${daysJoined} (${timeKey})`
-      })
-
-      return groupStrings.join("; ")
-    }
-
-    // Fallback: If it's a transformed RTK Query object: { days, startTime, endTime }
-    const schedObj = classData.schedule
-    if (schedObj && typeof schedObj === "object") {
-      const { days, startTime, endTime } = schedObj
-      if (days && days.length > 0) {
-        const formattedDays = days.map(day => {
-          const upperDay = String(day).toUpperCase()
-          return langDayNames[upperDay] || day
-        }).join(", ")
-
-        const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : ""
-        return timeStr ? `${formattedDays} (${timeStr})` : formattedDays
-      }
-    }
-
-    return "TBA"
-  }
+  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData, language || "en")
 
   if (isDetailLoading) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />

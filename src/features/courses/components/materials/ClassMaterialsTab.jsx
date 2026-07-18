@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react"
-import { Search, FileText, Download, Trash2, Upload, X } from "lucide-react"
+import { Search, FileText, Trash2, Upload, X, Eye } from "lucide-react"
 import { useGetClassMaterialsQuery, useUploadClassMaterialMutation, useDeleteClassMaterialMutation } from "@/store/api/coursesApi"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { toast } from "react-hot-toast"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
+import { getFileMeta } from "../../utils/assignmentUtils"
 
 const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
   const fileInputRef = useRef(null)
@@ -23,7 +24,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
 
   const materialsList = materialsResponse?.data || materialsResponse || []
   const filteredMaterials = materialsList.filter(file => {
-    const name = file.name || file.fileName || ""
+    const { name } = getFileMeta(file, "")
     return name.toLowerCase().includes(materialSearch.toLowerCase())
   })
 
@@ -124,9 +125,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
           ) : (
             <div className="flex flex-col divide-y divide-gray-100">
               {filteredMaterials.map((file) => {
-                const fileName = file.name || file.fileName || "Unnamed file"
-                const fileUrl = file.url || file.fileUrl || ""
-                const fileSize = file.size || file.fileSize || 0
+                const { name: fileName, url: fileUrl, size: fileSize } = getFileMeta(file)
                 const fileDate = file.createdAt || file.uploadedAt || ""
 
                 return (
@@ -152,9 +151,9 @@ const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
                           target="_blank"
                           rel="noreferrer"
                           className="p-2 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-xl transition-all"
-                          title="Download File"
+                          title="View File"
                         >
-                          <Download size={15} />
+                          <Eye size={15} />
                         </a>
                       )}
                       {!isStudent && (

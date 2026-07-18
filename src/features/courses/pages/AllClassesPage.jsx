@@ -10,7 +10,7 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ClassTable from "../components/ClassTable"
 import CourseTablePageHeader from "../components/CourseTablePageHeader"
 import CourseTabs from "../components/CourseTabs"
-import TablePagination from "../components/TablePagination"
+import TablePagination from "../components/shared/TablePagination"
 import { mapClassTableRow } from "../utils/courseTransforms"
 
 const AllClassesPage = () => {

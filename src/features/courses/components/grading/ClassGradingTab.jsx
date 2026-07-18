@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import AssignmentSubmissionsView from "./AssignmentSubmissionsView"
-import StudentAssignmentDetailView from "./StudentAssignmentDetailView"
+import StudentAssignmentDetailView from "../assignments/StudentAssignmentDetailView"
+import AssignmentSubmissionsView from "../assignments/submissions/AssignmentSubmissionsView"
 import {
   Search,
   ChevronDown,
@@ -17,34 +17,13 @@ import {
   useGetMyAssignmentSubmissionQuery,
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-
-const getAssignmentTitle = (assignment) => (
-  assignment?.name || assignment?.title || "Untitled assignment"
-)
-
-const getAssignmentStatus = (assignment) => (
-  String(assignment?.status || "").toLowerCase()
-)
-
-const getAssignmentCount = (assignment, keys) => {
-  const value = keys.map((key) => assignment?.[key]).find((item) => item !== undefined && item !== null)
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : 0
-}
-
-const getAssignmentTimeline = (assignment) => {
-  const dueTime = assignment?.dueDate ? new Date(assignment.dueDate).getTime() : null
-  const hasDueDate = dueTime && !Number.isNaN(dueTime)
-  return {
-    isExpired: Boolean(hasDueDate && dueTime < Date.now()),
-    isUpcoming: Boolean(hasDueDate && dueTime >= Date.now()),
-  }
-}
-
-const getSubmissionStatus = (submission) => {
-  if (!submission) return "not_submitted"
-  return String(submission.status || "submitted").toLowerCase()
-}
+import {
+  getAssignmentCount,
+  getAssignmentStatus,
+  getAssignmentTimeline,
+  getAssignmentTitle,
+  getSubmissionStatus,
+} from "../../utils/assignmentUtils"
 
 const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect }) => {
   const { data: submissionResponse, isLoading } = useGetMyAssignmentSubmissionQuery(
@@ -122,6 +101,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
+  const [nowMs] = useState(() => Date.now())
 
   const statusParam = useMemo(() => {
     if (statusFilter === "all") return undefined
@@ -334,7 +314,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               ? Math.round((submittedCount / enrolledCount) * 100)
               : 0
             const notSubmittedCount = Math.max(enrolledCount - submittedCount, 0)
-            const { isExpired, isUpcoming } = getAssignmentTimeline(assignment)
+            const { isExpired, isUpcoming } = getAssignmentTimeline(assignment, nowMs)
             const title = getAssignmentTitle(assignment)
             const dueDate = assignment.dueDate
               ? new Date(assignment.dueDate).toLocaleString(language === "vi" ? "vi-VN" : "en-US")

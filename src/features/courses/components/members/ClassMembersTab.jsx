@@ -3,7 +3,7 @@ import { Plus, MessageSquare, Trash2 } from "lucide-react"
 import { useGetClassMembersQuery, useUpdateClassMemberAttendanceMutation } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
-import { MOCK_STUDENTS, MOCK_TEACHER } from "./classMockData"
+import { MOCK_STUDENTS, MOCK_TEACHER } from "../../data/classMockData"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Toggle switch: set to false to use real API endpoint after backend is ready

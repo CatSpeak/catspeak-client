@@ -12,7 +12,7 @@ import { useGetProfileQuery } from "@/features/auth"
 import CourseSearchInput from "../../components/CourseSearchInput"
 import CourseSelectFilter from "../../components/CourseSelectFilter"
 import CourseTabs from "../../components/CourseTabs"
-import ViewModeToggle from "../../components/ViewModeToggle"
+import ViewModeToggle from "../../components/shared/ViewModeToggle"
 import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTransforms"
 
 const StudentDashboard = ({ t }) => {

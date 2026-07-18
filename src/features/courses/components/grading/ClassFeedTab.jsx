@@ -3,7 +3,7 @@ import { Send, MoreVertical, MessageSquare } from "lucide-react"
 import { useGetClassFeedQuery, useCreateClassPostMutation } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
-import { MOCK_FEED } from "./classMockData"
+import { MOCK_FEED } from "../../data/classMockData"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Toggle switch: set to false to use real API endpoint after backend is ready

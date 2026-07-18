@@ -488,7 +488,7 @@ export default {
     modalFeedbackLabel: "Nhận xét / Góp ý:",
     modalFeedbackPlaceholder: "Ghi nhận xét cho học viên...",
     modalBtnClose: "Đóng",
-    modalBtnSave: "Lưu điểm",
+    modalBtnSave: "Chấm điểm",
     modalBtnReturn: "Trả bài",
     toastScoreError: "Vui lòng nhập điểm từ 0 đến 100",
     toastGradeSaved: "Đã chấm {{score}} điểm cho {{student}}",

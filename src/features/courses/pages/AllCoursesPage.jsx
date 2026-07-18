@@ -10,7 +10,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import CourseTable from "../components/CourseTable"
 import CourseTablePageHeader from "../components/CourseTablePageHeader"
 import CourseTabs from "../components/CourseTabs"
-import TablePagination from "../components/TablePagination"
+import TablePagination from "../components/shared/TablePagination"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import { mapCourseTableRow } from "../utils/courseTransforms"
 

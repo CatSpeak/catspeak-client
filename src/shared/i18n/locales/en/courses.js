@@ -488,7 +488,7 @@ export default {
     modalFeedbackLabel: "Feedback / Comment:",
     modalFeedbackPlaceholder: "Enter feedback for student...",
     modalBtnClose: "Close",
-    modalBtnSave: "Save Grade",
+    modalBtnSave: "Submit Grade",
     modalBtnReturn: "Return",
     toastScoreError: "Please enter a score between 0 and 100",
     toastGradeSaved: "Graded {{score}} points for {{student}}",

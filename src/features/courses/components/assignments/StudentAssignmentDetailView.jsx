@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react"
+import React, { useState, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -9,11 +9,10 @@ import {
   Trash2,
   Calendar,
   Paperclip,
-  CheckCircle2,
-  Download,
   Lock,
   Unlock,
-  AlertTriangle
+  AlertTriangle,
+  Eye
 } from "lucide-react"
 import {
   useGetStudentAssignmentByIdQuery,
@@ -22,6 +21,11 @@ import {
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
+import {
+  getFileMeta,
+  isAssignmentExpired,
+  parseAttachmentList,
+} from "../../utils/assignmentUtils"
 
 const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, onBack }) => {
   const { language, t } = useLanguage()
@@ -50,23 +54,17 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
   const [submitAssignment, { isLoading: isSubmitting }] = useSubmitAssignmentMutation()
 
   // Form states
-  const [textContent, setTextContent] = useState("")
+  const [textDraft, setTextDraft] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
   const fileInputRef = useRef(null)
   const [dragActive, setDragActive] = useState(false)
-
-  // Sync state if already submitted
-  useEffect(() => {
-    if (submission) {
-      setTextContent(submission.contentText || "")
-    }
-  }, [submission])
+  const [nowMs] = useState(() => Date.now())
+  const textContent = textDraft ?? submission?.contentText ?? ""
 
   // Get status details
   const isExpired = useMemo(() => {
-    if (!assignment?.dueDate) return false
-    return new Date(assignment.dueDate).getTime() < Date.now()
-  }, [assignment?.dueDate])
+    return isAssignmentExpired(assignment, nowMs)
+  }, [assignment, nowMs])
 
   const isClosed = useMemo(() => {
     return String(assignment?.status || "").toLowerCase() === "closed"
@@ -80,24 +78,16 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
   const parsedTeacherAttachments = useMemo(() => {
     const raw = assignment?.attachments || assignment?.files || []
-    if (!raw) return []
-    try {
-      return typeof raw === "string" ? JSON.parse(raw) : raw
-    } catch (e) {
-      console.error("Failed to parse teacher attachments:", e)
-      return []
-    }
+    return parseAttachmentList(raw, (error) => {
+      console.error("Failed to parse teacher attachments:", error)
+    })
   }, [assignment])
 
   const parsedSubmissionFiles = useMemo(() => {
     const raw = submission?.files || []
-    if (!raw) return []
-    try {
-      return typeof raw === "string" ? JSON.parse(raw) : raw
-    } catch (e) {
-      console.error("Failed to parse submission files:", e)
-      return []
-    }
+    return parseAttachmentList(raw, (error) => {
+      console.error("Failed to parse submission files:", error)
+    })
   }, [submission])
 
   // Drag & drop handlers
@@ -128,14 +118,14 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
   const addFiles = (filesList) => {
     const maxFiles = Number(assignment?.maxFiles) || 1
-    const allowedTypes = assignment?.allowedFileTypes 
-      ? assignment.allowedFileTypes.split(",").map(t => t.trim().toLowerCase()) 
+    const allowedTypes = assignment?.allowedFileTypes
+      ? assignment.allowedFileTypes.split(",").map(t => t.trim().toLowerCase())
       : []
 
     if (selectedFiles.length + filesList.length > maxFiles) {
       toast.error(
-        language === "vi" 
-          ? `Tối đa ${maxFiles} tệp tin cho phép` 
+        language === "vi"
+          ? `Tối đa ${maxFiles} tệp tin cho phép`
           : `Maximum of ${maxFiles} files allowed`
       )
       return
@@ -145,12 +135,12 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
     for (let i = 0; i < filesList.length; i++) {
       const file = filesList[i]
       const ext = `.${file.name.split(".").pop().toLowerCase()}`
-      
+
       // Validate type
       if (allowedTypes.length > 0 && !allowedTypes.includes(ext)) {
         toast.error(
-          language === "vi" 
-            ? `Định dạng tệp ${ext} không hợp lệ. Chỉ chấp nhận: ${assignment.allowedFileTypes}` 
+          language === "vi"
+            ? `Định dạng tệp ${ext} không hợp lệ. Chỉ chấp nhận: ${assignment.allowedFileTypes}`
             : `File format ${ext} is not allowed. Supported: ${assignment.allowedFileTypes}`
         )
         return
@@ -159,8 +149,8 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
       // Validate size (50MB)
       if (file.size > 50 * 1024 * 1024) {
         toast.error(
-          language === "vi" 
-            ? `Kích thước tệp ${file.name} vượt quá 50MB` 
+          language === "vi"
+            ? `Kích thước tệp ${file.name} vượt quá 50MB`
             : `File ${file.name} exceeds the 50MB limit`
         )
         return
@@ -190,8 +180,8 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
     if (assignment.allowTextSubmission && !textContent.trim() && !assignment.allowFileSubmission) {
       toast.error(
-        language === "vi" 
-          ? "Vui lòng nhập nội dung bài nộp!" 
+        language === "vi"
+          ? "Vui lòng nhập nội dung bài nộp!"
           : "Please enter your submission text!"
       )
       return
@@ -199,8 +189,8 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
     if (assignment.allowFileSubmission && selectedFiles.length === 0 && parsedSubmissionFiles.length === 0 && !assignment.allowTextSubmission) {
       toast.error(
-        language === "vi" 
-          ? "Vui lòng tải lên tệp tin bài làm!" 
+        language === "vi"
+          ? "Vui lòng tải lên tệp tin bài làm!"
           : "Please upload at least one file!"
       )
       return
@@ -209,13 +199,11 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
     const formData = new FormData()
     if (assignment.allowTextSubmission) {
       formData.append("ContentText", textContent.trim())
-      formData.append("contentText", textContent.trim())
     }
 
     if (assignment.allowFileSubmission) {
       selectedFiles.forEach((file) => {
         formData.append("Files", file)
-        formData.append("files", file)
       })
     }
 
@@ -227,8 +215,8 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
       }).unwrap()
 
       toast.success(
-        language === "vi" 
-          ? "Nộp bài tập thành công!" 
+        language === "vi"
+          ? "Nộp bài tập thành công!"
           : "Successfully submitted assignment!"
       )
       setSelectedFiles([])
@@ -287,9 +275,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
   // File rendering function
   const renderFileRow = (file, index, isPending = false) => {
-    const name = file.name || file.fileName || "Unnamed file"
-    const url = file.url || file.fileUrl || ""
-    const size = file.size || file.fileSize || 0
+    const { name, url, size } = getFileMeta(file)
 
     return (
       <div key={index} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-150 rounded-xl hover:bg-gray-100/50 transition-colors">
@@ -307,9 +293,9 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
               target="_blank"
               rel="noreferrer"
               className="p-1.5 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-lg transition-colors"
-              title="Tải xuống"
+              title={language === "vi" ? "Xem trực tiếp" : "View file"}
             >
-              <Download size={14} />
+              <Eye size={14} />
             </a>
           )}
           {isPending && (
@@ -351,7 +337,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
       {/* Header Title & Navigation back */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-150 pb-5">
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={onBack}
             className="p-2.5 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl transition-all cursor-pointer shadow-2xs"
             title="Quay lại"
@@ -364,7 +350,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
             </h1>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {getStatusBadge()}
-              
+
               {isClosed ? (
                 <span className="bg-gray-150 text-gray-500 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide flex items-center gap-1">
                   <Lock size={10} />
@@ -415,7 +401,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                 {ca.descriptionLabel || "Mô tả / Hướng dẫn bài tập"}
               </h3>
             </div>
-            
+
             <div className="text-xs font-semibold text-gray-700 whitespace-pre-line leading-relaxed min-h-[80px]">
               {assignment.description || (
                 <span className="italic text-gray-400 font-medium">
@@ -451,13 +437,13 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                 <span className="text-[10px] text-gray-400 font-semibold">
                   {language === "vi" ? "Nộp lúc:" : "Submitted on:"}{" "}
                   <strong className="text-gray-600 font-extrabold">
-                    {submission.submittedAt 
-                      ? new Date(submission.submittedAt).toLocaleString(language === "vi" ? "vi-VN" : "en-US") 
+                    {submission.submittedAt
+                      ? new Date(submission.submittedAt).toLocaleString(language === "vi" ? "vi-VN" : "en-US")
                       : "—"}
                   </strong>
                 </span>
               </div>
-              
+
               <div className="flex flex-col gap-3">
                 {/* Submission text response */}
                 {assignment.allowTextSubmission && (
@@ -479,7 +465,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
                 {/* Submission files */}
                 {assignment.allowFileSubmission && parsedSubmissionFiles.length > 0 && (
-                  <div className="mt-4 border-t border-gray-50 pt-4">
+                  <div className="border-t border-gray-50">
                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <Paperclip size={12} />
                       {language === "vi" ? "Các tệp tin đã nộp" : "Submitted Files"}
@@ -502,7 +488,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
               <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
                 {language === "vi" ? "KẾT QUẢ ĐÁNH GIÁ" : "GRADING DETAILS"}
               </h3>
-              
+
               <div className="flex items-center gap-4 bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-2xs">
                 <div className="text-3xl font-black text-emerald-600 font-mono">
                   {submission.grade !== null && submission.grade !== undefined ? submission.grade : "—"}
@@ -554,7 +540,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                   </label>
                   <textarea
                     value={textContent}
-                    onChange={(e) => setTextContent(e.target.value)}
+                    onChange={(e) => setTextDraft(e.target.value)}
                     placeholder={language === "vi" ? "Nhập nội dung bài làm của bạn tại đây..." : "Type your submission here..."}
                     rows={8}
                     className="w-full px-4 py-3 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-750 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] shadow-2xs resize-none leading-relaxed transition-all"
@@ -569,22 +555,21 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                     {ca.uploadFile || "Tải lên tệp tin"}
                   </label>
                   <div className="text-[10px] text-gray-400 font-semibold leading-normal">
-                    {language === "vi" 
+                    {language === "vi"
                       ? `Hỗ trợ: ${assignment.allowedFileTypes || "Tất cả"} (Tối đa ${assignment.maxFiles || 1} tệp, tối đa 50MB/tệp)`
                       : `Supported formats: ${assignment.allowedFileTypes || "Any"} (Max ${assignment.maxFiles || 1} files, 50MB max each)`}
                   </div>
-                  
+
                   <div
                     onDragEnter={handleDrag}
                     onDragOver={handleDrag}
                     onDragLeave={handleDrag}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                      dragActive
+                    className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragActive
                         ? "border-[#990011] bg-[#990011]/5"
                         : "border-gray-255 hover:border-gray-400 hover:bg-gray-50/50"
-                    }`}
+                      }`}
                   >
                     <Upload size={24} className="text-gray-400 mb-2" />
                     <span className="text-xs font-bold text-gray-700 leading-snug">
@@ -623,8 +608,8 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                   <>
                     <Upload size={14} />
                     <span>
-                      {submission 
-                        ? (language === "vi" ? "NỘP LẠI BÀI" : "RESUBMIT ASSIGNMENT") 
+                      {submission
+                        ? (language === "vi" ? "NỘP LẠI BÀI" : "RESUBMIT ASSIGNMENT")
                         : (language === "vi" ? "NỘP BÀI TẬP" : "SUBMIT ASSIGNMENT")}
                     </span>
                   </>
@@ -638,7 +623,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                 {language === "vi" ? "BÀI NỘP ĐÃ KHÓA" : "SUBMISSIONS CLOSED"}
               </h3>
               <p className="text-xs font-semibold text-gray-500 leading-relaxed">
-                {isClosed 
+                {isClosed
                   ? (language === "vi" ? "Giảng viên đã khóa hoặc đóng bài tập này, học viên không thể nộp bài hoặc chỉnh sửa bài làm." : "The instructor has locked submissions for this assignment. You cannot submit or edit.")
                   : (language === "vi" ? "Hạn nộp bài đã qua và nộp muộn không được cho phép đối với bài tập này." : "The submission deadline has passed and late submissions are not allowed for this assignment.")}
               </p>
