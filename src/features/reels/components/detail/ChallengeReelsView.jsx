@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from "react"
-import { ChevronDown } from "lucide-react"
+import React, { useState, useMemo, useEffect } from "react"
+import { ChevronDown, Loader2 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import FilterDropdown from "../ui/FilterDropdown"
+import Dropdown from "@/shared/components/ui/Dropdown"
 import ReelGrid from "../grid/ReelGrid"
 import ReelGridSkeleton from "../grid/ReelGridSkeleton"
 import { useGetReelsByChallengeQuery } from "@/store/api/reelsApi"
@@ -11,19 +11,40 @@ import { formatCompactCount } from "../../utils/formatters"
 export default function ChallengeReelsView({ challengeId, selectedChallenge, challengeStatus, onReelClick }) {
   const { t } = useLanguage()
   const [challengeFilter, setChallengeFilter] = useState("Newest")
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    setPage(1)
+  }, [challengeId])
 
   // Fetch reels for specific challenge
   const {
     currentData: challengeReelsResponse,
     isLoading: isChallengeReelsLoading,
+    isFetching
   } = useGetReelsByChallengeQuery(
     {
       challengeId: challengeId || undefined,
-      page: 1,
+      page,
       pageSize: 20,
     },
     { skip: !challengeId }
   )
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 300
+      ) {
+        if (!isFetching && challengeReelsResponse?.lastPageCount === 20) {
+          setPage((p) => p + 1)
+        }
+      }
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [isFetching, challengeReelsResponse?.lastPageCount])
 
   const challengeReels = useMemo(() => {
     if (!challengeReelsResponse?.data) return []
@@ -84,31 +105,40 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
         </div>
         
         <div className="flex items-center relative shrink-0">
-          <FilterDropdown
+          <Dropdown
             options={[
               { value: "Newest", label: t.catSpeak.reels.newest || "Mới nhất" },
               { value: "Oldest", label: t.catSpeak.reels.oldest || "Cũ nhất" },
             ]}
             value={challengeFilter}
             onChange={(val) => setChallengeFilter(val)}
-            defaultLabel={t.catSpeak.reels.newest || "Mới nhất"}
+            placeholder={t.catSpeak.reels.newest || "Mới nhất"}
+            dropdownClassName="w-32 sm:w-40"
           />
         </div>
       </div>
 
-      {/* Grid */}
-      {isChallengeReelsLoading ? (
-        <ReelGridSkeleton />
-      ) : challengeReels.length > 0 ? (
-        <ReelGrid reels={challengeReels} onReelClick={onReelClick} />
-      ) : (
-        <div className="w-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-          <span className="text-3xl block mb-2">🎈</span>
-          <p className="text-sm font-semibold text-gray-500">
-            {t.catSpeak.reels.noReelsFound || "Không tìm thấy Thước phim nào."}
-          </p>
-        </div>
-      )}
+      <div className="w-full">
+        {isChallengeReelsLoading && page === 1 ? (
+          <ReelGridSkeleton />
+        ) : challengeReels.length > 0 ? (
+          <>
+            <ReelGrid reels={challengeReels} onReelClick={onReelClick} />
+            {isFetching && page > 1 && (
+              <div className="flex justify-center my-6">
+                <Loader2 className="w-8 h-8 animate-spin text-cath-red-700" />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="w-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <span className="text-3xl block mb-2">🎈</span>
+            <p className="text-sm font-semibold text-gray-500">
+              {t.catSpeak.reels.noReelsFound || "Không tìm thấy Thước phim nào."}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

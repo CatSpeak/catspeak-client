@@ -36,7 +36,6 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
-          // secure: true,
           secure: false,
         },
         "/hubs": {
@@ -72,8 +71,8 @@ export default defineConfig(({ mode }) => {
             warning.code === "UNRESOLVED_IMPORT" &&
             warning.exporter?.includes("face_mesh")
           )
-            return
-          warn(warning)
+            return;
+          warn(warning);
         },
       },
       chunkSizeWarningLimit: 1000,

@@ -7,7 +7,7 @@ export default {
   community: "社区",
   notifications: "通知",
   noNewNotifications: "没有新通知",
-  searchPlaceholder: "搜索房间或主题",
+  searchPlaceholder: "搜索房间",
   languages: {
     vi: "越南语 (国语)",
     viNom: "越南语 (喃字) - 即将推出",

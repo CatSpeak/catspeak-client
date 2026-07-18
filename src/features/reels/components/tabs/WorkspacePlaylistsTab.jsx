@@ -2,9 +2,10 @@ import React, { useMemo, useState, useRef, useEffect } from "react"
 import { Calendar, ChevronDown, ChevronUp, ListPlus, Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPlaylistsQuery, useCreatePlaylistMutation, useGetBookmarkedReelsQuery } from "@/store/api/reelsApi"
+import { useGetPlaylistsQuery, useCreatePlaylistMutation, useUpdatePlaylistMutation, useDeletePlaylistMutation, useGetBookmarkedReelsQuery } from "@/store/api/reelsApi"
 
 import PlaylistReelList from "./PlaylistReelList"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 
 const getLocale = (lang) => {
   if (lang === "zh") return "zh-CN"
@@ -84,27 +85,88 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   const { data: bookmarkedReels } = useGetBookmarkedReelsQuery(playlist.playlistId)
   const count = bookmarkedReels ? bookmarkedReels.length : (playlist.bookmarksCount || 0)
 
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(playlist.name)
+  const [updatePlaylist, { isLoading: isUpdating }] = useUpdatePlaylistMutation()
+  const [deletePlaylist, { isLoading: isDeleting }] = useDeletePlaylistMutation()
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
+
   const label = count === 1
     ? (lang?.itemCountSingular || "1 video")
     : (lang?.itemCount || "{{count}} videos").replace("{{count}}", count)
 
   const covers = bookmarkedReels?.map(r => r.coverUrl).filter(Boolean) || []
 
-  const handleFeatureInDev = (e) => {
+  const handleUpdate = async (e) => {
     e.stopPropagation()
-    toast(lang?.inDevelopment || "Chức năng đang phát triển", { icon: '🚧' })
+    if (!editName.trim() || editName.trim() === playlist.name) {
+      setIsEditing(false)
+      setEditName(playlist.name)
+      return
+    }
+    try {
+      await updatePlaylist({ playlistId: playlist.playlistId, name: editName.trim() }).unwrap()
+      setIsEditing(false)
+      toast.success(lang?.updated || "Cập nhật thành công")
+    } catch (err) {
+      toast.error(lang?.updateFailed || "Cập nhật thất bại")
+    }
+  }
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation()
+    setIsConfirmDeleteOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    try {
+      await deletePlaylist(playlist.playlistId).unwrap()
+      toast.success(lang?.deleted || "Đã xóa playlist")
+    } catch (err) {
+      toast.error(lang?.deleteFailed || "Xóa thất bại")
+    } finally {
+      setIsConfirmDeleteOpen(false)
+    }
+  }
+
+  const handleCancelEdit = (e) => {
+    e.stopPropagation()
+    setIsEditing(false)
+    setEditName(playlist.name)
   }
 
   return (
     <div className="border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden mb-2 group/row">
       <div
-        onClick={() => setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)}
+        onClick={() => !isEditing && setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)}
         className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left cursor-pointer"
       >
         <PlaylistAvatar covers={covers} />
         
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-gray-800 text-sm truncate">{playlist.name}</div>
+          {isEditing ? (
+            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+              <input
+                type="text"
+                autoFocus
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleUpdate(e)
+                  if (e.key === "Escape") handleCancelEdit(e)
+                }}
+                className="flex-1 px-3 py-1.5 text-sm font-medium text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cath-red-500/20 focus:border-cath-red-500 bg-white shadow-inner transition-all"
+              />
+              <button onClick={handleUpdate} disabled={isUpdating} className="p-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors" title="Lưu">
+                {isUpdating ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={2.5} />}
+              </button>
+              <button onClick={handleCancelEdit} disabled={isUpdating} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 hover:text-gray-700 transition-colors" title="Hủy">
+                <X size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+          ) : (
+            <div className="font-semibold text-gray-800 text-sm truncate">{playlist.name}</div>
+          )}
           <div className="flex items-center gap-1.5 flex-wrap text-xs text-gray-400 mt-0.5">
             <span>{label}</span>
             <span>•</span>
@@ -116,14 +178,16 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
         </div>
         
         {/* Actions */}
-        <div className="flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
-           <button onClick={handleFeatureInDev} className="p-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit name">
+        {!isEditing && (
+          <div className="flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+            <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="p-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit name">
               <Pencil size={16} />
-           </button>
-           <button onClick={handleFeatureInDev} className="p-1.5 bg-gray-100 text-gray-600 hover:text-red-600 rounded-lg hover:bg-[#ffdede] transition-colors" title="Delete playlist">
-              <Trash2 size={16} />
-           </button>
-        </div>
+            </button>
+            <button onClick={handleDeleteClick} disabled={isDeleting} className="p-1.5 bg-gray-100 text-gray-600 hover:text-red-600 rounded-lg hover:bg-[#ffdede] transition-colors" title="Delete playlist">
+              {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+            </button>
+          </div>
+        )}
 
         <div className="ml-1 text-gray-400">
           {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -139,6 +203,16 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
           />
         </div>
       )}
+
+      <ConfirmationModal
+        open={isConfirmDeleteOpen}
+        onClose={() => setIsConfirmDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        title={lang?.deletePlaylistTitle || "Xóa Playlist"}
+        message={lang?.deleteConfirm || "Bạn có chắc chắn muốn xóa playlist này?"}
+        confirmText={lang?.delete || "Xóa"}
+        cancelText={lang?.cancel || "Hủy"}
+      />
     </div>
   )
 }
