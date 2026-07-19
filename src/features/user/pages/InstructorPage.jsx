@@ -34,7 +34,7 @@ const INITIAL_FORM_DATA = {
   phonePrefix: "+84",
   nationality: "",
   languagesTeach: [],
-  nativeLanguage: "English",
+  nativeLanguage: "Tiếng Việt",
   idFrontFile: null,
   idBackFile: null,
   introduction: "",
@@ -93,7 +93,7 @@ function mapApplicationToFormData(app) {
     languagesTeach: normalizeLanguagesTeach(
       app.languagesTeach || app.LanguagesTeach,
     ),
-    nativeLanguage: app.nativeLanguage || app.NativeLanguage || "English",
+    nativeLanguage: app.nativeLanguage || app.NativeLanguage || "Tiếng Việt",
     idFrontFile: app.idCardFrontUrl || app.IdCardFrontUrl || null,
     idBackFile: app.idCardBackUrl || app.IdCardBackUrl || null,
     introduction: app.introduction || app.Introduction || "",
@@ -466,7 +466,9 @@ const InstructorPage = () => {
   if (hasNotApplied && !showForm) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="text-xl font-bold text-cath-red-700">{ins.title}</h1>
+        <PageTitle>
+        {t.nav?.instructor || "Giảng viên"}
+      </PageTitle>
         <InstructorEmptyState onApply={() => setShowForm(true)} t={t} />
       </div>
     );
@@ -498,42 +500,37 @@ const InstructorPage = () => {
         />
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div className="flex flex-col gap-10">
-          <InstructorPersonalInfo
-            formData={formData}
-            onChange={handleChange}
-            readOnly={readOnly}
-            errors={errors}
-            t={t}
-          />
-          <InstructorIdentity
-            formData={formData}
-            onEdit={handleEdit}
-            readOnly={readOnly}
-            errors={errors}
-            t={t}
-          />
-        </div>
-
-        <div className="flex flex-col gap-10">
-          <InstructorLanguages
-            formData={formData}
-            onChange={handleChange}
-            onLanguagesChange={handleLanguagesChange}
-            readOnly={readOnly}
-            errors={errors}
-            t={t}
-          />
-          <InstructorCredentials
-            formData={formData}
-            onAddCredential={handleAddCredential}
-            onRemoveCredential={handleRemoveCredential}
-            readOnly={readOnly}
-            errors={errors}
-            t={t}
-          />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <InstructorPersonalInfo
+          formData={formData}
+          onChange={handleChange}
+          readOnly={readOnly}
+          errors={errors}
+          t={t}
+        />
+        <InstructorLanguages
+          formData={formData}
+          onChange={handleChange}
+          onLanguagesChange={handleLanguagesChange}
+          readOnly={readOnly}
+          errors={errors}
+          t={t}
+        />
+        <InstructorIdentity
+          formData={formData}
+          onEdit={handleEdit}
+          readOnly={readOnly}
+          errors={errors}
+          t={t}
+        />
+        <InstructorCredentials
+          formData={formData}
+          onAddCredential={handleAddCredential}
+          onRemoveCredential={handleRemoveCredential}
+          readOnly={readOnly}
+          errors={errors}
+          t={t}
+        />
       </div>
 
       <InstructorMedia

@@ -36,7 +36,7 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
     <div ref={ref} className="relative">
       <div
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        className="flex flex-wrap items-center gap-2 h-11 w-full bg-gray-50/50 border border-gray-100 rounded-xl px-3 cursor-pointer text-sm transition-colors hover:border-gray-300"
+        className="flex flex-wrap items-center gap-2 min-h-[44px] py-2 w-full bg-gray-50/50 border border-gray-100 rounded-xl px-3 cursor-pointer text-sm transition-colors hover:border-gray-300"
       >
         {selected.length === 0 && (
           <span className="text-gray-400">{options.length ? placeholder : ""}</span>
@@ -99,7 +99,7 @@ const InstructorLanguages = ({
   const ins = t.profile?.instructor || {}
 
   return (
-    <FluentCard className="gap-6 !justify-start">
+    <FluentCard className="gap-6 !justify-start h-full min-h-[365px]">
       <h2 className="text-xl font-bold text-gray-900">
         {ins.languageTeach || "Ngôn ngữ giảng dạy"}
       </h2>
@@ -124,42 +124,46 @@ const InstructorLanguages = ({
             <label className="text-sm font-semibold text-gray-800">
               {ins.yourLevel || "Trình độ của bạn"}
             </label>
-            {formData.languagesTeach.map((item, index) => (
-              <div key={item.language} className="flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-600 w-16">
-                  {item.language}
-                </span>
-                <Dropdown
-                  options={(LANGUAGE_LEVELS[item.language] || []).map((code) => ({
-                    value: code,
-                    label: code,
-                  }))}
-                  value={item.level}
-                  onChange={(val) => {
-                    if (readOnly) return
-                    const updated = formData.languagesTeach.map((lang, i) =>
-                      i === index ? { ...lang, level: val } : lang
-                    )
-                    onLanguagesChange(updated)
-                  }}
-                  disabled={readOnly}
-                  placeholder={ins.selectLevel || "Chọn trình độ"}
-                  trigger={(isOpen, selectedOption, toggle) => (
-                    <button
-                      type="button"
-                      onClick={toggle}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {formData.languagesTeach.map((item, index) => (
+                <div key={item.language} className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-600 w-16 truncate">
+                    {item.language}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <Dropdown
+                      options={(LANGUAGE_LEVELS[item.language] || []).map((code) => ({
+                        value: code,
+                        label: code,
+                      }))}
+                      value={item.level}
+                      onChange={(val) => {
+                        if (readOnly) return
+                        const updated = formData.languagesTeach.map((lang, i) =>
+                          i === index ? { ...lang, level: val } : lang
+                        )
+                        onLanguagesChange(updated)
+                      }}
                       disabled={readOnly}
-                      className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.languagesTeach && !item.level ? "border-red-500" : "border-gray-100"}`}
-                    >
-                      <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
-                        {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
-                      </span>
-                      <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                    </button>
-                  )}
-                />
-              </div>
-            ))}
+                      placeholder={ins.selectLevel || "Chọn trình độ"}
+                      trigger={(isOpen, selectedOption, toggle) => (
+                        <button
+                          type="button"
+                          onClick={toggle}
+                          disabled={readOnly}
+                          className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.languagesTeach && !item.level ? "border-red-500" : "border-gray-100"}`}
+                        >
+                          <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
+                            {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
+                          </span>
+                          <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                        </button>
+                      )}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

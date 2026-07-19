@@ -8,7 +8,7 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
   const ins = t.profile?.instructor || {}
 
   return (
-    <FluentCard id="field-credentials" className="gap-6 !justify-start">
+    <FluentCard id="field-credentials" className="gap-6 !justify-start h-full min-h-[320px] flex-col flex">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">
           {ins.uploadCredentials || "Chứng chỉ"}

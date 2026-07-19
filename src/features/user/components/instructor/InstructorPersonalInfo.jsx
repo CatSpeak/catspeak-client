@@ -21,7 +21,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
             : "pl-[120px]"
 
   return (
-    <FluentCard className="gap-6 !justify-start">
+    <FluentCard className="gap-6 !justify-start h-full min-h-[365px]">
       <h2 className="text-xl font-bold text-gray-900">
         {ins.yourInfo || "Thông tin của bạn"}
       </h2>
