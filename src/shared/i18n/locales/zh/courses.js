@@ -499,7 +499,8 @@ export default {
     scoreTenSystem: "得分 (10分制)",
     generalFeedback: "综合评语",
     btnBack: "返回",
-    btnRegrade: "重新评分"
+    btnRegrade: "重新评分",
+    btnRelease: "公布结果"
   }
 }
 

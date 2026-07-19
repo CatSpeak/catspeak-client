@@ -315,24 +315,6 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
-      {/* Breadcrumb */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-            {t.nav?.home || "Trang chủ"}
-          </span>
-          <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>
-            {c.student?.dashboardTitle || "Lớp học đang học"}
-          </span>
-          <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={onBack}>
-            {c.student?.classDetails || "Chi tiết lớp học"}
-          </span>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{assignment.name}</span>
-        </div>
-      </div>
 
       {/* Header Title & Navigation back */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-150 pb-5">
@@ -483,7 +465,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
         {/* Right Column (35%) */}
         <div className="flex flex-col gap-6">
           {/* Grade and feedback panel (if graded/returned) */}
-          {submission && (submission.status === "graded" || submission.status === "returned") && (
+          {submission && (submission.status?.toLowerCase() === "graded" || submission.status?.toLowerCase() === "returned") && (
             <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
               <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
                 {language === "vi" ? "KẾT QUẢ ĐÁNH GIÁ" : "GRADING DETAILS"}
@@ -498,7 +480,7 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                     {language === "vi" ? `Thang điểm tối đa ${assignment.maxScore}` : `Out of ${assignment.maxScore}`}
                   </span>
                   <span className="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider mt-2 inline-block w-fit">
-                    {submission.status === "graded" ? (cg.filterGraded || "ĐÃ CHẤM") : (cg.filterReturned || "ĐÃ TRẢ BÀI")}
+                    {submission.status?.toLowerCase() === "graded" ? (cg.filterGraded || "ĐÃ CHẤM") : (cg.filterReturned || "ĐÃ TRẢ BÀI")}
                   </span>
                 </div>
               </div>
@@ -567,8 +549,8 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragActive
-                        ? "border-[#990011] bg-[#990011]/5"
-                        : "border-gray-255 hover:border-gray-400 hover:bg-gray-50/50"
+                      ? "border-[#990011] bg-[#990011]/5"
+                      : "border-gray-255 hover:border-gray-400 hover:bg-gray-50/50"
                       }`}
                   >
                     <Upload size={24} className="text-gray-400 mb-2" />

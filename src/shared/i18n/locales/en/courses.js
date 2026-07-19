@@ -499,7 +499,8 @@ export default {
     scoreTenSystem: "Score (Scale of 10)",
     generalFeedback: "General Feedback",
     btnBack: "Go Back",
-    btnRegrade: "Re-grade"
+    btnRegrade: "Re-grade",
+    btnRelease: "Release Results"
   }
 }
 

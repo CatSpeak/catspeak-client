@@ -12,6 +12,7 @@ import {
   useGetClassMembersQuery,
   useGradeSubmissionMutation,
   useOpenAssignmentMutation,
+  useReturnSubmissionMutation,
 } from "@/store/api/coursesApi"
 
 import {
@@ -47,6 +48,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
   const [openAssignment] = useOpenAssignmentMutation()
   const [gradeSubmission] = useGradeSubmissionMutation()
   const [bulkReturn] = useBulkReturnSubmissionsMutation()
+  const [returnSubmission] = useReturnSubmissionMutation()
 
   const currentAssignment = assignmentDetailResponse?.data || assignmentDetailResponse || assignment
   const assignmentTitle = getAssignmentTitle(currentAssignment)
@@ -184,6 +186,27 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
     }
   }
 
+  const handleReleaseGrade = async () => {
+    if (!activeStudent || !activeStudent.submissionId) return
+
+    try {
+      await returnSubmission({
+        classId,
+        assignmentId: assignment.id,
+        submissionId: activeStudent.submissionId,
+      }).unwrap()
+
+      const successMessage = gradingTranslations.toastGradeReturned
+        ? gradingTranslations.toastGradeReturned.replace("{{student}}", activeStudent.name)
+        : `Đã trả bài chấm cho học viên ${activeStudent.name}`
+      toast.success(successMessage)
+      setSearchParams({ assignmentId: assignment.id })
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.error?.message || "Lỗi khi trả kết quả")
+    }
+  }
+
   if (isSubmissionsLoading || isMembersLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -201,6 +224,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
         student={activeStudent}
         onBack={() => setSearchParams({ assignmentId: assignment.id })}
         onSave={handleSaveGrade}
+        onRelease={handleReleaseGrade}
       />
     )
   }

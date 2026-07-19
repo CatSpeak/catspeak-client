@@ -13,6 +13,7 @@ const AssignmentGradingWorkspace = ({
   student,
   onBack,
   onSave,
+  onRelease,
 }) => {
   const { language, t } = useLanguage()
   const cg = t.courses?.grading || {}
@@ -237,25 +238,36 @@ const AssignmentGradingWorkspace = ({
           )}
         </div>
 
-        <div className="p-6 border-t border-gray-200 flex gap-3 bg-gray-50/50">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex-1 py-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl text-center transition-colors shadow-2xs uppercase tracking-wider"
-          >
-            {cg.btnBack || "Quay về"}
-          </button>
-          {isSubmitted && (
+        <div className="p-6 border-t border-gray-200 flex flex-col gap-3 bg-gray-50/50">
+          {student.status === "graded" && (
             <button
               type="button"
-              onClick={() => onSave({ score, feedback })}
-              className="flex-1 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider"
+              onClick={onRelease}
+              className="w-full py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider"
             >
-              {student.status === "graded" || student.status === "returned"
-                ? (cg.btnRegrade || "Chấm lại bài")
-                : (cg.modalBtnSave || "Lưu điểm")}
+              {cg.btnRelease || "Trả về kết quả"}
             </button>
           )}
+          <div className="flex gap-3 w-full">
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex-1 py-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl text-center transition-colors shadow-2xs uppercase tracking-wider"
+            >
+              {cg.btnBack || "Quay về"}
+            </button>
+            {isSubmitted && (
+              <button
+                type="button"
+                onClick={() => onSave({ score, feedback })}
+                className="flex-1 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider"
+              >
+                {student.status === "graded" || student.status === "returned"
+                  ? (cg.btnRegrade || "Chấm lại bài")
+                  : (cg.modalBtnSave || "Lưu điểm")}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

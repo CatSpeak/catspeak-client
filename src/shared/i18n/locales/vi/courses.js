@@ -499,7 +499,8 @@ export default {
     scoreTenSystem: "Điểm (Hệ số 10)",
     generalFeedback: "Nhận xét chung",
     btnBack: "Quay về",
-    btnRegrade: "Chấm lại bài"
+    btnRegrade: "Chấm lại bài",
+    btnRelease: "Trả về kết quả"
   }
 }
 
