@@ -10,7 +10,7 @@ const ConversationItem = ({ conversation, onClick }) => {
   const { user } = useAuth()
   
   const username =
-    conversation?.friend?.username || t.components.messages.unknownUser
+    conversation?.friend?.username || t.messages.unknownUser
   const avatarSrc = conversation?.friend?.avatar || null
 
   const unreadCountRedux = useSelector(
@@ -37,7 +37,7 @@ const ConversationItem = ({ conversation, onClick }) => {
                 {conversation.lastMessage}
               </>
             ) : (
-              t.components.messages.noMessages
+              t.messages.noMessages
             )}
           </span>
         </div>
