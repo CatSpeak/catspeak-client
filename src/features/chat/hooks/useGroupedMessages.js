@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react"
+import { useMemo, useState } from "react"
 
 /**
  * useGroupedMessages — processes messages and groups them with date separators
@@ -12,17 +12,15 @@ export const useGroupedMessages = ({
   conversation,
   isLoading,
 }) => {
-  const initialMessageIdsRef = useRef(new Set())
-  const prevConversationIdRef = useRef(null)
+  const [initialMessageIds, setInitialMessageIds] = useState(() => new Set())
+  const [prevConversationId, setPrevConversationId] = useState(null)
 
-  // Reset and initialize during render when conversation changes or initially loads
-  if (conversation && conversation.id !== prevConversationIdRef.current) {
-    prevConversationIdRef.current = conversation.id
-    initialMessageIdsRef.current = new Set(
-      isLoading ? [] : messages.map((m) => m.id)
-    )
-  } else if (!isLoading && initialMessageIdsRef.current.size === 0 && messages.length > 0) {
-    initialMessageIdsRef.current = new Set(messages.map((m) => m.id))
+  const currentConvId = conversation?.id || null
+  if (currentConvId !== prevConversationId) {
+    setPrevConversationId(currentConvId)
+    setInitialMessageIds(new Set(isLoading ? [] : messages.map((m) => m.id)))
+  } else if (!isLoading && initialMessageIds.size === 0 && messages.length > 0) {
+    setInitialMessageIds(new Set(messages.map((m) => m.id)))
   }
 
   return useMemo(() => {
@@ -96,7 +94,7 @@ export const useGroupedMessages = ({
             })()
 
       const shouldAnimate =
-        !initialMessageIdsRef.current.has(msg.id) &&
+        !initialMessageIds.has(msg.id) &&
         new Date() - new Date(msg.timestamp) < 15000
 
       groupedItems.push({
@@ -113,5 +111,5 @@ export const useGroupedMessages = ({
     }
 
     return groupedItems
-  }, [messages, currentUser, conversation, isLoading])
+  }, [messages, currentUser, conversation, initialMessageIds])
 }

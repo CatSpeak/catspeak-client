@@ -4,6 +4,11 @@ import { useAddParticipantsMutation } from "@/store/api/social/conversationsApi"
 import Modal from "@/shared/components/ui/Modal"
 import Avatar from "@/shared/components/ui/Avatar"
 import { PillButton } from "@/shared/components/ui/buttons"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import Checkbox from "@/shared/components/ui/inputs/Checkbox"
+import ListItem from "@/shared/components/ui/ListItem"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
+import { Users } from "lucide-react"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 
 const AddMembersModal = ({
@@ -33,9 +38,11 @@ const AddMembersModal = ({
     const arr = Array.isArray(friendsResponse)
       ? friendsResponse
       : friendsResponse?.data || []
-    
+
     // Filter out participants already in the group
-    return arr.filter((f) => !groupParticipantIds.includes(f.accountId))
+    return arr.filter(
+      (f) => !groupParticipantIds.includes(f.accountId),
+    )
   }, [friendsResponse, groupParticipantIds])
 
   // Apply search query
@@ -53,7 +60,7 @@ const AddMembersModal = ({
     setSelectedFriends((prev) =>
       prev.includes(friendId)
         ? prev.filter((id) => id !== friendId)
-        : [...prev, friendId]
+        : [...prev, friendId],
     )
   }, [])
 
@@ -75,25 +82,31 @@ const AddMembersModal = ({
       open={open}
       onClose={handleClose}
       title="Add members to group"
+      bodyClassName="px-0 flex-1 flex flex-col overflow-hidden"
     >
-      <div className="flex flex-col h-[400px]">
+      <div className="flex flex-col md:max-h-[80vh] flex-1">
         {/* Search bar */}
-        <div className="mb-4">
-          <input
-            type="text"
+        <div className="px-4 pb-4">
+          <SearchInput
             placeholder="Search friends..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 px-4 rounded-xl bg-[#F2F2F2] text-sm text-[#1A1A1A] outline-none placeholder-[#9CA0AB] focus:bg-[#EBEBEB] focus:ring-1 focus:ring-[#990011]/20"
+            onChange={setSearchQuery}
+            className="min-w-0"
           />
         </div>
 
         {/* Friends checklist */}
-        <div className="flex-1 overflow-y-auto space-y-1 mb-4">
+        <div className="flex-1 flex flex-col gap-1 overflow-y-auto px-4 pb-4">
           {filteredFriends.length === 0 ? (
-            <p className="text-center text-sm text-[#9CA0AB] py-8">
-              {addableFriends.length === 0 ? "All of your friends are already in this group" : "No friends found matching your search"}
-            </p>
+            <EmptyState
+              variant="component"
+              icon={Users}
+              message={
+                addableFriends.length === 0
+                  ? "All of your friends are already in this group"
+                  : "No friends found matching your search"
+              }
+            />
           ) : (
             filteredFriends.map((friend) => {
               const isChecked = selectedFriends.includes(friend.accountId)
@@ -101,45 +114,38 @@ const AddMembersModal = ({
                 friend.accountId || friend.username || "",
               )
               return (
-                <div
+                <ListItem
                   key={friend.accountId}
                   onClick={() => toggleSelectFriend(friend.accountId)}
-                  className="flex items-center justify-between px-3 py-2 hover:bg-[#F8F8F8] rounded-xl cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center gap-3">
+                  hoverEffect={true}
+                  className="overflow-hidden cursor-pointer shrink-0"
+                  contentClassName={`rounded-xl ${isChecked ? "bg-[#F2F2F2]" : ""}`}
+                  lines={2}
+                  leftContent={
                     <Avatar
                       src={friend.avatarImageUrl}
                       name={friend.nickname || friend.username}
                       size={40}
                       className={theme.avatarClass}
                     />
-                    <div>
-                      <p className="text-sm font-medium text-[#1A1A1A]">
-                        {friend.nickname || friend.username}
-                      </p>
-                      <p className="text-xs text-[#9CA0AB]">
-                        {friend.level || "Student"}
-                      </p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => {}} // handled by parent div click
-                    className="w-4 h-4 rounded text-[#990011] focus:ring-[#990011]/20 border-[#E5E5E5]"
-                  />
-                </div>
+                  }
+                  rightContent={
+                    <Checkbox checked={isChecked} variant="large" as="div" />
+                  }
+                >
+                  <p>{friend.nickname || friend.username}</p>
+                  <p className="text-sm text-[#606060]">
+                    {friend.level || "Student"}
+                  </p>
+                </ListItem>
               )
             })
           )}
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-3 border-t border-[#E5E5E5] flex justify-end gap-2">
-          <PillButton
-            onClick={handleClose}
-            variant="secondary-no-outline"
-          >
+        <div className="border-t border-[#E5E5E5] flex justify-end gap-2 p-4">
+          <PillButton onClick={handleClose} variant="secondary-no-outline">
             Cancel
           </PillButton>
           <PillButton
@@ -147,7 +153,9 @@ const AddMembersModal = ({
             disabled={selectedFriends.length === 0}
             loading={isLoading}
           >
-            Add {selectedFriends.length > 0 ? `(${selectedFriends.length})` : ""} members
+            Add{" "}
+            {selectedFriends.length > 0 ? `(${selectedFriends.length})` : ""}{" "}
+            members
           </PillButton>
         </div>
       </div>

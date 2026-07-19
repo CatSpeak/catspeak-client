@@ -7,11 +7,24 @@ import {
 import { useGetFriendsQuery } from "@/store/api/social/friendshipApi"
 import Modal from "@/shared/components/ui/Modal"
 import Avatar from "@/shared/components/ui/Avatar"
-import { PillButton } from "@/shared/components/ui/buttons"
+import ListItem from "@/shared/components/ui/ListItem"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import { Users } from "lucide-react"
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import GroupMemberSelector from "./GroupMemberSelector"
+import GroupDetailsForm from "./GroupDetailsForm"
+
+const NEW_CHAT_TABS = [
+  { id: "direct", label: "Direct Message" },
+  { id: "group", label: "New Group" },
+]
 
 const NewChatModal = ({ open, onClose, onConversationCreated }) => {
   const { user: authUser } = useAuth()
   const [newChatTab, setNewChatTab] = useState("direct") // 'direct' | 'group'
+  const [groupStep, setGroupStep] = useState("select-members") // 'select-members' | 'details'
   const [groupName, setGroupName] = useState("")
   const [selectedFriends, setSelectedFriends] = useState([])
   const [newChatSearch, setNewChatSearch] = useState("")
@@ -33,17 +46,34 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
     )
   }, [friendsResponse, newChatSearch])
 
+  const selectedFriendsData = useMemo(() => {
+    const arr = Array.isArray(friendsResponse)
+      ? friendsResponse
+      : friendsResponse?.data || []
+    return arr.filter((f) => selectedFriends.includes(f.accountId))
+  }, [friendsResponse, selectedFriends])
+
   // ── Mutations ──────────────────────────────────────────
   const [createPrivateConversation] = useCreatePrivateConversationMutation()
-  const [createGroupConversation] = useCreateGroupConversationMutation()
+  const [createGroupConversation, { isLoading: isCreatingGroup }] =
+    useCreateGroupConversationMutation()
 
   // ── Handlers ───────────────────────────────────────────
   const handleClose = useCallback(() => {
     setGroupName("")
     setSelectedFriends([])
     setNewChatSearch("")
+    setGroupStep("select-members")
     onClose()
   }, [onClose])
+
+  const handleTabChange = useCallback((tab) => {
+    setNewChatTab(tab)
+    setGroupStep("select-members")
+    setGroupName("")
+    setSelectedFriends([])
+    setNewChatSearch("")
+  }, [])
 
   const handleStartPrivateChat = useCallback(
     async (friendAccountId) => {
@@ -74,7 +104,13 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
     } catch (err) {
       console.error("Failed to create group chat:", err)
     }
-  }, [groupName, selectedFriends, createGroupConversation, onConversationCreated, handleClose])
+  }, [
+    groupName,
+    selectedFriends,
+    createGroupConversation,
+    onConversationCreated,
+    handleClose,
+  ])
 
   const toggleSelectFriend = useCallback((friendId) => {
     setSelectedFriends((prev) =>
@@ -89,135 +125,89 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
       open={open}
       onClose={handleClose}
       title="Start a new chat"
+      bodyClassName="px-0 flex-1 flex flex-col overflow-hidden"
     >
-      <div className="flex flex-col h-[500px]">
+      <div className="flex flex-col md:max-h-[80vh] flex-1">
         {/* Tab Selection */}
-        <div className="flex border-b border-[#E5E5E5] mb-4">
-          <button
-            onClick={() => setNewChatTab("direct")}
-            className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition-colors ${
-              newChatTab === "direct"
-                ? "border-[#990011] text-[#990011]"
-                : "border-transparent text-[#606060] hover:text-[#1A1A1A]"
-            }`}
-          >
-            Direct Message
-          </button>
-          <button
-            onClick={() => setNewChatTab("group")}
-            className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition-colors ${
-              newChatTab === "group"
-                ? "border-[#990011] text-[#990011]"
-                : "border-transparent text-[#606060] hover:text-[#1A1A1A]"
-            }`}
-          >
-            New Group
-          </button>
-        </div>
-
-        {/* Search bar */}
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Search friends..."
-            value={newChatSearch}
-            onChange={(e) => setNewChatSearch(e.target.value)}
-            className="w-full h-10 px-4 rounded-xl bg-[#F2F2F2] text-sm text-[#1A1A1A] outline-none placeholder-[#9CA0AB] focus:bg-[#EBEBEB] focus:ring-1 focus:ring-[#990011]/20"
-          />
-        </div>
+        <Tabs
+          tabs={NEW_CHAT_TABS}
+          activeTab={newChatTab}
+          onChange={handleTabChange}
+          className="mb-4 px-4"
+        />
 
         {newChatTab === "direct" ? (
-          <div className="flex-1 overflow-y-auto space-y-1">
-            {friends.length === 0 ? (
-              <p className="text-center text-sm text-[#9CA0AB] py-8">
-                No friends found
-              </p>
-            ) : (
-              friends.map((friend) => (
-                <button
-                  key={friend.accountId}
-                  onClick={() => handleStartPrivateChat(friend.accountId)}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#F8F8F8] rounded-xl transition-colors text-left"
-                >
-                  <Avatar
-                    src={friend.avatarImageUrl}
-                    name={friend.nickname || friend.username}
-                    size={40}
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">
-                      {friend.nickname || friend.username}
-                    </p>
-                    <p className="text-xs text-[#9CA0AB]">{friend.level}</p>
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col flex-1 min-h-0">
-            {/* Group Name Input */}
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Group Name"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-                className="w-full h-10 px-4 rounded-xl border border-[#E5E5E5] text-sm text-[#1A1A1A] outline-none focus:border-[#990011]"
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Search bar */}
+            <div className="px-4 pb-4">
+              <SearchInput
+                placeholder="Search friends..."
+                value={newChatSearch}
+                onChange={setNewChatSearch}
+                className="min-w-0"
               />
             </div>
 
-            {/* Friends checklist */}
-            <div className="flex-1 overflow-y-auto space-y-1 mb-4">
+            {/* Direct Message List */}
+            <div className="flex-1 flex flex-col gap-1 overflow-y-auto px-4 pb-4">
               {friends.length === 0 ? (
-                <p className="text-center text-sm text-[#9CA0AB] py-8">
-                  No friends available
-                </p>
+                <EmptyState
+                  variant="component"
+                  icon={Users}
+                  message="No friends found"
+                />
               ) : (
                 friends.map((friend) => {
-                  const isChecked = selectedFriends.includes(friend.accountId)
+                  const theme = getParticipantTheme(
+                    friend.accountId || friend.username || "",
+                  )
                   return (
-                    <div
+                    <ListItem
                       key={friend.accountId}
-                      onClick={() => toggleSelectFriend(friend.accountId)}
-                      className="flex items-center justify-between px-3 py-2 hover:bg-[#F8F8F8] rounded-xl cursor-pointer transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
+                      onClick={() => handleStartPrivateChat(friend.accountId)}
+                      hoverEffect={true}
+                      className="overflow-hidden cursor-pointer shrink-0"
+                      contentClassName="rounded-xl"
+                      lines={2}
+                      leftContent={
                         <Avatar
                           src={friend.avatarImageUrl}
                           name={friend.nickname || friend.username}
                           size={40}
+                          className={theme.avatarClass}
                         />
-                        <div>
-                          <p className="text-sm font-medium text-[#1A1A1A]">
-                            {friend.nickname || friend.username}
-                          </p>
-                          <p className="text-xs text-[#9CA0AB]">
-                            {friend.level}
-                          </p>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {}} // handled by parent div click
-                        className="w-4 h-4 rounded text-[#990011] focus:ring-[#990011]/20 border-[#E5E5E5]"
-                      />
-                    </div>
+                      }
+                    >
+                      <p>{friend.nickname || friend.username}</p>
+                      <p className="text-sm text-[#606060]">
+                        {friend.level || "Student"}
+                      </p>
+                    </ListItem>
                   )
                 })
               )}
             </div>
-
-            <div className="pt-2 border-t border-[#E5E5E5] flex justify-end">
-              <PillButton
-                onClick={handleCreateGroupChat}
-                disabled={!groupName.trim() || selectedFriends.length === 0}
-              >
-                Create Group
-              </PillButton>
-            </div>
           </div>
+        ) : groupStep === "select-members" ? (
+          <GroupMemberSelector
+            friends={friends}
+            selectedFriends={selectedFriends}
+            onToggleFriend={toggleSelectFriend}
+            searchQuery={newChatSearch}
+            onSearchChange={setNewChatSearch}
+            onNext={() => setGroupStep("details")}
+            onClose={handleClose}
+          />
+        ) : (
+          <GroupDetailsForm
+            groupName={groupName}
+            setGroupName={setGroupName}
+            selectedFriendsData={selectedFriendsData}
+            onRemoveFriend={toggleSelectFriend}
+            onCreateGroup={handleCreateGroupChat}
+            onBack={() => setGroupStep("select-members")}
+            isLoading={isCreatingGroup}
+          />
         )}
       </div>
     </Modal>

@@ -31,7 +31,6 @@ const ChatBubble = ({
   isFirstInGroup,
   isLastInGroup,
   sender,
-  isGroupChat,
   shouldAnimate = false,
 }) => {
   const isEmoji = isEmojiOnly(message.content)

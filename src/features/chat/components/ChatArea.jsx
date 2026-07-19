@@ -9,6 +9,7 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { useGroupedMessages } from "../hooks/useGroupedMessages"
+import GroupAvatar from "./GroupAvatar"
 
 /**
  * ChatArea — main chat view with header, messages, and input.
@@ -22,7 +23,6 @@ const ChatArea = ({
   onSend,
   onBack,
   onToggleInfo,
-  showInfoActive,
   friendOnlineStatus,
   isLoading,
 }) => {
@@ -81,7 +81,7 @@ const ChatArea = ({
   }
 
   return (
-    <FluentCard className="flex-1 overflow-hidden" padding="p-0">
+    <FluentCard className="flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl" padding="p-0">
       {/* ── Chat Header ────────────────────────────── */}
       <div className="flex items-center justify-between px-4 h-[72px] border-b border-[#E5E5E5] shrink-0">
         <div className="flex items-center gap-4 min-w-0">
@@ -98,11 +98,7 @@ const ChatArea = ({
 
           {/* Avatar */}
           {isGroup ? (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#990011] to-[#c00015] flex items-center justify-center shrink-0">
-              <span className="text-white text-sm font-bold">
-                {name?.charAt(0)?.toUpperCase()}
-              </span>
-            </div>
+            <GroupAvatar conversation={conversation} size={40} />
           ) : (
             <div className="relative shrink-0">
               <Avatar

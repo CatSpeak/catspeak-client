@@ -16,6 +16,7 @@ import { useConversationSignalRContext } from "@/features/messages/context/Conve
 import useMessageSignalR from "@/features/messages/hooks/useMessageSignalR"
 import { EmptyState } from "@/shared/components/ui/indicators"
 import NewChatModal from "../components/NewChatModal"
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 
@@ -58,7 +59,7 @@ const ChatPage = () => {
     if (selectedId) {
       dispatch(setActiveChatPageConversation(selectedId))
       if (signalr) {
-        signalr.invoke("JoinConversation", Number(selectedId)).catch((err) => {
+        signalr.invoke("JoinConversation", Number(selectedId)).catch(() => {
           // Fallback to string if number format is rejected
           signalr
             .invoke("JoinConversation", String(selectedId))
@@ -175,7 +176,7 @@ const ChatPage = () => {
   }, [inputValue, selectedId, sendMessageMutation])
 
   return (
-    <div className="flex gap-4 p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
+    <div className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
       {/* ── Sidebar ──────────────────────────────────── */}
       <div
         className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-fit shrink-0`}
@@ -236,7 +237,7 @@ const ChatPage = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/40 z-40 lg:hidden backdrop-blur-xs"
+              className="fixed inset-0 bg-black/40 z-40 xl:hidden backdrop-blur-xs"
               onClick={() => setShowInfoPanel(false)}
             />
 
@@ -245,7 +246,7 @@ const ChatPage = () => {
               direction="left"
               distance={40}
               exit={true}
-              className="fixed right-0 top-0 h-full z-50 shadow-2xl lg:hidden flex max-w-[85vw] overflow-hidden"
+              className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex max-w-[85vw] overflow-hidden"
             >
               <ChatUserPanel
                 conversation={activeConversation}
@@ -257,7 +258,7 @@ const ChatPage = () => {
             </FluentAnimation>
 
             {/* Desktop inline panel */}
-            <div className="hidden lg:flex shrink-0">
+            <div className="hidden xl:flex shrink-0">
               <ChatUserPanel
                 conversation={activeConversation}
                 currentUser={currentUser}

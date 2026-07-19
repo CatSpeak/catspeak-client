@@ -42,6 +42,7 @@ export const navLinks = [
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
+      { key: "messages", path: "/chat", icon: MessageCircle },
     ],
   },
 
@@ -52,7 +53,6 @@ export const navLinks = [
   //   icon: CreditCard,
   // },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
-  { key: "messages", path: "/chat", icon: MessageCircle },
   // {
   //   key: "courses",
   //   hasDropdown: true,

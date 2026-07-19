@@ -4,47 +4,12 @@ import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { IconButton } from "@/shared/components/ui/buttons"
 import ListItem from "@/shared/components/ui/ListItem"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { formatRelativeTime } from "@/shared/utils/dateFormatter"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
-
-// ── Utility Helpers ───────────────────────────────────────
-
-/**
- * GroupAvatar — stacked initials for group conversations.
- */
-const GroupAvatar = ({ conversation, size = 48 }) => {
-  const participants = conversation.participants || []
-  // Show initials of up to 2 other participants
-  const first = participants[0]
-  const second = participants[1]
-  const smallSize = Math.round(size * 0.62)
-
-  const themeFirst = getParticipantTheme(
-    first?.accountId || first?.username || "",
-  )
-  const themeSecond = getParticipantTheme(
-    second?.accountId || second?.username || "",
-  )
-
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <Avatar
-        size={smallSize}
-        name={first?.username}
-        src={first?.avatarImageUrl}
-        className={`absolute top-0 left-0 z-[1] border-2 border-white ${themeFirst.avatarClass}`}
-      />
-      <Avatar
-        size={smallSize}
-        name={second?.username}
-        src={second?.avatarImageUrl}
-        className={`absolute bottom-0 right-0 z-[2] border-2 border-white ${themeSecond.avatarClass}`}
-      />
-    </div>
-  )
-}
+import GroupAvatar from "./GroupAvatar"
 
 /**
  * ConversationItem — single row in the conversation list.
@@ -169,11 +134,18 @@ const ChatSidebar = ({
   onNewChatClick,
   isLoading,
 }) => {
-  const [filter, setFilter] = useState("all")
+  const [filter] = useState("all")
 
   // Filter + search conversations
   const filtered = useMemo(() => {
     let result = [...conversations]
+
+    // Filter out empty 1:1 conversations unless they are currently selected/active
+    result = result.filter((c) => {
+      if (c.conversationId === selectedId) return true
+      if (c.isGroup) return true
+      return !!c.lastMessage
+    })
 
     // Apply filter
     if (filter === "unread") result = result.filter((c) => c.unreadCount > 0)
@@ -196,10 +168,10 @@ const ChatSidebar = ({
     })
 
     return result
-  }, [conversations, filter, searchQuery])
+  }, [conversations, filter, searchQuery, selectedId])
 
   return (
-    <FluentCard padding="p-0" className="w-full h-full flex-1 overflow-hidden">
+    <FluentCard padding="p-0" className="w-full h-full flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl">
       {/* ── Header ───────────────────────────────────── */}
       <div className="flex flex-col gap-4 p-4">
         <div className="flex items-center justify-between">
@@ -247,10 +219,7 @@ const ChatSidebar = ({
             </ListItem>
           ))
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-[#606060]">
-            <Users />
-            <p className="mt-2 text-sm">No conversations found</p>
-          </div>
+          <EmptyState variant="component" icon={Users} message="No conversations found" />
         ) : (
           filtered.map((conv) => (
             <ConversationItem

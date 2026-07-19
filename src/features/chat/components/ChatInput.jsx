@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef, useCallback } from "react"
 import { Paperclip, Smile, Send } from "lucide-react"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
@@ -32,12 +32,13 @@ const ChatInput = ({
   const [isMultiline, setIsMultiline] = useState(false)
   const { insertEmoji, addRecent } = useEmojiPicker()
 
-  // Reset multiline status when value is cleared
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
     if (value === "") {
       setIsMultiline(false)
     }
-  }, [value])
+  }
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -70,7 +71,7 @@ const ChatInput = ({
   }, [hasContent, onSend])
 
   return (
-    <div className="px-4 py-2 border-t border-[#E5E5E5] bg-white">
+    <div className="px-4 py-2 bg-transparent">
       <div
         onClick={() => textareaRef.current?.focus()}
         className={`w-full grid grid-cols-[auto_1fr_auto] border border-[#e5e5e5] focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${
@@ -88,7 +89,9 @@ const ChatInput = ({
               e.stopPropagation()
             }}
             className={`shrink-0 ${
-              isMultiline ? "col-start-1 row-start-2" : "col-start-1 row-start-1"
+              isMultiline
+                ? "col-start-1 row-start-2"
+                : "col-start-1 row-start-1"
             }`}
           >
             <Paperclip />
@@ -123,7 +126,9 @@ const ChatInput = ({
         {showRightIcons && (
           <div
             className={`flex items-center h-12 ${
-              isMultiline ? "col-start-3 row-start-2" : "col-start-3 row-start-1"
+              isMultiline
+                ? "col-start-3 row-start-2"
+                : "col-start-3 row-start-1"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
