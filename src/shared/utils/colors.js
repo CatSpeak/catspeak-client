@@ -46,11 +46,14 @@ export const colors = {
   // Neutral colors
   dusk: "#1a1a2e",
 
+  // ── Gray & Neutral Background Options ─────────────────
+  // Main page background color (used for core page/layout content panels)
+  primary2: "#f3f3f3", 
+  
   // Custom colors
   headingColor: "#2e2e2e",
   textColor: "#515151",
   subtext: coreColors.secondaryGray,
-  primary2: "#f3f3f3",
   darkOverlay: "rgba(0,0,0,0.2)",
   lightOverlay: "rgba(255,255,255,0.4)",
   lighttextGray: "#9ca0ab",

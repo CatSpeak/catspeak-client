@@ -1,18 +1,18 @@
 /* global process */
-import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import { fileURLToPath } from "url";
-import livekitDevToken from "./plugins/livekitDevToken.js";
+import { defineConfig, loadEnv } from "vite"
+import react from "@vitejs/plugin-react"
+import path from "path"
+import { fileURLToPath } from "url"
+import livekitDevToken from "./plugins/livekitDevToken.js"
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // Load .env.development.local vars into process.env (for server-side plugins)
-  const env = loadEnv(mode, process.cwd(), "");
-  Object.assign(process.env, env);
+  const env = loadEnv(mode, process.cwd(), "")
+  Object.assign(process.env, env)
 
   return {
     plugins: [react()],
@@ -45,6 +45,12 @@ export default defineConfig(({ mode }) => {
           // secure: true,
           secure: false,
         },
+        "/hubs/social": {
+          target: "https://social-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
         "/hubs": {
           target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
@@ -52,6 +58,7 @@ export default defineConfig(({ mode }) => {
           secure: false,
           ws: true,
         },
+
         "/r2": {
           target:
             "https://3bef3ed6d4d479f38c51000461eeaa0f.r2.cloudflarestorage.com",
@@ -103,5 +110,5 @@ export default defineConfig(({ mode }) => {
     // esbuild: {
     //   drop: mode === "production" ? ["console", "debugger"] : [],
     // },
-  };
-});
+  }
+})

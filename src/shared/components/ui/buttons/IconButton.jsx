@@ -4,7 +4,7 @@ const IconButton = ({
   children,
   onClick,
   disabled = false,
-  variant = "filled", // "filled" | "ghost"
+  variant = "filled", // "filled" | "ghost" | "primary"
   size = "sm", // "sm" | "md"
   className = "",
   ...props
@@ -21,6 +21,7 @@ const IconButton = ({
   }
 
   const variantClasses = {
+    primary: "bg-[#990011] group-hover:bg-[#80000e] text-white",
     filled: "bg-[#F2F2F2] group-hover:bg-[#C2C2C2]",
     ghost: "bg-transparent group-hover:bg-[#CCCCCC]",
     transparent: "bg-transparent",

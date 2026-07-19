@@ -90,3 +90,40 @@ export const calculateEndDate = (startDate, durationMinutes) => {
   if (isNaN(start.getTime())) return new Date()
   return new Date(start.getTime() + durationMinutes * 60000)
 }
+
+/**
+ * Format a date/timestamp to a short relative time string suitable for chat lists (e.g. Just now, 5m, 2h, Yesterday, Tue, Jul 18).
+ * @param {Date|string|number} timestamp - Date object, ISO string, or timestamp
+ * @returns {string} Formatted short relative time string
+ */
+export const formatRelativeTime = (timestamp) => {
+  if (!timestamp) return ""
+  const date = new Date(timestamp)
+  const diffMs = Date.now() - date.getTime()
+  const diffMins = Math.floor(diffMs / (60 * 1000))
+  const diffHours = Math.floor(diffMs / (60 * 60 * 1000))
+  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000))
+
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m`
+  if (diffHours < 24) return `${diffHours}h`
+  if (diffDays === 1) return "Yesterday"
+  if (diffDays < 7)
+    return date.toLocaleDateString(undefined, { weekday: "short" })
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+}
+
+/**
+ * Format a date to a full readable string containing weekday, month, day, and year.
+ * @param {Date|string|number} timestamp - Date object, ISO string, or timestamp
+ * @returns {string} Formatted date separator string
+ */
+export const formatDateSeparator = (timestamp) => {
+  const date = new Date(timestamp)
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  })
+}

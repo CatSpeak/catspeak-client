@@ -1,5 +1,9 @@
-import { useRef, useCallback } from "react"
-import { Paperclip, Smile, Send, Mic } from "lucide-react"
+import { useState, useRef, useCallback, useEffect } from "react"
+import { Paperclip, Smile, Send } from "lucide-react"
+import { IconButton } from "@/shared/components/ui/buttons"
+import Popover from "@/shared/components/ui/Popover"
+import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
+import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
 
 /**
  * ChatInput — message input bar with auto-resizing textarea.
@@ -15,9 +19,25 @@ import { Paperclip, Smile, Send, Mic } from "lucide-react"
  * @param {function} onSend  - Send handler
  * @param {boolean}  disabled - Whether input is disabled
  */
-const ChatInput = ({ value, onChange, onSend, disabled = false }) => {
+const ChatInput = ({
+  value,
+  onChange,
+  onSend,
+  disabled = false,
+  showLeftIcon = false, // temporarily default to false since image sending is not supported in chat
+  showRightIcons = true,
+}) => {
   const textareaRef = useRef(null)
   const hasContent = value.trim().length > 0
+  const [isMultiline, setIsMultiline] = useState(false)
+  const { insertEmoji, addRecent } = useEmojiPicker()
+
+  // Reset multiline status when value is cleared
+  useEffect(() => {
+    if (value === "") {
+      setIsMultiline(false)
+    }
+  }, [value])
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -29,80 +49,114 @@ const ChatInput = ({ value, onChange, onSend, disabled = false }) => {
     [hasContent, onSend],
   )
 
-  const handleInput = useCallback(() => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = "auto"
-    el.style.height = Math.min(el.scrollHeight, 120) + "px"
-  }, [])
-
   const handleChange = useCallback(
     (e) => {
-      onChange(e.target.value)
-      handleInput()
+      const val = e.target.value
+      onChange(val)
+
+      if (!isMultiline) {
+        const sh = e.target.scrollHeight
+        if (sh > 36 || val.includes("\n")) {
+          setIsMultiline(true)
+        }
+      }
     },
-    [onChange, handleInput],
+    [onChange, isMultiline],
   )
 
   const handleSend = useCallback(() => {
     if (!hasContent) return
     onSend()
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto"
-    }
   }, [hasContent, onSend])
 
   return (
-    <div className="px-4 py-3 border-t border-[#E5E5E5] bg-white">
-      <div className="flex items-end gap-2">
+    <div className="px-4 py-2 border-t border-[#E5E5E5] bg-white">
+      <div
+        onClick={() => textareaRef.current?.focus()}
+        className={`w-full grid grid-cols-[auto_1fr_auto] border border-[#e5e5e5] focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${
+          isMultiline
+            ? "pb-[3px] pt-3 min-h-[110px] gap-y-2"
+            : "items-center h-14"
+        } ${showLeftIcon ? "pl-1" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}
+      >
         {/* Attachment button */}
-        <button
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#606060] hover:bg-[#F2F2F2] transition-colors"
-          aria-label="Attach file"
-        >
-          <Paperclip size={20} />
-        </button>
+        {showLeftIcon && (
+          <IconButton
+            variant="ghost"
+            aria-label="Attach file"
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+            className={`shrink-0 ${
+              isMultiline ? "col-start-1 row-start-2" : "col-start-1 row-start-1"
+            }`}
+          >
+            <Paperclip />
+          </IconButton>
+        )}
 
-        {/* Input container */}
-        <div className="flex-1 flex items-end bg-[#F2F2F2] rounded-2xl px-4 py-2 min-h-[40px] transition-colors focus-within:bg-[#EBEBEB]">
+        {/* Textarea Wrapper */}
+        <div
+          className={`h-full ${
+            isMultiline
+              ? "col-span-3 col-start-1 row-start-1 px-3"
+              : "col-start-2 row-start-1 flex items-center px-1"
+          }`}
+        >
           <textarea
             ref={textareaRef}
-            className="chat-textarea flex-1 bg-transparent text-[14px] text-[#1A1A1A] placeholder-[#9CA0AB]"
+            className={`bg-transparent placeholder-[#606060] resize-none focus:outline-none w-full ${
+              isMultiline
+                ? "overflow-y-auto pr-4 pt-1"
+                : "overflow-y-hidden py-1"
+            }`}
             placeholder="Type a message..."
             value={value}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            rows={1}
+            rows={isMultiline ? 5 : 1}
           />
         </div>
 
-        {/* Emoji button */}
-        <button
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#606060] hover:bg-[#F2F2F2] transition-colors"
-          aria-label="Emoji"
-        >
-          <Smile size={20} />
-        </button>
+        {/* Right buttons */}
+        {showRightIcons && (
+          <div
+            className={`flex items-center h-12 ${
+              isMultiline ? "col-start-3 row-start-2" : "col-start-3 row-start-1"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Emoji button */}
+            <Popover
+              placement="top-right"
+              trigger={
+                <IconButton variant="ghost" aria-label="Emoji" type="button">
+                  <Smile />
+                </IconButton>
+              }
+              content={(close) => (
+                <EmojiPickerWrapper
+                  onSelect={(emoji) => {
+                    insertEmoji(emoji, textareaRef, value, onChange)
+                    addRecent(emoji)
+                    close()
+                  }}
+                />
+              )}
+            />
 
-        {/* Send / Mic button */}
-        <button
-          onClick={handleSend}
-          disabled={disabled}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
-            hasContent
-              ? "bg-[#990011] text-white hover:brightness-90 shadow-sm"
-              : "text-[#606060] hover:bg-[#F2F2F2]"
-          }`}
-          aria-label={hasContent ? "Send message" : "Voice message"}
-        >
-          {hasContent ? (
-            <Send size={17} className="translate-x-[1px]" />
-          ) : (
-            <Mic size={20} />
-          )}
-        </button>
+            {/* Send button */}
+            <IconButton
+              onClick={handleSend}
+              disabled={disabled || !hasContent}
+              variant={hasContent ? "primary" : "ghost"}
+              aria-label="Send message"
+            >
+              <Send className="-translate-x-[1px] translate-y-[1px]" />
+            </IconButton>
+          </div>
+        )}
       </div>
     </div>
   )

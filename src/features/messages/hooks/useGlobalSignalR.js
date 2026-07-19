@@ -48,8 +48,9 @@ export const useGlobalSignalR = () => {
           )
         }
 
+        const isChatPageOpen = window.location.pathname.endsWith("/chat")
         const isViewingConversation =
-          isWidgetOpen &&
+          (isWidgetOpen || isChatPageOpen) &&
           activeConversationId &&
           Number(conversationId) === Number(activeConversationId)
 

@@ -1,45 +1,47 @@
 import { useState, useMemo, memo } from "react"
-import { Search, SquarePen, Pin, Users, BellOff } from "lucide-react"
-import {
-  getConversationName,
-  getOtherUser,
-  formatRelativeTime,
-  getUserColor,
-} from "../data/chatMockData"
+import { SquarePen, Users, BellOff } from "lucide-react"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import FluentCard from "@/shared/components/ui/FluentCard"
+import { IconButton } from "@/shared/components/ui/buttons"
+import ListItem from "@/shared/components/ui/ListItem"
+import Avatar from "@/shared/components/ui/Avatar"
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { formatRelativeTime } from "@/shared/utils/dateFormatter"
+import Skeleton from "@/shared/components/ui/indicators/Skeleton"
+
+// ── Utility Helpers ───────────────────────────────────────
 
 /**
  * GroupAvatar — stacked initials for group conversations.
  */
-const GroupAvatar = ({ conversation, usersMap, size = 48 }) => {
-  const otherIds = conversation.participants.filter((id) => id !== "me")
-  const first = usersMap[otherIds[0]]
-  const second = usersMap[otherIds[1]]
+const GroupAvatar = ({ conversation, size = 48 }) => {
+  const participants = conversation.participants || []
+  // Show initials of up to 2 other participants
+  const first = participants[0]
+  const second = participants[1]
   const smallSize = Math.round(size * 0.62)
+
+  const themeFirst = getParticipantTheme(
+    first?.accountId || first?.username || "",
+  )
+  const themeSecond = getParticipantTheme(
+    second?.accountId || second?.username || "",
+  )
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <div
-        className="chat-group-avatar-first flex items-center justify-center rounded-full text-white font-semibold border-2 border-white"
-        style={{
-          width: smallSize,
-          height: smallSize,
-          fontSize: Math.round(smallSize * 0.38),
-          backgroundColor: getUserColor(first?.id || ""),
-        }}
-      >
-        {first?.name?.charAt(0) || "?"}
-      </div>
-      <div
-        className="chat-group-avatar-second flex items-center justify-center rounded-full text-white font-semibold border-2 border-white"
-        style={{
-          width: smallSize,
-          height: smallSize,
-          fontSize: Math.round(smallSize * 0.38),
-          backgroundColor: getUserColor(second?.id || ""),
-        }}
-      >
-        {second?.name?.charAt(0) || "?"}
-      </div>
+      <Avatar
+        size={smallSize}
+        name={first?.username}
+        src={first?.avatarImageUrl}
+        className={`absolute top-0 left-0 z-[1] border-2 border-white ${themeFirst.avatarClass}`}
+      />
+      <Avatar
+        size={smallSize}
+        name={second?.username}
+        src={second?.avatarImageUrl}
+        className={`absolute bottom-0 right-0 z-[2] border-2 border-white ${themeSecond.avatarClass}`}
+      />
     </div>
   )
 }
@@ -48,111 +50,99 @@ const GroupAvatar = ({ conversation, usersMap, size = 48 }) => {
  * ConversationItem — single row in the conversation list.
  */
 const ConversationItem = memo(
-  ({ conversation, usersMap, currentUser, messagesMap, isSelected, onClick }) => {
-    const isGroup = conversation.type === "group"
-    const otherUser = getOtherUser(conversation, usersMap)
-    const name = getConversationName(conversation, usersMap)
-    const lastMsg = messagesMap[conversation.id]?.slice(-1)[0]
-    const isOnline = otherUser?.status === "online"
+  ({ conversation, currentUser, friendOnlineStatus, isSelected, onClick }) => {
+    const isGroup = conversation.isGroup
+    const name = isGroup
+      ? conversation.groupName
+      : conversation.friend?.username || "Chat User"
+
+    // Check online status of friend in 1:1 conversation
+    const isOnline =
+      !isGroup && !!friendOnlineStatus[conversation.friend?.accountId]
     const hasUnread = conversation.unreadCount > 0
 
     // Last message preview
     let preview = ""
-    if (lastMsg) {
-      const senderPrefix =
-        lastMsg.senderId === "me"
-          ? "You: "
-          : isGroup
-            ? `${usersMap[lastMsg.senderId]?.name?.split(" ")[0] || "?"}: `
-            : ""
-      preview = senderPrefix + lastMsg.content
+    if (conversation.lastMessage) {
+      let senderPrefix = ""
+      if (conversation.lastMessageSenderId === currentUser.id) {
+        senderPrefix = "You: "
+      } else if (isGroup && conversation.participants) {
+        const sender = conversation.participants.find(
+          (p) => p.accountId === conversation.lastMessageSenderId,
+        )
+        if (sender) {
+          senderPrefix = `${sender.username?.split(" ")[0] || "?"}: `
+        }
+      }
+      preview = senderPrefix + conversation.lastMessage
     }
 
-    return (
-      <button
-        onClick={onClick}
-        className={`group w-full flex items-center gap-3 px-4 py-2.5 transition-all duration-150 rounded-xl mx-1 ${
-          isSelected
-            ? "bg-[#990011]/[0.06]"
-            : "hover:bg-[#F8F8F8]"
-        }`}
-        style={{ width: "calc(100% - 8px)" }}
-      >
-        {/* Avatar */}
-        <div className="relative shrink-0">
-          {isGroup ? (
-            <GroupAvatar
-              conversation={conversation}
-              usersMap={usersMap}
-              size={48}
-            />
-          ) : (
-            <>
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold text-white"
-                style={{
-                  backgroundColor: getUserColor(otherUser?.id || ""),
-                }}
-              >
-                {otherUser?.name?.charAt(0)?.toUpperCase() || "?"}
-              </div>
-              {/* Online dot */}
-              {isOnline && (
-                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#22C55E] rounded-full border-[2.5px] border-white" />
-              )}
-            </>
-          )}
-        </div>
+    const friendTheme = getParticipantTheme(
+      conversation.friend?.accountId || conversation.friend?.username || "",
+    )
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 text-left">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span
-                className={`text-[14px] truncate ${
-                  hasUnread
-                    ? "font-semibold text-[#1A1A1A]"
-                    : "font-medium text-[#1A1A1A]"
-                }`}
-              >
-                {name}
-              </span>
-              {conversation.muted && (
-                <BellOff size={12} className="shrink-0 text-[#9CA0AB]" />
-              )}
-            </div>
-            <span className="text-[11px] text-[#9CA0AB] shrink-0">
-              {formatRelativeTime(lastMsg?.timestamp)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between gap-2 mt-0.5">
-            <span
-              className={`text-[13px] truncate ${
-                hasUnread
-                  ? "text-[#1A1A1A] font-medium"
-                  : "text-[#606060]"
-              }`}
-            >
-              {preview || "No messages yet"}
-            </span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {conversation.pinned && (
-                <Pin
-                  size={12}
-                  className="text-[#9CA0AB] rotate-45"
-                />
-              )}
-              {hasUnread && (
-                <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#990011] px-1.5 text-[11px] text-white font-semibold">
-                  {conversation.unreadCount > 99
-                    ? "99+"
-                    : conversation.unreadCount}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </button>
+    const leftContent = (
+      <div className="relative shrink-0">
+        {isGroup ? (
+          <GroupAvatar conversation={conversation} size={40} />
+        ) : (
+          <>
+            <Avatar
+              size={40}
+              name={conversation.friend?.username}
+              src={conversation.friend?.avatarImageUrl}
+              className={friendTheme.avatarClass}
+            />
+            {/* Online dot */}
+            {isOnline && (
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#22C55E] rounded-full border-[2.5px] border-white" />
+            )}
+          </>
+        )}
+      </div>
+    )
+
+    const rightContent = (
+      <div className="flex flex-col items-end gap-1 justify-center">
+        <span className="text-xs text-[#606060]">
+          {formatRelativeTime(
+            conversation.lastMessageTime || conversation.createDate,
+          )}
+        </span>
+        {hasUnread ? (
+          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#990011] px-1.5 text-xs text-white">
+            {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
+          </span>
+        ) : (
+          <div className="h-5" />
+        )}
+      </div>
+    )
+
+    return (
+      <ListItem
+        onClick={onClick}
+        hoverEffect={!isSelected}
+        className={`rounded-xl ${isSelected ? "bg-primary2" : ""}`}
+        contentClassName="rounded-xl"
+        lines={2}
+        leftContent={leftContent}
+        rightContent={rightContent}
+      >
+        <span
+          className={`truncate ${hasUnread ? "font-semibold" : "font-medium"}`}
+        >
+          {name}
+        </span>
+        <span
+          className={`text-sm truncate ${
+            hasUnread ? "font-medium" : "text-[#606060]"
+          }`}
+        >
+          {preview || "No messages yet"}
+        </span>
+      </ListItem>
     )
   },
 )
@@ -167,25 +157,17 @@ const FILTERS = [
 
 /**
  * ChatSidebar — left panel with search, filters, and conversation list.
- *
- * @param {Array}    conversations - All conversations
- * @param {object}   users         - Users map
- * @param {object}   currentUser   - Current user
- * @param {object}   messagesMap   - Messages keyed by conversation ID
- * @param {string}   selectedId    - Currently selected conversation ID
- * @param {function} onSelect      - Conversation select handler
- * @param {string}   searchQuery   - Search input value
- * @param {function} onSearchChange - Search change handler
  */
 const ChatSidebar = ({
   conversations,
-  users: usersMap,
   currentUser,
-  messagesMap,
+  friendOnlineStatus,
   selectedId,
   onSelect,
   searchQuery,
   onSearchChange,
+  onNewChatClick,
+  isLoading,
 }) => {
   const [filter, setFilter] = useState("all")
 
@@ -195,99 +177,94 @@ const ChatSidebar = ({
 
     // Apply filter
     if (filter === "unread") result = result.filter((c) => c.unreadCount > 0)
-    if (filter === "groups") result = result.filter((c) => c.type === "group")
+    if (filter === "groups") result = result.filter((c) => c.isGroup)
 
     // Apply search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       result = result.filter((c) => {
-        const name = getConversationName(c, usersMap)
+        const name = c.isGroup ? c.groupName : c.friend?.username || "Chat User"
         return name.toLowerCase().includes(q)
       })
     }
 
-    // Sort: pinned first, then by latest message timestamp
+    // Sort: latest message timestamp
     result.sort((a, b) => {
-      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
-      const aTime = messagesMap[a.id]?.slice(-1)[0]?.timestamp || ""
-      const bTime = messagesMap[b.id]?.slice(-1)[0]?.timestamp || ""
+      const aTime = a.lastMessageTime || a.createDate || ""
+      const bTime = b.lastMessageTime || b.createDate || ""
       return new Date(bTime) - new Date(aTime)
     })
 
     return result
-  }, [conversations, filter, searchQuery, usersMap, messagesMap])
+  }, [conversations, filter, searchQuery])
 
   return (
-    <div className="w-full md:w-[360px] lg:w-[380px] h-full flex flex-col border-r border-[#E5E5E5] bg-white shrink-0">
+    <FluentCard padding="p-0" className="w-full h-full flex-1 overflow-hidden">
       {/* ── Header ───────────────────────────────────── */}
-      <div className="px-5 pt-5 pb-2">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-[22px] font-bold text-[#1A1A1A] tracking-tight">
-            Chats
-          </h1>
-          <button
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#606060] hover:bg-[#F2F2F2] transition-colors"
-            aria-label="New conversation"
+      <div className="flex flex-col gap-4 p-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">Chats</h1>
+          <IconButton
+            onClick={onNewChatClick}
+            size="sm"
+            variant="transparent"
+            className="text-[#606060] hover:bg-[#F2F2F2]"
+            aria-label="New chat or group"
           >
             <SquarePen size={20} />
-          </button>
+          </IconButton>
         </div>
 
         {/* ── Search ───────────────────────────────── */}
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA0AB] pointer-events-none"
-          />
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            className="w-full h-9 pl-9 pr-3 rounded-full bg-[#F2F2F2] text-[13px] text-[#1A1A1A] outline-none placeholder-[#9CA0AB] transition-colors focus:bg-[#EBEBEB] focus:ring-1 focus:ring-[#990011]/20"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* ── Filter tabs ──────────────────────────────── */}
-      <div className="flex gap-1 px-5 pb-2 pt-1">
-        {FILTERS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={`px-3 py-1 text-[12px] font-medium rounded-full transition-all duration-150 ${
-              filter === key
-                ? "bg-[#990011]/10 text-[#990011]"
-                : "text-[#606060] hover:bg-[#F2F2F2]"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+        <SearchInput
+          placeholder="Search conversations..."
+          value={searchQuery}
+          onChange={onSearchChange}
+        />
       </div>
 
       {/* ── Conversation list ────────────────────────── */}
-      <div className="flex-1 overflow-y-auto chat-scrollbar px-1 pb-2">
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-[#9CA0AB]">
-            <Users size={32} strokeWidth={1.5} />
+      <div className="flex-1 overflow-y-auto p-1 flex flex-col gap-1 w-0 min-w-full">
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, idx) => (
+            <ListItem
+              key={idx}
+              lines={2}
+              leftContent={<Skeleton className="w-10 h-10 rounded-full" />}
+              rightContent={
+                <div className="flex flex-col items-end gap-2 justify-center">
+                  <Skeleton className="h-3 w-8" />
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                </div>
+              }
+              contentClassName="rounded-xl"
+              className="rounded-xl"
+            >
+              <div className="flex flex-col gap-1.5 text-left">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-36" />
+              </div>
+            </ListItem>
+          ))
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-[#606060]">
+            <Users />
             <p className="mt-2 text-sm">No conversations found</p>
           </div>
         ) : (
           filtered.map((conv) => (
             <ConversationItem
-              key={conv.id}
+              key={conv.conversationId}
               conversation={conv}
-              usersMap={usersMap}
               currentUser={currentUser}
-              messagesMap={messagesMap}
-              isSelected={selectedId === conv.id}
-              onClick={() => onSelect(conv.id)}
+              friendOnlineStatus={friendOnlineStatus}
+              isSelected={selectedId === conv.conversationId}
+              onClick={() => onSelect(conv.conversationId)}
             />
           ))
         )}
       </div>
-    </div>
+    </FluentCard>
   )
 }
 

@@ -9,16 +9,6 @@ export const conversationsApi = socialApi.injectEndpoints({
       providesTags: ["Conversations"],
     }),
 
-    // Create a new conversation (legacy)
-    createConversation: builder.mutation({
-      query: (conversationData) => ({
-        url: "/conversations",
-        method: "POST",
-        body: conversationData,
-      }),
-      invalidatesTags: ["Conversations"],
-    }),
-
     // Create a private conversation
     createPrivateConversation: builder.mutation({
       query: (targetAccountId) => ({
@@ -43,7 +33,8 @@ export const conversationsApi = socialApi.injectEndpoints({
     getConversationMessages: builder.query({
       query: (conversationId) => `/conversations/${conversationId}/messages`,
       providesTags: (result, error, conversationId) => [
-        { type: "Messages", id: conversationId },
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
       ],
     }),
 
@@ -55,7 +46,8 @@ export const conversationsApi = socialApi.injectEndpoints({
         body: messageData,
       }),
       invalidatesTags: (result, error, { conversationId }) => [
-        { type: "Messages", id: conversationId },
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
       ],
     }),
 
@@ -66,16 +58,52 @@ export const conversationsApi = socialApi.injectEndpoints({
         method: "PUT",
       }),
     }),
+
+    // Add new participants to a group conversation
+    addParticipants: builder.mutation({
+      query: ({ conversationId, accountIds }) => ({
+        url: `/conversations/${conversationId}/participants`,
+        method: "POST",
+        body: accountIds,
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        "Conversations",
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+      ],
+    }),
+
+    // Remove a participant from a group conversation or leave the group
+    removeParticipant: builder.mutation({
+      query: ({ conversationId, accountId }) => ({
+        url: `/conversations/${conversationId}/participants/${accountId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        "Conversations",
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+      ],
+    }),
+
+    // Get list of available support staff members
+    getSupportStaff: builder.query({
+      query: () => "/conversations/staff",
+      providesTags: ["Conversations"],
+    }),
   }),
 })
 
 // Export hooks for usage in components
 export const {
   useGetConversationsQuery,
-  useCreateConversationMutation,
   useCreatePrivateConversationMutation,
   useCreateGroupConversationMutation,
   useGetConversationMessagesQuery,
   useSendMessageMutation,
   useMarkConversationAsReadMutation,
+  useAddParticipantsMutation,
+  useRemoveParticipantMutation,
+  useGetSupportStaffQuery,
 } = conversationsApi
+

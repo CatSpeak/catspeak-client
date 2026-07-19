@@ -112,10 +112,17 @@ export default {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-10deg) scale(1.1)' },
           '50%': { transform: 'rotate(10deg) scale(1.1)' },
+        },
+        'chat-bubble-in': {
+          '0%': { opacity: '0', transform: 'scale(0.2, 0.4) translateY(30px)' },
+          '40%': { transform: 'scale(1.15, 0.8) translateY(-10px)' },
+          '75%': { transform: 'scale(0.95, 1.15) translateY(-2px)' },
+          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
         }
       },
       animation: {
         wiggle: 'wiggle 0.3s ease-in-out infinite',
+        'chat-bubble-in': 'chat-bubble-in 0.45s cubic-bezier(0.25, 1, 0.5, 1) both',
       }
     },
   },

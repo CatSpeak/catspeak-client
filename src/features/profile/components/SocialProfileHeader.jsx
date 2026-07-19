@@ -104,26 +104,41 @@ const SocialProfileHeader = ({
           )
       }
     } else {
-      sendFriendRequest(targetAccountId)
-        .unwrap()
-        .then(() =>
-          toast.success(
-            t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-          ),
-        )
-        .catch((err) => {
-          if (err?.status === 422) {
-            toast.error(
-              t.profile?.social?.requestPending ||
-                "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-            )
-          } else {
-            toast.error(
-              t.profile?.social?.requestError ||
-                "Không thể gửi yêu cầu kết bạn",
-            )
-          }
-        })
+      const performSend = () => {
+        sendFriendRequest(targetAccountId)
+          .unwrap()
+          .then(() =>
+            toast.success(
+              t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+            ),
+          )
+          .catch((err) => {
+            if (err?.status === 422) {
+              toast.error(
+                t.profile?.social?.requestPending ||
+                  "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+              )
+            } else {
+              toast.error(
+                t.profile?.social?.requestError ||
+                  "Không thể gửi yêu cầu kết bạn",
+              )
+            }
+          })
+      }
+
+      if (status?.friendshipId) {
+        deleteFriendship(status.friendshipId)
+          .unwrap()
+          .then(() => {
+            performSend()
+          })
+          .catch(() => {
+            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra")
+          })
+      } else {
+        performSend()
+      }
     }
   }
 

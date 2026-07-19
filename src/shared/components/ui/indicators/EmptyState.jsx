@@ -8,7 +8,9 @@ const EmptyState = ({
 }) => {
   if (variant === "detailed" || Icon) {
     return (
-      <div className={`flex flex-col items-center justify-center py-20 text-[#606060] ${className}`}>
+      <div
+        className={`flex flex-col items-center justify-center py-20 text-[#606060] ${className}`}
+      >
         {Icon && <Icon className="w-16 h-16 mb-3 text-[#606060]" />}
         <p className="font-medium">{message}</p>
       </div>

@@ -1,7 +1,16 @@
 import { memo } from "react"
-import { Check, CheckCheck } from "lucide-react"
 import { formatTime } from "@/shared/utils/dateFormatter"
-import { getUserColor } from "../data/chatMockData"
+import Avatar from "@/shared/components/ui/Avatar"
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+
+// Matches strings that contain ONLY 1 to 3 emoji characters (optionally separated by spaces)
+const EMOJI_ONLY_REGEX = /^(?:(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(?:\s*(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)){0,2})$/u
+
+const isEmojiOnly = (text) => {
+  if (!text) return false
+  return EMOJI_ONLY_REGEX.test(text.trim())
+}
+
 
 /**
  * ChatBubble — individual message bubble.
@@ -23,93 +32,71 @@ const ChatBubble = ({
   isLastInGroup,
   sender,
   isGroupChat,
+  shouldAnimate = false,
 }) => {
-  const initial = sender?.name?.charAt(0)?.toUpperCase() || "?"
+  const isEmoji = isEmojiOnly(message.content)
 
-  // Bubble corner radius — mimics Messenger-style connected bubbles
-  const ownCorners = isLastInGroup
-    ? "rounded-2xl rounded-br-md"
-    : "rounded-2xl rounded-r-md"
+  const bubbleClasses = isEmoji
+    ? "bg-transparent text-4xl min-h-0 min-w-0 flex items-center"
+    : `${
+        isOwn
+          ? "rounded-2xl bg-[#990011] text-white"
+          : "rounded-2xl bg-[#F2F2F2]"
+      } px-4 py-3 min-h-[40px] flex items-center min-w-[60px]`
 
-  const otherCorners = isLastInGroup
-    ? "rounded-2xl rounded-bl-md"
-    : "rounded-2xl rounded-l-md"
-
-  const bubbleClasses = isOwn
-    ? `${ownCorners} bg-[#990011] text-white`
-    : `${otherCorners} bg-[#F2F2F2] text-[#1A1A1A]`
 
   // Spacing between groups
   const marginTop = isFirstInGroup ? "mt-3" : "mt-0.5"
 
+  const animationClass = shouldAnimate ? "animate-chat-bubble-in" : ""
+
   return (
-    <div className={`chat-bubble-enter ${marginTop}`}>
+    <div
+      className={`${marginTop} flex flex-col gap-1 ${
+        isOwn ? "items-end" : "items-start"
+      }`}
+    >
+      {/* Header with Sender Name + Timestamp */}
+      {isFirstInGroup && (
+        <div
+          className={`flex items-baseline gap-1 text-sm ${isOwn ? "" : "pl-[44px]"}`}
+        >
+          <span className="font-semibold">{isOwn ? "You" : sender?.name}</span>
+
+          <span className="text-xs text-[#606060]">
+            {formatTime(message.timestamp)}
+          </span>
+        </div>
+      )}
+
       <div
-        className={`flex ${isOwn ? "justify-end" : "justify-start"} items-end gap-2`}
+        className={`${animationClass} flex ${
+          isOwn ? "justify-end origin-bottom-right" : "justify-start origin-bottom-left"
+        } items-end gap-2 w-full`}
       >
         {/* Avatar slot for received messages */}
         {!isOwn && (
-          <div className="w-8 shrink-0">
+          <div className="w-9 shrink-0">
             {isLastInGroup && (
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-                style={{ backgroundColor: getUserColor(sender?.id || "") }}
-              >
-                {initial}
-              </div>
+              <Avatar
+                size={36}
+                name={sender?.name}
+                src={sender?.avatar}
+                className={
+                  getParticipantTheme(sender?.id || sender?.name || "")
+                    .avatarClass
+                }
+              />
             )}
           </div>
         )}
 
         {/* Bubble */}
-        <div className={`max-w-[70%] min-w-[60px] ${bubbleClasses} px-3 py-2`}>
-          {/* Sender name in group chats */}
-          {isGroupChat && !isOwn && isFirstInGroup && (
-            <p
-              className="text-xs font-semibold mb-0.5"
-              style={{ color: getUserColor(sender?.id || "") }}
-            >
-              {sender?.name}
-            </p>
-          )}
-
+        <div className={`max-w-[70%] ${bubbleClasses}`}>
           {/* Content */}
-          <p className="text-[14px] leading-relaxed whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
-
-          {/* Timestamp + read receipts */}
-          <div
-            className={`flex items-center gap-1 mt-1 ${
-              isOwn ? "justify-end" : "justify-start"
-            }`}
-          >
-            <span
-              className={`text-[10px] leading-none ${
-                isOwn ? "text-white/60" : "text-[#9CA0AB]"
-              }`}
-            >
-              {formatTime(message.timestamp)}
-            </span>
-            {isOwn && (
-              <span className="flex items-center">
-                {message.status === "read" ? (
-                  <CheckCheck
-                    size={13}
-                    className="text-white/70"
-                    strokeWidth={2.5}
-                  />
-                ) : (
-                  <Check
-                    size={13}
-                    className="text-white/50"
-                    strokeWidth={2.5}
-                  />
-                )}
-              </span>
-            )}
-          </div>
+          <p className="whitespace-pre-wrap break-words">{message.content}</p>
         </div>
+
       </div>
     </div>
   )
