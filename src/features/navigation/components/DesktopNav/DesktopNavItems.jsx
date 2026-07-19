@@ -5,7 +5,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "./DesktopNavItem"
 import DesktopNavDropdown from "./DesktopNavDropdown"
 import DesktopNavSubItem from "./DesktopNavSubItem"
-import { navLinks, footerLinks } from "../../config/navigation"
+import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
@@ -35,7 +35,7 @@ const DesktopNavItems = () => {
       <div
         className={`flex-1 flex flex-col gap-1 px-4 ${isDesktopSidebarDocked ? "overflow-visible" : "overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200"}`}
       >
-        {navLinks
+        {(pathname.startsWith("/setting") ? settingNavLinks : navLinks)
           .filter((item) => !item.hideInSidebar)
           .map((item) => {
             // Use key mapping for translations, falling back to capitalized key if not found

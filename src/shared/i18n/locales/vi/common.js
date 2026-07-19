@@ -47,7 +47,7 @@ export default {
     myCourses: "Khóa học của tôi",
     myLearning: "Góc học tập",
     messages: "Tin nhắn",
-    settings: "Thiết lập",
+    settings: "Cài đặt",
     help: "Trợ giúp",
     connect: "Cá nhân",
     workspace: "Nhà của bạn",
@@ -56,8 +56,11 @@ export default {
     personalInfo: "Thông tin cá nhân",
     instructor: "Giảng viên",
     organization: "Tổ chức",
-    billing: "Thanh toán",
+    billing: "Lịch sử thanh toán",
     recordings: "Bản ghi hình",
+    back: "Quay lại",
+    accountInfo: "Thông tin tài khoản",
+    systemConfig: "Thiết lập hệ thống",
   },
   comingSoon: {
     badge: "Sắp ra mắt",
@@ -69,4 +72,10 @@ export default {
     thankYou: "Cảm ơn bạn đã kiên nhẫn chờ đợi! ^^",
   },
   noOptionsFound: "Không tìm thấy lựa chọn nào",
+  pagination: {
+    page: "Trang",
+    of: "trên",
+    prevPage: "Trang trước",
+    nextPage: "Trang tiếp",
+  },
 }

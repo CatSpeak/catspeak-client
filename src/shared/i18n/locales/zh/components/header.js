@@ -1,5 +1,6 @@
 export default {
   profile: "个人信息",
+  personalPage: "个人主页",
   settings: "设置",
   logout: "登出",
   soon: "敬请期待",

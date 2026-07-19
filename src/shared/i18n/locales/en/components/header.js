@@ -1,5 +1,6 @@
 export default {
   profile: "Profile",
+  personalPage: "My Profile",
   settings: "Settings",
   logout: "Log out",
   soon: "Soon",

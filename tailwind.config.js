@@ -48,6 +48,7 @@ export default {
         secondary: "#606060",
         dusk: "#1a1a2e",
         border: "#e5e5e5",
+        "main-bg": "#f3f3f3",
       },
       width: {
         150: "150px",

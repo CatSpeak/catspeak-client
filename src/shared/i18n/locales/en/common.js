@@ -56,8 +56,11 @@ export default {
     personalInfo: "Personal Info",
     instructor: "Instructor",
     organization: "Organization",
-    billing: "Billing",
+    billing: "Payment History",
     recordings: "Recordings",
+    back: "Back",
+    accountInfo: "Account Info",
+    systemConfig: "System Settings",
   },
   comingSoon: {
     badge: "Coming Soon",
@@ -69,4 +72,10 @@ export default {
     thankYou: "Thank you for your patience! ^^",
   },
   noOptionsFound: "No options found",
+  pagination: {
+    page: "Page",
+    of: "of",
+    prevPage: "Previous page",
+    nextPage: "Next page",
+  },
 };

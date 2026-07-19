@@ -13,22 +13,25 @@ import {
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
 } from "@/store/api/instructorApi";
+import { parsePhoneData } from "@/shared/constants/countriesOptions";
 
-import InstructorEmptyState from "../components/instructor/InstructorEmptyState";
-import InstructorStatusBanner from "../components/instructor/InstructorStatusBanner";
+import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
+import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
 
-import InstructorPersonalInfo from "../components/instructor/InstructorPersonalInfo";
-import InstructorLanguages from "../components/instructor/InstructorLanguages";
-import InstructorIdentity from "../components/instructor/InstructorIdentity";
-import InstructorCredentials from "../components/instructor/InstructorCredentials";
-import InstructorMedia from "../components/instructor/InstructorMedia";
-import InstructorSubmitSection from "../components/instructor/InstructorSubmitSection";
+import InstructorPersonalInfo from "@/features/user/components/instructor/InstructorPersonalInfo";
+import InstructorLanguages from "@/features/user/components/instructor/InstructorLanguages";
+import InstructorIdentity from "@/features/user/components/instructor/InstructorIdentity";
+import InstructorCredentials from "@/features/user/components/instructor/InstructorCredentials";
+import InstructorMedia from "@/features/user/components/instructor/InstructorMedia";
+import InstructorSubmitSection from "@/features/user/components/instructor/InstructorSubmitSection";
+import PageTitle from "@/shared/components/ui/PageTitle";
 
 const INITIAL_FORM_DATA = {
   fullName: "",
   email: "",
   address: "",
   phoneNumber: "",
+  phonePrefix: "+84",
   nationality: "",
   languagesTeach: [],
   nativeLanguage: "English",
@@ -36,7 +39,6 @@ const INITIAL_FORM_DATA = {
   idBackFile: null,
   introduction: "",
   credentials: [],
-  videoFile: null,
 };
 
 /**
@@ -85,7 +87,8 @@ function mapApplicationToFormData(app) {
     fullName: app.fullName || app.FullName || "",
     email: app.email || app.Email || "",
     address: app.address || app.Address || "",
-    phoneNumber: app.phoneNumber || app.PhoneNumber || "",
+    phoneNumber: parsePhoneData(app.phoneNumber || app.PhoneNumber).phoneNumber,
+    phonePrefix: parsePhoneData(app.phoneNumber || app.PhoneNumber).phonePrefix,
     nationality: app.nationality || app.Nationality || "",
     languagesTeach: normalizeLanguagesTeach(
       app.languagesTeach || app.LanguagesTeach,
@@ -197,7 +200,8 @@ const InstructorPage = () => {
         fullName: profile.username || prev.fullName,
         email: profile.email || prev.email,
         address: profile.address || prev.address,
-        phoneNumber: profile.phoneNumber || prev.phoneNumber,
+        phoneNumber: parsePhoneData(profile.phoneNumber || prev.phoneNumber).phoneNumber,
+        phonePrefix: parsePhoneData(profile.phoneNumber || prev.phoneNumber).phonePrefix,
         nationality: profile.country || prev.nationality,
       }));
       setHasPreFilled(true);
@@ -377,7 +381,9 @@ const InstructorPage = () => {
       fullName: formData.fullName,
       email: formData.email,
       address: formData.address,
-      phoneNumber: formData.phoneNumber,
+      phoneNumber: formData.phoneNumber
+          ? `${formData.phonePrefix}${formData.phoneNumber.replace(/^0+/, "")}`
+          : "",
       nationality: formData.nationality,
       languagesTeach: formData.languagesTeach,
       nativeLanguage: formData.nativeLanguage,
@@ -471,7 +477,9 @@ const InstructorPage = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold text-cath-red-700">{ins.title}</h1>
+      <PageTitle>
+        {t.nav?.instructor || "Giảng viên"}
+      </PageTitle>
 
       {/* Status Banner — shown when an application exists */}
       {applicationStatus && (
