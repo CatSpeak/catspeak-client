@@ -40,12 +40,12 @@ const InstructorIdentity = ({ formData, onEdit, readOnly = false, errors = {}, t
   }
 
   return (
-    <FluentCard className="gap-4 !justify-start">
+    <FluentCard className="gap-4 !justify-start h-full min-h-[320px]">
       <h2 className="text-xl font-bold text-gray-900">
         {ins.idCard || "Căn cước công dân"}
       </h2>
       
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         {renderUploadBox(ins.idFront || "Mặt trước", "idFront", formData.idFrontFile, errors.idFrontFile)}
         {renderUploadBox(ins.idBack || "Mặt sau", "idBack", formData.idBackFile, errors.idBackFile)}
       </div>

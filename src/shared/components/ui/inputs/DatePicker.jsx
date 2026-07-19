@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { FluentAnimation } from "@/shared/components/ui/animations";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -22,6 +22,18 @@ const DatePicker = ({
   const [currentViewDate, setCurrentViewDate] = useState(
     value ? dayjs(value).startOf("month") : dayjs().startOf("month"),
   );
+  
+  const [viewMode, setViewMode] = useState("day");
+  const yearListRef = useRef(null);
+
+  useEffect(() => {
+    if (viewMode === "year" && yearListRef.current) {
+      const selectedYearButton = yearListRef.current.querySelector('[data-selected="true"]');
+      if (selectedYearButton) {
+        selectedYearButton.scrollIntoView({ block: "center" });
+      }
+    }
+  }, [viewMode]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -105,6 +117,16 @@ const DatePicker = ({
   const handleNextMonth = (e) => {
     e.stopPropagation();
     setCurrentViewDate(currentViewDate.add(1, "month"));
+  };
+
+  const handlePreviousYear = (e) => {
+    e.stopPropagation();
+    setCurrentViewDate(currentViewDate.subtract(1, "year"));
+  };
+
+  const handleNextYear = (e) => {
+    e.stopPropagation();
+    setCurrentViewDate(currentViewDate.add(1, "year"));
   };
 
   const weekDays =
@@ -198,87 +220,134 @@ const DatePicker = ({
                     >
                       {/* Header with Month Selection and Chevrons */}
                       <div className="flex items-center justify-between mb-4">
-                        <button
-                          type="button"
-                          onClick={handlePreviousMonth}
-                          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={handlePreviousYear}
+                            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                          >
+                            <ChevronsLeft size={18} className="text-gray-600" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handlePreviousMonth}
+                            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                          >
+                            <ChevronLeft size={18} className="text-gray-600" />
+                          </button>
+                        </div>
+                        <div 
+                          className="font-bold text-gray-800 text-[14px] cursor-pointer hover:text-[var(--focus-color)] transition-colors px-2 py-1 rounded-md hover:bg-gray-50"
+                          style={{ "--focus-color": color }}
+                          onClick={() => setViewMode(viewMode === "year" ? "day" : "year")}
                         >
-                          <ChevronLeft size={18} className="text-gray-600" />
-                        </button>
-                        <div className="font-bold text-gray-800 text-[14px]">
                           {language === "en"
                             ? currentViewDate.format("MMMM YYYY")
                             : language === "zh"
                               ? currentViewDate.format("YYYY年 M月")
                               : `Tháng ${currentViewDate.format("M, YYYY")}`}
                         </div>
-                        <button
-                          type="button"
-                          onClick={handleNextMonth}
-                          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
-                        >
-                          <ChevronRight size={18} className="text-gray-600" />
-                        </button>
-                      </div>
-
-                      {/* Weekdays */}
-                      <div className="grid grid-cols-7 gap-1 mb-2 shrink-0">
-                        {weekDays.map((day) => (
-                          <div
-                            key={day}
-                            className="text-center text-[12px] font-bold text-gray-400 pb-2 border-b border-gray-100"
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={handleNextMonth}
+                            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
                           >
-                            {day}
+                            <ChevronRight size={18} className="text-gray-600" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleNextYear}
+                            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                          >
+                            <ChevronsRight size={18} className="text-gray-600" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {viewMode === "day" ? (
+                        <>
+                          {/* Weekdays */}
+                          <div className="grid grid-cols-7 gap-1 mb-2 shrink-0">
+                            {weekDays.map((day) => (
+                              <div
+                                key={day}
+                                className="text-center text-[12px] font-bold text-gray-400 pb-2 border-b border-gray-100"
+                              >
+                                {day}
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Days Grid */}
-                      <div className="grid grid-cols-7 gap-y-2 gap-x-1">
-                        {days.map((item) => {
-                          if (item.isEmpty) {
-                            return <div key={item.key} />;
-                          }
+                          {/* Days Grid */}
+                          <div className="grid grid-cols-7 gap-y-2 gap-x-1">
+                            {days.map((item) => {
+                              if (item.isEmpty) {
+                                return <div key={item.key} />;
+                              }
 
-                          const isSelected =
-                            date &&
-                            item.day === date.date() &&
-                            currentViewDate.month() === date.month() &&
-                            currentViewDate.year() === date.year();
+                              const isSelected =
+                                date &&
+                                item.day === date.date() &&
+                                currentViewDate.month() === date.month() &&
+                                currentViewDate.year() === date.year();
 
-                          // Highlight today optionally
-                          const today = dayjs();
-                          const isToday =
-                            item.day === today.date() &&
-                            currentViewDate.month() === today.month() &&
-                            currentViewDate.year() === today.year();
+                              // Highlight today optionally
+                              const today = dayjs();
+                              const isToday =
+                                item.day === today.date() &&
+                                currentViewDate.month() === today.month() &&
+                                currentViewDate.year() === today.year();
 
-                          return (
+                              return (
+                                <button
+                                  type="button"
+                                  key={item.key}
+                                  onClick={() => handleSelectDate(item.day)}
+                                  className={`
+                              w-8 h-8 flex items-center justify-center text-[13px] rounded-md mx-auto transition-colors font-medium
+                              ${isSelected ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}
+                            `}
+                                  style={{
+                                    ...(isSelected
+                                      ? { backgroundColor: color }
+                                      : {}),
+                                    ...(isToday && !isSelected
+                                      ? {
+                                          border: `1px solid ${color}`,
+                                          color: color,
+                                        }
+                                      : {}),
+                                  }}
+                                >
+                                  {item.day}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      ) : (
+                        <div ref={yearListRef} className="grid grid-cols-3 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                          {Array.from({ length: 150 }, (_, i) => dayjs().year() - 100 + i).map((year) => (
                             <button
+                              key={year}
                               type="button"
-                              key={item.key}
-                              onClick={() => handleSelectDate(item.day)}
-                              className={`
-                          w-8 h-8 flex items-center justify-center text-[13px] rounded-md mx-auto transition-colors font-medium
-                          ${isSelected ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}
-                        `}
-                              style={{
-                                ...(isSelected
-                                  ? { backgroundColor: color }
-                                  : {}),
-                                ...(isToday && !isSelected
-                                  ? {
-                                      border: `1px solid ${color}`,
-                                      color: color,
-                                    }
-                                  : {}),
+                              data-selected={currentViewDate.year() === year}
+                              onClick={() => {
+                                setCurrentViewDate(currentViewDate.year(year));
+                                setViewMode("day");
                               }}
+                              className={`
+                                py-2 flex items-center justify-center text-[13px] rounded-md transition-colors font-medium
+                                ${currentViewDate.year() === year ? "text-white font-bold hover:brightness-90" : "text-gray-700 hover:bg-gray-100"}
+                              `}
+                              style={currentViewDate.year() === year ? { backgroundColor: color } : {}}
                             >
-                              {item.day}
+                              {year}
                             </button>
-                          );
-                        })}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </FluentAnimation>
                   </div>
                 </div>

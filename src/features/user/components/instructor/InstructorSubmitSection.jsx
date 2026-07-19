@@ -18,7 +18,7 @@ const InstructorSubmitSection = ({
   const isDisabled = isSubmitting || disabled;
 
   return (
-    <FluentCard className="sm:flex-row items-center justify-between gap-6 mt-10 mb-32">
+    <FluentCard className="sm:flex-row items-center justify-between gap-6 mb-32">
       {/* Terms */}
       <label id="field-agreed" className="flex items-start gap-3 cursor-pointer group flex-1">
         <Checkbox
