@@ -434,7 +434,7 @@ const ControlBarMoreMenu = ({
                                 onClick={() => setShowMobileSettings(false)}
                                 className="flex items-center gap-2 font-semibold text-base pb-3 border-b border-[#e5e5e5] mb-2"
                               >
-                                <ChevronLeft size={20} /> Quay lại
+                                <ChevronLeft size={20} /> {t?.rooms?.videoCall?.backBtn || "Back"}
                               </button>
 
                               {/* <MenuItem

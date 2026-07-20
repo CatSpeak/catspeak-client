@@ -178,6 +178,7 @@ export default {
     systemMessagesDesc: "显示自动系统消息",
     replyingTo: "回复",
     reply: "回复",
+    aiSuggestion: "来自AI的建议",
   },
   sessionActions: {
     connect11: "连接 1:1",
@@ -318,6 +319,7 @@ export default {
         "录像将保存在 <strong>你的空间 (My Workspace)</strong>。",
       continueBtn: "继续录制",
       confirmBtn: "确认",
+      backBtn: "返回",
     },
     provider: {
       connecting: "正在连接...",

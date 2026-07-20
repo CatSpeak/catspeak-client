@@ -23,7 +23,7 @@ const SwitchCallModal = ({
           <PillButton
             onClick={onCancel}
             variant="secondary"
-            className="h-10 border border-gray-300"
+            className="h-10"
           >
             {cancelText ??
               t.rooms?.videoCall?.provider?.switchCancel ??
