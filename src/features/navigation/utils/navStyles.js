@@ -10,11 +10,18 @@ export const getNavItemClasses = (
   isActive,
   isSubItem = false,
   isDocked = false,
+  isDeepSubItem = false,
 ) => {
   const baseClasses =
-    "relative flex items-center shrink-0 h-12 rounded-lg transition-all duration-300 group overflow-hidden w-full"
+    "relative flex items-center shrink-0 h-11 rounded-lg transition-all duration-300 group overflow-hidden w-full"
 
-  let spacingClasses = isSubItem ? "pl-8 pr-4 gap-3" : "px-4 gap-3"
+  let spacingClasses = "px-4 gap-3"
+  if (isDeepSubItem) {
+    spacingClasses = "pl-11 pr-3 gap-2"
+  } else if (isSubItem) {
+    spacingClasses = "pl-8 pr-3 gap-3"
+  }
+
   if (isDocked) {
     spacingClasses = "justify-center"
   }

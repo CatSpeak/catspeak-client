@@ -1,6 +1,5 @@
 import React, { useEffect } from "react"
-import { useParams } from "react-router-dom"
-import { Home, Settings } from "lucide-react"
+import { Home, Settings, Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "./DesktopNavItem"
 import DesktopNavDropdown from "./DesktopNavDropdown"
@@ -9,11 +8,13 @@ import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { useAuth } from "@/features/auth"
 
-const DesktopNavItems = () => {
+const DesktopNavItems = ({ isHorizontal = false }) => {
   const { t } = useLanguage()
   const { isStudent } = useRoleOverride()
-  const { resolvePath, checkIsActive, pathname } = useActiveLink()
+  const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
+  const { isAuthenticated } = useAuth()
 
   const { openDropdownKeys, setOpenDropdownKeys, isDesktopSidebarDocked } =
     useSidebar()
@@ -36,18 +37,33 @@ const DesktopNavItems = () => {
         className={`flex-1 flex flex-col gap-1 px-4 ${isDesktopSidebarDocked ? "overflow-visible" : "overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200"}`}
       >
         {(pathname.startsWith("/setting") ? settingNavLinks : navLinks)
-          .filter((item) => !item.hideInSidebar)
+          .filter((item) => {
+            if (item.hideInSidebar) return false
+            if (item.lang && item.lang !== currentLang) return false
+            if (isHorizontal && item.showOnHorizontalBar === false) return false
+            if (item.isPrivate && !isAuthenticated) return false
+            return true
+          })
           .map((item) => {
-            // Use key mapping for translations, falling back to capitalized key if not found
-            const label = t.nav?.[item.key] || item.key
-            const IconComponent = item.icon || Home
+            const label = t.nav?.[item.key] || item.label || item.key
+            const IconComponent = item.icon || Globe
 
             if (item.hasDropdown && item.subItems && item.subItems.length > 0) {
+              const filteredSubItems = (item.subItems || []).filter((sub) => {
+                if (sub.key === "myCourses" && isStudent) return false
+                if (sub.lang && sub.lang !== currentLang) return false
+                if (isHorizontal && sub.showOnHorizontalBar === false) return false
+                if (sub.isPrivate && !isAuthenticated) return false
+                return true
+              })
+
               return (
                 <DesktopNavDropdown
                   key={item.key}
                   icon={IconComponent}
                   label={label}
+                  color={item.color}
+                  img={item.img}
                   isOpen={openDropdownKeys.includes(item.key)}
                   onToggle={() => {
                     setOpenDropdownKeys((prev) =>
@@ -58,24 +74,21 @@ const DesktopNavItems = () => {
                   }}
                   isDocked={isDesktopSidebarDocked}
                 >
-                  {(item.subItems || [])
-                    .filter((sub) => {
-                      if (sub.key === "myCourses" && isStudent) return false
-                      return true
-                    })
-                    .map((sub, idx) => {
-                      const subLabel = t.nav?.[sub.key] || sub.key
-                      const SubIconComponent = sub.icon || Home
-                      return (
-                        <DesktopNavSubItem
-                          key={sub.key}
-                          to={resolvePath(sub.path)}
-                          icon={SubIconComponent}
-                          label={subLabel}
-                          isFlyout={isDesktopSidebarDocked}
-                        />
-                      )
-                    })}
+                  {filteredSubItems.map((sub) => {
+                    const subLabel = t.nav?.[sub.key] || sub.label || sub.key
+                    const SubIconComponent = sub.icon || Globe
+                    return (
+                      <DesktopNavSubItem
+                        key={sub.key}
+                        to={resolvePath(sub.path)}
+                        icon={SubIconComponent}
+                        label={subLabel}
+                        color={sub.color}
+                        img={sub.img}
+                        isFlyout={isDesktopSidebarDocked}
+                      />
+                    )
+                  })}
                 </DesktopNavDropdown>
               )
             }
@@ -86,6 +99,8 @@ const DesktopNavItems = () => {
                 to={resolvePath(item.path)}
                 icon={IconComponent}
                 label={label}
+                color={item.color}
+                img={item.img}
                 isDocked={isDesktopSidebarDocked}
               />
             )
@@ -94,7 +109,7 @@ const DesktopNavItems = () => {
 
       <div className="p-3 flex flex-col gap-1 mt-auto border-t border-border">
         {footerLinks.map((item) => {
-          const label = t.nav?.[item.key] || item.key
+          const label = t.nav?.[item.key] || item.label || item.key
           const IconComponent = item.icon || Settings
 
           return (
@@ -103,6 +118,8 @@ const DesktopNavItems = () => {
               to={resolvePath(item.path)}
               icon={IconComponent}
               label={label}
+              color={item.color}
+              img={item.img}
               isDocked={isDesktopSidebarDocked}
             />
           )

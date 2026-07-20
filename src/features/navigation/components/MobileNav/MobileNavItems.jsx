@@ -1,19 +1,49 @@
 import React, { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
-import { Home, Settings, ChevronRight, ChevronLeft } from "lucide-react"
+import { Home, Settings, ChevronRight, ChevronLeft, Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "../DesktopNav/DesktopNavItem"
 import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { useAuth } from "@/features/auth"
 import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
 import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
 import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 
-const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
+const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
+  const [imgError, setImgError] = useState(false)
+
+  useEffect(() => {
+    setImgError(false)
+  }, [img])
+
+  const IconComponent = Icon || Globe
+
+  if (img && !imgError) {
+    return (
+      <img
+        src={img}
+        alt=""
+        onError={() => setImgError(true)}
+        className="w-5 h-5 object-contain shrink-0 rounded-sm"
+      />
+    )
+  }
+
+  return (
+    <IconComponent
+      size={size}
+      className="shrink-0"
+      style={color ? { color } : undefined}
+    />
+  )
+}
+
+const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false }) => {
   const { t } = useLanguage()
   const { isStudent } = useRoleOverride()
-  const { resolvePath, checkIsActive, pathname } = useActiveLink()
+  const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
+  const { isAuthenticated } = useAuth()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
 
   // Sync drilldown state when drawer opens or when navigating
@@ -26,7 +56,6 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
       )
       setActiveDrilldownItem(activeItem || null)
     } else {
-      // Optional: Wait for drawer close animation before resetting to prevent layout jump
       const timer = setTimeout(() => {
         const activeLinks = pathname.startsWith("/setting") ? settingNavLinks : navLinks
         const activeItem = activeLinks.find(
@@ -53,10 +82,16 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-1 scrollbar-none">
           {(pathname.startsWith("/setting") ? settingNavLinks : navLinks)
-            .filter((item) => !item.hideInSidebar)
+            .filter((item) => {
+              if (item.hideInSidebar) return false
+              if (item.lang && item.lang !== currentLang) return false
+              if (isHorizontal && item.showOnHorizontalBar === false) return false
+              if (item.isPrivate && !isAuthenticated) return false
+              return true
+            })
             .map((item) => {
-              const label = t.nav?.[item.key] || item.key
-              const IconComponent = item.icon || Home
+              const label = t.nav?.[item.key] || item.label || item.key
+              const IconComponent = item.icon || Globe
 
               if (
                 item.hasDropdown &&
@@ -69,11 +104,20 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
                     onClick={() => setActiveDrilldownItem(item)}
                     className={getNavItemClasses(false, false)}
                   >
-                    <IconComponent size={20} className="shrink-0" />
-                    <span className={getNavTextClasses(true)}>{label}</span>
+                    <NavIcon
+                      img={item.img}
+                      icon={IconComponent}
+                      color={item.color}
+                    />
+                    <span
+                      className={getNavTextClasses(true)}
+                      style={item.color ? { color: item.color } : undefined}
+                    >
+                      {label}
+                    </span>
                     <ChevronRight
                       size={18}
-                      className="shrink-0 text-gray-500"
+                      className="shrink-0 text-gray-500 ml-auto"
                     />
                   </button>
                 )
@@ -85,6 +129,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
                   to={resolvePath(item.path)}
                   icon={IconComponent}
                   label={label}
+                  color={item.color}
+                  img={item.img}
                   onClick={() => setIsMobileOpen?.(false)}
                 />
               )
@@ -95,7 +141,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
           <MobileLanguageSwitcher />
 
           {footerLinks.map((item) => {
-            const label = t.nav?.[item.key] || item.key
+            const label = t.nav?.[item.key] || item.label || item.key
             const IconComponent = item.icon || Settings
 
             return (
@@ -104,6 +150,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
                 to={resolvePath(item.path)}
                 icon={IconComponent}
                 label={label}
+                color={item.color}
+                img={item.img}
                 onClick={() => setIsMobileOpen?.(false)}
               />
             )
@@ -123,8 +171,17 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
           >
             <ChevronLeft size={20} className="absolute left-1" />
             {activeDrilldownItem && (
-              <span className="font-semibold">
-                {t.nav?.[activeDrilldownItem.key] || activeDrilldownItem.key}
+              <span
+                className="font-semibold"
+                style={
+                  activeDrilldownItem.color
+                    ? { color: activeDrilldownItem.color }
+                    : undefined
+                }
+              >
+                {t.nav?.[activeDrilldownItem.key] ||
+                  activeDrilldownItem.label ||
+                  activeDrilldownItem.key}
               </span>
             )}
           </button>
@@ -135,17 +192,22 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
           {(activeDrilldownItem?.subItems || [])
             .filter((sub) => {
               if (sub.key === "myCourses" && isStudent) return false
+              if (sub.lang && sub.lang !== currentLang) return false
+              if (isHorizontal && sub.showOnHorizontalBar === false) return false
+              if (sub.isPrivate && !isAuthenticated) return false
               return true
             })
             .map((sub) => {
-              const subLabel = t.nav?.[sub.key] || sub.key
-              const SubIconComponent = sub.icon || Home
+              const subLabel = t.nav?.[sub.key] || sub.label || sub.key
+              const SubIconComponent = sub.icon || Globe
               return (
                 <DesktopNavItem
                   key={sub.key}
                   to={resolvePath(sub.path)}
                   icon={SubIconComponent}
                   label={subLabel}
+                  color={sub.color}
+                  img={sub.img}
                   onClick={() => setIsMobileOpen?.(false)}
                 />
               )
