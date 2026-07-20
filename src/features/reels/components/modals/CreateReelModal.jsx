@@ -1,5 +1,5 @@
 import React from "react"
-import { AlertCircle, Film, X, Video } from "lucide-react"
+import { AlertCircle, Film, X, Video, Minus } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -12,14 +12,15 @@ const CreateReelModalContent = ({ open }) => {
   const { t } = useLanguage()
   const {
     videoPreviewUrl, videoFile, handleDiscardVideo,
-    mobileTab, setMobileTab, handleSubmit, isLoading, handleClose,
+    mobileTab, setMobileTab, handleSubmit, isLoading,
+    uploadProgress, handleMinimize, handleCancelUpload,
     generalError, apiError
   } = useCreateReelContext()
 
   return (
     <Modal
       open={open}
-      onClose={handleClose}
+      onClose={handleMinimize}
       title={
         <div className="flex items-center gap-2">
           <Film size={20} className="text-cath-red-700" />
@@ -111,14 +112,16 @@ const CreateReelModalContent = ({ open }) => {
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleDiscardVideo}
-                className="p-2 border border-gray-200 bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
-                title="Discard video"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDiscardVideo}
+                  className="p-2 border border-gray-200 bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
+                  title="Discard video"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {/* Mobile View Toggle Segment Tabs (Only visible on mobile/tablet viewports) */}
@@ -158,8 +161,7 @@ const CreateReelModalContent = ({ open }) => {
           <PillButton
             type="button"
             variant="secondary"
-            onClick={handleClose}
-            disabled={isLoading}
+            onClick={handleCancelUpload}
             className="w-full sm:w-auto min-w-[120px] h-10 font-semibold"
           >
             {t.cancel || "Cancel"}
@@ -167,7 +169,7 @@ const CreateReelModalContent = ({ open }) => {
           <PillButton
             type="submit"
             loading={isLoading}
-            loadingText={t.catSpeak?.reels?.posting || "Posting..."}
+            loadingText={isLoading ? `${t.catSpeak?.reels?.posting || "Posting..."} ${uploadProgress}%` : t.catSpeak?.reels?.posting || "Posting..."}
             disabled={!videoFile || isLoading}
             className="w-full sm:w-auto min-w-[120px] h-10 font-semibold"
             bgColor="#990011"

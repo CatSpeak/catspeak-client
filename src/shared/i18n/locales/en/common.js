@@ -6,6 +6,9 @@ export default {
   seeMore: "See more",
   back: "Back",
   cancel: "Cancel",
+  reload: "Reload page",
+  cancelUploadConfirmTitle: "Uploading Data",
+  cancelUploadConfirmDesc: "There is an upload in progress. If you reload the page, the data will be lost. Are you sure you want to continue?",
   scrollToTop: "Scroll to top",
   toggle: {
     on: "On",
@@ -77,5 +80,13 @@ export default {
     of: "of",
     prevPage: "Previous page",
     nextPage: "Next page",
+  },
+  uploadWidget: {
+    uploading: "Uploading... {{progress}}%",
+    processing: "Processing... {{progress}}%",
+    success: "Success",
+    error: "Upload Failed",
+    itemsCount: "Uploading {{count}} items",
+    cancelTip: "Cancel upload",
   },
 };

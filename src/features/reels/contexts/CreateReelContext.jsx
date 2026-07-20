@@ -8,6 +8,7 @@ import {
   useSearchReelHashtagsQuery,
   useSearchReelMentionsQuery,
 } from "@/store/api/reelsApi"
+import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx"
 
 export const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
 export const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
@@ -129,6 +130,18 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreviewUrl, setCoverPreviewUrl] = useState("")
   const [coverType, setCoverType] = useState("frame") // "frame" | "custom"
+
+  // Upload progress state
+  const [isUploading, setIsUploading] = useState(false)
+  const [currentUploadId, setCurrentUploadId] = useState(null)
+
+  const { uploads, uploadFile, cancelUpload: cancelGlobalUpload, revealUpload } = useGlobalUpload();
+  
+  const currentUpload = useMemo(() => {
+    return uploads ? uploads.find(u => u.id === currentUploadId) : null;
+  }, [uploads, currentUploadId]);
+
+  const uploadProgress = currentUpload ? Math.floor(currentUpload.progress) : 0;
 
   // UI Drag-and-drop active states
   const [isVideoDragging, setIsVideoDragging] = useState(false)
@@ -271,6 +284,8 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
     setIsExtractingFilmstrip(false)
     setPreviewMode("video")
     setMobileTab("details")
+    setIsUploading(false)
+    setCurrentUploadId(null)
     filmstripRequestRef.current += 1
     filmstripSourceRef.current = ""
     metadataSourceRef.current = ""
@@ -298,8 +313,16 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
     setValidationErrors({})
     setGeneralError("")
 
-    onClose()
+    if (onClose) onClose()
   }, [lockedChallengeHashtag, videoPreviewUrl, coverPreviewUrl, onClose])
+
+  const handleMinimize = useCallback(() => {
+    if (onClose) onClose();
+  }, [onClose]);
+
+  const handleCancelUpload = useCallback(() => {
+    handleClose();
+  }, [handleClose]);
 
   // Revoke object URLs on unmount to avoid memory leaks
   useEffect(() => {
@@ -930,8 +953,25 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
         formData.append("CoverFile", coverFile)
       }
 
-      await createReel(formData).unwrap()
-      toast.success("Reel uploaded successfully!")
+      setIsUploading(true);
+
+      const id = uploadFile({
+        url: "/reels",
+        method: "POST",
+        data: formData,
+        isHidden: false, // Show in global widget immediately
+        title: t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới", // Fallback if translation is missing
+        onUploadSuccess: () => {
+          toast.success(t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!");
+        },
+        onUploadError: () => {
+          // Error handling is managed globally
+        }
+      });
+
+      // Close modal immediately and let global widget handle the progress
+      if (onClose) onClose();
+
     } catch (err) {
       setGeneralError(err?.data?.message || err?.message || t?.catSpeak?.reels?.uploadFailed || "Failed to upload Reel. Please try again.")
     }
@@ -976,7 +1016,8 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
     updateDescriptionTrigger, handleDescriptionChange, handleDescriptionCursorUpdate,
     handleDescriptionScroll, applyDescriptionSuggestion, handleDescriptionKeyDown,
     handleDescriptionProtectedClipboard, handleSubmit,
-    isLoading, isSuccess, apiError, t, lockedChallengeHashtag, createReel,
+    isLoading: isUploading, isSuccess, apiError, t, lockedChallengeHashtag, createReel,
+    uploadProgress, handleMinimize, handleCancelUpload,
   }
 
   return (

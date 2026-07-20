@@ -6,6 +6,9 @@ export default {
   seeMore: "Xem thêm",
   back: "Quay lại",
   cancel: "Hủy",
+  reload: "Tải lại trang",
+  cancelUploadConfirmTitle: "Đang tải dữ liệu lên",
+  cancelUploadConfirmDesc: "Đang có tiến trình tải dữ liệu lên chưa hoàn tất. Nếu bạn tải lại trang, dữ liệu sẽ bị mất. Bạn có chắc chắn muốn tiếp tục?",
   scrollToTop: "Lên đầu trang",
   toggle: {
     on: "Bật",
@@ -77,5 +80,13 @@ export default {
     of: "trên",
     prevPage: "Trang trước",
     nextPage: "Trang tiếp",
+  },
+  uploadWidget: {
+    uploading: "Đang tải lên... {{progress}}%",
+    processing: "Đang xử lý... {{progress}}%",
+    success: "Hoàn tất",
+    error: "Lỗi tải lên",
+    itemsCount: "Tải lên {{count}} mục",
+    cancelTip: "Hủy tải lên",
   },
 }
