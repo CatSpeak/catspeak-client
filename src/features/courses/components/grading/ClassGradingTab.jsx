@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import StudentAssignmentDetailView from "../assignments/StudentAssignmentDetailView"
 import AssignmentSubmissionsView from "../assignments/submissions/AssignmentSubmissionsView"
+import TablePagination from "../shared/TablePagination"
 import {
   Search,
   ChevronDown,
@@ -25,20 +26,38 @@ import {
   getSubmissionStatus,
 } from "../../utils/assignmentUtils"
 
+const STUDENT_ASSIGNMENTS_PAGE_SIZE = 10
+
 const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect }) => {
+  const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
+    || Object.prototype.hasOwnProperty.call(assignment, "submission")
+  const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
   const { data: submissionResponse, isLoading } = useGetMyAssignmentSubmissionQuery(
     { classId, assignmentId: assignment.id },
-    { skip: !classId || !assignment?.id },
+    { skip: !classId || !assignment?.id || hasEmbeddedSubmission },
   )
 
-  const submission = submissionResponse?.data || submissionResponse || null
+  const submission = hasEmbeddedSubmission
+    ? embeddedSubmission
+    : (submissionResponse?.data || submissionResponse || null)
   const submissionStatus = getSubmissionStatus(submission)
   const maxScore = Number(assignment.maxScore) || 10
-  const grade = submission?.grade
+
+  const isReleased = submission?.status?.toLowerCase() === "returned"
+  const grade = isReleased ? submission?.grade : null
   const gradeLabel = grade !== null && grade !== undefined ? `${grade} / ${maxScore}` : "—"
+
   const dueLabel = assignment.dueDate
     ? new Date(assignment.dueDate).toLocaleString(language === "vi" ? "vi-VN" : "en-US")
     : "—"
+
+  const isSubmissionLate = submission?.submittedAt && assignment?.dueDate
+    ? new Date(submission.submittedAt) > new Date(assignment.dueDate)
+    : false
+
+  const displayStatus = submissionStatus === "graded"
+    ? (isSubmissionLate ? "late" : "submitted")
+    : submissionStatus
 
   return (
     <tr
@@ -48,30 +67,25 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
       <td className="p-4 pl-6 font-extrabold text-gray-850">{getAssignmentTitle(assignment)}</td>
       <td className="p-4 text-gray-400">{dueLabel}</td>
       <td className="p-4">
-        {isLoading ? (
+        {isLoading && !hasEmbeddedSubmission ? (
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
             {cg.loading || "Loading"}
           </span>
         ) : (
           <>
-            {submissionStatus === "not_submitted" && (
+            {displayStatus === "not_submitted" && (
               <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-100 uppercase tracking-wide">
                 {cd.statusNotSubmitted || "Chưa nộp"}
               </span>
             )}
-            {(submissionStatus === "submitted" || submissionStatus === "late") && (
+            {(displayStatus === "submitted" || displayStatus === "late") && (
               <span className="bg-orange-50 text-orange-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-100 uppercase tracking-wide">
-                {submissionStatus === "late"
+                {displayStatus === "late"
                   ? (cg.filterLate || "Nộp muộn")
                   : (cd.statusNeedsGrading || "Chưa chấm")}
               </span>
             )}
-            {submissionStatus === "graded" && (
-              <span className="bg-amber-50 text-amber-600 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-amber-100 uppercase tracking-wide">
-                {cg.filterGraded || cd.statusGraded || "Đã chấm"}
-              </span>
-            )}
-            {submissionStatus === "returned" && (
+            {displayStatus === "returned" && (
               <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-100 uppercase tracking-wide">
                 {cg.filterReturned || cd.statusGraded || "Đã trả bài"}
               </span>
@@ -80,7 +94,7 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
         )}
       </td>
       <td className="p-4 pr-6 text-center font-black text-sm text-gray-900">
-        {isLoading ? "—" : gradeLabel}
+        {isLoading && !hasEmbeddedSubmission ? "—" : gradeLabel}
       </td>
     </tr>
   )
@@ -101,28 +115,17 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
+  const [studentPage, setStudentPage] = useState(1)
   const [nowMs] = useState(() => Date.now())
 
-  const statusParam = useMemo(() => {
-    if (statusFilter === "all") return undefined
-    if (statusFilter === "draft") return "Draft"
-    if (statusFilter === "published") return "Published"
-    if (statusFilter === "closed") return "Closed"
-    return undefined
-  }, [statusFilter])
-
   const teacherAssignmentsQuery = useGetTeacherAssignmentsQuery(
-    {
-      classId,
-      status: statusParam,
-      search: searchTerm || undefined,
-    },
-    { skip: isStudent || !classId },
+    { classId },
+    { skip: isStudent || !classId || Boolean(assignmentId) },
   )
 
   const studentAssignmentsQuery = useGetStudentAssignmentsQuery(
     { classId },
-    { skip: !isStudent || !classId },
+    { skip: !isStudent || !classId || Boolean(assignmentId) },
   )
 
   const assignmentsResponse = isStudent ? studentAssignmentsQuery.data : teacherAssignmentsQuery.data
@@ -132,11 +135,6 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
     const rawAssignments = assignmentsResponse?.data || assignmentsResponse || []
     return Array.isArray(rawAssignments) ? rawAssignments : []
   }, [assignmentsResponse])
-
-  const activeAssignment = useMemo(() => {
-    if (!assignmentId) return null
-    return assignments.find((a) => a.id?.toString() === assignmentId) || null
-  }, [assignments, assignmentId])
 
   // Filter and Sort Assignments
   const filteredAssignments = useMemo(() => {
@@ -158,6 +156,16 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
       })
   }, [assignments, searchTerm, statusFilter, sortBy])
 
+  const studentTotalPages = Math.max(
+    1,
+    Math.ceil(filteredAssignments.length / STUDENT_ASSIGNMENTS_PAGE_SIZE),
+  )
+  const activeStudentPage = Math.min(studentPage, studentTotalPages)
+  const visibleStudentAssignments = useMemo(() => {
+    const start = (activeStudentPage - 1) * STUDENT_ASSIGNMENTS_PAGE_SIZE
+    return filteredAssignments.slice(start, start + STUDENT_ASSIGNMENTS_PAGE_SIZE)
+  }, [filteredAssignments, activeStudentPage])
+
   // Dropdown options handlers
   const selectStatusOption = (val) => {
     setStatusFilter(val)
@@ -167,26 +175,29 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
     setSortBy(val)
   }
 
+  // Deep links are backed by detail endpoints; avoid fetching the full list first.
+  if (assignmentId) {
+    return isStudent ? (
+      <StudentAssignmentDetailView
+        assignmentId={assignmentId}
+        classId={classId}
+        onBack={() => setSearchParams({})}
+      />
+    ) : (
+      <AssignmentSubmissionsView
+        assignmentId={assignmentId}
+        classId={classId}
+        onBack={() => setSearchParams({})}
+      />
+    )
+  }
+
   if (isAssignmentsLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <LoadingSpinner />
       </div>
     )
-  }
-
-  // ─── Sub-View: Student Submission Drill-down (Student View) ───
-  if (isStudent && assignmentId) {
-    const activeStudentAssignment = assignments.find((a) => a.id?.toString() === assignmentId) || null
-    if (activeStudentAssignment) {
-      return (
-        <StudentAssignmentDetailView
-          assignment={activeStudentAssignment}
-          classId={classId}
-          onBack={() => setSearchParams({})}
-        />
-      )
-    }
   }
 
   // ─── Sub-View: Student personal grades view ───
@@ -212,7 +223,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                   </td>
                 </tr>
               ) : (
-                filteredAssignments.map((assignment) => (
+                visibleStudentAssignments.map((assignment) => (
                   <StudentAssignmentRow
                     key={assignment.id}
                     assignment={assignment}
@@ -227,18 +238,17 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </tbody>
           </table>
         </div>
+        {filteredAssignments.length > STUDENT_ASSIGNMENTS_PAGE_SIZE && (
+          <TablePagination
+            currentPage={activeStudentPage}
+            totalPages={studentTotalPages}
+            totalCount={filteredAssignments.length}
+            limit={STUDENT_ASSIGNMENTS_PAGE_SIZE}
+            onPageChange={setStudentPage}
+            t={t}
+          />
+        )}
       </div>
-    )
-  }
-
-  // ─── Sub-View: Student Submission Drill-down (Figma Layout) ───
-  if (activeAssignment) {
-    return (
-      <AssignmentSubmissionsView
-        assignment={activeAssignment}
-        classId={classId}
-        onBack={() => setSearchParams({})}
-      />
     )
   }
 

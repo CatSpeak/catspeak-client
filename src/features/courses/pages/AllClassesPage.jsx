@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
 
@@ -21,10 +21,20 @@ const AllClassesPage = () => {
 
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+      setCurrentPage(1)
+    }, 400)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchQuery])
+
   const { data, isLoading, error } = useGetAllClassesQuery({
-    search: searchQuery,
+    search: debouncedSearchQuery,
     status: activeTab === "all" ? "" : activeTab.toUpperCase(),
     page: currentPage,
     pageSize: 5,
@@ -46,7 +56,6 @@ const AllClassesPage = () => {
 
   const handleSearchChange = (value) => {
     setSearchQuery(value)
-    setCurrentPage(1)
   }
 
   const handleAction = () => {

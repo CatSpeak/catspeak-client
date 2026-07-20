@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetAllClassesQuery,
-  useGetScheduleDatesQuery,
   useGetScheduleSessionsQuery
 } from "@/store/api/coursesApi"
 import {
@@ -110,40 +109,41 @@ const SchedulePage = () => {
 
   // RTK Query endpoints integration
   const { data: classesData, isLoading: isClassesLoading } = useGetAllClassesQuery({ page: 1, pageSize: 100 })
-  const { data: scheduleDatesData, isLoading: isDatesLoading } = useGetScheduleDatesQuery({
+  const { data: scheduleSessionsData, isLoading: isSessionsLoading } = useGetScheduleSessionsQuery({
     from: startOfMonthStr,
     to: endOfMonthStr
   })
-  const { data: scheduleSessionsData, isLoading: isSessionsLoading } = useGetScheduleSessionsQuery({
-    from: selectedDateStr,
-    to: selectedDateStr
-  })
 
   const classesList = useMemo(() => classesData?.data || [], [classesData])
-  const sessionDates = useMemo(() => scheduleDatesData?.dates || [], [scheduleDatesData])
-  const isLoading = isClassesLoading || isDatesLoading || isSessionsLoading
+  const monthSessions = useMemo(() => scheduleSessionsData?.data || [], [scheduleSessionsData])
+  const sessionDates = useMemo(
+    () => [...new Set(monthSessions.map(session => session.date).filter(Boolean))],
+    [monthSessions]
+  )
+  const isLoading = isClassesLoading || isSessionsLoading
 
   // Map schedule sessions and enrich with metadata from classesList (levels, slots, studentCount)
   const selectedDateClasses = useMemo(() => {
-    const rawSessions = scheduleSessionsData?.data || []
-    return rawSessions.map(session => {
-      const matchedClass = classesList.find(c => c.id === session.class?.id)
-      return {
-        id: session.class?.id,
-        name: session.class?.name || matchedClass?.name || "",
-        language: session.class?.language || matchedClass?.language || "English",
-        levels: matchedClass?.levels || [],
-        status: session.class?.status || matchedClass?.status || "OPEN",
-        startTime: session.startTime,
-        endTime: session.endTime,
-        sessionNumber: session.sessionNumber,
-        totalSessions: session.totalSessions,
-        studentCount: matchedClass?.studentCount || 0,
-        slots: matchedClass?.slots || 10,
-        startDate: matchedClass?.startDate
-      }
-    })
-  }, [scheduleSessionsData, classesList])
+    return monthSessions
+      .filter(session => session.date === selectedDateStr)
+      .map(session => {
+        const matchedClass = classesList.find(c => c.id === session.class?.id)
+        return {
+          id: session.class?.id,
+          name: session.class?.name || matchedClass?.name || "",
+          language: session.class?.language || matchedClass?.language || "English",
+          levels: matchedClass?.levels || [],
+          status: session.class?.status || matchedClass?.status || "OPEN",
+          startTime: session.startTime,
+          endTime: session.endTime,
+          sessionNumber: session.sessionNumber,
+          totalSessions: session.totalSessions,
+          studentCount: matchedClass?.studentCount || 0,
+          slots: matchedClass?.slots || 10,
+          startDate: matchedClass?.startDate
+        }
+      })
+  }, [monthSessions, selectedDateStr, classesList])
 
   // Count active dates with sessions in current month
   const monthClassesCount = sessionDates.length

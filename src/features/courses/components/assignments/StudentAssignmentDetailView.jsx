@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useRef } from "react"
-import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import {
@@ -27,25 +26,27 @@ import {
   parseAttachmentList,
 } from "../../utils/assignmentUtils"
 
-const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, onBack }) => {
+const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignmentId: assignmentIdProp, classId, onBack }) => {
   const { language, t } = useLanguage()
-  const navigate = useNavigate()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const cg = c.grading || {}
   const ca = c.createAssignment || {}
 
-  const assignmentId = initialAssignment.id
+  const assignmentId = assignmentIdProp || initialAssignment?.id
 
   // Fetch complete/latest details of the assignment for student
   const { data: assignmentResponse, isLoading: isAssignmentLoading } = useGetStudentAssignmentByIdQuery(
     { classId, assignmentId },
     { skip: !classId || !assignmentId }
   )
-  const assignment = assignmentResponse?.data || assignmentResponse || initialAssignment
+  const assignment = useMemo(
+    () => assignmentResponse?.data || assignmentResponse || initialAssignment || {},
+    [assignmentResponse, initialAssignment],
+  )
 
   // Fetch the submission of the student
-  const { data: submissionResponse, isLoading: isSubmissionLoading, refetch: refetchSubmission } = useGetMyAssignmentSubmissionQuery(
+  const { data: submissionResponse, isLoading: isSubmissionLoading } = useGetMyAssignmentSubmissionQuery(
     { classId, assignmentId },
     { skip: !classId || !assignmentId }
   )
@@ -65,6 +66,11 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
   const isExpired = useMemo(() => {
     return isAssignmentExpired(assignment, nowMs)
   }, [assignment, nowMs])
+
+  const isSubmissionLate = useMemo(() => {
+    if (!submission?.submittedAt || !assignment?.dueDate) return false
+    return new Date(submission.submittedAt) > new Date(assignment.dueDate)
+  }, [submission, assignment])
 
   const isClosed = useMemo(() => {
     return String(assignment?.status || "").toLowerCase() === "closed"
@@ -220,7 +226,6 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
           : "Successfully submitted assignment!"
       )
       setSelectedFiles([])
-      refetchSubmission()
     } catch (err) {
       console.error(err)
       toast.error(err?.data?.message || err?.data?.error?.message || "Lỗi khi nộp bài")
@@ -245,21 +250,19 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
     }
 
     const status = (submission.status || "").toLowerCase()
+    let displayStatus = status
     if (status === "graded") {
-      return (
-        <span className="bg-amber-50 text-amber-600 text-[10px] font-extrabold px-2.5 py-1 rounded border border-amber-100 uppercase tracking-wide">
-          {cg.filterGraded || cd.statusGraded || "Đã chấm"}
-        </span>
-      )
+      displayStatus = isSubmissionLate ? "late" : "submitted"
     }
-    if (status === "returned") {
+
+    if (displayStatus === "returned") {
       return (
         <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 uppercase tracking-wide">
           {cg.filterReturned || cd.statusGraded || "Đã trả bài"}
         </span>
       )
     }
-    if (status === "late") {
+    if (displayStatus === "late") {
       return (
         <span className="bg-red-50 text-red-650 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 uppercase tracking-wide">
           {cg.filterLate || "Nộp muộn"}
@@ -464,8 +467,8 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, classId, o
 
         {/* Right Column (35%) */}
         <div className="flex flex-col gap-6">
-          {/* Grade and feedback panel (if graded/returned) */}
-          {submission && (submission.status?.toLowerCase() === "graded" || submission.status?.toLowerCase() === "returned") && (
+          {/* Grade and feedback panel (if released/returned) */}
+          {submission && submission.status?.toLowerCase() === "returned" && (
             <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
               <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
                 {language === "vi" ? "KẾT QUẢ ĐÁNH GIÁ" : "GRADING DETAILS"}

@@ -55,18 +55,21 @@ const CreateClassPage = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditMode = !!id
+  const location = useLocation()
+  const recoverClassId = location.state?.recoverClassId || new URLSearchParams(location.search).get("recoverClassId") || ""
+  const isRecoverMode = !!recoverClassId
   const fileInputRef = useRef(null)
 
   // Localizations
   const cc = c.createClass || {}
 
   const isProfileLoading = false
-  const { data: coursesData } = useGetAllCoursesQuery({ pageSize: 100 })
+  const { data: coursesData } = useGetAllCoursesQuery(
+    { page: 1, pageSize: 100 },
+    { skip: isEditMode || isRecoverMode }
+  )
   const [createClass, { isLoading: isCreating }] = useCreateClassMutation()
   const [updateClass, { isLoading: isUpdating }] = useUpdateClassMutation()
-  const location = useLocation()
-  const recoverClassId = location.state?.recoverClassId || new URLSearchParams(location.search).get("recoverClassId") || ""
-  const isRecoverMode = !!recoverClassId
 
   const { data: classDetailResponse, isLoading: isEditDetailsLoading } = useGetClassDetailQuery(id, { skip: !isEditMode })
   const { data: recoverClassResponse, isLoading: isRecoverLoading } = useGetClassDetailQuery(recoverClassId, { skip: !isRecoverMode })
@@ -475,6 +478,10 @@ const CreateClassPage = () => {
     }
   }
 
+  const lockedClass = (isEditMode ? classDetailResponse : recoverClassResponse)?.data
+    || (isEditMode ? classDetailResponse : recoverClassResponse)
+  const lockedCourseTitle = lockedClass?.courseName || lockedClass?.courseTitle || courseId
+
   if (isDetailsLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -540,9 +547,13 @@ const CreateClassPage = () => {
                   className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                 >
                   <option value="">{cc.selectCourseOption || "-- Select Course --"}</option>
-                  {coursesList.map((course) => (
-                    <option key={course.id} value={course.id}>{course.title}</option>
-                  ))}
+                  {isEditMode || isRecoverMode ? (
+                    courseId && <option value={courseId}>{lockedCourseTitle}</option>
+                  ) : (
+                    coursesList.map((course) => (
+                      <option key={course.id} value={course.id}>{course.title}</option>
+                    ))
+                  )}
                 </select>
                 <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>

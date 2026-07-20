@@ -25,7 +25,7 @@ import { buildSubmissionStudentList } from "../../../utils/submissionUtils"
 import AssignmentGradingWorkspace from "./AssignmentGradingWorkspace"
 import AssignmentSubmissionsList from "./AssignmentSubmissionsList"
 
-const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
+const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp, onBack, classId }) => {
   const { language, t } = useLanguage()
   const [searchParams, setSearchParams] = useSearchParams()
   const [nowMs] = useState(() => Date.now())
@@ -34,15 +34,16 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
   const [currentPage, setCurrentPage] = useState(1)
   const gradingTranslations = t.courses?.grading || {}
   const activeStudentId = searchParams.get("studentId")
+  const assignmentId = assignmentIdProp || assignment?.id
 
-  const { data: assignmentDetailResponse, refetch: refetchAssignment } = useGetAssignmentByIdQuery({
+  const { data: assignmentDetailResponse, isLoading: isAssignmentLoading } = useGetAssignmentByIdQuery({
     classId,
-    assignmentId: assignment.id,
-  })
+    assignmentId,
+  }, { skip: !classId || !assignmentId })
   const { data: submissionsResponse, isLoading: isSubmissionsLoading } = useGetAssignmentSubmissionsQuery({
     classId,
-    assignmentId: assignment.id,
-  })
+    assignmentId,
+  }, { skip: !classId || !assignmentId })
   const { data: membersResponse, isLoading: isMembersLoading } = useGetClassMembersQuery({ classId })
   const [closeAssignment] = useCloseAssignmentMutation()
   const [openAssignment] = useOpenAssignmentMutation()
@@ -50,7 +51,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
   const [bulkReturn] = useBulkReturnSubmissionsMutation()
   const [returnSubmission] = useReturnSubmissionMutation()
 
-  const currentAssignment = assignmentDetailResponse?.data || assignmentDetailResponse || assignment
+  const currentAssignment = assignmentDetailResponse?.data || assignmentDetailResponse || assignment || {}
   const assignmentTitle = getAssignmentTitle(currentAssignment)
   const assignmentClosed = getAssignmentStatus(currentAssignment) === "closed"
   const assignmentMaxScore = getAssignmentMaxScore(currentAssignment)
@@ -79,13 +80,12 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
   const handleToggleSubmissionsLock = async () => {
     try {
       if (assignmentClosed) {
-        await openAssignment({ classId, assignmentId: assignment.id }).unwrap()
+        await openAssignment({ classId, assignmentId }).unwrap()
         toast.success(gradingTranslations.toastOpenSuccess || "Đã mở lại bài nộp thành công!")
       } else {
-        await closeAssignment({ classId, assignmentId: assignment.id }).unwrap()
+        await closeAssignment({ classId, assignmentId }).unwrap()
         toast.success(gradingTranslations.toastLockSuccess || "Đã khóa bài nộp thành công!")
       }
-      refetchAssignment()
     } catch (error) {
       console.error(error)
       toast.error(error?.data?.error?.message || "Lỗi khi khóa/mở khóa bài nộp")
@@ -124,7 +124,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
     try {
       await gradeSubmission({
         classId,
-        assignmentId: assignment.id,
+        assignmentId,
         submissionId: activeStudent.submissionId,
         grade: numericScore,
         comment: feedback,
@@ -136,7 +136,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
           .replace("{{student}}", activeStudent.name)
         : `Đã chấm ${numericScore} điểm cho ${activeStudent.name}`
       toast.success(successMessage)
-      setSearchParams({ assignmentId: assignment.id })
+      setSearchParams({ assignmentId })
     } catch (error) {
       console.error(error)
       toast.error(error?.data?.error?.message || "Lỗi khi lưu điểm")
@@ -146,7 +146,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
   const handleDownloadGradeSheet = async () => {
     try {
       const baseUrl = import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api"
-      const url = `${baseUrl}/teacher/classes/${classId}/assignments/${assignment.id}/grade-sheet`
+      const url = `${baseUrl}/teacher/classes/${classId}/assignments/${assignmentId}/grade-sheet`
       const token = localStorage.getItem("token")
       const response = await fetch(url, {
         method: "GET",
@@ -175,7 +175,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
 
   const handleBulkReturn = async () => {
     try {
-      const response = await bulkReturn({ classId, assignmentId: assignment.id }).unwrap()
+      const response = await bulkReturn({ classId, assignmentId }).unwrap()
       const returnedCount = response.returnedCount || 0
       toast.success(gradingTranslations.toastBulkReturnSuccess
         ? gradingTranslations.toastBulkReturnSuccess.replace("{{count}}", returnedCount)
@@ -192,7 +192,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
     try {
       await returnSubmission({
         classId,
-        assignmentId: assignment.id,
+        assignmentId,
         submissionId: activeStudent.submissionId,
       }).unwrap()
 
@@ -200,14 +200,14 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
         ? gradingTranslations.toastGradeReturned.replace("{{student}}", activeStudent.name)
         : `Đã trả bài chấm cho học viên ${activeStudent.name}`
       toast.success(successMessage)
-      setSearchParams({ assignmentId: assignment.id })
+      setSearchParams({ assignmentId })
     } catch (error) {
       console.error(error)
       toast.error(error?.data?.error?.message || "Lỗi khi trả kết quả")
     }
   }
 
-  if (isSubmissionsLoading || isMembersLoading) {
+  if (isAssignmentLoading || isSubmissionsLoading || isMembersLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <LoadingSpinner />
@@ -222,7 +222,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
         assignmentTitle={assignmentTitle}
         assignmentMaxScore={assignmentMaxScore}
         student={activeStudent}
-        onBack={() => setSearchParams({ assignmentId: assignment.id })}
+        onBack={() => setSearchParams({ assignmentId })}
         onSave={handleSaveGrade}
         onRelease={handleReleaseGrade}
       />
@@ -231,7 +231,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
 
   return (
     <AssignmentSubmissionsList
-      assignmentId={assignment.id}
+      assignmentId={assignmentId}
       assignmentTitle={assignmentTitle}
       assignmentClosed={assignmentClosed}
       assignmentExpired={assignmentExpired}
@@ -246,7 +246,7 @@ const AssignmentSubmissionsView = ({ assignment, onBack, classId }) => {
       onToggleSubmissionsLock={handleToggleSubmissionsLock}
       onDownloadGradeSheet={handleDownloadGradeSheet}
       onBulkReturn={handleBulkReturn}
-      onSelectStudent={(studentId) => setSearchParams({ assignmentId: assignment.id, studentId })}
+      onSelectStudent={(studentId) => setSearchParams({ assignmentId, studentId })}
       onStudentSearchChange={(value) => {
         setStudentSearch(value)
         setCurrentPage(1)

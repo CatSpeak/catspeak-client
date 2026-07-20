@@ -172,7 +172,6 @@ const ClassDetailPage = () => {
                 }`}
             >
               <span>{cd.feed || "Feed"}</span>
-              <span className="ml-1 px-1.5 py-0.5 text-[10px] font-extrabold bg-[#f97316] text-white rounded-full leading-none">12</span>
             </button>
 
             <button
@@ -183,7 +182,6 @@ const ClassDetailPage = () => {
                 }`}
             >
               <span>{cd.grading || "Grading"}</span>
-              <span className="ml-1 px-1.5 py-0.5 text-[10px] font-extrabold bg-[#f97316] text-white rounded-full leading-none">12</span>
             </button>
 
             <button

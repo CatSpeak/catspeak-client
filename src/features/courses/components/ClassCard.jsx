@@ -31,7 +31,13 @@ const ClassCard = ({
       {/* Image Thumbnail Placeholder Area */}
       <div className="relative h-44 bg-[#D9D9D9] flex items-center justify-center overflow-hidden shrink-0">
         {cls.thumbnailUrl ? (
-          <img src={cls.thumbnailUrl} alt={cls.title} className="w-full h-full object-cover" />
+          <img
+            src={cls.thumbnailUrl}
+            alt={cls.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
         ) : null}
 
         {/* Top-left slots/capacity pill */}

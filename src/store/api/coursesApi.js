@@ -688,7 +688,7 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
         params: { status, search },
       }),
-      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-${classId}` }],
     }),
 
     // 17. Get Student Assignments
@@ -737,7 +737,7 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/assignments/${assignmentId}`,
         method: "GET",
       }),
-      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: assignmentId }],
+      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `assignment-${assignmentId}` }],
     }),
 
     // 22. Create Assignment (multipart/form-data)
@@ -747,7 +747,9 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "ClassGrading", id: `class-${classId}` },
+      ],
     }),
 
     // 23. Update Assignment (multipart/form-data)
@@ -757,7 +759,10 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "PUT",
         body: formData,
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+      invalidatesTags: (result, error, { classId, assignmentId }) => [
+        { type: "ClassGrading", id: `class-${classId}` },
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+      ],
     }),
 
     // 24. Close Assignment
@@ -766,7 +771,10 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/assignments/${assignmentId}/close`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+      invalidatesTags: (result, error, { classId, assignmentId }) => [
+        { type: "ClassGrading", id: `class-${classId}` },
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+      ],
     }),
 
     // 25. Open/Reopen Assignment
@@ -775,7 +783,10 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/assignments/${assignmentId}/open`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: classId }],
+      invalidatesTags: (result, error, { classId, assignmentId }) => [
+        { type: "ClassGrading", id: `class-${classId}` },
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+      ],
     }),
 
     // 26. Get Assignment Submissions
@@ -785,8 +796,7 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: (result, error, { assignmentId }) => [
-        { type: "ClassGrading", id: assignmentId },
-        { type: "ClassGrading", id: "submissions" }
+        { type: "ClassGrading", id: `submissions-${assignmentId}` },
       ],
     }),
 
@@ -798,8 +808,8 @@ export const coursesApi = baseApi.injectEndpoints({
         body: { grade, comment },
       }),
       invalidatesTags: (result, error, { assignmentId }) => [
-        { type: "ClassGrading", id: assignmentId },
-        { type: "ClassGrading", id: "submissions" }
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+        { type: "ClassGrading", id: `submissions-${assignmentId}` },
       ],
     }),
 
@@ -810,8 +820,8 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, { assignmentId }) => [
-        { type: "ClassGrading", id: assignmentId },
-        { type: "ClassGrading", id: "submissions" }
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+        { type: "ClassGrading", id: `submissions-${assignmentId}` },
       ],
     }),
 
@@ -822,8 +832,8 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, { assignmentId }) => [
-        { type: "ClassGrading", id: assignmentId },
-        { type: "ClassGrading", id: "submissions" }
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+        { type: "ClassGrading", id: `submissions-${assignmentId}` },
       ],
     }) ,
 

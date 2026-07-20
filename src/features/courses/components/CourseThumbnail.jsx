@@ -15,7 +15,7 @@ const CourseThumbnail = ({
   return (
     <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${hasThumbnail ? "" : `bg-gradient-to-br ${gradient}`} ${className}`}>
       {hasThumbnail ? (
-        <img src={item.thumbnailUrl} alt={title || item.title} className={imageClassName} />
+        <img src={item.thumbnailUrl} alt={title || item.title} className={imageClassName} loading="lazy" decoding="async" />
       ) : (
         Icon && <Icon size={iconSize} className="stroke-[1.5]" />
       )}

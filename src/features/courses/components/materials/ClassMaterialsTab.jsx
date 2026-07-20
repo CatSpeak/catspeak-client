@@ -8,6 +8,7 @@ import { getFileMeta } from "../../utils/assignmentUtils"
 
 const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
   const fileInputRef = useRef(null)
+  const deleteInFlightRef = useRef(false)
 
   const getFileIcon = (fileName) => {
     const colorClass = getFileIconColorClass(fileName)
@@ -65,13 +66,15 @@ const ClassMaterialsTab = ({ id, isStudent, cd, cancelText }) => {
   }
 
   const handleDeleteMaterial = async () => {
-    if (!deleteMaterialData) return
+    if (!deleteMaterialData || deleteInFlightRef.current) return
+    deleteInFlightRef.current = true
     try {
       await deleteMaterial({ classId: id, materialId: deleteMaterialData.id }).unwrap()
       toast.success(cd.toastDeleteSuccess || "Material deleted successfully!")
     } catch {
       toast.error(cd.toastDeleteFailed || "Failed to delete material!")
     } finally {
+      deleteInFlightRef.current = false
       setDeleteMaterialData(null)
     }
   }

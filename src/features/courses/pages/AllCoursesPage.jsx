@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { useGetAllCoursesQuery } from "@/store/api/coursesApi"
@@ -23,10 +23,20 @@ const AllCoursesPage = () => {
   const [activeTab, setActiveTab] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
   const deleteHelper = useDeleteCourse(t)
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+      setCurrentPage(1)
+    }, 400)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchQuery])
+
   const { data, isLoading, error } = useGetAllCoursesQuery({
-    search: searchQuery,
+    search: debouncedSearchQuery,
     status: activeTab === "all" ? "" : activeTab.toUpperCase(),
     page: currentPage,
     pageSize: 5,
@@ -48,7 +58,6 @@ const AllCoursesPage = () => {
 
   const handleSearchChange = (value) => {
     setSearchQuery(value)
-    setCurrentPage(1)
   }
 
   return (
