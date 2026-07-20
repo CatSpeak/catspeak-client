@@ -220,7 +220,7 @@ const VideoCallRoomContent = () => {
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           {isSessionBreakoutActive && (
-            <BreakoutBanner 
+            <BreakoutBanner
               breakoutRoomName={breakoutRoomName}
               breakoutStatus={breakoutStatus}
               countdownSeconds={countdownSeconds}

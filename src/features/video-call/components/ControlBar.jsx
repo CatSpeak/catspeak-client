@@ -14,6 +14,7 @@ import {
   MoreVertical,
   Hand,
   Split,
+  LayoutGrid,
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
@@ -26,6 +27,7 @@ import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
 import { useGame } from "@/features/games/context/GameContext"
 import RecordingButton from "./RecordingButton"
+import toast from "react-hot-toast"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
@@ -107,159 +109,196 @@ const VideoCallControlBar = () => {
   const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-      <ControlButton
-        isActive={micOn}
-        isLoading={isTogglingMic}
-        onClick={handleToggleMic}
-        title={
-          micOn
-            ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
-            : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
-        }
-        iconActive={<Mic className={iconClass} />}
-        iconInactive={<MicOff className={iconClass} />}
-        className="z-10"
-      />
-
-      <ControlButton
-        isActive={cameraOn}
-        isLoading={isTogglingCam}
-        onClick={handleToggleCam}
-        title={
-          cameraOn
-            ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
-            : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
-        }
-        iconActive={<Video className={iconClass} />}
-        iconInactive={<VideoOff className={iconClass} />}
-      />
-
-      <ControlButton
-        isActive={isLocalScreenShare}
-        isLoading={isTogglingScreenShare}
-        onClick={handleToggleScreenShare}
-        title={
-          isLocalScreenShare
-            ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
-            : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
-        }
-        iconActive={<MonitorOff className={iconClass} />}
-        iconInactive={<MonitorUp className={iconClass} />}
-        className="hidden min-[769px]:flex"
-      />
-
-      <div className="relative hidden min-[769px]:block z-50">
-        <RecordingButton
-          isRecording={isRecording}
-          isTogglingRecording={isTogglingRecording}
-          onToggleRecording={handleToggleRecording}
-          onStopRecording={confirmStopRecording}
-        />
-      </div>
-
-      <ControlButton
-        isActive={showParticipants}
-        onClick={() => setShowParticipants(!showParticipants)}
-        title={t.rooms?.videoCall?.controls?.participants || "Participants"}
-        iconActive={<Users className={iconClass} />}
-        iconInactive={<Users className={iconClass} />}
-        className="hidden min-[426px]:flex"
-      />
-
-      {!isAISession && (isHost || isBreakoutActive || breakoutStatus?.isBreakoutActive) && (
+    <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="flex gap-4 w-full items-center justify-center">
         <ControlButton
-          isActive={showBreakout}
-          onClick={() => setShowBreakout(!showBreakout)}
-          title="Breakout Rooms"
-          iconActive={<Split className={iconClass} />}
-          iconInactive={<Split className={iconClass} />}
-          className="hidden min-[769px]:flex"
-        />
-      )}
-
-      <ControlButton
-        isActive={isHandRaised}
-        isLoading={isTogglingHand}
-        onClick={handleToggleHand}
-        title={isHandRaised ? "Lower hand" : "Raise hand"}
-        iconActive={<Hand className={iconClass} />}
-        iconInactive={<Hand className={iconClass} />}
-      />
-
-      <ControlBarSubtitles className="hidden min-[426px]:flex" />
-
-      <div className="relative">
-        <ControlButton
-          isActive={showChat}
-          onClick={() => setShowChat(!showChat)}
-          title={t.rooms?.videoCall?.controls?.chat || "Chat"}
-          iconActive={<MessageSquare className={iconClass} />}
-          iconInactive={<MessageSquare className={iconClass} />}
-        />
-        {unreadMessages > 0 && (
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm pointer-events-none z-10">
-            {unreadMessages > 9 ? "9+" : unreadMessages}
-          </div>
-        )}
-      </div>
-
-      <div className="relative">
-        <ControlButton
-          isActive={showMoreMenu}
-          onClick={() => setShowMoreMenu(!showMoreMenu)}
-          title={t?.rooms?.videoCall?.moreOptions || "More options"}
-          iconActive={<MoreVertical className={iconClass} />}
-          iconInactive={<MoreVertical className={iconClass} />}
-        />
-        <ControlBarMoreMenu
-          showMoreMenu={showMoreMenu}
-          setShowMoreMenu={setShowMoreMenu}
-          setShowGameModal={setShowGameModal}
-        />
-      </div>
-
-      <ControlButton
-        isActive={true}
-        onClick={() => {
-          if (isHost && isBreakoutActive) {
-            toast.error("Bạn không thể rời phòng khi đang chia nhóm nhỏ. Vui lòng đóng tất cả phòng thảo luận trước.")
-            return
+          isActive={micOn}
+          isLoading={isTogglingMic}
+          onClick={handleToggleMic}
+          title={
+            micOn
+              ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
+              : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
           }
-          promptLeaveCall()
-        }}
-        title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
-        iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
-        iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
-        activeClassOverride="bg-[#d40018] text-white hover:bg-[#e7001a]"
-      />
-
-      {showStopModal && (
-        <StopRecordingModal
-          open={showStopModal}
-          onClose={cancelStopRecording}
-          onConfirm={confirmStopRecording}
+          iconActive={<Mic className={iconClass} />}
+          iconInactive={<MicOff className={iconClass} />}
+          className="z-10"
+          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
         />
-      )}
 
-      {showLeaveModal && (
-        <LeaveCallModal
-          open={showLeaveModal}
-          onClose={cancelLeaveCall}
-          isHost={isHost}
-          isBreakoutActive={isBreakoutActive}
-          onConfirm={() => {
+        <ControlButton
+          isActive={cameraOn}
+          isLoading={isTogglingCam}
+          onClick={handleToggleCam}
+          title={
+            cameraOn
+              ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
+              : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
+          }
+          iconActive={<Video className={iconClass} />}
+          iconInactive={<VideoOff className={iconClass} />}
+          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+        />
+
+        <ControlButton
+          isActive={isLocalScreenShare}
+          isLoading={isTogglingScreenShare}
+          onClick={handleToggleScreenShare}
+          title={
+            isLocalScreenShare
+              ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
+              : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
+          }
+          iconActive={<MonitorOff className={iconClass} />}
+          iconInactive={<MonitorUp className={iconClass} />}
+          className="hidden min-[769px]:flex"
+          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+
+        />
+
+        <div className="relative hidden min-[769px]:block z-50">
+          <RecordingButton
+            isRecording={isRecording}
+            isTogglingRecording={isTogglingRecording}
+            onToggleRecording={handleToggleRecording}
+            onStopRecording={confirmStopRecording}
+          />
+        </div>
+
+        {!isAISession && (isHost || isBreakoutActive || breakoutStatus?.isBreakoutActive) && (
+          <ControlButton
+            isActive={showBreakout}
+            onClick={() => setShowBreakout(!showBreakout)}
+            title="Breakout Rooms"
+            iconActive={<Split className={iconClass} />}
+            iconInactive={<Split className={iconClass} />}
+            className="hidden min-[769px]:flex"
+            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+
+          />
+        )}
+
+        <ControlButton
+          isActive={isHandRaised}
+          isLoading={isTogglingHand}
+          onClick={handleToggleHand}
+          title={isHandRaised ? "Lower hand" : "Raise hand"}
+          iconActive={<Hand className={iconClass} />}
+          iconInactive={<Hand className={iconClass} />}
+          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+        />
+
+        {/* <ControlBarSubtitles className="hidden min-[426px]:flex" /> */}
+
+        <div className="relative">
+          <ControlButton
+            isActive={showMoreMenu}
+            onClick={() => setShowMoreMenu(!showMoreMenu)}
+            title={t?.rooms?.videoCall?.moreOptions || "More options"}
+            iconActive={<MoreVertical className={iconClass} />}
+            iconInactive={<MoreVertical className={iconClass} />}
+            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          />
+          <ControlBarMoreMenu
+            showMoreMenu={showMoreMenu}
+            setShowMoreMenu={setShowMoreMenu}
+            setShowGameModal={setShowGameModal}
+          />
+        </div>
+
+        <ControlButton
+          isActive={true}
+          onClick={() => {
             if (isHost && isBreakoutActive) {
-              toast.error("Vui lòng đóng tất cả phòng nhỏ trước khi rời phòng.")
+              toast.error("Bạn không thể rời phòng khi đang chia nhóm nhỏ. Vui lòng đóng tất cả phòng thảo luận trước.")
               return
             }
-            cancelLeaveCall()
-            handleLeaveSession()
+            promptLeaveCall()
           }}
+          title={t?.rooms?.videoCall?.leaveCall || "Leave call"}
+          iconActive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
+          iconInactive={<Phone className={`rotate-[135deg] ${iconClass}`} />}
+          activeClassOverride="bg-[#990011] text-white hover:bg-[#e7001a] w-[62px]"
         />
-      )}
+      </div>
 
-    </div>
+
+      <div className="flex justify-end mr-4">
+        <div className="relative text-base">
+          <ControlButton
+            isActive={showParticipants}
+            onClick={() => setShowParticipants(!showParticipants)}
+            title={t.rooms?.videoCall?.controls?.participants || "Participants"}
+            iconActive={<Users size={20} />}
+            iconInactive={<Users size={20} />}
+            className="hidden min-[426px]:flex w-[58px]"
+            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          >
+            {
+              participants.length > 0 && (
+                <div className={`${showParticipants ? "text-white" : "text-black"} ml-1.5 text-base font-medium`}>
+                  {participants.length}
+                </div>
+              )
+            }
+          </ControlButton>
+
+        </div>
+
+        <div className="relative">
+          <ControlButton
+            isActive={showChat}
+            onClick={() => setShowChat(!showChat)}
+            title={t.rooms?.videoCall?.controls?.chat || "Chat"}
+            iconActive={<MessageSquare size={20} />}
+            iconInactive={<MessageSquare size={20} />}
+            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          />
+          {unreadMessages > 0 && (
+            <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm pointer-events-none z-10">
+              {unreadMessages > 9 ? "9+" : unreadMessages}
+            </div>
+          )}
+        </div>
+
+        <ControlButton
+          isActive={false}
+          onClick={() => { alert("change layout") }}
+          iconActive={<LayoutGrid size={20} />}
+          iconInactive={<LayoutGrid size={20} />}
+          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+        />
+      </div>
+
+      {
+        showStopModal && (
+          <StopRecordingModal
+            open={showStopModal}
+            onClose={cancelStopRecording}
+            onConfirm={confirmStopRecording}
+          />
+        )
+      }
+
+      {
+        showLeaveModal && (
+          <LeaveCallModal
+            open={showLeaveModal}
+            onClose={cancelLeaveCall}
+            isHost={isHost}
+            isBreakoutActive={isBreakoutActive}
+            onConfirm={() => {
+              if (isHost && isBreakoutActive) {
+                toast.error("Vui lòng đóng tất cả phòng nhỏ trước khi rời phòng.")
+                return
+              }
+              cancelLeaveCall()
+              handleLeaveSession()
+            }}
+          />
+        )
+      }
+    </div >
   );
 }
 

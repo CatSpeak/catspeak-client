@@ -38,13 +38,12 @@ const RecordingButton = ({
         onClick={onToggleRecording}
         disabled={isTogglingRecording}
         title={title}
-        className={`flex items-center justify-center rounded-full transition-all duration-300 shadow-sm h-12 relative overflow-hidden ${
-          isTogglingRecording
-            ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black w-12"
-            : isRecording
-              ? "bg-red-600 hover:bg-red-700 text-white px-4"
-              : "bg-[#F2F2F2] hover:bg-[#D9D9D9] text-black w-12"
-        }`}
+        className={`flex items-center justify-center rounded-full transition-all duration-300 shadow-sm h-12 relative overflow-hidden ${isTogglingRecording
+          ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black w-12"
+          : isRecording
+            ? "bg-red-600 hover:bg-red-700 text-white px-4"
+            : "hover:bg-[#D9D9D9] text-black w-12"
+          }`}
       >
         {isTogglingRecording ? (
           <div className="absolute inset-0 flex items-center justify-center">
