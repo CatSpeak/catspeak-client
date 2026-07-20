@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectCurrentToken } from "@/store/slices/authSlice";
+import { selectCurrentToken, selectCurrentUser } from "@/store/slices/authSlice";
+import { reelsApi } from "@/store/api/reelsApi";
 import {
   selectGlobalUploads,
   setUploads,
@@ -158,9 +159,59 @@ export const useGlobalUpload = () => {
 
 export const GlobalUploadSync = () => {
   const uploads = useSelector(selectGlobalUploads);
+  const user = useSelector(selectCurrentUser);
   const isConfirmingReload = useSelector(selectIsConfirmingReload);
   const dispatch = useDispatch();
   const { lang } = useLanguage();
+
+  // Background polling for stuck uploads (e.g. after F5 reload)
+  useEffect(() => {
+    const processingUploads = uploads.filter(
+      (u) => u.status === "PROCESSING" && u.isRestored
+    );
+
+    if (processingUploads.length === 0 || !user || (!user.userId && !user.id)) return;
+    
+    const actualUserId = user.userId || user.id;
+
+    const interval = setInterval(async () => {
+      try {
+        const result = await dispatch(
+          reelsApi.endpoints.getUserReels.initiate(
+            { userId: actualUserId, page: 1, pageSize: 10 },
+            { forceRefetch: true }
+          )
+        );
+
+        if (result.data) {
+          processingUploads.forEach((task) => {
+            const isTimeout = Date.now() - task.timestamp > 180000;
+            const foundReel = result.data.find(r => r.title === task.title);
+
+            if (foundReel) {
+              dispatch(
+                updateUpload({
+                  id: task.id,
+                  updates: { status: "SUCCESS", progress: 100, completionTime: Date.now() },
+                })
+              );
+            } else if (isTimeout) {
+              dispatch(
+                updateUpload({
+                  id: task.id,
+                  updates: { status: "ERROR", completionTime: Date.now() },
+                })
+              );
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [uploads, user, dispatch]);
 
   // Restore on mount
   useEffect(() => {
