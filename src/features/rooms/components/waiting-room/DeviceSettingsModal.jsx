@@ -91,7 +91,7 @@ const DeviceSettingsModal = ({
       title={t?.rooms?.waitingScreen?.deviceSettings || "Device Settings"}
       className="max-w-[600px] flex flex-col"
       headerClassName="flex items-center justify-between p-6"
-      bodyClassName="px-6 pb-6 flex-1 overflow-y-auto flex flex-col gap-6"
+      bodyClassName="px-6 pb-6 flex-1 overflow-y-auto flex flex-col gap-3"
     >
       <Dropdown
         options={mapToOptions(devices.audioinput, <Mic size={16} />)}
@@ -114,7 +114,7 @@ const DeviceSettingsModal = ({
             isSinkSupported
               ? t?.rooms?.waitingScreen?.selectSpeaker || "Select Speaker"
               : t?.rooms?.waitingScreen?.systemDefaultSpeaker ||
-                "System Default Speaker"
+              "System Default Speaker"
           }
           disabled={!isSinkSupported}
           className="w-full"
