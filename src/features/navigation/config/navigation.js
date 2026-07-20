@@ -1,3 +1,4 @@
+import { websites } from "@/features/navigation/config/websites";
 import {
   Home,
   LayoutDashboard,
@@ -13,7 +14,6 @@ import {
   Film,
   Mail,
   BookOpen,
-  Video,
 } from "lucide-react";
 
 export const navLinks = [
@@ -31,6 +31,7 @@ export const navLinks = [
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
+  ...websites,
   {
     key: "workspace",
     hasDropdown: true,
@@ -66,7 +67,7 @@ export const navLinks = [
 export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
-  { key: "systemConfig", path: "/setting/system", icon: Settings }
+  { key: "systemConfig", path: "/setting/system", icon: Settings },
 ];
 
 export const footerLinks = [

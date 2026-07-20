@@ -7,7 +7,11 @@ export const useActiveLink = () => {
 
   // Resolves the path with the current language prefix if needed
   const resolvePath = (p) => {
-    if (p && (p.startsWith('/community') || p.startsWith('/cat-speak'))) {
+    if (!p) return p
+    if (p.startsWith('/website')) {
+      return `/${currentLang}/cat-speak${p}`
+    }
+    if (p.startsWith('/community') || p.startsWith('/cat-speak')) {
       return `/${currentLang}${p}`
     }
     return p
@@ -16,12 +20,21 @@ export const useActiveLink = () => {
   // Checks if a navigation item or its dropdown sub-items are active
   const checkIsActive = (item) => {
     if (item.hasDropdown && item.subItems && item.subItems.length > 0) {
-      return item.subItems.some(sub => location.pathname.startsWith(resolvePath(sub.path)))
+      return item.subItems.some((sub) => {
+        if (sub.hasDropdown && sub.subItems && sub.subItems.length > 0) {
+          return sub.subItems.some((nestedSub) => {
+            const res = resolvePath(nestedSub.path)
+            return res && location.pathname.startsWith(res)
+          })
+        }
+        const res = resolvePath(sub.path)
+        return res && location.pathname.startsWith(res)
+      })
     }
-    
+
     const resolvedPath = resolvePath(item.path)
     if (!resolvedPath) return false
-    
+
     return location.pathname.startsWith(resolvedPath)
   }
 
