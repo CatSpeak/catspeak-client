@@ -59,8 +59,12 @@ const NormalVideoLayout = ({
     if (count === 2)
       return "w-full h-[calc(50%-2px)] md:w-[calc(50%-2px)] md:h-full flex-shrink-0"
 
-    // 3, 4 items: 50% width, 50% height to perfectly fill the screen without scrolling
-    if (count === 3 || count === 4)
+    // 3 items: Mobile -> 1 col 3 rows, Desktop -> 2 cols 2 rows (like 4 items)
+    if (count === 3)
+      return "w-full h-[calc(33.333%-2.66px)] md:w-[calc(50%-2px)] md:h-[calc(50%-2px)] md:min-h-[250px] flex-shrink-0"
+
+    // 4 items: 50% width, 50% height to perfectly fill the screen without scrolling (2 cols 2 rows)
+    if (count === 4)
       return "w-[calc(50%-2px)] h-[calc(50%-2px)] min-h-[250px] flex-shrink-0"
 
     // 5, 6 items: Mobile -> 2 cols 3 rows, Desktop -> 3 cols 2 rows
