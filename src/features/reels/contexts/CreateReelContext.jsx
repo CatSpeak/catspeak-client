@@ -317,21 +317,12 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   }, [lockedChallengeHashtag, videoPreviewUrl, coverPreviewUrl, onClose])
 
   const handleMinimize = useCallback(() => {
-    if (isUploading && currentUploadId) {
-      revealUpload(currentUploadId);
-    }
     if (onClose) onClose();
-  }, [isUploading, currentUploadId, revealUpload, onClose]);
+  }, [onClose]);
 
   const handleCancelUpload = useCallback(() => {
-    if (isUploading && currentUploadId) {
-      cancelGlobalUpload(currentUploadId);
-      setIsUploading(false);
-      setCurrentUploadId(null);
-    }
-    // Also run standard close resetting logic
     handleClose();
-  }, [isUploading, currentUploadId, cancelGlobalUpload, handleClose]);
+  }, [handleClose]);
 
   // Revoke object URLs on unmount to avoid memory leaks
   useEffect(() => {
@@ -968,19 +959,18 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
         url: "/reels",
         method: "POST",
         data: formData,
-        isHidden: true, // Hide from global widget initially
+        isHidden: false, // Show in global widget immediately
         title: t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới", // Fallback if translation is missing
         onUploadSuccess: () => {
-          setIsUploading(false);
           toast.success(t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!");
-          handleClose(); // Close modal when done if it's still open
         },
         onUploadError: () => {
-          setIsUploading(false);
+          // Error handling is managed globally
         }
       });
 
-      setCurrentUploadId(id);
+      // Close modal immediately and let global widget handle the progress
+      if (onClose) onClose();
 
     } catch (err) {
       setGeneralError(err?.data?.message || err?.message || t?.catSpeak?.reels?.uploadFailed || "Failed to upload Reel. Please try again.")

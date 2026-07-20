@@ -115,14 +115,6 @@ const CreateReelModalContent = ({ open }) => {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleMinimize}
-                  className="p-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-400 hover:text-gray-600 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
-                  title="Minimize"
-                >
-                  <Minus size={16} />
-                </button>
-                <button
-                  type="button"
                   onClick={handleDiscardVideo}
                   className="p-2 border border-gray-200 bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
                   title="Discard video"
