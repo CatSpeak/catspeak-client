@@ -103,6 +103,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                     key={item.key}
                     onClick={() => setActiveDrilldownItem(item)}
                     className={getNavItemClasses(false, false)}
+                    title={label}
                   >
                     <NavIcon
                       img={item.img}
@@ -168,11 +169,18 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
           <button
             onClick={() => setActiveDrilldownItem(null)}
             className="relative flex items-center justify-center w-full px-1 h-12 hover:bg-[#F2F2F2] rounded-lg transition-colors"
+            title={
+              activeDrilldownItem
+                ? t.nav?.[activeDrilldownItem.key] ||
+                  activeDrilldownItem.label ||
+                  activeDrilldownItem.key
+                : undefined
+            }
           >
             <ChevronLeft size={20} className="absolute left-1" />
             {activeDrilldownItem && (
               <span
-                className="font-semibold"
+                className="font-semibold truncate max-w-[80%]"
                 style={
                   activeDrilldownItem.color
                     ? { color: activeDrilldownItem.color }

@@ -25,6 +25,7 @@ const DesktopNavSubItem = ({
       to={to}
       className={({ isActive }) => getNavItemClasses(isActive, !isFlyout)}
       onClick={onClick}
+      title={label}
     >
       {img && !imgError ? (
         <img

@@ -30,6 +30,7 @@ const DesktopNavDropdown = ({
           }
         }}
         className={getNavItemClasses(false, false, isDocked)}
+        title={label}
       >
         {img && !imgError ? (
           <img
@@ -74,8 +75,9 @@ const DesktopNavDropdown = ({
       {isDocked && (
         <div className="absolute left-full ml-2 top-0 bg-white border border-gray-200 rounded-lg shadow-lg w-56 opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200 z-[100] flex flex-col p-2 pointer-events-auto text-gray-900">
           <div
-            className="px-3 pb-2 mb-2 border-b border-gray-100 text-sm font-medium text-gray-900"
+            className="px-3 pb-2 mb-2 border-b border-gray-100 text-sm font-medium text-gray-900 truncate"
             style={color ? { color } : undefined}
+            title={label}
           >
             {label}
           </div>
