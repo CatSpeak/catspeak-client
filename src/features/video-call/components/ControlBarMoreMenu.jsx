@@ -15,6 +15,10 @@ import {
   Gamepad2,
   History,
   Split,
+  Volume2,
+  Settings,
+  Info,
+  ChevronLeft
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
@@ -34,6 +38,7 @@ import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
 import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
 import { useGame } from "@/features/games/context/GameContext";
 import MenuItem from "@/shared/components/ui/MenuItem";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
@@ -64,10 +69,14 @@ const ControlBarMoreMenu = ({
     isTogglingRecording,
     handleToggleRecording,
     confirmStopRecording,
+    isLocalScreenShare,
+    isTogglingScreenShare,
+    handleToggleScreenShare,
   } = useGlobalVideoCall();
 
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [showGameHistory, setShowGameHistory] = useState(false);
+  const [showMobileSettings, setShowMobileSettings] = useState(false);
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall);
 
@@ -117,7 +126,7 @@ const ControlBarMoreMenu = ({
         {showMoreMenu && (
           <>
             <div
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 z-40 bg-black/40 md:bg-transparent"
               onClick={() => setShowMoreMenu(false)}
             />
             <FluentAnimation
@@ -126,9 +135,9 @@ const ControlBarMoreMenu = ({
               distance={15}
               exit={true}
               duration={0.2}
-              className="absolute bottom-[110%] right-0 z-50 mb-2 min-w-56 max-w-72 w-full"
+              className="fixed inset-x-0 bottom-0 md:absolute md:inset-x-auto md:bottom-[110%] md:right-0 z-50 md:mb-2 md:min-w-56 md:max-w-72 w-full"
             >
-              <div className="w-full overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
+              <div className="w-full overflow-hidden rounded-t-[24px] md:rounded-lg border border-[#E5E5E5] bg-white shadow-lg pb-safe md:pb-0">
                 <AnimatePresence mode="wait" initial={false}>
                   {!showSubtitlePicker || isSubtitleActive || isAISession ? (
                     <FluentAnimation
@@ -140,7 +149,7 @@ const ControlBarMoreMenu = ({
                       duration={0.2}
                       className="w-full"
                     >
-                      <div className="flex flex-col">
+                      <div className="hidden md:flex flex-col">
                         <MenuItem
                           onClick={() => {
                             setShowMoreMenu(false);
@@ -311,6 +320,163 @@ const ControlBarMoreMenu = ({
                             "Troubleshoot connection"
                           }
                         />
+                      </div>
+
+                      {/* MOBILE VIEW */}
+                      <div className="flex md:hidden flex-col px-4 pb-6 pt-2 w-full">
+                        <div className="w-full flex justify-center pb-4 cursor-pointer shrink-0" onClick={() => setShowMoreMenu(false)}>
+                          <div className="w-10 h-1.5 bg-[#D9D9D9] rounded-full" />
+                        </div>
+
+                        <AnimatePresence mode="wait">
+                          {!showMobileSettings ? (
+                            <motion.div
+                              key="mobile-main"
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -20 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex flex-col gap-3"
+                            >
+                              <button
+                                onClick={() => {
+                                  setShowMoreMenu(false);
+                                  if (ongoingGame) spectateGame();
+                                  else if (isHost) setShowGameSetup(true);
+                                }}
+                                disabled={!isHost && !ongoingGame}
+                                className="w-full h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center gap-2 font-medium disabled:opacity-50"
+                              >
+                                <Gamepad2 size={20} />
+                                {ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Trò chơi")}
+                              </button>
+
+                              <div className="grid grid-cols-3 gap-3">
+                                <button
+                                  onClick={() => {
+                                    handleToggleScreenShare();
+                                    setShowMoreMenu(false);
+                                  }}
+                                  disabled={isTogglingScreenShare}
+                                  className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${isLocalScreenShare ? 'bg-red-100 text-red-600' : 'bg-[#F5F5F5]'}`}
+                                >
+                                  {isLocalScreenShare ? <MonitorOff size={24} /> : <MonitorUp size={24} />}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (isAISession) {
+                                      setShowCC(!showCC);
+                                      setShowMoreMenu(false);
+                                    } else {
+                                      if (isSubtitleActive) {
+                                        stopSubtitles();
+                                        setShowMoreMenu(false);
+                                      } else {
+                                        setShowSubtitlePicker(true);
+                                      }
+                                    }
+                                  }}
+                                  className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${(isAISession ? showCC : isSubtitleActive) ? 'bg-red-100 text-red-600' : 'bg-[#F5F5F5]'}`}
+                                >
+                                  <Captions size={24} />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (isRecording) {
+                                      confirmStopRecording();
+                                    } else {
+                                      handleToggleRecording();
+                                    }
+                                    setShowMoreMenu(false);
+                                  }}
+                                  disabled={isTogglingRecording}
+                                  className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${isRecording ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-[#F5F5F5]'}`}
+                                >
+                                  {isTogglingRecording ? <Loader2 size={24} className="animate-spin" /> : <Circle size={24} className={isRecording ? 'fill-red-600 text-red-600' : ''} />}
+                                </button>
+                              </div>
+
+                              <button
+                                onClick={handleCopyLink}
+                                className="w-full h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center gap-2 font-medium"
+                              >
+                                <Copy size={20} />
+                                {t?.rooms?.videoCall?.copyLink || "Sao chép liên kết"}
+                              </button>
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <button
+                                  onClick={() => setShowMobileSettings(true)}
+                                  className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"
+                                >
+                                  <Settings size={24} />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setShowTroubleshoot(!showTroubleshoot);
+                                    setShowMoreMenu(false);
+                                  }}
+                                  className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"
+                                >
+                                  <Info size={24} />
+                                </button>
+                              </div>
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="mobile-settings"
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: 20 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex flex-col"
+                            >
+                              <button
+                                onClick={() => setShowMobileSettings(false)}
+                                className="flex items-center gap-2 font-semibold text-base pb-3 border-b border-[#e5e5e5] mb-2"
+                              >
+                                <ChevronLeft size={20} /> Quay lại
+                              </button>
+
+                              {/* <MenuItem
+                                onClick={() => {
+                                  setShowMoreMenu(false);
+                                  if (ongoingGame) spectateGame();
+                                  else if (isHost) setShowGameSetup(true);
+                                }}
+                                disabled={!isHost && !ongoingGame}
+                                icon={<Gamepad2 size={20} />}
+                                label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
+                              /> */}
+                              <MenuItem
+                                onClick={() => { setShowMoreMenu(false); setShowGameHistory(true); }}
+                                icon={<History size={20} />}
+                                label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
+                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
+                              />
+                              {!isAISession && (isHost || isBreakoutActive) && (
+                                <MenuItem
+                                  onClick={() => { setShowBreakout(!showBreakout); setShowMoreMenu(false); }}
+                                  icon={<Split size={20} />}
+                                  label={t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
+                                  hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
+                                />
+                              )}
+                              <MenuItem
+                                onClick={() => { setShowVirtualBackground(!showVirtualBackground); setShowMoreMenu(false); }}
+                                icon={<Sparkles size={20} />}
+                                label={t?.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"}
+                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
+                              />
+                              <MenuItem
+                                onClick={() => { setShowAvatarPicker(!showAvatarPicker); setShowMoreMenu(false); }}
+                                icon={<UserCircle size={20} />}
+                                label={t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
+                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
+                              />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </FluentAnimation>
                   ) : (
