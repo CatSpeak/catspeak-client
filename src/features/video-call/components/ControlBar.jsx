@@ -156,27 +156,9 @@ const VideoCallControlBar = () => {
 
         />
 
-        <div className="relative hidden min-[769px]:block z-50">
-          <RecordingButton
-            isRecording={isRecording}
-            isTogglingRecording={isTogglingRecording}
-            onToggleRecording={handleToggleRecording}
-            onStopRecording={confirmStopRecording}
-          />
-        </div>
 
-        {!isAISession && (isHost || isBreakoutActive || breakoutStatus?.isBreakoutActive) && (
-          <ControlButton
-            isActive={showBreakout}
-            onClick={() => setShowBreakout(!showBreakout)}
-            title="Breakout Rooms"
-            iconActive={<Split className={iconClass} />}
-            iconInactive={<Split className={iconClass} />}
-            className="hidden min-[769px]:flex"
-            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
 
-          />
-        )}
+
 
         <ControlButton
           isActive={isHandRaised}
@@ -298,6 +280,7 @@ const VideoCallControlBar = () => {
           />
         )
       }
+
     </div >
   );
 }

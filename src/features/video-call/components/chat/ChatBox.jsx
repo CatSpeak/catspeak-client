@@ -85,7 +85,7 @@ const ChatBox = ({
   return (
     <div className={`relative flex h-full flex-col bg-white ${className}`}>
       {/* Tab Bar */}
-      <div className="flex items-center shrink-0 px-4 pt-3 pb-2 gap-2">
+      <div className="flex items-center shrink-0 px-2 pt-3 pb-2 gap-2">
         {/* Room Chat Tab */}
         <PillButton
           onClick={() => setActiveTab("room")}

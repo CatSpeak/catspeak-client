@@ -24,6 +24,8 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls";
 import SubtitleLanguagePicker from "./SubtitleLanguagePicker";
+import { useRecordingStatus } from "@/features/video-call/hooks/useRecordingStatus";
+import ProgressBar from "@/shared/components/ui/ProgressBar";
 import {
   useParticipants,
   useLocalParticipant,
@@ -58,12 +60,19 @@ const ControlBarMoreMenu = ({
     user,
     showBreakout,
     setShowBreakout,
+    isRecording,
+    isTogglingRecording,
+    handleToggleRecording,
+    confirmStopRecording,
   } = useGlobalVideoCall();
 
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [showGameHistory, setShowGameHistory] = useState(false);
 
-  const { isBreakoutActive } = useSelector((s) => s.videoCall);
+  const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall);
+
+  // Need to import useGetBreakoutStatusQuery, oh wait, I didn't import it in the file! I will just use the one from videoCall context if possible?
+  // Let me just import it manually here in the chunk by fixing the top imports.
 
   const {
     isSubtitleActive,
@@ -72,6 +81,15 @@ const ControlBarMoreMenu = ({
     startSubtitles,
     stopSubtitles,
   } = useSubtitleControls();
+
+  const {
+    formattedTime,
+    totalUsedMb,
+    limitMb,
+    usagePercent,
+    isDanger,
+    isWarning,
+  } = useRecordingStatus(isRecording, confirmStopRecording);
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
 
@@ -167,9 +185,52 @@ const ControlBarMoreMenu = ({
                             }}
                             icon={<Split size={20} />}
                             label={t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
-                            className="min-[769px]:hidden"
                           />
                         )}
+
+                        <div className="flex flex-col">
+                          <MenuItem
+                            onClick={() => {
+                              if (isRecording) {
+                                confirmStopRecording();
+                              } else {
+                                handleToggleRecording();
+                              }
+                              setShowMoreMenu(false);
+                            }}
+                            disabled={isTogglingRecording}
+                            icon={
+                              isTogglingRecording ? (
+                                <Loader2 size={20} className="animate-spin" />
+                              ) : isRecording ? (
+                                <Circle size={20} className="text-red-600 fill-red-600 animate-pulse" />
+                              ) : (
+                                <Circle size={20} />
+                              )
+                            }
+                            label={
+                              isRecording
+                                ? (t?.rooms?.videoCall?.controls?.recordOff || "Stop recording")
+                                : (t?.rooms?.videoCall?.controls?.recordOn || "Start recording")
+                            }
+                            rightText={isRecording ? <span className="font-semibold text-red-600">{formattedTime}</span> : undefined}
+                          />
+                          {isRecording && (
+                            <div className="px-4 pb-2 pt-1">
+                              <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
+                                <span>Storage</span>
+                                <span>{totalUsedMb.toFixed(1)}MB / {limitMb.toFixed(0)}MB</span>
+                              </div>
+                              <ProgressBar
+                                progress={usagePercent}
+                                heightClass="h-1.5"
+                                trackColorClass="bg-[#F2F2F2]"
+                                colorClass={isDanger ? "bg-red-500 animate-pulse" : isWarning ? "bg-amber-500" : "bg-emerald-500"}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        {/* <div className="border-t border-[#E5E5E5]"></div> */}
 
                         <MenuItem
                           onClick={() => {
@@ -233,11 +294,11 @@ const ControlBarMoreMenu = ({
                           />
                         )}
 
-                        <MenuItem
+                        {/* <MenuItem
                           onClick={handleCopyLink}
                           icon={<Copy size={20} />}
                           label={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
-                        />
+                        /> */}
 
                         <MenuItem
                           onClick={() => {
