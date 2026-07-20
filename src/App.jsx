@@ -14,25 +14,31 @@ import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { ScrollToTopButton } from "@/shared/components/ui/buttons"
+import { GlobalUploadSync } from "@/shared/hooks/useGlobalUpload.jsx"
+import GlobalUploadWidget from "@/shared/components/ui/progress/GlobalUploadWidget"
+import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 
 function App() {
   return (
     <Provider store={store}>
       <GlobalVideoCallProvider>
-        <NavigationProgress />
-        <ServerDownScreen />
-        <SidebarProvider>
-          <ConversationSignalRProvider>
-            <GlobalPresenceProvider>
-              <GlobalSignalRHandler />
-              <Toaster position="top-center" limit={1} />
-              <ScrollToTopButton />
-              <AppRouter />
-              <PiPWidget />
-            </GlobalPresenceProvider>
-          </ConversationSignalRProvider>
-        </SidebarProvider>
-      </GlobalVideoCallProvider>
+          <NavigationProgress />
+          <ServerDownScreen />
+          <SidebarProvider>
+            <ConversationSignalRProvider>
+              <GlobalPresenceProvider>
+                <GlobalSignalRHandler />
+                <Toaster position="top-center" limit={1} />
+                <ScrollToTopButton />
+                <AppRouter />
+                <PiPWidget />
+                <GlobalUploadWidget />
+                <RecordingPoller />
+                <GlobalUploadSync />
+              </GlobalPresenceProvider>
+            </ConversationSignalRProvider>
+          </SidebarProvider>
+        </GlobalVideoCallProvider>
     </Provider>
   )
 }
