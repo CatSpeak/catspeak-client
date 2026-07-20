@@ -23,17 +23,20 @@ const MobileNavItem = ({ navKey, onClose }) => {
     href = "/";
   }
 
+  const label = t.nav?.[navKey] || navKey;
+
   return (
     <NavLink
       to={href}
       onClick={onClose}
-      className={`flex items-center px-3 h-10 text-sm rounded-[5px] transition-colors ${
+      title={label}
+      className={`flex items-center px-3 h-10 w-full text-sm rounded-[5px] transition-colors min-w-0 ${
         isActive
           ? "text-cath-red-700 bg-[#F2F2F2] hover:bg-[#E6E6E6]"
           : "hover:bg-[#F2F2F2]"
       }`}
     >
-      {t.nav[navKey]}
+      <span className="truncate min-w-0">{label}</span>
     </NavLink>
   );
 };

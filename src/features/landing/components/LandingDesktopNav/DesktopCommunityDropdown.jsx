@@ -88,6 +88,8 @@ const DesktopCommunityDropdown = ({ navKey }) => {
     navigate(`/${currentCommunity}/community`)
   }
 
+  const label = selectedLabel || t.nav?.[navKey] || "Community"
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div
@@ -100,9 +102,10 @@ const DesktopCommunityDropdown = ({ navKey }) => {
         {/* Community navigation */}
         <div
           onClick={handleCommunityClick}
-          className="h-10 flex items-center pl-6 pr-1 rounded-l-full cursor-pointer hover:bg-gray-100/50 transition-colors"
+          title={label}
+          className="h-10 w-28 flex items-center justify-center pl-4 pr-1 rounded-l-full cursor-pointer hover:bg-gray-100/50 transition-colors shrink-0 min-w-0"
         >
-          {selectedLabel || t.nav?.[navKey]}
+          <span className="truncate min-w-0">{label}</span>
         </div>
 
         {/* Dropdown toggle */}
@@ -112,7 +115,8 @@ const DesktopCommunityDropdown = ({ navKey }) => {
               e.stopPropagation()
               setIsOpen((prev) => !prev)
             }}
-            className="h-10 w-8 flex items-center justify-center rounded-r-full hover:bg-gray-100/50 transition-colors cursor-pointer"
+            title={label}
+            className="h-10 w-8 flex items-center justify-center rounded-r-full hover:bg-gray-100/50 transition-colors cursor-pointer shrink-0"
           >
             <ChevronDown
               className={`transition-transform duration-200 ${

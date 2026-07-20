@@ -31,11 +31,13 @@ const DesktopNavItem = ({ navKey, color, img }) => {
     href = "/";
   }
 
+  const label = t.nav?.[navKey] || (navKey === "workspace" ? "My Workspace" : navKey);
+
   return (
     <NavLink
       to={href}
-      className="flex min-w-max h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 text-base font-bold tracking-wide transition-colors duration-200 no-underline hover:bg-gray-100/50
-        text-black hover:text-[#990011]"
+      title={label}
+      className="flex h-10 w-36 shrink-0 items-center justify-center gap-2 rounded-full px-3 text-base font-bold tracking-wide transition-colors duration-200 no-underline hover:bg-gray-100/50 text-black hover:text-[#990011]"
       style={color ? { color } : undefined}
     >
       {img && !imgError ? (
@@ -48,7 +50,7 @@ const DesktopNavItem = ({ navKey, color, img }) => {
       ) : img !== undefined ? (
         <Globe size={18} className="shrink-0" style={color ? { color } : undefined} />
       ) : null}
-      <span>{t.nav?.[navKey] || (navKey === "workspace" ? "My Workspace" : navKey)}</span>
+      <span className="truncate min-w-0">{label}</span>
     </NavLink>
   );
 };
