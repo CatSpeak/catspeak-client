@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Globe, Users, Lock } from "lucide-react"
-import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useCreateReelMutation,
   useSearchReelHashtagsQuery,
@@ -316,12 +316,13 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   // Handle modal success reset
   useEffect(() => {
     if (isSuccess) {
+      toast.success(t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully")
       const timer = setTimeout(() => {
         handleClose()
       }, 0)
       return () => clearTimeout(timer)
     }
-  }, [isSuccess, handleClose])
+  }, [isSuccess, handleClose, t])
 
   // Discard/Clear video file
   const handleDiscardVideo = () => {
@@ -903,10 +904,10 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
     // Validate requirements
     const errors = {}
     if (!videoFile) {
-      errors.video = "A video file is required."
+      errors.video = t?.catSpeak?.reels?.videoRequiredError || "A video file is required."
     }
     if (!title.trim()) {
-      errors.title = "A title is required."
+      errors.title = t?.catSpeak?.reels?.titleRequiredError || "A title is required."
     }
 
     if (Object.keys(errors).length > 0) {
@@ -932,10 +933,7 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
       await createReel(formData).unwrap()
       toast.success("Reel uploaded successfully!")
     } catch (err) {
-      console.error("Reel upload error:", err)
-      const errorMessage = err?.data?.message || err?.message || "Failed to upload Reel. Please try again."
-      setGeneralError(errorMessage)
-      toast.error(errorMessage)
+      setGeneralError(err?.data?.message || err?.message || t?.catSpeak?.reels?.uploadFailed || "Failed to upload Reel. Please try again.")
     }
   }
 
