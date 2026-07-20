@@ -94,6 +94,8 @@ const IDLE_VALUE = {
   setUnreadAiChat: () => { },
   setIsChatCollapsed: () => { },
   setIsAiCollapsed: () => { },
+  layoutMode: "auto",
+  setLayoutMode: () => { },
 }
 
 const IdleCallContent = ({

@@ -78,6 +78,7 @@ const GlobalCallContent = ({
     eyeBrighten: 0,
     teethWhiten: 0,
   })
+  const [layoutMode, setLayoutMode] = useState("auto")
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -405,6 +406,8 @@ const GlobalCallContent = ({
     cancelStopRecording: recordingState.cancelStopRecording,
     egressId: egressId,
     startedByAccountId: startedByAccountId,
+    layoutMode,
+    setLayoutMode,
   }
 
   return (

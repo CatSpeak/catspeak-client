@@ -54,13 +54,13 @@ const RightSideControls = ({ className = "" }) => {
         )}
       </div>
 
-      <ControlButton
+      {/* <ControlButton
         isActive={false}
         onClick={() => { alert("change layout") }}
         iconActive={<LayoutGrid size={20} />}
         iconInactive={<LayoutGrid size={20} />}
         inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
-      />
+      /> */}
     </div>
   );
 };
