@@ -93,7 +93,7 @@ const VideoTile = ({ participant, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`group relative h-full w-full min-h-[100px] overflow-hidden rounded-2xl transition-all duration-200 ease-in-out [container-type:inline-size] ${isVideoVisible ? "bg-neutral-900" : ""
+      className={`group relative h-full w-full min-h-[100px] overflow-hidden rounded-xl transition-all duration-200 ease-in-out [container-type:inline-size] ${isVideoVisible ? "bg-neutral-900" : ""
         } ${onClick ? "cursor-pointer" : ""}`}
     >
       {/* Speaking Indicator Overlay */}

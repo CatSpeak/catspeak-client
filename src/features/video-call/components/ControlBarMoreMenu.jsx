@@ -331,7 +331,6 @@ const ControlBarMoreMenu = ({
                         <AnimatePresence mode="wait">
                           {!showMobileSettings ? (
                             <motion.div
-                              key="mobile-main"
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               exit={{ opacity: 0, x: -20 }}

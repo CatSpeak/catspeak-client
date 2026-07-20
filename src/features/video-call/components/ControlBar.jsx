@@ -25,6 +25,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ControlButton from "./ControlButton"
 import ControlBarSubtitles from "./ControlBarSubtitles"
 import LeaveCallModal from "./LeaveCallModal"
+import RightSideControls from "./RightSideControls"
 import { useGame } from "@/features/games/context/GameContext"
 import RecordingButton from "./RecordingButton"
 import toast from "react-hot-toast"
@@ -110,7 +111,7 @@ const VideoCallControlBar = () => {
 
   return (
     <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-      <div className="flex gap-4 w-full items-center justify-center">
+      <div className="flex md:gap-4 gap-5 w-full items-center md:justify-center justify-center">
         <ControlButton
           isActive={micOn}
           isLoading={isTogglingMic}
@@ -123,7 +124,7 @@ const VideoCallControlBar = () => {
           iconActive={<Mic className={iconClass} />}
           iconInactive={<MicOff className={iconClass} />}
           className="z-10"
-          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
         />
 
         <ControlButton
@@ -137,7 +138,7 @@ const VideoCallControlBar = () => {
           }
           iconActive={<Video className={iconClass} />}
           iconInactive={<VideoOff className={iconClass} />}
-          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
         />
 
         <ControlButton
@@ -152,13 +153,9 @@ const VideoCallControlBar = () => {
           iconActive={<MonitorOff className={iconClass} />}
           iconInactive={<MonitorUp className={iconClass} />}
           className="hidden min-[769px]:flex"
-          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
 
         />
-
-
-
-
 
         <ControlButton
           isActive={isHandRaised}
@@ -167,7 +164,7 @@ const VideoCallControlBar = () => {
           title={isHandRaised ? "Lower hand" : "Raise hand"}
           iconActive={<Hand className={iconClass} />}
           iconInactive={<Hand className={iconClass} />}
-          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
         />
 
         {/* <ControlBarSubtitles className="hidden min-[426px]:flex" /> */}
@@ -179,7 +176,7 @@ const VideoCallControlBar = () => {
             title={t?.rooms?.videoCall?.moreOptions || "More options"}
             iconActive={<MoreVertical className={iconClass} />}
             iconInactive={<MoreVertical className={iconClass} />}
-            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+            inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
           />
           <ControlBarMoreMenu
             showMoreMenu={showMoreMenu}
@@ -205,52 +202,7 @@ const VideoCallControlBar = () => {
       </div>
 
 
-      <div className="flex justify-end mr-4">
-        <div className="relative text-base">
-          <ControlButton
-            isActive={showParticipants}
-            onClick={() => setShowParticipants(!showParticipants)}
-            title={t.rooms?.videoCall?.controls?.participants || "Participants"}
-            iconActive={<Users size={20} />}
-            iconInactive={<Users size={20} />}
-            className="hidden min-[426px]:flex w-[58px]"
-            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
-          >
-            {
-              participants.length > 0 && (
-                <div className={`${showParticipants ? "text-white" : "text-black"} ml-1.5 text-base font-medium`}>
-                  {participants.length}
-                </div>
-              )
-            }
-          </ControlButton>
-
-        </div>
-
-        <div className="relative">
-          <ControlButton
-            isActive={showChat}
-            onClick={() => setShowChat(!showChat)}
-            title={t.rooms?.videoCall?.controls?.chat || "Chat"}
-            iconActive={<MessageSquare size={20} />}
-            iconInactive={<MessageSquare size={20} />}
-            inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
-          />
-          {unreadMessages > 0 && (
-            <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm pointer-events-none z-10">
-              {unreadMessages > 9 ? "9+" : unreadMessages}
-            </div>
-          )}
-        </div>
-
-        <ControlButton
-          isActive={false}
-          onClick={() => { alert("change layout") }}
-          iconActive={<LayoutGrid size={20} />}
-          iconInactive={<LayoutGrid size={20} />}
-          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
-        />
-      </div>
+      <RightSideControls className="hidden md:flex mr-4" />
 
       {
         showStopModal && (

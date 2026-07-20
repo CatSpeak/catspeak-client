@@ -8,6 +8,7 @@ import { useParticipants, useLocalParticipant } from "@livekit/components-react"
 import { toast } from "react-hot-toast"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { Link2 } from 'lucide-react';
+import RightSideControls from "./RightSideControls"
 
 const RoomHeader = () => {
   const { t, language } = useLanguage()
@@ -79,7 +80,14 @@ const RoomHeader = () => {
             {formattedRemaining} / {formattedMax}
           </div>
         )}
-        <IconButton title={t?.rooms?.videoCall?.copyLink || "Copy meeting link"} onClick={handleCopyLink}><Link2 color="#F3B403" className="transform rotate-[135deg]" /></IconButton>
+        <IconButton
+          title={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+          onClick={handleCopyLink}
+          className="md:flex hidden"
+        >
+          <Link2 color="#F3B403" className="transform rotate-[135deg]" />
+        </IconButton>
+        <RightSideControls className="md:hidden" />
       </div>
 
 

@@ -215,7 +215,7 @@ const VideoCallRoomContent = () => {
       <PictureITOverlay />
 
       {/* Main Content Area */}
-      <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row bg-[#F3F3F3]">
+      <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-[#F3F3F3] bg-white">
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
@@ -247,10 +247,10 @@ const VideoCallRoomContent = () => {
               animate={{ width: 376, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="hidden md:flex flex-col overflow-hidden relative py-5"
+              className="hidden md:flex flex-col overflow-hidden relative py-2 ml-1"
               style={{ width: 376 }}
             >
-              <div className="w-[360px] h-full flex flex-col shrink-0 bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+              <div className="w-[360px] h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
