@@ -70,15 +70,15 @@ const CreateReelModalContent = ({ open }) => {
           transform: scale(1.15);
         }
       `}} />
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
 
         {/* API Error Notification */}
         {(generalError || apiError) && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-2.5 text-sm animate-shake">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Upload failed</p>
-              <p className="opacity-90">{generalError || "Something went wrong. Please check your file formats and network."}</p>
+              <p className="font-semibold">{t?.catSpeak?.reels?.uploadFailedTitle || "Upload failed"}</p>
+              <p className="opacity-90">{generalError || t?.catSpeak?.reels?.uploadFailedDesc || "Something went wrong. Please check your file formats and network."}</p>
             </div>
           </div>
         )}
