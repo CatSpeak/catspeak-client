@@ -115,13 +115,16 @@ const RoomsPage = () => {
   const pageSize = 12;
   const shouldFetch = !!categories || !!topicsArg || !!requiredLevelsArg || !!searchArg;
 
+  const hasOtherCategory = categories?.includes("Other");
+  const apiCategories = hasOtherCategory ? undefined : categories;
+
   const { data: responseData } = useGetRoomsQuery(
     {
       page: 1,
       pageSize: 1000,
       languageType,
       requiredLevels: requiredLevelsArg,
-      categories,
+      categories: apiCategories,
       topics: topicsArg,
       roomName: searchArg,
     },
@@ -129,6 +132,26 @@ const RoomsPage = () => {
   );
 
   let rooms = responseData?.data ?? [];
+
+  if (hasOtherCategory) {
+    const known = ["Knowledge", "Culture", "Lifestyle", "Growth"];
+    rooms = rooms.filter((r) => {
+      const isOtherRoom =
+        !r.categories ||
+        r.categories === "[]" ||
+        r.categories.length === 0 ||
+        r.categories.includes("Other") ||
+        (Array.isArray(r.categories) 
+          ? !known.some((c) => r.categories.includes(c))
+          : !known.some((c) => r.categories.includes(c)));
+
+      if (isOtherRoom && categories.includes("Other")) return true;
+      if (r.categories && r.categories.length > 0) {
+        return categories.some((selected) => selected !== "Other" && r.categories.includes(selected));
+      }
+      return false;
+    });
+  }
 
   // Local pagination
   const totalFilteredCount = rooms.length;

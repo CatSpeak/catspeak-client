@@ -24,17 +24,19 @@ const CategoryRoomSection = ({
   const pageSize = itemsPerPage ?? 4
   const [page, setPage] = useState(1)
 
+  const isOther = categoryKey === "Other"
+
   const {
     data: responseData,
     isLoading,
     isFetching,
   } = useGetRoomsQuery({
-    page,
-    pageSize,
+    page: isOther ? 1 : page,
+    pageSize: isOther ? 1000 : pageSize,
     languageType,
     requiredLevels,
     topics,
-    categories: [categoryKey],
+    categories: isOther ? undefined : [categoryKey],
   })
 
   // Prefetch next page in the background so there's no delay when user clicks "Next"
@@ -47,14 +49,41 @@ const CategoryRoomSection = ({
       topics,
       categories: [categoryKey],
     },
-    { skip: !responseData?.additionalData?.hasNextPage }
+    { skip: isOther || !responseData?.additionalData?.hasNextPage }
   )
 
-  const currentRooms = useMemo(() => responseData?.data ?? [], [responseData])
-  const additionalData = responseData?.additionalData || {}
-  const totalCount = additionalData.totalCount || 0
-  const totalPages = additionalData.totalPages || 1
-  const hasNextPage = additionalData.hasNextPage || false
+  const { currentRooms, totalCount, totalPages, hasNextPage } = useMemo(() => {
+    let fetched = responseData?.data ?? []
+    const additionalData = responseData?.additionalData || {}
+
+    if (isOther) {
+      const known = ["Knowledge", "Culture", "Lifestyle", "Growth"]
+      const filtered = fetched.filter((r) => {
+        if (!r.categories || r.categories === "[]" || r.categories.length === 0) return true
+        if (r.categories.includes("Other")) return true
+        
+        const hasKnown = Array.isArray(r.categories)
+          ? known.some((c) => r.categories.includes(c))
+          : known.some((c) => r.categories.includes(c))
+        return !hasKnown
+      })
+
+      const start = (page - 1) * pageSize
+      return {
+        currentRooms: filtered.slice(start, start + pageSize),
+        totalCount: filtered.length,
+        totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
+        hasNextPage: start + pageSize < filtered.length,
+      }
+    }
+
+    return {
+      currentRooms: fetched,
+      totalCount: additionalData.totalCount || 0,
+      totalPages: additionalData.totalPages || 1,
+      hasNextPage: additionalData.hasNextPage || false,
+    }
+  }, [responseData, isOther, page, pageSize])
 
   const [displayRooms, setDisplayRooms] = useState([])
   const [visualPage, setVisualPage] = useState(page)
