@@ -80,13 +80,14 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
         {/* Navigate button */}
         <button
           onClick={handleNavigateClick}
-          className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors ${
+          title={displayLabel}
+          className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors min-w-0 ${
             isActive || communityOpen
               ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
               : "hover:bg-[#F2F2F2]"
           }`}
         >
-          <span>{displayLabel}</span>
+          <span className="truncate min-w-0">{displayLabel}</span>
         </button>
 
         {/* Expand button */}

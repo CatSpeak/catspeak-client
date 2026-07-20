@@ -38,6 +38,8 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
 
   const activeSubKey = getActiveSubKey();
 
+  const mainLabel = t.nav?.[navKey] || navKey;
+
   const handleNavigateClick = () => {
     navigate(`/${currentLang}/cat-speak/news`);
     onClose?.();
@@ -54,13 +56,14 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
         {/* Navigate button */}
         <button
           onClick={handleNavigateClick}
-          className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors ${
+          title={mainLabel}
+          className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors min-w-0 ${
             isActive || open
               ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
               : "hover:bg-[#F2F2F2]"
           }`}
         >
-          <span>{t.nav[navKey]}</span>
+          <span className="truncate min-w-0">{mainLabel}</span>
         </button>
 
         {/* Expand button */}
@@ -91,7 +94,8 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
               <button
                 key={item.key}
                 onClick={() => handleSubItemClick(item)}
-                className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors ${
+                title={item.label}
+                className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors min-w-0 ${
                   isItemActive
                     ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
                     : "hover:bg-[#F2F2F2]"
@@ -103,7 +107,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
                     className={isItemActive ? "text-cath-red-700" : ""}
                   />
                 </div>
-                <span className="flex-grow text-sm">{item.label}</span>
+                <span className="flex-grow text-sm truncate min-w-0">{item.label}</span>
               </button>
             );
           })}
