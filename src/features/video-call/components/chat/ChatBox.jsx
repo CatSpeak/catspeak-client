@@ -85,38 +85,40 @@ const ChatBox = ({
   return (
     <div className={`relative flex h-full flex-col bg-white ${className}`}>
       {/* Tab Bar */}
-      <div className="flex items-center shrink-0 px-2 pt-3 pb-2 gap-2">
-        {/* Room Chat Tab */}
-        <PillButton
-          onClick={() => setActiveTab("room")}
-          variant={activeTab === "room" ? "primary" : "secondary-no-outline"}
-        >
-          {roomLabel}
-          <span className={activeTab === "room" ? "text-white" : "text-[#999]"}>
-            ({roomCount})
-          </span>
-          {activeTab !== "room" && unreadRoomChat > 0 && (
-            <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
-              {unreadRoomChat > 9 ? "9+" : unreadRoomChat}
+      <div className="flex items-center justify-center shrink-0">
+        <div className="flex items-center justify-center gap-5 md:gap-2 md:bg-transparent rounded-xl px-2.5 py-1.5 bg-[#F5F5F5]">
+          {/* Room Chat Tab */}
+          <PillButton
+            onClick={() => setActiveTab("room")}
+            variant={activeTab === "room" ? "primary" : "secondary-no-outline"}
+          >
+            {roomLabel}
+            <span className={activeTab === "room" ? "text-white" : "text-[#999]"}>
+              ({roomCount})
             </span>
-          )}
-        </PillButton>
+            {activeTab !== "room" && unreadRoomChat > 0 && (
+              <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
+                {unreadRoomChat > 9 ? "9+" : unreadRoomChat}
+              </span>
+            )}
+          </PillButton>
 
-        {/* AI Chat Tab */}
-        <PillButton
-          onClick={() => setActiveTab("ai")}
-          variant={activeTab === "ai" ? "primary" : "secondary-no-outline"}
-        >
-          {aiLabel}
-          <span className={activeTab === "ai" ? "text-white" : "text-[#999]"}>
-            ({aiCount})
-          </span>
-          {activeTab !== "ai" && unreadAiChat > 0 && (
-            <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
-              {unreadAiChat > 9 ? "9+" : unreadAiChat}
+          {/* AI Chat Tab */}
+          <PillButton
+            onClick={() => setActiveTab("ai")}
+            variant={activeTab === "ai" ? "primary" : "secondary-no-outline"}
+          >
+            {aiLabel}
+            <span className={activeTab === "ai" ? "text-white" : "text-[#999]"}>
+              ({aiCount})
             </span>
-          )}
-        </PillButton>
+            {activeTab !== "ai" && unreadAiChat > 0 && (
+              <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
+                {unreadAiChat > 9 ? "9+" : unreadAiChat}
+              </span>
+            )}
+          </PillButton>
+        </div>
       </div>
 
       {/* Tab Content */}

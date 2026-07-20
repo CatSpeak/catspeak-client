@@ -284,31 +284,37 @@ const VideoCallRoomContent = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-30 flex bg-black/40"
+                className="fixed inset-0 z-[30] flex flex-col justify-end bg-black/50"
                 onClick={() => setActiveSidePanel(null)}
               >
                 <motion.div
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={{ type: "tween", duration: 0.2 }}
-                  className="ml-auto flex h-full w-full max-w-sm flex-col bg-white shadow-xl"
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                  transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
+                  className="flex h-[70vh] w-full flex-col bg-white shadow-xl rounded-t-[24px] overflow-hidden"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button
-                    type="button"
-                    className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50"
-                    onClick={() => setActiveSidePanel(null)}
-                  >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
-                      <ChevronRight className="rotate-180" />
-                    </span>
-                    <div className="text-base font-semibold">
-                      {sidePanelTitle}
-                    </div>
-                  </button>
+                  <div className="w-full flex justify-center pt-3 pb-1 shrink-0 cursor-pointer" onClick={() => setActiveSidePanel(null)}>
+                    <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
+                  </div>
 
-                  <div className="flex-1 overflow-y-auto">
+                  {!showChat && (
+                    <button
+                      type="button"
+                      className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50 shrink-0"
+                      onClick={() => setActiveSidePanel(null)}
+                    >
+                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
+                        <ChevronRight className="rotate-180" />
+                      </span>
+                      <div className="text-base font-semibold">
+                        {sidePanelTitle}
+                      </div>
+                    </button>
+                  )}
+
+                  <div className="flex-1 overflow-y-auto bg-white min-h-0">
                     {showParticipants && <ParticipantList hideTitle />}
                     {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                     {showAvatarPicker && <AvatarUrlPicker />}
@@ -325,7 +331,7 @@ const VideoCallRoomContent = () => {
                         currentUser={user}
                         onSendMessage={handleSendMessage}
                         isConnected={isConnected}
-                        className="h-full w-full"
+                        className="h-full w-full rounded-t-[24px]"
                         hideTitle
                       />
                     )}
