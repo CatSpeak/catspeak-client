@@ -9,6 +9,7 @@ import {
   leaveCall as leaveCallAction,
 } from "@/store/slices/videoCallSlice"
 import { getNavigate, getLocation } from "./useNavigateRef"
+import { useMaskTextMutation } from "@/store/api/moderationApi"
 
 /**
  * All user-facing action handlers for a video call.
@@ -74,13 +75,24 @@ export const useCallActions = ({
 
   // ── Chat ──
 
+  // [Moderation] Chat phòng meet đi qua LiveKit data channel, KHÔNG qua backend
+  // → phải mask từ vi phạm thành ★ TRƯỚC khi gửi (mọi client đều nhận bản đã che)
+  const [maskText] = useMaskTextMutation()
+
   const handleSendMessage = useCallback(
-    (text, replyTarget) => {
+    async (text, replyTarget) => {
+      let safeText = text
+      try {
+        const res = await maskText({ text }).unwrap()
+        if (res?.masked) safeText = res.masked
+      } catch {
+        // Moderation không phản hồi → gửi nguyên văn (fail-open, không làm chết chat)
+      }
       if (replyTarget) {
         chatSend(
           JSON.stringify({
             isReply: true,
-            text,
+            text: safeText,
             replyTo: {
               message: replyTarget.message,
               name: replyTarget.from?.name || "User",
@@ -88,10 +100,10 @@ export const useCallActions = ({
           }),
         )
       } else {
-        chatSend(text)
+        chatSend(safeText)
       }
     },
-    [chatSend],
+    [chatSend, maskText],
   )
 
   // ── Leave session ──
