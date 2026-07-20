@@ -82,7 +82,7 @@ const ChatInput = ({
     <div className="flex flex-col relative shrink-0 bg-white">
       {/* Reply preview banner */}
       {replyTarget && (
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border-t border-amber-200 text-xs">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50  border-amber-200 text-xs">
           <div className="flex-1 min-w-0">
             <span className="font-semibold text-amber-800">
               {t.rooms?.chatBox?.replyingTo || "Replying to"}{" "}
@@ -103,7 +103,7 @@ const ChatInput = ({
       )}
       <form
         onSubmit={handleSubmit}
-        className={`py-2 px-3 flex items-center gap-2 relative z-20 ${!isAiInput ? "border-t border-[#E5E5E5]" : ""
+        className={`py-2 px-3 flex items-center gap-2 relative z-20 ${!isAiInput ? "border-[#E5E5E5]" : ""
           }`}
       >
         <TextInput

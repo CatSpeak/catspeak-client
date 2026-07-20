@@ -122,7 +122,7 @@ const ChatBox = ({
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 border m-2 rounded-xl">
         {/* AI Tab Content */}
         {activeTab === "ai" && (
           <>
