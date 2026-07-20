@@ -1,15 +1,14 @@
-import { useState } from "react"
-import { Eye, EyeOff, ChevronDown } from "lucide-react"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import FormDatePicker from "../../forms/FormDatePicker"
-import Dropdown from "@/shared/components/ui/Dropdown"
-import { countries } from "@/shared/constants/countriesData"
+import { ChevronDown } from "lucide-react";
+import TextInput from "@/shared/components/ui/inputs/TextInput";
+import FormDatePicker from "../../forms/FormDatePicker";
+import Dropdown from "@/shared/components/ui/Dropdown";
+import { countries } from "@/shared/constants/countriesData";
 
 const languageOptions = [
   { value: "english", label: "English" },
   { value: "vietnamese", label: "Tiếng Việt" },
   { value: "chinese", label: "中文" },
-]
+];
 
 const countryOptions = countries.map((c) => ({
   key: c.code,
@@ -23,7 +22,7 @@ const countryOptions = countries.map((c) => ({
       alt={c.code}
     />
   ),
-}))
+}));
 
 const phonePrefixes = countries
   .filter((c) => c.dialCode)
@@ -40,7 +39,7 @@ const phonePrefixes = countries
         alt={c.code}
       />
     ),
-  }))
+  }));
 
 const RegisterFormFields = ({
   authText,
@@ -49,7 +48,7 @@ const RegisterFormFields = ({
   errors,
   setErrors,
 }) => {
-  const prefixLength = formData.phonePrefix?.length || 3
+  const prefixLength = formData.phonePrefix?.length || 3;
   const plClass =
     prefixLength <= 2
       ? "pl-[80px]"
@@ -59,62 +58,54 @@ const RegisterFormFields = ({
           ? "pl-[100px]"
           : prefixLength === 5
             ? "pl-[110px]"
-            : "pl-[120px]"
+            : "pl-[120px]";
 
   const handleChange = (field) => (e) => {
     const value =
-      e.target.type === "checkbox" ? e.target.checked : e.target.value
-    setFormData({ ...formData, [field]: value })
+      e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData({ ...formData, [field]: value });
     if (errors[field]) {
-      setErrors({ ...errors, [field]: "" })
+      setErrors({ ...errors, [field]: "" });
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-4 mb-6">
       {/* Username */}
       <div>
-        <label className="block text-sm mb-2">{authText.usernameLabel}</label>
+        <label className="block text-xs text-[#606060] mb-1">
+          {authText.usernameLabel}
+        </label>
         <TextInput
           type="text"
-          variant="square"
+          variant="round"
           placeholder={authText.usernamePlaceholder}
           value={formData.username}
           onChange={handleChange("username")}
-          className={
-            errors.username
-              ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-              : ""
-          }
+          error={errors.username}
         />
-        {errors.username && (
-          <p className="mt-1 text-xs text-red-600">{errors.username}</p>
-        )}
       </div>
 
       {/* Email & Phone Number - Side by Side */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
-          <label className="block text-sm mb-2">{authText.emailLabel}</label>
+          <label className="block text-xs text-[#606060] mb-1">
+            {authText.emailLabel}
+          </label>
           <TextInput
             type="email"
-            variant="square"
+            variant="round"
             placeholder={authText.emailOnlyPlaceholder}
             value={formData.email}
             onChange={handleChange("email")}
-            className={
-              errors.email
-                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                : ""
-            }
+            error={errors.email}
           />
-          {errors.email && (
-            <p className="mt-1 text-xs text-red-600">{errors.email}</p>
-          )}
         </div>
 
         <div className="flex-1">
-          <label className="block text-sm mb-2">{authText.phoneLabel}</label>
+          <label className="block text-xs text-[#606060] mb-1">
+            {authText.phoneLabel}
+          </label>
           <Dropdown
             options={phonePrefixes}
             value={formData.phonePrefix}
@@ -127,23 +118,19 @@ const RegisterFormFields = ({
             trigger={(isOpen, selectedOption, toggleDropdown) => (
               <TextInput
                 type="tel"
-                variant="square"
+                variant="round"
                 placeholder={authText.phonePlaceholder}
                 value={formData.phoneNumber}
                 onChange={handleChange("phoneNumber")}
-                className={
-                  errors.phoneNumber
-                    ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                    : ""
-                }
+                error={errors.phoneNumber}
                 leftContentWidthClass={plClass}
                 leftContent={
                   <div className="flex items-center h-full">
                     <button
                       type="button"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        toggleDropdown()
+                        e.stopPropagation();
+                        toggleDropdown();
                       }}
                       className="flex items-center gap-1 pl-0 pr-1 h-full focus:outline-none cursor-pointer"
                     >
@@ -177,16 +164,13 @@ const RegisterFormFields = ({
               </div>
             )}
           />
-          {errors.phoneNumber && (
-            <p className="mt-1 text-xs text-red-600">{errors.phoneNumber}</p>
-          )}
         </div>
       </div>
 
       {/* Date of Birth & Language - Side by Side */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
-          <label className="block text-sm mb-2">
+          <label className="block text-xs text-[#606060] mb-1">
             {authText.dateOfBirthLabel}
           </label>
           <FormDatePicker
@@ -199,7 +183,9 @@ const RegisterFormFields = ({
         </div>
 
         <div className="flex-1">
-          <label className="block text-sm mb-2">{authText.languageLabel}</label>
+          <label className="block text-xs text-[#606060] mb-1">
+            {authText.languageLabel}
+          </label>
           <Dropdown
             placeholder={authText.languagePlaceholder}
             value={formData.preferredLanguage}
@@ -208,6 +194,30 @@ const RegisterFormFields = ({
             }
             options={languageOptions}
             triggerClassName={errors.preferredLanguage ? "!border-red-600" : ""}
+            trigger={(isOpen, selectedOption, toggleDropdown) => (
+              <button
+                type="button"
+                onClick={toggleDropdown}
+                className={`text-sm flex items-center justify-between border rounded-3xl px-4 h-[56px] w-full bg-white transition-colors hover:border-[#8e0000] focus:border-[#8e0000] ${
+                  errors.preferredLanguage
+                    ? "border-red-500"
+                    : "border-[#e5e5e5]"
+                }`}
+              >
+                <div className="flex items-center gap-2 truncate mr-2">
+                  {selectedOption?.icon}
+                  <span
+                    className={`truncate ${!selectedOption ? "text-[#9e9e9e]" : ""}`}
+                  >
+                    {selectedOption?.label || authText.languagePlaceholder}
+                  </span>
+                </div>
+                <ChevronDown
+                  size={14}
+                  className={`shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+            )}
           />
           {errors.preferredLanguage && (
             <p className="mt-1 text-xs text-red-600">
@@ -220,26 +230,23 @@ const RegisterFormFields = ({
       {/* Password & Country - Side by Side */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
-          <label className="block text-sm mb-2">{authText.passwordLabel}</label>
+          <label className="block text-xs text-[#606060] mb-1">
+            {authText.passwordLabel}
+          </label>
           <TextInput
             type="password"
-            variant="square"
+            variant="round"
             placeholder={authText.passwordPlaceholder}
             value={formData.password}
             onChange={handleChange("password")}
-            className={
-              errors.password
-                ? "!border-red-600 focus:!border-red-600 focus:!ring-red-600"
-                : ""
-            }
+            error={errors.password}
           />
-          {errors.password && (
-            <p className="mt-1 text-xs text-red-600">{errors.password}</p>
-          )}
         </div>
 
         <div className="flex-1">
-          <label className="block text-sm mb-2">{authText.countryLabel}</label>
+          <label className="block text-xs text-[#606060] mb-1">
+            {authText.countryLabel}
+          </label>
           <Dropdown
             placeholder={authText.countryPlaceholder}
             value={formData.country}
@@ -256,13 +263,15 @@ const RegisterFormFields = ({
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`text-sm flex items-center justify-between border border-[#C6C6C6] rounded-lg px-4 h-10 shadow-sm w-full bg-white transition-colors hover:bg-gray-50 ${
-                  errors.country ? "!border-red-600" : ""
+                className={`text-sm flex items-center justify-between border rounded-3xl px-4 h-[56px] w-full bg-white transition-colors hover:border-[#8e0000] focus:border-[#8e0000] ${
+                  errors.country ? "border-red-500" : "border-[#e5e5e5]"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
                   {selectedOption?.icon}
-                  <span className="truncate">
+                  <span
+                    className={`truncate ${!selectedOption ? "text-[#9e9e9e]" : ""}`}
+                  >
                     {selectedOption?.label || authText.countryPlaceholder}
                   </span>
                 </div>
@@ -279,7 +288,7 @@ const RegisterFormFields = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default RegisterFormFields
+export default RegisterFormFields;
