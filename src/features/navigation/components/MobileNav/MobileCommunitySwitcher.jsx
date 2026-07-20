@@ -54,6 +54,7 @@ const MobileCommunitySwitcher = () => {
           <button 
             className={`${getNavItemClasses(false, false)} ${isOpen ? "bg-[#F2F2F2]" : ""}`}
             onClick={toggle}
+            title={t.header?.community || "Cộng đồng"}
           >
             <Users size={20} className="shrink-0" />
             <span className={getNavTextClasses(true)}>{t.header?.community || "Cộng đồng"}</span>

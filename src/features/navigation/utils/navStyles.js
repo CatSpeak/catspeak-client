@@ -53,8 +53,9 @@ export const getNavItemClasses = (
  *                               adds flex-1 so the chevron is pushed to the right.
  */
 export const getNavTextClasses = (isDropdown = false, isDocked = false) => {
-  const baseClasses = "text-sm whitespace-nowrap transition-all duration-300"
-  const dropdownClasses = isDropdown ? "flex-1 text-left" : ""
+  const baseClasses =
+    "text-sm whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
+  const dropdownClasses = isDropdown ? "text-left" : ""
 
   // Hide text entirely if docked
   const expandedClasses = isDocked ? "opacity-0 w-0 hidden" : "opacity-100"

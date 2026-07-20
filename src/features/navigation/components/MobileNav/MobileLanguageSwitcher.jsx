@@ -31,6 +31,7 @@ const MobileLanguageSwitcher = () => {
           <button 
             className={`${getNavItemClasses(false, false)} ${isOpen ? "bg-[#F2F2F2]" : ""}`}
             onClick={toggle}
+            title={t.header?.language || "Ngôn ngữ"}
           >
             <Globe size={20} className="shrink-0" />
             <span className={getNavTextClasses(true)}>{t.header?.language || "Ngôn ngữ"}</span>

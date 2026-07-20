@@ -28,6 +28,7 @@ const DesktopNavItem = ({
           getNavItemClasses(isActive, false, isDocked)
         }
         onClick={onClick}
+        title={label}
       >
         {img && !imgError ? (
           <img
