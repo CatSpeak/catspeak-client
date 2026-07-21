@@ -45,6 +45,15 @@ const DesktopNavItems = ({ isHorizontal = false }) => {
             return true
           })
           .map((item) => {
+            if (item.isHorizontalBar) {
+              return (
+                <div
+                  key={item.key}
+                  className={`my-2 border-t ${isDesktopSidebarDocked ? "border-white/20" : "border-border"} -mx-4`}
+                />
+              )
+            }
+
             const label = t.nav?.[item.key] || item.label || item.key
             const IconComponent = item.icon || Globe
 

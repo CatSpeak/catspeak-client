@@ -90,6 +90,14 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               return true
             })
             .map((item) => {
+              if (item.isHorizontalBar) {
+                return (
+                  <div
+                    key={item.key}
+                    className="my-2 border-t border-border -mx-3"
+                  />
+                )
+              }
               const label = t.nav?.[item.key] || item.label || item.key
               const IconComponent = item.icon || Globe
 
