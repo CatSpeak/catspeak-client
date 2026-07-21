@@ -86,7 +86,7 @@ export default {
     processing: "Đang xử lý... {{progress}}%",
     success: "Hoàn tất",
     error: "Lỗi tải lên",
-    itemsCount: "Tải lên {{count}} mục",
+    itemsCount: "Xử lý {{count}} tác vụ",
     cancelTip: "Hủy tải lên",
   },
 }

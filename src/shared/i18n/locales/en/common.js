@@ -86,7 +86,7 @@ export default {
     processing: "Processing... {{progress}}%",
     success: "Success",
     error: "Upload Failed",
-    itemsCount: "Uploading {{count}} items",
+    itemsCount: "Processing {{count}} tasks",
     cancelTip: "Cancel upload",
   },
 };

@@ -89,7 +89,7 @@ export default {
     processing: "处理中... {{progress}}%",
     success: "成功",
     error: "上传失败",
-    itemsCount: "上传 {{count}} 个项目",
+    itemsCount: "正在处理 {{count}} 个任务",
     cancelTip: "取消上传",
   },
 }
