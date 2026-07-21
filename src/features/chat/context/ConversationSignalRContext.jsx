@@ -16,9 +16,16 @@ const RETRY_DELAY_MS = 3000
 
 const HUB_EVENTS = [
   "NewMessage",
+  "MessageRead",
+  "ConversationRead",
+  "ReadReceipt",
+  "UserTyping",
+  "UserStoppedTyping",
   "NewConversation",
   "ConversationCreated",
+  "ConversationUpdated",
   "FriendStatusChange",
+  "NewFriendRequest",
   "ChatUpdated",
 ]
 
@@ -212,6 +219,46 @@ export const ConversationSignalRProvider = ({ children }) => {
     [invoke],
   )
 
+  const joinConversation = useCallback(
+    (conversationId) => {
+      if (conversationId == null) return Promise.resolve()
+      return invoke("JoinConversation", Number(conversationId)).catch(() => {
+        return invoke("JoinConversation", String(conversationId))
+      })
+    },
+    [invoke],
+  )
+
+  const leaveConversation = useCallback(
+    (conversationId) => {
+      if (conversationId == null) return Promise.resolve()
+      return invoke("LeaveConversation", Number(conversationId)).catch(() => {
+        return invoke("LeaveConversation", String(conversationId))
+      })
+    },
+    [invoke],
+  )
+
+  const startTyping = useCallback(
+    (conversationId) => {
+      if (conversationId == null) return Promise.resolve()
+      return invoke("StartTyping", Number(conversationId)).catch(() => {
+        return invoke("StartTyping", String(conversationId))
+      })
+    },
+    [invoke],
+  )
+
+  const stopTyping = useCallback(
+    (conversationId) => {
+      if (conversationId == null) return Promise.resolve()
+      return invoke("StopTyping", Number(conversationId)).catch(() => {
+        return invoke("StopTyping", String(conversationId))
+      })
+    },
+    [invoke],
+  )
+
   const reconnect = useCallback(async () => {
     if (connectionRef.current) {
       try {
@@ -232,6 +279,10 @@ export const ConversationSignalRProvider = ({ children }) => {
     isConnected,
     connectionId,
     sendMessage,
+    joinConversation,
+    leaveConversation,
+    startTyping,
+    stopTyping,
     invoke,
     reconnect,
     on,

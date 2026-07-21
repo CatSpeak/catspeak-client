@@ -7,13 +7,16 @@ import ChatUserPanel from "../components/ChatUserPanel"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import {
+  conversationsApi,
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
   useSendMessageMutation,
+  useMarkConversationAsReadMutation,
 } from "@/store/api/social/conversationsApi"
 import { setActiveChatPageConversation } from "@/store/slices/messageWidgetSlice"
-import { useConversationSignalRContext } from "@/features/messages/context/ConversationSignalRContext"
-import useMessageSignalR from "@/features/messages/hooks/useMessageSignalR"
+import { clearUnread } from "@/store/slices/notificationSlice"
+import { useConversationSignalRContext } from "@/features/chat/context/ConversationSignalRContext"
+import useMessageSignalR from "@/features/chat/hooks/useMessageSignalR"
 import { EmptyState } from "@/shared/components/ui/indicators"
 import NewChatModal from "../components/NewChatModal"
 // eslint-disable-next-line no-unused-vars
@@ -41,35 +44,42 @@ const ChatPage = () => {
     isLoading: isLoadingConversations,
   } = useGetConversationsQuery()
 
-  const conversations = useMemo(() => {
-    return Array.isArray(conversationsResponse)
-      ? conversationsResponse
-      : conversationsResponse?.data || []
-  }, [conversationsResponse])
-
   const [selectedId, setSelectedId] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [inputValue, setInputValue] = useState("")
 
+  const conversations = useMemo(() => {
+    const list = Array.isArray(conversationsResponse)
+      ? conversationsResponse
+      : conversationsResponse?.data || []
+
+    if (!selectedId) return list
+
+    return list.map((c) => {
+      const cId = c.conversationId ?? c.id
+      if (
+        Number(cId) === Number(selectedId) ||
+        String(cId) === String(selectedId)
+      ) {
+        return { ...c, unreadCount: 0 }
+      }
+      return c
+    })
+  }, [conversationsResponse, selectedId])
+
   // Sync active conversation with Redux and join SignalR group on select
-  useMessageSignalR({ activeConversationId: selectedId })
+  const { startTyping, stopTyping, typingUsers } = useMessageSignalR({
+    activeConversationId: selectedId,
+  })
 
   useEffect(() => {
     if (selectedId) {
       dispatch(setActiveChatPageConversation(selectedId))
-      if (signalr) {
-        signalr.invoke("JoinConversation", Number(selectedId)).catch(() => {
-          // Fallback to string if number format is rejected
-          signalr
-            .invoke("JoinConversation", String(selectedId))
-            .catch(console.warn)
-        })
-      }
     } else {
       dispatch(setActiveChatPageConversation(null))
     }
-  }, [selectedId, dispatch, signalr])
+  }, [selectedId, dispatch])
 
   // Clear active conversation on unmount
   useEffect(() => {
@@ -98,6 +108,50 @@ const ChatPage = () => {
 
   // ── Mutations ──────────────────────────────────────────
   const [sendMessageMutation] = useSendMessageMutation()
+  const [markConversationAsRead] = useMarkConversationAsReadMutation()
+
+  // Automatically mark active conversation as read when selected, when new messages arrive, or when conversation list updates while viewing
+  useEffect(() => {
+    if (!selectedId) return
+
+    const rawList = Array.isArray(conversationsResponse)
+      ? conversationsResponse
+      : conversationsResponse?.data || []
+
+    const currentCached = rawList.find(
+      (c) =>
+        Number(c.conversationId ?? c.id) === Number(selectedId) ||
+        String(c.conversationId ?? c.id) === String(selectedId),
+    )
+
+    // Clear unread if active conversation has unread items in RTK Query cache
+    if (!currentCached || currentCached.unreadCount > 0) {
+      dispatch(clearUnread(selectedId))
+      dispatch(
+        conversationsApi.util.updateQueryData(
+          "getConversations",
+          undefined,
+          (draft) => {
+            const cachedConv = draft.find(
+              (c) =>
+                Number(c.conversationId ?? c.id) === Number(selectedId) ||
+                String(c.conversationId ?? c.id) === String(selectedId),
+            )
+            if (cachedConv) {
+              cachedConv.unreadCount = 0
+            }
+          },
+        ),
+      )
+      markConversationAsRead(selectedId).catch(() => {})
+    }
+  }, [
+    selectedId,
+    activeMessagesRaw.length,
+    conversationsResponse,
+    markConversationAsRead,
+    dispatch,
+  ])
 
   // ── Mappings ───────────────────────────────────────────
   const currentUser = useMemo(() => {
@@ -135,10 +189,14 @@ const ChatPage = () => {
   const activeMessages = useMemo(() => {
     return activeMessagesRaw.map((msg) => ({
       id: msg.messageId,
+      conversationId: msg.conversationId,
       senderId: msg.sender?.accountId,
       content: msg.messageContent,
       timestamp: msg.createDate,
+      messageType: msg.messageType || "Text",
+      isRead: msg.isRead ?? false,
       status: msg.isRead ? "read" : "delivered",
+      readByAccountIds: msg.readByAccountIds || [],
       sender: msg.sender,
     }))
   }, [activeMessagesRaw])
@@ -157,6 +215,12 @@ const ChatPage = () => {
   const handleToggleInfo = useCallback(() => {
     setShowInfoPanel((prev) => !prev)
   }, [])
+
+  const handleLeaveGroup = useCallback(() => {
+    setSelectedId(null)
+    setShowInfoPanel(false)
+    dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+  }, [dispatch])
 
   const handleSend = useCallback(async () => {
     if (!inputValue.trim() || !selectedId) return
@@ -208,6 +272,9 @@ const ChatPage = () => {
           showInfoActive={showInfoPanel}
           friendOnlineStatus={friendOnlineStatus}
           isLoading={isLoadingMessages}
+          typingUsers={typingUsers}
+          onStartTyping={startTyping}
+          onStopTyping={stopTyping}
         />
       ) : (
         <EmptyState
@@ -252,6 +319,7 @@ const ChatPage = () => {
                 conversation={activeConversation}
                 currentUser={currentUser}
                 onClose={() => setShowInfoPanel(false)}
+                onLeaveGroup={handleLeaveGroup}
                 friendOnlineStatus={friendOnlineStatus}
                 isDrawer={true}
               />
@@ -263,6 +331,7 @@ const ChatPage = () => {
                 conversation={activeConversation}
                 currentUser={currentUser}
                 onClose={() => setShowInfoPanel(false)}
+                onLeaveGroup={handleLeaveGroup}
                 friendOnlineStatus={friendOnlineStatus}
                 isDrawer={false}
               />

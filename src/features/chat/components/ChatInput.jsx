@@ -23,11 +23,15 @@ const ChatInput = ({
   value,
   onChange,
   onSend,
+  onStartTyping,
+  onStopTyping,
   disabled = false,
   showLeftIcon = false, // temporarily default to false since image sending is not supported in chat
   showRightIcons = true,
 }) => {
   const textareaRef = useRef(null)
+  const typingTimerRef = useRef(null)
+  const isTypingRef = useRef(false)
   const hasContent = value.trim().length > 0
   const [isMultiline, setIsMultiline] = useState(false)
   const { insertEmoji, addRecent } = useEmojiPicker()
@@ -40,20 +44,57 @@ const ChatInput = ({
     }
   }
 
+  const stopTypingImmediately = useCallback(() => {
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current)
+      typingTimerRef.current = null
+    }
+    if (isTypingRef.current) {
+      isTypingRef.current = false
+      onStopTyping?.()
+    }
+  }, [onStopTyping])
+
+  const handleTypingActivity = useCallback(() => {
+    if (!isTypingRef.current) {
+      isTypingRef.current = true
+      onStartTyping?.()
+    }
+
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current)
+    }
+
+    typingTimerRef.current = setTimeout(() => {
+      isTypingRef.current = false
+      onStopTyping?.()
+      typingTimerRef.current = null
+    }, 2500)
+  }, [onStartTyping, onStopTyping])
+
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault()
-        if (hasContent) onSend()
+        if (hasContent) {
+          stopTypingImmediately()
+          onSend()
+        }
       }
     },
-    [hasContent, onSend],
+    [hasContent, onSend, stopTypingImmediately],
   )
 
   const handleChange = useCallback(
     (e) => {
       const val = e.target.value
       onChange(val)
+
+      if (val.trim().length > 0) {
+        handleTypingActivity()
+      } else {
+        stopTypingImmediately()
+      }
 
       if (!isMultiline) {
         const sh = e.target.scrollHeight
@@ -62,13 +103,14 @@ const ChatInput = ({
         }
       }
     },
-    [onChange, isMultiline],
+    [onChange, isMultiline, handleTypingActivity, stopTypingImmediately],
   )
 
   const handleSend = useCallback(() => {
     if (!hasContent) return
+    stopTypingImmediately()
     onSend()
-  }, [hasContent, onSend])
+  }, [hasContent, onSend, stopTypingImmediately])
 
   return (
     <div className="px-4 py-2 bg-transparent">

@@ -1,6 +1,6 @@
-import { baseApi } from "./baseApi"
+import { socialApi } from "./socialApi"
 
-export const storiesApi = baseApi.injectEndpoints({
+export const storiesApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     // Create a new story
     createStory: builder.mutation({

@@ -7,7 +7,7 @@ import { formatDateSeparator } from "@/shared/utils/dateFormatter"
 const DateSeparator = memo(({ timestamp }) => (
   <div className="flex items-center gap-4 p-4">
     <div className="flex-1 h-[1px] bg-border"></div>
-    <span className="text-xs text-[#606060] whitespace-nowrap">
+    <span className="text-xs text-[#606060] font-medium whitespace-nowrap">
       {formatDateSeparator(timestamp)}
     </span>
     <div className="flex-1 h-[1px] bg-border"></div>

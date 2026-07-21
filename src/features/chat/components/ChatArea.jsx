@@ -3,6 +3,7 @@ import { ArrowLeft, PanelRight } from "lucide-react"
 import ChatBubble from "./ChatBubble"
 import ChatInput from "./ChatInput"
 import DateSeparator from "./DateSeparator"
+import SystemMessage from "./SystemMessage"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -25,6 +26,9 @@ const ChatArea = ({
   onToggleInfo,
   friendOnlineStatus,
   isLoading,
+  typingUsers = [],
+  onStartTyping,
+  onStopTyping,
 }) => {
   const scrollRef = useRef(null)
 
@@ -37,33 +41,31 @@ const ChatArea = ({
     isLoading,
   })
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages or typing indicator changes
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [messages])
+  }, [messages, typingUsers])
 
   if (!conversation) return null
 
   const isGroup = conversation.isGroup
   const otherUser = conversation.friend
   const name = conversation.name
-  const isOnline = !isGroup && !!friendOnlineStatus[otherUser?.accountId]
   const memberCount = conversation.participants?.length || 0
 
-  // Status text for header
-  const statusText = isGroup
-    ? `${memberCount} members`
-    : isOnline
-      ? "Active now"
-      : "Offline"
+  // Status text for header (temporarily hide 1:1 online status until backend presence API is ready)
+  const statusText = isGroup ? `${memberCount} members` : null
 
   // ── Render message list from grouped items hook ──
   const renderMessages = () => {
     return groupedItems.map((item) => {
       if (item.type === "date") {
         return <DateSeparator key={item.id} timestamp={item.timestamp} />
+      }
+      if (item.type === "system") {
+        return <SystemMessage key={item.id} content={item.message.content} />
       }
       return (
         <ChatBubble
@@ -72,16 +74,21 @@ const ChatArea = ({
           isOwn={item.isOwn}
           isFirstInGroup={item.isFirstInGroup}
           isLastInGroup={item.isLastInGroup}
+          isLastMessageInChat={item.isLastMessageInChat}
           sender={item.sender}
           isGroupChat={item.isGroupChat}
           shouldAnimate={item.shouldAnimate}
+          readByUsers={item.readByUsers}
         />
       )
     })
   }
 
   return (
-    <FluentCard className="flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl" padding="p-0">
+    <FluentCard
+      className="flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl"
+      padding="p-0"
+    >
       {/* ── Chat Header ────────────────────────────── */}
       <div className="flex items-center justify-between px-4 h-[72px] border-b border-[#E5E5E5] shrink-0">
         <div className="flex items-center gap-4 min-w-0">
@@ -100,32 +107,24 @@ const ChatArea = ({
           {isGroup ? (
             <GroupAvatar conversation={conversation} size={40} />
           ) : (
-            <div className="relative shrink-0">
-              <Avatar
-                size={40}
-                name={otherUser?.username}
-                src={otherUser?.avatarImageUrl}
-                className={
-                  getParticipantTheme(
-                    otherUser?.accountId || otherUser?.username || "",
-                  ).avatarClass
-                }
-              />
-              {isOnline && (
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#22C55E] rounded-full border-2 border-white" />
-              )}
-            </div>
+            <Avatar
+              size={40}
+              name={otherUser?.username}
+              src={otherUser?.avatarImageUrl}
+              className={
+                getParticipantTheme(
+                  otherUser?.accountId || otherUser?.username || "",
+                ).avatarClass
+              }
+            />
           )}
 
           {/* Name + status */}
           <div className="min-w-0">
             <h2 className="font-semibold truncate">{name}</h2>
-            <p className="text-sm text-[#606060] flex items-center gap-1">
-              {!isGroup && isOnline && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] inline-block" />
-              )}
-              {statusText}
-            </p>
+            {statusText && (
+              <p className="text-sm text-[#606060]">{statusText}</p>
+            )}
           </div>
         </div>
 
@@ -143,7 +142,10 @@ const ChatArea = ({
       </div>
 
       {/* ── Messages ───────────────────────────────── */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 min-h-0">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0"
+      >
         {isLoading ? (
           <div className="flex flex-col gap-4 p-4 h-full justify-end">
             {/* Other User Message Skeleton */}
@@ -182,6 +184,32 @@ const ChatArea = ({
           <>
             <div className="flex-1" />
             {renderMessages()}
+            {typingUsers &&
+              typingUsers.map((u) => {
+                const participant = conversation?.participants?.find(
+                  (p) => Number(p.accountId || p.id) === Number(u.userId),
+                )
+                const avatar =
+                  participant?.avatarImageUrl ||
+                  participant?.avatar ||
+                  (conversation?.friend?.accountId === u.userId
+                    ? conversation.friend.avatarImageUrl
+                    : null)
+                return (
+                  <ChatBubble
+                    key={`typing-${u.userId}`}
+                    isTyping={true}
+                    isOwn={false}
+                    isFirstInGroup={true}
+                    isLastInGroup={true}
+                    sender={{
+                      username: u.username,
+                      accountId: u.userId,
+                      avatarImageUrl: avatar,
+                    }}
+                  />
+                )
+              })}
           </>
         )}
       </div>
@@ -191,6 +219,8 @@ const ChatArea = ({
         value={inputValue}
         onChange={onInputChange}
         onSend={onSend}
+        onStartTyping={onStartTyping}
+        onStopTyping={onStopTyping}
         disabled={isLoading}
       />
     </FluentCard>

@@ -2,12 +2,15 @@ import { useMemo, useRef, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import {
   conversationsApi,
+  useGetConversationsQuery,
   useMarkConversationAsReadMutation,
 } from "@/store/api/social/conversationsApi"
 import {
+  clearUnread,
   incrementUnread,
   setFriendOnlineStatus,
 } from "@/store/slices/notificationSlice"
+import { friendshipApi } from "@/store/api/social/friendshipApi"
 import useConversationSignalR from "./useConversationSignalR"
 
 /**
@@ -23,6 +26,17 @@ export const useGlobalSignalR = () => {
   const isWidgetOpen = useSelector((state) => state.messageWidget.isOpen)
   const [markConversationAsRead] = useMarkConversationAsReadMutation()
 
+  // Fetch user conversations to auto-join SignalR groups on load
+  const { data: conversationsResponse } = useGetConversationsQuery(undefined, {
+    pollingInterval: 0,
+  })
+
+  const conversations = useMemo(() => {
+    return Array.isArray(conversationsResponse)
+      ? conversationsResponse
+      : conversationsResponse?.data || []
+  }, [conversationsResponse])
+
   // Ref to hold invoke so the NewConversation handler can call JoinConversation
   // without creating a circular dependency (invoke comes from useConversationSignalR
   // which needs handlers, but handlers need invoke).
@@ -37,7 +51,7 @@ export const useGlobalSignalR = () => {
           message = args[1]
         } else {
           message = args[0]
-          conversationId = message?.conversationId
+          conversationId = message?.conversationId || message?.ConversationId
         }
 
         if (conversationId) {
@@ -48,7 +62,9 @@ export const useGlobalSignalR = () => {
           )
         }
 
-        const isChatPageOpen = window.location.pathname.endsWith("/chat")
+        const isChatPageOpen =
+          window.location.pathname.startsWith("/chat") ||
+          window.location.pathname.includes("/chat")
         const isViewingConversation =
           (isWidgetOpen || isChatPageOpen) &&
           activeConversationId &&
@@ -68,7 +84,9 @@ export const useGlobalSignalR = () => {
           }
         } else {
           if (conversationId) {
-            // Optimistically clear the unread count in Redux to prevent flickering
+            dispatch(clearUnread(conversationId))
+
+            // Optimistically update conversation in cache: set unreadCount = 0 & update preview
             dispatch(
               conversationsApi.util.updateQueryData(
                 "getConversations",
@@ -76,30 +94,30 @@ export const useGlobalSignalR = () => {
                 (draft) => {
                   const cachedConv = draft.find(
                     (c) =>
-                      c.conversationId === Number(conversationId) ||
-                      c.conversationId === String(conversationId),
+                      Number(c.conversationId) === Number(conversationId) ||
+                      String(c.conversationId) === String(conversationId),
                   )
                   if (cachedConv) {
                     cachedConv.unreadCount = 0
+                    if (message) {
+                      cachedConv.lastMessage =
+                        message.messageContent ||
+                        message.content ||
+                        cachedConv.lastMessage
+                      cachedConv.lastMessageTime =
+                        message.createDate ||
+                        message.timestamp ||
+                        new Date().toISOString()
+                      cachedConv.lastMessageSenderId =
+                        message.senderId || message.sender?.accountId
+                    }
                   }
                 },
               ),
             )
 
-            // Mark as read on the backend
-            markConversationAsRead(conversationId)
-              .unwrap()
-              .then(() => {
-                dispatch(
-                  conversationsApi.util.invalidateTags(["Conversations"]),
-                )
-              })
-              .catch((err) => {
-                console.error("Failed to mark conversation as read:", err)
-                dispatch(
-                  conversationsApi.util.invalidateTags(["Conversations"]),
-                )
-              })
+            // Silently mark as read on backend without triggering server refetch
+            markConversationAsRead(conversationId).catch(() => {})
           } else {
             dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
           }
@@ -112,6 +130,61 @@ export const useGlobalSignalR = () => {
         }, 500)
       },
 
+      ConversationUpdated: (data) => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+        const convId =
+          typeof data === "object"
+            ? (data?.conversationId ?? data?.ConversationId)
+            : data
+        if (convId) {
+          dispatch(
+            conversationsApi.util.invalidateTags([
+              { type: "Messages", id: Number(convId) },
+              { type: "Messages", id: String(convId) },
+            ]),
+          )
+        }
+      },
+
+      ConversationRead: (...args) => {
+        const convId =
+          typeof args[0] === "object" ? args[0]?.conversationId : args[0]
+        if (convId) {
+          dispatch(
+            conversationsApi.util.invalidateTags([
+              { type: "Messages", id: Number(convId) },
+              { type: "Messages", id: String(convId) },
+            ]),
+          )
+        }
+      },
+
+      MessageRead: (...args) => {
+        const convId =
+          typeof args[0] === "object" ? args[0]?.conversationId : args[0]
+        if (convId) {
+          dispatch(
+            conversationsApi.util.invalidateTags([
+              { type: "Messages", id: Number(convId) },
+              { type: "Messages", id: String(convId) },
+            ]),
+          )
+        }
+      },
+
+      ReadReceipt: (...args) => {
+        const convId =
+          typeof args[0] === "object" ? args[0]?.conversationId : args[0]
+        if (convId) {
+          dispatch(
+            conversationsApi.util.invalidateTags([
+              { type: "Messages", id: Number(convId) },
+              { type: "Messages", id: String(convId) },
+            ]),
+          )
+        }
+      },
+
       FriendStatusChange: (data) => {
         if (data?.userId != null) {
           dispatch(
@@ -122,6 +195,10 @@ export const useGlobalSignalR = () => {
           )
         }
         dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+      },
+
+      NewFriendRequest: () => {
+        dispatch(friendshipApi.util.invalidateTags(["FriendRequest"]))
       },
     }),
     [dispatch, activeConversationId, isWidgetOpen],
@@ -171,6 +248,23 @@ export const useGlobalSignalR = () => {
     invokeRef.current = invoke
     reconnectRef.current = reconnect
   }, [invoke, reconnect])
+
+  // Automatically join SignalR groups for ALL of the user's conversations as soon as SignalR connects
+  useEffect(() => {
+    if (invoke && conversations.length > 0) {
+      conversations.forEach((c) => {
+        const convId = c.conversationId || c.id
+        if (convId) {
+          invoke("JoinConversation", Number(convId)).catch((err) => {
+            console.warn(
+              `[GlobalSignalR] Auto-join failed for conversation ${convId}:`,
+              err,
+            )
+          })
+        }
+      })
+    }
+  }, [invoke, conversations])
 }
 
 export default useGlobalSignalR

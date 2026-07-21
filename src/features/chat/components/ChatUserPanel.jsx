@@ -17,6 +17,7 @@ const ChatUserPanel = ({
   conversation,
   currentUser,
   onClose,
+  onLeaveGroup,
   friendOnlineStatus,
   isDrawer = false,
 }) => {
@@ -41,16 +42,10 @@ const ChatUserPanel = ({
   const otherUser = conversation.friend
   const name = conversation.name
   const memberCount = conversation.participants?.length || 0
-  const isOnline = !isGroup && !!friendOnlineStatus[otherUser?.accountId]
+  const statusText = isGroup ? `${memberCount} members` : null
 
   // Check if current user is group creator
   const isCreator = conversation.createdById === currentUser.id
-
-  const statusText = isGroup
-    ? `${memberCount} members`
-    : isOnline
-      ? "Active now"
-      : "Offline"
 
   const handleLeaveGroup = async () => {
     try {
@@ -58,7 +53,11 @@ const ChatUserPanel = ({
         conversationId: conversation.id,
         accountId: currentUser.id,
       }).unwrap()
-      onClose()
+      if (onLeaveGroup) {
+        onLeaveGroup()
+      } else {
+        onClose()
+      }
     } catch (err) {
       console.error("Failed to leave group:", err)
     }
@@ -131,14 +130,7 @@ const ChatUserPanel = ({
             <h2 className="mt-3 font-semibold text-center">
               {selectedMember.username}
             </h2>
-            <p className="text-xs text-[#606060] flex items-center gap-1.5 justify-center">
-              {!!friendOnlineStatus[selectedMember.accountId] && (
-                <span className="w-2 h-2 rounded-full bg-[#22C55E] inline-block" />
-              )}
-              {friendOnlineStatus[selectedMember.accountId]
-                ? "Active now"
-                : "Offline"}
-            </p>
+
 
             <p className="mt-4 text-sm text-[#606060] text-center">
               Level: {selectedMember.level || "Student"}
@@ -176,12 +168,11 @@ const ChatUserPanel = ({
               )}
 
               <h2 className="mt-3 font-semibold text-center">{name}</h2>
-              <p className="text-xs text-[#606060] flex items-center gap-1.5">
-                {!isGroup && isOnline && (
-                  <span className="w-2 h-2 rounded-full bg-[#22C55E] inline-block" />
-                )}
-                {statusText}
-              </p>
+              {statusText && (
+                <p className="text-xs text-[#606060] flex items-center gap-1.5">
+                  {statusText}
+                </p>
+              )}
 
               {!isGroup && otherUser?.level && (
                 <p className="mt-3 text-[13px] text-[#606060] text-center leading-relaxed">
@@ -237,9 +228,6 @@ const ChatUserPanel = ({
                               src={participant.avatarImageUrl}
                               className={theme.avatarClass}
                             />
-                            {isOnline && (
-                              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white bg-[#22C55E]" />
-                            )}
                           </div>
                         }
                         rightContent={

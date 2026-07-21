@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { useConversationSignalRContext } from "../context/ConversationSignalRContext"
+import { useConversationSignalRContext } from "../../chat/context/ConversationSignalRContext"
 
 /**
  * Hook to consume SignalR connection for Real-time Conversations
@@ -22,7 +22,19 @@ export const useConversationSignalR = (handlers = {}) => {
     )
   }
 
-  const { isConnected, connectionId, sendMessage, invoke, reconnect, on, off } = context
+  const {
+    isConnected,
+    connectionId,
+    sendMessage,
+    joinConversation,
+    leaveConversation,
+    startTyping,
+    stopTyping,
+    invoke,
+    reconnect,
+    on,
+    off,
+  } = context
 
   // Keep handlers fresh without re-subscribing
   const handlersRef = useRef(handlers)
@@ -33,9 +45,16 @@ export const useConversationSignalR = (handlers = {}) => {
   useEffect(() => {
     const events = [
       "NewMessage",
+      "MessageRead",
+      "ConversationRead",
+      "ReadReceipt",
+      "UserTyping",
+      "UserStoppedTyping",
       "NewConversation",
       "ConversationCreated",
+      "ConversationUpdated",
       "FriendStatusChange",
+      "NewFriendRequest",
       "ChatUpdated",
       "OnConnected",
       "OnReconnected",
@@ -66,6 +85,10 @@ export const useConversationSignalR = (handlers = {}) => {
     isConnected,
     connectionId,
     sendMessage,
+    joinConversation,
+    leaveConversation,
+    startTyping,
+    stopTyping,
     invoke,
     reconnect,
   }

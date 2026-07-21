@@ -57,6 +57,11 @@ export const conversationsApi = socialApi.injectEndpoints({
         url: `/conversations/${conversationId}/read`,
         method: "PUT",
       }),
+      invalidatesTags: (result, error, conversationId) => [
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+        "Conversations",
+      ],
     }),
 
     // Add new participants to a group conversation
@@ -106,4 +111,3 @@ export const {
   useRemoveParticipantMutation,
   useGetSupportStaffQuery,
 } = conversationsApi
-

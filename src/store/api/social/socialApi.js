@@ -19,6 +19,18 @@ export const socialApi = createApi({
       return headers
     },
   }),
-  tagTypes: ["Post", "Conversations", "Messages", "Friendship", "Friend", "Follower", "Following", "Recommendation", "FriendRequest"],
+  tagTypes: [
+    "Post",
+    "Conversations",
+    "Messages",
+    "Friendship",
+    "Friend",
+    "Follower",
+    "Following",
+    "Recommendation",
+    "FriendRequest",
+    "Stories",
+    "MyStories",
+  ],
   endpoints: () => ({}),
 })

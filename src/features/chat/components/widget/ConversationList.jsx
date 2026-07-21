@@ -7,6 +7,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ConversationList = ({
   conversations,
+  currentUser,
   isLoading,
   isError,
   onSelectConversation,
@@ -19,15 +20,16 @@ const ConversationList = ({
         {isLoading ? (
           <LoadingSpinner className="flex items-center justify-center py-4" />
         ) : isError ? (
-          <ErrorMessage message={t.messages.error} className="py-4" />
+          <ErrorMessage message={t?.messages?.error || "Error loading data"} className="py-4" />
         ) : conversations.length === 0 ? (
-          <EmptyState message={t.messages.noMessages} className="py-4" />
+          <EmptyState message={t?.messages?.noMessages || "No messages yet"} className="py-4" />
         ) : (
           <div className="flex flex-col gap-1 p-1">
             {conversations.map((conv) => (
               <ConversationItem
                 key={conv.conversationId}
                 conversation={conv}
+                currentUser={currentUser}
                 onClick={() => onSelectConversation(conv)}
               />
             ))}

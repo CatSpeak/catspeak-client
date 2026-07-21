@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect, useContext } from "react"
+import React, { useState, useRef, useEffect, useContext, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useAuth } from "@/features/auth"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import {
   useGetConversationsQuery,
@@ -9,7 +10,7 @@ import {
   useMarkConversationAsReadMutation,
   conversationsApi,
 } from "@/store/api/social/conversationsApi"
-import useMessageSignalR from "../hooks/useMessageSignalR"
+import useMessageSignalR from "../../hooks/useMessageSignalR"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import {
   closeWidget,
@@ -25,14 +26,17 @@ import {
 import { MessageCircle, ExternalLink } from "lucide-react"
 import { Link } from "react-router-dom"
 import MessageModal from "./MessageModal"
-import ConversationListHeader from "./headers/ConversationListHeader"
-import ConversationDetailHeader from "./headers/ConversationDetailHeader"
-import ConversationList from "./conversation-list/ConversationList"
-import ConversationDetail from "./conversation-detail/ConversationDetail"
+import ConversationListHeader from "./ConversationListHeader"
+import ConversationDetailHeader from "./ConversationDetailHeader"
+import ConversationList from "./ConversationList"
+import ConversationDetail from "./ConversationDetail"
 
 const MessageWidget = () => {
   const dispatch = useDispatch()
-  const { isAuthenticated } = useAuth()
+  const { user: authUser, isAuthenticated } = useAuth()
+  const { data: userProfile } = useGetUserProfileQuery(undefined, {
+    skip: !isAuthenticated,
+  })
   const { openAuthModal } = useContext(AuthModalContext)
   const { isOpen, activeConversationId, view } = useSelector(
     (state) => state.messageWidget,
@@ -40,6 +44,14 @@ const MessageWidget = () => {
   const [input, setInput] = useState("")
   const totalUnreadCountRedux = useSelector(selectTotalUnread)
   const widgetRef = useRef(null)
+
+  const currentUser = useMemo(() => {
+    return {
+      id: authUser?.accountId,
+      name: userProfile?.username || authUser?.username || "Me",
+      avatar: userProfile?.avatarImageUrl || null,
+    }
+  }, [authUser, userProfile])
 
   // Handle click outside to close
   useClickOutside(
@@ -58,7 +70,7 @@ const MessageWidget = () => {
     data: conversations = [],
     isLoading,
     isError,
-  } = useGetConversationsQuery()
+  } = useGetConversationsQuery(undefined, { skip: !isAuthenticated })
 
   const totalUnreadCountServer = conversations.reduce(
     (sum, c) => sum + (c.unreadCount || 0),
@@ -72,17 +84,49 @@ const MessageWidget = () => {
     (c) => c.conversationId === activeConversationId,
   )
 
+  const activeConversation = useMemo(() => {
+    if (!selected) return null
+    return {
+      id: selected.conversationId,
+      type: selected.isGroup ? "group" : "direct",
+      name: selected.isGroup
+        ? selected.groupName
+        : selected.friend?.username || "Chat",
+      participants: selected.participants || [],
+      unreadCount: selected.unreadCount || 0,
+      friend: selected.friend,
+      isGroup: selected.isGroup,
+      groupName: selected.groupName,
+      groupAvatar: selected.groupAvatar,
+    }
+  }, [selected])
+
   // Fetch messages for selected conversation
-  const {
-    data: messages = [],
-    isLoading: messagesLoading,
-    refetch: refetchMessages,
-  } = useGetConversationMessagesQuery(activeConversationId, {
-    skip: !activeConversationId,
-  })
+  const { data: messagesResponse = [], isLoading: messagesLoading } =
+    useGetConversationMessagesQuery(activeConversationId, {
+      skip: !activeConversationId,
+    })
+
+  const activeMessages = useMemo(() => {
+    const rawList = Array.isArray(messagesResponse)
+      ? messagesResponse
+      : messagesResponse?.data || []
+    return rawList.map((msg) => ({
+      id: msg.messageId,
+      conversationId: msg.conversationId,
+      senderId: msg.sender?.accountId,
+      content: msg.messageContent,
+      timestamp: msg.createDate,
+      messageType: msg.messageType || "Text",
+      isRead: msg.isRead ?? false,
+      status: msg.isRead ? "read" : "delivered",
+      readByAccountIds: msg.readByAccountIds || [],
+      sender: msg.sender,
+    }))
+  }, [messagesResponse])
 
   // -- SignalR Integration --
-  const { sendSignalRMessage } = useMessageSignalR({
+  const { startTyping, stopTyping, typingUsers } = useMessageSignalR({
     activeConversationId,
   })
 
@@ -117,12 +161,20 @@ const MessageWidget = () => {
     clearUnreadLogic(conv.conversationId)
   }
 
-  // Handle programmatically opened conversations
+  // Handle programmatically opened conversations or updates to active conversation
   useEffect(() => {
-    if (activeConversationId) {
+    if (!activeConversationId) return
+
+    const currentCached = conversations.find(
+      (c) =>
+        Number(c.conversationId ?? c.id) === Number(activeConversationId) ||
+        String(c.conversationId ?? c.id) === String(activeConversationId),
+    )
+
+    if (!currentCached || currentCached.unreadCount > 0) {
       clearUnreadLogic(activeConversationId)
     }
-  }, [activeConversationId])
+  }, [activeConversationId, conversations])
 
   // Handle back to list
   const handleBackToList = () => {
@@ -134,10 +186,11 @@ const MessageWidget = () => {
   const handleSendMessage = async () => {
     if (!input.trim() || !activeConversationId) return
 
+    if (stopTyping) stopTyping()
     try {
       await sendMessageApi({
         conversationId: activeConversationId,
-        messageData: { messageContent: input, messageType: 0 },
+        messageData: { messageContent: input, messageType: "Text" },
       }).unwrap()
       setInput("")
     } catch (error) {
@@ -153,13 +206,32 @@ const MessageWidget = () => {
     }
   }
 
+  // Filter out empty 1:1 conversations (unless active) and sort by latest timestamp matching ChatSidebar
+  const filteredConversations = useMemo(() => {
+    let result = [...conversations]
+
+    result = result.filter((c) => {
+      if (c.conversationId === activeConversationId) return true
+      if (c.isGroup) return true
+      return !!c.lastMessage
+    })
+
+    result.sort((a, b) => {
+      const aTime = a.lastMessageTime || a.createDate || ""
+      const bTime = b.lastMessageTime || b.createDate || ""
+      return new Date(bTime) - new Date(aTime)
+    })
+
+    return result
+  }, [conversations, activeConversationId])
+
   return (
     <div className="relative flex items-center" ref={widgetRef}>
       <MessageModal isOpen={isOpen}>
         {/* Header */}
         {view === "detail" && selected ? (
           <ConversationDetailHeader
-            conversation={selected}
+            conversation={activeConversation || selected}
             onBack={handleBackToList}
             onClose={() => dispatch(closeWidget())}
           />
@@ -174,7 +246,8 @@ const MessageWidget = () => {
         {view === "list" ? (
           <>
             <ConversationList
-              conversations={conversations}
+              conversations={filteredConversations}
+              currentUser={currentUser}
               isLoading={isLoading}
               isError={isError}
               onSelectConversation={handleSelectConversation}
@@ -183,22 +256,34 @@ const MessageWidget = () => {
             <Link
               to="/chat"
               onClick={() => dispatch(closeWidget())}
-              className="flex items-center justify-center gap-1.5 border-t border-[#e5e5e5] px-3 py-2.5 text-[13px] font-medium text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
+              className="h-12 flex items-center justify-center gap-2 border-t border-[#e5e5e5] px-4 text-sm text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
             >
+              <ExternalLink size={20} />
               See all in Chat
-              <ExternalLink size={13} />
             </Link>
           </>
         ) : (
           <ConversationDetail
-            conversation={selected}
-            messages={messages}
+            conversation={activeConversation}
+            messages={activeMessages}
+            currentUser={currentUser}
             isLoading={messagesLoading}
             input={input}
-            onInputChange={(e) => setInput(e.target.value)}
+            onInputChange={(e) => {
+              const val = e.target.value
+              setInput(val)
+              if (val.trim().length > 0) {
+                if (startTyping) startTyping()
+              } else {
+                if (stopTyping) stopTyping()
+              }
+            }}
             onSendMessage={handleSendMessage}
             onKeyPress={handleKeyPress}
             isSending={isSending}
+            typingUsers={typingUsers}
+            onStartTyping={startTyping}
+            onStopTyping={stopTyping}
           />
         )}
       </MessageModal>

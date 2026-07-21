@@ -1,117 +1,12 @@
-import { useState, useMemo, memo } from "react"
+import { useState, useMemo } from "react"
 import { SquarePen, Users, BellOff } from "lucide-react"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { IconButton } from "@/shared/components/ui/buttons"
 import ListItem from "@/shared/components/ui/ListItem"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
-import Avatar from "@/shared/components/ui/Avatar"
-import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
-import { formatRelativeTime } from "@/shared/utils/dateFormatter"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
-import GroupAvatar from "./GroupAvatar"
-
-/**
- * ConversationItem — single row in the conversation list.
- */
-const ConversationItem = memo(
-  ({ conversation, currentUser, friendOnlineStatus, isSelected, onClick }) => {
-    const isGroup = conversation.isGroup
-    const name = isGroup
-      ? conversation.groupName
-      : conversation.friend?.username || "Chat User"
-
-    // Check online status of friend in 1:1 conversation
-    const isOnline =
-      !isGroup && !!friendOnlineStatus[conversation.friend?.accountId]
-    const hasUnread = conversation.unreadCount > 0
-
-    // Last message preview
-    let preview = ""
-    if (conversation.lastMessage) {
-      let senderPrefix = ""
-      if (conversation.lastMessageSenderId === currentUser.id) {
-        senderPrefix = "You: "
-      } else if (isGroup && conversation.participants) {
-        const sender = conversation.participants.find(
-          (p) => p.accountId === conversation.lastMessageSenderId,
-        )
-        if (sender) {
-          senderPrefix = `${sender.username?.split(" ")[0] || "?"}: `
-        }
-      }
-      preview = senderPrefix + conversation.lastMessage
-    }
-
-    const friendTheme = getParticipantTheme(
-      conversation.friend?.accountId || conversation.friend?.username || "",
-    )
-
-    const leftContent = (
-      <div className="relative shrink-0">
-        {isGroup ? (
-          <GroupAvatar conversation={conversation} size={40} />
-        ) : (
-          <>
-            <Avatar
-              size={40}
-              name={conversation.friend?.username}
-              src={conversation.friend?.avatarImageUrl}
-              className={friendTheme.avatarClass}
-            />
-            {/* Online dot */}
-            {isOnline && (
-              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#22C55E] rounded-full border-[2.5px] border-white" />
-            )}
-          </>
-        )}
-      </div>
-    )
-
-    const rightContent = (
-      <div className="flex flex-col items-end gap-1 justify-center">
-        <span className="text-xs text-[#606060]">
-          {formatRelativeTime(
-            conversation.lastMessageTime || conversation.createDate,
-          )}
-        </span>
-        {hasUnread ? (
-          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#990011] px-1.5 text-xs text-white">
-            {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
-          </span>
-        ) : (
-          <div className="h-5" />
-        )}
-      </div>
-    )
-
-    return (
-      <ListItem
-        onClick={onClick}
-        hoverEffect={!isSelected}
-        className={`rounded-xl ${isSelected ? "bg-primary2" : ""}`}
-        contentClassName="rounded-xl"
-        lines={2}
-        leftContent={leftContent}
-        rightContent={rightContent}
-      >
-        <span
-          className={`truncate ${hasUnread ? "font-semibold" : "font-medium"}`}
-        >
-          {name}
-        </span>
-        <span
-          className={`text-sm truncate ${
-            hasUnread ? "font-medium" : "text-[#606060]"
-          }`}
-        >
-          {preview || "No messages yet"}
-        </span>
-      </ListItem>
-    )
-  },
-)
-ConversationItem.displayName = "ConversationItem"
+import ConversationItem from "./widget/ConversationItem"
 
 // ── Filter Tabs ───────────────────────────────────────────
 const FILTERS = [
@@ -171,7 +66,10 @@ const ChatSidebar = ({
   }, [conversations, filter, searchQuery, selectedId])
 
   return (
-    <FluentCard padding="p-0" className="w-full h-full flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl">
+    <FluentCard
+      padding="p-0"
+      className="w-full h-full flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl"
+    >
       {/* ── Header ───────────────────────────────────── */}
       <div className="flex flex-col gap-4 p-4">
         <div className="flex items-center justify-between">
@@ -219,7 +117,11 @@ const ChatSidebar = ({
             </ListItem>
           ))
         ) : filtered.length === 0 ? (
-          <EmptyState variant="component" icon={Users} message="No conversations found" />
+          <EmptyState
+            variant="component"
+            icon={Users}
+            message="No conversations found"
+          />
         ) : (
           filtered.map((conv) => (
             <ConversationItem
