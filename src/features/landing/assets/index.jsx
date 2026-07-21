@@ -24,3 +24,4 @@ export { default as MeduEnglish } from "./partners/Medu_English.png";
 export { default as SpeakUpGlobal } from "./partners/Speak_Up_Global.png";
 export { default as HubNetwork } from "./partners/Hub_Network.png";
 export { default as QTEDU } from "./partners/QTEDU.png";
+export { default as EZTalking } from "./partners/EZTalking.png";
