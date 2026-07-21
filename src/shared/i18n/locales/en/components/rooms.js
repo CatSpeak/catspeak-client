@@ -310,6 +310,7 @@ export default {
       tilesDescription: "Maximum tiles to show, depending on window size.",
       hideNonVideo: "Hide non-video participants",
     },
+    remainingTime: "Remaining time",
     roomClosingTitle: "Room Ending Soon",
     roomClosingSubtitle:
       "This session will end in {{remainingSeconds}} seconds",

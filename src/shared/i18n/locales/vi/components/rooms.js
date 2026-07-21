@@ -288,6 +288,7 @@ export default {
       tilesDescription: "Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ.",
       hideNonVideo: "Ẩn ô không có video",
     },
+    remainingTime: "Thời gian còn lại",
     roomClosingTitle: "Phòng sắp đóng",
     roomClosingSubtitle:
       "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",

@@ -152,7 +152,7 @@ const VideoCallControlBar = () => {
           }
           iconActive={<MonitorOff className={iconClass} />}
           iconInactive={<MonitorUp className={iconClass} />}
-          className="hidden min-[769px]:flex"
+          className="hidden md:flex"
           inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
 
         />
@@ -202,7 +202,7 @@ const VideoCallControlBar = () => {
       </div>
 
 
-      <RightSideControls className="hidden md:flex mr-4 gap-2" />
+      <RightSideControls className="hidden lg:flex mr-4 gap-2" />
 
       {
         showStopModal && (

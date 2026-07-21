@@ -39,6 +39,8 @@ import GameHistoryModal from "@/features/games/components/shared/GameHistoryModa
 import { useGame } from "@/features/games/context/GameContext";
 import MenuItem from "@/shared/components/ui/MenuItem";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
+import { useSessionTimer } from "../hooks/useSessionTimer";
+import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
@@ -79,6 +81,9 @@ const ControlBarMoreMenu = ({
   const [showMobileSettings, setShowMobileSettings] = useState(false);
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall);
+
+  const { closingRemainingSeconds } = useVideoCallContext()
+  const { formattedRemaining, formattedMax, hasDuration, formattedElapsed } = useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
 
   // Need to import useGetBreakoutStatusQuery, oh wait, I didn't import it in the file! I will just use the one from videoCall context if possible?
   // Let me just import it manually here in the chunk by fixing the top imports.
@@ -337,18 +342,12 @@ const ControlBarMoreMenu = ({
                               transition={{ duration: 0.2 }}
                               className="flex flex-col gap-3"
                             >
-                              <button
-                                onClick={() => {
-                                  setShowMoreMenu(false);
-                                  if (ongoingGame) spectateGame();
-                                  else if (isHost) setShowGameSetup(true);
-                                }}
-                                disabled={!isHost && !ongoingGame}
-                                className="w-full h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center gap-2 font-medium disabled:opacity-50"
-                              >
-                                <Gamepad2 size={20} />
-                                {ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Trò chơi")}
-                              </button>
+
+                              {hasDuration && (
+                                <div className="flex items-center justify-center text-lg font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-12 w-full">
+                                  {t?.rooms?.videoCall?.remainingTime || "Thời gian còn lại"}: {formattedRemaining} / {formattedMax}
+                                </div>
+                              )}
 
                               <div className="grid grid-cols-3 gap-3">
                                 <button
@@ -423,7 +422,7 @@ const ControlBarMoreMenu = ({
                             </motion.div>
                           ) : (
                             <motion.div
-                              key="mobile-settings"
+                              // key="mobile-settings"
                               initial={{ opacity: 0, x: 20 }}
                               animate={{ opacity: 1, x: 0 }}
                               exit={{ opacity: 0, x: 20 }}
