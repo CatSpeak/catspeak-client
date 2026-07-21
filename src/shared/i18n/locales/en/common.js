@@ -7,8 +7,8 @@ export default {
   back: "Back",
   cancel: "Cancel",
   reload: "Reload page",
-  cancelUploadConfirmTitle: "Uploading Data",
-  cancelUploadConfirmDesc: "There is an upload in progress. If you reload the page, the data will be lost. Are you sure you want to continue?",
+  cancelUploadConfirmTitle: "Processing Tasks",
+  cancelUploadConfirmDesc: "There is a task processing in progress. If you reload the page, the task will be cancelled. Are you sure you want to continue?",
   scrollToTop: "Scroll to top",
   toggle: {
     on: "On",
@@ -113,11 +113,17 @@ export default {
     nextPage: "Next page",
   },
   uploadWidget: {
-    uploading: "Uploading... {{progress}}%",
+    uploading: "Executing... {{progress}}%",
     processing: "Processing... {{progress}}%",
     success: "Success",
-    error: "Upload Failed",
-    itemsCount: "Uploading {{count}} items",
-    cancelTip: "Cancel upload",
+    error: "Task Failed",
+    itemsCount: "Processing {{count}} tasks",
+    cancelTip: "Cancel task",
   },
+  catSpeak: {
+    reels: {
+      createReelTitle: "Create new Reel",
+      uploadSuccess: "Reel posted successfully!",
+    }
+  }
 };

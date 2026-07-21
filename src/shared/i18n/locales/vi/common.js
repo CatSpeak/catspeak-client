@@ -7,8 +7,8 @@ export default {
   back: "Quay lại",
   cancel: "Hủy",
   reload: "Tải lại trang",
-  cancelUploadConfirmTitle: "Đang tải dữ liệu lên",
-  cancelUploadConfirmDesc: "Đang có tiến trình tải dữ liệu lên chưa hoàn tất. Nếu bạn tải lại trang, dữ liệu sẽ bị mất. Bạn có chắc chắn muốn tiếp tục?",
+  cancelUploadConfirmTitle: "Đang xử lý tác vụ",
+  cancelUploadConfirmDesc: "Đang có tiến trình xử lý chưa hoàn tất. Nếu bạn tải lại trang, tiến trình sẽ bị hủy. Bạn có chắc chắn muốn tiếp tục?",
   scrollToTop: "Lên đầu trang",
   toggle: {
     on: "Bật",
@@ -113,11 +113,17 @@ export default {
     nextPage: "Trang tiếp",
   },
   uploadWidget: {
-    uploading: "Đang tải lên... {{progress}}%",
+    uploading: "Đang tiến hành... {{progress}}%",
     processing: "Đang xử lý... {{progress}}%",
     success: "Hoàn tất",
-    error: "Lỗi tải lên",
-    itemsCount: "Tải lên {{count}} mục",
-    cancelTip: "Hủy tải lên",
+    error: "Lỗi tác vụ",
+    itemsCount: "Xử lý {{count}} tác vụ",
+    cancelTip: "Hủy tác vụ",
   },
+  catSpeak: {
+    reels: {
+      createReelTitle: "Tạo Reel mới",
+      uploadSuccess: "Đăng Reel thành công!",
+    }
+  }
 }

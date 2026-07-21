@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle, AlertCircle, Loader2, ChevronDown, ChevronUp, FileUp } from "lucide-react";
+import { X, CheckCircle, AlertCircle, Loader2, ChevronDown, ChevronUp, ListTodo } from "lucide-react";
 import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx";
 
 const UploadItem = ({ upload, onCancel, onRemove }) => {
@@ -122,7 +122,7 @@ export const GlobalUploadWidget = () => {
           className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
         >
           <div className="flex items-center gap-2">
-            <FileUp className="w-5 h-5 text-cath-red-700" />
+            <ListTodo className="w-5 h-5 text-cath-red-700" />
             <span className="font-semibold text-gray-900 text-sm">
               {t?.uploadWidget?.itemsCount?.replace("{{count}}", visibleUploads.length)}
             </span>
