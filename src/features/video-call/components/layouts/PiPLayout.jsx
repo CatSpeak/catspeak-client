@@ -164,9 +164,9 @@ const PiPLayout = ({ spotlightItem, screenShareTracks, participants, handleTileC
 
   if (allItems.length === 1) {
     return (
-      <div ref={containerRef} className="relative h-full w-full bg-black overflow-hidden">
+      <div ref={containerRef} className="relative h-full w-full overflow-hidden">
         {/* Main Background Video */}
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 w-full h-full p-2">
           {renderItem(allItems[0])}
         </div>
       </div>
@@ -222,7 +222,7 @@ const PiPLayout = ({ spotlightItem, screenShareTracks, participants, handleTileC
   return (
     <div ref={containerRef} className="relative h-full w-full overflow-hidden">
       {/* Main Background Video */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full p-2">
         {renderItem(mainItem)}
       </div>
 

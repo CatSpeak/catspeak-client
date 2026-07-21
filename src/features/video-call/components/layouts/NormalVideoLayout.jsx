@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import ScreenShareTile from "../ScreenShareTile"
 import VideoTile from "../VideoTile"
-import useMediaQuery from "@/shared/hooks/useMediaQuery"
 
 const scrollbarClasses =
   "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
@@ -13,7 +12,6 @@ const NormalVideoLayout = ({
   totalItems,
   maxTiles = 16,
 }) => {
-  const isMobile = useMediaQuery("(max-width: 767px)")
   const [currentPage, setCurrentPage] = useState(0)
 
   // Reset page if total items change and current page is now invalid
