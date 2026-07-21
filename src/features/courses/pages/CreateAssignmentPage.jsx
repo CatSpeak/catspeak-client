@@ -2,8 +2,8 @@ import React, { useState, useRef } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
-import { 
-  useGetClassDetailQuery, 
+import {
+  useGetClassDetailQuery,
   useCreateAssignmentMutation,
   useGetAssignmentByIdQuery,
   useUpdateAssignmentMutation
@@ -19,16 +19,10 @@ import {
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ReactDatePicker from "react-datepicker"
 import "@/shared/styles/react-datepicker.css"
+import { Editor } from "@tinymce/tinymce-react"
 import {
   Calendar,
   Clock,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  Link2,
-  Image,
   Upload,
   FileText,
   Trash2,
@@ -68,13 +62,14 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     formData.append("AllowLateSubmission", String(allowLateSubmission))
     formData.append("AllowFileSubmission", String(submissionTypeFile))
     formData.append("AllowTextSubmission", String(submissionTypeText))
-    formData.append("AllowedFileTypes", allowedFileTypes.map(t => `.${t.toLowerCase()}`).join(","))
+    formData.append("AllowedFileTypes", allowedFileTypes.filter(Boolean).map(t => `.${t.toLowerCase()}`).join(","))
     formData.append("MaxFiles", String(clampMaxFiles(maxFiles)))
     formData.append("HasGrading", String(enableGrading))
     formData.append("MaxScore", String(gradeScale === "scale100" ? 100 : 10))
     formData.append("ReleaseMode", resultRelease === "automatic" ? "Automatic" : "Manual")
     formData.append("PostToBulletinBoard", String(postToFeed))
     formData.append("Status", status)
+    formData.append("status", status)
 
     // Append existing files to keep
     existingAttachments.forEach((f) => {
@@ -282,41 +277,25 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
             {/* 2. Mô tả / Yêu cầu */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-gray-800">{ca.descriptionLabel || "Mô tả / Yêu cầu bài nộp"}</label>
-              <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-xs focus-within:ring-2 focus-within:ring-red-100 focus-within:border-[#990011] transition-all">
-                {/* Editor mock toolbar */}
-                <div className="bg-gray-50 border-b border-gray-200 p-2.5 flex flex-wrap items-center gap-3">
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded text-gray-650 transition-colors" title="Bold">
-                    <Bold size={16} />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded text-gray-650 transition-colors" title="Italic">
-                    <Italic size={16} />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded text-gray-650 transition-colors" title="Underline">
-                    <Underline size={16} />
-                  </button>
-                  <div className="w-px h-4 bg-gray-300 mx-1" />
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded text-gray-650 transition-colors" title="Bullet List">
-                    <List size={16} />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded text-gray-650 transition-colors" title="Numbered List">
-                    <ListOrdered size={16} />
-                  </button>
-                  <div className="w-px h-4 bg-gray-300 mx-1" />
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded text-gray-650 transition-colors" title="Insert Link">
-                    <Link2 size={16} />
-                  </button>
-                  <button type="button" className="p-1 hover:bg-gray-200 rounded text-gray-650 transition-colors" title="Insert Image">
-                    <Image size={16} />
-                  </button>
-                </div>
-
-                {/* Textarea */}
-                <textarea
+              <label className="text-sm font-bold text-gray-800">{ca.descriptionLabel || "Yêu cầu bài tập"}</label>
+              <div className="assignment-editor overflow-hidden transition-all">
+                <Editor
+                  tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
                   value={editorText}
-                  onChange={(e) => setEditorText(e.target.value)}
-                  placeholder={ca.descriptionPlaceholder || "Nhập hướng dẫn chi tiết cho học sinh..."}
-                  className="w-full min-h-[160px] p-4 text-sm focus:outline-none resize-none"
+                  onEditorChange={(newVal) => setEditorText(newVal)}
+                  init={{
+                    height: 250,
+                    menubar: false,
+                    statusbar: false,
+                    plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                    toolbar:
+                      "bold italic underline strikethrough | emoticons link | bullist numlist",
+                    placeholder: ca.descriptionPlaceholder || "Nhập hướng dẫn chi tiết cho học sinh...",
+                    skin: "oxide",
+                    setup: (editor) => {
+                      editor.on("focus", () => { })
+                    },
+                  }}
                 />
               </div>
             </div>
@@ -667,6 +646,10 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 >
                   <button
                     type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setPublishStatus("now")
+                    }}
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "now"
                       ? "border-[#990011]"
                       : "border-gray-300"
@@ -688,6 +671,10 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 >
                   <button
                     type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setPublishStatus("draft")
+                    }}
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "draft"
                       ? "border-[#990011]"
                       : "border-gray-300"

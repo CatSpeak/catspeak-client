@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
@@ -7,6 +7,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useBulkReturnSubmissionsMutation,
   useCloseAssignmentMutation,
+  useDeleteAssignmentMutation,
   useGetAssignmentByIdQuery,
   useGetAssignmentSubmissionsQuery,
   useGetClassMembersQuery,
@@ -26,6 +27,7 @@ import AssignmentGradingWorkspace from "./AssignmentGradingWorkspace"
 import AssignmentSubmissionsList from "./AssignmentSubmissionsList"
 
 const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp, onBack, classId }) => {
+  const navigate = useNavigate()
   const { language, t } = useLanguage()
   const [searchParams, setSearchParams] = useSearchParams()
   const [nowMs] = useState(() => Date.now())
@@ -33,6 +35,7 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
   const [activeFilter, setActiveFilter] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
   const gradingTranslations = t.courses?.grading || {}
+  const activeSubmissionId = searchParams.get("submissionId")
   const activeStudentId = searchParams.get("studentId")
   const assignmentId = assignmentIdProp || assignment?.id
 
@@ -47,6 +50,7 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
   const { data: membersResponse, isLoading: isMembersLoading } = useGetClassMembersQuery({ classId })
   const [closeAssignment] = useCloseAssignmentMutation()
   const [openAssignment] = useOpenAssignmentMutation()
+  const [deleteAssignment, { isLoading: isDeletingAssignment }] = useDeleteAssignmentMutation()
   const [gradeSubmission] = useGradeSubmissionMutation()
   const [bulkReturn] = useBulkReturnSubmissionsMutation()
   const [returnSubmission] = useReturnSubmissionMutation()
@@ -73,9 +77,16 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
     language,
   }), [members, submissions, language])
   const activeStudent = useMemo(() => {
-    if (!activeStudentId) return null
-    return students.find((student) => student.id === activeStudentId) || null
-  }, [students, activeStudentId])
+    if (activeSubmissionId) {
+      const found = students.find((student) => String(student.submissionId) === String(activeSubmissionId))
+      if (found) return found
+    }
+    if (activeStudentId) {
+      const found = students.find((student) => String(student.id) === String(activeStudentId))
+      if (found) return found
+    }
+    return null
+  }, [students, activeSubmissionId, activeStudentId])
 
   const handleToggleSubmissionsLock = async () => {
     try {
@@ -229,6 +240,21 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
     )
   }
 
+  const handleDeleteAssignment = async () => {
+    try {
+      await deleteAssignment({ classId, assignmentId }).unwrap()
+      toast.success(gradingTranslations.toastDeleteSuccess || "Đã xóa bài tập thành công!")
+      if (onBack) {
+        onBack()
+      } else {
+        navigate(`/workspace/courses/details/${classId}`)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.error?.message || "Lỗi khi xóa bài tập")
+    }
+  }
+
   return (
     <AssignmentSubmissionsList
       assignmentId={assignmentId}
@@ -246,7 +272,16 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
       onToggleSubmissionsLock={handleToggleSubmissionsLock}
       onDownloadGradeSheet={handleDownloadGradeSheet}
       onBulkReturn={handleBulkReturn}
-      onSelectStudent={(studentId) => setSearchParams({ assignmentId, studentId })}
+      onDeleteAssignment={handleDeleteAssignment}
+      isDeletingAssignment={isDeletingAssignment}
+      onSelectStudent={(studentArg) => {
+        const student = typeof studentArg === "object" ? studentArg : students.find(s => String(s.id) === String(studentArg))
+        if (student?.submissionId) {
+          setSearchParams({ assignmentId, submissionId: student.submissionId })
+        } else if (student?.id) {
+          setSearchParams({ assignmentId, studentId: student.id })
+        }
+      }}
       onStudentSearchChange={(value) => {
         setStudentSearch(value)
         setCurrentPage(1)

@@ -92,7 +92,7 @@ export const getAssignmentFormDefaults = (assignment) => {
       .split(",")
       .map((type) => type.replace(".", "").trim().toUpperCase())
       .filter(Boolean)
-    : ["PDF", "DOCX"]
+    : []
 
   return {
     title: assignment?.name || assignment?.title || "",
@@ -109,7 +109,7 @@ export const getAssignmentFormDefaults = (assignment) => {
     enableGrading: assignment?.hasGrading ?? false,
     gradeScale: Number(assignment?.maxScore) === 100 ? "scale100" : "scale10",
     resultRelease: assignment?.releaseMode?.toLowerCase() === "automatic" ? "automatic" : "manual",
-    publishStatus: assignment?.status?.toLowerCase() === "draft" ? "draft" : "now",
+    publishStatus: (String(assignment?.status || "").toLowerCase().trim() === "draft" || String(assignment?.status) === "0") ? "draft" : "now",
     existingAttachments: parseAttachmentList(assignment?.attachments || assignment?.files),
   }
 }

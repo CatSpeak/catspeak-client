@@ -96,7 +96,7 @@ const AssignmentSubmissionsTable = ({
                   <td className="p-4 pr-6 text-center whitespace-nowrap">
                     <button
                       type="button"
-                      onClick={() => onSelectStudent(student.id)}
+                      onClick={() => onSelectStudent(student)}
                       className="h-8 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-lg flex items-center gap-1.5 justify-center transition-colors shadow-2xs mx-auto"
                     >
                       <Eye size={12} className="text-gray-400" />
@@ -136,7 +136,7 @@ const AssignmentSubmissionsTable = ({
               className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${isActive
                 ? "bg-[#990011] text-white shadow-2xs border border-[#990011]"
                 : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
+                }`}
               aria-current={isActive ? "page" : undefined}
             >
               {page}

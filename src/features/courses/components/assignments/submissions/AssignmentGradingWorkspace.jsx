@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Eye, FileText, Search, X, ZoomIn, ZoomOut } from "lucide-react"
 
 import { useLanguage } from "@/shared/context/LanguageContext"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
 
 import { getFileMeta } from "../../../utils/assignmentUtils"
 import { formatFileSize, getFileIconColorClass } from "../../../utils/courseUtils"
@@ -39,7 +40,7 @@ const AssignmentGradingWorkspace = ({
   const feedbackInputId = `assignment-feedback-${student.submissionId || student.id}`
 
   return (
-    <div className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-105px)] bg-gray-150 border border-gray-200 rounded-3xl overflow-hidden shadow-sm text-gray-800 animate-fade-in">
+    <div className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-115px)] bg-gray-150 border border-gray-200 rounded-3xl overflow-hidden shadow-sm text-gray-800 animate-fade-in">
       <div className="flex-1 flex flex-col bg-gray-100/50 min-h-[450px] md:min-h-0">
         <div className="h-14 bg-white border-b border-gray-200 px-6 flex items-center justify-between text-xs font-bold text-gray-500 shadow-2xs select-none">
           <div className="flex items-center gap-2">
@@ -117,13 +118,11 @@ const AssignmentGradingWorkspace = ({
               <div className="text-xs font-semibold text-gray-750 flex flex-col gap-4">
                 <span className="text-sm font-black text-gray-900">Part 1: Essay</span>
 
-                {student.submissionText ? (
-                  <p className="whitespace-pre-line leading-relaxed font-sans font-medium text-gray-700">
-                    {student.submissionText}
-                  </p>
-                ) : (
-                  <p className="italic text-gray-400">No submission content provided.</p>
-                )}
+                <RenderHTML
+                  html={student.submissionText}
+                  className="font-sans font-medium text-gray-700 text-xs"
+                  fallback={<p className="italic text-gray-400">No content provided.</p>}
+                />
 
                 {student.files?.length > 0 && (
                   <div className="mt-4 border-t border-gray-150 pt-4 flex flex-col gap-3">

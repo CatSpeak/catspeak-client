@@ -34,7 +34,7 @@ export default {
   endDateLabel: "结束日期",
   sessionsLabel: "课时数量",
   sessionsPlaceholder: "例如：10, 10 - 50",
-  descriptionLabel: "课程描述 (可选)",
+  descriptionLabel: "课程描述",
   descriptionPlaceholder: "内容",
   descriptionLimitNote: "内容不得超过 150 字",
   clearBtn: "清除",
@@ -394,7 +394,7 @@ export default {
     pageTitle: "创建作业",
     assignmentName: "作业名称",
     assignmentNamePlaceholder: "输入作业名称 (例如：期中考试)",
-    descriptionLabel: "描述 / 提交要求",
+    descriptionLabel: "提交要求",
     descriptionPlaceholder: "为学生输入详细的使用说明...",
     attachmentsLabel: "随附文件",
     maxFilesNote: "最多 5 个文件",
@@ -500,7 +500,14 @@ export default {
     generalFeedback: "综合评语",
     btnBack: "返回",
     btnRegrade: "重新评分",
-    btnRelease: "公布结果"
+    btnRelease: "公布结果",
+    mySubmission: "我的提交",
+    submittedAtLabel: "提交时间: ",
+    textResponseHeader: "正文内容",
+    submittedFilesHeader: "已提交的文件",
+    noTextResponse: "未提供直接文本内容。",
+    noSubmissionYetTitle: "暂无提交记录",
+    noSubmissionYetMsg: "您尚未提交此作业的完成内容。请填写内容并点击提交。"
   }
 }
 

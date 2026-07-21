@@ -749,6 +749,8 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { classId }) => [
         { type: "ClassGrading", id: `class-${classId}` },
+        { type: "ClassGrading", id: `student-${classId}` },
+        { type: "Class", id: classId },
       ],
     }),
 
@@ -761,7 +763,10 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { classId, assignmentId }) => [
         { type: "ClassGrading", id: `class-${classId}` },
+        { type: "ClassGrading", id: `student-${classId}` },
         { type: "ClassGrading", id: `assignment-${assignmentId}` },
+        { type: "ClassGrading", id: `student-assignment-${assignmentId}` },
+        { type: "Class", id: classId },
       ],
     }),
 
@@ -782,6 +787,18 @@ export const coursesApi = baseApi.injectEndpoints({
       query: ({ classId, assignmentId }) => ({
         url: `/teacher/classes/${classId}/assignments/${assignmentId}/open`,
         method: "POST",
+      }),
+      invalidatesTags: (result, error, { classId, assignmentId }) => [
+        { type: "ClassGrading", id: `class-${classId}` },
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+      ],
+    }),
+
+    // Delete Assignment
+    deleteAssignment: builder.mutation({
+      query: ({ classId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}`,
+        method: "DELETE",
       }),
       invalidatesTags: (result, error, { classId, assignmentId }) => [
         { type: "ClassGrading", id: `class-${classId}` },
@@ -835,7 +852,7 @@ export const coursesApi = baseApi.injectEndpoints({
         { type: "ClassGrading", id: `assignment-${assignmentId}` },
         { type: "ClassGrading", id: `submissions-${assignmentId}` },
       ],
-    }) ,
+    }),
 
     // 18. Update Attendance
     updateClassMemberAttendance: builder.mutation({
@@ -984,21 +1001,18 @@ export const {
   useUpdateAssignmentMutation,
   useCloseAssignmentMutation,
   useOpenAssignmentMutation,
+  useDeleteAssignmentMutation,
   useGetAssignmentSubmissionsQuery,
   useGradeSubmissionMutation,
   useReturnSubmissionMutation,
   useBulkReturnSubmissionsMutation,
   useUpdateClassMemberAttendanceMutation,
-  // Materials hooks
   useGetClassMaterialsQuery,
   useUploadClassMaterialMutation,
   useDeleteClassMaterialMutation,
-  // Schedule hooks
   useGetScheduleDatesQuery,
   useGetScheduleSessionsQuery,
-  // Commission hooks
   useGetCommissionQuery,
-  // Virtual Room hooks
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
 } = coursesApi

@@ -34,7 +34,7 @@ export default {
   endDateLabel: "End Date",
   sessionsLabel: "Number of sessions",
   sessionsPlaceholder: "Eg. 10, 10 - 50",
-  descriptionLabel: "Course description (optional)",
+  descriptionLabel: "Course description",
   descriptionPlaceholder: "Content",
   descriptionLimitNote: "Content must not exceed 150 words",
   clearBtn: "Clear",
@@ -394,7 +394,7 @@ export default {
     pageTitle: "Create Assignment",
     assignmentName: "Assignment Title",
     assignmentNamePlaceholder: "Enter assignment title (e.g. Midterm Test)",
-    descriptionLabel: "Description / Submission Requirements",
+    descriptionLabel: "Submission Requirements",
     descriptionPlaceholder: "Enter detailed instructions for students...",
     attachmentsLabel: "Attached Documents",
     maxFilesNote: "Max 5 files",
@@ -500,7 +500,14 @@ export default {
     generalFeedback: "General Feedback",
     btnBack: "Go Back",
     btnRegrade: "Re-grade",
-    btnRelease: "Release Results"
+    btnRelease: "Release Results",
+    mySubmission: "My Submission",
+    submittedAtLabel: "Submitted on: ",
+    textResponseHeader: "Text Response",
+    submittedFilesHeader: "Submitted Files",
+    noTextResponse: "No text response provided.",
+    noSubmissionYetTitle: "No Submission Yet",
+    noSubmissionYetMsg: "You haven't submitted your response for this assignment yet. Complete your work and click Submit."
   }
 }
 

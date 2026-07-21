@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
+  AlertTriangle,
   Calendar,
   ChevronDown,
   Download,
@@ -10,10 +11,12 @@ import {
   Lock,
   MoreVertical,
   Search,
+  Trash2,
   Unlock,
 } from "lucide-react"
 
 import { useLanguage } from "@/shared/context/LanguageContext"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 
 import {
   filterSubmissionStudents,
@@ -40,6 +43,8 @@ const AssignmentSubmissionsList = ({
   onToggleSubmissionsLock,
   onDownloadGradeSheet,
   onBulkReturn,
+  onDeleteAssignment,
+  isDeletingAssignment,
   onSelectStudent,
   onStudentSearchChange,
   onActiveFilterChange,
@@ -50,6 +55,7 @@ const AssignmentSubmissionsList = ({
   const coursesTranslations = t.courses || {}
   const gradingTranslations = coursesTranslations.grading || {}
   const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const stats = useMemo(() => getSubmissionStats(students), [students])
   const filteredStudents = useMemo(() => (
@@ -152,7 +158,7 @@ const AssignmentSubmissionsList = ({
               className={`h-10 px-4 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-sm text-white ${assignmentClosed
                 ? "bg-[#990011] hover:bg-[#80000e]"
                 : "bg-gray-800 hover:bg-gray-900"
-              }`}
+                }`}
             >
               {assignmentClosed ? (
                 <>
@@ -203,6 +209,17 @@ const AssignmentSubmissionsList = ({
                     >
                       <FileCheck size={14} />
                       <span>{gradingTranslations.bulkReturnGrade || "Trả điểm toàn bộ"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMoreMenu(false)
+                        setShowDeleteModal(true)
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-red-50 transition-colors flex items-center gap-2 text-red-600 cursor-pointer border-t border-gray-100"
+                    >
+                      <Trash2 size={14} />
+                      <span>{gradingTranslations.deleteAssignment || "Xóa bài tập"}</span>
                     </button>
                   </div>
                 </>
@@ -277,7 +294,7 @@ const AssignmentSubmissionsList = ({
                   className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all active:scale-95 ${isActive
                     ? "bg-[#990011] border-[#990011] text-white shadow-2xs"
                     : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   {filter.label}
                 </button>
@@ -310,6 +327,26 @@ const AssignmentSubmissionsList = ({
           onSelectStudent={onSelectStudent}
         />
       </div>
+
+      {/* Delete Assignment Modal Confirmation */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={async () => {
+          if (onDeleteAssignment) {
+            await onDeleteAssignment()
+          }
+          setShowDeleteModal(false)
+        }}
+        title={gradingTranslations.deleteModalTitle || "Xóa bài tập"}
+        message={
+          gradingTranslations.deleteModalConfirmMsg ||
+          `Bạn có chắc chắn muốn xóa bài tập "${assignmentTitle}"? Tất cả bài làm và điểm số của học sinh liên quan đến bài tập sẽ bị xóa vĩnh viễn và không thể khôi phục.`
+        }
+        confirmText={gradingTranslations.deleteConfirmBtn || "Xóa bài tập"}
+        cancelText={t.common?.cancel || "Hủy"}
+        confirmVariant="destructive"
+      />
     </div>
   )
 }

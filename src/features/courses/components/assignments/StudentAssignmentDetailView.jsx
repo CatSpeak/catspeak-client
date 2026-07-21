@@ -19,6 +19,8 @@ import {
   useSubmitAssignmentMutation
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
+import { Editor } from "@tinymce/tinymce-react"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
 import {
   getFileMeta,
@@ -387,13 +389,15 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignment
               </h3>
             </div>
 
-            <div className="text-xs font-semibold text-gray-700 whitespace-pre-line leading-relaxed min-h-[80px]">
-              {assignment.description || (
-                <span className="italic text-gray-400 font-medium">
+            <RenderHTML
+              html={assignment.description}
+              className="text-xs font-semibold text-gray-700 min-h-[80px]"
+              fallback={
+                <span className="italic text-gray-400 font-medium text-xs">
                   {language === "vi" ? "Không có mô tả chi tiết." : "No detailed description provided."}
                 </span>
-              )}
-            </div>
+              }
+            />
 
             {/* Teacher attachments */}
             {parsedTeacherAttachments.length > 0 && (
@@ -408,103 +412,6 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignment
               </div>
             )}
           </div>
-
-          {/* Submission Details View (if submitted) */}
-          {submission && (
-            <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-4 animate-fadeIn">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-emerald-500 rounded-full" />
-                  <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
-                    {language === "vi" ? "Bài làm của tôi" : "My Submission"}
-                  </h3>
-                </div>
-                <span className="text-[10px] text-gray-400 font-semibold">
-                  {language === "vi" ? "Nộp lúc:" : "Submitted on:"}{" "}
-                  <strong className="text-gray-600 font-extrabold">
-                    {submission.submittedAt
-                      ? new Date(submission.submittedAt).toLocaleString(language === "vi" ? "vi-VN" : "en-US")
-                      : "—"}
-                  </strong>
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                {/* Submission text response */}
-                {assignment.allowTextSubmission && (
-                  <div className="mt-2">
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2.5">
-                      {language === "vi" ? "Nội dung bài viết" : "Text Response"}
-                    </h4>
-                    {submission.contentText ? (
-                      <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750 whitespace-pre-line leading-relaxed">
-                        {submission.contentText}
-                      </div>
-                    ) : (
-                      <span className="italic text-gray-400 text-xs font-medium">
-                        {language === "vi" ? "Không có nội dung trả lời trực tiếp." : "No text response provided."}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Submission files */}
-                {assignment.allowFileSubmission && parsedSubmissionFiles.length > 0 && (
-                  <div className="border-t border-gray-50">
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <Paperclip size={12} />
-                      {language === "vi" ? "Các tệp tin đã nộp" : "Submitted Files"}
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {parsedSubmissionFiles.map((file, idx) => renderFileRow(file, idx))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Column (35%) */}
-        <div className="flex flex-col gap-6">
-          {/* Grade and feedback panel (if released/returned) */}
-          {submission && submission.status?.toLowerCase() === "returned" && (
-            <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
-              <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
-                {language === "vi" ? "KẾT QUẢ ĐÁNH GIÁ" : "GRADING DETAILS"}
-              </h3>
-
-              <div className="flex items-center gap-4 bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-2xs">
-                <div className="text-3xl font-black text-emerald-600 font-mono">
-                  {submission.grade !== null && submission.grade !== undefined ? submission.grade : "—"}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-gray-400 leading-none">
-                    {language === "vi" ? `Thang điểm tối đa ${assignment.maxScore}` : `Out of ${assignment.maxScore}`}
-                  </span>
-                  <span className="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider mt-2 inline-block w-fit">
-                    {submission.status?.toLowerCase() === "graded" ? (cg.filterGraded || "ĐÃ CHẤM") : (cg.filterReturned || "ĐÃ TRẢ BÀI")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Feedback comment */}
-              <div className="flex flex-col gap-2.5">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider leading-none">
-                  {cg.generalFeedback || "Nhận xét của giáo viên"}
-                </span>
-                {submission.comment ? (
-                  <p className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750 leading-relaxed whitespace-pre-line">
-                    {submission.comment}
-                  </p>
-                ) : (
-                  <p className="italic text-gray-400 text-xs font-medium pl-1">
-                    {language === "vi" ? "Chưa có nhận xét chi tiết." : "No feedback comments provided."}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Submission Form panel */}
           {allowSubmission ? (
@@ -521,15 +428,24 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignment
                 <div className="flex flex-col gap-2.5">
                   <label className="text-[10px] font-black text-gray-400 tracking-wider uppercase flex justify-between">
                     <span>{ca.directInput || "Nội dung bài làm"}</span>
-                    {submission && <span className="text-orange-600 font-extrabold text-[9px] uppercase">({language === "vi" ? "Cập nhật bài làm" : "Update"})</span>}
                   </label>
-                  <textarea
-                    value={textContent}
-                    onChange={(e) => setTextDraft(e.target.value)}
-                    placeholder={language === "vi" ? "Nhập nội dung bài làm của bạn tại đây..." : "Type your submission here..."}
-                    rows={8}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-750 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] shadow-2xs resize-none leading-relaxed transition-all"
-                  />
+                  <div className="assignment-editor overflow-hidden transition-all">
+                    <Editor
+                      tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+                      value={textContent}
+                      onEditorChange={(newVal) => setTextDraft(newVal)}
+                      init={{
+                        height: 250,
+                        menubar: false,
+                        statusbar: false,
+                        plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                        toolbar:
+                          "bold italic underline strikethrough | emoticons link | bullist numlist",
+                        placeholder: language === "vi" ? "Nhập nội dung bài làm của bạn tại đây..." : "Type your submission here...",
+                        skin: "oxide",
+                      }}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -614,6 +530,126 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignment
               </p>
             </div>
           )}
+        </div>
+
+        {/* Right Column (35%) */}
+        <div className="flex flex-col gap-6">
+          {/* Grade and feedback panel (if released/returned) */}
+          {submission && submission.status?.toLowerCase() === "returned" && (
+            <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
+              <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
+                {language === "vi" ? "KẾT QUẢ ĐÁNH GIÁ" : "GRADING DETAILS"}
+              </h3>
+
+              <div className="flex items-center gap-4 bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-2xs">
+                <div className="text-3xl font-black text-emerald-600 font-mono">
+                  {submission.grade !== null && submission.grade !== undefined ? submission.grade : "—"}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-gray-400 leading-none">
+                    {language === "vi" ? `Thang điểm tối đa ${assignment.maxScore}` : `Out of ${assignment.maxScore}`}
+                  </span>
+                  <span className="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider mt-2 inline-block w-fit">
+                    {submission.status?.toLowerCase() === "graded" ? (cg.filterGraded || "ĐÃ CHẤM") : (cg.filterReturned || "ĐÃ TRẢ BÀI")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Feedback comment */}
+              <div className="flex flex-col gap-2.5">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider leading-none">
+                  {cg.generalFeedback || "Nhận xét của giáo viên"}
+                </span>
+                {submission.comment ? (
+                  <p className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750 leading-relaxed whitespace-pre-line">
+                    {submission.comment}
+                  </p>
+                ) : (
+                  <p className="italic text-gray-400 text-xs font-medium pl-1">
+                    {language === "vi" ? "Chưa có nhận xét chi tiết." : "No feedback comments provided."}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Submission Details View / Empty State */}
+          <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-4 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className={`w-1.5 h-4 rounded-full ${submission ? "bg-emerald-500" : "bg-gray-300"}`} />
+                <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
+                  {cg.mySubmission || (language === "vi" ? "Bài làm của tôi" : "My Submission")}
+                </h3>
+              </div>
+              {submission ? (
+                <span className="text-[10px] text-gray-400 font-semibold">
+                  {cg.submittedAtLabel || (language === "vi" ? "Nộp lúc: " : "Submitted on: ")}
+                  <strong className="text-gray-600 font-extrabold">
+                    {submission.submittedAt
+                      ? new Date(submission.submittedAt).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US")
+                      : "—"}
+                  </strong>
+                </span>
+              ) : (
+                <span className="text-[9px] bg-gray-100 text-gray-500 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+                  {cg.filterNotSubmitted || (language === "vi" ? "Chưa nộp" : "Not Submitted")}
+                </span>
+              )}
+            </div>
+
+            {submission ? (
+              <div className="flex flex-col gap-3">
+                {/* Submission text response */}
+                {assignment.allowTextSubmission && (
+                  <div className="mt-2">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2.5">
+                      {cg.textResponseHeader || (language === "vi" ? "Nội dung bài viết" : "Text Response")}
+                    </h4>
+                    <RenderHTML
+                      html={submission.contentText}
+                      className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750"
+                      fallback={
+                        <span className="italic text-gray-400 text-xs font-medium">
+                          {cg.noTextResponse || (language === "vi" ? "Không có nội dung trả lời trực tiếp." : "No text response provided.")}
+                        </span>
+                      }
+                    />
+                  </div>
+                )}
+
+                {/* Submission files */}
+                {assignment.allowFileSubmission && parsedSubmissionFiles.length > 0 && (
+                  <div className="border-t border-gray-50">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Paperclip size={12} />
+                      {cg.submittedFilesHeader || (language === "vi" ? "Các tệp tin đã nộp" : "Submitted Files")}
+                    </h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      {parsedSubmissionFiles.map((file, idx) => renderFileRow(file, idx))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="py-6 flex flex-col items-center justify-center text-center gap-2.5 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 p-4">
+                <div className="w-10 h-10 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center">
+                  <FileText size={20} />
+                </div>
+                <div className="flex flex-col gap-1 max-w-[260px]">
+                  <span className="text-xs font-extrabold text-gray-700">
+                    {cg.noSubmissionYetTitle || (language === "vi" ? "Chưa có bài nộp" : "No Submission Yet")}
+                  </span>
+                  <p className="text-[11px] font-medium text-gray-400 leading-relaxed">
+                    {cg.noSubmissionYetMsg ||
+                      (language === "vi"
+                        ? "Bạn chưa gửi bài làm cho bài tập này. Hãy nhập nội dung và nhấn Nộp bài."
+                        : "You haven't submitted your response for this assignment yet. Complete your work and click Submit.")}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

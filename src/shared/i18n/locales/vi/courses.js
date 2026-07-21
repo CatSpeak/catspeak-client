@@ -34,7 +34,7 @@ export default {
   endDateLabel: "Thời gian kết thúc",
   sessionsLabel: "Số buổi dạy",
   sessionsPlaceholder: "Eg. 10, 10 - 50",
-  descriptionLabel: "Mô tả khóa học (tùy chọn)",
+  descriptionLabel: "Mô tả khóa học",
   descriptionPlaceholder: "Nội dung",
   descriptionLimitNote: "Nội dung không được quá 150 từ",
   clearBtn: "Xóa",
@@ -394,7 +394,7 @@ export default {
     pageTitle: "Tạo bài nộp",
     assignmentName: "Tên bài nộp",
     assignmentNamePlaceholder: "Nhập tên bài nộp (VD: Bài kiểm tra giữa kỳ)",
-    descriptionLabel: "Mô tả / Yêu cầu bài nộp",
+    descriptionLabel: "Yêu cầu bài tập",
     descriptionPlaceholder: "Nhập hướng dẫn chi tiết cho học sinh...",
     attachmentsLabel: "Tài liệu đính kèm",
     maxFilesNote: "Tối đa 5 files",
@@ -500,7 +500,14 @@ export default {
     generalFeedback: "Nhận xét chung",
     btnBack: "Quay về",
     btnRegrade: "Chấm lại bài",
-    btnRelease: "Trả về kết quả"
+    btnRelease: "Trả về kết quả",
+    mySubmission: "Bài làm của tôi",
+    submittedAtLabel: "Nộp lúc: ",
+    textResponseHeader: "Nội dung bài viết",
+    submittedFilesHeader: "Các tệp tin đã nộp",
+    noTextResponse: "Không có nội dung trả lời trực tiếp.",
+    noSubmissionYetTitle: "Chưa có bài nộp",
+    noSubmissionYetMsg: "Bạn chưa gửi bài làm cho bài tập này. Hãy nhập nội dung và nhấn Nộp bài."
   }
 }
 
