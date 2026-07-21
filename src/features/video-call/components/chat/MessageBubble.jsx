@@ -281,112 +281,114 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
       </div>
 
       {/* Main Bubble */}
-      {msg.suggestedSentences ? (
-        <SentenceSuggestions
-          suggestedSentences={msg.suggestedSentences}
-          showText={showText}
-          hideText={hideText}
-          renderFormattedMessage={renderFormattedMessage}
-        />
-      ) : (
-        <div
-          className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${isMe
-            ? "bg-[#990011] text-white"
-            : msg.status === "error"
-              ? "bg-red-100 text-red-900 border border-red-200"
-              : isSystem
-                ? "bg-orange-100 text-orange-900"
-                : isAi
-                  ? "bg-amber-50 text-amber-900"
-                  : "bg-[#F0F0F0] text-black"
-            }`}
-        >
-          {/* Reply Context - Zalo Style */}
-          {msg.replyTo && (
-            <div
-              className={`flex flex-col border-l-[3px] py-1 px-2 rounded-r-md mb-1.5 cursor-default ${isMe
-                ? "border-white/60 bg-white/10 text-white/90"
-                : msg.status === "error"
-                  ? "border-red-400 bg-red-400/10 text-red-900/90"
-                  : isSystem
-                    ? "border-orange-400 bg-orange-400/10 text-orange-900/90"
-                    : isAi
-                      ? "border-amber-500 bg-amber-500/10 text-amber-900/90"
-                      : "border-[#990011]/60 bg-[#990011]/10 text-black/80"
-                }`}
-            >
-              <span className="font-semibold text-xs shrink-0">
-                {msg.replyTo.name}
-              </span>
-              <span className="truncate opacity-80 text-xs">
-                {renderFormattedMessage(msg.replyTo.message)}
-              </span>
-            </div>
-          )}
-
-          {msg.status === "loading" ? (
-            <div className="flex gap-1 items-center h-2 px-1 py-1">
-              <span
-                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                style={{
-                  animationDelay: "0s",
-                  animationDuration: "0.8s",
-                }}
-              ></span>
-              <span
-                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                style={{
-                  animationDelay: "0.15s",
-                  animationDuration: "0.8s",
-                }}
-              ></span>
-              <span
-                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                style={{
-                  animationDelay: "0.3s",
-                  animationDuration: "0.8s",
-                }}
-              ></span>
-            </div>
-          ) : msg.vocabulary ? (
-            <VocabularySuggestions
-              vocabulary={msg.vocabulary}
-              introMessage={msg.introMessage}
-              expandedIdx={expandedIdx}
-              setExpandedIdx={setExpandedIdx}
-            />
-          ) : (
-            <p className="m-0 whitespace-pre-wrap">
-              {renderFormattedMessage(msg.message)}
-            </p>
-          )}
-
-          {msg.translatedMessage && (
-            <p
-              className={`m-0 mt-1 pt-1 text-xs border-t ${isMe
-                ? "border-white/20 text-white/90"
+      <div className={`group flex items-center gap-2 max-w-full ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+        {msg.suggestedSentences ? (
+          <SentenceSuggestions
+            suggestedSentences={msg.suggestedSentences}
+            showText={showText}
+            hideText={hideText}
+            renderFormattedMessage={renderFormattedMessage}
+          />
+        ) : (
+          <div
+            className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${isMe
+              ? "bg-[#990011] text-white"
+              : msg.status === "error"
+                ? "bg-red-100 text-red-900 border border-red-200"
                 : isSystem
-                  ? "border-orange-300 text-orange-800"
-                  : "border-black/10 text-black/70"
-                }`}
-            >
-              {msg.translatedMessage}
-            </p>
-          )}
-        </div>
-      )}
+                  ? "bg-orange-100 text-orange-900"
+                  : isAi
+                    ? "bg-amber-50 text-amber-900"
+                    : "bg-[#F0F0F0] text-black"
+              }`}
+          >
+            {/* Reply Context - Zalo Style */}
+            {msg.replyTo && (
+              <div
+                className={`flex flex-col border-l-[3px] py-1 px-2 rounded-r-md mb-1.5 cursor-default ${isMe
+                  ? "border-white/60 bg-white/10 text-white/90"
+                  : msg.status === "error"
+                    ? "border-red-400 bg-red-400/10 text-red-900/90"
+                    : isSystem
+                      ? "border-orange-400 bg-orange-400/10 text-orange-900/90"
+                      : isAi
+                        ? "border-amber-500 bg-amber-500/10 text-amber-900/90"
+                        : "border-[#990011]/60 bg-[#990011]/10 text-black/80"
+                  }`}
+              >
+                <span className="font-semibold text-xs shrink-0">
+                  {msg.replyTo.name}
+                </span>
+                <span className="truncate opacity-80 text-xs">
+                  {renderFormattedMessage(msg.replyTo.message)}
+                </span>
+              </div>
+            )}
 
-      {/* Reply button */}
-      {onReplyTo && (!isAi || msg.status === "done") && (
-        <button
-          type="button"
-          onClick={() => onReplyTo(msg)}
-          className="flex items-center gap-1 mt-1 px-2 py-0.5 text-xs text-[#606060] hover:text-[#990011] transition-colors rounded hover:bg-[#F6F6F6]"
-        >
-          <Reply size={12} />
-          <span>{t.rooms?.chatBox?.reply || "Reply"}</span>
-        </button>
-      )}
+            {msg.status === "loading" ? (
+              <div className="flex gap-1 items-center h-2 px-1 py-1">
+                <span
+                  className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
+                  style={{
+                    animationDelay: "0s",
+                    animationDuration: "0.8s",
+                  }}
+                ></span>
+                <span
+                  className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
+                  style={{
+                    animationDelay: "0.15s",
+                    animationDuration: "0.8s",
+                  }}
+                ></span>
+                <span
+                  className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
+                  style={{
+                    animationDelay: "0.3s",
+                    animationDuration: "0.8s",
+                  }}
+                ></span>
+              </div>
+            ) : msg.vocabulary ? (
+              <VocabularySuggestions
+                vocabulary={msg.vocabulary}
+                introMessage={msg.introMessage}
+                expandedIdx={expandedIdx}
+                setExpandedIdx={setExpandedIdx}
+              />
+            ) : (
+              <p className="m-0 whitespace-pre-wrap">
+                {renderFormattedMessage(msg.message)}
+              </p>
+            )}
+
+            {msg.translatedMessage && (
+              <p
+                className={`m-0 mt-1 pt-1 text-xs border-t ${isMe
+                  ? "border-white/20 text-white/90"
+                  : isSystem
+                    ? "border-orange-300 text-orange-800"
+                    : "border-black/10 text-black/70"
+                  }`}
+              >
+                {msg.translatedMessage}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Reply button */}
+        {onReplyTo && (!isAi || msg.status === "done") && (
+          <button
+            type="button"
+            onClick={() => onReplyTo(msg)}
+            className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 flex items-center justify-center p-1.5 text-gray-400 hover:text-[#990011] transition-all rounded-full hover:bg-gray-100 shrink-0"
+            title={t.rooms?.chatBox?.reply || "Reply"}
+          >
+            <Reply size={18} />
+          </button>
+        )}
+      </div>
     </div>
   )
 }
