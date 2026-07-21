@@ -36,7 +36,7 @@ const RoomHeader = () => {
   const isHost = hostParticipant && localParticipant && hostParticipant.identity === localParticipant.identity;
 
   return (
-    <div className="flex items-center justify-between border-b border-[#E5E5E5] bg-white px-5 h-[56px] shrink-0">
+    <div className="flex items-center justify-between bg-white px-5 h-[56px] shrink-0">
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
@@ -76,18 +76,18 @@ const RoomHeader = () => {
 
       <div className="flex items-center gap-1">
         {hasDuration && (
-          <div className="flex items-center justify-center text-sm font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-10 w-full">
+          <div className="hidden md:flex items-center justify-center text-sm font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-10 w-full">
             {formattedRemaining} / {formattedMax}
           </div>
         )}
         <IconButton
           title={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
           onClick={handleCopyLink}
-          className="md:flex hidden"
+          className="lg:flex hidden"
         >
           <Link2 color="#F3B403" className="transform rotate-[135deg]" />
         </IconButton>
-        <RightSideControls className="md:hidden" />
+        <RightSideControls className="lg:hidden" />
       </div>
 
 

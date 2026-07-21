@@ -305,6 +305,17 @@ export default {
     unknownDevice: "Unknown Device",
   },
   videoCall: {
+    changeLayout: {
+      title: "Change layout",
+      auto: "Auto",
+      grid: "Grid",
+      spotlight: "Spotlight",
+      sidebar: "Sidebar",
+      tilesLabel: "Tiles",
+      tilesDescription: "Maximum tiles to show, depending on window size.",
+      hideNonVideo: "Hide non-video participants",
+    },
+    remainingTime: "Remaining time",
     roomClosingTitle: "Room Ending Soon",
     roomClosingSubtitle:
       "This session will end in {{remainingSeconds}} seconds",

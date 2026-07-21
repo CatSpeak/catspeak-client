@@ -7,6 +7,7 @@ import ListItem from "@/shared/components/ui/ListItem";
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover";
 import { IconButton } from "@/shared/components/ui/buttons";
+import toast from "react-hot-toast";
 
 /**
  * A single row in the participant list.
@@ -122,13 +123,13 @@ const ParticipantList = ({ hideTitle }) => {
     <div className="flex flex-col h-full w-full bg-white">
       {!hideTitle && (
         <div className="px-4 py-3 border-b border-[#FFDADE] flex items-center justify-between">
-          <h3 className="text-black text-sm font-semibold m-0">
+          <h3 className="text-black text-base font-semibold m-0">
             {pl.title} ({participants.length})
           </h3>
-          {/* <div className="">
-            <IconButton variant="ghost" size="xs"><UserPlus size={22} /></IconButton>
-            <IconButton variant="ghost" size="xs"><Ellipsis size={22} /></IconButton>
-          </div> */}
+          <div className="">
+            <IconButton variant="ghost" size="xs" onClick={() => { toast.success(t?.comingSoon.title) }}><UserPlus size={22} /></IconButton>
+            {/* <IconButton variant="ghost" size="xs"><Ellipsis size={22} /></IconButton> */}
+          </div>
         </div>
       )}
       <div className="flex-1 overflow-y-auto p-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">

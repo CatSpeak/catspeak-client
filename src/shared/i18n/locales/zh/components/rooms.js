@@ -273,6 +273,17 @@ export default {
     unknownDevice: "未知设备",
   },
   videoCall: {
+    changeLayout: {
+      title: "更改布局",
+      auto: "自动",
+      grid: "平铺",
+      spotlight: "焦点",
+      sidebar: "侧边栏",
+      tilesLabel: "图块",
+      tilesDescription: "要显示的最多图块数，具体取决于窗口大小。",
+      hideNonVideo: "隐藏没有视频的参与者",
+    },
+    remainingTime: "剩余时间",
     roomClosingTitle: "房间即将关闭",
     roomClosingSubtitle: "此会话将在 {{remainingSeconds}} 秒后结束",
     roomClosingSubtitleStatic: "此会话即将结束。",

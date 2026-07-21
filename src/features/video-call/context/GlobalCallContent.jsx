@@ -84,7 +84,53 @@ const GlobalCallContent = ({
     eyeBrighten: 0,
     teethWhiten: 0,
   })
-  const [layoutMode, setLayoutMode] = useState("auto")
+  const [layoutMode, setLayoutMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem("catspeak_video_layout_settings")
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        const validModes = ["auto", "grid", "spotlight", "sidebar"]
+        if (parsed.layoutMode && validModes.includes(parsed.layoutMode)) {
+          return parsed.layoutMode
+        }
+      }
+    } catch { /* ignore */ }
+    return "auto"
+  })
+  const [maxTiles, setMaxTiles] = useState(() => {
+    try {
+      const saved = localStorage.getItem("catspeak_video_layout_settings")
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.maxTiles) {
+          const val = Number(parsed.maxTiles)
+          if (!isNaN(val) && val >= 4 && val <= 49) {
+            return val
+          }
+        }
+      }
+    } catch { /* ignore */ }
+    return 16
+  })
+  const [hideEmptyTiles, setHideEmptyTiles] = useState(() => {
+    try {
+      const saved = localStorage.getItem("catspeak_video_layout_settings")
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (typeof parsed.hideEmptyTiles === "boolean") return parsed.hideEmptyTiles
+      }
+    } catch { /* ignore */ }
+    return false
+  })
+
+  useEffect(() => {
+    try {
+      const settings = { layoutMode, maxTiles, hideEmptyTiles }
+      localStorage.setItem("catspeak_video_layout_settings", JSON.stringify(settings))
+    } catch (e) {
+      console.error("Failed to save layout settings", e)
+    }
+  }, [layoutMode, maxTiles, hideEmptyTiles])
 
 
   // ── LiveKit hooks ──
@@ -471,6 +517,10 @@ const GlobalCallContent = ({
     startedByAccountId: startedByAccountId,
     layoutMode,
     setLayoutMode,
+    maxTiles,
+    setMaxTiles,
+    hideEmptyTiles,
+    setHideEmptyTiles,
   }
 
   return (

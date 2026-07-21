@@ -98,6 +98,10 @@ const IDLE_VALUE = {
   setSpeakingAssistantEnabled: () => { },
   layoutMode: "auto",
   setLayoutMode: () => { },
+  maxTiles: 16,
+  setMaxTiles: () => { },
+  hideEmptyTiles: false,
+  setHideEmptyTiles: () => { },
 }
 
 const IdleCallContent = ({

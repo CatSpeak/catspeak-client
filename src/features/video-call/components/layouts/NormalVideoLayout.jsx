@@ -11,17 +11,19 @@ const NormalVideoLayout = ({
   participants,
   handleTileClick,
   totalItems,
+  maxTiles = 16,
 }) => {
   const isMobile = useMediaQuery("(max-width: 767px)")
   const [currentPage, setCurrentPage] = useState(0)
 
   // Reset page if total items change and current page is now invalid
   useEffect(() => {
-    const maxPages = Math.ceil(totalItems / 6)
+    const itemsPerPage = maxTiles
+    const maxPages = Math.ceil(totalItems / itemsPerPage)
     if (currentPage >= maxPages && maxPages > 0) {
       setCurrentPage(maxPages - 1)
     }
-  }, [totalItems, currentPage])
+  }, [totalItems, currentPage, maxTiles])
 
   const allItems = [
     ...(screenShareTracks || []).map((t) => ({
@@ -37,8 +39,8 @@ const NormalVideoLayout = ({
     })),
   ]
 
-  const shouldPaginate = isMobile && totalItems > 6
-  const itemsPerPage = 6
+  const itemsPerPage = maxTiles
+  const shouldPaginate = totalItems > itemsPerPage
   const maxPages = Math.ceil(totalItems / itemsPerPage)
 
   const displayedItems = shouldPaginate
@@ -93,7 +95,7 @@ const NormalVideoLayout = ({
         className={`
           flex-1 w-full
           gap-1
-          p-2
+          md:p-2 px-2
           ${!shouldPaginate ? "overflow-y-auto" : "overflow-hidden"}
           [align-content:safe_center]
           [justify-content:safe_center]
@@ -145,7 +147,7 @@ const NormalVideoLayout = ({
       </div>
 
       {shouldPaginate && maxPages > 1 && (
-        <div className="flex w-full shrink-0 items-center justify-center gap-2 pb-2">
+        <div className="flex w-full shrink-0 items-center justify-center gap-2 mt-2 md:mb-2 md:mt-0">
           {Array.from({ length: maxPages }).map((_, idx) => (
             <button
               key={idx}
