@@ -5,6 +5,7 @@ import { Reply, Copy, Trash2, Undo2 } from "lucide-react"
 import toast from "react-hot-toast"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatContextMenu — Context menu overlay with pixel-accurate positioning & avatar.
@@ -21,6 +22,7 @@ const ChatContextMenu = ({
   onDeleteForMe,
   onRecall,
 }) => {
+  const { t } = useLanguage()
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === "Escape") {
@@ -84,8 +86,8 @@ const ChatContextMenu = ({
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(contentToCopy)
-        .then(() => toast.success("Copied to clipboard"))
-        .catch(() => toast.error("Failed to copy"))
+        .then(() => toast.success(t?.chat?.actions?.copied || "Copied to clipboard"))
+        .catch(() => toast.error(t?.chat?.actions?.failedCopy || "Failed to copy"))
     }
   }
 
@@ -139,7 +141,7 @@ const ChatContextMenu = ({
                   <MenuItem
                     onClick={() => handleAction(onReply)}
                     icon={<Reply />}
-                    label="Reply"
+                    label={t?.chat?.actions?.reply || "Reply"}
                   />
                 )}
 
@@ -152,8 +154,8 @@ const ChatContextMenu = ({
                     icon={<Copy />}
                     label={
                       message?.mediaUrl || message?.fileUrl
-                        ? "Copy link"
-                        : "Copy text"
+                        ? (t?.chat?.actions?.copyLink || "Copy link")
+                        : (t?.chat?.actions?.copyText || "Copy text")
                     }
                   />
                 )}
@@ -162,7 +164,7 @@ const ChatContextMenu = ({
                   <MenuItem
                     onClick={() => handleAction(onDeleteForMe)}
                     icon={<Trash2 />}
-                    label="Remove for me"
+                    label={t?.chat?.actions?.removeForMe || "Remove for me"}
                   />
                 )}
 
@@ -171,7 +173,7 @@ const ChatContextMenu = ({
                     onClick={() => handleAction(onRecall)}
                     className="text-red-600"
                     icon={<Undo2 />}
-                    label="Remove for everyone"
+                    label={t?.chat?.actions?.removeForEveryone || "Remove for everyone"}
                   />
                 )}
               </MenuList>

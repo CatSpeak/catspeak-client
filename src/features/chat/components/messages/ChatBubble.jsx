@@ -8,6 +8,7 @@ import ChatBubbleActions from "./ChatBubbleActions"
 import ChatBubbleTyping from "./ChatBubbleTyping"
 import ChatBubbleContent from "./ChatBubbleContent"
 import ChatBubbleReadStatus from "./ChatBubbleReadStatus"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatBubble — individual message bubble.
@@ -31,6 +32,7 @@ const ChatBubble = ({
   onRecall,
   isWidget = false,
 }) => {
+  const { t } = useLanguage()
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
   const [targetRect, setTargetRect] = useState(null)
   const touchTimerRef = useRef(null)
@@ -139,7 +141,7 @@ const ChatBubble = ({
           }`}
         >
           <span className="font-semibold">
-            {isOwn ? "You" : sender?.name || sender?.username}
+            {isOwn ? (t?.chat?.you || "You") : sender?.name || sender?.username}
           </span>
 
           <span className="text-xs text-[#606060]">

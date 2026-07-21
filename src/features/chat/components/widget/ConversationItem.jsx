@@ -25,6 +25,7 @@ const ConversationItem = ({
   const name = isGroup
     ? conversation.groupName || conversation.name
     : conversation?.friend?.username ||
+      t?.chat?.unknownUser ||
       t?.messages?.unknownUser ||
       "Unknown User"
 
@@ -64,40 +65,53 @@ const ConversationItem = ({
 
     const hasText = rawMsg.trim().length > 0
     const textPrefix = isOwn
-      ? `${t?.you || "You"}: `
+      ? `${t?.chat?.you || t?.you || "You"}: `
       : senderName
         ? `${senderName}: `
         : ""
 
     if (isSystemMessage) {
       preview = rawMsg
-    } else if (typeStr === "recalled" || typeVal === 5) {
+    } else if (
+      typeStr === "recalled" ||
+      typeVal === 5 ||
+      rawMsg === "Tin nhắn đã bị thu hồi" ||
+      rawMsg === "[Message Recalled]"
+    ) {
       preview = isOwn
-        ? "You recalled a message"
+        ? t?.chat?.youRecalledMessage || "Bạn đã thu hồi một tin nhắn"
         : senderName
-          ? `${senderName} recalled a message`
-          : "Message was recalled"
+          ? (t?.chat?.userRecalledMessage
+              ? t.chat.userRecalledMessage.replace("{{name}}", senderName)
+              : `${senderName} đã thu hồi một tin nhắn`)
+          : t?.chat?.recalledMessage || "Tin nhắn đã bị thu hồi"
     } else if (hasText) {
       // If there is text attached with media/file or plain text, prioritize the text
       preview = textPrefix + rawMsg
     } else if (typeStr === "picture" || typeStr === "image" || typeVal === 1) {
       preview = isOwn
-        ? "You sent an image"
+        ? t?.chat?.youSentImage || "Bạn đã gửi một hình ảnh"
         : senderName
-          ? `${senderName} sent an image`
-          : "Sent an image"
+          ? (t?.chat?.userSentImage
+              ? t.chat.userSentImage.replace("{{name}}", senderName)
+              : `${senderName} đã gửi một hình ảnh`)
+          : t?.chat?.sentImage || "Đã gửi một hình ảnh"
     } else if (typeStr === "video" || typeVal === 2) {
       preview = isOwn
-        ? "You sent a video"
+        ? t?.chat?.youSentVideo || "Bạn đã gửi một video"
         : senderName
-          ? `${senderName} sent a video`
-          : "Sent a video"
+          ? (t?.chat?.userSentVideo
+              ? t.chat.userSentVideo.replace("{{name}}", senderName)
+              : `${senderName} đã gửi một video`)
+          : t?.chat?.sentVideo || "Đã gửi một video"
     } else if (typeStr === "file" || typeStr === "document" || typeVal === 3) {
       preview = isOwn
-        ? "You sent a file"
+        ? t?.chat?.youSentFile || "Bạn đã gửi một tệp"
         : senderName
-          ? `${senderName} sent a file`
-          : "Sent a file"
+          ? (t?.chat?.userSentFile
+              ? t.chat.userSentFile.replace("{{name}}", senderName)
+              : `${senderName} đã gửi một tệp`)
+          : t?.chat?.sentFile || "Đã gửi một tệp"
     } else {
       preview = textPrefix + rawMsg
     }
@@ -177,7 +191,7 @@ const ConversationItem = ({
           unreadCount > 0 ? "font-medium text-black" : "text-[#606060]"
         }`}
       >
-        {preview || t?.messages?.noMessages || "No messages yet"}
+        {preview || t?.chat?.noMessages || t?.messages?.noMessages || "No messages yet"}
       </span>
     </ListItem>
   )

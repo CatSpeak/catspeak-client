@@ -1,11 +1,13 @@
 import Avatar from "@/shared/components/ui/Avatar"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * MemberProfileView — displays single member profile details within info panel.
  */
 const MemberProfileView = ({ member }) => {
+  const { t } = useLanguage()
   if (!member) return null
 
   return (
@@ -24,7 +26,7 @@ const MemberProfileView = ({ member }) => {
       <h2 className="mt-3 font-semibold text-center">{member.username}</h2>
 
       <p className="mt-4 text-sm text-[#606060] text-center">
-        Level: {member.level || "Student"}
+        {t?.chat?.userPanel?.level || "Level"}: {member.level || t?.chat?.userPanel?.student || "Student"}
       </p>
 
       <div className="w-full mt-6">
@@ -33,7 +35,7 @@ const MemberProfileView = ({ member }) => {
           variant="primary"
           className="w-full"
         >
-          View Profile
+          {t?.chat?.userPanel?.viewProfile || "View Profile"}
         </PillButton>
       </div>
     </div>

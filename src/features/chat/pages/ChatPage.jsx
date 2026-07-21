@@ -15,6 +15,7 @@ import useChatMessages from "@/features/chat/hooks/useChatMessages"
 import useChatConversations from "@/features/chat/hooks/useChatConversations"
 import { EmptyState } from "@/shared/components/ui/indicators"
 import useMediaQuery from "@/shared/hooks/useMediaQuery"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatPage — fullscreen chat page.
@@ -23,6 +24,7 @@ import useMediaQuery from "@/shared/hooks/useMediaQuery"
  *   Sidebar (360px) | Chat Area (flex-1) | Info Panel (340px, toggleable)
  */
 const ChatPage = () => {
+  const { t } = useLanguage()
   const dispatch = useDispatch()
   const isDesktop = useMediaQuery("(min-width: 1280px)")
 
@@ -81,12 +83,12 @@ const ChatPage = () => {
   const currentUser = useMemo(() => {
     return {
       id: authUser?.accountId,
-      name: userProfile?.username || authUser?.username || "Me",
+      name: userProfile?.username || authUser?.username || t?.chat?.me || "Me",
       avatar: userProfile?.avatarImageUrl || null,
       status: "online",
-      about: userProfile?.level || "Student",
+      about: userProfile?.level || t?.chat?.userPanel?.student || "Student",
     }
-  }, [authUser, userProfile])
+  }, [authUser, userProfile, t])
 
   // ── Handlers ───────────────────────────────────────────
   const handleSelectConversation = useCallback(
@@ -176,10 +178,10 @@ const ChatPage = () => {
             <div className="flex flex-col items-center justify-center">
               <MessageCircle size={48} className="text-[#990011] mb-4" />
               <h2 className="text-lg font-semibold text-black mb-1">
-                Your Messages
+                {t?.chat?.yourMessages || "Your Messages"}
               </h2>
               <p className="text-sm text-[#606060] text-center max-w-[260px]">
-                Select a conversation from the sidebar to start chatting
+                {t?.chat?.selectConversationPrompt || "Select a conversation from the sidebar to start chatting"}
               </p>
             </div>
           }

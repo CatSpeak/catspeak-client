@@ -10,6 +10,7 @@ import { IconButton, PillButton } from "@/shared/components/ui/buttons"
 import AddMembersModal from "./modals/AddMembersModal"
 import MemberProfileView from "./MemberProfileView"
 import GroupMemberList from "./GroupMemberList"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatUserPanel — toggleable right-side info panel.
@@ -22,6 +23,7 @@ const ChatUserPanel = ({
   friendOnlineStatus,
   isDrawer = false,
 }) => {
+  const { t } = useLanguage()
   const [removeParticipant] = useRemoveParticipantMutation()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState(null)
@@ -43,7 +45,9 @@ const ChatUserPanel = ({
   const otherUser = conversation.friend
   const name = conversation.name
   const memberCount = conversation.participants?.length || 0
-  const statusText = isGroup ? `${memberCount} members` : null
+  const statusText = isGroup
+    ? (t?.chat?.memberCount ? t.chat.memberCount.replace("{{count}}", memberCount) : `${memberCount} members`)
+    : null
 
   // Check if current user is group creator
   const isCreator = conversation.createdById === currentUser.id
@@ -97,10 +101,10 @@ const ChatUserPanel = ({
           )}
           <h3 className="font-semibold">
             {selectedMember
-              ? "Member Profile"
+              ? (t?.chat?.userPanel?.memberProfile || "Member Profile")
               : isGroup
-                ? "Group Info"
-                : "Profile"}
+                ? (t?.chat?.userPanel?.groupInfo || "Group Info")
+                : (t?.chat?.userPanel?.profile || "Profile")}
           </h3>
         </div>
         <IconButton
@@ -145,7 +149,7 @@ const ChatUserPanel = ({
 
               {!isGroup && otherUser?.level && (
                 <p className="mt-3 text-[13px] text-[#606060] text-center leading-relaxed">
-                  Level: {otherUser.level}
+                  {t?.chat?.userPanel?.level || "Level"}: {otherUser.level}
                 </p>
               )}
             </div>
@@ -173,7 +177,7 @@ const ChatUserPanel = ({
                   startIcon={<LogOut size={16} />}
                   className="w-full"
                 >
-                  Leave group
+                  {t?.chat?.userPanel?.leaveGroup || "Leave group"}
                 </PillButton>
               </div>
             )}

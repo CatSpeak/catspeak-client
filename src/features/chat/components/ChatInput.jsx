@@ -7,6 +7,7 @@ import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import ChatInputPreview from "./ChatInputPreview"
 import useTypingDebounce from "../hooks/useTypingDebounce"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatInput — message input bar with auto-resizing textarea, file attachments, and reply preview.
@@ -23,6 +24,7 @@ const ChatInput = ({
   showLeftIcon = true,
   showRightIcons = true,
 }) => {
+  const { t } = useLanguage()
   const textareaRef = useRef(null)
   const fileInputRef = useRef(null)
   const [selectedFile, setSelectedFile] = useState(null)
@@ -115,7 +117,7 @@ const ChatInput = ({
       {replyingTo && (
         <RepliedMessage
           senderName={
-            replyingTo.sender?.name || replyingTo.sender?.username || "Someone"
+            replyingTo.sender?.name || replyingTo.sender?.username || t?.chat?.someone || "Someone"
           }
           content={replyingTo.content || replyingTo.messageContent || ""}
           onCancel={onCancelReply}
@@ -181,7 +183,7 @@ const ChatInput = ({
                 ? "overflow-y-auto pr-4 pt-1"
                 : "overflow-y-hidden py-1"
             }`}
-            placeholder="Type a message..."
+            placeholder={t?.chat?.typeMessagePlaceholder || "Type a message..."}
             value={value}
             onChange={handleChange}
             onKeyDown={handleKeyDown}

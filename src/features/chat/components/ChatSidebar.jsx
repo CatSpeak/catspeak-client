@@ -7,13 +7,7 @@ import ListItem from "@/shared/components/ui/ListItem"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import ConversationItem from "./widget/ConversationItem"
-
-// ── Filter Tabs ───────────────────────────────────────────
-const FILTERS = [
-  { key: "all", label: "All" },
-  { key: "unread", label: "Unread" },
-  { key: "groups", label: "Groups" },
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatSidebar — left panel with search, filters, and conversation list.
@@ -29,6 +23,7 @@ const ChatSidebar = ({
   onNewChatClick,
   isLoading,
 }) => {
+  const { t } = useLanguage()
   const [filter] = useState("all")
 
   // Filter + search conversations
@@ -73,7 +68,7 @@ const ChatSidebar = ({
       {/* ── Header ───────────────────────────────────── */}
       <div className="flex flex-col gap-4 p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Chats</h1>
+          <h1 className="text-xl font-bold">{t?.chat?.title || "Chats"}</h1>
           <IconButton
             onClick={onNewChatClick}
             size="sm"
@@ -87,7 +82,7 @@ const ChatSidebar = ({
 
         {/* ── Search ───────────────────────────────── */}
         <SearchInput
-          placeholder="Search conversations..."
+          placeholder={t?.chat?.sidebar?.searchPlaceholder || "Search conversations..."}
           value={searchQuery}
           onChange={onSearchChange}
         />
@@ -120,7 +115,7 @@ const ChatSidebar = ({
           <EmptyState
             variant="component"
             icon={Users}
-            message="No conversations found"
+            message={t?.chat?.sidebar?.noConversations || "No conversations found"}
           />
         ) : (
           filtered.map((conv) => (

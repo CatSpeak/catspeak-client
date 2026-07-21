@@ -6,6 +6,7 @@ import Checkbox from "@/shared/components/ui/inputs/Checkbox"
 import ListItem from "@/shared/components/ui/ListItem"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const GroupMemberSelector = ({
   friends = [],
@@ -16,12 +17,14 @@ const GroupMemberSelector = ({
   onNext,
   onClose,
 }) => {
+  const { t } = useLanguage()
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Search bar */}
       <div className="px-4 pb-4">
         <SearchInput
-          placeholder="Search friends..."
+          placeholder={t?.chat?.modals?.searchFriends || "Search friends..."}
           value={searchQuery}
           onChange={onSearchChange}
           className="min-w-0"
@@ -34,7 +37,7 @@ const GroupMemberSelector = ({
           <EmptyState
             variant="component"
             icon={Users}
-            message="No friends found"
+            message={t?.chat?.modals?.noFriendsFound || "No friends found"}
           />
         ) : (
           friends.map((friend) => {
@@ -68,7 +71,7 @@ const GroupMemberSelector = ({
               >
                 <p>{friend.nickname || friend.username}</p>
                 <p className="text-sm text-[#606060]">
-                  {friend.level || "Student"}
+                  {friend.level || t?.chat?.userPanel?.student || "Student"}
                 </p>
               </ListItem>
             )
@@ -79,13 +82,15 @@ const GroupMemberSelector = ({
       {/* Footer Actions */}
       <div className="border-t border-[#E5E5E5] flex justify-end gap-2 p-4">
         <PillButton onClick={onClose} variant="secondary-no-outline">
-          Cancel
+          {t?.chat?.modals?.cancel || "Cancel"}
         </PillButton>
         <PillButton
           onClick={onNext}
           disabled={selectedFriends.length === 0}
         >
-          Next {selectedFriends.length > 0 ? `(${selectedFriends.length})` : ""}
+          {t?.chat?.modals?.next
+            ? t.chat.modals.next.replace("{{count}}", selectedFriends.length > 0 ? `(${selectedFriends.length})` : "")
+            : `Next ${selectedFriends.length > 0 ? `(${selectedFriends.length})` : ""}`}
         </PillButton>
       </div>
     </div>

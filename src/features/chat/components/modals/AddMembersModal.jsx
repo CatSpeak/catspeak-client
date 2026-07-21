@@ -10,6 +10,7 @@ import ListItem from "@/shared/components/ui/ListItem"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import { Users } from "lucide-react"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const AddMembersModal = ({
   open,
@@ -18,6 +19,7 @@ const AddMembersModal = ({
   currentUser,
   groupParticipantIds = [],
 }) => {
+  const { t } = useLanguage()
   const [selectedFriends, setSelectedFriends] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -81,14 +83,14 @@ const AddMembersModal = ({
     <Modal
       open={open}
       onClose={handleClose}
-      title="Add members to group"
+      title={t?.chat?.modals?.addMembersTitle || "Add members to group"}
       bodyClassName="px-0 flex-1 flex flex-col overflow-hidden"
     >
       <div className="flex flex-col md:max-h-[80vh] flex-1">
         {/* Search bar */}
         <div className="px-4 pb-4">
           <SearchInput
-            placeholder="Search friends..."
+            placeholder={t?.chat?.modals?.searchFriends || "Search friends..."}
             value={searchQuery}
             onChange={setSearchQuery}
             className="min-w-0"
@@ -103,8 +105,8 @@ const AddMembersModal = ({
               icon={Users}
               message={
                 addableFriends.length === 0
-                  ? "All of your friends are already in this group"
-                  : "No friends found matching your search"
+                  ? (t?.chat?.modals?.allInGroup || "All of your friends are already in this group")
+                  : (t?.chat?.modals?.noFriendsFound || "No friends found matching your search")
               }
             />
           ) : (
@@ -135,7 +137,7 @@ const AddMembersModal = ({
                 >
                   <p>{friend.nickname || friend.username}</p>
                   <p className="text-sm text-[#606060]">
-                    {friend.level || "Student"}
+                    {friend.level || t?.chat?.userPanel?.student || "Student"}
                   </p>
                 </ListItem>
               )
@@ -146,16 +148,16 @@ const AddMembersModal = ({
         {/* Footer Actions */}
         <div className="border-t border-[#E5E5E5] flex justify-end gap-2 p-4">
           <PillButton onClick={handleClose} variant="secondary-no-outline">
-            Cancel
+            {t?.chat?.modals?.cancel || "Cancel"}
           </PillButton>
           <PillButton
             onClick={handleAdd}
             disabled={selectedFriends.length === 0}
             loading={isLoading}
           >
-            Add{" "}
-            {selectedFriends.length > 0 ? `(${selectedFriends.length})` : ""}{" "}
-            members
+            {t?.chat?.modals?.addMembersBtn
+              ? t.chat.modals.addMembersBtn.replace("{{count}}", selectedFriends.length > 0 ? selectedFriends.length : "")
+              : `Add ${selectedFriends.length > 0 ? `(${selectedFriends.length})` : ""} members`}
           </PillButton>
         </div>
       </div>

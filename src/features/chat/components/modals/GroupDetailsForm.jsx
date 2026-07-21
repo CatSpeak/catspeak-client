@@ -5,6 +5,7 @@ import TextInput from "@/shared/components/ui/inputs/TextInput"
 import ListItem from "@/shared/components/ui/ListItem"
 import { PillButton, IconButton } from "@/shared/components/ui/buttons"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const GroupDetailsForm = ({
   groupName,
@@ -15,6 +16,8 @@ const GroupDetailsForm = ({
   onBack,
   isLoading,
 }) => {
+  const { t } = useLanguage()
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
@@ -27,13 +30,13 @@ const GroupDetailsForm = ({
         >
           <ArrowLeft />
         </IconButton>
-        <span className="font-semibold">Group details</span>
+        <span className="font-semibold">{t?.chat?.modals?.groupDetailsTitle || "Group details"}</span>
       </div>
 
       {/* Group Name Input */}
       <div className="px-4 pb-6">
         <TextInput
-          label="Group Name"
+          label={t?.chat?.modals?.groupNameLabel || "Group Name"}
           value={groupName}
           onChange={(e) => setGroupName(e.target.value)}
           floatingLabel
@@ -45,8 +48,9 @@ const GroupDetailsForm = ({
       {/* Selected Friends Preview */}
       <div className="px-4 flex-1 overflow-hidden flex flex-col min-h-0">
         <span className="text-xs text-[#606060] mb-2">
-          {selectedFriendsData.length} member
-          {selectedFriendsData.length !== 1 ? "s" : ""} selected
+          {t?.chat?.modals?.selectedCount
+            ? t.chat.modals.selectedCount.replace("{{count}}", selectedFriendsData.length)
+            : `${selectedFriendsData.length} members selected`}
         </span>
 
         <div className="flex-1 overflow-y-auto flex flex-col gap-1 pb-4">
@@ -88,7 +92,7 @@ const GroupDetailsForm = ({
                   {friend.nickname || friend.username}
                 </p>
                 <p className="text-sm text-[#606060]">
-                  {friend.level || "Student"}
+                  {friend.level || t?.chat?.userPanel?.student || "Student"}
                 </p>
               </ListItem>
             )
@@ -99,7 +103,7 @@ const GroupDetailsForm = ({
       {/* Footer Actions */}
       <div className="border-t border-[#E5E5E5] flex justify-end gap-2 p-4 shrink-0">
         <PillButton onClick={onBack} variant="secondary-no-outline">
-          Back
+          {t?.chat?.modals?.back || "Back"}
         </PillButton>
         <PillButton
           onClick={onCreateGroup}
@@ -108,7 +112,7 @@ const GroupDetailsForm = ({
           }
           loading={isLoading}
         >
-          Create Group
+          {t?.chat?.modals?.createGroup || "Create Group"}
         </PillButton>
       </div>
     </div>

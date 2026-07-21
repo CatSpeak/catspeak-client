@@ -3,6 +3,7 @@ import MediaAttachment from "./MediaAttachment"
 import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
 import YouTubeEmbed from "./YouTubeEmbed"
 import LinkPreviewCard from "./LinkPreviewCard"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Matches strings that contain ONLY 1 to 3 emoji characters (optionally separated by spaces)
 const EMOJI_ONLY_REGEX =
@@ -18,10 +19,13 @@ const isEmojiOnly = (text) => {
  * Accepts simple (message, isOwn) props and computes derived flags internally.
  */
 const ChatBubbleContent = ({ message, isOwn }) => {
+  const { t } = useLanguage()
+
   const isRecalled =
     message?.isRecalled ||
     message?.messageType === "Recalled" ||
-    message?.content === "[Message Recalled]"
+    message?.content === "[Message Recalled]" ||
+    message?.messageContent === "Tin nhắn đã bị thu hồi"
 
   const parentMsg = message?.parentMessage || message?.replyToMessage
   const parentSenderName =
@@ -29,6 +33,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
     parentMsg?.sender?.name ||
     parentMsg?.senderName ||
     message?.parentSenderName ||
+    t?.chat?.someone ||
     "Someone"
   const parentContent =
     parentMsg?.messageContent ||
@@ -70,7 +75,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
       {/* Recalled State */}
       {isRecalled ? (
         <p className="italic opacity-60 m-0 select-none">
-          Message was recalled
+          {t?.chat?.recalledMessage || "Tin nhắn đã bị thu hồi"}
         </p>
       ) : hasMedia ? (
         <div className="flex flex-col w-full max-w-[360px]">

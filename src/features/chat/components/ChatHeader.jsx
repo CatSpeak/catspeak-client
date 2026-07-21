@@ -5,6 +5,7 @@ import GroupAvatar from "./GroupAvatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { formatLastSeen } from "@/shared/utils/dateFormatter"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatHeader — top bar displaying active conversation name, avatar, online status, and panel actions.
@@ -15,6 +16,7 @@ const ChatHeader = ({
   onToggleInfo,
   friendOnlineStatus,
 }) => {
+  const { t } = useLanguage()
   const isGroup = conversation?.isGroup
   const otherUser = conversation?.friend
   const name = conversation?.name
@@ -37,9 +39,9 @@ const ChatHeader = ({
     (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen
 
   const statusText = isGroup
-    ? `${memberCount} members`
+    ? (t?.chat?.memberCount ? t.chat.memberCount.replace("{{count}}", memberCount) : `${memberCount} members`)
     : isOnline
-      ? "Online"
+      ? (t?.chat?.online || "Online")
       : formatLastSeen(lastSeenTime)
 
   return (

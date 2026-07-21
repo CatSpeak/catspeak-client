@@ -15,19 +15,24 @@ import { Users } from "lucide-react"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import GroupMemberSelector from "./GroupMemberSelector"
 import GroupDetailsForm from "./GroupDetailsForm"
-
-const NEW_CHAT_TABS = [
-  { id: "direct", label: "Direct Message" },
-  { id: "group", label: "New Group" },
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const NewChatModal = ({ open, onClose, onConversationCreated }) => {
+  const { t } = useLanguage()
   const { user: authUser } = useAuth()
   const [newChatTab, setNewChatTab] = useState("direct") // 'direct' | 'group'
   const [groupStep, setGroupStep] = useState("select-members") // 'select-members' | 'details'
   const [groupName, setGroupName] = useState("")
   const [selectedFriends, setSelectedFriends] = useState([])
   const [newChatSearch, setNewChatSearch] = useState("")
+
+  const newChatTabs = useMemo(
+    () => [
+      { id: "direct", label: t?.chat?.modals?.directMessage || "Direct Message" },
+      { id: "group", label: t?.chat?.modals?.newGroup || "New Group" },
+    ],
+    [t],
+  )
 
   const { data: friendsResponse } = useGetFriendsQuery(authUser?.accountId, {
     skip: !authUser?.accountId,
@@ -124,13 +129,13 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
     <Modal
       open={open}
       onClose={handleClose}
-      title="Start a new chat"
+      title={t?.chat?.modals?.newChatTitle || "Start a new chat"}
       bodyClassName="px-0 flex-1 flex flex-col overflow-hidden"
     >
       <div className="flex flex-col md:max-h-[80vh] flex-1">
         {/* Tab Selection */}
         <Tabs
-          tabs={NEW_CHAT_TABS}
+          tabs={newChatTabs}
           activeTab={newChatTab}
           onChange={handleTabChange}
           className="mb-4 px-4"
@@ -141,7 +146,7 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
             {/* Search bar */}
             <div className="px-4 pb-4">
               <SearchInput
-                placeholder="Search friends..."
+                placeholder={t?.chat?.modals?.searchFriends || "Search friends..."}
                 value={newChatSearch}
                 onChange={setNewChatSearch}
                 className="min-w-0"
@@ -154,7 +159,7 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
                 <EmptyState
                   variant="component"
                   icon={Users}
-                  message="No friends found"
+                  message={t?.chat?.modals?.noFriendsFound || "No friends found"}
                 />
               ) : (
                 friends.map((friend) => {
@@ -180,7 +185,7 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
                     >
                       <p>{friend.nickname || friend.username}</p>
                       <p className="text-sm text-[#606060]">
-                        {friend.level || "Student"}
+                        {friend.level || t?.chat?.userPanel?.student || "Student"}
                       </p>
                     </ListItem>
                   )

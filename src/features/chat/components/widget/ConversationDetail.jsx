@@ -92,6 +92,7 @@ const ConversationDetail = ({
         ) : groupedItems.length === 0 ? (
           <EmptyState
             message={
+              t?.chat?.noMessagesStart ||
               t?.messages?.noMessages ||
               "No messages yet. Start a conversation!"
             }

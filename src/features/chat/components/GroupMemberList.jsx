@@ -2,6 +2,7 @@ import { UserPlus, Trash2 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * GroupMemberList — renders group participant items with creator removal capabilities and add member button.
@@ -14,10 +15,14 @@ const GroupMemberList = ({
   onRemoveMember,
   onOpenAddModal,
 }) => {
+  const { t } = useLanguage()
+
   return (
     <div>
       <div className="px-4 mb-2">
-        <h4 className="text-sm font-semibold text-[#606060]">Members</h4>
+        <h4 className="text-sm font-semibold text-[#606060]">
+          {t?.chat?.userPanel?.members || "Members"}
+        </h4>
       </div>
 
       <div>
@@ -32,9 +37,9 @@ const GroupMemberList = ({
             </div>
           }
         >
-          <span>Add members</span>
+          <span>{t?.chat?.userPanel?.addMembers || "Add members"}</span>
           <span className="text-sm text-[#606060]">
-            Invite friends to this group
+            {t?.chat?.userPanel?.inviteFriends || "Invite friends to this group"}
           </span>
         </ListItem>
 
@@ -68,7 +73,7 @@ const GroupMemberList = ({
                       onRemoveMember(participant.accountId)
                     }}
                     className="opacity-0 group-hover:opacity-100 flex items-center justify-center h-7 w-7 text-red-500 hover:bg-red-50 rounded-full transition-all duration-150"
-                    title="Remove from group"
+                    title={t?.chat?.userPanel?.removeTitle || "Remove from group"}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -77,10 +82,10 @@ const GroupMemberList = ({
             >
               <span className="truncate">
                 {participant.username}
-                {isMe && <span className="text-[#606060]"> (You)</span>}
+                {isMe && <span className="text-[#606060]"> ({t?.chat?.you || "You"})</span>}
               </span>
               <span className="text-sm text-[#606060] truncate">
-                {participant.level || "Student"}
+                {participant.level || t?.chat?.userPanel?.student || "Student"}
               </span>
             </ListItem>
           )

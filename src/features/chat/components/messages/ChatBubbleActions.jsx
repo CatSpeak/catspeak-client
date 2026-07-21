@@ -4,6 +4,7 @@ import toast from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatBubbleActions — action bar & popover menu for chat message bubbles.
@@ -29,6 +30,7 @@ const ChatBubbleActions = ({
   onMenuOpenChange,
   isWidget = false,
 }) => {
+  const { t } = useLanguage()
   const contentToCopy =
     message?.content ||
     message?.messageContent ||
@@ -41,8 +43,8 @@ const ChatBubbleActions = ({
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(contentToCopy)
-        .then(() => toast.success("Copied to clipboard"))
-        .catch(() => toast.error("Failed to copy"))
+        .then(() => toast.success(t?.chat?.actions?.copied || "Copied to clipboard"))
+        .catch(() => toast.error(t?.chat?.actions?.failedCopy || "Failed to copy"))
     }
   }
 
@@ -59,7 +61,7 @@ const ChatBubbleActions = ({
           placement="top-right"
           onOpenChange={onMenuOpenChange}
           trigger={
-            <IconButton type="button" variant="ghost" title="More actions">
+            <IconButton type="button" variant="ghost" title={t?.chat?.actions?.moreActions || "More actions"}>
               <MoreHorizontal />
             </IconButton>
           }
@@ -72,7 +74,7 @@ const ChatBubbleActions = ({
                     onReply(message)
                   }}
                   icon={<Reply />}
-                  label="Reply"
+                  label={t?.chat?.actions?.reply || "Reply"}
                 />
               )}
 
@@ -83,7 +85,7 @@ const ChatBubbleActions = ({
                     handleCopy()
                   }}
                   icon={<Copy />}
-                  label="Copy"
+                  label={t?.chat?.actions?.copy || "Copy"}
                 />
               )}
 
@@ -94,7 +96,7 @@ const ChatBubbleActions = ({
                     onDeleteForMe(message)
                   }}
                   icon={<Trash2 />}
-                  label="Remove for me"
+                  label={t?.chat?.actions?.removeForMe || "Remove for me"}
                 />
               )}
 
@@ -106,7 +108,7 @@ const ChatBubbleActions = ({
                   }}
                   className="text-red-600"
                   icon={<Undo2 />}
-                  label="Remove for everyone"
+                  label={t?.chat?.actions?.removeForEveryone || "Remove for everyone"}
                 />
               )}
             </MenuList>
@@ -127,7 +129,7 @@ const ChatBubbleActions = ({
           type="button"
           variant="ghost"
           onClick={() => onReply(message)}
-          title="Reply"
+          title={t?.chat?.actions?.reply || "Reply"}
         >
           <Reply />
         </IconButton>
@@ -138,7 +140,7 @@ const ChatBubbleActions = ({
           type="button"
           variant="ghost"
           onClick={handleCopy}
-          title="Copy"
+          title={t?.chat?.actions?.copy || "Copy"}
         >
           <Copy />
         </IconButton>
@@ -149,7 +151,7 @@ const ChatBubbleActions = ({
           placement="top-right"
           onOpenChange={onMenuOpenChange}
           trigger={
-            <IconButton type="button" variant="ghost" title="More actions">
+            <IconButton type="button" variant="ghost" title={t?.chat?.actions?.moreActions || "More actions"}>
               <MoreHorizontal />
             </IconButton>
           }
@@ -162,7 +164,7 @@ const ChatBubbleActions = ({
                     onDeleteForMe(message)
                   }}
                   icon={<Trash2 />}
-                  label="Remove for me"
+                  label={t?.chat?.actions?.removeForMe || "Remove for me"}
                 />
               )}
 
@@ -174,7 +176,7 @@ const ChatBubbleActions = ({
                   }}
                   className="text-red-600"
                   icon={<Undo2 />}
-                  label="Remove for everyone"
+                  label={t?.chat?.actions?.removeForEveryone || "Remove for everyone"}
                 />
               )}
             </MenuList>
