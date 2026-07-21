@@ -122,13 +122,11 @@ const CustomRoomsPage = lazy(
   () => import("@/features/rooms/pages/CustomRoomsPage"),
 );
 
-import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
-const WorkspaceIndex = () => {
-  const { isStudent } = useRoleOverride();
-  return <Navigate to={isStudent ? "learning" : "courses"} replace />;
-};
+const CreateExamPage = lazy(
+  () => import("@/features/courses/pages/CreateExamPage"),
+)
 
 const routesConfig = [
   {
@@ -404,6 +402,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <CreateAssignmentPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/create-exam",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
                   </LazyRoute>
                 ),
               },

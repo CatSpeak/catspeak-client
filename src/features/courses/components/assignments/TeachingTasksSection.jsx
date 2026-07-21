@@ -1,5 +1,6 @@
 import React from "react"
 import { BookOpen, Calendar, Clock, FileText, MessageSquare } from "lucide-react"
+import { BookOpen, Calendar, Clock, FileText, MessageSquare } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 const getTaskStatusClass = (status) => {
@@ -55,6 +56,16 @@ const buildDefaultTeachingTasks = ({
       icon: <FileText size={16} />,
       iconColor: "text-[#E11D48] bg-[#FFE4E6]",
     },
+    {
+      id: "lesson1",
+      title: prepareLessonLabel || "Prepare lesson plan",
+      subtitle: taskSpeakingSubtitle || "English speaking class",
+      time: "11:45 AM",
+      date: "31st Jul",
+      status: "Later",
+      icon: <FileText size={16} />,
+      iconColor: "text-[#E11D48] bg-[#FFE4E6]",
+    },
   ]
 
 const TeachingTasksSection = ({
@@ -69,8 +80,7 @@ const TeachingTasksSection = ({
   onViewAll,
   onTaskAction,
   isDevelopment = true,
-  actionIcon = "chevron",
-  devMessage = "Tính năng đang phát triển",
+  devMessage = "Tinh nang dang phat trien",
 }) => {
   const handleDevelopmentAction = (callback, payload) => {
     if (isDevelopment) {
@@ -104,7 +114,7 @@ const TeachingTasksSection = ({
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 mt-2">
+      <div className="flex flex-col gap-2 flex-1">
         {resolvedTasks.map((task) => {
           const badgeText = task.badge || task.status || task.due
           const badgeClass = task.badgeClass || task.dueColor || getTaskStatusClass(badgeText)
@@ -114,7 +124,7 @@ const TeachingTasksSection = ({
             <div
               key={task.id}
               onClick={() => handleDevelopmentAction(onTaskAction, task)}
-              className="flex items-start gap-3 hover:bg-gray-50/50 p-1.5 rounded-2xl transition-colors cursor-pointer"
+              className="flex items-start gap-3 p-1.5 rounded-2xl transition-all cursor-pointer hover:bg-gray-50/70 active:scale-[0.99]"
             >
               <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${iconClass}`}>
                 {task.icon}

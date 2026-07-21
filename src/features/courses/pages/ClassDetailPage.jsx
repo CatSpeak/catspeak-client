@@ -16,6 +16,7 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 import ClassDetailTabs from "../components/ClassDetailTabs"
 import ClassOverviewTab from "../components/overview/ClassOverviewTab"
+import CreatePostTypeModal from "../components/CreatePostTypeModal"
 
 const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
@@ -62,6 +63,7 @@ const ClassDetailPage = () => {
   // State Management for UI Actions
   const [showActionsDropdown, setShowActionsDropdown] = useState(false)
   const [showCancelClassModal, setShowCancelClassModal] = useState(false)
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false)
 
   // Cancel class handler
   const handleCancelClass = async () => {
@@ -151,7 +153,7 @@ const ClassDetailPage = () => {
 
               {/* Tạo bài button */}
               <button
-                onClick={() => navigate(`/workspace/courses/class/${id}/create-assignment`)}
+                onClick={() => setShowCreatePostModal(true)}
                 className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
               >
                 <span>{cd.createPost || "Create Post"}</span>
@@ -245,6 +247,18 @@ const ClassDetailPage = () => {
         message={cd.confirmCancelClass || "Are you sure you want to cancel this class?"}
         confirmText={cd.cancelClass || "Cancel Class"}
         cancelText={c.createClass?.cancel || "Hủy"}
+      />
+
+      <CreatePostTypeModal
+        open={showCreatePostModal}
+        onClose={() => setShowCreatePostModal(false)}
+        onSelect={(type) => {
+          if (type === "exam") {
+            navigate(`/workspace/courses/class/${id}/create-exam`)
+          } else {
+            navigate(`/workspace/courses/class/${id}/create-assignment`)
+          }
+        }}
       />
     </div>
   )
