@@ -342,7 +342,6 @@ const ControlBarMoreMenu = ({
                               transition={{ duration: 0.2 }}
                               className="flex flex-col gap-3"
                             >
-
                               {hasDuration && (
                                 <div className="flex items-center justify-center text-lg font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-12 w-full">
                                   {t?.rooms?.videoCall?.remainingTime || "Thời gian còn lại"}: {formattedRemaining} / {formattedMax}
@@ -436,7 +435,7 @@ const ControlBarMoreMenu = ({
                                 <ChevronLeft size={20} /> {t?.rooms?.videoCall?.backBtn || "Back"}
                               </button>
 
-                              {/* <MenuItem
+                              <MenuItem
                                 onClick={() => {
                                   setShowMoreMenu(false);
                                   if (ongoingGame) spectateGame();
@@ -445,7 +444,7 @@ const ControlBarMoreMenu = ({
                                 disabled={!isHost && !ongoingGame}
                                 icon={<Gamepad2 size={20} />}
                                 label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
-                              /> */}
+                              />
                               <MenuItem
                                 onClick={() => { setShowMoreMenu(false); setShowGameHistory(true); }}
                                 icon={<History size={20} />}
