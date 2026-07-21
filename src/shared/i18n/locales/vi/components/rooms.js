@@ -278,6 +278,16 @@ export default {
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
+    changeLayout: {
+      title: "Điều chỉnh chế độ xem",
+      auto: "Tự động (linh động)",
+      grid: "Lưới",
+      spotlight: "Tiêu điểm",
+      sidebar: "Thanh bên",
+      tilesLabel: "Số ô",
+      tilesDescription: "Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ.",
+      hideNonVideo: "Ẩn ô không có video",
+    },
     roomClosingTitle: "Phòng sắp đóng",
     roomClosingSubtitle:
       "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",

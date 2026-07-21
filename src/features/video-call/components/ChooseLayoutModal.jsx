@@ -3,6 +3,7 @@ import Switch from "@/shared/components/ui/inputs/Switch";
 import Slider from "@/shared/components/ui/Slider";
 import { Sparkles, LayoutGrid } from "lucide-react";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 const LOCAL_STORAGE_KEY = "catspeak_video_layout_settings";
 
@@ -55,6 +56,9 @@ const LayoutIconSidebar = () => (
 );
 
 const ChooseLayoutModal = ({ open, onClose }) => {
+  const { t } = useLanguage();
+  const changeLayoutT = t?.rooms?.videoCall?.changeLayout || {};
+
   const {
     layoutMode,
     setLayoutMode,
@@ -69,7 +73,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Điều chỉnh chế độ xem" className="md:max-w-[380px]">
+    <Modal open={open} onClose={onClose} title={changeLayoutT.title || "Điều chỉnh chế độ xem"} className="md:max-w-[380px]">
       <div className="flex flex-col text-[#3C4043] p-1 pb-4 w-full">
         {/* Layout Modes */}
         <div className="flex flex-col gap-3 mb-6">
@@ -84,7 +88,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
                 className="w-5 h-5 accent-[#1A73E8]"
               />
               <span className="text-[15px] flex items-center gap-2">
-                Tự động (linh động) <Sparkles size={16} className="text-[#3C4043]" />
+                {changeLayoutT.auto || "Tự động (linh động)"} <Sparkles size={16} className="text-[#3C4043]" />
               </span>
             </div>
             <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "auto" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
@@ -102,7 +106,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
                 onChange={() => handleLayoutChange("grid")}
                 className="w-5 h-5 accent-[#1A73E8]"
               />
-              <span className="text-[15px]">Lưới</span>
+              <span className="text-[15px]">{changeLayoutT.grid || "Lưới"}</span>
             </div>
             <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "grid" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
               <LayoutIconGrid />
@@ -119,7 +123,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
                 onChange={() => handleLayoutChange("spotlight")}
                 className="w-5 h-5 accent-[#1A73E8]"
               />
-              <span className="text-[15px]">Tiêu điểm</span>
+              <span className="text-[15px]">{changeLayoutT.spotlight || "Tiêu điểm"}</span>
             </div>
             <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "spotlight" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
               <LayoutIconSpotlight />
@@ -136,7 +140,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
                 onChange={() => handleLayoutChange("sidebar")}
                 className="w-5 h-5 accent-[#1A73E8]"
               />
-              <span className="text-[15px]">Thanh bên</span>
+              <span className="text-[15px]">{changeLayoutT.sidebar || "Thanh bên"}</span>
             </div>
             <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "sidebar" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
               <LayoutIconSidebar />
@@ -148,9 +152,9 @@ const ChooseLayoutModal = ({ open, onClose }) => {
         <div className={`flex flex-col mb-4 transition-opacity ${layoutMode !== 'grid' && layoutMode !== 'auto' ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="flex justify-between items-center mb-4">
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Số ô</span>
+              <span className="text-sm font-medium">{changeLayoutT.tilesLabel || "Số ô"}</span>
               <span className="text-xs text-gray-500">
-                Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ.
+                {changeLayoutT.tilesDescription || "Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ."}
               </span>
             </div>
             <span className="text-base font-semibold text-[#1A73E8] bg-blue-50 px-2 py-0.5 rounded-md min-w-[32px] text-center">{maxTiles}</span>
@@ -176,7 +180,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
 
         {/* Hide empty tiles */}
         <div className="flex items-center justify-between">
-          <span className="text-[15px] font-medium">Ẩn ô không có video</span>
+          <span className="text-[15px] font-medium">{changeLayoutT.hideNonVideo || "Ẩn ô không có video"}</span>
           <Switch
             checked={hideEmptyTiles}
             onChange={(e) => setHideEmptyTiles(e.target.checked)}
