@@ -19,7 +19,7 @@ const FluentAnimation = React.forwardRef(
       duration = 0.28,
       className,
     },
-    ref
+    ref,
   ) => {
     const getInitialPosition = () => {
       // Determine negative distance value
@@ -49,7 +49,9 @@ const FluentAnimation = React.forwardRef(
         key={animationKey}
         initial={{ y: initialPos.y, x: initialPos.x, opacity: 0 }}
         animate={{ y: 0, x: 0, opacity: 1 }}
-        exit={exit ? { y: initialPos.y, x: initialPos.x, opacity: 0 } : undefined}
+        exit={
+          exit ? { y: initialPos.y, x: initialPos.x, opacity: 0 } : undefined
+        }
         transition={{
           duration: duration,
           ease: [0.16, 1, 0.3, 1], // Strong ease-out (fast → slow)
@@ -59,7 +61,7 @@ const FluentAnimation = React.forwardRef(
         {children}
       </motion.div>
     )
-  }
+  },
 )
 
 export default FluentAnimation

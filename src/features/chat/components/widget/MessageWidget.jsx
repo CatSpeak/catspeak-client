@@ -6,11 +6,11 @@ import AuthModalContext from "@/shared/context/AuthModalContext"
 import {
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
-  useSendMessageMutation,
   useMarkConversationAsReadMutation,
   conversationsApi,
 } from "@/store/api/social/conversationsApi"
 import useMessageSignalR from "../../hooks/useMessageSignalR"
+import useChatMessageActions from "@/features/chat/hooks/useChatMessageActions"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import {
   closeWidget,
@@ -42,6 +42,18 @@ const MessageWidget = () => {
     (state) => state.messageWidget,
   )
   const [input, setInput] = useState("")
+
+  // ── Chat Message Actions Hook ──────────────────────────
+  const {
+    replyingTo,
+    handleReply,
+    handleCancelReply,
+    handleSend: sendAction,
+    handleDeleteForMe,
+    handleRecall,
+    isSending,
+  } = useChatMessageActions(activeConversationId)
+
   const totalUnreadCountRedux = useSelector(selectTotalUnread)
   const friendOnlineStatus = useSelector(
     (state) => state.notification?.friendOnlineStatus || {},
@@ -125,6 +137,11 @@ const MessageWidget = () => {
       status: msg.isRead ? "read" : "delivered",
       readByAccountIds: msg.readByAccountIds || [],
       sender: msg.sender,
+      parentMessageId: msg.parentMessageId,
+      parentMessage: msg.parentMessage || msg.replyToMessage,
+      mediaUrl: msg.mediaUrl || msg.fileUrl || msg.attachmentUrl,
+      isRecalled: msg.isRecalled,
+      isDeleted: msg.isDeleted,
     }))
   }, [messagesResponse])
 
@@ -133,7 +150,6 @@ const MessageWidget = () => {
     activeConversationId,
   })
 
-  const [sendMessageApi, { isLoading: isSending }] = useSendMessageMutation()
   const [markConversationAsRead] = useMarkConversationAsReadMutation()
 
   // Clear unread logic
@@ -161,6 +177,7 @@ const MessageWidget = () => {
   // Handle conversation selection
   const handleSelectConversation = (conv) => {
     dispatch(setActiveConversation(conv.conversationId))
+    handleCancelReply()
     clearUnreadLogic(conv.conversationId)
   }
 
@@ -183,29 +200,21 @@ const MessageWidget = () => {
   const handleBackToList = () => {
     dispatch(setView("list"))
     dispatch(setActiveConversation(null)) // Optional: clear selection
+    handleCancelReply()
   }
 
   // Handle send message
-  const handleSendMessage = async () => {
-    if (!input.trim() || !activeConversationId) return
-
+  const handleSendMessage = async (text, file) => {
     if (stopTyping) stopTyping()
-    try {
-      await sendMessageApi({
-        conversationId: activeConversationId,
-        messageData: { messageContent: input, messageType: "Text" },
-      }).unwrap()
-      setInput("")
-    } catch (error) {
-      console.error("Failed to send message:", error)
-    }
+    await sendAction(text, file)
+    setInput("")
   }
 
   // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSendMessage()
+      handleSendMessage(input)
     }
   }
 
@@ -216,7 +225,7 @@ const MessageWidget = () => {
     result = result.filter((c) => {
       if (c.conversationId === activeConversationId) return true
       if (c.isGroup) return true
-      return !!c.lastMessage
+      return Boolean(c.lastMessage || c.lastMessageType || c.lastMessageTime)
     })
 
     result.sort((a, b) => {
@@ -274,7 +283,7 @@ const MessageWidget = () => {
             isLoading={messagesLoading}
             input={input}
             onInputChange={(e) => {
-              const val = e.target.value
+              const val = typeof e === "string" ? e : e?.target?.value ?? ""
               setInput(val)
               if (val.trim().length > 0) {
                 if (startTyping) startTyping()
@@ -288,6 +297,11 @@ const MessageWidget = () => {
             typingUsers={typingUsers}
             onStartTyping={startTyping}
             onStopTyping={stopTyping}
+            replyingTo={replyingTo}
+            onReply={handleReply}
+            onCancelReply={handleCancelReply}
+            onDeleteForMe={handleDeleteForMe}
+            onRecall={handleRecall}
           />
         )}
       </MessageModal>

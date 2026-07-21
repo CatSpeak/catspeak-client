@@ -39,7 +39,7 @@ const ChatSidebar = ({
     result = result.filter((c) => {
       if (c.conversationId === selectedId) return true
       if (c.isGroup) return true
-      return !!c.lastMessage
+      return Boolean(c.lastMessage || c.lastMessageType || c.lastMessageTime)
     })
 
     // Apply filter

@@ -32,9 +32,12 @@ export const useGroupedMessages = ({
     const otherUser = conversation.friend
     const FIVE_MIN = 5 * 60 * 1000
 
+    const getMessageTypeStr = (m) =>
+      m && m.messageType != null ? String(m.messageType).toLowerCase() : ""
+
     let lastNonSystemMsgIndex = -1
     for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].messageType?.toLowerCase() !== "system") {
+      if (getMessageTypeStr(messages[i]) !== "system") {
         lastNonSystemMsgIndex = i
         break
       }
@@ -42,27 +45,36 @@ export const useGroupedMessages = ({
 
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i]
-      const msgDate = new Date(msg.timestamp).toDateString()
+      const msgTimestamp = msg.timestamp || msg.createDate
+      const msgSenderId = msg.senderId ?? msg.sender?.accountId
+      const msgId = msg.id || msg.messageId
+      const msgDate = new Date(msgTimestamp).toDateString()
+
       const prevMsg = i > 0 ? messages[i - 1] : null
       const nextMsg = i < messages.length - 1 ? messages[i + 1] : null
+
+      const prevTimestamp = prevMsg?.timestamp || prevMsg?.createDate
+      const nextTimestamp = nextMsg?.timestamp || nextMsg?.createDate
+      const prevSenderId = prevMsg?.senderId ?? prevMsg?.sender?.accountId
+      const nextSenderId = nextMsg?.senderId ?? nextMsg?.sender?.accountId
 
       // Date separator
       if (msgDate !== prevDate) {
         groupedItems.push({
           type: "date",
           id: `date-${msgDate}`,
-          timestamp: msg.timestamp,
+          timestamp: msgTimestamp,
         })
         prevDate = msgDate
       }
 
       // System messages handling
-      if (msg.messageType?.toLowerCase() === "system") {
+      if (getMessageTypeStr(msg) === "system") {
         groupedItems.push({
           type: "system",
-          id: msg.id,
+          id: msgId,
           message: msg,
-          timestamp: msg.timestamp,
+          timestamp: msgTimestamp,
         })
         continue
       }
@@ -70,34 +82,34 @@ export const useGroupedMessages = ({
       // Grouping: same sender within 5 minutes
       const isSameSenderAsPrev =
         prevMsg &&
-        prevMsg.messageType?.toLowerCase() !== "system" &&
-        prevMsg.senderId === msg.senderId &&
-        new Date(msg.timestamp) - new Date(prevMsg.timestamp) < FIVE_MIN &&
-        new Date(msg.timestamp).toDateString() ===
-          new Date(prevMsg.timestamp).toDateString()
+        getMessageTypeStr(prevMsg) !== "system" &&
+        prevSenderId === msgSenderId &&
+        new Date(msgTimestamp) - new Date(prevTimestamp) < FIVE_MIN &&
+        new Date(msgTimestamp).toDateString() ===
+          new Date(prevTimestamp).toDateString()
 
       const isSameSenderAsNext =
         nextMsg &&
-        nextMsg.messageType?.toLowerCase() !== "system" &&
-        nextMsg.senderId === msg.senderId &&
-        new Date(nextMsg.timestamp) - new Date(msg.timestamp) < FIVE_MIN &&
-        new Date(msg.timestamp).toDateString() ===
-          new Date(nextMsg.timestamp).toDateString()
+        getMessageTypeStr(nextMsg) !== "system" &&
+        nextSenderId === msgSenderId &&
+        new Date(nextTimestamp) - new Date(msgTimestamp) < FIVE_MIN &&
+        new Date(msgTimestamp).toDateString() ===
+          new Date(nextTimestamp).toDateString()
 
       const isFirstInGroup = !isSameSenderAsPrev
       const isLastInGroup = !isSameSenderAsNext
-      const isOwn = msg.senderId === currentUser.id
+      const isOwn = Number(msgSenderId) === Number(currentUser?.id || currentUser?.accountId)
       const isLastMessageInChat = i === lastNonSystemMsgIndex
 
       // Resolve sender info
       const sender = isOwn
         ? {
-            id: currentUser.id,
-            name: currentUser.name,
-            avatar: currentUser.avatar || msg.sender?.avatarImageUrl,
+            id: currentUser?.id || currentUser?.accountId,
+            name: currentUser?.name || currentUser?.username,
+            avatar: currentUser?.avatar || currentUser?.avatarImageUrl || msg.sender?.avatarImageUrl,
             ...msg.sender,
           }
-        : !isGroup && otherUser && otherUser.accountId === msg.senderId
+        : !isGroup && otherUser && otherUser.accountId === msgSenderId
           ? {
               id: otherUser.accountId,
               name: otherUser.username,
@@ -106,26 +118,24 @@ export const useGroupedMessages = ({
             }
           : (() => {
               const p = conversation.participants?.find(
-                (part) => part.accountId === msg.senderId,
+                (part) => Number(part.accountId || part.id) === Number(msgSenderId),
               )
               return p
                 ? {
-                    id: p.accountId,
-                    name: p.username,
-                    avatar: p.avatarImageUrl,
+                    id: p.accountId || p.id,
+                    name: p.username || p.name,
+                    avatar: p.avatarImageUrl || p.avatar,
                     ...msg.sender,
                   }
                 : {
-                    id: msg.sender?.accountId || msg.senderId,
-                    name: msg.sender?.username || "User",
-                    avatar: msg.sender?.avatarImageUrl,
+                    id: msg.sender?.accountId || msgSenderId,
+                    name: msg.sender?.username || msg.sender?.name || "User",
+                    avatar: msg.sender?.avatarImageUrl || msg.sender?.avatar,
                     ...msg.sender,
                   }
             })()
 
-      const shouldAnimate =
-        !initialMessageIds.has(msg.id) &&
-        new Date() - new Date(msg.timestamp) < 15000
+      const shouldAnimate = !initialMessageIds.has(msgId)
 
       // Resolve users who have read this message (only evaluated for the latest message in chat)
       let readByUsers = []

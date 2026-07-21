@@ -1,5 +1,5 @@
 import { memo, useMemo, useState } from "react"
-import { X, Users, LogOut, UserPlus, Trash2, ArrowLeft } from "lucide-react"
+import { X, LogOut, ArrowLeft } from "lucide-react"
 import GroupAvatar from "./GroupAvatar"
 import { useRemoveParticipantMutation } from "@/store/api/social/conversationsApi"
 import Avatar from "@/shared/components/ui/Avatar"
@@ -7,8 +7,9 @@ import { getParticipantTheme } from "@/features/video-call/utils/participantThem
 import Drawer from "@/shared/components/ui/Drawer"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
-import ListItem from "@/shared/components/ui/ListItem"
-import AddMembersModal from "./AddMembersModal"
+import AddMembersModal from "./modals/AddMembersModal"
+import MemberProfileView from "./MemberProfileView"
+import GroupMemberList from "./GroupMemberList"
 
 /**
  * ChatUserPanel — toggleable right-side info panel.
@@ -115,42 +116,10 @@ const ChatUserPanel = ({
       {/* ── Content ───────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
         {selectedMember ? (
-          <div className="flex flex-col items-center p-4">
-            <Avatar
-              size={80}
-              name={selectedMember.username}
-              src={selectedMember.avatarImageUrl}
-              className={
-                getParticipantTheme(
-                  selectedMember.accountId || selectedMember.username || "",
-                ).avatarClass
-              }
-            />
-
-            <h2 className="mt-3 font-semibold text-center">
-              {selectedMember.username}
-            </h2>
-
-
-            <p className="mt-4 text-sm text-[#606060] text-center">
-              Level: {selectedMember.level || "Student"}
-            </p>
-
-            <div className="w-full mt-6">
-              <PillButton
-                onClick={() =>
-                  window.open(`/profile/${selectedMember.accountId}`, "_blank")
-                }
-                variant="primary"
-                className="w-full"
-              >
-                View Profile
-              </PillButton>
-            </div>
-          </div>
+          <MemberProfileView member={selectedMember} />
         ) : (
           <>
-            {/* Profile section */}
+            {/* Profile header section */}
             <div className="flex flex-col items-center p-4">
               {isGroup ? (
                 <GroupAvatar conversation={conversation} size={80} />
@@ -183,83 +152,14 @@ const ChatUserPanel = ({
 
             {/* ── Group members ──────────────────────── */}
             {isGroup && (
-              <div>
-                <div className="px-4 mb-2">
-                  <h4 className="text-sm font-semibold text-[#606060]">
-                    Members
-                  </h4>
-                </div>
-
-                <div>
-                  {/* Add member button as a list item at the top of the stack */}
-                  <ListItem
-                    onClick={() => setIsAddModalOpen(true)}
-                    hoverEffect={true}
-                    lines={2}
-                    leftContent={
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#990011] text-white shrink-0">
-                        <UserPlus size={20} />
-                      </div>
-                    }
-                  >
-                    <span>Add members</span>
-                    <span className="text-sm text-[#606060]">
-                      Invite friends to this group
-                    </span>
-                  </ListItem>
-
-                  {conversation.participants?.map((participant) => {
-                    const isMe = participant.accountId === currentUser.id
-                    const isOnline = !!friendOnlineStatus[participant.accountId]
-                    const theme = getParticipantTheme(
-                      participant.accountId || participant.username || "",
-                    )
-                    return (
-                      <ListItem
-                        key={participant.accountId}
-                        onClick={() => setSelectedMember(participant)}
-                        hoverEffect={true}
-                        lines={2}
-                        leftContent={
-                          <div className="relative shrink-0">
-                            <Avatar
-                              size={40}
-                              name={participant.username}
-                              src={participant.avatarImageUrl}
-                              className={theme.avatarClass}
-                            />
-                          </div>
-                        }
-                        rightContent={
-                          isCreator &&
-                          !isMe && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleRemoveMember(participant.accountId)
-                              }}
-                              className="opacity-0 group-hover:opacity-100 flex items-center justify-center h-7 w-7 text-red-500 hover:bg-red-50 rounded-full transition-all duration-150"
-                              title="Remove from group"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )
-                        }
-                      >
-                        <span className="truncate">
-                          {participant.username}
-                          {isMe && (
-                            <span className="text-[#606060]"> (You)</span>
-                          )}
-                        </span>
-                        <span className="text-sm text-[#606060] truncate">
-                          {participant.level || "Student"}
-                        </span>
-                      </ListItem>
-                    )
-                  })}
-                </div>
-              </div>
+              <GroupMemberList
+                participants={conversation.participants}
+                currentUserId={currentUser.id}
+                isCreator={isCreator}
+                onSelectMember={setSelectedMember}
+                onRemoveMember={handleRemoveMember}
+                onOpenAddModal={() => setIsAddModalOpen(true)}
+              />
             )}
 
             {/* ── Danger zone ────────────────────────── */}

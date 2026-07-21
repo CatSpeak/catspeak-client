@@ -4,37 +4,38 @@ import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
 import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
 import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
+import RepliedMessage from "@/shared/components/ui/RepliedMessage"
+import ChatInputPreview from "./ChatInputPreview"
+import useTypingDebounce from "../hooks/useTypingDebounce"
 
 /**
- * ChatInput — message input bar with auto-resizing textarea.
- *
- * Features:
- * - Auto-expanding textarea (up to 120px)
- * - Attachment, emoji, and send buttons
- * - Enter to send, Shift+Enter for newline
- * - Send button transforms to mic when empty (visual only)
- *
- * @param {string}   value    - Current input value
- * @param {function} onChange - Input change handler
- * @param {function} onSend  - Send handler
- * @param {boolean}  disabled - Whether input is disabled
+ * ChatInput — message input bar with auto-resizing textarea, file attachments, and reply preview.
  */
 const ChatInput = ({
-  value,
+  value = "",
   onChange,
   onSend,
   onStartTyping,
   onStopTyping,
+  replyingTo = null,
+  onCancelReply,
   disabled = false,
-  showLeftIcon = false, // temporarily default to false since image sending is not supported in chat
+  showLeftIcon = true,
   showRightIcons = true,
 }) => {
   const textareaRef = useRef(null)
-  const typingTimerRef = useRef(null)
-  const isTypingRef = useRef(false)
-  const hasContent = value.trim().length > 0
+  const fileInputRef = useRef(null)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [filePreviewUrl, setFilePreviewUrl] = useState(null)
   const [isMultiline, setIsMultiline] = useState(false)
+
   const { insertEmoji, addRecent } = useEmojiPicker()
+  const { handleTypingActivity, stopTypingImmediately } = useTypingDebounce({
+    onStartTyping,
+    onStopTyping,
+  })
+
+  const hasContent = value.trim().length > 0 || selectedFile !== null
 
   const [prevValue, setPrevValue] = useState(value)
   if (value !== prevValue) {
@@ -44,45 +45,47 @@ const ChatInput = ({
     }
   }
 
-  const stopTypingImmediately = useCallback(() => {
-    if (typingTimerRef.current) {
-      clearTimeout(typingTimerRef.current)
-      typingTimerRef.current = null
-    }
-    if (isTypingRef.current) {
-      isTypingRef.current = false
-      onStopTyping?.()
-    }
-  }, [onStopTyping])
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const handleTypingActivity = useCallback(() => {
-    if (!isTypingRef.current) {
-      isTypingRef.current = true
-      onStartTyping?.()
+    setSelectedFile(file)
+    if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+      const url = URL.createObjectURL(file)
+      setFilePreviewUrl(url)
+    } else {
+      setFilePreviewUrl(null)
     }
+  }
 
-    if (typingTimerRef.current) {
-      clearTimeout(typingTimerRef.current)
+  const clearSelectedFile = () => {
+    setSelectedFile(null)
+    if (filePreviewUrl) {
+      URL.revokeObjectURL(filePreviewUrl)
+      setFilePreviewUrl(null)
     }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
 
-    typingTimerRef.current = setTimeout(() => {
-      isTypingRef.current = false
-      onStopTyping?.()
-      typingTimerRef.current = null
-    }, 2500)
-  }, [onStartTyping, onStopTyping])
+  const handleSend = useCallback(() => {
+    if (!hasContent) return
+    stopTypingImmediately()
+    onSend(value.trim(), selectedFile)
+    clearSelectedFile()
+  }, [hasContent, value, selectedFile, onSend, stopTypingImmediately])
 
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault()
         if (hasContent) {
-          stopTypingImmediately()
-          onSend()
+          handleSend()
         }
       }
     },
-    [hasContent, onSend, stopTypingImmediately],
+    [hasContent, handleSend],
   )
 
   const handleChange = useCallback(
@@ -106,21 +109,42 @@ const ChatInput = ({
     [onChange, isMultiline, handleTypingActivity, stopTypingImmediately],
   )
 
-  const handleSend = useCallback(() => {
-    if (!hasContent) return
-    stopTypingImmediately()
-    onSend()
-  }, [hasContent, onSend, stopTypingImmediately])
-
   return (
-    <div className="px-4 py-2 bg-transparent">
+    <div className="p-4 bg-transparent flex flex-col gap-4">
+      {/* Replying banner */}
+      {replyingTo && (
+        <RepliedMessage
+          senderName={
+            replyingTo.sender?.name || replyingTo.sender?.username || "Someone"
+          }
+          content={replyingTo.content || replyingTo.messageContent || ""}
+          onCancel={onCancelReply}
+        />
+      )}
+
+      {/* Selected Attachment preview */}
+      <ChatInputPreview
+        selectedFile={selectedFile}
+        filePreviewUrl={filePreviewUrl}
+        onClear={clearSelectedFile}
+      />
+
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        accept="image/*,video/*,.pdf,.doc,.docx,.zip"
+      />
+
       <div
         onClick={() => textareaRef.current?.focus()}
         className={`w-full grid grid-cols-[auto_1fr_auto] border border-[#e5e5e5] focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${
           isMultiline
             ? "pb-[3px] pt-3 min-h-[110px] gap-y-2"
             : "items-center h-14"
-        } ${showLeftIcon ? "pl-1" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}
+        } ${showLeftIcon ? "pl-2" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}
       >
         {/* Attachment button */}
         {showLeftIcon && (
@@ -129,7 +153,9 @@ const ChatInput = ({
             aria-label="Attach file"
             onClick={(e) => {
               e.stopPropagation()
+              fileInputRef.current?.click()
             }}
+            disabled={disabled}
             className={`shrink-0 ${
               isMultiline
                 ? "col-start-1 row-start-2"

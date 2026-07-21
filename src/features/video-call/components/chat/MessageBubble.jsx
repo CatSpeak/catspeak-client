@@ -1,6 +1,10 @@
 import React from "react"
 import { Reply } from "lucide-react"
 import { formatTime } from "@/shared/utils/dateFormatter"
+import RepliedMessage from "@/shared/components/ui/RepliedMessage"
+import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
+import YouTubeEmbed from "@/features/chat/components/messages/YouTubeEmbed"
+import LinkPreviewCard from "@/features/chat/components/messages/LinkPreviewCard"
 
 const MessageBubble = ({ msg, index, t, onReplyTo }) => {
   const renderFormattedMessage = (text) => {
@@ -10,51 +14,28 @@ const MessageBubble = ({ msg, index, t, onReplyTo }) => {
     let mainText = text
 
     if (text.startsWith("@AIPublic")) {
-      prefixNode = <span className="font-bold">@AIPublic</span>
+      prefixNode = <span className="font-bold pr-1">@AIPublic</span>
       mainText = text.slice(9)
     } else if (text.startsWith("@AIPrivate")) {
-      prefixNode = <span className="font-bold">@AIPrivate</span>
+      prefixNode = <span className="font-bold pr-1">@AIPrivate</span>
       mainText = text.slice(10)
     } else if (text.startsWith("@public-ai")) {
-      prefixNode = <span className="font-bold">@public-ai</span>
+      prefixNode = <span className="font-bold pr-1">@public-ai</span>
       mainText = text.slice(10)
     } else if (text.startsWith("@private-ai")) {
-      prefixNode = <span className="font-bold">@private-ai</span>
+      prefixNode = <span className="font-bold pr-1">@private-ai</span>
       mainText = text.slice(11)
     } else if (text.startsWith("@AISystem")) {
-      prefixNode = <span className="font-bold">@AISystem</span>
+      prefixNode = <span className="font-bold pr-1">@AISystem</span>
       mainText = text.slice(9)
     }
 
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-    const parts = mainText.split(urlRegex)
-    const textNodes = parts.map((part, i) => {
-      if (part.match(urlRegex)) {
-        return (
-          <a
-            key={i}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline font-semibold hover:opacity-80 break-all transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {part}
-          </a>
-        )
-      }
-      return part
-    })
-
-    if (prefixNode) {
-      return (
-        <>
-          {prefixNode}
-          {textNodes}
-        </>
-      )
-    }
-    return textNodes
+    return (
+      <>
+        {prefixNode}
+        <FormattedText text={mainText} isOwn={isMe} />
+      </>
+    )
   }
 
   const isMe = msg.from?.isLocal ?? false
@@ -104,28 +85,13 @@ const MessageBubble = ({ msg, index, t, onReplyTo }) => {
                   : "bg-[#F0F0F0] text-black"
         }`}
       >
-        {/* Reply Context - Zalo Style */}
+        {/* Reply Context */}
         {msg.replyTo && (
-          <div
-            className={`flex flex-col border-l-[3px] py-1 px-2 rounded-r-md mb-1.5 cursor-default ${
-              isMe
-                ? "border-white/60 bg-white/10 text-white/90"
-                : msg.status === "error"
-                  ? "border-red-400 bg-red-400/10 text-red-900/90"
-                  : isSystem
-                    ? "border-orange-400 bg-orange-400/10 text-orange-900/90"
-                    : isAi
-                      ? "border-amber-500 bg-amber-500/10 text-amber-900/90"
-                      : "border-[#990011]/60 bg-[#990011]/10 text-black/80"
-            }`}
-          >
-            <span className="font-semibold text-xs shrink-0">
-              {msg.replyTo.name}
-            </span>
-            <span className="truncate opacity-80 text-xs">
-              {renderFormattedMessage(msg.replyTo.message)}
-            </span>
-          </div>
+          <RepliedMessage
+            senderName={msg.replyTo.name}
+            content={msg.replyTo.message}
+            isOwn={isMe}
+          />
         )}
 
         {msg.status === "loading" ? (
@@ -153,9 +119,42 @@ const MessageBubble = ({ msg, index, t, onReplyTo }) => {
             ></span>
           </div>
         ) : (
-          <p className="m-0 whitespace-pre-wrap">
-            {renderFormattedMessage(msg.message)}
-          </p>
+          <div>
+            {msg.message &&
+              (() => {
+                const urlDetailsList = findUrlsInText(msg.message)
+                if (urlDetailsList.length === 0) return null
+                return (
+                  <div className="mb-1 flex flex-col gap-1 w-full">
+                    {urlDetailsList.map((urlDetails, idx) => {
+                      if (urlDetails.type === "youtube") {
+                        return (
+                          <YouTubeEmbed
+                            key={idx}
+                            videoId={urlDetails.youtube.videoId}
+                            timestamp={urlDetails.youtube.timestamp}
+                            originalUrl={urlDetails.originalUrl}
+                            isOwn={isMe}
+                            hasCaption={Boolean(msg.message)}
+                          />
+                        )
+                      }
+                      return (
+                        <LinkPreviewCard
+                          key={idx}
+                          urlDetails={urlDetails}
+                          isOwn={isMe}
+                          hasCaption={Boolean(msg.message)}
+                        />
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            <div className="m-0 whitespace-pre-wrap break-words">
+              {renderFormattedMessage(msg.message)}
+            </div>
+          </div>
         )}
 
         {msg.translatedMessage && (

@@ -110,19 +110,13 @@ export default {
       },
       keyframes: {
         wiggle: {
-          '0%, 100%': { transform: 'rotate(-10deg) scale(1.1)' },
-          '50%': { transform: 'rotate(10deg) scale(1.1)' },
+          "0%, 100%": { transform: "rotate(-10deg) scale(1.1)" },
+          "50%": { transform: "rotate(10deg) scale(1.1)" },
         },
-        'chat-bubble-in': {
-          '0%': { opacity: '0', transform: 'scale(0.85, 0.85) translateY(12px)' },
-          '60%': { transform: 'scale(1.02, 0.98) translateY(-2px)' },
-          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
-        }
       },
       animation: {
-        wiggle: 'wiggle 0.3s ease-in-out infinite',
-        'chat-bubble-in': 'chat-bubble-in 0.45s cubic-bezier(0.25, 1, 0.5, 1) both',
-      }
+        wiggle: "wiggle 0.3s ease-in-out infinite",
+      },
     },
   },
   plugins: [scrollbar],

@@ -1,27 +1,20 @@
 import { useState, useCallback, useMemo, useEffect } from "react"
-import { MessageCircle, SquarePen, Users, User, X } from "lucide-react"
+import { MessageCircle } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
 import ChatSidebar from "../components/ChatSidebar"
 import ChatArea from "../components/ChatArea"
 import ChatUserPanel from "../components/ChatUserPanel"
+import NewChatModal from "../components/modals/NewChatModal"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
-import {
-  conversationsApi,
-  useGetConversationsQuery,
-  useGetConversationMessagesQuery,
-  useSendMessageMutation,
-  useMarkConversationAsReadMutation,
-} from "@/store/api/social/conversationsApi"
+import { conversationsApi } from "@/store/api/social/conversationsApi"
 import { setActiveChatPageConversation } from "@/store/slices/messageWidgetSlice"
-import { clearUnread } from "@/store/slices/notificationSlice"
-import { useConversationSignalRContext } from "@/features/chat/context/ConversationSignalRContext"
 import useMessageSignalR from "@/features/chat/hooks/useMessageSignalR"
+import useChatMessageActions from "@/features/chat/hooks/useChatMessageActions"
+import useChatMessages from "@/features/chat/hooks/useChatMessages"
+import useChatConversations from "@/features/chat/hooks/useChatConversations"
 import { EmptyState } from "@/shared/components/ui/indicators"
-import NewChatModal from "../components/NewChatModal"
-// eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from "framer-motion"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import useMediaQuery from "@/shared/hooks/useMediaQuery"
 
 /**
  * ChatPage — fullscreen chat page.
@@ -31,129 +24,60 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
  */
 const ChatPage = () => {
   const dispatch = useDispatch()
-  const signalr = useConversationSignalRContext()
+  const isDesktop = useMediaQuery("(min-width: 1280px)")
 
   // ── Auth & Profile ─────────────────────────────────────
   const { user: authUser } = useAuth()
-
   const { data: userProfile } = useGetUserProfileQuery()
 
-  // ── RTK Query Data ─────────────────────────────────────
-  const {
-    data: conversationsResponse = [],
-    isLoading: isLoadingConversations,
-  } = useGetConversationsQuery()
-
+  // ── UI State ───────────────────────────────────────────
   const [selectedId, setSelectedId] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [inputValue, setInputValue] = useState("")
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false)
 
-  const conversations = useMemo(() => {
-    const list = Array.isArray(conversationsResponse)
-      ? conversationsResponse
-      : conversationsResponse?.data || []
+  // ── Chat Custom Hooks ──────────────────────────────────
+  const {
+    activeMessages,
+    accumulatedMessagesCount,
+    isLoadingMessages,
+    isFetchingMessages,
+    hasMoreMessages,
+    handleLoadMoreMessages,
+    page,
+  } = useChatMessages(selectedId)
 
-    if (!selectedId) return list
+  const { conversations, activeConversation, isLoadingConversations } =
+    useChatConversations(selectedId, accumulatedMessagesCount)
 
-    return list.map((c) => {
-      const cId = c.conversationId ?? c.id
-      if (
-        Number(cId) === Number(selectedId) ||
-        String(cId) === String(selectedId)
-      ) {
-        return { ...c, unreadCount: 0 }
-      }
-      return c
-    })
-  }, [conversationsResponse, selectedId])
+  const {
+    replyingTo,
+    handleReply,
+    handleCancelReply,
+    handleSend: sendAction,
+    handleDeleteForMe,
+    handleRecall,
+  } = useChatMessageActions(selectedId)
 
-  // Sync active conversation with Redux and join SignalR group on select
   const { startTyping, stopTyping, typingUsers } = useMessageSignalR({
     activeConversationId: selectedId,
   })
 
-  useEffect(() => {
-    if (selectedId) {
-      dispatch(setActiveChatPageConversation(selectedId))
-    } else {
-      dispatch(setActiveChatPageConversation(null))
-    }
-  }, [selectedId, dispatch])
-
-  // Clear active conversation on unmount
-  useEffect(() => {
-    return () => {
-      dispatch(setActiveChatPageConversation(null))
-    }
-  }, [dispatch])
-
-  // Fetch messages for selected conversation
-  const { data: activeMessagesResponse = [], isLoading: isLoadingMessages } =
-    useGetConversationMessagesQuery(selectedId, { skip: !selectedId })
-
-  const activeMessagesRaw = useMemo(() => {
-    return Array.isArray(activeMessagesResponse)
-      ? activeMessagesResponse
-      : activeMessagesResponse?.data || []
-  }, [activeMessagesResponse])
-
-  // Get Friend Status Map from Redux (populated via SignalR)
+  // Get Friend Status Map from Redux
   const friendOnlineStatus = useSelector(
     (state) => state.notification.friendOnlineStatus,
   )
 
-  // ── New Chat Modal State ──────────────────────────────
-  const [isNewChatOpen, setIsNewChatOpen] = useState(false)
-
-  // ── Mutations ──────────────────────────────────────────
-  const [sendMessageMutation] = useSendMessageMutation()
-  const [markConversationAsRead] = useMarkConversationAsReadMutation()
-
-  // Automatically mark active conversation as read when selected, when new messages arrive, or when conversation list updates while viewing
+  // ── Sync Active Conversation with Redux ────────────────
   useEffect(() => {
-    if (!selectedId) return
-
-    const rawList = Array.isArray(conversationsResponse)
-      ? conversationsResponse
-      : conversationsResponse?.data || []
-
-    const currentCached = rawList.find(
-      (c) =>
-        Number(c.conversationId ?? c.id) === Number(selectedId) ||
-        String(c.conversationId ?? c.id) === String(selectedId),
-    )
-
-    // Clear unread if active conversation has unread items in RTK Query cache
-    if (!currentCached || currentCached.unreadCount > 0) {
-      dispatch(clearUnread(selectedId))
-      dispatch(
-        conversationsApi.util.updateQueryData(
-          "getConversations",
-          undefined,
-          (draft) => {
-            const cachedConv = draft.find(
-              (c) =>
-                Number(c.conversationId ?? c.id) === Number(selectedId) ||
-                String(c.conversationId ?? c.id) === String(selectedId),
-            )
-            if (cachedConv) {
-              cachedConv.unreadCount = 0
-            }
-          },
-        ),
-      )
-      markConversationAsRead(selectedId).catch(() => {})
+    dispatch(setActiveChatPageConversation(selectedId || null))
+    return () => {
+      dispatch(setActiveChatPageConversation(null))
     }
-  }, [
-    selectedId,
-    activeMessagesRaw.length,
-    conversationsResponse,
-    markConversationAsRead,
-    dispatch,
-  ])
+  }, [selectedId, dispatch])
 
-  // ── Mappings ───────────────────────────────────────────
+  // ── Current User Formatting ────────────────────────────
   const currentUser = useMemo(() => {
     return {
       id: authUser?.accountId,
@@ -164,53 +88,21 @@ const ChatPage = () => {
     }
   }, [authUser, userProfile])
 
-  const activeConversationRaw = useMemo(() => {
-    return conversations.find((c) => c.conversationId === selectedId) || null
-  }, [conversations, selectedId])
-
-  const activeConversation = useMemo(() => {
-    if (!activeConversationRaw) return null
-    return {
-      id: activeConversationRaw.conversationId,
-      type: activeConversationRaw.isGroup ? "group" : "direct",
-      name: activeConversationRaw.isGroup
-        ? activeConversationRaw.groupName
-        : activeConversationRaw.friend?.username || "Chat",
-      participants: activeConversationRaw.participants || [],
-      unreadCount: activeConversationRaw.unreadCount || 0,
-      typing: [], // Typing indicators are currently not supported by backend spec
-      friend: activeConversationRaw.friend,
-      isGroup: activeConversationRaw.isGroup,
-      groupName: activeConversationRaw.groupName,
-      groupAvatar: activeConversationRaw.groupAvatar,
-    }
-  }, [activeConversationRaw])
-
-  const activeMessages = useMemo(() => {
-    return activeMessagesRaw.map((msg) => ({
-      id: msg.messageId,
-      conversationId: msg.conversationId,
-      senderId: msg.sender?.accountId,
-      content: msg.messageContent,
-      timestamp: msg.createDate,
-      messageType: msg.messageType || "Text",
-      isRead: msg.isRead ?? false,
-      status: msg.isRead ? "read" : "delivered",
-      readByAccountIds: msg.readByAccountIds || [],
-      sender: msg.sender,
-    }))
-  }, [activeMessagesRaw])
-
   // ── Handlers ───────────────────────────────────────────
-  const handleSelectConversation = useCallback((convId) => {
-    setSelectedId(convId)
-    setInputValue("")
-  }, [])
+  const handleSelectConversation = useCallback(
+    (convId) => {
+      setSelectedId(convId)
+      setInputValue("")
+      handleCancelReply()
+    },
+    [handleCancelReply],
+  )
 
   const handleBack = useCallback(() => {
     setSelectedId(null)
     setShowInfoPanel(false)
-  }, [])
+    handleCancelReply()
+  }, [handleCancelReply])
 
   const handleToggleInfo = useCallback(() => {
     setShowInfoPanel((prev) => !prev)
@@ -219,25 +111,17 @@ const ChatPage = () => {
   const handleLeaveGroup = useCallback(() => {
     setSelectedId(null)
     setShowInfoPanel(false)
+    handleCancelReply()
     dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-  }, [dispatch])
+  }, [dispatch, handleCancelReply])
 
-  const handleSend = useCallback(async () => {
-    if (!inputValue.trim() || !selectedId) return
-
-    try {
-      await sendMessageMutation({
-        conversationId: selectedId,
-        messageData: {
-          messageContent: inputValue.trim(),
-          messageType: "Text",
-        },
-      }).unwrap()
+  const handleSend = useCallback(
+    async (text, file) => {
+      await sendAction(text, file)
       setInputValue("")
-    } catch (err) {
-      console.error("Failed to send message:", err)
-    }
-  }, [inputValue, selectedId, sendMessageMutation])
+    },
+    [sendAction],
+  )
 
   return (
     <div className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
@@ -271,10 +155,18 @@ const ChatPage = () => {
           onToggleInfo={handleToggleInfo}
           showInfoActive={showInfoPanel}
           friendOnlineStatus={friendOnlineStatus}
-          isLoading={isLoadingMessages}
+          isLoading={isLoadingMessages && page === 1}
+          isLoadingMore={isFetchingMessages && page > 1}
+          hasMoreMessages={hasMoreMessages}
+          onLoadMoreMessages={handleLoadMoreMessages}
           typingUsers={typingUsers}
           onStartTyping={startTyping}
           onStopTyping={stopTyping}
+          replyingTo={replyingTo}
+          onReply={handleReply}
+          onCancelReply={handleCancelReply}
+          onDeleteForMe={handleDeleteForMe}
+          onRecall={handleRecall}
         />
       ) : (
         <EmptyState
@@ -295,26 +187,30 @@ const ChatPage = () => {
       )}
 
       {/* ── Info Panel (desktop inline, mobile drawer overlay) ── */}
-      <AnimatePresence initial={false}>
-        {showInfoPanel && selectedId && (
+      {showInfoPanel &&
+        selectedId &&
+        (isDesktop ? (
+          /* Desktop inline panel */
+          <div className="hidden xl:flex shrink-0">
+            <ChatUserPanel
+              conversation={activeConversation}
+              currentUser={currentUser}
+              onClose={() => setShowInfoPanel(false)}
+              onLeaveGroup={handleLeaveGroup}
+              friendOnlineStatus={friendOnlineStatus}
+              isDrawer={false}
+            />
+          </div>
+        ) : (
           <>
             {/* Mobile backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+            <div
               className="fixed inset-0 bg-black/40 z-40 xl:hidden backdrop-blur-xs"
               onClick={() => setShowInfoPanel(false)}
             />
 
             {/* Mobile drawer container */}
-            <FluentAnimation
-              direction="left"
-              distance={40}
-              exit={true}
-              className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex max-w-[85vw] overflow-hidden"
-            >
+            <div className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex max-w-[85vw] overflow-hidden">
               <ChatUserPanel
                 conversation={activeConversation}
                 currentUser={currentUser}
@@ -323,22 +219,9 @@ const ChatPage = () => {
                 friendOnlineStatus={friendOnlineStatus}
                 isDrawer={true}
               />
-            </FluentAnimation>
-
-            {/* Desktop inline panel */}
-            <div className="hidden xl:flex shrink-0">
-              <ChatUserPanel
-                conversation={activeConversation}
-                currentUser={currentUser}
-                onClose={() => setShowInfoPanel(false)}
-                onLeaveGroup={handleLeaveGroup}
-                friendOnlineStatus={friendOnlineStatus}
-                isDrawer={false}
-              />
             </div>
           </>
-        )}
-      </AnimatePresence>
+        ))}
 
       {/* ── New Chat Modal ───────────────────────────── */}
       <NewChatModal

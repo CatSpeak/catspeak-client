@@ -29,13 +29,32 @@ export const conversationsApi = socialApi.injectEndpoints({
       invalidatesTags: ["Conversations"],
     }),
 
-    // Get messages from a conversation
+    // Get messages from a conversation (supports pagination)
     getConversationMessages: builder.query({
-      query: (conversationId) => `/conversations/${conversationId}/messages`,
-      providesTags: (result, error, conversationId) => [
-        { type: "Messages", id: Number(conversationId) },
-        { type: "Messages", id: String(conversationId) },
-      ],
+      query: (arg) => {
+        const conversationId =
+          typeof arg === "object" && arg !== null ? arg.conversationId : arg
+        const page = typeof arg === "object" && arg !== null ? arg.page : undefined
+        const pageSize =
+          typeof arg === "object" && arg !== null ? arg.pageSize : undefined
+
+        const params = {}
+        if (page !== undefined) params.page = page
+        if (pageSize !== undefined) params.pageSize = pageSize
+
+        return {
+          url: `/conversations/${conversationId}/messages`,
+          params,
+        }
+      },
+      providesTags: (result, error, arg) => {
+        const conversationId =
+          typeof arg === "object" && arg !== null ? arg.conversationId : arg
+        return [
+          { type: "Messages", id: Number(conversationId) },
+          { type: "Messages", id: String(conversationId) },
+        ]
+      },
     }),
 
     // Send a message in a conversation
@@ -48,6 +67,46 @@ export const conversationsApi = socialApi.injectEndpoints({
       invalidatesTags: (result, error, { conversationId }) => [
         { type: "Messages", id: Number(conversationId) },
         { type: "Messages", id: String(conversationId) },
+        "Conversations",
+      ],
+    }),
+
+    // Send a media message in a conversation (multipart/form-data)
+    sendMediaMessage: builder.mutation({
+      query: ({ conversationId, formData }) => ({
+        url: `/conversations/${conversationId}/messages/media`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+        "Conversations",
+      ],
+    }),
+
+    // Soft delete a message for current user only
+    deleteMessageForMe: builder.mutation({
+      query: ({ conversationId, messageId }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}/delete-for-me`,
+        method: "PUT",
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+      ],
+    }),
+
+    // Recall / hard delete message for everyone (Strictly restricted to message owner)
+    recallMessage: builder.mutation({
+      query: ({ conversationId, messageId }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}/recall`,
+        method: "PUT",
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+        "Conversations",
       ],
     }),
 
@@ -106,6 +165,9 @@ export const {
   useCreateGroupConversationMutation,
   useGetConversationMessagesQuery,
   useSendMessageMutation,
+  useSendMediaMessageMutation,
+  useDeleteMessageForMeMutation,
+  useRecallMessageMutation,
   useMarkConversationAsReadMutation,
   useAddParticipantsMutation,
   useRemoveParticipantMutation,

@@ -36,26 +36,71 @@ const ConversationItem = ({
   )
   const unreadCount = conversation?.unreadCount ?? unreadCountRedux
 
-  // Build last message preview string matching ChatSidebar
+  // Build last message preview string matching backend MessageType spec
   let preview = ""
-  if (conversation?.lastMessage) {
-    let senderPrefix = ""
-    const isSystemMessage =
-      String(conversation?.lastMessageType || "").toLowerCase() === "system"
+  if (
+    conversation?.lastMessage !== undefined ||
+    conversation?.lastMessageType !== undefined ||
+    conversation?.lastMessageTime !== undefined
+  ) {
+    const typeVal = conversation?.lastMessageType
+    const typeStr = String(typeVal ?? "").toLowerCase()
+    const isSystemMessage = typeStr === "system" || typeVal === 4
+    const rawMsg = conversation?.lastMessage || ""
 
-    if (!isSystemMessage) {
-      if (conversation.lastMessageSenderId === currentUserId) {
-        senderPrefix = `${t?.you || "You"}: `
-      } else if (isGroup && conversation.participants) {
-        const sender = conversation.participants.find(
-          (p) => p.accountId === conversation.lastMessageSenderId,
-        )
-        if (sender) {
-          senderPrefix = `${sender.username?.split(" ")[0] || "?"}: `
-        }
+    const senderId = conversation?.lastMessageSenderId != null ? Number(conversation.lastMessageSenderId) : null
+    const myId = currentUserId != null ? Number(currentUserId) : null
+    const isOwn = senderId != null && myId != null && senderId === myId
+
+    let senderName = ""
+    if (isGroup && conversation?.participants && senderId != null && !isOwn) {
+      const sender = conversation.participants.find(
+        (p) => Number(p.accountId || p.id) === senderId,
+      )
+      if (sender) {
+        senderName = sender.username || sender.name || ""
       }
     }
-    preview = senderPrefix + conversation.lastMessage
+
+    const hasText = rawMsg.trim().length > 0
+    const textPrefix = isOwn
+      ? `${t?.you || "You"}: `
+      : senderName
+        ? `${senderName}: `
+        : ""
+
+    if (isSystemMessage) {
+      preview = rawMsg
+    } else if (typeStr === "recalled" || typeVal === 5) {
+      preview = isOwn
+        ? "You recalled a message"
+        : senderName
+          ? `${senderName} recalled a message`
+          : "Message was recalled"
+    } else if (hasText) {
+      // If there is text attached with media/file or plain text, prioritize the text
+      preview = textPrefix + rawMsg
+    } else if (typeStr === "picture" || typeStr === "image" || typeVal === 1) {
+      preview = isOwn
+        ? "You sent an image"
+        : senderName
+          ? `${senderName} sent an image`
+          : "Sent an image"
+    } else if (typeStr === "video" || typeVal === 2) {
+      preview = isOwn
+        ? "You sent a video"
+        : senderName
+          ? `${senderName} sent a video`
+          : "Sent a video"
+    } else if (typeStr === "file" || typeStr === "document" || typeVal === 3) {
+      preview = isOwn
+        ? "You sent a file"
+        : senderName
+          ? `${senderName} sent a file`
+          : "Sent a file"
+    } else {
+      preview = textPrefix + rawMsg
+    }
   }
 
   const reduxFriendOnlineStatus = useSelector(

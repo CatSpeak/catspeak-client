@@ -1,22 +1,16 @@
 import { memo, useEffect, useRef } from "react"
-import { useSelector } from "react-redux"
-import { ArrowLeft, PanelRight } from "lucide-react"
-import ChatBubble from "./ChatBubble"
+import ChatBubble from "./messages/ChatBubble"
 import ChatInput from "./ChatInput"
-import DateSeparator from "./DateSeparator"
-import SystemMessage from "./SystemMessage"
-import Avatar from "@/shared/components/ui/Avatar"
-import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import ChatHeader from "./ChatHeader"
+import ChatMessagesSkeleton from "./ChatMessagesSkeleton"
+import DateSeparator from "./messages/DateSeparator"
+import SystemMessage from "./messages/SystemMessage"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import { IconButton } from "@/shared/components/ui/buttons"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { useGroupedMessages } from "../hooks/useGroupedMessages"
-import GroupAvatar from "./GroupAvatar"
-
-import { formatLastSeen } from "@/shared/utils/dateFormatter"
 
 /**
- * ChatArea — main chat view with header, messages, and input.
+ * ChatArea — main chat view orchestrator with header, messages, typing indicators, and input.
  */
 const ChatArea = ({
   conversation,
@@ -29,13 +23,22 @@ const ChatArea = ({
   onToggleInfo,
   friendOnlineStatus,
   isLoading,
+  isLoadingMore = false,
+  hasMoreMessages = false,
+  onLoadMoreMessages,
   typingUsers = [],
   onStartTyping,
   onStopTyping,
+  replyingTo = null,
+  onReply,
+  onCancelReply,
+  onDeleteForMe,
+  onRecall,
 }) => {
   const scrollRef = useRef(null)
-
-  console.log(messages)
+  const isPrependingRef = useRef(false)
+  const prevScrollHeightRef = useRef(0)
+  const prevMessagesLengthRef = useRef(0)
 
   const groupedItems = useGroupedMessages({
     messages,
@@ -44,41 +47,48 @@ const ChatArea = ({
     isLoading,
   })
 
-  // Auto-scroll to bottom on new messages or typing indicator changes
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  // Trigger top scroll load more
+  const handleScroll = (e) => {
+    const el = e.currentTarget
+    if (
+      !el ||
+      isLoading ||
+      isLoadingMore ||
+      !hasMoreMessages ||
+      !onLoadMoreMessages
+    ) {
+      return
     }
+
+    if (el.scrollTop < 80) {
+      isPrependingRef.current = true
+      prevScrollHeightRef.current = el.scrollHeight
+      onLoadMoreMessages()
+    }
+  }
+
+  // Auto-scroll to bottom on initial load / new bottom messages, preserve offset on prepending
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    if (isPrependingRef.current) {
+      const newScrollHeight = el.scrollHeight
+      const heightDiff = newScrollHeight - prevScrollHeightRef.current
+      el.scrollTop = heightDiff
+      isPrependingRef.current = false
+    } else {
+      const isInitial = prevMessagesLengthRef.current === 0
+      const isNearBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight < 150
+      if (isInitial || isNearBottom) {
+        el.scrollTop = el.scrollHeight
+      }
+    }
+    prevMessagesLengthRef.current = messages.length
   }, [messages, typingUsers])
 
   if (!conversation) return null
-
-  const isGroup = conversation.isGroup
-  const otherUser = conversation.friend
-  const name = conversation.name
-  const memberCount = conversation.participants?.length || 0
-
-  const friendId = otherUser?.accountId || otherUser?.id
-  const reduxFriendOnlineStatus = useSelector(
-    (state) => state.notification?.friendOnlineStatus || {},
-  )
-  const reduxFriendLastSeen = useSelector(
-    (state) => state.notification?.friendLastSeen || {},
-  )
-  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus
-  const isOnline =
-    !isGroup &&
-    friendId &&
-    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false)
-
-  const lastSeenTime =
-    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen
-
-  const statusText = isGroup
-    ? `${memberCount} members`
-    : isOnline
-    ? "Online"
-    : formatLastSeen(lastSeenTime)
 
   // ── Render message list from grouped items hook ──
   const renderMessages = () => {
@@ -101,6 +111,9 @@ const ChatArea = ({
           isGroupChat={item.isGroupChat}
           shouldAnimate={item.shouldAnimate}
           readByUsers={item.readByUsers}
+          onReply={onReply}
+          onDeleteForMe={onDeleteForMe}
+          onRecall={onRecall}
         />
       )
     })
@@ -112,104 +125,29 @@ const ChatArea = ({
       padding="p-0"
     >
       {/* ── Chat Header ────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 h-[72px] border-b border-[#E5E5E5] shrink-0">
-        <div className="flex items-center gap-4 min-w-0">
-          {/* Back button — visible on mobile only */}
-          <IconButton
-            onClick={onBack}
-            size="sm"
-            variant="ghost"
-            className="flex lg:hidden"
-            aria-label="Back to conversations"
-          >
-            <ArrowLeft />
-          </IconButton>
-
-          {/* Avatar */}
-          {isGroup ? (
-            <GroupAvatar conversation={conversation} size={40} />
-          ) : (
-            <div className="relative shrink-0">
-              <Avatar
-                size={40}
-                name={otherUser?.username}
-                src={otherUser?.avatarImageUrl}
-                className={
-                  getParticipantTheme(
-                    otherUser?.accountId || otherUser?.username || "",
-                  ).avatarClass
-                }
-              />
-              {isOnline && (
-                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white ring-1 ring-white" />
-              )}
-            </div>
-          )}
-
-          {/* Name + status */}
-          <div className="min-w-0">
-            <h2 className="font-semibold truncate">{name}</h2>
-            {statusText && (
-              <p className="text-sm text-[#606060]">{statusText}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex items-center gap-0.5">
-          <IconButton
-            onClick={onToggleInfo}
-            size="sm"
-            variant="ghost"
-            aria-label="Toggle info panel"
-          >
-            <PanelRight />
-          </IconButton>
-        </div>
-      </div>
+      <ChatHeader
+        conversation={conversation}
+        onBack={onBack}
+        onToggleInfo={onToggleInfo}
+        friendOnlineStatus={friendOnlineStatus}
+      />
 
       {/* ── Messages ───────────────────────────────── */}
       <div
         ref={scrollRef}
+        onScroll={handleScroll}
         className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0"
       >
         {isLoading ? (
-          <div className="flex flex-col gap-4 p-4 h-full justify-end">
-            {/* Other User Message Skeleton */}
-            <div className="flex items-end gap-2 max-w-[70%]">
-              <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-              <div className="flex flex-col gap-1">
-                <Skeleton className="h-3 w-16 rounded" />
-                <Skeleton className="h-10 w-48 rounded-2xl rounded-bl-none" />
-              </div>
-            </div>
-
-            {/* Current User Message Skeleton */}
-            <div className="flex items-end gap-2 max-w-[70%] self-end flex-row-reverse">
-              <div className="flex flex-col items-end gap-1">
-                <Skeleton className="h-10 w-36 rounded-2xl rounded-br-none" />
-              </div>
-            </div>
-
-            {/* Other User Message Skeleton */}
-            <div className="flex items-end gap-2 max-w-[70%]">
-              <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-              <div className="flex flex-col gap-1">
-                <Skeleton className="h-3 w-20 rounded" />
-                <Skeleton className="h-14 w-64 rounded-2xl rounded-bl-none" />
-              </div>
-            </div>
-
-            {/* Current User Message Skeleton */}
-            <div className="flex items-end gap-2 max-w-[70%] self-end flex-row-reverse">
-              <div className="flex flex-col items-end gap-1">
-                <Skeleton className="h-10 w-52 rounded-2xl rounded-br-none" />
-              </div>
-            </div>
-          </div>
+          <ChatMessagesSkeleton />
         ) : (
           <>
             <div className="flex-1" />
+            {isLoadingMore && (
+              <div className="flex items-center justify-center py-2 shrink-0">
+                <Skeleton className="h-6 w-32 rounded-full" />
+              </div>
+            )}
             {renderMessages()}
             {typingUsers &&
               typingUsers.map((u) => {
@@ -248,6 +186,8 @@ const ChatArea = ({
         onSend={onSend}
         onStartTyping={onStartTyping}
         onStopTyping={onStopTyping}
+        replyingTo={replyingTo}
+        onCancelReply={onCancelReply}
         disabled={isLoading}
       />
     </FluentCard>

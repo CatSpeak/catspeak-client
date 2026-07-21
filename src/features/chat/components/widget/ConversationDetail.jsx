@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react"
-import ChatBubble from "../ChatBubble"
+import ChatBubble from "../messages/ChatBubble"
 import ChatInput from "../ChatInput"
-import DateSeparator from "../DateSeparator"
-import SystemMessage from "../SystemMessage"
+import DateSeparator from "../messages/DateSeparator"
+import SystemMessage from "../messages/SystemMessage"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -21,6 +21,11 @@ const ConversationDetail = ({
   typingUsers = [],
   onStartTyping,
   onStopTyping,
+  replyingTo = null,
+  onReply,
+  onCancelReply,
+  onDeleteForMe,
+  onRecall,
 }) => {
   const scrollRef = useRef(null)
   const { t } = useLanguage()
@@ -66,6 +71,10 @@ const ConversationDetail = ({
           isGroupChat={item.isGroupChat}
           shouldAnimate={item.shouldAnimate}
           readByUsers={item.readByUsers}
+          onReply={onReply}
+          onDeleteForMe={onDeleteForMe}
+          onRecall={onRecall}
+          isWidget={true}
         />
       )
     })
@@ -115,6 +124,7 @@ const ConversationDetail = ({
                       accountId: u.userId,
                       avatarImageUrl: avatar,
                     }}
+                    isWidget={true}
                   />
                 )
               })}
@@ -128,14 +138,16 @@ const ConversationDetail = ({
           value={input}
           onChange={(val) => {
             if (typeof val === "string") {
-              onInputChange({ target: { value: val } })
-            } else {
               onInputChange(val)
+            } else {
+              onInputChange(val?.target?.value ?? "")
             }
           }}
           onSend={onSendMessage}
           onStartTyping={onStartTyping}
           onStopTyping={onStopTyping}
+          replyingTo={replyingTo}
+          onCancelReply={onCancelReply}
           disabled={isSending || isLoading}
         />
       </div>

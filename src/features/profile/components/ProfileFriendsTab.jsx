@@ -22,7 +22,7 @@ import {
 } from "@/shared/components/ui/indicators"
 import Popover from "@/shared/components/ui/Popover"
 import { PillButton, IconButton } from "@/shared/components/ui/buttons"
-import MenuItem from "@/shared/components/ui/MenuItem"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 
 const ProfileFriendsTab = ({
   targetAccountId,
@@ -189,7 +189,7 @@ const ProfileFriendsTab = ({
                       </IconButton>
                     }
                     content={(close) => (
-                      <div className="bg-white border border-[#e5e5e5] rounded-xl shadow-lg py-[2px] min-w-[140px] flex flex-col">
+                      <MenuList>
                         <MenuItem
                           onClick={(e) => {
                             e.stopPropagation()
@@ -215,7 +215,7 @@ const ProfileFriendsTab = ({
                           label="Từ chối"
                           className="text-red-600"
                         />
-                      </div>
+                      </MenuList>
                     )}
                   />
                 ) : null
