@@ -2,7 +2,191 @@ import React from "react"
 import { Reply } from "lucide-react"
 import { formatTime } from "@/shared/utils/dateFormatter"
 
-const MessageBubble = ({ msg, index, t, onReplyTo }) => {
+/**
+ * Renders vocabulary suggestions inside dynamic cat-head styled pills
+ */
+const VocabularySuggestions = ({
+  vocabulary,
+  introMessage,
+  expandedIdx,
+  setExpandedIdx,
+}) => {
+  return (
+    <div className="flex flex-col gap-2 py-0.5">
+      <p className="m-0 text-sm font-medium leading-relaxed">
+        {introMessage || "Hoàng thượng gợi ý cho sen vài từ nè:"}
+      </p>
+      <div className="flex flex-wrap gap-x-1.5 gap-y-3 mt-2.5">
+        {vocabulary.map((vocabItem, idx) => {
+          const isObject = typeof vocabItem === "object" && vocabItem !== null
+          const word = isObject ? vocabItem.word : vocabItem
+          const meaning = isObject ? vocabItem.meaning : null
+          const isExpanded = expandedIdx === idx && !!meaning
+
+          const colors = [
+            "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100/90 active:bg-rose-200",
+            "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100/90 active:bg-blue-200",
+            "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/90 active:bg-emerald-200",
+            "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100/90 active:bg-violet-200",
+            "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100/90 active:bg-amber-200",
+            "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100/90 active:bg-cyan-200",
+          ]
+          const colorClass = colors[idx % colors.length]
+          return (
+            <button
+              key={word}
+              type="button"
+              onClick={() => {
+                if (meaning) {
+                  setExpandedIdx(isExpanded ? null : idx)
+                }
+                navigator.clipboard.writeText(word)
+              }}
+              title={meaning ? "Click to view meaning & copy" : "Click to copy"}
+              className={`relative px-3 text-xs font-semibold border cursor-pointer transition-all shadow-sm select-none active:scale-95 ${isExpanded ? "rounded-2xl py-1.5" : "rounded-full py-1"
+                } ${colorClass}`}
+            >
+              {/* Cat ears */}
+              <span className="absolute -top-1 left-2.5 w-2 h-2 bg-inherit border-t border-l border-inherit rotate-45 rounded-tl-[2px]" />
+              <span className="absolute -top-1 right-2.5 w-2 h-2 bg-inherit border-t border-l border-inherit rotate-45 rounded-tl-[2px]" />
+
+              <div className="flex flex-col items-center">
+                <span>{word}</span>
+                {isExpanded && (
+                  <span className="mt-1 pt-1 border-t border-dashed border-inherit font-normal text-[10px] opacity-90 max-w-[150px] break-words text-center">
+                    {meaning}
+                  </span>
+                )}
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Renders suggested sentence bubbles popping up sequentially with writing animation
+ */
+const SentenceSuggestions = ({
+  suggestedSentences,
+  showText,
+  hideText,
+  renderFormattedMessage,
+}) => {
+  const [visibleCount, setVisibleCount] = React.useState(1)
+  const [isTypingNext, setIsTypingNext] = React.useState(false)
+  const [expandedSentenceIdx, setExpandedSentenceIdx] = React.useState(null)
+  const containerRef = React.useRef(null)
+
+  React.useEffect(() => {
+    if (!suggestedSentences || suggestedSentences.length === 0) return
+
+    setVisibleCount(1)
+    setIsTypingNext(suggestedSentences.length > 1)
+
+    if (suggestedSentences.length <= 1) return
+
+    let currentVisible = 1
+    const interval = setInterval(() => {
+      currentVisible += 1
+      setVisibleCount(currentVisible)
+      if (currentVisible >= suggestedSentences.length) {
+        setIsTypingNext(false)
+        clearInterval(interval)
+      }
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [suggestedSentences])
+
+  React.useEffect(() => {
+    if (suggestedSentences) {
+      if (containerRef.current) {
+        const lastChild = containerRef.current.lastElementChild
+        if (lastChild) {
+          lastChild.scrollIntoView({ behavior: "smooth", block: "nearest" })
+        }
+      }
+    }
+  }, [visibleCount, isTypingNext, suggestedSentences])
+
+  return (
+    <div ref={containerRef} className="flex flex-col gap-1.5 w-full items-start">
+      {suggestedSentences.slice(0, visibleCount).map((item, idx) => {
+        const isObj = typeof item === "object" && item !== null
+        const question = isObj ? item.question : item
+        const meaning = isObj ? item.meaning : null
+        const isExpanded = expandedSentenceIdx === idx
+
+        return (
+          <div
+            key={idx}
+            className="max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words bg-orange-100 text-orange-900 border border-orange-200/50 shadow-sm"
+          >
+            <p className="m-0 whitespace-pre-wrap">
+              {renderFormattedMessage(question)}
+            </p>
+            {meaning && (
+              <div className="mt-1 flex flex-col items-start gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExpandedSentenceIdx(isExpanded ? null : idx)
+                  }}
+                  className="text-[10px] font-semibold text-orange-700 hover:text-orange-900 underline cursor-pointer select-none transition-colors"
+                >
+                  {isExpanded ? hideText : showText}
+                </button>
+                {isExpanded && (
+                  <p className="m-0 pt-1 text-xs border-t border-orange-300 text-orange-800 w-full">
+                    {meaning}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
+
+      {isTypingNext && (
+        <div className="max-w-[85%] rounded-2xl px-3 py-2 bg-orange-100 text-orange-950 border border-orange-200/50 shadow-sm">
+          <div className="flex gap-1 items-center h-2 px-1 py-1">
+            <span
+              className="w-1.5 h-1.5 bg-orange-600/60 rounded-full animate-bounce"
+              style={{
+                animationDelay: "0s",
+                animationDuration: "0.8s",
+              }}
+            ></span>
+            <span
+              className="w-1.5 h-1.5 bg-orange-600/60 rounded-full animate-bounce"
+              style={{
+                animationDelay: "0.15s",
+                animationDuration: "0.8s",
+              }}
+            ></span>
+            <span
+              className="w-1.5 h-1.5 bg-orange-600/60 rounded-full animate-bounce"
+              style={{
+                animationDelay: "0.3s",
+                animationDuration: "0.8s",
+              }}
+            ></span>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Message Bubble component rendering chat messages and suggestions
+ */
+const MessageBubble = ({ msg, t, onReplyTo }) => {
+  const [expandedIdx, setExpandedIdx] = React.useState(null)
+
   const renderFormattedMessage = (text) => {
     if (!text) return text
 
@@ -76,6 +260,12 @@ const MessageBubble = ({ msg, index, t, onReplyTo }) => {
     senderName = "Cat Speak"
   }
 
+  const isVi = t.rooms?.chatBox?.reply === "Trả lời"
+  const isZh = t.rooms?.chatBox?.reply === "回复" || t.rooms?.chatBox?.reply === "回覆"
+
+  const showText = isVi ? "Xem nghĩa" : isZh ? "显示解释" : "Show meaning"
+  const hideText = isVi ? "Ẩn nghĩa" : isZh ? "隐藏解释" : "Hide meaning"
+
   return (
     <div className={`flex flex-col mb-2 ${isMe ? "items-end" : "items-start"}`}>
       <div className="flex items-center gap-1 mb-1 max-w-full">
@@ -90,11 +280,17 @@ const MessageBubble = ({ msg, index, t, onReplyTo }) => {
         </span>
       </div>
 
-      {/* Main Bubble and Actions Wrapper */}
-      <div className={`flex items-center gap-2 max-w-full group ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-        {/* Main Bubble */}
+      {/* Main Bubble */}
+      {msg.suggestedSentences ? (
+        <SentenceSuggestions
+          suggestedSentences={msg.suggestedSentences}
+          showText={showText}
+          hideText={hideText}
+          renderFormattedMessage={renderFormattedMessage}
+        />
+      ) : (
         <div
-          className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words shadow-sm ${isMe
+          className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${isMe
             ? "bg-[#990011] text-white"
             : msg.status === "error"
               ? "bg-red-100 text-red-900 border border-red-200"
@@ -152,6 +348,13 @@ const MessageBubble = ({ msg, index, t, onReplyTo }) => {
                 }}
               ></span>
             </div>
+          ) : msg.vocabulary ? (
+            <VocabularySuggestions
+              vocabulary={msg.vocabulary}
+              introMessage={msg.introMessage}
+              expandedIdx={expandedIdx}
+              setExpandedIdx={setExpandedIdx}
+            />
           ) : (
             <p className="m-0 whitespace-pre-wrap">
               {renderFormattedMessage(msg.message)}
@@ -171,19 +374,19 @@ const MessageBubble = ({ msg, index, t, onReplyTo }) => {
             </p>
           )}
         </div>
+      )}
 
-        {/* Reply button */}
-        {onReplyTo && (!isAi || msg.status === "done") && (
-          <button
-            type="button"
-            onClick={() => onReplyTo(msg)}
-            className="flex items-center justify-center p-1.5 text-black/40 hover:text-black/60 transition-colors rounded-full hover:bg-black/5 opacity-0 group-hover:opacity-100 shrink-0"
-            title={t.rooms?.chatBox?.reply || "Reply"}
-          >
-            <Reply size={20} strokeWidth={2.5} />
-          </button>
-        )}
-      </div>
+      {/* Reply button */}
+      {onReplyTo && (!isAi || msg.status === "done") && (
+        <button
+          type="button"
+          onClick={() => onReplyTo(msg)}
+          className="flex items-center gap-1 mt-1 px-2 py-0.5 text-xs text-[#606060] hover:text-[#990011] transition-colors rounded hover:bg-[#F6F6F6]"
+        >
+          <Reply size={12} />
+          <span>{t.rooms?.chatBox?.reply || "Reply"}</span>
+        </button>
+      )}
     </div>
   )
 }

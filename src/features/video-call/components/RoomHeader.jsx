@@ -36,7 +36,7 @@ const RoomHeader = () => {
   const isHost = hostParticipant && localParticipant && hostParticipant.identity === localParticipant.identity;
 
   return (
-    <div className="flex items-center justify-between border-b border-[#E5E5E5] bg-white px-5 h-[56px] shrink-0">
+    <div className="flex items-center justify-between bg-white px-5 h-[56px] shrink-0">
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">

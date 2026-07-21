@@ -110,7 +110,7 @@ const VideoCallControlBar = () => {
   const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <div className="flex w-full items-center justify-center gap-2 bg-white p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div className="flex md:gap-4 gap-5 w-full items-center md:justify-center justify-center">
         <ControlButton
           isActive={micOn}
@@ -202,7 +202,7 @@ const VideoCallControlBar = () => {
       </div>
 
 
-      <RightSideControls className="hidden md:flex mr-4" />
+      <RightSideControls className="hidden md:flex mr-4 gap-2" />
 
       {
         showStopModal && (

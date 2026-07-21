@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Users, MessageSquare, LayoutGrid } from "lucide-react";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import ControlButton from "./ControlButton";
+import ChooseLayoutModal from "./ChooseLayoutModal";
 
 const RightSideControls = ({ className = "" }) => {
   const { t } = useLanguage();
@@ -15,6 +16,8 @@ const RightSideControls = ({ className = "" }) => {
     unreadRoomChat,
     unreadAiChat,
   } = useGlobalVideoCall();
+
+  const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
 
   const unreadMessages = (unreadRoomChat || 0) + (unreadAiChat || 0);
 
@@ -54,13 +57,15 @@ const RightSideControls = ({ className = "" }) => {
         )}
       </div>
 
-      {/* <ControlButton
+      <ControlButton
         isActive={false}
-        onClick={() => { alert("change layout") }}
+        onClick={() => setIsLayoutModalOpen(true)}
         iconActive={<LayoutGrid size={20} />}
         iconInactive={<LayoutGrid size={20} />}
         inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
-      /> */}
+      />
+
+      <ChooseLayoutModal open={isLayoutModalOpen} onClose={() => setIsLayoutModalOpen(false)} />
     </div>
   );
 };
