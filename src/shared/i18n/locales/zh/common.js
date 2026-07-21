@@ -7,8 +7,8 @@ export default {
   back: "返回",
   cancel: "取消",
   reload: "重新加载",
-  cancelUploadConfirmTitle: "正在上传数据",
-  cancelUploadConfirmDesc: "当前有上传任务正在进行。如果您重新加载页面，数据将会丢失。确定要继续吗？",
+  cancelUploadConfirmTitle: "正在处理任务",
+  cancelUploadConfirmDesc: "当前有任务正在进行中。如果您重新加载页面，进度将会丢失。确定要继续吗？",
   scrollToTop: "回到顶部",
   toggle: {
     on: "开",
@@ -85,11 +85,17 @@ export default {
     generalFailed: "发生错误，请重试。",
   },
   uploadWidget: {
-    uploading: "正在上传... {{progress}}%",
+    uploading: "正在执行... {{progress}}%",
     processing: "处理中... {{progress}}%",
     success: "成功",
-    error: "上传失败",
+    error: "任务失败",
     itemsCount: "正在处理 {{count}} 个任务",
-    cancelTip: "取消上传",
+    cancelTip: "取消任务",
   },
+  catSpeak: {
+    reels: {
+      createReelTitle: "创建新 Reel",
+      uploadSuccess: "Reel 发布成功！",
+    }
+  }
 }
