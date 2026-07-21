@@ -2,6 +2,7 @@ import Marquee from "react-fast-marquee";
 import { useLanguage } from "@/shared/context/LanguageContext.jsx";
 import {
   CulturalRoots,
+  EZTalking,
   FPTU,
   Go4AI,
   HubNetwork,
@@ -26,6 +27,7 @@ const partners = [
   { image: SpeakUpGlobal, alt: "SpeakUpGlobal" },
   { image: HubNetwork, alt: "HubNetwork" },
   { image: QTEDU, alt: "QTEDU" },
+  { image: EZTalking, alt: "EZTalking" },
 ];
 
 const PartnerSection = () => {
@@ -46,7 +48,7 @@ const PartnerSection = () => {
           <Marquee speed={35} gradient={false} pauseOnHover autoFill>
             {partners.map((partner) => (
               <div key={partner.alt} className="mx-3 sm:mx-4 lg:mx-5">
-                <div className="w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] md:w-[160px] md:h-[160px] lg:w-[190px] lg:h-[190px] rounded-full bg-white border flex items-center justify-center overflow-hidden">
+                <div className="w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] md:w-[160px] md:h-[160px] lg:w-[190px] lg:h-[190px]  bg-white  flex items-center justify-center overflow-hidden">
                   <img
                     src={partner.image}
                     alt={partner.alt}
