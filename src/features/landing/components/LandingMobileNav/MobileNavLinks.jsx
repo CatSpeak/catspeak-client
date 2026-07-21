@@ -16,8 +16,17 @@ const MobileNavLinks = ({ onClose }) => {
           if (item.isPrivate && !isAuthenticated) return false;
           return true;
         })
-        .map(({ key, hasDropdown }) => {
-        if (hasDropdown && key === "community") {
+        .map((item) => {
+          if (item.isHorizontalBar) {
+            return (
+              <div
+                key={item.key}
+                className="my-2 border-t border-border w-full"
+              />
+            );
+          }
+          const { key, hasDropdown } = item;
+          if (hasDropdown && key === "community") {
           return (
             <MobileCommunityDropdown key={key} navKey={key} onClose={onClose} />
           );

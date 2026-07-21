@@ -21,7 +21,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "ef-set",
@@ -45,7 +45,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "usa-learns",
@@ -61,7 +61,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "elllo",
@@ -98,7 +98,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "perfect-english-grammar",
@@ -128,7 +128,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "quizlet",
@@ -145,7 +145,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "eztalking-ai",
@@ -176,7 +176,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "english-news-in-levels",
@@ -197,7 +197,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "mini-ielts",
@@ -225,7 +225,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "nat-geo-kids",
@@ -241,7 +241,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "esol-courses",
@@ -273,7 +273,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "merriam-webster-learners-dictionary",
@@ -290,7 +290,7 @@ export const websites = [
     lang: "en",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "language-transfer",
@@ -306,7 +306,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "hanh-trang-so",
@@ -329,7 +329,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "improve-mandarin-hsk-practice-tests",
@@ -363,7 +363,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "mandarin-bean",
@@ -385,7 +385,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "mandarin-bean-all-lessons",
@@ -407,7 +407,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "chinese-grammar-wiki",
@@ -441,7 +441,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "chinese-pronunciation-wiki",
@@ -462,7 +462,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "stroke-order",
@@ -496,7 +496,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "mdbg-chinese-dictionary",
@@ -512,7 +512,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "mandarin-bean-graded-reading",
@@ -528,7 +528,7 @@ export const websites = [
     lang: "zh",
     showOnHorizontalBar: false,
     hasDropdown: true,
-    isPrivate: true,
+
     subItems: [
       {
         key: "tieng-trung-tai-nha",

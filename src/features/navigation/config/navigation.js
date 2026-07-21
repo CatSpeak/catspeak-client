@@ -31,7 +31,7 @@ export const navLinks = [
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
-  ...websites,
+
   {
     key: "workspace",
     hasDropdown: true,
@@ -45,6 +45,13 @@ export const navLinks = [
       { key: "profile", path: "/profile", icon: User },
     ],
   },
+  {
+    key: "horizontalBar",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  ...websites,
   // {
   //   key: "pricing",
   //   path: "/pricing",
