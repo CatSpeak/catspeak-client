@@ -43,6 +43,9 @@ const MessageWidget = () => {
   )
   const [input, setInput] = useState("")
   const totalUnreadCountRedux = useSelector(selectTotalUnread)
+  const friendOnlineStatus = useSelector(
+    (state) => state.notification?.friendOnlineStatus || {},
+  )
   const widgetRef = useRef(null)
 
   const currentUser = useMemo(() => {
@@ -248,6 +251,7 @@ const MessageWidget = () => {
             <ConversationList
               conversations={filteredConversations}
               currentUser={currentUser}
+              friendOnlineStatus={friendOnlineStatus}
               isLoading={isLoading}
               isError={isError}
               onSelectConversation={handleSelectConversation}

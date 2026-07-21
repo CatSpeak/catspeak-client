@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react"
+import { useSelector } from "react-redux"
 import { ArrowLeft, PanelRight } from "lucide-react"
 import ChatBubble from "./ChatBubble"
 import ChatInput from "./ChatInput"
@@ -11,6 +12,8 @@ import { IconButton } from "@/shared/components/ui/buttons"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { useGroupedMessages } from "../hooks/useGroupedMessages"
 import GroupAvatar from "./GroupAvatar"
+
+import { formatLastSeen } from "@/shared/utils/dateFormatter"
 
 /**
  * ChatArea — main chat view with header, messages, and input.
@@ -55,8 +58,27 @@ const ChatArea = ({
   const name = conversation.name
   const memberCount = conversation.participants?.length || 0
 
-  // Status text for header (temporarily hide 1:1 online status until backend presence API is ready)
-  const statusText = isGroup ? `${memberCount} members` : null
+  const friendId = otherUser?.accountId || otherUser?.id
+  const reduxFriendOnlineStatus = useSelector(
+    (state) => state.notification?.friendOnlineStatus || {},
+  )
+  const reduxFriendLastSeen = useSelector(
+    (state) => state.notification?.friendLastSeen || {},
+  )
+  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus
+  const isOnline =
+    !isGroup &&
+    friendId &&
+    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false)
+
+  const lastSeenTime =
+    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen
+
+  const statusText = isGroup
+    ? `${memberCount} members`
+    : isOnline
+    ? "Online"
+    : formatLastSeen(lastSeenTime)
 
   // ── Render message list from grouped items hook ──
   const renderMessages = () => {
@@ -107,16 +129,21 @@ const ChatArea = ({
           {isGroup ? (
             <GroupAvatar conversation={conversation} size={40} />
           ) : (
-            <Avatar
-              size={40}
-              name={otherUser?.username}
-              src={otherUser?.avatarImageUrl}
-              className={
-                getParticipantTheme(
-                  otherUser?.accountId || otherUser?.username || "",
-                ).avatarClass
-              }
-            />
+            <div className="relative shrink-0">
+              <Avatar
+                size={40}
+                name={otherUser?.username}
+                src={otherUser?.avatarImageUrl}
+                className={
+                  getParticipantTheme(
+                    otherUser?.accountId || otherUser?.username || "",
+                  ).avatarClass
+                }
+              />
+              {isOnline && (
+                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white ring-1 ring-white" />
+              )}
+            </div>
           )}
 
           {/* Name + status */}

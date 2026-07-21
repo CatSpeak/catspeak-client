@@ -40,18 +40,33 @@ const ConversationItem = ({
   let preview = ""
   if (conversation?.lastMessage) {
     let senderPrefix = ""
-    if (conversation.lastMessageSenderId === currentUserId) {
-      senderPrefix = `${t?.you || "You"}: `
-    } else if (isGroup && conversation.participants) {
-      const sender = conversation.participants.find(
-        (p) => p.accountId === conversation.lastMessageSenderId,
-      )
-      if (sender) {
-        senderPrefix = `${sender.username?.split(" ")[0] || "?"}: `
+    const isSystemMessage =
+      String(conversation?.lastMessageType || "").toLowerCase() === "system"
+
+    if (!isSystemMessage) {
+      if (conversation.lastMessageSenderId === currentUserId) {
+        senderPrefix = `${t?.you || "You"}: `
+      } else if (isGroup && conversation.participants) {
+        const sender = conversation.participants.find(
+          (p) => p.accountId === conversation.lastMessageSenderId,
+        )
+        if (sender) {
+          senderPrefix = `${sender.username?.split(" ")[0] || "?"}: `
+        }
       }
     }
     preview = senderPrefix + conversation.lastMessage
   }
+
+  const reduxFriendOnlineStatus = useSelector(
+    (state) => state.notification?.friendOnlineStatus || {},
+  )
+  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus
+  const friendId = conversation?.friend?.accountId
+  const isOnline =
+    !isGroup &&
+    friendId &&
+    (onlineStatusMap[friendId] ?? conversation?.friend?.isOnline ?? false)
 
   const friendTheme = getParticipantTheme(
     conversation?.friend?.accountId || conversation?.friend?.username || "",
@@ -64,13 +79,18 @@ const ConversationItem = ({
       {isGroup ? (
         <GroupAvatar conversation={conversation} size={40} />
       ) : (
-        <Avatar
-          size={40}
-          src={avatarSrc}
-          name={name}
-          alt={name}
-          className={friendTheme.avatarClass}
-        />
+        <>
+          <Avatar
+            size={40}
+            src={avatarSrc}
+            name={name}
+            alt={name}
+            className={friendTheme.avatarClass}
+          />
+          {isOnline && (
+            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+          )}
+        </>
       )}
     </div>
   )

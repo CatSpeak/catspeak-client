@@ -25,6 +25,9 @@ const HUB_EVENTS = [
   "ConversationCreated",
   "ConversationUpdated",
   "FriendStatusChange",
+  "UserStatusChanged",
+  "UserOnline",
+  "UserOffline",
   "NewFriendRequest",
   "ChatUpdated",
 ]

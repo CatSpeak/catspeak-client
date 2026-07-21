@@ -127,3 +127,30 @@ export const formatDateSeparator = (timestamp) => {
     year: "numeric",
   })
 }
+
+/**
+ * Format lastSeen timestamp to relative "Last seen X ago" string.
+ * @param {Date|string|number} lastSeen - Date object, ISO string, or timestamp
+ * @returns {string} Formatted last seen string
+ */
+export const formatLastSeen = (lastSeen) => {
+  if (!lastSeen) return "Offline"
+  const date = new Date(lastSeen)
+  if (isNaN(date.getTime())) return "Offline"
+
+  const diffMs = Date.now() - date.getTime()
+
+  // If timestamp is less than 1 minute ago (or slightly in future due to server clock skew), show "just now"
+  if (diffMs < 60 * 1000) return "Last seen just now"
+
+  const diffMins = Math.floor(diffMs / (60 * 1000))
+  const diffHours = Math.floor(diffMs / (60 * 60 * 1000))
+  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000))
+
+  if (diffMins < 60) return `Last seen ${diffMins}m ago`
+  if (diffHours < 24) return `Last seen ${diffHours}h ago`
+  if (diffDays === 1) return "Last seen yesterday"
+  if (diffDays < 7)
+    return `Last seen ${date.toLocaleDateString(undefined, { weekday: "short" })}`
+  return `Last seen ${date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+}

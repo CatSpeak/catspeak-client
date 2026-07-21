@@ -42,6 +42,76 @@ export const useGlobalSignalR = () => {
   // which needs handlers, but handlers need invoke).
   const invokeRef = useRef(null)
 
+  // Single internal helper for presence updates
+  const handleStatusUpdate = (data, forcedStatus = null) => {
+    const userId =
+      typeof data === "object"
+        ? (data?.userId ?? data?.accountId ?? data?.id)
+        : data
+    if (userId == null) return
+
+    const isOnline =
+      forcedStatus !== null
+        ? forcedStatus
+        : typeof data === "object"
+        ? (data?.isOnline ??
+          data?.status === "online" ??
+          data?.status === 1)
+        : true
+
+    const lastSeen =
+      (typeof data === "object" &&
+        (data?.lastSeen || data?.lastOnline || data?.timestamp)) ||
+      (!isOnline ? new Date().toISOString() : null)
+
+    dispatch(setFriendOnlineStatus({ userId, isOnline, lastSeen }))
+
+    dispatch(
+      conversationsApi.util.updateQueryData(
+        "getConversations",
+        undefined,
+        (draft) => {
+          const list = Array.isArray(draft) ? draft : draft?.data || []
+          list.forEach((conv) => {
+            if (
+              conv.friend &&
+              Number(conv.friend.accountId || conv.friend.id) === Number(userId)
+            ) {
+              conv.friend.isOnline = isOnline
+              if (lastSeen) {
+                conv.friend.lastSeen = lastSeen
+              }
+            }
+            if (Array.isArray(conv.participants)) {
+              conv.participants.forEach((p) => {
+                if (Number(p.accountId || p.id) === Number(userId)) {
+                  p.isOnline = isOnline
+                  if (lastSeen) {
+                    p.lastSeen = lastSeen
+                  }
+                }
+              })
+            }
+          })
+        },
+      ),
+    )
+  }
+
+  // Single internal helper for read receipts
+  const handleReadReceipt = (...args) => {
+    const convId =
+      typeof args[0] === "object" ? args[0]?.conversationId : args[0]
+    if (convId) {
+      dispatch(
+        conversationsApi.util.invalidateTags([
+          { type: "Messages", id: Number(convId) },
+          { type: "Messages", id: String(convId) },
+        ]),
+      )
+    }
+  }
+
   const handlers = useMemo(
     () => ({
       NewMessage: (...args) => {
@@ -110,6 +180,11 @@ export const useGlobalSignalR = () => {
                         new Date().toISOString()
                       cachedConv.lastMessageSenderId =
                         message.senderId || message.sender?.accountId
+                      cachedConv.lastMessageType =
+                        message.messageType ||
+                        message.type ||
+                        message.lastMessageType ||
+                        cachedConv.lastMessageType
                     }
                   }
                 },
@@ -146,56 +221,14 @@ export const useGlobalSignalR = () => {
         }
       },
 
-      ConversationRead: (...args) => {
-        const convId =
-          typeof args[0] === "object" ? args[0]?.conversationId : args[0]
-        if (convId) {
-          dispatch(
-            conversationsApi.util.invalidateTags([
-              { type: "Messages", id: Number(convId) },
-              { type: "Messages", id: String(convId) },
-            ]),
-          )
-        }
-      },
+      ConversationRead: handleReadReceipt,
+      MessageRead: handleReadReceipt,
+      ReadReceipt: handleReadReceipt,
 
-      MessageRead: (...args) => {
-        const convId =
-          typeof args[0] === "object" ? args[0]?.conversationId : args[0]
-        if (convId) {
-          dispatch(
-            conversationsApi.util.invalidateTags([
-              { type: "Messages", id: Number(convId) },
-              { type: "Messages", id: String(convId) },
-            ]),
-          )
-        }
-      },
-
-      ReadReceipt: (...args) => {
-        const convId =
-          typeof args[0] === "object" ? args[0]?.conversationId : args[0]
-        if (convId) {
-          dispatch(
-            conversationsApi.util.invalidateTags([
-              { type: "Messages", id: Number(convId) },
-              { type: "Messages", id: String(convId) },
-            ]),
-          )
-        }
-      },
-
-      FriendStatusChange: (data) => {
-        if (data?.userId != null) {
-          dispatch(
-            setFriendOnlineStatus({
-              userId: data.userId,
-              isOnline: data.isOnline ?? data.status === "online",
-            }),
-          )
-        }
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      },
+      FriendStatusChange: (data) => handleStatusUpdate(data),
+      UserStatusChanged: (data) => handleStatusUpdate(data),
+      UserOnline: (data) => handleStatusUpdate(data, true),
+      UserOffline: (data) => handleStatusUpdate(data, false),
 
       NewFriendRequest: () => {
         dispatch(friendshipApi.util.invalidateTags(["FriendRequest"]))

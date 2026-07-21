@@ -8,6 +8,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 const ConversationList = ({
   conversations,
   currentUser,
+  friendOnlineStatus,
   isLoading,
   isError,
   onSelectConversation,
@@ -30,6 +31,7 @@ const ConversationList = ({
                 key={conv.conversationId}
                 conversation={conv}
                 currentUser={currentUser}
+                friendOnlineStatus={friendOnlineStatus}
                 onClick={() => onSelectConversation(conv)}
               />
             ))}
