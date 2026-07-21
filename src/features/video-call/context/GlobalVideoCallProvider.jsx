@@ -96,6 +96,8 @@ const IDLE_VALUE = {
   setIsAiCollapsed: () => { },
   speakingAssistantEnabled: false,
   setSpeakingAssistantEnabled: () => { },
+  layoutMode: "auto",
+  setLayoutMode: () => { },
 }
 
 const IdleCallContent = ({

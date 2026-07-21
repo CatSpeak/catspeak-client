@@ -211,6 +211,7 @@ export default {
     systemMessagesDesc: "Show automatic system messages",
     replyingTo: "Replying to",
     reply: "Reply",
+    aiSuggestion: "Suggestions from AI",
   },
   sessionActions: {
     connect11: "Connect 1:1",
@@ -358,6 +359,7 @@ export default {
         "The recording will be saved in <strong>My Workspace</strong>.",
       continueBtn: "Continue recording",
       confirmBtn: "Confirm",
+      backBtn: "Back",
     },
     provider: {
       connecting: "Getting your session ready...",

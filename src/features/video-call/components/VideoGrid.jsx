@@ -2,6 +2,7 @@ import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call
 import { useSpotlight } from "@/features/video-call/hooks/useSpotlight"
 import SpotlightLayout from "./layouts/SpotlightLayout"
 import NormalVideoLayout from "./layouts/NormalVideoLayout"
+import PiPLayout from "./layouts/PiPLayout"
 
 /**
  * Renders a responsive grid of VideoTile and ScreenShareTile components.
@@ -9,7 +10,7 @@ import NormalVideoLayout from "./layouts/NormalVideoLayout"
  * to a sidebar (desktop) or bottom scroll row (mobile).
  */
 const VideoGrid = () => {
-  const { participants, screenShareTracks } = useVideoCallContext()
+  const { participants, screenShareTracks, layoutMode } = useVideoCallContext()
 
   const { spotlightItem, handleTileClick } = useSpotlight(
     screenShareTracks,
@@ -19,6 +20,17 @@ const VideoGrid = () => {
   const totalItems = (screenShareTracks?.length || 0) + (participants?.length || 0)
 
   if (spotlightItem) {
+    if (totalItems === 2) {
+      return (
+        <PiPLayout
+          spotlightItem={spotlightItem}
+          screenShareTracks={screenShareTracks}
+          participants={participants}
+          handleTileClick={handleTileClick}
+        />
+      )
+    }
+
     return (
       <SpotlightLayout
         spotlightItem={spotlightItem}

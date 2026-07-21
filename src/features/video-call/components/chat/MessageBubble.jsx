@@ -43,14 +43,13 @@ const VocabularySuggestions = ({
                 navigator.clipboard.writeText(word)
               }}
               title={meaning ? "Click to view meaning & copy" : "Click to copy"}
-              className={`relative px-3 text-xs font-semibold border cursor-pointer transition-all shadow-sm select-none active:scale-95 ${
-                isExpanded ? "rounded-2xl py-1.5" : "rounded-full py-1"
-              } ${colorClass}`}
+              className={`relative px-3 text-xs font-semibold border cursor-pointer transition-all shadow-sm select-none active:scale-95 ${isExpanded ? "rounded-2xl py-1.5" : "rounded-full py-1"
+                } ${colorClass}`}
             >
               {/* Cat ears */}
               <span className="absolute -top-1 left-2.5 w-2 h-2 bg-inherit border-t border-l border-inherit rotate-45 rounded-tl-[2px]" />
               <span className="absolute -top-1 right-2.5 w-2 h-2 bg-inherit border-t border-l border-inherit rotate-45 rounded-tl-[2px]" />
-              
+
               <div className="flex flex-col items-center">
                 <span>{word}</span>
                 {isExpanded && (
@@ -263,7 +262,7 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
 
   const isVi = t.rooms?.chatBox?.reply === "Trả lời"
   const isZh = t.rooms?.chatBox?.reply === "回复" || t.rooms?.chatBox?.reply === "回覆"
-  
+
   const showText = isVi ? "Xem nghĩa" : isZh ? "显示解释" : "Show meaning"
   const hideText = isVi ? "Ẩn nghĩa" : isZh ? "隐藏解释" : "Hide meaning"
 
@@ -291,8 +290,7 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
         />
       ) : (
         <div
-          className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${
-            isMe
+          className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${isMe
               ? "bg-[#990011] text-white"
               : msg.status === "error"
                 ? "bg-red-100 text-red-900 border border-red-200"
@@ -301,13 +299,12 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
                   : isAi
                     ? "bg-amber-50 text-amber-900"
                     : "bg-[#F0F0F0] text-black"
-          }`}
+            }`}
         >
           {/* Reply Context - Zalo Style */}
           {msg.replyTo && (
             <div
-              className={`flex flex-col border-l-[3px] py-1 px-2 rounded-r-md mb-1.5 cursor-default ${
-                isMe
+              className={`flex flex-col border-l-[3px] py-1 px-2 rounded-r-md mb-1.5 cursor-default ${isMe
                   ? "border-white/60 bg-white/10 text-white/90"
                   : msg.status === "error"
                     ? "border-red-400 bg-red-400/10 text-red-900/90"
@@ -316,7 +313,7 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
                       : isAi
                         ? "border-amber-500 bg-amber-500/10 text-amber-900/90"
                         : "border-[#990011]/60 bg-[#990011]/10 text-black/80"
-              }`}
+                }`}
             >
               <span className="font-semibold text-xs shrink-0">
                 {msg.replyTo.name}
@@ -366,13 +363,12 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
 
           {msg.translatedMessage && (
             <p
-              className={`m-0 mt-1 pt-1 text-xs border-t ${
-                isMe
+              className={`m-0 mt-1 pt-1 text-xs border-t ${isMe
                   ? "border-white/20 text-white/90"
                   : isSystem
                     ? "border-orange-300 text-orange-800"
                     : "border-black/10 text-black/70"
-              }`}
+                }`}
             >
               {msg.translatedMessage}
             </p>

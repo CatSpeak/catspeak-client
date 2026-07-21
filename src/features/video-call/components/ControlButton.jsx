@@ -18,7 +18,7 @@ const ControlButton = ({
   children, // For custom content overlays, like ping animations
 }) => {
   const buttonBaseClass =
-    "flex items-center justify-center rounded-full transition-colors shadow-sm w-12 h-12 relative overflow-hidden"
+    "flex items-center justify-center rounded-full transition-colors shadow-sm w-11 h-11 relative overflow-hidden"
 
   const buttonStateClass = isLoading
     ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black"

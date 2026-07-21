@@ -186,6 +186,7 @@ export default {
     systemMessagesDesc: "Hiển thị các tin nhắn hệ thống tự động",
     replyingTo: "Đang trả lời",
     reply: "Trả lời",
+    aiSuggestion: "Gợi ý từ AI",
   },
   sessionActions: {
     connect11: "Kết nối 1:1",
@@ -336,6 +337,7 @@ export default {
         "Bản ghi sẽ được lưu tại <strong>Nhà của bạn (My Workspace)</strong>.",
       continueBtn: "Tiếp tục ghi",
       confirmBtn: "Xác nhận",
+      backBtn: "Quay lại"
     },
     provider: {
       connecting: "Đang kết nối...",
