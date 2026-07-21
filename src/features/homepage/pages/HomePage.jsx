@@ -8,11 +8,13 @@ import {
   useRoomsPageLogic,
   SessionActionButtons,
   CreateRoomModal,
+  CreateCustomRoomModal,
 } from "@/features/rooms"
 import CommunityPresence from "../components/CommunityPresence"
 
 const HomePage = () => {
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
+  const [isCustomRoomModalOpen, setCustomRoomModalOpen] = useState(false)
   const navigate = useNavigate()
   const { lang } = useParams()
 
@@ -49,6 +51,12 @@ const HomePage = () => {
     })
   }
 
+  const handleCreateCustomRoom = () => {
+    actions.handleCreateCustomRoomSession(() => {
+      setCustomRoomModalOpen(true)
+    })
+  }
+
   return (
     <AnimatePresence mode="wait">
       <FluentAnimation animationKey="home-page" direction="up" className="p-5">
@@ -59,8 +67,10 @@ const HomePage = () => {
             <SessionActionButtons
               handleCreateOneOnOneSession={handleCreateOneOnOne}
               handleCreateStudyGroupSession={handleCreateStudyGroup}
+              handleCreateCustomRoomSession={handleCreateCustomRoom}
               isCreatingOneOnOne={state.isCreatingOneOnOne}
               isCreatingStudyGroup={state.isCreatingStudyGroup}
+              isCreatingCustom={state.isCreatingCustom}
             />
           </div>
 
@@ -72,6 +82,10 @@ const HomePage = () => {
         <CreateRoomModal
           open={isCreateRoomModalOpen}
           onCancel={() => setCreateRoomModalOpen(false)}
+        />
+        <CreateCustomRoomModal
+          open={isCustomRoomModalOpen}
+          onCancel={() => setCustomRoomModalOpen(false)}
         />
       </FluentAnimation>
     </AnimatePresence>

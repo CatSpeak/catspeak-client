@@ -78,6 +78,7 @@ const CourseDetailPage = lazy(() => import("@/features/courses/pages/CourseDetai
 const StudentClassDetailPage = lazy(() => import("@/features/courses/pages/StudentClassDetailPage"))
 const StudentCourseDetailPage = lazy(() => import("@/features/courses/pages/StudentCourseDetailPage"))
 const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
+const CustomRoomsPage = lazy(() => import("@/features/rooms/pages/CustomRoomsPage"))
 
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
@@ -405,6 +406,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <WorkspaceEventsPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "rooms",
+                element: (
+                  <LazyRoute>
+                    <CustomRoomsPage />
                   </LazyRoute>
                 ),
               },

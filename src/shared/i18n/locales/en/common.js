@@ -58,6 +58,7 @@ export default {
     organization: "Organization",
     billing: "Payment History",
     recordings: "Recordings",
+    myRooms: "My Custom Rooms",
     back: "Back",
     accountInfo: "Account Info",
     systemConfig: "System Settings",

@@ -8,6 +8,7 @@ import {
   useGetRoomsQuery,
   useRoomsPageLogic,
   CreateRoomModal,
+  CreateCustomRoomModal,
   AISessionSettingsModal,
   RoomsBannerContent,
 } from "@/features/rooms";
@@ -26,6 +27,7 @@ import SwitchCallModal from "@/features/video-call/components/SwitchCallModal";
 const RoomsPage = () => {
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isCustomRoomModalOpen, setCustomRoomModalOpen] = useState(false);
 
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -64,6 +66,12 @@ const RoomsPage = () => {
   const proceedCreateStudyGroup = () => {
     actions.handleCreateStudyGroupSession(() => {
       setCreateRoomModalOpen(true);
+    });
+  };
+
+  const handleCreateCustomRoom = () => {
+    actions.handleCreateCustomRoomSession(() => {
+      setCustomRoomModalOpen(true);
     });
   };
 
@@ -156,6 +164,10 @@ const RoomsPage = () => {
         onConfirm={handleCreateAI}
         onCancel={() => setIsSettingsModalOpen(false)}
       />
+      <CreateCustomRoomModal
+        open={isCustomRoomModalOpen}
+        onCancel={() => setCustomRoomModalOpen(false)}
+      />
       <AnimatePresence mode="wait">
         <FluentAnimation
           key="rooms-page"
@@ -172,9 +184,11 @@ const RoomsPage = () => {
                     handleCreateOneOnOneSession: proceedCreateOneOnOne,
                     handleCreateStudyGroupSession: proceedCreateStudyGroup,
                     handleCreateAISession: () => setIsSettingsModalOpen(true),
+                    handleCreateCustomRoomSession: handleCreateCustomRoom,
                     isCreatingOneOnOne: state.isCreatingOneOnOne,
                     isCreatingStudyGroup: state.isCreatingStudyGroup,
                     isCreatingAI: state.isCreatingAI,
+                    isCreatingCustom: state.isCreatingCustom,
                     canUseAI: true,
                   }}
                 />

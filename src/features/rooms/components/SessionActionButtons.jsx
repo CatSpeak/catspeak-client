@@ -7,9 +7,11 @@ const SessionActionButtons = ({
   handleCreateOneOnOneSession,
   handleCreateStudyGroupSession,
   handleCreateAISession,
+  handleCreateCustomRoomSession,
   isCreatingOneOnOne,
   isCreatingStudyGroup,
   isCreatingAI,
+  isCreatingCustom,
   canUseAI,
 }) => {
   const { t } = useLanguage()
@@ -22,27 +24,31 @@ const SessionActionButtons = ({
           const isOneOnOne = b.id === "connect_1_1"
           const isStudyGroup = b.id === "connect_2_5"
           const isAI = b.id === "your_ai"
+          const isCustomRoom = b.id === "custom_room"
 
           if (isAI) return null
 
-          const isActionable = isOneOnOne || isStudyGroup || isAI
+          const isActionable = isOneOnOne || isStudyGroup || isAI || isCustomRoom
 
           const handleClick = () => {
             if (isOneOnOne) handleCreateOneOnOneSession()
             if (isStudyGroup) handleCreateStudyGroupSession()
             if (isAI) handleCreateAISession()
+            if (isCustomRoom) handleCreateCustomRoomSession?.()
           }
 
           const isLoadingThis =
             (isOneOnOne && isCreatingOneOnOne) ||
             (isStudyGroup && isCreatingStudyGroup) ||
-            (isAI && isCreatingAI)
+            (isAI && isCreatingAI) ||
+            (isCustomRoom && isCreatingCustom)
 
           // Map IDs to translation keys
           let labelKey = ""
           if (isOneOnOne) labelKey = "connect11"
           if (isStudyGroup) labelKey = "connect25"
           if (isAI) labelKey = "yourAI"
+          if (isCustomRoom) labelKey = "customRoom"
 
           const label = labelKey ? t.rooms.sessionActions[labelKey] : b.label
 

@@ -179,6 +179,65 @@ export const roomsApi = baseApi.injectEndpoints({
         url: `/games/${roomId}/history`,
       }),
     }),
+
+    // --- Pro Custom Rooms ---
+    // Get current user's custom rooms and usage quota
+    getMyCustomRooms: builder.query({
+      query: () => "/rooms/my-custom-rooms",
+      providesTags: ["CustomRooms"],
+    }),
+
+    // Create a new Pro Custom Room
+    createCustomRoom: builder.mutation({
+      query: (body) => ({
+        url: "/rooms/custom",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["CustomRooms", "Rooms"],
+    }),
+
+    // Update an existing Pro Custom Room
+    updateCustomRoom: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/rooms/custom/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CustomRooms", id },
+        "CustomRooms",
+        "Rooms",
+      ],
+    }),
+
+    // Delete (soft delete) a Pro Custom Room
+    deleteCustomRoom: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/custom/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["CustomRooms", "Rooms"],
+    }),
+
+    // --- Host Moderation ---
+    // Kick a participant from a room
+    kickParticipant: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/rooms/${id}/moderation/kick`,
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // Mute audio/video track of a participant
+    muteParticipant: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/rooms/${id}/moderation/mute`,
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 })
 
@@ -200,4 +259,13 @@ export const {
   useToggleAllowChangeRoomMutation,
   useBroadcastBreakoutNotificationMutation,
   useGetGameHistoryQuery,
+  // Custom Rooms
+  useGetMyCustomRoomsQuery,
+  useCreateCustomRoomMutation,
+  useUpdateCustomRoomMutation,
+  useDeleteCustomRoomMutation,
+  // Host Moderation
+  useKickParticipantMutation,
+  useMuteParticipantMutation,
 } = roomsApi
+

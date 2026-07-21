@@ -58,6 +58,7 @@ export default {
     organization: "Tổ chức",
     billing: "Lịch sử thanh toán",
     recordings: "Bản ghi hình",
+    myRooms: "Phòng tùy chỉnh",
     back: "Quay lại",
     accountInfo: "Thông tin tài khoản",
     systemConfig: "Thiết lập hệ thống",
