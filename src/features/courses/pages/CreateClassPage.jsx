@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -10,7 +9,8 @@ import {
   Info,
   ChevronDown,
   Upload,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react"
 
 import {
@@ -21,9 +21,15 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import ReactDatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
+import "@/shared/styles/react-datepicker.css"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import {
+  COURSE_FORM_LANGUAGES,
+  DEFAULT_CLASS_FEE_TIERS,
+  DEFAULT_TEACHER_IS_VERIFIED,
+} from "../data/courseFormOptions"
 import { calculateFees, formatCurrency, formatCurrencyVND, formatToYYYYMMDD } from "../utils/courseUtils"
+import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -35,39 +41,27 @@ const DAYS_OF_WEEK = [
   { key: "sunday", label: "Sun", code: "CN", fullName: "Sunday" }
 ]
 
-const FALLBACK_TEACHER_PROFILE = {
-  isVerified: true,
-  languages: [
-    { id: 1, name: "English", levels: [{ id: 1, name: "A1" }, { id: 2, name: "A2" }, { id: 3, name: "B1" }, { id: 4, name: "B2" }, { id: 5, name: "C1" }, { id: 6, name: "C2" }] },
-    { id: 2, name: "Chinese", levels: [{ id: 1, name: "HSK 1" }, { id: 2, name: "HSK 2" }, { id: 3, name: "HSK 3" }, { id: 4, name: "HSK 4" }, { id: 5, name: "HSK 5" }, { id: 6, name: "HSK 6" }] },
-    { id: 3, name: "Vietnamese", levels: [{ id: 1, name: "A1" }, { id: 2, name: "A2" }, { id: 3, name: "B1" }, { id: 4, name: "B2" }] }
-  ],
-  feeTiers: [
-    { minSlots: 1, maxSlots: 6, openingFee: 0, commissionRate: 10 },
-    { minSlots: 7, maxSlots: 20, openingFee: 200000, commissionRate: 12 },
-    { minSlots: 21, maxSlots: 50, openingFee: 500000, commissionRate: 15 },
-    { minSlots: 51, maxSlots: Infinity, openingFee: 0, commissionRate: 20 }
-  ]
-}
-
 const CreateClassPage = () => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditMode = !!id
+  const location = useLocation()
+  const recoverClassId = location.state?.recoverClassId || new URLSearchParams(location.search).get("recoverClassId") || ""
+  const isRecoverMode = !!recoverClassId
   const fileInputRef = useRef(null)
 
   // Localizations
   const cc = c.createClass || {}
 
   const isProfileLoading = false
-  const { data: coursesData } = useGetAllCoursesQuery({ pageSize: 100 })
+  const { data: coursesData } = useGetAllCoursesQuery(
+    { page: 1, pageSize: 100 },
+    { skip: isEditMode || isRecoverMode }
+  )
   const [createClass, { isLoading: isCreating }] = useCreateClassMutation()
   const [updateClass, { isLoading: isUpdating }] = useUpdateClassMutation()
-  const location = useLocation()
-  const recoverClassId = location.state?.recoverClassId || new URLSearchParams(location.search).get("recoverClassId") || ""
-  const isRecoverMode = !!recoverClassId
 
   const { data: classDetailResponse, isLoading: isEditDetailsLoading } = useGetClassDetailQuery(id, { skip: !isEditMode })
   const { data: recoverClassResponse, isLoading: isRecoverLoading } = useGetClassDetailQuery(recoverClassId, { skip: !isRecoverMode })
@@ -77,7 +71,7 @@ const CreateClassPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // Static fallback teacher profile since /teacher/profile API does not exist
-  const languagesList = FALLBACK_TEACHER_PROFILE.languages || []
+  const languagesList = COURSE_FORM_LANGUAGES
   const coursesList = useMemo(() => coursesData?.data || [], [coursesData])
   const tomorrow = useMemo(() => {
     const d = new Date()
@@ -124,22 +118,6 @@ const CreateClassPage = () => {
     saturday: { start: "18:00", end: "19:30" },
     sunday: { start: "18:00", end: "19:30" }
   })
-
-  // Helper functions for date conversion (local timezone safe)
-  const toLocalDateString = (date) => {
-    if (!date) return ""
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    return `${y}-${m}-${d}`
-  }
-
-  const parseLocalDateString = (str) => {
-    if (!str) return null
-    const [y, m, d] = str.split("-").map(Number)
-    if (isNaN(y) || isNaN(m) || isNaN(d)) return null
-    return new Date(y, m - 1, d)
-  }
 
   // Minimum tuition fee calculation: (50k * slots) + (25k * sessions)
   const minFee = useMemo(() => {
@@ -320,7 +298,7 @@ const CreateClassPage = () => {
   const feeNum = parseFloat(fee.replace(/[^0-9]/g, "")) || 0
 
   const feeDetails = useMemo(() => {
-    return calculateFees(capacity, feeNum, FALLBACK_TEACHER_PROFILE.feeTiers)
+    return calculateFees(capacity, feeNum, DEFAULT_CLASS_FEE_TIERS)
   }, [feeNum, capacity])
 
   const amountReceived = formatCurrency(feeDetails.netPerStudent)
@@ -412,7 +390,7 @@ const CreateClassPage = () => {
     }))
 
     try {
-      if (!FALLBACK_TEACHER_PROFILE.isVerified) {
+      if (!DEFAULT_TEACHER_IS_VERIFIED) {
         toast.error(cc.toastVerifyProfile || "Please verify your profile identity to complete the transaction!")
         return
       }
@@ -476,6 +454,10 @@ const CreateClassPage = () => {
     }
   }
 
+  const lockedClass = (isEditMode ? classDetailResponse : recoverClassResponse)?.data
+    || (isEditMode ? classDetailResponse : recoverClassResponse)
+  const lockedCourseTitle = lockedClass?.courseName || lockedClass?.courseTitle || courseId
+
   if (isDetailsLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -511,9 +493,19 @@ const CreateClassPage = () => {
       </div>
 
       {/* ─── Header ─── */}
-      <h1 className="text-2xl font-bold tracking-tight text-gray-950">
-        {pageTitle}
-      </h1>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
+          title={t.common?.back || "Quay lại"}
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+          {pageTitle}
+        </h1>
+      </div>
 
       {/* ─── Main Form Box ─── */}
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6">
@@ -541,9 +533,13 @@ const CreateClassPage = () => {
                   className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                 >
                   <option value="">{cc.selectCourseOption || "-- Select Course --"}</option>
-                  {coursesList.map((course) => (
-                    <option key={course.id} value={course.id}>{course.title}</option>
-                  ))}
+                  {isEditMode || isRecoverMode ? (
+                    courseId && <option value={courseId}>{lockedCourseTitle}</option>
+                  ) : (
+                    coursesList.map((course) => (
+                      <option key={course.id} value={course.id}>{course.title}</option>
+                    ))
+                  )}
                 </select>
                 <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>

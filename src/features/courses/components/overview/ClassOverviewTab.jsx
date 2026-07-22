@@ -3,7 +3,7 @@ import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users } from 
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
-import TeachingTasksSection from "../TeachingTasksSection"
+import TeachingTasksSection from "../assignments/TeachingTasksSection"
 import { formatDateRange, formatDateDayMonth } from "../../utils/courseUtils"
 
 const ClassOverviewTab = ({
@@ -93,7 +93,7 @@ const ClassOverviewTab = ({
                         </button>
                         <button
                           onClick={onCancelClassClick}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-red-650 transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#BA021C] transition-colors"
                         >
                           {cd.cancelClass || "Cancel Class"}
                         </button>

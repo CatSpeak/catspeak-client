@@ -1,4 +1,5 @@
 import { MessageSquare, FileText, Users, GraduationCap, PenSquare, BookOpen } from "lucide-react"
+import { DEFAULT_CLASS_FEE_TIERS } from "../data/courseFormOptions.js"
 
 const CARD_GRADIENTS = [
   "from-[#8B5CF6]/20 to-[#C084FC]/20 text-[#8B5CF6]",
@@ -88,20 +89,13 @@ export function formatUTCDate(isoStr, locales = "en-GB", options = {}) {
  */
 
 // ─── BR19 Fee Tiers (default, can be overridden by server data) ─
-const DEFAULT_FEE_TIERS = [
-  { minSlots: 1, maxSlots: 6, openingFee: 0, commissionRate: 10 },
-  { minSlots: 7, maxSlots: 20, openingFee: 200000, commissionRate: 12 },
-  { minSlots: 21, maxSlots: 50, openingFee: 500000, commissionRate: 15 },
-  { minSlots: 51, maxSlots: Infinity, openingFee: 0, commissionRate: 20 },
-]
-
 /**
  * Get the fee tier for a given number of slots.
  * @param {number} slots - Number of student slots
  * @param {Array} [tiers] - Optional custom fee tiers from server
  * @returns {{ openingFee: number, commissionRate: number, minSlots: number, maxSlots: number }}
  */
-export function getFeeTier(slots, tiers = DEFAULT_FEE_TIERS) {
+export function getFeeTier(slots, tiers = DEFAULT_CLASS_FEE_TIERS) {
   const tier = tiers.find((t) => slots >= t.minSlots && slots <= t.maxSlots)
   return tier || tiers[tiers.length - 1]
 }
@@ -202,6 +196,16 @@ export const ATTENDANCE_STATUS = {
   ABSENT_UNEXCUSED: { label: "Vắng không phép", color: "#EF4444" },
 }
 
+const SHORT_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+const getOrdinalSuffix = (day) => {
+  if (day > 3 && day < 21) return "th"
+  if (day % 10 === 1) return "st"
+  if (day % 10 === 2) return "nd"
+  if (day % 10 === 3) return "rd"
+  return "th"
+}
+
 // Date range formatter helper (e.g. Jan 15th - Feb 16th)
 export const formatDateRange = (start, end) => {
   if (!start || !end) return "TBA"
@@ -210,19 +214,8 @@ export const formatDateRange = (start, end) => {
     const d = new Date(dStr)
     if (isNaN(d.getTime())) return dStr
     const day = d.getUTCDate()
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    const month = months[d.getUTCMonth()]
-
-    const suffix = (dayNum) => {
-      if (dayNum > 3 && dayNum < 21) return "th"
-      switch (dayNum % 10) {
-        case 1: return "st"
-        case 2: return "nd"
-        case 3: return "rd"
-        default: return "th"
-      }
-    }
-    return `${month} ${day}${suffix(day)}`
+    const month = SHORT_MONTH_NAMES[d.getUTCMonth()]
+    return `${month} ${day}${getOrdinalSuffix(day)}`
   }
   return `${parseDate(start)} - ${parseDate(end)}`
 }
@@ -232,18 +225,8 @@ export const formatDateDayMonth = (dateStr) => {
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return dateStr
   const day = d.getUTCDate()
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  const month = months[d.getUTCMonth()]
-  const suffix = (dayNum) => {
-    if (dayNum > 3 && dayNum < 21) return "th"
-    switch (dayNum % 10) {
-      case 1: return "st"
-      case 2: return "nd"
-      case 3: return "rd"
-      default: return "th"
-    }
-  }
-  return `${day}${suffix(day)} ${month}`
+  const month = SHORT_MONTH_NAMES[d.getUTCMonth()]
+  return `${day}${getOrdinalSuffix(day)} ${month}`
 }
 
 export const formatTime12h = (timeStr) => {
@@ -261,7 +244,7 @@ export const formatFileSize = (bytes) => {
   if (!bytes) return "0 Bytes"
   const k = 1024
   const sizes = ["Bytes", "KB", "MB", "GB"]
-  const i = Math.log(bytes) / Math.log(k)
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
 }
 

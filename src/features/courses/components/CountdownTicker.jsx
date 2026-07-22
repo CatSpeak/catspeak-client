@@ -14,39 +14,47 @@ const CountdownTicker = ({ targetDate }) => {
     return target
   }, [targetDate])
 
-  const calculateTimeLeft = useCallback(() => {
-    const diff = countdownTarget.getTime() - new Date().getTime()
-    return diff > 0 ? Math.floor(diff / 1000) : 0
+  const calculateMinutesLeft = useCallback(() => {
+    const diff = countdownTarget.getTime() - Date.now()
+    return diff > 0 ? Math.floor(diff / 60000) : 0
   }, [countdownTarget])
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft)
-  const [prevTarget, setPrevTarget] = useState(countdownTarget)
-
-  if (countdownTarget !== prevTarget) {
-    setPrevTarget(countdownTarget)
-    setTimeLeft(calculateTimeLeft())
-  }
+  const [minutesLeft, setMinutesLeft] = useState(calculateMinutesLeft)
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft())
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [calculateTimeLeft])
+    let timer
+
+    const updateCountdown = () => {
+      const remainingMs = countdownTarget.getTime() - Date.now()
+      const nextMinutesLeft = remainingMs > 0 ? Math.floor(remainingMs / 60000) : 0
+      setMinutesLeft(nextMinutesLeft)
+
+      if (nextMinutesLeft <= 0) return
+
+      const millisecondsUntilMinuteChanges = remainingMs % 60000
+      timer = setTimeout(
+        updateCountdown,
+        millisecondsUntilMinuteChanges > 0 ? millisecondsUntilMinuteChanges + 10 : 10
+      )
+    }
+
+    updateCountdown()
+    return () => clearTimeout(timer)
+  }, [countdownTarget])
 
   const countdownTime = useMemo(() => {
-    if (timeLeft <= 0) {
+    if (minutesLeft <= 0) {
       return { days: "00", hours: "00", mins: "00" }
     }
-    const days = Math.floor(timeLeft / (24 * 3600))
-    const hours = Math.floor((timeLeft % (24 * 3600)) / 3600)
-    const mins = Math.floor((timeLeft % 3600) / 60)
+    const days = Math.floor(minutesLeft / (24 * 60))
+    const hours = Math.floor((minutesLeft % (24 * 60)) / 60)
+    const mins = minutesLeft % 60
     return {
       days: days.toString().padStart(2, "0"),
       hours: hours.toString().padStart(2, "0"),
       mins: mins.toString().padStart(2, "0")
     }
-  }, [timeLeft])
+  }, [minutesLeft])
 
   return (
     <div className="flex justify-around items-center text-center py-3 border-b border-gray-100 select-none">

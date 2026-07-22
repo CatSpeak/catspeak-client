@@ -1,5 +1,5 @@
 import React from "react"
-import { CLASS_STATUS_CONFIG } from "../utils/courseUtils"
+import { CLASS_STATUS_CONFIG } from "../../utils/courseUtils"
 
 const StatusBadge = ({ status, label, className = "" }) => {
   const config = CLASS_STATUS_CONFIG[status] || {

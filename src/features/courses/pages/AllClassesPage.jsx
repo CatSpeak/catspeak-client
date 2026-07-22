@@ -10,7 +10,8 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ClassTable from "../components/ClassTable"
 import CourseTablePageHeader from "../components/CourseTablePageHeader"
 import CourseTabs from "../components/CourseTabs"
-import TablePagination from "../components/TablePagination"
+import TablePagination from "../components/shared/TablePagination"
+import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapClassTableRow } from "../utils/courseTransforms"
 
 const AllClassesPage = () => {
@@ -20,11 +21,16 @@ const AllClassesPage = () => {
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
+  const {
+    currentPage,
+    debouncedSearchQuery,
+    searchQuery,
+    setCurrentPage,
+    setSearchQuery,
+  } = usePaginatedSearch()
 
   const { data, isLoading, error } = useGetAllClassesQuery({
-    search: searchQuery,
+    search: debouncedSearchQuery,
     status: activeTab === "all" ? "" : activeTab.toUpperCase(),
     page: currentPage,
     pageSize: 5,
@@ -46,11 +52,10 @@ const AllClassesPage = () => {
 
   const handleSearchChange = (value) => {
     setSearchQuery(value)
-    setCurrentPage(1)
   }
 
   const handleAction = () => {
-    toast.success("Tinh nang dang phat trien")
+    toast.success("Tính năng đang phát triển")
   }
 
   return (

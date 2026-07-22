@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { MoreVertical, Layers, Users, Trash2, PenSquare } from "lucide-react"
-import StatusBadge from "./StatusBadge"
-import ProgressBar from "./ProgressBar"
+import ProgressBar from "./overview/ProgressBar"
+import StatusBadge from "./shared/StatusBadge"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import CourseThumbnail from "./CourseThumbnail"
 

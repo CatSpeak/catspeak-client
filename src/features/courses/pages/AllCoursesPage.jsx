@@ -10,8 +10,9 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import CourseTable from "../components/CourseTable"
 import CourseTablePageHeader from "../components/CourseTablePageHeader"
 import CourseTabs from "../components/CourseTabs"
-import TablePagination from "../components/TablePagination"
+import TablePagination from "../components/shared/TablePagination"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
+import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapCourseTableRow } from "../utils/courseTransforms"
 
 const AllCoursesPage = () => {
@@ -21,12 +22,17 @@ const AllCoursesPage = () => {
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchQuery, setSearchQuery] = useState("")
+  const {
+    currentPage,
+    debouncedSearchQuery,
+    searchQuery,
+    setCurrentPage,
+    setSearchQuery,
+  } = usePaginatedSearch()
   const deleteHelper = useDeleteCourse(t)
 
   const { data, isLoading, error } = useGetAllCoursesQuery({
-    search: searchQuery,
+    search: debouncedSearchQuery,
     status: activeTab === "all" ? "" : activeTab.toUpperCase(),
     page: currentPage,
     pageSize: 5,
@@ -48,7 +54,6 @@ const AllCoursesPage = () => {
 
   const handleSearchChange = (value) => {
     setSearchQuery(value)
-    setCurrentPage(1)
   }
 
   return (

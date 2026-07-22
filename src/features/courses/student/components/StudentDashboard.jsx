@@ -2,7 +2,6 @@ import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { BookOpen, Calendar, Clock, ArrowRight, Award, Flame, Sparkles, Compass, Play, Globe } from "lucide-react"
 import {
-  useGetStudentEnrolledCoursesQuery,
   useGetStudentAvailableCoursesQuery,
   useGetStudentJoinedClassesQuery
 } from "../../../../store/api/coursesApi"
@@ -12,7 +11,7 @@ import { useGetProfileQuery } from "@/features/auth"
 import CourseSearchInput from "../../components/CourseSearchInput"
 import CourseSelectFilter from "../../components/CourseSelectFilter"
 import CourseTabs from "../../components/CourseTabs"
-import ViewModeToggle from "../../components/ViewModeToggle"
+import ViewModeToggle from "../../components/shared/ViewModeToggle"
 import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTransforms"
 
 const StudentDashboard = ({ t }) => {
@@ -28,11 +27,13 @@ const StudentDashboard = ({ t }) => {
 
   // API Queries
   const { data: userData } = useGetProfileQuery()
-  const { data: enrolledCourses, isLoading: isEnrolledLoading } = useGetStudentEnrolledCoursesQuery()
-  const { data: availableCourses, isLoading: isAvailableLoading } = useGetStudentAvailableCoursesQuery()
   const { data: joinedClasses, isLoading: isClassesLoading } = useGetStudentJoinedClassesQuery()
+  const { data: availableCourses, isLoading: isAvailableLoading } = useGetStudentAvailableCoursesQuery(
+    undefined,
+    { skip: activeTab !== "explore" }
+  )
 
-  const isLoading = isEnrolledLoading || isAvailableLoading || isClassesLoading
+  const isLoading = isClassesLoading || (activeTab === "explore" && isAvailableLoading)
 
   // Handlers
   const handleOpenDetail = (course) => {
@@ -42,6 +43,27 @@ const StudentDashboard = ({ t }) => {
   const handleJoinClassRoom = (cls) => {
     navigate(`/workspace/learning/class/${cls.id}`)
   }
+
+  // The joined-classes response comes from the same endpoint that previously powered
+  // the enrolled-courses query, so derive the course cards without making a second request.
+  const enrolledCourses = useMemo(() => (
+    (joinedClasses || []).map((cls) => ({
+      id: cls.courseId?.toString() || "",
+      name: cls.courseName || cls.courseTitle || "Untitled Course",
+      title: cls.courseName || cls.courseTitle || "Untitled Course",
+      language: cls.language || "English",
+      levels: cls.levels || ["A1"],
+      description: cls.courseName ? `Enrolled in class ${cls.name || cls.title}` : "",
+      totalSessions: cls.progress?.totalSessions || cls.totalSessions || 24,
+      classCount: 1,
+      studentCount: cls.studentCount || cls.enrolledStudents || 0,
+      status: cls.status || "OPEN",
+      thumbnailUrl: cls.thumbnailUrl || "",
+      enrolledClassId: cls.id?.toString() || "",
+      enrolledClassName: cls.name || cls.title || "",
+      progress: cls.progress || { completedSessions: 0, totalSessions: 24 },
+    }))
+  ), [joinedClasses])
 
   // Memoized listings and filters
   const currentCourses = useMemo(() => {
