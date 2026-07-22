@@ -121,13 +121,18 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
       return
     }
 
-    const numericScore = parseFloat(score)
-    if (Number.isNaN(numericScore) || numericScore < 0 || numericScore > assignmentMaxScore) {
-      const errorMessage = language === "vi"
-        ? `Vui lòng nhập điểm từ 0 đến ${assignmentMaxScore}`
-        : language === "zh"
-          ? `请输入0至${assignmentMaxScore}之间的得分`
-          : `Please enter a score between 0 and ${assignmentMaxScore}`
+    const trimmedScore = (score ?? "").toString().trim()
+    const numericScore = Number(trimmedScore)
+    const isInvalidNumber = !trimmedScore || Number.isNaN(numericScore) || !/^\d+(\.\d+)?$/.test(trimmedScore)
+
+    if (isInvalidNumber || numericScore < 0 || numericScore > assignmentMaxScore) {
+      const errorMessage = gradingTranslations.scoreRangeError
+        ? gradingTranslations.scoreRangeError.replace("{{maxScore}}", assignmentMaxScore)
+        : language === "vi"
+          ? `Vui lòng nhập điểm từ 0 đến ${assignmentMaxScore}`
+          : language === "zh"
+            ? `请输入0至${assignmentMaxScore}之间的得分`
+            : `Please enter a score between 0 and ${assignmentMaxScore}`
       toast.error(errorMessage)
       return
     }

@@ -35,6 +35,7 @@ import { Navigate } from "react-router-dom";
 import { AuthGuard } from "@/shared/components";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect"
+import WebsitePage from "@/features/websites/WebsitePage";
 
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(

@@ -25,8 +25,36 @@ const AssignmentGradingWorkspace = ({
   ))
   const [feedback, setFeedback] = useState(student.feedback || "")
   const [zoomLevel, setZoomLevel] = useState(100)
+  const [isTouched, setIsTouched] = useState(false)
+
+  const getScoreError = (val, maxScore) => {
+    const trimmed = (val ?? "").toString().trim()
+    if (!trimmed) {
+      return cg.scoreRequired || "Vui lòng nhập điểm số"
+    }
+    const num = Number(trimmed)
+    if (Number.isNaN(num) || !/^\d+(\.\d+)?$/.test(trimmed)) {
+      return cg.scoreInvalidNumber || "Điểm số phải là một số hợp lệ"
+    }
+    if (num < 0) {
+      return cg.scoreMinError || "Điểm số không được nhỏ hơn 0"
+    }
+    if (num > maxScore) {
+      return (cg.scoreMaxError || "Điểm số không được vượt quá {{maxScore}}")
+        .replace("{{maxScore}}", maxScore)
+    }
+    return null
+  }
 
   const isSubmitted = student.status !== "not_submitted"
+  const scoreError = getScoreError(score, assignmentMaxScore)
+  const isScoreInvalid = isSubmitted && !!scoreError && (isTouched || score.trim() !== "")
+
+  const handleSave = () => {
+    setIsTouched(true)
+    if (scoreError) return
+    onSave({ score, feedback })
+  }
   const studentInitials = getStudentInitials(student.name)
   const firstFile = student.files?.[0] ? getFileMeta(student.files[0]) : null
   const cleanFileName = firstFile?.name
@@ -205,16 +233,33 @@ const AssignmentGradingWorkspace = ({
                 {cg.modalNotSubmittedMsg || "Học viên chưa nộp bài tập này."}
               </div>
             ) : (
-              <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-2xs focus-within:ring-2 focus-within:ring-red-100 focus-within:border-[#990011] transition-all">
-                <input
-                  id={scoreInputId}
-                  type="text"
-                  value={score}
-                  onChange={(event) => setScore(event.target.value)}
-                  placeholder="0.0"
-                  className="w-20 text-center font-black text-2xl text-[#990011] focus:outline-none placeholder-gray-300 select-all"
-                />
-                <span className="text-lg font-extrabold text-gray-400">/ {assignmentMaxScore}</span>
+              <div className="flex flex-col gap-1">
+                <div
+                  className={`flex items-center gap-3 bg-white border rounded-xl px-4 py-2.5 shadow-2xs transition-all ${isScoreInvalid
+                      ? "border-red-500 text-red-600 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-red-500"
+                      : "border-gray-200 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-[#990011]"
+                    }`}
+                >
+                  <input
+                    id={scoreInputId}
+                    type="text"
+                    value={score}
+                    onChange={(event) => {
+                      setScore(event.target.value)
+                      if (!isTouched) setIsTouched(true)
+                    }}
+                    onBlur={() => setIsTouched(true)}
+                    placeholder="0.0"
+                    className={`w-20 text-center font-black text-2xl focus:outline-none placeholder-gray-300 select-all ${isScoreInvalid ? "text-red-600" : "text-[#990011]"
+                      }`}
+                  />
+                  <span className="text-lg font-extrabold text-gray-400">/ {assignmentMaxScore}</span>
+                </div>
+                {isScoreInvalid && (
+                  <span className="text-red-500 text-xs font-semibold mt-1 flex items-center gap-1">
+                    <span className="font-bold">•</span> {scoreError}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -261,8 +306,8 @@ const AssignmentGradingWorkspace = ({
             {isSubmitted && (
               <button
                 type="button"
-                onClick={() => onSave({ score, feedback })}
-                disabled={isSaving}
+                onClick={handleSave}
+                disabled={isSaving || !!scoreError}
                 className="flex-1 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {student.status === "graded" || student.status === "returned"
