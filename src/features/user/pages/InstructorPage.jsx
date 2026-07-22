@@ -249,12 +249,12 @@ const InstructorPage = () => {
 
     if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
       newErrors.languagesTeach =
-        ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
+        ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
     } else {
       for (const lang of formData.languagesTeach) {
         if (!lang.language || !lang.level) {
-          newErrors.languagesTeach =
-            ins.requiredField || "Vui lòng chọn đầy đủ ngôn ngữ và trình độ";
+          newErrors.languagesTeachLevel =
+            ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
           break;
         }
       }
@@ -301,6 +301,7 @@ const InstructorPage = () => {
       if (!canEdit) return;
       setFormData((prev) => ({ ...prev, languagesTeach: languages }));
       clearError("languagesTeach");
+      clearError("languagesTeachLevel");
     },
     [canEdit],
   );
@@ -475,7 +476,7 @@ const InstructorPage = () => {
   }
 
   // Determine readOnly for section components
-  const readOnly = !canEdit;
+  const readOnly = !canEdit || isSubmitting;
 
   return (
     <div className="flex flex-col gap-6">

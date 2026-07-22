@@ -130,42 +130,47 @@ const InstructorLanguages = ({
                   <span className="text-sm font-medium text-gray-600 w-16 truncate">
                     {item.language}
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <Dropdown
-                      options={(LANGUAGE_LEVELS[item.language] || []).map((code) => ({
-                        value: code,
-                        label: code,
-                      }))}
-                      value={item.level}
-                      onChange={(val) => {
-                        if (readOnly) return
-                        const updated = formData.languagesTeach.map((lang, i) =>
-                          i === index ? { ...lang, level: val } : lang
-                        )
-                        onLanguagesChange(updated)
-                      }}
-                      disabled={readOnly}
-                      placeholder={ins.selectLevel || "Chọn trình độ"}
-                      trigger={(isOpen, selectedOption, toggle) => (
-                        <button
-                          type="button"
-                          onClick={toggle}
-                          disabled={readOnly}
-                          className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.languagesTeach && !item.level ? "border-red-500" : "border-gray-100"}`}
-                        >
-                          <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
-                            {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
-                          </span>
-                          <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                        </button>
+                    <div className="flex-1 min-w-0">
+                      <Dropdown
+                        options={(LANGUAGE_LEVELS[item.language] || []).map((code) => ({
+                          value: code,
+                          label: code,
+                        }))}
+                        value={item.level}
+                        onChange={(val) => {
+                          if (readOnly) return
+                          const updated = formData.languagesTeach.map((lang, i) =>
+                            i === index ? { ...lang, level: val } : lang
+                          )
+                          onLanguagesChange(updated)
+                        }}
+                        disabled={readOnly}
+                        placeholder={ins.selectLevel || "Chọn trình độ"}
+                        trigger={(isOpen, selectedOption, toggle) => (
+                          <button
+                            type="button"
+                            onClick={toggle}
+                            disabled={readOnly}
+                            className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${(errors.languagesTeachLevel || errors.languagesTeach) && !item.level ? "border-red-500" : "border-gray-100"}`}
+                          >
+                            <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
+                              {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
+                            </span>
+                            <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                          </button>
+                        )}
+                      />
+                      {(errors.languagesTeachLevel || errors.languagesTeach) && !item.level && (
+                        <p className="text-xs text-red-500 font-medium mt-1">
+                          {ins.requiredField || "Trường này là bắt buộc"}
+                        </p>
                       )}
-                    />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         <div id="field-nativeLanguage" className="flex flex-col gap-2">
           <label className="text-sm font-semibold text-gray-800">
