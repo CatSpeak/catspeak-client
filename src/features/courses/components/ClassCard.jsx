@@ -1,5 +1,5 @@
 import React from "react"
-import { Calendar, User, Tag, Clock } from "lucide-react"
+import { Calendar, Tag, Clock } from "lucide-react"
 import { formatDateRange, formatCurrencyVND } from "../utils/courseUtils"
 import CourseStatusPill from "./CourseStatusPill"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -40,11 +40,7 @@ const ClassCard = ({
           />
         ) : null}
 
-        {/* Top-left slots/capacity pill */}
-        <div className="absolute top-3 left-3 bg-[#EAB308]/90 text-white text-[11px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-          <User size={11} className="fill-white" />
-          <span>{cls.slots}</span>
-        </div>
+
 
         {/* Top-right status pill */}
         <div className="absolute top-3 right-3">

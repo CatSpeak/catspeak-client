@@ -9,7 +9,8 @@ import {
   Info,
   ChevronDown,
   Upload,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react"
 
 import {
@@ -492,9 +493,19 @@ const CreateClassPage = () => {
       </div>
 
       {/* ─── Header ─── */}
-      <h1 className="text-2xl font-bold tracking-tight text-gray-950">
-        {pageTitle}
-      </h1>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
+          title={t.common?.back || "Quay lại"}
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+          {pageTitle}
+        </h1>
+      </div>
 
       {/* ─── Main Form Box ─── */}
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6">

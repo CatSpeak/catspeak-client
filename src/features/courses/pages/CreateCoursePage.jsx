@@ -5,7 +5,8 @@ import { toast } from "react-hot-toast"
 import {
   Upload,
   ChevronDown,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react"
 
 import {
@@ -200,9 +201,19 @@ const CreateCoursePage = () => {
       </div>
 
       {/* ─── Header ─── */}
-      <h1 className="text-2xl font-bold tracking-tight text-gray-950">
-        {labelCourseAction}
-      </h1>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
+          title={t.common?.back || "Quay lại"}
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+          {labelCourseAction}
+        </h1>
+      </div>
 
       {/* ─── Form Container ─── */}
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6">
@@ -329,6 +340,14 @@ const CreateCoursePage = () => {
               <span>{c.courseDetail?.deleteCourse || "Delete Course"}</span>
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex-1 sm:flex-initial h-11 px-6 border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <ArrowLeft size={13} />
+            <span>{t.common?.back || "Quay lại"}</span>
+          </button>
           <button
             type="button"
             onClick={handleClear}
