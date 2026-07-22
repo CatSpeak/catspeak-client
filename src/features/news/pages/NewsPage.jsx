@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPostsQuery } from "@/store/api/postsApi"
+import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 import NewsCard from "../components/NewsCard"
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"

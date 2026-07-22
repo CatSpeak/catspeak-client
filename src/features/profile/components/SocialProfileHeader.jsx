@@ -19,7 +19,11 @@ import {
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
 } from "../../../store/api/social/friendshipApi"
-import { useUpdateAvatarMutation } from "@/store/api/userApi"
+import {
+  useUpdateAvatarMutation,
+  useGetCurrentBackgroundQuery,
+} from "@/store/api/userApi"
+import backgroundAccount from "@/shared/assets/backgrounds/background-account.png"
 
 const SocialProfileHeader = ({
   user,

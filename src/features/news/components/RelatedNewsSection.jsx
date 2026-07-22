@@ -2,7 +2,7 @@ import React from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { ArrowRight } from "lucide-react"
-import { useGetPostsQuery } from "@/store/api/postsApi"
+import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import NewsCard from "./NewsCard"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 

@@ -14,6 +14,7 @@ import {
   Mail,
   BookOpen,
   Video,
+  MessageCircle,
 } from "lucide-react"
 
 export const navLinks = [
