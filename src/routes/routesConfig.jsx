@@ -242,10 +242,9 @@ const routesConfig = [
                   {
                     path: "website/:id",
                     element: (
-                      <WebsitePage />
-                      // <AuthGuard>
-                      //   <WebsitePage />
-                      // </AuthGuard>
+                      <AuthGuard>
+                        <WebsitePage />
+                      </AuthGuard>
                     ),
                   },
                   { path: "*", element: <PageNotFound /> },
