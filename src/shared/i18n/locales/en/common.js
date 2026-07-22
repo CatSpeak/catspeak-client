@@ -88,9 +88,12 @@ export default {
     "zh-self-study-vn": "Chinese Self-Study (Vietnamese UI)",
   },
   website: {
+    connect: "Connect",
     error: {
       notFound: "Website not found",
       backToWebsites: "Back to Cat Speak",
+      timeout: "Webpage is taking too long to load",
+      reload: "Reload page",
     },
   },
   comingSoon: {
