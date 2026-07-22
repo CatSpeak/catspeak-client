@@ -10,14 +10,16 @@ import {
   useDeletePostCommentMutation,
   useEditPostCommentMutation,
   useReactToCommentMutation,
-} from "@/store/api/postsApi"
+} from "@/store/api/social/postsApi"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import CommentItem from "./CommentItem"
 
 const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
   const { t } = useLanguage()
   const { user: authUser, isAuthenticated } = useAuth()
-  const { data: userData } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
+  const { data: userData } = useGetProfileQuery(undefined, {
+    skip: !isAuthenticated,
+  })
   const user = userData?.data ?? authUser ?? {}
 
   const { data: comments, isLoading } = useGetPostCommentsQuery({ postId })
@@ -130,8 +132,12 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <Avatar
               size={32}
-              src={user?.avatarImageUrl ? getImageUrl(user.avatarImageUrl) : null}
-              name={user?.fullName || user?.firstName || user?.username || "User"}
+              src={
+                user?.avatarImageUrl ? getImageUrl(user.avatarImageUrl) : null
+              }
+              name={
+                user?.fullName || user?.firstName || user?.username || "User"
+              }
               className="shrink-0"
             />
             <div className="flex-1 relative">
@@ -139,7 +145,9 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
                 type="text"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder={t.news?.newsDetail?.writeComment || "Nhập bình luận..."}
+                placeholder={
+                  t.news?.newsDetail?.writeComment || "Nhập bình luận..."
+                }
                 className="min-h-[42px] w-full rounded-2xl border border-[#e2e2e2] bg-[#f5f5f5] px-3 py-2 font-nunito text-sm text-black transition-colors placeholder:text-[rgba(123,121,121,0.5)] focus:border-cath-red-700 focus:outline-none"
               />
             </div>
@@ -191,7 +199,10 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
         onClose={() => setCommentToDelete(null)}
         onConfirm={confirmDelete}
         title={t.news?.newsDetail?.deleteCommentTitle || "Delete Comment"}
-        message={t.news?.newsDetail?.deleteCommentMessage || "Are you sure you want to delete this comment? This action cannot be undone."}
+        message={
+          t.news?.newsDetail?.deleteCommentMessage ||
+          "Are you sure you want to delete this comment? This action cannot be undone."
+        }
         cancelText={t.news?.newsDetail?.cancel || "Cancel"}
         confirmText={t.news?.newsDetail?.deleteCommentConfirm || "Delete"}
         confirmVariant="destructive"

@@ -12,6 +12,7 @@ const PillButton = ({
   variant = "primary", // "primary" | "secondary" | "outline" | "secondary-no-outline"
   bgColor,
   textColor,
+  borderColor,
   className = "",
   ...props
 }) => {
@@ -46,6 +47,7 @@ const PillButton = ({
         ...variantCustomStyle,
         ...(bgColor ? { backgroundColor: bgColor } : {}),
         ...(textColor ? { color: textColor } : {}),
+        ...(borderColor ? { borderColor: borderColor } : {}),
       }
     : {}
 

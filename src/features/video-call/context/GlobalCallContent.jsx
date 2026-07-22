@@ -22,7 +22,6 @@ import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
-import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import {
   useParticipantList,
   parseMetadata,
@@ -43,7 +42,6 @@ import {
   getNavigate,
   getLocation,
 } from "@/features/video-call/hooks/useNavigateRef"
-
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
@@ -94,7 +92,9 @@ const GlobalCallContent = ({
           return parsed.layoutMode
         }
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return "auto"
   })
   const [maxTiles, setMaxTiles] = useState(() => {
@@ -109,7 +109,9 @@ const GlobalCallContent = ({
           }
         }
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return 16
   })
   const [hideEmptyTiles, setHideEmptyTiles] = useState(() => {
@@ -117,21 +119,26 @@ const GlobalCallContent = ({
       const saved = localStorage.getItem("catspeak_video_layout_settings")
       if (saved) {
         const parsed = JSON.parse(saved)
-        if (typeof parsed.hideEmptyTiles === "boolean") return parsed.hideEmptyTiles
+        if (typeof parsed.hideEmptyTiles === "boolean")
+          return parsed.hideEmptyTiles
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return false
   })
 
   useEffect(() => {
     try {
       const settings = { layoutMode, maxTiles, hideEmptyTiles }
-      localStorage.setItem("catspeak_video_layout_settings", JSON.stringify(settings))
+      localStorage.setItem(
+        "catspeak_video_layout_settings",
+        JSON.stringify(settings),
+      )
     } catch (e) {
       console.error("Failed to save layout settings", e)
     }
   }, [layoutMode, maxTiles, hideEmptyTiles])
-
 
   // ── LiveKit hooks ──
   let lkRoom = null
@@ -183,17 +190,24 @@ const GlobalCallContent = ({
           }
         } catch (err) {
           console.error("Failed to start speaking assistant:", err)
-          toast.error(err?.data?.message || "Failed to start speaking assistant")
+          toast.error(
+            err?.data?.message || "Failed to start speaking assistant",
+          )
         }
       } else {
         const dispatchIdToStop = activeDispatchId || assistantStatus?.dispatchId
         if (dispatchIdToStop) {
           try {
-            await stopAssistant({ sessionId, dispatchId: dispatchIdToStop }).unwrap()
+            await stopAssistant({
+              sessionId,
+              dispatchId: dispatchIdToStop,
+            }).unwrap()
             setActiveDispatchId(null)
           } catch (err) {
             console.error("Failed to stop speaking assistant:", err)
-            toast.error(err?.data?.message || "Failed to stop speaking assistant")
+            toast.error(
+              err?.data?.message || "Failed to stop speaking assistant",
+            )
           }
         }
       }
@@ -205,7 +219,15 @@ const GlobalCallContent = ({
       prevEnabled.current = speakingAssistantEnabled
       triggerToggle()
     }
-  }, [speakingAssistantEnabled, isConnected, sessionId, activeDispatchId, assistantStatus, startAssistant, stopAssistant])
+  }, [
+    speakingAssistantEnabled,
+    isConnected,
+    sessionId,
+    activeDispatchId,
+    assistantStatus,
+    startAssistant,
+    stopAssistant,
+  ])
 
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState(null)
@@ -245,13 +267,13 @@ const GlobalCallContent = ({
             if (finishedRec.status === "completed") {
               toast.success(
                 t.recordings?.actions?.stopSuccess ||
-                "Recording trước đó đã được lưu thành công trong My Workspace.",
+                  "Recording trước đó đã được lưu thành công trong My Workspace.",
                 { duration: 6000 },
               )
             } else if (finishedRec.status === "Partial Completed") {
               toast.error(
                 t.recordings?.storage?.warningLimitReached ||
-                "Recording trước đó đã dừng và được lưu một phần.",
+                  "Recording trước đó đã dừng và được lưu một phần.",
                 { duration: 6000 },
               )
             }
@@ -272,13 +294,13 @@ const GlobalCallContent = ({
         if (data.reason === "storage_exceeded") {
           toast.error(
             t.recordings?.storage?.warningLimitReached ||
-            "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
+              "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
             { duration: 6000 },
           )
         } else if (data.reason === "reconnect_timeout") {
           toast.error(
             t.recordings?.errors?.interrupted ||
-            "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
+              "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
             { duration: 6000 },
           )
         }
@@ -286,7 +308,7 @@ const GlobalCallContent = ({
     } else if (event === "RecordingWarning") {
       toast.error(
         t.recordings?.storage?.warningAlmostFull ||
-        "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
+          "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
         { icon: "⚠️", duration: 6000 },
       )
     }
@@ -298,7 +320,7 @@ const GlobalCallContent = ({
       if (connectionState === ConnectionState.Reconnecting) {
         toast.error(
           t.recordings?.errors?.disconnected ||
-          "Kết nối bị gián đoạn. Recording tạm dừng...",
+            "Kết nối bị gián đoạn. Recording tạm dừng...",
           { id: "rec-disconnect", duration: 99999 },
         )
       } else if (
@@ -308,7 +330,7 @@ const GlobalCallContent = ({
         toast.dismiss("rec-disconnect")
         toast.success(
           t.recordings?.actions?.reconnected ||
-          "Kết nối đã được khôi phục. Recording tiếp tục.",
+            "Kết nối đã được khôi phục. Recording tiếp tục.",
           { duration: 3000 },
         )
       }

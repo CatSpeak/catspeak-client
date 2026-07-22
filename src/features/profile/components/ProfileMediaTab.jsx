@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
 import { Image as ImageIcon, X, ZoomIn, ZoomOut, Play } from "lucide-react"
-import { useGetUserWallMediaQuery } from "../api/profilePostsApi"
+import { useGetUserWallMediaQuery } from "../../../store/api/social/profilePostsApi"
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import { IconButton } from "@/shared/components/ui/buttons"
 import FluentCard from "@/shared/components/ui/FluentCard"

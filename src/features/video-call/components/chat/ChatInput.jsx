@@ -101,6 +101,7 @@ const ChatInput = ({
           </button>
         </div>
       )}
+
       <form
         onSubmit={handleSubmit}
         className={`py-2 px-3 flex items-center gap-2 relative z-20 ${!isAiInput ? "border-[#E5E5E5]" : ""

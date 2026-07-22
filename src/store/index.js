@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { setupListeners } from "@reduxjs/toolkit/query"
 import { baseApi } from "./api/baseApi"
+import { socialApi } from "./api/social/socialApi"
 import authReducer from "./slices/authSlice"
 import messageWidgetReducer from "./slices/messageWidgetSlice"
 import serverStatusReducer from "./slices/serverStatusSlice"
@@ -13,6 +14,7 @@ import globalUploadReducer from "./slices/globalUploadSlice"
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
+    [socialApi.reducerPath]: socialApi.reducer,
     auth: authReducer,
     messageWidget: messageWidgetReducer,
     serverStatus: serverStatusReducer,
@@ -23,7 +25,7 @@ export const store = configureStore({
     globalUpload: globalUploadReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(baseApi.middleware),
+    getDefaultMiddleware().concat(baseApi.middleware, socialApi.middleware),
   devTools: import.meta.env.DEV,
 })
 

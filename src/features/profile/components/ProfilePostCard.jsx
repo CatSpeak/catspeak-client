@@ -4,11 +4,11 @@ import { Video, FileText } from "lucide-react"
 import {
   useUpdatePostMutation,
   useDeletePostMutation,
-} from "../api/profilePostsApi"
+} from "../../../store/api/social/profilePostsApi"
 import {
   useReactToPostMutation,
   useSharePostMutation,
-} from "@/store/api/postsApi"
+} from "@/store/api/social/postsApi"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PostEditorModal from "./PostEditorModal"
 import ShareModal from "@/features/news/components/ShareModal"
@@ -74,8 +74,6 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
     }
   }
 
-
-
   return (
     <>
       <FluentCard className="space-y-4">
@@ -128,7 +126,9 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                       {m.fileName || "Tài liệu"}
                     </span>
                     <span className="text-xs text-gray-400 mt-1">
-                      {m.fileSize ? `${(m.fileSize / (1024 * 1024)).toFixed(2)} MB` : ""}
+                      {m.fileSize
+                        ? `${(m.fileSize / (1024 * 1024)).toFixed(2)} MB`
+                        : ""}
                     </span>
                   </a>
                 )}
