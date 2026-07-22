@@ -145,7 +145,7 @@ const NormalVideoLayout = ({
       </div>
 
       {shouldPaginate && maxPages > 1 && (
-        <div className="flex w-full shrink-0 items-center justify-center gap-2 mt-2 md:mb-2 md:mt-0">
+        <div className="flex w-full shrink-0 items-center justify-center gap-2 mt-2 md:mb-1.5 md:mt-0">
           {Array.from({ length: maxPages }).map((_, idx) => (
             <button
               key={idx}
