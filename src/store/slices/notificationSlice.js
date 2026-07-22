@@ -7,6 +7,8 @@ const initialState = {
   totalUnreadMessages: 0,
   // Friend online status: { [userId]: boolean }
   friendOnlineStatus: {},
+  // Friend last seen timestamp: { [userId]: string }
+  friendLastSeen: {},
 }
 
 /** Recalculate total from the unread map */
@@ -37,8 +39,11 @@ const notificationSlice = createSlice({
       state.totalUnreadMessages = 0
     },
     setFriendOnlineStatus: (state, action) => {
-      const { userId, isOnline } = action.payload
+      const { userId, isOnline, lastSeen } = action.payload
       state.friendOnlineStatus[userId] = isOnline
+      if (lastSeen) {
+        state.friendLastSeen[userId] = lastSeen
+      }
     },
   },
 })

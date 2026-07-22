@@ -76,7 +76,7 @@ const EventDetailsSection = ({
           </div>
           <div className="flex-1 flex flex-col gap-6 w-full relative min-w-0">
             <div className="flex flex-col min-[426px]:flex-row items-start gap-6 w-full">
-              <div className="flex-1 flex flex-col w-full min-w-0">
+              <div className="flex-[4] flex flex-col w-full min-w-0">
                 <Dropdown
                   options={countryOptions}
                   value={countryId}
@@ -89,7 +89,7 @@ const EventDetailsSection = ({
                   disabled={isCountriesLoading}
                   activeColor={eventColor}
                   className="w-full"
-                  triggerClassName={`border ${errors.countryId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                  // triggerClassName={`border ${errors.count ryId ? "border-red-500" : ""}`}
                   enableSearch
                 />
                 {errors.countryId && (
@@ -99,7 +99,7 @@ const EventDetailsSection = ({
                 )}
               </div>
 
-              <div className="flex-1 flex flex-col w-full min-w-0">
+              <div className="flex-[6] flex flex-col w-full min-w-0">
                 <Dropdown
                   options={cityOptions}
                   value={cityId}
@@ -110,7 +110,7 @@ const EventDetailsSection = ({
                   }
                   activeColor={eventColor}
                   className="w-full"
-                  triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                  // triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
                   enableSearch
                 />
                 {errors.cityId && (
@@ -178,8 +178,7 @@ const EventDetailsSection = ({
                   const val = e.target.value;
                   if (val === "" || /^\d+$/.test(val)) {
                     onMaxParticipantsChange(val);
-                    if (errors.maxParticipants)
-                      onMaxParticipantsChange(val);
+                    if (errors.maxParticipants) onMaxParticipantsChange(val);
                   }
                 }}
                 onBlur={(e) => {
@@ -197,7 +196,6 @@ const EventDetailsSection = ({
               />
               <span className="text-[#606060] mt-[10px]">{cal.guest}</span>
             </div>
-
           </div>
         </div>
       </div>

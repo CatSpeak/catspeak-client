@@ -211,6 +211,7 @@ export default {
     systemMessagesDesc: "Show automatic system messages",
     replyingTo: "Replying to",
     reply: "Reply",
+    aiSuggestion: "Suggestions from AI",
   },
   sessionActions: {
     connect11: "Connect 1:1",
@@ -304,6 +305,17 @@ export default {
     unknownDevice: "Unknown Device",
   },
   videoCall: {
+    changeLayout: {
+      title: "Change layout",
+      auto: "Auto",
+      grid: "Grid",
+      spotlight: "Spotlight",
+      sidebar: "Sidebar",
+      tilesLabel: "Tiles",
+      tilesDescription: "Maximum tiles to show, depending on window size.",
+      hideNonVideo: "Hide non-video participants",
+    },
+    remainingTime: "Remaining time",
     roomClosingTitle: "Room Ending Soon",
     roomClosingSubtitle:
       "This session will end in {{remainingSeconds}} seconds",
@@ -358,6 +370,7 @@ export default {
         "The recording will be saved in <strong>My Workspace</strong>.",
       continueBtn: "Continue recording",
       confirmBtn: "Confirm",
+      backBtn: "Back",
     },
     provider: {
       connecting: "Getting your session ready...",
@@ -654,6 +667,7 @@ export default {
     joinError: "Error joining breakout room.",
     returnMainError: "Error returning to main room.",
     broadcastError: "Error sending broadcast.",
+    broadcastToastTitle: "Announcement from Host",
     toggleAllowError: "Cannot change room change settings.",
     breakoutRoomPrefix: "Breakout room: ",
     freeToChange: "Free to move",

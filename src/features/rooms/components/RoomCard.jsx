@@ -31,6 +31,8 @@ const RoomCard = ({ room }) => {
 
   const currentLang = lang || (typeof window !== 'undefined' ? localStorage.getItem("communityLanguage") : null) || "en";
   const fallbackThumbnail = currentLang === "zh" ? ZHThumbnail : ENThumbnail;
+  const [imageError, setImageError] = useState(false);
+  const displayThumbnail = imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl;
 
   const translatedName = room.name;
   const isRoomFull =
@@ -116,13 +118,14 @@ const RoomCard = ({ room }) => {
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
-            style={{ backgroundImage: `url(${room.thumbnailUrl || fallbackThumbnail})` }}
+            style={{ backgroundImage: `url(${displayThumbnail})` }}
           />
           {/* Main Image */}
           <img
-            src={room.thumbnailUrl || fallbackThumbnail}
+            src={displayThumbnail}
+            onError={() => setImageError(true)}
             alt="Room Cover"
-            className={`relative z-10 h-full w-full ${room.thumbnailUrl ? "object-contain" : "object-cover"}`}
+            className={`relative z-10 h-full w-full ${(!imageError && room.thumbnailUrl) ? "object-contain" : "object-cover"}`}
           />
 
           {/* Top Left: Badges */}

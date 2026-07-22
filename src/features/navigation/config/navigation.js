@@ -1,8 +1,7 @@
+import { websites } from "@/features/navigation/config/websites";
 import {
   Home,
   LayoutDashboard,
-  ShoppingCart,
-  MessageCircle,
   GraduationCap,
   Settings,
   HelpCircle,
@@ -10,13 +9,14 @@ import {
   User,
   CreditCard,
   Newspaper,
-  Video,
   Calendar,
   Mic,
   Film,
   Mail,
-  BookOpen
-} from "lucide-react"
+  BookOpen,
+  Video,
+  MessageCircle,
+} from "lucide-react";
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -33,6 +33,7 @@ export const navLinks = [
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
+
   {
     key: "workspace",
     hasDropdown: true,
@@ -43,9 +44,17 @@ export const navLinks = [
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
+      { key: "profile", path: "/profile", icon: User },
+      { key: "messages", path: "/chat", icon: MessageCircle },
     ],
   },
-
+  {
+    key: "horizontalBar",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  ...websites,
   // {
   //   key: "pricing",
   //   path: "/pricing",
@@ -53,7 +62,6 @@ export const navLinks = [
   //   icon: CreditCard,
   // },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
-  // { key: "messages", path: "/messages", icon: MessageCircle },
   // {
   //   key: "courses",
   //   hasDropdown: true,
@@ -63,9 +71,16 @@ export const navLinks = [
   //     { key: "myCourses", path: "/my-courses" }
   //   ]
   // },
-]
+];
+
+export const settingNavLinks = [
+  { key: "accountInfo", path: "/setting/account", icon: User },
+  { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
+  { key: "systemConfig", path: "/setting/system", icon: Settings },
+];
 
 export const footerLinks = [
+  { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
   // { key: "help", path: "/help", icon: HelpCircle }
-]
+];

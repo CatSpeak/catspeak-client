@@ -83,6 +83,15 @@ const updateLikeFields = (reel) => {
 // Reels API slice
 export const reelsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    getCreatorCount: builder.query({
+      query: ({ from, to } = {}) => {
+        const params = new URLSearchParams()
+        if (from) params.append("from", from)
+        if (to) params.append("to", to)
+        return `/Reels/creator-count?${params.toString()}`
+      },
+    }),
+
     // Get Reels feed using decay scoring (perfect for infinite scroll)
     getReelsFeed: builder.query({
       query: ({ sourceFilter = "All", page = 1, pageSize = 20, excludeReelIds } = {}) => {
@@ -301,6 +310,40 @@ export const reelsApi = baseApi.injectEndpoints({
         if (pageSize) params.append("pageSize", String(pageSize))
         return `/Reels/challenge?${params.toString()}`
       },
+      transformResponse: (response) => ({
+        ...(response && typeof response === "object" && !Array.isArray(response) ? response : {}),
+        data: getReelList(response),
+        lastPageCount: getReelList(response).length,
+      }),
+      serializeQueryArgs: ({ endpointName, queryArgs = {} }) => {
+        const challengeId = queryArgs.challengeId || ""
+        const challengeFilter = queryArgs.challengeFilter || ""
+        const pageSize = queryArgs.pageSize || 10
+        return `${endpointName}-${challengeId}-${challengeFilter}-${pageSize}`
+      },
+      merge: (currentCache, incomingResponse, { arg }) => {
+        const incomingReels = getReelList(incomingResponse)
+
+        if (!arg?.page || arg.page === 1) {
+          Object.assign(currentCache, incomingResponse, {
+            data: incomingReels,
+            lastPageCount: incomingReels.length,
+          })
+          return
+        }
+
+        const currentReels = getReelList(currentCache)
+        const existingIds = new Set(currentReels.map((reel) => String(reel.reelId)))
+        incomingReels.forEach((reel) => {
+          if (!existingIds.has(String(reel.reelId))) {
+            currentReels.push(reel)
+          }
+        })
+
+        Object.entries(incomingResponse || {}).forEach(([key, value]) => {
+          if (key !== "data") currentCache[key] = value
+        })
+      },
       providesTags: (result, error, { challengeId, challengeFilter } = {}) => {
         const challengeTag = challengeId
           ? { type: "Reels", id: `CHALLENGE_${challengeId}` }
@@ -467,10 +510,29 @@ export const reelsApi = baseApi.injectEndpoints({
 
     // Create a new playlist
     createPlaylist: builder.mutation({
-      query: (data) => ({
-        url: `/Reels/playlists`,
+      query: (body) => ({
+        url: "/Reels/playlists",
         method: "POST",
-        body: data,
+        body,
+      }),
+      invalidatesTags: ["Playlists"],
+    }),
+
+    // Update a playlist
+    updatePlaylist: builder.mutation({
+      query: ({ playlistId, ...body }) => ({
+        url: `/Reels/playlists/${playlistId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Playlists"],
+    }),
+
+    // Delete a playlist
+    deletePlaylist: builder.mutation({
+      query: (playlistId) => ({
+        url: `/Reels/playlists/${playlistId}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Playlists"],
     }),
@@ -551,7 +613,10 @@ export const {
   useGetBookmarkedReelsQuery,
   useGetAllBookmarkedReelsQuery,
   useCreatePlaylistMutation,
+  useUpdatePlaylistMutation,
+  useDeletePlaylistMutation,
   useBookmarkReelMutation,
   useReportReelMutation,
   useNotInterestedReelMutation,
+  useGetCreatorCountQuery,
 } = reelsApi

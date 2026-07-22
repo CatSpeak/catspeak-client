@@ -103,7 +103,18 @@ const GameSetupModal = ({ open, onClose }) => {
               value={selectedLevel}
               onChange={(val) => setSelectedLevel(val)}
               dropdownClassName="w-full max-w-full"
-              triggerClassName="w-full justify-between bg-white border border-gray-200 text-slate-800 rounded-xl px-4 py-3 outline-none hover:border-cath-red-400 transition-all shadow-sm"
+              trigger={(isOpen, selectedOption, toggle) => (
+                <button
+                  type="button"
+                  onClick={toggle}
+                  className="w-full flex items-center justify-between bg-white border border-gray-200 text-slate-800 rounded-xl px-4 h-12 outline-none hover:border-cath-red-400 transition-all shadow-sm font-medium"
+                >
+                  <span className="truncate text-sm">{selectedOption?.label || t.rooms?.game?.setup?.levelMedium || "Medium"}</span>
+                  <svg className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              )}
             />
           </div>
 
@@ -126,7 +137,18 @@ const GameSetupModal = ({ open, onClose }) => {
               value={selectedLanguage}
               onChange={(val) => setSelectedLanguage(val)}
               dropdownClassName="w-full max-w-full"
-              triggerClassName="w-full justify-between bg-white border border-gray-200 text-slate-800 rounded-xl px-4 py-3 outline-none hover:border-cath-red-400 transition-all shadow-sm"
+              trigger={(isOpen, selectedOption, toggle) => (
+                <button
+                  type="button"
+                  onClick={toggle}
+                  className="w-full flex items-center justify-between bg-white border border-gray-200 text-slate-800 rounded-xl px-4 h-12 outline-none hover:border-cath-red-400 transition-all shadow-sm font-medium"
+                >
+                  <span className="truncate text-sm">{selectedOption?.label || t.rooms?.game?.setup?.langEn || "English"}</span>
+                  <svg className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              )}
             />
           </div>
         </div>

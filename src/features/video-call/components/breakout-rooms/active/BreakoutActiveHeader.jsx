@@ -14,6 +14,7 @@ const BreakoutActiveHeader = ({
   return (
     <div className="py-2 border-b border-[#e5e5e5]">
       <ListItem
+        contentClassName="!h-12"
         rightContent={
           <Switch
             checked={Boolean(status?.allowParticipantChangeRoom)}

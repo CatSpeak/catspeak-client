@@ -9,7 +9,8 @@ import VideoPreview from "./VideoPreview"
 import RoomInformation from "./RoomInformation"
 import EditNickname from "./EditNickName"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import meetingFallbackImage from "@/shared/assets/images/rooms/BackgroundDefault.png"
+import meetingFallbackImageZH from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
+import meetingFallbackImageEN from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayShell"
 import { getCommunityPath } from "@/shared/utils/navigation"
 import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal"
@@ -36,6 +37,7 @@ const WaitingScreen = ({
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const participants = room?.currentParticipants || session?.participants || []
+  const meetingFallbackImage = room?.languageType === "English" ? meetingFallbackImageEN : meetingFallbackImageZH
   const { t, language } = useLanguage()
   const { lang } = useParams()
   const effectiveParticipantCount = participantCount ?? participants.length

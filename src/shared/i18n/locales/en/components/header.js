@@ -1,5 +1,6 @@
 export default {
   profile: "Profile",
+  personalPage: "My Profile",
   settings: "Settings",
   logout: "Log out",
   soon: "Soon",
@@ -7,7 +8,7 @@ export default {
   community: "Community",
   notifications: "Notifications",
   noNewNotifications: "No new notifications",
-  searchPlaceholder: "Search rooms or topics",
+  searchPlaceholder: "Search rooms",
   languages: {
     vi: "Vietnamese",
     viNom: "Vietnamese (Nom) - Coming soon",

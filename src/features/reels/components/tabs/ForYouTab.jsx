@@ -1,14 +1,44 @@
-import React, { useMemo } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Upload, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ReelGrid from "../grid/ReelGrid"
 import ReelGridSkeleton from "../grid/ReelGridSkeleton"
-import { useGetReelsFeedQuery } from "@/store/api/reelsApi"
+import { useGetReelsFeedQuery, useGetCreatorCountQuery } from "@/store/api/reelsApi"
 import { mapReelDtoToFrontend } from "../../utils/mappers"
+import { Loader2 } from "lucide-react"
 
 export default function ForYouTab({ onReelClick, onUploadClick, searchQuery = "" }) {
   const { t } = useLanguage()
-  const { data: feedResponse, isLoading } = useGetReelsFeedQuery({ page: 1, pageSize: 20, search: searchQuery })
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery])
+
+  const { data: feedResponse, isLoading, isFetching } = useGetReelsFeedQuery({ page, pageSize: 20, search: searchQuery })
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 300
+      ) {
+        if (!isFetching && feedResponse?.lastPageCount === 20) {
+          setPage((p) => p + 1)
+        }
+      }
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [isFetching, feedResponse?.lastPageCount])
+
+  const dateParams = useMemo(() => {
+    const now = new Date()
+    const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
+    return { from, to }
+  }, [])
+  const { data: creatorCount } = useGetCreatorCountQuery(dateParams)
   
   const feedReels = useMemo(
     () => (feedResponse?.data ? feedResponse.data.map(mapReelDtoToFrontend) : []),
@@ -43,7 +73,7 @@ export default function ForYouTab({ onReelClick, onUploadClick, searchQuery = ""
             <span className="text-[13px] text-lighttextGray mb-0 md:mb-1">{t.catSpeak.reels.monthlyCreator || "Monthly creator"}</span>
             <div className="flex items-center text-[#fbbf24] font-medium text-[15px] space-x-1.5">
               <Users size={16} />
-              <span>450</span>
+              <span>{creatorCount?.count ?? "..."}</span>
             </div>
           </div>
           <button
@@ -56,10 +86,17 @@ export default function ForYouTab({ onReelClick, onUploadClick, searchQuery = ""
         </div>
       </div>
 
-      {isLoading ? (
+      {isLoading && page === 1 ? (
         <ReelGridSkeleton />
       ) : (
-        <ReelGrid reels={feedReels} onReelClick={onReelClick} />
+        <>
+          <ReelGrid reels={feedReels} onReelClick={onReelClick} />
+          {isFetching && page > 1 && (
+            <div className="flex justify-center my-6">
+              <Loader2 className="w-8 h-8 animate-spin text-cath-red-700" />
+            </div>
+          )}
+        </>
       )}
     </div>
   )

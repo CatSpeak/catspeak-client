@@ -1,5 +1,6 @@
 export default {
   profile: "Thông tin cá nhân",
+  personalPage: "Trang cá nhân",
   settings: "Cài đặt",
   logout: "Đăng xuất",
   soon: "Sắp ra mắt",
@@ -7,7 +8,7 @@ export default {
   community: "Cộng đồng",
   notifications: "Thông báo",
   noNewNotifications: "Không có thông báo mới",
-  searchPlaceholder: "Tìm kiếm phòng hoặc chủ đề",
+  searchPlaceholder: "Tìm kiếm phòng",
   languages: {
     vi: "Tiếng Việt",
     viNom: "Tiếng Việt (Nôm) - Sắp ra mắt",

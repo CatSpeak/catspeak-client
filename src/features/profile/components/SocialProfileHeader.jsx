@@ -18,8 +18,12 @@ import {
   useUnfollowUserMutation,
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
-} from "../api/friendshipApi"
-import { useUpdateAvatarMutation } from "@/store/api/userApi"
+} from "../../../store/api/social/friendshipApi"
+import {
+  useUpdateAvatarMutation,
+  useGetCurrentBackgroundQuery,
+} from "@/store/api/userApi"
+import backgroundAccount from "@/shared/assets/backgrounds/background-account.png"
 
 const SocialProfileHeader = ({
   user,
@@ -52,6 +56,15 @@ const SocialProfileHeader = ({
   const [deleteFriendship] = useDeleteFriendshipMutation()
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation()
+
+  const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
+    useGetCurrentBackgroundQuery(undefined, {
+      skip: !isOwnProfile,
+    })
+  const fetchedCoverUrl = isOwnProfile
+    ? currentBackgroundResponse?.data?.activeBackgroundUrl
+    : null
+
   const fileInputRef = useRef(null)
 
   const handleFollowToggle = () => {
@@ -72,7 +85,9 @@ const SocialProfileHeader = ({
     try {
       toast.loading("Đang cập nhật...", { id: "avatar-update" })
       await updateAvatar(avatarData).unwrap()
-      toast.success("Cập nhật ảnh đại diện thành công", { id: "avatar-update" })
+      toast.success("Cập nhật ảnh đại diện thành công", {
+        id: "avatar-update",
+      })
     } catch (error) {
       toast.error("Không thể cập nhật ảnh đại diện", { id: "avatar-update" })
       console.error(error)
@@ -104,26 +119,41 @@ const SocialProfileHeader = ({
           )
       }
     } else {
-      sendFriendRequest(targetAccountId)
-        .unwrap()
-        .then(() =>
-          toast.success(
-            t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-          ),
-        )
-        .catch((err) => {
-          if (err?.status === 422) {
-            toast.error(
-              t.profile?.social?.requestPending ||
-                "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-            )
-          } else {
-            toast.error(
-              t.profile?.social?.requestError ||
-                "Không thể gửi yêu cầu kết bạn",
-            )
-          }
-        })
+      const performSend = () => {
+        sendFriendRequest(targetAccountId)
+          .unwrap()
+          .then(() =>
+            toast.success(
+              t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+            ),
+          )
+          .catch((err) => {
+            if (err?.status === 422) {
+              toast.error(
+                t.profile?.social?.requestPending ||
+                  "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+              )
+            } else {
+              toast.error(
+                t.profile?.social?.requestError ||
+                  "Không thể gửi yêu cầu kết bạn",
+              )
+            }
+          })
+      }
+
+      if (status?.friendshipId) {
+        deleteFriendship(status.friendshipId)
+          .unwrap()
+          .then(() => {
+            performSend()
+          })
+          .catch(() => {
+            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra")
+          })
+      } else {
+        performSend()
+      }
     }
   }
 
@@ -142,15 +172,17 @@ const SocialProfileHeader = ({
       : t.profile?.social?.addFriend || "Kết bạn"
 
   const actionButtons = isOwnProfile
-    ? [
-        {
-          key: "edit",
-          variant: "outline",
-          startIcon: <Edit2 />,
-          label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
-          onClick: onEditClick,
-        },
-      ]
+    ? onEditClick
+      ? [
+          {
+            key: "edit",
+            variant: "outline",
+            startIcon: <Edit2 />,
+            label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
+            onClick: onEditClick,
+          },
+        ]
+      : []
     : [
         {
           key: "follow",
@@ -173,8 +205,20 @@ const SocialProfileHeader = ({
   return (
     <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}
-      <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group">
-        {/* Placeholder for cover photo edit button */}
+      <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group overflow-hidden">
+        {isBackgroundLoading ? (
+          <div className="w-full h-full bg-gray-300 animate-pulse"></div>
+        ) : (
+          <img
+            src={fetchedCoverUrl || backgroundAccount}
+            alt="Cover fallback"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null // prevent infinite loop
+              e.target.src = backgroundAccount
+            }}
+          />
+        )}
       </div>
 
       {/* Profile Info Area */}

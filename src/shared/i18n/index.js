@@ -4,6 +4,7 @@ import zh from "./locales/zh"
 
 import { billingTranslations } from "@/features/billing/i18n"
 import { profileTranslations } from "@/features/profile/i18n"
+import { chatTranslations } from "@/features/chat/i18n"
 
 // Helper to deeply merge multiple translation objects
 const deepMerge = (...objects) => {
@@ -22,9 +23,9 @@ const deepMerge = (...objects) => {
 }
 
 export const translations = {
-  vi: deepMerge(vi, billingTranslations.vi, profileTranslations.vi /*, authTranslations.vi, dashboardTranslations.vi */),
-  en: deepMerge(en, billingTranslations.en, profileTranslations.en /*, authTranslations.en, dashboardTranslations.en */),
-  zh: deepMerge(zh, billingTranslations.zh, profileTranslations.zh /*, authTranslations.zh, dashboardTranslations.zh */),
+  vi: deepMerge(vi, billingTranslations.vi, profileTranslations.vi, chatTranslations.vi),
+  en: deepMerge(en, billingTranslations.en, profileTranslations.en, chatTranslations.en),
+  zh: deepMerge(zh, billingTranslations.zh, profileTranslations.zh, chatTranslations.zh),
 }
 
 export const languageNames = {

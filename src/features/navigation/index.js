@@ -1,4 +1,4 @@
-// Components
+export { default as DesktopNav } from "./components/DesktopNav/DesktopNav"
 export { default as DesktopSidebar } from "./components/DesktopNav/DesktopSidebar"
 export { default as DesktopNavItems } from "./components/DesktopNav/DesktopNavItems"
 export { default as DesktopNavItem } from "./components/DesktopNav/DesktopNavItem"

@@ -183,6 +183,7 @@ export default {
     systemMessagesDesc: "显示自动系统消息",
     replyingTo: "回复",
     reply: "回复",
+    aiSuggestion: "来自AI的建议",
   },
   sessionActions: {
     connect11: "连接 1:1",
@@ -272,6 +273,17 @@ export default {
     unknownDevice: "未知设备",
   },
   videoCall: {
+    changeLayout: {
+      title: "更改布局",
+      auto: "自动",
+      grid: "平铺",
+      spotlight: "焦点",
+      sidebar: "侧边栏",
+      tilesLabel: "图块",
+      tilesDescription: "要显示的最多图块数，具体取决于窗口大小。",
+      hideNonVideo: "隐藏没有视频的参与者",
+    },
+    remainingTime: "剩余时间",
     roomClosingTitle: "房间即将关闭",
     roomClosingSubtitle: "此会话将在 {{remainingSeconds}} 秒后结束",
     roomClosingSubtitleStatic: "此会话即将结束。",
@@ -323,6 +335,7 @@ export default {
         "录像将保存在 <strong>你的空间 (My Workspace)</strong>。",
       continueBtn: "继续录制",
       confirmBtn: "确认",
+      backBtn: "返回",
     },
     provider: {
       connecting: "正在连接...",
@@ -487,6 +500,7 @@ export default {
     joinError: "加入分组房间出错。",
     returnMainError: "返回主房间出错。",
     broadcastError: "发送广播出错。",
+    broadcastToastTitle: "来自主持人的通知",
     toggleAllowError: "无法更改房间更换设置。",
     breakoutRoomPrefix: "分组房间: ",
     freeToChange: "自由移动",

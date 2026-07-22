@@ -9,6 +9,7 @@ const PasswordInput = ({
   isValid,
   validMessage,
   invalidMessage,
+  className = "",
 }) => {
   const [show, setShow] = useState(false)
 
@@ -28,14 +29,14 @@ const PasswordInput = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full h-12 rounded-2xl border px-4 pr-10 text-base focus:outline-none transition-colors duration-200 ${borderClass}`}
+          className={`w-full h-12 rounded-2xl border px-4 pr-10 text-base focus:outline-none transition-colors duration-200 ${borderClass} ${className}`}
         />
         <button
           type="button"
           onClick={toggleShow}
           className="absolute right-4 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
         >
-          {show ? <EyeOff size={18} /> : <Eye size={18} />}
+          {show ? <Eye size={18} /> : <EyeOff size={18} />}
         </button>
       </div>
 

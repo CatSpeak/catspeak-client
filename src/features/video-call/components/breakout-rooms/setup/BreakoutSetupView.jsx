@@ -147,23 +147,12 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div 
+      <div
         ref={containerRef}
         onDragOver={handleDragOverScroll}
         onDragLeave={handleDragLeaveScroll}
         className="flex-1 overflow-y-auto"
       >
-        <div className="border-b border-[#e5e5e5]">
-          <BreakoutSettingsArea
-            allowChangeRoom={allowChangeRoom}
-            setAllowChangeRoom={setAllowChangeRoom}
-            timerEnabled={timerEnabled}
-            setTimerEnabled={setTimerEnabled}
-            timerDuration={timerDuration}
-            setTimerDuration={setTimerDuration}
-          />
-        </div>
-
         <div className="border-b border-[#e5e5e5]">
           <BreakoutSetupControls
             roomCount={roomCount}
@@ -174,6 +163,17 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
             setMaxParticipantsEnabled={setMaxParticipantsEnabled}
             maxParticipants={maxParticipants}
             setMaxParticipants={setMaxParticipants}
+          />
+        </div>
+
+        <div className="border-b border-[#e5e5e5]">
+          <BreakoutSettingsArea
+            allowChangeRoom={allowChangeRoom}
+            setAllowChangeRoom={setAllowChangeRoom}
+            timerEnabled={timerEnabled}
+            setTimerEnabled={setTimerEnabled}
+            timerDuration={timerDuration}
+            setTimerDuration={setTimerDuration}
           />
         </div>
 

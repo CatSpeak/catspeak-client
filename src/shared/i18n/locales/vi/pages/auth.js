@@ -28,13 +28,13 @@ export default {
   stepVerifyOtp: "Xác minh OTP",
   stepNewPassword: "Mật khẩu mới",
   emailLabel: "Email",
-  emailPlaceholder: "Email / SĐT",
+  emailPlaceholder: "Nhập email",
   passwordLabel: "Mật khẩu",
-  passwordPlaceholder: "Nhập mật khẩu của bạn ở đây",
+  passwordPlaceholder: "Nhập mật khẩu",
   fullNameLabel: "Họ và Tên",
   fullNamePlaceholder: "Nhập họ và tên",
   phoneLabel: "Số điện thoại",
-  phonePlaceholder: "Nhập sđt của bạn ở đây",
+  phonePlaceholder: "Nhập số điện thoại của bạn ở đây",
   languageLabel: "Ngôn ngữ",
   countryLabel: "Quốc gia",
   rememberMe: "Lưu mật khẩu",
@@ -118,4 +118,5 @@ export default {
   tooManyOtpRequests: "Yêu cầu mã OTP quá nhiều lần. Vui lòng thử lại sau.",
   loginFailed: "Đăng nhập thất bại. Vui lòng thử lại.",
   serverConnectionRestored: "Đã khôi phục kết nối máy chủ!",
-}
+  
+};

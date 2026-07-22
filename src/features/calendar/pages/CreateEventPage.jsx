@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Trash2,
   Clock,
@@ -27,13 +27,24 @@ import MapView from "../components/Mapview";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "@/store/slices/authSlice";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
+import Dropdown from "@/shared/components/ui/Dropdown";
 
 // const DEFAULT_COVER =
 //   "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"
 
+const eventTypeOptions = [
+  {
+    value: "online",
+    label: "Online",
+  },
+  {
+    value: "offline",
+    label: "Offline",
+  },
+];
+
 const CreateEventPage = () => {
   const navigate = useNavigate();
-  const { lang } = useParams();
   const location = useLocation();
   const { t } = useLanguage();
   const cal = t.calendar || {};
@@ -141,11 +152,9 @@ const CreateEventPage = () => {
     }
   };
 
-  const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
   const workspaceEventsPath = "/workspace/events";
-  const returnPath = isEditing
-    ? (location.state?.from || workspaceEventsPath)
-    : (location.state?.from || basePath);
+  // the return path should go back to workspace events or wherever it came from
+  const returnPath = location.state?.from || workspaceEventsPath;
 
   const breadcrumbItems = [
     {
@@ -153,12 +162,12 @@ const CreateEventPage = () => {
       onClick: () => navigate("/"),
     },
     {
-      label: "Cat Speak",
-      onClick: () => navigate(`/${lang}/community`),
+      label: t.nav?.workspace || "Không gian làm việc",
+      onClick: () => navigate("/workspace"),
     },
     {
-      label: cal.schedule || "Thời gian biểu",
-      onClick: () => navigate(basePath),
+      label: cal.workspaceEventsTitle || "Sự kiện",
+      onClick: () => navigate(workspaceEventsPath),
     },
     {
       label: isEditing
@@ -221,7 +230,7 @@ const CreateEventPage = () => {
     : "hh/mm";
 
   return (
-    <div className="w-full min-h-screen bg-[#fdfdfd]">
+    <div className=" min-h-screen bg-[#F3F3F3]">
       {/* Breadcrumb */}
       <div className="px-5 py-3 pt-2">
         <Breadcrumb items={breadcrumbItems} />
@@ -455,8 +464,9 @@ const CreateEventPage = () => {
                 {cal.filterEventType || "Loại sự kiện"}
               </label>
               <div className="w-full min-w-0">
-                <div className="relative w-full max-w-[240px]">
-                  <select
+                <div className="w-full max-w-[240px]">
+                  <Dropdown
+                    options={eventTypeOptions}
                     value={
                       form.isOnline === true
                         ? "online"
@@ -464,34 +474,23 @@ const CreateEventPage = () => {
                           ? "offline"
                           : ""
                     }
-                    onChange={(e) => {
-                      if (e.target.value === "online") form.setIsOnline(true);
-                      else if (e.target.value === "offline")
+                    onChange={(value) => {
+                      if (value === "online") {
+                        form.setIsOnline(true);
+                      } else if (value === "offline") {
                         form.setIsOnline(false);
-                      else form.setIsOnline(null);
+                      } else {
+                        form.setIsOnline(null);
+                      }
                     }}
-                    className="w-full h-11 rounded-2xl border border-[#e5e5e5] px-4 text-sm text-gray-500 appearance-none bg-white outline-none focus:border-[#990011] transition-colors pr-9"
-                  >
-                    <option value="">
-                      {cal.eventTypePlaceholder || "Online hay offline?"}
-                    </option>
-                    <option value="online">Online</option>
-                    <option value="offline">Offline</option>
-                  </select>
-                  <svg
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                    placeholder={
+                      cal.eventTypePlaceholder || "Online hay offline?"
+                    }
+                    className="w-full"
+                    // activeColor={eventColor}
+                  />
                 </div>
+
                 {form.isOnline === true && (
                   <p className="text-red-500 text-xs mt-1">
                     Tạo sự kiện online (trực tuyến) hiện tại chưa được hỗ trợ.
@@ -805,26 +804,28 @@ const CreateEventPage = () => {
 
             {/* Map section */}
             <div className="mt-4">
-              <h2 className="text-lg font-bold text-black mb-4">Bản đồ</h2>
-              <MapView
-                dayEvents={
-                  form.eventLocation && !form.isOnline
-                    ? [
-                        {
-                          id: "preview",
-                          title: previewTitle || "Sự kiện được đánh dấu",
-                          location: form.eventLocation,
-                          isOnline: false,
-                        },
-                      ]
-                    : []
-                }
-                selectedEvent={
-                  form.eventLocation && !form.isOnline
-                    ? { id: "preview" }
-                    : null
-                }
-              />
+              <h2 className=" text-lg font-bold text-black mb-4">Bản đồ</h2>
+              <div className=" relative z-0 ">
+                <MapView
+                  dayEvents={
+                    form.eventLocation && !form.isOnline
+                      ? [
+                          {
+                            id: "preview",
+                            title: previewTitle || "Sự kiện được đánh dấu",
+                            location: form.eventLocation,
+                            isOnline: false,
+                          },
+                        ]
+                      : []
+                  }
+                  selectedEvent={
+                    form.eventLocation && !form.isOnline
+                      ? { id: "preview" }
+                      : null
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>

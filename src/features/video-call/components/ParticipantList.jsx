@@ -1,10 +1,13 @@
 import React from "react";
-import { Mic, MicOff, Video, VideoOff, Hand } from "lucide-react";
+import { Mic, MicOff, Video, VideoOff, Hand, UserPlus, Ellipsis } from "lucide-react";
 import { useIsSpeaking } from "@livekit/components-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import Avatar from "@/shared/components/ui/Avatar";
+import ListItem from "@/shared/components/ui/ListItem";
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover";
+import { IconButton } from "@/shared/components/ui/buttons";
+import toast from "react-hot-toast";
 
 /**
  * A single row in the participant list.
@@ -35,61 +38,56 @@ const ParticipantItem = ({ participant }) => {
   const meta = parseMetadata(participant.metadata);
   // console.log("Participant Metadata [ParticipantList]:", meta)
   const isHandRaised = meta.handRaised === true;
-  const avatarUrl = meta.avatarUrl;
+  const avatarUrl = meta.avatarImageUrl;
 
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest);
 
   return (
-    <div className="flex items-center justify-between gap-3 pl-1.5 pr-2 py-2 rounded w-full">
-      {/* LEFT */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
+    <ListItem
+      leftContent={
         <div
-          className={`rounded-full transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}
+          className={`rounded-full my-1 ml-1 transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}
         >
           <Avatar size={36} name={name} src={avatarUrl} />
         </div>
-
-        <div className="flex flex-col min-w-0 flex-1">
-          {/* Name */}
-          <div className="flex items-center gap-2 m-0">
-            <p className="text-sm leading-5 truncate m-0">
-              {name} {isLocal && pl.youSuffix}
-            </p>
-          </div>
-
-          {/* Mic + Camera UNDER name */}
-          <div className="flex items-center gap-1 mt-1">
-            {/* Camera (indicator only) */}
-            <div className="flex items-center justify-center">
-              {isCameraOn ? (
-                <Video size={16} className="text-cath-red-700" />
-              ) : (
-                <VideoOff size={16} className="text-[#606060]" />
-              )}
-            </div>
-
-            {/* Mic (indicator only) */}
-            <div className="flex items-center justify-center">
-              {isMicOn ? (
-                <Mic size={16} className="text-cath-red-700" />
-              ) : (
-                <MicOff size={16} className="text-[#606060]" />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT: indicators (Hand icon to replace old popover trigger) */}
-      <div className="flex items-center gap-1">
-        {isHandRaised && (
+      }
+      rightContent={
+        isHandRaised ? (
           <div className="h-9 w-9 flex items-center justify-center">
             <Hand size={20} className="text-yellow-500 shrink-0" />
           </div>
-        )}
+        ) : null
+      }
+    >
+      {/* Name */}
+      <div className="flex items-center gap-2 m-0">
+        <p className="text-sm leading-5 truncate m-0">
+          {name} {isLocal && pl.youSuffix}
+        </p>
       </div>
-    </div>
+
+      {/* Mic + Camera UNDER name */}
+      <div className="flex items-center gap-1 mt-1">
+        {/* Camera (indicator only) */}
+        <div className="flex items-center justify-center">
+          {isCameraOn ? (
+            <Video size={16} className="text-cath-red-700" />
+          ) : (
+            <VideoOff size={16} className="text-[#606060]" />
+          )}
+        </div>
+
+        {/* Mic (indicator only) */}
+        <div className="flex items-center justify-center">
+          {isMicOn ? (
+            <Mic size={16} className="text-cath-red-700" />
+          ) : (
+            <MicOff size={16} className="text-[#606060]" />
+          )}
+        </div>
+      </div>
+    </ListItem>
   );
 };
 
@@ -124,10 +122,14 @@ const ParticipantList = ({ hideTitle }) => {
   return (
     <div className="flex flex-col h-full w-full bg-white">
       {!hideTitle && (
-        <div className="px-4 py-3 border-b border-[#E5E5E5]">
-          <h3 className="text-black text-sm font-semibold m-0">
+        <div className="px-4 py-3 border-b border-[#FFDADE] flex items-center justify-between">
+          <h3 className="text-black text-base font-semibold m-0">
             {pl.title} ({participants.length})
           </h3>
+          <div className="">
+            <IconButton variant="ghost" size="xs" onClick={() => { toast.success(t?.comingSoon.title) }}><UserPlus size={22} /></IconButton>
+            {/* <IconButton variant="ghost" size="xs"><Ellipsis size={22} /></IconButton> */}
+          </div>
         </div>
       )}
       <div className="flex-1 overflow-y-auto p-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">

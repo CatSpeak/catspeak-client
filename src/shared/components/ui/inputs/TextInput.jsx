@@ -146,12 +146,18 @@ const TextInput = ({
           </label>
         )}
       </div>
-      {showCount && props.maxLength && (
-        <span className="self-start px-2 text-xs text-[#7A7574]">
-          {String(value || "").length} / {props.maxLength}
-        </span>
-      )}
-      {error && <span className="text-xs text-red-500 px-1">{error}</span>}
+      {(showCount && props.maxLength) || error ? (
+        <div className="flex justify-between items-start px-1">
+          <div className="flex-1">
+            {error && <span className="text-xs text-red-500 block">{error}</span>}
+          </div>
+          {showCount && props.maxLength && (
+            <span className="text-xs text-[#7A7574] ml-2 whitespace-nowrap">
+              {String(value || "").length} / {props.maxLength}
+            </span>
+          )}
+        </div>
+      ) : null}
     </div>
   )
 }

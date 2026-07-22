@@ -1,5 +1,5 @@
 import React from "react"
-import { AlertCircle, Film, X, Video } from "lucide-react"
+import { AlertCircle, Film, X, Video, Minus } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -12,14 +12,15 @@ const CreateReelModalContent = ({ open }) => {
   const { t } = useLanguage()
   const {
     videoPreviewUrl, videoFile, handleDiscardVideo,
-    mobileTab, setMobileTab, handleSubmit, isLoading, handleClose,
+    mobileTab, setMobileTab, handleSubmit, isLoading,
+    uploadProgress, handleMinimize, handleCancelUpload,
     generalError, apiError
   } = useCreateReelContext()
 
   return (
     <Modal
       open={open}
-      onClose={handleClose}
+      onClose={handleMinimize}
       title={
         <div className="flex items-center gap-2">
           <Film size={20} className="text-cath-red-700" />
@@ -70,15 +71,15 @@ const CreateReelModalContent = ({ open }) => {
           transform: scale(1.15);
         }
       `}} />
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
 
         {/* API Error Notification */}
         {(generalError || apiError) && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-2.5 text-sm animate-shake">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Upload failed</p>
-              <p className="opacity-90">{generalError || "Something went wrong. Please check your file formats and network."}</p>
+              <p className="font-semibold">{t?.catSpeak?.reels?.uploadFailedTitle || "Upload failed"}</p>
+              <p className="opacity-90">{generalError || t?.catSpeak?.reels?.uploadFailedDesc || "Something went wrong. Please check your file formats and network."}</p>
             </div>
           </div>
         )}
@@ -111,14 +112,16 @@ const CreateReelModalContent = ({ open }) => {
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleDiscardVideo}
-                className="p-2 border border-gray-200 bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
-                title="Discard video"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDiscardVideo}
+                  className="p-2 border border-gray-200 bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
+                  title="Discard video"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {/* Mobile View Toggle Segment Tabs (Only visible on mobile/tablet viewports) */}
@@ -157,19 +160,18 @@ const CreateReelModalContent = ({ open }) => {
         <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-2 w-full">
           <PillButton
             type="button"
-            variant="outline"
-            onClick={handleClose}
-            disabled={isLoading}
-            className="w-full sm:w-auto h-10 px-5 !border-gray-300 hover:!bg-gray-50 !text-gray-600 font-semibold"
+            variant="secondary"
+            onClick={handleCancelUpload}
+            className="w-full sm:w-auto min-w-[120px] h-10 font-semibold"
           >
             {t.cancel || "Cancel"}
           </PillButton>
           <PillButton
             type="submit"
             loading={isLoading}
-            loadingText={t.catSpeak?.reels?.posting || "Posting..."}
+            loadingText={isLoading ? `${t.catSpeak?.reels?.posting || "Posting..."} ${uploadProgress}%` : t.catSpeak?.reels?.posting || "Posting..."}
             disabled={!videoFile || isLoading}
-            className="w-full sm:w-auto h-10 px-6 font-semibold shadow-sm shadow-red-950/10"
+            className="w-full sm:w-auto min-w-[120px] h-10 font-semibold"
             bgColor="#990011"
             textColor="#ffffff"
           >

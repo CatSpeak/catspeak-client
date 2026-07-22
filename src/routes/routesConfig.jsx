@@ -1,82 +1,124 @@
-import { lazy } from "react"
-import { MainLayout, UserLayout, VideoCallLayout } from "@layouts"
-import { PageNotFound, ForbiddenPage } from "@/shared/pages"
+import { lazy } from "react";
+import { MainLayout, UserLayout, VideoCallLayout } from "@layouts";
+import { PageNotFound, ForbiddenPage } from "@/shared/pages";
 
 // Guest Pages
-import PolicyPage from "@/features/auth/pages/PolicyPage"
-import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage"
-import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage"
-import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom"
-import QueuePage from "@/features/queue/pages/QueuePage"
-import RoomsPage from "@/features/rooms/pages/RoomsPage"
+import PolicyPage from "@/features/auth/pages/PolicyPage";
+import ResetPasswordPage from "@/features/auth/pages/ResetPasswordPage";
+import VerifyEmailPage from "@/features/auth/pages/VerifyEmailPage";
+import VideoCallRoom from "@/features/video-call/pages/VideoCallRoom";
+import QueuePage from "@/features/queue/pages/QueuePage";
+import RoomsPage from "@/features/rooms/pages/RoomsPage";
 
 // Cat Speak Feature Pages
-import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
-import NewsPage from "@/features/news/pages/NewsPage"
-import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
-import DiscoverPage from "@/features/discover/DiscoverPage"
-import MailPage from "@/features/mail/pages/MailPage"
-import SharedEventPage from "@/features/calendar/pages/SharedEventPage"
-import CalendarPage from "@/features/calendar/pages/CalendarPage"
-import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
+import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout";
+import NewsPage from "@/features/news/pages/NewsPage";
+import NewsDetailPage from "@/features/news/pages/NewsDetailPage";
+import DiscoverPage from "@/features/discover/DiscoverPage";
+import MailPage from "@/features/mail/pages/MailPage";
+import SharedEventPage from "@/features/calendar/pages/SharedEventPage";
+import CalendarPage from "@/features/calendar/pages/CalendarPage";
+import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
 
 // Shared Pages
-import { ComingSoonPage } from "@/shared/pages"
+import { ComingSoonPage } from "@/shared/pages";
 
 // User & Admin Pages
-import UserDashboard from "@/features/user/pages/UserDashboard"
+import UserDashboard from "@/features/user/pages/UserDashboard";
 
-import UserPagesLayout from "@/features/user/layouts/UserPagesLayout"
+import UserPagesLayout from "@/features/user/layouts/UserPagesLayout";
 // Language routing components
-import LanguageLayout from "./LanguageLayout"
-import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
+import LanguageLayout from "./LanguageLayout";
+import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
-import { Navigate } from "react-router-dom"
-import { AuthGuard } from "@/shared/components"
-
-const Profile = lazy(() => import("@/features/profile/pages/Profile"))
+import { Navigate } from "react-router-dom";
+import { AuthGuard } from "@/shared/components";
+const Profile = lazy(() => import("@/features/profile/pages/Profile"));
+const AccountInfoPage = lazy(
+  () => import("@/features/settings/pages/AccountInfoPage"),
+);
 const RecordingsPage = lazy(
   () => import("@/features/recordings/pages/RecordingsPage"),
-)
+);
 const WorkspaceLayout = lazy(
   () => import("@/features/workspace/layouts/WorkspaceLayout"),
-)
+);
 const InstructorPage = lazy(
   () => import("@/features/user/pages/InstructorPage"),
-)
+);
 const OrganizationPage = lazy(
   () => import("@/features/user/pages/OrganizationPage"),
-)
-const AccountSettingsPage = lazy(
-  () => import("@/features/user/pages/AccountSettingsPage"),
-)
+);
+const SystemSettingsPage = lazy(
+  () => import("@/features/settings/pages/SystemSettingsPage"),
+);
 
-const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"))
-const ReelDetailPage = lazy(() => import("@/features/reels/pages/ReelDetailPage"))
-const WorkspaceReelsPage = lazy(() => import("@/features/reels/pages/WorkspaceReelsPage"))
-const WorkspaceReelDetailPage = lazy(() => import("@/features/reels/pages/WorkspaceReelDetailPage"))
-const WorkspaceEventsPage = lazy(() => import("@/features/calendar/pages/WorkspaceEventsPage"))
-const BillingFeature = lazy(() => import("@/features/billing/index.jsx"))
-const PaymentResultPage = lazy(() => import("@/features/billing/pages/PaymentResultPage.jsx"))
-const PricingPage = lazy(() => import("@/features/billing/pages/PricingPage.jsx"))
-const MyCoursesPage = lazy(() => import("@/features/courses/pages/MyCoursesPage"))
-const MyLearningPage = lazy(() => import("@/features/courses/pages/MyLearningPage"))
-const CreateCoursePage = lazy(() => import("@/features/courses/pages/CreateCoursePage"))
-const AllCoursesPage = lazy(() => import("@/features/courses/pages/AllCoursesPage"))
-const AllClassesPage = lazy(() => import("@/features/courses/pages/AllClassesPage"))
-const CreateClassPage = lazy(() => import("@/features/courses/pages/CreateClassPage"))
-const ClassDetailPage = lazy(() => import("@/features/courses/pages/ClassDetailPage"))
-const CourseDetailPage = lazy(() => import("@/features/courses/pages/CourseDetailPage"))
-const StudentClassDetailPage = lazy(() => import("@/features/courses/pages/StudentClassDetailPage"))
-const StudentCourseDetailPage = lazy(() => import("@/features/courses/pages/StudentCourseDetailPage"))
-const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
+const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"));
+const ChatPage = lazy(() => import("@/features/chat/pages/ChatPage"));
+const ReelDetailPage = lazy(
+  () => import("@/features/reels/pages/ReelDetailPage"),
+);
+const WorkspaceReelsPage = lazy(
+  () => import("@/features/reels/pages/WorkspaceReelsPage"),
+);
+const WorkspaceReelDetailPage = lazy(
+  () => import("@/features/reels/pages/WorkspaceReelDetailPage"),
+);
 
-import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+const WorkspaceEventsPage = lazy(
+  () => import("@/features/calendar/pages/WorkspaceEventsPage"),
+);
+const BillingFeature = lazy(() => import("@/features/billing/index.jsx"));
+const MyLearningPage = lazy(
+  () => import("@/features/courses/pages/MyLearningPage"),
+);
+const PaymentResultPage = lazy(
+  () => import("@/features/billing/pages/PaymentResultPage.jsx"),
+);
+const PricingPage = lazy(
+  () => import("@/features/billing/pages/PricingPage.jsx"),
+);
+const CheckoutPage = lazy(
+  () => import("@/features/billing/pages/CheckoutPage.jsx"),
+);
+const MyCoursesPage = lazy(
+  () => import("@/features/courses/pages/MyCoursesPage"),
+);
+const CreateCoursePage = lazy(
+  () => import("@/features/courses/pages/CreateCoursePage"),
+);
+const AllCoursesPage = lazy(
+  () => import("@/features/courses/pages/AllCoursesPage"),
+);
+const AllClassesPage = lazy(
+  () => import("@/features/courses/pages/AllClassesPage"),
+);
+const CreateClassPage = lazy(
+  () => import("@/features/courses/pages/CreateClassPage"),
+);
+const ClassDetailPage = lazy(
+  () => import("@/features/courses/pages/ClassDetailPage"),
+);
+const CourseDetailPage = lazy(
+  () => import("@/features/courses/pages/CourseDetailPage"),
+);
+const StudentClassDetailPage = lazy(
+  () => import("@/features/courses/pages/StudentClassDetailPage"),
+);
+const StudentCourseDetailPage = lazy(
+  () => import("@/features/courses/pages/StudentCourseDetailPage"),
+);
+const SchedulePage = lazy(
+  () => import("@/features/courses/pages/SchedulePage"),
+);
+
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
+import WebsitePage from "@/features/websites/WebsitePage";
 
 const WorkspaceIndex = () => {
-  const { isStudent } = useRoleOverride()
-  return <Navigate to={isStudent ? "learning" : "courses"} replace />
-}
+  const { isStudent } = useRoleOverride();
+  return <Navigate to={isStudent ? "learning" : "courses"} replace />;
+};
 
 const routesConfig = [
   {
@@ -106,6 +148,16 @@ const routesConfig = [
               <LazyRoute>
                 <PricingPage />
               </LazyRoute>
+            ),
+          },
+          {
+            path: "checkout",
+            element: (
+              <AuthGuard>
+                <LazyRoute>
+                  <CheckoutPage />
+                </LazyRoute>
+              </AuthGuard>
             ),
           },
           { path: "*", element: <PageNotFound /> },
@@ -186,6 +238,14 @@ const routesConfig = [
                   {
                     path: "calendar/create",
                     element: <CreateEventPage />,
+                  },
+                  {
+                    path: "website/:id",
+                    element: (
+                      <AuthGuard>
+                        <WebsitePage />
+                      </AuthGuard>
+                    ),
                   },
                   { path: "*", element: <PageNotFound /> },
                 ],
@@ -416,19 +476,36 @@ const routesConfig = [
             children: [
               {
                 path: "setting",
-                element: (
-                  <LazyRoute>
-                    <AccountSettingsPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "instructor",
-                element: (
-                  <LazyRoute>
-                    <InstructorPage />
-                  </LazyRoute>
-                ),
+                children: [
+                  {
+                    index: true,
+                    element: <Navigate to="account" replace />,
+                  },
+                  {
+                    path: "account",
+                    element: (
+                      <LazyRoute>
+                        <AccountInfoPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "instructor",
+                    element: (
+                      <LazyRoute>
+                        <InstructorPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "system",
+                    element: (
+                      <LazyRoute>
+                        <SystemSettingsPage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
               },
               {
                 path: "organization",
@@ -480,6 +557,24 @@ const routesConfig = [
         ],
       },
       {
+        path: "/chat",
+        element: (
+          <AuthGuard>
+            <MainLayout showFooter={false} />
+          </AuthGuard>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <LazyRoute>
+                <ChatPage />
+              </LazyRoute>
+            ),
+          },
+        ],
+      },
+      {
         path: "/connect",
         element: <MainLayout />,
         children: [
@@ -509,6 +604,6 @@ const routesConfig = [
       },
     ], // end RootLayout children
   }, // end RootLayout wrapper
-]
+];
 
-export default routesConfig
+export default routesConfig;

@@ -1,153 +1,124 @@
-import React, { useState } from "react"
-import { FileText, AlertCircle } from "lucide-react"
-import { useGetPaymentHistoryQuery, useRepayMutation } from "@/store/api/paymentsApi"
-import ReportIssueModal from "../invoices/components/ReportIssueModal"
+import React, { useState, useMemo } from "react"
+import { useGetPaymentHistoryQuery } from "@/store/api/paymentsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import FluentCard from "@/shared/components/ui/FluentCard"
+import { Pagination } from "@/shared/components/ui/navigation"
+import BillingFilters from "../components/BillingFilters"
+import BillingTable from "../components/BillingTable"
+
+const ITEMS_PER_PAGE = 5
 
 const BillingPage = () => {
   const { t } = useLanguage()
+  const hist = t.billing?.history || {}
+
   const STATUS_MAP = {
-    1: { label: t.billing.history.statuses.success, styles: "bg-[#E5F7ED] text-green-700" },
-    3: { label: t.billing.history.statuses.pending, styles: "bg-[#FFFBEA] text-yellow-700" },
-    0: { label: t.billing.history.statuses.cancelled, styles: "bg-[#F3F3F3] text-[#7A7574]" },
+    1: { label: hist.statuses?.success || "Success", styles: "bg-[#E5F7ED] text-green-700" },
+    3: { label: hist.statuses?.pending || "Pending", styles: "bg-[#FFFBEA] text-yellow-700" },
+    0: { label: hist.statuses?.cancelled || "Cancelled", styles: "bg-[#F3F3F3] text-[#7A7574]" },
   }
 
   const { data: invoices = [], isLoading } = useGetPaymentHistoryQuery()
-  const [repay, { isLoading: isRepaying }] = useRepayMutation()
-  
-  const [reportModalOpen, setReportModalOpen] = useState(false)
-  const [selectedPaymentId, setSelectedPaymentId] = useState(null)
 
-  const handleRepayClick = async (invoice) => {
-    try {
-      const response = await repay({
-        paymentId: invoice.paymentId,
-        amountVnd: Number(invoice.amount),
-        returnUrl: `${window.location.origin}/billing/result`,
-        cancelUrl: `${window.location.origin}/billing/result`
-      }).unwrap()
+  // Filters
+  const [searchQuery, setSearchQuery] = useState("")
+  const [dateFilter, setDateFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
 
-      if (response.checkoutUrl) {
-        window.location.href = response.checkoutUrl
+  // Filter logic
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter((inv) => {
+      const searchStr = searchQuery.toLowerCase()
+      const matchesSearch =
+        !searchQuery || inv.orderCode?.toString().toLowerCase().includes(searchStr)
+
+      const matchesStatus =
+        statusFilter === "all" || inv.status.toString() === statusFilter
+
+      let matchesDate = true
+      if (dateFilter !== "all") {
+        const invDate = new Date(inv.createDate)
+        const now = new Date()
+        if (dateFilter === "week") {
+          matchesDate = invDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        } else if (dateFilter === "month") {
+          matchesDate = invDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        }
       }
-    } catch (error) {
-      console.error("Failed to initiate repayment", error)
-    }
-  }
+      return matchesSearch && matchesStatus && matchesDate
+    })
+  }, [invoices, searchQuery, statusFilter, dateFilter])
 
-  const handleReport = (paymentId) => {
-    setSelectedPaymentId(paymentId)
-    setReportModalOpen(true)
+  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE))
+  const paginatedInvoices = filteredInvoices.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  )
+
+  // Reset page when filters change
+  const handleSearchChange = (val) => {
+    setSearchQuery(val)
+    setCurrentPage(1)
+  }
+  const handleDateFilterChange = (val) => {
+    setDateFilter(val)
+    setCurrentPage(1)
+  }
+  const handleStatusFilterChange = (val) => {
+    setStatusFilter(val)
+    setCurrentPage(1)
   }
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-cath-red-700 rounded-full animate-spin"></div>
-      </div>
-    )
-  }
-
-  if (invoices.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="w-16 h-16 bg-[#F3F3F3] rounded-full flex items-center justify-center mb-4">
-          <FileText size={32} className="text-[#BFBFBF]" />
-        </div>
-        <h3 className="text-xl font-bold mb-2">{t.billing.history.noHistoryTitle}</h3>
-        <p className="text-[#7A7574] max-w-sm">
-          {t.billing.history.noHistorySubtitle}
-        </p>
+        <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-cath-red-700 rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">{t.billing.history.title}</h2>
-        <p className="text-[#7A7574]">{t.billing.history.subtitle}</p>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 bg-white min-h-[calc(100vh-70px)]">
+      {/* Header */}
+      <div className="mb-8">
+
+        <h2 className="text-2xl font-bold text-cath-red-700 mb-1">
+          {hist.title || "Payment History"}
+        </h2>
+        <p className="text-gray-500 text-sm">
+          {hist.subtitle || "View your past invoices and billing history."}
+        </p>
       </div>
 
-      <div className="bg-white border border-[#E5E5E5] rounded-3xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#F8F8F8] border-b border-[#E5E5E5]">
-                <th className="py-4 px-6 font-semibold text-sm text-[#7A7574]">{t.billing.history.columns.date}</th>
-                <th className="py-4 px-6 font-semibold text-sm text-[#7A7574]">{t.billing.history.columns.orderCode}</th>
-                <th className="py-4 px-6 font-semibold text-sm text-[#7A7574]">{t.billing.history.columns.method}</th>
-                <th className="py-4 px-6 font-semibold text-sm text-[#7A7574]">{t.billing.history.columns.amount}</th>
-                <th className="py-4 px-6 font-semibold text-sm text-[#7A7574]">{t.billing.history.columns.status}</th>
-                <th className="py-4 px-6 font-semibold text-sm text-[#7A7574] text-right">{t.billing.history.columns.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((invoice) => {
-                const statusInfo = STATUS_MAP[invoice.status] || { label: "Unknown", styles: "bg-gray-100 text-gray-700" }
-                const isPending = invoice.status === 3
-
-                return (
-                  <tr key={invoice.paymentId} className="border-b border-[#E5E5E5] last:border-0 hover:bg-[#fafafa]">
-                    <td className="py-4 px-6 text-sm">
-                      {new Date(invoice.createDate).toLocaleString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                    <td className="py-4 px-6 text-sm font-medium text-[#7A7574]">
-                      #{invoice.orderCode}
-                    </td>
-                    <td className="py-4 px-6 text-sm">
-                      {invoice.method}
-                    </td>
-                    <td className="py-4 px-6 text-sm font-medium">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(invoice.amount)}
-                    </td>
-                    <td className="py-4 px-6 text-sm">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.styles}`}>
-                        {statusInfo.label}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-sm text-right">
-                      {isPending && (
-                        <div className="flex items-center justify-end gap-3">
-                          <button
-                            onClick={() => handleReport(invoice.paymentId)}
-                            className="text-[#7A7574] hover:text-cath-red-700 transition-colors flex items-center gap-1 text-xs font-medium"
-                            title="Report Issue"
-                          >
-                            <AlertCircle size={14} />
-                            {t.billing.history.actions.report}
-                          </button>
-                          <button
-                            onClick={() => handleRepayClick(invoice)}
-                            disabled={isRepaying}
-                            className="bg-cath-red-700 text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:brightness-90 transition-all disabled:opacity-50"
-                          >
-                            {t.billing.history.actions.repay}
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {selectedPaymentId && (
-        <ReportIssueModal
-          isOpen={reportModalOpen}
-          onClose={() => setReportModalOpen(false)}
-          paymentId={selectedPaymentId}
+      <div className=" !justify-start gap-6 min-h-[500px]">
+        {/* Filters */}
+        <BillingFilters
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          dateFilter={dateFilter}
+          onDateFilterChange={handleDateFilterChange}
+          statusFilter={statusFilter}
+          onStatusFilterChange={handleStatusFilterChange}
+          t={t}
         />
-      )}
+
+        {/* Table */}
+        <BillingTable
+          invoices={paginatedInvoices}
+          statusMap={STATUS_MAP}
+          t={t}
+        />
+
+        {/* Pagination — only show when more than 10 items */}
+        {filteredInvoices.length > ITEMS_PER_PAGE && (
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            onChangePage={setCurrentPage}
+          />
+        )}
+      </div>
     </div>
   )
 }

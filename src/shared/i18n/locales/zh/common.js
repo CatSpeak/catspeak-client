@@ -6,6 +6,10 @@ export default {
   seeMore: "查看更多",
   back: "返回",
   cancel: "取消",
+  reload: "重新加载",
+  cancelUploadConfirmTitle: "正在处理任务",
+  cancelUploadConfirmDesc:
+    "当前有任务正在进行中。如果您重新加载页面，进度将会丢失。确定要继续吗？",
   scrollToTop: "回到顶部",
   toggle: {
     on: "开",
@@ -56,8 +60,42 @@ export default {
     personalInfo: "个人信息",
     instructor: "讲师",
     organization: "组织",
-    billing: "账单",
+    billing: "支付历史",
     recordings: "录像",
+    back: "返回",
+    accountInfo: "账户信息",
+    systemConfig: "系统设置",
+    websites: "网站",
+    test: "英语水平测试",
+    platform: "综合学习平台",
+    listening: "听力练习",
+    grammar: "语法练习",
+    vocabulary: "词汇练习",
+    pronunciation: "发音练习",
+    "graded-news": "分级新闻",
+    exam: "雅思/托福备考",
+    kids: "少儿英语",
+    reading: "拓展阅读",
+    dictionary: "词典",
+    exchange: "语言交流",
+    multilingual: "多语言学习",
+    "gdpt-materials": "GDPT 2018 标准教材",
+    "hsk-prep": "免费 HSK 备考",
+    "zh-platform": "综合学习平台",
+    "zh-listening": "中文听力练习",
+    "zh-grammar": "中文语法练习",
+    "zh-pronunciation": "发音与声调",
+    "zh-stroke-order": "汉字书写与笔顺",
+    "zh-dictionary": "汉语词典",
+    "zh-graded-reading": "分级阅读",
+    "zh-kids": "少儿中文",
+    "zh-self-study-vn": "中文自学网站（越南语界面）",
+  },
+  website: {
+    error: {
+      notFound: "未找到网站",
+      backToWebsites: "返回 Cat Speak",
+    },
   },
   comingSoon: {
     badge: "即将推出",
@@ -68,8 +106,29 @@ export default {
     thankYou: "感谢您的耐心等待！^^",
   },
   noOptionsFound: "未找到选项",
+  pagination: {
+    page: "第",
+    of: "页，共",
+    prevPage: "上一页",
+    nextPage: "下一页",
+  },
   errors: {
-    maxActiveRoomsReached: "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
+    maxActiveRoomsReached:
+      "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
     generalFailed: "发生错误，请重试。",
-  }
-}
+  },
+  uploadWidget: {
+    uploading: "正在执行... {{progress}}%",
+    processing: "处理中... {{progress}}%",
+    success: "成功",
+    error: "任务失败",
+    itemsCount: "正在处理 {{count}} 个任务",
+    cancelTip: "取消任务",
+  },
+  catSpeak: {
+    reels: {
+      createReelTitle: "创建新 Reel",
+      uploadSuccess: "Reel 发布成功！",
+    },
+  },
+};

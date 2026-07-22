@@ -1,5 +1,6 @@
 export default {
   profile: "个人信息",
+  personalPage: "个人主页",
   settings: "设置",
   logout: "登出",
   soon: "敬请期待",
@@ -7,7 +8,7 @@ export default {
   community: "社区",
   notifications: "通知",
   noNewNotifications: "没有新通知",
-  searchPlaceholder: "搜索房间或主题",
+  searchPlaceholder: "搜索房间",
   languages: {
     vi: "越南语 (国语)",
     viNom: "越南语 (喃字) - 即将推出",

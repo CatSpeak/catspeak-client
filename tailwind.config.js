@@ -48,6 +48,7 @@ export default {
         secondary: "#606060",
         dusk: "#1a1a2e",
         border: "#e5e5e5",
+        "main-bg": "#f3f3f3",
       },
       width: {
         150: "150px",
@@ -110,13 +111,23 @@ export default {
       },
       keyframes: {
         wiggle: {
-          '0%, 100%': { transform: 'rotate(-10deg) scale(1.1)' },
-          '50%': { transform: 'rotate(10deg) scale(1.1)' },
-        }
+          "0%, 100%": { transform: "rotate(-10deg) scale(1.1)" },
+          "50%": { transform: "rotate(10deg) scale(1.1)" },
+        },
+        enter: {
+          "0%": { transform: "scale(0.9)", opacity: 0 },
+          "100%": { transform: "scale(1)", opacity: 1 },
+        },
+        leave: {
+          "0%": { transform: "scale(1)", opacity: 1 },
+          "100%": { transform: "scale(0.9)", opacity: 0 },
+        },
       },
       animation: {
-        wiggle: 'wiggle 0.3s ease-in-out infinite',
-      }
+        wiggle: "wiggle 0.3s ease-in-out infinite",
+        enter: "enter 200ms ease-out",
+        leave: "leave 150ms ease-in forwards",
+      },
     },
   },
   plugins: [scrollbar],

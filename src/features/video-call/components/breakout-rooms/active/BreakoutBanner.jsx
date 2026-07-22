@@ -11,8 +11,8 @@ const BreakoutBanner = ({
   const { t } = useLanguage()
 
   return (
-    <div className="px-6 pt-6 z-10 animate-fade-in shrink-0">
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-2.5 text-xs font-bold shadow-md rounded-xl border border-orange-400">
+    <div className="px-2 pb-2 md:py-0 z-10 animate-fade-in shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-1 lg:py-2.5 text-xs font-bold shadow-md rounded-xl border border-orange-400">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse flex-shrink-0" />
           <span className="truncate">

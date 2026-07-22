@@ -1,11 +1,9 @@
 import { store } from "@/store"
 import {
   addUpload,
-  updateProgress,
-  uploadSuccess,
-  uploadFailed,
+  updateUpload,
   removeUpload,
-} from "@/store/slices/reelUploadSlice"
+} from "@/store/slices/globalUploadSlice"
 import { reelsApi } from "@/store/api/reelsApi"
 
 const fileCache = new Map()
@@ -17,15 +15,19 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
   // Store raw files in memory cache for preview/retry purposes
   fileCache.set(id, { file, coverFile })
 
-  const title = formData.get("Title") || "Untitled Reel"
-  const size = file.size
+  const title = formData.get("Title") || "Tải lên Reel mới"
   const challengeId = formData.get("ChallengeId")
 
-  // Generate cover preview url
-  const coverUrl = coverFile ? URL.createObjectURL(coverFile) : null
-
-  // 1. Dispatch start to Redux
-  store.dispatch(addUpload({ id, title, size, coverUrl }))
+  // 1. Dispatch start to globalUploadSlice
+  store.dispatch(
+    addUpload({
+      id,
+      title,
+      status: "UPLOADING",
+      progress: 0,
+      timestamp: Date.now(),
+    })
+  )
 
   // 2. Perform native XHR upload
   const xhr = new XMLHttpRequest()
@@ -42,15 +44,15 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
 
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable && e.total > 0) {
-      const progress = Math.round((e.loaded / e.total) * 100)
-      // Limit to 99% during transfer, 100% is set on response load
-      store.dispatch(updateProgress({ id, progress: Math.min(progress, 99) }))
+      const progress = Math.round((e.loaded / e.total) * 80)
+      store.dispatch(updateUpload({ id, updates: { progress: Math.min(progress, 80) } }))
     }
   }
 
   xhr.onload = () => {
     if (xhr.status >= 200 && xhr.status < 300) {
-      store.dispatch(uploadSuccess({ id }))
+      store.dispatch(updateUpload({ id, updates: { progress: 100, status: "SUCCESS" } }))
+      
       // Invalidate reels query cache to auto-reload feeds
       const tags = [
         { type: "Reels", id: "FEED" },
@@ -61,24 +63,24 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
       }
       store.dispatch(reelsApi.util.invalidateTags(tags))
     } else {
-      let errorMsg = "Upload failed"
+      let errMsg = "Tải lên thất bại"
       try {
-        const resJson = JSON.parse(xhr.responseText)
-        errorMsg = resJson.message || errorMsg
-      } catch (err) {}
-      store.dispatch(uploadFailed({ id, error: errorMsg }))
+        const res = JSON.parse(xhr.responseText)
+        errMsg = res.message || errMsg
+      } catch {}
+      store.dispatch(updateUpload({ id, updates: { status: "ERROR", error: errMsg } }))
     }
     cleanupCache(id)
   }
 
   xhr.onerror = () => {
-    store.dispatch(uploadFailed({ id, error: "Network error encountered." }))
+    store.dispatch(updateUpload({ id, updates: { status: "ERROR", error: "Lỗi kết nối mạng" } }))
     cleanupCache(id)
-  };
+  }
 
   xhr.onabort = () => {
     cleanupCache(id)
-  };
+  }
 
   xhr.send(formData)
 }

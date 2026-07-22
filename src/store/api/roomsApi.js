@@ -13,12 +13,14 @@ export const roomsApi = baseApi.injectEndpoints({
         requiredLevels,
         categories,
         topics,
+        roomName,
       } = {}) => {
         const params = new URLSearchParams({
           page,
           pageSize,
         })
         if (roomType) params.append("roomType", roomType)
+        if (roomName) params.append("roomName", roomName)
         if (languageType) {
           if (Array.isArray(languageType)) {
             languageType.forEach((lang) => params.append("languageTypes", lang))

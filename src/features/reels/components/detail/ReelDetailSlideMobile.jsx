@@ -595,6 +595,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
       {/* Long Press Modal Menu */}
       <ReelMoreMenu
         isMobile
+        reel={reel}
         showMenu={showMoreMenu}
         onClose={() => setShowMoreMenu(false)}
       />

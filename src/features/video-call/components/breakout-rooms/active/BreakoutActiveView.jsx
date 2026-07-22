@@ -164,7 +164,7 @@ const BreakoutActiveView = ({
         handleToggleAllowChange={handleToggleAllowChange}
       />
 
-      <div 
+      <div
         ref={containerRef}
         onDragOver={handleDragOverScroll}
         onDragLeave={handleDragLeaveScroll}

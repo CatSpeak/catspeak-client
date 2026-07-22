@@ -8,8 +8,8 @@ import {
   useCreateStoryMutation,
   useInteractWithStoryMutation,
   useDeleteStoryMutation,
-} from "@/store/api/storiesApi"
-import { useConversationSignalRContext } from "@/features/messages/context/ConversationSignalRContext"
+} from "@/store/api/social/storiesApi"
+import { useConversationSignalRContext } from "@/features/chat/context/ConversationSignalRContext"
 
 const useStories = (languageCommunity) => {
   const dispatch = useDispatch()
@@ -76,11 +76,14 @@ const useStories = (languageCommunity) => {
         // messages work immediately without requiring a page refresh.
         if (signalR?.invoke) {
           signalR.invoke("JoinConversation", Number(convId)).catch((err) => {
-            console.warn("[useStories] Failed to join conversation group, falling back to reconnect:", err)
+            console.warn(
+              "[useStories] Failed to join conversation group, falling back to reconnect:",
+              err,
+            )
             if (signalR.reconnect) signalR.reconnect()
           })
         } else if (signalR?.reconnect) {
-           signalR.reconnect()
+          signalR.reconnect()
         }
 
         dispatch(setActiveConversation(convId))

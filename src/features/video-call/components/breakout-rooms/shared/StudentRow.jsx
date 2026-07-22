@@ -53,7 +53,7 @@ const StudentRow = ({
       onDragStart={isDraggable ? handleDragStart : undefined}
       hoverEffect={isDraggable}
       className={isDraggable ? "cursor-grab active:cursor-grabbing" : ""}
-      contentClassName={isHost ? "h-[72px]" : ""}
+      contentClassName={isHost ? "h-[58px]" : ""}
       leftContent={<Avatar size={40} name={displayName} src={avatarSrc} />}
       rightContent={
         showPopover && (
@@ -62,9 +62,8 @@ const StudentRow = ({
             trigger={
               <div className="group flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-                    isDraggable ? "hover:bg-[#E6E6E6]" : "hover:bg-[#F2F2F2]"
-                  }`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${isDraggable ? "hover:bg-[#E6E6E6]" : "hover:bg-[#F2F2F2]"
+                    }`}
                 >
                   <MoreVertical />
                 </div>
@@ -87,11 +86,10 @@ const StudentRow = ({
                             if (onMoveStudent) onMoveStudent(studentId, room.id)
                             close()
                           }}
-                          className={`text-left px-4 py-3 rounded-xl transition-colors ${
-                            room.isFull
-                              ? "opacity-50 cursor-not-allowed bg-[#F9F9F9] text-[#A0A0A0]"
-                              : "hover:bg-[#F2F2F2]"
-                          }`}
+                          className={`text-left px-4 py-3 rounded-xl transition-colors ${room.isFull
+                            ? "opacity-50 cursor-not-allowed bg-[#F9F9F9] text-[#A0A0A0]"
+                            : "hover:bg-[#F2F2F2]"
+                            }`}
                         >
                           {t.rooms.breakoutRooms.moveTo} {room.name}{" "}
                           {room.isFull && t.rooms.breakoutRooms.isFull}
@@ -133,7 +131,7 @@ const StudentRow = ({
       }
     >
       <div className="flex flex-col min-w-0">
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 text-sm">
           <span className="truncate max-w-[120px]">{displayName}</span>
           {isCurrentUser && (
             <span className="text-[#606060] shrink-0">

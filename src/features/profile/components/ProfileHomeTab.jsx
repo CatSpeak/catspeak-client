@@ -2,14 +2,13 @@ import React, { useState, useRef } from "react"
 import {
   useGetUserTimelinePostsQuery,
   useCreatePostMutation,
-} from "../api/profilePostsApi"
+} from "../../../store/api/social/profilePostsApi"
 import PostEditorModal from "./PostEditorModal"
 import ProfilePostCard from "./ProfilePostCard"
 import ProfileSidebar from "./ProfileSidebar"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { EmptyState } from "@/shared/components/ui/indicators"
 import { Newspaper, Image, Video, FileText } from "lucide-react"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
@@ -70,10 +69,10 @@ const ProfileHomeTab = ({
   }
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 pb-20">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-3 pb-20">
       {/* Main Content - Timeline */}
       <div
-        className={`space-y-6 ${isOwnProfile ? "lg:col-span-2" : "lg:col-span-3"}`}
+        className={`space-y-3 ${isOwnProfile ? "lg:col-span-2" : "lg:col-span-3"}`}
       >
         {isOwnProfile && (
           <>
@@ -103,15 +102,14 @@ const ProfileHomeTab = ({
                   ref={triggerImageRef}
                   onChange={handleTriggerFileChange}
                 />
-                <PillButton
-                  variant="secondary"
+                <button
+                  type="button"
                   onClick={() => triggerImageRef.current?.click()}
-                  textColor="#16a34a"
-                  startIcon={<Image className="text-[#16a34a]" />}
-                  className="flex-1 rounded-none"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-[#f3f3f3] active:bg-green-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
-                  Ảnh
-                </PillButton>
+                  <Image size={20} className="text-[#16a34a]" />
+                  <span>Ảnh</span>
+                </button>
 
                 {/* Temporarily hidden
                 <input
@@ -122,15 +120,14 @@ const ProfileHomeTab = ({
                   ref={triggerVideoRef}
                   onChange={handleTriggerFileChange}
                 />
-                <PillButton
-                  variant="secondary"
+                <button
+                  type="button"
                   onClick={() => triggerVideoRef.current?.click()}
-                  textColor="#e11d48"
-                  startIcon={<Video className="text-[#e11d48]" />}
-                  className="flex-1 rounded-none"
+                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 text-sm font-medium text-[#e11d48] hover:bg-rose-50 active:bg-rose-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
-                  Video
-                </PillButton>
+                  <Video size={20} className="text-[#e11d48]" />
+                  <span>Video</span>
+                </button>
 
                 <input
                   type="file"
@@ -140,15 +137,14 @@ const ProfileHomeTab = ({
                   ref={triggerFileRef}
                   onChange={handleTriggerFileChange}
                 />
-                <PillButton
-                  variant="secondary"
+                <button
+                  type="button"
                   onClick={() => triggerFileRef.current?.click()}
-                  textColor="#2563eb"
-                  startIcon={<FileText className="text-[#2563eb]" />}
-                  className="flex-1 rounded-none"
+                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 text-sm font-medium text-[#2563eb] hover:bg-blue-50 active:bg-blue-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
-                  Tài liệu
-                </PillButton>
+                  <FileText size={20} className="text-[#2563eb]" />
+                  <span>Tài liệu</span>
+                </button>
                 */}
               </div>
             </FluentCard>
@@ -164,7 +160,7 @@ const ProfileHomeTab = ({
         )}
 
         {/* News Block */}
-        <div className="space-y-6">
+        <div className="space-y-3">
           {isLoadingPosts ? (
             <FluentCard>
               <div className="text-sm text-gray-500">Đang tải bài viết...</div>

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion"
  * @param {string} props.className - Additional class names for the container
  * @param {boolean} props.autoPlay - Whether to automatically rotate images
  * @param {number} props.interval - Duration in ms for auto-rotation
+ * @param {boolean} props.showIndicators - Whether to show pagination dots (default true)
  */
 const Carousel = ({
   images = [],
@@ -17,6 +18,7 @@ const Carousel = ({
   interval = 5000,
   objectFit = "cover",
   allowFullscreen = true,
+  showIndicators = true,
 }) => {
   const [page, setPage] = useState(0)
   const [direction, setDirection] = useState(0)
@@ -85,7 +87,7 @@ const Carousel = ({
       )}
 
       {/* Image Container */}
-      <div className={`relative w-full overflow-hidden ${isFullscreen ? "h-full flex-1" : `aspect-video rounded-2xl ${className}`}`}>
+      <div className={`relative w-full overflow-hidden ${isFullscreen ? "h-full flex-1" : `rounded-2xl ${className}`}`}>
         {/* Slides (Sliding Effect with Framer Motion) */}
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
@@ -151,7 +153,7 @@ const Carousel = ({
       </div>
 
       {/* Desktop Indicators (Under the slide, centered) */}
-      {!isFullscreen && images.length > 1 && (
+      {showIndicators && !isFullscreen && images.length > 1 && (
         <div className="hidden sm:flex items-center justify-center gap-2 mt-6">
           {images.map((_, index) => (
             <button

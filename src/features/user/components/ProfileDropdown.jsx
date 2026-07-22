@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -35,13 +36,16 @@ const ProfileDropdown = () => {
   const { data: userData, isLoading } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
   })
+  const { data: detailedProfile } = useGetUserProfileQuery(undefined, {
+    skip: !isAuthenticated,
+  })
   const [isOpen, setIsOpen] = useState(false)
   const [showLogoutWarning, setShowLogoutWarning] = useState(false)
   const menuRef = useRef(null)
   const isMobile = useIsMobile(425)
   const { isInCall } = useSelector((state) => state.videoCall)
 
-  const user = userData?.data ?? authUser ?? {}
+  const user = { ...(userData?.data ?? authUser ?? {}), ...(detailedProfile?.data ?? {}) }
 
 
   const handleToggleMenu = () => {
@@ -72,6 +76,11 @@ const ProfileDropdown = () => {
     navigate("/profile")
   }
 
+  const handlePricingClick = () => {
+    handleCloseMenu()
+    navigate("/pricing")
+  }
+
   const handleSettingsClick = () => {
     handleCloseMenu()
     navigate("/setting")
@@ -79,7 +88,7 @@ const ProfileDropdown = () => {
 
   const handleInstructorClick = () => {
     handleCloseMenu()
-    navigate("/instructor")
+    navigate("/setting/instructor")
   }
 
   const handleBillingClick = () => {
@@ -123,30 +132,41 @@ const ProfileDropdown = () => {
           size={40}
           src={user?.avatarImageUrl}
           alt={user?.username || "User"}
-          name={user?.fullName || user?.username}
+          name={user?.nickname || user?.fullName || user?.username}
         />
 
-        <div className="min-w-0">
-          <p className="m-0 truncate text-base font-medium">
-            {user?.username || "User"}
+        <div className="min-w-0 flex flex-col justify-center">
+          <p className="m-0 truncate text-base font-medium flex items-center gap-1">
+            {user?.nickname ? (
+              <>
+                <span>{user.nickname}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  ({t.profile?.personalInfo?.nickname || "Biệt danh"})
+                </span>
+              </>
+            ) : (
+              user?.fullName || user?.username || "User"
+            )}
           </p>
-          <p className="m-0 truncate text-sm text-[#7A7574]">
-            {user?.email || ""}
-          </p>
+          {user?.nickname && (user?.fullName || user?.username) && (
+            <p className="m-0 truncate text-sm text-gray-500">
+              {user.fullName || user.username}
+            </p>
+          )}
         </div>
       </div>
 
       <div className="border-t border-[#e5e5e5]" />
 
       <div className="flex flex-col gap-1 p-1">
+
         <button onClick={handleProfileClick} className={menuItemClass}>
           <User size={20} />
-          <span>{t.header.profile}</span>
+          <span>{t.header?.personalPage || "Trang cá nhân"}</span>
         </button>
-
-        <button onClick={handleSettingsClick} className={menuItemClass}>
-          <Settings size={20} />
-          <span>{t.header.settings || "Settings"}</span>
+        <button onClick={handlePricingClick} className={menuItemClass}>
+          <CreditCard size={20} />
+          <span>{t.billing?.pricing.tabTitle || "Pricing"}</span>
         </button>
 
         <button onClick={handleInstructorClick} className={menuItemClass}>
@@ -158,6 +178,12 @@ const ProfileDropdown = () => {
           <CreditCard size={20} />
           <span>{t.profile?.sidebar?.billing || "Thanh toán"}</span>
         </button>
+
+        <button onClick={handleSettingsClick} className={menuItemClass}>
+          <Settings size={20} />
+          <span>{t.header.settings || "Settings"}</span>
+        </button>
+
         <button onClick={handleLogout} className={menuItemClass}>
           <LogOut size={20} />
           <span>{t.header.logout}</span>
@@ -210,7 +236,7 @@ const ProfileDropdown = () => {
             size={40}
             src={user?.avatarImageUrl}
             alt={user?.username || "User"}
-            name={user?.fullName || user?.username}
+            name={user?.nickname || user?.fullName || user?.username}
           />
         </button>
       )}

@@ -2,9 +2,11 @@ import React, { useMemo, useState, useRef, useEffect } from "react"
 import { Calendar, ChevronDown, ChevronUp, ListPlus, Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPlaylistsQuery, useCreatePlaylistMutation, useGetBookmarkedReelsQuery } from "@/store/api/reelsApi"
+import { useGetPlaylistsQuery, useCreatePlaylistMutation, useUpdatePlaylistMutation, useDeletePlaylistMutation, useGetBookmarkedReelsQuery } from "@/store/api/reelsApi"
 
 import PlaylistReelList from "./PlaylistReelList"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Modal from "@/shared/components/ui/Modal"
 
 const getLocale = (lang) => {
   if (lang === "zh") return "zh-CN"
@@ -15,15 +17,15 @@ const getLocale = (lang) => {
 const PlaylistAvatar = ({ covers }) => {
   if (!covers || covers.length === 0) {
     return (
-      <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden">
-        <ListPlus size={20} className="text-red-600" />
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden">
+        <ListPlus size={24} className="text-red-600 scale-75 md:scale-100" />
       </div>
     )
   }
 
   if (covers.length === 1) {
     return (
-      <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100">
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100">
         <img src={covers[0]} className="w-full h-full object-cover" alt="" />
       </div>
     )
@@ -31,7 +33,7 @@ const PlaylistAvatar = ({ covers }) => {
 
   if (covers.length === 2) {
     return (
-      <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
         <div className="w-1/2 h-full border-r border-white/50">
           <img src={covers[0]} className="w-full h-full object-cover" alt="" />
         </div>
@@ -44,7 +46,7 @@ const PlaylistAvatar = ({ covers }) => {
 
   if (covers.length === 3) {
     return (
-      <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
         <div className="w-1/2 h-full border-r border-white/50">
           <img src={covers[0]} className="w-full h-full object-cover" alt="" />
         </div>
@@ -61,7 +63,7 @@ const PlaylistAvatar = ({ covers }) => {
   }
 
   return (
-    <div className="w-11 h-11 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex flex-wrap">
+    <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex flex-wrap">
       <div className="w-1/2 h-1/2 border-r border-b border-white/50">
         <img src={covers[0]} className="w-full h-full object-cover" alt="" />
       </div>
@@ -84,21 +86,60 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   const { data: bookmarkedReels } = useGetBookmarkedReelsQuery(playlist.playlistId)
   const count = bookmarkedReels ? bookmarkedReels.length : (playlist.bookmarksCount || 0)
 
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(playlist.name)
+  const [updatePlaylist, { isLoading: isUpdating }] = useUpdatePlaylistMutation()
+  const [deletePlaylist, { isLoading: isDeleting }] = useDeletePlaylistMutation()
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
+
   const label = count === 1
     ? (lang?.itemCountSingular || "1 video")
     : (lang?.itemCount || "{{count}} videos").replace("{{count}}", count)
 
   const covers = bookmarkedReels?.map(r => r.coverUrl).filter(Boolean) || []
 
-  const handleFeatureInDev = (e) => {
+  const handleUpdate = async (e) => {
     e.stopPropagation()
-    toast(lang?.inDevelopment || "Chức năng đang phát triển", { icon: '🚧' })
+    if (!editName.trim() || editName.trim() === playlist.name) {
+      setIsEditing(false)
+      setEditName(playlist.name)
+      return
+    }
+    try {
+      await updatePlaylist({ playlistId: playlist.playlistId, name: editName.trim() }).unwrap()
+      setIsEditing(false)
+      toast.success(lang?.updated || "Cập nhật thành công")
+    } catch (err) {
+      toast.error(lang?.updateFailed || "Cập nhật thất bại")
+    }
+  }
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation()
+    setIsConfirmDeleteOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    try {
+      await deletePlaylist(playlist.playlistId).unwrap()
+      toast.success(lang?.deleted || "Đã xóa playlist")
+    } catch (err) {
+      toast.error(lang?.deleteFailed || "Xóa thất bại")
+    } finally {
+      setIsConfirmDeleteOpen(false)
+    }
+  }
+
+  const handleCancelEdit = (e) => {
+    e.stopPropagation()
+    setIsEditing(false)
+    setEditName(playlist.name)
   }
 
   return (
     <div className="border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden mb-2 group/row">
       <div
-        onClick={() => setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)}
+        onClick={() => !isEditing && setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)}
         className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left cursor-pointer"
       >
         <PlaylistAvatar covers={covers} />
@@ -116,13 +157,13 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
         </div>
         
         {/* Actions */}
-        <div className="flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
-           <button onClick={handleFeatureInDev} className="p-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit name">
-              <Pencil size={16} />
-           </button>
-           <button onClick={handleFeatureInDev} className="p-1.5 bg-gray-100 text-gray-600 hover:text-red-600 rounded-lg hover:bg-[#ffdede] transition-colors" title="Delete playlist">
-              <Trash2 size={16} />
-           </button>
+        <div className="flex items-center gap-3 sm:gap-2 opacity-100 sm:opacity-0 group-hover/row:opacity-100 transition-opacity">
+          <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="p-2.5 sm:p-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="Edit name">
+            <Pencil className="w-5 h-5 sm:w-4 sm:h-4" />
+          </button>
+          <button onClick={handleDeleteClick} disabled={isDeleting} className="p-2.5 sm:p-1.5 bg-gray-100 text-gray-600 hover:text-red-600 rounded-lg hover:bg-[#ffdede] transition-colors" title="Delete playlist">
+            {isDeleting ? <Loader2 className="animate-spin w-5 h-5 sm:w-4 sm:h-4" /> : <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />}
+          </button>
         </div>
 
         <div className="ml-1 text-gray-400">
@@ -139,6 +180,53 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
           />
         </div>
       )}
+
+      <ConfirmationModal
+        open={isConfirmDeleteOpen}
+        onClose={() => setIsConfirmDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        title={lang?.deletePlaylistTitle || "Xóa Playlist"}
+        message={lang?.deleteConfirm || "Bạn có chắc chắn muốn xóa playlist này?"}
+        confirmText={lang?.delete || "Xóa"}
+        cancelText={lang?.cancel || "Hủy"}
+      />
+
+      <Modal
+        open={isEditing}
+        onClose={() => setIsEditing(false)}
+        title={lang?.editPlaylist || "Sửa tên Playlist"}
+        fullScreenOnMobile={false}
+      >
+        <div className="p-4 pt-1 flex flex-col gap-4">
+          <input
+            type="text"
+            autoFocus
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleUpdate(e)
+            }}
+            className="w-full px-4 py-3 text-sm font-medium text-gray-800 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cath-red-500/20 focus:border-cath-red-500 bg-white transition-all"
+            placeholder={lang?.playlistName || "Tên playlist"}
+          />
+          <div className="flex justify-end gap-3 mt-2">
+            <button
+              onClick={() => setIsEditing(false)}
+              className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+            >
+              {lang?.cancel || "Hủy"}
+            </button>
+            <button
+              onClick={handleUpdate}
+              disabled={isUpdating}
+              className="px-5 py-2.5 text-sm font-semibold text-white bg-cath-red-700 hover:bg-cath-red-800 rounded-full transition-colors flex items-center gap-2"
+            >
+              {isUpdating && <Loader2 size={16} className="animate-spin" />}
+              {lang?.save || "Lưu"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
