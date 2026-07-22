@@ -30,7 +30,7 @@ import { useUnreadTracking } from "@/features/video-call/hooks/useUnreadTracking
 import {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
-} from "@/store/api/conversationsApi"
+} from "@/store/api/aiApi"
 import {
   useStartAssistantMutation,
   useStopAssistantMutation,

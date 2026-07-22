@@ -7,7 +7,7 @@ import {
   useGetSharedPostQuery,
   useReactToPostMutation,
   useSharePostMutation,
-} from "@/store/api/postsApi"
+} from "@/store/api/social/postsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 import PostContent from "../components/PostContent"
