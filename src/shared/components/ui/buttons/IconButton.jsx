@@ -1,17 +1,12 @@
-import React from "react"
+import React from "react";
 
 const IconButton = ({
   children,
   onClick,
   title,
   disabled = false,
-<<<<<<< HEAD
   variant = "filled", // "filled" | "ghost" | "outline" | "primary"
   size = "sm", // "xs" | "sm" | "md"
-=======
-  variant = "filled", // "filled" | "ghost" | "outline"
-  size = "sm", // "sm" | "md"
->>>>>>> release/220726
   className = "",
   ...props
 }) => {
@@ -28,7 +23,7 @@ const IconButton = ({
       button: "w-14 h-14",
       inner: "w-14 h-14",
     },
-  }
+  };
 
   const variantClasses = {
     primary: "bg-[#990011] group-hover/icon:bg-[#80000e] text-white",
@@ -41,9 +36,9 @@ const IconButton = ({
       "bg-transparent group-hover:bg-[#f3f3f3] group-active:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
     primary:
       "bg-[#990011] text-white hover:bg-[#7a000d] border-[1.5px] border-solid border-[#990011]",
-  }
+  };
 
-  const currentSize = sizeClasses[size] || sizeClasses.sm
+  const currentSize = sizeClasses[size] || sizeClasses.sm;
 
   return (
     <button
@@ -59,7 +54,7 @@ const IconButton = ({
         {children}
       </span>
     </button>
-  )
-}
+  );
+};
 
-export default IconButton
+export default IconButton;
