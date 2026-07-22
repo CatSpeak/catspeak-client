@@ -14,7 +14,7 @@ const LANG_FLAGS = { en: UK, vi: VietNam, zh: China }
 /**
  * In-call subtitle overlay for non-AI rooms.
  * Displays subtitles filtered by the viewer's selected display language.
- * Includes an inline language switcher for changing the display language.
+ * Includes an inline language switcher that invokes changeSubtitleLanguage to trigger backend API sessions.
  */
 const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
   const { subtitles } = useSubtitles()
