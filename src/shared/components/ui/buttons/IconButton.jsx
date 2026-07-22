@@ -5,8 +5,13 @@ const IconButton = ({
   onClick,
   title,
   disabled = false,
+<<<<<<< HEAD
   variant = "filled", // "filled" | "ghost" | "outline" | "primary"
   size = "sm", // "xs" | "sm" | "md"
+=======
+  variant = "filled", // "filled" | "ghost" | "outline"
+  size = "sm", // "sm" | "md"
+>>>>>>> release/220726
   className = "",
   ...props
 }) => {

@@ -45,8 +45,11 @@ const Checkbox = ({
       checked={checked}
       onChange={onChange}
       className={`h-4 w-4 cursor-pointer rounded border-gray-300 text-cath-red-700 accent-cath-red-700 focus:ring-cath-red-700 ${className}`}
+<<<<<<< HEAD
       disabled={disabled}
       {...props}
+=======
+>>>>>>> release/220726
     />
   )
 }
