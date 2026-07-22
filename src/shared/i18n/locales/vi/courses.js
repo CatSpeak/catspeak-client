@@ -388,7 +388,11 @@ export default {
     tuition: "Học phí",
     yourClass: "Lớp học của bạn (Giảng viên)",
     manageCourse: "Quản lý khóa học (Giảng viên)",
-    cannotEnrollOwn: "Bạn không thể đăng ký khóa học hoặc lớp học do chính mình tạo."
+    cannotEnrollOwn: "Bạn không thể đăng ký khóa học hoặc lớp học do chính mình tạo.",
+    startDate: "Ngày khai giảng:",
+    goToWorkspace: "Vào lớp học",
+    enrollBatch: "Đăng ký lớp",
+    seniorCoach: "Giảng viên CatSpeak"
   },
   createAssignment: {
     pageTitle: "Tạo bài nộp",

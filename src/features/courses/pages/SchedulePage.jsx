@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 
 import { formatUTCDate } from "../utils/courseUtils"
+import { toLocalDateString } from "../utils/dateUtils"
 
 const SchedulePage = () => {
   const { language, t } = useLanguage()
@@ -27,15 +28,6 @@ const SchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [viewMode, setViewMode] = useState("calendar") // "calendar" or "grid"
-
-  // Date Formatting Helper (yyyy-MM-dd)
-  const formatDateToYYYYMMDD = (date) => {
-    if (!date) return ""
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    return `${y}-${m}-${d}`
-  }
 
   // Helper arrays for calendar from localization
   const MONTHS = c.months || [
@@ -95,29 +87,41 @@ const SchedulePage = () => {
   // YYYY-MM-DD Date Queries computed values
   const startOfMonthStr = useMemo(() => {
     const d = new Date(year, month, 1)
-    return formatDateToYYYYMMDD(d)
+    return toLocalDateString(d)
   }, [year, month])
 
   const endOfMonthStr = useMemo(() => {
     const d = new Date(year, month + 1, 0)
-    return formatDateToYYYYMMDD(d)
+    return toLocalDateString(d)
   }, [year, month])
 
   const selectedDateStr = useMemo(() => {
-    return formatDateToYYYYMMDD(selectedDate)
+    return toLocalDateString(selectedDate)
   }, [selectedDate])
 
   // RTK Query endpoints integration
-  const { data: classesData, isLoading: isClassesLoading } = useGetAllClassesQuery({ page: 1, pageSize: 100 })
-  const { data: scheduleSessionsData, isLoading: isSessionsLoading } = useGetScheduleSessionsQuery({
+  const {
+    data: classesData,
+    isLoading: isClassesLoading,
+    error: classesError,
+  } = useGetAllClassesQuery({ page: 1, pageSize: 100 })
+  const {
+    data: scheduleSessionsData,
+    isLoading: isSessionsLoading,
+    error: sessionsError,
+  } = useGetScheduleSessionsQuery({
     from: startOfMonthStr,
     to: endOfMonthStr
   })
 
   const classesList = useMemo(() => classesData?.data || [], [classesData])
   const monthSessions = useMemo(() => scheduleSessionsData?.data || [], [scheduleSessionsData])
-  const sessionDates = useMemo(
-    () => [...new Set(monthSessions.map(session => session.date).filter(Boolean))],
+  const classesById = useMemo(
+    () => new Map(classesList.map((item) => [String(item.id), item])),
+    [classesList]
+  )
+  const sessionDateSet = useMemo(
+    () => new Set(monthSessions.map(session => session.date).filter(Boolean)),
     [monthSessions]
   )
   const isLoading = isClassesLoading || isSessionsLoading
@@ -127,7 +131,7 @@ const SchedulePage = () => {
     return monthSessions
       .filter(session => session.date === selectedDateStr)
       .map(session => {
-        const matchedClass = classesList.find(c => c.id === session.class?.id)
+        const matchedClass = classesById.get(String(session.class?.id))
         return {
           id: session.class?.id,
           name: session.class?.name || matchedClass?.name || "",
@@ -143,10 +147,10 @@ const SchedulePage = () => {
           startDate: matchedClass?.startDate
         }
       })
-  }, [monthSessions, selectedDateStr, classesList])
+  }, [monthSessions, selectedDateStr, classesById])
 
   // Count active dates with sessions in current month
-  const monthClassesCount = sessionDates.length
+  const monthClassesCount = sessionDateSet.size
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -247,7 +251,7 @@ const SchedulePage = () => {
                 {calendarDays.map((date, idx) => {
                   if (!date) return <div key={idx} className="aspect-square" />
 
-                  const hasClasses = sessionDates.includes(formatDateToYYYYMMDD(date))
+                  const hasClasses = sessionDateSet.has(toLocalDateString(date))
                   const active = isSelected(date)
                   const today = isToday(date)
 
@@ -299,6 +303,10 @@ const SchedulePage = () => {
             {isLoading ? (
               <div className="flex justify-center items-center py-10">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#990011]"></div>
+              </div>
+            ) : classesError || sessionsError ? (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
+                {c.scheduleLoadError || "Failed to load the teaching schedule."}
               </div>
             ) : selectedDateClasses.length > 0 ? (
               <div className="flex flex-col gap-4">

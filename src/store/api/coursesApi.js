@@ -79,6 +79,7 @@ const transformCourse = (course) => {
   if (!course) return null
   const resolvedTitle = course.name || course.title || "Untitled Course"
   const resolvedStudents = course.studentCount !== undefined ? course.studentCount : (course.totalStudents || 0)
+
   return {
     id: course.id?.toString() || "",
     name: resolvedTitle,
@@ -98,10 +99,8 @@ const transformCourse = (course) => {
     priceRange: course.priceRange || { min: 0, max: 0 },
     thumbnailUrl: course.thumbnailUrl || "",
     createdAt: course.createdAt || "",
-    instructorId: course.instructorId?.toString() || course.instructor?.id?.toString() || course.teacherId?.toString() || course.creatorId?.toString() || course.createdById?.toString() || "",
-    instructorName: course.instructorName || course.instructor?.fullName || "",
-    instructor: course.instructor || null,
-    teacherId: course.teacherId?.toString() || ""
+    teacher: course.teacher || null,
+    teacherId: course.teacher?.accountId?.toString() || course.accountId?.toString() || ""
   }
 }
 
@@ -114,6 +113,7 @@ const transformClass = (cls) => {
     completedSessions: cls.completedSessions || 0,
     totalSessions: cls.totalSessions || 24
   }
+
   return {
     id: cls.id?.toString() || "",
     courseId: cls.courseId?.toString() || null,
@@ -148,13 +148,13 @@ const transformClass = (cls) => {
     slots: cls.capacity || cls.slots || 10,
     studentCount: resolvedStudentCount,
     enrolledStudents: resolvedStudentCount,
-    tuitionFee: cls.price || cls.tuitionFee || 0,
+    tuitionFee: cls.price !== undefined ? cls.price : (cls.tuitionFee !== undefined ? cls.tuitionFee : 0),
     status: cls.status || "OPEN",
     roomId: cls.roomId?.toString() || "",
     roomName: cls.roomName || "",
     thumbnailUrl: cls.thumbnailUrl || "",
-    instructorId: cls.instructorId?.toString() || cls.instructor?.id?.toString() || cls.teacherId?.toString() || cls.creatorId?.toString() || cls.createdById?.toString() || "",
-    teacherId: cls.teacherId?.toString() || ""
+    teacher: cls.teacher || null,
+    teacherId: cls.teacher?.accountId?.toString() || cls.accountId?.toString() || ""
   }
 }
 
@@ -300,38 +300,6 @@ const buildCreateClassFormData = (data) => buildFormData({
 export const coursesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Student Endpoints
-    getStudentEnrolledCourses: builder.query({
-      query: (params) => ({
-        url: "/student/classes/my-enrollments",
-        method: "GET",
-        params: {
-          page: params?.page || 1,
-          pageSize: params?.pageSize || 100,
-        },
-      }),
-      transformResponse: (response) => {
-        const rawItems = response?.data || response?.items || (Array.isArray(response) ? response : [])
-        // Map enrolled classes back to course structures for the StudentDashboard
-        return rawItems.map(cls => ({
-          id: cls.courseId?.toString() || "",
-          name: cls.courseName || "Untitled Course",
-          title: cls.courseName || "Untitled Course",
-          language: cls.language || "English",
-          levels: cls.levels || ["A1"],
-          description: cls.courseName ? `Enrolled in class ${cls.name}` : "",
-          totalSessions: cls.progress?.totalSessions || 24,
-          classCount: 1,
-          studentCount: cls.studentCount || 0,
-          status: cls.status || "OPEN",
-          thumbnailUrl: cls.thumbnailUrl || "",
-          enrolledClassId: cls.id?.toString() || "",
-          enrolledClassName: cls.name || "",
-          progress: cls.progress || { completedSessions: 0, totalSessions: 24 }
-        }))
-      },
-      providesTags: ["StudentCourses", "StudentClasses"]
-    }),
-
     getStudentAvailableCourses: builder.query({
       query: (params) => ({
         url: "/student/courses",
@@ -430,18 +398,9 @@ export const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: ["StudentCourses", "StudentClasses"]
     }),
 
-    // 1. Overview Dashboard
-    getMyCoursesOverview: builder.query({
-      query: () => ({
-        url: "/teacher/my-courses/overview",
-        method: "GET",
-      }),
-      providesTags: ["Courses", "Classes"],
-    }),
-
     // 2. Get All Courses
     getAllCourses: builder.query({
-      query: (params) => ({
+      query: (params = {}) => ({
         url: "/teacher/courses",
         method: "GET",
         params: {
@@ -458,7 +417,7 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // 3. Get All Classes
     getAllClasses: builder.query({
-      query: (params) => ({
+      query: (params = {}) => ({
         url: "/teacher/classes",
         method: "GET",
         params: {
@@ -516,34 +475,6 @@ export const coursesApi = baseApi.injectEndpoints({
         }
       },
       providesTags: (result, error, id) => [{ type: "ClassDetail", id }],
-    }),
-
-    // 6. Get Class Members
-    getClassMembers: builder.query({
-      query: ({ classId, ...params }) => ({
-        url: `/teacher/classes/${classId}/members`,
-        method: "GET",
-        params,
-      }),
-      providesTags: (result, error, { classId }) => [{ type: "ClassMembers", id: classId }],
-    }),
-
-    // 7. Get Teacher Profile
-    getTeacherProfile: builder.query({
-      query: () => ({
-        url: "/teacher/profile",
-        method: "GET",
-      }),
-      providesTags: ["TeacherProfile"],
-    }),
-
-    // 8. Search Students pool
-    searchStudents: builder.query({
-      query: (q) => ({
-        url: "/teacher/students/search",
-        method: "GET",
-        params: { q },
-      }),
     }),
 
     // 9. Create Course
@@ -750,7 +681,7 @@ export const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { classId }) => [
         { type: "ClassGrading", id: `class-${classId}` },
         { type: "ClassGrading", id: `student-${classId}` },
-        { type: "Class", id: classId },
+        { type: "ClassDetail", id: classId },
       ],
     }),
 
@@ -766,7 +697,7 @@ export const coursesApi = baseApi.injectEndpoints({
         { type: "ClassGrading", id: `student-${classId}` },
         { type: "ClassGrading", id: `assignment-${assignmentId}` },
         { type: "ClassGrading", id: `student-assignment-${assignmentId}` },
-        { type: "Class", id: classId },
+        { type: "ClassDetail", id: classId },
       ],
     }),
 
@@ -854,14 +785,12 @@ export const coursesApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // 18. Update Attendance
-    updateClassMemberAttendance: builder.mutation({
-      query: ({ classId, studentId, attendance }) => ({
-        url: `/teacher/classes/${classId}/attendance`,
-        method: "POST",
-        body: { studentId, attendance },
+    downloadAssignmentGradeSheet: builder.mutation({
+      query: ({ classId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/assignments/${assignmentId}/grade-sheet`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassMembers", id: classId }],
     }),
 
     // ─── Materials Management ───────────────────────────────────────
@@ -969,20 +898,15 @@ export const coursesApi = baseApi.injectEndpoints({
 })
 
 export const {
-  useGetStudentEnrolledCoursesQuery,
   useGetStudentAvailableCoursesQuery,
   useGetStudentJoinedClassesQuery,
   useGetStudentCourseDetailQuery,
   useGetStudentClassDetailQuery,
   useEnrollInCourseMutation,
-  useGetMyCoursesOverviewQuery,
   useGetAllCoursesQuery,
   useGetAllClassesQuery,
   useGetCourseDetailQuery,
   useGetClassDetailQuery,
-  useGetClassMembersQuery,
-  useGetTeacherProfileQuery,
-  useSearchStudentsQuery,
   useCreateCourseMutation,
   useUpdateCourseMutation,
   useDeleteCourseMutation,
@@ -1006,7 +930,7 @@ export const {
   useGradeSubmissionMutation,
   useReturnSubmissionMutation,
   useBulkReturnSubmissionsMutation,
-  useUpdateClassMemberAttendanceMutation,
+  useDownloadAssignmentGradeSheetMutation,
   useGetClassMaterialsQuery,
   useUploadClassMaterialMutation,
   useDeleteClassMaterialMutation,

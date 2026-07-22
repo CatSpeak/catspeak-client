@@ -70,7 +70,7 @@ const TeachingTasksSection = ({
   onTaskAction,
   isDevelopment = true,
   actionIcon = "chevron",
-  devMessage = "Tinh nang dang phat trien",
+  devMessage = "Tính năng đang phát triển",
 }) => {
   const handleDevelopmentAction = (callback, payload) => {
     if (isDevelopment) {

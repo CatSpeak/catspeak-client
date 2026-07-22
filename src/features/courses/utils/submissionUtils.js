@@ -1,4 +1,4 @@
-import { parseAttachmentList } from "./assignmentUtils"
+import { parseAttachmentList } from "./assignmentUtils.js"
 
 const getMemberStudentId = (member) => (
   member?.studentId ?? member?.userId ?? member?.id
@@ -140,7 +140,7 @@ export const formatPaginationShowingText = ({
   totalItems,
   template,
 }) => {
-  const start = (currentPage - 1) * itemsPerPage + 1
+  const start = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
   const end = Math.min(currentPage * itemsPerPage, totalItems)
 
   if (template) {

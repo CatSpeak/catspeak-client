@@ -24,6 +24,7 @@ import { Editor } from "@tinymce/tinymce-react"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
 import {
   getFileMeta,
+  getAssignmentErrorMessage,
   isAssignmentExpired,
   parseAttachmentList,
 } from "../../utils/assignmentUtils"
@@ -38,7 +39,11 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignment
   const assignmentId = assignmentIdProp || initialAssignment?.id
 
   // Fetch complete/latest details of the assignment for student
-  const { data: assignmentResponse, isLoading: isAssignmentLoading } = useGetStudentAssignmentByIdQuery(
+  const {
+    data: assignmentResponse,
+    isLoading: isAssignmentLoading,
+    error: assignmentError,
+  } = useGetStudentAssignmentByIdQuery(
     { classId, assignmentId },
     { skip: !classId || !assignmentId }
   )
@@ -48,7 +53,11 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignment
   )
 
   // Fetch the submission of the student
-  const { data: submissionResponse, isLoading: isSubmissionLoading } = useGetMyAssignmentSubmissionQuery(
+  const {
+    data: submissionResponse,
+    isLoading: isSubmissionLoading,
+    error: submissionError,
+  } = useGetMyAssignmentSubmissionQuery(
     { classId, assignmentId },
     { skip: !classId || !assignmentId }
   )
@@ -238,6 +247,16 @@ const StudentAssignmentDetailView = ({ assignment: initialAssignment, assignment
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <LoadingSpinner />
+      </div>
+    )
+  }
+
+  const relevantSubmissionError = submissionError?.status === 404 ? null : submissionError
+
+  if (assignmentError || relevantSubmissionError) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
+        {getAssignmentErrorMessage(assignmentError || relevantSubmissionError, "Failed to load assignment")}
       </div>
     )
   }

@@ -8,9 +8,9 @@ import {
   useBulkReturnSubmissionsMutation,
   useCloseAssignmentMutation,
   useDeleteAssignmentMutation,
+  useDownloadAssignmentGradeSheetMutation,
   useGetAssignmentByIdQuery,
   useGetAssignmentSubmissionsQuery,
-  useGetClassMembersQuery,
   useGradeSubmissionMutation,
   useOpenAssignmentMutation,
   useReturnSubmissionMutation,
@@ -18,6 +18,7 @@ import {
 
 import {
   getAssignmentMaxScore,
+  getAssignmentErrorMessage,
   getAssignmentStatus,
   getAssignmentTitle,
   isAssignmentExpired,
@@ -39,21 +40,29 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
   const activeStudentId = searchParams.get("studentId")
   const assignmentId = assignmentIdProp || assignment?.id
 
-  const { data: assignmentDetailResponse, isLoading: isAssignmentLoading } = useGetAssignmentByIdQuery({
+  const {
+    data: assignmentDetailResponse,
+    isLoading: isAssignmentLoading,
+    error: assignmentError,
+  } = useGetAssignmentByIdQuery({
     classId,
     assignmentId,
   }, { skip: !classId || !assignmentId })
-  const { data: submissionsResponse, isLoading: isSubmissionsLoading } = useGetAssignmentSubmissionsQuery({
+  const {
+    data: submissionsResponse,
+    isLoading: isSubmissionsLoading,
+    error: submissionsError,
+  } = useGetAssignmentSubmissionsQuery({
     classId,
     assignmentId,
   }, { skip: !classId || !assignmentId })
-  const { data: membersResponse, isLoading: isMembersLoading } = useGetClassMembersQuery({ classId })
   const [closeAssignment] = useCloseAssignmentMutation()
   const [openAssignment] = useOpenAssignmentMutation()
   const [deleteAssignment, { isLoading: isDeletingAssignment }] = useDeleteAssignmentMutation()
-  const [gradeSubmission] = useGradeSubmissionMutation()
+  const [gradeSubmission, { isLoading: isGrading }] = useGradeSubmissionMutation()
   const [bulkReturn] = useBulkReturnSubmissionsMutation()
-  const [returnSubmission] = useReturnSubmissionMutation()
+  const [returnSubmission, { isLoading: isReturning }] = useReturnSubmissionMutation()
+  const [downloadGradeSheet] = useDownloadAssignmentGradeSheetMutation()
 
   const currentAssignment = assignmentDetailResponse?.data || assignmentDetailResponse || assignment || {}
   const assignmentTitle = getAssignmentTitle(currentAssignment)
@@ -67,15 +76,11 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
     () => submissionsResponse?.data || submissionsResponse || [],
     [submissionsResponse],
   )
-  const members = useMemo(
-    () => membersResponse?.data || membersResponse?.items || membersResponse || [],
-    [membersResponse],
-  )
   const students = useMemo(() => buildSubmissionStudentList({
-    members,
+    members: [],
     submissions,
     language,
-  }), [members, submissions, language])
+  }), [submissions, language])
   const activeStudent = useMemo(() => {
     if (activeSubmissionId) {
       const found = students.find((student) => String(student.submissionId) === String(activeSubmissionId))
@@ -156,19 +161,7 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
 
   const handleDownloadGradeSheet = async () => {
     try {
-      const baseUrl = import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api"
-      const url = `${baseUrl}/teacher/classes/${classId}/assignments/${assignmentId}/grade-sheet`
-      const token = localStorage.getItem("token")
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) throw new Error("Failed to download grade sheet")
-
-      const blob = await response.blob()
+      const blob = await downloadGradeSheet({ classId, assignmentId }).unwrap()
       const downloadUrl = window.URL.createObjectURL(blob)
       const downloadLink = document.createElement("a")
       downloadLink.href = downloadUrl
@@ -218,10 +211,21 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
     }
   }
 
-  if (isAssignmentLoading || isSubmissionsLoading || isMembersLoading) {
+  if (isAssignmentLoading || isSubmissionsLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <LoadingSpinner />
+      </div>
+    )
+  }
+
+  if (assignmentError || submissionsError) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
+        {getAssignmentErrorMessage(
+          assignmentError || submissionsError,
+          "Failed to load assignment submissions",
+        )}
       </div>
     )
   }
@@ -236,6 +240,8 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
         onBack={() => setSearchParams({ assignmentId })}
         onSave={handleSaveGrade}
         onRelease={handleReleaseGrade}
+        isSaving={isGrading}
+        isReleasing={isReturning}
       />
     )
   }

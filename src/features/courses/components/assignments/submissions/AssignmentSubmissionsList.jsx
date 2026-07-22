@@ -62,12 +62,13 @@ const AssignmentSubmissionsList = ({
     filterSubmissionStudents(students, studentSearch, activeFilter)
   ), [students, studentSearch, activeFilter])
   const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE) || 1
+  const activePage = Math.min(currentPage, totalPages)
   const paginatedStudents = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    const startIndex = (activePage - 1) * ITEMS_PER_PAGE
     return filteredStudents.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-  }, [filteredStudents, currentPage])
+  }, [filteredStudents, activePage])
   const paginationText = formatPaginationShowingText({
-    currentPage,
+    currentPage: activePage,
     itemsPerPage: ITEMS_PER_PAGE,
     totalItems: filteredStudents.length,
     template: gradingTranslations.paginationShowing,
@@ -319,7 +320,7 @@ const AssignmentSubmissionsList = ({
         <AssignmentSubmissionsTable
           students={paginatedStudents}
           assignmentMaxScore={assignmentMaxScore}
-          currentPage={currentPage}
+          currentPage={activePage}
           totalPages={totalPages}
           paginationText={paginationText}
           translations={gradingTranslations}
@@ -333,7 +334,7 @@ const AssignmentSubmissionsList = ({
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={async () => {
-          if (onDeleteAssignment) {
+          if (onDeleteAssignment && !isDeletingAssignment) {
             await onDeleteAssignment()
           }
           setShowDeleteModal(false)
@@ -343,7 +344,9 @@ const AssignmentSubmissionsList = ({
           gradingTranslations.deleteModalConfirmMsg ||
           `Bạn có chắc chắn muốn xóa bài tập "${assignmentTitle}"? Tất cả bài làm và điểm số của học sinh liên quan đến bài tập sẽ bị xóa vĩnh viễn và không thể khôi phục.`
         }
-        confirmText={gradingTranslations.deleteConfirmBtn || "Xóa bài tập"}
+        confirmText={isDeletingAssignment
+          ? (gradingTranslations.deletingLabel || "Deleting...")
+          : (gradingTranslations.deleteConfirmBtn || "Xóa bài tập")}
         cancelText={t.common?.cancel || "Hủy"}
         confirmVariant="destructive"
       />

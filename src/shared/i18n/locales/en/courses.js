@@ -388,7 +388,11 @@ export default {
     tuition: "Tuition Fee",
     yourClass: "Your Class (Teacher)",
     manageCourse: "Manage Course (Teacher)",
-    cannotEnrollOwn: "You cannot enroll in your own course or class."
+    cannotEnrollOwn: "You cannot enroll in your own course or class.",
+    startDate: "Start date:",
+    goToWorkspace: "Go to Workspace",
+    enrollBatch: "Enroll Batch",
+    seniorCoach: "CatSpeak Instructor"
   },
   createAssignment: {
     pageTitle: "Create Assignment",

@@ -38,8 +38,10 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
   const ca = c.createAssignment || {}
   const defaults = getAssignmentFormDefaults(initialAssignment)
 
-  const [createAssignment] = useCreateAssignmentMutation()
-  const [updateAssignment] = useUpdateAssignmentMutation()
+  const [createAssignment, { isLoading: isCreating }] = useCreateAssignmentMutation()
+  const [updateAssignment, { isLoading: isUpdating }] = useUpdateAssignmentMutation()
+  const isSaving = isCreating || isUpdating
+  const saveInFlightRef = useRef(false)
 
   // Editor mock state
   const [editorText, setEditorText] = useState(() => defaults.editorText)
@@ -156,19 +158,28 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     navigate(`/workspace/courses/class/${id}`)
   }
 
-  const handleSaveDraft = async () => {
+  const saveAssignment = async (status) => {
+    if (saveInFlightRef.current) return false
+
+    saveInFlightRef.current = true
     try {
-      if (assignmentId) {
-        await updateAssignment({
-          classId: id,
-          assignmentId,
-          formData: buildAssignmentFormData("Draft")
-        }).unwrap()
-        toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
-      } else {
-        await createAssignment({ classId: id, formData: buildAssignmentFormData("Draft") }).unwrap()
-        toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
-      }
+      const formData = buildAssignmentFormData(status)
+      await (assignmentId
+        ? updateAssignment({ classId: id, assignmentId, formData }).unwrap()
+        : createAssignment({ classId: id, formData }).unwrap())
+      return true
+    } finally {
+      saveInFlightRef.current = false
+    }
+  }
+
+  const handleSaveDraft = async () => {
+    if (isSaving) return
+
+    try {
+      const didSave = await saveAssignment("Draft")
+      if (!didSave) return
+      toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
       navigate(`/workspace/courses/class/${id}`)
     } catch (err) {
       console.error(err)
@@ -178,6 +189,8 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (isSaving) return
+
     const targetStatus = publishStatus === "draft" ? "Draft" : "Published"
 
     // Form Validation
@@ -199,15 +212,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     }
 
     try {
+      const didSave = await saveAssignment(targetStatus)
+      if (!didSave) return
       if (assignmentId) {
-        await updateAssignment({
-          classId: id,
-          assignmentId,
-          formData: buildAssignmentFormData(targetStatus)
-        }).unwrap()
         toast.success(ca.successUpdate || "Cập nhật bài nộp thành công!")
       } else {
-        await createAssignment({ classId: id, formData: buildAssignmentFormData(targetStatus) }).unwrap()
         toast.success(targetStatus === "Draft"
           ? (ca.successDraft || "Đã lưu bản nháp bài nộp")
           : (ca.successCreate || "Tạo bài nộp thành công!")
@@ -725,13 +734,15 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="h-10 px-5 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs"
+              disabled={isSaving}
+              className="h-10 px-5 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {ca.btnSaveDraft || "Lưu nháp"}
             </button>
             <button
               type="submit"
-              className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md"
+              disabled={isSaving}
+              className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {assignmentId ? (language === "vi" ? "Lưu thay đổi" : "Save Changes") : (ca.btnCreate || "Tạo bài nộp")}
             </button>
@@ -750,14 +761,30 @@ const CreateAssignmentPage = () => {
   const assignmentId = searchParams.get("assignmentId")
   const { language, t } = useLanguage()
 
-  const { data: detailResponse, isLoading: isClassLoading } = useGetClassDetailQuery(id)
-  const { data: assignmentResponse, isLoading: isAssignmentLoading } = useGetAssignmentByIdQuery(
+  const {
+    data: detailResponse,
+    isLoading: isClassLoading,
+    error: classError,
+  } = useGetClassDetailQuery(id, { skip: !id })
+  const {
+    data: assignmentResponse,
+    isLoading: isAssignmentLoading,
+    error: assignmentError,
+  } = useGetAssignmentByIdQuery(
     { classId: id, assignmentId },
     { skip: !id || !assignmentId }
   )
 
   if (isClassLoading || (assignmentId && isAssignmentLoading)) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
+  }
+
+  if (classError || assignmentError) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
+        {getAssignmentErrorMessage(classError || assignmentError, "Failed to load assignment form data")}
+      </div>
+    )
   }
 
   const classData = detailResponse?.data || detailResponse || {}

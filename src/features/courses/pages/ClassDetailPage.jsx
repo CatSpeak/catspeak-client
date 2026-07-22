@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { lazy, Suspense, useState } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -14,12 +14,17 @@ import { formatCurrency } from "../utils/courseUtils"
 import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
-// Import subcomponents for tabs
-import ClassFeedTab from "../components/grading/ClassFeedTab"
-import ClassGradingTab from "../components/grading/ClassGradingTab"
-import ClassMaterialsTab from "../components/materials/ClassMaterialsTab"
-import ClassMembersTab from "../components/members/ClassMembersTab"
+import ClassDetailTabs from "../components/ClassDetailTabs"
 import ClassOverviewTab from "../components/overview/ClassOverviewTab"
+
+const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
+const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
+const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
+const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
+
+const TabLoadingFallback = () => (
+  <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
+)
 
 const ClassDetailPage = () => {
   const { id } = useParams()
@@ -28,21 +33,26 @@ const ClassDetailPage = () => {
   const c = t.courses || {}
   const cd = c.classDetail || {}
 
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
 
-  // Active Tab: "overview", "members", "feed", "grading", "materials"
-  const [activeTab, setActiveTab] = useState("overview")
+  const [selectedTab, setSelectedTab] = useState("overview")
+  const activeTab = assignmentId ? "grading" : selectedTab
 
-  // Sync tab with URL search parameter if present
-  useEffect(() => {
+  const handleTabChange = (tab) => {
+    setSelectedTab(tab)
+
     if (assignmentId) {
-      setActiveTab("grading")
+      const nextSearchParams = new URLSearchParams(searchParams)
+      nextSearchParams.delete("assignmentId")
+      nextSearchParams.delete("studentId")
+      nextSearchParams.delete("submissionId")
+      setSearchParams(nextSearchParams)
     }
-  }, [assignmentId])
+  }
 
   // Fetch Class Details via RTK Query
-  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetClassDetailQuery(id)
+  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetClassDetailQuery(id, { skip: !id })
   const [updateClass] = useUpdateClassMutation()
   const [deleteClass] = useDeleteClassMutation()
 
@@ -80,6 +90,14 @@ const ClassDetailPage = () => {
   const notifyInDevelopment = () => {
     toast.success(c.devMessage || "Feature in development")
   }
+
+  const tabs = [
+    { value: "overview", label: cd.overview || "Overview" },
+    { value: "members", label: cd.members || "Members" },
+    { value: "feed", label: cd.feed || "Feed" },
+    { value: "grading", label: cd.grading || "Grading" },
+    { value: "materials", label: cd.materials || "Materials" },
+  ]
 
   const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData, language || "en")
 
@@ -143,62 +161,17 @@ const ClassDetailPage = () => {
           </div>
 
           {/* ─── Navigation Tabs ─── */}
-          <div className="flex border-b border-gray-150 pb-px gap-8 text-sm font-bold text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-none">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`pb-3 transition-all relative ${activeTab === "overview"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-                : "hover:text-gray-600"
-                }`}
-            >
-              {cd.overview || "Overview"}
-            </button>
-
-            <button
-              onClick={() => setActiveTab("members")}
-              className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "members"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-                : "hover:text-gray-600"
-                }`}
-            >
-              <span>{cd.members || "Members"}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("feed")}
-              className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "feed"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-                : "hover:text-gray-600"
-                }`}
-            >
-              <span>{cd.feed || "Feed"}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("grading")}
-              className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "grading"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-                : "hover:text-gray-600"
-                }`}
-            >
-              <span>{cd.grading || "Grading"}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("materials")}
-              className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "materials"
-                ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-                : "hover:text-gray-600"
-                }`}
-            >
-              <span>{cd.materials || "Materials"}</span>
-            </button>
-          </div>
+          <ClassDetailTabs
+            tabs={tabs}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+          />
         </>
       )}
 
       {/* ─── Tab Contents ─── */}
-      {activeTab === "overview" && (
+      <Suspense fallback={<TabLoadingFallback />}>
+        {activeTab === "overview" && (
         <ClassOverviewTab
           classData={classData}
           isStudent={false}
@@ -228,16 +201,13 @@ const ClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "members" && (
+        {activeTab === "members" && (
         <ClassMembersTab
-          id={id}
           isStudent={false}
-          language={language}
-          cd={cd}
         />
       )}
 
-      {activeTab === "feed" && (
+        {activeTab === "feed" && (
         <ClassFeedTab
           id={id}
           isStudent={false}
@@ -246,7 +216,7 @@ const ClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "grading" && (
+        {activeTab === "grading" && (
         <ClassGradingTab
           id={id}
           isStudent={false}
@@ -255,7 +225,7 @@ const ClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "materials" && (
+        {activeTab === "materials" && (
         <ClassMaterialsTab
           id={id}
           isStudent={false}
@@ -263,7 +233,8 @@ const ClassDetailPage = () => {
           cd={cd}
           cancelText={c.createClass?.cancel || "Hủy"}
         />
-      )}
+        )}
+      </Suspense>
 
       {/* Confirmation Modals */}
       <ConfirmationModal

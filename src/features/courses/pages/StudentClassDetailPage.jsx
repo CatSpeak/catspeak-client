@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react"
+import React, { lazy, Suspense, useState } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { MessageSquare, Lock } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 
 import {
   useGetStudentClassDetailQuery,
@@ -14,12 +14,17 @@ import { formatCurrency } from "../utils/courseUtils"
 import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
-// Import subcomponents for tabs
-import ClassFeedTab from "../components/grading/ClassFeedTab"
-import ClassGradingTab from "../components/grading/ClassGradingTab"
-import ClassMaterialsTab from "../components/materials/ClassMaterialsTab"
-import ClassMembersTab from "../components/members/ClassMembersTab"
+import ClassDetailTabs from "../components/ClassDetailTabs"
 import StudentClassOverviewTab from "../components/overview/StudentClassOverviewTab"
+
+const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
+const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
+const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
+const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
+
+const TabLoadingFallback = () => (
+  <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
+)
 
 const StudentClassDetailPage = () => {
   const { id } = useParams()
@@ -30,14 +35,8 @@ const StudentClassDetailPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
 
-  // Active Tab: "overview", "members", "feed", "grading", "materials"
-  const [activeTab, setActiveTab] = useState(() => assignmentId ? "grading" : "overview")
-
-  useEffect(() => {
-    if (assignmentId) {
-      setActiveTab("grading")
-    }
-  }, [assignmentId])
+  const [selectedTab, setSelectedTab] = useState("overview")
+  const activeTab = assignmentId ? "grading" : selectedTab
 
   const clearAssignmentParam = () => {
     if (!assignmentId) return
@@ -48,12 +47,12 @@ const StudentClassDetailPage = () => {
   }
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab)
+    setSelectedTab(tab)
     clearAssignmentParam()
   }
 
   // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
-  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetStudentClassDetailQuery(id)
+  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetStudentClassDetailQuery(id, { skip: !id })
   const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}
@@ -99,6 +98,24 @@ const StudentClassDetailPage = () => {
   const notifyInDevelopment = () => {
     toast.success("Tính năng đang phát triển")
   }
+
+  const handleLockedTabSelect = (tab) => {
+    const messages = {
+      members: c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!",
+      feed: c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view feed!",
+      grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
+      materials: c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!",
+    }
+    toast.error(messages[tab])
+  }
+
+  const tabs = [
+    { value: "overview", label: c.student?.overview || "Overview" },
+    { value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled },
+    { value: "feed", label: c.student?.feed || "Feed", locked: !isEnrolled },
+    { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
+    { value: "materials", label: c.student?.materials || "Materials", locked: !isEnrolled },
+  ]
 
   const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData, language || "en")
 
@@ -166,96 +183,16 @@ const StudentClassDetailPage = () => {
       </div>
 
       {/* ─── Navigation Tabs ─── */}
-      <div className="flex border-b border-gray-150 pb-px gap-8 text-sm font-bold text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-none">
-        <button
-          onClick={() => handleTabChange("overview")}
-          className={`pb-3 transition-all relative ${activeTab === "overview"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {c.student?.overview || "Overview"}
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!"
-              )
-              return
-            }
-            handleTabChange("members")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "members"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.classmates || "Classmates"}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view feed!"
-              )
-              return
-            }
-            handleTabChange("feed")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "feed"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.feed || "Feed"}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!"
-              )
-              return
-            }
-            handleTabChange("grading")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "grading"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.myGrades || "My Grades"}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!"
-              )
-              return
-            }
-            handleTabChange("materials")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "materials"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.materials || "Materials"}</span>
-        </button>
-      </div>
+      <ClassDetailTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        onLockedSelect={handleLockedTabSelect}
+      />
 
       {/* ─── Tab Contents ─── */}
-      {activeTab === "overview" && (
+      <Suspense fallback={<TabLoadingFallback />}>
+        {activeTab === "overview" && (
         <StudentClassOverviewTab
           classData={classData}
           isEnrolled={isEnrolled}
@@ -269,16 +206,13 @@ const StudentClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "members" && isEnrolled && (
+        {activeTab === "members" && isEnrolled && (
         <ClassMembersTab
-          id={id}
           isStudent={true}
-          language={language}
-          cd={cd}
         />
       )}
 
-      {activeTab === "feed" && isEnrolled && (
+        {activeTab === "feed" && isEnrolled && (
         <ClassFeedTab
           id={id}
           isStudent={true}
@@ -287,7 +221,7 @@ const StudentClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "grading" && isEnrolled && (
+        {activeTab === "grading" && isEnrolled && (
         <ClassGradingTab
           id={id}
           isStudent={true}
@@ -296,7 +230,7 @@ const StudentClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "materials" && isEnrolled && (
+        {activeTab === "materials" && isEnrolled && (
         <ClassMaterialsTab
           id={id}
           isStudent={true}
@@ -304,7 +238,8 @@ const StudentClassDetailPage = () => {
           cd={cd}
           cancelText={c.createClass?.cancel || "Hủy"}
         />
-      )}
+        )}
+      </Suspense>
 
       {/* Confirmation Modals */}
       <ConfirmationModal

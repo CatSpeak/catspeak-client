@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { useGetAllCoursesQuery } from "@/store/api/coursesApi"
@@ -12,6 +12,7 @@ import CourseTablePageHeader from "../components/CourseTablePageHeader"
 import CourseTabs from "../components/CourseTabs"
 import TablePagination from "../components/shared/TablePagination"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
+import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapCourseTableRow } from "../utils/courseTransforms"
 
 const AllCoursesPage = () => {
@@ -21,19 +22,14 @@ const AllCoursesPage = () => {
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
+  const {
+    currentPage,
+    debouncedSearchQuery,
+    searchQuery,
+    setCurrentPage,
+    setSearchQuery,
+  } = usePaginatedSearch()
   const deleteHelper = useDeleteCourse(t)
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery)
-      setCurrentPage(1)
-    }, 400)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [searchQuery])
 
   const { data, isLoading, error } = useGetAllCoursesQuery({
     search: debouncedSearchQuery,

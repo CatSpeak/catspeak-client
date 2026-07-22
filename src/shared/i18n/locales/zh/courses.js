@@ -388,7 +388,11 @@ export default {
     tuition: "学费",
     yourClass: "您的班级 (教师)",
     manageCourse: "管理课程 (教师)",
-    cannotEnrollOwn: "您不能注册自己创建的课程或班级。"
+    cannotEnrollOwn: "您不能注册自己创建的课程或班级。",
+    startDate: "开课日期：",
+    goToWorkspace: "进入班级空间",
+    enrollBatch: "报名班级",
+    seniorCoach: "CatSpeak 认证教练"
   },
   createAssignment: {
     pageTitle: "创建作业",

@@ -1,4 +1,4 @@
-import { toLocalDateString } from "./dateUtils"
+import { toLocalDateString } from "./dateUtils.js"
 
 export const getAssignmentTitle = (assignment, fallback = "Untitled assignment") => (
   assignment?.name || assignment?.title || fallback

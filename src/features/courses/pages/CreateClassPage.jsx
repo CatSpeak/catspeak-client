@@ -22,7 +22,13 @@ import {
 import ReactDatePicker from "react-datepicker"
 import "@/shared/styles/react-datepicker.css"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import {
+  COURSE_FORM_LANGUAGES,
+  DEFAULT_CLASS_FEE_TIERS,
+  DEFAULT_TEACHER_IS_VERIFIED,
+} from "../data/courseFormOptions"
 import { calculateFees, formatCurrency, formatCurrencyVND, formatToYYYYMMDD } from "../utils/courseUtils"
+import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -33,21 +39,6 @@ const DAYS_OF_WEEK = [
   { key: "saturday", label: "Sat", code: "T7", fullName: "Saturday" },
   { key: "sunday", label: "Sun", code: "CN", fullName: "Sunday" }
 ]
-
-const FALLBACK_TEACHER_PROFILE = {
-  isVerified: true,
-  languages: [
-    { id: 1, name: "English", levels: [{ id: 1, name: "A1" }, { id: 2, name: "A2" }, { id: 3, name: "B1" }, { id: 4, name: "B2" }, { id: 5, name: "C1" }, { id: 6, name: "C2" }] },
-    { id: 2, name: "Chinese", levels: [{ id: 1, name: "HSK 1" }, { id: 2, name: "HSK 2" }, { id: 3, name: "HSK 3" }, { id: 4, name: "HSK 4" }, { id: 5, name: "HSK 5" }, { id: 6, name: "HSK 6" }] },
-    { id: 3, name: "Vietnamese", levels: [{ id: 1, name: "A1" }, { id: 2, name: "A2" }, { id: 3, name: "B1" }, { id: 4, name: "B2" }] }
-  ],
-  feeTiers: [
-    { minSlots: 1, maxSlots: 6, openingFee: 0, commissionRate: 10 },
-    { minSlots: 7, maxSlots: 20, openingFee: 200000, commissionRate: 12 },
-    { minSlots: 21, maxSlots: 50, openingFee: 500000, commissionRate: 15 },
-    { minSlots: 51, maxSlots: Infinity, openingFee: 0, commissionRate: 20 }
-  ]
-}
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
@@ -79,7 +70,7 @@ const CreateClassPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // Static fallback teacher profile since /teacher/profile API does not exist
-  const languagesList = FALLBACK_TEACHER_PROFILE.languages || []
+  const languagesList = COURSE_FORM_LANGUAGES
   const coursesList = useMemo(() => coursesData?.data || [], [coursesData])
   const tomorrow = useMemo(() => {
     const d = new Date()
@@ -126,22 +117,6 @@ const CreateClassPage = () => {
     saturday: { start: "18:00", end: "19:30" },
     sunday: { start: "18:00", end: "19:30" }
   })
-
-  // Helper functions for date conversion (local timezone safe)
-  const toLocalDateString = (date) => {
-    if (!date) return ""
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    return `${y}-${m}-${d}`
-  }
-
-  const parseLocalDateString = (str) => {
-    if (!str) return null
-    const [y, m, d] = str.split("-").map(Number)
-    if (isNaN(y) || isNaN(m) || isNaN(d)) return null
-    return new Date(y, m - 1, d)
-  }
 
   // Minimum tuition fee calculation: (50k * slots) + (25k * sessions)
   const minFee = useMemo(() => {
@@ -322,7 +297,7 @@ const CreateClassPage = () => {
   const feeNum = parseFloat(fee.replace(/[^0-9]/g, "")) || 0
 
   const feeDetails = useMemo(() => {
-    return calculateFees(capacity, feeNum, FALLBACK_TEACHER_PROFILE.feeTiers)
+    return calculateFees(capacity, feeNum, DEFAULT_CLASS_FEE_TIERS)
   }, [feeNum, capacity])
 
   const amountReceived = formatCurrency(feeDetails.netPerStudent)
@@ -414,7 +389,7 @@ const CreateClassPage = () => {
     }))
 
     try {
-      if (!FALLBACK_TEACHER_PROFILE.isVerified) {
+      if (!DEFAULT_TEACHER_IS_VERIFIED) {
         toast.error(cc.toastVerifyProfile || "Please verify your profile identity to complete the transaction!")
         return
       }

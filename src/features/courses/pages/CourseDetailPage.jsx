@@ -17,7 +17,7 @@ const CourseDetailPage = () => {
   const c = t.courses || {}
 
   // Fetch course details
-  const { data, isLoading, error } = useGetCourseDetailQuery(id)
+  const { data, isLoading, error } = useGetCourseDetailQuery(id, { skip: !id })
 
   if (isLoading) {
     return (

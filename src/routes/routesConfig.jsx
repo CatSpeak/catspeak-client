@@ -32,6 +32,7 @@ import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
 
 import { Navigate } from "react-router-dom"
 import { AuthGuard } from "@/shared/components"
+import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect"
 
 const Profile = lazy(() => import("@/features/profile/pages/Profile"))
 const RecordingsPage = lazy(
@@ -101,13 +102,6 @@ const SchedulePage = lazy(() => import("@/features/courses/pages/SchedulePage"))
 const CreateAssignmentPage = lazy(
   () => import("@/features/courses/pages/CreateAssignmentPage"),
 )
-
-import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
-
-const WorkspaceIndex = () => {
-  const { isStudent } = useRoleOverride()
-  return <Navigate to={isStudent ? "learning" : "courses"} replace />
-}
 
 const routesConfig = [
   {
@@ -281,7 +275,7 @@ const routesConfig = [
             children: [
               {
                 index: true,
-                element: <WorkspaceIndex />,
+                element: <WorkspaceCourseRedirect />,
               },
               {
                 path: "courses",
