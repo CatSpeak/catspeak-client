@@ -8,7 +8,8 @@ export default {
   cancel: "Cancel",
   reload: "Reload page",
   cancelUploadConfirmTitle: "Processing Tasks",
-  cancelUploadConfirmDesc: "There is a task processing in progress. If you reload the page, the task will be cancelled. Are you sure you want to continue?",
+  cancelUploadConfirmDesc:
+    "There is a task processing in progress. If you reload the page, the task will be cancelled. Are you sure you want to continue?",
   scrollToTop: "Scroll to top",
   toggle: {
     on: "On",
@@ -93,6 +94,6 @@ export default {
     reels: {
       createReelTitle: "Create new Reel",
       uploadSuccess: "Reel posted successfully!",
-    }
-  }
+    },
+  },
 };

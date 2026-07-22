@@ -34,68 +34,10 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
 
   const [isMinimized, setIsMinimized] = useState(false)
 
-  // 1. Auto-increment progress for processing recordings smoothly
-  useEffect(() => {
-    const processingItems = recordingItems.filter(
-      (r) => r.status === "processing",
-    )
-    if (processingItems.length === 0) return
-
-    const interval = setInterval(() => {
-      processingItems.forEach((rec) => {
-        let nextProgress = rec.progress
-        if (rec.progress < 50) {
-          nextProgress += 2
-        } else if (rec.progress < 85) {
-          nextProgress += 1
-        } else if (rec.progress < 95) {
-          nextProgress += 0.5
-        } else if (rec.progress < 99) {
-          nextProgress += 0.1
-        }
-        dispatch(
-          updateRecordingProgress({
-            egressId: rec.egressId,
-            progress: parseFloat(nextProgress.toFixed(1)),
-          }),
-        )
-      })
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [recordingItems, dispatch])
-
-  // 2. Poll DB to verify recording completion when there are active processing tasks
-  const activeRecordings = recordingItems.filter(
-    (r) => r.status === "processing",
-  )
+  // Fetch my recordings without polling interval
   const { data: dbRecordings = [] } = useGetMyRecordingsQuery(undefined, {
-    skip: activeRecordings.length === 0,
-    pollingInterval: 5000,
+    skip: true,
   })
-
-  // Check completions
-  useEffect(() => {
-    if (activeRecordings.length === 0 || dbRecordings.length === 0) return
-
-    activeRecordings.forEach((rec) => {
-      const match = dbRecordings.find(
-        (dbRec) =>
-          dbRec.egressId === rec.egressId ||
-          (rec.sessionId && dbRec.sessionId === rec.sessionId),
-      )
-      if (match) {
-        if (rec.progress < 100) {
-          dispatch(
-            updateRecordingProgress({ egressId: rec.egressId, progress: 100 }),
-          )
-          setTimeout(() => {
-            dispatch(recordingSuccess({ egressId: rec.egressId }))
-          }, 500)
-        }
-      }
-    })
-  }, [dbRecordings, activeRecordings, dispatch])
 
   const completedUploads = uploadItems.filter((i) => i.status === "success")
   const completedRecs = recordingItems.filter((i) => i.status === "success")

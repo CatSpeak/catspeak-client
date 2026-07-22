@@ -14,6 +14,7 @@ import {
   useUpdateInstructorProfileMutation,
 } from "@/store/api/instructorApi";
 import { parsePhoneData } from "@/shared/constants/countriesOptions";
+import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx";
 
 import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
 import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
@@ -116,6 +117,7 @@ function getApplicationStatus(app) {
 const InstructorPage = () => {
   const { t } = useLanguage();
   const ins = t.profile?.instructor || {};
+  const { uploadFile } = useGlobalUpload();
 
   // --- API hooks ---
   const {
@@ -429,14 +431,39 @@ const InstructorPage = () => {
         // PUT /my for resubmission
         await updateInstructor(buildPayload()).unwrap();
         toast.success(ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!");
+        setShowForm(false);
+        setAgreed(false);
+        setErrors({});
+        setIsReapplying(false);
       } else {
-        // POST /apply for new applications
-        await applyInstructor(buildPayload()).unwrap();
+        // POST /apply for new applications using Global Progress System
+        const rawPayload = buildPayload();
+        const formDataPayload = new FormData();
+        Object.entries(rawPayload).forEach(([key, val]) => {
+          if (Array.isArray(val)) {
+            val.forEach((item) => formDataPayload.append(key, item));
+          } else if (val) {
+            formDataPayload.append(key, val);
+          }
+        });
+
+        uploadFile({
+          url: "/api/InstructorProfile/apply",
+          method: "POST",
+          data: formDataPayload,
+          title: ins.formTitle || "Nộp hồ sơ Giảng viên",
+          onUploadSuccess: () => {
+            toast.success(ins.statusPendingDesc || "Đã gửi đơn đăng ký thành công!");
+            setShowForm(false);
+            setAgreed(false);
+            setErrors({});
+            setIsReapplying(false);
+          },
+          onUploadError: (err) => {
+            toast.error(err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
+          },
+        });
       }
-      setShowForm(false);
-      setAgreed(false);
-      setErrors({});
-      setIsReapplying(false);
     } catch (err) {
       console.error("Failed to submit instructor application:", err);
       toast.error(err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");

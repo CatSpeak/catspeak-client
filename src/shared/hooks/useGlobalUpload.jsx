@@ -14,6 +14,7 @@ import {
 } from "@/store/slices/globalUploadSlice";
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useCancelTaskProgressMutation } from "@/store/api/taskProgressApi";
 
 // Shared registry for XHR instances and custom cancel callbacks
 const uploadRegistry = new Map();
@@ -22,6 +23,7 @@ export const useGlobalUpload = () => {
   const uploads = useSelector(selectGlobalUploads);
   const token = useSelector(selectCurrentToken);
   const dispatch = useDispatch();
+  const [cancelTaskProgress] = useCancelTaskProgressMutation();
 
   const uploadFile = useCallback(
     ({ url, method = "POST", data, title, isHidden = false, onUploadSuccess, onUploadError }) => {
@@ -123,8 +125,12 @@ export const useGlobalUpload = () => {
       }
       uploadRegistry.delete(id);
     }
+
+    // Cancel task via RTK Query mutation
+    cancelTaskProgress(id);
+
     dispatch(removeUploadAction(id));
-  }, [dispatch]);
+  }, [dispatch, cancelTaskProgress]);
 
   const removeUpload = useCallback((id) => {
     uploadRegistry.delete(id);

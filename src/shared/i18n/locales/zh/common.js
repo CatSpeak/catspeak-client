@@ -8,7 +8,8 @@ export default {
   cancel: "取消",
   reload: "重新加载",
   cancelUploadConfirmTitle: "正在处理任务",
-  cancelUploadConfirmDesc: "当前有任务正在进行中。如果您重新加载页面，进度将会丢失。确定要继续吗？",
+  cancelUploadConfirmDesc:
+    "当前有任务正在进行中。如果您重新加载页面，进度将会丢失。确定要继续吗？",
   scrollToTop: "回到顶部",
   toggle: {
     on: "开",
@@ -81,7 +82,8 @@ export default {
     nextPage: "下一页",
   },
   errors: {
-    maxActiveRoomsReached: "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
+    maxActiveRoomsReached:
+      "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
     generalFailed: "发生错误，请重试。",
   },
   uploadWidget: {
@@ -96,6 +98,6 @@ export default {
     reels: {
       createReelTitle: "创建新 Reel",
       uploadSuccess: "Reel 发布成功！",
-    }
-  }
-}
+    },
+  },
+};

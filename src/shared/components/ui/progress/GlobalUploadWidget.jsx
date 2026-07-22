@@ -1,34 +1,50 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle, AlertCircle, Loader2, ChevronDown, ChevronUp, ListTodo } from "lucide-react";
+import {
+  X,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  ListTodo,
+} from "lucide-react";
 import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx";
+import { useGlobalTaskProgress } from "@/shared/hooks/useGlobalTaskProgress.jsx";
+
+// Clean helper function to format status text cleanly without nested ternaries
+const getUploadStatusText = (upload, displayProgress, t) => {
+  const { status, error, stepName } = upload;
+  const pct = Math.floor(displayProgress);
+
+  if (status === "SUCCESS") return t?.uploadWidget?.success || "Hoàn tất";
+  if (status === "ERROR") return error || t?.uploadWidget?.error || "Lỗi tác vụ";
+  if (status === "CANCELED") return t?.uploadWidget?.cancelTip || "Đã hủy";
+
+  if (stepName) {
+    const translatedStep = t?.uploadWidget?.[stepName];
+    if (translatedStep) {
+      return translatedStep.replace("{{progress}}", pct);
+    }
+    return `${stepName} (${pct}%)`;
+  }
+
+  const template =
+    status === "PROCESSING"
+      ? t?.uploadWidget?.processing || "Processing... {{progress}}%"
+      : t?.uploadWidget?.uploading || "Uploading... {{progress}}%";
+
+  return template.replace("{{progress}}", pct);
+};
 
 const UploadItem = ({ upload, onCancel, onRemove }) => {
   const { t } = useLanguage();
   const [displayProgress, setDisplayProgress] = useState(upload.progress);
 
-  // Fake progress logic for PROCESSING state
   useEffect(() => {
-    let interval;
-    if (upload.status === "PROCESSING") {
-      // It starts at 80, we want it to creep up to 99 over time
-      interval = setInterval(() => {
-        setDisplayProgress((prev) => {
-          if (prev >= 99) {
-            clearInterval(interval);
-            return 99;
-          }
-          // Increment slowly, slowing down as it gets closer to 99
-          const increment = Math.max(0.5, (99 - prev) * 0.05);
-          return Math.min(99, prev + increment);
-        });
-      }, 1000);
-    } else {
-      setDisplayProgress(upload.progress);
-    }
-    return () => clearInterval(interval);
-  }, [upload.status, upload.progress]);
+    setDisplayProgress(upload.progress);
+  }, [upload.progress]);
 
   const isSuccess = upload.status === "SUCCESS";
   const isError = upload.status === "ERROR";
@@ -62,22 +78,14 @@ const UploadItem = ({ upload, onCancel, onRemove }) => {
             <span className="text-sm font-medium text-gray-900 truncate">
               {upload.title}
             </span>
-            <span className="text-xs text-gray-500">
-              {isSuccess
-                ? t?.uploadWidget?.success
-                : isError
-                ? t?.uploadWidget?.error
-                : isCanceled
-                ? t?.uploadWidget?.cancelTip
-                : upload.status === "PROCESSING"
-                ? t?.uploadWidget?.processing?.replace("{{progress}}", Math.floor(displayProgress))
-                : t?.uploadWidget?.uploading?.replace("{{progress}}", Math.floor(displayProgress))}
+            <span className="text-xs text-gray-500 truncate">
+              {getUploadStatusText(upload, displayProgress, t)}
             </span>
           </div>
         </div>
-        
+
         <button
-          onClick={() => isDone ? onRemove(upload.id) : onCancel(upload.id)}
+          onClick={() => (isDone ? onRemove(upload.id) : onCancel(upload.id))}
           className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0"
           title={t?.uploadWidget?.cancelTip}
         >
@@ -99,6 +107,7 @@ const UploadItem = ({ upload, onCancel, onRemove }) => {
 };
 
 export const GlobalUploadWidget = () => {
+  useGlobalTaskProgress();
   const { uploads, cancelUpload, removeUpload } = useGlobalUpload();
   const { t } = useLanguage();
   const [isMinimized, setIsMinimized] = useState(false);
@@ -117,18 +126,25 @@ export const GlobalUploadWidget = () => {
         className="fixed z-[9999] bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 w-auto sm:w-80 rounded-xl shadow-2xl border border-gray-100 backdrop-blur-xl bg-white/90 overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div 
+        <div
           onClick={() => setIsMinimized(!isMinimized)}
           className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
         >
           <div className="flex items-center gap-2">
             <ListTodo className="w-5 h-5 text-cath-red-700" />
             <span className="font-semibold text-gray-900 text-sm">
-              {t?.uploadWidget?.itemsCount?.replace("{{count}}", visibleUploads.length)}
+              {t?.uploadWidget?.itemsCount?.replace(
+                "{{count}}",
+                visibleUploads.length,
+              )}
             </span>
           </div>
           <button className="text-gray-500 hover:text-gray-700">
-            {isMinimized ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            {isMinimized ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
           </button>
         </div>
 
@@ -143,9 +159,9 @@ export const GlobalUploadWidget = () => {
             >
               <div className="p-3 flex flex-col gap-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                 {visibleUploads.map((upload) => (
-                  <UploadItem 
-                    key={upload.id} 
-                    upload={upload} 
+                  <UploadItem
+                    key={upload.id}
+                    upload={upload}
                     onCancel={cancelUpload}
                     onRemove={removeUpload}
                   />

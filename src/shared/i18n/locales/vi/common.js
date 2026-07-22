@@ -8,7 +8,8 @@ export default {
   cancel: "Hủy",
   reload: "Tải lại trang",
   cancelUploadConfirmTitle: "Đang xử lý tác vụ",
-  cancelUploadConfirmDesc: "Đang có tiến trình xử lý chưa hoàn tất. Nếu bạn tải lại trang, tiến trình sẽ bị hủy. Bạn có chắc chắn muốn tiếp tục?",
+  cancelUploadConfirmDesc:
+    "Đang có tiến trình xử lý chưa hoàn tất. Nếu bạn tải lại trang, tiến trình sẽ bị hủy. Bạn có chắc chắn muốn tiếp tục?",
   scrollToTop: "Lên đầu trang",
   toggle: {
     on: "Bật",
@@ -27,7 +28,7 @@ export default {
       vi: "Tiếng Việt",
       zh: "中文",
       en: "English",
-    }
+    },
   },
   pagination: {
     range: "{{start}}-{{end}} trong số {{total}}",
@@ -93,6 +94,6 @@ export default {
     reels: {
       createReelTitle: "Tạo Reel mới",
       uploadSuccess: "Đăng Reel thành công!",
-    }
-  }
-}
+    },
+  },
+};
