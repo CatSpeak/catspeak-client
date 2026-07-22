@@ -88,9 +88,12 @@ export default {
     "zh-self-study-vn": "Tự học tiếng Trung (Giao diện VI)",
   },
   website: {
+    connect: "Kết nối",
     error: {
       notFound: "Không tìm thấy trang web",
       backToWebsites: "Quay lại Cat Speak",
+      timeout: "Trang web mất quá nhiều thời gian để tải",
+      reload: "Tải lại trang",
     },
   },
   comingSoon: {
