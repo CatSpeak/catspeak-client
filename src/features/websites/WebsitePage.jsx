@@ -26,7 +26,7 @@ const WebsitePage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-[calc(100dvh-64px)] lg:h-full items-center justify-center">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-cath-red-700 border-t-transparent" />
       </div>
     );
@@ -34,7 +34,7 @@ const WebsitePage = () => {
 
   if (error || !website) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center">
+      <div className="flex h-[calc(100dvh-64px)] lg:h-full flex-col items-center justify-center">
         <h5 className="mb-4 text-2xl font-bold">
           {t.website?.error?.notFound}
         </h5>
@@ -49,7 +49,7 @@ const WebsitePage = () => {
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-[calc(100dvh-64px)] lg:h-full">
       {(isIframeLoading || showOverlay) && (
         <div className="absolute inset-0 z-5 flex items-center justify-center bg-slate-800/80 bg-opacity-80">
           {isIframeLoading ? (

@@ -20,7 +20,7 @@ const CatSpeakLayout = () => {
   return (
     <div className="flex flex-col lg:flex-row w-full items-start">
       {/* Main Content */}
-      <main className="flex-1 min-w-0 w-full relative h-[calc(100vh-70px)]">
+      <main className="flex-1 min-w-0 w-full relative h-[calc(100dvh-64px)] lg:h-[calc(100vh-70px)]">
         <AnimatePresence mode="wait">
           <div
             key={animationKey}
