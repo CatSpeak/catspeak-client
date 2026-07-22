@@ -32,6 +32,12 @@ import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
 import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
 import { useGame } from "@/features/games/context/GameContext";
 
+const DISPLAY_NAMES = {
+  en: "English",
+  vi: "Tiếng Việt",
+  zh: "中文",
+};
+
 const ControlBarMoreMenu = ({
   showMoreMenu,
   setShowMoreMenu,
@@ -57,6 +63,7 @@ const ControlBarMoreMenu = ({
     user,
     showBreakout,
     setShowBreakout,
+    subtitleSelectedLanguage,
   } = useGlobalVideoCall();
 
   const [showGameSetup, setShowGameSetup] = useState(false);
@@ -69,6 +76,7 @@ const ControlBarMoreMenu = ({
     isStarting,
     subtitleSupportedLangs,
     startSubtitles,
+    changeSubtitleLanguage,
     stopSubtitles,
   } = useSubtitleControls();
 
@@ -111,7 +119,7 @@ const ControlBarMoreMenu = ({
             >
               <div className="w-full overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
                 <AnimatePresence mode="wait" initial={false}>
-                  {!showSubtitlePicker || isSubtitleActive || isAISession ? (
+                  {!showSubtitlePicker || isAISession ? (
                     <FluentAnimation
                       key="main-menu"
                       animationKey="main-menu"
@@ -189,7 +197,7 @@ const ControlBarMoreMenu = ({
                                 stopSubtitles();
                                 setShowMoreMenu(false);
                               } else {
-                                setShowSubtitlePicker((v) => !v);
+                                setShowSubtitlePicker(true);
                               }
                             }
                           }}
@@ -207,6 +215,27 @@ const ControlBarMoreMenu = ({
                             : t?.rooms?.videoCall?.controls?.captionsOn ||
                               "Turn on captions"}
                         </button>
+
+                        {!isAISession && isSubtitleActive && (
+                          <button
+                            onClick={() => {
+                              setShowSubtitlePicker(true);
+                            }}
+                            className="flex w-full items-center justify-between rounded-md px-3 py-2 min-h-10 text-sm hover:bg-[#F6F6F6]"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Captions size={20} />
+                              <span>
+                                {t?.rooms?.videoCall?.controls?.captionLanguage ||
+                                  "Caption language"}
+                              </span>
+                            </div>
+                            <span className="text-xs text-gray-500 font-medium">
+                              {DISPLAY_NAMES[subtitleSelectedLanguage] ||
+                                subtitleSelectedLanguage}
+                            </span>
+                          </button>
+                        )}
 
                         <div className="border-t border-[#E5E5E5]"></div>
                         <button
@@ -284,9 +313,13 @@ const ControlBarMoreMenu = ({
                     >
                       <SubtitleLanguagePicker
                         languages={subtitleSupportedLangs}
-                        selectedLanguage={null}
+                        selectedLanguage={subtitleSelectedLanguage}
                         onSelect={(lang) => {
-                          startSubtitles(lang);
+                          if (isSubtitleActive) {
+                            changeSubtitleLanguage(lang);
+                          } else {
+                            startSubtitles(lang);
+                          }
                           setShowSubtitlePicker(false);
                           setShowMoreMenu(false);
                         }}
