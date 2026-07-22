@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetWebsiteByIdQuery } from "@/store/api/websiteApi";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { Maximize, Minimize } from "lucide-react";
 
 const WebsitePage = () => {
   const { lang, id } = useParams();
   const [showOverlay, setShowOverlay] = useState(true);
   const [isIframeLoading, setIsIframeLoading] = useState(true);
   const [prevId, setPrevId] = useState(id);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef(null);
 
   if (id !== prevId) {
     setPrevId(id);
@@ -23,6 +26,31 @@ const WebsitePage = () => {
     isLoading,
     error,
   } = useGetWebsiteByIdQuery(id, { skip: !id });
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return;
+
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.error("Error attempting to toggle fullscreen:", err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -49,7 +77,16 @@ const WebsitePage = () => {
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full bg-black">
+      {/* Fullscreen Toggle Button */}
+      <button
+        onClick={toggleFullscreen}
+        className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/70 text-white backdrop-blur-sm transition-colors hover:bg-slate-900/90 focus:outline-none shadow-md"
+        title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+      >
+        {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+      </button>
+
       {(isIframeLoading || showOverlay) && (
         <div className="absolute inset-0 z-5 flex items-center justify-center bg-slate-800/80 bg-opacity-80">
           {isIframeLoading ? (
@@ -68,7 +105,7 @@ const WebsitePage = () => {
         src={website.url}
         title={website.label}
         className="w-full h-full border-0"
-        allow="fullscreen"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowFullScreen
         onLoad={() => setIsIframeLoading(false)}
       />
