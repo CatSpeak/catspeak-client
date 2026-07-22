@@ -4,7 +4,7 @@ import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import HorizontalCard from "@/shared/components/ui/HorizontalCard"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
-import { useGetFriendRecommendationsQuery } from "../api/friendshipApi"
+import { useGetFriendRecommendationsQuery } from "../../../store/api/social/friendshipApi"
 
 const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
   const navigate = useNavigate()

@@ -21,12 +21,16 @@ const IconButton = ({
   }
 
   const variantClasses = {
-    filled: "bg-[#F2F2F2] group-hover:bg-[#C2C2C2]",
-    ghost: "bg-transparent group-hover:bg-[#CCCCCC]",
+    primary: "bg-[#990011] group-hover/icon:bg-[#80000e] text-white",
+    filled: "bg-[#F2F2F2] group-hover/icon:bg-[#C2C2C2]",
+    ghost: "bg-transparent group-hover/icon:bg-[#CCCCCC]",
     transparent: "bg-transparent",
-    overlay: "bg-black/50 group-hover:bg-black/80 text-white/70 group-hover:text-white transition-all",
-    outline: "bg-transparent group-hover:bg-[#f3f3f3] group-active:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
-    primary: "bg-[#990011] text-white hover:bg-[#7a000d] border-[1.5px] border-solid border-[#990011]",
+    overlay:
+      "bg-black/50 group-hover:bg-black/80 text-white/70 group-hover:text-white transition-all",
+    outline:
+      "bg-transparent group-hover:bg-[#f3f3f3] group-active:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
+    primary:
+      "bg-[#990011] text-white hover:bg-[#7a000d] border-[1.5px] border-solid border-[#990011]",
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm
@@ -35,7 +39,7 @@ const IconButton = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`group inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${currentSize.button} ${className}`}
+      className={`group/icon inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${currentSize.button} ${className}`}
       {...props}
     >
       <span

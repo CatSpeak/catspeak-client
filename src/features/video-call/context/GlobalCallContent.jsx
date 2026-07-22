@@ -22,24 +22,16 @@ import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useCallActions } from "@/features/video-call/hooks/useCallActions"
-import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import {
   useParticipantList,
   parseMetadata,
 } from "@/features/video-call/hooks/useParticipantList"
-import { useUnreadTracking } from "@/features/video-call/hooks/useUnreadTracking"
-import {
-  useChatPublicAiMutation,
-  useChatPrivateAiMutation,
-} from "@/store/api/conversationsApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
-
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
   getNavigate,
   getLocation,
 } from "@/features/video-call/hooks/useNavigateRef"
-
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
@@ -137,13 +129,13 @@ const GlobalCallContent = ({
             if (finishedRec.status === "completed") {
               toast.success(
                 t.recordings?.actions?.stopSuccess ||
-                "Recording trước đó đã được lưu thành công trong My Workspace.",
+                  "Recording trước đó đã được lưu thành công trong My Workspace.",
                 { duration: 6000 },
               )
             } else if (finishedRec.status === "Partial Completed") {
               toast.error(
                 t.recordings?.storage?.warningLimitReached ||
-                "Recording trước đó đã dừng và được lưu một phần.",
+                  "Recording trước đó đã dừng và được lưu một phần.",
                 { duration: 6000 },
               )
             }
@@ -164,13 +156,13 @@ const GlobalCallContent = ({
         if (data.reason === "storage_exceeded") {
           toast.error(
             t.recordings?.storage?.warningLimitReached ||
-            "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
+              "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
             { duration: 6000 },
           )
         } else if (data.reason === "reconnect_timeout") {
           toast.error(
             t.recordings?.errors?.interrupted ||
-            "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
+              "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
             { duration: 6000 },
           )
         }
@@ -178,7 +170,7 @@ const GlobalCallContent = ({
     } else if (event === "RecordingWarning") {
       toast.error(
         t.recordings?.storage?.warningAlmostFull ||
-        "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
+          "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
         { icon: "⚠️", duration: 6000 },
       )
     }
@@ -190,7 +182,7 @@ const GlobalCallContent = ({
       if (connectionState === ConnectionState.Reconnecting) {
         toast.error(
           t.recordings?.errors?.disconnected ||
-          "Kết nối bị gián đoạn. Recording tạm dừng...",
+            "Kết nối bị gián đoạn. Recording tạm dừng...",
           { id: "rec-disconnect", duration: 99999 },
         )
       } else if (
@@ -200,7 +192,7 @@ const GlobalCallContent = ({
         toast.dismiss("rec-disconnect")
         toast.success(
           t.recordings?.actions?.reconnected ||
-          "Kết nối đã được khôi phục. Recording tiếp tục.",
+            "Kết nối đã được khôi phục. Recording tiếp tục.",
           { duration: 3000 },
         )
       }

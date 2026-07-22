@@ -25,8 +25,7 @@ const RelatedNewsSection = ({ currentPostId }) => {
 
   const relatedPosts = (data?.data || [])
     .filter(
-      (post) =>
-        post.postId !== currentPostId && post.privacy === "Public",
+      (post) => post.postId !== currentPostId && post.privacy === "Public",
     )
     .slice(0, RELATED_COUNT)
 

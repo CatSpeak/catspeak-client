@@ -28,6 +28,9 @@ const messageWidgetSlice = createSlice({
         state.isOpen = true
       }
     },
+    setActiveChatPageConversation: (state, action) => {
+      state.activeConversationId = action.payload
+    },
     setView: (state, action) => {
       state.view = action.payload
     },
@@ -40,8 +43,10 @@ export const {
   closeWidget,
   toggleWidget,
   setActiveConversation,
+  setActiveChatPageConversation,
   setView,
   resetWidget,
 } = messageWidgetSlice.actions
 
 export default messageWidgetSlice.reducer
+

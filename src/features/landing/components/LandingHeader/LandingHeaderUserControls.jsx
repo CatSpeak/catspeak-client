@@ -1,7 +1,7 @@
 import React from "react";
 import ProfileDropdown from "@/features/user/components/ProfileDropdown";
 import { useAuth } from "@/features/auth";
-import { MessageWidget } from "@/features/messages";
+import { MessageWidget } from "@/features/chat";
 import { NotificationWidget } from "@/features/notifications";
 
 const LandingHeaderUserControls = () => {

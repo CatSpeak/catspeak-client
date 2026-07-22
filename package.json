@@ -23,6 +23,7 @@
     "@videosdk.live/react-sdk": "^0.6.7",
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.2",
+    "emoji-picker-react": "^4.19.1",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.26",
     "leaflet": "^1.9.4",
