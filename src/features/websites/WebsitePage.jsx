@@ -49,9 +49,9 @@ const WebsitePage = () => {
   }
 
   return (
-    <div className="relative w-full h-[calc(100dvh-64px)] lg:h-full">
+    <div className="relative w-full h-[calc(100dvh-64px)] lg:h-full bg-gray-100 p-3 sm:p-4 flex flex-col">
       {(isIframeLoading || showOverlay) && (
-        <div className="absolute inset-0 z-5 flex items-center justify-center bg-slate-800/80 bg-opacity-80">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/80 bg-opacity-80">
           {isIframeLoading ? (
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-cath-red-700 border-t-transparent" />
           ) : (
@@ -67,7 +67,7 @@ const WebsitePage = () => {
       <iframe
         src={website.url}
         title={website.label}
-        className="w-full h-full border-0"
+        className="w-full h-full rounded-xl shadow-md border-0"
         allow="fullscreen"
         allowFullScreen
         onLoad={() => setIsIframeLoading(false)}
