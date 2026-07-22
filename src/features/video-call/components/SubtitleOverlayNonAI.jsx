@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react"
 import { Globe, ChevronDown } from "lucide-react"
 import { useSubtitles } from "@/features/video-call/hooks/useSubtitles"
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
@@ -17,8 +18,8 @@ const LANG_FLAGS = { en: UK, vi: VietNam, zh: China }
  */
 const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
   const { subtitles } = useSubtitles()
-  const { room, subtitleSelectedLanguage, setSubtitleSelectedLanguage } =
-    useGlobalVideoCall()
+  const { room, subtitleSelectedLanguage } = useGlobalVideoCall()
+  const { changeSubtitleLanguage } = useSubtitleControls()
   const { t } = useLanguage()
 
   const [showLangPicker, setShowLangPicker] = useState(false)
@@ -76,7 +77,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
               <button
                 key={lang}
                 onClick={() => {
-                  setSubtitleSelectedLanguage(lang)
+                  changeSubtitleLanguage(lang)
                   setShowLangPicker(false)
                 }}
                 className={`text-base flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${subtitleSelectedLanguage === lang
