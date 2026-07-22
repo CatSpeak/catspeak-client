@@ -121,6 +121,8 @@ export default {
     pdfDocument: "PDF Document",
     remove: "Remove",
     requiredField: "This field is required",
+    selectLanguagesError: "Please select teaching languages",
+    selectLevelError: "Please select proficiency level for each language",
     certifyError: "Please check the box to agree with our terms.",
     formInvalid: "Please fill all required fields before submitting.",
   },

@@ -115,6 +115,8 @@ export default {
     pdfDocument: "PDF文档",
     remove: "删除",
     requiredField: "此字段为必填项",
+    selectLanguagesError: "请选择教学语言",
+    selectLevelError: "请选择每种语言的熟练程度",
     certifyError: "请选中复选框以同意我们的条款。",
     formInvalid: "提交前请填写所有必填字段。",
   },
