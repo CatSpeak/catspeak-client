@@ -1,6 +1,5 @@
 import React from "react"
 import { BookOpen, Calendar, Clock, FileText, MessageSquare } from "lucide-react"
-import { BookOpen, Calendar, Clock, FileText, MessageSquare } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 const getTaskStatusClass = (status) => {
@@ -80,7 +79,7 @@ const TeachingTasksSection = ({
   onViewAll,
   onTaskAction,
   isDevelopment = true,
-  devMessage = "Tinh nang dang phat trien",
+  devMessage = "Tính năng đang phát triển",
 }) => {
   const handleDevelopmentAction = (callback, payload) => {
     if (isDevelopment) {
