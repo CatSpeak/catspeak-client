@@ -16,7 +16,7 @@ export const useChatManager = ({
 }) => {
   const chatState = useChat()
   const baseChatMessages = chatState.chatMessages ?? []
-  const chatSend = chatState.send ?? (() => {})
+  const chatSend = chatState.send ?? (() => { })
 
   const systemMessages = useSystemMessages(lkRoom, receiveSystemMsgs)
 

@@ -23,8 +23,8 @@ const SpotlightLayout = ({
     spotlightItem.type === "screen"
       ? participants
       : participants.filter(
-          (p) => p.identity !== spotlightItem.participant.identity,
-        )
+        (p) => p.identity !== spotlightItem.participant.identity,
+      )
 
   const hasSidebarItems =
     sidebarScreenShares.length > 0 || sidebarParticipants.length > 0
@@ -37,7 +37,7 @@ const SpotlightLayout = ({
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-6">
+    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-2">
       {/* Main: spotlighted tile */}
       <div className="flex-[3] md:flex-[4] min-h-0 min-w-0">
         {spotlightItem.type === "screen" ? (

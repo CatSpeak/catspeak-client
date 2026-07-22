@@ -50,7 +50,7 @@ const GameLayoutOverlay = ({
           </div>
 
           {/* Column 3: Chat */}
-          <div className="hidden lg:block lg:w-[300px] xl:w-[320px] shrink-0 h-full min-h-0">
+          <div className="hidden lg:block lg:w-[360px] xl:w-[400px] shrink-0 h-full min-h-0">
             <div className="w-full h-full bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
               <ChatBox
                 messages={messages}

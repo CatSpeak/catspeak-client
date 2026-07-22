@@ -181,6 +181,7 @@ export default {
     systemMessagesDesc: "Hiển thị các tin nhắn hệ thống tự động",
     replyingTo: "Đang trả lời",
     reply: "Trả lời",
+    aiSuggestion: "Gợi ý từ AI",
   },
   sessionActions: {
     connect11: "Kết nối 1:1",
@@ -277,6 +278,17 @@ export default {
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
+    changeLayout: {
+      title: "Điều chỉnh chế độ xem",
+      auto: "Tự động (linh động)",
+      grid: "Lưới",
+      spotlight: "Tiêu điểm",
+      sidebar: "Thanh bên",
+      tilesLabel: "Số ô",
+      tilesDescription: "Số ô tối đa được hiển thị, tùy vào kích thước cửa sổ.",
+      hideNonVideo: "Ẩn ô không có video",
+    },
+    remainingTime: "Thời gian còn lại",
     roomClosingTitle: "Phòng sắp đóng",
     roomClosingSubtitle:
       "Phiên này sẽ kết thúc trong {{remainingSeconds}} giây",
@@ -331,6 +343,7 @@ export default {
         "Bản ghi sẽ được lưu tại <strong>Nhà của bạn (My Workspace)</strong>.",
       continueBtn: "Tiếp tục ghi",
       confirmBtn: "Xác nhận",
+      backBtn: "Quay lại"
     },
     provider: {
       connecting: "Đang kết nối...",

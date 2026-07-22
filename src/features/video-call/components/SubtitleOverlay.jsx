@@ -36,8 +36,8 @@ const SubtitleOverlay = () => {
   }, [lkRoom])
 
   return (
-    <div className="w-full shrink-0 flex justify-center p-4 z-20 relative">
-      <div className="w-full max-w-4xl bg-white text-gray-800 rounded-2xl shadow-lg border border-gray-200 px-6 py-4 min-h-[100px] flex items-center justify-center text-center text-sm leading-relaxed sm:text-base md:text-lg">
+    <div className="w-full shrink-0 flex justify-center p-2 md:pt-0 z-20 relative">
+      <div className="w-full max-w-4xl bg-white text-gray-800 rounded-xl shadow-lg border border-gray-200 px-6 py-4 min-h-[100px] flex items-center justify-center text-center text-sm leading-relaxed sm:text-base md:text-lg">
         {latestText ? (
           latestText
         ) : (

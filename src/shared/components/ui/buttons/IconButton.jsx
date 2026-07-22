@@ -3,13 +3,18 @@ import React from "react"
 const IconButton = ({
   children,
   onClick,
+  title,
   disabled = false,
-  variant = "filled", // "filled" | "ghost" | "outline"
-  size = "sm", // "sm" | "md"
+  variant = "filled", // "filled" | "ghost" | "outline" | "primary"
+  size = "sm", // "xs" | "sm" | "md"
   className = "",
   ...props
 }) => {
   const sizeClasses = {
+    xs: {
+      button: "w-8 h-8",
+      inner: "w-8 h-8",
+    },
     sm: {
       button: "w-12 h-12",
       inner: "w-10 h-10",
@@ -39,6 +44,7 @@ const IconButton = ({
     <button
       onClick={onClick}
       disabled={disabled}
+      title={title}
       className={`group/icon inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${currentSize.button} ${className}`}
       {...props}
     >

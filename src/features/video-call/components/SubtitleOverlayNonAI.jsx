@@ -42,8 +42,8 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
     })
 
   return (
-    <div className="w-full shrink-0 flex flex-col items-center p-6 pt-0 z-20 relative">
-      <div className="w-full flex flex-col h-40 bg-white rounded-2xl border border-[#e5e5e5] overflow-hidden">
+    <div className="w-full shrink-0 flex flex-col items-center p-2 md:pt-0 z-20 relative">
+      <div className="w-full flex flex-col h-40 bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
         {/* Language switcher */}
         <div className="relative flex justify-end shrink-0 border-b border-[#e5e5e5] p-2">
           <button
@@ -79,11 +79,10 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                   setSubtitleSelectedLanguage(lang)
                   setShowLangPicker(false)
                 }}
-                className={`text-base flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
-                  subtitleSelectedLanguage === lang
-                    ? "bg-[#f2f2f2] font-semibold text-[#d40018]"
-                    : "hover:bg-[#f2f2f2]"
-                }`}
+                className={`text-base flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${subtitleSelectedLanguage === lang
+                  ? "bg-[#f2f2f2] font-semibold text-[#d40018]"
+                  : "hover:bg-[#f2f2f2]"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <img

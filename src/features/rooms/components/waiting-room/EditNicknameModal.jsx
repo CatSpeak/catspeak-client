@@ -25,7 +25,7 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
       await updateProfile({ nickname: tempName.trim() }).unwrap()
       toast.success(
         t?.rooms?.waitingScreen?.updateNameSuccess ||
-          "Nickname updated successfully",
+        "Nickname updated successfully",
       )
       onClose()
     } catch (err) {
@@ -57,15 +57,15 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
             if (e.key === "Enter") handleSaveName()
           }}
           disabled={isUpdating}
-          className="!h-11 text-[15px]"
+          className="!h-11 text-[15px] rounded-xl"
           variant="square"
         />
         <div className="flex gap-3 justify-end">
           <PillButton
-            variant="secondary"
+            variant="outline"
             onClick={onClose}
             disabled={isUpdating}
-            className="flex-1 min-[426px]:flex-none bg-white border border-[#E5E5E5] text-gray-700 hover:bg-gray-50 shadow-sm w-20 h-auto !px-3 py-2"
+            className="flex-1 min-[426px]:flex-none w-20 h-auto font-medium"
           >
             {t?.rooms?.waitingScreen?.cancelEdit || "Cancel"}
           </PillButton>
@@ -73,7 +73,7 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
             onClick={handleSaveName}
             disabled={isUpdating || !tempName.trim()}
             loading={isUpdating}
-            className="flex-1 min-[426px]:flex-none w-20 !px-3 py-2 h-auto"
+            className="flex-1 min-[426px]:flex-none w-20 h-auto"
           >
             {t?.rooms?.waitingScreen?.saveName || "Save"}
           </PillButton>
