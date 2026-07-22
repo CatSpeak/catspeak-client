@@ -1,8 +1,8 @@
 import React from "react"
-import DesktopCommunityDropdown from "./DesktopCommunityDropdown"
-import DesktopNavItem from "./DesktopNavItem"
-import { navLinks } from "@/features/navigation/config/navigation"
-import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
+import DesktopCommunityDropdown from "@/features/landing/components/LandingDesktopNav/DesktopCommunityDropdown"
+import DesktopNavItem from "@/features/landing/components/LandingDesktopNav/DesktopNavItem"
+import { navLinks } from "../../config/navigation"
+import { useActiveLink } from "../../hooks/useActiveLink"
 import { useAuth } from "@/features/auth"
 
 const DesktopNav = () => {
@@ -19,8 +19,7 @@ const DesktopNav = () => {
           if (item.isPrivate && !isAuthenticated) return false
           return true
         })
-        .map((item) => {
-          const { key, hasDropdown, noActive, color, img } = item
+        .map(({ key, hasDropdown, noActive, color, img }) => {
           if (hasDropdown && key === "community") {
             return <DesktopCommunityDropdown key={key} navKey={key} />
           }
