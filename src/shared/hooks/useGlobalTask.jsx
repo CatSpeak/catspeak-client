@@ -10,6 +10,7 @@ import {
   revealTask as revealTaskAction,
   selectIsConfirmingReload,
   setConfirmingReload,
+  clearTasks,
 } from "@/store/slices/globalTaskSlice";
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -29,6 +30,11 @@ export const useGlobalTask = () => {
     ({ url, method = "POST", data, title, isHidden = false, onUploadSuccess, onUploadError }) => {
       const id = Math.random().toString(36).substring(7) + Date.now();
 
+      // Automatically attach TaskId to FormData if available for BE progress tracking sync
+      if (data instanceof FormData && !data.has("TaskId")) {
+        data.append("TaskId", id);
+      }
+
       const newTask = {
         id,
         title,
@@ -36,6 +42,7 @@ export const useGlobalTask = () => {
         status: "UPLOADING", // 'UPLOADING', 'PROCESSING', 'SUCCESS', 'ERROR'
         timestamp: Date.now(),
         isHidden,
+        isUploadTask: true,
       };
 
       dispatch(addTask(newTask));
@@ -59,15 +66,35 @@ export const useGlobalTask = () => {
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
-          const rawProgress = (e.loaded / e.total) * 100;
-          const scaledProgress = Math.round(rawProgress * 0.8);
-          dispatch(updateTask({ id, updates: { progress: scaledProgress } }));
+          const rawProgress = Math.round((e.loaded / e.total) * 100);
+          // Scale client upload byte progress into 0% - 50% range of the single continuous bar
+          const uploadProgress = Math.round((rawProgress / 100) * 50);
+          dispatch(
+            updateTask({
+              id,
+              updates: {
+                status: "UPLOADING",
+                progress: Math.min(49, uploadProgress),
+                stepName: "UPLOADING_FILE",
+                isUploadTask: true,
+              },
+            })
+          );
         }
       };
 
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          dispatch(updateTask({ id, updates: { status: "SUCCESS", progress: 100, completionTime: Date.now() } }));
+          dispatch(
+            updateTask({
+              id,
+              updates: {
+                status: "SUCCESS",
+                progress: 100,
+                completionTime: Date.now(),
+              },
+            })
+          );
           taskRegistry.delete(id);
           if (onUploadSuccess) {
             let responseData = xhr.responseText;
@@ -79,7 +106,12 @@ export const useGlobalTask = () => {
             onUploadSuccess(responseData);
           }
         } else {
-          dispatch(updateTask({ id, updates: { status: "ERROR", completionTime: Date.now() } }));
+          dispatch(
+            updateTask({
+              id,
+              updates: { status: "ERROR", completionTime: Date.now() },
+            })
+          );
           taskRegistry.delete(id);
           if (onUploadError) {
             onUploadError(new Error(`Upload failed with status ${xhr.status}`));
@@ -88,7 +120,12 @@ export const useGlobalTask = () => {
       };
 
       xhr.onerror = () => {
-        dispatch(updateTask({ id, updates: { status: "ERROR", completionTime: Date.now() } }));
+        dispatch(
+          updateTask({
+            id,
+            updates: { status: "ERROR", completionTime: Date.now() },
+          })
+        );
         taskRegistry.delete(id);
         if (onUploadError) {
           onUploadError(new Error("Network Error"));
@@ -100,7 +137,17 @@ export const useGlobalTask = () => {
       xhr.upload.onload = () => {
         const currentTask = tasks.find((t) => t.id === id);
         if (!currentTask || currentTask.status === "UPLOADING") {
-          dispatch(updateTask({ id, updates: { status: "PROCESSING", progress: 80 } }));
+          dispatch(
+            updateTask({
+              id,
+              updates: {
+                status: "PROCESSING",
+                progress: 50,
+                stepName: "PROCESSING_ON_SERVER",
+                isUploadTask: true,
+              },
+            })
+          );
         }
       };
 
@@ -140,7 +187,8 @@ export const useGlobalTask = () => {
 
   return {
     tasks,
-    uploadFile,
+    startTask: uploadFile, // General task runner alias
+    uploadFile,            // Dedicated file upload helper
     removeTask,
     revealTask,
     addCustomTask,
@@ -153,9 +201,18 @@ export const useGlobalTask = () => {
  */
 export const GlobalTaskSync = () => {
   const tasks = useSelector(selectGlobalTasks);
+  const token = useSelector(selectCurrentToken);
   const isConfirmingReload = useSelector(selectIsConfirmingReload);
   const dispatch = useDispatch();
   const { lang } = useLanguage();
+
+  // Clear tasks when user logs out (no token)
+  useEffect(() => {
+    if (!token) {
+      localStorage.removeItem("global_tasks_cache");
+      dispatch(clearTasks());
+    }
+  }, [token, dispatch]);
 
   // Khôi phục tác vụ từ Cache khi Reload trang
   useEffect(() => {

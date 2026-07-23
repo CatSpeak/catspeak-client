@@ -17,6 +17,7 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
 
   const title = formData.get("Title") || "Tải lên Reel mới"
   const challengeId = formData.get("ChallengeId")
+  formData.append("TaskId", id)
 
   // 1. Dispatch start to globalTaskSlice
   store.dispatch(
@@ -26,6 +27,7 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
       status: "UPLOADING",
       progress: 0,
       timestamp: Date.now(),
+      isUploadTask: true,
     })
   )
 

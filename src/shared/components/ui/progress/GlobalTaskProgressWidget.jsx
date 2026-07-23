@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 import { useGlobalTaskProgress } from "@/shared/hooks/useGlobalTaskProgress.jsx";
+import { useSelector } from "react-redux";
+import { selectCurrentToken } from "@/store/slices/authSlice";
 
 // Clean helper function to format status text
 const getTaskStatusText = (task, displayProgress, t) => {
@@ -96,6 +98,7 @@ const TaskItem = ({ task, onRemove }) => {
 };
 
 export const GlobalTaskProgressWidget = () => {
+  const token = useSelector(selectCurrentToken);
   useGlobalTaskProgress();
   const { tasks, removeTask } = useGlobalTask();
   const { t } = useLanguage();
@@ -103,8 +106,8 @@ export const GlobalTaskProgressWidget = () => {
 
   const visibleTasks = tasks ? tasks.filter((t) => !t.isHidden) : [];
 
-  // If there are no visible tasks, don't show the widget
-  if (visibleTasks.length === 0) return null;
+  // If user is not logged in or there are no visible tasks, don't show the widget
+  if (!token || visibleTasks.length === 0) return null;
 
   return (
     <AnimatePresence>
