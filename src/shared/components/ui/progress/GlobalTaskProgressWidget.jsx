@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -10,17 +9,16 @@ import {
   ChevronUp,
   ListTodo,
 } from "lucide-react";
-import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx";
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 import { useGlobalTaskProgress } from "@/shared/hooks/useGlobalTaskProgress.jsx";
 
-// Clean helper function to format status text cleanly without nested ternaries
-const getUploadStatusText = (upload, displayProgress, t) => {
-  const { status, error, stepName } = upload;
+// Clean helper function to format status text
+const getTaskStatusText = (task, displayProgress, t) => {
+  const { status, error, stepName } = task;
   const pct = Math.floor(displayProgress);
 
   if (status === "SUCCESS") return t?.uploadWidget?.success || "Hoàn tất";
   if (status === "ERROR") return error || t?.uploadWidget?.error || "Lỗi tác vụ";
-  if (status === "CANCELED") return t?.uploadWidget?.cancelTip || "Đã hủy";
 
   if (stepName) {
     const translatedStep = t?.uploadWidget?.[stepName];
@@ -38,28 +36,27 @@ const getUploadStatusText = (upload, displayProgress, t) => {
   return template.replace("{{progress}}", pct);
 };
 
-const UploadItem = ({ upload, onCancel, onRemove }) => {
+const TaskItem = ({ task, onRemove }) => {
   const { t } = useLanguage();
-  const [displayProgress, setDisplayProgress] = useState(upload.progress);
+  const [displayProgress, setDisplayProgress] = useState(task.progress);
 
   useEffect(() => {
-    setDisplayProgress(upload.progress);
-  }, [upload.progress]);
+    setDisplayProgress(task.progress);
+  }, [task.progress]);
 
-  const isSuccess = upload.status === "SUCCESS";
-  const isError = upload.status === "ERROR";
-  const isCanceled = upload.status === "CANCELED";
-  const isDone = isSuccess || isError || isCanceled;
+  const isSuccess = task.status === "SUCCESS";
+  const isError = task.status === "ERROR";
+  const isDone = isSuccess || isError;
 
   // Auto remove success/error items after 5 seconds
   useEffect(() => {
     if (isDone) {
       const timer = setTimeout(() => {
-        onRemove(upload.id);
+        onRemove(task.id);
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [isDone, upload.id, onRemove]);
+  }, [isDone, task.id, onRemove]);
 
   return (
     <div className="flex flex-col gap-2 p-3 rounded-lg bg-gray-50">
@@ -68,7 +65,7 @@ const UploadItem = ({ upload, onCancel, onRemove }) => {
           <div className="flex-shrink-0">
             {isSuccess ? (
               <CheckCircle className="w-5 h-5 text-green-500" />
-            ) : isError || isCanceled ? (
+            ) : isError ? (
               <AlertCircle className="w-5 h-5 text-red-500" />
             ) : (
               <Loader2 className="w-5 h-5 text-cath-red-700 animate-spin" />
@@ -76,21 +73,13 @@ const UploadItem = ({ upload, onCancel, onRemove }) => {
           </div>
           <div className="flex flex-col truncate">
             <span className="text-sm font-medium text-gray-900 truncate">
-              {upload.title}
+              {task.title}
             </span>
             <span className="text-xs text-gray-500 truncate">
-              {getUploadStatusText(upload, displayProgress, t)}
+              {getTaskStatusText(task, displayProgress, t)}
             </span>
           </div>
         </div>
-
-        <button
-          onClick={() => (isDone ? onRemove(upload.id) : onCancel(upload.id))}
-          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0"
-          title={t?.uploadWidget?.cancelTip}
-        >
-          <X className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Progress Bar */}
@@ -99,23 +88,23 @@ const UploadItem = ({ upload, onCancel, onRemove }) => {
           initial={{ width: 0 }}
           animate={{ width: `${displayProgress}%` }}
           transition={{ duration: 0.3 }}
-          className={`h-full rounded-full ${isSuccess ? "bg-green-500" : isError || isCanceled ? "bg-red-500" : "bg-cath-red-700"}`}
+          className={`h-full rounded-full ${isSuccess ? "bg-green-500" : isError ? "bg-red-500" : "bg-cath-red-700"}`}
         />
       </div>
     </div>
   );
 };
 
-export const GlobalUploadWidget = () => {
+export const GlobalTaskProgressWidget = () => {
   useGlobalTaskProgress();
-  const { uploads, cancelUpload, removeUpload } = useGlobalUpload();
+  const { tasks, removeTask } = useGlobalTask();
   const { t } = useLanguage();
   const [isMinimized, setIsMinimized] = useState(false);
 
-  const visibleUploads = uploads ? uploads.filter((u) => !u.isHidden) : [];
+  const visibleTasks = tasks ? tasks.filter((t) => !t.isHidden) : [];
 
-  // If there are no visible uploads, don't show the widget
-  if (visibleUploads.length === 0) return null;
+  // If there are no visible tasks, don't show the widget
+  if (visibleTasks.length === 0) return null;
 
   return (
     <AnimatePresence>
@@ -135,7 +124,7 @@ export const GlobalUploadWidget = () => {
             <span className="font-semibold text-gray-900 text-sm">
               {t?.uploadWidget?.itemsCount?.replace(
                 "{{count}}",
-                visibleUploads.length,
+                visibleTasks.length,
               )}
             </span>
           </div>
@@ -148,7 +137,7 @@ export const GlobalUploadWidget = () => {
           </button>
         </div>
 
-        {/* Upload List */}
+        {/* Task List */}
         <AnimatePresence>
           {!isMinimized && (
             <motion.div
@@ -158,12 +147,11 @@ export const GlobalUploadWidget = () => {
               className="overflow-hidden"
             >
               <div className="p-3 flex flex-col gap-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
-                {visibleUploads.map((upload) => (
-                  <UploadItem
-                    key={upload.id}
-                    upload={upload}
-                    onCancel={cancelUpload}
-                    onRemove={removeUpload}
+                {visibleTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onRemove={removeTask}
                   />
                 ))}
               </div>
@@ -175,4 +163,4 @@ export const GlobalUploadWidget = () => {
   );
 };
 
-export default GlobalUploadWidget;
+export default GlobalTaskProgressWidget;

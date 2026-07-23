@@ -8,7 +8,7 @@ import {
 import { setPiP } from "@/store/slices/videoCallSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
-import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx"
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
 
 /**
  * useRecording — manages recording state for a video call session.
@@ -21,7 +21,7 @@ import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx"
 export function useRecording(lkRoom = null, syncState = {}) {
   const dispatch = useDispatch()
   const { t } = useLanguage()
-  const { addCustomTask } = useGlobalUpload()
+  const { addCustomTask } = useGlobalTask()
   const {
     isRecording,
     setIsRecording,

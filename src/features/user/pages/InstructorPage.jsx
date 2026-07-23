@@ -14,7 +14,7 @@ import {
   useUpdateInstructorProfileMutation,
 } from "@/store/api/instructorApi";
 import { parsePhoneData } from "@/shared/constants/countriesOptions";
-import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx";
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 
 import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
 import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
@@ -117,7 +117,7 @@ function getApplicationStatus(app) {
 const InstructorPage = () => {
   const { t } = useLanguage();
   const ins = t.profile?.instructor || {};
-  const { uploadFile } = useGlobalUpload();
+  const { uploadFile } = useGlobalTask();
 
   // --- API hooks ---
   const {

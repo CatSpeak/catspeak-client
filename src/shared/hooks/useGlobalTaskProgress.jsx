@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { useSelector, useDispatch } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentToken } from "@/store/slices/authSlice";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
-import { updateUpload, addUpload } from "@/store/slices/globalUploadSlice";
+import { updateTask, addTask } from "@/store/slices/globalTaskSlice";
 
 export const useGlobalTaskProgress = () => {
   const token = useSelector(selectCurrentToken);
@@ -27,7 +27,7 @@ export const useGlobalTaskProgress = () => {
 
     connection.on("TaskStarted", (task) => {
       dispatch(
-        updateUpload({
+        updateTask({
           id: task.taskId,
           updates: {
             title: task.title,
@@ -45,7 +45,7 @@ export const useGlobalTaskProgress = () => {
       const scaledProgress = 80 + Math.round((bePercent / 100) * 20);
 
       dispatch(
-        updateUpload({
+        updateTask({
           id: task.taskId,
           updates: {
             status: "PROCESSING",
@@ -58,7 +58,7 @@ export const useGlobalTaskProgress = () => {
 
     connection.on("TaskCompleted", (task) => {
       dispatch(
-        updateUpload({
+        updateTask({
           id: task.taskId,
           updates: {
             status: "SUCCESS",
@@ -72,7 +72,7 @@ export const useGlobalTaskProgress = () => {
 
     connection.on("TaskFailed", (task) => {
       dispatch(
-        updateUpload({
+        updateTask({
           id: task.taskId,
           updates: {
             status: "ERROR",
@@ -98,7 +98,7 @@ export const useGlobalTaskProgress = () => {
                 const bePercent = t.progressPercentage || 0;
                 const scaledProgress = 80 + Math.round((bePercent / 100) * 20);
                 dispatch(
-                  addUpload({
+                  addTask({
                     id: t.taskId,
                     title: t.title,
                     status: "PROCESSING",

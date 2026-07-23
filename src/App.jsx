@@ -14,8 +14,8 @@ import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { ScrollToTopButton } from "@/shared/components/ui/buttons"
-import { GlobalUploadSync } from "@/shared/hooks/useGlobalUpload.jsx"
-import GlobalUploadWidget from "@/shared/components/ui/progress/GlobalUploadWidget"
+import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
+import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 
 function App() {
@@ -32,9 +32,9 @@ function App() {
                 <ScrollToTopButton />
                 <AppRouter />
                 <PiPWidget />
-                <GlobalUploadWidget />
+                <GlobalTaskProgressWidget />
                 <RecordingPoller />
-                <GlobalUploadSync />
+                <GlobalTaskSync />
               </GlobalPresenceProvider>
             </ConversationSignalRProvider>
           </SidebarProvider>

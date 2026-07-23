@@ -8,7 +8,7 @@ import videoCallReducer from "./slices/videoCallSlice"
 import notificationReducer from "./slices/notificationSlice"
 import reelUploadReducer from "./slices/reelUploadSlice"
 import recordingProcessReducer from "./slices/recordingProcessSlice"
-import globalUploadReducer from "./slices/globalUploadSlice"
+import globalTaskReducer from "./slices/globalTaskSlice"
 
 export const store = configureStore({
   reducer: {
@@ -20,7 +20,7 @@ export const store = configureStore({
     notification: notificationReducer,
     reelUpload: reelUploadReducer,
     recordingProcess: recordingProcessReducer,
-    globalUpload: globalUploadReducer,
+    globalTask: globalTaskReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(baseApi.middleware),
