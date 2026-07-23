@@ -21,7 +21,7 @@ import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
 export function useRecording(lkRoom = null, syncState = {}) {
   const dispatch = useDispatch()
   const { t } = useLanguage()
-  const { addCustomTask } = useGlobalTask()
+  const { startTask } = useGlobalTask()
   const {
     isRecording,
     setIsRecording,
@@ -174,17 +174,15 @@ export function useRecording(lkRoom = null, syncState = {}) {
     setIsTogglingRecording(true)
     try {
       if (egressId) {
-        const result = await stopRecording(egressId).unwrap()
-        console.log("[Recording Debug] Stop response:", JSON.stringify(result))
-        if (result && result.egressId) {
-          addCustomTask({
-            id: result.egressId,
-            title: t?.uploadWidget?.recordingTitle || result.meetingId || "Bản ghi hình cuộc họp",
-            status: "PROCESSING",
-            progress: 0,
-            isRecording: true
-          })
-        }
+        const targetEgressId = egressId;
+        startTask({
+          id: targetEgressId,
+          title: t?.uploadWidget?.recordingTitle || "Bản ghi hình cuộc họp",
+          taskType: "VideoRecording",
+          taskFn: async () => {
+            return await stopRecording(targetEgressId).unwrap();
+          },
+        });
       }
       if (setEgressId) setEgressId(null)
       if (setIsRecording) setIsRecording(false)

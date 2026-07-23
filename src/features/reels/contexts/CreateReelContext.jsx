@@ -136,7 +136,7 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [currentUploadId, setCurrentUploadId] = useState(null)
 
-  const { tasks, uploadFile, revealTask } = useGlobalTask();
+  const { tasks, startTask, revealTask } = useGlobalTask();
   
   const currentUpload = useMemo(() => {
     return tasks ? tasks.find(u => u.id === currentUploadId) : null;
@@ -972,23 +972,28 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
       const taskTitle = t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới"
       formData.append("TaskTitle", taskTitle)
 
-      const id = uploadFile({
-        url: "/reels",
-        method: "POST",
-        data: formData,
-        isHidden: false, // Show in global widget immediately
+      startTask({
         title: taskTitle,
-        onUploadSuccess: () => {
+        taskType: "ReelUpload",
+        isHidden: false, // Show in global widget immediately
+        taskFn: async (taskId) => {
+          if (taskId && !formData.has("TaskId")) {
+            formData.append("TaskId", taskId);
+          }
+          return await createReel(formData).unwrap();
+        },
+        onSuccess: () => {
           toast.success(t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!");
         },
-        onUploadError: () => {
-          // Error handling is managed globally
-        }
+        onError: (err) => {
+          const errMsg = err?.data?.message || err?.message || t?.catSpeak?.reels?.uploadFailed || "Failed to upload Reel. Please try again.";
+          toast.error(errMsg);
+        },
       });
 
       setIsUploading(false);
 
-      // Close modal only after eligibility check passes
+      // Close modal immediately after eligibility check passes
       if (onClose) onClose();
 
     } catch (err) {
