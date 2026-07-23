@@ -1,9 +1,9 @@
 import { store } from "@/store"
 import {
-  addUpload,
-  updateUpload,
-  removeUpload,
-} from "@/store/slices/globalUploadSlice"
+  addTask,
+  updateTask,
+  removeTask,
+} from "@/store/slices/globalTaskSlice"
 import { reelsApi } from "@/store/api/reelsApi"
 
 const fileCache = new Map()
@@ -18,9 +18,9 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
   const title = formData.get("Title") || "Tải lên Reel mới"
   const challengeId = formData.get("ChallengeId")
 
-  // 1. Dispatch start to globalUploadSlice
+  // 1. Dispatch start to globalTaskSlice
   store.dispatch(
-    addUpload({
+    addTask({
       id,
       title,
       status: "UPLOADING",
@@ -45,13 +45,13 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable && e.total > 0) {
       const progress = Math.round((e.loaded / e.total) * 80)
-      store.dispatch(updateUpload({ id, updates: { progress: Math.min(progress, 80) } }))
+      store.dispatch(updateTask({ id, updates: { progress: Math.min(progress, 80) } }))
     }
   }
 
   xhr.onload = () => {
     if (xhr.status >= 200 && xhr.status < 300) {
-      store.dispatch(updateUpload({ id, updates: { progress: 100, status: "SUCCESS" } }))
+      store.dispatch(updateTask({ id, updates: { progress: 100, status: "SUCCESS" } }))
       
       // Invalidate reels query cache to auto-reload feeds
       const tags = [
@@ -68,13 +68,13 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
         const res = JSON.parse(xhr.responseText)
         errMsg = res.message || errMsg
       } catch {}
-      store.dispatch(updateUpload({ id, updates: { status: "ERROR", error: errMsg } }))
+      store.dispatch(updateTask({ id, updates: { status: "ERROR", error: errMsg } }))
     }
     cleanupCache(id)
   }
 
   xhr.onerror = () => {
-    store.dispatch(updateUpload({ id, updates: { status: "ERROR", error: "Lỗi kết nối mạng" } }))
+    store.dispatch(updateTask({ id, updates: { status: "ERROR", error: "Lỗi kết nối mạng" } }))
     cleanupCache(id)
   }
 
@@ -90,7 +90,7 @@ export const cancelReelUpload = (id) => {
   if (xhr) {
     xhr.abort()
   }
-  store.dispatch(removeUpload(id))
+  store.dispatch(removeTask(id))
   cleanupCache(id)
 }
 

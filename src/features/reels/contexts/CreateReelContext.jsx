@@ -8,7 +8,7 @@ import {
   useSearchReelHashtagsQuery,
   useSearchReelMentionsQuery,
 } from "@/store/api/reelsApi"
-import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx"
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
 
 export const DESCRIPTION_TRIGGER_REGEX = /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u
 export const DESCRIPTION_LINK_REGEX = /([@#][\p{L}\p{N}_.-]+)/gu
@@ -135,11 +135,11 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [currentUploadId, setCurrentUploadId] = useState(null)
 
-  const { uploads, uploadFile, cancelUpload: cancelGlobalUpload, revealUpload } = useGlobalUpload();
+  const { tasks, uploadFile, revealTask } = useGlobalTask();
   
   const currentUpload = useMemo(() => {
-    return uploads ? uploads.find(u => u.id === currentUploadId) : null;
-  }, [uploads, currentUploadId]);
+    return tasks ? tasks.find(u => u.id === currentUploadId) : null;
+  }, [tasks, currentUploadId]);
 
   const uploadProgress = currentUpload ? Math.floor(currentUpload.progress) : 0;
 
