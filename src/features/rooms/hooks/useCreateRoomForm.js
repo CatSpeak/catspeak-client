@@ -3,27 +3,27 @@ import { useCreateRoomMutation } from "@/store/api/roomsApi"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 
-const INITIAL_STATE = {
-  mode: "join",
-  name: "",
-  topics: [],
-  selectedLevel: "",
-  isPrivate: false,
-  password: "",
-  thumbnail: null
-}
-
 const getLanguageName = (langCode) => {
   switch (langCode) {
-    case "zh": return "Chinese"
-    case "vi": return "Vietnamese"
-    case "en": return "English"
-    default: return "English"
+    case "zh":
+      return "Chinese"
+    case "vi":
+      return "Vietnamese"
+    case "en":
+      return "English"
+    default:
+      return "English"
   }
 }
 
 export const useCreateRoomForm = () => {
-  const [formData, setFormData] = useState(INITIAL_STATE)
+  const [formData, setFormData] = useState({
+    name: "",
+    topics: [],
+    selectedLevel: "",
+    isPrivate: false,
+    password: "",
+  })
   const [createRoom, { isLoading: isCreating }] = useCreateRoomMutation()
   const navigate = useNavigate()
   const { lang } = useParams()
@@ -36,16 +36,13 @@ export const useCreateRoomForm = () => {
   }
 
   const resetForm = () => {
-    setFormData(INITIAL_STATE)
-  }
-
-  const switchMode = (newMode) => {
-    setFormData((prev) => ({
-      ...INITIAL_STATE,
-      mode: newMode,
-      topics: prev.topics,
-      selectedLevel: prev.selectedLevel
-    }))
+    setFormData({
+      name: "",
+      topics: [],
+      selectedLevel: "",
+      isPrivate: false,
+      password: "",
+    })
   }
 
   const handleTopicChange = (event) => {
@@ -56,23 +53,11 @@ export const useCreateRoomForm = () => {
     }
   }
 
-  const submitJoin = (onSuccess) => {
-    if (!selectedLanguage) return
-    const preferences = {
-      roomType: "Group",
-      topics: formData.topics.length > 0 ? formData.topics : [],
-      languageType: selectedLanguage,
-      requiredLevel: formData.selectedLevel || undefined,
-    }
-    if (onSuccess) onSuccess()
-    navigate("/queue", { state: preferences })
-  }
-
   const submitCreate = async (onSuccess) => {
     if (!selectedLanguage) return
 
     const data = new FormData()
-    data.append("Name", formData.name || "")
+    data.append("Name", formData.name.trim() || "")
     data.append("RoomType", "Group")
     data.append("LanguageType", selectedLanguage)
     data.append("RequiredLevel", formData.selectedLevel || "")
@@ -80,10 +65,6 @@ export const useCreateRoomForm = () => {
 
     if (formData.isPrivate && formData.password) {
       data.append("Password", formData.password)
-    }
-
-    if (formData.thumbnail) {
-      data.append("Thumbnail", formData.thumbnail)
     }
 
     const topicsList = formData.topics.length > 0 ? formData.topics : ["Other"]
@@ -99,26 +80,28 @@ export const useCreateRoomForm = () => {
     } catch (err) {
       console.error("Failed to create room:", err)
       const errorCode = err?.data?.errorCode
-      
-      let errorMessage = err?.data?.message || err?.message || t?.errors?.generalFailed || "Failed to create room."
-      
+      let errorMessage =
+        err?.data?.message || err?.message || "Failed to create room."
+
       if (errorCode === "MAX_ACTIVE_ROOMS_REACHED") {
-        errorMessage = t?.errors?.maxActiveRoomsReached || errorMessage
+        errorMessage = "Maximum active rooms reached."
       }
-      
+
       toast.error(errorMessage, { duration: 4000 })
     }
   }
+
+  const isCreateDisabled =
+    !selectedLanguage || isCreating || !formData.name.trim()
 
   return {
     formData,
     handleChange,
     handleTopicChange,
     resetForm,
-    switchMode,
-    submitJoin,
     submitCreate,
     isCreating,
-    selectedLanguage
+    isCreateDisabled,
+    selectedLanguage,
   }
 }

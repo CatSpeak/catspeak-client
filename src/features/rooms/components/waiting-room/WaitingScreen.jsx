@@ -152,6 +152,7 @@ const WaitingScreen = ({
         lkVideoTrack={lkVideoTrack}
         cameraOn={cameraOn}
         onToggleCam={onToggleCam}
+        room={room}
       />
 
       {deviceSelection && (

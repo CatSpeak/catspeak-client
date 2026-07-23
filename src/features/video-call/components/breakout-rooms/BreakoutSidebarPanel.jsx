@@ -8,6 +8,7 @@ import {
 } from "@/store/api/roomsApi"
 import { exitBreakout, updateLivekitToken } from "@/store/slices/videoCallSlice"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
 
 import BreakoutSetupView from "./setup/BreakoutSetupView"
 import BreakoutActiveView from "./active/BreakoutActiveView"
@@ -18,6 +19,10 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
 
   const { isBreakoutActive, callInfo } = useSelector((s) => s.videoCall)
   const { participants: liveParticipants } = useVideoCallContext()
+
+  if (!isBreakoutSupported(callInfo?.roomData?.roomType)) {
+    return null
+  }
 
   const currentSubSessionId = callInfo?.sessionId
   const roomCreatorId = callInfo?.roomData?.creatorId

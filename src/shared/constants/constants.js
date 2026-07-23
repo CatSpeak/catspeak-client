@@ -23,8 +23,8 @@ export const slides = [
 
 export const badges = [
   { id: "connect_1_1", label: "Queue 1:1", icon: User },
-  { id: "connect_2_5", label: "Create 2:5 room", icon: Users },
-  { id: "custom_room", label: "Custom Room", icon: Crown },
+  { id: "connect_2_5", label: "Connect 2:5", icon: Users },
+  { id: "custom_room", label: "Create Room", icon: Crown },
   { id: "your_ai", label: "AI", icon: Cpu },
 ]
 

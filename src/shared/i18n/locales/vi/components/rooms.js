@@ -118,7 +118,7 @@ export default {
     title: "Tham gia phòng",
   },
   createRoom: {
-    title: "Tên phòng của bạn là gì?",
+    title: "Tạo phòng",
     namePlaceholder: "ví dụ: Luyện tập vui vẻ",
     topicsLabel: "Chủ đề",
     nameLabel: "Tên phòng",
@@ -186,7 +186,7 @@ export default {
     connect11: "Kết nối 1:1",
     connect25: "Kết nối 2:5",
     yourAI: "1:1 với AI",
-    customRoom: "Phòng Tùy Chỉnh",
+    customRoom: "Tạo phòng",
   },
   customRooms: {
     title: "Phòng Tùy Chỉnh Pro",
@@ -211,7 +211,8 @@ export default {
     createSuccess: "Đã tạo phòng tùy chỉnh thành công",
     updateSuccess: "Đã cập nhật phòng thành công",
     noRooms: "Bạn chưa tạo phòng tùy chỉnh nào",
-    noRoomsSubtext: "Tạo phòng vĩnh viễn đầu tiên với tối đa 100 người tham gia!",
+    noRoomsSubtext:
+      "Tạo phòng vĩnh viễn đầu tiên với tối đa 100 người tham gia!",
     join: "Tham gia",
     copyLink: "Sao chép liên kết",
     linkCopied: "Đã sao chép!",
@@ -593,7 +594,8 @@ export default {
       cancel: "Hủy",
       confirmExit: "Đồng ý thoát",
       roundLeaderboard: "Thành tích ván này",
-      forceStopNotEnoughPlayers: "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
+      forceStopNotEnoughPlayers:
+        "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
       forceStopGeneric: "Trò chơi bị dừng đột ngột.",
       out: "Thoát",
       tallyingFinalResults: "Đang tổng hợp kết quả chung cuộc...",
@@ -603,11 +605,12 @@ export default {
       noHistoryFound: "Chưa có dữ liệu lịch sử cho phòng này.",
       score: "Điểm",
       matchDate: "Ngày chơi",
-      winner: "Người chiến thắng"
+      winner: "Người chiến thắng",
     },
     setup: {
       title: "Thiết lập Trò chơi",
-      pictureItDesc: "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
+      pictureItDesc:
+        "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
       crackItDesc: "Đoán từ khóa ẩn qua các gợi ý trước những người chơi khác.",
       difficultyDesc: "Điều chỉnh độ khó phù hợp cho phòng của bạn.",
       languageDesc: "Chọn ngôn ngữ trò chơi cho phiên này.",
@@ -619,7 +622,7 @@ export default {
       levelMedium: "Trung bình",
       levelHard: "Khó",
       cancel: "Hủy",
-      startNow: "Bắt đầu ngay"
+      startNow: "Bắt đầu ngay",
     },
     pictureIt: {
       topBar: {
@@ -627,7 +630,7 @@ export default {
         describer: "Người mô tả",
         spectator: "Khán giả",
         roleDescriber: "Người mô tả",
-        roleRater: "Người đoán"
+        roleRater: "Người đoán",
       },
       actionPanel: {
         watchingAsSpectator: "Bạn đang xem với tư cách khán giả.",
@@ -638,7 +641,7 @@ export default {
         timeLeft: "(Còn {0}s)",
         submitRating: "Gửi điểm",
         ratingSubmitted: "Đã gửi! Đang chờ người khác...",
-        waiting: "Đang chờ..."
+        waiting: "Đang chờ...",
       },
       imageCard: {
         describeToTeam: "Hãy mô tả bức ảnh này cho đội của bạn",
@@ -649,13 +652,13 @@ export default {
         preparing: "Đang chuẩn bị...",
         forbiddenWordsTitle: "Từ cấm",
         forbiddenWordsDesc: "KHÔNG được sử dụng các từ này",
-        flaggedCount: "{0} / {1} người đã báo vi phạm"
+        flaggedCount: "{0} / {1} người đã báo vi phạm",
       },
       modals: {
         gameEnded: "Kết thúc trò chơi",
         notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
         close: "Đóng",
-        waitingStart: "Đang chuẩn bị ván đấu..."
+        waitingStart: "Đang chuẩn bị ván đấu...",
       },
       badges: {
         "Master Describer": "Bậc thầy mô tả",
@@ -664,7 +667,7 @@ export default {
         "Most Fluent": "Trôi chảy nhất",
         "Team Player": "Tinh thần đồng đội",
         "Keep Practicing": "Cố gắng hơn nhé",
-        champion: "Nhà vô địch"
+        champion: "Nhà vô địch",
       },
       gameOver: {
         title: "Trò chơi kết thúc",
@@ -677,16 +680,16 @@ export default {
         highestRoundScore: "Điểm 1 vòng cao nhất",
         playAgain: "Chơi lại",
         backToRoom: "Về phòng",
-        playersCount: "{0} người chơi"
+        playersCount: "{0} người chơi",
       },
       leaderboard: {
         title: "Bảng xếp hạng",
-        playersCount: "{0} người chơi"
+        playersCount: "{0} người chơi",
       },
       roundResult: {
         nextRoundStartsIn: "Vòng tiếp theo bắt đầu sau...",
-        averageRating: "Điểm trung bình"
-      }
-    }
+        averageRating: "Điểm trung bình",
+      },
+    },
   },
 }

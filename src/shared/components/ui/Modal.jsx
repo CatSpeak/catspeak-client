@@ -9,11 +9,14 @@ const Modal = ({
   onClose,
   children,
   className = "",
-  headerClassName = "flex items-center justify-between p-3 pl-6",
+  headerClassName = "flex items-center justify-between p-4 sm:p-6",
   title,
   showCloseButton = true,
+  subHeader,
+  subHeaderClassName = "px-4 sm:px-6 pb-6 shrink-0",
   footer,
-  bodyClassName = "px-4 flex-1 overflow-y-auto",
+  footerClassName = "p-4 sm:p-6",
+  bodyClassName = "p-4 sm:p-6 flex-1 overflow-y-auto",
   fullScreenOnMobile = true,
 }) => {
   useScrollLock(open)
@@ -24,7 +27,9 @@ const Modal = ({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className={`fixed inset-0 z-[1300] flex items-center justify-center ${fullScreenOnMobile ? "p-0 md:p-4" : "p-4"}`}>
+        <div
+          className={`fixed inset-0 z-[1300] flex items-center justify-center ${fullScreenOnMobile ? "p-0 md:p-4" : "p-4"}`}
+        >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -42,19 +47,19 @@ const Modal = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className={`relative flex flex-col w-full shadow-xl ${
-              fullScreenOnMobile 
-                ? "h-full md:h-auto md:max-h-[90vh]" 
+              fullScreenOnMobile
+                ? "h-full md:h-auto md:max-h-[90vh]"
                 : "h-auto max-h-[90vh]"
             } ${
-              /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(
-                className,
-              )
+              /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(className)
                 ? ""
                 : "md:max-w-md"
             } ${/(^|\s)bg-/.test(className) ? "" : "bg-white"} ${
               /(^|\s)rounded/.test(className)
                 ? ""
-                : fullScreenOnMobile ? "rounded-none md:rounded-3xl md:border md:border-[#E5e5e5]" : "rounded-3xl border border-[#E5e5e5]"
+                : fullScreenOnMobile
+                  ? "rounded-none md:rounded-3xl md:border md:border-[#E5e5e5]"
+                  : "rounded-3xl border border-[#E5e5e5]"
             } ${className}`}
             role="dialog"
             aria-modal="true"
@@ -63,9 +68,13 @@ const Modal = ({
             {(title || showCloseButton) && (
               <div className={headerClassName}>
                 {title ? (
-                  <h2 className="text-[20px] leading-[26px] font-semibold">
-                    {title}
-                  </h2>
+                  typeof title === "string" ? (
+                    <h2 className="text-[20px] leading-[26px] font-semibold">
+                      {title}
+                    </h2>
+                  ) : (
+                    title
+                  )
                 ) : (
                   <div />
                 )}
@@ -81,9 +90,11 @@ const Modal = ({
               </div>
             )}
 
+            {subHeader && <div className={subHeaderClassName}>{subHeader}</div>}
+
             <div className={bodyClassName}>{children}</div>
 
-            {footer && <div className="p-4">{footer}</div>}
+            {footer && <div className={footerClassName}>{footer}</div>}
           </motion.div>
         </div>
       )}

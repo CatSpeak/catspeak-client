@@ -8,13 +8,14 @@ import {
   useRoomsPageLogic,
   SessionActionButtons,
   CreateRoomModal,
-  CreateCustomRoomModal,
+  JoinRoomModal,
 } from "@/features/rooms"
 import CommunityPresence from "../components/CommunityPresence"
 
 const HomePage = () => {
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
-  const [isCustomRoomModalOpen, setCustomRoomModalOpen] = useState(false)
+  const [createRoomMode, setCreateRoomMode] = useState("custom")
+  const [isJoinRoomModalOpen, setJoinRoomModalOpen] = useState(false)
   const navigate = useNavigate()
   const { lang } = useParams()
 
@@ -47,13 +48,14 @@ const HomePage = () => {
 
   const handleCreateStudyGroup = () => {
     actions.handleCreateStudyGroupSession(() => {
-      setCreateRoomModalOpen(true)
+      setJoinRoomModalOpen(true)
     })
   }
 
   const handleCreateCustomRoom = () => {
     actions.handleCreateCustomRoomSession(() => {
-      setCustomRoomModalOpen(true)
+      setCreateRoomMode("group")
+      setCreateRoomModalOpen(true)
     })
   }
 
@@ -81,11 +83,12 @@ const HomePage = () => {
 
         <CreateRoomModal
           open={isCreateRoomModalOpen}
+          initialMode={createRoomMode}
           onCancel={() => setCreateRoomModalOpen(false)}
         />
-        <CreateCustomRoomModal
-          open={isCustomRoomModalOpen}
-          onCancel={() => setCustomRoomModalOpen(false)}
+        <JoinRoomModal
+          open={isJoinRoomModalOpen}
+          onCancel={() => setJoinRoomModalOpen(false)}
         />
       </FluentAnimation>
     </AnimatePresence>

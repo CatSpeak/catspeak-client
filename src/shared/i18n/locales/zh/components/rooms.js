@@ -183,7 +183,7 @@ export default {
     connect11: "连接 1:1",
     connect25: "连接 2:5",
     yourAI: "1:1 AI 对话",
-    customRoom: "自定义房间",
+    customRoom: "创建房间",
   },
   customRooms: {
     title: "Pro 自定义房间",
@@ -579,7 +579,7 @@ export default {
       noHistoryFound: "该房间没有游戏历史记录。",
       score: "分数",
       matchDate: "比赛日期",
-      winner: "获胜者"
+      winner: "获胜者",
     },
     setup: {
       title: "游戏设置",
@@ -595,7 +595,7 @@ export default {
       levelMedium: "中等",
       levelHard: "困难",
       cancel: "取消",
-      startNow: "立即开始"
+      startNow: "立即开始",
     },
     pictureIt: {
       topBar: {
@@ -603,7 +603,7 @@ export default {
         describer: "描述者",
         spectator: "观众",
         roleDescriber: "描述者",
-        roleRater: "评分者"
+        roleRater: "评分者",
       },
       actionPanel: {
         watchingAsSpectator: "您正在以观众身份观看。",
@@ -614,7 +614,7 @@ export default {
         timeLeft: "(剩余 {0}秒)",
         submitRating: "提交评分",
         ratingSubmitted: "已提交！等待其他玩家...",
-        waiting: "等待中..."
+        waiting: "等待中...",
       },
       imageCard: {
         describeToTeam: "向您的团队描述这张图片",
@@ -625,13 +625,13 @@ export default {
         preparing: "准备中...",
         forbiddenWordsTitle: "禁用词",
         forbiddenWordsDesc: "请勿使用这些词",
-        flaggedCount: "{0} / {1} 人已标记违规"
+        flaggedCount: "{0} / {1} 人已标记违规",
       },
       modals: {
         gameEnded: "游戏结束",
         notEnoughPlayers: "玩家人数不足以继续。",
         close: "关闭",
-        waitingStart: "正在准备游戏..."
+        waitingStart: "正在准备游戏...",
       },
       badges: {
         "Master Describer": "描述大师",
@@ -640,7 +640,7 @@ export default {
         "Most Fluent": "最流利",
         "Team Player": "团队合作",
         "Keep Practicing": "继续努力",
-        champion: "冠军"
+        champion: "冠军",
       },
       gameOver: {
         title: "游戏结束",
@@ -653,16 +653,16 @@ export default {
         highestRoundScore: "最高单回合分数",
         playAgain: "再玩一次",
         backToRoom: "返回房间",
-        playersCount: "{0} 名玩家"
+        playersCount: "{0} 名玩家",
       },
       leaderboard: {
         title: "排行榜",
-        playersCount: "{0} 名玩家"
+        playersCount: "{0} 名玩家",
       },
       roundResult: {
         nextRoundStartsIn: "下一回合开始于...",
-        averageRating: "平均评分"
-      }
-    }
-  }
+        averageRating: "平均评分",
+      },
+    },
+  },
 }

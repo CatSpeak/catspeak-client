@@ -199,10 +199,10 @@ export const roomsApi = baseApi.injectEndpoints({
 
     // Update an existing Pro Custom Room
     updateCustomRoom: builder.mutation({
-      query: ({ id, ...body }) => ({
+      query: ({ id, data }) => ({
         url: `/rooms/custom/${id}`,
         method: "PUT",
-        body,
+        body: data,
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: "CustomRooms", id },

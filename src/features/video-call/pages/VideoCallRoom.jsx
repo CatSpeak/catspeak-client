@@ -1,13 +1,16 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Navigate, useParams } from "react-router-dom";
-import { ChevronRight, Loader2, Clock } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useConnectionState } from "@livekit/components-react";
-import { ConnectionState } from "livekit-client";
-import { useSelector, useDispatch } from "react-redux";
-import { useGetBreakoutStatusQuery, useStopBreakoutRoomsMutation } from "@/store/api/roomsApi";
-import { exitBreakout } from "@/store/slices/videoCallSlice";
-import { toast } from "react-hot-toast";
+import React, { useState, useRef, useEffect, useCallback } from "react"
+import { Navigate, useParams } from "react-router-dom"
+import { ChevronRight, Loader2, Clock } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useConnectionState } from "@livekit/components-react"
+import { ConnectionState } from "livekit-client"
+import { useSelector, useDispatch } from "react-redux"
+import {
+  useGetBreakoutStatusQuery,
+  useStopBreakoutRoomsMutation,
+} from "@/store/api/roomsApi"
+import { exitBreakout } from "@/store/slices/videoCallSlice"
+import { toast } from "react-hot-toast"
 
 import {
   VideoGrid,
@@ -15,29 +18,30 @@ import {
   ChatBox,
   ControlBar as VideoCallControlBar,
   RoomHeader,
-} from "@/features/video-call";
-import BackgroundsAndEffectsPanel from "@/features/video-call/components/BackgroundsAndEffectsPanel";
-import TroubleshootPanel from "@/features/video-call/components/TroubleshootPanel";
-import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker";
-import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker";
-import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay";
-import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI";
+} from "@/features/video-call"
+import BackgroundsAndEffectsPanel from "@/features/video-call/components/BackgroundsAndEffectsPanel"
+import TroubleshootPanel from "@/features/video-call/components/TroubleshootPanel"
+import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBackgroundPicker"
+import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
+import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
+import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
 
-import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner";
-import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel";
+import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
+import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
 
-import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
-import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
-import { GameProvider } from "@/features/games/context/GameContext";
+import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
+import { GameProvider } from "@/features/games/context/GameContext"
 // import CrackItOverlay from "@/features/video-call/components/games/crack-it/CrackItOverlay";
-import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import VideoCallLoading from "@/features/video-call/components/VideoCallLoading";
-import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer";
-import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay";
+import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
+import { isBreakoutSupported, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
+import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
+import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay"
 
 const VideoCallRoomContent = () => {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
   const {
     showChat,
     setShowChat,
@@ -72,44 +76,46 @@ const VideoCallRoomContent = () => {
     isRecording,
     confirmStopRecording,
     participants,
-  } = useVideoCallContext();
+  } = useVideoCallContext()
 
   const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
     (s) => s.videoCall,
-  );
-  const isHost = room?.creatorId === user?.accountId;
+  )
+  const isHost = isCustomRoom(room?.roomType) && room?.creatorId === user?.accountId
 
-  const dispatch = useDispatch();
-  const [stopBreakoutRooms] = useStopBreakoutRoomsMutation();
+
+  const dispatch = useDispatch()
+  const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
 
   const handleTimerEnd = useCallback(() => {
     if (isHost && parentSessionId) {
-      stopBreakoutRooms(parentSessionId).unwrap().catch(console.error);
-      dispatch(exitBreakout());
-      toast.success("Hết thời gian! Đã tự động đóng phòng nhóm.");
+      stopBreakoutRooms(parentSessionId).unwrap().catch(console.error)
+      dispatch(exitBreakout())
+      toast.success("Hết thời gian! Đã tự động đóng phòng nhóm.")
     }
-  }, [isHost, parentSessionId, stopBreakoutRooms, dispatch]);
+  }, [isHost, parentSessionId, stopBreakoutRooms, dispatch])
 
-  const { countdownSeconds, formattedTime, breakoutStatus, isSessionBreakoutActive } = useBreakoutTimer(
-    parentSessionId,
-    isBreakoutActive,
-    handleTimerEnd
-  );
+  const {
+    countdownSeconds,
+    formattedTime,
+    breakoutStatus,
+    isSessionBreakoutActive,
+  } = useBreakoutTimer(parentSessionId, isBreakoutActive, handleTimerEnd)
 
   // Prevent host from accidentally closing/refreshing tab during active breakout
   useEffect(() => {
-    if (!isHost || !isBreakoutActive) return;
+    if (!isHost || !isBreakoutActive) return
     const handleBeforeUnload = (e) => {
-      e.preventDefault();
+      e.preventDefault()
       e.returnValue =
-        "Đang có các phòng thảo luận nhỏ hoạt động. Bạn có chắc chắn muốn rời khỏi trang?";
-      return e.returnValue;
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isHost, isBreakoutActive]);
+        "Đang có các phòng thảo luận nhỏ hoạt động. Bạn có chắc chắn muốn rời khỏi trang?"
+      return e.returnValue
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [isHost, isBreakoutActive])
 
-  const isSidePanelOpen = activeSidePanel !== null;
+  const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
     : showVirtualBackground
@@ -122,7 +128,7 @@ const VideoCallRoomContent = () => {
             ? isBreakoutActive
               ? "Phòng thảo luận"
               : "Phòng họp nhóm"
-            : t.rooms.chatBox.title;
+            : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -130,18 +136,18 @@ const VideoCallRoomContent = () => {
   // negotiating the WebSocket at that point.  Keep showing a loader
   // until the connection is fully established so that participant
   // metadata (name, avatar, etc.) is available when VideoGrid renders.
-  const connectionState = useConnectionState();
-  const [hasConnected, setHasConnected] = useState(false);
+  const connectionState = useConnectionState()
+  const [hasConnected, setHasConnected] = useState(false)
 
   useEffect(() => {
     if (connectionState === ConnectionState.Connected) {
-      setHasConnected(true);
+      setHasConnected(true)
     }
-  }, [connectionState]);
+  }, [connectionState])
 
   const livekitReady =
-    hasConnected || connectionState === ConnectionState.Connected;
-  const isReconnecting = connectionState === ConnectionState.Reconnecting;
+    hasConnected || connectionState === ConnectionState.Connected
+  const isReconnecting = connectionState === ConnectionState.Reconnecting
 
   const wasBreakoutActiveRef = useRef(false)
   useEffect(() => {
@@ -155,11 +161,11 @@ const VideoCallRoomContent = () => {
 
   useEffect(() => {
     // Prevent iOS/macOS swipe-to-go-back gestures during the call
-    document.body.style.overscrollBehaviorX = "none";
+    document.body.style.overscrollBehaviorX = "none"
     return () => {
-      document.body.style.overscrollBehaviorX = "auto";
-    };
-  }, []);
+      document.body.style.overscrollBehaviorX = "auto"
+    }
+  }, [])
 
   if (!user) {
     return (
@@ -171,7 +177,7 @@ const VideoCallRoomContent = () => {
         }}
         replace
       />
-    );
+    )
   }
 
   if (!livekitReady) {
@@ -188,7 +194,7 @@ const VideoCallRoomContent = () => {
       <VideoCallLoading
         message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
       />
-    );
+    )
   }
 
   return (
@@ -220,7 +226,7 @@ const VideoCallRoomContent = () => {
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           {isSessionBreakoutActive && (
-            <BreakoutBanner 
+            <BreakoutBanner
               breakoutRoomName={breakoutRoomName}
               breakoutStatus={breakoutStatus}
               countdownSeconds={countdownSeconds}
@@ -229,7 +235,6 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex-1 relative min-h-0">
             <VideoGrid />
-
           </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
@@ -255,7 +260,7 @@ const VideoCallRoomContent = () => {
                 {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
                 {showTroubleshoot && <TroubleshootPanel />}
-                {showBreakout && (
+                {showBreakout && isBreakoutSupported(room?.roomType) && (
                   <BreakoutSidebarPanel
                     sessionId={parentSessionId}
                     onClose={() => setActiveSidePanel(null)}
@@ -313,7 +318,7 @@ const VideoCallRoomContent = () => {
                     {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                     {showAvatarPicker && <AvatarUrlPicker />}
                     {showTroubleshoot && <TroubleshootPanel hideTitle />}
-                    {showBreakout && (
+                    {showBreakout && isBreakoutSupported(room?.roomType) && (
                       <BreakoutSidebarPanel
                         sessionId={parentSessionId}
                         onClose={() => setActiveSidePanel(null)}
@@ -339,18 +344,18 @@ const VideoCallRoomContent = () => {
 
       <VideoCallControlBar />
     </div>
-  );
-};
+  )
+}
 
 const VideoCallRoomWrapper = () => {
-  const { lang } = useParams();
+  const { lang } = useParams()
   return (
     <VideoCallProvider>
       <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>
-  );
-};
+  )
+}
 
-export default VideoCallRoomWrapper;
+export default VideoCallRoomWrapper

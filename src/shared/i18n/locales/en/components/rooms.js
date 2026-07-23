@@ -117,7 +117,7 @@ export default {
     title: "Join Room",
   },
   createRoom: {
-    title: "What's your room name?",
+    title: "Create Room",
     namePlaceholder: "e.g. Chill Practice",
     // This tool call only supports file replacement. I will do i18n updates in separate calls or use multiple `replace_file_content` calls serially in my list?
     // I can only do one replacement per tool call for `replace_file_content`.
@@ -211,7 +211,7 @@ export default {
     connect11: "Connect 1:1",
     connect25: "Connect 2:5",
     yourAI: "With AI 1:1",
-    customRoom: "Custom Room",
+    customRoom: "Create Room",
   },
   customRooms: {
     title: "Pro Custom Room",
@@ -236,7 +236,8 @@ export default {
     createSuccess: "Custom room created successfully",
     updateSuccess: "Room updated successfully",
     noRooms: "You haven't created any custom rooms yet",
-    noRoomsSubtext: "Create your first persistent room with up to 100 participants!",
+    noRoomsSubtext:
+      "Create your first persistent room with up to 100 participants!",
     join: "Join",
     copyLink: "Copy Link",
     linkCopied: "Link copied!",
@@ -615,7 +616,8 @@ export default {
       cancel: "Cancel",
       confirmExit: "Yes, Exit",
       roundLeaderboard: "Round Leaderboard",
-      forceStopNotEnoughPlayers: "Not enough players to continue. Game cancelled.",
+      forceStopNotEnoughPlayers:
+        "Not enough players to continue. Game cancelled.",
       forceStopGeneric: "Game stopped unexpectedly.",
       tallyingFinalResults: "Tallying final results...",
       gameHistory: "Game History",
@@ -623,11 +625,12 @@ export default {
       noHistoryFound: "No game history found for this room.",
       score: "Score",
       matchDate: "Date Played",
-      winner: "Winner"
+      winner: "Winner",
     },
     setup: {
       title: "Game Setup",
-      pictureItDesc: "Describe an image using the room language. Other players will rate your description.",
+      pictureItDesc:
+        "Describe an image using the room language. Other players will rate your description.",
       crackItDesc: "Guess hidden words from hints before everyone else.",
       difficultyDesc: "Adjust the challenge level for your room.",
       languageDesc: "Choose the language for this session.",
@@ -639,7 +642,7 @@ export default {
       levelMedium: "Medium",
       levelHard: "Hard",
       cancel: "Cancel",
-      startNow: "Start Now"
+      startNow: "Start Now",
     },
     pictureIt: {
       topBar: {
@@ -647,7 +650,7 @@ export default {
         describer: "Describer",
         spectator: "Spectator",
         roleDescriber: "Describer",
-        roleRater: "Rater"
+        roleRater: "Rater",
       },
       actionPanel: {
         watchingAsSpectator: "You are watching as a spectator.",
@@ -658,7 +661,7 @@ export default {
         timeLeft: "({0}s left)",
         submitRating: "Submit rating",
         ratingSubmitted: "Rating submitted! Waiting for others...",
-        waiting: "Waiting..."
+        waiting: "Waiting...",
       },
       imageCard: {
         describeToTeam: "Describe this image to your team",
@@ -669,13 +672,13 @@ export default {
         preparing: "Preparing...",
         forbiddenWordsTitle: "Forbidden words",
         forbiddenWordsDesc: "Do NOT use these words",
-        flaggedCount: "{0} / {1} flagged"
+        flaggedCount: "{0} / {1} flagged",
       },
       modals: {
         gameEnded: "Game Ended",
         notEnoughPlayers: "Not enough players to continue.",
         close: "Close",
-        waitingStart: "Preparing game..."
+        waitingStart: "Preparing game...",
       },
       badges: {
         "Master Describer": "Master Describer",
@@ -684,7 +687,7 @@ export default {
         "Most Fluent": "Most Fluent",
         "Team Player": "Team Player",
         "Keep Practicing": "Keep Practicing",
-        champion: "Champion"
+        champion: "Champion",
       },
       gameOver: {
         title: "Game Finished",
@@ -697,16 +700,16 @@ export default {
         highestRoundScore: "Highest Round Score",
         playAgain: "Play Again",
         backToRoom: "Back to Room",
-        playersCount: "{0} players"
+        playersCount: "{0} players",
       },
       leaderboard: {
         title: "Leaderboard",
-        playersCount: "{0} players"
+        playersCount: "{0} players",
       },
       roundResult: {
         nextRoundStartsIn: "Next round starts in...",
-        averageRating: "Average Rating"
-      }
-    }
+        averageRating: "Average Rating",
+      },
+    },
   },
 }

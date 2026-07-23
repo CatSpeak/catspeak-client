@@ -152,17 +152,23 @@ export const ConversationSignalRProvider = ({ children }) => {
           // next attempt uses a fresh access token instead of the expired one.
           const pending = getRefreshPromise()
           if (pending) {
-            console.debug("[ConversationSignalR] Waiting for token refresh before retry…")
+            console.debug(
+              "[ConversationSignalR] Waiting for token refresh before retry…",
+            )
             await pending
           }
 
           await new Promise((resolve, reject) => {
             const timer = setTimeout(resolve, RETRY_DELAY_MS)
             // If aborted during the wait, clean up and bail out
-            signal.addEventListener("abort", () => {
-              clearTimeout(timer)
-              reject(new DOMException("Aborted", "AbortError"))
-            }, { once: true })
+            signal.addEventListener(
+              "abort",
+              () => {
+                clearTimeout(timer)
+                reject(new DOMException("Aborted", "AbortError"))
+              },
+              { once: true },
+            )
           }).catch(() => {})
           return start(attempt + 1)
         }
