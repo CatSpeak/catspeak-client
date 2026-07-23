@@ -38,6 +38,10 @@ const globalTaskSlice = createSlice({
     },
     setConfirmingReload(state, action) {
       state.isConfirmingReload = action.payload;
+    },
+    clearTasks(state) {
+      state.tasks = [];
+      state.isConfirmingReload = false;
     }
   },
 });
@@ -49,6 +53,7 @@ export const {
   removeTask,
   revealTask,
   setConfirmingReload,
+  clearTasks,
 } = globalTaskSlice.actions;
 
 export const selectGlobalTasks = (state) => state.globalTask.tasks;

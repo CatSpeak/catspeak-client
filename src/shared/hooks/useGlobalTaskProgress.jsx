@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentToken } from "@/store/slices/authSlice";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { updateTask, addTask } from "@/store/slices/globalTaskSlice";
+import { store } from "@/store";
 
 export const useGlobalTaskProgress = () => {
   const token = useSelector(selectCurrentToken);
@@ -26,13 +27,21 @@ export const useGlobalTaskProgress = () => {
     connectionRef.current = connection;
 
     connection.on("TaskStarted", (task) => {
+      const existingTask = store.getState().globalTask.tasks.find((t) => t.id === task.taskId);
+      const isUpload = existingTask?.isUploadTask;
+      const bePercent = task.progressPercentage || 0;
+
+      const progress = isUpload
+        ? 50 + Math.round((bePercent / 100) * 50)
+        : bePercent;
+
       dispatch(
         updateTask({
           id: task.taskId,
           updates: {
             title: task.title,
             status: "PROCESSING",
-            progress: 80,
+            progress: Math.min(99, progress),
             stepName: task.stepName,
           },
         })
@@ -40,16 +49,22 @@ export const useGlobalTaskProgress = () => {
     });
 
     connection.on("TaskProgressUpdated", (task) => {
-      // Scale BE progress (0 - 100%) into the 80% - 100% range of the FE Progress Bar
+      const existingTask = store.getState().globalTask.tasks.find((t) => t.id === task.taskId);
+      const isUpload = existingTask?.isUploadTask;
       const bePercent = task.progressPercentage || 0;
-      const scaledProgress = 80 + Math.round((bePercent / 100) * 20);
+
+      // 0-50% is reserved for client file upload; 50-100% is for server background processing
+      // Pure server tasks run directly from 0-100%
+      const calculatedProgress = isUpload
+        ? 50 + Math.round((bePercent / 100) * 50)
+        : bePercent;
 
       dispatch(
         updateTask({
           id: task.taskId,
           updates: {
             status: "PROCESSING",
-            progress: Math.min(99, scaledProgress),
+            progress: Math.min(99, calculatedProgress),
             stepName: task.stepName,
           },
         })
@@ -94,17 +109,29 @@ export const useGlobalTaskProgress = () => {
           .then((res) => res.json())
           .then((tasks) => {
             if (Array.isArray(tasks)) {
+              const now = Date.now();
               tasks.forEach((t) => {
+                const startTime = t.startedAt ? new Date(t.startedAt).getTime() : now;
+                // Ignore stale tasks older than 3 minutes
+                if (now - startTime > 180000) return;
+
+                const existingTask = store.getState().globalTask.tasks.find((tk) => tk.id === t.taskId);
+                const isUpload = existingTask?.isUploadTask || t.taskType?.includes("Upload") || t.taskType?.includes("Reel");
                 const bePercent = t.progressPercentage || 0;
-                const scaledProgress = 80 + Math.round((bePercent / 100) * 20);
+
+                const calculatedProgress = isUpload
+                  ? 50 + Math.round((bePercent / 100) * 50)
+                  : bePercent;
+
                 dispatch(
                   addTask({
                     id: t.taskId,
                     title: t.title,
                     status: "PROCESSING",
-                    progress: Math.min(99, scaledProgress),
-                    timestamp: new Date(t.startedAt).getTime(),
+                    progress: Math.min(99, calculatedProgress),
+                    timestamp: startTime,
                     stepName: t.stepName,
+                    isUploadTask: isUpload,
                   })
                 );
               });
