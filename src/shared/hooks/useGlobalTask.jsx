@@ -27,7 +27,15 @@ export const useGlobalTask = () => {
   const dispatch = useDispatch();
 
   const uploadFile = useCallback(
-    ({ url, method = "POST", data, title, isHidden = false, onUploadSuccess, onUploadError }) => {
+    ({
+      url,
+      method = "POST",
+      data,
+      title,
+      isHidden = false,
+      onUploadSuccess,
+      onUploadError,
+    }) => {
       const id = Math.random().toString(36).substring(7) + Date.now();
 
       // Automatically attach TaskId to FormData if available for BE progress tracking sync
@@ -78,7 +86,7 @@ export const useGlobalTask = () => {
                 stepName: "UPLOADING_FILE",
                 isUploadTask: true,
               },
-            })
+            }),
           );
         }
       };
@@ -93,7 +101,7 @@ export const useGlobalTask = () => {
                 progress: 100,
                 completionTime: Date.now(),
               },
-            })
+            }),
           );
           taskRegistry.delete(id);
           if (onUploadSuccess) {
@@ -110,7 +118,7 @@ export const useGlobalTask = () => {
             updateTask({
               id,
               updates: { status: "ERROR", completionTime: Date.now() },
-            })
+            }),
           );
           taskRegistry.delete(id);
           if (onUploadError) {
@@ -124,7 +132,7 @@ export const useGlobalTask = () => {
           updateTask({
             id,
             updates: { status: "ERROR", completionTime: Date.now() },
-          })
+          }),
         );
         taskRegistry.delete(id);
         if (onUploadError) {
@@ -146,14 +154,14 @@ export const useGlobalTask = () => {
                 stepName: "PROCESSING_ON_SERVER",
                 isUploadTask: true,
               },
-            })
+            }),
           );
         }
       };
 
       return id;
     },
-    [token, dispatch, tasks]
+    [token, dispatch, tasks],
   );
 
   const removeTask = useCallback(
@@ -161,34 +169,34 @@ export const useGlobalTask = () => {
       taskRegistry.delete(id);
       dispatch(removeTaskAction(id));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const revealTask = useCallback(
     (id) => {
       dispatch(revealTaskAction(id));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const addCustomTask = useCallback(
     (task) => {
       dispatch(addTask({ ...task, isCustom: true }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const updateCustomTask = useCallback(
     (id, updates) => {
       dispatch(updateTask({ id, updates }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   return {
     tasks,
     startTask: uploadFile, // General task runner alias
-    uploadFile,            // Dedicated file upload helper
+    uploadFile, // Dedicated file upload helper
     removeTask,
     revealTask,
     addCustomTask,
@@ -243,7 +251,12 @@ export const GlobalTaskSync = () => {
   // Lưu trạng thái tác vụ vào localStorage
   useEffect(() => {
     const targetTasks = tasks
-      .filter((t) => t.status === "PROCESSING" || t.status === "SUCCESS" || t.status === "ERROR")
+      .filter(
+        (t) =>
+          t.status === "PROCESSING" ||
+          t.status === "SUCCESS" ||
+          t.status === "ERROR",
+      )
       .map((t) => ({
         id: t.id,
         title: t.title,
@@ -276,7 +289,8 @@ export const GlobalTaskSync = () => {
   // Bắt phím F5 / Ctrl+R để hiện Modal xác nhận
   useEffect(() => {
     const handleKeyDown = (e) => {
-      const isRefreshKey = e.key === "F5" || (e.ctrlKey && (e.key === "r" || e.key === "R"));
+      const isRefreshKey =
+        e.key === "F5" || (e.ctrlKey && (e.key === "r" || e.key === "R"));
       if (isRefreshKey) {
         const hasUploading = tasks.some((t) => t.status === "UPLOADING");
         if (hasUploading) {

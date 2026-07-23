@@ -28,6 +28,7 @@ export default {
     titleRequiredError: "A title is required.",
     uploadFailed: "Failed to upload Reel. Please try again.",
     uploadSuccess: "Reel uploaded successfully",
+    monthlyQuotaExceeded: "You have reached the maximum upload limit of 5 Reels this month. Please upgrade to Pro to upload more Reels!",
     uploadFailedTitle: "Upload failed",
     uploadFailedDesc: "Something went wrong. Please check your file formats and network.",
     foryou: "For You",
