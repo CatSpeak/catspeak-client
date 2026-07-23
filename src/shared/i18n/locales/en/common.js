@@ -89,10 +89,12 @@ export default {
     error: "Task Failed",
     itemsCount: "Processing {{count}} tasks",
     cancelTip: "Cancel task",
+    instructorTaskTitle: "Submitting instructor application",
+    recordingTaskTitle: "Processing recording",
   },
   catSpeak: {
     reels: {
-      createReelTitle: "Create new Reel",
+      createReelTitle: "Upload Reel",
       uploadSuccess: "Reel posted successfully!",
     },
   },

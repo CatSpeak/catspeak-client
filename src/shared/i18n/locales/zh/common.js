@@ -93,10 +93,12 @@ export default {
     error: "任务失败",
     itemsCount: "正在处理 {{count}} 个任务",
     cancelTip: "取消任务",
+    instructorTaskTitle: "提交导师申请",
+    recordingTaskTitle: "正在处理录制文件",
   },
   catSpeak: {
     reels: {
-      createReelTitle: "创建新 Reel",
+      createReelTitle: "发布新 Reel",
       uploadSuccess: "Reel 发布成功！",
     },
   },

@@ -19,7 +19,7 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
   // Store raw files in memory cache for preview/retry purposes
   fileCache.set(id, { file, coverFile })
 
-  const title = formData.get("Title") || "Tải lên Reel mới"
+  const title = formData.get("TaskTitle") || "Đăng Reel mới"
   const challengeId = formData.get("ChallengeId")
   formData.append("TaskId", id)
 

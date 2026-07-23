@@ -41,7 +41,7 @@ export const useGlobalTaskProgress = () => {
         updateTask({
           id: task.taskId,
           updates: {
-            title: task.title,
+            title: existingTask?.title || task.title || "Tác vụ hệ thống",
             status: "PROCESSING",
             progress: Math.min(99, progress),
             stepName: task.stepName,

@@ -969,12 +969,15 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
         formData.append("CoverFile", coverFile)
       }
 
+      const taskTitle = t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới"
+      formData.append("TaskTitle", taskTitle)
+
       const id = uploadFile({
         url: "/reels",
         method: "POST",
         data: formData,
         isHidden: false, // Show in global widget immediately
-        title: t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới", // Fallback if translation is missing
+        title: taskTitle,
         onUploadSuccess: () => {
           toast.success(t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!");
         },
