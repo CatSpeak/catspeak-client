@@ -7,6 +7,7 @@ import {
   useCreateReelMutation,
   useSearchReelHashtagsQuery,
   useSearchReelMentionsQuery,
+  useLazyCheckUploadEligibilityQuery,
 } from "@/store/api/reelsApi"
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
 
@@ -207,6 +208,8 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   } = useSearchReelMentionsQuery(mentionSearchArgs, {
     skip: !open || debouncedDescriptionTrigger?.type !== "mention",
   })
+
+  const [checkUploadEligibility] = useLazyCheckUploadEligibilityQuery()
 
   const hashtagSuggestions = useMemo(
     () => hashtagResults.filter((item) => getHashtagName(item)),
@@ -939,6 +942,19 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
     }
 
     try {
+      setIsUploading(true)
+
+      // 1. Check upload eligibility with BE before closing modal and starting upload
+      try {
+        await checkUploadEligibility().unwrap()
+      } catch (checkErr) {
+        const fallbackMsg = t?.catSpeak?.reels?.monthlyQuotaExceeded || "Bạn đã đạt giới hạn tải lên tối đa 5 Reels trong tháng này. Vui lòng nâng cấp lên gói Pro để đăng thêm Reels!"
+        const errMsg = checkErr?.data?.message || checkErr?.message || fallbackMsg
+        setGeneralError(errMsg)
+        setIsUploading(false)
+        return // BLOCK SUBMISSION: Keep modal open and display Alert box at top!
+      }
+
       const formData = new FormData()
       formData.append("Title", title.trim())
       formData.append("Description", description.trim())
@@ -953,14 +969,15 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
         formData.append("CoverFile", coverFile)
       }
 
-      setIsUploading(true);
+      const taskTitle = t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới"
+      formData.append("TaskTitle", taskTitle)
 
       const id = uploadFile({
         url: "/reels",
         method: "POST",
         data: formData,
         isHidden: false, // Show in global widget immediately
-        title: t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới", // Fallback if translation is missing
+        title: taskTitle,
         onUploadSuccess: () => {
           toast.success(t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!");
         },
@@ -969,11 +986,15 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
         }
       });
 
-      // Close modal immediately and let global widget handle the progress
+      setIsUploading(false);
+
+      // Close modal only after eligibility check passes
       if (onClose) onClose();
 
     } catch (err) {
-      setGeneralError(err?.data?.message || err?.message || t?.catSpeak?.reels?.uploadFailed || "Failed to upload Reel. Please try again.")
+      setIsUploading(false);
+      const errMsg = err?.data?.message || err?.message || t?.catSpeak?.reels?.uploadFailed || "Failed to upload Reel. Please try again."
+      setGeneralError(errMsg);
     }
   }
 

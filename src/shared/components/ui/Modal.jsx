@@ -41,7 +41,7 @@ const Modal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`relative flex flex-col w-full shadow-xl ${
+            className={`relative flex flex-col w-full shadow-xl overflow-hidden ${
               fullScreenOnMobile 
                 ? "h-full md:h-auto md:max-h-[90vh]" 
                 : "h-auto max-h-[90vh]"

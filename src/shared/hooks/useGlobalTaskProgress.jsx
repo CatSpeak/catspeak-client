@@ -27,7 +27,9 @@ export const useGlobalTaskProgress = () => {
     connectionRef.current = connection;
 
     connection.on("TaskStarted", (task) => {
-      const existingTask = store.getState().globalTask.tasks.find((t) => t.id === task.taskId);
+      const existingTask = store
+        .getState()
+        .globalTask.tasks.find((t) => t.id === task.taskId);
       const isUpload = existingTask?.isUploadTask;
       const bePercent = task.progressPercentage || 0;
 
@@ -39,17 +41,19 @@ export const useGlobalTaskProgress = () => {
         updateTask({
           id: task.taskId,
           updates: {
-            title: task.title,
+            title: existingTask?.title || task.title || "Tác vụ hệ thống",
             status: "PROCESSING",
             progress: Math.min(99, progress),
             stepName: task.stepName,
           },
-        })
+        }),
       );
     });
 
     connection.on("TaskProgressUpdated", (task) => {
-      const existingTask = store.getState().globalTask.tasks.find((t) => t.id === task.taskId);
+      const existingTask = store
+        .getState()
+        .globalTask.tasks.find((t) => t.id === task.taskId);
       const isUpload = existingTask?.isUploadTask;
       const bePercent = task.progressPercentage || 0;
 
@@ -67,7 +71,7 @@ export const useGlobalTaskProgress = () => {
             progress: Math.min(99, calculatedProgress),
             stepName: task.stepName,
           },
-        })
+        }),
       );
     });
 
@@ -81,7 +85,7 @@ export const useGlobalTaskProgress = () => {
             completionTime: Date.now(),
             payload: task.payload,
           },
-        })
+        }),
       );
     });
 
@@ -95,7 +99,7 @@ export const useGlobalTaskProgress = () => {
             completionTime: Date.now(),
             error: task.errorMessage || "Tác vụ thất bại",
           },
-        })
+        }),
       );
     });
 
@@ -111,12 +115,19 @@ export const useGlobalTaskProgress = () => {
             if (Array.isArray(tasks)) {
               const now = Date.now();
               tasks.forEach((t) => {
-                const startTime = t.startedAt ? new Date(t.startedAt).getTime() : now;
+                const startTime = t.startedAt
+                  ? new Date(t.startedAt).getTime()
+                  : now;
                 // Ignore stale tasks older than 3 minutes
                 if (now - startTime > 180000) return;
 
-                const existingTask = store.getState().globalTask.tasks.find((tk) => tk.id === t.taskId);
-                const isUpload = existingTask?.isUploadTask || t.taskType?.includes("Upload") || t.taskType?.includes("Reel");
+                const existingTask = store
+                  .getState()
+                  .globalTask.tasks.find((tk) => tk.id === t.taskId);
+                const isUpload =
+                  existingTask?.isUploadTask ||
+                  t.taskType?.includes("Upload") ||
+                  t.taskType?.includes("Reel");
                 const bePercent = t.progressPercentage || 0;
 
                 const calculatedProgress = isUpload
@@ -132,7 +143,7 @@ export const useGlobalTaskProgress = () => {
                     timestamp: startTime,
                     stepName: t.stepName,
                     isUploadTask: isUpload,
-                  })
+                  }),
                 );
               });
             }

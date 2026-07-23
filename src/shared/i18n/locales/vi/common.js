@@ -120,10 +120,12 @@ export default {
     error: "Lỗi tác vụ",
     itemsCount: "Xử lý {{count}} tác vụ",
     cancelTip: "Hủy tác vụ",
+    instructorTaskTitle: "Gửi hồ sơ giảng viên",
+    recordingTaskTitle: "Đang xử lý bản ghi hình",
   },
   catSpeak: {
     reels: {
-      createReelTitle: "Tạo Reel mới",
+      createReelTitle: "Đăng Reel mới",
       uploadSuccess: "Đăng Reel thành công!",
     },
   },

@@ -14,26 +14,42 @@ import { useGlobalTaskProgress } from "@/shared/hooks/useGlobalTaskProgress.jsx"
 import { useSelector } from "react-redux";
 import { selectCurrentToken } from "@/store/slices/authSlice";
 
+// Clean helper function to format task title in user language
+const getTaskTitleText = (task, t) => {
+  const rawTitle = task.title || "";
+  const taskId = task.id || "";
+  const lowerTitle = rawTitle.toLowerCase();
+
+  // 1. Reel upload task
+  if (taskId.startsWith("reel-upload-") || lowerTitle.includes("reel")) {
+    return t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới";
+  }
+
+  // 2. Instructor application submission task
+  if (taskId.includes("instructor") || lowerTitle.includes("instructor") || lowerTitle.includes("giảng viên") || lowerTitle.includes("hồ sơ")) {
+    return t?.uploadWidget?.instructorTaskTitle || "Gửi hồ sơ giảng viên";
+  }
+
+  // 3. Recording processing task
+  if (taskId.includes("rec") || task.isRecording || lowerTitle.includes("record") || lowerTitle.includes("ghi hình") || lowerTitle.includes("bản ghi")) {
+    return t?.uploadWidget?.recordingTaskTitle || "Đang xử lý bản ghi hình";
+  }
+
+  return rawTitle || "Tác vụ hệ thống";
+};
+
 // Clean helper function to format status text
 const getTaskStatusText = (task, displayProgress, t) => {
-  const { status, error, stepName } = task;
+  const { status, error } = task;
   const pct = Math.floor(displayProgress);
 
   if (status === "SUCCESS") return t?.uploadWidget?.success || "Hoàn tất";
   if (status === "ERROR") return error || t?.uploadWidget?.error || "Lỗi tác vụ";
 
-  if (stepName) {
-    const translatedStep = t?.uploadWidget?.[stepName];
-    if (translatedStep) {
-      return translatedStep.replace("{{progress}}", pct);
-    }
-    return `${stepName} (${pct}%)`;
-  }
-
   const template =
     status === "PROCESSING"
-      ? t?.uploadWidget?.processing || "Processing... {{progress}}%"
-      : t?.uploadWidget?.uploading || "Uploading... {{progress}}%";
+      ? t?.uploadWidget?.processing || "Đang xử lý... {{progress}}%"
+      : t?.uploadWidget?.uploading || "Đang tiến hành... {{progress}}%";
 
   return template.replace("{{progress}}", pct);
 };
@@ -75,7 +91,7 @@ const TaskItem = ({ task, onRemove }) => {
           </div>
           <div className="flex flex-col truncate">
             <span className="text-sm font-medium text-gray-900 truncate">
-              {task.title}
+              {getTaskTitleText(task, t)}
             </span>
             <span className="text-xs text-gray-500 truncate">
               {getTaskStatusText(task, displayProgress, t)}
@@ -151,11 +167,7 @@ export const GlobalTaskProgressWidget = () => {
             >
               <div className="p-3 flex flex-col gap-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                 {visibleTasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onRemove={removeTask}
-                  />
+                  <TaskItem key={task.id} task={task} onRemove={removeTask} />
                 ))}
               </div>
             </motion.div>

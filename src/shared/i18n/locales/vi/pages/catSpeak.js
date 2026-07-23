@@ -28,6 +28,7 @@ export default {
     titleRequiredError: "Vui lòng nhập tiêu đề.",
     uploadFailed: "Đăng tải Reel thất bại. Vui lòng thử lại.",
     uploadSuccess: "Đăng tải Reel thành công",
+    monthlyQuotaExceeded: "Bạn đã đạt giới hạn tải lên tối đa 5 Reels trong tháng này. Vui lòng nâng cấp lên gói Pro để đăng thêm Reels!",
     uploadFailedTitle: "Tải lên thất bại",
     uploadFailedDesc: "Đã xảy ra lỗi. Vui lòng kiểm tra định dạng tệp và mạng của bạn.",
     foryou: "Dành cho bạn",
