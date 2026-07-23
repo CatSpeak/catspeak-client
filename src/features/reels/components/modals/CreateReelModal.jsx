@@ -1,5 +1,5 @@
-import React from "react"
-import { AlertCircle, Film, X, Video, Minus } from "lucide-react"
+import React, { useEffect, useRef } from "react"
+import { AlertCircle, Film, X, Video } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -16,6 +16,19 @@ const CreateReelModalContent = ({ open }) => {
     uploadProgress, handleMinimize, handleCancelUpload,
     generalError, apiError
   } = useCreateReelContext()
+
+  const formRef = useRef(null)
+
+  useEffect(() => {
+    if (generalError || apiError) {
+      const modalBody = formRef.current?.closest(".overflow-y-auto")
+      if (modalBody) {
+        modalBody.scrollTo({ top: 0, behavior: "smooth" })
+      } else {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    }
+  }, [generalError, apiError])
 
   return (
     <Modal
@@ -71,7 +84,7 @@ const CreateReelModalContent = ({ open }) => {
           transform: scale(1.15);
         }
       `}} />
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
+      <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
 
         {/* API Error Notification */}
         {(generalError || apiError) && (

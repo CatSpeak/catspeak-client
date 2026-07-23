@@ -30,24 +30,39 @@ export const useGlobalTaskProgress = () => {
       const existingTask = store
         .getState()
         .globalTask.tasks.find((t) => t.id === task.taskId);
-      const isUpload = existingTask?.isUploadTask;
+      const isUpload = existingTask
+        ? existingTask.isUploadTask
+        : (task.taskType === "ReelUpload" || task.taskType === "InstructorApplication");
       const bePercent = task.progressPercentage || 0;
 
       const progress = isUpload
         ? 50 + Math.round((bePercent / 100) * 50)
         : bePercent;
 
-      dispatch(
-        updateTask({
-          id: task.taskId,
-          updates: {
-            title: existingTask?.title || task.title || "Tác vụ hệ thống",
+      if (!existingTask) {
+        dispatch(
+          addTask({
+            id: task.taskId,
+            title: task.title || "Tác vụ hệ thống",
             status: "PROCESSING",
             progress: Math.min(99, progress),
             stepName: task.stepName,
-          },
-        }),
-      );
+            isUploadTask: isUpload,
+          }),
+        );
+      } else {
+        dispatch(
+          updateTask({
+            id: task.taskId,
+            updates: {
+              title: existingTask?.title || task.title || "Tác vụ hệ thống",
+              status: "PROCESSING",
+              progress: Math.min(99, progress),
+              stepName: task.stepName,
+            },
+          }),
+        );
+      }
     });
 
     connection.on("TaskProgressUpdated", (task) => {

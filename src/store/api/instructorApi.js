@@ -17,8 +17,11 @@ function buildInstructorFormData({
   idCardBack,
   credentials,
   introVideo,
+  taskId,
 }) {
   const fd = new FormData()
+
+  if (taskId) fd.append("TaskId", taskId)
 
   // Text fields
   if (fullName) fd.append("FullName", fullName)
@@ -68,7 +71,7 @@ export const instructorApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: "/InstructorProfile/apply",
         method: "POST",
-        body: buildInstructorFormData(data),
+        body: data instanceof FormData ? data : buildInstructorFormData(data),
         // Let the browser set the Content-Type with boundary
         formData: true,
       }),
@@ -79,7 +82,7 @@ export const instructorApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: "/InstructorProfile/my",
         method: "PUT",
-        body: buildInstructorFormData(data),
+        body: data instanceof FormData ? data : buildInstructorFormData(data),
         formData: true,
       }),
       invalidatesTags: ["InstructorProfile"],
