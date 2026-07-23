@@ -16,24 +16,16 @@ import { selectCurrentToken } from "@/store/slices/authSlice";
 
 // Clean helper function to format status text
 const getTaskStatusText = (task, displayProgress, t) => {
-  const { status, error, stepName } = task;
+  const { status, error } = task;
   const pct = Math.floor(displayProgress);
 
   if (status === "SUCCESS") return t?.uploadWidget?.success || "Hoàn tất";
   if (status === "ERROR") return error || t?.uploadWidget?.error || "Lỗi tác vụ";
 
-  if (stepName) {
-    const translatedStep = t?.uploadWidget?.[stepName];
-    if (translatedStep) {
-      return translatedStep.replace("{{progress}}", pct);
-    }
-    return `${stepName} (${pct}%)`;
-  }
-
   const template =
     status === "PROCESSING"
-      ? t?.uploadWidget?.processing || "Processing... {{progress}}%"
-      : t?.uploadWidget?.uploading || "Uploading... {{progress}}%";
+      ? t?.uploadWidget?.processing || "Đang xử lý... {{progress}}%"
+      : t?.uploadWidget?.uploading || "Đang tiến hành... {{progress}}%";
 
   return template.replace("{{progress}}", pct);
 };
@@ -151,11 +143,7 @@ export const GlobalTaskProgressWidget = () => {
             >
               <div className="p-3 flex flex-col gap-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                 {visibleTasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onRemove={removeTask}
-                  />
+                  <TaskItem key={task.id} task={task} onRemove={removeTask} />
                 ))}
               </div>
             </motion.div>
