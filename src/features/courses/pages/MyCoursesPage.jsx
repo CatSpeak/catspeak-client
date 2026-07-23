@@ -11,9 +11,9 @@ import CourseManagementCard from "../components/CourseManagementCard"
 import CourseSelectFilter from "../components/CourseSelectFilter"
 import CourseTabs from "../components/CourseTabs"
 import EmptyCoursesState from "../components/EmptyCoursesState"
-import TeachingTasksSection from "../components/TeachingTasksSection"
-import UpcomingSessionsPanel from "../components/UpcomingSessionsPanel"
-import ViewModeToggle from "../components/ViewModeToggle"
+import TeachingTasksSection from "../components/assignments/TeachingTasksSection"
+import UpcomingSessionsPanel from "../components/sessions/UpcomingSessionsPanel"
+import ViewModeToggle from "../components/shared/ViewModeToggle"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import {
   filterByStatus,

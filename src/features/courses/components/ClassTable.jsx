@@ -1,8 +1,8 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { MoreVertical, Calendar, Users, Clock } from "lucide-react"
-import StatusBadge from "./StatusBadge"
-import ProgressBar from "./ProgressBar"
+import ProgressBar from "./overview/ProgressBar"
+import StatusBadge from "./shared/StatusBadge"
 import CourseThumbnail from "./CourseThumbnail"
 
 const ClassTable = ({ classes, t, handleAction }) => {

@@ -1,3 +1,4 @@
+import { websites } from "@/features/navigation/config/websites";
 import {
   Home,
   LayoutDashboard,
@@ -14,6 +15,7 @@ import {
   Mail,
   BookOpen,
   Video,
+  MessageCircle,
 } from "lucide-react";
 
 export const navLinks = [
@@ -31,6 +33,7 @@ export const navLinks = [
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
+
   {
     key: "workspace",
     hasDropdown: true,
@@ -42,8 +45,16 @@ export const navLinks = [
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
       { key: "profile", path: "/profile", icon: User },
+      { key: "messages", path: "/chat", icon: MessageCircle },
     ],
   },
+  {
+    key: "horizontalBar",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  ...websites,
   // {
   //   key: "pricing",
   //   path: "/pricing",
@@ -51,7 +62,6 @@ export const navLinks = [
   //   icon: CreditCard,
   // },
   // { key: "cart", path: "/cart", icon: ShoppingCart },
-  // { key: "messages", path: "/messages", icon: MessageCircle },
   // {
   //   key: "courses",
   //   hasDropdown: true,
@@ -66,7 +76,7 @@ export const navLinks = [
 export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
-  { key: "systemConfig", path: "/setting/system", icon: Settings }
+  { key: "systemConfig", path: "/setting/system", icon: Settings },
 ];
 
 export const footerLinks = [

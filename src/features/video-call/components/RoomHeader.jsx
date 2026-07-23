@@ -6,6 +6,9 @@ import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call
 import { useSessionTimer } from "@/features/video-call"
 import { useParticipants, useLocalParticipant } from "@livekit/components-react"
 import { toast } from "react-hot-toast"
+import { IconButton } from "@/shared/components/ui/buttons"
+import { Link2 } from 'lucide-react';
+import RightSideControls from "./RightSideControls"
 
 const RoomHeader = () => {
   const { t, language } = useLanguage()
@@ -17,18 +20,23 @@ const RoomHeader = () => {
 
   const allParticipants = useParticipants();
   const { localParticipant } = useLocalParticipant();
-  
+
   // Whoever joined first is the host
   const hostParticipant = [...allParticipants].sort((a, b) => {
     const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
     const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
     return timeA - timeB;
   })[0];
-  
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!");
+  };
+
   const isHost = hostParticipant && localParticipant && hostParticipant.identity === localParticipant.identity;
 
   return (
-    <div className="flex items-center justify-between border-b border-[#E5E5E5] bg-white px-5 h-[56px] shrink-0">
+    <div className="flex items-center justify-between bg-white px-5 h-[56px] shrink-0">
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
@@ -65,11 +73,23 @@ const RoomHeader = () => {
           </div>
         </div>
       </div>
-      {hasDuration && (
-        <div className="text-xs font-medium text-[#7A7574] md:text-sm">
-          {formattedRemaining} / {formattedMax}
-        </div>
-      )}
+
+      <div className="flex items-center gap-1">
+        {hasDuration && (
+          <div className="hidden md:flex items-center justify-center text-sm font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-10 w-full">
+            {formattedRemaining} / {formattedMax}
+          </div>
+        )}
+        <IconButton
+          title={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+          onClick={handleCopyLink}
+          className="lg:flex hidden"
+        >
+          <Link2 color="#F3B403" className="transform rotate-[135deg]" />
+        </IconButton>
+        <RightSideControls className="lg:hidden" />
+      </div>
+
 
     </div>
   )

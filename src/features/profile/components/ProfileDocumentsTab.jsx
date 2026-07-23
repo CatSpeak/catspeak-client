@@ -1,6 +1,6 @@
 import React from "react"
 import { FileText, Download, FileArchive } from "lucide-react"
-import { useGetUserWallDocumentsQuery } from "../api/profilePostsApi"
+import { useGetUserWallDocumentsQuery } from "../../../store/api/social/profilePostsApi"
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import FluentCard from "@/shared/components/ui/FluentCard"
 

@@ -5,10 +5,10 @@ import { useGetCourseDetailQuery } from "@/store/api/coursesApi"
 import { Pencil } from "lucide-react"
 import { formatDateRange } from "../utils/courseUtils"
 
-import CourseInfoCard from "../components/CourseInfoCard"
 import ClassCard from "../components/ClassCard"
-import UpcomingSessionCard from "../components/UpcomingSessionCard"
-import TeachingTasksSection from "../components/TeachingTasksSection"
+import CourseInfoCard from "../components/CourseInfoCard"
+import TeachingTasksSection from "../components/assignments/TeachingTasksSection"
+import UpcomingSessionCard from "../components/sessions/UpcomingSessionCard"
 
 const CourseDetailPage = () => {
   const { id } = useParams()
@@ -17,7 +17,7 @@ const CourseDetailPage = () => {
   const c = t.courses || {}
 
   // Fetch course details
-  const { data, isLoading, error } = useGetCourseDetailQuery(id)
+  const { data, isLoading, error } = useGetCourseDetailQuery(id, { skip: !id })
 
   if (isLoading) {
     return (

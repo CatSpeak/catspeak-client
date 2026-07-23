@@ -1,6 +1,5 @@
-import React, { useState } from "react"
-import { ChevronDown } from "lucide-react"
-import { NavLink } from "react-router-dom"
+import React, { useState, useEffect } from "react"
+import { ChevronDown, Globe } from "lucide-react"
 
 import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 
@@ -11,20 +10,49 @@ const DesktopNavDropdown = ({
   onToggle,
   children,
   isDocked = false,
+  color,
+  img,
 }) => {
+  const [imgError, setImgError] = useState(false)
+
+  useEffect(() => {
+    setImgError(false)
+  }, [img])
+
+  const IconComponent = Icon || Globe
+
   return (
     <div className="flex flex-col gap-1 shrink-0 relative group/dropdown w-full">
       <button
-        onClick={(e) => {
+        onClick={() => {
           if (!isDocked) {
             onToggle()
           }
         }}
         className={getNavItemClasses(false, false, isDocked)}
+        title={label}
       >
-        <Icon size={20} className="shrink-0" />
+        {img && !imgError ? (
+          <img
+            src={img}
+            alt=""
+            onError={() => setImgError(true)}
+            className="w-5 h-5 object-contain shrink-0 rounded-sm"
+          />
+        ) : (
+          <IconComponent
+            size={20}
+            className="shrink-0"
+            style={color ? { color } : undefined}
+          />
+        )}
 
-        <span className={getNavTextClasses(true, isDocked)}>{label}</span>
+        <span
+          className={getNavTextClasses(true, isDocked)}
+          style={color ? { color } : undefined}
+        >
+          {label}
+        </span>
 
         {!isDocked && (
           <ChevronDown
@@ -46,7 +74,11 @@ const DesktopNavDropdown = ({
       {/* Floating Flyout Menu (Docked) */}
       {isDocked && (
         <div className="absolute left-full ml-2 top-0 bg-white border border-gray-200 rounded-lg shadow-lg w-56 opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200 z-[100] flex flex-col p-2 pointer-events-auto text-gray-900">
-          <div className="px-3 pb-2 mb-2 border-b border-gray-100 text-sm font-medium text-gray-900">
+          <div
+            className="px-3 pb-2 mb-2 border-b border-gray-100 text-sm font-medium text-gray-900 truncate"
+            style={color ? { color } : undefined}
+            title={label}
+          >
             {label}
           </div>
           {/* Subitems container */}

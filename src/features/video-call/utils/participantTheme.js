@@ -67,11 +67,11 @@ const USER_PALETTES = [
 
 const themeCache = new Map()
 
-// Deterministic string hash function
 const stringToHash = (str) => {
+  const s = String(str || "")
   let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  for (let i = 0; i < s.length; i++) {
+    hash = s.charCodeAt(i) + ((hash << 5) - hash)
   }
   return Math.abs(hash)
 }

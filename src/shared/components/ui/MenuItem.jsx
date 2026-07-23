@@ -72,4 +72,5 @@ const MenuItem = ({
   )
 }
 
+export { default as MenuList } from "./MenuList"
 export default MenuItem

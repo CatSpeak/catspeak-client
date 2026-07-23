@@ -5,7 +5,8 @@ import { toast } from "react-hot-toast"
 import {
   Upload,
   ChevronDown,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react"
 
 import {
@@ -15,6 +16,7 @@ import {
   useDeleteCourseMutation
 } from "@/store/api/coursesApi"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { COURSE_FORM_LANGUAGES } from "../data/courseFormOptions"
 
 const CreateCoursePage = () => {
   const { t } = useLanguage()
@@ -45,15 +47,7 @@ const CreateCoursePage = () => {
     }
   }
 
-  // Static fallback teacher profile since /teacher/profile API does not exist
-  const teacherProfile = {
-    languages: [
-      { id: 1, name: "English", levels: [{ id: 1, name: "A1" }, { id: 2, name: "A2" }, { id: 3, name: "B1" }, { id: 4, name: "B2" }, { id: 5, name: "C1" }, { id: 6, name: "C2" }] },
-      { id: 2, name: "Chinese", levels: [{ id: 1, name: "HSK 1" }, { id: 2, name: "HSK 2" }, { id: 3, name: "HSK 3" }, { id: 4, name: "HSK 4" }, { id: 5, name: "HSK 5" }, { id: 6, name: "HSK 6" }] },
-      { id: 3, name: "Vietnamese", levels: [{ id: 1, name: "A1" }, { id: 2, name: "A2" }, { id: 3, name: "B1" }, { id: 4, name: "B2" }] }
-    ]
-  }
-  const languagesList = teacherProfile.languages || []
+  const languagesList = COURSE_FORM_LANGUAGES
 
   // Form states
   const [avatar, setAvatar] = useState(null)
@@ -68,13 +62,20 @@ const CreateCoursePage = () => {
   const labelCourseInfoTitle = isEditMode ? (cc.updateCourseInfo || "Update Course Information") : (c.courseInfoTitle || "Thông tin khóa học")
 
   // Populate data when in edit mode
-
   useEffect(() => {
     if (isEditMode && courseDetailResponse) {
       const course = courseDetailResponse.data || courseDetailResponse
       setCourseName(course.title || course.name || "")
-      setSelectedLanguage(course.language || "")
-      setLevel(course.levels?.[0] || "")
+
+      const matchedLang = languagesList.find(
+        (l) => (l.name || "").trim().toLowerCase() === (course.language || "").trim().toLowerCase()
+      )
+      const langName = matchedLang ? matchedLang.name : (course.language || "")
+      setSelectedLanguage(langName)
+
+      const rawLevel = Array.isArray(course.levels) ? course.levels[0] : (course.levels || course.level || "")
+      setLevel(rawLevel || "")
+
       setDescription(course.description || "")
       if (course.thumbnailUrl) {
         setAvatarPreview(course.thumbnailUrl)
@@ -82,9 +83,14 @@ const CreateCoursePage = () => {
     }
   }, [courseDetailResponse, isEditMode])
 
-
-  const selectedLanguageObj = languagesList.find((l) => l.name === selectedLanguage)
-  const levelsList = selectedLanguageObj?.levels || []
+  const selectedLanguageObj = languagesList.find(
+    (l) => (l.name || "").trim().toLowerCase() === (selectedLanguage || "").trim().toLowerCase()
+  )
+  const baseLevels = selectedLanguageObj?.levels || []
+  const levelsList = [...baseLevels]
+  if (level && !baseLevels.some((l) => (l.name || "").trim().toLowerCase() === level.trim().toLowerCase())) {
+    levelsList.unshift({ id: "current-level", name: level })
+  }
 
   // Handlers
   const handleAvatarClick = () => {
@@ -92,7 +98,8 @@ const CreateCoursePage = () => {
   }
 
   const handleLanguageChange = (e) => {
-    setSelectedLanguage(e.target.value)
+    const newLang = e.target.value
+    setSelectedLanguage(newLang)
     setLevel("")
   }
 
@@ -194,9 +201,19 @@ const CreateCoursePage = () => {
       </div>
 
       {/* ─── Header ─── */}
-      <h1 className="text-2xl font-bold tracking-tight text-gray-950">
-        {labelCourseAction}
-      </h1>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
+          title={t.common?.back || "Quay lại"}
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+          {labelCourseAction}
+        </h1>
+      </div>
 
       {/* ─── Form Container ─── */}
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6">
@@ -281,11 +298,11 @@ const CreateCoursePage = () => {
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
                 disabled={isProfileLoading || !selectedLanguage}
-                className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer"
+                className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
                 {levelsList.map((lvl) => (
-                  <option key={lvl.id} value={lvl.name}>{lvl.name}</option>
+                  <option key={lvl.id || lvl.name} value={lvl.name}>{lvl.name}</option>
                 ))}
               </select>
               <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
@@ -323,6 +340,14 @@ const CreateCoursePage = () => {
               <span>{c.courseDetail?.deleteCourse || "Delete Course"}</span>
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex-1 sm:flex-initial h-11 px-6 border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <ArrowLeft size={13} />
+            <span>{t.common?.back || "Quay lại"}</span>
+          </button>
           <button
             type="button"
             onClick={handleClear}

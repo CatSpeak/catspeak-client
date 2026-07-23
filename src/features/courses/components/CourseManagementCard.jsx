@@ -87,12 +87,7 @@ const CourseManagementCard = ({
       >
         {isGrid && (
           <>
-            {!isCourse && (
-              <div className="absolute top-3 left-3 bg-[#EAB308]/90 text-white text-[11px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                <Users size={11} className="fill-white" />
-                <span>{item.slots}</span>
-              </div>
-            )}
+
 
             {item.status && (
               <div className="absolute top-3 right-3">

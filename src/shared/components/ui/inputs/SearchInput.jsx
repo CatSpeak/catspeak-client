@@ -11,7 +11,7 @@ const SearchInput = ({
 }) => {
   return (
     <div
-      className={`flex items-center w-full h-14 border border-[#e5e5e5] rounded-full focus-within:border-cath-red-700 transition-colors ${className}`}
+      className={`flex items-center w-full min-w-0 sm:min-w-[360px] h-14 border border-[#e5e5e5] rounded-full focus-within:border-cath-red-700 transition-colors ${className}`}
     >
       <input
         type="text"

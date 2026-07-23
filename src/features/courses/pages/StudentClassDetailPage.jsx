@@ -1,9 +1,9 @@
-import React, { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import React, { lazy, Suspense, useState } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { MessageSquare, Lock } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 
 import {
   useGetStudentClassDetailQuery,
@@ -11,14 +11,20 @@ import {
 } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { formatCurrency } from "../utils/courseUtils"
+import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
-// Import subcomponents for tabs
-import StudentClassOverviewTab from "../components/detail/StudentClassOverviewTab"
-import ClassMembersTab from "../components/detail/ClassMembersTab"
-import ClassFeedTab from "../components/detail/ClassFeedTab"
-import ClassGradingTab from "../components/detail/ClassGradingTab"
-import ClassMaterialsTab from "../components/detail/ClassMaterialsTab"
+import ClassDetailTabs from "../components/ClassDetailTabs"
+import StudentClassOverviewTab from "../components/overview/StudentClassOverviewTab"
+
+const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
+const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
+const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
+const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
+
+const TabLoadingFallback = () => (
+  <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
+)
 
 const StudentClassDetailPage = () => {
   const { id } = useParams()
@@ -26,12 +32,27 @@ const StudentClassDetailPage = () => {
   const { language, t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
+  const [searchParams, setSearchParams] = useSearchParams()
+  const assignmentId = searchParams.get("assignmentId")
 
-  // Active Tab: "overview", "members", "feed", "grading", "materials"
-  const [activeTab, setActiveTab] = useState("overview")
+  const [selectedTab, setSelectedTab] = useState("overview")
+  const activeTab = assignmentId ? "grading" : selectedTab
+
+  const clearAssignmentParam = () => {
+    if (!assignmentId) return
+
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete("assignmentId")
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  const handleTabChange = (tab) => {
+    setSelectedTab(tab)
+    clearAssignmentParam()
+  }
 
   // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
-  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetStudentClassDetailQuery(id)
+  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetStudentClassDetailQuery(id, { skip: !id })
   const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}
@@ -78,66 +99,25 @@ const StudentClassDetailPage = () => {
     toast.success("Tính năng đang phát triển")
   }
 
-  // Helper to format weekly schedule dynamically and defensively
-  const getWeeklyScheduleText = () => {
-    let schedArray = null
-    if (Array.isArray(classData.rawSchedule) && classData.rawSchedule.length > 0) {
-      schedArray = classData.rawSchedule
-    } else if (Array.isArray(classData.schedule)) {
-      schedArray = classData.schedule
+  const handleLockedTabSelect = (tab) => {
+    const messages = {
+      members: c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!",
+      feed: c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view feed!",
+      grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
+      materials: c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!",
     }
-
-    const dayNames = {
-      vi: { "MON": "Thứ 2", "TUE": "Thứ 3", "WED": "Thứ 4", "THU": "Thứ 5", "FRI": "Thứ 6", "SAT": "Thứ 7", "SUN": "Chủ nhật" },
-      zh: { "MON": "周一", "TUE": "周二", "WED": "周三", "THU": "周四", "FRI": "周五", "SAT": "周六", "SUN": "周日" },
-      en: { "MON": "Mon", "TUE": "Tue", "WED": "Wed", "THU": "Thu", "FRI": "Fri", "SAT": "Sat", "SUN": "Sun" }
-    }
-    const currentLang = language || "en"
-    const langDayNames = dayNames[currentLang] || dayNames.en
-
-    // If we have an array of individual schedule items (e.g. raw / detailed schedule)
-    if (schedArray && schedArray.length > 0) {
-      // Group by time slot "startTime - endTime"
-      const groups = {}
-      schedArray.forEach(item => {
-        const start = item.startTime || "00:00"
-        const end = item.endTime || "00:00"
-        const timeKey = `${start} - ${end}`
-        const day = String(item.dayOfWeek || "").toUpperCase()
-        const dayStr = langDayNames[day] || day
-
-        if (!groups[timeKey]) {
-          groups[timeKey] = []
-        }
-        groups[timeKey].push(dayStr)
-      })
-
-      // Construct formatted strings: "Day 1, Day 2 (Time Slot)"
-      const groupStrings = Object.entries(groups).map(([timeKey, daysList]) => {
-        const daysJoined = daysList.join(", ")
-        return `${daysJoined} (${timeKey})`
-      })
-
-      return groupStrings.join("; ")
-    }
-
-    // Fallback: If it's a transformed RTK Query object: { days, startTime, endTime }
-    const schedObj = classData.schedule
-    if (schedObj && typeof schedObj === "object") {
-      const { days, startTime, endTime } = schedObj
-      if (days && days.length > 0) {
-        const formattedDays = days.map(day => {
-          const upperDay = String(day).toUpperCase()
-          return langDayNames[upperDay] || day
-        }).join(", ")
-
-        const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : ""
-        return timeStr ? `${formattedDays} (${timeStr})` : formattedDays
-      }
-    }
-
-    return "TBA"
+    toast.error(messages[tab])
   }
+
+  const tabs = [
+    { value: "overview", label: c.student?.overview || "Overview" },
+    { value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled },
+    { value: "feed", label: c.student?.feed || "Feed", locked: !isEnrolled },
+    { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
+    { value: "materials", label: c.student?.materials || "Materials", locked: !isEnrolled },
+  ]
+
+  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData, language || "en")
 
   if (isDetailLoading) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
@@ -203,96 +183,16 @@ const StudentClassDetailPage = () => {
       </div>
 
       {/* ─── Navigation Tabs ─── */}
-      <div className="flex border-b border-gray-150 pb-px gap-8 text-sm font-bold text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-none">
-        <button
-          onClick={() => setActiveTab("overview")}
-          className={`pb-3 transition-all relative ${activeTab === "overview"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {c.student?.overview || "Overview"}
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!"
-              )
-              return
-            }
-            setActiveTab("members")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "members"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.classmates || "Classmates"}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view feed!"
-              )
-              return
-            }
-            setActiveTab("feed")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "feed"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.feed || "Feed"}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!"
-              )
-              return
-            }
-            setActiveTab("grading")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "grading"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.myGrades || "My Grades"}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isEnrolled) {
-              toast.error(
-                c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!"
-              )
-              return
-            }
-            setActiveTab("materials")
-          }}
-          className={`pb-3 transition-all relative flex items-center gap-1.5 ${activeTab === "materials"
-            ? "text-[#990011] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#990011]"
-            : "hover:text-gray-600"
-            }`}
-        >
-          {!isEnrolled && <Lock size={12} className="text-gray-400" />}
-          <span>{c.student?.materials || "Materials"}</span>
-        </button>
-      </div>
+      <ClassDetailTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        onLockedSelect={handleLockedTabSelect}
+      />
 
       {/* ─── Tab Contents ─── */}
-      {activeTab === "overview" && (
+      <Suspense fallback={<TabLoadingFallback />}>
+        {activeTab === "overview" && (
         <StudentClassOverviewTab
           classData={classData}
           isEnrolled={isEnrolled}
@@ -306,16 +206,13 @@ const StudentClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "members" && isEnrolled && (
+        {activeTab === "members" && isEnrolled && (
         <ClassMembersTab
-          id={id}
           isStudent={true}
-          language={language}
-          cd={cd}
         />
       )}
 
-      {activeTab === "feed" && isEnrolled && (
+        {activeTab === "feed" && isEnrolled && (
         <ClassFeedTab
           id={id}
           isStudent={true}
@@ -324,7 +221,7 @@ const StudentClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "grading" && isEnrolled && (
+        {activeTab === "grading" && isEnrolled && (
         <ClassGradingTab
           id={id}
           isStudent={true}
@@ -333,7 +230,7 @@ const StudentClassDetailPage = () => {
         />
       )}
 
-      {activeTab === "materials" && isEnrolled && (
+        {activeTab === "materials" && isEnrolled && (
         <ClassMaterialsTab
           id={id}
           isStudent={true}
@@ -341,7 +238,8 @@ const StudentClassDetailPage = () => {
           cd={cd}
           cancelText={c.createClass?.cancel || "Hủy"}
         />
-      )}
+        )}
+      </Suspense>
 
       {/* Confirmation Modals */}
       <ConfirmationModal
