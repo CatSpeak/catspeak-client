@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useGetWebsiteByIdQuery } from "@/store/api/websiteApi";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import EmptyState from "@/shared/components/ui/indicators/EmptyState";
 
 const WebsitePage = () => {
   const { lang, id } = useParams();
@@ -9,24 +10,23 @@ const WebsitePage = () => {
   const [isIframeLoading, setIsIframeLoading] = useState(true);
   const [hasTimedOut, setHasTimedOut] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
-  const [prevId, setPrevId] = useState(id);
 
-  if (id !== prevId) {
-    setPrevId(id);
+  const [prevParams, setPrevParams] = useState({ lang, id });
+  if (prevParams.lang !== lang || prevParams.id !== id) {
+    setPrevParams({ lang, id });
     setIsIframeLoading(true);
     setShowOverlay(true);
     setHasTimedOut(false);
     setIframeKey(0);
   }
 
-  const navigate = useNavigate();
   const { t } = useLanguage();
 
   const {
     data: website,
     isLoading,
     error,
-  } = useGetWebsiteByIdQuery(id, { skip: !id });
+  } = useGetWebsiteByIdQuery({ lang, id }, { skip: !id || !lang });
 
   useEffect(() => {
     if (!isIframeLoading) return;
@@ -36,7 +36,7 @@ const WebsitePage = () => {
     }, 10000);
 
     return () => clearTimeout(timer);
-  }, [isIframeLoading, iframeKey, id]);
+  }, [isIframeLoading, iframeKey, id, lang]);
 
   const handleReload = () => {
     setHasTimedOut(false);
@@ -54,19 +54,7 @@ const WebsitePage = () => {
   }
 
   if (error || !website) {
-    return (
-      <div className="flex h-[calc(100dvh-64px)] lg:h-full flex-col items-center justify-center">
-        <h5 className="mb-4 text-2xl font-bold">
-          {t.website?.error?.notFound}
-        </h5>
-        <button
-          onClick={() => navigate(`/${lang}/cat-speak/websites`)}
-          className="rounded-full border border-white px-6 py-2 text-sm font-medium text-cath-red-700 transition-colors hover:bg-cath-red-50"
-        >
-          {t.website?.error?.backToWebsites}
-        </button>
-      </div>
-    );
+    return <EmptyState message="No websites found" />;
   }
 
   return (
