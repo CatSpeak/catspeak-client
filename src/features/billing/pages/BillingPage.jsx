@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from "react"
-import { useGetPaymentHistoryQuery } from "@/store/api/paymentsApi"
+import { useGetPaymentHistoryQuery, useRepayMutation } from "@/store/api/paymentsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import FluentCard from "@/shared/components/ui/FluentCard"
 import { Pagination } from "@/shared/components/ui/navigation"
 import BillingFilters from "../components/BillingFilters"
 import BillingTable from "../components/BillingTable"
+import ReportIssueModal from "../invoices/components/ReportIssueModal"
 
 const ITEMS_PER_PAGE = 5
 
@@ -19,6 +19,11 @@ const BillingPage = () => {
   }
 
   const { data: invoices = [], isLoading } = useGetPaymentHistoryQuery()
+  const [repay] = useRepayMutation()
+
+  // State for modals & actions
+  const [reportTargetPaymentId, setReportTargetPaymentId] = useState(null)
+  const [repayingId, setRepayingId] = useState(null)
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("")
@@ -70,6 +75,30 @@ const BillingPage = () => {
     setCurrentPage(1)
   }
 
+  const handleReport = (invoice) => {
+    setReportTargetPaymentId(invoice.paymentId || invoice.orderCode)
+  }
+
+  const handleRepay = async (invoice) => {
+    try {
+      setRepayingId(invoice.paymentId)
+      const res = await repay({
+        paymentId: invoice.paymentId,
+        returnUrl: `${window.location.origin}/billing/result`,
+        cancelUrl: `${window.location.origin}/billing/result`,
+      }).unwrap()
+
+      const checkoutUrl = res?.checkoutUrl || res?.data?.checkoutUrl
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl
+      }
+    } catch (err) {
+      console.error("Failed to repay order:", err)
+    } finally {
+      setRepayingId(null)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
@@ -82,7 +111,6 @@ const BillingPage = () => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 bg-white min-h-[calc(100vh-70px)]">
       {/* Header */}
       <div className="mb-8">
-
         <h2 className="text-2xl font-bold text-cath-red-700 mb-1">
           {hist.title || "Payment History"}
         </h2>
@@ -107,10 +135,13 @@ const BillingPage = () => {
         <BillingTable
           invoices={paginatedInvoices}
           statusMap={STATUS_MAP}
+          onReport={handleReport}
+          onRepay={handleRepay}
+          repayingId={repayingId}
           t={t}
         />
 
-        {/* Pagination — only show when more than 10 items */}
+        {/* Pagination — only show when more than 5 items */}
         {filteredInvoices.length > ITEMS_PER_PAGE && (
           <Pagination
             page={currentPage}
@@ -119,6 +150,15 @@ const BillingPage = () => {
           />
         )}
       </div>
+
+      {/* Report Issue Modal */}
+      {Boolean(reportTargetPaymentId) && (
+        <ReportIssueModal
+          isOpen={Boolean(reportTargetPaymentId)}
+          paymentId={reportTargetPaymentId}
+          onClose={() => setReportTargetPaymentId(null)}
+        />
+      )}
     </div>
   )
 }

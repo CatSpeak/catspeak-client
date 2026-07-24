@@ -36,11 +36,11 @@ const ReelGrid = memo(function ReelGrid({ reels, onReelClick }) {
   }
 
   return (
-    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6 w-full">
       {reels.map((reel, index) => (
         <div
           key={reel.id}
-          className="break-inside-avoid mb-3 sm:mb-4 md:mb-5 lg:mb-6"
+          className="break-inside-avoid pb-3 sm:pb-4 md:pb-5 lg:pb-6 inline-block w-full"
         >
           <ReelCard
             reel={reel}

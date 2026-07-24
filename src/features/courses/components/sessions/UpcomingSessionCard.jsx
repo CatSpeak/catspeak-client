@@ -1,8 +1,8 @@
 import React from "react"
 import { Calendar, Clock } from "lucide-react"
-import { formatDateDayMonth, formatTime12h } from "../utils/courseUtils"
-import { STUDENT_AVATARS } from "../utils/courseTransforms"
-import CourseStatusPill from "./CourseStatusPill"
+import { formatDateDayMonth, formatTime12h } from "../../utils/courseUtils"
+import { STUDENT_AVATARS } from "../../utils/courseTransforms"
+import CourseStatusPill from "../CourseStatusPill"
 
 const UpcomingSessionCard = ({
   nextClass,

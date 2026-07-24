@@ -1,0 +1,309 @@
+import { useMemo, useState } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { toast } from "react-hot-toast"
+
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import {
+  useBulkReturnSubmissionsMutation,
+  useCloseAssignmentMutation,
+  useDeleteAssignmentMutation,
+  useDownloadAssignmentGradeSheetMutation,
+  useGetAssignmentByIdQuery,
+  useGetAssignmentSubmissionsQuery,
+  useGradeSubmissionMutation,
+  useOpenAssignmentMutation,
+  useReturnSubmissionMutation,
+} from "@/store/api/coursesApi"
+
+import {
+  getAssignmentMaxScore,
+  getAssignmentErrorMessage,
+  getAssignmentStatus,
+  getAssignmentTitle,
+  isAssignmentExpired,
+} from "../../../utils/assignmentUtils"
+import { buildSubmissionStudentList } from "../../../utils/submissionUtils"
+import AssignmentGradingWorkspace from "./AssignmentGradingWorkspace"
+import AssignmentSubmissionsList from "./AssignmentSubmissionsList"
+
+const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp, onBack, classId }) => {
+  const navigate = useNavigate()
+  const { language, t } = useLanguage()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [nowMs] = useState(() => Date.now())
+  const [studentSearch, setStudentSearch] = useState("")
+  const [activeFilter, setActiveFilter] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const gradingTranslations = t.courses?.grading || {}
+  const activeSubmissionId = searchParams.get("submissionId")
+  const activeStudentId = searchParams.get("studentId")
+  const assignmentId = assignmentIdProp || assignment?.id
+
+  const {
+    data: assignmentDetailResponse,
+    isLoading: isAssignmentLoading,
+    error: assignmentError,
+  } = useGetAssignmentByIdQuery({
+    classId,
+    assignmentId,
+  }, { skip: !classId || !assignmentId })
+  const {
+    data: submissionsResponse,
+    isLoading: isSubmissionsLoading,
+    error: submissionsError,
+  } = useGetAssignmentSubmissionsQuery({
+    classId,
+    assignmentId,
+  }, { skip: !classId || !assignmentId })
+  const [closeAssignment] = useCloseAssignmentMutation()
+  const [openAssignment] = useOpenAssignmentMutation()
+  const [deleteAssignment, { isLoading: isDeletingAssignment }] = useDeleteAssignmentMutation()
+  const [gradeSubmission, { isLoading: isGrading }] = useGradeSubmissionMutation()
+  const [bulkReturn] = useBulkReturnSubmissionsMutation()
+  const [returnSubmission, { isLoading: isReturning }] = useReturnSubmissionMutation()
+  const [downloadGradeSheet] = useDownloadAssignmentGradeSheetMutation()
+
+  const currentAssignment = assignmentDetailResponse?.data || assignmentDetailResponse || assignment || {}
+  const assignmentTitle = getAssignmentTitle(currentAssignment)
+  const assignmentClosed = getAssignmentStatus(currentAssignment) === "closed"
+  const assignmentMaxScore = getAssignmentMaxScore(currentAssignment)
+  const assignmentExpired = isAssignmentExpired(currentAssignment, nowMs)
+  const assignmentDueLabel = currentAssignment.dueDate
+    ? new Date(currentAssignment.dueDate).toLocaleString(language === "vi" ? "vi-VN" : "en-US")
+    : "—"
+  const submissions = useMemo(
+    () => submissionsResponse?.data || submissionsResponse || [],
+    [submissionsResponse],
+  )
+  const students = useMemo(() => buildSubmissionStudentList({
+    members: [],
+    submissions,
+    language,
+  }), [submissions, language])
+  const activeStudent = useMemo(() => {
+    if (activeSubmissionId) {
+      const found = students.find((student) => String(student.submissionId) === String(activeSubmissionId))
+      if (found) return found
+    }
+    if (activeStudentId) {
+      const found = students.find((student) => String(student.id) === String(activeStudentId))
+      if (found) return found
+    }
+    return null
+  }, [students, activeSubmissionId, activeStudentId])
+
+  const handleToggleSubmissionsLock = async () => {
+    try {
+      if (assignmentClosed) {
+        await openAssignment({ classId, assignmentId }).unwrap()
+        toast.success(gradingTranslations.toastOpenSuccess || "Đã mở lại bài nộp thành công!")
+      } else {
+        await closeAssignment({ classId, assignmentId }).unwrap()
+        toast.success(gradingTranslations.toastLockSuccess || "Đã khóa bài nộp thành công!")
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.error?.message || "Lỗi khi khóa/mở khóa bài nộp")
+    }
+  }
+
+  const handleSaveGrade = async ({ score, feedback }) => {
+    if (!activeStudent) return
+
+    if (!assignmentClosed) {
+      const errorMessage = language === "vi"
+        ? "Cần khóa bài nộp trước khi chấm điểm!"
+        : language === "zh"
+          ? "评分前需要关闭作业！"
+          : "Submissions must be closed before grading!"
+      toast.error(errorMessage)
+      return
+    }
+
+    const trimmedScore = (score ?? "").toString().trim()
+    const numericScore = Number(trimmedScore)
+    const isInvalidNumber = !trimmedScore || Number.isNaN(numericScore) || !/^\d+(\.\d+)?$/.test(trimmedScore)
+
+    if (isInvalidNumber || numericScore < 0 || numericScore > assignmentMaxScore) {
+      const errorMessage = gradingTranslations.scoreRangeError
+        ? gradingTranslations.scoreRangeError.replace("{{maxScore}}", assignmentMaxScore)
+        : language === "vi"
+          ? `Vui lòng nhập điểm từ 0 đến ${assignmentMaxScore}`
+          : language === "zh"
+            ? `请输入0至${assignmentMaxScore}之间的得分`
+            : `Please enter a score between 0 and ${assignmentMaxScore}`
+      toast.error(errorMessage)
+      return
+    }
+
+    if (!activeStudent.submissionId) {
+      toast.error("Không tìm thấy bài nộp của học viên này")
+      return
+    }
+
+    try {
+      await gradeSubmission({
+        classId,
+        assignmentId,
+        submissionId: activeStudent.submissionId,
+        grade: numericScore,
+        comment: feedback,
+      }).unwrap()
+
+      const successMessage = gradingTranslations.toastGradeSaved
+        ? gradingTranslations.toastGradeSaved
+          .replace("{{score}}", numericScore)
+          .replace("{{student}}", activeStudent.name)
+        : `Đã chấm ${numericScore} điểm cho ${activeStudent.name}`
+      toast.success(successMessage)
+      setSearchParams({ assignmentId })
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.error?.message || "Lỗi khi lưu điểm")
+    }
+  }
+
+  const handleDownloadGradeSheet = async () => {
+    try {
+      const blob = await downloadGradeSheet({ classId, assignmentId }).unwrap()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const downloadLink = document.createElement("a")
+      downloadLink.href = downloadUrl
+      downloadLink.download = `${assignmentTitle || "Grades"}_grades.xlsx`
+      document.body.appendChild(downloadLink)
+      downloadLink.click()
+      downloadLink.remove()
+      window.URL.revokeObjectURL(downloadUrl)
+      toast.success(gradingTranslations.toastDownloadSuccess || "Tải xuống bảng điểm thành công!")
+    } catch (error) {
+      console.error(error)
+      toast.error(gradingTranslations.toastDownloadError || "Lỗi khi tải xuống bảng điểm")
+    }
+  }
+
+  const handleBulkReturn = async () => {
+    try {
+      const response = await bulkReturn({ classId, assignmentId }).unwrap()
+      const returnedCount = response.returnedCount || 0
+      toast.success(gradingTranslations.toastBulkReturnSuccess
+        ? gradingTranslations.toastBulkReturnSuccess.replace("{{count}}", returnedCount)
+        : `Đã trả bài cho ${returnedCount} học viên`)
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.error?.message || "Lỗi khi trả bài")
+    }
+  }
+
+  const handleReleaseGrade = async () => {
+    if (!activeStudent || !activeStudent.submissionId) return
+
+    try {
+      await returnSubmission({
+        classId,
+        assignmentId,
+        submissionId: activeStudent.submissionId,
+      }).unwrap()
+
+      const successMessage = gradingTranslations.toastGradeReturned
+        ? gradingTranslations.toastGradeReturned.replace("{{student}}", activeStudent.name)
+        : `Đã trả bài chấm cho học viên ${activeStudent.name}`
+      toast.success(successMessage)
+      setSearchParams({ assignmentId })
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.error?.message || "Lỗi khi trả kết quả")
+    }
+  }
+
+  if (isAssignmentLoading || isSubmissionsLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <LoadingSpinner />
+      </div>
+    )
+  }
+
+  if (assignmentError || submissionsError) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
+        {getAssignmentErrorMessage(
+          assignmentError || submissionsError,
+          "Failed to load assignment submissions",
+        )}
+      </div>
+    )
+  }
+
+  if (activeStudent) {
+    return (
+      <AssignmentGradingWorkspace
+        key={`${activeStudent.id}-${activeStudent.submissionId}-${activeStudent.score}-${activeStudent.feedback}`}
+        assignmentTitle={assignmentTitle}
+        assignmentMaxScore={assignmentMaxScore}
+        student={activeStudent}
+        onBack={() => setSearchParams({ assignmentId })}
+        onSave={handleSaveGrade}
+        onRelease={handleReleaseGrade}
+        isSaving={isGrading}
+        isReleasing={isReturning}
+      />
+    )
+  }
+
+  const handleDeleteAssignment = async () => {
+    try {
+      await deleteAssignment({ classId, assignmentId }).unwrap()
+      toast.success(gradingTranslations.toastDeleteSuccess || "Đã xóa bài tập thành công!")
+      if (onBack) {
+        onBack()
+      } else {
+        navigate(`/workspace/courses/details/${classId}`)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error(error?.data?.error?.message || "Lỗi khi xóa bài tập")
+    }
+  }
+
+  return (
+    <AssignmentSubmissionsList
+      assignmentId={assignmentId}
+      assignmentTitle={assignmentTitle}
+      assignmentClosed={assignmentClosed}
+      assignmentExpired={assignmentExpired}
+      assignmentDueLabel={assignmentDueLabel}
+      assignmentMaxScore={assignmentMaxScore}
+      classId={classId}
+      students={students}
+      studentSearch={studentSearch}
+      activeFilter={activeFilter}
+      currentPage={currentPage}
+      onBack={onBack}
+      onToggleSubmissionsLock={handleToggleSubmissionsLock}
+      onDownloadGradeSheet={handleDownloadGradeSheet}
+      onBulkReturn={handleBulkReturn}
+      onDeleteAssignment={handleDeleteAssignment}
+      isDeletingAssignment={isDeletingAssignment}
+      onSelectStudent={(studentArg) => {
+        const student = typeof studentArg === "object" ? studentArg : students.find(s => String(s.id) === String(studentArg))
+        if (student?.submissionId) {
+          setSearchParams({ assignmentId, submissionId: student.submissionId })
+        } else if (student?.id) {
+          setSearchParams({ assignmentId, studentId: student.id })
+        }
+      }}
+      onStudentSearchChange={(value) => {
+        setStudentSearch(value)
+        setCurrentPage(1)
+      }}
+      onActiveFilterChange={(value) => {
+        setActiveFilter(value)
+        setCurrentPage(1)
+      }}
+      onPageChange={setCurrentPage}
+    />
+  )
+}
+
+export default AssignmentSubmissionsView

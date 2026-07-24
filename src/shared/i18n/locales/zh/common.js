@@ -93,9 +93,12 @@ export default {
     "zh-self-study-vn": "中文自学网站（越南语界面）",
   },
   website: {
+    connect: "连接",
     error: {
       notFound: "未找到网站",
       backToWebsites: "返回 Cat Speak",
+      timeout: "网页加载时间过长",
+      reload: "重新加载页面",
     },
   },
   comingSoon: {

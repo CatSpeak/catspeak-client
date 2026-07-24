@@ -1,6 +1,5 @@
 import React from "react"
 import { Outlet } from "react-router-dom"
-import SharedLayout from "@/shared/components/layout/SharedLayout"
 
 const WorkspaceLayout = () => {
   return (

@@ -1,15 +1,9 @@
-import React, { useState, useMemo } from "react"
 import { Plus, MessageSquare, Trash2 } from "lucide-react"
-import { useGetClassMembersQuery, useUpdateClassMemberAttendanceMutation } from "@/store/api/coursesApi"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
-import { MOCK_STUDENTS, MOCK_TEACHER } from "./classMockData"
+import { MOCK_STUDENTS, MOCK_TEACHER } from "../../data/classMockData"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-// Toggle switch: set to false to use real API endpoint after backend is ready
-const USE_MOCK = true
-
-const ClassMembersTab = ({ id, isStudent, mockTeacher: propMockTeacher }) => {
+const ClassMembersTab = ({ isStudent }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
@@ -18,68 +12,8 @@ const ClassMembersTab = ({ id, isStudent, mockTeacher: propMockTeacher }) => {
     toast.success(c.devMessage || "Feature in development")
   }
 
-  const teacher = propMockTeacher || MOCK_TEACHER
-  const { data: membersResponse, isLoading, error } = useGetClassMembersQuery({ classId: id }, { skip: USE_MOCK })
-  const [updateAttendance] = useUpdateClassMemberAttendanceMutation()
-
-  const [attendanceOverrides, setAttendanceOverrides] = useState({}) // { studentId: attendance }
-
-  const studentsList = useMemo(() => {
-    const baseStudents = USE_MOCK
-      ? MOCK_STUDENTS
-      : (() => {
-        const rawMembers = membersResponse?.data || membersResponse?.items || membersResponse || [];
-        return rawMembers.filter(m => m.role !== "TEACHER" && m.role !== "INSTRUCTOR");
-      })();
-
-    return baseStudents.map(student => {
-      if (attendanceOverrides[student.id]) {
-        return { ...student, attendance: attendanceOverrides[student.id] }
-      }
-      return student
-    })
-  }, [membersResponse, attendanceOverrides])
-
-  const handleUpdateAttendance = async (studentId, newAttendance) => {
-    if (USE_MOCK) {
-      notifyInDevelopment()
-      return
-    }
-
-    // Update local state to keep UI interactive
-    setAttendanceOverrides(prev => ({
-      ...prev,
-      [studentId]: newAttendance
-    }))
-
-    try {
-      await updateAttendance({ classId: id, studentId, attendance: newAttendance }).unwrap()
-      const labelMap = {
-        PRESENT: cd.present || "Present",
-        ABSENT_EXCUSED: cd.absentExcused || "Absent (Excused)",
-        ABSENT_UNEXCUSED: cd.absentUnexcused || "Absent (Unexcused)"
-      }
-      const attendStr = labelMap[newAttendance] || newAttendance
-      const successMsg = cd.toastAttendanceSuccess
-        ? cd.toastAttendanceSuccess.replace("{{attendance}}", attendStr)
-        : `Attendance updated: ${attendStr}`
-      toast.success(successMsg)
-    } catch (err) {
-      toast.error(err.data?.message || err.message || "Failed to update attendance")
-    }
-  }
-
-  if (!USE_MOCK && isLoading) {
-    return <LoadingSpinner className="flex justify-center items-center py-12" />
-  }
-
-  if (!USE_MOCK && error) {
-    return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Failed to load class members: {error.message || "Unknown error"}
-      </div>
-    )
-  }
+  const teacher = MOCK_TEACHER
+  const studentsList = MOCK_STUDENTS
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
@@ -163,7 +97,7 @@ const ClassMembersTab = ({ id, isStudent, mockTeacher: propMockTeacher }) => {
                     ) : (
                       <select
                         value={student.attendance || "PRESENT"}
-                        onChange={(e) => handleUpdateAttendance(student.id, e.target.value)}
+                        onChange={notifyInDevelopment}
                         className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border focus:outline-none appearance-none cursor-pointer pr-6 transition-all ${student.attendance === "PRESENT" ? "bg-green-50 text-green-700 border-green-200" :
                           student.attendance === "ABSENT_EXCUSED" ? "bg-blue-50 text-blue-700 border-blue-200" :
                             "bg-red-50 text-red-700 border-red-200"

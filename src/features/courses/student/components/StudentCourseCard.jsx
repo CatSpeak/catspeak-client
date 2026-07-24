@@ -30,7 +30,13 @@ const StudentCourseCard = ({
           {/* Icon/Thumbnail area */}
           <div className="h-16 w-24 shrink-0 rounded-2xl overflow-hidden bg-[#D9D9D9] flex items-center justify-center relative shadow-sm border border-gray-100 group-hover:scale-102 transition-transform duration-300">
             {course.thumbnailUrl ? (
-              <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+              <img
+                src={course.thumbnailUrl}
+                alt={course.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
               <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
                 <Icon size={24} className="stroke-[1.5] text-white" />
@@ -113,7 +119,13 @@ const StudentCourseCard = ({
       {/* Thumbnail / Icon area */}
       <div className="relative h-44 w-full bg-[#D9D9D9] flex items-center justify-center shrink-0 overflow-hidden border-b border-gray-100">
         {course.thumbnailUrl ? (
-          <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" />
+          <img
+            src={course.thumbnailUrl}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center group-hover:scale-102 transition-transform duration-500`}>
             <Icon size={44} className="stroke-[1.5] text-white" />

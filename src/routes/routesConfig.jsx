@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { MainLayout, UserLayout, VideoCallLayout } from "@layouts";
+import { MainLayout, VideoCallLayout } from "@layouts";
 import { PageNotFound, ForbiddenPage } from "@/shared/pages";
 
 // Guest Pages
@@ -33,6 +33,10 @@ import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
 import { Navigate } from "react-router-dom";
 import { AuthGuard } from "@/shared/components";
+
+import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
+import WebsitePage from "@/features/websites/WebsitePage";
+
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
@@ -116,9 +120,9 @@ const CustomRoomsPage = lazy(
 );
 
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
-import WebsitePage from "@/features/websites/WebsitePage";
 
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
+import CreateAssignmentPage from "@/features/courses/pages/CreateAssignmentPage";
 
 const WorkspaceIndex = () => {
   const { isStudent } = useRoleOverride();
@@ -320,7 +324,7 @@ const routesConfig = [
             children: [
               {
                 index: true,
-                element: <WorkspaceIndex />,
+                element: <WorkspaceCourseRedirect />,
               },
               {
                 path: "courses",
@@ -391,6 +395,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <ClassDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/create-assignment",
+                element: (
+                  <LazyRoute>
+                    <CreateAssignmentPage />
                   </LazyRoute>
                 ),
               },

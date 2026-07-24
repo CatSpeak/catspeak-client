@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from "react"
+import React, { useState } from "react"
 import { Send, MoreVertical, MessageSquare } from "lucide-react"
 import { useGetClassFeedQuery, useCreateClassPostMutation } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
-import { MOCK_FEED } from "./classMockData"
+import { MOCK_FEED } from "../../data/classMockData"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Toggle switch: set to false to use real API endpoint after backend is ready
@@ -23,14 +23,9 @@ const ClassFeedTab = ({ id, isStudent }) => {
 
   const [newPostText, setNewPostText] = useState("")
   const [localLikes, setLocalLikes] = useState({}) // { postId: { count, isLiked } }
-  const [localPosts] = useState([])
-
-  const feedPosts = useMemo(() => {
-    const baseFeed = USE_MOCK
-      ? MOCK_FEED
-      : (feedResponse?.data || feedResponse?.items || feedResponse || [])
-    return [...localPosts, ...baseFeed]
-  }, [feedResponse, localPosts])
+  const feedPosts = USE_MOCK
+    ? MOCK_FEED
+    : (feedResponse?.data || feedResponse?.items || feedResponse || [])
 
   const handleCreatePost = async (e) => {
     e.preventDefault()

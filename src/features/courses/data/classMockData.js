@@ -49,12 +49,3 @@ export const MOCK_FEED = [
     isLiked: false
   }
 ]
-
-export const MOCK_GRADING = [
-  { id: "g1", studentName: "Nguyễn Văn A", title: "Homework Session 1", dueDate: "Due: Tomorrow", status: "Ungraded", grade: null },
-  { id: "g2", studentName: "Trần Thị B", title: "Resubmission Request", dueDate: "Due: 3 more days", status: "Resubmitted", grade: null },
-  { id: "g3", studentName: "Lê Hoàng C", title: "Homework Session 1", dueDate: "Due: Yesterday", status: "Graded", grade: 8.5 },
-  { id: "g4", studentName: "Phạm Minh D", title: "Vocabulary Test 1", dueDate: "Due: 5 more days", status: "Ungraded", grade: null },
-  { id: "g5", studentName: "Hoàng Thị E", title: "Homework Session 2", dueDate: "Due: Last week", status: "Graded", grade: 9.0 },
-  { id: "g6", studentName: "Vũ Văn F", title: "Speaking Practice 1", dueDate: "Due: Yesterday", status: "Graded", grade: 10 }
-]
