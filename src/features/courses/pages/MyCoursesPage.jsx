@@ -91,7 +91,7 @@ const MyCoursesPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-4 text-[#2e2e2e]">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
           <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Home"}</span>
@@ -114,7 +114,7 @@ const MyCoursesPage = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 flex flex-col gap-5">
           <UpcomingSessionsPanel
             title={mc.upcomingClasses || "Upcoming Classes"}
@@ -146,7 +146,7 @@ const MyCoursesPage = () => {
           tabs={tabs}
           activeTab={activeTab}
           onChange={setActiveTab}
-          className="gap-8"
+          className="gap-4"
         />
 
         <div className="flex items-center gap-3 self-end sm:self-auto">
@@ -159,7 +159,7 @@ const MyCoursesPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         {filteredDisplayList.length === 0 ? (
           <EmptyCoursesState
             message={isCoursesTab
@@ -167,7 +167,7 @@ const MyCoursesPage = () => {
               : (c.myCourses?.noClasses || "No classes yet")}
           />
         ) : (
-          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>
             {filteredDisplayList.map((item) => (
               <CourseManagementCard
                 key={item.id}

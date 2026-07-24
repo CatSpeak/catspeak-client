@@ -43,9 +43,9 @@ const ClassOverviewTab = ({
   const showRightColumn = !isStudent || isEnrolled
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* LEFT COLUMN: Visual Banner, Information Details, and Circular Progress */}
-      <div className={`${showRightColumn ? "lg:col-span-2" : "lg:col-span-3"} flex flex-col gap-8`}>
+      <div className={`${showRightColumn ? "lg:col-span-2" : "lg:col-span-3"} flex flex-col gap-4`}>
         {/* Visual Banner */}
         <div className="relative rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm text-white">
           <div
@@ -225,7 +225,7 @@ const ClassOverviewTab = ({
             {cd.teachingProgress || "Teaching Progress"}
           </h3>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-8 py-4 px-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2">
             <div className="relative w-60 h-60 flex items-center justify-center shrink-0">
               <CircularProgressbar
                 value={progressPercent}
@@ -261,7 +261,7 @@ const ClassOverviewTab = ({
 
       {/* RIGHT COLUMN: Upcoming session and Teaching tasks */}
       {showRightColumn && (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
           {/* Upcoming Session */}
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
             <h3 className="text-lg font-black text-gray-950 tracking-tight">

@@ -119,8 +119,8 @@ const StudentCourseDetailPage = () => {
         <span className="text-[#990011] font-bold">{rawCourse.title}</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
-        <div className="lg:col-span-2 flex flex-col gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+        <div className="lg:col-span-2 flex flex-col gap-4">
           {/* ─── 1. Course Header Block inside Left Column ─── */}
           <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-5">
             <div className="flex flex-wrap items-center gap-2">

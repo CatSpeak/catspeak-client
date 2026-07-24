@@ -356,7 +356,6 @@ export default {
     availableClasses: "招收班级 / 现有班级",
     instructor: "讲师",
     courseInstructor: "主讲教师",
-    contactInstructor: "联系老师",
     slotsAvailable: "剩余 {{slots}} 名额",
     noEnrolledTitle: "暂未注册任何课程",
     noEnrolledDesc: "您还没有加入任何课程。访问“探索”标签来查找合适的班级！",
