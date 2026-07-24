@@ -4,8 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import { useGetClassDetailQuery } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import ReactDatePicker from "react-datepicker"
-import "@/shared/styles/react-datepicker.css"
+import { DatePicker } from "@/shared/components/ui/inputs"
 import { Editor } from "@tinymce/tinymce-react"
 import {
   ChevronRight,
@@ -1083,18 +1082,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             <label className="text-xs font-bold text-gray-800">
               {ce.openTimeLabel || "Thời gian mở"}
             </label>
-            <div className="relative">
-              <Calendar size={14} className="absolute left-3.5 top-3 text-gray-400 pointer-events-none z-10" />
-              <ReactDatePicker
-                selected={openDate}
-                onChange={(date) => setOpenDate(date)}
-                showTimeSelect
-                dateFormat="dd/MM/yyyy, hh:mm aa"
-                placeholderText="mm/dd/yyyy, --:-- --"
-                wrapperClassName="w-full"
-                className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] text-xs cursor-pointer"
-              />
-            </div>
+            <DatePicker
+              value={openDate}
+              onChange={(date) => setOpenDate(date)}
+              mode="datetime"
+              color="#990011"
+              placeholder="DD/MM/YYYY, --:--"
+              className="w-full"
+            />
           </div>
 
           {/* Close Time */}
@@ -1102,18 +1097,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             <label className="text-xs font-bold text-gray-800">
               {ce.closeTimeLabel || "Thời gian đóng"}
             </label>
-            <div className="relative">
-              <Calendar size={14} className="absolute left-3.5 top-3 text-gray-400 pointer-events-none z-10" />
-              <ReactDatePicker
-                selected={closeDate}
-                onChange={(date) => setCloseDate(date)}
-                showTimeSelect
-                dateFormat="dd/MM/yyyy, hh:mm aa"
-                placeholderText="mm/dd/yyyy, --:-- --"
-                wrapperClassName="w-full"
-                className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] text-xs cursor-pointer"
-              />
-            </div>
+            <DatePicker
+              value={closeDate}
+              onChange={(date) => setCloseDate(date)}
+              mode="datetime"
+              color="#990011"
+              placeholder="DD/MM/YYYY, --:--"
+              className="w-full"
+            />
           </div>
 
           <div className="h-px bg-gray-100 w-full" />

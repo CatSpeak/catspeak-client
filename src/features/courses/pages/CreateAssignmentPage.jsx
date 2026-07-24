@@ -9,7 +9,7 @@ import {
   useUpdateAssignmentMutation
 } from "@/store/api/coursesApi"
 import { formatFileSize } from "../utils/courseUtils"
-import { parseLocalDateString, toDueDateIso, toLocalDateString } from "../utils/dateUtils"
+import { toDueDateIso, toLocalDateString } from "../utils/dateUtils"
 import {
   clampMaxFiles,
   getAssignmentErrorMessage,
@@ -17,12 +17,9 @@ import {
   getFileMeta,
 } from "../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import ReactDatePicker from "react-datepicker"
-import "@/shared/styles/react-datepicker.css"
+import { DatePicker } from "@/shared/components/ui/inputs"
 import { Editor } from "@tinymce/tinymce-react"
 import {
-  Calendar,
-  Clock,
   Upload,
   FileText,
   Trash2,
@@ -421,17 +418,14 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 <label className="text-sm font-bold text-gray-800">
                   {ca.dueDate || "Ngày hết hạn"} <span className="text-red-500">*</span>
                 </label>
-                <div className="relative w-full">
-                  <Calendar size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
-                  <ReactDatePicker
-                    selected={parseLocalDateString(dueDate)}
-                    onChange={(date) => setDueDate(date ? toLocalDateString(date) : "")}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="DD/MM/YYYY"
-                    wrapperClassName="w-full"
-                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm cursor-pointer"
-                  />
-                </div>
+                <DatePicker
+                  value={dueDate}
+                  onChange={(date) => setDueDate(date ? toLocalDateString(date) : "")}
+                  mode="date"
+                  color="#990011"
+                  placeholder="DD/MM/YYYY"
+                  className="w-full"
+                />
               </div>
 
               {/* Giờ nộp */}
@@ -439,15 +433,14 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 <label className="text-sm font-bold text-gray-800">
                   {ca.dueTime || "Giờ nộp"} <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <Clock size={18} className="absolute left-3.5 top-3.5 text-gray-400 pointer-events-none" />
-                  <input
-                    type="time"
-                    value={dueTime}
-                    onChange={(e) => setDueTime(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm cursor-pointer"
-                  />
-                </div>
+                <DatePicker
+                  value={dueTime}
+                  onChange={(val) => setDueTime(val || "")}
+                  mode="time"
+                  color="#990011"
+                  placeholder="--:--"
+                  className="w-full"
+                />
               </div>
             </div>
 

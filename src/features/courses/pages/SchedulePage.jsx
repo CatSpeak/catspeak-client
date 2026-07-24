@@ -259,7 +259,7 @@ const SchedulePage = () => {
                     <button
                       key={idx}
                       onClick={() => setSelectedDate(date)}
-                      className={`relative aspect-square flex items-center justify-center text-xs font-bold rounded-full transition-all duration-200 select-none
+                      className={`relative aspect-square flex items-center justify-center font-bold rounded-full transition-all duration-200 select-none
                         ${active
                           ? "bg-[#990011] text-white shadow-sm hover:bg-[#80000e]"
                           : today

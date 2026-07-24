@@ -3,7 +3,6 @@ import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import {
-  Clock,
   Plus,
   Minus,
   Info,
@@ -20,8 +19,7 @@ import {
   useUpdateClassMutation,
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
-import ReactDatePicker from "react-datepicker"
-import "@/shared/styles/react-datepicker.css"
+import { DatePicker } from "@/shared/components/ui/inputs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import {
   COURSE_FORM_LANGUAGES,
@@ -605,48 +603,43 @@ const CreateClassPage = () => {
               <div className="flex flex-col gap-2 md:col-span-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.admissionPeriod} <span className="text-[#990011]">*</span></label>
                 <div className="flex items-center gap-1.5">
-                  <div className="relative flex-1">
-                    <ReactDatePicker
-                      selected={parseLocalDateString(admissionStart)}
+                  <div className="flex-1">
+                    <DatePicker
+                      value={admissionStart}
                       onChange={(date) => setAdmissionStart(date ? toLocalDateString(date) : "")}
-                      dateFormat="dd/MM/yyyy"
-                      placeholderText="DD/MM/YYYY"
+                      mode="date"
+                      color="#990011"
+                      placeholder="DD/MM/YYYY"
                       minDate={isEditMode ? null : tomorrow}
-                      wrapperClassName="w-full"
-                      className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all cursor-pointer"
+                      className="w-full"
                     />
-                    <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
                   </div>
                   <span className="text-gray-300 text-xs font-bold">-</span>
-                  <div className="relative flex-1">
-                    <ReactDatePicker
-                      selected={parseLocalDateString(admissionEnd)}
+                  <div className="flex-1">
+                    <DatePicker
+                      value={admissionEnd}
                       onChange={(date) => setAdmissionEnd(date ? toLocalDateString(date) : "")}
-                      dateFormat="dd/MM/yyyy"
-                      placeholderText="DD/MM/YYYY"
+                      mode="date"
+                      color="#990011"
+                      placeholder="DD/MM/YYYY"
                       minDate={isEditMode ? null : tomorrow}
-                      wrapperClassName="w-full"
-                      className="w-full h-11 px-3 pr-8 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all cursor-pointer"
+                      className="w-full"
                     />
-                    <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col gap-2 md:col-span-1">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.startDate} <span className="text-[#990011]">*</span></label>
-                <div className="relative">
-                  <ReactDatePicker
-                    selected={parseLocalDateString(startDate)}
-                    onChange={(date) => setStartDate(date ? toLocalDateString(date) : "")}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="DD/MM/YYYY"
-                    minDate={isEditMode ? null : tomorrow}
-                    wrapperClassName="w-full"
-                    className="w-full h-11 px-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all cursor-pointer"
-                  />
-                  <Clock size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
-                </div>
+                <DatePicker
+                  value={startDate}
+                  onChange={(date) => setStartDate(date ? toLocalDateString(date) : "")}
+                  mode="date"
+                  color="#990011"
+                  placeholder="DD/MM/YYYY"
+                  minDate={isEditMode ? null : tomorrow}
+                  className="w-full"
+                />
               </div>
             </div>
 
@@ -769,18 +762,22 @@ const CreateClassPage = () => {
 
                         {/* Start and end times */}
                         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                          <input
-                            type="time"
+                          <DatePicker
                             value={timeSlots[day.key].start}
-                            onChange={(e) => handleTimeChange(day.key, "start", e.target.value)}
-                            className="h-9 px-3 flex-1 sm:flex-initial sm:w-28 bg-white border border-gray-200 focus:border-[#990011]/30 outline-none rounded-xl text-xs font-bold text-gray-800 transition-all cursor-pointer"
+                            onChange={(val) => handleTimeChange(day.key, "start", val || "")}
+                            mode="time"
+                            color="#990011"
+                            placeholder="--:--"
+                            className="flex-1 sm:flex-initial sm:w-28"
                           />
                           <span className="text-gray-300 font-bold text-xs flex-shrink-0">-</span>
-                          <input
-                            type="time"
+                          <DatePicker
                             value={timeSlots[day.key].end}
-                            onChange={(e) => handleTimeChange(day.key, "end", e.target.value)}
-                            className="h-9 px-3 flex-1 sm:flex-initial sm:w-28 bg-white border border-gray-200 focus:border-[#990011]/30 outline-none rounded-xl text-xs font-bold text-gray-800 transition-all cursor-pointer"
+                            onChange={(val) => handleTimeChange(day.key, "end", val || "")}
+                            mode="time"
+                            color="#990011"
+                            placeholder="--:--"
+                            className="flex-1 sm:flex-initial sm:w-28"
                           />
                         </div>
                       </div>
