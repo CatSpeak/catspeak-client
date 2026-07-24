@@ -48,6 +48,7 @@ export const useGlobalTaskProgress = () => {
             progress: Math.min(99, progress),
             stepName: task.stepName,
             isUploadTask: isUpload,
+            taskType: task.taskType,
           }),
         );
       } else {
@@ -158,6 +159,7 @@ export const useGlobalTaskProgress = () => {
                     timestamp: startTime,
                     stepName: t.stepName,
                     isUploadTask: isUpload,
+                    taskType: t.taskType,
                   }),
                 );
               });

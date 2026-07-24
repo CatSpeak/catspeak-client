@@ -314,8 +314,7 @@ export const GlobalTaskSync = () => {
   useEffect(() => {
     const isFileUploading = (t) =>
       Boolean(t.isUploadTask || t.taskType === "InstructorApplication" || t.taskType === "ReelUpload") &&
-      t.status !== "SUCCESS" &&
-      t.status !== "ERROR";
+      t.status === "UPLOADING";
 
     const handleBeforeUnload = (e) => {
       if (window.__allowReload || isConfirmingReload) return;
