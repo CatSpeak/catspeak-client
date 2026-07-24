@@ -22,7 +22,9 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
 
   useEffect(() => {
     if (!sessionId || !token) {
-      console.warn("[VideoChatSignalR] Missing sessionId or token — skipping hub instantiation.")
+      console.warn(
+        "[VideoChatSignalR] Missing sessionId or token — skipping hub instantiation.",
+      )
       return
     }
 
@@ -38,17 +40,34 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
       .withAutomaticReconnect()
       .build()
 
-    connection.on("RecordingStatusChanged", (sessId, status, egressId, startedByAccountId, reason) => {
-      console.log("[VideoChatSignalR] Received RecordingStatusChanged:", { sessId, status, egressId, startedByAccountId, reason })
-      if (Number(sessId) === Number(sessionId)) {
-        if (onEventReceivedRef.current) {
-          onEventReceivedRef.current("RecordingStatusChanged", { status, egressId, startedByAccountId, reason })
+    connection.on(
+      "RecordingStatusChanged",
+      (sessId, status, egressId, startedByAccountId, reason) => {
+        console.log("[VideoChatSignalR] Received RecordingStatusChanged:", {
+          sessId,
+          status,
+          egressId,
+          startedByAccountId,
+          reason,
+        })
+        if (Number(sessId) === Number(sessionId)) {
+          if (onEventReceivedRef.current) {
+            onEventReceivedRef.current("RecordingStatusChanged", {
+              status,
+              egressId,
+              startedByAccountId,
+              reason,
+            })
+          }
         }
-      }
-    })
+      },
+    )
 
     connection.on("RecordingWarning", (sessId, message) => {
-      console.log("[VideoChatSignalR] Received RecordingWarning:", { sessId, message })
+      console.log("[VideoChatSignalR] Received RecordingWarning:", {
+        sessId,
+        message,
+      })
       if (Number(sessId) === Number(sessionId)) {
         if (onEventReceivedRef.current) {
           onEventReceivedRef.current("RecordingWarning", { message })
@@ -59,20 +78,31 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
     // Picture IT Events
     connection.on("OnSyncGameState", (sessId, senderId, statePayload) => {
       if (Number(sessId) === Number(sessionId) && onEventReceivedRef.current) {
-        onEventReceivedRef.current("OnSyncGameState", { senderId, statePayload })
+        onEventReceivedRef.current("OnSyncGameState", {
+          senderId,
+          statePayload,
+        })
       }
     })
 
     connection.on("OnGameAction", (sessId, senderId, actionType, payload) => {
       if (Number(sessId) === Number(sessionId) && onEventReceivedRef.current) {
-        onEventReceivedRef.current("OnGameAction", { senderId, actionType, payload })
+        onEventReceivedRef.current("OnGameAction", {
+          senderId,
+          actionType,
+          payload,
+        })
       }
     })
 
-    connection.start()
+    connection
+      .start()
       .then(() => {
         setIsConnected(true)
-        console.log("[VideoChatSignalR] Connected successfully. Joining SignalR session:", sessionId)
+        console.log(
+          "[VideoChatSignalR] Connected successfully. Joining SignalR session:",
+          sessionId,
+        )
         connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
           console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
         })
@@ -82,9 +112,15 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
       })
 
     connection.onreconnected((connectionId) => {
-      console.log("[VideoChatSignalR] Automatically reconnected. Re-joining SignalR session:", sessionId)
+      console.log(
+        "[VideoChatSignalR] Automatically reconnected. Re-joining SignalR session:",
+        sessionId,
+      )
       connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
-        console.error("[VideoChatSignalR] Failed to re-invoke JoinSession after reconnect:", err)
+        console.error(
+          "[VideoChatSignalR] Failed to re-invoke JoinSession after reconnect:",
+          err,
+        )
       })
     })
 

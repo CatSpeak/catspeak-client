@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
+import { isBreakoutSupported, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -72,7 +73,8 @@ const VideoCallControlBar = () => {
   } = useVideoCallContext()
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall)
-  const isHost = room?.creatorId === user?.accountId
+  const isHost = isCustomRoom(room?.roomType) && room?.creatorId === user?.accountId
+
 
   const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
     skip: !parentSessionId,
@@ -110,7 +112,7 @@ const VideoCallControlBar = () => {
   const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 bg-white p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <div className="flex w-full items-center justify-center gap-2 border-t border-[#E5E5E5] bg-white p-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div className="flex md:gap-4 gap-5 w-full items-center md:justify-center justify-center">
         <ControlButton
           isActive={micOn}

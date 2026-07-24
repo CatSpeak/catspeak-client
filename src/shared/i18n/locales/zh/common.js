@@ -62,6 +62,7 @@ export default {
     organization: "组织",
     billing: "支付历史",
     recordings: "录像",
+    myRooms: "自定义房间",
     back: "返回",
     accountInfo: "账户信息",
     systemConfig: "系统设置",

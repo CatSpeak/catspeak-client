@@ -1,65 +1,91 @@
-import React, { useEffect } from "react"
+import React, { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { Lock } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import TopicSelect from "./ui/TopicSelect"
-import LevelSelector from "./ui/LevelSelector"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Modal from "@/shared/components/ui/Modal"
-import { motion, AnimatePresence } from "framer-motion"
-import { TOPICS, LEVELS } from "../config/constants"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import SegmentedButtons from "@/shared/components/ui/buttons/SegmentedButtons"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
-import { useCreateRoomForm } from "../hooks/useCreateRoomForm"
 import { useCallInterceptor } from "@/features/video-call/hooks/useCallInterceptor"
-import { X } from "lucide-react"
-import Switch from "@/shared/components/ui/inputs/Switch"
-import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
-import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
-const scrollbarClasses =
-  "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useAuth } from "@/features/auth"
+import { useCreateCustomRoomForm } from "../hooks/useCreateCustomRoomForm"
+import { useCreateRoomForm } from "../hooks/useCreateRoomForm"
+import CreateRoomFormFields from "./ui/CreateRoomFormFields"
 
-const CreateRoomModal = ({ open, onCancel }) => {
+const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
-  const { hasFeature } = usePlanFeatures()
-  
-  const canCreatePrivateRoom = hasFeature(PLAN_FEATURES.ALLOW_PRIVATE_ROOMS)
+  const ct = t.rooms?.customRooms || {}
+  const { isAuthenticated } = useAuth()
 
-  const {
-    formData,
-    handleChange,
-    handleTopicChange,
-    resetForm,
-    switchMode,
-    submitCreate,
-    submitJoin,
-    isCreating,
-    selectedLanguage
-  } = useCreateRoomForm()
+  const { data: profileResponse } = useGetUserProfileQuery(undefined, {
+    skip: !isAuthenticated,
+  })
+  const userTier = profileResponse?.data?.tier?.toLowerCase()
+  const isPro = userTier === "pro"
 
+  const [mode, setMode] = useState(initialMode)
+
+  useEffect(() => {
+    if (open) {
+      setMode(initialMode)
+    }
+  }, [open, initialMode])
+
+  // Custom Room Form Hook
+  const customForm = useCreateCustomRoomForm(open && mode === "custom")
+
+  // Group Room Form Hook
+  const groupForm = useCreateRoomForm()
+
+  // Call interceptor
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =
     useCallInterceptor()
 
-  useEffect(() => {
-    if (open) resetForm()
-  }, [open])
-
-  const handleJoin = (e) => {
-    if (e) e.preventDefault()
-    const proceed = () => submitJoin(onCancel)
+  const handleCreateCustom = () => {
+    const proceed = () => customForm.submitCreate(onCancel)
     if (!intercept(proceed)) proceed()
   }
 
-  const handleCreate = (e) => {
-    if (e) e.preventDefault()
-    const proceed = () => submitCreate(onCancel)
+  const handleCreateGroup = () => {
+    const proceed = () => groupForm.submitCreate(onCancel)
     if (!intercept(proceed)) proceed()
   }
 
-  const isJoinDisabled = !selectedLanguage
+  const handleModeChange = (newMode) => {
+    if (newMode === "custom" && !isPro) {
+      onCancel()
+      navigate("/pricing", {
+        state: { highlightPlan: "pro", featureName: "Custom Rooms" },
+      })
+      return
+    }
+    setMode(newMode)
+  }
+
+  const activeForm = mode === "custom" ? customForm : groupForm
+  const isCreating =
+    mode === "custom" ? customForm.isCreating : groupForm.isCreating
   const isCreateDisabled =
-    !selectedLanguage ||
-    isCreating ||
-    !formData.name.trim() ||
-    (formData.isPrivate && canCreatePrivateRoom && !formData.password.trim())
+    mode === "custom" ? customForm.isCreateDisabled : groupForm.isCreateDisabled
+
+  const handleCreateSubmit = () => {
+    if (mode === "custom") {
+      handleCreateCustom()
+    } else {
+      handleCreateGroup()
+    }
+  }
+
+  const roomTypeOptions = [
+    { value: "group", label: "Group" },
+    {
+      value: "custom",
+      label: "Custom",
+      startIcon: !isPro ? <Lock /> : undefined,
+    },
+  ]
 
   return (
     <>
@@ -68,208 +94,51 @@ const CreateRoomModal = ({ open, onCancel }) => {
         onCancel={cancelSwitch}
         onConfirm={confirmSwitch}
       />
+
       <Modal
         open={open}
         onClose={onCancel}
-        title={null}
-        showCloseButton={false}
-        className="max-w-sm sm:max-w-[850px] w-full max-sm:!fixed max-sm:!inset-0 max-sm:!m-0 max-sm:!max-w-none max-sm:!h-full max-sm:!w-full max-sm:!rounded-none max-sm:flex max-sm:flex-col sm:rounded-3xl"
-        bodyClassName="flex flex-col flex-1 overflow-hidden"
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={formData.mode}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col flex-1 min-h-0"
-          >
-            <div className="flex items-center justify-between p-6 shrink-0">
-              <h2 className="text-[28px] font-medium">
-                {formData.mode === "create"
-                  ? t.rooms.createRoom.title
-                  : t.rooms?.joinRoom?.title || "Join Room"}
-              </h2>
-              <button
-                onClick={onCancel}
-                className="flex shrink-0 items-center justify-center h-12 w-12 hover:bg-[#E5E5E5] rounded-full transition-colors"
-              >
-                <X size={22} strokeWidth={2.5} />
-              </button>
-            </div>
+        title={t.rooms?.createRoom?.title || "Create Room"}
+        showCloseButton={true}
+        className="md:max-w-3xl"
+        subHeader={
+          <SegmentedButtons
+            options={roomTypeOptions}
+            value={mode}
+            onChange={handleModeChange}
+          />
+        }
+        bodyClassName="px-4 sm:px-6 flex flex-col gap-6 flex-1 overflow-y-auto max-h-[65vh] max-sm:max-h-none"
+        footer={
+          <div className="flex flex-wrap items-center justify-end gap-2 shrink-0 w-full">
+            <PillButton onClick={onCancel} variant="secondary">
+              {t.back || "Back"}
+            </PillButton>
 
-            <div
-              className={`flex flex-col gap-6 max-h-[60vh] overflow-y-auto px-6 pb-6 max-sm:max-h-none max-sm:flex-1 ${scrollbarClasses}`}
+            <PillButton
+              onClick={handleCreateSubmit}
+              loading={isCreating}
+              loadingText={ct.creating || "Creating..."}
+              disabled={isCreateDisabled}
             >
-              {formData.mode === "create" && (
-                <CreateFormInputs
-                  formData={formData}
-                  handleChange={handleChange}
-                  canCreatePrivateRoom={canCreatePrivateRoom}
-                  t={t}
-                />
-              )}
-
-              <TopicSelect
-                value={formData.topics}
-                onChange={handleTopicChange}
-                options={TOPICS}
-                t={t}
-              />
-
-              <LevelSelector
-                selectedLevel={formData.selectedLevel}
-                onSelect={(level) => handleChange("selectedLevel", level)}
-                levels={LEVELS[selectedLanguage]}
-                t={t}
-              />
-            </div>
-
-            <ModalFooter
-              mode={formData.mode}
-              onCancel={onCancel}
-              onSwitchMode={switchMode}
-              onJoin={handleJoin}
-              onCreate={handleCreate}
-              isCreating={isCreating}
-              disabledJoin={isJoinDisabled}
-              disabledCreate={isCreateDisabled}
-              t={t}
-            />
-          </motion.div>
-        </AnimatePresence>
+              {ct.create || "Create Room"}
+            </PillButton>
+          </div>
+        }
+      >
+        <CreateRoomFormFields
+          mode={mode}
+          formData={activeForm.formData}
+          thumbnailFile={customForm.thumbnailFile}
+          setThumbnailFile={customForm.setThumbnailFile}
+          handleChange={activeForm.handleChange}
+          handleTopicChange={activeForm.handleTopicChange}
+          isQuotaFull={customForm.isQuotaFull}
+          selectedLanguage={activeForm.selectedLanguage}
+          t={t}
+        />
       </Modal>
     </>
-  )
-}
-
-// --- Sub Components ---
-const CreateFormInputs = ({ formData, handleChange, canCreatePrivateRoom, t }) => (
-  <div className="flex flex-col gap-6">
-    <TextInput
-      id="name"
-      value={formData.name}
-      onChange={(e) => handleChange("name", e.target.value)}
-      label={t.rooms?.createRoom?.nameLabel || "Room name"}
-      placeholder={
-        t.rooms?.createRoom?.namePlaceholder || "e.g. Chill Practice"
-      }
-      autoFocus
-      autoComplete="off"
-      containerClassName="gap-3"
-      labelClassName="text-base"
-      className="!h-12 !text-base !px-4 min-h-[48px]"
-    />
-    {/* <div className="flex flex-col gap-3">
-      <label>{t.rooms?.createRoom?.thumbnailLabel || "Room Thumbnail"}</label>
-      <div className="flex items-center gap-3">
-        <label className="inline-flex min-h-[48px] h-12 items-center rounded-full px-4 text-base border transition-colors border-[#C6C6C6] hover:bg-[#F2F2F2] cursor-pointer">
-          {t.rooms?.createRoom?.uploadImage || "Upload Image"}
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files && e.target.files.length > 0) {
-                handleChange("thumbnail", e.target.files[0])
-              }
-            }}
-          />
-        </label>
-        <span className="text-sm text-[#606060]">
-          {formData.thumbnail
-            ? formData.thumbnail.name
-            : t.rooms?.createRoom?.noFileChosen || "No file chosen"}
-        </span>
-      </div>
-    </div> */}
-
-    {canCreatePrivateRoom && (
-      <div className="flex items-center justify-between">
-        <span className="text-base">
-          {t.rooms?.createRoom?.privateRoom || "Private Room"}
-        </span>
-        <Switch
-          checked={formData.isPrivate}
-          onChange={(e) => {
-            handleChange("isPrivate", e.target.checked)
-            if (!e.target.checked) handleChange("password", "")
-          }}
-        />
-      </div>
-    )}
-
-    {formData.isPrivate && canCreatePrivateRoom && (
-      <TextInput
-        id="password"
-        type="password"
-        value={formData.password}
-        onChange={(e) => handleChange("password", e.target.value)}
-        label={t.rooms?.createRoom?.passwordLabel || "Password"}
-        placeholder={
-          t.rooms?.createRoom?.passwordPlaceholder || "Enter room password"
-        }
-        autoComplete="new-password"
-        containerClassName="gap-3"
-        labelClassName="text-base"
-        className="!h-12 !text-base !px-4 min-h-[48px]"
-      />
-    )}
-  </div>
-)
-
-const ModalFooter = ({
-  mode,
-  onCancel,
-  onSwitchMode,
-  onJoin,
-  onCreate,
-  isCreating,
-  disabledJoin,
-  disabledCreate,
-  t,
-}) => {
-  if (mode === "join") {
-    return (
-      <div className="p-6 sm:px-8 sm:py-6 flex flex-wrap justify-end gap-4 sm:gap-6 shrink-0 border-t border-gray-100 bg-gray-50/50">
-        <PillButton
-          onClick={() => onSwitchMode("create")}
-          variant="outline"
-          className="h-12 text-base max-sm:flex-1"
-        >
-          {t.rooms.createRoom.create}
-        </PillButton>
-        <PillButton
-          onClick={onJoin}
-          className="h-12 text-base max-sm:flex-1"
-          disabled={disabledJoin}
-        >
-          {t.rooms.createRoom.join}
-        </PillButton>
-      </div>
-    )
-  }
-
-  return (
-    <div className="p-6 sm:px-8 sm:py-6 flex flex-wrap justify-end gap-4 sm:gap-6 shrink-0 border-t border-gray-100 bg-gray-50/50">
-      <PillButton
-        onClick={() => onSwitchMode("join")}
-        variant="secondary"
-        className="h-12 text-base max-sm:flex-1"
-      >
-        {t.back || "Back"}
-      </PillButton>
-      <PillButton
-        onClick={onCreate}
-        className="h-12 text-base max-sm:flex-1"
-        loading={isCreating}
-        loadingText={t.rooms.createRoom.creating}
-        disabled={disabledCreate}
-      >
-        {t.rooms.createRoom.create}
-      </PillButton>
-    </div>
   )
 }
 

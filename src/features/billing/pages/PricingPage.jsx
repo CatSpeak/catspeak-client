@@ -1,5 +1,5 @@
-import React from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useEffect, useRef } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 import PlanCard from "../subscription/components/PlanCard"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useGetPlansQuery } from "@/store/api/plansApi"
@@ -11,6 +11,7 @@ import { History } from "lucide-react"
 
 const PricingPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t, language } = useLanguage()
   const { isAuthenticated } = useAuth()
   const { data: profileResponse, isLoading: isProfileLoading } =
@@ -19,6 +20,50 @@ const PricingPage = () => {
     useGetPlansQuery()
 
   const userTier = profileResponse?.data?.tier?.toLowerCase()
+
+  // Capture route state into a ref at mount so navigate() clearing history state
+  // doesn't cause highlightPlan to become undefined mid-effect.
+  const highlightStateRef = useRef({
+    plan: location.state?.highlightPlan?.toLowerCase() || null,
+    featureName: location.state?.featureName || null,
+  })
+  const highlightPlan = highlightStateRef.current.plan
+  const featureName = highlightStateRef.current.featureName
+  const highlightedRef = useRef(null)
+
+  const [activeHighlight, setActiveHighlight] = React.useState(false)
+
+  useEffect(() => {
+    if (highlightPlan && !isPlansLoading) {
+      // Clear route state so refreshing (F5) will not re-trigger highlight
+      navigate(location.pathname, { replace: true, state: {} })
+
+      // 1. Scroll first while card is in normal state
+      const scrollTimer = setTimeout(() => {
+        highlightedRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        })
+      }, 300)
+
+      // 2. Trigger highlight AFTER scroll completes (at 600ms)
+      const startHighlightTimer = setTimeout(() => {
+        setActiveHighlight(true)
+      }, 600)
+
+      // 3. Hold highlight for 3 seconds, then revert to original UI (at 3600ms)
+      const revertTimer = setTimeout(() => {
+        setActiveHighlight(false)
+      }, 3600)
+
+      return () => {
+        clearTimeout(scrollTimer)
+        clearTimeout(startHighlightTimer)
+        clearTimeout(revertTimer)
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlansLoading])
 
   const handleUpgradeClick = (plan) => {
     navigate("/checkout", { state: { plan } })
@@ -35,8 +80,7 @@ const PricingPage = () => {
       interval: plan.billingCycle,
       description: plan.description,
       features: plan.subscriptionFeatures
-        ? plan.subscriptionFeatures
-          .map((f) => ({
+        ? plan.subscriptionFeatures.map((f) => ({
             id: f.id,
             name: f.featureName,
             limitValue: f.limitValue,
@@ -76,7 +120,7 @@ const PricingPage = () => {
         {/* Billing History Button */}
         <button
           onClick={() => navigate("/billing")}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-cath-red-700 text-cath-red-700 font-semibold text-sm hover:bg-[#990011]/5 transition-all w-fit cursor-pointer active:scale-95 shadow-sm hover:shadow"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-all w-fit cursor-pointer active:scale-95 shadow-sm hover:shadow"
         >
           <span>{t.billing.billingHistory || "Lịch sử thanh toán"}</span>
           <History size={16} />
@@ -86,7 +130,10 @@ const PricingPage = () => {
       {isPlansLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto w-full">
           {[1, 2].map((i) => (
-            <div key={i} className="border border-gray-200 bg-white p-6 rounded-3xl shadow-sm animate-pulse space-y-6">
+            <div
+              key={i}
+              className="border border-gray-200 bg-white p-6 rounded-3xl shadow-sm animate-pulse space-y-6"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-2xl" />
                 <div className="space-y-2 flex-1">
@@ -109,17 +156,38 @@ const PricingPage = () => {
           <div className={getGridClasses(formattedPlans.length)}>
             {formattedPlans.map((plan) => {
               const isActive = userTier === plan.name?.toLowerCase()
+              const isTargetMatch =
+                highlightPlan &&
+                plan.name?.toLowerCase().includes(highlightPlan)
+              const isTargetHighlighted = activeHighlight && isTargetMatch
+
               return (
-                <PlanCard
+                <div
                   key={plan.id}
-                  plan={plan}
-                  isActive={isActive}
-                  actionLabel={t.billing.pricing.upgradeTo.replace("{{planName}}", plan.name)}
-                  isProcessing={isProcessing}
-                  onAction={
-                    plan.price > 0 ? () => handleUpgradeClick(plan) : undefined
-                  }
-                />
+                  ref={isTargetMatch ? highlightedRef : null}
+                  className="w-full"
+                >
+                  <PlanCard
+                    plan={plan}
+                    isActive={isActive}
+                    isHighlighted={isTargetHighlighted}
+                    highlightBadge={
+                      isTargetHighlighted && featureName
+                        ? `Unlocks ${featureName}`
+                        : undefined
+                    }
+                    actionLabel={t.billing.pricing.upgradeTo.replace(
+                      "{{planName}}",
+                      plan.name,
+                    )}
+                    isProcessing={isProcessing}
+                    onAction={
+                      plan.price > 0
+                        ? () => handleUpgradeClick(plan)
+                        : undefined
+                    }
+                  />
+                </div>
               )
             })}
           </div>

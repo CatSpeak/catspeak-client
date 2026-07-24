@@ -111,9 +111,14 @@ const StudentCourseDetailPage = lazy(
 const SchedulePage = lazy(
   () => import("@/features/courses/pages/SchedulePage"),
 );
+const CustomRoomsPage = lazy(
+  () => import("@/features/rooms/pages/CustomRoomsPage"),
+);
 
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
 import WebsitePage from "@/features/websites/WebsitePage";
+
+import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
 
 const WorkspaceIndex = () => {
   const { isStudent } = useRoleOverride();
@@ -124,6 +129,7 @@ const routesConfig = [
   {
     // Root wrapper — registers navigate for global PiP provider
     element: <RootLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       // Main layout routes (no language prefix)
       {
@@ -447,6 +453,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <WorkspaceEventsPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "rooms",
+                element: (
+                  <LazyRoute>
+                    <CustomRoomsPage />
                   </LazyRoute>
                 ),
               },

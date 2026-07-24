@@ -1,4 +1,4 @@
-import { websites } from "@/features/navigation/config/websites";
+import { websites } from "@/features/navigation/config/websites"
 import {
   Home,
   LayoutDashboard,
@@ -16,7 +16,8 @@ import {
   BookOpen,
   Video,
   MessageCircle,
-} from "lucide-react";
+  DoorOpen,
+} from "lucide-react"
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -41,6 +42,7 @@ export const navLinks = [
     subItems: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+      { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
@@ -71,16 +73,16 @@ export const navLinks = [
   //     { key: "myCourses", path: "/my-courses" }
   //   ]
   // },
-];
+]
 
 export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "systemConfig", path: "/setting/system", icon: Settings },
-];
+]
 
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
   // { key: "help", path: "/help", icon: HelpCircle }
-];
+]

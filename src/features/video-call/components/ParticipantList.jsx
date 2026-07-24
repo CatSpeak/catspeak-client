@@ -1,47 +1,67 @@
-import React from "react";
-import { Mic, MicOff, Video, VideoOff, Hand, UserPlus, Ellipsis } from "lucide-react";
-import { useIsSpeaking } from "@livekit/components-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import Avatar from "@/shared/components/ui/Avatar";
-import ListItem from "@/shared/components/ui/ListItem";
-import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
-import { ParticipantVolumePopover } from "./ParticipantVolumePopover";
-import { IconButton } from "@/shared/components/ui/buttons";
-import toast from "react-hot-toast";
+import React from "react"
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Hand,
+  UserPlus,
+  Crown,
+} from "lucide-react"
+import { useIsSpeaking } from "@livekit/components-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import Avatar from "@/shared/components/ui/Avatar"
+import ListItem from "@/shared/components/ui/ListItem"
+import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
+import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
+import { IconButton } from "@/shared/components/ui/buttons"
+import toast from "react-hot-toast"
 
 /**
  * A single row in the participant list.
  * Uses LiveKit Participant object properties directly.
  */
 const ParticipantItem = ({ participant }) => {
-  const { t } = useLanguage();
-  const { micOn: localMicOn, cameraOn: localCameraOn } = useVideoCallContext();
-  const isSpeaking = useIsSpeaking(participant);
-  const pl = t.rooms.videoCall.participantList;
+  const { t } = useLanguage()
+  const {
+    micOn: localMicOn,
+    cameraOn: localCameraOn,
+    room,
+    user,
+  } = useVideoCallContext()
+  const isSpeaking = useIsSpeaking(participant)
+  const pl = t.rooms.videoCall.participantList
 
-  const isLocal = participant.isLocal;
+  const isLocal = participant.isLocal
   const isMicOn = isLocal
     ? localMicOn
-    : (participant.isMicrophoneEnabled ?? false);
+    : (participant.isMicrophoneEnabled ?? false)
   const isCameraOn = isLocal
     ? localCameraOn
-    : (participant.isCameraEnabled ?? false);
+    : (participant.isCameraEnabled ?? false)
 
   const parseMetadata = (metadata) => {
-    if (!metadata) return {};
+    if (!metadata) return {}
     try {
-      return JSON.parse(metadata);
+      return JSON.parse(metadata)
     } catch {
-      return {};
+      return {}
     }
-  };
-  const meta = parseMetadata(participant.metadata);
-  // console.log("Participant Metadata [ParticipantList]:", meta)
-  const isHandRaised = meta.handRaised === true;
-  const avatarUrl = meta.avatarImageUrl;
+  }
+  const meta = parseMetadata(participant.metadata)
+  const accountId = meta.accountId || (isLocal ? user?.accountId : null)
+  const isHandRaised = meta.handRaised === true
+  const avatarUrl = meta.avatarImageUrl
+
+  const isParticipantHost =
+    isCustomRoom(room?.roomType) &&
+    room?.creatorId != null &&
+    accountId != null &&
+    String(accountId) === String(room.creatorId)
 
   const name =
-    participant.name || participant.identity || (isLocal ? pl.you : pl.guest);
+    participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
 
   return (
     <ListItem
@@ -65,6 +85,12 @@ const ParticipantItem = ({ participant }) => {
         <p className="text-sm leading-5 truncate m-0">
           {name} {isLocal && pl.youSuffix}
         </p>
+        {isParticipantHost && (
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-full shrink-0">
+            <Crown size={12} className="text-amber-500 fill-amber-400" />
+            Host
+          </span>
+        )}
       </div>
 
       {/* Mic + Camera UNDER name */}
@@ -88,36 +114,36 @@ const ParticipantItem = ({ participant }) => {
         </div>
       </div>
     </ListItem>
-  );
-};
+  )
+}
 
 /**
  * Participant list panel.
  * Reads participants and local media state from VideoCallContext.
  */
 const ParticipantList = ({ hideTitle }) => {
-  const { t } = useLanguage();
-  const { participants } = useVideoCallContext();
-  const pl = t.rooms.videoCall.participantList;
+  const { t } = useLanguage()
+  const { participants } = useVideoCallContext()
+  const pl = t.rooms.videoCall.participantList
 
   const parseMetadata = (metadata) => {
-    if (!metadata) return {};
+    if (!metadata) return {}
     try {
-      return JSON.parse(metadata);
+      return JSON.parse(metadata)
     } catch {
-      return {};
+      return {}
     }
-  };
+  }
 
   const raisedHandParticipants = participants.filter((p) => {
-    const meta = parseMetadata(p.metadata);
-    return meta.handRaised === true;
-  });
+    const meta = parseMetadata(p.metadata)
+    return meta.handRaised === true
+  })
 
   const otherParticipants = participants.filter((p) => {
-    const meta = parseMetadata(p.metadata);
-    return meta.handRaised !== true;
-  });
+    const meta = parseMetadata(p.metadata)
+    return meta.handRaised !== true
+  })
 
   return (
     <div className="flex flex-col h-full w-full bg-white">
@@ -127,7 +153,15 @@ const ParticipantList = ({ hideTitle }) => {
             {pl.title} ({participants.length})
           </h3>
           <div className="">
-            <IconButton variant="ghost" size="xs" onClick={() => { toast.success(t?.comingSoon.title) }}><UserPlus size={22} /></IconButton>
+            <IconButton
+              variant="ghost"
+              size="xs"
+              onClick={() => {
+                toast.success(t?.comingSoon.title)
+              }}
+            >
+              <UserPlus size={22} />
+            </IconButton>
             {/* <IconButton variant="ghost" size="xs"><Ellipsis size={22} /></IconButton> */}
           </div>
         </div>
@@ -162,7 +196,7 @@ const ParticipantList = ({ hideTitle }) => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ParticipantList;
+export default ParticipantList

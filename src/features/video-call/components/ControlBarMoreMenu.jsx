@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import { isBreakoutSupported, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
@@ -117,15 +118,13 @@ const ControlBarMoreMenu = ({
 
   const allParticipants = useParticipants();
   const { localParticipant } = useLocalParticipant();
-  const hostParticipant = [...allParticipants].sort((a, b) => {
-    const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
-    const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
-    return timeA - timeB;
-  })[0];
+
   const isHost =
-    hostParticipant &&
-    localParticipant &&
-    hostParticipant.identity === localParticipant.identity;
+    isCustomRoom(room?.roomType) &&
+    room?.creatorId != null &&
+    user?.accountId != null &&
+    String(room.creatorId) === String(user.accountId);
+
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -199,7 +198,7 @@ const ControlBarMoreMenu = ({
                           label={t.rooms?.videoCall?.controls?.participants || "Participants"}
                         />
 
-                        {!isAISession && (isHost || isBreakoutActive) && (
+                        {!isAISession && isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive) && (
                           <MenuItem
                             onClick={() => {
                               setShowBreakout(!showBreakout);

@@ -57,7 +57,7 @@ export const useVideoCallSignaling = (handlers = {}) => {
       "JoinBreakoutRoom",
       "ReturnToMainRoom",
       "BreakoutStatusChanged",
-      "BroadcastNotification"
+      "BroadcastNotification",
     ]
     events.forEach((evt) => {
       newConnection.on(evt, safeHandler(evt))

@@ -34,7 +34,14 @@ const TextInput = ({
       : "password"
     : type
 
-  const variantClasses = variant === "square" ? "rounded-md" : "rounded-3xl"
+  const variantClasses =
+    variant === "square"
+      ? "rounded-md"
+      : variant === "rounded-xl" || variant === "semi-round"
+        ? "rounded-xl"
+        : variant === "rounded-2xl"
+          ? "rounded-2xl"
+          : "rounded-3xl"
 
   const iconPadding = Icon ? "!pl-10" : ""
   const passwordPadding = isPassword ? "!pr-10" : ""
@@ -44,9 +51,8 @@ const TextInput = ({
     : ""
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
-
   const heightClass = multiline ? "min-h-[56px] px-4" : "h-[56px] px-4"
-  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-[#e5e5e5] disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {
@@ -56,14 +62,9 @@ const TextInput = ({
   }
 
   return (
-    <div className={`flex flex-col gap-1 ${containerClassName}`}>
+    <div className={`flex flex-col gap-2 ${containerClassName}`}>
       {label && !floatingLabel && (
-        <label
-          htmlFor={id}
-          className={labelClassName || "text-sm text-[#606060] font-medium"}
-        >
-          {label}
-        </label>
+        <span className={labelClassName}>{label}</span>
       )}
       <div className="relative">
         {leftContent && (
@@ -149,7 +150,9 @@ const TextInput = ({
       {(showCount && props.maxLength) || error ? (
         <div className="flex justify-between items-start px-1">
           <div className="flex-1">
-            {error && <span className="text-xs text-red-500 block">{error}</span>}
+            {error && (
+              <span className="text-xs text-red-500 block">{error}</span>
+            )}
           </div>
           {showCount && props.maxLength && (
             <span className="text-xs text-[#7A7574] ml-2 whitespace-nowrap">

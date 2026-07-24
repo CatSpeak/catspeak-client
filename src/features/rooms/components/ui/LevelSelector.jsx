@@ -1,30 +1,21 @@
 import React from "react"
-import { colors } from "@/shared/utils/colors"
+import OptionGroupSelect from "@/shared/components/ui/OptionGroupSelect"
 
 const LevelSelector = ({ selectedLevel, onSelect, levels, t }) => {
   return (
-    <div className="text-left flex flex-col gap-3">
-      <label className="text-base font-semibold text-gray-800">{t.rooms.createRoom.requiredLevel}</label>
-      <div className="flex flex-wrap justify-start gap-2">
-        {levels?.map((level) => {
-          const isSelected = selectedLevel === level.value
-          return (
-            <button
-              key={level.value}
-              type="button"
-              onClick={() => onSelect(isSelected ? "" : level.value)}
-              className={`inline-flex min-h-[48px] h-12 w-12 sm:w-auto items-center justify-center rounded-full sm:px-6 text-sm sm:text-base font-semibold transition-all duration-200 ease-out border ${
-                isSelected
-                  ? "bg-gradient-to-r from-cath-red-500 to-cath-red-700 border-transparent text-white shadow-md shadow-cath-red-500/20 transform scale-[1.05]"
-                  : "bg-white border-gray-200 text-gray-700 hover:border-cath-red-300 hover:bg-red-50 hover:text-cath-red-700 hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
-              }`}
-            >
-              {level.labelKey ? t.rooms?.filters?.levels?.[level.labelKey] || level.label : level.label}
-            </button>
-          )
-        })}
-      </div>
-    </div>
+    <OptionGroupSelect
+      label={t.rooms.createRoom.requiredLevel}
+      options={levels}
+      value={selectedLevel}
+      onChange={onSelect}
+      multiple={false}
+      getOptionLabel={(level) =>
+        level.labelKey
+          ? t.rooms?.filters?.levels?.[level.labelKey] || level.label
+          : level.label
+      }
+      getOptionValue={(level) => level.value}
+    />
   )
 }
 
