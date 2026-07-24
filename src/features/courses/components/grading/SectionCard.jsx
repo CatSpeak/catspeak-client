@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { GripVertical, MoreVertical, Plus, EyeOff } from "lucide-react"
 import LessonItemRow from "./LessonItemRow"
 import { MOCK_CHAPTER } from "./mockData"
@@ -25,13 +25,17 @@ const SectionCard = ({
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false)
   const [isSectionMenuOpen, setIsSectionMenuOpen] = useState(false)
   const [openItemMenuId, setOpenItemMenuId] = useState(null)
+  
+  const sectionRef = useRef(null)
 
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (!e.target.closest(".dropdown-container")) {
+      if (sectionRef.current && !sectionRef.current.contains(e.target)) {
         setIsAddMenuOpen(false)
         setIsSectionMenuOpen(false)
+      }
+      if (!e.target.closest(".lesson-dropdown-container")) {
         setOpenItemMenuId(null)
       }
     }
@@ -75,7 +79,7 @@ const SectionCard = ({
 
         {/* Action Controls in edit mode */}
         {isEdit && (
-          <div className="flex items-center gap-2 shrink-0 dropdown-container relative">
+          <div ref={sectionRef} className="flex items-center gap-2 shrink-0 relative">
             {/* Add Content Button */}
             <PillButton
               type="button"
@@ -120,6 +124,7 @@ const SectionCard = ({
               onToggleHide={onToggleHideChapter}
               onMove={onMoveChapter}
               onDelete={onDeleteChapter}
+              onAddContent={(type) => onOpenAddItem(chapter.id, type)}
             />
           </div>
         )}

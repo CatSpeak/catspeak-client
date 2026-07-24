@@ -50,10 +50,10 @@ const LessonItemRow = ({
   isEdit = true,
   isStudent = false,
   isMenuOpen = false,
-  onToggleMenu = () => {},
-  onEditItem = () => {},
-  onToggleHideItem = () => {},
-  onDeleteItem = () => {},
+  onToggleMenu = () => { },
+  onEditItem = () => { },
+  onToggleHideItem = () => { },
+  onDeleteItem = () => { },
   className = "",
 }) => {
   if (isStudent && item.isHidden) return null
@@ -110,7 +110,7 @@ const LessonItemRow = ({
 
       {/* Right section: 3-dots Menu Button */}
       {isEdit && (
-        <div className="dropdown-container relative shrink-0">
+        <div className="lesson-dropdown-container relative shrink-0">
           <IconButton
             size="xs"
             variant="ghost"
