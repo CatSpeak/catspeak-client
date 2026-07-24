@@ -6,4 +6,5 @@ export { default as profile } from "./profile"
 export { default as payment } from "./payment"
 export { default as news } from "./news"
 export { default as calendar } from "./calendar"
+export { default as planUsage } from "./planUsage"
 
