@@ -9,12 +9,15 @@ import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
 import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
 import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
+import { useAuth } from "@/features/auth"
 
 const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
   const { t } = useLanguage()
   const { isStudent } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname } = useActiveLink()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
+  const { user } = useAuth()
+  const userId = user?.accountId || user?.id || ""
 
   // Sync drilldown state when drawer opens or when navigating
   useEffect(() => {
@@ -140,10 +143,15 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen }) => {
             .map((sub) => {
               const subLabel = t.nav?.[sub.key] || sub.key
               const SubIconComponent = sub.icon || Home
+              let subPath = sub.path
+              if (sub.key === "profile" && userId) {
+                subPath = `/profile/${userId}`
+              }
+
               return (
                 <DesktopNavItem
                   key={sub.key}
-                  to={resolvePath(sub.path)}
+                  to={resolvePath(subPath)}
                   icon={SubIconComponent}
                   label={subLabel}
                   onClick={() => setIsMobileOpen?.(false)}

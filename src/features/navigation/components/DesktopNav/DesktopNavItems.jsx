@@ -5,15 +5,18 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "./DesktopNavItem"
 import DesktopNavDropdown from "./DesktopNavDropdown"
 import DesktopNavSubItem from "./DesktopNavSubItem"
-import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { useAuth } from "@/features/auth"
+import { footerLinks, navLinks, settingNavLinks } from "../../config/navigation"
 
 const DesktopNavItems = () => {
   const { t } = useLanguage()
   const { isStudent } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname } = useActiveLink()
+  const { user } = useAuth()
+  const userId = user?.accountId || user?.id || ""
 
   const { openDropdownKeys, setOpenDropdownKeys, isDesktopSidebarDocked } =
     useSidebar()
@@ -66,10 +69,15 @@ const DesktopNavItems = () => {
                     .map((sub, idx) => {
                       const subLabel = t.nav?.[sub.key] || sub.key
                       const SubIconComponent = sub.icon || Home
+                      let subPath = sub.path
+                      if (sub.key === "profile" && userId) {
+                        subPath = `/profile/${userId}`
+                      }
+
                       return (
                         <DesktopNavSubItem
                           key={sub.key}
-                          to={resolvePath(sub.path)}
+                          to={resolvePath(subPath)}
                           icon={SubIconComponent}
                           label={subLabel}
                           isFlyout={isDesktopSidebarDocked}
