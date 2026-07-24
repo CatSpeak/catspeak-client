@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { Image as ImageIcon, Play } from "lucide-react"
-import { useGetUserWallMediaQuery } from "../api/profilePostsApi"
+import { useGetUserWallMediaQuery } from "@/store/api/social/profilePostsApi"
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
