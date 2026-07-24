@@ -4,17 +4,18 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "./DesktopNavItem"
 import DesktopNavDropdown from "./DesktopNavDropdown"
 import DesktopNavSubItem from "./DesktopNavSubItem"
-import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useAuth } from "@/features/auth"
+import { footerLinks, navLinks, settingNavLinks } from "../../config/navigation"
 
 const DesktopNavItems = ({ isHorizontal = false }) => {
   const { t } = useLanguage()
   const { isStudent } = useRoleOverride()
-  const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
-  const { isAuthenticated } = useAuth()
+  const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink();
+  const { user } = useAuth()
+  const userId = user?.accountId || user?.id || ""
 
   const { openDropdownKeys, setOpenDropdownKeys, isDesktopSidebarDocked } =
     useSidebar()
@@ -41,7 +42,7 @@ const DesktopNavItems = ({ isHorizontal = false }) => {
             if (item.hideInSidebar) return false
             if (item.lang && item.lang !== currentLang) return false
             if (isHorizontal && item.showOnHorizontalBar === false) return false
-            if (item.isPrivate && !isAuthenticated) return false
+            if (item.isPrivate && !user) return false;
             return true
           })
           .map((item) => {
@@ -62,7 +63,7 @@ const DesktopNavItems = ({ isHorizontal = false }) => {
                 if (sub.key === "myCourses" && isStudent) return false
                 if (sub.lang && sub.lang !== currentLang) return false
                 if (isHorizontal && sub.showOnHorizontalBar === false) return false
-                if (sub.isPrivate && !isAuthenticated) return false
+                if (sub.isPrivate && !user) return false
                 return true
               })
 
@@ -83,21 +84,29 @@ const DesktopNavItems = ({ isHorizontal = false }) => {
                   }}
                   isDocked={isDesktopSidebarDocked}
                 >
-                  {filteredSubItems.map((sub) => {
-                    const subLabel = t.nav?.[sub.key] || sub.label || sub.key
-                    const SubIconComponent = sub.icon || Globe
-                    return (
-                      <DesktopNavSubItem
-                        key={sub.key}
-                        to={resolvePath(sub.path)}
-                        icon={SubIconComponent}
-                        label={subLabel}
-                        color={sub.color}
-                        img={sub.img}
-                        isFlyout={isDesktopSidebarDocked}
-                      />
-                    )
-                  })}
+                  {(item.subItems || [])
+                    .filter((sub) => {
+                      if (sub.key === "myCourses" && isStudent) return false
+                      return true
+                    })
+                    .map((sub, idx) => {
+                      const subLabel = t.nav?.[sub.key] || sub.key
+                      const SubIconComponent = sub.icon || Home
+                      let subPath = sub.path
+                      if (sub.key === "profile" && userId) {
+                        subPath = `/profile/${userId}`
+                      }
+
+                      return (
+                        <DesktopNavSubItem
+                          key={sub.key}
+                          to={resolvePath(subPath)}
+                          icon={SubIconComponent}
+                          label={subLabel}
+                          isFlyout={isDesktopSidebarDocked}
+                        />
+                      )
+                    })}
                 </DesktopNavDropdown>
               )
             }

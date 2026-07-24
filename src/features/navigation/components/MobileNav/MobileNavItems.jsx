@@ -45,6 +45,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
   const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
+  const { user } = useAuth()
+  const userId = user?.accountId || user?.id || ""
 
   // Sync drilldown state when drawer opens or when navigating
   useEffect(() => {
@@ -214,12 +216,17 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               return true
             })
             .map((sub) => {
-              const subLabel = t.nav?.[sub.key] || sub.label || sub.key
-              const SubIconComponent = sub.icon || Globe
+              const subLabel = t.nav?.[sub.key] || sub.key
+              const SubIconComponent = sub.icon || Home
+              let subPath = sub.path
+              if (sub.key === "profile" && userId) {
+                subPath = `/profile/${userId}`
+              }
+
               return (
                 <DesktopNavItem
                   key={sub.key}
-                  to={resolvePath(sub.path)}
+                  to={resolvePath(subPath)}
                   icon={SubIconComponent}
                   label={subLabel}
                   color={sub.color}
