@@ -18,20 +18,38 @@ import { selectCurrentToken } from "@/store/slices/authSlice";
 const getTaskTitleText = (task, t) => {
   const rawTitle = task.title || "";
   const taskId = task.id || "";
+  const taskType = task.taskType || "";
   const lowerTitle = rawTitle.toLowerCase();
+  const lowerType = taskType.toLowerCase();
 
   // 1. Reel upload task
-  if (taskId.startsWith("reel-upload-") || lowerTitle.includes("reel")) {
+  if (
+    taskId.startsWith("reel-upload-") ||
+    taskType === "ReelUpload" ||
+    lowerType.includes("reel") ||
+    lowerTitle.includes("reel")
+  ) {
     return t?.catSpeak?.reels?.createReelTitle || "Đăng Reel mới";
   }
 
   // 2. Instructor application submission task
-  if (taskId.includes("instructor") || lowerTitle.includes("instructor") || lowerTitle.includes("giảng viên") || lowerTitle.includes("hồ sơ")) {
+  if (
+    taskId.includes("instructor") ||
+    lowerTitle.includes("instructor") ||
+    lowerTitle.includes("giảng viên") ||
+    lowerTitle.includes("hồ sơ")
+  ) {
     return t?.uploadWidget?.instructorTaskTitle || "Gửi hồ sơ giảng viên";
   }
 
   // 3. Recording processing task
-  if (taskId.includes("rec") || task.isRecording || lowerTitle.includes("record") || lowerTitle.includes("ghi hình") || lowerTitle.includes("bản ghi")) {
+  if (
+    taskId.includes("rec") ||
+    task.isRecording ||
+    lowerTitle.includes("record") ||
+    lowerTitle.includes("ghi hình") ||
+    lowerTitle.includes("bản ghi")
+  ) {
     return t?.uploadWidget?.recordingTaskTitle || "Đang xử lý bản ghi hình";
   }
 
@@ -44,7 +62,8 @@ const getTaskStatusText = (task, displayProgress, t) => {
   const pct = Math.floor(displayProgress);
 
   if (status === "SUCCESS") return t?.uploadWidget?.success || "Hoàn tất";
-  if (status === "ERROR") return error || t?.uploadWidget?.error || "Lỗi tác vụ";
+  if (status === "ERROR")
+    return error || t?.uploadWidget?.error || "Lỗi tác vụ";
 
   const template =
     status === "PROCESSING"

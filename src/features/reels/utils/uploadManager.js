@@ -50,9 +50,16 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
 
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable && e.total > 0) {
-      const progress = Math.round((e.loaded / e.total) * 80)
+      const rawProgress = Math.round((e.loaded / e.total) * 100)
+      const uploadProgress = Math.min(49, Math.round((rawProgress / 100) * 50))
       store.dispatch(
-        updateTask({ id, updates: { progress: Math.min(progress, 80) } }),
+        updateTask({
+          id,
+          updates: {
+            progress: uploadProgress,
+            stepName: "UPLOADING_FILE",
+          },
+        }),
       )
     }
   }
@@ -60,7 +67,14 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
   xhr.onload = () => {
     if (xhr.status >= 200 && xhr.status < 300) {
       store.dispatch(
-        updateTask({ id, updates: { progress: 100, status: "SUCCESS" } }),
+        updateTask({
+          id,
+          updates: {
+            progress: 100,
+            status: "SUCCESS",
+            stepName: "COMPLETED",
+          },
+        }),
       )
 
       // Invalidate reels query cache to auto-reload feeds
