@@ -12,6 +12,7 @@ export const useRoomsPageLogic = () => {
   const [isCreatingOneOnOne, setIsCreatingOneOnOne] = useState(false)
   const [isCreatingStudyGroup, setIsCreatingStudyGroup] = useState(false)
   const [isCreatingAI, setIsCreatingAI] = useState(false)
+  const [isCreatingCustom, setIsCreatingCustom] = useState(false)
 
   const canUseAI = AI_ALLOWED_ACCOUNT_IDS.includes(user?.accountId)
 
@@ -50,18 +51,29 @@ export const useRoomsPageLogic = () => {
     }
   }
 
+  const handleCreateCustomRoomSession = (onSuccess) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
+    onSuccess?.()
+  }
+
   return {
     state: {
-      isCreating: isCreatingOneOnOne || isCreatingStudyGroup || isCreatingAI,
+      isCreating: isCreatingOneOnOne || isCreatingStudyGroup || isCreatingAI || isCreatingCustom,
       isCreatingOneOnOne,
       isCreatingStudyGroup,
       isCreatingAI,
+      isCreatingCustom,
       canUseAI,
     },
     actions: {
       handleCreateOneOnOneSession,
       handleCreateStudyGroupSession,
       handleCreateAISession,
+      handleCreateCustomRoomSession,
     },
   }
 }
+

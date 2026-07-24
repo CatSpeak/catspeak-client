@@ -235,8 +235,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       return
     }
 
-    // Public rooms or rooms without a password — skip verification
-    if (room.privacy !== "Private" || !room.hasPassword) {
+    // Rooms without a password — skip verification
+    if (!room.hasPassword) {
       verifyTriggered.current = true
       setPhase("waiting")
       return

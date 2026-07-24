@@ -323,6 +323,7 @@ export const baseApi = createApi({
     "Schedule",
     "Commission",
     "Breakout",
+    "CustomRooms",
   ],
   endpoints: () => ({}),
 })

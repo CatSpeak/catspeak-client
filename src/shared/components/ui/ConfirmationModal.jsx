@@ -20,30 +20,23 @@ const ConfirmationModal = ({
       open={open}
       onClose={onClose}
       title={title}
+      showCloseButton={false}
       fullScreenOnMobile={false}
+      headerClassName="flex items-start justify-between px-4 sm:px-6 pt-4 sm:pt-6"
+      bodyClassName="px-4 sm:px-6 pt-2"
+      footerClassName="p-4 sm:p-6"
       footer={
-        <div className="flex justify-end gap-3">
-          <PillButton
-            variant="secondary"
-            onClick={onClose}
-            className="h-10 text-sm"
-            bgColor="#F6F6F6"
-            textColor="#7A7574"
-          >
+        <div className="flex justify-end gap-2">
+          <PillButton variant="secondary" onClick={onClose}>
             {cancelText}
           </PillButton>
-          <PillButton
-            variant="primary"
-            onClick={onConfirm}
-            className="h-10 text-sm"
-            bgColor={isDestructive ? undefined : "#18181B"}
-          >
+          <PillButton variant="primary" onClick={onConfirm}>
             {confirmText}
           </PillButton>
         </div>
       }
     >
-      <div className="text-[#7A7574] text-sm py-2">
+      <div className="text-[#606060] text-sm">
         {message ? <p>{message}</p> : children}
       </div>
     </Modal>

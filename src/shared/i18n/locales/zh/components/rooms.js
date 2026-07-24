@@ -184,6 +184,54 @@ export default {
     connect11: "连接 1:1",
     connect25: "连接 2:5",
     yourAI: "1:1 AI 对话",
+    customRoom: "创建房间",
+  },
+  customRooms: {
+    title: "Pro 自定义房间",
+    myRoomsTitle: "我的房间",
+    createTitle: "创建自定义房间",
+    editTitle: "编辑房间",
+    quota: "已使用 {{used}}/{{max}} 个房间",
+    quotaFull: "您已达到最大 {{max}} 个自定义房间的限制",
+    capacity: "容量：100 人",
+    persistent: "持久房间",
+    roomName: "房间名称",
+    roomNamePlaceholder: "例如：我的学习小组",
+    description: "描述",
+    descriptionPlaceholder: "这个房间是关于什么的？",
+    create: "创建房间",
+    creating: "创建中...",
+    save: "保存更改",
+    saving: "保存中...",
+    delete: "删除",
+    deleteConfirm: "确定要删除此房间吗？",
+    deleteSuccess: "房间删除成功",
+    createSuccess: "自定义房间创建成功",
+    updateSuccess: "房间更新成功",
+    noRooms: "您还没有创建任何自定义房间",
+    noRoomsSubtext: "创建您的第一个最多可容纳 100 人的持久房间！",
+    join: "加入",
+    copyLink: "复制链接",
+    linkCopied: "已复制！",
+    tabCreate: "创建",
+    tabMyRooms: "我的房间",
+    proBadge: "PRO",
+    maxRoomsReached: "已达到房间上限",
+    manageRooms: "管理房间",
+    privateHint: "在公开房间列表中隐藏。仅可通过链接访问。",
+    publicHint: "在公开房间列表中显示，所有人均可加入。",
+    private: "私密",
+    passwordRequired: "需要密码",
+    passwordLabel: "密码（可选）",
+    passwordPlaceholder: "输入房间密码",
+    roomThumbnail: "房间封面",
+    uploadThumbnail: "上传图片",
+    dragDropHint: "拖放封面图片至此处",
+    imageHint: "PNG, JPG, WEBP 最大 5MB",
+    change: "更换",
+    remove: "移除",
+    people: "人",
+    unlimited: "无限制",
   },
   aiSettings: {
     title: "AI 会话设置",
@@ -559,7 +607,7 @@ export default {
       noHistoryFound: "该房间没有游戏历史记录。",
       score: "分数",
       matchDate: "比赛日期",
-      winner: "获胜者"
+      winner: "获胜者",
     },
     setup: {
       title: "游戏设置",
@@ -575,7 +623,7 @@ export default {
       levelMedium: "中等",
       levelHard: "困难",
       cancel: "取消",
-      startNow: "立即开始"
+      startNow: "立即开始",
     },
     pictureIt: {
       topBar: {
@@ -583,7 +631,7 @@ export default {
         describer: "描述者",
         spectator: "观众",
         roleDescriber: "描述者",
-        roleRater: "评分者"
+        roleRater: "评分者",
       },
       actionPanel: {
         watchingAsSpectator: "您正在以观众身份观看。",
@@ -594,7 +642,7 @@ export default {
         timeLeft: "(剩余 {0}秒)",
         submitRating: "提交评分",
         ratingSubmitted: "已提交！等待其他玩家...",
-        waiting: "等待中..."
+        waiting: "等待中...",
       },
       imageCard: {
         describeToTeam: "向您的团队描述这张图片",
@@ -605,13 +653,13 @@ export default {
         preparing: "准备中...",
         forbiddenWordsTitle: "禁用词",
         forbiddenWordsDesc: "请勿使用这些词",
-        flaggedCount: "{0} / {1} 人已标记违规"
+        flaggedCount: "{0} / {1} 人已标记违规",
       },
       modals: {
         gameEnded: "游戏结束",
         notEnoughPlayers: "玩家人数不足以继续。",
         close: "关闭",
-        waitingStart: "正在准备游戏..."
+        waitingStart: "正在准备游戏...",
       },
       badges: {
         "Master Describer": "描述大师",
@@ -620,7 +668,7 @@ export default {
         "Most Fluent": "最流利",
         "Team Player": "团队合作",
         "Keep Practicing": "继续努力",
-        champion: "冠军"
+        champion: "冠军",
       },
       gameOver: {
         title: "游戏结束",
@@ -633,16 +681,16 @@ export default {
         highestRoundScore: "最高单回合分数",
         playAgain: "再玩一次",
         backToRoom: "返回房间",
-        playersCount: "{0} 名玩家"
+        playersCount: "{0} 名玩家",
       },
       leaderboard: {
         title: "排行榜",
-        playersCount: "{0} 名玩家"
+        playersCount: "{0} 名玩家",
       },
       roundResult: {
         nextRoundStartsIn: "下一回合开始于...",
-        averageRating: "平均评分"
-      }
-    }
-  }
+        averageRating: "平均评分",
+      },
+    },
+  },
 }

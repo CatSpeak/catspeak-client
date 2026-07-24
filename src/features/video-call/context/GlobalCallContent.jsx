@@ -333,6 +333,49 @@ const GlobalCallContent = ({
     setShowLeaveModal(false)
   }
 
+  // ── Moderation Listener (Real-Time Kick & Mute) ──
+  useEffect(() => {
+    if (!lkRoom) return
+
+    const handleModerationData = (payload, participant, kind, topic) => {
+      if (topic !== "moderation") return
+
+      try {
+        const decoded = new TextDecoder().decode(payload)
+        const data = JSON.parse(decoded)
+        const currentAccId = user?.accountId != null ? String(user.accountId) : null
+        const localIdent = localParticipant?.identity != null ? String(localParticipant.identity) : null
+
+        const isTarget =
+          (data.targetId != null && String(data.targetId) === currentAccId) ||
+          (data.targetIdentity != null && String(data.targetIdentity) === localIdent)
+
+        if (!isTarget) return
+
+        if (data.action === "KICK_PARTICIPANT") {
+          toast.error("Bạn đã bị Host mời ra khỏi phòng.", { duration: 5000 })
+          actions.handleLeaveSession()
+        } else if (data.action === "MUTE_PARTICIPANT") {
+          if (data.trackKind === "audio" && localParticipant) {
+            localParticipant.setMicrophoneEnabled(false)
+            toast.error("Host đã tắt mic của bạn.")
+          } else if (data.trackKind === "video" && localParticipant) {
+            localParticipant.setCameraEnabled(false)
+            toast.error("Host đã tắt camera của bạn.")
+          }
+        }
+      } catch (err) {
+        console.error("[Moderation] Error parsing moderation payload:", err)
+      }
+    }
+
+    lkRoom.on(RoomEvent.DataReceived, handleModerationData)
+    return () => {
+      lkRoom.off(RoomEvent.DataReceived, handleModerationData)
+    }
+  }, [lkRoom, localParticipant, user?.accountId, actions])
+
+
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
   const { closingRemainingSeconds } = useRoomLifecycle({

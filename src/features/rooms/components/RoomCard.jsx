@@ -39,7 +39,8 @@ const RoomCard = ({ room }) => {
     room.maxParticipants !== null &&
     (room.currentParticipantCount || 0) >= room.maxParticipants;
 
-  const isPrivate = room.privacy === "Private" && room.hasPassword;
+  const isPrivate = room.privacy === "Private" || room.isPrivate;
+  const hasPassword = room.hasPassword || room.isPasswordProtected || !!room.password;
 
   const handleJoinRoom = (e) => {
     e.stopPropagation();
@@ -142,8 +143,17 @@ const RoomCard = ({ room }) => {
 
           {/* Top Right: Actions & Status */}
           <div className="absolute right-2 top-2 flex items-center gap-1.5 z-10 p-1">
-            {isPrivate && (
-              <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm shadow-sm">
+            {(isPrivate || hasPassword) && (
+              <div
+                className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm shadow-sm"
+                title={
+                  isPrivate && hasPassword
+                    ? "Private & Password Protected"
+                    : isPrivate
+                      ? "Private Room"
+                      : "Password Protected"
+                }
+              >
                 <Lock size={14} className="text-white" />
               </div>
             )}
