@@ -6,7 +6,7 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import SectionCard from "./SectionCard"
 import CreateFeedModal from "./CreateFeedModal"
 import AddMaterialModal from "./AddMaterialModal"
-import AddActivityModa from "./AddActivityModa"
+import AddActivityModal from "./AddActivityModal"
 import AddLinkModal from "./AddLinkModal"
 import SectionModal from "./SectionModal"
 import { MOCK_SECTIONS } from "./mockData"
@@ -354,7 +354,7 @@ const ClassFeedTab = ({ id, isStudent }) => {
       />
 
       {/* 3. Add Activity Modal */}
-      <AddActivityModa
+      <AddActivityModal
         open={activeModal === "assignment"}
         onClose={() => setActiveModal(null)}
         onSubmit={handleSaveActivities}

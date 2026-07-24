@@ -12,14 +12,14 @@ const SectionCard = ({
   totalSections = 1,
   isEdit = true,
   isStudent = false,
-  onOpenAddItem = () => {},
-  onEditChapter = () => {},
-  onToggleHideChapter = () => {},
-  onDeleteChapter = () => {},
-  onMoveChapter = () => {},
-  onEditItem = () => {},
-  onToggleHideItem = () => {},
-  onDeleteItem = () => {},
+  onOpenAddItem = () => { },
+  onEditChapter = () => { },
+  onToggleHideChapter = () => { },
+  onDeleteChapter = () => { },
+  onMoveChapter = () => { },
+  onEditItem = () => { },
+  onToggleHideItem = () => { },
+  onDeleteItem = () => { },
   className = "",
 }) => {
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false)
@@ -48,16 +48,14 @@ const SectionCard = ({
       {/* Section Header */}
       <div className="flex items-center rounded-t-xl justify-between gap-4 px-6 py-4 bg-[#F3F4F5] border-b border-[#E2E2E2] w-full">
         <div className="flex items-center gap-2.5 flex-1">
-          {/* Drag Handle in edit mode */}
-          {isEdit && (
-            <GripVertical
-              size={18}
-              className="text-[#5B403C] cursor-grab shrink-0 hover:text-gray-600 transition-colors"
-            />
-          )}
-
           <div className="space-y-1">
             <div className="flex items-center gap-3 flex-wrap">
+              {isEdit && (
+                <GripVertical
+                  size={18}
+                  className="text-[#5B403C] cursor-grab shrink-0 hover:text-gray-600 transition-colors"
+                />
+              )}
               <h3 className="text-lg font-bold text-[#191C1D]">
                 {chapter.title}
               </h3>
@@ -68,7 +66,7 @@ const SectionCard = ({
               )}
             </div>
             {chapter.subtitle && (
-              <p className="text-xs sm:text-sm text-gray-500 font-normal">
+              <p className="text-xs sm:text-sm text-[#5B403C] font-normal">
                 {chapter.subtitle}
               </p>
             )}
@@ -87,11 +85,12 @@ const SectionCard = ({
                 setIsSectionMenuOpen(false)
               }}
               startIcon={<Plus size={10} />}
+              bgColor={"white"}
             >
               Thêm nội dung
             </PillButton>
 
-            {/* Standalone Component: Add Content Menu */}
+            {/* Add Content Menu */}
             <AddContentMenu
               open={isAddMenuOpen}
               onClose={() => setIsAddMenuOpen(false)}
@@ -110,7 +109,7 @@ const SectionCard = ({
               <MoreVertical size={16} />
             </IconButton>
 
-            {/* Standalone Component: Section Action Menu */}
+            {/* Section Action Menu */}
             <SectionActionMenu
               open={isSectionMenuOpen}
               onClose={() => setIsSectionMenuOpen(false)}
