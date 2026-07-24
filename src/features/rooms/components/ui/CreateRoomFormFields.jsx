@@ -79,36 +79,44 @@ const CreateRoomFormFields = ({
         disabled={isCustomMode && isQuotaFull}
       />
 
-      {/* Private Room Toggle & Password (Custom Mode Only) */}
+      {/* Room Privacy Toggle (Custom Mode Only) */}
       {isCustomMode && (
         <div className="flex flex-col gap-2">
-          <div className="flex items-end justify-between">
-            <span>{t.rooms?.createRoom?.privateRoom || "Private Room"}</span>
+          <span>{t.rooms?.createRoom?.privateRoom || "Private Room"}</span>
+          <div className="flex items-center justify-between gap-4 w-full rounded-xl border border-[#e5e5e5] px-4 min-h-[56px] bg-white transition-all duration-200 hover:border-[#8e0000]">
+            <span className="flex-1">
+              {formData.isPrivate
+                ? ct.privateHint ||
+                  "Hidden from public room list. Only accessible via link."
+                : ct.publicHint ||
+                  "Visible in public room list for anyone to join."}
+            </span>
             <Switch
               checked={formData.isPrivate}
-              onChange={(e) => {
-                handleChange("isPrivate", e.target.checked)
-                if (!e.target.checked) handleChange("password", "")
-              }}
+              onChange={(e) => handleChange("isPrivate", e.target.checked)}
               disabled={isQuotaFull}
             />
           </div>
-
-          <TextInput
-            id="custom-room-password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => handleChange("password", e.target.value)}
-            placeholder={
-              passwordPlaceholder ||
-              t.rooms?.createRoom?.passwordPlaceholder ||
-              "Enter room password"
-            }
-            disabled={!formData.isPrivate || isQuotaFull}
-            autoComplete="new-password"
-            variant="rounded-xl"
-          />
         </div>
+      )}
+
+      {/* Room Password Input (Custom Mode Only) */}
+      {isCustomMode && (
+        <TextInput
+          id="custom-room-password"
+          type="password"
+          label={t.rooms?.createRoom?.passwordLabel || "Password (Optional)"}
+          value={formData.password}
+          onChange={(e) => handleChange("password", e.target.value)}
+          placeholder={
+            passwordPlaceholder ||
+            t.rooms?.createRoom?.passwordPlaceholder ||
+            "Enter room password"
+          }
+          disabled={isQuotaFull}
+          autoComplete="new-password"
+          variant="rounded-xl"
+        />
       )}
 
       {/* Topics Selection (Shared) */}

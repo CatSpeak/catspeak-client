@@ -82,6 +82,8 @@ const CustomRoomsPage = lazy(() => import("@/features/rooms/pages/CustomRoomsPag
 
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
+import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
+
 const WorkspaceIndex = () => {
   const { isStudent } = useRoleOverride()
   return <Navigate to={isStudent ? "learning" : "courses"} replace />
@@ -91,6 +93,7 @@ const routesConfig = [
   {
     // Root wrapper — registers navigate for global PiP provider
     element: <RootLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       // Main layout routes (no language prefix)
       {

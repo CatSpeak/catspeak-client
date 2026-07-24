@@ -43,7 +43,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
           : []
 
       const isPrivate =
-        room.isPrivate || room.privacy === "Private" || room.hasPassword === true
+        room.isPrivate || room.privacy === "Private"
 
       setFormData({
         name: room.name || "",
@@ -82,8 +82,8 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
 
       data.append("Privacy", formData.isPrivate ? "Private" : "Public")
 
-      // Only append Password if private AND user actually entered a new password
-      if (formData.isPrivate && formData.password.trim()) {
+      // Only append Password if user actually entered a new password
+      if (formData.password.trim()) {
         data.append("Password", formData.password.trim())
       }
 
@@ -97,7 +97,6 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
       }
 
       await updateCustomRoom({ id: roomId, data }).unwrap()
-      toast.success("Room updated successfully")
 
       if (onClose) onClose()
     } catch (err) {
@@ -108,9 +107,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
 
   const isDisabled = !formData.name.trim() || isUpdating
 
-  const passwordPlaceholder = formData.isPrivate
-    ? "Leave blank to keep current password"
-    : "Enter room password"
+  const passwordPlaceholder = "Leave blank to keep current password"
 
   return {
     formData,

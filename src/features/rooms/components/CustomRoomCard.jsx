@@ -3,7 +3,9 @@ import { Users, Copy, Check, Pencil, Trash2, Clock } from "lucide-react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import Badge from "@/shared/components/ui/indicators/Badge"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { getTopicIcon } from "../utils/getTopicIcon"
+import { formatTopic, formatLevel } from "../utils/formatters"
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
 
@@ -17,6 +19,7 @@ const CustomRoomCard = ({
   isDeleting,
   ct = {},
 }) => {
+  const { t } = useLanguage()
   const roomId = room.id || room.roomId
   const isCopied = copiedId === roomId
   const [imageError, setImageError] = useState(false)
@@ -39,7 +42,7 @@ const CustomRoomCard = ({
   // Privacy & Password
   const isPrivate = room.isPrivate || room.privacy === "Private"
   const hasPassword =
-    room.hasPassword || room.isPasswordProtected || !!room.password || isPrivate
+    room.hasPassword || room.isPasswordProtected || !!room.password
 
   // Duration text
   const durationText =
@@ -102,23 +105,28 @@ const CustomRoomCard = ({
           </div>
         </div>
 
-        {/* Level, Topic & Private Chips */}
-        {(hasPassword || room.requiredLevel || topicsList.length > 0) && (
+        {/* Level, Topic, Private & Password Chips */}
+        {(isPrivate || hasPassword || room.requiredLevel || topicsList.length > 0) && (
           <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
             {/* Private Chip */}
-            {hasPassword && (
+            {isPrivate && (
               <Badge color="dark">{ct.private || "Private"}</Badge>
+            )}
+
+            {/* Password Chip */}
+            {hasPassword && (
+              <Badge color="dark">{ct.passwordRequired || "Password Required"}</Badge>
             )}
 
             {/* Level Chip */}
             {room.requiredLevel && (
-              <Badge color="cath-red">{room.requiredLevel}</Badge>
+              <Badge color="cath-red">{formatLevel(room.requiredLevel, t)}</Badge>
             )}
 
             {/* Topic Chips */}
             {topicsList.map((topic, idx) => (
               <Badge key={`${topic}-${idx}`} color="cath-red">
-                {topic}
+                {formatTopic(topic, t)}
               </Badge>
             ))}
           </div>

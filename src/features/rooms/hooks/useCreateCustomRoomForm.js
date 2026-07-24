@@ -78,8 +78,8 @@ export const useCreateCustomRoomForm = (open = true) => {
         data.append("RequiredLevel", formData.selectedLevel)
       }
       data.append("Privacy", formData.isPrivate ? "Private" : "Public")
-      if (formData.isPrivate && formData.password) {
-        data.append("Password", formData.password)
+      if (formData.password.trim()) {
+        data.append("Password", formData.password.trim())
       }
 
       const topicsList =
@@ -91,7 +91,6 @@ export const useCreateCustomRoomForm = (open = true) => {
       }
 
       const result = await createCustomRoom(data).unwrap()
-      toast.success("Custom room created successfully")
       resetForm()
 
       if (onSuccess) onSuccess()
@@ -108,8 +107,7 @@ export const useCreateCustomRoomForm = (open = true) => {
   const isCreateDisabled =
     !formData.name.trim() ||
     isCreating ||
-    isQuotaFull ||
-    (formData.isPrivate && !formData.password.trim())
+    isQuotaFull
 
   return {
     formData,

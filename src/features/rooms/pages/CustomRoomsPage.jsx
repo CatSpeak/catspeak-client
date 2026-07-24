@@ -96,7 +96,6 @@ const CustomRoomsPage = () => {
   const handleDelete = async (roomId) => {
     try {
       await deleteCustomRoom(roomId).unwrap()
-      toast.success(ct.deleteSuccess || "Room deleted successfully")
     } catch (err) {
       console.error("Failed to delete custom room:", err)
       toast.error(err?.data?.message || "Failed to delete room")

@@ -63,8 +63,8 @@ export const useCreateRoomForm = () => {
     data.append("RequiredLevel", formData.selectedLevel || "")
     data.append("Privacy", formData.isPrivate ? "Private" : "Public")
 
-    if (formData.isPrivate && formData.password) {
-      data.append("Password", formData.password)
+    if (formData.password.trim()) {
+      data.append("Password", formData.password.trim())
     }
 
     const topicsList = formData.topics.length > 0 ? formData.topics : ["Other"]

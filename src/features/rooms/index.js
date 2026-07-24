@@ -33,6 +33,9 @@ export { useRoomsPageLogic } from "./hooks/useRoomsPageLogic"
 export { useMediaPreview } from "./hooks/useMediaPreview"
 export { useDeviceSelection } from "./hooks/useDeviceSelection"
 
+// Utils
+export { formatTopic, formatLevel } from "./utils/formatters"
+
 // API
 export {
   roomsApi,
