@@ -5,8 +5,6 @@ import {
   selectGlobalTasks,
   addTask,
   updateTask,
-  removeTask as removeTaskAction,
-  revealTask as revealTaskAction,
   selectIsConfirmingReload,
   setConfirmingReload,
   clearTasks,
@@ -24,15 +22,18 @@ export const useGlobalTask = () => {
   const dispatch = useDispatch();
 
   /**
-   * Khởi chạy một tác vụ toàn cục (hỗ trợ cả Tác vụ Upload HTTP lẫn Tác vụ xử lý Nền).
+   * Khởi chạy một tác vụ toàn cục (Hỗ trợ cả XHR Upload Byte thực tế & Hàm Async/RTK Query mutation).
    *
    * @param {Object} params
+   * @param {string} [params.id] - Task ID tùy chỉnh (nếu không truyền sẽ tự tạo mới)
    * @param {string} params.title - Tiêu đề hiển thị trên Progress Bar
    * @param {string} [params.taskType] - Loại tác vụ (ReelUpload, InstructorApplication, Recording...)
-   * @param {string} [params.url] - URL API (nếu là tác vụ upload file HTTP)
+   * @param {string} [params.url] - URL API (dành cho tác vụ upload file XHR thuần)
    * @param {string} [params.method] - HTTP method (mặc định POST)
    * @param {FormData|Object} [params.data] - Dữ liệu payload / FormData
+   * @param {Function} [params.taskFn] - Hàm async thực thi công việc (nếu dùng RTK Query / Async function)
    * @param {boolean} [params.isHidden] - Ẩn khỏi widget UI
+   * @param {boolean} [params.isUploadTask] - Cờ đánh dấu tác vụ upload file (để bật bảo vệ F5)
    * @param {Function} [params.onSuccess] - Callback khi hoàn tất thành công
    * @param {Function} [params.onError] - Callback khi gặp lỗi
    * @returns {string} taskId
@@ -45,31 +46,23 @@ export const useGlobalTask = () => {
       url = null,
       method = "POST",
       data = null,
-      taskFn = null, // Hỗ trợ nhận hàm Async API (ví dụ RTK Query mutation từ src/store/api)
+      taskFn = null,
       isHidden = false,
-      isUploadTask,
+      isUploadTask = false,
       onSuccess = null,
       onError = null,
-      onUploadSuccess = null,
-      onUploadError = null,
     }) => {
       const taskId =
         customId || Math.random().toString(36).substring(7) + Date.now();
-      const successCb = onSuccess || onUploadSuccess;
-      const errorCb = onError || onUploadError;
+      const successCb = onSuccess;
+      const errorCb = onError;
 
       // Đính kèm TaskId vào FormData để đồng bộ với SignalR backend (nếu có)
       if (data instanceof FormData && !data.has("TaskId")) {
         data.append("TaskId", taskId);
       }
 
-      const isUpload =
-        isUploadTask !== undefined
-          ? Boolean(isUploadTask)
-          : !!url ||
-            data instanceof FormData ||
-            taskType === "ReelUpload" ||
-            taskType === "InstructorApplication";
+      const isUpload = Boolean(isUploadTask);
 
       dispatch(
         addTask({
@@ -84,12 +77,17 @@ export const useGlobalTask = () => {
         }),
       );
 
-      // Trường hợp 1: Tác vụ Upload file HTTP -> Sử dụng XHR để đo % byte upload thực tế từ trình duyệt (0% -> 50%)
-      if (url) {
+      // ----------------------------------------------------------------------
+      // Trường hợp 1: Tác vụ Upload file XHR thuần (chỉ chạy khi truyền url và KHÔNG truyền taskFn)
+      // ----------------------------------------------------------------------
+      if (isUpload && typeof taskFn !== "function" && url) {
         const xhr = new XMLHttpRequest();
 
+        const targetUrl = url || "";
         const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
-        const finalUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
+        const finalUrl = targetUrl.startsWith("http")
+          ? targetUrl
+          : `${baseUrl}${targetUrl}`;
 
         xhr.open(method, finalUrl, true);
 
@@ -102,45 +100,101 @@ export const useGlobalTask = () => {
           xhr.setRequestHeader("X-Community-Lang", match[1]);
         }
 
-        // Đo dung lượng byte đã gửi từ browser (0% -> 50%)
+        // 1. Tính % tiến độ upload Byte thực tế theo thời gian thực (0% -> 99%)
         xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            const rawProgress = Math.round((e.loaded / e.total) * 100);
-            const uploadProgress = Math.min(
-              49,
-              Math.round((rawProgress / 100) * 50),
+          if (e.lengthComputable && e.total > 0) {
+            const percent = Math.min(
+              99,
+              Math.floor((e.loaded / e.total) * 100),
             );
             dispatch(
               updateTask({
                 id: taskId,
                 updates: {
                   status: "UPLOADING",
-                  progress: uploadProgress,
-                  stepName: "UPLOADING_FILE",
+                  progress: percent,
                 },
               }),
             );
           }
         };
 
-        // Khi gửi hết byte file lên server -> chuyển 50% nhường cho Backend SignalR xử lý (50% -> 100%)
+        // 2. Gửi xong 100% Byte file sang server -> Chuyển trạng thái sang PROCESSING
         xhr.upload.onload = () => {
           dispatch(
             updateTask({
               id: taskId,
               updates: {
                 status: "PROCESSING",
-                progress: 50,
-                stepName: "PROCESSING_ON_SERVER",
               },
             }),
           );
         };
+
+        // 3. Xử lý phản hồi từ Server khi HTTP Request hoàn tất
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            let resData = null;
+            try {
+              resData = JSON.parse(xhr.responseText);
+            } catch {}
+
+            dispatch(
+              updateTask({
+                id: taskId,
+                updates: {
+                  status: "SUCCESS",
+                  progress: 100,
+                  completionTime: Date.now(),
+                  payload: resData,
+                },
+              }),
+            );
+            if (successCb) successCb(resData);
+          } else {
+            let errorMsg = "Tải lên thất bại";
+            try {
+              const res = JSON.parse(xhr.responseText);
+              errorMsg = res.message || errorMsg;
+            } catch {}
+
+            dispatch(
+              updateTask({
+                id: taskId,
+                updates: {
+                  status: "ERROR",
+                  completionTime: Date.now(),
+                  error: errorMsg,
+                },
+              }),
+            );
+            if (errorCb) errorCb(new Error(errorMsg));
+          }
+        };
+
+        // 4. Xử lý khi gặp lỗi mạng kết nối
+        xhr.onerror = () => {
+          const errorMsg = "Lỗi kết nối mạng";
+          dispatch(
+            updateTask({
+              id: taskId,
+              updates: {
+                status: "ERROR",
+                completionTime: Date.now(),
+                error: errorMsg,
+              },
+            }),
+          );
+          if (errorCb) errorCb(new Error(errorMsg));
+        };
+
         xhr.send(data);
         return taskId;
       }
 
+      // ----------------------------------------------------------------------
       // Trường hợp 2: Chạy hàm Async / RTK Query mutation từ src/store/api
+      // ----------------------------------------------------------------------
       if (typeof taskFn === "function") {
         try {
           const reportProgress = (percentage, stepName) => {
@@ -249,51 +303,12 @@ export const useGlobalTask = () => {
     },
     [dispatch],
   );
-  /**
-   * Xóa một tác vụ khỏi danh sách
-   */
-  const removeTask = useCallback(
-    (id) => {
-      dispatch(removeTaskAction(id));
-    },
-    [dispatch],
-  );
-
-  /**
-   * Hiện tác vụ đang bị ẩn
-   */
-  const revealTask = useCallback(
-    (id) => {
-      dispatch(revealTaskAction(id));
-    },
-    [dispatch],
-  );
-
-  const addCustomTask = useCallback(
-    (task) => {
-      dispatch(addTask({ ...task, isCustom: true }));
-    },
-    [dispatch],
-  );
-
-  const updateCustomTask = useCallback(
-    (id, updates) => {
-      dispatch(updateTask({ id, updates }));
-    },
-    [dispatch],
-  );
 
   return {
     tasks,
     startTask, // Hàm đẩy BẤT KỲ tác vụ nào vào Progress Bar
-    uploadFile: startTask, // Alias tương thích với code cũ
-    updateTaskProgress, // Cập nhật % tiến độ tác vụ
     completeTask, // Đánh dấu hoàn tất
     failTask, // Đánh dấu thất bại
-    removeTask, // Xóa tác vụ
-    revealTask, // Hiện tác vụ ẩn
-    addCustomTask,
-    updateCustomTask,
   };
 };
 
@@ -317,11 +332,7 @@ export const GlobalTaskSync = () => {
   // Cảnh báo reload/tắt tab & bắt phím F5 / Ctrl+R CHỈ KHI đang UPLOADING FILE (isUploadTask)
   useEffect(() => {
     const isFileUploading = (t) =>
-      Boolean(
-        t.isUploadTask ||
-        t.taskType === "InstructorApplication" ||
-        t.taskType === "ReelUpload",
-      ) && t.status === "UPLOADING";
+      Boolean(t.isUploadTask) && t.status === "UPLOADING";
 
     const handleBeforeUnload = (e) => {
       if (window.__allowReload || isConfirmingReload) return;

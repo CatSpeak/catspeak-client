@@ -48,7 +48,19 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
     xhr.setRequestHeader("Authorization", `Bearer ${token}`)
   }
 
-  // Simulated timer in GlobalTaskSync drives 0% -> 99% progress automatically
+  // When raw file bytes finish sending to server -> switch to PROCESSING
+  if (xhr.upload) {
+    xhr.upload.onload = () => {
+      store.dispatch(
+        updateTask({
+          id,
+          updates: {
+            status: "PROCESSING",
+          },
+        }),
+      )
+    }
+  }
 
   xhr.onload = () => {
     if (xhr.status >= 200 && xhr.status < 300) {

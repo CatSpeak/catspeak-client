@@ -4,7 +4,7 @@ import { baseApi } from "./baseApi"
  * Build a FormData object from text fields and file fields.
  * Skips null/undefined values so only provided fields are sent.
  */
-function buildInstructorFormData({
+export function buildInstructorFormData({
   fullName,
   email,
   address,
