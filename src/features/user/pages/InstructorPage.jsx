@@ -8,7 +8,10 @@ import React, {
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetUserProfileQuery } from "@/store/api/userApi";
+import { store } from "@/store";
 import {
+  instructorApi,
+  buildInstructorFormData,
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
@@ -439,6 +442,7 @@ const InstructorPage = () => {
       } else {
         // POST /apply for new applications — Task Progress Bar
         const rawPayload = buildPayload();
+        const formData = buildInstructorFormData(rawPayload);
 
         // Lock form immediately
         setIsTaskSubmitting(true);
@@ -446,9 +450,10 @@ const InstructorPage = () => {
         startTask({
           title: t?.uploadWidget?.instructorTaskTitle || "Gửi hồ sơ giảng viên",
           taskType: "InstructorApplication",
-          taskFn: async (taskId) => {
-            return await applyInstructor({ ...rawPayload, taskId }).unwrap();
-          },
+          isUploadTask: true,
+          url: "/InstructorProfile/apply",
+          method: "POST",
+          data: formData,
           onSuccess: () => {
             toast.success(ins.statusPendingDesc || "Đã gửi đơn đăng ký thành công!");
             setIsTaskSubmitting(false);
@@ -456,10 +461,11 @@ const InstructorPage = () => {
             setAgreed(false);
             setErrors({});
             setIsReapplying(false);
+            store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
           },
           onError: (err) => {
             setIsTaskSubmitting(false);
-            toast.error(err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
+            toast.error(err?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
           },
         });
       }
