@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Clock,
   EyeOff,
+  Eye,
   FileText,
   Timer,
 } from "lucide-react"
@@ -236,7 +237,7 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
         </button>
       </td>
       <td className="p-4 text-gray-400 font-semibold">{closeTimeFormatted}</td>
-      <td className="p-4">
+      <td className="p-4 flex items-center gap-2">
         {recordStatus === "submitted" ? (
           <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-100 uppercase tracking-wide">
             Đã nộp
@@ -253,6 +254,19 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
           <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-gray-200 uppercase tracking-wide">
             {language === "vi" ? "Không xác định" : "Unavailable"}
           </span>
+        )}
+        {(recordStatus === "submitted" || recordStatus === "inprogress") && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onSelect?.(quiz.id, "result")
+            }}
+            className="ml-auto px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+          >
+            <Eye size={11} />
+            <span>{language === "vi" ? "Xem kết quả" : "See Result"}</span>
+          </button>
         )}
       </td>
       <td className="p-4 pr-6 text-center font-black text-xs text-gray-900">
@@ -371,13 +385,15 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
             </span>
           </div>
           <div className="flex items-center gap-3 text-[11px] text-gray-500 font-bold mt-1">
-            <span>
-              ⏱️ {Number.isFinite(Number(quiz.timeLimitMinutes))
+            <span className="inline-flex items-center gap-1">
+              <Timer size={13} className="text-gray-400 shrink-0" />
+              {Number.isFinite(Number(quiz.timeLimitMinutes))
                 ? `${quiz.timeLimitMinutes} ${language === "vi" ? "phút" : "mins"}`
                 : "—"}
             </span>
-            <span>
-              📝 {questionCount ?? "—"} {language === "vi" ? "câu hỏi" : "questions"}
+            <span className="inline-flex items-center gap-1">
+              <FileText size={13} className="text-gray-400 shrink-0" />
+              {questionCount ?? "—"} {language === "vi" ? "câu hỏi" : "questions"}
             </span>
           </div>
         </div>
@@ -396,10 +412,10 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
           <span>
             {
               quiz.autoGradingEnabled === true
-                ? "⚡ Tự động chấm"
+                ? "Tự động chấm"
                 : (
                   quiz.autoGradingEnabled === false
-                    ? "✋ Chấm thủ công"
+                    ? "Chấm thủ công"
                     : "—"
                 )
             }
@@ -411,7 +427,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
             <button
               type="button"
               onClick={() => navigate(
-                `/workspace/courses/class/${encodeURIComponent(classId)}/create-exam?quizId=${encodeURIComponent(quiz.id)}`
+                `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`
               )}
               className="flex-1 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-[10px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider cursor-pointer"
             >
@@ -431,7 +447,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
           <button
             type="button"
             onClick={() => navigate(
-              `/workspace/courses/class/${encodeURIComponent(classId)}/create-exam?quizId=${encodeURIComponent(quiz.id)}`
+              `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
             )}
             className="w-full py-2 border border-gray-200 hover:bg-gray-50 text-gray-655 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider cursor-pointer"
           >
@@ -657,7 +673,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
     const encodedQuizId = encodeURIComponent(quizId)
     const target = isStudent
       ? `/workspace/courses/class/${encodedClassId}/quiz/${encodedQuizId}/take`
-      : `/workspace/courses/class/${encodedClassId}/create-exam?quizId=${encodedQuizId}`
+      : `/workspace/courses/class/${encodedClassId}/quiz/${encodedQuizId}`
     return <Navigate to={target} replace />
   }
 
@@ -795,8 +811,8 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       key={`quiz-${item.value.id}`}
                       quiz={item.value}
                       language={language}
-                      onSelect={(id) => navigate(
-                        `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(id)}/take`
+                      onSelect={(id, step) => navigate(
+                        `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(id)}/take${step ? `?step=${step}` : ""}`
                       )}
                     />
                   )
@@ -1102,7 +1118,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                   {isDraft ? (
                     <button
                       type="button"
-                      onClick={() => navigate(`/workspace/courses/class/${classId}/create-assignment?assignmentId=${assignment.id}`)}
+                      onClick={() => navigate(`/workspace/courses/class/${classId}/assignment/${assignment.id}`)}
                       className="w-full py-2 border border-[#990011] hover:bg-red-50/50 text-[#990011] font-extrabold text-[11px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider"
                     >
                       {cg.btnContinueEditing || "Tiếp tục chỉnh sửa"}

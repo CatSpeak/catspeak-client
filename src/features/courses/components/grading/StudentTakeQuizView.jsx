@@ -22,6 +22,7 @@ import {
   ArrowRight,
   Send,
   RefreshCw,
+  Eye,
 } from "lucide-react"
 import {
   useGetStudentQuizzesQuery,
@@ -140,9 +141,13 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   const activeQuizKeyRef = useRef(quizKey)
   activeQuizKeyRef.current = quizKey
   const hasCurrentQuizFlow = flowQuizKey === quizKey
+  const requestedStep = searchParams.get("step") || searchParams.get("view")
+  const defaultStep = requestedStep === "result"
+    ? "result"
+    : (String(quiz?.recordStatus ?? "").toLowerCase() === "submitted" ? "result" : "intro")
+
   const attemptStep =
-    (hasCurrentQuizFlow ? stepOverride : null) ??
-    (quiz?.recordStatus === "Submitted" ? "result" : "intro")
+    (hasCurrentQuizFlow ? stepOverride : null) ?? defaultStep
 
   const {
     currentData: quizResultResponse,
@@ -462,7 +467,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       language === "vi"
         ? "Hết giờ làm bài. Hệ thống đang tự động nộp bài..."
         : "Time is up. Submitting automatically...",
-      { icon: "⏱️", id: "quiz-timeout" },
+      { id: "quiz-timeout" },
     )
     await executeSubmit({ timedOut: true })
   }, [executeSubmit, language])
@@ -526,12 +531,13 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       autoSubmitTriggeredRef.current = false
       attemptActiveRef.current = true
       setStepOverride("taking")
+      const isInProgress = String(quiz?.recordStatus ?? "").toLowerCase() === "inprogress"
       hotToast.success(
         language === "vi"
-          ? quiz?.recordStatus === "InProgress"
+          ? isInProgress
             ? "Đã tiếp tục lượt làm bài đang dở."
             : "Bắt đầu làm bài kiểm tra!"
-          : quiz?.recordStatus === "InProgress"
+          : isInProgress
             ? "Resumed your in-progress attempt."
             : "Exam started!",
       )
@@ -738,19 +744,6 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   if (attemptStep === "intro") {
     return (
       <div className="min-h-screen bg-gray-50 overflow-y-auto p-4 flex flex-col items-center justify-center font-sans">
-
-        {/* Back navigation button */}
-        <div className="max-w-3xl w-full mb-4 flex justify-start">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="flex items-center gap-2 text-xs font-extrabold text-gray-500 hover:text-gray-900 transition-colors bg-white border border-gray-200 px-4 py-2 rounded-xl shadow-2xs cursor-pointer"
-          >
-            <ChevronLeft size={16} />
-            <span>{language === "vi" ? "Quay lại" : "Back"}</span>
-          </button>
-        </div>
-
         {/* Main Info & Confirmation Card */}
         <div className="max-w-3xl w-full bg-white rounded-3xl border border-gray-150 p-6 md:p-10 shadow-lg flex flex-col gap-6">
 
@@ -867,11 +860,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               {language === "vi" ? "Bạn có muốn tiến hành làm bài kiểm tra này không?" : "Do you want to proceed to start this quiz?"}
             </span>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex-1 sm:flex-none px-5 py-3 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-2xl transition-all cursor-pointer"
+                className="flex-1 sm:flex-none px-4 py-3 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-2xl transition-all cursor-pointer"
               >
                 {language === "vi" ? "Hủy bỏ" : "Cancel"}
               </button>
@@ -1262,7 +1255,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                               </div>
 
                               {/* Option Label */}
-                              <span className={isStudentPick && hasAnswerKey && !isRightAnswer ? "line-through text-gray-600" : ""}>
+                              <span className={isStudentPick && hasAnswerKey && !isRightAnswer ? "text-gray-600" : ""}>
                                 <span className="font-black mr-1.5">{String.fromCharCode(65 + optIdx)}.</span>
                                 {optText}
                               </span>
@@ -1329,7 +1322,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             onClick={handleBack}
             className="px-6 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
           >
-            {language === "vi" ? "Quay lại danh sách" : "Back to List"}
+            {language === "vi" ? "Quay lại" : "Back"}
           </button>
 
           {canRetake && (

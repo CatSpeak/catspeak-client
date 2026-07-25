@@ -544,7 +544,7 @@ export default {
     noDataLabel: "Chưa có số liệu",
     btnViewSubmissions: "Xem bài nộp",
     btnContinueEditing: "Tiếp tục chỉnh sửa",
-    backToAssignments: "Quay lại danh sách",
+    backToAssignments: "Quay lại",
     notPublishedLabel: "Chưa đăng tải cho học viên",
     viewSubmissionsTitle: "Xem bài nộp",
     viewPost: "Xem bài đăng",

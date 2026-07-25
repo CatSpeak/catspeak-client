@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer } from "react"
-import { useParams, useNavigate, useSearchParams } from "react-router-dom"
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import {
@@ -22,6 +22,7 @@ import {
   validateQuizForm,
 } from "@/features/courses/utils/quizUtils"
 import { Editor } from "@tinymce/tinymce-react"
+import TeacherQuizDetailView from "@/features/courses/components/grading/TeacherQuizDetailView"
 import {
   ChevronRight,
   Trash2,
@@ -116,10 +117,35 @@ const formReducer = (state, action) => {
 
 const CreateExamForm = ({ id, classData, language, t }) => {
   const navigate = useNavigate()
+  const params = useParams()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const routeQuizId = searchParams.get("quizId")
+
+  const routeQuizId = params.quizId || searchParams.get("quizId")
   const [createdQuizId, setCreatedQuizId] = useState(null)
   const effectiveQuizId = routeQuizId || createdQuizId
+
+  const isEditPath = location.pathname.endsWith("/edit") || searchParams.get("mode") === "edit"
+  const initialViewMode = isEditPath || !effectiveQuizId ? "edit" : "detail"
+  const [viewMode, setViewMode] = useState(initialViewMode)
+
+  // Redirect legacy /create-exam?quizId=4 to clean route /quiz/4
+  useEffect(() => {
+    if (effectiveQuizId && location.pathname.includes("/create-exam")) {
+      const cleanPath = isEditPath
+        ? `/workspace/courses/class/${encodeURIComponent(id)}/quiz/${encodeURIComponent(effectiveQuizId)}/edit`
+        : `/workspace/courses/class/${encodeURIComponent(id)}/quiz/${encodeURIComponent(effectiveQuizId)}`
+      navigate(cleanPath, { replace: true })
+    }
+  }, [effectiveQuizId, location.pathname, isEditPath, id, navigate])
+
+  useEffect(() => {
+    if (isEditPath) {
+      setViewMode("edit")
+    } else if (effectiveQuizId) {
+      setViewMode("detail")
+    }
+  }, [isEditPath, effectiveQuizId])
 
   const {
     currentData: quizDetailResponse,
@@ -502,7 +528,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
   // Save/Submit Actions
   const handleCancel = () => {
-    navigate(`/workspace/courses/class/${id}`)
+    if (effectiveQuizId) {
+      setViewMode("detail")
+    } else {
+      navigate(`/workspace/courses/class/${id}`)
+    }
   }
 
   const rememberCreatedQuiz = (newQuizId) => {
@@ -584,7 +614,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     submissionGuardRef.current = true
     setIsActionPending(true)
     try {
-      await persistQuiz()
+      const persistedQuiz = await persistQuiz()
       const isExistingPublishedQuiz = Boolean(
         effectiveQuizId && quizDetail?.status !== "Draft"
       )
@@ -593,7 +623,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           ? (language === "vi" ? "Đã lưu thay đổi" : "Changes saved")
           : (language === "vi" ? "Đã lưu bản nháp bài kiểm tra" : "Quiz draft saved")
       )
-      navigate(`/workspace/courses/class/${id}`)
+      const targetId = persistedQuiz?.quizId || effectiveQuizId
+      if (targetId) {
+        setCreatedQuizId(targetId)
+        navigate(`/workspace/courses/class/${encodeURIComponent(id)}/quiz/${encodeURIComponent(targetId)}`, { replace: true })
+        setViewMode("detail")
+      } else {
+        navigate(`/workspace/courses/class/${id}`)
+      }
     } catch (error) {
       toast.error(getQuizErrorMessage(
         error,
@@ -672,7 +709,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         )
       }
 
-      navigate(`/workspace/courses/class/${id}`)
+      const targetId = persistedQuiz?.quizId || effectiveQuizId
+      if (targetId) {
+        setCreatedQuizId(targetId)
+        navigate(`/workspace/courses/class/${encodeURIComponent(id)}/quiz/${encodeURIComponent(targetId)}`, { replace: true })
+        setViewMode("detail")
+      } else {
+        navigate(`/workspace/courses/class/${id}`)
+      }
     } catch (error) {
       toast.error(getQuizErrorMessage(
         error,
@@ -832,6 +876,20 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {language === "vi" ? "Thử lại" : "Try again"}
         </button>
       </div>
+    )
+  }
+
+  if (viewMode === "detail" && effectiveQuizId && !isPreviewMode) {
+    return (
+      <TeacherQuizDetailView
+        classId={id}
+        quizId={effectiveQuizId}
+        onEdit={() => {
+          navigate(`/workspace/courses/class/${encodeURIComponent(id)}/quiz/${encodeURIComponent(effectiveQuizId)}/edit`)
+          setViewMode("edit")
+        }}
+        onBack={() => navigate(`/workspace/courses/class/${id}`)}
+      />
     )
   }
 

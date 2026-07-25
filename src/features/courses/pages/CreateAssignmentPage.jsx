@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react"
-import { useParams, useNavigate, useSearchParams } from "react-router-dom"
+import React, { useState, useRef, useEffect } from "react"
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import {
@@ -911,10 +911,20 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 }
 
 const CreateAssignmentPage = () => {
-  const { id } = useParams()
+  const params = useParams()
+  const id = params.id
+  const location = useLocation()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const assignmentId = searchParams.get("assignmentId")
+  const assignmentId = params.assignmentId || searchParams.get("assignmentId")
   const { language, t } = useLanguage()
+
+  // Redirect legacy /create-assignment?assignmentId=X to /assignment/X
+  useEffect(() => {
+    if (assignmentId && location.pathname.includes("/create-assignment")) {
+      navigate(`/workspace/courses/class/${encodeURIComponent(id)}/assignment/${encodeURIComponent(assignmentId)}`, { replace: true })
+    }
+  }, [assignmentId, location.pathname, id, navigate])
 
   const {
     currentData: detailResponse,

@@ -148,8 +148,7 @@ const AssignmentSubmissionsList = ({
             <button
               type="button"
               onClick={() => {
-                const query = new URLSearchParams({ assignmentId: String(assignmentId) })
-                navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}/create-assignment?${query}`)
+                navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}/assignment/${encodeURIComponent(String(assignmentId))}`)
               }}
               className="h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
             >

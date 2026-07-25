@@ -419,7 +419,31 @@ const routesConfig = [
                 ),
               },
               {
+                path: "courses/class/:id/assignment/:assignmentId",
+                element: (
+                  <LazyRoute>
+                    <CreateAssignmentPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "courses/class/:id/create-exam",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/quiz/:quizId",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/quiz/:quizId/edit",
                 element: (
                   <LazyRoute>
                     <CreateExamPage />
