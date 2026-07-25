@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { ChevronDown, Globe } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import DesktopNavItem from "./DesktopNavItem"
+import ListItem from "@/shared/components/ui/ListItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
@@ -92,20 +93,24 @@ const DesktopNavSection = ({
 
         {/* Inline "See More / Show Less" Toggle (Only when expanded) */}
         {hasLimit && (
-          <button
+          <ListItem
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="flex items-center shrink-0 h-11 px-3 gap-2 rounded-xl w-full hover:bg-[#F2F2F2] transition-colors select-none cursor-pointer"
+            lines={1}
+            leftContent={
+              <ChevronDown
+                size={20}
+                className={`shrink-0 transition-transform duration-200 ${
+                  isExpanded ? "rotate-180" : ""
+                }`}
+              />
+            }
+            className="rounded-2xl cursor-pointer select-none"
+            contentClassName="rounded-2xl hover:bg-[#F2F2F2] text-gray-700 font-medium transition-colors px-4"
           >
-            <ChevronDown
-              size={20}
-              className={`shrink-0 transition-transform duration-200 ${
-                isExpanded ? "rotate-180" : ""
-              }`}
-            />
             <span className="text-sm whitespace-nowrap truncate">
               {isExpanded ? t.showLess || "Show less" : t.seeMore || "See more"}
             </span>
-          </button>
+          </ListItem>
         )}
       </div>
     </div>

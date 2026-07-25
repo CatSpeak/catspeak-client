@@ -8,10 +8,14 @@ const SearchInput = ({
   placeholder = "Search...",
   className = "",
   inputClassName = "",
+  buttonClassName = "",
+  focusBorder = true,
 }) => {
   return (
     <div
-      className={`flex items-center w-full min-w-0 sm:min-w-[360px] h-14 border border-[#e5e5e5] rounded-full focus-within:border-cath-red-700 transition-colors ${className}`}
+      className={`flex items-center w-full min-w-0 sm:min-w-[360px] h-14 bg-white text-black border border-[#e5e5e5] rounded-full transition-colors ${
+        focusBorder ? "focus-within:border-cath-red-700" : ""
+      } ${className}`}
     >
       <input
         type="text"
@@ -23,14 +27,16 @@ const SearchInput = ({
             onSearch()
           }
         }}
-        className={`flex-1 h-full pl-6 bg-transparent focus:outline-none ${inputClassName}`}
+        className={`flex-1 min-w-0 h-full pl-6 pr-2 truncate bg-transparent focus:outline-none ${inputClassName}`}
       />
 
       <button
         onClick={onSearch}
         className="w-12 h-12 flex items-center justify-center rounded-full group cursor-pointer shrink-0 mr-1"
       >
-        <div className="w-10 h-10 flex items-center justify-center rounded-full transition-colors group-hover:bg-[#E5E5E5]">
+        <div
+          className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors group-hover:bg-[#E5E5E5] ${buttonClassName}`}
+        >
           <Search />
         </div>
       </button>

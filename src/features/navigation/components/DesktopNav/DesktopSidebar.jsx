@@ -1,5 +1,6 @@
 import React, { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
+import { LayoutGroup } from "framer-motion"
 import { useSelector } from "react-redux"
 import { LandingPageIcon } from "@/features/landing/assets"
 import { useSidebar } from "@/shared/context/SidebarContext"
@@ -22,6 +23,7 @@ import {
   MessageCircle,
 } from "lucide-react"
 import DesktopNavItem from "./DesktopNavItem"
+import ListItem from "@/shared/components/ui/ListItem"
 
 // Primary Dock Navigation Items
 const dockItems = [
@@ -222,73 +224,73 @@ const DesktopSidebar = () => {
         </div>
       </div>
 
-      {/* 2. SECONDARY EXPANDABLE SIDEBAR PANEL (256px) */}
+      {/* 2. SECONDARY EXPANDABLE SIDEBAR PANEL (393px) */}
       <div
         className={`h-full bg-white border-r border-border flex flex-col gap-1 transition-all duration-300 overflow-hidden relative z-10 ${
           isPanelOpen
-            ? "w-[256px] px-4 opacity-100"
+            ? "w-80 px-4 opacity-100"
             : "w-0 px-0 opacity-0 border-none"
         }`}
       >
         {/* Secondary Header */}
-        <div className="h-[64px] flex items-center justify-between shrink-0 gap-2">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <span className="font-bold truncate">
-              {isSettingsPage
-                ? t.nav?.settings || "Settings"
-                : currentSectionData?.defaultLabel ||
-                  t.nav?.[activeDockSection] ||
-                  "Navigation"}
-            </span>
-          </div>
-        </div>
+        <ListItem className="font-bold">
+          <span className="truncate text-lg">
+            {isSettingsPage
+              ? t.nav?.settings || "Settings"
+              : currentSectionData?.defaultLabel ||
+                t.nav?.[activeDockSection] ||
+                "Navigation"}
+          </span>
+        </ListItem>
 
         {/* Content Sub-Links */}
-        <div className="flex-1 overflow-y-auto flex flex-col gap-1">
-          {isSettingsPage
-            ? settingNavLinks
-                .filter((item) => {
-                  if (item.hideInSidebar) return false
-                  if (item.lang && item.lang !== currentLang) return false
-                  if (item.isPrivate && !isAuthenticated) return false
-                  return true
-                })
-                .map((item) => {
-                  const label = t.nav?.[item.key] || item.label || item.key
-                  return (
-                    <DesktopNavItem
-                      key={item.key}
-                      to={resolvePath(item.path)}
-                      icon={item.icon}
-                      label={label}
-                      color={item.color}
-                      img={item.img}
-                      isDocked={false}
-                    />
-                  )
-                })
-            : (currentSectionData?.items || [])
-                .filter((item) => {
-                  if (item.hideInSidebar) return false
-                  if (item.lang && item.lang !== currentLang) return false
-                  if (item.isPrivate && !isAuthenticated) return false
-                  return true
-                })
-                .map((item) => {
-                  const label = t.nav?.[item.key] || item.label || item.key
-                  return (
-                    <DesktopNavItem
-                      key={item.key}
-                      to={resolvePath(item.path)}
-                      icon={item.icon}
-                      label={label}
-                      color={item.color}
-                      img={item.img}
-                      isDocked={false}
-                    />
-                  )
-                })}
-        </div>
+        <LayoutGroup id="secondaryDesktopSidebar">
+          <div className="flex-1 overflow-y-auto flex flex-col gap-1">
+            {isSettingsPage
+              ? settingNavLinks
+                  .filter((item) => {
+                    if (item.hideInSidebar) return false
+                    if (item.lang && item.lang !== currentLang) return false
+                    if (item.isPrivate && !isAuthenticated) return false
+                    return true
+                  })
+                  .map((item) => {
+                    const label = t.nav?.[item.key] || item.label || item.key
+                    return (
+                      <DesktopNavItem
+                        key={item.key}
+                        to={resolvePath(item.path)}
+                        icon={item.icon}
+                        label={label}
+                        color={item.color}
+                        img={item.img}
+                        isDocked={false}
+                      />
+                    )
+                  })
+              : (currentSectionData?.items || [])
+                  .filter((item) => {
+                    if (item.hideInSidebar) return false
+                    if (item.lang && item.lang !== currentLang) return false
+                    if (item.isPrivate && !isAuthenticated) return false
+                    return true
+                  })
+                  .map((item) => {
+                    const label = t.nav?.[item.key] || item.label || item.key
+                    return (
+                      <DesktopNavItem
+                        key={item.key}
+                        to={resolvePath(item.path)}
+                        icon={item.icon}
+                        label={label}
+                        color={item.color}
+                        img={item.img}
+                        isDocked={false}
+                      />
+                    )
+                  })}
+          </div>
+        </LayoutGroup>
       </div>
     </aside>
   )
