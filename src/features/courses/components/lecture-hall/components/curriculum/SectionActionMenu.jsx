@@ -14,7 +14,7 @@ const SectionActionMenu = ({
   if (!open) return null
 
   return (
-    <div className="absolute right-1 top-12 z-30 animate-fadeIn">
+    <div className="absolute right-1 top-10 z-30 animate-fadeIn">
       <MenuList className="w-[218px] rounded-xl shadow-faq-card text-sm text-[#1A1A1A]">
         <MenuItem
           icon={<FilePlusCorner size={14} className="text-[#1A1A1A]" />}

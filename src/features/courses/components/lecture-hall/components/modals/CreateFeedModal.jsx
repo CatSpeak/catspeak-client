@@ -51,7 +51,7 @@ const CreateFeedModal = ({
           >
             Hủy
           </PillButton>
-          <PillButton type="submit">
+          <PillButton>
             Lưu
           </PillButton>
         </div>

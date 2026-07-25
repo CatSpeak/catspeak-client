@@ -1,380 +1,189 @@
 import React, { useState } from "react"
-import { Pencil, PlusCircle } from "lucide-react"
+import { Send, MoreVertical, MessageSquare } from "lucide-react"
+import { useGetClassFeedQuery, useCreateClassPostMutation } from "@/store/api/coursesApi"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
+import { MOCK_FEED } from "../../data/classMockData"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { PillButton } from "@/shared/components/ui/buttons"
-import SectionCard from "./SectionCard"
-import CreateFeedModal from "./CreateFeedModal"
-import AddMaterialModal from "./AddMaterialModal"
-import AddActivityModal from "./AddActivityModal"
-import AddLinkModal from "./AddLinkModal"
-import SectionModal from "./SectionModal"
-import { MOCK_SECTIONS } from "./mockData"
+
+// Toggle switch: set to false to use real API endpoint after backend is ready
+const USE_MOCK = true
 
 const ClassFeedTab = ({ id, isStudent }) => {
   const { t } = useLanguage()
+  const c = t.courses || {}
+  const cd = c.classDetail || {}
 
-  // Main State for Sections and Editing
-  const [sections, setSections] = useState(MOCK_SECTIONS)
-  const [sectionsBackup, setSectionsBackup] = useState(MOCK_SECTIONS)
-  const [isEdit, setIsEdit] = useState(false)
-
-  // Active Modal state
-  const [activeModal, setActiveModal] = useState(null) // null | 'announcement' | 'material' | 'assignment' | 'link'
-  const [targetSectionId, setTargetSectionId] = useState(null)
-  const [targetSectionName, setTargetSectionName] = useState("")
-
-  // Section Modal State
-  const [sectionModal, setSectionModal] = useState({
-    open: false,
-    mode: "create", // "create" | "edit"
-    sectionId: null,
-    title: "",
-    subtitle: "",
-    isHidden: false,
-  })
-
-  // Edit Controls
-  const handleStartEdit = () => {
-    setSectionsBackup(JSON.parse(JSON.stringify(sections)))
-    setIsEdit(true)
+  const notifyInDevelopment = () => {
+    toast.success(c.devMessage || "Feature in development")
   }
 
-  const handleCancelEdit = () => {
-    setSections(JSON.parse(JSON.stringify(sectionsBackup)))
-    setIsEdit(false)
-    toast.success("Đã hủy các thay đổi!")
-  }
+  const { data: feedResponse, isLoading, error } = useGetClassFeedQuery(id, { skip: USE_MOCK })
+  const [createPost, { isLoading: isCreatingPost }] = useCreateClassPostMutation()
 
-  const handleSaveEdit = () => {
-    setSectionsBackup(JSON.parse(JSON.stringify(sections)))
-    setIsEdit(false)
-    toast.success("Đã lưu thay đổi nội dung khóa học thành công!")
-  }
+  const [newPostText, setNewPostText] = useState("")
+  const [localLikes, setLocalLikes] = useState({}) // { postId: { count, isLiked } }
+  const feedPosts = USE_MOCK
+    ? MOCK_FEED
+    : (feedResponse?.data || feedResponse?.items || feedResponse || [])
 
-  // Open Modal for adding content to a section
-  const handleOpenAddItemModal = (sectionId, itemType) => {
-    const section = sections.find((s) => s.id === sectionId)
-    setTargetSectionId(sectionId)
-    setTargetSectionName(section ? section.title : "Section")
-    setActiveModal(itemType) // "announcement" | "material" | "assignment" | "link"
-  }
-
-  // --- SUBMIT HANDLERS FOR MODALS ---
-  // 1. Create Feed / Announcement
-  const handleSaveFeedPost = (data) => {
-    const newItem = {
-      id: `item-${Date.now()}`,
-      type: "announcement",
-      title: data.title,
-      meta: `Bài viết mới nhất: ${new Date().toLocaleDateString("vi-VN")}`,
-      metaType: "clock",
-      isHidden: !data.isVisible,
-      content: data.content,
-      allowReply: data.allowReply,
-    }
-    setSections((prev) =>
-      prev.map((sec) =>
-        sec.id === targetSectionId
-          ? { ...sec, items: [newItem, ...sec.items] }
-          : sec
-      )
-    )
-    toast.success("Đã tạo bảng tin mới!")
-  }
-
-  // 2. Add Material
-  const handleSaveMaterial = (data) => {
-    const fileExt = data.file?.name
-      ? data.file.name.split(".").pop().toUpperCase()
-      : "PDF"
-    const fileSize = data.file?.size
-      ? `${(data.file.size / (1024 * 1024)).toFixed(1)} MB`
-      : "2.4 MB"
-
-    const newItem = {
-      id: `item-${Date.now()}`,
-      type: "material",
-      title: data.title,
-      meta: `${fileExt} • ${fileSize}`,
-      metaType: "file",
-      isHidden: !data.isVisible,
-    }
-
-    setSections((prev) =>
-      prev.map((sec) =>
-        sec.id === targetSectionId
-          ? { ...sec, items: [...sec.items, newItem] }
-          : sec
-      )
-    )
-    toast.success("Đã thêm học liệu thành công!")
-  }
-
-  // 3. Add Activity (Assignment/Quiz/Forum)
-  const handleSaveActivities = (activities) => {
-    if (!activities || activities.length === 0) return
-    const newItems = activities.map((act) => ({
-      id: `item-${Date.now()}-${act.id}`,
-      type: "assignment",
-      title: act.title,
-      meta: `Hạn nộp: ${act.dueDate}`,
-      metaType: "clock",
-      isHidden: false,
-    }))
-
-    setSections((prev) =>
-      prev.map((sec) =>
-        sec.id === targetSectionId
-          ? { ...sec, items: [...sec.items, ...newItems] }
-          : sec
-      )
-    )
-    toast.success(`Đã thêm ${activities.length} hoạt động học tập!`)
-  }
-
-  // 4. Add Link
-  const handleSaveLink = (data) => {
-    const newItem = {
-      id: `item-${Date.now()}`,
-      type: "link",
-      title: data.title,
-      meta: data.url || "",
-      metaType: "none",
-      isHidden: !data.isVisible,
-    }
-
-    setSections((prev) =>
-      prev.map((sec) =>
-        sec.id === targetSectionId
-          ? { ...sec, items: [...sec.items, newItem] }
-          : sec
-      )
-    )
-    toast.success("Đã thêm liên kết mới!")
-  }
-
-  // --- SECTION / CHAPTER HANDLERS ---
-  const handleOpenAddSection = () => {
-    setSectionModal({
-      open: true,
-      mode: "create",
-      sectionId: null,
-      title: "",
-      subtitle: "",
-      isHidden: false,
-    })
-  }
-
-  const handleOpenEditSection = (chapter) => {
-    setSectionModal({
-      open: true,
-      mode: "edit",
-      sectionId: chapter.id,
-      title: chapter.title,
-      subtitle: chapter.subtitle || "",
-      isHidden: chapter.isHidden || false,
-    })
-  }
-
-  const handleSaveSectionModal = (e) => {
+  const handleCreatePost = async (e) => {
     e.preventDefault()
-    if (!sectionModal.title.trim()) {
-      toast.error("Vui lòng nhập tên section")
+    if (!newPostText.trim()) return
+
+    if (USE_MOCK) {
+      notifyInDevelopment()
       return
     }
 
-    if (sectionModal.mode === "create") {
-      const newSection = {
-        id: `sec-${Date.now()}`,
-        title: sectionModal.title.trim(),
-        subtitle: sectionModal.subtitle.trim(),
-        isHidden: sectionModal.isHidden,
-        items: [],
-      }
-      setSections((prev) => [...prev, newSection])
-      toast.success("Đã thêm section mới!")
-    } else {
-      setSections((prev) =>
-        prev.map((sec) =>
-          sec.id === sectionModal.sectionId
-            ? {
-              ...sec,
-              title: sectionModal.title.trim(),
-              subtitle: sectionModal.subtitle.trim(),
-              isHidden: sectionModal.isHidden,
-            }
-            : sec
-        )
-      )
-      toast.success("Đã cập nhật section!")
+    try {
+      await createPost({ classId: id, content: newPostText }).unwrap()
+      setNewPostText("")
+      toast.success(cd.postPublished || "Đã đăng bảng tin thành công!")
+    } catch (err) {
+      toast.error(err.data?.message || err.message || "Failed to create post")
     }
-
-    setSectionModal({ open: false, mode: "create", sectionId: null, title: "", subtitle: "", isHidden: false })
   }
 
-  const handleToggleHideChapter = (chapterId) => {
-    setSections((prev) =>
-      prev.map((sec) =>
-        sec.id === chapterId ? { ...sec, isHidden: !sec.isHidden } : sec
-      )
+  const handleLikeToggle = (item) => {
+    if (USE_MOCK) {
+      notifyInDevelopment()
+      return
+    }
+
+    const current = localLikes[item.id] || { count: item.likes || 0, isLiked: item.isLiked || false }
+    const newIsLiked = !current.isLiked
+    const newCount = newIsLiked ? current.count + 1 : current.count - 1
+    setLocalLikes(prev => ({
+      ...prev,
+      [item.id]: { count: newCount, isLiked: newIsLiked }
+    }))
+    toast.success(newIsLiked ? "Liked post" : "Unliked post")
+  }
+
+  if (!USE_MOCK && isLoading) {
+    return <LoadingSpinner className="flex justify-center items-center py-12" />
+  }
+
+  if (!USE_MOCK && error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
+        Failed to load class feed: {error.message || "Unknown error"}
+      </div>
     )
-    toast.success("Đã cập nhật trạng thái hiển thị section")
-  }
-
-  const handleDeleteChapter = (chapterId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa section này?")) {
-      setSections((prev) => prev.filter((sec) => sec.id !== chapterId))
-      toast.success("Đã xóa section")
-    }
-  }
-
-  const handleMoveChapter = (index, direction) => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1
-    if (targetIndex < 0 || targetIndex >= sections.length) return
-    const updated = [...sections]
-    const temp = updated[index]
-    updated[index] = updated[targetIndex]
-    updated[targetIndex] = temp
-    setSections(updated)
-  }
-
-  // --- ITEM HANDLERS ---
-  const handleToggleHideItem = (chapterId, itemId) => {
-    setSections((prev) =>
-      prev.map((sec) =>
-        sec.id === chapterId
-          ? {
-            ...sec,
-            items: sec.items.map((it) =>
-              it.id === itemId ? { ...it, isHidden: !it.isHidden } : it
-            ),
-          }
-          : sec
-      )
-    )
-    toast.success("Đã cập nhật trạng thái bài học")
-  }
-
-  const handleDeleteItem = (chapterId, itemId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa bài học này?")) {
-      setSections((prev) =>
-        prev.map((sec) =>
-          sec.id === chapterId
-            ? { ...sec, items: sec.items.filter((it) => it.id !== itemId) }
-            : sec
-        )
-      )
-      toast.success("Đã xóa bài học")
-    }
   }
 
   return (
-    <div className="animate-fadeIn space-y-6 pb-10">
-      {/* Top Edit Bar */}
-      {!isStudent && (
-        <div className="flex justify-end">
-          {isEdit ? (
-            <div className="flex items-center gap-3">
-              <PillButton
-                variant="outline"
-                onClick={handleCancelEdit}
-                className="!rounded-xl"
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
+      <div className="lg:col-span-2 flex flex-col gap-4">
+        {/* Create Post Form (Hidden for students) */}
+        {!isStudent && (
+          <form onSubmit={handleCreatePost} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
+            <textarea
+              rows={3}
+              placeholder={cd.feedFormPlaceholder || "Share announcements, links, study resources..."}
+              value={newPostText}
+              onChange={(e) => setNewPostText(e.target.value)}
+              className="w-full p-3 bg-gray-50 hover:bg-gray-50 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
+            />
+            <div className="flex justify-between items-center border-t border-gray-50 pt-2">
+              <span className="text-[10px] text-gray-400 font-bold">{cd.postingAsInstructor || "Posting as Instructor"}</span>
+              <button
+                type="submit"
+                disabled={isCreatingPost}
+                className="h-8 px-4 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs active:scale-95 disabled:bg-gray-250 disabled:text-gray-400"
               >
-                Hủy
-              </PillButton>
-              <PillButton onClick={handleSaveEdit} className="!rounded-xl">
-                Lưu
-              </PillButton>
+                {isCreatingPost ? (
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                ) : (
+                  <>
+                    <Send size={12} />
+                    <span>{cd.publishButton || "Publish"}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* List of feed items */}
+        <div className="flex flex-col gap-3">
+          {feedPosts.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-xs text-gray-400 font-bold">
+              {cd.noAnnouncements || "No announcements posted yet."}
             </div>
           ) : (
-            <PillButton
-              onClick={handleStartEdit}
-              startIcon={<Pencil size={14} />}
-              className="rounded-xl"
-            >
-              Chỉnh sửa
-            </PillButton>
+            feedPosts.map((item) => {
+              const likesState = localLikes[item.id] || { count: item.likes || 0, isLiked: item.isLiked || false }
+              const authorName = item.author || "John Doe"
+              const roleLabel = item.role || "Lead Instructor"
+
+              return (
+                <div key={item.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
+                  <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-gray-150 text-gray-700 font-black text-xs flex items-center justify-center border border-gray-200">
+                        {authorName[0]}
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-extrabold text-gray-800">{authorName}</span>
+                          <span className="bg-red-50 text-[#990011] text-[8px] font-black px-1.5 py-0.5 rounded">
+                            {roleLabel}
+                          </span>
+                        </div>
+                        <span className="text-[9px] text-gray-400 font-semibold">{item.time || "Just now"}</span>
+                      </div>
+                    </div>
+
+                    <button onClick={notifyInDevelopment} className="text-gray-400 hover:text-gray-600">
+                      <MoreVertical size={14} />
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                    {item.content}
+                  </p>
+
+                  <div className="flex items-center gap-4 text-[10px] text-gray-400 font-bold border-t border-gray-50 pt-2 mt-1">
+                    <button
+                      onClick={() => handleLikeToggle(item)}
+                      className={`hover:text-[#990011] transition-colors ${likesState.isLiked ? "text-[#990011]" : ""}`}
+                    >
+                      Like ({likesState.count})
+                    </button>
+                    <span>•</span>
+                    <button
+                      onClick={notifyInDevelopment}
+                      className="hover:text-[#990011] transition-colors flex items-center gap-1"
+                    >
+                      <MessageSquare size={11} />
+                      Comment ({item.commentsCount || 0})
+                    </button>
+                  </div>
+                </div>
+              )
+            })
           )}
         </div>
-      )}
-
-      {/* Chapters / Sections List */}
-      <div className="space-y-6">
-        {sections.map((chapter, secIdx) => (
-          <SectionCard
-            key={chapter.id}
-            chapter={chapter}
-            secIdx={secIdx}
-            totalSections={sections.length}
-            isEdit={isEdit}
-            isStudent={isStudent}
-            onOpenAddItem={handleOpenAddItemModal}
-            onEditChapter={handleOpenEditSection}
-            onToggleHideChapter={handleToggleHideChapter}
-            onDeleteChapter={handleDeleteChapter}
-            onMoveChapter={handleMoveChapter}
-            onToggleHideItem={handleToggleHideItem}
-            onDeleteItem={handleDeleteItem}
-          />
-        ))}
       </div>
 
-      {/* Add New Section Button */}
-      {isEdit && !isStudent && (
-        <div className="flex justify-center pt-2">
-          <PillButton
-            variant="secondary-no-outline"
-            onClick={handleOpenAddSection}
-            startIcon={<PlusCircle size={18} className="text-[#5B403C]" />}
-            className="rounded-xl font-semibold text-sm px-8 py-4 border-2 border-[#E2E2E2] min-w-[240px] border-dashed hover:border-[#5B403C]"
-            textColor={"#5B403C"}
-            bgColor="white"
-          >
-            Tạo section mới
-          </PillButton>
+      {/* Side Announcements widgets */}
+      <div className="flex flex-col gap-4 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm h-fit">
+        <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest border-b border-gray-55 pb-1.5">
+          {c.myCourses?.classAnnouncements || "Class Announcements"}
+        </h4>
+        <div className="flex flex-col gap-3 text-xs font-semibold">
+          <div className="p-2.5 bg-yellow-50/40 border border-yellow-100 rounded-xl text-yellow-800">
+            <span className="font-extrabold block mb-0.5">Quiz Notice:</span>
+            Vocabulary quiz is scheduled on Next Monday. Make sure to complete revisions.
+          </div>
+          <div className="p-2.5 bg-purple-50/40 border border-purple-100 rounded-xl text-purple-800">
+            <span className="font-extrabold block mb-0.5">Project Upload:</span>
+            Submit your self-intro project PDF onto materials panel.
+          </div>
         </div>
-      )}
-
-      {/* --- ALL CONNECTED MODALS --- */}
-      {/* 1. Create Feed / Announcement Modal */}
-      <CreateFeedModal
-        open={activeModal === "announcement"}
-        onClose={() => setActiveModal(null)}
-        onSubmit={handleSaveFeedPost}
-        sessionName={targetSectionName}
-      />
-
-      {/* 2. Add Material Modal */}
-      <AddMaterialModal
-        open={activeModal === "material"}
-        onClose={() => setActiveModal(null)}
-        onSubmit={handleSaveMaterial}
-        sessionName={targetSectionName}
-      />
-
-      {/* 3. Add Activity Modal */}
-      <AddActivityModal
-        open={activeModal === "assignment"}
-        onClose={() => setActiveModal(null)}
-        onSubmit={handleSaveActivities}
-        sessionName={targetSectionName}
-      />
-
-      {/* 4. Add Link Modal */}
-      <AddLinkModal
-        open={activeModal === "link"}
-        onClose={() => setActiveModal(null)}
-        onSubmit={handleSaveLink}
-        sessionName={targetSectionName}
-      />
-
-      {/* 5. Section Modal */}
-      <SectionModal
-        sectionModal={sectionModal}
-        setSectionModal={setSectionModal}
-        onSaveSection={handleSaveSectionModal}
-      />
+      </div>
     </div>
   )
 }

@@ -10,7 +10,7 @@ import {
   FileText,
   EyeOff,
 } from "lucide-react"
-import { MOCK_LESSON_ITEM } from "./mockData"
+import { MOCK_LESSON_ITEM } from "../../mockData"
 import { IconButton } from "@/shared/components/ui/buttons"
 import LessonActionMenu from "./LessonActionMenu"
 
@@ -67,14 +67,6 @@ const LessonItemRow = ({
     >
       {/* Left section: Drag Handle + Type Icon + Title & Meta */}
       <div className="flex items-center gap-4 flex-1 min-w-0">
-        {/* Drag handle (visible in edit mode) */}
-        {isEdit && (
-          <GripVertical
-            size={18}
-            className="text-[#5B403C] cursor-grab shrink-0 hover:text-gray-600 transition-colors"
-          />
-        )}
-
         {/* Type Icon Circle */}
         <div
           className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${config.iconBg}`}

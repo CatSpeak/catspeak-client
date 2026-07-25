@@ -17,7 +17,8 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ClassDetailTabs from "../components/ClassDetailTabs"
 import ClassOverviewTab from "../components/overview/ClassOverviewTab"
 
-const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
+// const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
+const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
 const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
@@ -172,67 +173,67 @@ const ClassDetailPage = () => {
       {/* ─── Tab Contents ─── */}
       <Suspense fallback={<TabLoadingFallback />}>
         {activeTab === "overview" && (
-        <ClassOverviewTab
-          classData={classData}
-          isStudent={false}
-          isEnrolled={true}
-          language={language}
-          cd={cd}
-          id={id}
-          navigate={navigate}
-          showActionsDropdown={showActionsDropdown}
-          setShowActionsDropdown={setShowActionsDropdown}
-          onCompleteClass={handleCompleteClass}
-          onCancelClassClick={() => setShowCancelClassModal(true)}
-          formatCurrency={formatCurrency}
-          getWeeklyScheduleText={getWeeklyScheduleText}
-          upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
-          joinRoomLabel={c.joinRoom || "Join Room"}
-          viewAllLabel={c.viewAll || "View All"}
-          noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
-          createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
-          teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
-          gradeAssignmentLabel={c.gradeAssignment || "Grade homework"}
-          giveFeedbackLabel={c.giveFeedback || "Give feedback"}
-          prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
-          onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
-          onTaskAction={() => navigate("/workspace/courses/schedule")}
-          onViewTasks={() => navigate("/workspace/courses/schedule")}
-        />
-      )}
+          <ClassOverviewTab
+            classData={classData}
+            isStudent={false}
+            isEnrolled={true}
+            language={language}
+            cd={cd}
+            id={id}
+            navigate={navigate}
+            showActionsDropdown={showActionsDropdown}
+            setShowActionsDropdown={setShowActionsDropdown}
+            onCompleteClass={handleCompleteClass}
+            onCancelClassClick={() => setShowCancelClassModal(true)}
+            formatCurrency={formatCurrency}
+            getWeeklyScheduleText={getWeeklyScheduleText}
+            upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
+            joinRoomLabel={c.joinRoom || "Join Room"}
+            viewAllLabel={c.viewAll || "View All"}
+            noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
+            createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
+            teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
+            gradeAssignmentLabel={c.gradeAssignment || "Grade homework"}
+            giveFeedbackLabel={c.giveFeedback || "Give feedback"}
+            prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
+            onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
+            onTaskAction={() => navigate("/workspace/courses/schedule")}
+            onViewTasks={() => navigate("/workspace/courses/schedule")}
+          />
+        )}
 
         {activeTab === "members" && (
-        <ClassMembersTab
-          isStudent={false}
-        />
-      )}
+          <ClassMembersTab
+            isStudent={false}
+          />
+        )}
 
         {activeTab === "feed" && (
-        <ClassFeedTab
-          id={id}
-          isStudent={false}
-          language={language}
-          cd={cd}
-        />
-      )}
+          <ClassLectureHallPage
+            id={id}
+            isStudent={false}
+            language={language}
+            cd={cd}
+          />
+        )}
 
         {activeTab === "grading" && (
-        <ClassGradingTab
-          id={id}
-          isStudent={false}
-          language={language}
-          cd={cd}
-        />
-      )}
+          <ClassGradingTab
+            id={id}
+            isStudent={false}
+            language={language}
+            cd={cd}
+          />
+        )}
 
         {activeTab === "materials" && (
-        <ClassMaterialsTab
-          id={id}
-          isStudent={false}
-          language={language}
-          cd={cd}
-          cancelText={c.createClass?.cancel || "Hủy"}
-        />
+          <ClassMaterialsTab
+            id={id}
+            isStudent={false}
+            language={language}
+            cd={cd}
+            cancelText={c.createClass?.cancel || "Hủy"}
+          />
         )}
       </Suspense>
 

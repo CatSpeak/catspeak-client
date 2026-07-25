@@ -13,7 +13,7 @@ const LessonActionMenu = ({
   if (!open) return null
 
   return (
-    <div className="absolute right-0 top-8 z-30 animate-fadeIn">
+    <div className="absolute right-0 top-10 z-30 animate-fadeIn">
       <MenuList className="w-44 rounded-xl shadow-faq-card text-sm text-[#1A1A1A]">
         <MenuItem
           icon={<Pencil size={15} className="text-[#1A1A1A]" />}

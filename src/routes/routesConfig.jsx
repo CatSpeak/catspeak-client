@@ -36,6 +36,9 @@ import { AuthGuard } from "@/shared/components";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect"
 import WebsitePage from "@/features/websites/WebsitePage";
+import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/BulletinBoardPage";
+import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage";
+import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage";
 
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
@@ -390,6 +393,30 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <CreateAssignmentPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/bulletin-board",
+                element: (
+                  <LazyRoute>
+                    <BulletinBoardPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/bulletin-board/posts/:postId",
+                element: (
+                  <LazyRoute>
+                    <PostDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/bulletin-board/create-post",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
                   </LazyRoute>
                 ),
               },

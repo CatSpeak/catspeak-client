@@ -3,7 +3,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { Checkbox, TextInput } from "@/shared/components/ui/inputs"
 import { Search, ChevronDown, FileText, CheckSquare, MessageSquare } from "lucide-react"
-import { MOCK_ACTIVITIES } from "./mockData"
+import { MOCK_ACTIVITIES } from "../../mockData"
 
 const AddActivityModal = ({
   open = false,

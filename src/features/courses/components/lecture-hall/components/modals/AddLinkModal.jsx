@@ -90,9 +90,9 @@ const AddLinkModal = ({
         {/* Visible to Students Card Box Toggle */}
         <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl px-4 py-3 flex items-center justify-between">
           <div className="space-y-0.5">
-            <h5 className="text-sm font-semibold text-[#111827]">
+            <p className="text-sm font-semibold text-[#111827]">
               Hiển thị với học viên
-            </h5>
+            </p>
             <p className="text-xs text-[#6B7280] font-normal">
               Học viên có thể nhìn thấy liên kết này ngay lập tức
             </p>
