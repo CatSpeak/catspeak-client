@@ -14,7 +14,7 @@ import {
 import {
   useReactToPostMutation,
   useSharePostMutation,
-} from "@/store/api/postsApi";
+} from "@/store/api/social/postsApi";
 import ShareModal from "./ShareModal";
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
 import Carousel from "@/shared/components/ui/Carousel";
