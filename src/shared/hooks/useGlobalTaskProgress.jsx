@@ -7,9 +7,41 @@ import { store } from "@/store";
 
 export const useGlobalTaskProgress = () => {
   const token = useSelector(selectCurrentToken);
+  const tasks = useSelector((state) => state.globalTask.tasks);
   const dispatch = useDispatch();
   const connectionRef = useRef(null);
 
+  // 1. Smooth 60s progress simulation for active tasks (0% -> 99% in 60,000ms)
+  useEffect(() => {
+    const activeTasks = tasks.filter(
+      (t) => t.status === "UPLOADING" || t.status === "PROCESSING"
+    );
+
+    if (activeTasks.length === 0) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      activeTasks.forEach((t) => {
+        const startTime = t.timestamp || now;
+        const elapsed = now - startTime;
+        // Calculate smooth progress capping out at 99%
+        const targetProgress = Math.min(99, Math.floor((elapsed / 60000) * 99));
+
+        if (targetProgress > (t.progress || 0)) {
+          dispatch(
+            updateTask({
+              id: t.id,
+              updates: { progress: targetProgress },
+            })
+          );
+        }
+      });
+    }, 400);
+
+    return () => clearInterval(interval);
+  }, [tasks, dispatch]);
+
+  // 2. SignalR Connection & Real-time Task Completion/Failure events
   useEffect(() => {
     if (!token) return;
 
@@ -26,71 +58,6 @@ export const useGlobalTaskProgress = () => {
 
     connectionRef.current = connection;
 
-    connection.on("TaskStarted", (task) => {
-      const existingTask = store
-        .getState()
-        .globalTask.tasks.find((t) => t.id === task.taskId);
-      const isUpload = existingTask
-        ? existingTask.isUploadTask
-        : (task.taskType === "ReelUpload" || task.taskType === "InstructorApplication");
-      const bePercent = task.progressPercentage || 0;
-
-      const progress = isUpload
-        ? 50 + Math.round((bePercent / 100) * 50)
-        : bePercent;
-
-      if (!existingTask) {
-        dispatch(
-          addTask({
-            id: task.taskId,
-            title: task.title || "Tác vụ hệ thống",
-            status: "PROCESSING",
-            progress: Math.min(99, progress),
-            stepName: task.stepName,
-            isUploadTask: isUpload,
-            taskType: task.taskType,
-          }),
-        );
-      } else {
-        dispatch(
-          updateTask({
-            id: task.taskId,
-            updates: {
-              title: existingTask?.title || task.title || "Tác vụ hệ thống",
-              status: "PROCESSING",
-              progress: Math.min(99, progress),
-              stepName: task.stepName,
-            },
-          }),
-        );
-      }
-    });
-
-    connection.on("TaskProgressUpdated", (task) => {
-      const existingTask = store
-        .getState()
-        .globalTask.tasks.find((t) => t.id === task.taskId);
-      const isUpload = existingTask?.isUploadTask;
-      const bePercent = task.progressPercentage || 0;
-
-      // 0-50% is reserved for client file upload; 50-100% is for server background processing
-      // Pure server tasks run directly from 0-100%
-      const calculatedProgress = isUpload
-        ? 50 + Math.round((bePercent / 100) * 50)
-        : bePercent;
-
-      dispatch(
-        updateTask({
-          id: task.taskId,
-          updates: {
-            status: "PROCESSING",
-            progress: Math.min(99, calculatedProgress),
-            stepName: task.stepName,
-          },
-        }),
-      );
-    });
-
     connection.on("TaskCompleted", (task) => {
       dispatch(
         updateTask({
@@ -101,7 +68,7 @@ export const useGlobalTaskProgress = () => {
             completionTime: Date.now(),
             payload: task.payload,
           },
-        }),
+        })
       );
     });
 
@@ -115,22 +82,22 @@ export const useGlobalTaskProgress = () => {
             completionTime: Date.now(),
             error: task.errorMessage || "Tác vụ thất bại",
           },
-        }),
+        })
       );
     });
 
     connection
       .start()
       .then(() => {
-        // Fetch active tasks from BE Cache on startup (multi-device sync and F5 restore)
+        // Fetch active tasks from BE Cache on startup (F5 restore)
         fetch(`${baseUrl}/TaskProgress/active`, {
           headers: { Authorization: `Bearer ${token}` },
         })
           .then((res) => res.json())
-          .then((tasks) => {
-            if (Array.isArray(tasks)) {
+          .then((backendTasks) => {
+            if (Array.isArray(backendTasks)) {
               const now = Date.now();
-              tasks.forEach((t) => {
+              backendTasks.forEach((t) => {
                 const startTime = t.startedAt
                   ? new Date(t.startedAt).getTime()
                   : now;
@@ -140,28 +107,23 @@ export const useGlobalTaskProgress = () => {
                 const existingTask = store
                   .getState()
                   .globalTask.tasks.find((tk) => tk.id === t.taskId);
-                const isUpload =
-                  existingTask?.isUploadTask ||
-                  t.taskType?.includes("Upload") ||
-                  t.taskType?.includes("Reel");
-                const bePercent = t.progressPercentage || 0;
 
-                const calculatedProgress = isUpload
-                  ? 50 + Math.round((bePercent / 100) * 50)
-                  : bePercent;
+                if (!existingTask) {
+                  const elapsed = now - startTime;
+                  const initialProgress = Math.min(99, Math.floor((elapsed / 60000) * 99));
 
-                dispatch(
-                  addTask({
-                    id: t.taskId,
-                    title: t.title,
-                    status: "PROCESSING",
-                    progress: Math.min(99, calculatedProgress),
-                    timestamp: startTime,
-                    stepName: t.stepName,
-                    isUploadTask: isUpload,
-                    taskType: t.taskType,
-                  }),
-                );
+                  dispatch(
+                    addTask({
+                      id: t.taskId,
+                      title: t.title,
+                      status: "PROCESSING",
+                      progress: initialProgress,
+                      timestamp: startTime,
+                      isUploadTask: true,
+                      taskType: t.taskType,
+                    })
+                  );
+                }
               });
             }
           })
