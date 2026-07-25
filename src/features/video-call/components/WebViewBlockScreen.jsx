@@ -3,6 +3,7 @@ import { Copy, Check, ExternalLink, AlertTriangle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { isAndroid } from "@/shared/utils/isWebView"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import "./WebViewBlockScreen.css"
 
 /**
@@ -16,7 +17,7 @@ const WebViewBlockScreen = ({ appName }) => {
   const wb = t.rooms.videoCall.webviewBlock ?? {}
 
   const [copied, setCopied] = useState(false)
-  const currentUrl = window.location.href
+  const currentUrl = getShareUrlWithVersion(window.location.href)
 
   const handleCopyLink = async () => {
     try {

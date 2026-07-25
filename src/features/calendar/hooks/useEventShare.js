@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { useCreateSharedLinkMutation } from "@/store/api/eventsApi"
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -65,7 +66,7 @@ const useEventShare = (eventId, occurrenceId) => {
             ? res.split("/").pop()
             : res.shareUrl?.split("/").pop())
         const url = `${window.location.origin}/events/shared/${token}`
-        setShareUrl(url)
+        setShareUrl(getShareUrlWithVersion(url))
       } catch (err) {
         console.error("Failed to create share link:", err)
         return

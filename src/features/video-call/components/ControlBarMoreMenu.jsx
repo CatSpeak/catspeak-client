@@ -32,6 +32,7 @@ import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
 import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
 import { useGame } from "@/features/games/context/GameContext";
 import MenuItem from "@/shared/components/ui/MenuItem";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
@@ -88,7 +89,7 @@ const ControlBarMoreMenu = ({
     hostParticipant.identity === localParticipant.identity;
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(getShareUrlWithVersion(window.location.href));
     toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!");
     setShowMoreMenu(false);
   };

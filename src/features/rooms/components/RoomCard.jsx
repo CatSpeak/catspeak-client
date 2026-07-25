@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Clock, Users, Link as LinkIcon, Bookmark, Lock } from "lucide-react";
@@ -91,7 +92,7 @@ const RoomCard = ({ room }) => {
   const handleCopyLink = (e) => {
     e.stopPropagation();
     const communityLang = localStorage.getItem("communityLanguage") || "en";
-    const link = `${window.location.origin}/${communityLang}/meet/${room.roomId}`;
+    const link = getShareUrlWithVersion(`${window.location.origin}/${communityLang}/meet/${room.roomId}`);
     navigator.clipboard
       .writeText(link)
       .then(() => {

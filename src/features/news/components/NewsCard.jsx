@@ -18,6 +18,7 @@ import {
 import ShareModal from "./ShareModal";
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
 import Carousel from "@/shared/components/ui/Carousel";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import { getImageUrl } from "@/shared/utils/imageUtils";
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 
@@ -86,7 +87,7 @@ const NewsCard = ({ news }) => {
       }
 
       if (url) {
-        setShareUrl(url);
+        setShareUrl(getShareUrlWithVersion(url));
         setIsShareModalOpen(true);
       }
     } catch (err) {

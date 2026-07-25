@@ -9,6 +9,7 @@ import {
   useSharePostMutation,
 } from "@/store/api/postsApi";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import { Breadcrumb } from "@/shared/components/ui/navigation";
 import PostContent from "../components/PostContent";
 import CommentsSection from "../components/CommentsSection";
@@ -104,7 +105,7 @@ const NewsDetailPage = () => {
       }
 
       if (url) {
-        setShareUrl(url);
+        setShareUrl(getShareUrlWithVersion(url));
         setIsShareModalOpen(true);
       }
     } catch (e) {
