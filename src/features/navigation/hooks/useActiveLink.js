@@ -8,9 +8,6 @@ export const useActiveLink = () => {
   // Resolves the path with the current language prefix if needed
   const resolvePath = (p) => {
     if (!p) return p
-    if (p.startsWith('/website')) {
-      return `/${currentLang}/cat-speak${p}`
-    }
     if (p.startsWith('/community') || p.startsWith('/cat-speak')) {
       return `/${currentLang}${p}`
     }

@@ -1,4 +1,3 @@
-import { websites } from "@/features/navigation/config/websites";
 import {
   Home,
   LayoutDashboard,
@@ -16,10 +15,72 @@ import {
   BookOpen,
   Video,
   MessageCircle,
+  Globe,
 } from "lucide-react";
+
+export const navSections = [
+  {
+    key: "main",
+    labelKey: null,
+    items: [
+      { key: "community", path: "/community", icon: Home },
+      {
+        key: "learningResources",
+        label: "Resource Hub",
+        path: "/resources",
+        icon: Globe,
+      },
+      {
+        key: "messages",
+        label: "Chat",
+        path: "/chat",
+        icon: MessageCircle,
+      },
+    ],
+  },
+  {
+    key: "catSpeak",
+    labelKey: "catSpeak",
+    defaultLabel: "Cat Speak",
+    maxInitial: 5,
+    items: [
+      { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
+      { key: "reels", path: "/cat-speak/reels", icon: Film },
+      { key: "letters", path: "/cat-speak/letters", icon: Mail },
+      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
+    ],
+  },
+  {
+    key: "workspace",
+    labelKey: "workspace",
+    defaultLabel: "My Workspace",
+    maxInitial: 5,
+    items: [
+      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+      { key: "recordings", path: "/workspace/recordings", icon: Mic },
+      { key: "workspaceReels", path: "/workspace/reels", icon: Film },
+      { key: "events", path: "/workspace/events", icon: Calendar },
+      { key: "profile", path: "/profile", icon: User },
+    ],
+  },
+];
+
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: Globe,
+  },
+  {
+    key: "messages",
+    label: "Chat",
+    path: "/chat",
+    icon: MessageCircle,
+  },
   {
     key: "catSpeak",
     hasDropdown: true,
@@ -33,7 +94,6 @@ export const navLinks = [
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
-
   {
     key: "workspace",
     hasDropdown: true,
@@ -45,7 +105,6 @@ export const navLinks = [
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
       { key: "profile", path: "/profile", icon: User },
-      { key: "messages", path: "/chat", icon: MessageCircle },
     ],
   },
   {
@@ -54,23 +113,6 @@ export const navLinks = [
     isHorizontalBar: true,
     showOnHorizontalBar: false,
   },
-  ...websites,
-  // {
-  //   key: "pricing",
-  //   path: "/pricing",
-  //   hasDropdown: false,
-  //   icon: CreditCard,
-  // },
-  // { key: "cart", path: "/cart", icon: ShoppingCart },
-  // {
-  //   key: "courses",
-  //   hasDropdown: true,
-  //   icon: GraduationCap,
-  //   subItems: [
-  //     { key: "allCourses", path: "/courses" },
-  //     { key: "myCourses", path: "/my-courses" }
-  //   ]
-  // },
 ];
 
 export const settingNavLinks = [
@@ -82,5 +124,5 @@ export const settingNavLinks = [
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
-  // { key: "help", path: "/help", icon: HelpCircle }
 ];
+

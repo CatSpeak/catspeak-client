@@ -1,4 +1,4 @@
-import { baseApi } from "./baseApi";
+import { baseApi } from "@/store/api/baseApi";
 
 export const websiteApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -8,12 +8,12 @@ export const websiteApi = baseApi.injectEndpoints({
         const id = typeof params === "object" ? params?.id : params;
         const lang = typeof params === "object" ? params?.lang : undefined;
 
-        const website = resources.find((item) => {
-          if (lang) {
-            return item.id === id && item.lang === lang;
-          }
-          return item.id === id;
-        });
+        let website = lang
+          ? resources.find((item) => item.id === id && item.lang === lang)
+          : null;
+        if (!website) {
+          website = resources.find((item) => item.id === id);
+        }
 
         if (!website) {
           return {
@@ -328,8 +328,6 @@ const resources = [
     lang: "zh",
     url: "https://mandarinbean.com/",
   },
-
-  // 10. Học tiếng Trung cho trẻ em
 
   // 11. Website tự học tiếng Trung nội địa (giao diện tiếng Việt)
   {

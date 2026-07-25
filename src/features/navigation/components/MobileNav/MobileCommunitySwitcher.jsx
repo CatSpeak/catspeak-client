@@ -3,7 +3,6 @@ import { Users, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useParams, useLocation } from "react-router-dom"
 import { LANGUAGE_CONFIG } from "@/features/navigation"
-import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 import Dropdown from "@/shared/components/ui/Dropdown"
 
 const DEFAULT_COMMUNITY = "zh"
@@ -52,12 +51,12 @@ const MobileCommunitySwitcher = () => {
         dropdownClassName="!min-w-full w-full p-2"
         trigger={(isOpen, selectedOption, toggle) => (
           <button 
-            className={`${getNavItemClasses(false, false)} ${isOpen ? "bg-[#F2F2F2]" : ""}`}
+            className={`relative flex items-center shrink-0 h-11 px-4 gap-3 rounded-lg transition-all duration-300 group overflow-hidden w-full ${isOpen ? "bg-gray-100" : "hover:bg-gray-100"}`}
             onClick={toggle}
             title={t.header?.community || "Cộng đồng"}
           >
             <Users size={20} className="shrink-0" />
-            <span className={getNavTextClasses(true)}>{t.header?.community || "Cộng đồng"}</span>
+            <span className="text-sm font-medium text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate">{t.header?.community || "Cộng đồng"}</span>
             
             <ChevronDown 
               size={18} 

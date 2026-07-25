@@ -15,7 +15,7 @@ import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
 
 const MainHeader = ({ onGetStarted, onMenuClick }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
-  
+
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -49,7 +49,6 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
       }`}
     >
       <div className="flex w-full h-[64px] items-center justify-between px-4 lg:px-6">
-        
         {/* Left Section: Mobile Menu + Community Switcher + Online count */}
         <div className="flex items-center gap-3 md:gap-4 shrink-0">
           <button
@@ -58,11 +57,15 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
           >
             <Menu size={24} />
           </button>
-          
+
           {/* Logo (Mobile Only) */}
           <Link to="/" className="flex items-center gap-2 lg:hidden">
             <img src={IconLogo} alt="Cat Speak" className="h-7 w-7" />
-            <img src={MainLogo} alt="Cat Speak" className="h-6 w-auto hidden sm:block" />
+            <img
+              src={MainLogo}
+              alt="Cat Speak"
+              className="h-6 w-auto hidden sm:block"
+            />
           </Link>
 
           {/* Community Switcher Dropdown */}
@@ -74,7 +77,6 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
 
         {/* Right Section: Search + Filter + Lang + User */}
         <div className="flex items-center justify-end gap-3 shrink-0">
-
           {/* Search */}
           <HeaderSearchBar />
 
@@ -95,7 +97,6 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
           )}
         </div>
       </div>
-
     </header>
   )
 }

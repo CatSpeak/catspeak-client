@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { ChevronDown, Globe } from "lucide-react"
 
-import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
-
 const DesktopNavDropdown = ({
   icon: Icon,
   label,
@@ -29,7 +27,9 @@ const DesktopNavDropdown = ({
             onToggle()
           }
         }}
-        className={getNavItemClasses(false, false, isDocked)}
+        className={`relative flex items-center shrink-0 h-11 rounded-xl transition-all duration-300 group overflow-hidden w-full ${
+          isDocked ? "justify-center" : "px-3 gap-3"
+        } hover:bg-[#F2F2F2]`}
         title={label}
       >
         {img && !imgError ? (
@@ -48,7 +48,11 @@ const DesktopNavDropdown = ({
         )}
 
         <span
-          className={getNavTextClasses(true, isDocked)}
+          className={`text-sm font-medium text-left whitespace-nowrap transition-all duration-300 truncate ${
+            isDocked
+              ? "opacity-0 w-0 pointer-events-none hidden"
+              : "opacity-100 min-w-[180px] flex-1"
+          }`}
           style={color ? { color } : undefined}
         >
           {label}

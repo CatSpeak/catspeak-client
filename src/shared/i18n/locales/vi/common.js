@@ -33,6 +33,8 @@ export default {
     home: "Trang chủ",
     rooms: "Phòng",
     community: "Trang chủ",
+    learningResources: "Tài nguyên học tập",
+    workspaceReels: "Reels cá nhân",
     catSpeak: "Cat Speak",
     catSpeakNews: "Bản tin Cat Speak",
     worldNews: "Bản tin thế giới",

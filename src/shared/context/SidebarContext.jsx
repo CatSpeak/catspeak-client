@@ -4,15 +4,18 @@ const SidebarContext = createContext()
 
 export const SidebarProvider = ({ children }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
-  const [isDesktopSidebarDocked, setIsDesktopSidebarDocked] = useState(false)
+  const [activeDockSection, setActiveDockSection] = useState("community") // default section or selected dock key
+  const [isDesktopExpanded, setIsDesktopExpanded] = useState(true) // controls if the secondary panel is open
   const [openDropdownKeys, setOpenDropdownKeys] = useState([])
 
   return (
     <SidebarContext.Provider value={{
       isMobileSidebarOpen,
       setIsMobileSidebarOpen,
-      isDesktopSidebarDocked,
-      setIsDesktopSidebarDocked,
+      activeDockSection,
+      setActiveDockSection,
+      isDesktopExpanded,
+      setIsDesktopExpanded,
       openDropdownKeys,
       setOpenDropdownKeys
     }}>
@@ -28,3 +31,4 @@ export const useSidebar = () => {
   }
   return context
 }
+

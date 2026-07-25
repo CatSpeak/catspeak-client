@@ -33,6 +33,8 @@ export default {
     home: "Home",
     rooms: "Rooms",
     community: "Home",
+    learningResources: "Learning Resources",
+    workspaceReels: "Workspace Reels",
     catSpeak: "Cat Speak",
     catSpeakNews: "Cat Speak News",
     worldNews: "World News",
