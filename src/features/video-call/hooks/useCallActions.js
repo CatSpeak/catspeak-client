@@ -1,14 +1,15 @@
-import { useCallback } from "react"
-import { useDispatch } from "react-redux"
-import { toast } from "react-hot-toast"
+import { useCallback } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-hot-toast";
 
-import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
-import { getCommunityPath } from "@/shared/utils/navigation"
+import { handleMediaError } from "@/shared/utils/mediaErrorUtils";
+import { getCommunityPath } from "@/shared/utils/navigation";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import {
   setPiP as setPiPAction,
   leaveCall as leaveCallAction,
-} from "@/store/slices/videoCallSlice"
-import { getNavigate, getLocation } from "./useNavigateRef"
+} from "@/store/slices/videoCallSlice";
+import { getNavigate, getLocation } from "./useNavigateRef";
 
 /**
  * All user-facing action handlers for a video call.
@@ -41,36 +42,36 @@ export const useCallActions = ({
   chatSend,
   setActiveSidePanel,
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   // ── Media toggles ──
 
   const handleToggleMic = useCallback(async () => {
     try {
-      await toggleAudioFn()
+      await toggleAudioFn();
     } catch (err) {
-      handleMediaError(err, "mic", t, { isToggle: true })
+      handleMediaError(err, "mic", t, { isToggle: true });
     }
-  }, [toggleAudioFn, t])
+  }, [toggleAudioFn, t]);
 
   const handleToggleCam = useCallback(async () => {
     try {
-      await toggleVideoFn()
+      await toggleVideoFn();
     } catch (err) {
-      handleMediaError(err, "camera", t, { isToggle: true })
+      handleMediaError(err, "camera", t, { isToggle: true });
     }
-  }, [toggleVideoFn, t])
+  }, [toggleVideoFn, t]);
 
   const handleToggleScreenShare = useCallback(() => {
     try {
-      screenShareState.toggleScreenShare()
+      screenShareState.toggleScreenShare();
     } catch (err) {
-      console.error("[useCallActions] Screen share error:", err)
+      console.error("[useCallActions] Screen share error:", err);
       toast.error(
         t?.rooms?.videoCall?.screenShare?.error ?? "Failed to share screen.",
-      )
+      );
     }
-  }, [screenShareState.toggleScreenShare, t])
+  }, [screenShareState.toggleScreenShare, t]);
 
   // ── Chat ──
 
@@ -86,36 +87,36 @@ export const useCallActions = ({
               name: replyTarget.from?.name || "User",
             },
           }),
-        )
+        );
       } else {
-        chatSend(text)
+        chatSend(text);
       }
     },
     [chatSend],
-  )
+  );
 
   // ── Leave session ──
 
   const handleLeaveSession = useCallback(async () => {
-    await leaveMeetingFn()
-    dispatch(leaveCallAction())
+    await leaveMeetingFn();
+    dispatch(leaveCallAction());
 
     // Navigate away if on the call page (not in PiP)
-    const navigate = getNavigate()
+    const navigate = getNavigate();
     if (!isPiP && navigate) {
-      navigate(getCommunityPath(language), { replace: true })
+      navigate(getCommunityPath(language), { replace: true });
     }
-  }, [isPiP, language, leaveMeetingFn, dispatch])
+  }, [isPiP, language, leaveMeetingFn, dispatch]);
 
   // ── Copy link ──
 
   const handleCopyLink = useCallback(() => {
     const url = callInfo?.callPath
       ? `${window.location.origin}${callInfo.callPath}`
-      : window.location.href
-    navigator.clipboard.writeText(url)
-    toast.success("Link copied to clipboard!")
-  }, [callInfo?.callPath])
+      : window.location.href;
+    navigator.clipboard.writeText(getShareUrlWithVersion(url));
+    toast.success("Link copied to clipboard!");
+  }, [callInfo?.callPath]);
 
   // ── PiP transitions ──
 
@@ -132,32 +133,32 @@ export const useCallActions = ({
             height: 300,
           })
           .catch((err) => {
-            console.error("Failed to request PiP window in click handler", err)
-            return null
-          })
+            console.error("Failed to request PiP window in click handler", err);
+            return null;
+          });
       }
 
-      dispatch(setPiPAction(true))
-      setActiveSidePanel(null)
-      const navigate = getNavigate()
+      dispatch(setPiPAction(true));
+      setActiveSidePanel(null);
+      const navigate = getNavigate();
       if (navigateTo && navigate) {
-        navigate(navigateTo)
+        navigate(navigateTo);
       }
     },
     [dispatch, setActiveSidePanel],
-  )
+  );
 
   const exitPiP = useCallback(() => {
-    dispatch(setPiPAction(false))
-  }, [dispatch])
+    dispatch(setPiPAction(false));
+  }, [dispatch]);
 
   const returnToCall = useCallback(() => {
-    const navigate = getNavigate()
+    const navigate = getNavigate();
     if (callInfo?.callPath && navigate) {
-      dispatch(setPiPAction(false))
-      navigate(callInfo.callPath)
+      dispatch(setPiPAction(false));
+      navigate(callInfo.callPath);
     }
-  }, [dispatch, callInfo?.callPath])
+  }, [dispatch, callInfo?.callPath]);
 
   return {
     handleToggleMic,
@@ -169,5 +170,5 @@ export const useCallActions = ({
     enterPiP,
     exitPiP,
     returnToCall,
-  }
-}
+  };
+};

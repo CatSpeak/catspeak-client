@@ -14,12 +14,13 @@ import {
 import {
   useReactToPostMutation,
   useSharePostMutation,
-} from "@/store/api/social/postsApi"
-import ShareModal from "./ShareModal"
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal"
-import Carousel from "@/shared/components/ui/Carousel"
-import { getImageUrl } from "@/shared/utils/imageUtils"
-import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
+} from "@/store/api/postsApi";
+import ShareModal from "./ShareModal";
+import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
+import Carousel from "@/shared/components/ui/Carousel";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
+import { getImageUrl } from "@/shared/utils/imageUtils";
+import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 
 /**
  * NewsCard — Figma "Card_Bản tin Catspeak" layout.
@@ -86,8 +87,8 @@ const NewsCard = ({ news }) => {
       }
 
       if (url) {
-        setShareUrl(url)
-        setIsShareModalOpen(true)
+        setShareUrl(getShareUrlWithVersion(url));
+        setIsShareModalOpen(true);
       }
     } catch (err) {
       console.error("Share failed", err)

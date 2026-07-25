@@ -7,17 +7,18 @@ import {
   useGetSharedPostQuery,
   useReactToPostMutation,
   useSharePostMutation,
-} from "@/store/api/social/postsApi"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { Breadcrumb } from "@/shared/components/ui/navigation"
-import PostContent from "../components/PostContent"
-import CommentsSection from "../components/CommentsSection"
-import Carousel from "@/shared/components/ui/Carousel"
-import ShareModal from "../components/ShareModal"
-import RelatedNewsSection from "../components/RelatedNewsSection"
-import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
-import { getImageUrl } from "@/shared/utils/imageUtils"
-import FluentCard from "@/shared/components/ui/FluentCard"
+} from "@/store/api/postsApi";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
+import { Breadcrumb } from "@/shared/components/ui/navigation";
+import PostContent from "../components/PostContent";
+import CommentsSection from "../components/CommentsSection";
+import Carousel from "@/shared/components/ui/Carousel";
+import ShareModal from "../components/ShareModal";
+import RelatedNewsSection from "../components/RelatedNewsSection";
+import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
+import { getImageUrl } from "@/shared/utils/imageUtils";
+import FluentCard from "@/shared/components/ui/FluentCard";
 
 const NewsDetailPage = () => {
   const { lang: paramLang, slug } = useParams()
@@ -104,8 +105,8 @@ const NewsDetailPage = () => {
       }
 
       if (url) {
-        setShareUrl(url)
-        setIsShareModalOpen(true)
+        setShareUrl(getShareUrlWithVersion(url));
+        setIsShareModalOpen(true);
       }
     } catch (e) {
       console.error("Share failed", e)

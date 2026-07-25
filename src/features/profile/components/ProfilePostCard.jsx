@@ -12,6 +12,7 @@ import {
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PostEditorModal from "./PostEditorModal"
 import ShareModal from "@/features/news/components/ShareModal"
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import CommentsSection from "@/features/news/components/CommentsSection"
 import PostContent from "@/features/news/components/PostContent"
 import PostHeader from "./PostHeader"
@@ -66,7 +67,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
       }
 
       if (url) {
-        setShareUrl(url)
+        setShareUrl(getShareUrlWithVersion(url))
         setIsShareModalOpen(true)
       }
     } catch (err) {
