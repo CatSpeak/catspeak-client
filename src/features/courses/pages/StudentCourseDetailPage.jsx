@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -8,7 +8,14 @@ import {
 } from "@/store/api/coursesApi"
 import StudentJoinModal from "../student/components/StudentJoinModal"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
-import { formatCurrencyVND, formatDateDayMonth } from "../utils/courseUtils"
+import {
+  formatCurrencyVND,
+  formatDateDayMonth,
+  getClassEnrollmentIssue,
+  getClassEnrollmentIssueLabel,
+  getClassEnrollmentIssueMessage,
+  getSafeMediaUrl,
+} from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { Calendar, Mail, CheckCircle2, BookOpen, FileText, Award, Globe, User, Radio, Users, Clock, Video } from "lucide-react"
 
@@ -19,17 +26,48 @@ const StudentCourseDetailPage = () => {
   const c = t.courses || {}
 
   // Fetch course details
-  const { data: courseDetail, isLoading, error } = useGetStudentCourseDetailQuery(id, { skip: !id })
+  const {
+    currentData: courseDetail,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetStudentCourseDetailQuery(id, { skip: !id })
   const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}
-  const currentUserId = profile.id?.toString() || ""
+  const currentUserId = (
+    profile.accountId
+    ?? profile.id
+    ?? ""
+  ).toString()
 
   // State
   const [enrollTarget, setEnrollTarget] = useState(null)
   const [isJoinOpen, setIsJoinOpen] = useState(false)
   const [enrollSuccess, setEnrollSuccess] = useState(false)
   const [expandedClassIds, setExpandedClassIds] = useState({})
+  const enrollmentGuardRef = useRef(false)
+
+  const isRecord = (value) => (
+    value !== null
+    && typeof value === "object"
+    && !Array.isArray(value)
+  )
+  const rawCourse = isRecord(courseDetail) && courseDetail.id
+    ? courseDetail
+    : null
+  const classes = Array.isArray(rawCourse?.classes)
+    ? rawCourse.classes.filter((cls) => isRecord(cls) && cls.id)
+    : []
+  const teacher = isRecord(rawCourse?.teacher) ? rawCourse.teacher : {}
+  const isOwner = Boolean(
+    currentUserId
+    && (
+      rawCourse?.accountId?.toString() === currentUserId
+      || teacher.accountId?.toString() === currentUserId
+    )
+  )
 
   const toggleClassExpand = (classId) => {
     setExpandedClassIds((prev) => ({
@@ -43,33 +81,70 @@ const StudentCourseDetailPage = () => {
       toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
       return
     }
+    if (!isRecord(cls) || !cls.id) {
+      toast.error(c.student?.classUnavailable || "This class is not available for enrollment.")
+      return
+    }
+    const enrollmentIssue = getClassEnrollmentIssue({
+      classData: cls,
+      enrolledClassId: course?.enrolledClassId,
+    })
+    if (enrollmentIssue) {
+      toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
+      return
+    }
     setEnrollTarget({ course, class: cls })
     setEnrollSuccess(false)
     setIsJoinOpen(true)
   }
 
   const handleConfirmEnroll = async () => {
-    if (!enrollTarget) return
+    if (!enrollTarget || enrollmentGuardRef.current || isEnrolling) return
+    const enrollmentIssue = getClassEnrollmentIssue({
+      classData: enrollTarget.class,
+      enrolledClassId: enrollTarget.course?.enrolledClassId,
+    })
+    if (enrollmentIssue) {
+      toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
+      setIsJoinOpen(false)
+      return
+    }
+    enrollmentGuardRef.current = true
     try {
       const result = await enrollInCourse({
-        classId: enrollTarget.class.id
+        classId: enrollTarget.class.id,
+        courseId: enrollTarget.course.id,
       }).unwrap()
+      const resultPayload = isRecord(result) && Object.prototype.hasOwnProperty.call(result, "data")
+        ? result.data
+        : result
+      if (!isRecord(resultPayload)) {
+        throw new Error("Unexpected enrollment response")
+      }
 
-      if (result.checkoutUrl) {
+      if (resultPayload.checkoutUrl) {
+        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
+        if (!checkoutUrl) {
+          throw new Error("Invalid checkout URL")
+        }
         toast.success(
           c.createClass?.toastRedirectPayment || "Redirecting to payment..."
         )
-        window.location.href = result.checkoutUrl
-      } else {
+        window.location.assign(checkoutUrl)
+      } else if (resultPayload.classId || resultPayload.enrollmentId) {
         setEnrollSuccess(true)
         toast.success(
           c.student?.enrolledSuccess
             ? c.student.enrolledSuccess.replace("{{className}}", enrollTarget.class.title)
             : `Successfully enrolled in ${enrollTarget.class.title}!`
         )
+      } else {
+        throw new Error("Missing enrollment confirmation")
       }
-    } catch (err) {
-      toast.error(err.data?.message || err.message || "Failed to enroll in class.")
+    } catch {
+      toast.error(c.student?.enrollFailed || "Enrollment could not be completed. Please try again.")
+    } finally {
+      enrollmentGuardRef.current = false
     }
   }
 
@@ -78,43 +153,61 @@ const StudentCourseDetailPage = () => {
     const targetClassId = enrollTarget?.class?.id
     setEnrollTarget(null)
     if (targetClassId) {
-      navigate(`/workspace/learning/class/${targetClassId}`)
+      navigate(`/workspace/learning/class/${encodeURIComponent(String(targetClassId))}`)
     }
   }
 
-  const notifyInDevelopment = () => {
-    toast.success(c.student?.inDevelopment || "Tính năng đang phát triển")
-  }
-
-  if (isLoading) {
+  if (isLoading || (isFetching && courseDetail === undefined)) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
-  if (error) {
+  if (error || (courseDetail !== undefined && !rawCourse)) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Error loading course: {error.message || "Unknown error"}
+      <div
+        role="alert"
+        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+      >
+        <span>{c.student?.courseLoadFailed || "This course could not be loaded. Please try again."}</span>
+        <button
+          type="button"
+          onClick={refetch}
+          className="rounded-full bg-[#990011] px-4 py-2 text-xs font-black text-white"
+        >
+          {c.student?.retry || "Try again"}
+        </button>
       </div>
     )
   }
 
-  const rawCourse = courseDetail || {}
-  const classes = rawCourse.classes || []
-  const teacher = rawCourse.teacher || {}
-  const isOwner = currentUserId && (rawCourse.accountId?.toString() === currentUserId || teacher.accountId?.toString() === currentUserId)
+  if (!rawCourse) {
+    return (
+      <div role="status" className="p-8 text-center text-sm font-semibold text-gray-500">
+        {c.student?.courseUnavailable || "Course details are unavailable."}
+      </div>
+    )
+  }
 
   // Data helpers
-  const languageLabel = rawCourse.language || "English"
-  const levelLabel = rawCourse.levels?.join(", ") || "All Levels"
+  const languageLabel = rawCourse.language || "—"
+  const levelLabel = Array.isArray(rawCourse.levels) && rawCourse.levels.length > 0
+    ? rawCourse.levels.join(", ")
+    : "—"
+  const thumbnailUrl = getSafeMediaUrl(rawCourse.thumbnailUrl)
+  const teacherAvatarUrl = getSafeMediaUrl(teacher.avatarImageUrl)
 
   return (
     <div className="flex flex-col gap-8 text-[#2e2e2e] bg-gray-50/30 -mx-4 sm:-mx-6 px-4 sm:px-6">
+      {isFetching && (
+        <span className="sr-only" role="status">
+          {c.student?.refreshing || "Refreshing course details"}
+        </span>
+      )}
 
       {/* ─── Breadcrumb ─── */}
       <div className="text-xs text-gray-400 font-semibold flex flex-wrap items-center gap-1.5">
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Home"}</span>
+        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Home"}</button>
         <span>/</span>
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle || "My Learning"}</span>
+        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle || "My Learning"}</button>
         <span>/</span>
         <span className="text-[#990011] font-bold">{rawCourse.title}</span>
       </div>
@@ -145,11 +238,20 @@ const StudentCourseDetailPage = () => {
               )}
 
               <div className="w-full">
-                <img
-                  src={rawCourse.thumbnailUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"}
-                  alt={rawCourse.title}
-                  className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-gray-150 shadow-2xs block"
-                />
+                {thumbnailUrl ? (
+                  <img
+                    src={thumbnailUrl}
+                    alt={rawCourse.title || ""}
+                    className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-gray-150 shadow-2xs block"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div
+                    aria-hidden="true"
+                    className="w-full h-52 sm:h-60 rounded-2xl border border-gray-150 bg-gray-100"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -218,8 +320,21 @@ const StudentCourseDetailPage = () => {
                 {classes.map((cls) => {
                   const isClassEnrolled = cls.isEnrolled || rawCourse.enrolledClassId === cls.id
                   const isExpanded = !!expandedClassIds[cls.id]
-                  const enrolledSeats = cls.studentCount !== undefined ? cls.studentCount : (cls.enrolledStudents || 0)
-                  const totalSlots = cls.slots || cls.capacity || 10
+                  const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
+                  const totalSlots = cls.slots ?? cls.capacity ?? null
+                  const tuitionLabel = cls.tuitionFee == null
+                    ? "TBA"
+                    : formatCurrencyVND(cls.tuitionFee)
+                  const sessionCount = cls.progress?.totalSessions ?? cls.totalSessions ?? null
+                  const enrollmentIssue = isClassEnrolled
+                    ? null
+                    : getClassEnrollmentIssue({
+                        classData: cls,
+                        enrolledClassId: rawCourse.enrolledClassId,
+                      })
+                  const enrollmentIssueMessage = enrollmentIssue
+                    ? getClassEnrollmentIssueMessage(enrollmentIssue, c.student)
+                    : ""
 
                   return (
                     <div
@@ -234,6 +349,19 @@ const StudentCourseDetailPage = () => {
                       {/* Accordion Trigger */}
                       <div
                         onClick={() => toggleClassExpand(cls.id)}
+                        onKeyDown={(event) => {
+                          if (
+                            event.currentTarget === event.target
+                            && (event.key === "Enter" || event.key === " ")
+                          ) {
+                            event.preventDefault()
+                            toggleClassExpand(cls.id)
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-expanded={isExpanded}
+                        aria-controls={`class-details-${cls.id}`}
                         className="p-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 cursor-pointer select-none group bg-white"
                       >
                         <div className="flex-1 flex flex-col gap-1.5 min-w-0">
@@ -250,7 +378,10 @@ const StudentCourseDetailPage = () => {
                           </div>
 
                           <h3 className="font-black text-base text-gray-950 group-hover:text-[#990011] transition-colors leading-snug">
-                            {cls.schedule?.days?.join(" - ") || "Weekly"} | {cls.schedule?.startTime} - {cls.schedule?.endTime}
+                            {cls.schedule?.days?.join(" - ") || "TBA"}
+                            {cls.schedule?.startTime && cls.schedule?.endTime
+                              ? ` | ${cls.schedule.startTime} - ${cls.schedule.endTime}`
+                              : ""}
                           </h3>
 
                           <div className="flex items-center gap-3 text-sm font-semibold text-gray-500">
@@ -270,15 +401,16 @@ const StudentCourseDetailPage = () => {
                         <div className="flex sm:flex-col justify-between items-center sm:items-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-150 shrink-0">
                           <div className="flex flex-col sm:items-end">
                             <span className="text-[12px] text-gray-400 font-bold uppercase tracking-wider">{c.student?.tuitionFee || "Tuition Fee"}</span>
-                            <span className="text-gray-950 font-black text-base">{formatCurrencyVND(cls.tuitionFee)}</span>
+                            <span className="text-gray-950 font-black text-base">{tuitionLabel}</span>
                           </div>
 
                           <div className="flex items-center gap-2">
                             {isClassEnrolled ? (
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  navigate(`/workspace/learning/class/${cls.id}`)
+                                  navigate(`/workspace/learning/class/${encodeURIComponent(String(cls.id))}`)
                                 }}
                                 className="h-8 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-black rounded-full transition-all active:scale-95 shadow-2xs"
                               >
@@ -286,13 +418,18 @@ const StudentCourseDetailPage = () => {
                               </button>
                             ) : (
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   handleOpenEnroll(rawCourse, cls)
                                 }}
-                                className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-sm font-black rounded-full transition-all active:scale-95 shadow-2xs"
+                                disabled={Boolean(enrollmentIssue)}
+                                title={enrollmentIssueMessage || undefined}
+                                className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-sm font-black rounded-full transition-all active:scale-95 shadow-2xs disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600"
                               >
-                                {c.student?.enroll || "Enroll"}
+                                {enrollmentIssue
+                                  ? getClassEnrollmentIssueLabel(enrollmentIssue, c.student)
+                                  : (c.student?.enroll || "Enroll")}
                               </button>
                             )}
                           </div>
@@ -301,13 +438,15 @@ const StudentCourseDetailPage = () => {
 
                       {/* Collapsible Panel */}
                       {isExpanded && (
-                        <div className="bg-gray-50/70 border-t border-gray-150 p-5 flex flex-col gap-4 text-sm animate-fadeIn">
+                        <div id={`class-details-${cls.id}`} className="bg-gray-50/70 border-t border-gray-150 p-5 flex flex-col gap-4 text-sm animate-fadeIn">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
                               <Users size={18} className="text-[#990011] shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.enrolledSlots || "Enrolled Slots"}</span>
-                                <span className="text-gray-950 font-black text-sm">{enrolledSeats} / {totalSlots}</span>
+                                <span className="text-gray-950 font-black text-sm">
+                                  {enrolledSeats ?? "—"} / {totalSlots ?? "—"}
+                                </span>
                               </div>
                             </div>
 
@@ -315,7 +454,9 @@ const StudentCourseDetailPage = () => {
                               <Clock size={18} className="text-amber-600 shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.sessionCount || "Session Count"}</span>
-                                <span className="text-gray-950 font-black text-sm">{cls.progress?.totalSessions || cls.totalSessions || 24} {c.student?.sessionsText || "Sessions"}</span>
+                                <span className="text-gray-950 font-black text-sm">
+                                  {sessionCount ?? "—"} {c.student?.sessionsText || "Sessions"}
+                                </span>
                               </div>
                             </div>
 
@@ -348,7 +489,7 @@ const StudentCourseDetailPage = () => {
                               <span>{c.student?.description || "Description"}</span>
                             </span>
                             <p className="text-gray-600 font-medium text-sm leading-relaxed">
-                              {cls.description || c.student?.defaultClassDesc || "Weekly interactive live class batch featuring 1-on-1 speaking practice, real-time feedback, and structured curriculum modules."}
+                              {cls.description || c.student?.noClassDescription || "No description provided."}
                             </p>
                           </div>
                         </div>
@@ -370,11 +511,13 @@ const StudentCourseDetailPage = () => {
             </h2>
 
             <div className="flex items-center gap-3.5">
-              {teacher.avatarImageUrl ? (
+              {teacherAvatarUrl ? (
                 <img
                   className="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-2xs shrink-0"
-                  src={teacher.avatarImageUrl}
-                  alt={teacher.name || "Instructor"}
+                  src={teacherAvatarUrl}
+                  alt={teacher.name || ""}
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 <div className="w-14 h-14 rounded-full bg-red-100 text-[#990011] flex items-center justify-center font-black text-xl border border-red-200 shadow-2xs shrink-0">
@@ -383,11 +526,13 @@ const StudentCourseDetailPage = () => {
               )}
               <div className="flex flex-col gap-0.5 min-w-0">
                 <h3 className="font-black text-gray-950 text-base truncate">
-                  {teacher.name || "CatSpeak Instructor"}
+                  {teacher.name || c.student?.instructorUnavailable || "Instructor not provided"}
                 </h3>
-                <span className="text-[12px] text-[#b20a1c] font-bold uppercase truncate">
-                  {c.student?.seniorCoach || "Senior CatSpeak Coach"}
-                </span>
+                {teacher.title && (
+                  <span className="text-[12px] text-[#b20a1c] font-bold uppercase truncate">
+                    {teacher.title}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -405,11 +550,10 @@ const StudentCourseDetailPage = () => {
                 onClick={() => {
                   const teacherId = teacher.accountId || teacher.id
                   if (teacherId) {
-                    navigate(`/workspace/instructor/${teacherId}`)
-                  } else {
-                    notifyInDevelopment()
+                    navigate(`/workspace/instructor/${encodeURIComponent(String(teacherId))}`)
                   }
                 }}
+                disabled={!teacher.accountId && !teacher.id}
                 className="flex-1 h-10 border border-gray-200 hover:bg-gray-50 text-gray-800 text-sm font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs"
               >
                 <User size={14} />
@@ -417,8 +561,10 @@ const StudentCourseDetailPage = () => {
               </button>
 
               <button
-                onClick={notifyInDevelopment}
-                className="flex-1 h-10 border border-gray-200 hover:bg-gray-50 text-gray-800 text-sm font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+                type="button"
+                disabled
+                title={c.student?.contactUnavailable || "Contact is not available yet."}
+                className="flex-1 h-10 border border-gray-200 text-gray-400 text-sm font-black rounded-full flex items-center justify-center gap-1.5 shadow-2xs cursor-not-allowed"
               >
                 <Mail size={14} />
                 <span>{c.student?.contactInstructor || "Contact Instructor"}</span>

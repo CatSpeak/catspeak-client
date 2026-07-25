@@ -127,6 +127,9 @@ import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),
 )
+const StudentTakeQuizView = lazy(
+  () => import("@/features/courses/components/grading/StudentTakeQuizView"),
+)
 
 const routesConfig = [
   {
@@ -308,6 +311,16 @@ const routesConfig = [
             ],
           },
         ],
+      },
+      {
+        path: "/workspace/courses/class/:classId/quiz/:quizId/take",
+        element: (
+          <AuthGuard>
+            <LazyRoute>
+              <StudentTakeQuizView />
+            </LazyRoute>
+          </AuthGuard>
+        ),
       },
       // Workspace routes
       {

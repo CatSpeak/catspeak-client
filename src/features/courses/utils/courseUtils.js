@@ -68,7 +68,7 @@ export function formatUTCDate(isoStr, locales = "en-GB", options = {}) {
   if (!isoStr) return "TBA"
   try {
     const d = new Date(isoStr)
-    if (isNaN(d.getTime())) return isoStr
+    if (isNaN(d.getTime())) return "TBA"
     return d.toLocaleDateString(locales, {
       timeZone: "UTC",
       ...options
@@ -212,40 +212,206 @@ export const formatDateRange = (start, end) => {
 
   const parseDate = (dStr) => {
     const d = new Date(dStr)
-    if (isNaN(d.getTime())) return dStr
+    if (isNaN(d.getTime())) return null
     const day = d.getUTCDate()
     const month = SHORT_MONTH_NAMES[d.getUTCMonth()]
     return `${month} ${day}${getOrdinalSuffix(day)}`
   }
-  return `${parseDate(start)} - ${parseDate(end)}`
+  const startLabel = parseDate(start)
+  const endLabel = parseDate(end)
+  return startLabel && endLabel ? `${startLabel} - ${endLabel}` : "TBA"
 }
 
 export const formatDateDayMonth = (dateStr) => {
-  if (!dateStr) return "31st Jul"
+  if (!dateStr) return "TBA"
   const d = new Date(dateStr)
-  if (isNaN(d.getTime())) return dateStr
+  if (isNaN(d.getTime())) return "TBA"
   const day = d.getUTCDate()
   const month = SHORT_MONTH_NAMES[d.getUTCMonth()]
   return `${day}${getOrdinalSuffix(day)} ${month}`
 }
 
 export const formatTime12h = (timeStr) => {
-  if (!timeStr) return "11:45 AM"
-  if (timeStr.includes("AM") || timeStr.includes("PM")) return timeStr
-  const parts = timeStr.split(":")
-  const hours = parseInt(parts[0])
-  if (isNaN(hours)) return timeStr
+  if (!timeStr) return "TBA"
+  const value = String(timeStr).trim()
+  if (/^(?:0?[1-9]|1[0-2]):[0-5]\d\s?(?:AM|PM)$/i.test(value)) {
+    return value
+  }
+  const match = value.match(/^(\d{1,2}):(\d{2})$/)
+  if (!match) return "TBA"
+  const hours = Number(match[1])
+  const minutes = Number(match[2])
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return "TBA"
   const ampm = hours >= 12 ? "PM" : "AM"
   const displayHours = hours % 12 || 12
-  return `${displayHours}:${parts[1] || "00"} ${ampm}`
+  return `${displayHours}:${match[2]} ${ampm}`
+}
+
+export const getSafeMediaUrl = (value) => {
+  if (typeof value !== "string" || !value.trim()) return null
+
+  try {
+    const trimmedValue = value.trim()
+    const hasControlCharacter = [...trimmedValue].some((character) => {
+      const codePoint = character.codePointAt(0)
+      return codePoint <= 31 || codePoint === 127
+    })
+    if (hasControlCharacter || trimmedValue.startsWith("#")) return null
+
+    const baseUrl = typeof window !== "undefined"
+      ? window.location.origin
+      : "https://localhost"
+    const parsedUrl = new URL(trimmedValue, baseUrl)
+    if (
+      !["http:", "https:"].includes(parsedUrl.protocol)
+      || parsedUrl.username
+      || parsedUrl.password
+    ) {
+      return null
+    }
+
+    return parsedUrl.href
+  } catch {
+    return null
+  }
+}
+
+export const getClassEnrollmentIssue = ({
+  classData,
+  enrolledClassId,
+  nowMs = Date.now(),
+}) => {
+  if (!classData || typeof classData !== "object" || Array.isArray(classData)) {
+    return "unavailable"
+  }
+
+  const classId = classData.id == null ? "" : String(classData.id)
+  if (!classId) return "unavailable"
+
+  if (
+    enrolledClassId !== null
+    && enrolledClassId !== undefined
+    && String(enrolledClassId) !== ""
+    && String(enrolledClassId) !== classId
+  ) {
+    return "already_enrolled_in_course"
+  }
+
+  const status = typeof classData.status === "string"
+    ? classData.status.trim().toUpperCase()
+    : ""
+  if (!["OPEN", "OPEN_FOR_ENROLLMENT"].includes(status)) {
+    return status ? "not_open" : "unavailable"
+  }
+
+  const enrolledCountValue = (
+    classData.enrolledCount
+    ?? classData.studentCount
+    ?? classData.enrolledStudents
+  )
+  const capacityValue = classData.capacity ?? classData.slots
+  const enrolledCount = Number(enrolledCountValue)
+  const capacity = Number(capacityValue)
+  const hasEnrolledCount = (
+    enrolledCountValue !== null
+    && enrolledCountValue !== undefined
+    && enrolledCountValue !== ""
+  )
+  const hasCapacity = (
+    capacityValue !== null
+    && capacityValue !== undefined
+    && capacityValue !== ""
+  )
+  if (
+    (hasEnrolledCount && (!Number.isFinite(enrolledCount) || enrolledCount < 0))
+    || (hasCapacity && (!Number.isFinite(capacity) || capacity < 0))
+  ) {
+    return "unavailable"
+  }
+  if (
+    hasEnrolledCount
+    && hasCapacity
+    && Number.isFinite(enrolledCount)
+    && Number.isFinite(capacity)
+    && capacity >= 0
+    && enrolledCount >= capacity
+  ) {
+    return "full"
+  }
+
+  const hasEnrollmentStart = Boolean(classData.enrollmentStart)
+  const enrollmentStartMs = new Date(classData.enrollmentStart || "").getTime()
+  if (hasEnrollmentStart && !Number.isFinite(enrollmentStartMs)) {
+    return "unavailable"
+  }
+  if (Number.isFinite(enrollmentStartMs) && nowMs < enrollmentStartMs) {
+    return "not_started"
+  }
+
+  const hasEnrollmentEnd = Boolean(classData.enrollmentEnd)
+  const enrollmentEndMs = new Date(classData.enrollmentEnd || "").getTime()
+  if (hasEnrollmentEnd && !Number.isFinite(enrollmentEndMs)) {
+    return "unavailable"
+  }
+  if (Number.isFinite(enrollmentEndMs) && nowMs > enrollmentEndMs) {
+    return "closed"
+  }
+
+  return null
+}
+
+export const getClassEnrollmentIssueMessage = (issue, studentText = {}) => {
+  const messages = {
+    already_enrolled_in_course:
+      studentText.alreadyEnrolledInCourse
+      || "You are already enrolled in another class for this course.",
+    not_open:
+      studentText.enrollmentNotOpen
+      || "This class is not open for enrollment.",
+    full:
+      studentText.classFull
+      || "This class is full.",
+    not_started:
+      studentText.enrollmentNotStarted
+      || "Enrollment has not started yet.",
+    closed:
+      studentText.enrollmentClosed
+      || "The enrollment period has ended.",
+    unavailable:
+      studentText.enrollmentUnavailable
+      || "Enrollment availability cannot be confirmed right now.",
+  }
+  return messages[issue] || messages.unavailable
+}
+
+export const getClassEnrollmentIssueLabel = (issue, studentText = {}) => {
+  const labels = {
+    already_enrolled_in_course:
+      studentText.alreadyEnrolled || "Already enrolled",
+    not_open:
+      studentText.notOpen || "Not open",
+    full:
+      studentText.full || "Full",
+    not_started:
+      studentText.notStarted || "Not started",
+    closed:
+      studentText.closed || "Closed",
+    unavailable:
+      studentText.unavailable || "Unavailable",
+  }
+  return labels[issue] || labels.unavailable
 }
 
 export const formatFileSize = (bytes) => {
-  if (!bytes) return "0 Bytes"
+  const value = Number(bytes)
+  if (!Number.isFinite(value) || value <= 0) return "0 Bytes"
   const k = 1024
   const sizes = ["Bytes", "KB", "MB", "GB"]
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  const i = Math.min(
+    sizes.length - 1,
+    Math.floor(Math.log(value) / Math.log(k)),
+  )
+  return `${parseFloat((value / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
 }
 
 export const getFileIconColorClass = (fileName) => {

@@ -1,20 +1,30 @@
-import React from "react"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 
 // Hook to check and manage role based on backend user profile field isTeacher
 export const useRoleOverride = () => {
-  const { data: profileResponse, isLoading, error } = useGetUserProfileQuery()
-  const profile = profileResponse?.data || profileResponse || {}
+  const {
+    data: profileResponse,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetUserProfileQuery()
+  const profile = profileResponse?.data ?? profileResponse
+  const isRoleResolved = typeof profile?.isTeacher === "boolean"
 
   // Determine if the user is a teacher based on the backend profile field
-  const isTeacher = !!profile.isTeacher
-  const isStudent = !isTeacher
+  const isTeacher = isRoleResolved ? profile.isTeacher : null
+  const isStudent = isRoleResolved ? !isTeacher : null
 
   return {
+    isTeacher,
     isStudent,
-    activeRole: isTeacher ? "Teacher" : "Student",
+    activeRole: isRoleResolved ? (isTeacher ? "Teacher" : "Student") : null,
+    isRoleResolved,
     isLoading,
-    error
+    isFetching,
+    error,
+    retry: refetch,
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 export const usePaginatedSearch = (delay = 400) => {
   const [searchQuery, setSearchQuery] = useState("")
@@ -14,11 +14,15 @@ export const usePaginatedSearch = (delay = 400) => {
     return () => window.clearTimeout(timeoutId)
   }, [delay, searchQuery])
 
+  const updateSearchQuery = useCallback((value) => {
+    setSearchQuery(value)
+  }, [])
+
   return {
     searchQuery,
     debouncedSearchQuery,
     currentPage,
-    setSearchQuery,
+    setSearchQuery: updateSearchQuery,
     setCurrentPage,
   }
 }

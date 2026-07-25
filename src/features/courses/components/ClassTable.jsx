@@ -1,11 +1,11 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
-import { MoreVertical, Calendar, Users, Clock } from "lucide-react"
+import { PenSquare, Calendar, Users, Clock } from "lucide-react"
 import ProgressBar from "./overview/ProgressBar"
 import StatusBadge from "./shared/StatusBadge"
 import CourseThumbnail from "./CourseThumbnail"
 
-const ClassTable = ({ classes, t, handleAction }) => {
+const ClassTable = ({ classes, t, onEdit }) => {
   const c = t.courses || {}
   const navigate = useNavigate()
 
@@ -25,7 +25,18 @@ const ClassTable = ({ classes, t, handleAction }) => {
         </thead>
         <tbody className="divide-y divide-gray-200 text-gray-700">
           {classes.map((item) => (
-            <tr key={item.id} onClick={() => navigate(`/workspace/courses/class/${item.id}`)} className="hover:bg-gray-50/60 cursor-pointer transition-colors">
+            <tr
+              key={item.id}
+              onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(item.id))}`)}
+              onKeyDown={(event) => {
+                if (event.currentTarget === event.target && (event.key === "Enter" || event.key === " ")) {
+                  event.preventDefault()
+                  navigate(`/workspace/courses/class/${encodeURIComponent(String(item.id))}`)
+                }
+              }}
+              tabIndex={0}
+              className="hover:bg-gray-50/60 cursor-pointer transition-colors"
+            >
 
               {/* Cover Image cell */}
               <td className="p-4 border-r border-gray-200">
@@ -39,7 +50,7 @@ const ClassTable = ({ classes, t, handleAction }) => {
 
               {/* Belongs to Course cell */}
               <td className="p-4 border-r border-gray-200 text-xs font-bold text-gray-700 min-w-[150px]">
-                {item.courseTitle || "Luyện viết hiệu quả"}
+                {item.courseTitle || "—"}
               </td>
 
               {/* Class Info cell */}
@@ -102,10 +113,15 @@ const ClassTable = ({ classes, t, handleAction }) => {
               {/* Actions */}
               <td className="p-4 text-center">
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleAction("Options", item.classTitle || item.title); }}
+                  type="button"
+                  aria-label={c.editClass || `Edit ${item.classTitle || item.title || "class"}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEdit?.(item)
+                  }}
                   className="text-gray-400 hover:text-gray-600 inline-flex p-1 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <MoreVertical size={16} />
+                  <PenSquare size={16} />
                 </button>
               </td>
 

@@ -1,35 +1,24 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 
 const CountdownTicker = ({ targetDate }) => {
-  const countdownTarget = useMemo(() => {
-    if (targetDate) {
-      const parsed = new Date(targetDate)
-      if (!isNaN(parsed.getTime())) return parsed
-    }
-    const target = new Date()
-    target.setDate(target.getDate() + 12)
-    target.setHours(target.getHours() + 9)
-    target.setMinutes(target.getMinutes() + 9)
-    target.setSeconds(target.getSeconds() + 9)
-    return target
+  const countdownTargetMs = useMemo(() => {
+    if (!targetDate) return null
+    const parsed = new Date(targetDate)
+    const timestamp = parsed.getTime()
+    return Number.isFinite(timestamp) ? timestamp : null
   }, [targetDate])
-
-  const calculateMinutesLeft = useCallback(() => {
-    const diff = countdownTarget.getTime() - Date.now()
-    return diff > 0 ? Math.floor(diff / 60000) : 0
-  }, [countdownTarget])
-
-  const [minutesLeft, setMinutesLeft] = useState(calculateMinutesLeft)
+  const [nowMs, setNowMs] = useState(() => Date.now())
 
   useEffect(() => {
+    if (countdownTargetMs === null) return undefined
+
     let timer
 
     const updateCountdown = () => {
-      const remainingMs = countdownTarget.getTime() - Date.now()
-      const nextMinutesLeft = remainingMs > 0 ? Math.floor(remainingMs / 60000) : 0
-      setMinutesLeft(nextMinutesLeft)
-
-      if (nextMinutesLeft <= 0) return
+      const currentTime = Date.now()
+      setNowMs(currentTime)
+      const remainingMs = countdownTargetMs - currentTime
+      if (remainingMs <= 0) return
 
       const millisecondsUntilMinuteChanges = remainingMs % 60000
       timer = setTimeout(
@@ -38,11 +27,16 @@ const CountdownTicker = ({ targetDate }) => {
       )
     }
 
-    updateCountdown()
+    timer = setTimeout(updateCountdown, 0)
     return () => clearTimeout(timer)
-  }, [countdownTarget])
+  }, [countdownTargetMs])
+
+  const minutesLeft = countdownTargetMs === null
+    ? null
+    : Math.max(0, Math.floor((countdownTargetMs - nowMs) / 60000))
 
   const countdownTime = useMemo(() => {
+    if (minutesLeft === null) return null
     if (minutesLeft <= 0) {
       return { days: "00", hours: "00", mins: "00" }
     }
@@ -55,6 +49,14 @@ const CountdownTicker = ({ targetDate }) => {
       mins: mins.toString().padStart(2, "0")
     }
   }, [minutesLeft])
+
+  if (countdownTargetMs === null || !countdownTime) {
+    return (
+      <div role="status" className="py-6 text-center text-xs font-semibold text-gray-500">
+        TBA
+      </div>
+    )
+  }
 
   return (
     <div className="flex justify-around items-center text-center py-3 border-b border-gray-100 select-none">

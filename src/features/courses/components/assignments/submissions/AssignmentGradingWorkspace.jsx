@@ -1,12 +1,25 @@
 import { useState } from "react"
-import { Eye, FileText, Search, X, ZoomIn, ZoomOut } from "lucide-react"
+import { Eye, FileText, X, ZoomIn, ZoomOut } from "lucide-react"
 
 import { useLanguage } from "@/shared/context/LanguageContext"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 
-import { getFileMeta } from "../../../utils/assignmentUtils"
+import { getFileMeta, getSafeFileUrl } from "../../../utils/assignmentUtils"
 import { formatFileSize, getFileIconColorClass } from "../../../utils/courseUtils"
 import { getStudentInitials } from "../../../utils/submissionUtils"
+
+const formatWorkspaceFileSize = (value) => {
+  if (value === null || value === undefined || value === "") return "—"
+
+  const size = Number(value)
+  return Number.isFinite(size) && size > 0 && size < (1024 ** 4)
+    ? formatFileSize(size)
+    : "—"
+}
+
+const getDisplayFileName = (value, fallback) => (
+  typeof value === "string" && value.trim() ? value : fallback
+)
 
 const AssignmentGradingWorkspace = ({
   assignmentTitle,
@@ -21,11 +34,19 @@ const AssignmentGradingWorkspace = ({
   const { language, t } = useLanguage()
   const cg = t.courses?.grading || {}
   const [score, setScore] = useState(() => (
-    student.score !== null && student.score !== undefined ? student.score.toString() : ""
+    student.score !== null
+      && student.score !== undefined
+      && student.score !== ""
+      && Number.isFinite(Number(student.score))
+      ? String(student.score)
+      : ""
   ))
-  const [feedback, setFeedback] = useState(student.feedback || "")
+  const [feedback, setFeedback] = useState(
+    typeof student.feedback === "string" ? student.feedback : ""
+  )
   const [zoomLevel, setZoomLevel] = useState(100)
   const [isTouched, setIsTouched] = useState(false)
+  const [hasAvatarError, setHasAvatarError] = useState(false)
 
   const getScoreError = (val, maxScore) => {
     const trimmed = (val ?? "").toString().trim()
@@ -46,19 +67,41 @@ const AssignmentGradingWorkspace = ({
     return null
   }
 
-  const isSubmitted = student.status !== "not_submitted"
+  const studentStatus = typeof student.status === "string"
+    ? student.status.trim().toLowerCase()
+    : ""
+  const isSubmitted = ["graded", "late", "returned", "submitted"]
+    .includes(studentStatus)
   const scoreError = getScoreError(score, assignmentMaxScore)
   const isScoreInvalid = isSubmitted && !!scoreError && (isTouched || score.trim() !== "")
 
   const handleSave = () => {
     setIsTouched(true)
-    if (scoreError) return
+    if (scoreError || isSaving || isReleasing) return
     onSave({ score, feedback })
   }
-  const studentInitials = getStudentInitials(student.name)
-  const firstFile = student.files?.[0] ? getFileMeta(student.files[0]) : null
-  const cleanFileName = firstFile?.name
-    || `Bai_tap_tieng_anh_HK1_${student.name.replace(/\s+/g, "")}.pdf`
+  const studentName = typeof student.name === "string" && student.name.trim()
+    ? student.name.trim()
+    : (language === "vi" ? "Học viên" : "Student")
+  const studentInitials = getStudentInitials(studentName)
+  const submissionFiles = Array.isArray(student.files) ? student.files : []
+  const firstFile = submissionFiles[0] ? getFileMeta(submissionFiles[0]) : null
+  const firstFileUrl = getSafeFileUrl(firstFile?.url)
+  const firstFileName = getDisplayFileName(
+    firstFile?.name,
+    language === "vi" ? "Tệp không tên" : "Unnamed file"
+  )
+  const submissionHeader = language === "vi"
+    ? "Bài nộp"
+    : (language === "zh" ? "提交内容" : "Submission")
+  const safeAssignmentTitle = typeof assignmentTitle === "string"
+    && assignmentTitle.trim()
+    ? assignmentTitle.trim()
+    : (language === "vi" ? "Bài tập chưa đặt tên" : "Untitled assignment")
+  const submissionText = typeof student.submissionText === "string"
+    ? student.submissionText
+    : ""
+  const safeAvatarUrl = getSafeFileUrl(student.avatar)
   const scoreInputLabel = assignmentMaxScore === 10
     ? (cg.scoreTenSystem || "Điểm (Hệ số 10)")
     : language === "zh"
@@ -66,30 +109,29 @@ const AssignmentGradingWorkspace = ({
       : language === "vi"
         ? `Điểm (Tối đa ${assignmentMaxScore})`
         : `Score (max ${assignmentMaxScore})`
-  const scoreInputId = `assignment-score-${student.submissionId || student.id}`
-  const feedbackInputId = `assignment-feedback-${student.submissionId || student.id}`
+  const inputIdSuffix = String(student.submissionId || student.id || "student")
+    .replace(/[^a-zA-Z0-9_-]/g, "-")
+  const scoreInputId = `assignment-score-${inputIdSuffix}`
+  const feedbackInputId = `assignment-feedback-${inputIdSuffix}`
+  const isMutating = Boolean(isSaving || isReleasing)
 
   return (
-    <div className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-115px)] bg-gray-150 border border-gray-200 rounded-3xl overflow-hidden shadow-sm text-gray-800 animate-fade-in">
+    <div
+      aria-busy={isMutating}
+      className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-115px)] bg-gray-150 border border-gray-200 rounded-3xl overflow-hidden shadow-sm text-gray-800 animate-fade-in"
+    >
       <div className="flex-1 flex flex-col bg-gray-100/50 min-h-[450px] md:min-h-0">
         <div className="h-14 bg-white border-b border-gray-200 px-6 flex items-center justify-between text-xs font-bold text-gray-500 shadow-2xs select-none">
           <div className="flex items-center gap-2">
             <FileText size={16} className="text-[#990011]" />
-            <span className="font-extrabold text-gray-800 tracking-tight">{cleanFileName}</span>
+            <span className="font-extrabold text-gray-800 tracking-tight">{submissionHeader}</span>
           </div>
           <div className="flex items-center gap-4 text-gray-400">
-            <button
-              type="button"
-              className="hover:text-gray-700 transition-colors"
-              title="Search"
-            >
-              <Search size={14} />
-            </button>
-            <span className="text-gray-200">|</span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setZoomLevel((value) => Math.max(50, value - 10))}
+                aria-label={language === "vi" ? "Thu nhỏ bài nộp" : "Zoom out submission"}
                 className="hover:text-gray-700 transition-colors"
                 title="Zoom Out"
               >
@@ -101,17 +143,20 @@ const AssignmentGradingWorkspace = ({
               <button
                 type="button"
                 onClick={() => setZoomLevel((value) => Math.min(200, value + 10))}
+                aria-label={language === "vi" ? "Phóng to bài nộp" : "Zoom in submission"}
                 className="hover:text-gray-700 transition-colors"
                 title="Zoom In"
               >
                 <ZoomIn size={14} />
               </button>
             </div>
-            {firstFile && (
+            {firstFileUrl && (
               <a
-                href={firstFile.url}
+                href={firstFileUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                referrerPolicy="no-referrer"
+                aria-label={`${language === "vi" ? "Xem tệp" : "View file"}: ${firstFileName}`}
                 className="hover:text-gray-700 transition-colors flex items-center justify-center text-gray-400"
                 title="View"
               >
@@ -136,47 +181,56 @@ const AssignmentGradingWorkspace = ({
             >
               <div className="border-b border-gray-100 pb-5">
                 <h3 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
-                  {assignmentTitle}
+                  {safeAssignmentTitle}
                 </h3>
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-400 mt-2">
-                  <span>Student: <strong className="text-gray-700 font-extrabold">{student.name}</strong></span>
-                  <span>•</span>
-                  <span>Class: <strong className="text-gray-700 font-extrabold">ENG-301</strong></span>
+                  <span>Student: <strong className="text-gray-700 font-extrabold">{studentName}</strong></span>
                 </div>
               </div>
 
               <div className="text-xs font-semibold text-gray-750 flex flex-col gap-4">
-                <span className="text-sm font-black text-gray-900">Part 1: Essay</span>
+                <span className="text-sm font-black text-gray-900">
+                  {cg.textResponseHeader || (language === "vi" ? "Nội dung bài làm" : "Text response")}
+                </span>
 
                 <RenderHTML
-                  html={student.submissionText}
+                  html={submissionText}
                   className="font-sans font-medium text-gray-700 text-xs"
                   fallback={<p className="italic text-gray-400">No content provided.</p>}
                 />
 
-                {student.files?.length > 0 && (
+                {submissionFiles.length > 0 && (
                   <div className="mt-4 border-t border-gray-150 pt-4 flex flex-col gap-3">
-                    <span className="text-sm font-black text-gray-900">Part 2: Submitted Files</span>
+                    <span className="text-sm font-black text-gray-900">
+                      {cg.submittedFilesHeader || (language === "vi" ? "Tệp đã nộp" : "Submitted files")}
+                    </span>
                     <div className="grid grid-cols-1 gap-3">
-                      {student.files.map((file, index) => {
+                      {submissionFiles.map((file, index) => {
                         const { name, url, size } = getFileMeta(file)
+                        const safeUrl = getSafeFileUrl(url)
+                        const displayName = getDisplayFileName(
+                          name,
+                          language === "vi" ? "Tệp không tên" : "Unnamed file"
+                        )
                         return (
                           <div
-                            key={url || `${name}-${index}`}
+                            key={`${safeUrl || displayName}-${index}`}
                             className="flex items-center justify-between p-3 bg-gray-50 border border-gray-150 rounded-xl hover:bg-gray-100/50 transition-colors"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <FileText size={18} className={getFileIconColorClass(name)} />
+                              <FileText size={18} className={getFileIconColorClass(displayName)} />
                               <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-bold text-gray-800 truncate max-w-[200px] md:max-w-xs">{name}</span>
-                                <span className="text-[10px] text-gray-400 font-semibold">{formatFileSize(size)}</span>
+                                <span className="text-xs font-bold text-gray-800 truncate max-w-[200px] md:max-w-xs">{displayName}</span>
+                                <span className="text-[10px] text-gray-400 font-semibold">{formatWorkspaceFileSize(size)}</span>
                               </div>
                             </div>
-                            {url && (
+                            {safeUrl && (
                               <a
-                                href={url}
+                                href={safeUrl}
                                 target="_blank"
-                                rel="noreferrer"
+                                rel="noopener noreferrer"
+                                referrerPolicy="no-referrer"
+                                aria-label={`${language === "vi" ? "Xem tệp" : "View file"}: ${displayName}`}
                                 className="p-1.5 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-lg transition-colors"
                                 title={language === "vi" ? "Xem trực tiếp" : "View file"}
                               >
@@ -202,10 +256,12 @@ const AssignmentGradingWorkspace = ({
           </h2>
 
           <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 flex items-center gap-3">
-            {student.avatar ? (
+            {safeAvatarUrl && !hasAvatarError ? (
               <img
-                src={student.avatar}
-                alt={student.name}
+                src={safeAvatarUrl}
+                alt={studentName}
+                referrerPolicy="no-referrer"
+                onError={() => setHasAvatarError(true)}
                 className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-2xs"
               />
             ) : (
@@ -214,9 +270,11 @@ const AssignmentGradingWorkspace = ({
               </div>
             )}
             <div className="flex flex-col">
-              <span className="font-extrabold text-gray-900 text-sm leading-snug">{student.name}</span>
+              <span className="font-extrabold text-gray-900 text-sm leading-snug">{studentName}</span>
               <span className="text-[10px] text-gray-400 font-semibold mt-0.5">
-                {isSubmitted ? `Đã nộp: ${student.time}` : (cg.filterNotSubmitted || "Chưa nộp")}
+                {isSubmitted
+                  ? `Đã nộp: ${typeof student.time === "string" ? student.time : "—"}`
+                  : (cg.filterNotSubmitted || "Chưa nộp")}
               </span>
             </div>
           </div>
@@ -236,27 +294,35 @@ const AssignmentGradingWorkspace = ({
               <div className="flex flex-col gap-1">
                 <div
                   className={`flex items-center gap-3 bg-white border rounded-xl px-4 py-2.5 shadow-2xs transition-all ${isScoreInvalid
-                      ? "border-red-500 text-red-600 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-red-500"
-                      : "border-gray-200 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-[#990011]"
+                    ? "border-red-500 text-red-600 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-red-500"
+                    : "border-gray-200 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-[#990011]"
                     }`}
                 >
                   <input
                     id={scoreInputId}
                     type="text"
                     value={score}
+                    disabled={isMutating}
                     onChange={(event) => {
                       setScore(event.target.value)
                       if (!isTouched) setIsTouched(true)
                     }}
                     onBlur={() => setIsTouched(true)}
+                    inputMode="decimal"
+                    aria-invalid={isScoreInvalid}
+                    aria-describedby={isScoreInvalid ? `${scoreInputId}-error` : undefined}
                     placeholder="0.0"
-                    className={`w-20 text-center font-black text-2xl focus:outline-none placeholder-gray-300 select-all ${isScoreInvalid ? "text-red-600" : "text-[#990011]"
+                    className={`w-20 text-center font-black text-2xl focus:outline-none placeholder-gray-300 select-all disabled:cursor-not-allowed disabled:opacity-60 ${isScoreInvalid ? "text-red-600" : "text-[#990011]"
                       }`}
                   />
                   <span className="text-lg font-extrabold text-gray-400">/ {assignmentMaxScore}</span>
                 </div>
                 {isScoreInvalid && (
-                  <span className="text-red-500 text-xs font-semibold mt-1 flex items-center gap-1">
+                  <span
+                    id={`${scoreInputId}-error`}
+                    role="alert"
+                    className="text-red-500 text-xs font-semibold mt-1 flex items-center gap-1"
+                  >
                     <span className="font-bold">•</span> {scoreError}
                   </span>
                 )}
@@ -275,21 +341,24 @@ const AssignmentGradingWorkspace = ({
               <textarea
                 id={feedbackInputId}
                 value={feedback}
+                disabled={isMutating}
                 onChange={(event) => setFeedback(event.target.value)}
                 placeholder={cg.modalFeedbackPlaceholder || "Ghi nhận xét cho học viên..."}
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-750 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] shadow-2xs resize-none leading-relaxed"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-750 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] shadow-2xs resize-none leading-relaxed disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
           )}
         </div>
 
         <div className="p-6 border-t border-gray-200 flex flex-col gap-3 bg-gray-50/50">
-          {student.status === "graded" && (
+          {studentStatus === "graded" && (
             <button
               type="button"
-              onClick={onRelease}
-              disabled={isReleasing}
+              onClick={() => {
+                if (!isSaving && !isReleasing) onRelease()
+              }}
+              disabled={isSaving || isReleasing}
               className="w-full py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cg.btnRelease || "Trả về kết quả"}
@@ -298,8 +367,11 @@ const AssignmentGradingWorkspace = ({
           <div className="flex gap-3 w-full">
             <button
               type="button"
-              onClick={onBack}
-              className="flex-1 py-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl text-center transition-colors shadow-2xs uppercase tracking-wider"
+              onClick={() => {
+                if (!isMutating) onBack()
+              }}
+              disabled={isMutating}
+              className="flex-1 py-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl text-center transition-colors shadow-2xs uppercase tracking-wider disabled:cursor-not-allowed disabled:opacity-50"
             >
               {cg.btnBack || "Quay về"}
             </button>
@@ -307,10 +379,10 @@ const AssignmentGradingWorkspace = ({
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={isSaving || !!scoreError}
+                disabled={isSaving || isReleasing || !!scoreError}
                 className="flex-1 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {student.status === "graded" || student.status === "returned"
+                {studentStatus === "graded" || studentStatus === "returned"
                   ? (cg.btnRegrade || "Chấm lại bài")
                   : (cg.modalBtnSave || "Lưu điểm")}
               </button>

@@ -15,6 +15,7 @@ import {
   getAssignmentErrorMessage,
   getAssignmentFormDefaults,
   getFileMeta,
+  getSafeFileUrl,
 } from "../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { DatePicker } from "@/shared/components/ui/inputs"
@@ -29,6 +30,77 @@ import {
   ChevronRight
 } from "lucide-react"
 
+const MAX_ASSIGNMENT_ATTACHMENTS = 5
+const MAX_ASSIGNMENT_ATTACHMENT_SIZE = 50 * 1024 * 1024
+const ASSIGNMENT_ATTACHMENT_EXTENSIONS = new Set([
+  "docx",
+  "jpg",
+  "pdf",
+  "png",
+  "pptx",
+  "xlsx",
+])
+
+const isRecord = (value) => (
+  value !== null && typeof value === "object" && !Array.isArray(value)
+)
+
+const getObjectPayload = (response) => {
+  const payload = (
+    isRecord(response)
+    && Object.prototype.hasOwnProperty.call(response, "data")
+  )
+    ? response.data
+    : response
+
+  return isRecord(payload) ? payload : null
+}
+
+const getAttachmentExtension = (fileName) => {
+  if (typeof fileName !== "string") return ""
+  const dotIndex = fileName.lastIndexOf(".")
+  return dotIndex >= 0 ? fileName.slice(dotIndex + 1).toLowerCase() : ""
+}
+
+const getAttachmentValidationError = (file) => {
+  if (!file || typeof file.name !== "string") return "invalid"
+
+  const size = Number(file.size)
+  if (!Number.isFinite(size) || size <= 0) return "empty"
+  if (size > MAX_ASSIGNMENT_ATTACHMENT_SIZE) return "size"
+  if (!ASSIGNMENT_ATTACHMENT_EXTENSIONS.has(getAttachmentExtension(file.name))) {
+    return "type"
+  }
+
+  return null
+}
+
+const getAttachmentFingerprint = (file) => (
+  `${String(file?.name || "").toLowerCase()}-${Number(file?.size) || 0}-${Number(file?.lastModified) || 0}`
+)
+
+const getExistingAttachmentReference = (file) => {
+  const metadataUrl = getFileMeta(file, "").url
+  const path = isRecord(file) && typeof file.path === "string" ? file.path : ""
+  const rawReference = metadataUrl || path
+
+  if (rawReference) {
+    return getSafeFileUrl(rawReference) ? rawReference.trim() : ""
+  }
+
+  const hasStableId = (
+    isRecord(file)
+    && ["string", "number"].includes(typeof file.id)
+  )
+  if (!hasStableId) return ""
+
+  try {
+    return JSON.stringify(file)
+  } catch {
+    return ""
+  }
+}
+
 const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, language, t }) => {
   const navigate = useNavigate()
   const c = t.courses || {}
@@ -40,7 +112,6 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
   const isSaving = isCreating || isUpdating
   const saveInFlightRef = useRef(false)
 
-  // Editor mock state
   const [editorText, setEditorText] = useState(() => defaults.editorText)
 
   // Form States
@@ -53,7 +124,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     const formData = new FormData()
     const dueDateIso = toDueDateIso(dueDate, dueTime)
 
-    formData.append("Name", title.trim() || "Bài tập chưa đặt tên")
+    formData.append("Name", title.trim())
     formData.append("Description", editorText || "")
     if (dueDateIso) {
       formData.append("DueDate", dueDateIso)
@@ -72,7 +143,10 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
     // Append existing files to keep
     existingAttachments.forEach((f) => {
-      formData.append("KeepAttachments", getFileMeta(f).url || f.path || JSON.stringify(f))
+      const attachmentReference = getExistingAttachmentReference(f)
+      if (attachmentReference) {
+        formData.append("KeepAttachments", attachmentReference)
+      }
     })
 
     attachedFiles.forEach((f) => {
@@ -97,12 +171,13 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
   const [gradeScale, setGradeScale] = useState(() => defaults.gradeScale) // scale10, scale100
   const [resultRelease, setResultRelease] = useState(() => defaults.resultRelease) // manual, automatic
   const [publishStatus, setPublishStatus] = useState(() => defaults.publishStatus) // now, draft
-  const [postToFeed, setPostToFeed] = useState(true)
+  const [postToFeed, setPostToFeed] = useState(() => defaults.postToFeed)
 
   // State for existing attachments to keep
-  const [existingAttachments, setExistingAttachments] = useState(() => defaults.existingAttachments)
+  const [existingAttachments, setExistingAttachments] = useState(() => (
+    defaults.existingAttachments.filter((file) => getExistingAttachmentReference(file))
+  ))
 
-  // Handle Drag & Drop Upload Mocking
   const handleDragOver = (e) => {
     e.preventDefault()
   }
@@ -118,15 +193,57 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     if (e.target.files && e.target.files.length > 0) {
       addFiles(e.target.files)
     }
+    e.target.value = ""
   }
 
   const addFiles = (filesList) => {
-    if (attachedFiles.length + filesList.length > 5) {
+    const files = Array.from(filesList || [])
+    if (files.length === 0) return
+
+    const availableSlots = (
+      MAX_ASSIGNMENT_ATTACHMENTS
+      - existingAttachments.length
+      - attachedFiles.length
+    )
+    if (files.length > availableSlots) {
       toast.error(ca.toastMaxFiles || "Tối đa 5 tài liệu đính kèm")
       return
     }
 
-    const newFiles = Array.from(filesList).map((file, idx) => {
+    const validationError = files
+      .map(getAttachmentValidationError)
+      .find(Boolean)
+    if (validationError === "size") {
+      toast.error(ca.toastFileTooLarge || "Mỗi tệp phải có dung lượng tối đa 50MB")
+      return
+    }
+    if (validationError === "type") {
+      toast.error(ca.toastInvalidFileType || "Định dạng tệp không được hỗ trợ")
+      return
+    }
+    if (validationError) {
+      toast.error(ca.toastInvalidFile || "Vui lòng chọn tệp không rỗng")
+      return
+    }
+
+    const fingerprints = new Set(attachedFiles.map(getAttachmentFingerprint))
+    if (files.some((file) => fingerprints.has(getAttachmentFingerprint(file)))) {
+      toast.error(ca.toastDuplicateFile || "Tệp này đã được đính kèm")
+      return
+    }
+
+    const selectionFingerprints = new Set()
+    if (files.some((file) => {
+      const fingerprint = getAttachmentFingerprint(file)
+      if (selectionFingerprints.has(fingerprint)) return true
+      selectionFingerprints.add(fingerprint)
+      return false
+    })) {
+      toast.error(ca.toastDuplicateFile || "Tệp này đã được đính kèm")
+      return
+    }
+
+    const newFiles = files.map((file, idx) => {
       const sizeInMB = (file.size / (1024 * 1024)).toFixed(1)
       return {
         id: `uploaded-file-${Date.now()}-${idx}`,
@@ -172,6 +289,10 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
   const handleSaveDraft = async () => {
     if (isSaving) return
+    if (!title.trim()) {
+      toast.error(ca.errTitle || "Please enter an assignment name.")
+      return
+    }
 
     try {
       const didSave = await saveAssignment("Draft")
@@ -179,7 +300,6 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
       navigate(`/workspace/courses/class/${id}`)
     } catch (err) {
-      console.error(err)
       toast.error(getAssignmentErrorMessage(err, "Lỗi khi lưu bản nháp bài nộp"))
     }
   }
@@ -191,7 +311,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     const targetStatus = publishStatus === "draft" ? "Draft" : "Published"
 
     // Form Validation
-    if (!title.trim() && targetStatus === "Published") {
+    if (!title.trim()) {
       toast.error(ca.errTitle || "Vui lòng nhập tên bài nộp")
       return
     }
@@ -221,7 +341,6 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       }
       navigate(`/workspace/courses/class/${id}`)
     } catch (err) {
-      console.error(err)
       toast.error(getAssignmentErrorMessage(err, assignmentId ? "Lỗi khi cập nhật bài nộp" : "Lỗi khi tạo bài nộp"))
     }
   }
@@ -232,25 +351,30 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       {/* ─── Breadcrumbs ─── */}
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
             {t.nav?.home || "Trang chủ"}
-          </span>
+          </button>
           <ChevronRight size={12} className="text-gray-300" />
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>
             {c.title || "Khóa học của tôi"}
-          </span>
+          </button>
           <ChevronRight size={12} className="text-gray-300" />
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses/all")}>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses/all")}>
             {c.allCourses?.title || "Toàn bộ khóa học"}
-          </span>
+          </button>
           <ChevronRight size={12} className="text-gray-300" />
-          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classData.courseId || ""}`)}>
+          <button
+            type="button"
+            disabled={!classData.courseId}
+            className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)}
+          >
             {c.student?.courseDetails || "Chi tiết khóa học"}
-          </span>
+          </button>
           <ChevronRight size={12} className="text-gray-300" />
-          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/class/${id}`)}>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}`)}>
             {classData.name || c.student?.classDetails || "Chi tiết lớp học"}
-          </span>
+          </button>
           <ChevronRight size={12} className="text-gray-300" />
           <span className="text-[#990011] font-semibold">{assignmentId ? (language === "vi" ? "Chỉnh sửa bài nộp" : "Edit Assignment") : (ca.pageTitle || "Tạo bài nộp")}</span>
         </div>
@@ -318,6 +442,16 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    fileInputRef.current?.click()
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={ca.dropzoneMainText || "Select assignment attachments"}
+                aria-describedby="assignment-attachment-limits"
                 className="border-2 border-dashed border-red-100 hover:border-[#990011] bg-red-50/10 hover:bg-red-50/20 transition-all rounded-2xl p-6 text-center cursor-pointer flex flex-col items-center justify-center gap-2 group"
               >
                 <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-[#990011] group-hover:scale-110 transition-transform">
@@ -326,18 +460,21 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 <div className="text-sm font-bold text-[#990011] tracking-wide">
                   {ca.dropzoneMainText || "Nhấn để tải lên hoặc kéo thả file vào đây"}
                 </div>
-                <div className="text-xs text-gray-400 font-medium">
+                <div
+                  id="assignment-attachment-limits"
+                  className="text-xs text-gray-400 font-medium"
+                >
                   {ca.dropzoneSubText || "Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG (Max 50MB/file)"}
                 </div>
-                <input
-                  type="file"
-                  multiple
-                  ref={fileInputRef}
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  accept=".pdf,.docx,.xlsx,.pptx,.jpg,.png"
-                />
               </div>
+              <input
+                type="file"
+                multiple
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                className="hidden"
+                accept=".pdf,.docx,.xlsx,.pptx,.jpg,.png"
+              />
 
               {/* Attached file list */}
               {(existingAttachments.length > 0 || attachedFiles.length > 0) && (
@@ -346,6 +483,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   {existingAttachments.map((file, idx) => {
                     const { name, size } = getFileMeta(file)
                     const fileId = file.id || `existing-${idx}`
+                    const numericSize = Number(size)
                     return (
                       <div
                         key={fileId}
@@ -359,9 +497,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                             <span className="text-xs font-bold text-gray-800 leading-tight truncate max-w-[200px] md:max-w-md">
                               {name}
                             </span>
-                            {size > 0 && (
+                            {Number.isFinite(numericSize) && numericSize > 0 && (
                               <span className="text-[10px] text-gray-400 font-semibold">
-                                {formatFileSize(size)}
+                                {formatFileSize(numericSize)}
                               </span>
                             )}
                           </div>
@@ -456,6 +594,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               {/* Custom Toggle Switch */}
               <button
                 type="button"
+                role="switch"
+                aria-checked={allowLateSubmission}
+                aria-label={ca.allowLateSubmission || "Allow late submission"}
                 onClick={() => setAllowLateSubmission(!allowLateSubmission)}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowLateSubmission ? "bg-[#990011]" : "bg-gray-200"
                   }`}
@@ -486,6 +627,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <div className="flex items-center gap-3">
                 <button
                   type="button"
+                  role="checkbox"
+                  aria-checked={submissionTypeFile}
+                  aria-label={ca.uploadFile || "Allow file uploads"}
                   onClick={() => setSubmissionTypeFile(!submissionTypeFile)}
                   className={`w-5 h-5 border rounded-lg flex items-center justify-center transition-all ${submissionTypeFile
                     ? "bg-[#990011] border-[#990011] text-white"
@@ -506,6 +650,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <div className="flex items-center gap-3">
                 <button
                   type="button"
+                  role="checkbox"
+                  aria-checked={submissionTypeText}
+                  aria-label={ca.directInput || "Allow direct text input"}
                   onClick={() => setSubmissionTypeText(!submissionTypeText)}
                   className={`w-5 h-5 border rounded-lg flex items-center justify-center transition-all ${submissionTypeText
                     ? "bg-[#990011] border-[#990011] text-white"
@@ -560,6 +707,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                       {type}
                       <button
                         type="button"
+                        aria-label={`${ca.removeFileType || "Remove file type"} ${type}`}
                         onClick={() => removeFileType(type)}
                         className="hover:text-orange-950 transition-colors"
                       >
@@ -591,6 +739,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <span className="text-sm font-bold text-gray-800">{ca.gradingLabel || "Chấm điểm"}</span>
               <button
                 type="button"
+                role="switch"
+                aria-checked={enableGrading}
+                aria-label={ca.gradingLabel || "Enable grading"}
                 onClick={() => setEnableGrading(!enableGrading)}
                 className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${enableGrading ? "bg-[#990011]" : "bg-gray-200"
                   }`}
@@ -640,7 +791,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
             <div className="flex flex-col gap-3">
               <span className="text-sm font-bold text-gray-800">{ca.publishStatus || "Trạng thái đăng"}</span>
 
-              <div className="flex flex-col gap-2.5">
+              <div
+                role="radiogroup"
+                aria-label={ca.publishStatus || "Publish status"}
+                className="flex flex-col gap-2.5"
+              >
                 {/* Radio: Đăng ngay */}
                 <div
                   onClick={() => setPublishStatus("now")}
@@ -648,6 +803,8 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 >
                   <button
                     type="button"
+                    role="radio"
+                    aria-checked={publishStatus === "now"}
                     onClick={(e) => {
                       e.stopPropagation()
                       setPublishStatus("now")
@@ -673,6 +830,8 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 >
                   <button
                     type="button"
+                    role="radio"
+                    aria-checked={publishStatus === "draft"}
                     onClick={(e) => {
                       e.stopPropagation()
                       setPublishStatus("draft")
@@ -698,6 +857,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <span className="text-xs font-bold text-gray-800">{ca.postToFeed || "Đăng lên bảng tin lớp học"}</span>
               <button
                 type="button"
+                role="switch"
+                aria-checked={postToFeed}
+                aria-label={ca.postToFeed || "Post to class feed"}
                 onClick={() => setPostToFeed(!postToFeed)}
                 className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${postToFeed ? "bg-[#990011]" : "bg-gray-200"
                   }`}
@@ -755,33 +917,77 @@ const CreateAssignmentPage = () => {
   const { language, t } = useLanguage()
 
   const {
-    data: detailResponse,
+    currentData: detailResponse,
     isLoading: isClassLoading,
+    isFetching: isClassFetching,
     error: classError,
+    refetch: refetchClass,
   } = useGetClassDetailQuery(id, { skip: !id })
   const {
-    data: assignmentResponse,
+    currentData: assignmentResponse,
     isLoading: isAssignmentLoading,
+    isFetching: isAssignmentFetching,
     error: assignmentError,
+    refetch: refetchAssignment,
   } = useGetAssignmentByIdQuery(
     { classId: id, assignmentId },
     { skip: !id || !assignmentId }
   )
 
-  if (isClassLoading || (assignmentId && isAssignmentLoading)) {
+  if (
+    isClassLoading
+    || (isClassFetching && detailResponse === undefined)
+    || (
+      assignmentId
+      && (
+        isAssignmentLoading
+        || (isAssignmentFetching && assignmentResponse === undefined)
+      )
+    )
+  ) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
-  if (classError || assignmentError) {
+  const classData = getObjectPayload(detailResponse)
+  const assignmentData = getObjectPayload(assignmentResponse)
+  const hasMalformedClass = !classData
+  const hasMalformedAssignment = Boolean(assignmentId) && !assignmentData
+
+  if (
+    !id
+    || classError
+    || assignmentError
+    || hasMalformedClass
+    || hasMalformedAssignment
+  ) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        {getAssignmentErrorMessage(classError || assignmentError, "Failed to load assignment form data")}
+      <div
+        role="alert"
+        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+      >
+        <span>
+          {classError || assignmentError
+            ? getAssignmentErrorMessage(
+              classError || assignmentError,
+              "Failed to load assignment form data"
+            )
+            : "Failed to load assignment form data"}
+        </span>
+        {id && (
+          <button
+            type="button"
+            onClick={() => {
+              refetchClass()
+              if (assignmentId) refetchAssignment()
+            }}
+            className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+          >
+            {language === "vi" ? "Thử lại" : "Try again"}
+          </button>
+        )}
       </div>
     )
   }
-
-  const classData = detailResponse?.data || detailResponse || {}
-  const assignmentData = assignmentResponse?.data || assignmentResponse || null
 
   return (
     <CreateAssignmentForm

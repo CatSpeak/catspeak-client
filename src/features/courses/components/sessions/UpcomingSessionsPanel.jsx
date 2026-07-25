@@ -56,7 +56,7 @@ const UpcomingSessionsPanel = ({
                   <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                     {item.levels?.[0]}
                   </span>
-                  <CourseStatusPill status={item.status} />
+                  {item.status && <CourseStatusPill status={item.status} />}
                 </div>
 
                 <h3 className="font-extrabold text-base text-gray-950 leading-snug">
@@ -77,14 +77,9 @@ const UpcomingSessionsPanel = ({
 
               <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
                 <div className="flex items-center gap-1.5">
-                  <div className="flex -space-x-2 overflow-hidden shrink-0">
-                    {item.avatars.map((src) => (
-                      <img key={src} className="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover" src={src} alt="student" />
-                    ))}
-                  </div>
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-gray-400 font-sans">
                     <Users size={11} />
-                    {item.studentCount}
+                    {item.studentCount ?? "—"}
                   </span>
                 </div>
 

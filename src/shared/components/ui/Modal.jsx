@@ -1,6 +1,6 @@
-import React from "react"
+import React, { useEffect, useId, useRef } from "react"
 import { createPortal } from "react-dom"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line no-unused-vars
 import { X } from "lucide-react"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 
@@ -11,6 +11,7 @@ const Modal = ({
   className = "",
   headerClassName = "flex items-center justify-between p-4 sm:p-6",
   title,
+  ariaLabel = "Dialog",
   showCloseButton = true,
   subHeader,
   subHeaderClassName = "px-4 sm:px-6 pb-6 shrink-0",
@@ -20,8 +21,67 @@ const Modal = ({
   fullScreenOnMobile = true,
 }) => {
   useScrollLock(open)
+  const dialogRef = useRef(null)
+  const previousFocusRef = useRef(null)
+  const onCloseRef = useRef(onClose)
+  const titleId = useId()
 
-  // Modal visibility is handled by the "open" prop and AnimatePresence
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  useEffect(() => {
+    if (!open) return undefined
+
+    previousFocusRef.current = document.activeElement
+    const focusFrame = window.requestAnimationFrame(() => {
+      const firstFocusable = dialogRef.current?.querySelector(
+        "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+      )
+      const focusTarget = firstFocusable || dialogRef.current
+      focusTarget?.focus()
+    })
+
+    const handleKeyDown = (event) => {
+      if (!dialogRef.current) return
+
+      if (event.key === "Escape") {
+        event.preventDefault()
+        onCloseRef.current?.()
+        return
+      }
+      if (event.key !== "Tab") return
+
+      const focusableElements = Array.from(
+        dialogRef.current.querySelectorAll(
+          "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+        )
+      )
+      if (focusableElements.length === 0) {
+        event.preventDefault()
+        dialogRef.current.focus()
+        return
+      }
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault()
+        lastElement.focus()
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      document.removeEventListener("keydown", handleKeyDown)
+      previousFocusRef.current?.focus?.()
+      previousFocusRef.current = null
+    }
+  }, [open])
 
   // Use createPortal to render the modal at the document body level
   return createPortal(
@@ -32,6 +92,8 @@ const Modal = ({
         >
           {/* Backdrop */}
           <motion.div
+            role="presentation"
+            aria-hidden="true"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -42,6 +104,7 @@ const Modal = ({
 
           {/* Modal Container */}
           <motion.div
+            ref={dialogRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -63,13 +126,16 @@ const Modal = ({
             } ${className}`}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={typeof title === "string" ? titleId : undefined}
+            aria-label={typeof title === "string" ? undefined : ariaLabel}
+            tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
           >
             {(title || showCloseButton) && (
               <div className={headerClassName}>
                 {title ? (
                   typeof title === "string" ? (
-                    <h2 className="text-[20px] leading-[26px] font-semibold">
+                    <h2 id={titleId} className="text-[20px] leading-[26px] font-semibold">
                       {title}
                     </h2>
                   ) : (
@@ -81,6 +147,8 @@ const Modal = ({
 
                 {showCloseButton && (
                   <button
+                    type="button"
+                    aria-label="Close dialog"
                     onClick={onClose}
                     className="flex shrink-0 items-center justify-center h-10 w-10 hover:bg-[#E5E5E5] rounded-full transition-colors"
                   >

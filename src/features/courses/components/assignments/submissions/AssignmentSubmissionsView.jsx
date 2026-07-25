@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 
@@ -17,70 +17,252 @@ import {
 } from "@/store/api/coursesApi"
 
 import {
-  getAssignmentMaxScore,
-  getAssignmentErrorMessage,
   getAssignmentStatus,
   getAssignmentTitle,
   isAssignmentExpired,
 } from "../../../utils/assignmentUtils"
-import { buildSubmissionStudentList } from "../../../utils/submissionUtils"
+import {
+  buildSubmissionStudentList,
+  formatSubmissionDate,
+  getSafeSubmissionErrorMessage,
+  getValidAttachmentList,
+  getValidDateMs,
+} from "../../../utils/submissionUtils"
 import AssignmentGradingWorkspace from "./AssignmentGradingWorkspace"
 import AssignmentSubmissionsList from "./AssignmentSubmissionsList"
 
-const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp, onBack, classId }) => {
+const SUBMISSION_STATUSES = new Set([
+  "graded",
+  "late",
+  "returned",
+  "submitted",
+])
+const ASSIGNMENT_STATUSES = new Set(["closed", "draft", "published"])
+
+const isRecord = (value) => (
+  value !== null && typeof value === "object" && !Array.isArray(value)
+)
+
+const hasValidId = (value) => (
+  ["string", "number"].includes(typeof value)
+  && String(value).trim().length > 0
+)
+
+const isValidOptionalString = (value) => (
+  value === null || value === undefined || typeof value === "string"
+)
+
+const isValidSubmissionRecord = (submission) => {
+  if (
+    !isRecord(submission)
+    || !hasValidId(submission.id)
+    || typeof submission.status !== "string"
+    || !SUBMISSION_STATUSES.has(submission.status.trim().toLowerCase())
+  ) {
+    return false
+  }
+
+  const hasGrade = (
+    submission.grade !== null
+    && submission.grade !== undefined
+    && submission.grade !== ""
+  )
+  const hasInvalidDate = (
+    submission.submittedAt !== null
+    && submission.submittedAt !== undefined
+    && submission.submittedAt !== ""
+    && getValidDateMs(submission.submittedAt) === null
+  )
+  const hasInvalidFiles = getValidAttachmentList(submission.files) === null
+
+  return (
+    (!hasGrade || Number.isFinite(Number(submission.grade)))
+    && !hasInvalidDate
+    && !hasInvalidFiles
+    && isValidOptionalString(submission.contentText)
+    && isValidOptionalString(submission.comment)
+    && isValidOptionalString(submission.studentName)
+    && isValidOptionalString(submission.studentEmail)
+    && (
+      submission.studentId === null
+      || submission.studentId === undefined
+      || hasValidId(submission.studentId)
+    )
+  )
+}
+
+const unwrapResponse = (response) => (
+  isRecord(response)
+    && Object.prototype.hasOwnProperty.call(response, "data")
+    ? response.data
+    : response
+)
+
+const getAssignmentFromResponse = (response) => {
+  const payload = unwrapResponse(response)
+  return isRecord(payload) ? payload : null
+}
+
+const getSubmissionsFromResponse = (response) => {
+  const payload = unwrapResponse(response)
+  return Array.isArray(payload) ? payload : null
+}
+
+const getAssignmentMaxScore = (assignment) => {
+  const maxScore = Number(assignment?.maxScore)
+  return Number.isFinite(maxScore) && maxScore > 0 ? maxScore : null
+}
+
+const getGradingSearchParams = (
+  currentParams,
+  assignmentId,
+  { studentId, submissionId } = {}
+) => {
+  const nextParams = new URLSearchParams(currentParams)
+  nextParams.set("assignmentId", String(assignmentId))
+  nextParams.delete("studentId")
+  nextParams.delete("submissionId")
+
+  if (submissionId !== undefined && submissionId !== null) {
+    nextParams.set("submissionId", String(submissionId))
+  } else if (studentId !== undefined && studentId !== null) {
+    nextParams.set("studentId", String(studentId))
+  }
+
+  return nextParams
+}
+
+const sanitizeDownloadName = (value) => {
+  const unsafeCharacters = '<>:"/\\|?*'
+  const safeName = [...String(value || "")].map((character) => {
+    const codePoint = character.codePointAt(0)
+    return codePoint <= 31
+      || codePoint === 127
+      || unsafeCharacters.includes(character)
+      ? "_"
+      : character
+  }).join("").trim()
+
+  return safeName.slice(0, 100) || "grades"
+}
+
+const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdProp, onBack, classId }) => {
   const navigate = useNavigate()
   const { language, t } = useLanguage()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [nowMs] = useState(() => Date.now())
+  const [nowMs, setNowMs] = useState(() => Date.now())
   const [studentSearch, setStudentSearch] = useState("")
   const [activeFilter, setActiveFilter] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
+  const toggleInFlightRef = useRef(false)
+  const gradeInFlightRef = useRef(false)
+  const bulkReturnInFlightRef = useRef(false)
+  const returnInFlightRef = useRef(false)
+  const downloadInFlightRef = useRef(false)
+  const deleteInFlightRef = useRef(false)
+  const componentActiveRef = useRef(true)
   const gradingTranslations = t.courses?.grading || {}
   const activeSubmissionId = searchParams.get("submissionId")
   const activeStudentId = searchParams.get("studentId")
-  const assignmentId = assignmentIdProp || assignment?.id
+  const assignmentId = assignmentIdProp ?? assignment?.id
 
   const {
-    data: assignmentDetailResponse,
+    currentData: assignmentDetailResponse,
+    isSuccess: isAssignmentSuccess,
     isLoading: isAssignmentLoading,
     error: assignmentError,
+    refetch: refetchAssignment,
   } = useGetAssignmentByIdQuery({
     classId,
     assignmentId,
   }, { skip: !classId || !assignmentId })
   const {
-    data: submissionsResponse,
+    currentData: submissionsResponse,
+    isSuccess: isSubmissionsSuccess,
     isLoading: isSubmissionsLoading,
     error: submissionsError,
+    refetch: refetchSubmissions,
   } = useGetAssignmentSubmissionsQuery({
     classId,
     assignmentId,
   }, { skip: !classId || !assignmentId })
-  const [closeAssignment] = useCloseAssignmentMutation()
-  const [openAssignment] = useOpenAssignmentMutation()
+  const [closeAssignment, { isLoading: isClosingAssignment }] = useCloseAssignmentMutation()
+  const [openAssignment, { isLoading: isOpeningAssignment }] = useOpenAssignmentMutation()
   const [deleteAssignment, { isLoading: isDeletingAssignment }] = useDeleteAssignmentMutation()
   const [gradeSubmission, { isLoading: isGrading }] = useGradeSubmissionMutation()
-  const [bulkReturn] = useBulkReturnSubmissionsMutation()
+  const [bulkReturn, { isLoading: isBulkReturning }] = useBulkReturnSubmissionsMutation()
   const [returnSubmission, { isLoading: isReturning }] = useReturnSubmissionMutation()
-  const [downloadGradeSheet] = useDownloadAssignmentGradeSheetMutation()
+  const [downloadGradeSheet, { isLoading: isDownloading }] = useDownloadAssignmentGradeSheetMutation()
 
-  const currentAssignment = assignmentDetailResponse?.data || assignmentDetailResponse || assignment || {}
-  const assignmentTitle = getAssignmentTitle(currentAssignment)
-  const assignmentClosed = getAssignmentStatus(currentAssignment) === "closed"
+  const assignmentPayload = getAssignmentFromResponse(assignmentDetailResponse)
+  const fallbackAssignment = isRecord(assignment) ? assignment : null
+  const currentAssignment = assignmentDetailResponse == null
+    ? fallbackAssignment
+    : assignmentPayload
+  const rawSubmissions = getSubmissionsFromResponse(submissionsResponse)
+  const seenSubmissionIds = new Set()
+  const hasDuplicateSubmissionIds = Boolean(rawSubmissions?.some((submission) => {
+    const submissionId = isRecord(submission) ? String(submission.id).trim() : ""
+    if (!submissionId || seenSubmissionIds.has(submissionId)) return Boolean(submissionId)
+    seenSubmissionIds.add(submissionId)
+    return false
+  }))
+  const hasMalformedAssignment = (
+    (isAssignmentSuccess && !assignmentPayload)
+    || (!isAssignmentLoading && !currentAssignment)
+  )
+  const hasMalformedSubmissions = (
+    isSubmissionsSuccess
+    && (
+      !rawSubmissions
+      || hasDuplicateSubmissionIds
+      || rawSubmissions.some((submission) => !isValidSubmissionRecord(submission))
+    )
+  )
+  const submissions = useMemo(() => (
+    (rawSubmissions || []).filter(isValidSubmissionRecord)
+  ), [rawSubmissions])
+  const rawAssignmentTitle = currentAssignment
+    ? getAssignmentTitle(
+      currentAssignment,
+      language === "vi" ? "Bài tập chưa đặt tên" : "Untitled assignment"
+    )
+    : ""
+  const assignmentTitle = typeof rawAssignmentTitle === "string"
+    ? rawAssignmentTitle
+    : (language === "vi" ? "Bài tập chưa đặt tên" : "Untitled assignment")
+  const assignmentStatus = getAssignmentStatus(currentAssignment)
+  const assignmentClosed = assignmentStatus === "closed"
+  const isDraftAssignment = assignmentStatus === "draft"
+  const hasInvalidAssignmentStatus = Boolean(
+    currentAssignment
+    && !ASSIGNMENT_STATUSES.has(assignmentStatus)
+  )
   const assignmentMaxScore = getAssignmentMaxScore(currentAssignment)
+  const hasInvalidDueDate = Boolean(
+    currentAssignment
+    && getValidDateMs(currentAssignment.dueDate) === null
+  )
   const assignmentExpired = isAssignmentExpired(currentAssignment, nowMs)
-  const assignmentDueLabel = currentAssignment.dueDate
-    ? new Date(currentAssignment.dueDate).toLocaleString(language === "vi" ? "vi-VN" : "en-US")
-    : "—"
-  const submissions = useMemo(
-    () => submissionsResponse?.data || submissionsResponse || [],
-    [submissionsResponse],
+  const assignmentDueLabel = formatSubmissionDate(
+    currentAssignment?.dueDate,
+    language === "vi"
+      ? "vi-VN"
+      : (language === "zh" ? "zh-CN" : "en-US")
+  )
+  const assignmentMembers = useMemo(
+    () => (
+      Array.isArray(currentAssignment?.members)
+        ? currentAssignment.members
+        : []
+    ),
+    [currentAssignment?.members]
   )
   const students = useMemo(() => buildSubmissionStudentList({
-    members: [],
+    members: assignmentMembers,
     submissions,
     language,
-  }), [submissions, language])
+  }), [assignmentMembers, submissions, language])
   const activeStudent = useMemo(() => {
     if (activeSubmissionId) {
       const found = students.find((student) => String(student.submissionId) === String(activeSubmissionId))
@@ -93,23 +275,101 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
     return null
   }, [students, activeSubmissionId, activeStudentId])
 
+  useEffect(() => {
+    componentActiveRef.current = true
+    return () => {
+      componentActiveRef.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => setNowMs(Date.now()), 30_000)
+    return () => window.clearInterval(timerId)
+  }, [])
+
+  useEffect(() => {
+    if (
+      !assignmentId
+      || isSubmissionsLoading
+      || submissionsError
+      || hasMalformedSubmissions
+    ) {
+      return
+    }
+
+    const hasRouteSelection = Boolean(activeSubmissionId || activeStudentId)
+    if (hasRouteSelection && !activeStudent) {
+      setSearchParams(
+        (currentParams) => getGradingSearchParams(currentParams, assignmentId),
+        { replace: true }
+      )
+      return
+    }
+
+    if (activeStudent && activeSubmissionId && activeStudentId) {
+      setSearchParams(
+        (currentParams) => getGradingSearchParams(currentParams, assignmentId, {
+          submissionId: activeStudent.submissionId,
+        }),
+        { replace: true }
+      )
+    }
+  }, [
+    activeStudent,
+    activeStudentId,
+    activeSubmissionId,
+    assignmentId,
+    hasMalformedSubmissions,
+    isSubmissionsLoading,
+    setSearchParams,
+    submissionsError,
+  ])
+
   const handleToggleSubmissionsLock = async () => {
+    if (
+      !classId
+      || !assignmentId
+      || isClosingAssignment
+      || isOpeningAssignment
+      || toggleInFlightRef.current
+    ) {
+      return
+    }
+
+    toggleInFlightRef.current = true
     try {
       if (assignmentClosed) {
         await openAssignment({ classId, assignmentId }).unwrap()
+        if (!componentActiveRef.current) return
         toast.success(gradingTranslations.toastOpenSuccess || "Đã mở lại bài nộp thành công!")
       } else {
         await closeAssignment({ classId, assignmentId }).unwrap()
+        if (!componentActiveRef.current) return
         toast.success(gradingTranslations.toastLockSuccess || "Đã khóa bài nộp thành công!")
       }
     } catch (error) {
-      console.error(error)
-      toast.error(error?.data?.error?.message || "Lỗi khi khóa/mở khóa bài nộp")
+      if (!componentActiveRef.current) return
+
+      toast.error(getSafeSubmissionErrorMessage(
+        error,
+        language,
+        language === "vi"
+          ? "Không thể thay đổi trạng thái bài nộp. Vui lòng thử lại."
+          : "The submission status could not be changed. Please try again."
+      ))
+    } finally {
+      toggleInFlightRef.current = false
     }
   }
 
   const handleSaveGrade = async ({ score, feedback }) => {
-    if (!activeStudent) return
+    if (
+      !activeStudent
+      || isGrading
+      || gradeInFlightRef.current
+    ) {
+      return
+    }
 
     if (!assignmentClosed) {
       const errorMessage = language === "vi"
@@ -125,7 +385,12 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
     const numericScore = Number(trimmedScore)
     const isInvalidNumber = !trimmedScore || Number.isNaN(numericScore) || !/^\d+(\.\d+)?$/.test(trimmedScore)
 
-    if (isInvalidNumber || numericScore < 0 || numericScore > assignmentMaxScore) {
+    if (
+      assignmentMaxScore === null
+      || isInvalidNumber
+      || numericScore < 0
+      || numericScore > assignmentMaxScore
+    ) {
       const errorMessage = gradingTranslations.scoreRangeError
         ? gradingTranslations.scoreRangeError.replace("{{maxScore}}", assignmentMaxScore)
         : language === "vi"
@@ -138,98 +403,321 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
     }
 
     if (!activeStudent.submissionId) {
-      toast.error("Không tìm thấy bài nộp của học viên này")
+      toast.error(
+        language === "vi"
+          ? "Không tìm thấy bài nộp của học viên này."
+          : "This student's submission could not be found."
+      )
       return
     }
 
+    const targetSubmissionId = activeStudent.submissionId
+    const targetStudentId = activeStudent.studentId ?? activeStudent.id
+    const targetStudentName = typeof activeStudent.name === "string"
+      ? activeStudent.name
+      : (language === "vi" ? "học viên" : "student")
+    const normalizedFeedback = typeof feedback === "string" ? feedback : ""
+
+    gradeInFlightRef.current = true
     try {
       await gradeSubmission({
         classId,
         assignmentId,
-        submissionId: activeStudent.submissionId,
+        submissionId: targetSubmissionId,
         grade: numericScore,
-        comment: feedback,
+        comment: normalizedFeedback,
       }).unwrap()
+
+      if (!componentActiveRef.current) return
 
       const successMessage = gradingTranslations.toastGradeSaved
         ? gradingTranslations.toastGradeSaved
           .replace("{{score}}", numericScore)
-          .replace("{{student}}", activeStudent.name)
-        : `Đã chấm ${numericScore} điểm cho ${activeStudent.name}`
+          .replace("{{student}}", targetStudentName)
+        : `Đã chấm ${numericScore} điểm cho ${targetStudentName}`
       toast.success(successMessage)
-      setSearchParams({ assignmentId })
+      setSearchParams((currentParams) => {
+        const routeAssignmentId = currentParams.get("assignmentId")
+        const routeSubmissionId = currentParams.get("submissionId")
+        const routeStudentId = currentParams.get("studentId")
+        const isSameAssignment = (
+          !routeAssignmentId
+          || routeAssignmentId === String(assignmentId)
+        )
+        const isSameSelection = (
+          routeSubmissionId === String(targetSubmissionId)
+          || (
+            !routeSubmissionId
+            && routeStudentId === String(targetStudentId)
+          )
+        )
+
+        return isSameAssignment && isSameSelection
+          ? getGradingSearchParams(currentParams, assignmentId)
+          : currentParams
+      })
     } catch (error) {
-      console.error(error)
-      toast.error(error?.data?.error?.message || "Lỗi khi lưu điểm")
+      if (!componentActiveRef.current) return
+
+      toast.error(getSafeSubmissionErrorMessage(
+        error,
+        language,
+        language === "vi"
+          ? "Không thể lưu điểm. Vui lòng tải lại và thử lại."
+          : "The grade could not be saved. Refresh and try again."
+      ))
+    } finally {
+      gradeInFlightRef.current = false
     }
   }
 
   const handleDownloadGradeSheet = async () => {
+    if (
+      !classId
+      || !assignmentId
+      || isDownloading
+      || downloadInFlightRef.current
+    ) {
+      return
+    }
+
+    downloadInFlightRef.current = true
+    let downloadUrl = ""
+    let downloadLink = null
     try {
-      const blob = await downloadGradeSheet({ classId, assignmentId }).unwrap()
-      const downloadUrl = window.URL.createObjectURL(blob)
-      const downloadLink = document.createElement("a")
+      const response = await downloadGradeSheet({ classId, assignmentId }).unwrap()
+      const blob = response instanceof Blob
+        ? response
+        : (response?.data instanceof Blob ? response.data : null)
+      const responseType = blob?.type?.toLowerCase() || ""
+      if (
+        !blob
+        || blob.size <= 0
+        || responseType.includes("json")
+        || responseType.startsWith("text/")
+      ) {
+        throw new Error("Invalid grade sheet response")
+      }
+
+      if (!componentActiveRef.current) return
+
+      downloadUrl = window.URL.createObjectURL(blob)
+      downloadLink = document.createElement("a")
       downloadLink.href = downloadUrl
-      downloadLink.download = `${assignmentTitle || "Grades"}_grades.xlsx`
+      downloadLink.download = `${sanitizeDownloadName(assignmentTitle)}_grades.xlsx`
+      downloadLink.style.display = "none"
       document.body.appendChild(downloadLink)
       downloadLink.click()
-      downloadLink.remove()
-      window.URL.revokeObjectURL(downloadUrl)
       toast.success(gradingTranslations.toastDownloadSuccess || "Tải xuống bảng điểm thành công!")
     } catch (error) {
-      console.error(error)
-      toast.error(gradingTranslations.toastDownloadError || "Lỗi khi tải xuống bảng điểm")
+      if (!componentActiveRef.current) return
+
+      toast.error(getSafeSubmissionErrorMessage(
+        error,
+        language,
+        gradingTranslations.toastDownloadError || (
+          language === "vi"
+            ? "Không thể tải bảng điểm. Vui lòng thử lại."
+            : "The grade sheet could not be downloaded. Please try again."
+        )
+      ))
+    } finally {
+      downloadLink?.remove()
+      if (downloadUrl) {
+        window.setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 0)
+      }
+      downloadInFlightRef.current = false
     }
   }
 
   const handleBulkReturn = async () => {
+    if (
+      !classId
+      || !assignmentId
+      || isBulkReturning
+      || bulkReturnInFlightRef.current
+    ) {
+      return
+    }
+
+    bulkReturnInFlightRef.current = true
     try {
       const response = await bulkReturn({ classId, assignmentId }).unwrap()
-      const returnedCount = response.returnedCount || 0
-      toast.success(gradingTranslations.toastBulkReturnSuccess
-        ? gradingTranslations.toastBulkReturnSuccess.replace("{{count}}", returnedCount)
-        : `Đã trả bài cho ${returnedCount} học viên`)
+      if (!componentActiveRef.current) return
+
+      const payload = unwrapResponse(response)
+      const returnedCount = Number(payload?.returnedCount)
+      const hasReturnedCount = Number.isInteger(returnedCount) && returnedCount >= 0
+      const translatedSuccess = gradingTranslations.toastBulkReturnSuccess
+      const successMessage = (
+        hasReturnedCount
+        && typeof translatedSuccess === "string"
+      )
+        ? translatedSuccess.replace(
+          "{{count}}",
+          returnedCount
+        )
+        : (
+          typeof translatedSuccess === "string"
+          && !translatedSuccess.includes("{{count}}")
+        )
+          ? translatedSuccess
+          : hasReturnedCount
+            ? (language === "vi"
+              ? `Đã trả bài cho ${returnedCount} học viên`
+              : `Returned ${returnedCount} submissions`)
+            : (language === "vi"
+              ? "Đã hoàn tất trả bài."
+              : "Submissions were returned.")
+      toast.success(successMessage)
     } catch (error) {
-      console.error(error)
-      toast.error(error?.data?.error?.message || "Lỗi khi trả bài")
+      if (!componentActiveRef.current) return
+
+      toast.error(getSafeSubmissionErrorMessage(
+        error,
+        language,
+        language === "vi"
+          ? "Không thể trả bài hàng loạt. Vui lòng thử lại."
+          : "The submissions could not be returned. Please try again."
+      ))
+    } finally {
+      bulkReturnInFlightRef.current = false
     }
   }
 
   const handleReleaseGrade = async () => {
-    if (!activeStudent || !activeStudent.submissionId) return
+    if (
+      !activeStudent?.submissionId
+      || isReturning
+      || returnInFlightRef.current
+    ) {
+      return
+    }
 
+    const targetSubmissionId = activeStudent.submissionId
+    const targetStudentId = activeStudent.studentId ?? activeStudent.id
+    const targetStudentName = typeof activeStudent.name === "string"
+      ? activeStudent.name
+      : (language === "vi" ? "học viên" : "student")
+
+    returnInFlightRef.current = true
     try {
       await returnSubmission({
         classId,
         assignmentId,
-        submissionId: activeStudent.submissionId,
+        submissionId: targetSubmissionId,
       }).unwrap()
 
+      if (!componentActiveRef.current) return
+
       const successMessage = gradingTranslations.toastGradeReturned
-        ? gradingTranslations.toastGradeReturned.replace("{{student}}", activeStudent.name)
-        : `Đã trả bài chấm cho học viên ${activeStudent.name}`
+        ? gradingTranslations.toastGradeReturned.replace("{{student}}", targetStudentName)
+        : `Đã trả bài chấm cho học viên ${targetStudentName}`
       toast.success(successMessage)
-      setSearchParams({ assignmentId })
+      setSearchParams((currentParams) => {
+        const routeAssignmentId = currentParams.get("assignmentId")
+        const routeSubmissionId = currentParams.get("submissionId")
+        const routeStudentId = currentParams.get("studentId")
+        const isSameAssignment = (
+          !routeAssignmentId
+          || routeAssignmentId === String(assignmentId)
+        )
+        const isSameSelection = (
+          routeSubmissionId === String(targetSubmissionId)
+          || (
+            !routeSubmissionId
+            && routeStudentId === String(targetStudentId)
+          )
+        )
+
+        return isSameAssignment && isSameSelection
+          ? getGradingSearchParams(currentParams, assignmentId)
+          : currentParams
+      })
     } catch (error) {
-      console.error(error)
-      toast.error(error?.data?.error?.message || "Lỗi khi trả kết quả")
+      if (!componentActiveRef.current) return
+
+      toast.error(getSafeSubmissionErrorMessage(
+        error,
+        language,
+        language === "vi"
+          ? "Không thể trả kết quả. Vui lòng thử lại."
+          : "The result could not be released. Please try again."
+      ))
+    } finally {
+      returnInFlightRef.current = false
     }
   }
 
   if (isAssignmentLoading || isSubmissionsLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div
+        role="status"
+        aria-label={language === "vi" ? "Đang tải bài nộp" : "Loading submissions"}
+        className="flex justify-center items-center min-h-[400px]"
+      >
         <LoadingSpinner />
       </div>
     )
   }
 
-  if (assignmentError || submissionsError) {
+  if (
+    !classId
+    || !assignmentId
+    || assignmentError
+    || submissionsError
+    || hasMalformedAssignment
+    || hasMalformedSubmissions
+    || hasInvalidAssignmentStatus
+    || isDraftAssignment
+    || assignmentMaxScore === null
+    || hasInvalidDueDate
+  ) {
+    const hasRequestError = Boolean(assignmentError || submissionsError)
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        {getAssignmentErrorMessage(
-          assignmentError || submissionsError,
-          "Failed to load assignment submissions",
+      <div
+        role="alert"
+        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+      >
+        <span>
+          {hasRequestError
+            ? getSafeSubmissionErrorMessage(
+              assignmentError || submissionsError,
+              language,
+              language === "vi"
+                ? "Không thể tải danh sách bài nộp."
+                : "Failed to load assignment submissions."
+            )
+            : isDraftAssignment
+              ? (language === "vi"
+                ? "Bài tập này chưa được xuất bản."
+                : "This assignment has not been published.")
+              : (language === "vi"
+                ? "Dữ liệu bài tập hoặc bài nộp không hợp lệ."
+                : "The assignment or submission data is invalid.")}
+        </span>
+        {classId && assignmentId && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                refetchAssignment()
+                refetchSubmissions()
+              }}
+              className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
+            >
+              {language === "vi" ? "Thử lại" : "Try again"}
+            </button>
+            {typeof onBack === "function" && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
+              >
+                {language === "vi" ? "Quay lại" : "Go back"}
+              </button>
+            )}
+          </div>
         )}
       </div>
     )
@@ -238,31 +726,54 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
   if (activeStudent) {
     return (
       <AssignmentGradingWorkspace
-        key={`${activeStudent.id}-${activeStudent.submissionId}-${activeStudent.score}-${activeStudent.feedback}`}
+        key={`${assignmentId}-${activeStudent.submissionId || activeStudent.id}`}
         assignmentTitle={assignmentTitle}
         assignmentMaxScore={assignmentMaxScore}
         student={activeStudent}
-        onBack={() => setSearchParams({ assignmentId })}
+        onBack={() => setSearchParams(
+          (currentParams) => getGradingSearchParams(currentParams, assignmentId)
+        )}
         onSave={handleSaveGrade}
         onRelease={handleReleaseGrade}
-        isSaving={isGrading}
-        isReleasing={isReturning}
+        isSaving={isGrading || gradeInFlightRef.current}
+        isReleasing={isReturning || returnInFlightRef.current}
       />
     )
   }
 
   const handleDeleteAssignment = async () => {
+    if (
+      !classId
+      || !assignmentId
+      || isDeletingAssignment
+      || deleteInFlightRef.current
+    ) {
+      return
+    }
+
+    deleteInFlightRef.current = true
     try {
       await deleteAssignment({ classId, assignmentId }).unwrap()
+      if (!componentActiveRef.current) return
+
       toast.success(gradingTranslations.toastDeleteSuccess || "Đã xóa bài tập thành công!")
       if (onBack) {
         onBack()
       } else {
-        navigate(`/workspace/courses/details/${classId}`)
+        navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}`)
       }
     } catch (error) {
-      console.error(error)
-      toast.error(error?.data?.error?.message || "Lỗi khi xóa bài tập")
+      if (!componentActiveRef.current) return
+
+      toast.error(getSafeSubmissionErrorMessage(
+        error,
+        language,
+        language === "vi"
+          ? "Không thể xóa bài tập. Vui lòng thử lại."
+          : "The assignment could not be deleted. Please try again."
+      ))
+    } finally {
+      deleteInFlightRef.current = false
     }
   }
 
@@ -285,12 +796,23 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
       onBulkReturn={handleBulkReturn}
       onDeleteAssignment={handleDeleteAssignment}
       isDeletingAssignment={isDeletingAssignment}
+      isTogglingSubmissionsLock={isClosingAssignment || isOpeningAssignment}
+      isDownloadingGradeSheet={isDownloading}
+      isBulkReturning={isBulkReturning}
       onSelectStudent={(studentArg) => {
         const student = typeof studentArg === "object" ? studentArg : students.find(s => String(s.id) === String(studentArg))
         if (student?.submissionId) {
-          setSearchParams({ assignmentId, submissionId: student.submissionId })
+          setSearchParams((currentParams) => getGradingSearchParams(
+            currentParams,
+            assignmentId,
+            { submissionId: student.submissionId }
+          ))
         } else if (student?.id) {
-          setSearchParams({ assignmentId, studentId: student.id })
+          setSearchParams((currentParams) => getGradingSearchParams(
+            currentParams,
+            assignmentId,
+            { studentId: student.id }
+          ))
         }
       }}
       onStudentSearchChange={(value) => {
@@ -304,6 +826,13 @@ const AssignmentSubmissionsView = ({ assignment, assignmentId: assignmentIdProp,
       onPageChange={setCurrentPage}
     />
   )
+}
+
+const AssignmentSubmissionsView = (props) => {
+  const assignmentId = props.assignmentId ?? props.assignment?.id ?? ""
+  const viewKey = `${props.classId ?? ""}-${assignmentId}`
+
+  return <AssignmentSubmissionsContent key={viewKey} {...props} />
 }
 
 export default AssignmentSubmissionsView

@@ -1,188 +1,224 @@
-import React, { useState } from "react"
-import { Send, MoreVertical, MessageSquare } from "lucide-react"
-import { useGetClassFeedQuery, useCreateClassPostMutation } from "@/store/api/coursesApi"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import React, { useMemo, useState } from "react"
+import { Send } from "lucide-react"
 import { toast } from "react-hot-toast"
-import { MOCK_FEED } from "../../data/classMockData"
-import { useLanguage } from "@/shared/context/LanguageContext"
 
-// Toggle switch: set to false to use real API endpoint after backend is ready
-const USE_MOCK = true
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import {
+  useCreateClassPostMutation,
+  useGetClassFeedQuery,
+} from "@/store/api/coursesApi"
+
+const getFeedArray = (response) => {
+  const payload = response?.data ?? response
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.items)) return payload.items
+  return null
+}
+
+const getPostTime = (post, language) => {
+  if (typeof post?.time === "string" && post.time.trim()) return post.time
+  if (!post?.createdAt) return "—"
+
+  const date = new Date(post.createdAt)
+  if (Number.isNaN(date.getTime())) return "—"
+  return date.toLocaleString(language === "vi" ? "vi-VN" : "en-US")
+}
 
 const ClassFeedTab = ({ id, isStudent }) => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
+  const [newPostText, setNewPostText] = useState("")
 
-  const notifyInDevelopment = () => {
-    toast.success(c.devMessage || "Feature in development")
-  }
-
-  const { data: feedResponse, isLoading, error } = useGetClassFeedQuery(id, { skip: USE_MOCK })
+  const {
+    currentData: feedResponse,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetClassFeedQuery(id, { skip: !id || isStudent })
   const [createPost, { isLoading: isCreatingPost }] = useCreateClassPostMutation()
 
-  const [newPostText, setNewPostText] = useState("")
-  const [localLikes, setLocalLikes] = useState({}) // { postId: { count, isLiked } }
-  const feedPosts = USE_MOCK
-    ? MOCK_FEED
-    : (feedResponse?.data || feedResponse?.items || feedResponse || [])
+  const rawFeedPosts = useMemo(
+    () => getFeedArray(feedResponse),
+    [feedResponse],
+  )
+  const feedPosts = useMemo(() => {
+    if (!Array.isArray(rawFeedPosts)) return []
 
-  const handleCreatePost = async (e) => {
-    e.preventDefault()
-    if (!newPostText.trim()) return
+    const seenIds = new Set()
+    return rawFeedPosts.filter((post) => {
+      if (!post || typeof post !== "object" || post.id === undefined || post.id === null) {
+        return false
+      }
+      const idKey = String(post.id)
+      if (seenIds.has(idKey)) return false
+      seenIds.add(idKey)
+      return true
+    })
+  }, [rawFeedPosts])
+  const hasMalformedFeed = (
+    feedResponse !== undefined
+    && (rawFeedPosts === null || feedPosts.length !== rawFeedPosts.length)
+  )
 
-    if (USE_MOCK) {
-      notifyInDevelopment()
-      return
-    }
+  const handleCreatePost = async (event) => {
+    event.preventDefault()
+    const content = newPostText.trim()
+    if (!content || isCreatingPost) return
 
     try {
-      await createPost({ classId: id, content: newPostText }).unwrap()
+      await createPost({ classId: id, content }).unwrap()
       setNewPostText("")
-      toast.success(cd.postPublished || "Đã đăng bảng tin thành công!")
-    } catch (err) {
-      toast.error(err.data?.message || err.message || "Failed to create post")
+      toast.success(cd.postPublished || "Announcement published.")
+    } catch {
+      toast.error(
+        language === "vi"
+          ? "Không thể đăng thông báo. Vui lòng thử lại."
+          : "Could not publish the announcement. Please try again.",
+      )
     }
   }
 
-  const handleLikeToggle = (item) => {
-    if (USE_MOCK) {
-      notifyInDevelopment()
-      return
-    }
-
-    const current = localLikes[item.id] || { count: item.likes || 0, isLiked: item.isLiked || false }
-    const newIsLiked = !current.isLiked
-    const newCount = newIsLiked ? current.count + 1 : current.count - 1
-    setLocalLikes(prev => ({
-      ...prev,
-      [item.id]: { count: newCount, isLiked: newIsLiked }
-    }))
-    toast.success(newIsLiked ? "Liked post" : "Unliked post")
-  }
-
-  if (!USE_MOCK && isLoading) {
-    return <LoadingSpinner className="flex justify-center items-center py-12" />
-  }
-
-  if (!USE_MOCK && error) {
+  if (isStudent) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Failed to load class feed: {error.message || "Unknown error"}
+      <div
+        className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-xs font-bold text-gray-500"
+        role="status"
+      >
+        {language === "vi"
+          ? "Bảng tin cho học viên chưa được API hiện tại hỗ trợ."
+          : "The current API does not provide a student class feed yet."}
+      </div>
+    )
+  }
+
+  if ((isLoading || isFetching) && feedResponse === undefined) {
+    return (
+      <div
+        className="flex justify-center items-center py-12"
+        role="status"
+        aria-label={language === "vi" ? "Đang tải bảng tin" : "Loading class feed"}
+      >
+        <LoadingSpinner />
+      </div>
+    )
+  }
+
+  if (isError || hasMalformedFeed) {
+    return (
+      <div
+        role="alert"
+        className="flex flex-col items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-5 text-center text-sm font-semibold text-red-700"
+      >
+        <span>
+          {language === "vi"
+            ? "Không thể tải bảng tin của lớp."
+            : "Could not load the class feed."}
+        </span>
+        <button
+          type="button"
+          onClick={refetch}
+          disabled={isFetching}
+          className="rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-extrabold disabled:opacity-50"
+        >
+          {language === "vi" ? "Thử lại" : "Retry"}
+        </button>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
-      <div className="lg:col-span-2 flex flex-col gap-4">
-        {/* Create Post Form (Hidden for students) */}
-        {!isStudent && (
-          <form onSubmit={handleCreatePost} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
-            <textarea
-              rows={3}
-              placeholder={cd.feedFormPlaceholder || "Share announcements, links, study resources..."}
-              value={newPostText}
-              onChange={(e) => setNewPostText(e.target.value)}
-              className="w-full p-3 bg-gray-50 hover:bg-gray-50 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
-            />
-            <div className="flex justify-between items-center border-t border-gray-50 pt-2">
-              <span className="text-[10px] text-gray-400 font-bold">{cd.postingAsInstructor || "Posting as Instructor"}</span>
-              <button
-                type="submit"
-                disabled={isCreatingPost}
-                className="h-8 px-4 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs active:scale-95 disabled:bg-gray-250 disabled:text-gray-400"
-              >
-                {isCreatingPost ? (
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                ) : (
-                  <>
-                    <Send size={12} />
-                    <span>{cd.publishButton || "Publish"}</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* List of feed items */}
-        <div className="flex flex-col gap-3">
-          {feedPosts.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-xs text-gray-400 font-bold">
-              {cd.noAnnouncements || "No announcements posted yet."}
-            </div>
-          ) : (
-            feedPosts.map((item) => {
-              const likesState = localLikes[item.id] || { count: item.likes || 0, isLiked: item.isLiked || false }
-              const authorName = item.author || "John Doe"
-              const roleLabel = item.role || "Lead Instructor"
-
-              return (
-                <div key={item.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
-                  <div className="flex items-center justify-between border-b border-gray-50 pb-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-gray-150 text-gray-700 font-black text-xs flex items-center justify-center border border-gray-200">
-                        {authorName[0]}
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-extrabold text-gray-800">{authorName}</span>
-                          <span className="bg-red-50 text-[#990011] text-[8px] font-black px-1.5 py-0.5 rounded">
-                            {roleLabel}
-                          </span>
-                        </div>
-                        <span className="text-[9px] text-gray-400 font-semibold">{item.time || "Just now"}</span>
-                      </div>
-                    </div>
-
-                    <button onClick={notifyInDevelopment} className="text-gray-400 hover:text-gray-600">
-                      <MoreVertical size={14} />
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-gray-600 font-medium leading-relaxed">
-                    {item.content}
-                  </p>
-
-                  <div className="flex items-center gap-4 text-[10px] text-gray-400 font-bold border-t border-gray-50 pt-2 mt-1">
-                    <button
-                      onClick={() => handleLikeToggle(item)}
-                      className={`hover:text-[#990011] transition-colors ${likesState.isLiked ? "text-[#990011]" : ""}`}
-                    >
-                      Like ({likesState.count})
-                    </button>
-                    <span>•</span>
-                    <button
-                      onClick={notifyInDevelopment}
-                      className="hover:text-[#990011] transition-colors flex items-center gap-1"
-                    >
-                      <MessageSquare size={11} />
-                      Comment ({item.commentsCount || 0})
-                    </button>
-                  </div>
-                </div>
-              )
-            })
-          )}
+    <div className="flex flex-col gap-4 animate-fadeIn">
+      <form
+        onSubmit={handleCreatePost}
+        className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3"
+      >
+        <label htmlFor="class-feed-post" className="sr-only">
+          {cd.feedFormPlaceholder || "Share an announcement"}
+        </label>
+        <textarea
+          id="class-feed-post"
+          rows={3}
+          placeholder={cd.feedFormPlaceholder || "Share announcements, links, study resources..."}
+          value={newPostText}
+          onChange={(event) => setNewPostText(event.target.value)}
+          className="w-full p-3 bg-gray-50 hover:bg-gray-50 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
+        />
+        <div className="flex justify-between items-center border-t border-gray-50 pt-2">
+          <span className="text-[10px] text-gray-400 font-bold">
+            {cd.postingAsInstructor || "Posting as Instructor"}
+          </span>
+          <button
+            type="submit"
+            disabled={isCreatingPost || !newPostText.trim()}
+            aria-busy={isCreatingPost}
+            className="h-8 px-4 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs active:scale-95 disabled:bg-gray-250 disabled:text-gray-400"
+          >
+            {isCreatingPost ? (
+              <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+            ) : (
+              <Send size={12} />
+            )}
+            <span>{cd.publishButton || "Publish"}</span>
+          </button>
         </div>
-      </div>
+      </form>
 
-      {/* Side Announcements widgets */}
-      <div className="flex flex-col gap-4 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm h-fit">
-        <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-widest border-b border-gray-55 pb-1.5">
-          {c.myCourses?.classAnnouncements || "Class Announcements"}
-        </h4>
-        <div className="flex flex-col gap-3 text-xs font-semibold">
-          <div className="p-2.5 bg-yellow-50/40 border border-yellow-100 rounded-xl text-yellow-800">
-            <span className="font-extrabold block mb-0.5">Quiz Notice:</span>
-            Vocabulary quiz is scheduled on Next Monday. Make sure to complete revisions.
+      {isFetching && (
+        <p className="text-xs font-semibold text-gray-500" role="status" aria-live="polite">
+          {language === "vi" ? "Đang cập nhật bảng tin…" : "Refreshing the feed…"}
+        </p>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {feedPosts.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center text-xs text-gray-400 font-bold">
+            {cd.noAnnouncements || "No announcements posted yet."}
           </div>
-          <div className="p-2.5 bg-purple-50/40 border border-purple-100 rounded-xl text-purple-800">
-            <span className="font-extrabold block mb-0.5">Project Upload:</span>
-            Submit your self-intro project PDF onto materials panel.
-          </div>
-        </div>
+        ) : feedPosts.map((item) => {
+          const authorName = String(
+            item.authorName
+            ?? item.author?.name
+            ?? item.author
+            ?? (language === "vi" ? "Giảng viên" : "Instructor"),
+          )
+          const roleLabel = typeof item.role === "string" ? item.role : null
+
+          return (
+            <article
+              key={item.id}
+              className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3"
+            >
+              <header className="flex items-center gap-2.5 border-b border-gray-50 pb-2">
+                <span
+                  className="w-8 h-8 rounded-full bg-gray-150 text-gray-700 font-black text-xs flex items-center justify-center border border-gray-200"
+                  aria-hidden="true"
+                >
+                  {authorName.charAt(0).toLocaleUpperCase()}
+                </span>
+                <span className="flex flex-col">
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs font-extrabold text-gray-800">{authorName}</span>
+                    {roleLabel && (
+                      <span className="bg-red-50 text-[#990011] text-[8px] font-black px-1.5 py-0.5 rounded">
+                        {roleLabel}
+                      </span>
+                    )}
+                  </span>
+                  <time className="text-[9px] text-gray-400 font-semibold">
+                    {getPostTime(item, language)}
+                  </time>
+                </span>
+              </header>
+
+              <p className="whitespace-pre-wrap break-words text-xs text-gray-600 font-medium leading-relaxed">
+                {typeof item.content === "string" ? item.content : ""}
+              </p>
+            </article>
+          )
+        })}
       </div>
     </div>
   )

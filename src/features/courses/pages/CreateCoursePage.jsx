@@ -17,6 +17,7 @@ import {
 } from "@/store/api/coursesApi"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { COURSE_FORM_LANGUAGES } from "../data/courseFormOptions"
+import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
   const { t } = useLanguage()
@@ -24,24 +25,39 @@ const CreateCoursePage = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditMode = !!id
+  const formInstanceKey = isEditMode ? `edit:${String(id)}` : "create"
   const fileInputRef = useRef(null)
+  const imageReaderRef = useRef(null)
+  const submitGuardRef = useRef(false)
+  const previousFormInstanceKeyRef = useRef(null)
+  const hydratedCourseKeyRef = useRef(null)
 
-  const isProfileLoading = false
   const [createCourse, { isLoading: isCreating }] = useCreateCourseMutation()
   const [updateCourse, { isLoading: isUpdating }] = useUpdateCourseMutation()
-  const { data: courseDetailResponse, isLoading: isDetailsLoading } = useGetCourseDetailQuery(id, { skip: !isEditMode })
+  const {
+    currentData: courseDetailResponse,
+    isLoading: isDetailsLoading,
+    isFetching: isDetailsFetching,
+    error: detailsError,
+    refetch: refetchDetails,
+  } = useGetCourseDetailQuery(id, { skip: !isEditMode })
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showClearModal, setShowClearModal] = useState(false)
 
+  useEffect(() => () => {
+    imageReaderRef.current?.abort()
+  }, [])
+
   const handleDeleteCourse = async () => {
+    if (!id || isDeleting) return
     try {
       await deleteCourse(id).unwrap()
       toast.success(c.courseDetail?.toastDeleteSuccess || "Course deleted successfully!")
       navigate("/workspace/courses")
-    } catch (err) {
-      toast.error(err.data?.message || c.courseDetail?.toastDeleteFailed || "Failed to delete course!")
+    } catch {
+      toast.error(c.courseDetail?.toastDeleteFailed || "Failed to delete course!")
     } finally {
       setShowDeleteModal(false)
     }
@@ -63,8 +79,41 @@ const CreateCoursePage = () => {
 
   // Populate data when in edit mode
   useEffect(() => {
-    if (isEditMode && courseDetailResponse) {
+    if (previousFormInstanceKeyRef.current !== formInstanceKey) {
+      previousFormInstanceKeyRef.current = formInstanceKey
+      hydratedCourseKeyRef.current = null
+      submitGuardRef.current = false
+      imageReaderRef.current?.abort()
+      imageReaderRef.current = null
+      setShowDeleteModal(false)
+      setShowClearModal(false)
+      setAvatar(null)
+      setAvatarPreview("")
+      setCourseName("")
+      setSelectedLanguage("")
+      setLevel("")
+      setDescription("")
+    }
+
+    if (
+      isEditMode
+      && courseDetailResponse
+      && hydratedCourseKeyRef.current !== formInstanceKey
+    ) {
       const course = courseDetailResponse.data || courseDetailResponse
+      if (
+        !course
+        || typeof course !== "object"
+        || Array.isArray(course)
+        || !course.id
+      ) {
+        return
+      }
+
+      hydratedCourseKeyRef.current = formInstanceKey
+      imageReaderRef.current?.abort()
+      imageReaderRef.current = null
+      setAvatar(null)
       setCourseName(course.title || course.name || "")
 
       const matchedLang = languagesList.find(
@@ -77,11 +126,9 @@ const CreateCoursePage = () => {
       setLevel(rawLevel || "")
 
       setDescription(course.description || "")
-      if (course.thumbnailUrl) {
-        setAvatarPreview(course.thumbnailUrl)
-      }
+      setAvatarPreview(getSafeMediaUrl(course.thumbnailUrl) || "")
     }
-  }, [courseDetailResponse, isEditMode])
+  }, [courseDetailResponse, formInstanceKey, isEditMode, languagesList])
 
   const selectedLanguageObj = languagesList.find(
     (l) => (l.name || "").trim().toLowerCase() === (selectedLanguage || "").trim().toLowerCase()
@@ -106,16 +153,32 @@ const CreateCoursePage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        toast.error(cc.toastInvalidImage || "Choose a JPG, PNG, or WebP image.")
+        e.target.value = ""
+        return
+      }
       if (file.size > 50 * 1024 * 1024) {
         toast.error(c.avatarDesc2 || "Kích cỡ dưới 50mb")
+        e.target.value = ""
         return
       }
       setAvatar(file)
+      imageReaderRef.current?.abort()
       const reader = new FileReader()
+      imageReaderRef.current = reader
       reader.onloadend = () => {
-        setAvatarPreview(reader.result)
+        if (typeof reader.result === "string") {
+          setAvatarPreview(reader.result)
+        }
+        imageReaderRef.current = null
+      }
+      reader.onerror = () => {
+        imageReaderRef.current = null
+        toast.error(cc.toastImageReadFail || "The selected image could not be read.")
       }
       reader.readAsDataURL(file)
+      e.target.value = ""
     }
   }
 
@@ -140,9 +203,10 @@ const CreateCoursePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (submitGuardRef.current || isCreating || isUpdating) return
 
     // Quick validation
-    if (!courseName) {
+    if (!courseName.trim()) {
       toast.error("Vui lòng điền tên khóa học!")
       return
     }
@@ -154,10 +218,18 @@ const CreateCoursePage = () => {
       toast.error("Vui lòng chọn trình độ!")
       return
     }
+    const descriptionWordCount = description.trim()
+      ? description.trim().split(/\s+/).length
+      : 0
+    if (descriptionWordCount > 150) {
+      toast.error(cc.descriptionTooLong || "The description cannot exceed 150 words.")
+      return
+    }
 
+    submitGuardRef.current = true
     try {
       const payload = {
-        title: courseName,
+        title: courseName.trim(),
         language: selectedLanguage,
         levels: [level],
         description,
@@ -173,15 +245,46 @@ const CreateCoursePage = () => {
       }
 
       navigate("/workspace/courses")
-    } catch (err) {
-      toast.error(err.data?.message || (isEditMode ? (cc.toastUpdateFailed || "Course update failed!") : (cc.toastCreateFailed || "Course creation failed!")))
+    } catch {
+      toast.error(isEditMode
+        ? (cc.toastUpdateFailed || "Course update failed!")
+        : (cc.toastCreateFailed || "Course creation failed!"))
+    } finally {
+      submitGuardRef.current = false
     }
   }
 
-  if (isDetailsLoading) {
+  if (
+    isEditMode
+    && (
+      isDetailsLoading
+      || (isDetailsFetching && courseDetailResponse === undefined)
+    )
+  ) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]"></div>
+      </div>
+    )
+  }
+
+  const courseDetails = courseDetailResponse?.data || courseDetailResponse
+  const hasMalformedDetails = (
+    isEditMode
+    && (
+      !courseDetails
+      || typeof courseDetails !== "object"
+      || Array.isArray(courseDetails)
+      || !courseDetails.id
+    )
+  )
+  if (detailsError || hasMalformedDetails) {
+    return (
+      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+        <span>{cc.loadFailed || "The course form could not be loaded. Please try again."}</span>
+        <button type="button" onClick={refetchDetails} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
+          {cc.retry || "Try again"}
+        </button>
       </div>
     )
   }
@@ -191,9 +294,9 @@ const CreateCoursePage = () => {
 
       {/* ─── Breadcrumb ─── */}
       <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
+        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
         <span>/</span>
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
+        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
         <span>/</span>
         <span className="text-[#990011] font-semibold">
           {labelCourseAction}
@@ -227,12 +330,20 @@ const CreateCoursePage = () => {
           <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.avatarLabel || "Ảnh đại diện"}</label>
           <div
             onClick={handleAvatarClick}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault()
+                handleAvatarClick()
+              }
+            }}
+            role="button"
+            tabIndex={0}
             className="group relative border border-dashed border-gray-200 hover:border-gray-300 rounded-2xl p-6 bg-[#F8F9FA] hover:bg-[#F2F2F2]/60 flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 text-center min-h-[140px]"
           >
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/png, image/jpeg, image/svg+xml"
+              accept="image/png,image/jpeg,image/webp"
               className="hidden"
               onChange={handleFileChange}
             />
@@ -249,7 +360,7 @@ const CreateCoursePage = () => {
                   <Upload size={20} />
                 </div>
                 <div className="text-xs text-gray-400 font-semibold space-y-1">
-                  <p>{c.avatarDesc1 || "Hỗ trợ định dạng png, jpeg và svg."}</p>
+                  <p>{c.avatarDesc1 || "Supports PNG, JPEG, and WebP."}</p>
                   <p>{c.avatarDesc2 || "Kích cỡ dưới 50mb"}</p>
                 </div>
               </div>
@@ -277,7 +388,6 @@ const CreateCoursePage = () => {
               <select
                 value={selectedLanguage}
                 onChange={handleLanguageChange}
-                disabled={isProfileLoading}
                 className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer"
               >
                 <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
@@ -297,7 +407,7 @@ const CreateCoursePage = () => {
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
-                disabled={isProfileLoading || !selectedLanguage}
+                disabled={!selectedLanguage}
                 className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
@@ -368,8 +478,11 @@ const CreateCoursePage = () => {
 
       <ConfirmationModal
         open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={() => {
+          if (!isDeleting) setShowDeleteModal(false)
+        }}
         onConfirm={handleDeleteCourse}
+        isPending={isDeleting}
         title={c.courseDetail?.deleteCourse || "Delete Course"}
         message={c.courseDetail?.confirmDeleteCourse || "Are you sure you want to delete this course? All associated classes will also be affected."}
         confirmText={c.courseDetail?.deleteCourse || "Delete"}

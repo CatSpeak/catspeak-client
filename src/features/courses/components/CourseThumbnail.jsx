@@ -1,4 +1,5 @@
 import React from "react"
+import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CourseThumbnail = ({
   item,
@@ -9,13 +10,14 @@ const CourseThumbnail = ({
   children,
 }) => {
   const Icon = item?.icon
-  const hasThumbnail = Boolean(item?.thumbnailUrl)
+  const thumbnailUrl = getSafeMediaUrl(item?.thumbnailUrl)
+  const hasThumbnail = Boolean(thumbnailUrl)
   const gradient = item?.gradient || "from-gray-100 to-gray-200 text-gray-400"
 
   return (
     <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${hasThumbnail ? "" : `bg-gradient-to-br ${gradient}`} ${className}`}>
       {hasThumbnail ? (
-        <img src={item.thumbnailUrl} alt={title || item.title} className={imageClassName} loading="lazy" decoding="async" />
+        <img src={thumbnailUrl} alt={title || item.title || ""} className={imageClassName} loading="lazy" decoding="async" />
       ) : (
         Icon && <Icon size={iconSize} className="stroke-[1.5]" />
       )}

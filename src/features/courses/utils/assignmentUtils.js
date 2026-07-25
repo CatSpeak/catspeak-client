@@ -1,17 +1,14 @@
 import { toLocalDateString } from "./dateUtils.js"
 
-export const getAssignmentTitle = (assignment, fallback = "Untitled assignment") => (
-  assignment?.name || assignment?.title || fallback
-)
+export const getAssignmentTitle = (assignment, fallback = "Untitled assignment") => {
+  const title = [assignment?.name, assignment?.title]
+    .find((value) => typeof value === "string" && value.trim())
+  return title?.trim() || fallback
+}
 
 export const getAssignmentStatus = (assignment) => (
   String(assignment?.status || "").toLowerCase()
 )
-
-export const getAssignmentMaxScore = (assignment, fallback = 10) => {
-  const maxScore = Number(assignment?.maxScore)
-  return Number.isFinite(maxScore) && maxScore > 0 ? maxScore : fallback
-}
 
 export const getAssignmentCount = (assignment, keys) => {
   const value = keys
@@ -19,7 +16,7 @@ export const getAssignmentCount = (assignment, keys) => {
     .find((item) => item !== undefined && item !== null)
   const parsed = Number(value)
 
-  return Number.isFinite(parsed) ? parsed : 0
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null
 }
 
 export const getAssignmentTimeline = (assignment, nowMs) => {
@@ -41,13 +38,26 @@ export const getSubmissionStatus = (submission) => {
   return String(submission.status || "submitted").toLowerCase()
 }
 
-export const getAssignmentErrorMessage = (error, fallback) => (
-  error?.data?.error?.message ||
-  error?.data?.message ||
-  error?.error ||
-  error?.message ||
-  fallback
-)
+export const getAssignmentErrorMessage = (error, fallback) => {
+  const status = error?.status
+  if (status === 401 || status === 403) {
+    return "You do not have permission to perform this assignment action."
+  }
+  if (status === 404) {
+    return "The assignment or class could not be found."
+  }
+  if (status === 413) {
+    return "An attachment exceeds the server's file-size limit."
+  }
+  if (status === 415) {
+    return "An attachment type is not supported."
+  }
+  if (status === "FETCH_ERROR" || status === "TIMEOUT_ERROR") {
+    return "The server could not be reached. Check your connection and try again."
+  }
+
+  return fallback || "The assignment action could not be completed. Please try again."
+}
 
 export const parseAttachmentList = (raw, onError) => {
   if (!raw) return []
@@ -68,17 +78,71 @@ export const parseAttachmentList = (raw, onError) => {
 
 export const getFileMeta = (file, fallbackName = "Unnamed file") => {
   if (typeof file === "string") {
+    const pathWithoutQuery = file.split(/[?#]/, 1)[0]
+    const encodedName = pathWithoutQuery.split("/").pop() || ""
+    let displayName = encodedName
+
+    try {
+      displayName = decodeURIComponent(encodedName)
+    } catch {
+      // Keep the encoded name when the server returns invalid percent encoding.
+    }
+
     return {
-      name: file.split("/").pop() || fallbackName,
+      name: displayName || fallbackName,
       url: file,
       size: 0,
     }
   }
 
+  const getText = (...values) => {
+    const value = values.find((item) => (
+      typeof item === "string"
+      || (typeof item === "number" && Number.isFinite(item))
+    ))
+    return value === undefined ? "" : String(value)
+  }
+
   return {
-    name: file?.name || file?.fileName || file?.FileName || fallbackName,
-    url: file?.url || file?.fileUrl || file?.FileUrl || "",
-    size: file?.size || file?.fileSize || file?.FileSize || 0,
+    name: getText(file?.name, file?.fileName, file?.FileName) || fallbackName,
+    url: getText(file?.url, file?.fileUrl, file?.FileUrl),
+    size: Number(file?.size ?? file?.fileSize ?? file?.FileSize) || 0,
+  }
+}
+
+export const getSafeFileUrl = (rawUrl) => {
+  if (typeof rawUrl !== "string") return ""
+
+  const value = rawUrl.trim()
+  const hasControlCharacter = [...value].some((character) => {
+    const codePoint = character.codePointAt(0)
+    return codePoint <= 31 || codePoint === 127
+  })
+  if (
+    !value
+    || value.startsWith("#")
+    || hasControlCharacter
+  ) {
+    return ""
+  }
+
+  try {
+    const baseUrl = typeof window === "undefined"
+      ? "https://local.invalid/"
+      : `${window.location.origin}/`
+    const parsedUrl = new URL(value, baseUrl)
+
+    if (
+      !["http:", "https:"].includes(parsedUrl.protocol)
+      || parsedUrl.username
+      || parsedUrl.password
+    ) {
+      return ""
+    }
+
+    return parsedUrl.href
+  } catch {
+    return ""
   }
 }
 
@@ -87,16 +151,27 @@ export const clampMaxFiles = (value) => Math.min(5, Math.max(1, Number(value) ||
 export const getAssignmentFormDefaults = (assignment) => {
   const dueDate = assignment?.dueDate ? new Date(assignment.dueDate) : null
   const hasValidDueDate = dueDate && !Number.isNaN(dueDate.getTime())
-  const allowedFileTypes = assignment?.allowedFileTypes
-    ? assignment.allowedFileTypes
-      .split(",")
-      .map((type) => type.replace(".", "").trim().toUpperCase())
-      .filter(Boolean)
-    : []
+  const rawAllowedFileTypes = assignment?.allowedFileTypes
+  const allowedFileTypes = (
+    Array.isArray(rawAllowedFileTypes)
+      ? rawAllowedFileTypes
+      : (typeof rawAllowedFileTypes === "string"
+          ? rawAllowedFileTypes.split(",")
+          : [])
+  )
+    .map((type) => String(type).replace(".", "").trim().toUpperCase())
+    .filter(Boolean)
+
+  const getText = (value) => (
+    typeof value === "string"
+      ? value
+      : (typeof value === "number" && Number.isFinite(value) ? String(value) : "")
+  )
+  const releaseMode = getText(assignment?.releaseMode).toLowerCase()
 
   return {
-    title: assignment?.name || assignment?.title || "",
-    editorText: assignment?.description || "",
+    title: getText(assignment?.name) || getText(assignment?.title),
+    editorText: getText(assignment?.description),
     dueDate: hasValidDueDate ? toLocalDateString(dueDate) : "",
     dueTime: hasValidDueDate
       ? `${String(dueDate.getHours()).padStart(2, "0")}:${String(dueDate.getMinutes()).padStart(2, "0")}`
@@ -108,8 +183,9 @@ export const getAssignmentFormDefaults = (assignment) => {
     maxFiles: assignment?.maxFiles || 1,
     enableGrading: assignment?.hasGrading ?? false,
     gradeScale: Number(assignment?.maxScore) === 100 ? "scale100" : "scale10",
-    resultRelease: assignment?.releaseMode?.toLowerCase() === "automatic" ? "automatic" : "manual",
+    resultRelease: releaseMode === "automatic" ? "automatic" : "manual",
     publishStatus: (String(assignment?.status || "").toLowerCase().trim() === "draft" || String(assignment?.status) === "0") ? "draft" : "now",
+    postToFeed: assignment?.postToBulletinBoard ?? true,
     existingAttachments: parseAttachmentList(assignment?.attachments || assignment?.files),
   }
 }

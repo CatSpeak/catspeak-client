@@ -28,7 +28,7 @@ function App() {
               <GlobalPresenceProvider>
                 <GlobalSignalRHandler />
                 <Toaster position="top-center" limit={1} />
-                <ScrollToTopButton />
+                {/* <ScrollToTopButton /> */}
                 <AppRouter />
                 <PiPWidget />
               </GlobalPresenceProvider>

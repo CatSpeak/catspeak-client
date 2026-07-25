@@ -87,29 +87,12 @@ async function ensureRefresh(api, extraOptions, reason) {
   const lsRefresh = refreshToken || localStorage.getItem("refreshToken")
 
   if (!lsRefresh || !lsToken) {
-    console.warn(AUTH_LOG, "No refresh token available — logging out", {
-      reason,
-    })
+    console.warn(AUTH_LOG, "No refresh token available — logging out")
     api.dispatch(logout())
     return false
   }
 
-  console.info(AUTH_LOG, `Starting token refresh (reason: ${reason})`, {
-    tokenExp: decodeJwtPayload(lsToken)?.exp
-      ? new Date(decodeJwtPayload(lsToken).exp * 1000).toISOString()
-      : "unknown",
-    tokenSecondsLeft: Math.round(tokenSecondsRemaining(lsToken)),
-    tokenExpired: tokenSecondsRemaining(lsToken) < 0,
-    refreshTokenPreview: lsRefresh?.slice(-8),
-    stateHasToken: !!api.getState().auth.token,
-    stateHasRefresh: !!api.getState().auth.refreshToken,
-    lsHasToken: !!localStorage.getItem("token"),
-    lsHasRefresh: !!localStorage.getItem("refreshToken"),
-    stateAndLsTokenMatch:
-      api.getState().auth.token === localStorage.getItem("token"),
-    stateAndLsRefreshMatch:
-      api.getState().auth.refreshToken === localStorage.getItem("refreshToken"),
-  })
+  console.info(AUTH_LOG, `Starting token refresh (reason: ${reason})`)
 
   refreshPromise = (async () => {
     try {
@@ -125,7 +108,6 @@ async function ensureRefresh(api, extraOptions, reason) {
 
       if (refreshResult.error) {
         const status = refreshResult.error.status
-        const details = refreshResult.error.data
 
         const isServerError =
           status === "FETCH_ERROR" ||
@@ -137,7 +119,7 @@ async function ensureRefresh(api, extraOptions, reason) {
             console.warn(
               AUTH_LOG,
               `Refresh failed with server/network error (${status}) — server down, skipping logout`,
-              { reason, fullError: refreshResult.error },
+              { reason },
             )
             api.dispatch(setServerDown())
             return false
@@ -146,7 +128,7 @@ async function ensureRefresh(api, extraOptions, reason) {
           console.warn(
             AUTH_LOG,
             `Refresh failed with server error (${status}) but server is healthy — logging out`,
-            { reason, fullError: refreshResult.error },
+            { reason },
           )
           api.dispatch(logout())
           return false
@@ -155,7 +137,7 @@ async function ensureRefresh(api, extraOptions, reason) {
         console.error(
           AUTH_LOG,
           `Refresh failed with status ${status} — logging out`,
-          { reason, details, fullError: refreshResult.error },
+          { reason },
         )
         api.dispatch(logout())
         return false
@@ -169,11 +151,7 @@ async function ensureRefresh(api, extraOptions, reason) {
             user: refreshResult.data.user || user,
           }),
         )
-        const remaining = tokenSecondsRemaining(refreshResult.data.token)
-        console.info(
-          AUTH_LOG,
-          `Refresh successful — new token expires in ${Math.round(remaining)}s`,
-        )
+        console.info(AUTH_LOG, "Token refresh successful")
         return true
       }
 
@@ -182,8 +160,8 @@ async function ensureRefresh(api, extraOptions, reason) {
       })
       api.dispatch(logout())
       return false
-    } catch (err) {
-      console.error(AUTH_LOG, "Refresh threw an exception — logging out", err, {
+    } catch {
+      console.error(AUTH_LOG, "Refresh threw an exception — logging out", {
         reason,
       })
       api.dispatch(logout())
@@ -218,13 +196,9 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       if (remaining < PROACTIVE_REFRESH_BUFFER) {
         console.info(
           AUTH_LOG,
-          `Token expires in ${Math.round(remaining)}s — proactively refreshing before ${url}`,
+          `Token nearing expiry — proactively refreshing before ${url}`,
         )
-        await ensureRefresh(
-          api,
-          extraOptions,
-          `proactive (${Math.round(remaining)}s left)`,
-        )
+        await ensureRefresh(api, extraOptions, "proactive")
       }
     }
   }
@@ -324,6 +298,13 @@ export const baseApi = createApi({
     "Commission",
     "Breakout",
     "CustomRooms",
+    "Quizzes",
+    "QuizDetail",
+    "QuizGrading",
+    "QuizStats",
+    "QuizStudents",
+    "StudentQuizzes",
+    "StudentQuizResult",
   ],
   endpoints: () => ({}),
 })

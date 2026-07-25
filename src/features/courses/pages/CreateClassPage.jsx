@@ -24,9 +24,14 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import {
   COURSE_FORM_LANGUAGES,
   DEFAULT_CLASS_FEE_TIERS,
-  DEFAULT_TEACHER_IS_VERIFIED,
 } from "../data/courseFormOptions"
-import { calculateFees, formatCurrency, formatCurrencyVND, formatToYYYYMMDD } from "../utils/courseUtils"
+import {
+  calculateFees,
+  formatCurrency,
+  formatCurrencyVND,
+  formatToYYYYMMDD,
+  getSafeMediaUrl,
+} from "../utils/courseUtils"
 import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 const DAYS_OF_WEEK = [
@@ -39,6 +44,26 @@ const DAYS_OF_WEEK = [
   { key: "sunday", label: "Sun", code: "CN", fullName: "Sunday" }
 ]
 
+const createDefaultCheckedDays = () => ({
+  monday: true,
+  tuesday: false,
+  wednesday: true,
+  thursday: false,
+  friday: true,
+  saturday: false,
+  sunday: false,
+})
+
+const createDefaultTimeSlots = () => ({
+  monday: { start: "18:00", end: "19:30" },
+  tuesday: { start: "18:00", end: "19:30" },
+  wednesday: { start: "18:00", end: "19:30" },
+  thursday: { start: "18:00", end: "19:30" },
+  friday: { start: "18:00", end: "19:30" },
+  saturday: { start: "18:00", end: "19:30" },
+  sunday: { start: "18:00", end: "19:30" },
+})
+
 const CreateClassPage = () => {
   const { t } = useLanguage()
   const c = t.courses || {}
@@ -46,40 +71,95 @@ const CreateClassPage = () => {
   const { id } = useParams()
   const isEditMode = !!id
   const location = useLocation()
-  const recoverClassId = location.state?.recoverClassId || new URLSearchParams(location.search).get("recoverClassId") || ""
+  const routeSearchParams = new URLSearchParams(location.search)
+  const recoverClassId = location.state?.recoverClassId || routeSearchParams.get("recoverClassId") || ""
   const isRecoverMode = !!recoverClassId
+  const initialCourseId = location.state?.courseId || routeSearchParams.get("courseId") || ""
+  const formInstanceKey = isEditMode
+    ? `edit:${String(id)}`
+    : isRecoverMode
+      ? `recover:${String(recoverClassId)}`
+      : `create:${String(initialCourseId)}`
   const fileInputRef = useRef(null)
+  const thumbnailReaderRef = useRef(null)
+  const previousFormInstanceKeyRef = useRef(null)
+  const hydratedDetailsKeyRef = useRef(null)
+  const appliedInitialCourseKeyRef = useRef(null)
+  const activeFormInstanceKeyRef = useRef(formInstanceKey)
+  const activeMutationRequestRef = useRef(null)
+  const mountedRef = useRef(true)
 
   // Localizations
   const cc = c.createClass || {}
 
-  const isProfileLoading = false
-  const { data: coursesData } = useGetAllCoursesQuery(
+  const {
+    currentData: coursesData,
+    isLoading: isCoursesLoading,
+    isFetching: isCoursesFetching,
+    error: coursesError,
+    refetch: refetchCourses,
+  } = useGetAllCoursesQuery(
     { page: 1, pageSize: 100 },
     { skip: isEditMode || isRecoverMode }
   )
   const [createClass, { isLoading: isCreating }] = useCreateClassMutation()
   const [updateClass, { isLoading: isUpdating }] = useUpdateClassMutation()
 
-  const { data: classDetailResponse, isLoading: isEditDetailsLoading } = useGetClassDetailQuery(id, { skip: !isEditMode })
-  const { data: recoverClassResponse, isLoading: isRecoverLoading } = useGetClassDetailQuery(recoverClassId, { skip: !isRecoverMode })
-  const isDetailsLoading = isEditMode ? isEditDetailsLoading : (isRecoverMode ? isRecoverLoading : false)
+  const {
+    currentData: classDetailResponse,
+    isLoading: isEditDetailsLoading,
+    isFetching: isEditDetailsFetching,
+    error: editDetailsError,
+    refetch: refetchEditDetails,
+  } = useGetClassDetailQuery(id, { skip: !isEditMode })
+  const {
+    currentData: recoverClassResponse,
+    isLoading: isRecoverLoading,
+    isFetching: isRecoverFetching,
+    error: recoverDetailsError,
+    refetch: refetchRecoverDetails,
+  } = useGetClassDetailQuery(recoverClassId, { skip: !isRecoverMode })
+  const isDetailsLoading = isEditMode
+    ? (
+        isEditDetailsLoading
+        || (isEditDetailsFetching && classDetailResponse === undefined)
+      )
+    : (
+        isRecoverMode
+          ? (
+              isRecoverLoading
+              || (isRecoverFetching && recoverClassResponse === undefined)
+            )
+          : false
+      )
   const [deleteClass, { isLoading: isDeleting }] = useDeleteClassMutation()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const submitGuardRef = useRef(false)
+  const deleteGuardRef = useRef(false)
 
-  // Static fallback teacher profile since /teacher/profile API does not exist
+  activeFormInstanceKeyRef.current = formInstanceKey
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      thumbnailReaderRef.current?.abort()
+      activeMutationRequestRef.current?.abort?.()
+    }
+  }, [])
+
   const languagesList = COURSE_FORM_LANGUAGES
-  const coursesList = useMemo(() => coursesData?.data || [], [coursesData])
+  const coursesList = useMemo(
+    () => (Array.isArray(coursesData?.data) ? coursesData.data : []),
+    [coursesData],
+  )
   const tomorrow = useMemo(() => {
     const d = new Date()
     d.setDate(d.getDate() + 1)
     d.setHours(0, 0, 0, 0)
     return d
   }, [])
-
-  // Check navigation state for initial course selection
-  const initialCourseId = location.state?.courseId || ""
 
   // Form State
   const [courseId, setCourseId] = useState(initialCourseId)
@@ -97,25 +177,40 @@ const CreateClassPage = () => {
   const [thumbnailPreview, setThumbnailPreview] = useState("")
 
   // Teaching Schedule State
-  const [checkedDays, setCheckedDays] = useState({
-    monday: true,
-    tuesday: false,
-    wednesday: true,
-    thursday: false,
-    friday: true,
-    saturday: false,
-    sunday: false
-  })
+  const [checkedDays, setCheckedDays] = useState(createDefaultCheckedDays)
 
-  const [timeSlots, setTimeSlots] = useState({
-    monday: { start: "18:00", end: "19:30" },
-    tuesday: { start: "18:00", end: "19:30" },
-    wednesday: { start: "18:00", end: "19:30" },
-    thursday: { start: "18:00", end: "19:30" },
-    friday: { start: "18:00", end: "19:30" },
-    saturday: { start: "18:00", end: "19:30" },
-    sunday: { start: "18:00", end: "19:30" }
-  })
+  const [timeSlots, setTimeSlots] = useState(createDefaultTimeSlots)
+
+  useEffect(() => {
+    if (previousFormInstanceKeyRef.current === formInstanceKey) return
+
+    previousFormInstanceKeyRef.current = formInstanceKey
+    hydratedDetailsKeyRef.current = null
+    appliedInitialCourseKeyRef.current = null
+    submitGuardRef.current = false
+    deleteGuardRef.current = false
+    thumbnailReaderRef.current?.abort()
+    thumbnailReaderRef.current = null
+    activeMutationRequestRef.current?.abort?.()
+    activeMutationRequestRef.current = null
+
+    setShowDeleteModal(false)
+    setCourseId(initialCourseId)
+    setClassName("")
+    setSelectedLanguage("English")
+    setLevel("A1")
+    setAdmissionStart("")
+    setAdmissionEnd("")
+    setStartDate("")
+    setSessions(24)
+    setCapacity(6)
+    setDescription("")
+    setFee("850000")
+    setThumbnailFile(null)
+    setThumbnailPreview("")
+    setCheckedDays(createDefaultCheckedDays())
+    setTimeSlots(createDefaultTimeSlots())
+  }, [formInstanceKey, initialCourseId])
 
   // Minimum tuition fee calculation: (50k * slots) + (25k * sessions)
   const minFee = useMemo(() => {
@@ -125,11 +220,10 @@ const CreateClassPage = () => {
   // Automatically set tuition fee to minFee on load or configuration changes (only in Create mode)
   useEffect(() => {
     if (isEditMode || isRecoverMode) return
-    const currentFeeNum = parseFloat(fee.replace(/[^0-9]/g, "")) || 0
-    if (currentFeeNum < minFee) {
-      setFee(minFee.toString())
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setFee((currentFee) => {
+      const currentFeeNum = parseFloat(currentFee.replace(/[^0-9]/g, "")) || 0
+      return currentFeeNum < minFee ? minFee.toString() : currentFee
+    })
   }, [minFee, isEditMode, isRecoverMode])
 
   const selectedLanguageObj = languagesList.find((l) => (l.name || "").toLowerCase() === (selectedLanguage || "").toLowerCase())
@@ -142,14 +236,14 @@ const CreateClassPage = () => {
     if (selectedCourse) {
       setSelectedLanguage(selectedCourse.language)
       setLevel(selectedCourse.levels?.[0] || "")
-      setSessions(selectedCourse.totalSessions || 24)
+      setSessions(selectedCourse.totalSessions ?? "")
 
 
 
       setAdmissionStart(formatToYYYYMMDD(selectedCourse.enrollmentStart))
       setAdmissionEnd(formatToYYYYMMDD(selectedCourse.enrollmentEnd))
       setThumbnailFile(null)
-      setThumbnailPreview(selectedCourse.thumbnailUrl || "")
+      setThumbnailPreview(getSafeMediaUrl(selectedCourse.thumbnailUrl) || "")
     } else {
       setThumbnailFile(null)
       setThumbnailPreview("")
@@ -158,19 +252,44 @@ const CreateClassPage = () => {
 
   // Auto-fill course details if navigated from course details page
   useEffect(() => {
-    if (initialCourseId && coursesList.length > 0) {
+    if (
+      !isEditMode
+      && !isRecoverMode
+      && initialCourseId
+      && coursesList.length > 0
+      && appliedInitialCourseKeyRef.current !== formInstanceKey
+    ) {
+      appliedInitialCourseKeyRef.current = formInstanceKey
       handleCourseChange(initialCourseId)
     }
-  }, [initialCourseId, coursesList, handleCourseChange])
+  }, [
+    formInstanceKey,
+    initialCourseId,
+    coursesList,
+    handleCourseChange,
+    isEditMode,
+    isRecoverMode,
+  ])
 
   // Populate data when in edit or recover mode
   useEffect(() => {
     const responseData = isEditMode ? classDetailResponse : (isRecoverMode ? recoverClassResponse : null)
-    if (responseData) {
+    if (
+      responseData
+      && hydratedDetailsKeyRef.current !== formInstanceKey
+    ) {
       const cls = responseData.data || responseData
+      if (!cls || typeof cls !== "object" || Array.isArray(cls) || !cls.id) {
+        return
+      }
+
+      hydratedDetailsKeyRef.current = formInstanceKey
+      thumbnailReaderRef.current?.abort()
+      thumbnailReaderRef.current = null
+      setThumbnailFile(null)
       setCourseId(cls.courseId || "")
       setClassName(cls.name || cls.title || "")
-      setSelectedLanguage(cls.language || "English")
+      setSelectedLanguage(cls.language || "")
       setLevel(cls.levels?.[0] || "")
 
 
@@ -178,19 +297,19 @@ const CreateClassPage = () => {
       setAdmissionStart(formatToYYYYMMDD(cls.enrollmentStart))
       setAdmissionEnd(formatToYYYYMMDD(cls.enrollmentEnd))
       setStartDate(formatToYYYYMMDD(cls.startDate))
-      setSessions(cls.totalSessions || 24)
-      setCapacity(cls.slots || 10)
+      setSessions(cls.totalSessions ?? "")
+      setCapacity(cls.slots ?? "")
       setDescription(cls.description || "")
-      setFee(cls.tuitionFee?.toString() || "0")
+      setFee(cls.tuitionFee?.toString() || "")
 
       if (cls.thumbnailUrl) {
-        setThumbnailPreview(cls.thumbnailUrl)
+        setThumbnailPreview(getSafeMediaUrl(cls.thumbnailUrl) || "")
       } else {
         setThumbnailPreview("")
       }
 
       // Parse schedule
-      if (cls.schedule) {
+      if (cls.schedule || cls.rawSchedule) {
         const apiDaysToLocalKeys = {
           "MON": "monday",
           "TUE": "tuesday",
@@ -220,18 +339,21 @@ const CreateClassPage = () => {
           sunday: { start: "18:00", end: "19:30" }
         }
 
-        const days = cls.schedule.days || (Array.isArray(cls.schedule) ? cls.schedule.map(s => s.dayOfWeek) : [])
-        const startTime = cls.schedule.startTime || (Array.isArray(cls.schedule) ? cls.schedule[0]?.startTime : "18:00")
-        const endTime = cls.schedule.endTime || (Array.isArray(cls.schedule) ? cls.schedule[0]?.endTime : "19:30")
+        const scheduleEntries = Array.isArray(cls.rawSchedule)
+          ? cls.rawSchedule
+          : (Array.isArray(cls.schedule) ? cls.schedule : [])
+        const days = cls.schedule?.days || scheduleEntries.map(s => s.dayOfWeek)
+        const startTime = cls.schedule?.startTime || scheduleEntries[0]?.startTime || ""
+        const endTime = cls.schedule?.endTime || scheduleEntries[0]?.endTime || ""
 
-        if (Array.isArray(cls.schedule)) {
-          cls.schedule.forEach(item => {
+        if (scheduleEntries.length > 0) {
+          scheduleEntries.forEach(item => {
             const key = apiDaysToLocalKeys[item.dayOfWeek]
             if (key) {
               updatedCheckedDays[key] = true
               updatedTimeSlots[key] = {
-                start: item.startTime || "18:00",
-                end: item.endTime || "19:30"
+                start: item.startTime || "",
+                end: item.endTime || ""
               }
             }
           })
@@ -241,8 +363,8 @@ const CreateClassPage = () => {
             if (key) {
               updatedCheckedDays[key] = true
               updatedTimeSlots[key] = {
-                start: startTime || "18:00",
-                end: endTime || "19:30"
+                start: startTime,
+                end: endTime
               }
             }
           })
@@ -251,15 +373,32 @@ const CreateClassPage = () => {
         setTimeSlots(updatedTimeSlots)
       }
     }
-  }, [classDetailResponse, recoverClassResponse, isEditMode, isRecoverMode])
+  }, [
+    classDetailResponse,
+    formInstanceKey,
+    recoverClassResponse,
+    isEditMode,
+    isRecoverMode,
+  ])
 
   const handleThumbnailClick = () => {
+    if (!isEditMode) return
     fileInputRef.current?.click()
   }
 
   const handleThumbnailFileChange = (e) => {
+    if (!isEditMode) {
+      e.target.value = ""
+      return
+    }
     const file = e.target.files?.[0]
     if (!file) return
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error(cc.toastInvalidImage || "Choose a JPG, PNG, or WebP image.")
+      e.target.value = ""
+      return
+    }
 
     if (file.size > 50 * 1024 * 1024) {
       toast.error(c.avatarDesc2 || "File size must be under 50mb")
@@ -268,11 +407,21 @@ const CreateClassPage = () => {
     }
 
     setThumbnailFile(file)
+    thumbnailReaderRef.current?.abort()
     const reader = new FileReader()
+    thumbnailReaderRef.current = reader
     reader.onloadend = () => {
-      setThumbnailPreview(reader.result)
+      if (typeof reader.result === "string") {
+        setThumbnailPreview(reader.result)
+      }
+      thumbnailReaderRef.current = null
+    }
+    reader.onerror = () => {
+      thumbnailReaderRef.current = null
+      toast.error(cc.toastImageReadFail || "The selected image could not be read.")
     }
     reader.readAsDataURL(file)
+    e.target.value = ""
   }
 
   const handleToggleDay = (day) => {
@@ -312,13 +461,14 @@ const CreateClassPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (submitGuardRef.current || isCreating || isUpdating) return
 
     if (!courseId) {
       toast.error(cc.toastSelectCourseFirst || "Please select a course first!")
       return
     }
 
-    if (!className) {
+    if (!className.trim()) {
       toast.error(cc.toastEnterClassName || "Please enter class name!")
       return
     }
@@ -331,6 +481,25 @@ const CreateClassPage = () => {
     const start = parseLocalDateString(startDate)
     const enrollStart = parseLocalDateString(admissionStart)
     const enrollEnd = parseLocalDateString(admissionEnd)
+    if (!start || !enrollStart || !enrollEnd) {
+      toast.error(cc.toastInvalidDates || "Enter valid enrollment and class dates.")
+      return
+    }
+
+    const sessionCount = Number(sessions)
+    const classCapacity = Number(capacity)
+    if (!Number.isSafeInteger(sessionCount) || sessionCount <= 0) {
+      toast.error(cc.toastInvalidSessions || "Enter a valid number of sessions.")
+      return
+    }
+    if (!Number.isSafeInteger(classCapacity) || classCapacity <= 0) {
+      toast.error(cc.toastInvalidCapacity || "Enter a valid class capacity.")
+      return
+    }
+    if (!selectedLanguage || !level) {
+      toast.error(cc.toastLanguageLevelRequired || "Select a language and level.")
+      return
+    }
 
     if (!isEditMode) {
       if (enrollStart && enrollStart < tomorrow) {
@@ -371,6 +540,19 @@ const CreateClassPage = () => {
       toast.error(cc.toastSelectSchedule || "Please select at least one teaching day!")
       return
     }
+    const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/
+    const invalidScheduleDay = checkedDaysList.find((day) => {
+      const slot = timeSlots[day]
+      return (
+        !timePattern.test(slot?.start || "")
+        || !timePattern.test(slot?.end || "")
+        || slot.start >= slot.end
+      )
+    })
+    if (invalidScheduleDay) {
+      toast.error(cc.toastInvalidScheduleTime || "Each class must end after it starts.")
+      return
+    }
 
     const daysCodeMap = {
       monday: "MON",
@@ -387,26 +569,37 @@ const CreateClassPage = () => {
       endTime: timeSlots[k].end
     }))
 
+    submitGuardRef.current = true
+    const submittedFormKey = formInstanceKey
+    let request = null
     try {
-      if (!DEFAULT_TEACHER_IS_VERIFIED) {
-        toast.error(cc.toastVerifyProfile || "Please verify your profile identity to complete the transaction!")
-        return
-      }
-
       const payload = {
         courseId,
-        title: className,
+        title: className.trim(),
         language: selectedLanguage,
         levels: [level],
         description,
-        totalSessions: sessions,
+        totalSessions: sessionCount,
         enrollmentStart: admissionStart ? `${admissionStart}T00:00:00Z` : "",
         enrollmentEnd: admissionEnd ? `${admissionEnd}T00:00:00Z` : "",
         startDate: startDate ? `${startDate}T00:00:00Z` : "",
         schedule,
-        slots: capacity,
+        slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
         timezone: "Asia/Ho_Chi_Minh",
+        cancelUrl: (
+          window.location.origin
+          + window.location.pathname
+          + (
+            isRecoverMode
+              ? `?recoverClassId=${encodeURIComponent(String(recoverClassId))}`
+              : (
+                  courseId
+                    ? `?courseId=${encodeURIComponent(String(courseId))}`
+                    : ""
+                )
+          )
+        ),
       }
 
       if (isEditMode) {
@@ -415,51 +608,155 @@ const CreateClassPage = () => {
           thumbnailUrl: thumbnailFile || thumbnailPreview || "",
           commissionPercent: feeDetails.commissionRate,
         }
-        await updateClass({ id, data: updatePayload }).unwrap()
+        request = updateClass({ id, courseId, data: updatePayload })
+        activeMutationRequestRef.current = request
+        await request.unwrap()
+        if (
+          !mountedRef.current
+          || activeFormInstanceKeyRef.current !== submittedFormKey
+        ) {
+          return
+        }
         toast.success(cc.toastUpdateSuccess || "Class updated successfully!")
         navigate("/workspace/courses/all-classes")
       } else {
-        const result = await createClass(payload).unwrap()
+        request = createClass(payload)
+        activeMutationRequestRef.current = request
+        const result = await request.unwrap()
+        if (
+          !mountedRef.current
+          || activeFormInstanceKeyRef.current !== submittedFormKey
+        ) {
+          return
+        }
+        const resultPayload = result?.data ?? result
+        if (
+          !resultPayload
+          || typeof resultPayload !== "object"
+          || Array.isArray(resultPayload)
+        ) {
+          throw new Error("Unexpected create-class response")
+        }
 
-        if (result.checkoutUrl) {
+        if (resultPayload.checkoutUrl) {
+          const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
+          if (!checkoutUrl) throw new Error("Invalid checkout URL")
           toast.success(cc.toastRedirectPayment || "Redirecting to payment...")
-          window.location.href = result.checkoutUrl
-        } else if (result.classId) {
+          window.location.assign(checkoutUrl)
+        } else if (resultPayload.classId) {
           // Free flow (capacity ≤ 6): class created immediately
           toast.success(cc.toastCreateSuccess || "Class created successfully!")
           navigate("/workspace/courses/all-classes")
         } else {
-          // Fallback: assume success
-          toast.success(cc.toastCreateSuccess || "Class created successfully!")
-          navigate("/workspace/courses/all-classes")
+          throw new Error("Missing class ID or checkout URL")
         }
       }
-    } catch (err) {
-      console.error("Create/update class error details:", err)
-      toast.error(err.data?.message || (isEditMode ? (cc.toastUpdateFail || "Failed to update class!") : (cc.toastCreateFail || "Failed to create class!")))
+    } catch (error) {
+      if (
+        !mountedRef.current
+        || activeFormInstanceKeyRef.current !== submittedFormKey
+        || error?.name === "AbortError"
+      ) {
+        return
+      }
+      toast.error(isEditMode
+        ? (cc.toastUpdateFail || "Failed to update class!")
+        : (cc.toastCreateFail || "Failed to create class!"))
+    } finally {
+      if (activeMutationRequestRef.current === request) {
+        activeMutationRequestRef.current = null
+      }
+      if (activeFormInstanceKeyRef.current === submittedFormKey) {
+        submitGuardRef.current = false
+      }
     }
   }
 
   const handleDeleteClass = async () => {
+    if (deleteGuardRef.current || isDeleting || !id) return
+    deleteGuardRef.current = true
+    const deletedFormKey = formInstanceKey
+    let request = null
     try {
-      await deleteClass(id).unwrap()
+      request = deleteClass({ id, courseId })
+      activeMutationRequestRef.current = request
+      await request.unwrap()
+      if (
+        !mountedRef.current
+        || activeFormInstanceKeyRef.current !== deletedFormKey
+      ) {
+        return
+      }
       toast.success(cc.toastDeleteSuccess || "Class deleted successfully!")
       navigate("/workspace/courses/all-classes")
-    } catch (err) {
-      toast.error(err.data?.message || (cc.toastDeleteFail || "Failed to delete class!"))
+    } catch (error) {
+      if (
+        !mountedRef.current
+        || activeFormInstanceKeyRef.current !== deletedFormKey
+        || error?.name === "AbortError"
+      ) {
+        return
+      }
+      toast.error(cc.toastDeleteFail || "Failed to delete class!")
     } finally {
-      setShowDeleteModal(false)
+      if (activeMutationRequestRef.current === request) {
+        activeMutationRequestRef.current = null
+      }
+      if (activeFormInstanceKeyRef.current === deletedFormKey) {
+        deleteGuardRef.current = false
+        setShowDeleteModal(false)
+      }
     }
   }
 
   const lockedClass = (isEditMode ? classDetailResponse : recoverClassResponse)?.data
     || (isEditMode ? classDetailResponse : recoverClassResponse)
   const lockedCourseTitle = lockedClass?.courseName || lockedClass?.courseTitle || courseId
+  const isFormBusy = isCreating || isUpdating || isDeleting
 
-  if (isDetailsLoading) {
+  if (
+    isDetailsLoading
+    || (
+      !isEditMode
+      && !isRecoverMode
+      && (
+        isCoursesLoading
+        || (isCoursesFetching && coursesData === undefined)
+      )
+    )
+  ) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]"></div>
+      </div>
+    )
+  }
+
+  const detailsError = isEditMode ? editDetailsError : recoverDetailsError
+  const hasMalformedDetails = (
+    (isEditMode || isRecoverMode)
+    && (
+      !lockedClass
+      || typeof lockedClass !== "object"
+      || Array.isArray(lockedClass)
+      || !lockedClass.id
+    )
+  )
+  if (coursesError || detailsError || hasMalformedDetails) {
+    return (
+      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+        <span>{cc.loadFailed || "The class form could not be loaded. Please try again."}</span>
+        <button
+          type="button"
+          onClick={() => {
+            if (isEditMode) refetchEditDetails()
+            else if (isRecoverMode) refetchRecoverDetails()
+            else refetchCourses()
+          }}
+          className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+        >
+          {cc.retry || "Try again"}
+        </button>
       </div>
     )
   }
@@ -481,11 +778,11 @@ const CreateClassPage = () => {
 
       {/* ─── Breadcrumb ─── */}
       <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
+        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
         <span>/</span>
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
+        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
         <span>/</span>
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</span>
+        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
         <span>/</span>
         <span className="text-[#990011] font-semibold">{pageTitle}</span>
       </div>
@@ -495,7 +792,8 @@ const CreateClassPage = () => {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
+          disabled={isFormBusy}
+          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
           title={t.common?.back || "Quay lại"}
         >
           <ArrowLeft size={18} />
@@ -506,7 +804,11 @@ const CreateClassPage = () => {
       </div>
 
       {/* ─── Main Form Box ─── */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6">
+      <form
+        onSubmit={handleSubmit}
+        aria-busy={isFormBusy}
+        className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6"
+      >
 
         <h2 className="text-lg font-bold text-gray-900 border-b border-gray-50 pb-2">
           {sectionTitle}
@@ -567,7 +869,7 @@ const CreateClassPage = () => {
                       setSelectedLanguage(e.target.value)
                       setLevel("")
                     }}
-                    disabled={isProfileLoading || isRecoverMode}
+                    disabled={isRecoverMode}
                     className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
@@ -585,7 +887,7 @@ const CreateClassPage = () => {
                   <select
                     value={level}
                     onChange={(e) => setLevel(e.target.value)}
-                    disabled={isProfileLoading || !selectedLanguage || isRecoverMode}
+                    disabled={!selectedLanguage || isRecoverMode}
                     className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
@@ -797,23 +1099,46 @@ const CreateClassPage = () => {
                 {cc.thumbnailLabel || c.avatarLabel || "Thumbnail"}
               </label>
               <div
-                onClick={isRecoverMode ? undefined : handleThumbnailClick}
-                className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${isRecoverMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200"
+                role={isEditMode ? "button" : undefined}
+                tabIndex={isEditMode ? 0 : undefined}
+                aria-disabled={!isEditMode}
+                title={!isEditMode
+                  ? (
+                      cc.thumbnailEditOnly
+                      || "The checkout API does not accept a class thumbnail. You can change it after the class is created."
+                    )
+                  : undefined}
+                onClick={isEditMode ? handleThumbnailClick : undefined}
+                onKeyDown={isEditMode
+                  ? (event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault()
+                        handleThumbnailClick()
+                      }
+                    }
+                  : undefined}
+                className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${!isEditMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
                   }`}
               >
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/png, image/jpeg, image/svg+xml"
+                  accept="image/png,image/jpeg,image/webp"
                   className="hidden"
                   onChange={handleThumbnailFileChange}
+                  disabled={!isEditMode}
                 />
                 {thumbnailPreview ? (
                   <div className="relative w-full max-h-[190px] flex justify-center overflow-hidden rounded-xl">
                     <img src={thumbnailPreview} alt="Class thumbnail preview" className="object-contain max-h-[180px]" />
-                    <div className={`absolute inset-0 bg-black/40 opacity-0 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl ${isRecoverMode ? "" : "group-hover:opacity-100"
+                    <div className={`absolute inset-0 bg-black/40 opacity-0 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl ${isEditMode ? "group-hover:opacity-100 group-focus:opacity-100" : ""
                       }`}>
-                      {cc.changeThumbnail || "Change image"}
+                      {isEditMode
+                        ? (cc.changeThumbnail || "Change image")
+                        : (
+                            cc.thumbnailEditOnly
+                            || "Thumbnail changes are available after creation."
+                          )}
                     </div>
                   </div>
                 ) : (
@@ -822,12 +1147,23 @@ const CreateClassPage = () => {
                       <Upload size={20} />
                     </div>
                     <div className="text-xs text-gray-400 font-semibold space-y-1">
-                      <p>{c.avatarDesc1 || "Supports png, jpeg and svg."}</p>
+                      <p>{isEditMode
+                        ? (c.avatarDesc1 || "Supports PNG, JPEG, and WebP.")
+                        : (
+                            cc.thumbnailEditOnly
+                            || "Thumbnail changes are available after creation."
+                          )}</p>
                       <p>{c.avatarDesc2 || "File size must be under 50mb"}</p>
                     </div>
                   </div>
                 )}
               </div>
+              {!isEditMode && (
+                <p className="text-[11px] font-semibold leading-relaxed text-gray-500">
+                  {cc.thumbnailEditOnly
+                    || "The checkout API does not accept a class thumbnail. You can change it after the class is created."}
+                </p>
+              )}
             </div>
 
             {/* Class Description */}
@@ -915,7 +1251,7 @@ const CreateClassPage = () => {
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(true)}
-                disabled={isDeleting}
+                disabled={isFormBusy}
                 className="h-11 px-6 bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-1.5 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Trash2 size={13} />
@@ -925,13 +1261,14 @@ const CreateClassPage = () => {
             <button
               type="button"
               onClick={() => navigate("/workspace/courses/all-classes")}
-              className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center"
+              disabled={isFormBusy}
+              className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
             >
               {cc.cancel}
             </button>
             <button
               type="submit"
-              disabled={isCreating || isUpdating}
+              disabled={isFormBusy}
               className="flex-1 sm:flex-initial h-11 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isEditMode ? (cc.saveChanges || "Save Changes") : (cc.confirmPay || "Confirm & Pay")}
@@ -943,8 +1280,11 @@ const CreateClassPage = () => {
 
       <ConfirmationModal
         open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={() => {
+          if (!isDeleting) setShowDeleteModal(false)
+        }}
         onConfirm={handleDeleteClass}
+        isPending={isDeleting}
         title={cc.deleteClass || "Delete Class"}
         message={cc.confirmDeleteClassMsg || "Are you sure you want to delete this class? This action cannot be undone."}
         confirmText={cc.deleteConfirmButton || "Delete"}

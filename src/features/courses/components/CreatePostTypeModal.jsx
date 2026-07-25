@@ -39,6 +39,7 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
           const Icon = opt.icon
           return (
             <button
+              type="button"
               key={opt.id}
               onClick={() => {
                 onSelect(opt.id)

@@ -15,8 +15,8 @@ export function useDeleteCourse(t, onSuccess) {
       await deleteCourse(targetId).unwrap()
       toast.success(c.courseDetail?.toastDeleteSuccess || "Course deleted successfully!")
       if (onSuccess) onSuccess()
-    } catch (err) {
-      toast.error(err?.data?.message || c.courseDetail?.toastDeleteFailed || "Failed to delete course!")
+    } catch {
+      toast.error(c.courseDetail?.toastDeleteFailed || "Failed to delete course!")
     } finally {
       isDeletingRef.current = false
       setTargetId(null)
@@ -24,6 +24,7 @@ export function useDeleteCourse(t, onSuccess) {
   }
 
   const handleCancel = () => {
+    if (isDeletingRef.current || isDeleting) return
     setTargetId(null)
   }
 

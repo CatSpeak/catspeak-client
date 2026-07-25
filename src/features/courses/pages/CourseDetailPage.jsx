@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetCourseDetailQuery } from "@/store/api/coursesApi"
 import { Pencil } from "lucide-react"
-import { formatDateRange } from "../utils/courseUtils"
+import { formatDateRange, getSafeMediaUrl } from "../utils/courseUtils"
+import { toLocalDateString } from "../utils/dateUtils"
 
 import ClassCard from "../components/ClassCard"
 import CourseInfoCard from "../components/CourseInfoCard"
@@ -17,52 +18,114 @@ const CourseDetailPage = () => {
   const c = t.courses || {}
 
   // Fetch course details
-  const { data, isLoading, error } = useGetCourseDetailQuery(id, { skip: !id })
+  const {
+    currentData: data,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetCourseDetailQuery(id, { skip: !id })
+  const rawCourse = (
+    data
+    && typeof data === "object"
+    && !Array.isArray(data)
+    && data.id
+  )
+    ? data
+    : null
 
-  if (isLoading) {
+  if ((isLoading || isFetching) && data === undefined) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center min-h-[400px]" role="status">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]"></div>
       </div>
     )
   }
 
-  if (error) {
+  if (error || !id || (!isLoading && !rawCourse)) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Error loading course detail: {error.message || "Unknown error"}
+      <div
+        className="flex flex-col items-start gap-3 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold"
+        role="alert"
+      >
+        <span>Could not load the course details.</span>
+        <button
+          type="button"
+          onClick={refetch}
+          disabled={isFetching}
+          className="rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-extrabold disabled:opacity-50"
+        >
+          Retry
+        </button>
       </div>
     )
   }
 
-  // Process data for rendering
-  const rawCourse = data || {}
-  const classes = rawCourse.classes || []
+  const classes = Array.isArray(rawCourse.classes)
+    ? rawCourse.classes.filter((item) => item && typeof item === "object")
+    : []
 
-  // Format hours dynamically (mocking 4 hours per session as per mockup 12 sessions = 48 hours)
-  const totalSessions = rawCourse.totalSessions || 0
-  const durationText = `${totalSessions} Sessions (${totalSessions * 4} Hours)`
+  const parsedSessions = Number(rawCourse.totalSessions)
+  const totalSessions = Number.isFinite(parsedSessions)
+    ? Math.max(0, Math.floor(parsedSessions))
+    : 0
+  const parsedHours = Number(rawCourse.durationHours ?? rawCourse.totalHours)
+  const totalHours = Number.isFinite(parsedHours) && parsedHours >= 0
+    ? parsedHours
+    : null
+  const durationParts = []
+  if (totalSessions > 0) durationParts.push(`${totalSessions} Sessions`)
+  if (totalHours !== null) durationParts.push(`${totalHours} Hours`)
+  const durationText = durationParts.join(" • ") || "TBA"
 
   const courseData = {
     id: rawCourse.id,
     title: rawCourse.title,
-    language: rawCourse.language || "English",
-    level: rawCourse.levels?.join(", ") || "N/A",
+    language: rawCourse.language || "N/A",
+    levels: Array.isArray(rawCourse.levels) ? rawCourse.levels : [],
+    level: Array.isArray(rawCourse.levels) && rawCourse.levels.length > 0
+      ? rawCourse.levels.join(", ")
+      : "N/A",
     admissionPeriod: rawCourse.enrollmentStart && rawCourse.enrollmentEnd
       ? formatDateRange(rawCourse.enrollmentStart, rawCourse.enrollmentEnd)
       : "TBA",
     duration: durationText,
     description: rawCourse.description || "",
-    thumbnailUrl: rawCourse.thumbnailUrl || ""
+    thumbnailUrl: getSafeMediaUrl(rawCourse.thumbnailUrl)
   }
 
 
 
 
 
-  // Get next session details from classes
-  const activeClasses = classes.filter(cls => cls.status === "TEACHING" || cls.status === "LIVE" || cls.status === "OPEN")
-  const nextClass = activeClasses[0] || classes[0]
+  // Only show an upcoming session when the API provides one.
+  const nextSessionCandidate = classes
+    .map((cls) => {
+      const startTimeMs = new Date(cls.nextSession?.startTime || "").getTime()
+      return { cls, startTimeMs }
+    })
+    .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
+    .sort((left, right) => left.startTimeMs - right.startTimeMs)[0]
+  const nextSessionClass = nextSessionCandidate?.cls || null
+  const nextSessionStart = nextSessionCandidate
+    ? new Date(nextSessionCandidate.startTimeMs)
+    : null
+  const nextSessionEnd = nextSessionClass?.nextSession?.endTime
+    ? new Date(nextSessionClass.nextSession.endTime)
+    : null
+  const nextClass = nextSessionStart
+    ? {
+        ...nextSessionClass,
+        startDate: toLocalDateString(nextSessionStart),
+        schedule: {
+          ...nextSessionClass.schedule,
+          startTime: nextSessionStart.toTimeString().slice(0, 5),
+          endTime: nextSessionEnd && !Number.isNaN(nextSessionEnd.getTime())
+            ? nextSessionEnd.toTimeString().slice(0, 5)
+            : "",
+        },
+      }
+    : null
 
   // Localized Labels
   const courseDetailTitle = c.student?.courseDetails || "Course Details"
@@ -96,14 +159,19 @@ const CourseDetailPage = () => {
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
+      {isFetching && (
+        <span role="status" className="sr-only">
+          Refreshing course details
+        </span>
+      )}
       {/* ─── Breadcrumb ─── */}
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{allCoursesLabel}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{allCoursesLabel}</button>
           <span>/</span>
           <span className="text-[#990011] font-semibold">{courseDetailTitle}</span>
         </div>
@@ -122,11 +190,18 @@ const CourseDetailPage = () => {
 
           {/* ─── Visual Banner ─── */}
           <div
-            className="relative overflow-hidden rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm bg-cover bg-center text-white"
-            style={{
-              backgroundImage: `url('${courseData.thumbnailUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"}')`
-            }}
+            className="relative overflow-hidden rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm bg-gray-700 text-white"
           >
+            {courseData.thumbnailUrl && (
+              <img
+                src={courseData.thumbnailUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            )}
             {/* Dark overlay for text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
 
@@ -138,7 +213,8 @@ const CourseDetailPage = () => {
 
               {/* Tùy chỉnh button */}
               <button
-                onClick={() => navigate(`/workspace/courses/edit/${id}`)}
+                type="button"
+                onClick={() => navigate(`/workspace/courses/edit/${encodeURIComponent(String(id))}`)}
                 className="shrink-0 h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
               >
                 <Pencil size={14} />
@@ -181,7 +257,7 @@ const CourseDetailPage = () => {
                       key={cls.id}
                       cls={cls}
                       isStudent={false}
-                      onClick={() => navigate(`/workspace/courses/class/${cls.id}`)}
+                      onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)}
                       progressLabel={progressLabel}
                       courseTitle={courseData.title}
                     />
@@ -216,7 +292,11 @@ const CourseDetailPage = () => {
             createClassToScheduleLabel={createClassToScheduleLabel}
             joinRoomLabel={joinRoomLabel}
             viewAllLabel={viewAllLabel}
-            onJoin={() => navigate(`/workspace/courses/class/${nextClass.id}`)}
+            onJoin={() => {
+              if (nextClass?.id) {
+                navigate(`/workspace/courses/class/${encodeURIComponent(String(nextClass.id))}`)
+              }
+            }}
             onViewAll={() => navigate("/workspace/courses/schedule")}
           />
 

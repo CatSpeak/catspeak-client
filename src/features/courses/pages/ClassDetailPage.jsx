@@ -1,9 +1,9 @@
-import React, { lazy, Suspense, useState } from "react"
+import React, { lazy, Suspense, useRef, useState } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Video } from "lucide-react"
 
 import {
   useGetClassDetailQuery,
@@ -27,6 +27,13 @@ const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
 )
 
+const GRADING_DETAIL_PARAM_KEYS = [
+  "assignmentId",
+  "quizId",
+  "studentId",
+  "submissionId",
+]
+
 const ClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -36,61 +43,97 @@ const ClassDetailPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
+  const quizId = searchParams.get("quizId")
+  const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
   const [selectedTab, setSelectedTab] = useState("overview")
-  const activeTab = assignmentId ? "grading" : selectedTab
+  const activeTab = hasGradingDeepLink ? "grading" : selectedTab
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab)
 
-    if (assignmentId) {
+    const hasDetailParams = GRADING_DETAIL_PARAM_KEYS.some((key) => (
+      searchParams.has(key)
+    ))
+    if (hasDetailParams) {
       const nextSearchParams = new URLSearchParams(searchParams)
-      nextSearchParams.delete("assignmentId")
-      nextSearchParams.delete("studentId")
-      nextSearchParams.delete("submissionId")
-      setSearchParams(nextSearchParams)
+      GRADING_DETAIL_PARAM_KEYS.forEach((key) => (
+        nextSearchParams.delete(key)
+      ))
+      setSearchParams(nextSearchParams, { replace: true })
     }
   }
 
   // Fetch Class Details via RTK Query
-  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetClassDetailQuery(id, { skip: !id })
-  const [updateClass] = useUpdateClassMutation()
-  const [deleteClass] = useDeleteClassMutation()
+  const {
+    currentData: detailResponse,
+    isLoading: isDetailLoading,
+    isFetching: isDetailFetching,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useGetClassDetailQuery(id, { skip: !id })
+  const [updateClass, { isLoading: isCompletingClass }] = useUpdateClassMutation()
+  const [deleteClass, { isLoading: isCancellingClass }] = useDeleteClassMutation()
 
   // Process data for rendering
-  const classData = detailResponse?.data || detailResponse || {}
+  const classData = (
+    detailResponse
+    && typeof detailResponse === "object"
+    && !Array.isArray(detailResponse)
+    && detailResponse.id
+  )
+    ? detailResponse
+    : null
 
   // State Management for UI Actions
   const [showActionsDropdown, setShowActionsDropdown] = useState(false)
   const [showCancelClassModal, setShowCancelClassModal] = useState(false)
   const [showCreatePostModal, setShowCreatePostModal] = useState(false)
+  const classActionGuardRef = useRef(false)
 
   // Cancel class handler
   const handleCancelClass = async () => {
+    if (
+      classActionGuardRef.current
+      || isCancellingClass
+      || isCompletingClass
+      || !id
+    ) return
+    classActionGuardRef.current = true
     try {
-      await deleteClass(id).unwrap()
+      await deleteClass({ id, courseId: classData?.courseId }).unwrap()
       toast.success(cd.toastCancelSuccess || "Class cancelled successfully")
       navigate("/workspace/courses")
     } catch {
       toast.error("Failed to cancel class")
     } finally {
+      classActionGuardRef.current = false
       setShowCancelClassModal(false)
     }
   }
 
   // Complete class handler
   const handleCompleteClass = async () => {
+    if (
+      classActionGuardRef.current
+      || isCompletingClass
+      || isCancellingClass
+      || !id
+    ) return
+    classActionGuardRef.current = true
     setShowActionsDropdown(false)
     try {
-      await updateClass({ id, data: { status: "COMPLETED" } }).unwrap()
+      await updateClass({
+        id,
+        courseId: classData?.courseId,
+        data: { status: "COMPLETED" },
+      }).unwrap()
       toast.success(cd.toastCompleteSuccess || "Marked class as complete")
     } catch {
       toast.error("Failed to complete class")
+    } finally {
+      classActionGuardRef.current = false
     }
-  }
-
-  const notifyInDevelopment = () => {
-    toast.success(c.devMessage || "Feature in development")
   }
 
   const tabs = [
@@ -101,35 +144,59 @@ const ClassDetailPage = () => {
     { value: "materials", label: cd.materials || "Materials" },
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData, language || "en")
+  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData || {}, language || "en")
 
-  if (isDetailLoading) {
+  if (
+    isDetailLoading
+    || (isDetailFetching && detailResponse === undefined)
+  ) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
-  if (detailError) {
+  if (detailError || !id || !classData) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Error loading class detail: {detailError.data?.message || detailError.message || "Class not found"}
+      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+        <span>{cd.loadFailed || "This class could not be loaded. Please try again."}</span>
+        {id && (
+          <button type="button" onClick={refetchDetail} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
+            {cd.retry || "Try again"}
+          </button>
+        )}
       </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
+      {isDetailFetching && (
+        <span role="status" className="sr-only">
+          {cd.refreshing || "Refreshing class details"}
+        </span>
+      )}
 
-      {!assignmentId && (
+      {!hasGradingDeepLink && (
         <>
           {/* ─── Breadcrumb ─── */}
           <div className="flex justify-between items-center flex-wrap gap-2">
             <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-              <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
+              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
               <span>/</span>
-              <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
+              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
               <span>/</span>
-              <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</span>
+              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</button>
               <span>/</span>
-              <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classData.courseId || ""}`)}>{c.student?.courseDetails || "Course Details"}</span>
+              <button
+                type="button"
+                className="cursor-pointer hover:underline"
+                disabled={!classData.courseId}
+                onClick={() => {
+                  if (classData.courseId) {
+                    navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)
+                  }
+                }}
+              >
+                {c.student?.courseDetails || "Course Details"}
+              </button>
               <span>/</span>
               <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
             </div>
@@ -142,10 +209,22 @@ const ClassDetailPage = () => {
             </h1>
 
             <div className="flex items-center gap-3">
+              {/* Vào phòng học button */}
+              <button
+                type="button"
+                onClick={() => navigate(`/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
+              >
+                <Video size={14} className="fill-white" />
+                <span>{cd.joinRoom || c.joinRoom || "Vào phòng học"}</span>
+              </button>
+
               {/* Trò chuyện button */}
               <button
-                onClick={notifyInDevelopment}
-                className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
+                type="button"
+                disabled
+                title={cd.chatUnavailable || "Class chat is not available yet."}
+                className="h-10 px-5 bg-gray-200 text-gray-500 font-extrabold text-xs rounded-full flex items-center gap-2 cursor-not-allowed"
               >
                 <MessageSquare size={14} className="fill-white" />
                 <span>{c.student?.chat || "Chat"}</span>
@@ -153,6 +232,7 @@ const ClassDetailPage = () => {
 
               {/* Tạo bài button */}
               <button
+                type="button"
                 onClick={() => setShowCreatePostModal(true)}
                 className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
               >
@@ -174,75 +254,82 @@ const ClassDetailPage = () => {
       {/* ─── Tab Contents ─── */}
       <Suspense fallback={<TabLoadingFallback />}>
         {activeTab === "overview" && (
-        <ClassOverviewTab
-          classData={classData}
-          isStudent={false}
-          isEnrolled={true}
-          language={language}
-          cd={cd}
-          id={id}
-          navigate={navigate}
-          showActionsDropdown={showActionsDropdown}
-          setShowActionsDropdown={setShowActionsDropdown}
-          onCompleteClass={handleCompleteClass}
-          onCancelClassClick={() => setShowCancelClassModal(true)}
-          formatCurrency={formatCurrency}
-          getWeeklyScheduleText={getWeeklyScheduleText}
-          upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
-          joinRoomLabel={c.joinRoom || "Join Room"}
-          viewAllLabel={c.viewAll || "View All"}
-          noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
-          createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
-          teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
-          gradeAssignmentLabel={c.gradeAssignment || "Grade homework"}
-          giveFeedbackLabel={c.giveFeedback || "Give feedback"}
-          prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
-          onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
-          onTaskAction={() => navigate("/workspace/courses/schedule")}
-          onViewTasks={() => navigate("/workspace/courses/schedule")}
-        />
-      )}
+          <ClassOverviewTab
+            classData={classData}
+            isStudent={false}
+            isEnrolled={true}
+            language={language}
+            cd={cd}
+            id={id}
+            navigate={navigate}
+            showActionsDropdown={showActionsDropdown}
+            setShowActionsDropdown={setShowActionsDropdown}
+            onCompleteClass={handleCompleteClass}
+            onCancelClassClick={() => setShowCancelClassModal(true)}
+            isActionPending={isCompletingClass || isCancellingClass}
+            formatCurrency={formatCurrency}
+            getWeeklyScheduleText={getWeeklyScheduleText}
+            upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
+            joinRoomLabel={c.joinRoom || "Join Room"}
+            viewAllLabel={c.viewAll || "View All"}
+            noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
+            createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
+            teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
+            gradeAssignmentLabel={c.gradeAssignment || "Grade homework"}
+            giveFeedbackLabel={c.giveFeedback || "Give feedback"}
+            prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
+            onJoinRoom={() => navigate(
+              `/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`
+            )}
+            onTaskAction={() => navigate("/workspace/courses/schedule")}
+            onViewTasks={() => navigate("/workspace/courses/schedule")}
+          />
+        )}
 
         {activeTab === "members" && (
-        <ClassMembersTab
-          isStudent={false}
-        />
-      )}
+          <ClassMembersTab
+            classData={classData}
+            isStudent={false}
+          />
+        )}
 
         {activeTab === "feed" && (
-        <ClassFeedTab
-          id={id}
-          isStudent={false}
-          language={language}
-          cd={cd}
-        />
-      )}
+          <ClassFeedTab
+            id={id}
+            isStudent={false}
+            language={language}
+            cd={cd}
+          />
+        )}
 
         {activeTab === "grading" && (
-        <ClassGradingTab
-          id={id}
-          isStudent={false}
-          language={language}
-          cd={cd}
-        />
-      )}
+          <ClassGradingTab
+            id={id}
+            isStudent={false}
+            language={language}
+            cd={cd}
+          />
+        )}
 
         {activeTab === "materials" && (
-        <ClassMaterialsTab
-          id={id}
-          isStudent={false}
-          language={language}
-          cd={cd}
-          cancelText={c.createClass?.cancel || "Hủy"}
-        />
+          <ClassMaterialsTab
+            id={id}
+            isStudent={false}
+            language={language}
+            cd={cd}
+            cancelText={c.createClass?.cancel || "Hủy"}
+          />
         )}
       </Suspense>
 
       {/* Confirmation Modals */}
       <ConfirmationModal
         open={showCancelClassModal}
-        onClose={() => setShowCancelClassModal(false)}
+        onClose={() => {
+          if (!isCancellingClass) setShowCancelClassModal(false)
+        }}
         onConfirm={handleCancelClass}
+        isPending={isCancellingClass}
         title={cd.cancelClass || "Cancel Class"}
         message={cd.confirmCancelClass || "Are you sure you want to cancel this class?"}
         confirmText={cd.cancelClass || "Cancel Class"}
@@ -254,9 +341,9 @@ const ClassDetailPage = () => {
         onClose={() => setShowCreatePostModal(false)}
         onSelect={(type) => {
           if (type === "exam") {
-            navigate(`/workspace/courses/class/${id}/create-exam`)
+            navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}/create-exam`)
           } else {
-            navigate(`/workspace/courses/class/${id}/create-assignment`)
+            navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}/create-assignment`)
           }
         }}
       />
