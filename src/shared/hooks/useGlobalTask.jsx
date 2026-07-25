@@ -14,8 +14,6 @@ import {
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
-
-
 /**
  * Custom Hook quản lý tác vụ toàn cục (Global Task Management System).
  * Cung cấp API React thuần túy, dễ đọc và linh hoạt để khởi tạo, theo dõi & cập nhật tác vụ lên Progress Bar.
@@ -55,7 +53,8 @@ export const useGlobalTask = () => {
       onUploadSuccess = null,
       onUploadError = null,
     }) => {
-      const taskId = customId || Math.random().toString(36).substring(7) + Date.now();
+      const taskId =
+        customId || Math.random().toString(36).substring(7) + Date.now();
       const successCb = onSuccess || onUploadSuccess;
       const errorCb = onError || onUploadError;
 
@@ -64,9 +63,13 @@ export const useGlobalTask = () => {
         data.append("TaskId", taskId);
       }
 
-      const isUpload = isUploadTask !== undefined 
-        ? Boolean(isUploadTask) 
-        : (!!url || data instanceof FormData || taskType === "ReelUpload" || taskType === "InstructorApplication");
+      const isUpload =
+        isUploadTask !== undefined
+          ? Boolean(isUploadTask)
+          : !!url ||
+            data instanceof FormData ||
+            taskType === "ReelUpload" ||
+            taskType === "InstructorApplication";
 
       dispatch(
         addTask({
@@ -103,7 +106,10 @@ export const useGlobalTask = () => {
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             const rawProgress = Math.round((e.loaded / e.total) * 100);
-            const uploadProgress = Math.min(49, Math.round((rawProgress / 100) * 50));
+            const uploadProgress = Math.min(
+              49,
+              Math.round((rawProgress / 100) * 50),
+            );
             dispatch(
               updateTask({
                 id: taskId,
@@ -165,7 +171,8 @@ export const useGlobalTask = () => {
           if (successCb) successCb(result);
           return result;
         } catch (err) {
-          const errorMsg = err?.data?.message || err?.message || "Tác vụ thất bại";
+          const errorMsg =
+            err?.data?.message || err?.message || "Tác vụ thất bại";
           dispatch(
             updateTask({
               id: taskId,
@@ -209,7 +216,6 @@ export const useGlobalTask = () => {
    */
   const completeTask = useCallback(
     (id, payload = null) => {
-
       dispatch(
         updateTask({
           id,
@@ -230,7 +236,6 @@ export const useGlobalTask = () => {
    */
   const failTask = useCallback(
     (id, errorMessage = "Tác vụ thất bại") => {
-
       dispatch(
         updateTask({
           id,
@@ -309,12 +314,14 @@ export const GlobalTaskSync = () => {
     }
   }, [token, dispatch]);
 
-
   // Cảnh báo reload/tắt tab & bắt phím F5 / Ctrl+R CHỈ KHI đang UPLOADING FILE (isUploadTask)
   useEffect(() => {
     const isFileUploading = (t) =>
-      Boolean(t.isUploadTask || t.taskType === "InstructorApplication" || t.taskType === "ReelUpload") &&
-      t.status === "UPLOADING";
+      Boolean(
+        t.isUploadTask ||
+        t.taskType === "InstructorApplication" ||
+        t.taskType === "ReelUpload",
+      ) && t.status === "UPLOADING";
 
     const handleBeforeUnload = (e) => {
       if (window.__allowReload || isConfirmingReload) return;
