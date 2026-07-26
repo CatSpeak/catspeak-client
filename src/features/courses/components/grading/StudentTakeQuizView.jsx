@@ -19,6 +19,7 @@ import {
   ArrowRight,
   Send,
   RefreshCw,
+  Flag,
 } from "lucide-react"
 import {
   useGetStudentQuizzesQuery,
@@ -126,12 +127,32 @@ const getQuestionAudioUrl = (q) => {
   return null
 }
 
+const getQuestionTypeLabel = (typeRaw, lang = "vi") => {
+  const type = String(typeRaw || "").trim()
+  if (type === "MultipleChoiceSingle" || type === "mcq") {
+    return lang === "vi" ? "Trắc nghiệm (1 đáp án)" : "Single Choice"
+  }
+  if (type === "MultipleChoiceMultiple") {
+    return lang === "vi" ? "Trắc nghiệm (Nhiều đáp án)" : "Multiple Choice"
+  }
+  if (type === "TrueFalse") {
+    return lang === "vi" ? "Đúng / Sai" : "True / False"
+  }
+  if (type === "FillInBlank") {
+    return lang === "vi" ? "Điền vào chỗ trống" : "Fill in the blank"
+  }
+  if (type === "Essay" || type === "essay") {
+    return lang === "vi" ? "Tự luận" : "Essay"
+  }
+  return type || (lang === "vi" ? "Trắc nghiệm" : "Multiple Choice")
+}
+
 const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBack }) => {
   const navigate = useNavigate()
   const params = useParams()
   const [searchParams] = useSearchParams()
 
-  const classId = propsClassId || params.classId || searchParams.get("classId")
+  const classId = propsClassId || params.classId || params.id || searchParams.get("classId") || searchParams.get("id")
   const quizId = propsQuizId || params.quizId || searchParams.get("quizId")
 
   const handleBack = () => {
@@ -174,6 +195,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   const [attemptData, setAttemptData] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [userAnswers, setUserAnswers] = useState({})
+  const [markedQuestions, setMarkedQuestions] = useState({})
   const [timeRemaining, setTimeRemaining] = useState(0)
   const [deadlineMs, setDeadlineMs] = useState(null)
   const [lastSavedTimeStr, setLastSavedTimeStr] = useState("")
@@ -188,6 +210,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   const activeStartRequestRef = useRef(null)
   const activeSaveRequestRef = useRef(null)
   const userAnswersRef = useRef({})
+  const markedQuestionsRef = useRef({})
   const questionsRef = useRef([])
   const mountedRef = useRef(true)
   const attemptActiveRef = useRef(false)
@@ -250,6 +273,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   }, [userAnswers])
 
   useEffect(() => {
+    markedQuestionsRef.current = markedQuestions
+  }, [markedQuestions])
+
+  useEffect(() => {
     mountedRef.current = true
     return () => {
       mountedRef.current = false
@@ -279,6 +306,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     submitGuardRef.current = false
     autoSubmitTriggeredRef.current = false
     userAnswersRef.current = {}
+    markedQuestionsRef.current = {}
     questionsRef.current = []
 
     setFlowQuizKey(null)
@@ -286,6 +314,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     setAttemptData(null)
     setCurrentIndex(0)
     setUserAnswers({})
+    setMarkedQuestions({})
     setTimeRemaining(0)
     setDeadlineMs(null)
     setLastSavedTimeStr("")
@@ -336,20 +365,27 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   )
 
   const enqueueAnswerSave = useCallback(
-    (answersSnapshot) => {
+    (answersSnapshot, markedSnapshot = markedQuestionsRef.current) => {
       const queuedQuizKey = activeQuizKeyRef.current
       const answers = buildQuizAnswerPayload(
         answersSnapshot,
         questionsRef.current,
+        markedSnapshot,
       )
 
       if (
         !attemptActiveRef.current ||
         !classId ||
         !quizId ||
-        queuedQuizKey !== quizKey ||
-        answers.length === 0
+        queuedQuizKey !== quizKey
       ) {
+        return saveQueueRef.current
+      }
+
+      if (answers.length === 0) {
+        if (mountedRef.current) {
+          setSaveStatus("idle")
+        }
         return saveQueueRef.current
       }
 
@@ -422,7 +458,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   )
 
   const scheduleAnswerSave = useCallback(
-    (answersSnapshot) => {
+    (answersSnapshot, markedSnapshot = markedQuestionsRef.current) => {
       if (autosaveTimerRef.current) {
         window.clearTimeout(autosaveTimerRef.current)
       }
@@ -430,18 +466,28 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       setSaveStatus("pending")
       autosaveTimerRef.current = window.setTimeout(() => {
         autosaveTimerRef.current = null
-        enqueueAnswerSave(answersSnapshot)
+        enqueueAnswerSave(answersSnapshot, markedSnapshot)
       }, AUTOSAVE_DELAY_MS)
     },
     [enqueueAnswerSave],
   )
+
+  const toggleMarkForReview = useCallback((questionId) => {
+    if (questionId === undefined || questionId === null) return
+    setMarkedQuestions((prev) => {
+      const next = { ...prev, [questionId]: !prev[questionId] }
+      markedQuestionsRef.current = next
+      scheduleAnswerSave(userAnswersRef.current, next)
+      return next
+    })
+  }, [scheduleAnswerSave])
 
   const retryAnswerSave = useCallback(() => {
     if (autosaveTimerRef.current) {
       window.clearTimeout(autosaveTimerRef.current)
       autosaveTimerRef.current = null
     }
-    enqueueAnswerSave(userAnswersRef.current)
+    enqueueAnswerSave(userAnswersRef.current, markedQuestionsRef.current)
   }, [enqueueAnswerSave])
 
   // ─── Submit Quiz Flow ───────────────────────────────────────────────
@@ -471,6 +517,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       const answers = buildQuizAnswerPayload(
         userAnswersRef.current,
         questionsRef.current,
+        markedQuestionsRef.current,
       )
       const response = await submitAttempt({
         classId,
@@ -496,8 +543,9 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       setSaveStatus("saved")
       setStepOverride("result")
       try {
-        refetchQuizResult()
-      } catch (e) {
+        const refetchRequest = refetchQuizResult()
+        refetchRequest?.catch?.(() => undefined)
+      } catch {
         // Ignore refetch error fallback
       }
       hotToast.success(
@@ -524,7 +572,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       setSubmissionError(errorMessage)
       hotToast.error(errorMessage)
     }
-  }, [classId, language, quizId, submitAttempt])
+  }, [classId, language, quizId, refetchQuizResult, submitAttempt])
 
   const handleAutoSubmitOnTimeOut = useCallback(async () => {
     if (autoSubmitTriggeredRef.current) return
@@ -582,10 +630,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       }
 
       const initialAnswers = {}
+      const initialMarked = {}
       if (Array.isArray(data.questions)) {
         data.questions.forEach((q) => {
           if (!q || q.id === undefined || q.id === null) return
           const type = q.type || "MultipleChoiceSingle"
+
+          if (q.isMarkedForReview === true || q.isFlagged === true || q.isMarked === true) {
+            initialMarked[q.id] = true
+          }
 
           if (q.fillText !== undefined && q.fillText !== null && q.fillText !== "") {
             initialAnswers[q.id] = String(q.fillText)
@@ -611,6 +664,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       setCurrentIndex(0)
       setUserAnswers(initialAnswers)
       userAnswersRef.current = initialAnswers
+      setMarkedQuestions(initialMarked)
+      markedQuestionsRef.current = initialMarked
       setSubmitResult(null)
       setSubmittedAttemptNumber(null)
       setLastSavedTimeStr("")
@@ -721,11 +776,6 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     quizStatus === "open" && Number(quiz?.remainingAttempts) > 0
   const isLowTime =
     Number.isFinite(timeRemaining) && timeRemaining >= 0 && timeRemaining < 300
-  const questionCount = Array.isArray(quiz?.questions)
-    ? quiz.questions.length
-    : Number.isFinite(Number(quiz?.questionCount))
-      ? Number(quiz.questionCount)
-      : null
   const quizStatusLabel = {
     open: language === "vi" ? "ĐANG MỞ" : "OPEN",
     upcoming: language === "vi" ? "SẮP MỞ" : "UPCOMING",
@@ -737,6 +787,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     setAttemptData(null)
     setUserAnswers({})
     userAnswersRef.current = {}
+    setMarkedQuestions({})
+    markedQuestionsRef.current = {}
     setCurrentIndex(0)
     setDeadlineMs(null)
     setTimeRemaining(0)
@@ -860,7 +912,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           </div>
 
           {/* Details Overview Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50/70 border border-gray-150 p-4 rounded-2xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/70 border border-gray-150 p-4 rounded-2xl">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
                 {language === "vi" ? "Thời gian làm bài" : "Time Limit"}
@@ -868,6 +920,19 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
                 <Clock size={14} className="text-[#990011]" />
                 {quiz?.timeLimitMinutes ?? "—"} {quiz?.timeLimitMinutes != null ? (language === "vi" ? "phút" : "mins") : ""}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+                {language === "vi" ? "Tổng số câu" : "Total Questions"}
+              </span>
+              <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
+                <HelpCircle size={14} className="text-[#990011]" />
+                {quiz?.totalQuestions ?? quiz?.totalQuestion ?? quiz?.questionCount ?? quiz?.questionsCount ?? (Array.isArray(quiz?.questions) ? quiz.questions.length : (Array.isArray(attemptData?.questions) ? attemptData.questions.length : "—"))}
+                {(quiz?.totalQuestions ?? quiz?.totalQuestion ?? quiz?.questionCount ?? quiz?.questionsCount ?? quiz?.questions?.length ?? attemptData?.questions?.length) != null
+                  ? ` ${language === "vi" ? "câu" : "questions"}`
+                  : ""}
               </span>
             </div>
 
@@ -1215,7 +1280,19 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             ) : resultQuestions.map((q, qIdx) => {
               const isCorrect = q.isCorrect === true
               const isWrong = q.isCorrect === false
-              const isPending = q.isCorrect === null || q.isCorrect === undefined
+              const hasPointsEarned = q.pointsEarned !== undefined && q.pointsEarned !== null
+              const isGradedStatus = q.status === "Đã chấm" || q.status === "Graded" || q.essayStatus === "Đã chấm" || q.status === "Passed" || q.status === "Failed"
+              const isGraded = isCorrect || isWrong || hasPointsEarned || isGradedStatus
+              const isPending = !isGraded
+
+              const pointsEarnedVal = hasPointsEarned
+                ? q.pointsEarned
+                : isCorrect
+                  ? (q.points ?? "—")
+                  : isWrong
+                    ? 0
+                    : "—"
+              const pointsMaxVal = q.points ?? "—"
 
               const parseOptionsArray = (opts) => {
                 if (Array.isArray(opts)) return opts
@@ -1260,12 +1337,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       ? "bg-red-50/60 border-red-150"
                       : isPending
                         ? "bg-amber-50/50 border-amber-150"
-                        : isCorrect
-                          ? "bg-emerald-50/60 border-emerald-150"
-                          : "bg-gray-50/80 border-gray-150"
+                        : "bg-emerald-50/60 border-emerald-150"
                       }`}
                   >
-                    <span className={`text-sm font-extrabold ${isWrong ? "text-red-950" : isCorrect ? "text-emerald-950" : "text-gray-900"}`}>
+                    <span className={`text-sm font-extrabold ${isWrong ? "text-red-950" : isPending ? "text-gray-900" : "text-emerald-950"}`}>
                       {language === "vi" ? `Câu ${qIdx + 1}` : `Question ${qIdx + 1}`}
                     </span>
 
@@ -1273,27 +1348,43 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       {isCorrect && (
                         <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <CheckCircle2 size={14} />
-                          <span>{language === "vi" ? `Đúng (${q.pointsEarned ?? q.points ?? "—"}/${q.points ?? "—"} điểm)` : `Correct (${q.pointsEarned ?? q.points ?? "—"}/${q.points ?? "—"} pts)`}</span>
+                          <span>{language === "vi" ? `Đúng (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Correct (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
                         </span>
                       )}
                       {isWrong && (
                         <span className="bg-red-100/70 text-red-700 border border-red-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <XCircle size={14} />
-                          <span>{language === "vi" ? `Sai (${q.pointsEarned ?? "—"}/${q.points ?? "—"} điểm)` : `Incorrect (${q.pointsEarned ?? "—"}/${q.points ?? "—"} pts)`}</span>
+                          <span>{language === "vi" ? `Sai (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Incorrect (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
+                        </span>
+                      )}
+                      {!isCorrect && !isWrong && isGraded && (
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                          <CheckCircle2 size={14} />
+                          <span>{language === "vi" ? `Đã chấm (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Graded (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
                         </span>
                       )}
                       {isPending && (
                         <span className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <Clock size={14} />
-                          <span>{language === "vi" ? `Chờ chấm (—/${q.points ?? "—"} điểm)` : `Pending (—/${q.points ?? "—"} pts)`}</span>
+                          <span>{language === "vi" ? `Chờ chấm (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Pending (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Question Image Media (Image on top, small scale, un-cropped) */}
+                  {/* Question Type Info (Above question content) */}
+                  <div className="px-5 pt-4 text-base font-black text-gray-950">
+                    {getQuestionTypeLabel(q?.type, language)}
+                  </div>
+
+                  {/* Question Content / Prompt */}
+                  <div className="px-5 py-2 text-sm font-bold text-gray-850 leading-relaxed">
+                    <RenderHTML html={q.content} />
+                  </div>
+
+                  {/* Question Image Media (Image below content, small scale, un-cropped) */}
                   {getQuestionImageUrl(q) && (
-                    <div className="mx-5 mt-4 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
+                    <div className="mx-5 mt-2 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
                       <img
                         src={getQuestionImageUrl(q)}
                         alt={`Minh họa câu hỏi ${qIdx + 1}`}
@@ -1308,11 +1399,6 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       <audio controls src={getQuestionAudioUrl(q)} className="w-full h-10 rounded-xl" />
                     </div>
                   )}
-
-                  {/* Question Content / Prompt */}
-                  <div className="p-5 text-sm font-bold text-gray-850 leading-relaxed">
-                    <RenderHTML html={q.content} />
-                  </div>
 
                   {/* Options List (Radio choices / Multiple choice) */}
                   {options && options.length > 0 && (
@@ -1407,12 +1493,14 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
                   {/* Essay or Fill-in Blank Student Text */}
                   {(q.type === "Essay" || q.type === "FillInBlank") && (
-                    <div className="px-5 pb-4 flex flex-col gap-2">
+                    <div className="px-5 py-4 flex flex-col gap-2">
                       <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wide">
                         {language === "vi" ? "Câu trả lời của bạn:" : "Your Answer:"}
                       </span>
                       <div
-                        className={`p-4 border rounded-xl text-xs md:text-sm flex items-center justify-between gap-3 ${isCorrect
+                        className={`p-4 border rounded-xl text-xs md:text-sm flex items-center justify-between gap-3 ${q.type === "Essay"
+                          ? "bg-gray-50 border-gray-200 text-gray-800 font-semibold"
+                          : isCorrect
                             ? "border-2 border-emerald-500 bg-emerald-50/20 text-emerald-950 font-bold"
                             : isWrong
                               ? "border-2 border-red-500 bg-red-50/20 text-red-950 font-bold"
@@ -1424,9 +1512,19 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             (typeof q.studentAnswer === "string" && q.studentAnswer.trim() ? q.studentAnswer : null) ||
                             (language === "vi" ? "(Chưa nhập câu trả lời)" : "(No answer provided)")}
                         </span>
-                        {isCorrect && <Check size={18} className="text-emerald-600 shrink-0" />}
-                        {isWrong && <X size={18} className="text-red-600 shrink-0" />}
+                        {q.type !== "Essay" && isCorrect && <Check size={18} className="text-emerald-600 shrink-0" />}
+                        {q.type !== "Essay" && isWrong && <X size={18} className="text-red-600 shrink-0" />}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Teacher Feedback Callout */}
+                  {(q.essayComment || q.comment || q.feedback) && (
+                    <div className="mx-5 mb-5 bg-blue-50/80 border-l-4 border-blue-600 rounded-r-xl p-4 text-xs font-semibold text-blue-950 leading-relaxed">
+                      <span className="font-extrabold text-blue-900 mr-1.5">
+                        {language === "vi" ? "Nhận xét của giáo viên:" : "Teacher's Feedback:"}
+                      </span>
+                      <span>{q.essayComment || q.comment || q.feedback}</span>
                     </div>
                   )}
 
@@ -1615,10 +1713,39 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   <span className="px-3.5 py-1 bg-red-50 border border-red-100 rounded-xl text-xs font-black text-[#990011]">
                     {currentQuestion?.points ?? "—"} {language === "vi" ? "điểm" : "pts"}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => toggleMarkForReview(currentQuestion?.id)}
+                    className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${markedQuestions[currentQuestion?.id]
+                      ? "border-red-500 bg-red-50 text-red-500 shadow-2xs"
+                      : "border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50/50"
+                      }`}
+                    title={
+                      markedQuestions[currentQuestion?.id]
+                        ? (language === "vi" ? "Bỏ đánh dấu câu hỏi" : "Unflag question")
+                        : (language === "vi" ? "Đánh dấu xem lại" : "Flag for review")
+                    }
+                  >
+                    <Flag className={`w-4 h-4 ${markedQuestions[currentQuestion?.id] ? "fill-red-500" : ""}`} />
+                  </button>
                 </div>
               </div>
 
-              {/* Question Image Media (Image on top, small scale, un-cropped) */}
+              {/* Question Type Info (Bold, bigger text, above question content and media) */}
+              <div className="text-base md:text-lg font-black text-gray-950">
+                {getQuestionTypeLabel(currentQuestion?.type, language)}
+              </div>
+
+              {/* Question Content / Prompt */}
+              <div className="text-sm md:text-base font-bold text-gray-850 leading-relaxed">
+                {currentQuestion?.content ? (
+                  <RenderHTML html={currentQuestion.content} />
+                ) : (
+                  <span>{language === "vi" ? "Chưa có nội dung câu hỏi." : "No question content."}</span>
+                )}
+              </div>
+
+              {/* Question Image Media (Image below content, small scale, un-cropped) */}
               {getQuestionImageUrl(currentQuestion) && (
                 <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
                   <img
@@ -1635,15 +1762,6 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   <audio controls src={getQuestionAudioUrl(currentQuestion)} className="w-full h-10 rounded-xl" />
                 </div>
               )}
-
-              {/* Question Content / Prompt */}
-              <div className="text-sm md:text-base font-bold text-gray-850 leading-relaxed">
-                {currentQuestion?.content ? (
-                  <RenderHTML html={currentQuestion.content} />
-                ) : (
-                  <span>{language === "vi" ? "Chưa có nội dung câu hỏi." : "No question content."}</span>
-                )}
-              </div>
 
               {/* Question Tip / Hint Callout if provided */}
               {currentQuestion?.tipText && (
@@ -1846,7 +1964,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             </div>
 
             {/* Legend Indicators */}
-            <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+            <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex-wrap gap-1">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
                 <span>{language === "vi" ? "Đã làm" : "Done"}</span>
@@ -1859,6 +1977,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 <span className="w-2.5 h-2.5 rounded-full bg-[#990011] inline-block" />
                 <span>{language === "vi" ? "Đang làm" : "Current"}</span>
               </div>
+              <div className="flex items-center gap-1">
+                <Flag className="w-3 h-3 text-red-500 fill-red-500" />
+                <span>{language === "vi" ? "Đánh dấu" : "Flagged"}</span>
+              </div>
             </div>
 
             {/* Grid of Question Buttons */}
@@ -1866,6 +1988,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               {questions.map((q, idx) => {
                 const isCurrent = currentIndex === idx
                 const isAnswered = isQuestionAnswered(q)
+                const isMarked = Boolean(markedQuestions[q.id])
 
                 let btnStyle = "bg-white border border-gray-200 text-gray-700 font-bold hover:bg-gray-100"
                 if (isCurrent) {
@@ -1881,13 +2004,18 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     onClick={() => setCurrentIndex(idx)}
                     aria-label={
                       language === "vi"
-                        ? `Đi đến câu ${idx + 1}${isAnswered ? ", đã trả lời" : ", chưa trả lời"}`
-                        : `Go to question ${idx + 1}${isAnswered ? ", answered" : ", unanswered"}`
+                        ? `Đi đến câu ${idx + 1}${isAnswered ? ", đã trả lời" : ", chưa trả lời"}${isMarked ? ", đã đánh dấu xem lại" : ""}`
+                        : `Go to question ${idx + 1}${isAnswered ? ", answered" : ", unanswered"}${isMarked ? ", flagged for review" : ""}`
                     }
                     aria-current={isCurrent ? "step" : undefined}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs transition-all cursor-pointer active:scale-95 ${btnStyle}`}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs transition-all cursor-pointer active:scale-95 relative ${btnStyle}`}
                   >
-                    {idx + 1}
+                    <span>{idx + 1}</span>
+                    {isMarked && (
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-white shadow-xs">
+                        <Flag className="w-2 h-2 text-white fill-white" />
+                      </span>
+                    )}
                   </button>
                 )
               })}

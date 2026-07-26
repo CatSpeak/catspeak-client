@@ -686,13 +686,13 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
       <StudentAssignmentDetailView
         assignmentId={assignmentId}
         classId={classId}
-        onBack={() => setSearchParams({})}
+        onBack={() => setSearchParams({ tab: "grading" })}
       />
     ) : (
       <AssignmentSubmissionsView
         assignmentId={assignmentId}
         classId={classId}
-        onBack={() => setSearchParams({})}
+        onBack={() => setSearchParams({ tab: "grading" })}
       />
     )
   }
@@ -700,9 +700,12 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   if (quizId) {
     const encodedClassId = encodeURIComponent(classId)
     const encodedQuizId = encodeURIComponent(quizId)
+    const studentIdParam = searchParams.get("studentId")
     const target = isStudent
       ? `/workspace/courses/class/${encodedClassId}/quiz/${encodedQuizId}/take`
-      : `/workspace/courses/class/${encodedClassId}/quiz/${encodedQuizId}`
+      : (studentIdParam
+        ? `/workspace/courses/class/${encodedClassId}/quiz/${encodedQuizId}/submission/${encodeURIComponent(studentIdParam)}`
+        : `/workspace/courses/class/${encodedClassId}/quiz/${encodedQuizId}`)
     return <Navigate to={target} replace />
   }
 
@@ -833,7 +836,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       cd={cd}
                       cg={cg}
                       language={language}
-                      onSelect={(id) => setSearchParams({ assignmentId: id })}
+                      onSelect={(id) => setSearchParams({ tab: "grading", assignmentId: id })}
                     />
                   ) : (
                     <StudentQuizRow
@@ -1155,7 +1158,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setSearchParams({ assignmentId: assignment.id })}
+                      onClick={() => setSearchParams({ tab: "grading", assignmentId: assignment.id })}
                       className="w-full py-2 border border-gray-200 hover:bg-gray-50 text-gray-650 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider"
                     >
                       {cg.btnViewSubmissions || "Xem bài nộp"}

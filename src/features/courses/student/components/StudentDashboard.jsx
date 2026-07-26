@@ -17,6 +17,8 @@ import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTr
 
 const UNKNOWN_VALUE = "—"
 const PAGE_SIZE = 24
+const SUPPORTED_ROUTE_LANGUAGES = new Set(["en", "vi", "zh"])
+const SIMPLE_TIME_PATTERN = /^\d{2}:\d{2}(?::\d{2})?$/
 
 const isRecord = (value) => (
   value !== null &&
@@ -113,16 +115,89 @@ const formatDisplayDate = (value) => {
   }).format(date)
 }
 
+const getSessionTimestamp = (dateValue, timeValue) => {
+  const date = toText(dateValue)
+  const time = toText(timeValue)
+
+  if (time && !SIMPLE_TIME_PATTERN.test(time)) {
+    const timestamp = new Date(time).getTime()
+    if (Number.isFinite(timestamp)) return timestamp
+  }
+
+  const datePart = date.match(/^\d{4}-\d{2}-\d{2}/)?.[0]
+  if (datePart && time && SIMPLE_TIME_PATTERN.test(time)) {
+    return new Date(`${datePart}T${time}`).getTime()
+  }
+
+  const timestamp = new Date(date).getTime()
+  return Number.isFinite(timestamp) ? timestamp : Number.NaN
+}
+
+const formatLocalDatePart = (date) => [
+  date.getFullYear(),
+  String(date.getMonth() + 1).padStart(2, "0"),
+  String(date.getDate()).padStart(2, "0"),
+].join("-")
+
+const formatLocalTimePart = (date) => [
+  String(date.getHours()).padStart(2, "0"),
+  String(date.getMinutes()).padStart(2, "0"),
+].join(":")
+
 const normalizeSession = (session) => {
   if (!isRecord(session)) return null
+
+  const rawDate = toText(session.date)
+  const rawStartTime = toText(session.startTime)
+  const rawEndTime = toText(session.endTime)
+  const startTimestamp = getSessionTimestamp(rawDate, rawStartTime)
+  const startDate = Number.isFinite(startTimestamp)
+    ? new Date(startTimestamp)
+    : null
+  const hasAbsoluteStartTime = (
+    rawStartTime
+    && !SIMPLE_TIME_PATTERN.test(rawStartTime)
+  )
+  const endTimestamp = getSessionTimestamp(
+    startDate ? formatLocalDatePart(startDate) : rawDate,
+    rawEndTime,
+  )
 
   return {
     number: toText(session.number ?? session.sessionNumber),
     topic: toText(session.topic ?? session.title),
-    startTime: toText(session.startTime),
-    endTime: toText(session.endTime),
-    date: toText(session.date),
+    startTime: hasAbsoluteStartTime && startDate
+      ? formatLocalTimePart(startDate)
+      : rawStartTime,
+    endTime: (
+      rawEndTime
+      && !SIMPLE_TIME_PATTERN.test(rawEndTime)
+      && Number.isFinite(endTimestamp)
+    )
+      ? formatLocalTimePart(new Date(endTimestamp))
+      : rawEndTime,
+    date: hasAbsoluteStartTime && startDate
+      ? formatLocalDatePart(startDate)
+      : rawDate.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || rawDate,
+    isLive: session.isLive === true,
+    startTimestamp,
   }
+}
+
+const getUpcomingSession = (classData) => {
+  const canonicalNextSession = classData?.nextSession
+  if (Number.isFinite(canonicalNextSession?.startTimestamp)) {
+    return canonicalNextSession
+  }
+
+  const now = Date.now()
+  return (classData?.sessions || [])
+    .filter((session) => (
+      Number.isFinite(session.startTimestamp)
+      && session.startTimestamp >= now
+    ))
+    .sort((left, right) => left.startTimestamp - right.startTimestamp)[0]
+    || null
 }
 
 const normalizeClass = (cls) => {
@@ -162,6 +237,7 @@ const normalizeClass = (cls) => {
     startDate: toText(cls.startDate),
     endDate: toText(cls.endDate),
     schedule,
+    nextSession: normalizeSession(cls.nextSession),
     sessions: Array.isArray(cls.sessions)
       ? cls.sessions.map(normalizeSession).filter(Boolean)
       : [],
@@ -237,9 +313,13 @@ const normalizeCollection = (value, normalizeItem) => {
   return { items, issueCount, hasMalformedShape: false }
 }
 
-const StudentDashboard = ({ t }) => {
+const StudentDashboard = ({ t, language }) => {
   const sc = t?.courses?.student || {}
   const navigate = useNavigate()
+  const normalizedLanguage = toText(language).toLowerCase()
+  const routeLanguage = SUPPORTED_ROUTE_LANGUAGES.has(normalizedLanguage)
+    ? normalizedLanguage
+    : "vi"
 
   // Local State
   const [activeTab, setActiveTab] = useState("enrolled") // "enrolled" | "explore" | "classes"
@@ -313,10 +393,18 @@ const StudentDashboard = ({ t }) => {
     navigate(`/workspace/learning/details/${encodeURIComponent(courseId)}`)
   }
 
-  const handleJoinClassRoom = (cls) => {
+  const handleOpenClassDetail = (cls) => {
     const classId = toText(cls?.id)
     if (!classId) return
     navigate(`/workspace/learning/class/${encodeURIComponent(classId)}`)
+  }
+
+  const handleJoinClassRoom = (cls) => {
+    const classId = toText(cls?.id)
+    if (!classId) return
+    navigate(
+      `/${routeLanguage}/meet/${encodeURIComponent(`class-${classId}`)}`,
+    )
   }
 
   const clearFilters = () => {
@@ -571,7 +659,7 @@ const StudentDashboard = ({ t }) => {
     ? joinedClasses.find((cls) => cls.id === activeCourse.enrolledClassId)
     : null
   const activeProgressPercent = getProgressPercent(activeClass?.progress)
-  const nextSession = activeClass?.sessions[0] || null
+  const nextSession = getUpcomingSession(activeClass)
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -739,7 +827,7 @@ const StudentDashboard = ({ t }) => {
                 <div className="flex items-center gap-4 shrink-0 self-end md:self-center">
                   <button
                     type="button"
-                    onClick={() => handleJoinClassRoom(activeClass)}
+                    onClick={() => handleOpenClassDetail(activeClass)}
                     aria-label={`${sc.resumeLearning || "Resume Learning"}: ${activeCourse.title}`}
                     className="h-11 px-6 bg-[#990011] hover:bg-[#b20a1c] text-white font-extrabold text-sm rounded-full flex items-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95 group-hover:translate-x-0.5"
                   >
@@ -1003,7 +1091,7 @@ const StudentDashboard = ({ t }) => {
                       return (
                         <div
                           key={cls.id}
-                          onClick={() => handleJoinClassRoom(cls)}
+                          onClick={() => handleOpenClassDetail(cls)}
                           className="group flex cursor-pointer flex-col items-stretch justify-between gap-6 rounded-3xl border border-gray-150 bg-white p-5 transition-all duration-300 hover:border-gray-250 hover:shadow-md md:flex-row md:items-center"
                         >
                           <div className="flex flex-1 flex-col gap-2">

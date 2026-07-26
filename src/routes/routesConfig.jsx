@@ -313,6 +313,16 @@ const routesConfig = [
         ],
       },
       {
+        path: "/workspace/courses/class/:id/quiz/:quizId/take",
+        element: (
+          <AuthGuard>
+            <LazyRoute>
+              <StudentTakeQuizView />
+            </LazyRoute>
+          </AuthGuard>
+        ),
+      },
+      {
         path: "/workspace/courses/class/:classId/quiz/:quizId/take",
         element: (
           <AuthGuard>
@@ -427,6 +437,14 @@ const routesConfig = [
                 ),
               },
               {
+                path: "courses/class/:id/assignment/:assignmentId/edit",
+                element: (
+                  <LazyRoute>
+                    <CreateAssignmentPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "courses/class/:id/create-exam",
                 element: (
                   <LazyRoute>
@@ -436,6 +454,14 @@ const routesConfig = [
               },
               {
                 path: "courses/class/:id/quiz/:quizId",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/quiz/:quizId/submission/:studentId",
                 element: (
                   <LazyRoute>
                     <CreateExamPage />

@@ -64,6 +64,9 @@ const ClassOverviewTab = ({
     : null
 
   const showRightColumn = !isStudent || isEnrolled
+  const normalizedStatus = String(classData.status || "").trim().toUpperCase()
+  const isArchivedClass = normalizedStatus === "ARCHIVED"
+  const isCompletedClass = normalizedStatus === "COMPLETED"
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -87,69 +90,78 @@ const ClassOverviewTab = ({
             </h2>
 
             {!isStudent && (
-              <div className="relative shrink-0">
-                <button
-                  type="button"
-                  disabled={isActionPending}
-                  aria-expanded={showActionsDropdown}
-                  aria-haspopup="menu"
-                  onClick={() => setShowActionsDropdown(!showActionsDropdown)}
-                  className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+              isCompletedClass ? (
+                <span
+                  role="status"
+                  className="h-10 px-5 bg-emerald-100 text-emerald-800 font-extrabold text-sm rounded-full flex items-center justify-center"
                 >
-                  <Pencil size={14} />
-                  <span>{cd.customizeClass || "Customize"}</span>
-                </button>
+                  {cd.classCompleted || "Class completed"}
+                </span>
+              ) : (
+                <div className="relative shrink-0">
+                  <button
+                    type="button"
+                    disabled={isActionPending}
+                    aria-expanded={showActionsDropdown}
+                    aria-haspopup="menu"
+                    onClick={() => setShowActionsDropdown(!showActionsDropdown)}
+                    className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Pencil size={14} />
+                    <span>{cd.customizeClass || "Customize"}</span>
+                  </button>
 
-                {showActionsDropdown && (
-                  <div role="menu" className="absolute right-0 mt-2 w-48 bg-white border border-gray-150 rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700">
-                    {classData.status !== "ARCHIVED" ? (
-                      <>
+                  {showActionsDropdown && (
+                    <div role="menu" className="absolute right-0 mt-2 w-48 bg-white border border-gray-150 rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700">
+                      {!isArchivedClass ? (
+                        <>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setShowActionsDropdown(false)
+                              navigate(`/workspace/courses/edit-class/${encodeURIComponent(String(id))}`)
+                            }}
+                            className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
+                          >
+                            {cd.editClass || "Edit Class"}
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            disabled={isActionPending}
+                            onClick={onCompleteClass}
+                            className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
+                          >
+                            {cd.completeClass || "Complete Class"}
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            disabled={isActionPending}
+                            onClick={onCancelClassClick}
+                            className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#BA021C] transition-colors"
+                          >
+                            {cd.cancelClass || "Cancel Class"}
+                          </button>
+                        </>
+                      ) : (
                         <button
                           type="button"
                           role="menuitem"
                           onClick={() => {
                             setShowActionsDropdown(false)
-                            navigate(`/workspace/courses/edit-class/${encodeURIComponent(String(id))}`)
+                            navigate(`/workspace/courses/create-class`, { state: { recoverClassId: id } })
                           }}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
+                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#b20a1c] transition-colors"
                         >
-                          {cd.editClass || "Edit Class"}
+                          {cd.reopenClass || "Reopen Class (Recover)"}
                         </button>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          disabled={isActionPending}
-                          onClick={onCompleteClass}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
-                        >
-                          {cd.completeClass || "Complete Class"}
-                        </button>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          disabled={isActionPending}
-                          onClick={onCancelClassClick}
-                          className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#BA021C] transition-colors"
-                        >
-                          {cd.cancelClass || "Cancel Class"}
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => {
-                          setShowActionsDropdown(false)
-                          navigate(`/workspace/courses/create-class`, { state: { recoverClassId: id } })
-                        }}
-                        className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#b20a1c] transition-colors"
-                      >
-                        {cd.reopenClass || "Reopen Class (Recover)"}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
             )}
           </div>
         </div>

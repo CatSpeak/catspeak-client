@@ -1,6 +1,5 @@
-// The repository's alias-only import resolver does not recognize Node's built-in protocol.
-// eslint-disable-next-line import/no-unresolved
 import test from "node:test"
+// The repository's alias-only import resolver does not recognize Node's built-in protocol.
 // eslint-disable-next-line import/no-unresolved
 import assert from "node:assert/strict"
 

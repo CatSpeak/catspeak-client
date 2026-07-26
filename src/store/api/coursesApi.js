@@ -1411,6 +1411,16 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
     }),
 
+    getTeacherStudentAttempt: builder.query({
+      query: ({ classId, quizId, studentId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/students/${encodePathSegment(studentId)}/attempt`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId, quizId, studentId }) => [
+        { type: "QuizStudents", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
     // ─── Student Quiz Endpoints ────────────────────────────────────────
 
     getStudentQuizzes: builder.query({
@@ -1529,6 +1539,7 @@ export const {
   useGradeTeacherEssayMutation,
   useGetTeacherQuizStatsQuery,
   useGetTeacherQuizStudentsQuery,
+  useGetTeacherStudentAttemptQuery,
   useExportTeacherQuizReportMutation,
   // Student Quiz Hooks
   useGetStudentQuizzesQuery,

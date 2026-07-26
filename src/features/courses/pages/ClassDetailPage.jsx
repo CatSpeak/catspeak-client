@@ -46,22 +46,18 @@ const ClassDetailPage = () => {
   const quizId = searchParams.get("quizId")
   const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
-  const [selectedTab, setSelectedTab] = useState("overview")
-  const activeTab = hasGradingDeepLink ? "grading" : selectedTab
+  const urlTab = searchParams.get("tab")
+  const VALID_TABS = ["overview", "members", "feed", "grading", "materials"]
+  const initialTab = (urlTab && VALID_TABS.includes(urlTab)) ? urlTab : "overview"
+  const activeTab = hasGradingDeepLink ? "grading" : initialTab
 
   const handleTabChange = (tab) => {
-    setSelectedTab(tab)
-
-    const hasDetailParams = GRADING_DETAIL_PARAM_KEYS.some((key) => (
-      searchParams.has(key)
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.set("tab", tab)
+    GRADING_DETAIL_PARAM_KEYS.forEach((key) => (
+      nextSearchParams.delete(key)
     ))
-    if (hasDetailParams) {
-      const nextSearchParams = new URLSearchParams(searchParams)
-      GRADING_DETAIL_PARAM_KEYS.forEach((key) => (
-        nextSearchParams.delete(key)
-      ))
-      setSearchParams(nextSearchParams, { replace: true })
-    }
+    setSearchParams(nextSearchParams)
   }
 
   // Fetch Class Details via RTK Query

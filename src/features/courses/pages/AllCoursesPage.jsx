@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import React from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { useGetAllCoursesQuery } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -21,7 +21,8 @@ const AllCoursesPage = () => {
   const ac = c.allCourses || {}
   const navigate = useNavigate()
 
-  const [activeTab, setActiveTab] = useState("all")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get("tab") || "all"
   const {
     currentPage,
     debouncedSearchQuery,
@@ -62,7 +63,11 @@ const AllCoursesPage = () => {
   ]
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("tab", tab)
+      return next
+    })
     setCurrentPage(1)
   }
 

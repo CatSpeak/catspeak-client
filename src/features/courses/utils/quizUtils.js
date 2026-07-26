@@ -891,7 +891,11 @@ export const validateQuizForm = (
   }
 }
 
-export const buildQuizAnswerPayload = (answers, questions = []) => {
+export const buildQuizAnswerPayload = (
+  answers,
+  questions = [],
+  markedForReview = {},
+) => {
   const questionById = new Map()
   if (Array.isArray(questions)) {
     questions.forEach((question) => {
@@ -902,31 +906,71 @@ export const buildQuizAnswerPayload = (answers, questions = []) => {
     })
   }
 
-  return getAnswerEntries(answers)
+  const markedEntries = getAnswerEntries(markedForReview)
+    .filter(([questionId]) => questionId !== undefined && questionId !== null)
+  const markedMap = new Map(
+    markedEntries.map(([questionId, isMarked]) => [
+      String(questionId),
+      Boolean(isMarked),
+    ]),
+  )
+  const answeredQuestionIds = new Set()
+
+  const answerPayload = getAnswerEntries(answers)
     .filter(([, value]) => value !== undefined)
     .map(([answerId, value]) => {
       const question = questionById.get(String(answerId))
       const questionId = getQuestionId(question) ?? answerId
+      const idStr = String(questionId)
       const type = normalizeQuestionType(question?.type)
+      answeredQuestionIds.add(idStr)
+
+      const isMarkedForReview = Boolean(
+        markedMap.has(idStr)
+          ? markedMap.get(idStr)
+          : (isRecord(value) && hasOwn(value, "isMarkedForReview"))
+            ? value.isMarkedForReview
+            : question?.isMarkedForReview
+              ?? question?.isFlagged
+              ?? question?.isMarked
+              ?? false,
+      )
 
       if (type === "FillInBlank" || type === "Essay") {
         return {
           questionId,
           selectedOptions: null,
-          fillText: value === null ? "" : String(value),
+          fillText: isRecord(value)
+            ? (value.fillText ?? "")
+            : (value === undefined || value === null ? "" : String(value)),
+          isMarkedForReview,
         }
       }
 
-      const selectedOptions = Array.isArray(value)
-        ? value.map(String)
-        : (value === null ? [] : [String(value)])
+      const rawOpts = isRecord(value) && "selectedOptions" in value ? value.selectedOptions : value
+      const selectedOptions = Array.isArray(rawOpts)
+        ? rawOpts.map(String)
+        : (rawOpts === undefined || rawOpts === null ? [] : [String(rawOpts)])
 
       return {
         questionId,
         selectedOptions,
         fillText: null,
+        isMarkedForReview,
       }
     })
+
+  const markOnlyPayload = markedEntries
+    .filter(([questionId]) => !answeredQuestionIds.has(String(questionId)))
+    .map(([markedQuestionId, isMarkedForReview]) => {
+      const question = questionById.get(String(markedQuestionId))
+      return {
+        questionId: getQuestionId(question) ?? markedQuestionId,
+        isMarkedForReview: Boolean(isMarkedForReview),
+      }
+    })
+
+  return [...answerPayload, ...markOnlyPayload]
 }
 
 export const getQuizDeadlineMs = ({

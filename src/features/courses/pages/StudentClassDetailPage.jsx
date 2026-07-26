@@ -39,6 +39,8 @@ const GRADING_DETAIL_PARAM_KEYS = [
   "studentId",
   "submissionId",
 ]
+const VALID_TABS = ["overview", "members", "feed", "grading", "materials"]
+const ENROLLED_ONLY_TABS = new Set(["members", "feed", "grading", "materials"])
 
 const StudentClassDetailPage = () => {
   const { id } = useParams()
@@ -51,22 +53,17 @@ const StudentClassDetailPage = () => {
   const quizId = searchParams.get("quizId")
   const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
-  const [selectedTab, setSelectedTab] = useState("overview")
-
-  const clearGradingDetailParams = () => {
-    const hasDetailParams = GRADING_DETAIL_PARAM_KEYS.some((key) => (
-      searchParams.has(key)
-    ))
-    if (!hasDetailParams) return
-
-    const nextParams = new URLSearchParams(searchParams)
-    GRADING_DETAIL_PARAM_KEYS.forEach((key) => nextParams.delete(key))
-    setSearchParams(nextParams, { replace: true })
-  }
+  const urlTab = searchParams.get("tab")
+  const requestedTab = (urlTab && VALID_TABS.includes(urlTab))
+    ? urlTab
+    : "overview"
+  const hasLockedTabDeepLink = ENROLLED_ONLY_TABS.has(requestedTab)
 
   const handleTabChange = (tab) => {
-    setSelectedTab(tab)
-    clearGradingDetailParams()
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set("tab", tab)
+    GRADING_DETAIL_PARAM_KEYS.forEach((key) => nextParams.delete(key))
+    setSearchParams(nextParams)
   }
 
   // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
@@ -155,27 +152,31 @@ const StudentClassDetailPage = () => {
   )
 
   // Enrollment Status
-  const activeTab = hasGradingDeepLink && isEnrolled
-    ? "grading"
-    : selectedTab
+  const activeTab = isEnrolled
+    ? (hasGradingDeepLink ? "grading" : requestedTab)
+    : "overview"
 
   useEffect(() => {
     if (
       isDetailLoading ||
       isDetailFetching ||
       detailError ||
+      !classData ||
       isEnrolled ||
-      !hasGradingDeepLink
+      (!hasGradingDeepLink && !hasLockedTabDeepLink)
     ) {
       return
     }
 
     const nextParams = new URLSearchParams(searchParams)
+    nextParams.set("tab", "overview")
     GRADING_DETAIL_PARAM_KEYS.forEach((key) => nextParams.delete(key))
     setSearchParams(nextParams, { replace: true })
   }, [
+    classData,
     detailError,
     hasGradingDeepLink,
+    hasLockedTabDeepLink,
     isDetailFetching,
     isDetailLoading,
     isEnrolled,

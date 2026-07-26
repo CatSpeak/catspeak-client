@@ -1,6 +1,5 @@
-// The repository's alias-only import resolver does not recognize Node's built-in protocol.
-// eslint-disable-next-line import/no-unresolved
 import test from "node:test"
+// The repository's alias-only import resolver does not recognize this built-in subpath.
 // eslint-disable-next-line import/no-unresolved
 import assert from "node:assert/strict"
 
@@ -464,38 +463,66 @@ test("answer payload preserves numeric and string question IDs and answer zero",
       questionId: 10,
       selectedOptions: ["0"],
       fillText: null,
+      isMarkedForReview: false,
     },
     {
       questionId: "question-uuid",
       selectedOptions: ["0", "2"],
       fillText: null,
+      isMarkedForReview: false,
     },
     {
       questionId: "fill-id",
       selectedOptions: null,
       fillText: "0",
+      isMarkedForReview: false,
     },
   ])
 })
 
-test("answer payload supports Maps without coercing their IDs", () => {
+test("answer payload supports Maps without coercing their IDs and includes markedForReview", () => {
   const answers = new Map([
     [99, "1"],
     ["external-id", null],
   ])
 
-  assert.deepEqual(buildQuizAnswerPayload(answers), [
+  assert.deepEqual(buildQuizAnswerPayload(answers, [], { "external-id": true }), [
     {
       questionId: 99,
       selectedOptions: ["1"],
       fillText: null,
+      isMarkedForReview: false,
     },
     {
       questionId: "external-id",
       selectedOptions: [],
       fillText: null,
+      isMarkedForReview: true,
     },
   ])
+})
+
+test("answer payload persists flag and unflag updates for an unanswered question", () => {
+  const questions = [{
+    id: "unanswered-id",
+    type: "MultipleChoiceSingle",
+    isMarkedForReview: true,
+  }]
+
+  assert.deepEqual(
+    buildQuizAnswerPayload({}, questions, { "unanswered-id": true }),
+    [{
+      questionId: "unanswered-id",
+      isMarkedForReview: true,
+    }],
+  )
+  assert.deepEqual(
+    buildQuizAnswerPayload({}, questions, { "unanswered-id": false }),
+    [{
+      questionId: "unanswered-id",
+      isMarkedForReview: false,
+    }],
+  )
 })
 
 test("deadline helpers calculate against an absolute start and reject invalid dates", () => {

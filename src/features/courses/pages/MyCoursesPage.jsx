@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { toast } from "react-hot-toast"
 
@@ -42,9 +42,34 @@ const MyCoursesPage = () => {
   const c = t.courses || {}
   const mc = c.myCourses || {}
 
-  const [activeTab, setActiveTab] = useState("courses")
-  const [viewMode, setViewMode] = useState("grid")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get("tab") || "courses"
+  const viewMode = searchParams.get("view") || "grid"
+  const statusFilter = searchParams.get("status") || "all"
+
+  const setActiveTab = (tab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("tab", tab)
+      return next
+    })
+  }
+
+  const setViewMode = (mode) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("view", mode)
+      return next
+    })
+  }
+
+  const setStatusFilter = (status) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("status", status)
+      return next
+    })
+  }
 
   const deleteHelper = useDeleteCourse(t)
   const [classDeleteTarget, setClassDeleteTarget] = useState(null)
