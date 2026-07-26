@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 const PictureItActionPanel = ({
   isDescriber,
   isSpectator,
+  isMain = true,
   isDescribing,
   isRatingPhase,
   isWaitingForRatings,
@@ -26,50 +27,30 @@ const PictureItActionPanel = ({
   const { t } = useLanguage()
   const ap = t.rooms?.game?.pictureIt?.actionPanel || {}
 
+  // Khi đang ở giai đoạn mô tả (describing), đếm ngược 30s đã ở TopBar nên ẩn thanh ActionPanel phía dưới
+  if (isMain && !isSpectator && isDescribing) {
+    return null
+  }
+
   return (
     <div className="shrink-0 border-t border-t-[#E5E5E5] px-5 py-3 flex items-center justify-center min-h-[64px] bg-white rounded-[24px]">
+      {/* Tile thu nhỏ ở sidebar — không cho tương tác */}
+      {!isMain && (
+        <span className="text-sm text-slate-500 italic">
+          {ap.clickToExpand || 'Click the tile to interact'}
+        </span>
+      )}
+
       {/* Spectator — chỉ xem */}
-      {isSpectator && (
+      {isMain && isSpectator && (
         <span className="text-sm text-secondary italic">
           {ap.watchingAsSpectator || 'You are watching as a spectator.'}
         </span>
       )}
 
-      {/* Describer — Describing phase */}
-      {!isSpectator && isDescriber && isDescribing && (
-        <div className="flex items-center gap-4 animate-fade-in">
-          {!hasDescribeStarted ? (
-            <PillButton
-              className="h-11 px-6 font-bold transition-all shadow-sm"
-              textColor="black"
-              bgColor="#F7F7F7"
-              onClick={handleDescribeStart}
-            >
-              {ap.startDescribe || 'Start describing'}
-            </PillButton>
-          ) : (
-            <div className="flex items-center gap-3">
-              <span className={`text-xl font-black tabular-nums ${describeCountdownSec <= 10 ? 'text-cath-red-600' : 'text-slate-800'}`}>
-                00:{describeCountdownSec.toString().padStart(2, '0')}
-              </span>
-              <PillButton
-                className="h-11 px-6 text-white font-bold transition-all relative flex items-center gap-2"
-                onClick={handleDescribeEnd}
-              >
-                <span className="relative flex h-3 w-3 mr-1">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                </span>
-                {ap.finishDescribe || 'Finish describing'}
-              </PillButton>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Describer — waiting for ratings */}
       {
-        isWaitingForRatings && (
+        isMain && isWaitingForRatings && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -87,7 +68,7 @@ const PictureItActionPanel = ({
 
       {/* Rater — Rating phase */}
       {
-        !isSpectator && !isDescriber && isRatingPhase && (
+        isMain && !isSpectator && !isDescriber && isRatingPhase && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -148,7 +129,7 @@ const PictureItActionPanel = ({
 
       {/* Generic waiting state */}
       {
-        !isSpectator && !isDescriber && !isDescribing && !isRatingPhase && (
+        isMain && !isSpectator && !isDescriber && !isDescribing && !isRatingPhase && (
           <div className="flex items-center justify-center">
             <span className="text-sm text-secondary">{ap.waiting || 'Waiting...'}</span>
           </div>

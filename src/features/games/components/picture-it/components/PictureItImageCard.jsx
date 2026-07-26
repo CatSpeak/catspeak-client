@@ -101,9 +101,6 @@ const PictureItImageCard = ({
           </div>
         )}
 
-        {category && (
-          <CategoryBadge category={category} className="absolute bottom-4 left-4 z-10" />
-        )}
       </div>
 
       {/* Forbidden words + flag UI đã bỏ — game dùng cơ chế 30s tự động end describe. */}

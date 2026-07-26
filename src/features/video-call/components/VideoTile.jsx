@@ -17,7 +17,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  *
  * @param {{ participant: import('livekit-client').Participant }} props
  */
-const VideoTile = ({ participant, onClick }) => {
+const VideoTileInner = ({ participant, onClick }) => {
   const { t } = useLanguage()
   const isSpeaking = useIsSpeaking(participant)
 
@@ -26,6 +26,7 @@ const VideoTile = ({ participant, onClick }) => {
   const [, forceUpdate] = useReducer((x) => x + 1, 0)
 
   useEffect(() => {
+    if (!participant) return
     const events = [
       ParticipantEvent.TrackSubscribed,
       ParticipantEvent.TrackUnsubscribed,
@@ -36,10 +37,10 @@ const VideoTile = ({ participant, onClick }) => {
       ParticipantEvent.MetadataChanged,
     ]
 
-    events.forEach((evt) => participant.on(evt, forceUpdate))
+    events.forEach((evt) => participant.on?.(evt, forceUpdate))
 
     return () => {
-      events.forEach((evt) => participant.off(evt, forceUpdate))
+      events.forEach((evt) => participant.off?.(evt, forceUpdate))
     }
   }, [participant])
 
@@ -185,6 +186,11 @@ const VideoTile = ({ participant, onClick }) => {
       </div>
     </div>
   )
+}
+
+const VideoTile = (props) => {
+  if (!props?.participant) return null
+  return <VideoTileInner {...props} />
 }
 
 export default VideoTile

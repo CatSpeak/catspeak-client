@@ -9,7 +9,7 @@ import BaseGameOverlay from '@/features/games/components/shared/BaseGameOverlay'
 import PictureItImageCard from './PictureItImageCard'
 import PictureItActionPanel from './PictureItActionPanel'
 
-const PictureITOverlay = ({ mode = "fullscreen" }) => {
+const PictureITOverlay = ({ mode = "fullscreen", isMain = true }) => {
   const {
     gameState,
     gameType,
@@ -62,6 +62,13 @@ const PictureITOverlay = ({ mode = "fullscreen" }) => {
     if (!isDescriber) return
     startPictureItDescribe()
   }, [isDescriber, startPictureItDescribe])
+
+  // Tự động kích hoạt bắt đầu mô tả (30s) mà không cần người chơi bấm nút "Start describing"
+  useEffect(() => {
+    if (isDescribing && isDescriber && !hasDescribeStarted) {
+      handleDescribeStart()
+    }
+  }, [isDescribing, isDescriber, hasDescribeStarted, handleDescribeStart])
 
   const handleDescribeEnd = useCallback(() => {
     if (!isDescriber) return
@@ -145,6 +152,7 @@ const PictureITOverlay = ({ mode = "fullscreen" }) => {
           <PictureItActionPanel
             isDescriber={isDescriber}
             isSpectator={isSpectator}
+            isMain={isMain}
             isDescribing={isDescribing}
             isRatingPhase={isRatingPhase}
             isWaitingForRatings={isWaitingForRatings}
@@ -197,7 +205,7 @@ const PictureITOverlay = ({ mode = "fullscreen" }) => {
           />
 
           {showForceStopped && (
-            <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-white/95">
+            <div className="absolute inset-0 z-[1200] flex items-center justify-center bg-white/95">
               <div className="text-center space-y-3">
                 <p className="text-2xl font-bold text-cath-red-700">{t.rooms?.game?.pictureIt?.modals?.gameEnded || 'Game Ended'}</p>
                 <p className="text-secondary">{t.rooms?.game?.pictureIt?.modals?.notEnoughPlayers || 'Không đủ người chơi tiếp tục.'}</p>

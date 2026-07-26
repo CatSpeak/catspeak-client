@@ -7,7 +7,7 @@ import { Send, CheckCircle2 } from "lucide-react"
 
 import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect"
 
-const AnswerInput = () => {
+const AnswerInput = ({ isMain = true }) => {
   const {
     submitAnswer,
     gameState,
@@ -26,8 +26,8 @@ const AnswerInput = () => {
   const [myScoreEarned, setMyScoreEarned] = useState(null)
   const inputRef = useRef(null)
 
-  const isCorrect = correctPlayers.has(currentUserId.toString())
-  const isDisabled = gameState !== "playing" || isCorrect || isSpectator
+  const isCorrect = currentUserId ? (correctPlayers?.has(currentUserId.toString()) || false) : false
+  const isDisabled = gameState !== "playing" || isCorrect || isSpectator || !isMain
 
   // Xóa trắng input khi bắt đầu ván mới
   useEffect(() => {
@@ -139,7 +139,7 @@ const AnswerInput = () => {
         onSubmit={handleSubmit}
         animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
         transition={{ duration: 0.4 }}
-        className={`flex items-center rounded-full shadow-sm border-2 p-1.5 transition-all ${shake
+        className={`flex items-center rounded-full shadow-sm border-2 p-1.5  transition-all ${shake
             ? "bg-red-50 border-red-500 shadow-red-100"
             : isCorrect
               ? "bg-green-50 border-green-500 shadow-green-100"
@@ -153,9 +153,11 @@ const AnswerInput = () => {
           onChange={(e) => setInputValue(e.target.value)}
           disabled={isDisabled}
           placeholder={
-            isSpectator
-              ? (t.rooms?.game?.crackIt?.spectatorPlaceholder || "Bạn đang xem dưới dạng người quan sát...")
-              : (t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn...")
+            !isMain
+              ? (t.rooms?.game?.crackIt?.notMainPlaceholder || "Click the tile to expand and play")
+              : isSpectator
+                ? (t.rooms?.game?.crackIt?.spectatorPlaceholder || "Bạn đang xem dưới dạng người quan sát...")
+                : (t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn...")
           }
           className={`flex-1 min-w-0 bg-transparent px-2 md:px-6 h-10 outline-none text-lg font-medium tracking-wide ${isCorrect ? "text-green-700" : "text-slate-800 disabled:text-slate-500"
             } placeholder-gray-400`}

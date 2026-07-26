@@ -75,6 +75,29 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
     }
   }
 
+  // Timer cho Picture IT (Describe 30s countdown & Rating countdown)
+  const describeStartTimeMs = pictureIt?.describeStartTime
+    ? new Date(pictureIt.describeStartTime).getTime()
+    : null
+
+  useEffect(() => {
+    let interval
+    if (isPictureIt && gameState === "playing") {
+      if (pictureIt?.ratingOpen) {
+        setTimeLeft(pictureIt?.ratingCountdownSec || 0)
+      } else if (describeStartTimeMs) {
+        const updateTimer = () => {
+          const elapsed = Math.floor((Date.now() - describeStartTimeMs) / 1000)
+          const remaining = Math.max(0, 30 - elapsed)
+          setTimeLeft(remaining)
+        }
+        updateTimer()
+        interval = setInterval(updateTimer, 300)
+      }
+    }
+    return () => clearInterval(interval)
+  }, [isPictureIt, gameState, pictureIt?.ratingOpen, pictureIt?.ratingCountdownSec, describeStartTimeMs])
+
   const isLowTime = timeLeft <= 10
 
   return (
@@ -112,14 +135,16 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
           </div>
         )}
 
-        <div className="flex-1 flex justify-center">
-          {!isPictureIt && currentRound && (
-            <motion.div
-              transition={isLowTime ? { repeat: Infinity, duration: 1 } : {}}
-              className={`text-2xl md:text-3xl font-black tabular-nums ${isLowTime ? "text-cath-red-600 drop-shadow-sm" : "text-slate-800"}`}
-            >
-              00:{timeLeft.toString().padStart(2, "0")}
-            </motion.div>
+        <div className="flex-1 flex justify-center items-center">
+          {currentRound && (
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <motion.div
+                transition={isLowTime ? { repeat: Infinity, duration: 1 } : {}}
+                className={`text-2xl md:text-3xl font-black tabular-nums ${isLowTime ? "text-cath-red-600 drop-shadow-sm" : "text-slate-800"}`}
+              >
+                00:{timeLeft.toString().padStart(2, "0")}
+              </motion.div>
+            </div>
           )}
         </div>
       </div>

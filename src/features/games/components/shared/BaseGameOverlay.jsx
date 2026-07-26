@@ -20,11 +20,14 @@ const BaseGameOverlay = ({
 }) => {
   const { gameState, gameType, countdown, currentUserId, leftPlayers } = useGame();
 
-  const hasLeft = leftPlayers?.has(currentUserId?.toString())
+  const hasLeft = Boolean(currentUserId && leftPlayers?.has(currentUserId?.toString()))
+
+  const normalizeType = (t) => t?.toLowerCase()?.replace(/-/g, "_")
+  const normCurrent = normalizeType(gameType)
 
   const matchesGameType = Array.isArray(expectedGameType)
-    ? expectedGameType.includes(gameType)
-    : gameType === expectedGameType;
+    ? expectedGameType.map(normalizeType).includes(normCurrent)
+    : normalizeType(expectedGameType) === normCurrent;
 
   if (!matchesGameType || hasLeft) {
     return null

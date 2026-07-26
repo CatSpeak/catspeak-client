@@ -145,14 +145,15 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   const connection = useGameSignaling({
     GAME_SETUP: (payload) => {
-      setGameType(payload.game_type);
+      const normType = payload.game_type?.toLowerCase()?.replace(/-/g, "_");
+      setGameType(normType);
       setGameLanguage(payload.language);
       setGameState("setup");
       resetGameStates();
       setGamePlayers(
         new Set(payload.original_players?.map((id) => id.toString()) || []),
       );
-      if (payload.game_type === "picture_it") {
+      if (normType === "picture_it") {
         setPictureItState((prev) => ({
           ...prev,
           describerOrder: payload.describer_order || [],
@@ -443,7 +444,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       }
     },
     SYNC_GAME_STATE: (payload) => {
-      setGameType(payload.game_type);
+      const normType = payload.game_type?.toLowerCase()?.replace(/-/g, "_");
+      setGameType(normType);
       setGameLanguage(payload.language);
       setScores(payload.scores || {});
       setGamePlayers(
@@ -458,7 +460,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         new Set(payload.left_players?.map((id) => id.toString()) || []),
       );
 
-      if (payload.game_type === "picture_it") {
+      if (normType === "picture_it") {
         setCurrentRound({
           round: payload.current_round?.round,
           total: payload.current_round?.total,

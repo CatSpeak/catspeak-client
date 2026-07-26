@@ -9,7 +9,7 @@ import BaseGameOverlay from "../shared/BaseGameOverlay"
 import RoundResultOverlay from "../shared/RoundResultOverlay"
 import GameOverScreen from "../shared/GameOverScreen"
 
-const CrackItOverlay = ({ mode = "fullscreen" }) => {
+const CrackItOverlay = ({ mode = "fullscreen", isMain = true }) => {
   const { gameState, exitGame, roundResults, finalResults, currentUserId, playerNames, currentRound } = useGame();
   const { t } = useLanguage()
   const participants = useParticipants()
@@ -37,33 +37,33 @@ const CrackItOverlay = ({ mode = "fullscreen" }) => {
       mode={mode}
       gameContent={
         (gameState === "playing" || gameState === "result") ? (
-          <div className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0 relative items-center justify-start md:justify-center overflow-y-auto md:overflow-visible w-full pb-8 md:pb-4">
+          <div className="flex-1 flex flex-col gap-2 md:gap-6 min-h-0 relative items-center justify-start md:justify-center overflow-hidden w-full pb-2 md:pb-4">
             <PuzzleCenter />
-            <div className="w-full mt-4 shrink-0">
-              <AnswerInput />
+            <div className="w-full mt-2 md:mt-4 shrink-0">
+              <AnswerInput isMain={isMain} />
             </div>
-            
-            {/* ROUND RESULT OVERLAY */}
-            <RoundResultOverlay
-              gameState={gameState}
-              roundResults={roundResults}
-              currentRound={currentRound}
-              t={t}
-              getPlayerName={getPlayerName}
-            />
           </div>
         ) : (
           <div className="flex-1" />
         )
       }
       overlays={
-        <GameOverScreen
-          gameState={gameState}
-          finalResults={finalResults}
-          t={t}
-          getPlayerName={getPlayerName}
-          exitGame={exitGame}
-        />
+        <>
+          <RoundResultOverlay
+            gameState={gameState}
+            roundResults={roundResults}
+            currentRound={currentRound}
+            t={t}
+            getPlayerName={getPlayerName}
+          />
+          <GameOverScreen
+            gameState={gameState}
+            finalResults={finalResults}
+            t={t}
+            getPlayerName={getPlayerName}
+            exitGame={exitGame}
+          />
+        </>
       }
     />
   )

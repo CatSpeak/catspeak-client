@@ -86,7 +86,14 @@ const PuzzleCenter = () => {
      };
    }, [puzzle, currentRound?.started_at]);
 
-  if (!puzzle) return null
+  if (!puzzle) {
+    return (
+      <div className="flex-1 bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col items-center justify-center p-8 text-center text-slate-500 min-h-[280px] w-full">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cath-red-600 mb-4" />
+        <p className="font-semibold text-lg">{t.rooms?.game?.crackIt?.waitingStart || "Đang đồng bộ ván đấu..."}</p>
+      </div>
+    )
+  }
 
   const hintContent = (() => {
     // Nếu ngôn ngữ UI là 'zh', ưu tiên hiển thị tiếng Trung
@@ -109,10 +116,10 @@ const PuzzleCenter = () => {
   })()
 
   return (
-    <div className="flex-1 bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
-      {/* Left: Image Container */}
-      <div className="w-full md:w-1/2 flex-1 p-6 md:p-10 flex items-center justify-center min-h-[35vh] md:min-h-0 bg-slate-50/50">
-        <div className="relative w-full max-w-[300px] md:max-w-[420px] aspect-square rounded-3xl overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-gray-100">
+    <div className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-sm md:shadow-md border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
+      {/* Top / Left: Image Container — chiếm trọn không gian trống phía trên */}
+      <div className="w-full md:w-1/2 flex-1 min-h-0 p-3 sm:p-4 md:p-8 flex items-center justify-center bg-slate-50/50 overflow-hidden">
+        <div className="relative h-full w-auto max-h-full aspect-square rounded-2xl md:rounded-3xl overflow-hidden shadow-md md:shadow-2xl border-4 md:border-[6px] border-white ring-1 ring-gray-100">
           <img
             src={puzzle.image_url}
             alt="Puzzle"
@@ -121,19 +128,19 @@ const PuzzleCenter = () => {
         </div>
       </div>
 
-      {/* Right: Hint & Word Count */}
-      <div className="w-full md:w-1/2 flex-1 flex flex-col items-center justify-center p-6 md:p-10 text-center gap-6 md:gap-8 overflow-y-auto bg-red-50/50">
-        <div className="flex flex-col items-center gap-2 md:gap-4">
-          <div className="text-xs md:text-sm font-black tracking-[0.3em] text-cath-red-600 uppercase">
+      {/* Bottom / Right: Hint & Word Count Container */}
+      <div className="w-full md:w-1/2 shrink-0 md:flex-1 p-3 sm:p-4 md:p-8 flex flex-col items-center justify-center text-center gap-2 md:gap-6 bg-red-50/30 md:bg-red-50/50">
+        <div className="flex flex-col items-center gap-1 md:gap-3">
+          <div className="text-xs md:text-sm font-black tracking-[0.2em] md:tracking-[0.3em] text-cath-red-600 uppercase">
             {t.rooms?.game?.crackIt?.hint || "Gợi ý"}
           </div>
-          <div className="text-lg md:text-2xl font-semibold text-slate-800 leading-relaxed max-w-lg px-4 md:px-0">
+          <div className="text-base sm:text-lg md:text-2xl font-semibold text-slate-800 leading-snug md:leading-relaxed max-w-lg px-2 md:px-0">
             {hintContent}
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2 md:gap-4">
-          <div className="text-3xl md:text-4xl font-black text-gray-400 tracking-[0.1em] mt-2">
+        <div className="flex flex-col items-center gap-1 md:gap-3">
+          <div className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-500 tracking-[0.1em]">
             {displayMask}
           </div>
         </div>
