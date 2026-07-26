@@ -39,6 +39,7 @@ import WebsitePage from "@/features/websites/WebsitePage";
 import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/BulletinBoardPage";
 import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage";
 import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage";
+import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage";
 
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
@@ -417,6 +418,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/links/:itemId",
+                element: (
+                  <LazyRoute>
+                    <LinkYoutubePage />
                   </LazyRoute>
                 ),
               },

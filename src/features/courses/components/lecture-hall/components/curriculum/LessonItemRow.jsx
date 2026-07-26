@@ -63,6 +63,7 @@ const LessonItemRow = ({
   if (isStudent && !item.isVisibleToStudents) return null
 
   const displayData = getDisplayData(item)
+  const isYoutubeLink = displayData.type === "link" && displayData.meta && (displayData.meta.includes("youtube.com") || displayData.meta.includes("youtu.be"))
   const config = getItemConfig(displayData.type || "assignment")
   const IconComponent = config.Icon
 
@@ -83,10 +84,18 @@ const LessonItemRow = ({
         <div className="min-w-0 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
             <h4
-              className={`text-base font-semibold ${displayData.type === "bulletinBoard" ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
+              className={`text-base font-semibold ${displayData.type === "bulletinBoard" || displayData.type === "link" ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
               onClick={() => {
                 if (displayData.type === "bulletinBoard") {
                   navigate(`/workspace/courses/class/${classId}/bulletin-board/${displayData.realItemId}`)
+                } else if (isYoutubeLink) {
+                  navigate(`/workspace/courses/class/${classId}/links/${displayData.realItemId}`)
+                } else if (displayData.type === "link") {
+                  let urlToOpen = displayData.meta
+                  if (urlToOpen && !/^https?:\/\//i.test(urlToOpen)) {
+                    urlToOpen = 'https://' + urlToOpen
+                  }
+                  window.open(urlToOpen, "_blank")
                 }
               }}
             >
