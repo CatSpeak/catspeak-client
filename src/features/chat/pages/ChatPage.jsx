@@ -16,6 +16,7 @@ import useChatConversations from "@/features/chat/hooks/useChatConversations"
 import { EmptyState } from "@/shared/components/ui/indicators"
 import useMediaQuery from "@/shared/hooks/useMediaQuery"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { FluentAnimation } from "@/shared/components/ui/animations"
 
 /**
  * ChatPage — fullscreen chat page.
@@ -126,7 +127,7 @@ const ChatPage = () => {
   )
 
   return (
-    <div className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
+    <FluentAnimation className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
       {/* ── Sidebar ──────────────────────────────────── */}
       <div
         className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-fit shrink-0`}
@@ -231,7 +232,7 @@ const ChatPage = () => {
         onClose={() => setIsNewChatOpen(false)}
         onConversationCreated={handleSelectConversation}
       />
-    </div>
+    </FluentAnimation>
   )
 }
 

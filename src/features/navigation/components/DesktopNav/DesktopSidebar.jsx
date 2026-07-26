@@ -43,7 +43,7 @@ const dockItems = [
   {
     key: "catSpeak",
     icon: LayoutDashboard,
-    path: "/cat-speak/news",
+    path: "/cat-speak/global-news",
     hasSublinks: true,
   },
   {
@@ -128,10 +128,7 @@ const DesktopSidebar = () => {
       setLastSublink("settings", cleanPath)
     } else if (pathname.includes("/cat-speak")) {
       setLastSublink("catSpeak", cleanPath)
-    } else if (
-      pathname.includes("/workspace") ||
-      pathname.includes("/profile")
-    ) {
+    } else if (pathname.includes("/workspace")) {
       setLastSublink("workspace", cleanPath)
     }
   }, [pathname, setLastSublink])
@@ -157,9 +154,6 @@ const DesktopSidebar = () => {
   }
 
   const getDockItemPath = (item) => {
-    if (item.hasSublinks && lastSublinks?.[item.key]) {
-      return resolvePath(lastSublinks[item.key])
-    }
     return resolvePath(item.path)
   }
 

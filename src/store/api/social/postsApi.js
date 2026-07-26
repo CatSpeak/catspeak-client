@@ -87,18 +87,11 @@ export const postsApi = socialApi.injectEndpoints({
           const { data: res } = await queryFulfilled
           const serverData = res?.data || res
           if (serverData) {
-            const finalReaction =
-              serverData.currentUserReaction !== undefined
-                ? serverData.currentUserReaction
-                : serverData.action === "removed"
-                  ? null
-                  : type
-            const finalTotal = serverData.totalReactions
-
             updatePostInCaches(getState(), dispatch, postId, (post) => {
-              if (finalReaction !== undefined)
-                post.currentUserReaction = finalReaction
-              if (finalTotal !== undefined) post.totalReactions = finalTotal
+              if (serverData.currentUserReaction !== undefined)
+                post.currentUserReaction = serverData.currentUserReaction
+              if (serverData.totalReactions !== undefined)
+                post.totalReactions = serverData.totalReactions
             })
           }
         } catch {

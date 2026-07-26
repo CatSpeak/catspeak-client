@@ -14,7 +14,7 @@ import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import ChipFilter from "@/shared/components/ChipFilter"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import ResourceCard from "../components/ResourceCard"
-import { TypewriterText } from "@/shared/components/ui/animations"
+import { TypewriterText, FluentAnimation } from "@/shared/components/ui/animations"
 
 const ResourcesHubPage = () => {
   const { t } = useLanguage()
@@ -131,7 +131,7 @@ const ResourcesHubPage = () => {
   }, [categoryCounts, t.websites?.category, activeLang])
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] flex flex-col p-0 sm:p-6 gap-4 sm:gap-6">
+    <FluentAnimation className="min-h-screen bg-[#f3f3f3] flex flex-col p-0 sm:p-6 gap-4 sm:gap-6">
       {/* ── Dashboard Hero Banner ── */}
 
       <div className="relative overflow-hidden rounded-none sm:rounded-xl bg-gradient-to-br from-[#3b0712] via-[#6b1428] to-[#2d050d] text-white py-8 px-4 sm:py-12 sm:px-8 shadow-lg shadow-rose-950/30 border-b sm:border border-rose-500/25">
@@ -199,7 +199,7 @@ const ResourcesHubPage = () => {
           </EmptyState>
         )}
       </div>
-    </div>
+    </FluentAnimation>
   )
 }
 

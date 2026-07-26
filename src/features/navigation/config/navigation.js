@@ -17,7 +17,7 @@ import {
   MessageCircle,
   DoorOpen,
   Globe,
-} from "lucide-react";
+} from "lucide-react"
 
 export const navSections = [
   {
@@ -66,7 +66,7 @@ export const navSections = [
       { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
-];
+]
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -89,8 +89,8 @@ export const navLinks = [
     hasDropdown: true,
     icon: LayoutDashboard,
     subItems: [
-      { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
+      { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
@@ -116,15 +116,15 @@ export const navLinks = [
     isHorizontalBar: true,
     showOnHorizontalBar: false,
   },
-];
+]
 
 export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "systemConfig", path: "/setting/system", icon: Settings },
-];
+]
 
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard },
   { key: "settings", path: "/setting", icon: Settings },
-];
+]
