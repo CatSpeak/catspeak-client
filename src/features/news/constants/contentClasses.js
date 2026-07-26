@@ -1,6 +1,6 @@
 export const CONTENT_CLASSES = [
   // Base text — Figma: Web/P1/Regular (Nunito 20px, line-height 1.4)
-  "font-nunito text-[20px] leading-[1.4] text-black",
+  "text-[20px] leading-[1.4] text-black",
 
   // Inline formatting
   "[&_strong]:font-bold [&_b]:font-bold",
@@ -39,7 +39,7 @@ export const CONTENT_CLASSES = [
 
   // Figure & caption — Figma: centered, muted color
   "[&_figure]:my-4 [&_figure]:table [&_figure]:text-center [&_figure]:mx-auto [&_figure]:clear-both",
-  "[&_figcaption]:text-center [&_figcaption]:font-nunito [&_figcaption]:text-base [&_figcaption]:font-medium [&_figcaption]:text-[#7b7979] [&_figcaption]:mt-3",
+  "[&_figcaption]:text-center [&_figcaption]:text-base [&_figcaption]:font-medium [&_figcaption]:text-[#7b7979] [&_figcaption]:mt-3",
 
   // Tables
   "[&_table]:w-full [&_table]:mb-4 [&_td]:align-top [&_td]:p-2 [&_th]:p-2 [&_th]:text-left [&_th]:font-bold",

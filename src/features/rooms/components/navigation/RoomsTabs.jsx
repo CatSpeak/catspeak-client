@@ -20,7 +20,7 @@ const RoomsTabs = ({ tab, setTab }) => {
           <button
             key={tItem.value}
             onClick={() => setTab(tItem.value)}
-            className={`relative pb-3 font-nunito px-2 max-sm:w-1/3 sm:w-auto sm:px-6 text-base sm:text-lg transition-colors ${
+            className={`relative pb-3 px-2 max-sm:w-1/3 sm:w-auto sm:px-6 text-base sm:text-lg transition-colors ${
               isSelected
                 ? "text-cath-red-700 font-semibold"
                 : "text-gray-500 hover:text-gray-800"

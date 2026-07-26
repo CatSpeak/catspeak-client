@@ -3,8 +3,10 @@ import { FileText, Download, FileArchive } from "lucide-react"
 import { useGetUserWallDocumentsQuery } from "../../../store/api/social/profilePostsApi"
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfileDocumentsTab = ({ targetAccountId }) => {
+  const { t } = useLanguage()
   const { data, isLoading } = useGetUserWallDocumentsQuery({
     accountId: targetAccountId,
     page: 1,
@@ -33,7 +35,7 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
       {/* Top Header Card */}
       <FluentCard className="p-4 sm:p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Tài liệu chia sẻ</h2>
+          <h2 className="text-xl font-bold">{t.profile?.documents?.title || "Tài liệu chia sẻ"}</h2>
         </div>
       </FluentCard>
 
@@ -57,7 +59,7 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
         ) : documents.length === 0 ? (
           <FluentCard>
             <EmptyState
-              message="Chưa có tài liệu nào được chia sẻ."
+              message={t.profile?.documents?.noDocuments || "Chưa có tài liệu nào được chia sẻ."}
               icon={FileText}
             />
           </FluentCard>
@@ -83,7 +85,7 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
                     </div>
                     <div className="flex flex-col overflow-hidden">
                       <span className="font-semibold text-gray-900 text-[15px] truncate">
-                        {doc.fileName || "Tài liệu không tên"}
+                        {doc.fileName || t.profile?.documents?.unnamed || "Tài liệu không tên"}
                       </span>
                       <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                         <span>{formatFileSize(doc.fileSize)}</span>

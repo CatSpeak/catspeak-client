@@ -35,7 +35,7 @@ const LandingHeader = ({ onGetStarted }) => {
 
         {/* Center Section: Desktop Nav */}
         <div className="hidden shrink-0 lg:block">
-          <DesktopNav />
+          <DesktopNav onRequestLogin={() => onGetStarted?.("login")} />
         </div>
 
         {/* Right Section: Controls */}

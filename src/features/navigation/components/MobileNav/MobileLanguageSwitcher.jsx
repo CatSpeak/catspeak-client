@@ -2,7 +2,6 @@ import React from "react"
 import { Globe, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, UK } from "@/shared/assets/icons/flags"
-import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 import Dropdown from "@/shared/components/ui/Dropdown"
 
 const LANGUAGES = [
@@ -29,12 +28,12 @@ const MobileLanguageSwitcher = () => {
         dropdownClassName="!min-w-full w-full p-2"
         trigger={(isOpen, selectedOption, toggle) => (
           <button 
-            className={`${getNavItemClasses(false, false)} ${isOpen ? "bg-[#F2F2F2]" : ""}`}
+            className={`relative flex items-center shrink-0 h-11 px-4 gap-3 rounded-lg transition-all duration-300 group overflow-hidden w-full ${isOpen ? "bg-gray-100" : "hover:bg-gray-100"}`}
             onClick={toggle}
             title={t.header?.language || "Ngôn ngữ"}
           >
             <Globe size={20} className="shrink-0" />
-            <span className={getNavTextClasses(true)}>{t.header?.language || "Ngôn ngữ"}</span>
+            <span className="text-sm font-medium text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate">{t.header?.language || "Ngôn ngữ"}</span>
             
             <ChevronDown 
               size={18} 

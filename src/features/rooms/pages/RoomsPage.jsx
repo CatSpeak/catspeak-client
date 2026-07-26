@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useSearchParams, useParams, useNavigate } from "react-router-dom"
+import React, { useState } from "react";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import {
   CommunicateTab,
   RoomsTabs,
@@ -11,120 +11,151 @@ import {
   JoinRoomModal,
   AISessionSettingsModal,
   RoomsBannerContent,
-} from "@/features/rooms"
-import { WorkshopCarousel } from "@/features/workshops"
+} from "@/features/rooms";
+import { WorkshopCarousel } from "@/features/workshops";
 
-import { useCreateAISessionMutation } from "@/store/api/roomsApi"
-import { AnimatePresence } from "framer-motion"
+import { useCreateAISessionMutation } from "@/store/api/roomsApi";
+import { AnimatePresence } from "framer-motion";
 import {
   FadeAnimation,
   FluentAnimation,
-} from "@/shared/components/ui/animations"
-import { useSelector, useDispatch } from "react-redux"
-import { leaveCall } from "@/store/slices/videoCallSlice"
-import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
+} from "@/shared/components/ui/animations";
+import { useSelector, useDispatch } from "react-redux";
+import { leaveCall } from "@/store/slices/videoCallSlice";
+import SwitchCallModal from "@/features/video-call/components/SwitchCallModal";
+import {
+  pingActiveCall,
+  requestLeaveActiveCall,
+} from "@/features/video-call/services/callBroadcastChannel";
 
 const RoomsPage = () => {
-  const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
-  const [createRoomMode, setCreateRoomMode] = useState("custom")
-  const [isJoinRoomModalOpen, setJoinRoomModalOpen] = useState(false)
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false);
+  const [createRoomMode, setCreateRoomMode] = useState("custom");
+  const [isJoinRoomModalOpen, setJoinRoomModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-  const [showSwitchModal, setShowSwitchModal] = useState(false)
-  const [pendingAction, setPendingAction] = useState(null)
+  const [showSwitchModal, setShowSwitchModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
-  const { isInCall } = useSelector((s) => s.videoCall)
-  const dispatch = useDispatch()
+  const { isInCall } = useSelector((s) => s.videoCall);
+  const dispatch = useDispatch();
 
-  const [page, setPage] = useState(1)
-  const [tab, setTab] = useState("communicate")
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { lang } = useParams()
+  const [page, setPage] = useState(1);
+  const [tab, setTab] = useState("communicate");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { lang } = useParams();
 
-  const { state, actions } = useRoomsPageLogic()
-  const [createAISession] = useCreateAISessionMutation()
+  const { state, actions } = useRoomsPageLogic();
+  const [createAISession] = useCreateAISessionMutation();
 
   const langMap = {
     en: "English",
     zh: "Chinese",
     vi: "Vietnamese",
-  }
-  const languageType = lang ? [langMap[lang]] : undefined
+  };
+  const languageType = lang ? [langMap[lang]] : undefined;
 
-  const proceedCreateOneOnOne = () => {
-    actions.handleCreateOneOnOneSession(() => {
-      const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
-      const preferences = {
-        roomType: "OneToOne",
-        topics: [],
-        languageType: langMap[supportedLangCode],
-      }
-      navigate("/queue", { state: preferences })
-    })
-  }
-
-  const proceedCreateStudyGroup = () => {
-    actions.handleCreateStudyGroupSession(() => {
-      setJoinRoomModalOpen(true);
-    });
+  const checkAndIntercept = async (action) => {
+    const remoteActive = await pingActiveCall();
+    if (isInCall || remoteActive) {
+      setPendingAction(() => action);
+      setShowSwitchModal(true);
+      return true;
+    }
+    return false;
   };
 
-  const handleCreateCustomRoom = () => {
-    actions.handleCreateCustomRoomSession(() => {
-      setCreateRoomMode("group");
-      setCreateRoomModalOpen(true);
-    });
+  const proceedCreateOneOnOne = async () => {
+    const action = () => {
+      actions.handleCreateOneOnOneSession(() => {
+        const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
+        const preferences = {
+          roomType: "OneToOne",
+          topics: [],
+          languageType: langMap[supportedLangCode],
+        };
+        navigate("/queue", { state: preferences });
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
+  };
+
+  const proceedCreateStudyGroup = async () => {
+    const action = () => {
+      actions.handleCreateStudyGroupSession(() => {
+        setCreateRoomModalOpen(true);
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
+  };
+
+  const handleCreateCustomRoom = async () => {
+    const action = () => {
+      actions.handleCreateCustomRoomSession(() => {
+        setCreateRoomMode("group");
+        setCreateRoomModalOpen(true);
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
   };
 
   const handleConfirmSwitch = async () => {
-    setShowSwitchModal(false)
+    setShowSwitchModal(false);
+    requestLeaveActiveCall();
     if (isInCall) {
-      dispatch(leaveCall())
+      dispatch(leaveCall());
     }
 
-    if (pendingAction === "1:1") {
-      proceedCreateOneOnOne()
+    if (typeof pendingAction === "function") {
+      pendingAction();
     }
-    setPendingAction(null)
-  }
+    setPendingAction(null);
+  };
 
   const handleCancelSwitch = () => {
-    setShowSwitchModal(false)
-    setPendingAction(null)
-  }
+    setShowSwitchModal(false);
+    setPendingAction(null);
+  };
 
-  const handleCreateAI = (settings) => {
-    setIsSettingsModalOpen(false)
-    actions.handleCreateAISession(async () => {
-      try {
-        const result = await createAISession(settings).unwrap()
-        navigate(`/${lang}/meet/${result.roomId}`, {
-          state: { fromQueue: true, isAISession: true },
-        })
-      } catch (err) {
-        console.error("Failed to create AI session", err)
-      }
-    })
-  }
+  const handleCreateAI = async (settings) => {
+    setIsSettingsModalOpen(false);
+    const action = () => {
+      actions.handleCreateAISession(async () => {
+        try {
+          const result = await createAISession(settings).unwrap();
+          navigate(`/${lang}/meet/${result.roomId}`, {
+            state: { fromQueue: true, isAISession: true },
+          });
+        } catch (err) {
+          console.error("Failed to create AI session", err);
+        }
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
+  };
 
-  const requiredLevels = searchParams.getAll("requiredLevels")
+  const requiredLevels = searchParams.getAll("requiredLevels");
   const requiredLevelsArg =
-    requiredLevels.length > 0 ? requiredLevels : undefined
+    requiredLevels.length > 0 ? requiredLevels : undefined;
 
-  const categoriesParam = searchParams.get("categories")
+  const categoriesParam = searchParams.get("categories");
   const categories = categoriesParam
     ? categoriesParam.split(",").map((c) => c.trim())
-    : undefined
+    : undefined;
 
-  const topicsValues = searchParams.getAll("topics")
-  const topicsArg = topicsValues.length > 0 ? topicsValues : undefined
+  const topicsValues = searchParams.getAll("topics");
+  const topicsArg = topicsValues.length > 0 ? topicsValues : undefined;
 
-  const searchArg = searchParams.get("search")
+  const searchArg = searchParams.get("search");
 
-  const pageSize = 12
+  const pageSize = 12;
   const shouldFetch =
-    !!categories || !!topicsArg || !!requiredLevelsArg || !!searchArg
+    !!categories || !!topicsArg || !!requiredLevelsArg || !!searchArg;
 
   const hasOtherCategory = categories?.includes("Other");
   const apiCategories = hasOtherCategory ? undefined : categories;
@@ -140,9 +171,9 @@ const RoomsPage = () => {
       roomName: searchArg,
     },
     { skip: !shouldFetch },
-  )
+  );
 
-  let rooms = responseData?.data ?? []
+  let rooms = responseData?.data ?? [];
 
   if (hasOtherCategory) {
     const known = ["Knowledge", "Culture", "Lifestyle", "Growth"];
@@ -152,26 +183,28 @@ const RoomsPage = () => {
         r.categories === "[]" ||
         r.categories.length === 0 ||
         r.categories.includes("Other") ||
-        (Array.isArray(r.categories) 
+        (Array.isArray(r.categories)
           ? !known.some((c) => r.categories.includes(c))
           : !known.some((c) => r.categories.includes(c)));
 
       if (isOtherRoom && categories.includes("Other")) return true;
       if (r.categories && r.categories.length > 0) {
-        return categories.some((selected) => selected !== "Other" && r.categories.includes(selected));
+        return categories.some(
+          (selected) => selected !== "Other" && r.categories.includes(selected),
+        );
       }
       return false;
     });
   }
 
   // Local pagination
-  const totalFilteredCount = rooms.length
-  const totalPages = Math.max(1, Math.ceil(totalFilteredCount / pageSize))
+  const totalFilteredCount = rooms.length;
+  const totalPages = Math.max(1, Math.ceil(totalFilteredCount / pageSize));
 
   // Slice rooms for current page
-  rooms = rooms.slice((page - 1) * pageSize, page * pageSize)
+  rooms = rooms.slice((page - 1) * pageSize, page * pageSize);
 
-  const additionalData = responseData?.additionalData ?? {}
+  const additionalData = responseData?.additionalData ?? {};
 
   return (
     <>
@@ -251,7 +284,7 @@ const RoomsPage = () => {
         </FluentAnimation>
       </AnimatePresence>
     </>
-  )
-}
+  );
+};
 
-export default RoomsPage
+export default RoomsPage;

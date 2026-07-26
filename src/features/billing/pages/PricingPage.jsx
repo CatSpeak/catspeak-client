@@ -104,7 +104,7 @@ const PricingPage = () => {
   ]
 
   return (
-    <div className="mx-auto px-12 pt-6 pb-16 w-full font-nunito animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl">
+    <div className="mx-auto px-12 pt-6 pb-16 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl">
       <div className="mb-8">
         <Breadcrumb items={breadcrumbItems} />
       </div>

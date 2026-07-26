@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import { useGetConversationMessagesQuery } from "@/store/api/social/conversationsApi"
 
 const PAGE_SIZE = 30
+const EMPTY_ARRAY = []
 
 /**
  * Custom hook for managing conversation messages, pagination, deduplication, and formatting.
@@ -22,11 +23,13 @@ export default function useChatMessages(selectedId) {
 
   // Fetch messages for selected conversation (paginated)
   const {
-    data: activeMessagesResponse = [],
+    data: activeMessagesResponse = EMPTY_ARRAY,
     isLoading: isLoadingMessages,
     isFetching: isFetchingMessages,
   } = useGetConversationMessagesQuery(
-    selectedId ? { conversationId: selectedId, page, pageSize: PAGE_SIZE } : undefined,
+    selectedId
+      ? { conversationId: selectedId, page, pageSize: PAGE_SIZE }
+      : undefined,
     { skip: !selectedId },
   )
 

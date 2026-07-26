@@ -1,14 +1,21 @@
 import React from "react"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import "dayjs/locale/vi"
+import "dayjs/locale/zh-cn"
 import { Globe, Users, Lock, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 dayjs.extend(relativeTime)
 
 const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
+  const { t, language } = useLanguage()
+  // Map app language to dayjs locale identifier (zh → zh-cn, others match directly)
+  const dayjsLocale = language === "zh" ? "zh-cn" : language
+
   return (
     <div className="flex gap-4 justify-between">
       <div className="flex gap-4">
@@ -26,7 +33,9 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
             </span>
             <span className="w-1 h-1 rounded-full bg-[#606060]"></span>
             <span>
-              {post.createDate ? dayjs(post.createDate).fromNow() : "Vừa xong"}
+              {post.createDate
+                ? dayjs(post.createDate).locale(dayjsLocale).fromNow()
+                : t.profile?.post?.header?.justNow || "Vừa xong"}
             </span>
             {post.privacy && (
               <>
@@ -34,10 +43,10 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
                 <span
                   title={
                     post.privacy === "Public"
-                      ? "Công khai"
+                      ? t.profile?.post?.header?.privacy?.public || "Công khai"
                       : post.privacy === "FriendsOnly"
-                        ? "Bạn bè"
-                        : "Chỉ mình tôi"
+                        ? t.profile?.post?.header?.privacy?.friendsOnly || "Bạn bè"
+                        : t.profile?.post?.header?.privacy?.private || "Chỉ mình tôi"
                   }
                   className="inline-flex items-center"
                 >
@@ -74,7 +83,7 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
                 }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <Edit className="w-4 h-4" /> Chỉnh sửa
+                <Edit className="w-4 h-4" /> {t.profile?.post?.header?.edit || "Chỉnh sửa"}
               </button>
               <button
                 onClick={() => {
@@ -83,7 +92,7 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
                 }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
-                <Trash2 className="w-4 h-4" /> Xóa bài viết
+                <Trash2 className="w-4 h-4" /> {t.profile?.post?.header?.delete || "Xóa bài viết"}
               </button>
             </div>
           )}

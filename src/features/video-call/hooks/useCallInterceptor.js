@@ -1,6 +1,10 @@
 import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { leaveCall } from "@/store/slices/videoCallSlice"
+import {
+  pingActiveCall,
+  requestLeaveActiveCall,
+} from "@/features/video-call/services/callBroadcastChannel"
 
 export const useCallInterceptor = () => {
   const { isInCall } = useSelector((s) => s.videoCall)
@@ -10,11 +14,12 @@ export const useCallInterceptor = () => {
   const [pendingAction, setPendingAction] = useState(null)
 
   /**
-   * Intercepts an action if the user is in a call.
+   * Intercepts an action if the user is in a call (local or in another tab).
    * Returns true if intercepted (modal opened), false otherwise.
    */
-  const intercept = (action) => {
-    if (isInCall) {
+  const intercept = async (action) => {
+    const remoteActive = await pingActiveCall()
+    if (isInCall || remoteActive) {
       setPendingAction(() => action)
       setShowSwitchModal(true)
       return true
@@ -24,7 +29,10 @@ export const useCallInterceptor = () => {
 
   const confirmSwitch = async () => {
     setShowSwitchModal(false)
-    dispatch(leaveCall())
+    requestLeaveActiveCall()
+    if (isInCall) {
+      dispatch(leaveCall())
+    }
     if (pendingAction) {
       await pendingAction()
     }
@@ -43,3 +51,4 @@ export const useCallInterceptor = () => {
     cancelSwitch,
   }
 }
+

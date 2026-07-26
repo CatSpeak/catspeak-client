@@ -83,13 +83,13 @@ const SocialProfileHeader = ({
     avatarData.append("file", file)
 
     try {
-      toast.loading("Đang cập nhật...", { id: "avatar-update" })
+      toast.loading(t.profile?.avatar?.updating || "Đang cập nhật...", { id: "avatar-update" })
       await updateAvatar(avatarData).unwrap()
-      toast.success("Cập nhật ảnh đại diện thành công", {
+      toast.success(t.profile?.avatar?.updateSuccess || "Cập nhật ảnh đại diện thành công", {
         id: "avatar-update",
       })
     } catch (error) {
-      toast.error("Không thể cập nhật ảnh đại diện", { id: "avatar-update" })
+      toast.error(t.profile?.avatar?.updateError || "Không thể cập nhật ảnh đại diện", { id: "avatar-update" })
       console.error(error)
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = ""

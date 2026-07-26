@@ -5,6 +5,7 @@ import {
 } from "../../../store/api/social/profilePostsApi"
 import PostEditorModal from "./PostEditorModal"
 import ProfilePostCard from "./ProfilePostCard"
+import PostFeedList from "./PostFeedList"
 import ProfileSidebar from "./ProfileSidebar"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { EmptyState } from "@/shared/components/ui/indicators"
@@ -12,6 +13,7 @@ import { Newspaper, Image, Video, FileText } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfileHomeTab = ({
   targetAccountId,
@@ -19,6 +21,7 @@ const ProfileHomeTab = ({
   onNavigateToFriends,
 }) => {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const { data: profileResponse } = useGetUserProfileQuery()
   const currentUser = profileResponse?.data || user
 
@@ -87,7 +90,7 @@ const ProfileHomeTab = ({
                   onClick={handleOpenEditorEmpty}
                   className="flex-1 h-10 pl-5 text-left text-gray-500 bg-transparent border border-[#e5e5e5] hover:border-cath-red-700 rounded-full outline-none cursor-pointer text-sm transition-colors"
                 >
-                  Bạn đang nghĩ gì?
+                  {t.profile?.home?.whatOnYourMind || "Bạn đang nghĩ gì?"}
                 </button>
               </div>
 
@@ -108,7 +111,7 @@ const ProfileHomeTab = ({
                   className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-[#f3f3f3] active:bg-green-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <Image size={20} className="text-[#16a34a]" />
-                  <span>Ảnh</span>
+                  <span>{t.profile?.home?.photo || "Ảnh"}</span>
                 </button>
 
                 {/* Temporarily hidden
@@ -160,25 +163,14 @@ const ProfileHomeTab = ({
         )}
 
         {/* News Block */}
-        <div className="space-y-3">
-          {isLoadingPosts ? (
-            <FluentCard>
-              <div className="text-sm text-gray-500">Đang tải bài viết...</div>
-            </FluentCard>
-          ) : timelinePosts.length === 0 ? (
-            <FluentCard>
-              <EmptyState message="Chưa có bài viết nào." icon={Newspaper} />
-            </FluentCard>
-          ) : (
-            timelinePosts.map((post) => (
-              <ProfilePostCard
-                key={post.postId}
-                post={post}
-                isOwnProfile={isOwnProfile}
-              />
-            ))
-          )}
-        </div>
+        <PostFeedList
+          posts={timelinePosts}
+          isLoading={isLoadingPosts}
+          isOwnProfile={isOwnProfile}
+          emptyMessage={t.profile?.home?.noPosts || "Chưa có bài viết nào."}
+          emptyIcon={Newspaper}
+          emptyVariant="card"
+        />
       </div>
 
       {/* Right Column - Sidebar */}

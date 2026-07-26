@@ -101,7 +101,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
 
   if (isLoading)
     return (
-      <div className="p-4 text-center text-gray-500 font-nunito">
+      <div className="p-4 text-center text-gray-500">
         {t.news?.newsDetail?.loadingComments || "Loading comments..."}
       </div>
     )
@@ -112,7 +112,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
     <div ref={ref}>
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="min-w-0 truncate font-nunito text-lg font-semibold leading-[1.35] text-black">
+        <h3 className="min-w-0 truncate text-lg font-semibold leading-[1.35] text-black">
           {t.news?.newsDetail?.totalComments?.replace(
             "{{count}}",
             totalComments,
@@ -148,7 +148,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
                 placeholder={
                   t.news?.newsDetail?.writeComment || "Nhập bình luận..."
                 }
-                className="min-h-[42px] w-full rounded-2xl border border-[#e2e2e2] bg-[#f5f5f5] px-3 py-2 font-nunito text-sm text-black transition-colors placeholder:text-[rgba(123,121,121,0.5)] focus:border-cath-red-700 focus:outline-none"
+                className="min-h-[42px] w-full rounded-2xl border border-[#e2e2e2] bg-[#f5f5f5] px-3 py-2 text-sm text-black transition-colors placeholder:text-[rgba(123,121,121,0.5)] focus:border-cath-red-700 focus:outline-none"
               />
             </div>
           </form>
@@ -157,7 +157,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
               <button
                 type="button"
                 onClick={() => setContent("")}
-                className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-nunito font-medium text-sm hover:bg-cath-red-50 transition-colors"
+                className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-medium text-sm hover:bg-cath-red-50 transition-colors"
               >
                 {t.news?.newsDetail?.cancel || "Hủy"}
               </button>
@@ -165,7 +165,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
                 type="submit"
                 onClick={handleSubmit}
                 disabled={!content.trim()}
-                className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-nunito font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
+                className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
               >
                 {t.news?.newsDetail?.comment || "Gửi"}
               </button>

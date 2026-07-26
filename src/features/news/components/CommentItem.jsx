@@ -14,6 +14,7 @@ import {
 } from "@/features/news/utils/newsUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
+import ReactionsPopover, { COMMENT_REACTIONS } from "@/shared/components/ui/ReactionsPopover"
 
 export const REACTION_TYPES = {
   1: {
@@ -122,13 +123,13 @@ const CommentItem = ({
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <span className="font-nunito font-medium text-lg text-[#7b7979] leading-[1.4]">
+              <span className="font-medium text-lg text-[#7b7979] leading-[1.4]">
                 {comment.authorName}
               </span>
-              <span className="font-nunito text-base text-[#7b7979] leading-[1.4]">
+              <span className="text-base text-[#7b7979] leading-[1.4]">
                 •
               </span>
-              <span className="font-nunito text-base text-[#7b7979] leading-[1.4]">
+              <span className="text-base text-[#7b7979] leading-[1.4]">
                 {getTranslatedTimeAgo(
                   comment.createDate,
                   t.news?.newsCard?.timeAgo,
@@ -136,8 +137,8 @@ const CommentItem = ({
               </span>
               {hasBeenEdited(comment) && (
                 <>
-                  <span className="font-nunito text-base text-[#7b7979]">•</span>
-                  <span className="font-nunito text-base text-[#7b7979]">
+                  <span className="text-base text-[#7b7979]">•</span>
+                  <span className="text-base text-[#7b7979]">
                     {t.news?.newsDetail?.edited || "Edited"}
                   </span>
                 </>
@@ -162,13 +163,13 @@ const CommentItem = ({
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 autoFocus
-                className="w-full bg-[#f5f5f5] border border-[#e2e2e2] rounded-2xl px-4 py-3 font-nunito text-base text-black focus:outline-none focus:border-cath-red-700 transition-colors"
+                className="w-full bg-[#f5f5f5] border border-[#e2e2e2] rounded-2xl px-4 py-3 text-base text-black focus:outline-none focus:border-cath-red-700 transition-colors"
               />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-nunito font-medium text-sm hover:bg-cath-red-50 transition-colors"
+                  className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-medium text-sm hover:bg-cath-red-50 transition-colors"
                 >
                   {t.news?.newsDetail?.cancel || "Hủy"}
                 </button>
@@ -181,14 +182,14 @@ const CommentItem = ({
                     setIsEditing(false)
                   }}
                   disabled={!editContent.trim() || editContent === comment.content}
-                  className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-nunito font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
+                  className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
                 >
                   {t.news?.newsDetail?.save || "Gửi"}
                 </button>
               </div>
             </div>
           ) : (
-            <p className="font-nunito text-base text-black leading-[1.4] break-words whitespace-pre-wrap">
+            <p className="text-base text-black leading-[1.4] break-words whitespace-pre-wrap">
               {comment.replyToAccountName && (
                 <span className="text-blue-600 font-semibold mr-1">
                   @{comment.replyToAccountName}
@@ -226,50 +227,26 @@ const CommentItem = ({
                     <ThumbsUp size={16} strokeWidth={1.5} className="text-[#7b7979]" />
                   )}
                   {comment.totalReactions > 0 && (
-                    <span className="font-nunito font-medium text-sm text-[#7b7979]">
+                    <span className="font-medium text-sm text-[#7b7979]">
                       {comment.totalReactions}
                     </span>
                   )}
                 </button>
 
                 {/* Reactions Popover */}
-                <div
-                  className={`absolute bottom-full left-0 mb-1 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-gray-100 p-1 flex items-center gap-1 transition-all duration-200 z-20 origin-bottom-left
-                  ${showReactions ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible group-hover/reactions:opacity-100 group-hover/reactions:scale-100 group-hover/reactions:visible"}`}
-                >
-                  {Object.entries(REACTION_TYPES).map(([type, config]) => {
-                    const IconComp = config.icon
-                    return (
-                      <button
-                        key={type}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onReact(comment.commentId, parseInt(type, 10))
-                          setShowReactions(false)
-                        }}
-                        className={`p-2 hover:-translate-y-1 transition-transform rounded-full ${
-                          type === "1"
-                            ? "hover:bg-blue-50"
-                            : type === "2"
-                              ? "hover:bg-red-50"
-                              : "hover:bg-yellow-50"
-                        }`}
-                        title={config.label}
-                      >
-                        <IconComp
-                          size={24}
-                          className={`${config.colorClass} ${config.fillClass}`}
-                        />
-                      </button>
-                    )
-                  })}
-                </div>
+                <ReactionsPopover
+                  show={showReactions}
+                  onClose={() => setShowReactions(false)}
+                  onSelect={(_, type) => onReact(comment.commentId, parseInt(type, 10))}
+                  reactions={COMMENT_REACTIONS}
+                  iconSize={24}
+                />
               </div>
 
               {/* Reply text */}
               <button
                 onClick={handleReplyClick}
-                className="font-nunito text-sm text-[#7b7979] hover:text-black transition-colors"
+                className="text-sm text-[#7b7979] hover:text-black transition-colors"
               >
                 {t.news?.newsDetail?.reply || "Phản hồi"}
               </button>
@@ -296,7 +273,7 @@ const CommentItem = ({
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder={`Reply to @${comment.authorName}...`}
                 autoFocus
-                className="flex-1 bg-transparent border-b-2 border-cath-red-700 px-2 py-1 font-nunito text-base text-black focus:outline-none transition-colors"
+                className="flex-1 bg-transparent border-b-2 border-cath-red-700 px-2 py-1 text-base text-black focus:outline-none transition-colors"
               />
             </div>
             <div className="flex items-center justify-between">
@@ -311,14 +288,14 @@ const CommentItem = ({
                 <button
                   type="button"
                   onClick={() => setIsReplying(false)}
-                  className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-nunito font-medium text-sm hover:bg-cath-red-50 transition-colors"
+                  className="px-3 py-1 rounded-full border border-cath-red-700 text-cath-red-700 font-medium text-sm hover:bg-cath-red-50 transition-colors"
                 >
                   {t.news?.newsDetail?.cancel || "Hủy"}
                 </button>
                 <button
                   type="submit"
                   disabled={!replyContent.trim()}
-                  className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-nunito font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
+                  className="px-4 py-1 rounded-full bg-cath-red-700 text-white font-medium text-sm hover:bg-cath-red-800 transition-colors disabled:opacity-50"
                 >
                   {t.news?.newsDetail?.comment || "Gửi"}
                 </button>
@@ -352,7 +329,7 @@ const CommentItem = ({
         {hasReplies && (
           <button
             onClick={() => setShowReplies(!showReplies)}
-            className="mt-2 flex items-center gap-2 font-nunito font-semibold text-sm text-cath-red-700 hover:text-cath-red-800 transition-colors relative z-10"
+            className="mt-2 flex items-center gap-2 font-semibold text-sm text-cath-red-700 hover:text-cath-red-800 transition-colors relative z-10"
           >
             {showReplies ? (
               <>

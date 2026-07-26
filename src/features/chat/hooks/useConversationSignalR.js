@@ -46,6 +46,7 @@ export const useConversationSignalR = (handlers = {}) => {
     const events = [
       "NewMessage",
       "MessageRead",
+      "MessageRecalled",
       "ConversationRead",
       "ReadReceipt",
       "UserTyping",

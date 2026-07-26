@@ -8,7 +8,6 @@ import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useAuth } from "@/features/auth"
 import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
 import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
-import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 
 const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
   const [imgError, setImgError] = useState(false)
@@ -112,7 +111,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                   <button
                     key={item.key}
                     onClick={() => setActiveDrilldownItem(item)}
-                    className={getNavItemClasses(false, false)}
+                    className="relative flex items-center shrink-0 h-11 px-4 gap-3 rounded-lg transition-all duration-300 group overflow-hidden w-full hover:bg-gray-100"
                     title={label}
                   >
                     <NavIcon
@@ -121,7 +120,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                       color={item.color}
                     />
                     <span
-                      className={getNavTextClasses(true)}
+                      className="text-sm font-medium text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
                       style={item.color ? { color: item.color } : undefined}
                     >
                       {label}
