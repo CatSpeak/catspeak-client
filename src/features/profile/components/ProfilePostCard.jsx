@@ -14,8 +14,10 @@ import CommentsSection from "@/features/news/components/CommentsSection"
 import PostContent from "@/features/news/components/PostContent"
 import PostHeader from "./PostHeader"
 import PostActionBar from "./PostActionBar"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfilePostCard = ({ post, isOwnProfile }) => {
+  const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
   const {
@@ -39,7 +41,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   }
 
   const handleDeletePost = async () => {
-    if (window.confirm("Bạn có chắc muốn xóa bài viết này?")) {
+    if (window.confirm(t.profile?.post?.deleteConfirm || "Bạn có chắc muốn xóa bài viết này?")) {
       try {
         await deletePost(post.postId).unwrap()
       } catch (error) {
@@ -108,7 +110,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                   >
                     <FileText className="w-10 h-10 text-blue-500 mb-2 shrink-0" />
                     <span className="text-sm font-semibold text-gray-700 truncate w-full px-2">
-                      {m.fileName || "Tài liệu"}
+                      {m.fileName || t.profile?.post?.document || "Tài liệu"}
                     </span>
                     <span className="text-xs text-gray-400 mt-1">
                       {m.fileSize

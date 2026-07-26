@@ -15,24 +15,7 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Modal from "@/shared/components/ui/Modal"
 import PostEditorPreviews from "./PostEditorPreviews"
-
-const PRIVACY_OPTIONS = [
-  {
-    value: "Public",
-    label: "Công khai",
-    icon: <Globe />,
-  },
-  {
-    value: "FriendsOnly",
-    label: "Bạn bè",
-    icon: <Users />,
-  },
-  {
-    value: "Private",
-    label: "Chỉ mình tôi",
-    icon: <Lock />,
-  },
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getFileType = (file) => {
   if (file && file.type) {
@@ -66,6 +49,25 @@ const PostEditorModal = ({
   isSubmitting = false,
   isEditMode = false,
 }) => {
+  const { t } = useLanguage()
+
+  const PRIVACY_OPTIONS = [
+    {
+      value: "Public",
+      label: t.profile?.post?.editor?.privacy?.public || "Công khai",
+      icon: <Globe />,
+    },
+    {
+      value: "FriendsOnly",
+      label: t.profile?.post?.editor?.privacy?.friendsOnly || "Bạn bè",
+      icon: <Users />,
+    },
+    {
+      value: "Private",
+      label: t.profile?.post?.editor?.privacy?.private || "Chỉ mình tôi",
+      icon: <Lock />,
+    },
+  ]
   const [title, setTitle] = useState(initialTitle)
   const [content, setContent] = useState(initialContent)
   const [privacy, setPrivacy] = useState(initialPrivacy)
@@ -220,7 +222,7 @@ const PostEditorModal = ({
           startIcon={<Image className="w-5 h-5 text-[#16a34a]" />}
           disabled={isSubmitting}
         >
-          Ảnh
+          {t.profile?.post?.editor?.photo || "Ảnh"}
         </PillButton>
 
         {/* Temporarily hidden
@@ -268,13 +270,13 @@ const PostEditorModal = ({
           variant="secondary"
           disabled={isSubmitting}
         >
-          Hủy
+          {t.profile?.post?.editor?.cancel || "Hủy"}
         </PillButton>
         <PillButton
           onClick={handleSubmit}
           variant="primary"
           loading={isSubmitting}
-          loadingText="Đang xử lý..."
+          loadingText={t.profile?.post?.editor?.processing || "Đang xử lý..."}
           disabled={
             !title.trim() &&
             !content.trim() &&
@@ -282,7 +284,9 @@ const PostEditorModal = ({
             existingMedias.length === 0
           }
         >
-          {isEditMode ? "Lưu thay đổi" : "Đăng"}
+          {isEditMode
+            ? t.profile?.post?.editor?.saveChanges || "Lưu thay đổi"
+            : t.profile?.post?.editor?.post || "Đăng"}
         </PillButton>
       </div>
     </div>
@@ -292,7 +296,9 @@ const PostEditorModal = ({
     <Modal
       open={isOpen}
       onClose={handleCancelClick}
-      title={isEditMode ? "Chỉnh sửa bài viết" : "Tạo bài viết"}
+      title={isEditMode
+        ? t.profile?.post?.editor?.editTitle || "Chỉnh sửa bài viết"
+        : t.profile?.post?.editor?.createTitle || "Tạo bài viết"}
       className="md:max-w-2xl w-full bg-white"
       fullScreenOnMobile={true}
       footer={renderFooter()}
@@ -316,14 +322,14 @@ const PostEditorModal = ({
                   />
                 }
               >
-                {selectedOption ? selectedOption.label : "Chọn quyền riêng tư"}
+                {selectedOption ? selectedOption.label : t.profile?.post?.editor?.selectPrivacy || "Chọn quyền riêng tư"}
               </PillButton>
             )}
           />
         </div>
 
         <TextInput
-          label="Tiêu đề bài viết"
+          label={t.profile?.post?.editor?.titleLabel || "Tiêu đề bài viết"}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           variant="square"
@@ -342,8 +348,8 @@ const PostEditorModal = ({
             toolbar:
               "bold italic underline strikethrough | emoticons link | bullist numlist",
             placeholder: isEditMode
-              ? "Chỉnh sửa bài viết..."
-              : "Bạn đang nghĩ gì?",
+              ? t.profile?.post?.editor?.editPlaceholder || "Chỉnh sửa bài viết..."
+              : t.profile?.post?.editor?.placeholder || "Bạn đang nghĩ gì?",
             skin: "oxide",
             setup: (editor) => {
               editor.on("focus", () => {})

@@ -42,10 +42,8 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100"
-          : "bg-transparent"
+      className={`sticky top-0 z-40 transition-all duration-300  ${
+        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm " : "bg-transparent "
       }`}
     >
       <div className="flex w-full h-[64px] items-center justify-between px-4 lg:px-6">

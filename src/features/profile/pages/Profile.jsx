@@ -101,14 +101,14 @@ const Profile = () => {
   const displayAvatarUrl = formData.avatarImageUrl
 
   const tabs = [
-    { id: "home", label: "Nhà" },
+    { id: "home", label: t.profile?.tabs?.home || "Nhà" },
     {
       id: "friends",
-      label: "Bạn bè",
+      label: t.profile?.tabs?.friends || "Bạn bè",
       badge: pendingCount > 0 ? pendingCount.toString() : null,
     },
-    { id: "media", label: "Video/Ảnh" },
-    { id: "documents", label: "Tài liệu" },
+    { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
+    { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },
   ]
 
   return (

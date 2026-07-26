@@ -6,8 +6,10 @@ import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import { IconButton } from "@/shared/components/ui/buttons"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import useColumnCount from "@/shared/hooks/useColumnCount"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfileMediaTab = ({ targetAccountId }) => {
+  const { t } = useLanguage()
   const [fullscreenMedia, setFullscreenMedia] = useState(null)
 
   // Pan and Zoom state
@@ -114,7 +116,7 @@ const ProfileMediaTab = ({ targetAccountId }) => {
           </div>
         ) : medias.length === 0 ? (
           <FluentCard>
-            <EmptyState message="Chưa có phương tiện nào" icon={ImageIcon} />
+            <EmptyState message={t.profile?.media?.noMedia || "Chưa có phương tiện nào"} icon={ImageIcon} />
           </FluentCard>
         ) : (
           <div className="flex flex-row w-full gap-3 items-start">

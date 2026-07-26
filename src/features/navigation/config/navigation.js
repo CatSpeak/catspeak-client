@@ -62,7 +62,6 @@ export const navSections = [
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "workspaceReels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
-      { key: "profile", path: "/profile", icon: User },
     ],
   },
 ]
@@ -74,12 +73,14 @@ export const navLinks = [
     label: "Resource Hub",
     path: "/resources",
     icon: Globe,
+    isPrivate: true,
   },
   {
     key: "messages",
     label: "Chat",
     path: "/chat",
     icon: MessageCircle,
+    isPrivate: true,
   },
   {
     key: "catSpeak",
@@ -98,13 +99,13 @@ export const navLinks = [
     key: "workspace",
     hasDropdown: true,
     icon: Briefcase,
+    requiresAuth: true,
     subItems: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
-      { key: "profile", path: "/profile", icon: User },
     ],
   },
   {

@@ -51,6 +51,7 @@ export default {
     newsCard: {
       reaction: "reaction",
       reactions: "reactions",
+      views: "views",
       timeAgo: {
         justNow: "just now",
         minuteAgo: "{{count}} minute ago",

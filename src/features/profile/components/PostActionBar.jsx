@@ -4,6 +4,7 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ReactionsPopover, {
   ReactionIcon,
 } from "@/shared/components/ui/ReactionsPopover"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PostActionBar = ({
   post,
@@ -12,6 +13,7 @@ const PostActionBar = ({
   onReact,
   onShare,
 }) => {
+  const { t } = useLanguage()
   const [showReactions, setShowReactions] = useState(false)
   const holdTimer = useRef(null)
 
@@ -77,7 +79,7 @@ const PostActionBar = ({
           onClick={onShare}
           startIcon={<Share size={20} />}
         >
-          Chia sẻ
+          {t.profile?.post?.actions?.share || "Chia sẻ"}
         </PillButton>
       </div>
     </div>

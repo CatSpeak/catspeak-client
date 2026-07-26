@@ -50,6 +50,7 @@ export default {
     newsCard: {
       reaction: "个互动",
       reactions: "个互动",
+      views: "次观看",
       timeAgo: {
         justNow: "刚刚",
         minuteAgo: "{{count}}分钟前",

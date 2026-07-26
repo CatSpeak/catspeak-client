@@ -51,6 +51,7 @@ export default {
     newsCard: {
       reaction: "lượt tương tác",
       reactions: "lượt tương tác",
+      views: "lượt xem",
       timeAgo: {
         justNow: "vừa xong",
         minuteAgo: "{{count}} phút trước",
