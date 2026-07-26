@@ -143,11 +143,11 @@ const NewsCard = ({ news }) => {
       <div className="flex flex-col gap-1 p-4">
         <h3 className="font-bold line-clamp-2">{news.title}</h3>
         {/* Inline dot-separated metadata row */}
-        <div className="flex items-center text-sm gap-1 text-[#606060]">
+        <div className="flex items-center text-sm gap-1.5 text-[#606060]">
           <span>
             {news.viewCount || 0} {newsCard?.views || "views"}
           </span>
-          <span>•</span>
+          <span className="w-[3px] h-[3px] rounded-full bg-[#606060] inline-block" />
           <span>
             {getTranslatedTimeAgo(news.createDate, newsCard?.timeAgo)}
           </span>

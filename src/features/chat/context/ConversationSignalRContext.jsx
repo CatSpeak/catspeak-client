@@ -17,6 +17,7 @@ const RETRY_DELAY_MS = 3000
 const HUB_EVENTS = [
   "NewMessage",
   "MessageRead",
+  "MessageRecalled",
   "ConversationRead",
   "ReadReceipt",
   "UserTyping",

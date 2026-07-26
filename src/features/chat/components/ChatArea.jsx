@@ -5,6 +5,7 @@ import ChatHeader from "./ChatHeader"
 import ChatMessagesSkeleton from "./ChatMessagesSkeleton"
 import DateSeparator from "./messages/DateSeparator"
 import SystemMessage from "./messages/SystemMessage"
+import StoryInterestMessage from "./messages/StoryInterestMessage"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { useGroupedMessages } from "../hooks/useGroupedMessages"
@@ -98,6 +99,15 @@ const ChatArea = ({
       }
       if (item.type === "system") {
         return <SystemMessage key={item.id} content={item.message.content} />
+      }
+      if (item.type === "storyinterest") {
+        return (
+          <StoryInterestMessage
+            key={item.id}
+            message={item.message}
+            sender={item.sender}
+          />
+        )
       }
       return (
         <ChatBubble

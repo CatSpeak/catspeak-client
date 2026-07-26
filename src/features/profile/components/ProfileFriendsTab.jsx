@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { MoreHorizontal, User, UserCheck, UserX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import toast from "react-hot-toast"
@@ -21,7 +21,7 @@ import {
   EmptyState,
 } from "@/shared/components/ui/indicators"
 import Popover from "@/shared/components/ui/Popover"
-import { PillButton, IconButton } from "@/shared/components/ui/buttons"
+import { IconButton } from "@/shared/components/ui/buttons"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 
 const ProfileFriendsTab = ({
@@ -33,6 +33,7 @@ const ProfileFriendsTab = ({
   const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all")
   const [searchQuery, setSearchQuery] = useState("")
   const [limit, setLimit] = useState(10)
+  const secondLastRecRef = useRef(null)
 
   // Fetch all potential data
   const { data: friendsResponse, isLoading: loadingFriends } =
@@ -49,7 +50,22 @@ const ProfileFriendsTab = ({
     data: recResponse,
     isLoading: loadingRecs,
     isFetching: fetchingRecs,
-  } = useGetFriendRecommendationsQuery(limit)
+  } = useGetFriendRecommendationsQuery(searchQuery ? 9999 : limit)
+
+  // Infinite scroll — observe second-to-last recommendation card
+  useEffect(() => {
+    if (!secondLastRecRef.current) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !fetchingRecs) {
+          setLimit((prev) => prev + 10)
+        }
+      },
+      { rootMargin: "200px" },
+    )
+    observer.observe(secondLastRecRef.current)
+    return () => observer.disconnect()
+  }, [recResponse, fetchingRecs])
   const [respondFriendRequest] = useRespondFriendRequestMutation()
 
   const handleRespondRequest = (friendshipId, action, closePopover) => {
@@ -165,81 +181,86 @@ const ProfileFriendsTab = ({
       )
     }
 
+    const secondLastId =
+      list[list.length - 2]?.accountId ?? list[list.length - 1]?.accountId
+    const hasMore = activeSubTab === "find" && !searchQuery && list.length >= limit
+
     return (
       <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {list.map((user) => (
-            <HorizontalCard
-              key={user.accountId}
-              onClick={() => navigate(`/profile/${user.accountId}`)}
-              leftContent={
-                <Avatar
-                  size={40}
-                  src={user.avatarImageUrl}
-                  name={user.nickname || user.username}
-                />
-              }
-              rightContent={
-                user.isPendingRequest ? (
-                  <Popover
-                    placement="bottom-right"
-                    trigger={
-                      <IconButton variant="ghost">
-                        <MoreHorizontal />
-                      </IconButton>
-                    }
-                    content={(close) => (
-                      <MenuList>
-                        <MenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRespondRequest(
-                              user.friendshipId,
-                              "accept",
-                              close,
-                            )
-                          }}
-                          icon={<UserCheck />}
-                          label="Chấp nhận"
-                        />
-                        <MenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRespondRequest(
-                              user.friendshipId,
-                              "decline",
-                              close,
-                            )
-                          }}
-                          icon={<UserX />}
-                          label="Từ chối"
-                          className="text-red-600"
-                        />
-                      </MenuList>
-                    )}
-                  />
-                ) : null
-              }
-            >
-              <h3 className="font-semibold">
-                {user.nickname || user.username}
-              </h3>
-
-              <p className="text-sm text-[#606060]">{user.level || "Member"}</p>
-            </HorizontalCard>
-          ))}
+          {list.map((user) => {
+            const isSecondLast =
+              activeSubTab === "find" && user.accountId === secondLastId
+            return (
+              <div
+                key={user.accountId}
+                ref={isSecondLast ? secondLastRecRef : null}
+              >
+                <HorizontalCard
+                  onClick={() => navigate(`/profile/${user.accountId}`)}
+                  leftContent={
+                    <Avatar
+                      size={40}
+                      src={user.avatarImageUrl}
+                      name={user.nickname || user.username}
+                    />
+                  }
+                  rightContent={
+                    user.isPendingRequest ? (
+                      <Popover
+                        placement="bottom-right"
+                        trigger={
+                          <IconButton variant="ghost">
+                            <MoreHorizontal />
+                          </IconButton>
+                        }
+                        content={(close) => (
+                          <MenuList>
+                            <MenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRespondRequest(
+                                  user.friendshipId,
+                                  "accept",
+                                  close,
+                                )
+                              }}
+                              icon={<UserCheck />}
+                              label="Chấp nhận"
+                            />
+                            <MenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRespondRequest(
+                                  user.friendshipId,
+                                  "decline",
+                                  close,
+                                )
+                              }}
+                              icon={<UserX />}
+                              label="Từ chối"
+                              className="text-red-600"
+                            />
+                          </MenuList>
+                        )}
+                      />
+                    ) : null
+                  }
+                >
+                  <h3 className="font-semibold">
+                    {user.nickname || user.username}
+                  </h3>
+                  <p className="text-sm text-[#606060]">{user.level || "Member"}</p>
+                </HorizontalCard>
+              </div>
+            )
+          })}
         </div>
 
-        {activeSubTab === "find" && list.length >= limit && (
-          <div className="w-full flex justify-center mt-6">
-            <PillButton
-              onClick={() => setLimit((prev) => prev + 10)}
-              loading={fetchingRecs}
-              loadingText="Đang tải..."
-              variant="secondary"
-            >
-              Tải thêm
-            </PillButton>
+        {/* Infinite scroll loading spinner */}
+        {hasMore && fetchingRecs && (
+          <div className="flex justify-center py-4">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </>

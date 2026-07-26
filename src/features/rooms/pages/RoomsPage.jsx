@@ -22,6 +22,10 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { leaveCall } from "@/store/slices/videoCallSlice";
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal";
+import {
+  pingActiveCall,
+  requestLeaveActiveCall,
+} from "@/features/video-call/services/callBroadcastChannel";
 
 const RoomsPage = () => {
   const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false);
@@ -49,32 +53,51 @@ const RoomsPage = () => {
   };
   const languageType = lang ? [langMap[lang]] : undefined;
 
-  const proceedCreateOneOnOne = () => {
-    actions.handleCreateOneOnOneSession(() => {
-      const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
-      const preferences = {
-        roomType: "OneToOne",
-        topics: [],
-        languageType: langMap[supportedLangCode],
-      };
-      navigate("/queue", { state: preferences });
-    });
+  const checkAndIntercept = async (action) => {
+    const remoteActive = await pingActiveCall();
+    if (isInCall || remoteActive) {
+      setPendingAction(() => action);
+      setShowSwitchModal(true);
+      return true;
+    }
+    return false;
   };
 
-  const proceedCreateStudyGroup = () => {
-    actions.handleCreateStudyGroupSession(() => {
-      setCreateRoomModalOpen(true);
-    });
+  const proceedCreateOneOnOne = async () => {
+    const action = () => {
+      actions.handleCreateOneOnOneSession(() => {
+        const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
+        const preferences = {
+          roomType: "OneToOne",
+          topics: [],
+          languageType: langMap[supportedLangCode],
+        };
+        navigate("/queue", { state: preferences });
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
+  };
+
+  const proceedCreateStudyGroup = async () => {
+    const action = () => {
+      actions.handleCreateStudyGroupSession(() => {
+        setCreateRoomModalOpen(true);
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
   };
 
   const handleConfirmSwitch = async () => {
     setShowSwitchModal(false);
+    requestLeaveActiveCall();
     if (isInCall) {
       dispatch(leaveCall());
     }
 
-    if (pendingAction === "1:1") {
-      proceedCreateOneOnOne();
+    if (typeof pendingAction === "function") {
+      pendingAction();
     }
     setPendingAction(null);
   };
@@ -84,18 +107,22 @@ const RoomsPage = () => {
     setPendingAction(null);
   };
 
-  const handleCreateAI = (settings) => {
+  const handleCreateAI = async (settings) => {
     setIsSettingsModalOpen(false);
-    actions.handleCreateAISession(async () => {
-      try {
-        const result = await createAISession(settings).unwrap();
-        navigate(`/${lang}/meet/${result.roomId}`, {
-          state: { fromQueue: true, isAISession: true },
-        });
-      } catch (err) {
-        console.error("Failed to create AI session", err);
-      }
-    });
+    const action = () => {
+      actions.handleCreateAISession(async () => {
+        try {
+          const result = await createAISession(settings).unwrap();
+          navigate(`/${lang}/meet/${result.roomId}`, {
+            state: { fromQueue: true, isAISession: true },
+          });
+        } catch (err) {
+          console.error("Failed to create AI session", err);
+        }
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
   };
 
   const requiredLevels = searchParams.getAll("requiredLevels");

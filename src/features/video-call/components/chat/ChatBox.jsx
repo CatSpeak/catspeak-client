@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect } from "react"
 import {
   Settings,
   Sparkles,
@@ -13,39 +13,36 @@ import { PillButton } from "@/shared/components/ui/buttons"
 
 const ChatBox = ({
   messages,
-  currentUser,
   onSendMessage,
   isConnected,
   className = "",
-  hideTitle,
 }) => {
   const { t } = useLanguage()
   const {
     aiMessages = [],
     receiveSystemMsgs,
     setReceiveSystemMsgs,
-    isChatCollapsed,
     setIsChatCollapsed,
-    isAiCollapsed,
     setIsAiCollapsed,
     unreadRoomChat,
     unreadAiChat,
+    activeChatTab,
+    setActiveChatTab,
   } = useGlobalVideoCall()
 
-  const [activeTab, setActiveTab] = useState("ai") // "room" | "ai"
-  const [aiReplyTarget, setAiReplyTarget] = useState(null)
-  const [roomReplyTarget, setRoomReplyTarget] = useState(null)
+  const [aiReplyTarget, setAiReplyTarget] = React.useState(null)
+  const [roomReplyTarget, setRoomReplyTarget] = React.useState(null)
 
   // Bridge tab state → collapse state so useUnreadTracking works correctly
   useEffect(() => {
-    if (activeTab === "room") {
+    if (activeChatTab === "room") {
       setIsChatCollapsed(false)
       setIsAiCollapsed(true)
     } else {
       setIsChatCollapsed(true)
       setIsAiCollapsed(false)
     }
-  }, [activeTab, setIsChatCollapsed, setIsAiCollapsed])
+  }, [activeChatTab, setIsChatCollapsed, setIsAiCollapsed])
 
   const settingsPopoverContent = (
     <div className="bg-white rounded-lg shadow-lg border border-[#E5E5E5] p-3 w-max">
@@ -79,9 +76,6 @@ const ChatBox = ({
   const roomLabel = t.rooms?.chatBox?.title || "Tin nhắn phòng"
   const aiLabel = t.rooms?.chatBox?.aiAssistant || "Trợ lý Cat Speak"
 
-  const roomCount = messages?.length || 0
-  const aiCount = aiMessages?.length || 0
-
   return (
     <div className={`relative flex h-full flex-col bg-white ${className}`}>
       {/* Tab Bar */}
@@ -89,14 +83,14 @@ const ChatBox = ({
         <div className="flex items-center justify-center gap-5 md:gap-2 md:bg-transparent rounded-xl px-2.5 py-1.5 bg-[#F5F5F5]">
           {/* Room Chat Tab */}
           <PillButton
-            onClick={() => setActiveTab("room")}
-            variant={activeTab === "room" ? "primary" : "secondary-no-outline"}
+            onClick={() => setActiveChatTab("room")}
+            variant={activeChatTab === "room" ? "primary" : "secondary-no-outline"}
           >
             {roomLabel}
-            <span className={activeTab === "room" ? "text-white" : "text-[#999]"}>
-              ({roomCount})
+            <span className={activeChatTab === "room" ? "text-white" : "text-[#999]"}>
+              ({messages?.length || 0})
             </span>
-            {activeTab !== "room" && unreadRoomChat > 0 && (
+            {activeChatTab !== "room" && unreadRoomChat > 0 && (
               <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
                 {unreadRoomChat > 9 ? "9+" : unreadRoomChat}
               </span>
@@ -105,14 +99,14 @@ const ChatBox = ({
 
           {/* AI Chat Tab */}
           <PillButton
-            onClick={() => setActiveTab("ai")}
-            variant={activeTab === "ai" ? "primary" : "secondary-no-outline"}
+            onClick={() => setActiveChatTab("ai")}
+            variant={activeChatTab === "ai" ? "primary" : "secondary-no-outline"}
           >
             {aiLabel}
-            <span className={activeTab === "ai" ? "text-white" : "text-[#999]"}>
-              ({aiCount})
+            <span className={activeChatTab === "ai" ? "text-white" : "text-[#999]"}>
+              ({aiMessages?.length || 0})
             </span>
-            {activeTab !== "ai" && unreadAiChat > 0 && (
+            {activeChatTab !== "ai" && unreadAiChat > 0 && (
               <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
                 {unreadAiChat > 9 ? "9+" : unreadAiChat}
               </span>
@@ -124,9 +118,9 @@ const ChatBox = ({
       {/* Tab Content */}
       <div className="flex-1 flex flex-col min-h-0 border m-2 rounded-xl">
         {/* AI Tab Content */}
-        {activeTab === "ai" && (
+        {activeChatTab === "ai" && (
           <>
-            < div className="flex items-center justify-between px-4 py-2 border-b border-[#FFDADE] shrink-0">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[#FFDADE] shrink-0">
               <div className="flex items-center gap-2">
                 <div className="flex items-center justify-center w-7 h-7 rounded-full bg-cath-red-700/10">
                   <Sparkles size={14} className="text-cath-red-700" />
@@ -160,29 +154,27 @@ const ChatBox = ({
         )}
 
         {/* Room Chat Tab Content */}
-        {
-          activeTab === "room" && (
-            <>
-              <MessageList
-                messages={messages}
-                t={t}
-                emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
-                onReplyTo={(msg) => setRoomReplyTarget(msg)}
-              />
-              <ChatInput
-                onSendMessage={(text) => {
-                  onSendMessage(text, roomReplyTarget)
-                  setRoomReplyTarget(null)
-                }}
-                isConnected={isConnected}
-                replyTarget={roomReplyTarget}
-                onCancelReply={() => setRoomReplyTarget(null)}
-              />
-            </>
-          )
-        }
-      </div >
-    </div >
+        {activeChatTab === "room" && (
+          <>
+            <MessageList
+              messages={messages}
+              t={t}
+              emptyText={t.rooms?.chatBox?.empty || "No messages yet"}
+              onReplyTo={(msg) => setRoomReplyTarget(msg)}
+            />
+            <ChatInput
+              onSendMessage={(text) => {
+                onSendMessage(text, roomReplyTarget)
+                setRoomReplyTarget(null)
+              }}
+              isConnected={isConnected}
+              replyTarget={roomReplyTarget}
+              onCancelReply={() => setRoomReplyTarget(null)}
+            />
+          </>
+        )}
+      </div>
+    </div>
   )
 }
 

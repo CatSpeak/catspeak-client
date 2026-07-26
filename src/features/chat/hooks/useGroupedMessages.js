@@ -79,6 +79,63 @@ export const useGroupedMessages = ({
         continue
       }
 
+      // StoryInterest messages handling (messageType 6 or "storyinterest")
+      const msgTypeRaw = msg?.messageType
+      const isStoryInterest =
+        msgTypeRaw === 6 ||
+        msgTypeRaw === "6" ||
+        String(msgTypeRaw).toLowerCase() === "storyinterest"
+
+      if (isStoryInterest) {
+        // Resolve sender so the card can show avatar + name
+        const siSenderId = msg.senderId ?? msg.sender?.accountId
+        const siIsOwn =
+          Number(siSenderId) === Number(currentUser?.id || currentUser?.accountId)
+        const siSender = siIsOwn
+          ? {
+              id: currentUser?.id || currentUser?.accountId,
+              name: currentUser?.name || currentUser?.username,
+              avatar: currentUser?.avatar || currentUser?.avatarImageUrl,
+              ...msg.sender,
+            }
+          : !isGroup && otherUser && otherUser.accountId === siSenderId
+            ? {
+                id: otherUser.accountId,
+                name: otherUser.username,
+                avatar: otherUser.avatarImageUrl,
+                ...msg.sender,
+              }
+            : (() => {
+                const p = conversation.participants?.find(
+                  (part) =>
+                    Number(part.accountId || part.id) === Number(siSenderId),
+                )
+                return p
+                  ? {
+                      id: p.accountId || p.id,
+                      name: p.username || p.name,
+                      avatar: p.avatarImageUrl || p.avatar,
+                      ...msg.sender,
+                    }
+                  : {
+                      id: msg.sender?.accountId || siSenderId,
+                      name: msg.sender?.username || msg.sender?.name || "User",
+                      avatar: msg.sender?.avatarImageUrl || msg.sender?.avatar,
+                      ...msg.sender,
+                    }
+              })()
+
+        groupedItems.push({
+          type: "storyinterest",
+          id: msgId,
+          message: msg,
+          sender: siSender,
+          timestamp: msgTimestamp,
+        })
+        continue
+      }
+
+
       // Grouping: same sender within 5 minutes
       const isSameSenderAsPrev =
         prevMsg &&

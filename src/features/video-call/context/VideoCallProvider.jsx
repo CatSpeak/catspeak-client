@@ -22,6 +22,10 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { enterCall, setPiP, leaveCall, enterBreakout } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
+import {
+  pingActiveCall,
+  requestLeaveActiveCall,
+} from "@/features/video-call/services/callBroadcastChannel"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import WebViewBlockScreen from "../components/WebViewBlockScreen"
@@ -303,16 +307,22 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     confirmedSwitch = false,
     isAutoJoin = false,
   } = {}) => {
-    // If we are already in a different call, show switch modal
-    if (isInCall && !confirmedSwitch) {
-      setShowSwitchModal(true)
-      setPendingJoinArgs({ skipRoomFullCheck, isAutoJoin })
-      return
+    // If we are already in a call (local or in another tab), show switch modal
+    if (!confirmedSwitch) {
+      const activeRemoteCall = await pingActiveCall()
+      if (isInCall || activeRemoteCall) {
+        setShowSwitchModal(true)
+        setPendingJoinArgs({ skipRoomFullCheck, isAutoJoin })
+        return
+      }
     }
 
-    // If switching from another call, cleanly leave it first
-    if (isInCall && confirmedSwitch) {
-      dispatch(leaveCall())
+    // If switching from another call, cleanly leave it first (both locally and remote tabs)
+    if (confirmedSwitch) {
+      requestLeaveActiveCall()
+      if (isInCall) {
+        dispatch(leaveCall())
+      }
     }
 
     // Room full check (moved from deleted useJoinVideoSession hook)
