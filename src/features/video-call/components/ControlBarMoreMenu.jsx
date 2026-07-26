@@ -107,18 +107,11 @@ const ControlBarMoreMenu = ({
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
 
-  // isHost = chỉ true khi phòng là custom room VÀ user hiện tại là người tạo phòng.
-  // Hiện đang dùng để gate một số action host-only (breakout rooms).
-  // [TEMP-DISABLE-HOST-CHECK] Test xong thì bỏ comment block dưới:
-  /*
   const isHost =
     isCustomRoom(room?.roomType) &&
     room?.creatorId != null &&
     user?.accountId != null &&
     String(room.creatorId) === String(user.accountId);
-  */
-  // Placeholder (no-op) — được thay thế bằng `isHost` thật khi mở lại check host.
-  const isHost = false;
 
 
   const handleCopyLink = () => {
@@ -185,10 +178,7 @@ const ControlBarMoreMenu = ({
                           label={t.rooms?.videoCall?.controls?.participants || "Participants"}
                         />
 
-                        {
-                          // [TEMP-DISABLE-HOST-CHECK] Test xong thì mở lại:
-                          //   !isAISession && isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive) && (
-                          !isAISession && isBreakoutSupported(room?.roomType) && (true /* Tạm thời: bỏ check host để test */ || isBreakoutActive) && (
+                        {!isAISession && isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive) && (
                           <MenuItem
                             onClick={() => {
                               setShowBreakout(!showBreakout);
