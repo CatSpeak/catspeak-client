@@ -97,6 +97,15 @@ export const useCallActions = ({
   // ── Leave session ──
 
   const handleLeaveSession = useCallback(async () => {
+    // Thông báo cho game (nếu đang chơi) để gọi exitGame → gửi PlayerLeaveGame lên BE.
+    // GameProvider sẽ lắng nghe event này và tự xử lý (player thì gọi BE, spectator thì chỉ reset FE).
+    // Dùng CustomEvent trên window để tránh phải truyền signalR connection xuống đây.
+    try {
+      window.dispatchEvent(new CustomEvent("hostLeaveGame"))
+    } catch (e) {
+      // ignore
+    }
+
     await leaveMeetingFn()
     dispatch(leaveCallAction())
 

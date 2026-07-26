@@ -50,7 +50,6 @@ const ControlBarMoreMenu = ({
 }) => {
   const { id: roomId } = useParams();
   const { t } = useLanguage();
-  const { ongoingGame, spectateGame } = useGame();
   const {
     showParticipants,
     setShowParticipants,
@@ -108,14 +107,18 @@ const ControlBarMoreMenu = ({
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
 
-  const allParticipants = useParticipants();
-  const { localParticipant } = useLocalParticipant();
-
+  // isHost = chỉ true khi phòng là custom room VÀ user hiện tại là người tạo phòng.
+  // Hiện đang dùng để gate một số action host-only (breakout rooms).
+  // [TEMP-DISABLE-HOST-CHECK] Test xong thì bỏ comment block dưới:
+  /*
   const isHost =
     isCustomRoom(room?.roomType) &&
     room?.creatorId != null &&
     user?.accountId != null &&
     String(room.creatorId) === String(user.accountId);
+  */
+  // Placeholder (no-op) — được thay thế bằng `isHost` thật khi mở lại check host.
+  const isHost = false;
 
 
   const handleCopyLink = () => {
@@ -157,18 +160,10 @@ const ControlBarMoreMenu = ({
                         <MenuItem
                           onClick={() => {
                             setShowMoreMenu(false);
-                            if (ongoingGame) {
-                              spectateGame();
-                            } else {
-                              if (!isHost) return;
-                              setShowGameSetup(true);
-                            }
+                            setShowGameSetup(true);
                           }}
-                          disabled={!isHost && !ongoingGame}
-                          hoverBg={!isHost && !ongoingGame ? "hover:bg-transparent" : "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2]"}
-                          className={!isHost && !ongoingGame ? "!text-[#8F8F8F]" : ""}
                           icon={<Gamepad2 size={20} />}
-                          label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
+                          label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
                         />
 
                         <MenuItem
@@ -190,7 +185,10 @@ const ControlBarMoreMenu = ({
                           label={t.rooms?.videoCall?.controls?.participants || "Participants"}
                         />
 
-                        {!isAISession && isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive) && (
+                        {
+                          // [TEMP-DISABLE-HOST-CHECK] Test xong thì mở lại:
+                          //   !isAISession && isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive) && (
+                          !isAISession && isBreakoutSupported(room?.roomType) && (true /* Tạm thời: bỏ check host để test */ || isBreakoutActive) && (
                           <MenuItem
                             onClick={() => {
                               setShowBreakout(!showBreakout);
@@ -437,12 +435,11 @@ const ControlBarMoreMenu = ({
                               <MenuItem
                                 onClick={() => {
                                   setShowMoreMenu(false);
-                                  if (ongoingGame) spectateGame();
-                                  else if (isHost) setShowGameSetup(true);
+                                  setShowGameSetup(true);
                                 }}
-                                disabled={!isHost && !ongoingGame}
                                 icon={<Gamepad2 size={20} />}
-                                label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
+                                label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
+                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
                               />
                               <MenuItem
                                 onClick={() => { setShowMoreMenu(false); setShowGameHistory(true); }}
@@ -450,7 +447,10 @@ const ControlBarMoreMenu = ({
                                 label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
                                 hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
                               />
-                              {!isAISession && (isHost || isBreakoutActive) && (
+                              {
+                                // [TEMP-DISABLE-HOST-CHECK] Test xong thì mở lại:
+                                //   !isAISession && (isHost || isBreakoutActive) && (
+                                !isAISession && (true /* Tạm thời: bỏ check host để test */ || isBreakoutActive) && (
                                 <MenuItem
                                   onClick={() => { setShowBreakout(!showBreakout); setShowMoreMenu(false); }}
                                   icon={<Split size={20} />}

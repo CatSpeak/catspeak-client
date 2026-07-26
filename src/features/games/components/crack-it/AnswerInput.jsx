@@ -15,6 +15,7 @@ const AnswerInput = () => {
     currentUserId,
     correctPlayers,
     currentRound,
+    isSpectator,
   } = useGame()
   const { t } = useLanguage()
 
@@ -26,7 +27,7 @@ const AnswerInput = () => {
   const inputRef = useRef(null)
 
   const isCorrect = correctPlayers.has(currentUserId.toString())
-  const isDisabled = gameState !== "playing" || isCorrect
+  const isDisabled = gameState !== "playing" || isCorrect || isSpectator
 
   // Xóa trắng input khi bắt đầu ván mới
   useEffect(() => {
@@ -152,7 +153,9 @@ const AnswerInput = () => {
           onChange={(e) => setInputValue(e.target.value)}
           disabled={isDisabled}
           placeholder={
-            t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn..."
+            isSpectator
+              ? (t.rooms?.game?.crackIt?.spectatorPlaceholder || "Bạn đang xem dưới dạng người quan sát...")
+              : (t.rooms?.game?.crackIt?.typeAnswer || "Nhập đáp án của bạn...")
           }
           className={`flex-1 min-w-0 bg-transparent px-2 md:px-6 h-10 outline-none text-lg font-medium tracking-wide ${isCorrect ? "text-green-700" : "text-slate-800 disabled:text-slate-500"
             } placeholder-gray-400`}

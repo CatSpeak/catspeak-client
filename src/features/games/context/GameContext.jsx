@@ -33,7 +33,6 @@ const initialPictureItState = {
   myRatingSubmitted: false,
   flagCount: 0,
   raterCount: 0,
-  isSpectator: false,
   badges: {},
   winnerIds: [],
   leaderboard: [],
@@ -78,11 +77,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const [playerNames, setPlayerNames] = useState({}); // Map of playerId -> playerName
   const [leftPlayers, setLeftPlayers] = useState(new Set()); // IDs of players who have left the game
 
-  // --- Spectator & Ongoing Mode ---
-  const [ongoingGame, setOngoingGame] = useState(false);
-  const [ongoingGameType, setOngoingGameType] = useState(null);
-  const [isSpectator, setIsSpectator] = useState(false);
+  // --- Spectator state (late-joiners / leave-resumers: read-only viewers) ---
   const [gamePlayers, setGamePlayers] = useState(new Set());
+  const [isSpectator, setIsSpectator] = useState(false);
   const [spectatorIds, setSpectatorIds] = useState(new Set());
 
   // --- Crack It specific states ---
@@ -98,7 +95,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   // Timer ref for Picture It Rating
   const ratingTimerRef = useRef(null);
   const gameOverTimeoutRef = useRef(null);
-  const hasInitialSyncRef = useRef(false);
 
   const resetGameStates = useCallback(() => {
     setScores({});
@@ -106,12 +102,10 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     setFinalResults(null);
     setCountdown(null);
     setCurrentRound(null);
-    setOngoingGame(false);
-    setOngoingGameType(null);
-    setIsSpectator(false);
     setGamePlayers(new Set());
-    setSpectatorIds(new Set());
     setLeftPlayers(new Set());
+    setIsSpectator(false);
+    setSpectatorIds(new Set());
     setPuzzle(null);
     setTimer(0);
     setCorrectPlayers(new Set());
@@ -240,7 +234,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       setPictureItState((prev) => ({
         ...prev,
         describeStarted: true,
-        describeStartTime: payload?.describe_start_time
+        describeStartTime: payload?.describe_start_time,
       }));
     },
     DESCRIBE_ENDED: (payload) => {
@@ -279,10 +273,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       toast.error(payload.message || "An error occurred.");
       setGameState("idle");
       resetGameStates();
-    },
-    JOINED_AS_SPECTATOR: () => {
-      setIsSpectator(true);
-      setPictureItState((prev) => ({ ...prev, isSpectator: true }));
     },
     CORRECT_ANSWER: (payload) => {
       if (payload.is_correct) {
@@ -345,7 +335,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
                   // eslint-disable-next-line no-unused-vars
-                } catch (e) { /* empty */ }
+                } catch (e) {
+                  /* empty */
+                }
               }
               return {
                 id: pId,
@@ -390,7 +382,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
                   avatarUrl = meta.avatarUrl;
                   if (meta.username) username = meta.username;
                   // eslint-disable-next-line no-empty, no-unused-vars
-                } catch (e) { }
+                } catch (e) {}
               }
               return {
                 id: pId,
@@ -441,44 +433,29 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           next.delete(payload.player_id.toString());
           return next;
         });
+        // Nếu chính mình rời game (là spectator) thì clear isSpectator
+        if (
+          currentUserId &&
+          payload.player_id.toString() === currentUserId.toString()
+        ) {
+          setIsSpectator(false);
+        }
       }
     },
     SYNC_GAME_STATE: (payload) => {
-      // If we just loaded the component (e.g., after F5 or re-entering the room)
-      // and the backend still thinks we are a spectator (ghost connection),
-      // we immediately leave the game to clear ourselves from the spectator list.
-      let isActuallySpectating = payload.is_spectator || false;
-
-      if (!hasInitialSyncRef.current) {
-        hasInitialSyncRef.current = true;
-
-        if (isActuallySpectating && connection && roomId) {
-          // Note: The backend keeps the old connection alive for ~30s due to SignalR reconnect window.
-          // We cannot force kill it from the frontend if PlayerLeaveGame doesn't work for spectators.
-          // Just return early so the local UI doesn't force them into the game.
-          setOngoingGame(true);
-          setOngoingGameType(payload.game_type);
-          return;
-        }
-      }
-
       setGameType(payload.game_type);
       setGameLanguage(payload.language);
       setScores(payload.scores || {});
-      setIsSpectator(isActuallySpectating);
       setGamePlayers(
         new Set(payload.original_players?.map((id) => id.toString()) || []),
       );
-
-      // If we receive SYNC_GAME_STATE, a game is running!
-      setOngoingGame(true);
-      setOngoingGameType(payload.game_type);
+      setIsSpectator(payload.is_spectator || false);
+      setSpectatorIds(
+        new Set(payload.spectators?.map((id) => id.toString()) || []),
+      );
 
       setLeftPlayers(
         new Set(payload.left_players?.map((id) => id.toString()) || []),
-      );
-      setSpectatorIds(
-        new Set(payload.spectators?.map((id) => id.toString()) || []),
       );
 
       if (payload.game_type === "picture_it") {
@@ -495,22 +472,31 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
           describerId: describerId,
           describerOrder: payload.describer_order || [],
           imageUrl: payload.current_round?.image_url,
-          imageUrlFull: (isDescriber || isRatingOpen) ? payload.current_round?.image_url : null,
+          imageUrlFull:
+            isDescriber || isRatingOpen
+              ? payload.current_round?.image_url
+              : null,
           imageBlurred: !(isDescriber || isRatingOpen),
           forbiddenWords: payload.current_round?.forbidden_words || [],
           category: payload.current_round?.category,
-          describeStarted: isRatingOpen ? false : (payload.current_round?.describe_started || false),
+          describeStarted: isRatingOpen
+            ? false
+            : payload.current_round?.describe_started || false,
           describeStartTime: payload.current_round?.describe_start_time,
           ratingOpen: isRatingOpen,
           ratingCountdownSec: payload.current_round?.rating_countdown_sec || 0,
-          myRatingSubmitted: payload.current_round?.my_rating_submitted || false,
+          myRatingSubmitted:
+            payload.current_round?.my_rating_submitted || false,
           flagCount: payload.current_round?.flag_count || 0,
           raterCount: payload.current_round?.rater_count || 0,
           roundAverageRating: null,
           roundDescriberId: null,
         }));
 
-        if (payload.rating_open && payload.current_round?.rating_countdown_sec > 0) {
+        if (
+          payload.rating_open &&
+          payload.current_round?.rating_countdown_sec > 0
+        ) {
           startRatingTimer(payload.current_round.rating_countdown_sec);
         }
 
@@ -548,21 +534,13 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       toast.error(
         payload.reason === "NOT_ENOUGH_PLAYERS"
           ? t.rooms?.game?.crackIt?.forceStopNotEnoughPlayers ||
-          "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
+              "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy."
           : t.rooms?.game?.crackIt?.forceStopGeneric ||
-          "Trò chơi bị dừng đột ngột.",
+              "Trò chơi bị dừng đột ngột.",
       );
       setGameState("idle");
       setGameType(null);
       resetGameStates();
-    },
-    GAME_ALREADY_STARTED: (payload) => {
-      // Clean up ghost spectator state on backend if we just reconnected
-      if (connection && roomId) {
-        connection.send("PlayerLeaveGame", roomId);
-      }
-      setOngoingGame(true);
-      setOngoingGameType(payload.game_type);
     },
   });
 
@@ -588,14 +566,15 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   const restoreVolumes = useCallback((participantList) => {
     if (previousVolumesRef.current.size > 0) {
-      participantList.forEach(p => {
+      participantList.forEach((p) => {
         if (previousVolumesRef.current.has(p.identity)) {
           const originalVol = previousVolumesRef.current.get(p.identity);
-          
+
           if (typeof p.setVolume === "function") p.setVolume(originalVol);
           else if (p.audioTrackPublications) {
-            p.audioTrackPublications.forEach(pub => {
-              if (pub.track && typeof pub.track.setVolume === "function") pub.track.setVolume(originalVol);
+            p.audioTrackPublications.forEach((pub) => {
+              if (pub.track && typeof pub.track.setVolume === "function")
+                pub.track.setVolume(originalVol);
             });
           }
         }
@@ -613,10 +592,14 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   useEffect(() => {
     const isPictureIt = gameType === "picture_it" || gameType === "picture-it";
-    const isDescribing = isPictureIt && gameState === "playing" && pictureItState.describeStarted && !pictureItState.ratingOpen;
-    
+    const isDescribing =
+      isPictureIt &&
+      gameState === "playing" &&
+      pictureItState.describeStarted &&
+      !pictureItState.ratingOpen;
+
     // Cleanup disconnected participants from the ref to prevent bugs if they rejoin
-    const currentIdentities = new Set(participants.map(p => p.identity));
+    const currentIdentities = new Set(participants.map((p) => p.identity));
     for (const identity of previousVolumesRef.current.keys()) {
       if (!currentIdentities.has(identity)) {
         previousVolumesRef.current.delete(identity);
@@ -624,10 +607,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     }
 
     if (isDescribing) {
-      participants.forEach(p => {
+      participants.forEach((p) => {
         if (p.isLocal) return;
-        const isDescriber = Number(p.identity) === Number(pictureItState.describerId);
-        
+        const isDescriber =
+          Number(p.identity) === Number(pictureItState.describerId);
+
         if (!isDescriber) {
           // Backup original volume and duck only ONCE per participant connection
           if (!previousVolumesRef.current.has(p.identity)) {
@@ -641,8 +625,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             // Duck the volume
             if (typeof p.setVolume === "function") p.setVolume(0.3);
             else if (p.audioTrackPublications) {
-              p.audioTrackPublications.forEach(pub => {
-                if (pub.track && typeof pub.track.setVolume === "function") pub.track.setVolume(0.3);
+              p.audioTrackPublications.forEach((pub) => {
+                if (pub.track && typeof pub.track.setVolume === "function")
+                  pub.track.setVolume(0.3);
               });
             }
           }
@@ -659,7 +644,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     pictureItState.ratingOpen,
     pictureItState.describerId,
     participants,
-    restoreVolumes
+    restoreVolumes,
   ]);
 
   const startGame = useCallback(
@@ -714,19 +699,11 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (connection?.isConnected && roomId && isSpectator) {
-        connection.send("PlayerLeaveGame", roomId);
-      }
+      // Đã bỏ spectator — không còn gửi "PlayerLeaveGame" khi rời trang.
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [connection, roomId, isSpectator]);
-
-  const spectateGame = useCallback(() => {
-    if (connection.isConnected && roomId) {
-      connection.send("SpectateGame", roomId);
-    }
-  }, [connection.isConnected, connection.send, roomId]);
+  }, []);
 
   useEffect(() => {
     const handleHostStart = (e) => {
@@ -742,6 +719,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     window.addEventListener("hostStartGame", handleHostStart);
     return () => window.removeEventListener("hostStartGame", handleHostStart);
   }, [startGame, gameState]);
+
+  // Lắng nghe event từ nút Leave call của room (sẽ thêm sau khi khai báo exitGame bên dưới).
 
   // Crack IT Actions
   const submitAnswer = useCallback(
@@ -762,10 +741,10 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   );
 
   // Picture IT Actions
+  // Mic được share từ room state — không tự bật/tắt mic trong game.
   const startPictureItDescribe = useCallback(() => {
-    localParticipant?.setMicrophoneEnabled(true).catch(() => { });
     connection.send("PictureItDescribeStart", roomId || "general");
-  }, [connection.send, roomId, localParticipant]);
+  }, [connection.send, roomId]);
 
   const endPictureItDescribe = useCallback(() => {
     connection.send("PictureItDescribeEnd", roomId || "general");
@@ -787,20 +766,28 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   const exitGame = useCallback(() => {
     connection.send("PlayerLeaveGame", roomId || "general");
 
-    // Keep track of the current game type before resetting
-    const lastGameType = gameType;
-    const isGameOver = gameState === "game_over" || gameState === "force_stopped";
-
     setGameState("idle");
     setGameType(null);
     resetGameStates();
+  }, [connection, roomId, resetGameStates]);
 
-    // Allow the player to spectate the game they just left (unless GAME_OVER is received)
-    if (lastGameType && !isGameOver) {
-      setOngoingGame(true);
-      setOngoingGameType(lastGameType);
-    }
-  }, [connection, roomId, resetGameStates, gameType, gameState]);
+  // Lắng nghe event từ nút Leave call của room.
+  // - Người chơi: gọi exitGame (gửi PlayerLeaveGame lên BE, reset state FE).
+  // - Người xem (spectator): chỉ reset state FE, không tương tác BE.
+  useEffect(() => {
+    const handleHostLeave = () => {
+      if (gameState === "idle") return;
+      if (isSpectator) {
+        setGameState("idle");
+        setGameType(null);
+        resetGameStates();
+      } else {
+        exitGame();
+      }
+    };
+    window.addEventListener("hostLeaveGame", handleHostLeave);
+    return () => window.removeEventListener("hostLeaveGame", handleHostLeave);
+  }, [exitGame, resetGameStates, gameState, isSpectator]);
 
   const value = {
     gameState,
@@ -814,7 +801,6 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     finalResults,
     leftPlayers,
     playerNames,
-    spectatorIds,
 
     // Crack It specific
     puzzle,
@@ -832,11 +818,9 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     submitPictureItRating,
 
     // Actions
-    ongoingGame,
-    ongoingGameType,
-    isSpectator,
     gamePlayers,
-    spectateGame,
+    isSpectator,
+    spectatorIds,
     startGame,
     exitGame,
     currentUserId,

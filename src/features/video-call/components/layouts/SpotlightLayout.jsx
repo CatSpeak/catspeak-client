@@ -1,5 +1,7 @@
 import ScreenShareTile from "../ScreenShareTile"
 import VideoTile from "../VideoTile"
+import GameSpotlight from "../GameSpotlight"
+import { useGame } from "@/features/games/context/GameContext"
 
 const scrollbarClasses =
   "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
@@ -11,20 +13,30 @@ const SpotlightLayout = ({
   handleTileClick,
   totalItems,
 }) => {
-  const sidebarScreenShares = (screenShareTracks ?? []).filter((trackRef) => {
-    if (spotlightItem.type !== "screen") return true
-    return (
-      trackRef.publication?.trackSid !==
-      spotlightItem.trackRef.publication?.trackSid
-    )
-  })
+  const { gameState, gameType } = useGame()
+  const isGameActive = gameState !== "idle" && !!gameType
 
-  const sidebarParticipants =
-    spotlightItem.type === "screen"
+  // Khi game đang chạy: TẤT CẢ screen share đều xuống sidebar,
+  // game sẽ chiếm slot spotlight.
+  // Khi game idle: giữ logic cũ — screen share spotlight nằm chính giữa,
+  // các screen share khác xuống sidebar.
+  const sidebarScreenShares = isGameActive
+    ? (screenShareTracks ?? [])
+    : (screenShareTracks ?? []).filter((trackRef) => {
+        if (spotlightItem?.type !== "screen") return true
+        return (
+          trackRef.publication?.trackSid !==
+          spotlightItem.trackRef.publication?.trackSid
+        )
+      })
+
+  const sidebarParticipants = isGameActive
+    ? participants
+    : spotlightItem?.type === "screen"
       ? participants
       : participants.filter(
-        (p) => p.identity !== spotlightItem.participant.identity,
-      )
+          (p) => p.identity !== spotlightItem?.participant?.identity,
+        )
 
   const hasSidebarItems =
     sidebarScreenShares.length > 0 || sidebarParticipants.length > 0
@@ -39,8 +51,11 @@ const SpotlightLayout = ({
   return (
     <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-2">
       {/* Main: spotlighted tile */}
-      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0">
-        {spotlightItem.type === "screen" ? (
+      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0 relative">
+        {isGameActive ? (
+          // Game chiếm slot spotlight (thay cho screen share/video tile)
+          <GameSpotlight />
+        ) : spotlightItem?.type === "screen" ? (
           <div className="h-full w-full">
             <ScreenShareTile
               trackRef={spotlightItem.trackRef}
@@ -70,7 +85,7 @@ const SpotlightLayout = ({
             className={`
               flex flex-1 gap-1 min-h-0 min-w-0
               flex-row overflow-x-auto
-              md:flex-col md:overflow-y-auto md:overflow-x-hidden 
+              md:flex-col md:overflow-y-auto md:overflow-x-hidden
               ${scrollbarClasses}
             `}
           >

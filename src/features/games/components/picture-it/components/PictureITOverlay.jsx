@@ -9,7 +9,7 @@ import BaseGameOverlay from '@/features/games/components/shared/BaseGameOverlay'
 import PictureItImageCard from './PictureItImageCard'
 import PictureItActionPanel from './PictureItActionPanel'
 
-const PictureITOverlay = () => {
+const PictureITOverlay = ({ mode = "fullscreen" }) => {
   const {
     gameState,
     gameType,
@@ -20,7 +20,6 @@ const PictureITOverlay = () => {
     isSpectator,
     startPictureItDescribe,
     endPictureItDescribe,
-    submitPictureItFlag,
     submitPictureItRating,
     exitGame
   } = useGame()
@@ -32,7 +31,7 @@ const PictureITOverlay = () => {
   const [imgError, setImgError] = useState(false)
   const [hoveredRating, setHoveredRating] = useState(0)
   const [selectedRating, setSelectedRating] = useState(0)
-  const [myFlagged, setMyFlagged] = useState(false)
+  const [describeCountdownSec, setDescribeCountdownSec] = useState(30)
 
   const displayImageUrl = pictureIt?.imageUrlFull || pictureIt?.imageUrl
   const roundNumber = currentRound?.round || 0
@@ -41,7 +40,7 @@ const PictureITOverlay = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedRating(0);
     setHoveredRating(0);
-    setMyFlagged(false);
+    setDescribeCountdownSec(30);
   }, [roundNumber]);
 
   const isPictureIt = gameType === 'picture_it' || gameType === 'picture-it'
@@ -57,7 +56,6 @@ const PictureITOverlay = () => {
   const hasDescribeStarted = pictureIt?.describeStarted
 
   const totalRounds = currentRound?.total || 0
-  const forbiddenWords = pictureIt?.forbiddenWords || []
   const imageBlurred = pictureIt?.imageBlurred
 
   const handleDescribeStart = useCallback(() => {
@@ -70,18 +68,34 @@ const PictureITOverlay = () => {
     endPictureItDescribe()
   }, [isDescriber, endPictureItDescribe])
 
-  const handleFlag = useCallback(() => {
-    if (isDescriber || isSpectator || myFlagged || selectedRating > 0 || pictureIt?.myRatingSubmitted) return
-    setMyFlagged(true)
-    submitPictureItFlag()
-  }, [isDescriber, isSpectator, myFlagged, selectedRating, pictureIt?.myRatingSubmitted, submitPictureItFlag])
+  // 30s describe timer — đếm ngược từ BE DESCRIBE_STARTED.
+  // Khi hết, tự động gọi end để chuyển sang rating phase.
+  const describeStartTimeMs = pictureIt?.describeStartTime
+    ? new Date(pictureIt.describeStartTime).getTime()
+    : null
+
+  useEffect(() => {
+    if (!isDescribing || !isDescriber || !hasDescribeStarted || !describeStartTimeMs) return
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() - describeStartTimeMs) / 1000)
+      const remaining = Math.max(0, 30 - elapsed)
+      setDescribeCountdownSec(remaining)
+      if (remaining <= 0) {
+        endPictureItDescribe()
+      }
+    }
+    tick()
+    const interval = setInterval(tick, 500)
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDescribing, isDescriber, hasDescribeStarted, describeStartTimeMs])
 
   const handleSubmitRating = useCallback(() => {
-    if (selectedRating === 0 || isDescriber || isSpectator) return
+    if (selectedRating === 0 || isDescriber) return
     submitPictureItRating(selectedRating)
 
     setSelectedRating(0)
-  }, [selectedRating, isDescriber, isSpectator, submitPictureItRating])
+  }, [selectedRating, isDescriber, submitPictureItRating])
 
   const handleGameOverClose = () => {
     exitGame()
@@ -107,8 +121,6 @@ const PictureITOverlay = () => {
 
   if (!open) return null
 
-  const interactionsDisabled = isSpectator
-
   return (
     <BaseGameOverlay
       expectedGameType={['picture_it', 'picture-it']}
@@ -116,6 +128,7 @@ const PictureITOverlay = () => {
       waitingText={t.rooms?.game?.pictureIt?.modals?.waitingStart || "Đang chuẩn bị ván đấu..."}
       useFluentAnimation={true}
       animationKey="picture-it-overlay"
+      mode={mode}
       gameContent={
         <div className="flex flex-col flex-1 gap-3 md:gap-4 h-full min-h-0 overflow-y-auto pr-1">
           <PictureItImageCard
@@ -128,18 +141,15 @@ const PictureITOverlay = () => {
             imageBlurred={imageBlurred}
             hasDescribeStarted={hasDescribeStarted}
             category={pictureIt?.category}
-            forbiddenWords={forbiddenWords}
-            flagCount={pictureIt?.flagCount || 0}
-            raterCount={pictureIt?.raterCount || 0}
           />
           <PictureItActionPanel
-            isSpectator={isSpectator}
             isDescriber={isDescriber}
+            isSpectator={isSpectator}
             isDescribing={isDescribing}
             isRatingPhase={isRatingPhase}
             isWaitingForRatings={isWaitingForRatings}
             hasDescribeStarted={hasDescribeStarted}
-            myFlagged={myFlagged}
+            describeCountdownSec={describeCountdownSec}
             ratingCountdownSec={pictureIt?.ratingCountdownSec || 0}
             selectedRating={selectedRating}
             setSelectedRating={setSelectedRating}
@@ -148,9 +158,7 @@ const PictureITOverlay = () => {
             myRatingSubmitted={pictureIt?.myRatingSubmitted}
             handleDescribeStart={handleDescribeStart}
             handleDescribeEnd={handleDescribeEnd}
-            handleFlag={handleFlag}
             handleSubmitRating={handleSubmitRating}
-            interactionsDisabled={interactionsDisabled}
           />
         </div>
       }

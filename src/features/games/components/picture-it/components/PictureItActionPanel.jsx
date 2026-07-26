@@ -1,17 +1,17 @@
 import React from 'react'
-import { motion } from 'framer-motion'
-import { CheckCircle2, Flag, Loader2, Mic, Star } from 'lucide-react'
+import { CheckCircle2, Loader2, Star } from 'lucide-react'
 import { PillButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { motion } from 'framer-motion'
 
 const PictureItActionPanel = ({
-  isSpectator,
   isDescriber,
+  isSpectator,
   isDescribing,
   isRatingPhase,
   isWaitingForRatings,
   hasDescribeStarted,
-  myFlagged,
+  describeCountdownSec,
   ratingCountdownSec,
   selectedRating,
   setSelectedRating,
@@ -20,7 +20,6 @@ const PictureItActionPanel = ({
   myRatingSubmitted,
   handleDescribeStart,
   handleDescribeEnd,
-  handleFlag,
   handleSubmitRating,
   interactionsDisabled
 }) => {
@@ -29,9 +28,11 @@ const PictureItActionPanel = ({
 
   return (
     <div className="shrink-0 border-t border-t-[#E5E5E5] px-5 py-3 flex items-center justify-center min-h-[64px] bg-white rounded-[24px]">
-      {/* Spectator — no actions */}
+      {/* Spectator — chỉ xem */}
       {isSpectator && (
-        <span className="text-sm text-secondary italic">{ap.watchingAsSpectator || 'You are watching as a spectator.'}</span>
+        <span className="text-sm text-secondary italic">
+          {ap.watchingAsSpectator || 'You are watching as a spectator.'}
+        </span>
       )}
 
       {/* Describer — Describing phase */}
@@ -42,30 +43,33 @@ const PictureItActionPanel = ({
               className="h-11 px-6 font-bold transition-all shadow-sm"
               textColor="black"
               bgColor="#F7F7F7"
-              startIcon={<Mic size={18} className="text-black" />}
               onClick={handleDescribeStart}
             >
-              {ap.turnOnMic || 'Turn on Mic (Start)'}
+              {ap.startDescribe || 'Start describing'}
             </PillButton>
           ) : (
-            <PillButton
-              className="h-11 px-6 text-white font-bold transition-all relative flex items-center gap-2"
-              onClick={handleDescribeEnd}
-            >
-              <span className="relative flex h-3 w-3 mr-1">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+            <div className="flex items-center gap-3">
+              <span className={`text-xl font-black tabular-nums ${describeCountdownSec <= 10 ? 'text-cath-red-600' : 'text-slate-800'}`}>
+                00:{describeCountdownSec.toString().padStart(2, '0')}
               </span>
-              {ap.turnOffMic || 'Turn off Mic (Finish)'}
-            </PillButton>
+              <PillButton
+                className="h-11 px-6 text-white font-bold transition-all relative flex items-center gap-2"
+                onClick={handleDescribeEnd}
+              >
+                <span className="relative flex h-3 w-3 mr-1">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                </span>
+                {ap.finishDescribe || 'Finish describing'}
+              </PillButton>
+            </div>
           )}
         </div>
-      )
-      }
+      )}
 
       {/* Describer — waiting for ratings */}
       {
-        !isSpectator && isWaitingForRatings && (
+        isWaitingForRatings && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}

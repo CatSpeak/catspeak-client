@@ -6,6 +6,18 @@ import { Check, TrendingUp, Star, SlidersHorizontal } from "lucide-react"
 import { useParticipants, useIsSpeaking } from "@livekit/components-react"
 import { motion, animate, AnimatePresence } from "framer-motion"
 import { ParticipantVolumePopover } from "@/features/video-call/components/ParticipantVolumePopover"
+import { getImageUrl } from "@/shared/utils/imageUtils"
+
+// Try to read avatarUrl from participant metadata JSON.
+const getParticipantAvatar = (participant) => {
+  if (!participant?.metadata) return null
+  try {
+    const meta = JSON.parse(participant.metadata)
+    return meta.avatarImageUrl || meta.avatarUrl || null
+  } catch (e) {
+    return null
+  }
+}
 
 const AnimatedScore = ({ value, suffix }) => {
   const safeValue = typeof value === 'number' && !isNaN(value) ? value : 0;
@@ -31,14 +43,32 @@ const AnimatedScore = ({ value, suffix }) => {
 
 const SpeakingAvatar = ({ participant, name }) => {
   const isSpeaking = useIsSpeaking(participant)
+  const ringClass = isSpeaking
+    ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white"
+    : "ring-0 ring-transparent"
+
+  const avatarUrl = getParticipantAvatar(participant)
+
+  if (avatarUrl) {
+    return (
+      <div className={`w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0 transition-all duration-200 ${ringClass}`}>
+        <img
+          src={getImageUrl(avatarUrl)}
+          alt={name || ""}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    )
+  }
+
   return (
-    <div className={`w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0 transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}>
+    <div className={`w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0 transition-all duration-200 ${ringClass}`}>
       {(name || "?").charAt(0).toUpperCase()}
     </div>
   )
 }
 
-const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participant }) => {
+const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participant, fallbackAvatarUrl }) => {
   return (
     <>
       {/* Rank badge */}
@@ -54,9 +84,17 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
         )}
       </div>
 
-      {/* Avatar placeholder */}
+      {/* Avatar */}
       {participant ? (
         <SpeakingAvatar participant={participant} name={player.name} />
+      ) : fallbackAvatarUrl ? (
+        <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0 ring-0 ring-transparent">
+          <img
+            src={getImageUrl(fallbackAvatarUrl)}
+            alt={player.name || ""}
+            className="w-full h-full object-cover"
+          />
+        </div>
       ) : (
         <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0 transition-all duration-200 ring-0 ring-transparent">
           {(player.name || "?").charAt(0).toUpperCase()}
@@ -117,7 +155,7 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
 }
 
 const GameSidebar = () => {
-  const { scores, correctPlayers, gameState, currentUserId, playerNames, leftPlayers, gameType, pictureIt, gamePlayers, spectatorIds } = useGame()
+  const { scores, correctPlayers, gameState, currentUserId, playerNames, leftPlayers, gameType, pictureIt, gamePlayers } = useGame()
   const { t } = useLanguage()
   const { user } = useAuth()
   const participants = useParticipants()
@@ -176,22 +214,6 @@ const GameSidebar = () => {
       hasLeft: leftPlayers?.has(idStr) || false,
     }
   }).sort((a, b) => b.score - a.score)
-
-  const spectators = Array.from(spectatorIds).map(idStr => {
-    const safeIdStr = String(idStr);
-    const safeCurrentId = String(currentUserId || "");
-    const isYou = safeIdStr === safeCurrentId;
-    let name = playerNames[safeIdStr];
-    if (!name) {
-      const p = participants.find(p => String(p.identity) === safeIdStr);
-      name = p?.name || `Người xem ${safeIdStr}`;
-    }
-    return {
-      id: safeIdStr,
-      name,
-      isYou
-    }
-  });
 
   const title = isPictureIt ? (t.rooms?.game?.pictureIt?.leaderboard?.title || "Leaderboard") : (t.rooms?.game?.crackIt?.leaderboard || "Bảng xếp hạng")
 
@@ -261,63 +283,6 @@ const GameSidebar = () => {
         </div>
       </div>
 
-      {/* SPECTATORS CARD */}
-      {spectators.length > 0 && (
-        <div className="shrink-0 max-h-[35%] bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-100 p-4 md:p-6 flex flex-col">
-          <h4 className="text-xs font-black text-gray-400 mb-3 uppercase tracking-wider pl-2 shrink-0">
-            {t.rooms?.game?.crackIt?.spectators || "Người xem"} ({spectators.length})
-          </h4>
-          <div className="flex flex-col gap-2 overflow-y-auto pr-2 min-h-0">
-            {spectators.map(spectator => {
-              const participant = participants.find(p => String(p.identity) === spectator.id)
-
-              const innerContent = (
-                <>
-                  {participant ? (
-                    <SpeakingAvatar participant={participant} name={spectator.name} />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold shrink-0 text-sm">
-                      {(spectator.name || "?").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-gray-600 text-sm flex items-center gap-1 min-w-0">
-                      <span className="truncate min-w-0 max-w-full">{spectator.name}</span>
-                      {spectator.isYou && (
-                        <span className="font-normal text-gray-400 text-xs shrink-0">
-                          ({t.rooms?.game?.crackIt?.you || "Bạn"})
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )
-
-              return (
-                <div key={spectator.id}>
-                  {participant && !spectator.isYou ? (
-                    <ParticipantVolumePopover participant={participant}>
-                      <div className="group flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 cursor-pointer relative">
-                        {innerContent}
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center pointer-events-none">
-                          <div className="w-4 h-8 bg-gradient-to-r from-transparent to-[#F9FAFB]"></div>
-                          <div className="bg-[#F9FAFB] h-8 flex items-center text-gray-400 pr-1">
-                            <SlidersHorizontal size={14} />
-                          </div>
-                        </div>
-                      </div>
-                    </ParticipantVolumePopover>
-                  ) : (
-                    <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 relative">
-                      {innerContent}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
