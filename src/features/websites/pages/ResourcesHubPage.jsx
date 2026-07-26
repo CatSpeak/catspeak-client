@@ -11,7 +11,7 @@ import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { websites, RESOURCE_CATEGORIES } from "../config/websitesData"
 import { websiteApi } from "../api/websiteApi"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
-import { PillButton } from "@/shared/components/ui/buttons"
+import ChipFilter from "@/shared/components/ChipFilter"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import ResourceCard from "../components/ResourceCard"
 import { TypewriterText } from "@/shared/components/ui/animations"
@@ -118,6 +118,18 @@ const ResourcesHubPage = () => {
     return counts
   }, [allResourceItems, activeLang])
 
+  // Compute category items for ChipFilter
+  const categoryItems = useMemo(() => {
+    return Object.entries(RESOURCE_CATEGORIES)
+      .filter(([catKey]) => catKey === "all" || (categoryCounts[catKey] || 0) > 0)
+      .map(([catKey, catMeta]) => ({
+        key: catKey,
+        label:
+          t.websites?.category?.[catKey] ||
+          (activeLang === "zh" ? catMeta.labelZh : catMeta.labelEn),
+      }))
+  }, [categoryCounts, t.websites?.category, activeLang])
+
   return (
     <div className="min-h-screen bg-[#f3f3f3] flex flex-col p-0 sm:p-6 gap-4 sm:gap-6">
       {/* ── Dashboard Hero Banner ── */}
@@ -132,11 +144,11 @@ const ResourcesHubPage = () => {
           {/* Subtitle Description */}
           <p className="text-rose-100/90 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto drop-shadow-sm">
             {t.websites?.hero?.description ||
-              "Explore 30+ curated interactive practice portals, AI tools, test simulators, and dictionaries to accelerate your language journey."}
+              "Explore curated flashcards, dictionaries, video channels, and practice tools for learning Chinese & English."}
           </p>
 
-          {/* Frosted Glass Hero Search Bar */}
-          <div className="pt-2 max-w-2xl mx-auto">
+          {/* Search Input Bar */}
+          <div className="max-w-xl mx-auto pt-2">
             <SearchInput
               value={searchInput}
               onChange={handleInputChange}
@@ -157,28 +169,11 @@ const ResourcesHubPage = () => {
       {/* ── Main Content Container ── */}
       <div className="relative z-10 w-full px-4 sm:px-0 flex flex-col gap-4 sm:gap-6 pb-6 sm:pb-0">
         {/* Category Filter Chips Toolbar */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hidden -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 lg:flex-wrap">
-          {Object.entries(RESOURCE_CATEGORIES).map(([catKey, catMeta]) => {
-            const count = categoryCounts[catKey] || 0
-            const isSelected = selectedCategory === catKey
-            if (catKey !== "all" && count === 0) return null
-
-            const categoryTitle =
-              t.websites?.category?.[catKey] ||
-              (activeLang === "zh" ? catMeta.labelZh : catMeta.labelEn)
-
-            return (
-              <PillButton
-                key={catKey}
-                variant={isSelected ? "primary" : "secondary"}
-                onClick={() => setSelectedCategory(catKey)}
-                className="shrink-0"
-              >
-                {categoryTitle}
-              </PillButton>
-            )
-          })}
-        </div>
+        <ChipFilter
+          items={categoryItems}
+          value={selectedCategory}
+          onChange={setSelectedCategory}
+        />
 
         {/* ── Resource Cards Grid ── */}
         {filteredResources.length > 0 ? (

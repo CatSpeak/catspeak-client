@@ -14,6 +14,7 @@ const DesktopNavItem = ({
   img,
   rightContent,
   rightText,
+  sectionId = "default",
 }) => {
   const [imgError, setImgError] = useState(false)
 
@@ -47,7 +48,7 @@ const DesktopNavItem = ({
           <>
             {isActive && !isDocked && (
               <motion.div
-                layoutId="desktopNavActiveIndicator"
+                layoutId={`desktopNavActiveIndicator-${sectionId}`}
                 className="absolute left-0 inset-y-0 my-auto w-[3px] h-5 bg-cath-red-700 rounded-r-full z-20"
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />

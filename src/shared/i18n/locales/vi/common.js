@@ -37,6 +37,7 @@ export default {
     workspaceReels: "Reels cá nhân",
     catSpeak: "Cat Speak",
     catSpeakNews: "Bản tin Cat Speak",
+    globalNews: "Bản tin thế giới",
     worldNews: "Bản tin thế giới",
     reels: "Reels",
     video: "Video",

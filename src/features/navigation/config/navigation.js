@@ -16,7 +16,7 @@ import {
   Video,
   MessageCircle,
   Globe,
-} from "lucide-react";
+} from "lucide-react"
 
 export const navSections = [
   {
@@ -44,6 +44,7 @@ export const navSections = [
     defaultLabel: "Cat Speak",
     maxInitial: 5,
     items: [
+      { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
@@ -64,8 +65,7 @@ export const navSections = [
       { key: "profile", path: "/profile", icon: User },
     ],
   },
-];
-
+]
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -87,7 +87,7 @@ export const navLinks = [
     icon: LayoutDashboard,
     subItems: [
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
-      // { key: "worldNews", path: "/cat-speak/discover" },
+      { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       // { key: "video", path: "/cat-speak/video" },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
@@ -113,16 +113,15 @@ export const navLinks = [
     isHorizontalBar: true,
     showOnHorizontalBar: false,
   },
-];
+]
 
 export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "systemConfig", path: "/setting/system", icon: Settings },
-];
+]
 
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
   { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
-];
-
+]

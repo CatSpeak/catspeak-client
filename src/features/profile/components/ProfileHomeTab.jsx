@@ -5,6 +5,7 @@ import {
 } from "../../../store/api/social/profilePostsApi"
 import PostEditorModal from "./PostEditorModal"
 import ProfilePostCard from "./ProfilePostCard"
+import PostFeedList from "./PostFeedList"
 import ProfileSidebar from "./ProfileSidebar"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { EmptyState } from "@/shared/components/ui/indicators"
@@ -160,25 +161,14 @@ const ProfileHomeTab = ({
         )}
 
         {/* News Block */}
-        <div className="space-y-3">
-          {isLoadingPosts ? (
-            <FluentCard>
-              <div className="text-sm text-gray-500">Đang tải bài viết...</div>
-            </FluentCard>
-          ) : timelinePosts.length === 0 ? (
-            <FluentCard>
-              <EmptyState message="Chưa có bài viết nào." icon={Newspaper} />
-            </FluentCard>
-          ) : (
-            timelinePosts.map((post) => (
-              <ProfilePostCard
-                key={post.postId}
-                post={post}
-                isOwnProfile={isOwnProfile}
-              />
-            ))
-          )}
-        </div>
+        <PostFeedList
+          posts={timelinePosts}
+          isLoading={isLoadingPosts}
+          isOwnProfile={isOwnProfile}
+          emptyMessage="Chưa có bài viết nào."
+          emptyIcon={Newspaper}
+          emptyVariant="card"
+        />
       </div>
 
       {/* Right Column - Sidebar */}

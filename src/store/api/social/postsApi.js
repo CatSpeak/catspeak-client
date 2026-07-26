@@ -1,15 +1,25 @@
 import { socialApi } from "./socialApi"
+import {
+  updatePostInCaches,
+  updateCommentInCaches,
+} from "./utils/postsCacheUtils"
 
 export const postsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     getPosts: builder.query({
-      query: ({ page = 1, pageSize = 10 } = {}) => ({
+      query: ({ page = 1, pageSize = 10, postType } = {}) => ({
         url: "/Post",
-        params: { page, pageSize, sortBy: "createDate", sortDesc: true },
+        params: {
+          page,
+          pageSize,
+          postType,
+          sortBy: "createDate",
+          sortDesc: true,
+        },
       }),
       providesTags: ["Post"],
-      serializeQueryArgs: ({ endpointName }) => {
-        return endpointName
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        return `${endpointName}_${queryArgs?.postType || "all"}`
       },
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) {
@@ -24,7 +34,10 @@ export const postsApi = socialApi.injectEndpoints({
         currentCache.hasMore = newItems.data.length === arg.pageSize
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.page !== previousArg?.page
+        return (
+          currentArg?.page !== previousArg?.page ||
+          currentArg?.postType !== previousArg?.postType
+        )
       },
     }),
     getPostById: builder.query({
@@ -51,135 +64,45 @@ export const postsApi = socialApi.injectEndpoints({
         { postId, type },
         { dispatch, getState, queryFulfilled },
       ) {
-        const state = getState()
-        const patches = []
-
-        // Iterate over all active getPosts and getUserTimelinePosts queries
-        for (const [, query] of Object.entries(state.api.queries)) {
-          if (
-            (query.endpointName === "getPosts" ||
-              query.endpointName === "getUserTimelinePosts") &&
-            query.status === "fulfilled"
-          ) {
-            const patch = dispatch(
-              postsApi.util.updateQueryData(
-                query.endpointName,
-                query.originalArgs,
-                (draft) => {
-                  if (draft?.data) {
-                    const post = draft.data.find((p) => p.postId === postId)
-                    if (post) {
-                      if (post.currentUserReaction === type) {
-                        // Toggle off
-                        post.currentUserReaction = null
-                        post.totalReactions = Math.max(
-                          0,
-                          (post.totalReactions || 0) - 1,
-                        )
-                      } else {
-                        // Switch or add reaction
-                        if (!post.currentUserReaction) {
-                          post.totalReactions = (post.totalReactions || 0) + 1
-                        }
-                        post.currentUserReaction = type
-                      }
-                    }
-                  }
-                },
-              ),
-            )
-            patches.push(patch)
-          } else if (
-            query.endpointName === "getPostById" &&
-            query.status === "fulfilled"
-          ) {
-            const patch = dispatch(
-              postsApi.util.updateQueryData(
-                "getPostById",
-                query.originalArgs,
-                (draft) => {
-                  if (draft?.data && draft.data.postId === postId) {
-                    const post = draft.data
-                    if (post.currentUserReaction === type) {
-                      post.currentUserReaction = null
-                      post.totalReactions = Math.max(
-                        0,
-                        (post.totalReactions || 0) - 1,
-                      )
-                    } else {
-                      if (!post.currentUserReaction) {
-                        post.totalReactions = (post.totalReactions || 0) + 1
-                      }
-                      post.currentUserReaction = type
-                    }
-                  }
-                },
-              ),
-            )
-            patches.push(patch)
-          } else if (
-            query.endpointName === "getPostBySlug" &&
-            query.status === "fulfilled"
-          ) {
-            const patch = dispatch(
-              postsApi.util.updateQueryData(
-                "getPostBySlug",
-                query.originalArgs,
-                (draft) => {
-                  if (draft?.data && draft.data.postId === postId) {
-                    const post = draft.data
-                    if (post.currentUserReaction === type) {
-                      post.currentUserReaction = null
-                      post.totalReactions = Math.max(
-                        0,
-                        (post.totalReactions || 0) - 1,
-                      )
-                    } else {
-                      if (!post.currentUserReaction) {
-                        post.totalReactions = (post.totalReactions || 0) + 1
-                      }
-                      post.currentUserReaction = type
-                    }
-                  }
-                },
-              ),
-            )
-            patches.push(patch)
-          } else if (
-            query.endpointName === "getSharedPost" &&
-            query.status === "fulfilled"
-          ) {
-            const patch = dispatch(
-              postsApi.util.updateQueryData(
-                "getSharedPost",
-                query.originalArgs,
-                (draft) => {
-                  if (draft?.data && draft.data.postId === postId) {
-                    const post = draft.data
-                    if (post.currentUserReaction === type) {
-                      post.currentUserReaction = null
-                      post.totalReactions = Math.max(
-                        0,
-                        (post.totalReactions || 0) - 1,
-                      )
-                    } else {
-                      if (!post.currentUserReaction) {
-                        post.totalReactions = (post.totalReactions || 0) + 1
-                      }
-                      post.currentUserReaction = type
-                    }
-                  }
-                },
-              ),
-            )
-            patches.push(patch)
-          }
-        }
+        // 1. Instant optimistic local update
+        const patches = updatePostInCaches(
+          getState(),
+          dispatch,
+          postId,
+          (post) => {
+            if (post.currentUserReaction === type) {
+              post.currentUserReaction = null
+              post.totalReactions = Math.max(0, (post.totalReactions || 0) - 1)
+            } else {
+              if (!post.currentUserReaction) {
+                post.totalReactions = (post.totalReactions || 0) + 1
+              }
+              post.currentUserReaction = type
+            }
+          },
+        )
 
         try {
-          await queryFulfilled
+          // 2. Sync with authoritative server response when request completes
+          const { data: res } = await queryFulfilled
+          const serverData = res?.data || res
+          if (serverData) {
+            const finalReaction =
+              serverData.currentUserReaction !== undefined
+                ? serverData.currentUserReaction
+                : serverData.action === "removed"
+                  ? null
+                  : type
+            const finalTotal = serverData.totalReactions
+
+            updatePostInCaches(getState(), dispatch, postId, (post) => {
+              if (finalReaction !== undefined)
+                post.currentUserReaction = finalReaction
+              if (finalTotal !== undefined) post.totalReactions = finalTotal
+            })
+          }
         } catch {
-          // If the request fails, revert all optimistic updates
+          // 3. Rollback optimistic patches on error
           patches.forEach((patch) => patch.undo())
         }
       },
@@ -233,39 +156,39 @@ export const postsApi = socialApi.injectEndpoints({
       ) {
         try {
           const { data: created } = await queryFulfilled
+          const queries =
+            getState().socialApi?.queries || getState().api?.queries || {}
 
-          for (const [, query] of Object.entries(getState().api.queries)) {
+          for (const [, query] of Object.entries(queries)) {
             if (
               query.endpointName === "getPostComments" &&
               query.status === "fulfilled" &&
-              query.originalArgs?.postId === postId
+              String(query.originalArgs?.postId) === String(postId)
             ) {
-              const patch = dispatch(
-                postsApi.util.updateQueryData(
+              dispatch(
+                socialApi.util.updateQueryData(
                   "getPostComments",
                   query.originalArgs,
                   (draft) => {
                     if (!draft?.data) return
-                    const newComment = created?.data
+                    const newComment = created?.data || created
                     if (!newComment) return
 
                     if (parentCommentId) {
-                      // Reply — find parent and push into its replies
                       const parent = draft.data.find(
-                        (c) => c.commentId === parentCommentId,
+                        (c) => String(c.commentId) === String(parentCommentId),
                       )
                       if (parent) {
                         if (!parent.replies) parent.replies = []
                         parent.replies.push(newComment)
                       }
                     } else {
-                      // Top-level comment — push to front
                       draft.data.unshift(newComment)
                     }
                   },
                 ),
               )
-              return patch
+              return
             }
           }
         } catch {
@@ -302,55 +225,23 @@ export const postsApi = socialApi.injectEndpoints({
         { postId, commentId, type },
         { dispatch, getState, queryFulfilled },
       ) {
-        const state = getState()
-        const patches = []
-
-        for (const [, query] of Object.entries(state.api.queries)) {
-          if (
-            query.endpointName === "getPostComments" &&
-            query.status === "fulfilled" &&
-            query.originalArgs?.postId === postId
-          ) {
-            const patch = dispatch(
-              postsApi.util.updateQueryData(
-                "getPostComments",
-                query.originalArgs,
-                (draft) => {
-                  const list = draft?.data
-                  if (list) {
-                    let comment = list.find((c) => c.commentId === commentId)
-                    if (!comment) {
-                      for (const topLevel of list) {
-                        if (topLevel.replies) {
-                          comment = topLevel.replies.find(
-                            (r) => r.commentId === commentId,
-                          )
-                          if (comment) break
-                        }
-                      }
-                    }
-                    if (comment) {
-                      if (comment.currentUserReaction === type) {
-                        comment.currentUserReaction = null
-                        comment.totalReactions = Math.max(
-                          0,
-                          (comment.totalReactions || 0) - 1,
-                        )
-                      } else {
-                        if (!comment.currentUserReaction) {
-                          comment.totalReactions =
-                            (comment.totalReactions || 0) + 1
-                        }
-                        comment.currentUserReaction = type
-                      }
-                    }
-                  }
-                },
-              ),
-            )
-            patches.push(patch)
-          }
-        }
+        const patches = updateCommentInCaches(
+          getState(),
+          dispatch,
+          postId,
+          commentId,
+          (comment) => {
+            if (comment.currentUserReaction === type) {
+              comment.currentUserReaction = null
+              comment.totalReactions = Math.max(0, (comment.totalReactions || 0) - 1)
+            } else {
+              if (!comment.currentUserReaction) {
+                comment.totalReactions = (comment.totalReactions || 0) + 1
+              }
+              comment.currentUserReaction = type
+            }
+          },
+        )
 
         try {
           await queryFulfilled

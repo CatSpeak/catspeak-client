@@ -33,7 +33,7 @@ const RelatedNewsSection = ({ currentPostId }) => {
     <section className="w-full pb-4 sm:pb-6">
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-5">
-        <h2 className="font-nunito font-bold text-[28px] leading-[1.4] text-black">
+        <h2 className="font-bold text-[28px] leading-[1.4] text-black">
           {newsDetail?.relatedNews || "Bản tin liên quan"}
         </h2>
         {relatedPosts.length > 0 && (
@@ -55,7 +55,7 @@ const RelatedNewsSection = ({ currentPostId }) => {
           ))}
         </div>
       ) : (
-        <p className="font-nunito text-base text-[#7b7979] leading-[1.4]">
+        <p className="text-base text-[#7b7979] leading-[1.4]">
           {newsDetail?.noRelatedNews || "Không có bản tin liên quan."}
         </p>
       )}

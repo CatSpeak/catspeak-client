@@ -5,10 +5,8 @@ import {
   useUpdatePostMutation,
   useDeletePostMutation,
 } from "../../../store/api/social/profilePostsApi"
-import {
-  useReactToPostMutation,
-  useSharePostMutation,
-} from "@/store/api/social/postsApi"
+import { useReactToPostMutation } from "@/store/api/social/postsApi"
+import useSharePost from "@/shared/hooks/useSharePost"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PostEditorModal from "./PostEditorModal"
 import ShareModal from "@/features/news/components/ShareModal"
@@ -20,13 +18,16 @@ import PostActionBar from "./PostActionBar"
 const ProfilePostCard = ({ post, isOwnProfile }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
-  const [shareUrl, setShareUrl] = useState("")
+  const {
+    shareUrl,
+    isShareModalOpen,
+    setIsShareModalOpen,
+    handleShare: triggerShare,
+  } = useSharePost()
 
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation()
   const [deletePost] = useDeletePostMutation()
   const [reactToPost] = useReactToPostMutation()
-  const [sharePost] = useSharePostMutation()
 
   const handleUpdatePost = async (formData) => {
     try {
@@ -47,31 +48,15 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
     }
   }
 
+
+
   const handleReact = (e, type) => {
     e.stopPropagation()
     reactToPost({ postId: post.postId, type })
   }
 
-  const handleShare = async (e) => {
-    e.stopPropagation()
-    try {
-      const result = await sharePost(post.postId).unwrap()
-      let url =
-        (typeof result === "string" ? result : result?.shareLink) ||
-        window.location.href
-
-      if (url && !url.startsWith("http")) {
-        url = url.startsWith("/") ? url : `/${url}`
-        url = `${window.location.origin}${url}`
-      }
-
-      if (url) {
-        setShareUrl(url)
-        setIsShareModalOpen(true)
-      }
-    } catch (err) {
-      console.error("Share failed", err)
-    }
+  const handleShare = (e) => {
+    triggerShare(e, post?.postId)
   }
 
   return (

@@ -8,7 +8,7 @@ import {
   useCreateStoryMutation,
   useInteractWithStoryMutation,
   useDeleteStoryMutation,
-} from "@/store/api/social/storiesApi"
+} from "../api/storiesApi"
 import { useConversationSignalRContext } from "@/features/chat/context/ConversationSignalRContext"
 
 const useStories = (languageCommunity) => {

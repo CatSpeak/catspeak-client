@@ -13,6 +13,7 @@ import RoomsPage from "@/features/rooms/pages/RoomsPage"
 // Cat Speak Feature Pages
 import CatSpeakLayout from "@/features/cat-speak/layouts/CatSpeakLayout"
 import NewsPage from "@/features/news/pages/NewsPage"
+import GlobalNewsPage from "@/features/news/pages/GlobalNewsPage"
 import NewsDetailPage from "@/features/news/pages/NewsDetailPage"
 import DiscoverPage from "@/features/discover/DiscoverPage"
 import MailPage from "@/features/mail/pages/MailPage"
@@ -213,6 +214,10 @@ const routesConfig = [
                   {
                     path: "news",
                     element: <NewsPage />,
+                  },
+                  {
+                    path: "global-news",
+                    element: <GlobalNewsPage />,
                   },
                   {
                     path: "news/:slug",

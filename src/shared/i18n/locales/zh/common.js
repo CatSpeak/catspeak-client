@@ -37,6 +37,7 @@ export default {
     workspaceReels: "工作区 Reels",
     catSpeak: "猫语",
     catSpeakNews: "猫语新闻",
+    globalNews: "世界新闻",
     worldNews: "世界新闻",
     reels: "短视频",
     video: "视频",

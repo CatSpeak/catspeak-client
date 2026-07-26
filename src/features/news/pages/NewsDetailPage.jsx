@@ -18,6 +18,79 @@ import RelatedNewsSection from "../components/RelatedNewsSection"
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import { Skeleton } from "@/shared/components/ui/indicators"
+
+const NewsDetailSkeleton = () => (
+  <div className="w-full p-4 sm:p-6">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-5">
+      {/* Left Column: Article Content Skeleton */}
+      <div className="flex min-w-0 flex-col gap-4">
+        {/* Breadcrumb Skeleton */}
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-20" />
+          <span className="text-gray-300">/</span>
+          <Skeleton className="h-4 w-24" />
+          <span className="text-gray-300">/</span>
+          <Skeleton className="h-4 w-32" />
+        </div>
+
+        {/* Title + Meta Skeleton */}
+        <div className="flex flex-col gap-3 md:gap-4">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-4/5" />
+            <Skeleton className="h-8 w-3/5" />
+            <div className="flex items-center gap-2 mt-1">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+
+          {/* Hero Image Skeleton */}
+          <Skeleton className="w-full aspect-video rounded-2xl" />
+        </div>
+
+        {/* Article Body Skeleton */}
+        <div className="bg-white py-6 flex flex-col gap-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-[95%]" />
+          <Skeleton className="h-4 w-[90%]" />
+          <Skeleton className="h-4 w-[98%]" />
+          <Skeleton className="h-4 w-[75%]" />
+
+          {/* Action Bar Skeleton */}
+          <div className="mt-6 flex items-center justify-between border-t border-b border-gray-100 py-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-9 w-20 rounded-full" />
+              <Skeleton className="h-9 w-20 rounded-full" />
+            </div>
+            <Skeleton className="h-9 w-24 rounded-full" />
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column: Comments Sidebar Skeleton */}
+      <div className="w-full h-full min-w-0">
+        <div className="lg:sticky lg:top-[76px]">
+          <FluentCard padding="p-3 md:p-4">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="w-9 h-9 rounded-full shrink-0" />
+                  <div className="flex-1 flex flex-col gap-2">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </FluentCard>
+        </div>
+      </div>
+    </div>
+  </div>
+)
 
 const NewsDetailPage = () => {
   const { lang: paramLang, slug } = useParams()
@@ -80,15 +153,14 @@ const NewsDetailPage = () => {
       ? normalError
       : slugError
   const [reactToPost] = useReactToPostMutation()
-  const [sharePost] = useSharePostMutation()
   const newsItem = data?.data
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
-  const [shareUrl, setShareUrl] = useState("")
-
   const handleReact = (type) => {
     if (!newsItem?.postId) return
     reactToPost({ postId: newsItem.postId, type })
   }
+  const [sharePost] = useSharePostMutation()
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [shareUrl, setShareUrl] = useState("")
 
   const handleShare = async () => {
     if (!newsItem?.postId) return
@@ -113,7 +185,7 @@ const NewsDetailPage = () => {
   }
 
   if (isLoading) {
-    return <div className="min-h-[50vh]" />
+    return <NewsDetailSkeleton />
   }
 
   if (error || !newsItem || newsItem.privacy !== "Public") {
@@ -156,7 +228,7 @@ const NewsDetailPage = () => {
           <div className="flex flex-col gap-3 md:gap-4">
             <div className="flex flex-col">
               <h1
-                className="font-nunito text-[24px] font-semibold leading-[1.35] text-black md:text-[32px] line-clamp-2"
+                className="text-[24px] font-semibold leading-[1.35] text-black md:text-[32px] line-clamp-2"
                 title={newsItem.title}
               >
                 {newsItem.title}
@@ -164,12 +236,12 @@ const NewsDetailPage = () => {
               {/* Inline dot-separated metadata row */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 {newsItem.viewCount !== undefined && (
-                  <span className="font-nunito font-medium text-sm text-[#7b7979]">
+                  <span className="font-medium text-sm text-[#7b7979]">
                     {newsItem.viewCount} lượt xem
                   </span>
                 )}
                 <span className="w-1 h-1 rounded-full bg-[#7b7979] inline-block shrink-0" />
-                <span className="font-nunito font-medium text-sm text-[#7b7979]">
+                <span className="font-medium text-sm text-[#7b7979]">
                   {getTranslatedTimeAgo(
                     newsItem.createDate,
                     t.news?.newsCard?.timeAgo,

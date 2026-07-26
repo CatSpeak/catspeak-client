@@ -1,42 +1,52 @@
 import React from "react"
-/**
- * ChipFilter — A reusable, horizontally scrollable filter chip list (similar to YouTube's category filters).
- *
- * @param {Array} options - Array of objects: { value: string, label: string }
- * @param {string} value - The currently active value
- * @param {function} onChange - Callback when a chip is clicked: (newValue) => void
- * @param {string} className - Optional extra wrapper classes
- */
-const ChipFilter = ({ options, value, onChange, className = "" }) => {
-  return (
-    <div
-      className={`flex overflow-x-auto gap-3 scrollbar-hide ${className}`}
-      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-    >
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-      `}</style>
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
-      {options.map((option) => {
-        const isActive = value === option.value
+/**
+ * ChipFilter — A reusable, responsive filter chip toolbar.
+ * Supports horizontal scrolling on mobile/tablet and optional wrapping on desktop.
+ *
+ * @param {Array} options - Array of objects: { key?: string, value?: string, id?: string, label: ReactNode, count?: number }
+ * @param {Array} items - Alias for options
+ * @param {string} value - Currently active value/key
+ * @param {string} activeKey - Alias for value
+ * @param {function} onChange - Callback when a chip is clicked: (newKey) => void
+ * @param {boolean} wrapDesktop - Whether chips wrap on lg screens (default true)
+ * @param {string} className - Optional wrapper CSS classes
+ */
+const ChipFilter = ({
+  options,
+  items,
+  value,
+  activeKey,
+  onChange,
+  wrapDesktop = true,
+  className = "",
+}) => {
+  const chipItems = items || options || []
+  const currentActive = activeKey !== undefined ? activeKey : value
+
+  const containerClasses = className
+    ? className
+    : `flex items-center gap-2 overflow-x-auto scrollbar-hidden -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 ${
+        wrapDesktop ? "lg:flex-wrap" : ""
+      }`
+
+  return (
+    <div className={containerClasses}>
+      {chipItems.map((item) => {
+        const itemKey = item.key ?? item.value ?? item.id
+        const isSelected = currentActive === itemKey
 
         return (
-          <button
-            key={option.value}
-            onClick={() => onChange(option.value)}
-            className={`
-              flex-shrink-0 text-sm px-4 py-3 rounded-full transition-colors
-              ${
-                isActive
-                  ? "bg-[#990011] text-white"
-                  : "bg-[#F2F2F2] hover:bg-[#E6E6E6]"
-              }
-            `}
+          <PillButton
+            key={itemKey}
+            variant={isSelected ? "primary" : "secondary"}
+            onClick={() => onChange?.(itemKey)}
+            className="shrink-0"
           >
-            {option.label}
-          </button>
+            {item.label}
+            {typeof item.count === "number" ? ` (${item.count})` : ""}
+          </PillButton>
         )
       })}
     </div>

@@ -5,26 +5,7 @@ import { useGetUserWallMediaQuery } from "../../../store/api/social/profilePosts
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import { IconButton } from "@/shared/components/ui/buttons"
 import FluentCard from "@/shared/components/ui/FluentCard"
-
-const useColumnCount = () => {
-  const [cols, setCols] = useState(3)
-
-  useEffect(() => {
-    const handleResize = () => {
-      const w = window.innerWidth
-      if (w >= 1024) setCols(4)
-      else if (w >= 768) setCols(3)
-      else if (w >= 480) setCols(2)
-      else setCols(1)
-    }
-
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  return cols
-}
+import useColumnCount from "@/shared/hooks/useColumnCount"
 
 const ProfileMediaTab = ({ targetAccountId }) => {
   const [fullscreenMedia, setFullscreenMedia] = useState(null)

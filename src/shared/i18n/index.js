@@ -6,15 +6,23 @@ import { billingTranslations } from "@/features/billing/i18n"
 import { profileTranslations } from "@/features/profile/i18n"
 import { chatTranslations } from "@/features/chat/i18n"
 import { websitesTranslations } from "@/features/websites/i18n"
+import { newsTranslations } from "@/features/news/i18n"
 
-// Helper to deeply merge multiple translation objects
+const isObject = (item) =>
+  Boolean(item && typeof item === "object" && !Array.isArray(item))
+
+// Helper to deeply merge multiple translation objects safely
 const deepMerge = (...objects) => {
   return objects.reduce((target, source) => {
     if (!source) return target
     const result = { ...target }
-    for (const key in source) {
-      if (source[key] instanceof Object && key in target) {
-        result[key] = deepMerge(target[key], source[key])
+    for (const key of Object.keys(source)) {
+      if (
+        isObject(source[key]) &&
+        Object.prototype.hasOwnProperty.call(result, key) &&
+        isObject(result[key])
+      ) {
+        result[key] = deepMerge(result[key], source[key])
       } else {
         result[key] = source[key]
       }
@@ -24,9 +32,9 @@ const deepMerge = (...objects) => {
 }
 
 export const translations = {
-  vi: deepMerge(vi, billingTranslations.vi, profileTranslations.vi, chatTranslations.vi, websitesTranslations.vi),
-  en: deepMerge(en, billingTranslations.en, profileTranslations.en, chatTranslations.en, websitesTranslations.en),
-  zh: deepMerge(zh, billingTranslations.zh, profileTranslations.zh, chatTranslations.zh, websitesTranslations.zh),
+  vi: deepMerge(vi, billingTranslations.vi, profileTranslations.vi, chatTranslations.vi, websitesTranslations.vi, newsTranslations.vi),
+  en: deepMerge(en, billingTranslations.en, profileTranslations.en, chatTranslations.en, websitesTranslations.en, newsTranslations.en),
+  zh: deepMerge(zh, billingTranslations.zh, profileTranslations.zh, chatTranslations.zh, websitesTranslations.zh, newsTranslations.zh),
 }
 
 export const languageNames = {
