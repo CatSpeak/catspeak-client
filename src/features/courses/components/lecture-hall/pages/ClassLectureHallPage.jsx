@@ -10,6 +10,7 @@ import {
   useUploadMaterialToSectionMutation,
   useAddLinkToSectionMutation,
   useCreateBulletinBoardMutation,
+  useUpdateBulletinBoardMutation,
   useAddAssignmentToSectionMutation,
   useAddQuizToSectionMutation,
   useChangeVisibilityOfItemMutation,
@@ -29,12 +30,14 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
     isError,
     error,
   } = useGetCurriculumByClassQuery(id, { skip: !id })
+  console.log(apiSections);
 
   const [deleteSection] = useDeleteCurriculumSectionMutation()
   const [updateSection] = useUpdateCurriculumSectionMutation()
   const [uploadMaterial] = useUploadMaterialToSectionMutation()
   const [addLink] = useAddLinkToSectionMutation()
   const [createBulletinBoard] = useCreateBulletinBoardMutation()
+  const [updateBulletinBoard] = useUpdateBulletinBoardMutation()
   const [addAssignment] = useAddAssignmentToSectionMutation()
   const [addQuiz] = useAddQuizToSectionMutation()
   const [changeItemVisibility] = useChangeVisibilityOfItemMutation()
@@ -53,6 +56,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const [activeModal, setActiveModal] = useState(null) // null | 'bulletin-board' | 'material' | 'assignment' | 'link'
   const [targetSectionId, setTargetSectionId] = useState(null)
   const [targetSectionName, setTargetSectionName] = useState("")
+  const [editItemData, setEditItemData] = useState(null)
 
   // Section Modal State
   const [sectionModal, setSectionModal] = useState({
@@ -73,51 +77,110 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   })
 
   // Open Modal for adding content to a section
-  const handleOpenAddItemModal = (sectionId, itemType) => {
-    const section = sections.find((s) => s.id === sectionId)
+  const handleOpenAddItemModal = (sectionId, type) => {
     setTargetSectionId(sectionId)
-    setTargetSectionName(section ? section.name : "Section")
-    setActiveModal(itemType) // "bulletin-board" | "material" | "assignment" | "link"
+    const targetSec = sections.find((s) => s.id === sectionId)
+    setTargetSectionName(targetSec?.title || "Unknown Section")
+    setEditItemData(null) // Reset edit data
+    setActiveModal(type)
+  }
+
+  const handleEditItem = (sectionId, item) => {
+    console.log(item);
+
+    if (item.type === "bulletinBoard") {
+      setTargetSectionId(sectionId)
+      const targetSec = sections.find((s) => s.id === sectionId)
+      setTargetSectionName(targetSec?.title || "Unknown Section")
+      setEditItemData(item)
+      setActiveModal("announcement")
+    }
   }
 
   // --- SUBMIT HANDLERS FOR MODALS ---
-  // 1. Add Bulletin Board
+  // 1. Add / Edit Bulletin Board
   const handleSaveBulletinBoard = async (data) => {
     if (id) {
-      try {
-        await createBulletinBoard({
-          classId: id,
-          sectionId: targetSectionId,
-          title: data.title,
-          content: data.content,
-          allowStudentReply: data.allowReply,
-          isVisibleToStudents: data.isVisible,
-        }).unwrap()
-        toast.success("Đã tạo bảng tin mới!")
-        setSectionsOverride(null)
-      } catch (err) {
-        toast.error(err?.data?.message || err?.message || "Lỗi khi tạo bảng tin.")
+      if (editItemData) {
+        // Edit mode
+        try {
+          await updateBulletinBoard({
+            classId: id,
+            boardId: editItemData.itemId,
+            title: data.title,
+            content: data.content,
+            allowStudentReply: data.allowReply,
+            isVisibleToStudents: data.isVisible,
+          }).unwrap()
+          toast.success("Đã cập nhật bảng tin!")
+          setSectionsOverride(null)
+        } catch (err) {
+          toast.error(err?.data?.message || err?.message || "Lỗi khi cập nhật bảng tin.")
+        }
+      } else {
+        // Create mode
+        try {
+          await createBulletinBoard({
+            classId: id,
+            sectionId: targetSectionId,
+            title: data.title,
+            content: data.content,
+            allowStudentReply: data.allowReply,
+            isVisibleToStudents: data.isVisible,
+          }).unwrap()
+          toast.success("Đã tạo bảng tin mới!")
+          setSectionsOverride(null)
+        } catch (err) {
+          toast.error(err?.data?.message || err?.message || "Lỗi khi tạo bảng tin.")
+        }
       }
     } else {
-      const newItem = {
-        id: `item-${Date.now()}`,
-        type: "announcement",
-        title: data.title,
-        meta: `Bài viết mới nhất: ${new Date().toLocaleDateString("vi-VN")}`,
-        metaType: "clock",
-        isVisibleToStudents: data.isVisible,
-        content: data.content,
-        allowReply: data.allowReply,
-      }
-      updateSections((prev) =>
-        prev.map((sec) =>
-          sec.id === targetSectionId
-            ? { ...sec, items: [newItem, ...sec.items] }
-            : sec
+      if (editItemData) {
+        // Local edit mode
+        updateSections((prev) =>
+          prev.map((sec) =>
+            sec.id === targetSectionId
+              ? {
+                ...sec,
+                items: sec.items.map((it) =>
+                  it.id === editItemData.id
+                    ? {
+                      ...it,
+                      title: data.title,
+                      content: data.content,
+                      allowReply: data.allowReply,
+                      isVisibleToStudents: data.isVisible,
+                    }
+                    : it
+                ),
+              }
+              : sec
+          )
         )
-      )
-      toast.success("Đã tạo bảng tin mới!")
+        toast.success("Đã cập nhật bảng tin!")
+      } else {
+        // Local create mode
+        const newItem = {
+          id: `item-${Date.now()}`,
+          type: "announcement",
+          title: data.title,
+          meta: `Bài viết mới nhất: ${new Date().toLocaleDateString("vi-VN")}`,
+          metaType: "clock",
+          isVisibleToStudents: data.isVisible,
+          content: data.content,
+          allowReply: data.allowReply,
+        }
+        updateSections((prev) =>
+          prev.map((sec) =>
+            sec.id === targetSectionId
+              ? { ...sec, items: [newItem, ...sec.items] }
+              : sec
+          )
+        )
+        toast.success("Đã tạo bảng tin mới!")
+      }
     }
+    setEditItemData(null)
   }
 
   // 2. Add Material
@@ -314,11 +377,11 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           prev.map((sec) =>
             sec.id === sectionModal.sectionId
               ? {
-                  ...sec,
-                  name: sectionModal.name.trim(),
-                  description: sectionModal.description.trim(),
-                  isVisibleToStudents: sectionModal.isVisibleToStudents,
-                }
+                ...sec,
+                name: sectionModal.name.trim(),
+                description: sectionModal.description.trim(),
+                isVisibleToStudents: sectionModal.isVisibleToStudents,
+              }
               : sec
           )
         )
@@ -488,6 +551,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
                   onEditSection={handleOpenEditSection}
                   onToggleSectionVisibility={handleToggleSectionVisibility}
                   onDeleteSection={handleDeleteSection}
+                  onEditItem={handleEditItem}
                   onToggleItemVisibility={handleToggleItemVisibility}
                   onDeleteItem={handleDeleteItem}
                 />
@@ -516,9 +580,22 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
       {/* 1. Create Feed / Announcement Modal */}
       <CreateBulletinBoardModal
         open={activeModal === "announcement"}
-        onClose={() => setActiveModal(null)}
+        onClose={() => {
+          setActiveModal(null)
+          setEditItemData(null)
+        }}
         onSubmit={handleSaveBulletinBoard}
         sessionName={targetSectionName}
+        initialData={
+          editItemData
+            ? {
+              title: editItemData.bulletinBoard?.title || editItemData.title,
+              content: editItemData.bulletinBoard?.content || editItemData.content,
+              allowReply: editItemData.bulletinBoard?.allowStudentReply ?? editItemData.allowReply ?? true,
+              isVisibleToStudents: editItemData.isVisibleToStudents,
+            }
+            : null
+        }
       />
 
       {/* 2. Add Material Modal */}

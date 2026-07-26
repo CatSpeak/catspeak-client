@@ -945,10 +945,12 @@ export const coursesApi = baseApi.injectEndpoints({
               let title = item.title || item.name || "Untitled"
               let meta = item.meta || item.description || ""
               let metaType = item.metaType || "none"
+              let content = item.content || ""
 
               if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
                 title = item.bulletinBoard.title || title
                 metaType = "clock"
+                content = item.bulletinBoard.content
               } else if (item.itemType === "Link" && item.link) {
                 title = item.link.title || title
                 meta = item.link.url || meta
@@ -974,6 +976,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 id: item.id?.toString() || "",
                 itemId: item.itemId?.toString() || "",
                 type,
+                content,
                 title,
                 meta,
                 metaType,

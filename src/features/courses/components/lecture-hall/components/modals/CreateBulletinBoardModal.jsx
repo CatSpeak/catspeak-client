@@ -9,12 +9,26 @@ const CreateBulletinBoardModal = ({
   open = false,
   onClose = () => { },
   onSubmit = () => { },
-  sessionName = "Buổi 1: Introduction & Greetings",
+  initialData = null,
 }) => {
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
-  const [allowReply, setAllowReply] = useState(true)
-  const [isVisible, setIsVisible] = useState(true)
+  const [title, setTitle] = useState(initialData?.title || "")
+  const [content, setContent] = useState(initialData?.content || "")
+  const [allowReply, setAllowReply] = useState(initialData?.allowReply ?? true)
+  const [isVisible, setIsVisible] = useState(initialData?.isVisibleToStudents ?? true)
+
+  const [prevOpen, setPrevOpen] = useState(open)
+  const [prevInitialData, setPrevInitialData] = useState(initialData)
+
+  if (open !== prevOpen || initialData !== prevInitialData) {
+    setPrevOpen(open)
+    setPrevInitialData(initialData)
+    if (open) {
+      setTitle(initialData?.title || "")
+      setContent(initialData?.content || "")
+      setAllowReply(initialData?.allowReply ?? true)
+      setIsVisible(initialData?.isVisibleToStudents ?? true)
+    }
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -36,15 +50,8 @@ const CreateBulletinBoardModal = ({
       content,
       allowReply,
       isVisible,
-      sessionName,
     })
     onClose()
-
-    // Clear form
-    setTitle("")
-    setContent("")
-    setAllowReply(true)
-    setIsVisible(true)
   }
 
   const handleEditorChange = (newContent) => {
@@ -55,7 +62,7 @@ const CreateBulletinBoardModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title="Tạo bảng tin"
+      title={initialData ? "Chỉnh sửa bảng tin" : "Tạo bảng tin"}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -79,11 +86,6 @@ const CreateBulletinBoardModal = ({
 
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Banner session info */}
-        <div className="bg-[#F9FAFB] text-[#4B5563] text-sm p-3 rounded-xl font-medium">
-          Đang thêm vào: <span className="font-semibold text-[#111827]">{sessionName}</span>
-        </div>
-
         {/* Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
