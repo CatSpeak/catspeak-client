@@ -36,20 +36,19 @@ const ClassDetailPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
+  const tabParam = searchParams.get("tab") || "overview"
 
-  const [selectedTab, setSelectedTab] = useState("overview")
-  const activeTab = assignmentId ? "grading" : selectedTab
+  const activeTab = assignmentId ? "grading" : tabParam
 
   const handleTabChange = (tab) => {
-    setSelectedTab(tab)
-
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.set("tab", tab)
     if (assignmentId) {
-      const nextSearchParams = new URLSearchParams(searchParams)
       nextSearchParams.delete("assignmentId")
       nextSearchParams.delete("studentId")
       nextSearchParams.delete("submissionId")
-      setSearchParams(nextSearchParams)
     }
+    setSearchParams(nextSearchParams)
   }
 
   // Fetch Class Details via RTK Query
@@ -95,7 +94,7 @@ const ClassDetailPage = () => {
   const tabs = [
     { value: "overview", label: cd.overview || "Overview" },
     { value: "members", label: cd.members || "Members" },
-    { value: "feed", label: cd.feed || "Feed" },
+    { value: "lecture-hall", label: cd.lectureHall || "Lecture Hall" },
     { value: "grading", label: cd.grading || "Grading" },
     { value: "materials", label: cd.materials || "Materials" },
   ]
@@ -208,7 +207,7 @@ const ClassDetailPage = () => {
           />
         )}
 
-        {activeTab === "feed" && (
+        {activeTab === "lecture-hall" && (
           <ClassLectureHallPage
             id={id}
             isStudent={false}

@@ -102,6 +102,7 @@ export default {
     overview: "Overview",
     members: "Members",
     feed: "Feed",
+    lectureHall: "Lecture Hall",
     grading: "Grading",
     classOverview: "Class Overview",
     classInformation: "Class Information",

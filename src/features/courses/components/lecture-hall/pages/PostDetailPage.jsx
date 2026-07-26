@@ -10,6 +10,7 @@ import {
   useGetPostDetailQuery,
   useCreateCommentInBulletinBoardMutation,
   useCreateReplyInCommentMutation,
+  useGetClassDetailQuery,
 } from "@/store/api/coursesApi"
 import { useSelector } from "react-redux"
 import { formatFileSize } from "../utils/fileUtils"
@@ -17,6 +18,8 @@ import { formatFileSize } from "../utils/fileUtils"
 const PostDetailPage = () => {
   const navigate = useNavigate()
   const { id: classId, postId } = useParams()
+  const { data: detailResponse } = useGetClassDetailQuery(classId, { skip: !classId })
+  const classData = detailResponse?.data || detailResponse || {}
 
   const [showAll, setShowAll] = useState(false)
   const [replyingTo, setReplyingTo] = useState(null)
@@ -94,18 +97,18 @@ const PostDetailPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: "Trang chủ", href: "/workspace" },
-          { label: "Khóa học của tôi", href: `/courses/details/${classId}` },
-          { label: "Toàn bộ khóa học", href: "/courses" },
-          { label: "Chi tiết khóa học", href: "#" },
-          { label: "Chi tiết lớp học", href: "#" },
-          { label: "Chi tiết bài đăng", active: true },
+          { label: "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
+          { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
+          { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
+          { label: "Chi tiết bảng tin", active: true },
         ]}
       />
 
       <div className="min-w-6xl p-8">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`)}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
           <ArrowLeft size={16} /> Quay lại

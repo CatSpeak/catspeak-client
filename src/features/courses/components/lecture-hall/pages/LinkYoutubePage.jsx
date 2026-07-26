@@ -1,12 +1,14 @@
 import React, { useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useGetCurriculumByClassQuery } from '@/store/api/coursesApi'
+import { useGetClassDetailQuery, useGetCurriculumByClassQuery } from '@/store/api/coursesApi'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 const LinkYoutubePage = () => {
   const { id: classId, itemId } = useParams()
+  const { data: detailResponse } = useGetClassDetailQuery(classId, { skip: !classId })
+  const classData = detailResponse?.data || detailResponse || {}
   const navigate = useNavigate()
 
   const { data: curriculum, isLoading } = useGetCurriculumByClassQuery(classId, { skip: !classId })
@@ -72,20 +74,24 @@ const LinkYoutubePage = () => {
 
   return (
     <div className="flex flex-col h-full bg-[#FCFCFC]">
-      <div className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+      <div className="flex-1 w-full min-w-7xl mx-auto p-4 md:p-8 space-y-6">
         {/* ── Breadcrumb & Nút quay lại ── */}
         <div className="flex flex-col gap-4">
           <Breadcrumb
+            className="text-[#7B7979] text-sm"
             items={[
+              { label: "Trang chủ", onClick: () => navigate("/workspace") },
               { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
-              { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}`) },
-              { label: linkItem.title || "Video bài giảng", isCurrent: true },
+              { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
+              { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
+              { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
+              { label: "Chi tiết bảng tin", active: true },
             ]}
           />
 
           <div
             className="inline-flex items-center gap-2 text-sm text-[#5B403C] hover:text-[#D94C38] cursor-pointer transition-colors w-fit font-medium"
-            onClick={() => navigate(`/workspace/courses/class/${classId}`)}
+            onClick={() => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`)}
           >
             <ArrowLeft size={16} /> Quay lại
           </div>

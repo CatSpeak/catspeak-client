@@ -57,7 +57,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
     })
   }
   // Active Modal state
-  const [activeModal, setActiveModal] = useState(null) // null | 'bulletin-board' | 'material' | 'assignment' | 'link'
+  const [activeModal, setActiveModal] = useState(null) // null | 'announcement' | 'material' | 'assignment' | 'link'
   const [targetSectionId, setTargetSectionId] = useState(null)
   const [targetSectionName, setTargetSectionName] = useState("")
   const [editItemData, setEditItemData] = useState(null)

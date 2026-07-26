@@ -18,7 +18,7 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import FileAttachmentItem from "../components/ui/FileAttachmentItem"
 import ToggleOption from "../components/ui/ToggleOption"
 import { useParams, useNavigate } from "react-router-dom"
-import { useCreatePostInBulletinBoardMutation, useUpdatePostInBulletinBoardMutation, useGetPostDetailQuery } from "@/store/api/coursesApi"
+import { useCreatePostInBulletinBoardMutation, useUpdatePostInBulletinBoardMutation, useGetPostDetailQuery, useGetClassDetailQuery } from "@/store/api/coursesApi"
 import toast from "react-hot-toast"
 
 // ─── Helpers (reused pattern from CreatePostModal / AddMaterialModal) ────────
@@ -39,6 +39,8 @@ const CreatePostPage = () => {
     { classId, postId },
     { skip: !isEditMode }
   )
+  const { data: detailResponse } = useGetClassDetailQuery(classId, { skip: !classId })
+  const classData = detailResponse?.data || detailResponse || {}
 
   // Form state
   const [title, setTitle] = useState("")
@@ -169,7 +171,7 @@ const CreatePostPage = () => {
         await createPost({ classId, boardId, formData }).unwrap()
         toast.success("Tạo bài viết thành công")
       }
-      navigate(-1)
+      navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}`)
     } catch (err) {
       console.error("Failed to save post", err)
       toast.error(isEditMode ? "Đã xảy ra lỗi khi cập nhật bài viết" : "Đã xảy ra lỗi khi tạo bài viết")
@@ -190,7 +192,7 @@ const CreatePostPage = () => {
   // }
 
   const cancelEdit = () => {
-    navigate(-1)
+    navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}`)
   }
 
   return (
@@ -199,12 +201,12 @@ const CreatePostPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: "Trang chủ", href: "/" },
-          { label: "Khóa học của tôi", href: "/workspace/courses" },
-          { label: "Toàn bộ khóa học", href: "/workspace/courses" },
-          { label: "Chi tiết khóa học", href: "#" },
-          { label: "Chi tiết lớp học", href: "#" },
-          { label: "Chi tiết bảng tin", href: "#" },
+          { label: "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
+          { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
+          { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
+          { label: "Chi tiết bảng tin", onClick: () => navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}`) },
           { label: isEditMode ? "Chỉnh sửa bài viết" : "Thêm bài viết", active: true },
         ]}
       />

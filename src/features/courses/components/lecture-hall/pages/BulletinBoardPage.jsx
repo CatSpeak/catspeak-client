@@ -5,7 +5,7 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import DataTable from "@/shared/components/ui/DataTable"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
-import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation, useDeletePostInBulletinBoardMutation } from "@/store/api/coursesApi"
+import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation, useDeletePostInBulletinBoardMutation, useGetClassDetailQuery } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { toast } from "react-hot-toast"
@@ -14,6 +14,8 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 const BulletinBoardPage = () => {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
+  const { data: detailResponse } = useGetClassDetailQuery(classId, { skip: !classId })
+  const classData = detailResponse?.data || detailResponse || {}
 
   const [searchTerm, setSearchTerm] = useState("")
   const [updatePost] = useUpdatePostInBulletinBoardMutation()
@@ -114,18 +116,18 @@ const BulletinBoardPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: "Trang chủ", href: "/" },
-          { label: "Khóa học của tôi", href: "/workspace/courses" },
-          { label: "Toàn bộ khóa học", href: "/workspace/courses" },
-          { label: "Chi tiết khóa học", href: "#" },
-          { label: "Chi tiết lớp học", href: "#" },
+          { label: "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
+          { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
+          { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
           { label: "Chi tiết bảng tin", active: true },
         ]}
       />
 
       <div className="min-w-6xl p-8 w-full">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`)}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
           <ArrowLeft size={16} /> Quay lại

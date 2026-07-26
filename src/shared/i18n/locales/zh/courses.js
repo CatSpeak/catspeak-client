@@ -102,6 +102,7 @@ export default {
     overview: "概览",
     members: "成员",
     feed: "动态",
+    lectureHall: "演讲厅",
     grading: "打分",
     classOverview: "班级概览",
     classInformation: "班级信息",

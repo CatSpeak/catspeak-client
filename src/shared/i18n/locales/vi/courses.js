@@ -102,6 +102,7 @@ export default {
     overview: "Tổng quan",
     members: "Thành viên",
     feed: "Bảng tin",
+    lectureHall: "Giảng đường",
     grading: "Chấm điểm",
     classOverview: "Tổng quan lớp học",
     classInformation: "Thông tin lớp học",
