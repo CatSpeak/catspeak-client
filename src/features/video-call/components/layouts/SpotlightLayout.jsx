@@ -31,15 +31,15 @@ const SpotlightLayout = ({
 
   const getSidebarItemClass = () => {
     if (totalItems <= 5) {
-      return "flex-shrink-0 w-[160px] aspect-video md:w-full md:flex-1 md:aspect-auto md:h-auto relative"
+      return "flex-shrink-0 w-[120px] sm:w-[150px] aspect-video md:w-full md:flex-1 md:aspect-auto md:h-auto relative"
     }
-    return "flex-shrink-0 w-[160px] md:w-full aspect-video md:flex-shrink-0 relative"
+    return "flex-shrink-0 w-[120px] sm:w-[150px] md:w-full aspect-video md:flex-shrink-0 relative"
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-2">
+    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-1 sm:p-2">
       {/* Main: spotlighted tile */}
-      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0">
+      <div className="flex-[4] md:flex-[5] min-h-0 min-w-0">
         {spotlightItem.type === "screen" ? (
           <div className="h-full w-full">
             <ScreenShareTile

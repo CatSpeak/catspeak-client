@@ -1,7 +1,8 @@
-import React, { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { MoreHorizontal, User, UserCheck, UserX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetFriendsQuery,
   useGetFollowersQuery,
@@ -21,7 +22,7 @@ import {
   EmptyState,
 } from "@/shared/components/ui/indicators"
 import Popover from "@/shared/components/ui/Popover"
-import { PillButton, IconButton } from "@/shared/components/ui/buttons"
+import { IconButton } from "@/shared/components/ui/buttons"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 
 const ProfileFriendsTab = ({
@@ -30,9 +31,11 @@ const ProfileFriendsTab = ({
   defaultSubTab,
 }) => {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all")
   const [searchQuery, setSearchQuery] = useState("")
   const [limit, setLimit] = useState(10)
+  const secondLastRecRef = useRef(null)
 
   // Fetch all potential data
   const { data: friendsResponse, isLoading: loadingFriends } =
@@ -49,7 +52,22 @@ const ProfileFriendsTab = ({
     data: recResponse,
     isLoading: loadingRecs,
     isFetching: fetchingRecs,
-  } = useGetFriendRecommendationsQuery(limit)
+  } = useGetFriendRecommendationsQuery(searchQuery ? 9999 : limit)
+
+  // Infinite scroll — observe second-to-last recommendation card
+  useEffect(() => {
+    if (!secondLastRecRef.current) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !fetchingRecs) {
+          setLimit((prev) => prev + 10)
+        }
+      },
+      { rootMargin: "200px" },
+    )
+    observer.observe(secondLastRecRef.current)
+    return () => observer.disconnect()
+  }, [recResponse, fetchingRecs])
   const [respondFriendRequest] = useRespondFriendRequestMutation()
 
   const handleRespondRequest = (friendshipId, action, closePopover) => {
@@ -58,10 +76,12 @@ const ProfileFriendsTab = ({
       .unwrap()
       .then(() => {
         toast.success(
-          action === "accept" ? "Đã chấp nhận kết bạn!" : "Đã từ chối kết bạn",
+          action === "accept"
+            ? t.profile?.friends?.actions?.acceptSuccess || "Đã chấp nhận kết bạn!"
+            : t.profile?.friends?.actions?.declineSuccess || "Đã từ chối kết bạn",
         )
       })
-      .catch(() => toast.error("Có lỗi xảy ra"))
+      .catch(() => toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra"))
   }
 
   const getArray = (res) => (Array.isArray(res) ? res : res?.data || [])
@@ -70,20 +90,20 @@ const ProfileFriendsTab = ({
   const pendingRequests = getArray(pendingResponse)
 
   const subTabs = [
-    { id: "all", label: "Tất cả bạn bè" },
-    { id: "following", label: "Đang theo dõi" },
-    { id: "followers", label: "Người theo dõi" },
+    { id: "all", label: t.profile?.friends?.subTabs?.all || "Tất cả bạn bè" },
+    { id: "following", label: t.profile?.friends?.subTabs?.following || "Đang theo dõi" },
+    { id: "followers", label: t.profile?.friends?.subTabs?.followers || "Người theo dõi" },
   ]
 
   // Add "Pending Requests" only for own profile
   if (isOwnProfile) {
     subTabs.push({
       id: "pending",
-      label: "Yêu cầu kết nối",
+      label: t.profile?.friends?.subTabs?.pending || "Yêu cầu kết nối",
       badge:
         pendingRequests.length > 0 ? pendingRequests.length.toString() : null,
     })
-    subTabs.push({ id: "find", label: "Tìm bạn bè" })
+    subTabs.push({ id: "find", label: t.profile?.friends?.subTabs?.find || "Tìm bạn bè" })
   }
 
   // Reset activeSubTab to 'all' if navigating to another user's profile while on a restricted tab
@@ -99,20 +119,20 @@ const ProfileFriendsTab = ({
   const renderGridList = () => {
     let list = []
     let isLoading = false
-    let emptyMessage = "Không có dữ liệu"
+    let emptyMessage = t.profile?.friends?.empty?.noData || "Không có dữ liệu"
 
     if (activeSubTab === "all") {
       list = getArray(friendsResponse)
       isLoading = loadingFriends
-      emptyMessage = "Chưa có bạn bè nào."
+      emptyMessage = t.profile?.friends?.empty?.noFriends || "Chưa có bạn bè nào."
     } else if (activeSubTab === "following") {
       list = getArray(followingResponse)
       isLoading = loadingFollowing
-      emptyMessage = "Chưa theo dõi ai."
+      emptyMessage = t.profile?.friends?.empty?.noFollowing || "Chưa theo dõi ai."
     } else if (activeSubTab === "followers") {
       list = getArray(followersResponse)
       isLoading = loadingFollowers
-      emptyMessage = "Chưa có người theo dõi."
+      emptyMessage = t.profile?.friends?.empty?.noFollowers || "Chưa có người theo dõi."
     } else if (activeSubTab === "pending") {
       list = pendingRequests.map((req) => ({
         ...req.requester,
@@ -120,11 +140,11 @@ const ProfileFriendsTab = ({
         isPendingRequest: true,
       }))
       isLoading = loadingPending
-      emptyMessage = "Không có yêu cầu kết nối nào."
+      emptyMessage = t.profile?.friends?.empty?.noPending || "Không có yêu cầu kết nối nào."
     } else if (activeSubTab === "find") {
       list = getArray(recResponse)
       isLoading = loadingRecs
-      emptyMessage = "Không có gợi ý nào."
+      emptyMessage = t.profile?.friends?.empty?.noRecommendations || "Không có gợi ý nào."
     }
 
     if (searchQuery) {
@@ -165,81 +185,86 @@ const ProfileFriendsTab = ({
       )
     }
 
+    const secondLastId =
+      list[list.length - 2]?.accountId ?? list[list.length - 1]?.accountId
+    const hasMore = activeSubTab === "find" && !searchQuery && list.length >= limit
+
     return (
       <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {list.map((user) => (
-            <HorizontalCard
-              key={user.accountId}
-              onClick={() => navigate(`/profile/${user.accountId}`)}
-              leftContent={
-                <Avatar
-                  size={40}
-                  src={user.avatarImageUrl}
-                  name={user.nickname || user.username}
-                />
-              }
-              rightContent={
-                user.isPendingRequest ? (
-                  <Popover
-                    placement="bottom-right"
-                    trigger={
-                      <IconButton variant="ghost">
-                        <MoreHorizontal />
-                      </IconButton>
-                    }
-                    content={(close) => (
-                      <MenuList>
-                        <MenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRespondRequest(
-                              user.friendshipId,
-                              "accept",
-                              close,
-                            )
-                          }}
-                          icon={<UserCheck />}
-                          label="Chấp nhận"
-                        />
-                        <MenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRespondRequest(
-                              user.friendshipId,
-                              "decline",
-                              close,
-                            )
-                          }}
-                          icon={<UserX />}
-                          label="Từ chối"
-                          className="text-red-600"
-                        />
-                      </MenuList>
-                    )}
-                  />
-                ) : null
-              }
-            >
-              <h3 className="font-semibold">
-                {user.nickname || user.username}
-              </h3>
-
-              <p className="text-sm text-[#606060]">{user.level || "Member"}</p>
-            </HorizontalCard>
-          ))}
+          {list.map((user) => {
+            const isSecondLast =
+              activeSubTab === "find" && user.accountId === secondLastId
+            return (
+              <div
+                key={user.accountId}
+                ref={isSecondLast ? secondLastRecRef : null}
+              >
+                <HorizontalCard
+                  onClick={() => navigate(`/profile/${user.accountId}`)}
+                  leftContent={
+                    <Avatar
+                      size={40}
+                      src={user.avatarImageUrl}
+                      name={user.nickname || user.username}
+                    />
+                  }
+                  rightContent={
+                    user.isPendingRequest ? (
+                      <Popover
+                        placement="bottom-right"
+                        trigger={
+                          <IconButton variant="ghost">
+                            <MoreHorizontal />
+                          </IconButton>
+                        }
+                        content={(close) => (
+                          <MenuList>
+                            <MenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRespondRequest(
+                                  user.friendshipId,
+                                  "accept",
+                                  close,
+                                )
+                              }}
+                              icon={<UserCheck />}
+                              label={t.profile?.friends?.actions?.accept || "Chấp nhận"}
+                            />
+                            <MenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRespondRequest(
+                                  user.friendshipId,
+                                  "decline",
+                                  close,
+                                )
+                              }}
+                              icon={<UserX />}
+                              label={t.profile?.friends?.actions?.decline || "Từ chối"}
+                              className="text-red-600"
+                            />
+                          </MenuList>
+                        )}
+                      />
+                    ) : null
+                  }
+                >
+                  <h3 className="font-semibold">
+                    {user.nickname || user.username}
+                  </h3>
+                  <p className="text-sm text-[#606060]">{user.level || t.profile?.friends?.member || "Member"}</p>
+                </HorizontalCard>
+              </div>
+            )
+          })}
         </div>
 
-        {activeSubTab === "find" && list.length >= limit && (
-          <div className="w-full flex justify-center mt-6">
-            <PillButton
-              onClick={() => setLimit((prev) => prev + 10)}
-              loading={fetchingRecs}
-              loadingText="Đang tải..."
-              variant="secondary"
-            >
-              Tải thêm
-            </PillButton>
+        {/* Infinite scroll loading spinner */}
+        {hasMore && fetchingRecs && (
+          <div className="flex justify-center py-4">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </>
@@ -251,12 +276,12 @@ const ProfileFriendsTab = ({
       {/* Top Header Card containing Tabs and Search */}
       <FluentCard padding="p-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e5e5e5] p-4 sm:p-6">
-          <h2 className="text-xl font-bold">Bạn bè</h2>
+          <h2 className="text-xl font-bold">{t.profile?.friends?.title || "Bạn bè"}</h2>
           {/* Search Bar */}
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Tìm kiếm bạn bè..."
+            placeholder={t.profile?.friends?.searchPlaceholder || "Tìm kiếm bạn bè..."}
             className="md:w-[360px]"
           />
         </div>

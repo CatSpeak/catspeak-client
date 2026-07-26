@@ -3,7 +3,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import { NavLink, useParams } from "react-router-dom";
 import { Globe } from "lucide-react";
 
-const DesktopNavItem = ({ navKey, color, img }) => {
+const DesktopNavItem = ({ navKey, path, color, img }) => {
   const { t } = useLanguage();
   const { lang } = useParams();
   const [imgError, setImgError] = useState(false);
@@ -20,15 +20,10 @@ const DesktopNavItem = ({ navKey, color, img }) => {
     const currentLang =
       lang || localStorage.getItem("communityLanguage") || "zh";
     href = `/${currentLang}/cat-speak/news`;
-  } else if (navKey === "cart") {
-    href = "/cart";
-  } else if (navKey === "connect") {
-    href = "/connect";
   } else if (navKey === "workspace") {
     href = "/workspace";
   } else {
-    // Default fallback
-    href = "/";
+    href = path || "/";
   }
 
   return (
@@ -54,3 +49,4 @@ const DesktopNavItem = ({ navKey, color, img }) => {
 };
 
 export default DesktopNavItem;
+

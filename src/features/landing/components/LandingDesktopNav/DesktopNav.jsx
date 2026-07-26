@@ -1,11 +1,12 @@
 import React from "react"
 import DesktopCommunityDropdown from "./DesktopCommunityDropdown"
 import DesktopNavItem from "./DesktopNavItem"
+import DesktopSubNavDropdown from "./DesktopSubNavDropdown"
 import { navLinks } from "@/features/navigation/config/navigation"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { useAuth } from "@/features/auth"
 
-const DesktopNav = () => {
+const DesktopNav = ({ onRequestLogin }) => {
   const { currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
 
@@ -20,14 +21,30 @@ const DesktopNav = () => {
           return true
         })
         .map((item) => {
-          const { key, hasDropdown, noActive, color, img } = item
+          const { key, path, hasDropdown, subItems, noActive, color, img } = item
+
+          // Community: language-picker dropdown
           if (hasDropdown && key === "community") {
             return <DesktopCommunityDropdown key={key} navKey={key} />
           }
+
+          // Items with subroutes: hover dropdown
+          if (subItems && subItems.length > 0) {
+            return (
+              <DesktopSubNavDropdown
+                key={key}
+                item={item}
+                onRequestLogin={onRequestLogin}
+              />
+            )
+          }
+
+          // Plain nav link
           return (
             <DesktopNavItem
               key={key}
               navKey={key}
+              path={path}
               noActive={noActive}
               color={color}
               img={img}
@@ -38,4 +55,4 @@ const DesktopNav = () => {
   )
 }
 
-export default DesktopNav
+export default DesktopNav

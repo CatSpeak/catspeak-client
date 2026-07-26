@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
+import { leaveCall } from "@/store/slices/videoCallSlice"
+import {
+  subscribeToCallBroadcast,
+  broadcastCallEvent,
+  BROADCAST_EVENT_TYPES,
+} from "@/features/video-call/services/callBroadcastChannel"
 import GlobalCallContent from "./GlobalCallContent"
 
 const GlobalVideoCallContext = createContext(null)
@@ -89,11 +95,13 @@ const IDLE_VALUE = {
   unreadRoomChat: 0,
   unreadAiChat: 0,
   isChatCollapsed: false,
-  isAiCollapsed: false,
+  isAiCollapsed: true,
   setUnreadRoomChat: () => { },
   setUnreadAiChat: () => { },
   setIsChatCollapsed: () => { },
   setIsAiCollapsed: () => { },
+  activeChatTab: "room",
+  setActiveChatTab: () => { },
   layoutMode: "auto",
   setLayoutMode: () => { },
   maxTiles: 16,
@@ -117,6 +125,7 @@ const IdleCallContent = ({
 // --- Main Provider ----------------------------------------------------------
 
 export const GlobalVideoCallProvider = ({ children }) => {
+  const dispatch = useDispatch()
   const { isInCall, livekitToken, livekitServerUrl, callInfo } = useSelector(
     (s) => s.videoCall,
   )
@@ -131,6 +140,25 @@ export const GlobalVideoCallProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("receiveSystemMsgs", JSON.stringify(receiveSystemMsgs))
   }, [receiveSystemMsgs])
+
+  // Cross-tab call state broadcast listener
+  useEffect(() => {
+    const unsubscribe = subscribeToCallBroadcast(({ type }) => {
+      if (type === BROADCAST_EVENT_TYPES.PING_ACTIVE_CALL) {
+        if (isInCall) {
+          broadcastCallEvent(BROADCAST_EVENT_TYPES.PONG_ACTIVE_CALL, {
+            isInCall: true,
+            callInfo,
+          })
+        }
+      } else if (type === BROADCAST_EVENT_TYPES.REQUEST_LEAVE_CALL) {
+        if (isInCall) {
+          dispatch(leaveCall())
+        }
+      }
+    })
+    return unsubscribe
+  }, [isInCall, callInfo, dispatch])
 
   if (!isInCall || !livekitToken) {
     return (

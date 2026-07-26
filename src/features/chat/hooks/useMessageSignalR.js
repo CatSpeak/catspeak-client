@@ -170,6 +170,23 @@ export const useMessageSignalR = ({ activeConversationId }) => {
         }
       },
 
+      MessageRecalled: (payload) => {
+        const convId = payload?.conversationId
+
+        if (
+          convId &&
+          activeConversationId &&
+          Number(convId) === Number(activeConversationId)
+        ) {
+          dispatch(
+            conversationsApi.util.invalidateTags([
+              { type: "Messages", id: Number(activeConversationId) },
+              { type: "Messages", id: String(activeConversationId) },
+            ]),
+          )
+        }
+      },
+
       ReadReceipt: (...args) => {
         const convId =
           typeof args[0] === "object" ? args[0]?.conversationId : args[0]

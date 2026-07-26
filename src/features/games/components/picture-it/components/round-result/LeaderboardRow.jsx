@@ -32,7 +32,7 @@ const LeaderboardRow = ({ player, index }) => {
       />
 
       {/* Player name */}
-      <div className="flex-1 min-w-0 items-center text-sm font-nunito font-semibold">
+      <div className="flex-1 min-w-0 items-center text-sm font-semibold">
         {player.name}
       </div>
 

@@ -84,7 +84,7 @@ export const useRoomLifecycle = ({
         (toastInstance) => (
           <div
             className={`${toastInstance.visible ? "animate-enter" : "animate-leave"
-              } flex items-center gap-4 w-[90vw] max-w-[480px] rounded-xl bg-white p-3 shadow-faq-card font-nunito`}
+              } flex items-center gap-4 w-[90vw] max-w-[480px] rounded-xl bg-white p-3 shadow-faq-card`}
           >
             <div className="bg-[#FEF5C7] border rounded-full w-10 h-10 flex items-center justify-center">
               <Megaphone color="#F4AB1B" size={20} />

@@ -4,7 +4,7 @@
 
 /* CSS Variables */
 :root {
-  --font-primary: "Noto Sans", sans-serif;
+  --font-primary: "Nunito", "Noto Sans", sans-serif;
   --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
   --cath-red-50: #100002;

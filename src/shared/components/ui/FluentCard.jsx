@@ -4,11 +4,12 @@ const FluentCard = ({
   children,
   className = "",
   padding = "p-4 sm:p-6",
+  rounded = "rounded-xl",
   variant = "default",
   ...props
 }) => {
   const baseClasses =
-    `flex flex-col justify-center rounded-xl ${padding} min-h-[69px]`
+    `flex flex-col justify-center ${rounded} ${padding} min-h-[69px]`
 
   const variantClasses = {
     default: "border border-[#E5E5E5] bg-white",

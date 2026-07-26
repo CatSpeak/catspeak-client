@@ -1,4 +1,4 @@
-import { socialApi } from "./socialApi"
+import { socialApi } from "@/store/api/social/socialApi"
 
 export const storiesApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({

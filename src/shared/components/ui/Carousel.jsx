@@ -87,7 +87,7 @@ const Carousel = ({
       )}
 
       {/* Image Container */}
-      <div className={`relative w-full overflow-hidden ${isFullscreen ? "h-full flex-1" : `rounded-2xl ${className}`}`}>
+      <div className={`relative w-full overflow-hidden ${isFullscreen ? "h-full flex-1" : `${className.includes("rounded") ? "" : "rounded-xl"} ${className}`}`}>
         {/* Slides (Sliding Effect with Framer Motion) */}
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div

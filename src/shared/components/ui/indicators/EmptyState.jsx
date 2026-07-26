@@ -1,12 +1,24 @@
 import React from "react"
 
+/**
+ * EmptyState — Shared component for empty state feedback across pages and components.
+ *
+ * @param {string} message - Primary title / message text
+ * @param {string} title - Alias for message
+ * @param {string|ReactNode} description - Secondary description text
+ * @param {string|ReactNode} subtext - Alias for description
+ * @param {React.ComponentType} icon - Optional Lucide or custom SVG icon component
+ * @param {string} variant - Layout style variant ("simple" | "component" | "page" | "detailed")
+ * @param {string} className - Optional container CSS classes
+ * @param {ReactNode} children - Optional extra action buttons / elements
+ */
 const EmptyState = ({
   message = "No items found",
   title,
-  description,
+  description = null,
   subtext,
   icon: Icon,
-  iconClassName = "w-12 h-12 mb-4 text-gray-400",
+  iconClassName,
   action,
   children,
   fullPage = false,
@@ -16,34 +28,58 @@ const EmptyState = ({
   const displayTitle = title || message
   const displaySubtext = subtext || description
 
+  const renderDescription = () => {
+    if (!displaySubtext) return null
+    if (typeof displaySubtext === "string") {
+      return (
+        <p className="text-sm text-[#606060] mt-1 text-center max-w-sm">
+          {displaySubtext}
+        </p>
+      )
+    }
+    return displaySubtext
+  }
+
   if (variant === "component") {
     return (
       <div
         className={`flex flex-col items-center justify-center py-12 text-[#606060] ${className}`}
       >
         {Icon && <Icon className="w-8 h-8 mb-2 text-[#606060]" />}
-        <div className="text-sm text-center">{displayTitle}</div>
+        <div className="text-sm text-center font-medium">{displayTitle}</div>
+        {renderDescription()}
+        {action}
         {children}
       </div>
     )
   }
 
-  if (variant === "detailed" || variant === "page" || Icon || displaySubtext || action || children) {
+  if (variant === "page") {
     return (
       <div
-        className={`flex flex-col items-center justify-center text-center text-[#606060] ${
-          fullPage ? "min-h-[50vh] py-12" : "py-16"
-        } ${className}`}
+        className={`flex-1 w-full flex flex-col items-center justify-center ${
+          fullPage ? "min-h-[50vh] py-12" : "py-12"
+        } text-[#606060] ${className}`}
       >
-        {Icon && <Icon className={iconClassName} />}
-        <p className="text-lg font-semibold text-gray-800 mb-1">
-          {displayTitle}
-        </p>
-        {displaySubtext && (
-          <p className="text-sm text-[#606060] max-w-[360px] mb-4">
-            {displaySubtext}
-          </p>
-        )}
+        {Icon && <Icon className={iconClassName || "w-16 h-16 mb-3 text-[#606060]"} />}
+        <div className="font-semibold text-lg text-center">{displayTitle}</div>
+        {renderDescription()}
+        {action}
+        {children}
+      </div>
+    )
+  }
+
+  if (variant === "detailed" || Icon) {
+    return (
+      <div
+        className={`flex flex-col items-center justify-center ${
+          fullPage ? "min-h-[50vh] py-12" : "py-16"
+        } text-[#606060] ${className}`}
+      >
+        {Icon && <Icon className={iconClassName || "w-14 h-14 mb-3 text-[#606060]"} />}
+        <div className="font-semibold text-base text-center">{displayTitle}</div>
+        {renderDescription()}
         {action}
         {children}
       </div>
@@ -51,8 +87,11 @@ const EmptyState = ({
   }
 
   return (
-    <div className={`flex justify-center ${className || "p-10"}`}>
-      <div className="text-[#7A7574] text-base">{displayTitle}</div>
+    <div className={`flex flex-col items-center justify-center ${className || "p-10"}`}>
+      <div className="text-[#7A7574] text-base text-center">{displayTitle}</div>
+      {renderDescription()}
+      {action}
+      {children}
     </div>
   )
 }
