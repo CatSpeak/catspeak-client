@@ -5,7 +5,9 @@ import test from "node:test"
 import assert from "node:assert/strict"
 
 import {
+  buildQuestionFormData,
   buildQuizAnswerPayload,
+  buildQuizFormData,
   buildQuizPayload,
   buildQuizUpdatePayload,
   createInitialQuizForm,
@@ -141,7 +143,7 @@ test("quiz mapping clones question arrays and rejects malformed question data", 
   const response = {
     id: "quiz-a",
     questions: [{
-      id: "question-a",
+      id: 42,
       type: "MultipleChoiceMultiple",
       points: 0,
       content: "Pick",
@@ -152,7 +154,8 @@ test("quiz mapping clones question arrays and rejects malformed question data", 
   const form = mapQuizToFormState(response)
 
   assert.deepEqual(form.questions[0], {
-    id: "q-question-a",
+    id: "q-42",
+    questionId: 42,
     type: "MultipleChoiceMultiple",
     score: 0,
     content: "Pick",
@@ -245,6 +248,117 @@ test("update payload contains only normalized changed fields", () => {
     buildQuizUpdatePayload(unchanged, baseline, { status: "Draft" }),
     { status: "Draft" }
   )
+})
+
+test("quiz FormData uses indexed multipart question fields from Swagger", () => {
+  const mediaFile = new File(["image"], "question.png", {
+    type: "image/png",
+    lastModified: 100,
+  })
+  const audioFile = new File(["audio"], "question.mp3", {
+    type: "audio/mpeg",
+    lastModified: 200,
+  })
+  const payload = buildQuizPayload({
+    title: "Media quiz",
+    duration: 30,
+    questions: [{
+      type: "MultipleChoiceSingle",
+      content: "Choose one.",
+      score: 5,
+      required: false,
+      options: ["A", "B"],
+      correctAnswers: ["1"],
+      mediaUrl: "blob:https://client.invalid/image",
+      audioUrl: "blob:https://client.invalid/audio",
+      mediaFile,
+      audioFile,
+    }],
+  }, { status: "Draft" })
+
+  const formData = buildQuizFormData(payload)
+
+  assert.equal(formData.get("Name"), "Media quiz")
+  assert.equal(formData.get("TimeLimitMinutes"), "30")
+  assert.equal(formData.get("Status"), "Draft")
+  assert.equal(formData.get("Questions"), null)
+  assert.equal(formData.get("questions"), null)
+  assert.equal(formData.get("Questions[0].Type"), "MultipleChoiceSingle")
+  assert.equal(formData.get("Questions[0].Content"), "Choose one.")
+  assert.equal(formData.get("Questions[0].Points"), "5")
+  assert.equal(formData.get("Questions[0].IsRequired"), "false")
+  assert.equal(formData.get("Questions[0].Options[0]"), "A")
+  assert.equal(formData.get("Questions[0].Options[1]"), "B")
+  assert.equal(formData.get("Questions[0].CorrectAnswers[0]"), "1")
+  assert.equal(formData.get("Questions[0].MediaFile"), mediaFile)
+  assert.equal(formData.get("Questions[0].AudioFile"), audioFile)
+  assert.equal(formData.get("Questions[0].MediaUrl"), null)
+  assert.equal(formData.get("Questions[0].AudioUrl"), null)
+  assert.equal(formData.get("Questions[0].ClearMedia"), null)
+  assert.equal(formData.get("Questions[0].ClearAudio"), null)
+})
+
+test("quiz update FormData includes persisted IDs and clear flags", () => {
+  const payload = buildQuizPayload({
+    questions: [{
+      id: "q-42",
+      questionId: 42,
+      type: "Essay",
+      content: "Updated prompt",
+      score: 10,
+      required: true,
+      maxWordCount: 250,
+      clearMedia: true,
+      clearAudio: false,
+    }],
+  })
+
+  const formData = buildQuizFormData(payload, { isUpdate: true })
+
+  assert.equal(formData.get("Questions[0].Id"), "42")
+  assert.equal(formData.get("Questions[0].Type"), "Essay")
+  assert.equal(formData.get("Questions[0].MaxWordCount"), "250")
+  assert.equal(formData.get("Questions[0].ClearMedia"), "true")
+  assert.equal(formData.get("Questions[0].ClearAudio"), null)
+})
+
+test("standalone question FormData sends arrays as indexed fields", () => {
+  const formData = buildQuestionFormData({
+    type: "MultipleChoiceMultiple",
+    content: "Pick two.",
+    points: 4,
+    options: ["A", "B", "C"],
+    correctAnswers: ["0", "2"],
+  })
+
+  assert.equal(formData.get("Type"), "MultipleChoiceMultiple")
+  assert.equal(formData.get("Content"), "Pick two.")
+  assert.equal(formData.get("Points"), "4")
+  assert.equal(formData.get("Options"), null)
+  assert.equal(formData.get("Options[0]"), "A")
+  assert.equal(formData.get("Options[2]"), "C")
+  assert.equal(formData.get("CorrectAnswers[0]"), "0")
+  assert.equal(formData.get("CorrectAnswers[1]"), "2")
+})
+
+test("update payload detects replacing one selected file with another", () => {
+  const baseline = createPublishableForm()
+  baseline.questions[0].mediaFile = new File(["one"], "question.png", {
+    type: "image/png",
+    lastModified: 100,
+  })
+  const changed = {
+    ...baseline,
+    questions: baseline.questions.map((question) => ({
+      ...question,
+      mediaFile: new File(["two"], "question.png", {
+        type: "image/png",
+        lastModified: 200,
+      }),
+    })),
+  }
+
+  assert.ok(buildQuizUpdatePayload(changed, baseline).questions)
 })
 
 test("draft validation permits incomplete quiz content but rejects malformed values", () => {

@@ -12,6 +12,7 @@ import {
   Eye,
   FileText,
   Timer,
+  RotateCcw,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import {
@@ -87,7 +88,6 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
   const {
     currentData: submissionResponse,
     isLoading,
-    isSuccess,
   } = useGetMyAssignmentSubmissionQuery(
     { classId, assignmentId: assignment.id },
     { skip: !classId || !assignment?.id || hasEmbeddedSubmission },
@@ -255,7 +255,7 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
             {language === "vi" ? "Không xác định" : "Unavailable"}
           </span>
         )}
-        {(recordStatus === "submitted" || recordStatus === "inprogress") && (
+        {recordStatus === "submitted" && (
           <button
             type="button"
             onClick={(event) => {
@@ -266,6 +266,19 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
           >
             <Eye size={11} />
             <span>{language === "vi" ? "Xem kết quả" : "See Result"}</span>
+          </button>
+        )}
+        {recordStatus === "inprogress" && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onSelect?.(quiz.id)
+            }}
+            className="ml-auto px-2.5 py-1 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+          >
+            <RotateCcw size={11} />
+            <span>{language === "vi" ? "Làm tiếp" : "Continue"}</span>
           </button>
         )}
       </td>
@@ -338,7 +351,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
     >
       {/* Header Info */}
       <div>
-        <div className="flex items-center mb-3">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex gap-1.5 flex-wrap items-center">
             {/* Quiz Type Badge */}
             <span className="bg-red-50 text-[#990011] border border-red-100 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide flex items-center gap-1">
@@ -369,10 +382,27 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
             )}
           </div>
 
+          {/* Quick View Details Icon Button */}
+          <button
+            type="button"
+            onClick={() => navigate(
+              `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
+            )}
+            className="p-1 text-gray-400 hover:text-[#990011] hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            title={language === "vi" ? "Xem chi tiết bài kiểm tra" : "View Quiz Details"}
+          >
+            <Eye size={16} />
+          </button>
         </div>
 
-        {/* Title */}
-        <h4 className="text-sm font-extrabold text-gray-900 leading-snug line-clamp-2 mb-2">
+        {/* Title (Clickable to Quiz Detail) */}
+        <h4
+          onClick={() => navigate(
+            `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
+          )}
+          className="text-sm font-extrabold text-gray-900 leading-snug line-clamp-2 mb-2 hover:text-[#990011] hover:underline cursor-pointer transition-colors"
+          title={language === "vi" ? "Xem chi tiết bài kiểm tra" : "View Quiz Details"}
+        >
           {quiz.name || quiz.title || (language === "vi" ? "Bài kiểm tra chưa đặt tên" : "Untitled quiz")}
         </h4>
 
@@ -458,7 +488,6 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
     </div>
   )
 }
-
 
 const ClassGradingTab = ({ id: classId, isStudent }) => {
   const { language, t } = useLanguage()

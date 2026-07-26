@@ -128,7 +128,7 @@ export default {
     openNow: "ĐANG MỞ",
     mainRoom: "Phòng học trực tuyến chính",
     virtualClassroom: "Lớp học ảo",
-    joinRoom: "Vào lớp ngay",
+    joinRoom: "Vào lớp",
     materials: "Tài liệu học tập",
     materialsList: "Danh sách tài liệu",
     searchMaterials: "Tìm tài liệu...",

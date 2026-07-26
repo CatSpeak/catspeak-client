@@ -38,6 +38,8 @@ import {
   ArrowLeft,
   ArrowRight,
   Flag,
+  Image as ImageIcon,
+  Music as MusicIcon,
 } from "lucide-react"
 
 const VI_VALIDATION_MESSAGES = {
@@ -297,6 +299,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     const copiedQ = {
       ...qToCopy,
       id: newId,
+      questionId: undefined,
       options: qToCopy.options ? [...qToCopy.options] : undefined,
       correctAnswers: qToCopy.correctAnswers ? [...qToCopy.correctAnswers] : [],
     }
@@ -372,6 +375,80 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const handleRequiredToggle = (index) => {
     setFormField("questions", (prev) =>
       prev.map((q, i) => (i === index ? { ...q, required: !q.required } : q))
+    )
+  }
+
+  const handleMediaUpload = (index, file) => {
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      toast.error(language === "vi" ? "Vui lòng chọn file hình ảnh hợp lệ" : "Please select a valid image file")
+      return
+    }
+    const previewUrl = URL.createObjectURL(file)
+    setFormField("questions", (prev) =>
+      prev.map((q, i) =>
+        i === index
+          ? {
+              ...q,
+              mediaFile: file,
+              mediaUrl: previewUrl,
+              clearMedia: false,
+            }
+          : q
+      )
+    )
+    toast.success(language === "vi" ? "Đã chọn hình ảnh" : "Image selected")
+  }
+
+  const handleAudioUpload = (index, file) => {
+    if (!file) return
+    if (!file.type.startsWith("audio/")) {
+      toast.error(language === "vi" ? "Vui lòng chọn file âm thanh hợp lệ" : "Please select a valid audio file")
+      return
+    }
+    const previewUrl = URL.createObjectURL(file)
+    setFormField("questions", (prev) =>
+      prev.map((q, i) =>
+        i === index
+          ? {
+              ...q,
+              audioFile: file,
+              audioUrl: previewUrl,
+              clearAudio: false,
+            }
+          : q
+      )
+    )
+    toast.success(language === "vi" ? "Đã chọn file âm thanh" : "Audio selected")
+  }
+
+  const handleRemoveMedia = (index) => {
+    setFormField("questions", (prev) =>
+      prev.map((q, i) =>
+        i === index
+          ? {
+              ...q,
+              mediaFile: null,
+              mediaUrl: null,
+              clearMedia: true,
+            }
+          : q
+      )
+    )
+  }
+
+  const handleRemoveAudio = (index) => {
+    setFormField("questions", (prev) =>
+      prev.map((q, i) =>
+        i === index
+          ? {
+              ...q,
+              audioFile: null,
+              audioUrl: null,
+              clearAudio: true,
+            }
+          : q
+      )
     )
   }
 
@@ -982,6 +1059,27 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   </span>
                 </div>
 
+                {/* Question Image Media (Image on top) */}
+                {currentQuestion.mediaUrl && !currentQuestion.clearMedia && (
+                  <div className="rounded-2xl overflow-hidden border border-gray-150 bg-gray-50 flex items-center justify-center p-2">
+                    <img
+                      src={currentQuestion.mediaUrl}
+                      alt={`Minh họa câu hỏi ${previewCurrentIndex + 1}`}
+                      className="max-h-48 max-w-xs sm:max-w-sm w-auto h-auto object-contain rounded-xl"
+                    />
+                  </div>
+                )}
+
+                {/* Question Audio Media (Audio play below image) */}
+                {currentQuestion.audioUrl && !currentQuestion.clearAudio && (
+                  <div className="p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#990011] text-white flex items-center justify-center shrink-0">
+                      <MusicIcon size={16} />
+                    </div>
+                    <audio controls src={currentQuestion.audioUrl} className="w-full h-9 rounded-xl" />
+                  </div>
+                )}
+
                 {/* Question text content */}
                 <RenderHTML
                   html={currentQuestion.content}
@@ -1414,16 +1512,59 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       </div>
                     </div>
 
-                    {/* Points field */}
+                    {/* Controls & Points & File Upload Icons */}
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-bold text-gray-500">{ce.point || "Điểm"}:</span>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={q.score}
-                        onChange={(e) => handleScoreChange(idx, e.target.value)}
-                        className="w-16 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-center text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                      />
+                      {/* Media Image Upload Icon Button */}
+                      <label
+                        className="p-1.5 border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
+                        title={language === "vi" ? "Tải lên hình ảnh" : "Upload Image"}
+                      >
+                        <ImageIcon size={15} className="text-[#990011]" />
+                        <span className="hidden sm:inline text-[11px]">{language === "vi" ? "Ảnh" : "Image"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handleMediaUpload(idx, e.target.files[0])
+                            }
+                            e.target.value = ""
+                          }}
+                        />
+                      </label>
+
+                      {/* Audio Upload Icon Button */}
+                      <label
+                        className="p-1.5 border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
+                        title={language === "vi" ? "Tải lên âm thanh" : "Upload Audio"}
+                      >
+                        <MusicIcon size={15} className="text-[#990011]" />
+                        <span className="hidden sm:inline text-[11px]">{language === "vi" ? "Âm thanh" : "Audio"}</span>
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handleAudioUpload(idx, e.target.files[0])
+                            }
+                            e.target.value = ""
+                          }}
+                        />
+                      </label>
+
+                      {/* Points field */}
+                      <div className="flex items-center gap-1 ml-1">
+                        <span className="text-xs font-bold text-gray-500">{ce.point || "Điểm"}:</span>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={q.score}
+                          onChange={(e) => handleScoreChange(idx, e.target.value)}
+                          className="w-16 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-center text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1435,6 +1576,45 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   ) : (
                     /* Expanded full editor fields */
                     <>
+                      {/* Image Media Preview (Image on top) */}
+                      {q.mediaUrl && !q.clearMedia && (
+                        <div className="relative rounded-2xl overflow-hidden max-h-64 border border-gray-200 bg-gray-50 flex items-center justify-center p-2 group/img">
+                          <img
+                            src={q.mediaUrl}
+                            alt={`Hình ảnh câu hỏi ${idx + 1}`}
+                            className="max-h-60 max-w-full object-contain rounded-xl"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveMedia(idx)}
+                            className="absolute top-3 right-3 p-1.5 bg-black/60 hover:bg-red-600 text-white rounded-full transition-colors cursor-pointer shadow-md"
+                            title={language === "vi" ? "Xóa ảnh" : "Remove Image"}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Audio Player (Audio play below image) */}
+                      {q.audioUrl && !q.clearAudio && (
+                        <div className="relative p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center justify-between gap-3">
+                          <div className="flex-1 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-[#990011] text-white flex items-center justify-center shrink-0">
+                              <MusicIcon size={16} />
+                            </div>
+                            <audio controls src={q.audioUrl} className="w-full h-9 rounded-xl" />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAudio(idx)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer shrink-0"
+                            title={language === "vi" ? "Xóa âm thanh" : "Remove Audio"}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      )}
+
                       {/* Content input */}
                       <textarea
                         value={q.content}

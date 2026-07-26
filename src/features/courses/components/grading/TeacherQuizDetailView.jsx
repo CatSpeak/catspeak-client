@@ -10,6 +10,7 @@ import {
   useCloseTeacherQuizMutation,
   useDeleteTeacherQuizMutation,
   useExportTeacherQuizReportMutation,
+  useGradeTeacherEssayMutation,
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
@@ -181,8 +182,8 @@ const getGradingStatus = (student) => {
 const AudioPlayerBar = ({ src }) => {
   const audioRef = React.useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(12)
-  const [duration, setDuration] = useState(30)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
 
   const togglePlay = () => {
     if (!audioRef.current) return
@@ -202,54 +203,284 @@ const AudioPlayerBar = ({ src }) => {
   }
 
   return (
-    <div className="mt-4 mb-3 w-full max-w-2xl">
+    <div className="mt-3 mb-3 w-full bg-gray-50 border border-gray-150 p-3.5 rounded-2xl flex items-center gap-3">
       {src && (
         <audio
           ref={audioRef}
           src={src}
           onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
-          onLoadedMetadata={() => setDuration(audioRef.current?.duration || 30)}
+          onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
           onEnded={() => setIsPlaying(false)}
           className="hidden"
         />
       )}
-      {/* Progress Track */}
-      <div
-        className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden relative cursor-pointer"
-        onClick={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect()
-          const pct = (e.clientX - rect.left) / rect.width
-          if (audioRef.current && duration) {
-            const newTime = pct * duration
-            audioRef.current.currentTime = newTime
-            setCurrentTime(newTime)
-          }
-        }}
+      {/* Play / Pause Button placed to the left side of progress bar */}
+      <button
+        type="button"
+        onClick={togglePlay}
+        className="w-10 h-10 rounded-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-sm active:scale-95"
+        aria-label={isPlaying ? "Tạm dừng" : "Phát âm thanh"}
       >
+        {isPlaying ? (
+          <Pause className="w-4 h-4 fill-current text-white" />
+        ) : (
+          <Play className="w-4 h-4 fill-current text-white ml-0.5" />
+        )}
+      </button>
+
+      {/* Progress Track & Time Labels (Full width) */}
+      <div className="flex-1 flex flex-col gap-1.5 min-w-0">
         <div
-          className="bg-[#990011] h-full transition-all duration-150"
-          style={{ width: `${duration ? (currentTime / duration) * 100 : 40}%` }}
-        />
-      </div>
-      {/* Time Labels */}
-      <div className="flex justify-between text-xs text-gray-400 font-medium mt-1.5 px-0.5">
-        <span>{formatTime(currentTime)}</span>
-        <span>{formatTime(duration)}</span>
-      </div>
-      {/* Play Button Center */}
-      <div className="flex justify-center mt-1">
-        <button
-          type="button"
-          onClick={togglePlay}
-          className="w-9 h-9 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 flex items-center justify-center transition-colors cursor-pointer"
-          aria-label={isPlaying ? "Tạm dừng" : "Phát âm thanh"}
+          className="w-full bg-gray-200 h-2 rounded-full overflow-hidden relative cursor-pointer"
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            const pct = (e.clientX - rect.left) / rect.width
+            if (audioRef.current && duration) {
+              const newTime = pct * duration
+              audioRef.current.currentTime = newTime
+              setCurrentTime(newTime)
+            }
+          }}
         >
-          {isPlaying ? (
-            <Pause className="w-4 h-4 fill-current text-gray-700" />
+          <div
+            className="bg-[#990011] h-full transition-all duration-150 rounded-full"
+            style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+          />
+        </div>
+        {/* Time Labels */}
+        <div className="flex justify-between text-[11px] text-gray-500 font-bold px-0.5">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Student Attempt Review Modal for Teacher
+const StudentAttemptReviewModal = ({ submission, quizQuestions, onClose, classId, quizId }) => {
+  const [gradeEssay] = useGradeTeacherEssayMutation()
+  const [essayScores, setEssayScores] = useState({})
+  const [essayComments, setEssayComments] = useState({})
+  const [savingQuestionId, setSavingQuestionId] = useState(null)
+
+  const studentName = submission.studentName || submission.name || "Học viên"
+  const studentCode = submission.studentCode || submission.studentId || "N/A"
+  const scoreDisplay = submission.score !== null && submission.score !== undefined ? submission.score : "—"
+
+  // Merge questions from submission or quizDetail
+  const displayQuestions = (submission.questions && submission.questions.length > 0)
+    ? submission.questions
+    : (quizQuestions || [])
+
+  const handleGrade = async (questionId, isDraft) => {
+    const scoreVal = parseFloat(essayScores[questionId])
+    const commentVal = essayComments[questionId] || ""
+    if (Number.isNaN(scoreVal)) {
+      toast.error("Vui lòng nhập điểm số hợp lệ")
+      return
+    }
+
+    setSavingQuestionId(questionId)
+    try {
+      await gradeEssay({
+        classId,
+        quizId,
+        questionId,
+        studentId: submission.studentId || submission.id,
+        attemptNumber: submission.attemptNumber || 1,
+        score: scoreVal,
+        comment: commentVal,
+        isDraft,
+      }).unwrap()
+      toast.success(isDraft ? "Đã lưu nháp điểm" : "Đã hoàn tất chấm điểm")
+    } catch (err) {
+      toast.error("Không thể lưu điểm chấm")
+    } finally {
+      setSavingQuestionId(null)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col gap-6 border border-gray-100">
+
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+          <div>
+            <h3 className="font-bold text-gray-900 text-lg">
+              Xem chi tiết bài làm: <span className="text-[#990011]">{studentName}</span>
+            </h3>
+            <p className="text-xs text-gray-500 font-medium">Mã học viên: {studentCode}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 cursor-pointer transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-150 text-xs">
+          <div>
+            <span className="text-gray-400 font-medium block">Điểm số</span>
+            <span className="text-base font-bold text-[#990011]">{scoreDisplay}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 font-medium block">Trạng thái nộp</span>
+            <span className="font-bold text-gray-800">{getSubmissionStatus(submission).label}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 font-medium block">Trạng thái chấm</span>
+            <span className="font-bold text-gray-800">{getGradingStatus(submission).label}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 font-medium block">Thời gian làm bài</span>
+            <span className="font-bold text-gray-800">
+              {submission.timeSpentSeconds ? `${Math.floor(submission.timeSpentSeconds / 60)} phút` : "N/A"}
+            </span>
+          </div>
+        </div>
+
+        {/* Questions Review List */}
+        <div className="flex flex-col gap-5">
+          <h4 className="font-bold text-gray-900 text-sm border-b border-gray-100 pb-2">
+            Danh sách câu hỏi & câu trả lời ({displayQuestions.length})
+          </h4>
+
+          {displayQuestions.length === 0 ? (
+            <p className="text-xs text-gray-400 text-center py-6">Không có dữ liệu chi tiết câu hỏi.</p>
           ) : (
-            <Play className="w-4 h-4 fill-current text-gray-700 ml-0.5" />
+            displayQuestions.map((q, idx) => {
+              const points = q.points ?? 5
+              const imageUrl = q.mediaUrl || q.imageUrl
+              const audioUrl = q.audioUrl
+              const type = q.type || "MultipleChoiceSingle"
+              const options = Array.isArray(q.options) ? q.options : []
+              const studentOpts = Array.isArray(q.studentOptions) ? q.studentOptions.map(String) : []
+              const correctAnswers = Array.isArray(q.correctAnswers) ? q.correctAnswers.map(String) : []
+              const isCorrect = q.isCorrect === true
+              const isWrong = q.isCorrect === false
+              const isEssay = type === "Essay"
+
+              return (
+                <div key={q.questionId || q.id || idx} className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col gap-3 shadow-2xs">
+                  {/* Question Header */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-[#990011]">Câu {idx + 1} ({points} điểm)</span>
+                    {isCorrect && <span className="bg-emerald-50 text-emerald-600 text-xs font-bold px-2.5 py-0.5 rounded-full">Đúng (+{q.pointsEarned ?? points})</span>}
+                    {isWrong && <span className="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-0.5 rounded-full">Sai (0 điểm)</span>}
+                    {isEssay && <span className="bg-amber-50 text-amber-600 text-xs font-bold px-2.5 py-0.5 rounded-full">{q.status || "Tự luận"}</span>}
+                  </div>
+
+                  {/* Image on top (Small scale, un-cropped) */}
+                  {imageUrl && (
+                    <div className="rounded-2xl overflow-hidden border border-gray-150 bg-gray-50/50 p-2 flex justify-center">
+                      <img
+                        src={imageUrl}
+                        alt={`Minh họa câu hỏi ${idx + 1}`}
+                        className="max-h-48 max-w-xs sm:max-w-sm w-auto h-auto object-contain rounded-xl"
+                      />
+                    </div>
+                  )}
+
+                  {/* Audio Player below image (Play button on left, full width progress bar) */}
+                  {audioUrl && (
+                    <AudioPlayerBar src={audioUrl} />
+                  )}
+
+                  {/* Question Content */}
+                  {q.content && (
+                    <div className="text-xs font-bold text-gray-800 leading-relaxed">
+                      <RenderHTML html={q.content} />
+                    </div>
+                  )}
+
+                  {/* MCQ Options */}
+                  {options.length > 0 && (
+                    <div className="space-y-2 text-xs">
+                      {options.map((opt, optIdx) => {
+                        const strIdx = String(optIdx)
+                        const isStudentPick = studentOpts.includes(strIdx) || studentOpts.includes(opt)
+                        const isRightOpt = correctAnswers.includes(strIdx) || correctAnswers.includes(opt)
+
+                        let style = "bg-gray-50 border-gray-150 text-gray-700"
+                        if (isStudentPick && isRightOpt) style = "bg-emerald-50 border-emerald-300 text-emerald-900 font-bold"
+                        else if (isStudentPick && !isRightOpt) style = "bg-red-50 border-red-300 text-red-900 font-bold"
+                        else if (!isStudentPick && isRightOpt) style = "bg-blue-50 border-blue-200 text-blue-900 font-bold"
+
+                        return (
+                          <div key={optIdx} className={`p-3 border rounded-xl flex items-center justify-between ${style}`}>
+                            <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
+                            {isStudentPick && <span className="text-[10px] font-black uppercase tracking-wider">(Đã chọn)</span>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Essay Answer & Grading */}
+                  {isEssay && (
+                    <div className="flex flex-col gap-3 pt-2 border-t border-gray-100 text-xs">
+                      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                        <span className="font-bold text-gray-500 block mb-1">Bài làm của học sinh:</span>
+                        <p className="text-gray-800 font-medium whitespace-pre-wrap">{q.studentFillText || q.answerText || "(Chưa có bài làm)"}</p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-gray-700">Điểm chấm:</span>
+                          <input
+                            type="number"
+                            step="0.5"
+                            max={points}
+                            value={essayScores[q.questionId || q.id] ?? q.essayScore ?? ""}
+                            onChange={(e) => setEssayScores((prev) => ({ ...prev, [q.questionId || q.id]: e.target.value }))}
+                            placeholder="0"
+                            className="w-20 px-3 py-1.5 border border-gray-200 rounded-xl font-bold focus:outline-none focus:border-[#990011]"
+                          />
+                          <span className="text-gray-400 font-semibold">/ {points}</span>
+                        </div>
+
+                        <input
+                          type="text"
+                          value={essayComments[q.questionId || q.id] ?? q.essayComment ?? ""}
+                          onChange={(e) => setEssayComments((prev) => ({ ...prev, [q.questionId || q.id]: e.target.value }))}
+                          placeholder="Nhận xét cho học sinh..."
+                          className="flex-1 px-3 py-1.5 border border-gray-200 rounded-xl font-semibold focus:outline-none focus:border-[#990011]"
+                        />
+
+                        <button
+                          type="button"
+                          disabled={savingQuestionId === (q.questionId || q.id)}
+                          onClick={() => handleGrade(q.questionId || q.id, false)}
+                          className="px-4 py-1.5 bg-[#990011] hover:bg-[#80000e] text-white font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                        >
+                          {savingQuestionId === (q.questionId || q.id) ? "Đang lưu..." : "Lưu điểm"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )
+            })
           )}
-        </button>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end pt-2 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-colors cursor-pointer"
+          >
+            Đóng
+          </button>
+        </div>
+
       </div>
     </div>
   )
@@ -307,27 +538,29 @@ const QuestionDetailCard = ({ question, index }) => {
         </div>
       </div>
 
+      {/* Image Media Preview (Full size ratio, Image on top) */}
+      {imageUrl && (
+        <div className="mb-3 rounded-2xl overflow-hidden border border-gray-100 flex justify-center bg-gray-50 p-2">
+          <img
+            src={imageUrl}
+            alt={`Minh họa câu hỏi ${index + 1}`}
+            className="max-h-48 max-w-xs sm:max-w-sm w-auto h-auto object-contain rounded-xl"
+          />
+        </div>
+      )}
+
+      {/* Audio Media Player Bar (Audio play button on left, full width progress bar) */}
+      {audioUrl && (
+        <div className="mb-3">
+          <AudioPlayerBar src={audioUrl} />
+        </div>
+      )}
+
       {/* Content / Prompt */}
       {content && (
         <div className="text-sm text-gray-700 font-medium leading-relaxed mb-4">
           <RenderHTML html={content} />
         </div>
-      )}
-
-      {/* Image Media Preview */}
-      {imageUrl && (
-        <div className="mt-3 mb-4 rounded-2xl overflow-hidden max-h-80 border border-gray-100">
-          <img
-            src={imageUrl}
-            alt={`Minh họa câu hỏi ${index + 1}`}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      {/* Audio Media Player Bar */}
-      {(audioUrl || content.includes("audio") || index === 0) && (
-        <AudioPlayerBar src={audioUrl} />
       )}
 
       {/* Choice Options List */}
@@ -462,8 +695,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
   const questions = Array.isArray(quizDetail.questions) ? quizDetail.questions : []
   const totalQuestions = questions.length
   const timeLimit = quizDetail.timeLimitMinutes
-  const submittedCount = quizDetail.submissionCount
-  const totalStudents = quizDetail.totalStudents
+  const maxAttempts = quizDetail.maxAttempts
 
   // Extract student submission list from API
   const rawStudentsData = (
@@ -719,15 +951,15 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             </div>
           </div>
 
-          {/* Card 4: Đã nộp */}
+          {/* Card 4: Số lần nộp */}
           <div className="bg-gray-50/60 rounded-2xl p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 shrink-0">
               <CheckSquare className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Đã nộp</p>
+              <p className="text-xs text-gray-400 font-medium">Số lần nộp</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
-                {submittedCount}/{totalStudents}
+                {maxAttempts}
               </p>
             </div>
           </div>
@@ -1108,74 +1340,15 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         </div>
       )}
 
-      {/* Student Submission Modal */}
+      {/* Student Submission Attempt Review Modal */}
       {selectedStudentSubmission && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 border border-gray-100">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h4 className="font-bold text-gray-900 text-base">
-                Chi tiết bài làm:{" "}
-                {selectedStudentSubmission.studentName ||
-                  selectedStudentSubmission.name ||
-                  "Học viên"}
-              </h4>
-              <button
-                type="button"
-                onClick={() => setSelectedStudentSubmission(null)}
-                className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs text-gray-600">
-              <div className="flex justify-between py-1 border-b border-gray-50">
-                <span className="font-medium text-gray-500">Mã học viên:</span>
-                <span className="font-bold text-gray-900">
-                  {selectedStudentSubmission.studentCode ||
-                    selectedStudentSubmission.studentId ||
-                    "N/A"}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-gray-50">
-                <span className="font-medium text-gray-500">Trạng thái nộp:</span>
-                <span className="font-bold text-gray-900">
-                  {getSubmissionStatus(selectedStudentSubmission).label}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-gray-50">
-                <span className="font-medium text-gray-500">Trạng thái chấm:</span>
-                <span className="font-bold text-gray-900">
-                  {getGradingStatus(selectedStudentSubmission).label}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-gray-50">
-                <span className="font-medium text-gray-500">Điểm số:</span>
-                <span className="font-bold text-[#990011] text-sm">
-                  {selectedStudentSubmission.score ?? "Chưa có"}
-                </span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="font-medium text-gray-500">Thời gian làm bài:</span>
-                <span className="font-bold text-gray-900">
-                  {selectedStudentSubmission.timeSpentSeconds
-                    ? `${Math.floor(selectedStudentSubmission.timeSpentSeconds / 60)} phút`
-                    : "N/A"}
-                </span>
-              </div>
-            </div>
-
-            <div className="pt-3 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedStudentSubmission(null)}
-                className="bg-[#990011] text-white text-xs font-bold px-5 py-2 rounded-xl hover:bg-[#80000e] transition-colors cursor-pointer"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
+        <StudentAttemptReviewModal
+          submission={selectedStudentSubmission}
+          quizQuestions={quizDetail?.questions}
+          classId={classId}
+          quizId={quizId}
+          onClose={() => setSelectedStudentSubmission(null)}
+        />
       )}
 
       {/* TAB CONTENT: Stats (Thống kê) */}

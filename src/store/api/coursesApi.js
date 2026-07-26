@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi"
+import { buildQuizFormData, buildQuestionFormData } from "@/features/courses/utils/quizUtils"
 
 // ─── Helpers for UTC to Local conversion ───────────────────────────────
 const parseToLocalTimeStr = (isoString) => {
@@ -1226,7 +1227,7 @@ export const coursesApi = baseApi.injectEndpoints({
       query: ({ classId, ...body }) => ({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes`,
         method: "POST",
-        body,
+        body: buildQuizFormData(body),
       }),
       invalidatesTags: (result, error, { classId }) => (
         getQuizListInvalidationTags(classId)
@@ -1237,7 +1238,7 @@ export const coursesApi = baseApi.injectEndpoints({
       query: ({ classId, quizId, ...body }) => ({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}`,
         method: "PUT",
-        body,
+        body: buildQuizFormData(body, { isUpdate: true }),
       }),
       invalidatesTags: (result, error, { classId, quizId }) => (
         getQuizContentInvalidationTags(classId, quizId)
@@ -1262,7 +1263,7 @@ export const coursesApi = baseApi.injectEndpoints({
       query: ({ classId, quizId, ...body }) => ({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions`,
         method: "POST",
-        body,
+        body: buildQuestionFormData(body),
       }),
       invalidatesTags: (result, error, { classId, quizId }) => (
         getQuizContentInvalidationTags(classId, quizId)
@@ -1273,7 +1274,7 @@ export const coursesApi = baseApi.injectEndpoints({
       query: ({ classId, quizId, questionId, ...body }) => ({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/${encodePathSegment(questionId)}`,
         method: "PUT",
-        body,
+        body: buildQuestionFormData(body),
       }),
       invalidatesTags: (result, error, { classId, quizId }) => (
         getQuizContentInvalidationTags(classId, quizId)

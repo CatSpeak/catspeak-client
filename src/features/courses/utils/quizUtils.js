@@ -12,6 +12,10 @@ const QUESTION_TYPES = new Set([
 
 const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key)
 
+const isFileValue = (value) => (
+  typeof File !== "undefined" && value instanceof File
+)
+
 const isRecord = (value) => {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return false
@@ -99,9 +103,13 @@ const mapQuestionToFormState = (question, index) => {
   const type = normalizeQuestionType(question.type) || "MultipleChoiceSingle"
   const points = toFiniteNumber(question.points)
   const maxWordCount = toFiniteNumber(question.maxWordCount)
+  const questionId = toFiniteNumber(question.id ?? question.questionId)
 
   return omitUndefined({
     id: createFormQuestionId(question.id ?? question.questionId, index),
+    questionId: Number.isInteger(questionId) && questionId > 0
+      ? questionId
+      : undefined,
     type,
     score: points ?? 5,
     content: typeof question.content === "string" ? question.content : "",
@@ -115,8 +123,8 @@ const mapQuestionToFormState = (question, index) => {
     skillTag: toOptionalText(question.skillTag) ?? "",
     tipText: toOptionalText(question.tipText) ?? "",
     required: question.isRequired ?? question.required ?? true,
-    mediaUrl: question.mediaUrl,
-    audioUrl: question.audioUrl,
+    mediaUrl: question.mediaUrl || question.imageUrl || undefined,
+    audioUrl: question.audioUrl || undefined,
   })
 }
 
@@ -130,16 +138,26 @@ const buildQuestionPayload = (question, index) => {
   const correctAnswers = Array.isArray(question.correctAnswers)
     ? question.correctAnswers.map(String)
     : undefined
+  const questionId = toFiniteNumber(question.questionId)
 
   return omitUndefined({
+    id: Number.isInteger(questionId) && questionId > 0
+      ? questionId
+      : undefined,
     type,
     content: toOptionalText(question.content),
     points: score,
     isRequired: toOptionalBoolean(question.required ?? question.isRequired),
     sortOrder: index + 1,
     skillTag: toNullableTrimmedText(question.skillTag),
-    mediaUrl: question.mediaUrl,
-    audioUrl: question.audioUrl,
+    mediaFile: isFileValue(question.mediaFile)
+      ? question.mediaFile
+      : undefined,
+    audioFile: isFileValue(question.audioFile)
+      ? question.audioFile
+      : undefined,
+    clearMedia: question.clearMedia ? true : undefined,
+    clearAudio: question.clearAudio ? true : undefined,
     options: isChoiceQuestion
       ? (Array.isArray(question.options) ? question.options.map(String) : undefined)
       : null,
@@ -149,9 +167,36 @@ const buildQuestionPayload = (question, index) => {
   })
 }
 
-const arePayloadValuesEqual = (left, right) => (
-  JSON.stringify(left) === JSON.stringify(right)
-)
+const arePayloadValuesEqual = (left, right) => {
+  if (Object.is(left, right)) return true
+  if (isFileValue(left) || isFileValue(right)) return false
+
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return (
+      Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((item, index) => (
+        arePayloadValuesEqual(item, right[index])
+      ))
+    )
+  }
+
+  if (isRecord(left) || isRecord(right)) {
+    if (!isRecord(left) || !isRecord(right)) return false
+    const leftKeys = Object.keys(left)
+    const rightKeys = Object.keys(right)
+    return (
+      leftKeys.length === rightKeys.length
+      && leftKeys.every((key) => (
+        hasOwn(right, key)
+        && arePayloadValuesEqual(left[key], right[key])
+      ))
+    )
+  }
+
+  return false
+}
 
 const addValidationError = (errors, field, code, message, questionIndex) => {
   errors.push(omitUndefined({ field, code, message, questionIndex }))
@@ -442,6 +487,122 @@ export const buildQuizUpdatePayload = (form, baselineForm, options = {}) => {
       key === "status" || !arePayloadValuesEqual(value, baselinePayload[key])
     ))
   )
+}
+
+const QUIZ_FORM_FIELDS = {
+  name: "Name",
+  description: "Description",
+  timeLimitMinutes: "TimeLimitMinutes",
+  openTime: "OpenTime",
+  closeTime: "CloseTime",
+  maxAttempts: "MaxAttempts",
+  shuffleQuestions: "ShuffleQuestions",
+  shuffleOptions: "ShuffleOptions",
+  allowLateSubmission: "AllowLateSubmission",
+  showAnswersAfterSubmission: "ShowAnswersAfterSubmission",
+  autoGradingEnabled: "AutoGradingEnabled",
+  gradingScale: "GradingScale",
+  resultReleaseMode: "ResultReleaseMode",
+  passPercent: "PassPercent",
+  postToBulletinBoard: "PostToBulletinBoard",
+  status: "Status",
+}
+
+const QUESTION_FORM_FIELDS = {
+  id: "Id",
+  type: "Type",
+  content: "Content",
+  points: "Points",
+  isRequired: "IsRequired",
+  sortOrder: "SortOrder",
+  skillTag: "SkillTag",
+  mediaFile: "MediaFile",
+  audioFile: "AudioFile",
+  clearMedia: "ClearMedia",
+  clearAudio: "ClearAudio",
+  options: "Options",
+  correctAnswers: "CorrectAnswers",
+  maxWordCount: "MaxWordCount",
+  tipText: "TipText",
+}
+
+const appendFormValue = (formData, key, value) => {
+  if (value === undefined || value === null) return
+  if (isFileValue(value)) {
+    formData.append(key, value)
+    return
+  }
+  formData.append(key, String(value))
+}
+
+const appendQuestionFormFields = (
+  formData,
+  question,
+  { prefix = "", includeUpdateFields = true } = {},
+) => {
+  if (!isRecord(question)) return
+
+  Object.entries(QUESTION_FORM_FIELDS).forEach(([property, fieldName]) => {
+    if (
+      !includeUpdateFields
+      && (
+        property === "id"
+        || property === "clearMedia"
+        || property === "clearAudio"
+      )
+    ) {
+      return
+    }
+
+    const value = question[property]
+    const formKey = prefix ? `${prefix}.${fieldName}` : fieldName
+
+    if (Array.isArray(value)) {
+      value.forEach((item, itemIndex) => {
+        appendFormValue(formData, `${formKey}[${itemIndex}]`, item)
+      })
+      return
+    }
+
+    appendFormValue(formData, formKey, value)
+  })
+}
+
+export const buildQuizFormData = (payload, { isUpdate = false } = {}) => {
+  if (typeof FormData !== "undefined" && payload instanceof FormData) {
+    return payload
+  }
+
+  const formData = new FormData()
+  if (!isRecord(payload)) return formData
+
+  const questions = Array.isArray(payload.questions) ? payload.questions : []
+
+  Object.entries(QUIZ_FORM_FIELDS).forEach(([property, fieldName]) => {
+    appendFormValue(formData, fieldName, payload[property])
+  })
+
+  questions.forEach((question, questionIndex) => {
+    appendQuestionFormFields(formData, question, {
+      prefix: `Questions[${questionIndex}]`,
+      includeUpdateFields: isUpdate,
+    })
+  })
+
+  return formData
+}
+
+export const buildQuestionFormData = (payload) => {
+  if (typeof FormData !== "undefined" && payload instanceof FormData) {
+    return payload
+  }
+
+  const formData = new FormData()
+  if (!isRecord(payload)) return formData
+
+  appendQuestionFormFields(formData, payload)
+
+  return formData
 }
 
 export const validateQuizForm = (
@@ -830,6 +991,15 @@ export const mergeQuizResultQuestions = (resultQuestions, attemptQuestions) => {
     "isRequired",
     "options",
     "maxWordCount",
+    "mediaUrl",
+    "imageUrl",
+    "audioUrl",
+    "audio",
+    "image",
+    "media",
+    "fileUrl",
+    "attachmentUrl",
+    "tipText",
   ]
 
   return resultQuestions

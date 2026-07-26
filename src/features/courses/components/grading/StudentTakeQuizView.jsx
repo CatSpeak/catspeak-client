@@ -8,10 +8,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Award,
   Layers,
-  ChevronLeft,
-  FileText,
   Calendar,
   Check,
   X,
@@ -22,7 +19,6 @@ import {
   ArrowRight,
   Send,
   RefreshCw,
-  Eye,
 } from "lucide-react"
 import {
   useGetStudentQuizzesQuery,
@@ -63,6 +59,71 @@ const formatTimer = (totalSeconds) => {
   return `${minutes.toString().padStart(2, "0")}:${seconds
     .toString()
     .padStart(2, "0")}`
+}
+
+const isAudioFileUrl = (url) => {
+  if (typeof url !== "string") return false
+  const clean = url.trim().toLowerCase()
+  return (
+    clean.endsWith(".mp3") ||
+    clean.endsWith(".wav") ||
+    clean.endsWith(".ogg") ||
+    clean.endsWith(".m4a") ||
+    clean.endsWith(".aac") ||
+    clean.includes("audio/") ||
+    clean.includes("type=audio")
+  )
+}
+
+const getQuestionImageUrl = (q) => {
+  if (!q || typeof q !== "object") return null
+  const candidates = [
+    q.mediaUrl,
+    q.imageUrl,
+    q.image,
+    q.media,
+    q.fileUrl,
+    q.pictureUrl,
+    q.photoUrl,
+    typeof q.file === "string" ? q.file : null,
+    typeof q.attachment === "string" ? q.attachment : null,
+  ]
+  for (const url of candidates) {
+    if (typeof url === "string" && url.trim() && !isAudioFileUrl(url)) {
+      return url.trim()
+    }
+  }
+  return null
+}
+
+const getQuestionAudioUrl = (q) => {
+  if (!q || typeof q !== "object") return null
+  const candidates = [
+    q.audioUrl,
+    q.audio,
+    q.audioFileUrl,
+    q.soundUrl,
+    q.voiceUrl,
+    q.mediaUrl,
+    q.fileUrl,
+    q.attachmentUrl,
+    typeof q.file === "string" ? q.file : null,
+  ]
+  for (const url of candidates) {
+    if (typeof url === "string" && url.trim()) {
+      if (
+        isAudioFileUrl(url) ||
+        url === q.audioUrl ||
+        url === q.audio ||
+        url === q.audioFileUrl ||
+        url === q.soundUrl ||
+        url === q.voiceUrl
+      ) {
+        return url.trim()
+      }
+    }
+  }
+  return null
 }
 
 const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBack }) => {
@@ -434,6 +495,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       setDeadlineMs(null)
       setSaveStatus("saved")
       setStepOverride("result")
+      try {
+        refetchQuizResult()
+      } catch (e) {
+        // Ignore refetch error fallback
+      }
       hotToast.success(
         language === "vi"
           ? timedOut
@@ -515,13 +581,36 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         throw new Error("Malformed quiz deadline")
       }
 
+      const initialAnswers = {}
+      if (Array.isArray(data.questions)) {
+        data.questions.forEach((q) => {
+          if (!q || q.id === undefined || q.id === null) return
+          const type = q.type || "MultipleChoiceSingle"
+
+          if (q.fillText !== undefined && q.fillText !== null && q.fillText !== "") {
+            initialAnswers[q.id] = String(q.fillText)
+          } else if (Array.isArray(q.selectedOptions) && q.selectedOptions.length > 0) {
+            if (type === "MultipleChoiceMultiple") {
+              initialAnswers[q.id] = q.selectedOptions.map((opt) => {
+                const num = Number(opt)
+                return Number.isFinite(num) ? num : String(opt)
+              })
+            } else {
+              const firstOpt = q.selectedOptions[0]
+              const num = Number(firstOpt)
+              initialAnswers[q.id] = Number.isFinite(num) ? num : String(firstOpt)
+            }
+          }
+        })
+      }
+
       setFlowQuizKey(quizKey)
       setAttemptData(data)
       setDeadlineMs(nextDeadlineMs)
       setTimeRemaining(getQuizTimeRemaining(nextDeadlineMs))
       setCurrentIndex(0)
-      setUserAnswers({})
-      userAnswersRef.current = {}
+      setUserAnswers(initialAnswers)
+      userAnswersRef.current = initialAnswers
       setSubmitResult(null)
       setSubmittedAttemptNumber(null)
       setLastSavedTimeStr("")
@@ -771,10 +860,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           </div>
 
           {/* Details Overview Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/70 border border-gray-150 p-4 rounded-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50/70 border border-gray-150 p-4 rounded-2xl">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                {language === "vi" ? "Thời gian" : "Time limit"}
+                {language === "vi" ? "Thời gian làm bài" : "Time Limit"}
               </span>
               <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
                 <Clock size={14} className="text-[#990011]" />
@@ -784,25 +873,14 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                {language === "vi" ? "Số câu hỏi" : "Questions"}
+                {language === "vi" ? "Lượt còn lại" : "Remaining Attempts"}
               </span>
               <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
-                <FileText size={14} className="text-[#990011]" />
-                {questionCount ?? "—"} {questionCount != null ? (language === "vi" ? "câu" : "items") : ""}
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                {language === "vi" ? "Thang điểm" : "Score Scale"}
-              </span>
-              <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
-                <Award size={14} className="text-[#990011]" />
-                {
-                  quiz?.gradingScale === "Hundred"
-                    ? 100
-                    : (quiz?.gradingScale === "Ten" ? 10 : "—")
-                }
+                <RotateCcw size={14} className="text-[#990011]" />
+                {quiz?.remainingAttempts ?? (quiz?.maxAttempts != null ? quiz.maxAttempts : "—")}
+                {quiz?.remainingAttempts != null || quiz?.maxAttempts != null
+                  ? ` ${language === "vi" ? "lần" : "times"}`
+                  : ""}
               </span>
             </div>
 
@@ -857,7 +935,9 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           {/* Confirmation Question & Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-100">
             <span className="text-sm font-black text-gray-900 text-center sm:text-left">
-              {language === "vi" ? "Bạn có muốn tiến hành làm bài kiểm tra này không?" : "Do you want to proceed to start this quiz?"}
+              {recordStatus === "InProgress" || recordStatus === "inprogress"
+                ? (language === "vi" ? "Bạn có một lượt làm bài đang dở. Tiến hành làm tiếp?" : "You have an in-progress attempt. Proceed to continue?")
+                : (language === "vi" ? "Bạn có muốn tiến hành làm bài kiểm tra này không?" : "Do you want to proceed to start this quiz?")}
             </span>
 
             <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
@@ -872,27 +952,20 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 type="button"
                 disabled={isStarting || !canStart}
                 onClick={handleConfirmStart}
-                className="flex-1 sm:flex-none px-6 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-2xl shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="flex-1 sm:flex-none px-6 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-2xl shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
-                {isStarting
-                  ? language === "vi"
-                    ? "Đang khởi tạo..."
-                    : "Starting..."
-                  : !canStart
-                    ? quizStatus === "upcoming"
-                      ? language === "vi"
-                        ? "Chưa đến giờ mở"
-                        : "Not open yet"
-                      : language === "vi"
-                        ? "Không thể bắt đầu"
-                        : "Unavailable"
-                    : recordStatus === "InProgress"
-                      ? language === "vi"
-                        ? "Tiếp tục làm bài"
-                        : "Resume Quiz"
-                      : language === "vi"
-                        ? "Bắt đầu làm bài"
-                        : "Start Exam"}
+                {(recordStatus === "InProgress" || recordStatus === "inprogress") && <RotateCcw size={14} />}
+                <span>
+                  {isStarting
+                    ? (language === "vi" ? "Đang tải..." : "Loading...")
+                    : (!canStart
+                      ? (quizStatus === "upcoming"
+                        ? (language === "vi" ? "Chưa đến giờ mở" : "Not open yet")
+                        : (language === "vi" ? "Không thể bắt đầu" : "Unavailable"))
+                      : (recordStatus === "InProgress" || recordStatus === "inprogress"
+                        ? (language === "vi" ? "Tiếp tục làm bài" : "Continue Quiz")
+                        : (language === "vi" ? "Bắt đầu làm bài" : "Start Quiz")))}
+                </span>
               </button>
             </div>
           </div>
@@ -1144,18 +1217,37 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               const isWrong = q.isCorrect === false
               const isPending = q.isCorrect === null || q.isCorrect === undefined
 
-              const options = Array.isArray(q.options)
-                ? q.options
+              const parseOptionsArray = (opts) => {
+                if (Array.isArray(opts)) return opts
+                if (typeof opts === "string" && opts.trim()) {
+                  try {
+                    const parsed = JSON.parse(opts)
+                    if (Array.isArray(parsed)) return parsed
+                  } catch {
+                    // Not a JSON string
+                  }
+                }
+                return []
+              }
+
+              const rawOptions = parseOptionsArray(q.options)
+              const options = rawOptions.length > 0
+                ? rawOptions
                 : q.type === "TrueFalse"
                   ? ["Đúng", "Sai"]
                   : []
-              const studentAnswers = Array.isArray(q.studentOptions)
-                ? q.studentOptions.map(String)
-                : []
-              const hasAnswerKey = Array.isArray(q.correctAnswers)
-              const correctAnswers = hasAnswerKey
-                ? q.correctAnswers.map(String)
-                : []
+
+              const studentAnswers = [
+                ...parseOptionsArray(q.studentOptions),
+                ...parseOptionsArray(q.selectedOptions),
+                ...(q.studentAnswer !== undefined && q.studentAnswer !== null ? [q.studentAnswer] : []),
+              ].map(String)
+
+              const hasAnswerKey = q.correctAnswers !== undefined && q.correctAnswers !== null
+              const correctAnswers = [
+                ...parseOptionsArray(q.correctAnswers),
+                ...parseOptionsArray(q.correctOptions),
+              ].map(String)
 
               return (
                 <div
@@ -1168,16 +1260,18 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       ? "bg-red-50/60 border-red-150"
                       : isPending
                         ? "bg-amber-50/50 border-amber-150"
-                        : "bg-gray-50/80 border-gray-150"
+                        : isCorrect
+                          ? "bg-emerald-50/60 border-emerald-150"
+                          : "bg-gray-50/80 border-gray-150"
                       }`}
                   >
-                    <span className={`text-sm font-extrabold ${isWrong ? "text-red-950" : "text-gray-900"}`}>
+                    <span className={`text-sm font-extrabold ${isWrong ? "text-red-950" : isCorrect ? "text-emerald-950" : "text-gray-900"}`}>
                       {language === "vi" ? `Câu ${qIdx + 1}` : `Question ${qIdx + 1}`}
                     </span>
 
                     <div>
                       {isCorrect && (
-                        <span className="bg-red-50 text-[#990011] border border-red-100 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <CheckCircle2 size={14} />
                           <span>{language === "vi" ? `Đúng (${q.pointsEarned ?? q.points ?? "—"}/${q.points ?? "—"} điểm)` : `Correct (${q.pointsEarned ?? q.points ?? "—"}/${q.points ?? "—"} pts)`}</span>
                         </span>
@@ -1197,6 +1291,24 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     </div>
                   </div>
 
+                  {/* Question Image Media (Image on top, small scale, un-cropped) */}
+                  {getQuestionImageUrl(q) && (
+                    <div className="mx-5 mt-4 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
+                      <img
+                        src={getQuestionImageUrl(q)}
+                        alt={`Minh họa câu hỏi ${qIdx + 1}`}
+                        className="max-h-56 max-w-full w-auto h-auto object-contain rounded-xl shadow-xs"
+                      />
+                    </div>
+                  )}
+
+                  {/* Question Audio Media (Audio play below image) */}
+                  {getQuestionAudioUrl(q) && (
+                    <div className="mx-5 mt-3 p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center gap-3 shadow-2xs">
+                      <audio controls src={getQuestionAudioUrl(q)} className="w-full h-10 rounded-xl" />
+                    </div>
+                  )}
+
                   {/* Question Content / Prompt */}
                   <div className="p-5 text-sm font-bold text-gray-850 leading-relaxed">
                     <RenderHTML html={q.content} />
@@ -1207,8 +1319,19 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     <div className="px-5 pb-4 flex flex-col gap-3">
                       {options.map((optText, optIdx) => {
                         const optIndexStr = String(optIdx)
-                        const isStudentPick = studentAnswers.includes(optIndexStr)
-                        const isRightAnswer = correctAnswers.includes(optIndexStr)
+                        const optLetter = String.fromCharCode(65 + optIdx)
+                        const optTextStr = String(optText).trim()
+
+                        const isStudentPick = (
+                          studentAnswers.includes(optIndexStr) ||
+                          studentAnswers.includes(optLetter) ||
+                          studentAnswers.some((ans) => String(ans).trim() === optTextStr)
+                        )
+                        const isRightAnswer = (
+                          correctAnswers.includes(optIndexStr) ||
+                          correctAnswers.includes(optLetter) ||
+                          correctAnswers.some((ans) => String(ans).trim() === optTextStr)
+                        )
 
                         let optionStyle = "border-gray-200 bg-white text-gray-700 font-semibold"
                         let circleStyle = "border-gray-300"
@@ -1218,20 +1341,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                           optionStyle = "border-2 border-gray-400 bg-gray-50 text-gray-900 font-bold"
                           circleStyle = "border-2 border-gray-500 bg-gray-100"
                         } else if (isStudentPick && isRightAnswer) {
-                          // Selected Correct Option
-                          optionStyle = "border-2 border-[#990011] bg-red-50/10 text-gray-900 font-bold"
-                          circleStyle = "border-2 border-[#990011] bg-red-50"
-                          rightIcon = <Check size={18} className="text-[#990011] shrink-0" />
-                        } else if (isStudentPick && !isRightAnswer) {
-                          // Selected Wrong Option
-                          optionStyle = "border-2 border-red-500 bg-red-50/20 text-gray-900 font-bold"
-                          circleStyle = "border-2 border-red-500 bg-red-100"
-                          rightIcon = <X size={18} className="text-red-600 shrink-0" />
-                        } else if (!isStudentPick && isRightAnswer) {
-                          // Unselected Correct Option (when student picked wrong)
+                          // Student chose correct option -> Green
                           optionStyle = "border-2 border-emerald-500 bg-emerald-50/20 text-emerald-950 font-bold"
                           circleStyle = "border-2 border-emerald-500 bg-emerald-100"
                           rightIcon = <Check size={18} className="text-emerald-600 shrink-0" />
+                        } else if (isStudentPick && !isRightAnswer) {
+                          // Student chose wrong option -> Red
+                          optionStyle = "border-2 border-red-500 bg-red-50/20 text-red-900 font-bold"
+                          circleStyle = "border-2 border-red-500 bg-red-100"
+                          rightIcon = <X size={18} className="text-red-600 shrink-0" />
                         }
 
                         return (
@@ -1247,7 +1365,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                                     className={`w-2 h-2 rounded-full ${!hasAnswerKey
                                       ? "bg-gray-600"
                                       : isRightAnswer
-                                        ? "bg-[#990011]"
+                                        ? "bg-emerald-600"
                                         : "bg-red-600"
                                       }`}
                                   />
@@ -1256,7 +1374,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
                               {/* Option Label */}
                               <span className={isStudentPick && hasAnswerKey && !isRightAnswer ? "text-gray-600" : ""}>
-                                <span className="font-black mr-1.5">{String.fromCharCode(65 + optIdx)}.</span>
+                                <span className="font-black mr-1.5">{optLetter}.</span>
                                 {optText}
                               </span>
                             </div>
@@ -1293,9 +1411,51 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wide">
                         {language === "vi" ? "Câu trả lời của bạn:" : "Your Answer:"}
                       </span>
-                      <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-800">
-                        {q.studentFillText || (language === "vi" ? "(Chưa nhập câu trả lời)" : "(No answer provided)")}
+                      <div
+                        className={`p-4 border rounded-xl text-xs md:text-sm flex items-center justify-between gap-3 ${isCorrect
+                            ? "border-2 border-emerald-500 bg-emerald-50/20 text-emerald-950 font-bold"
+                            : isWrong
+                              ? "border-2 border-red-500 bg-red-50/20 text-red-950 font-bold"
+                              : "bg-gray-50 border-gray-200 text-gray-800 font-semibold"
+                          }`}
+                      >
+                        <span>
+                          {q.studentFillText ||
+                            (typeof q.studentAnswer === "string" && q.studentAnswer.trim() ? q.studentAnswer : null) ||
+                            (language === "vi" ? "(Chưa nhập câu trả lời)" : "(No answer provided)")}
+                        </span>
+                        {isCorrect && <Check size={18} className="text-emerald-600 shrink-0" />}
+                        {isWrong && <X size={18} className="text-red-600 shrink-0" />}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Correct Answer Display Box Below Question */}
+                  {hasAnswerKey && correctAnswers.length > 0 && (
+                    <div className="mx-5 mb-5 p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-900 flex items-center gap-2.5 shadow-2xs">
+                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                      <span>
+                        {language === "vi" ? "Đáp án đúng: " : "Correct Answer: "}
+                        <strong className="text-emerald-950 font-extrabold">
+                          {correctAnswers
+                            .map((ans) => {
+                              const idx = Number(ans)
+                              if (options && options.length > 0 && Number.isInteger(idx) && idx >= 0 && idx < options.length) {
+                                return `${String.fromCharCode(65 + idx)}. ${options[idx]}`
+                              }
+                              if (options && options.length > 0) {
+                                const foundIdx = options.findIndex((o, i) =>
+                                  String(o).trim() === String(ans).trim() || String.fromCharCode(65 + i) === String(ans).trim()
+                                )
+                                if (foundIdx !== -1) {
+                                  return `${String.fromCharCode(65 + foundIdx)}. ${options[foundIdx]}`
+                                }
+                              }
+                              return ans
+                            })
+                            .join(" | ")}
+                        </strong>
+                      </span>
                     </div>
                   )}
 
@@ -1457,6 +1617,24 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   </span>
                 </div>
               </div>
+
+              {/* Question Image Media (Image on top, small scale, un-cropped) */}
+              {getQuestionImageUrl(currentQuestion) && (
+                <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
+                  <img
+                    src={getQuestionImageUrl(currentQuestion)}
+                    alt={`Minh họa câu hỏi ${currentIndex + 1}`}
+                    className="max-h-56 max-w-full w-auto h-auto object-contain rounded-xl shadow-xs"
+                  />
+                </div>
+              )}
+
+              {/* Question Audio Media (Audio play below image) */}
+              {getQuestionAudioUrl(currentQuestion) && (
+                <div className="p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center gap-3 shadow-2xs">
+                  <audio controls src={getQuestionAudioUrl(currentQuestion)} className="w-full h-10 rounded-xl" />
+                </div>
+              )}
 
               {/* Question Content / Prompt */}
               <div className="text-sm md:text-base font-bold text-gray-850 leading-relaxed">

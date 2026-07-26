@@ -88,8 +88,8 @@ const ClassFeedTab = ({ id, isStudent }) => {
         role="status"
       >
         {language === "vi"
-          ? "Bảng tin cho học viên chưa được API hiện tại hỗ trợ."
-          : "The current API does not provide a student class feed yet."}
+          ? "Tính năng đang phát triển."
+          : "Feature is under development."}
       </div>
     )
   }
