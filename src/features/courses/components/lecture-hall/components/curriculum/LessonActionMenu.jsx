@@ -7,8 +7,8 @@ const LessonActionMenu = ({
   onClose = () => { },
   item = {},
   onEdit = () => { },
-  onToggleHide = () => { },
-  onDelete = () => { },
+  onToggleItemVisibility = () => { },
+  onDeleteItem = () => { },
 }) => {
   if (!open) return null
 
@@ -24,10 +24,10 @@ const LessonActionMenu = ({
           }}
         />
         <MenuItem
-          icon={item?.isHidden ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
+          icon={item?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
           label={"Tuỳ chỉnh ẩn/hiện"}
           onClick={() => {
-            onToggleHide(item.id)
+            onToggleItemVisibility(item.id)
             onClose()
           }}
         />
@@ -35,7 +35,7 @@ const LessonActionMenu = ({
           icon={<Trash size={15} className="text-[#1A1A1A]" />}
           label={"Xoá"}
           onClick={() => {
-            onDelete(item.id)
+            onDeleteItem(item.id)
             onClose()
           }}
         />

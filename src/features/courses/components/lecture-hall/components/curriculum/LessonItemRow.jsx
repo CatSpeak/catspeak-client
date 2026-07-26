@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import {
   GripVertical,
   MoreVertical,
@@ -10,14 +11,14 @@ import {
   FileText,
   EyeOff,
 } from "lucide-react"
-import { MOCK_LESSON_ITEM } from "../../mockData"
 import { IconButton } from "@/shared/components/ui/buttons"
 import LessonActionMenu from "./LessonActionMenu"
+import { getDisplayData } from "../../utils/curriculumUtils"
 
 // Helper function to resolve icon, background, and left accent border based on item type
 const getItemConfig = (type) => {
   switch (type) {
-    case "announcement":
+    case "bulletinBoard":
       return {
         leftBorder: "border-l-4 border-[#72000d]",
         iconBg: "bg-red-100/70 text-[#72000d]",
@@ -46,24 +47,28 @@ const getItemConfig = (type) => {
 }
 
 const LessonItemRow = ({
-  item = MOCK_LESSON_ITEM,
+  item = {},
   isEdit = true,
   isStudent = false,
   isMenuOpen = false,
   onToggleMenu = () => { },
   onEditItem = () => { },
-  onToggleHideItem = () => { },
+  onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
   className = "",
 }) => {
-  if (isStudent && item.isHidden) return null
+  const navigate = useNavigate()
+  const { id: classId } = useParams()
 
-  const config = getItemConfig(item.type || "assignment")
+  if (isStudent && !item.isVisibleToStudents) return null
+
+  const displayData = getDisplayData(item)
+  const config = getItemConfig(displayData.type || "assignment")
   const IconComponent = config.Icon
 
   return (
     <div
-      className={`bg-[#F8F9FA] border border-[#E2E2E2] rounded-xl p-4 flex items-center justify-between gap-4 relative transition-all hover:border-gray-300 ${config.leftBorder} ${className}`}
+      className={`bg-[#F8F9FA] border border-[#E2E2E2] rounded-xl p-4 flex items-center justify-between gap-4 relative transition-all hover:border-primary ${config.leftBorder} ${className}`}
     >
       {/* Left section: Drag Handle + Type Icon + Title & Meta */}
       <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -77,24 +82,31 @@ const LessonItemRow = ({
         {/* Title and Meta Information */}
         <div className="min-w-0 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
-            <h4 className="text-[#191C1D] text-base font-semibold">
-              {item.title}
+            <h4
+              className={`text-base font-semibold ${displayData.type === "bulletinBoard" ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
+              onClick={() => {
+                if (displayData.type === "bulletinBoard") {
+                  navigate(`/workspace/courses/class/${classId}/bulletin-board/${displayData.realItemId}`)
+                }
+              }}
+            >
+              {displayData.title}
             </h4>
-            {item.isHidden && (
+            {item.isVisibleToStudents === false && (
               <span className="inline-flex items-center gap-1 bg-[#E1E3E4] text-[#5B403C] text-xs px-2 py-0.5 rounded-full font-medium">
                 <EyeOff size={12} /> <span className="font-medium">Đang ẩn</span>
               </span>
             )}
           </div>
 
-          {item.meta && (
+          {displayData.meta && (
             <div className="flex items-center gap-1 text-xs text-[#5B403C] font-normal">
-              {item.metaType === "file" ? (
+              {displayData.metaType === "file" ? (
                 <FileText size={13} className="text-stone-500 shrink-0" />
-              ) : item.metaType === "none" ? null : (
+              ) : displayData.metaType === "none" ? null : (
                 <Clock size={13} className="text-stone-500 shrink-0" />
               )}
-              <span>{item.meta}</span>
+              <span className="truncate">{displayData.meta}</span>
             </div>
           )}
         </div>
@@ -118,8 +130,8 @@ const LessonItemRow = ({
             onClose={onToggleMenu}
             item={item}
             onEdit={onEditItem}
-            onToggleHide={onToggleHideItem}
-            onDelete={onDeleteItem}
+            onToggleItemVisibility={onToggleItemVisibility}
+            onDeleteItem={onDeleteItem}
           />
         </div>
       )}

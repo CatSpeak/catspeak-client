@@ -622,6 +622,16 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-${classId}` }],
     }),
 
+    // Get Teacher Quizzes
+    getTeacherQuizzes: builder.query({
+      query: ({ classId, search }) => ({
+        url: `/teacher/classes/${classId}/quizzes`,
+        method: "GET",
+        params: { search },
+      }),
+      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-quizzes-${classId}` }],
+    }),
+
     // 17. Get Student Assignments
     getStudentAssignments: builder.query({
       query: ({ classId }) => ({
@@ -894,6 +904,327 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Commission"],
     }),
+
+    // ─── Curriculum / Lecture Hall ─────────────────────────────────────
+
+    // Get curriculum by class
+    getCurriculumByClass: builder.query({
+      query: (classId) => ({
+        url: `/teacher/classes/${classId}/curriculum`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        if (!data) return []
+
+        const rawSections = data.sections
+          ?? data.items
+          ?? (Array.isArray(data) ? data : [])
+
+        return rawSections.map((section) => {
+          const rawItems = section.items
+            ?? section.contents
+            ?? section.lessons
+            ?? []
+
+          return {
+            id: section.id?.toString() || "",
+            name: section.name || section.title || "Untitled Section",
+            description: section.description || section.subtitle || "",
+            isVisibleToStudents: section.isVisibleToStudents ?? (section.isHidden === false),
+            items: rawItems.map((item) => {
+              const itemTypeMap = {
+                "BulletinBoard": "bulletinBoard",
+                "Link": "link",
+                "Material": "material",
+                "Assignment": "assignment",
+                "Quiz": "quiz",
+              }
+              const type = item.itemType ? itemTypeMap[item.itemType] || item.itemType.toLowerCase() : (item.type || item.contentType || "material").toLowerCase()
+
+              let title = item.title || item.name || "Untitled"
+              let meta = item.meta || item.description || ""
+              let metaType = item.metaType || "none"
+
+              if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
+                title = item.bulletinBoard.title || title
+                metaType = "clock"
+              } else if (item.itemType === "Link" && item.link) {
+                title = item.link.title || title
+                meta = item.link.url || meta
+              } else if (item.itemType === "Material" && item.material) {
+                title = item.material.title || item.material.name || title
+                const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
+                const size = item.material.size ? `${(item.material.size / (1024 * 1024)).toFixed(1)} MB` : ""
+                meta = size ? `${ext} • ${size}` : ext
+                metaType = "file"
+              } else if (item.itemType === "Assignment" && item.assignment) {
+                title = item.assignment.name
+                meta = item.assignment.dueDate ? `Hạn nộp: ${new Date(item.assignment.dueDate).toLocaleDateString("vi-VN")}` : meta
+                metaType = "clock"
+              } else if (item.itemType === "Quiz" && item.quiz) {
+                title = item.quiz.name
+                const openTime = item.quiz.openTime ? `Mở: ${new Date(item.quiz.openTime).toLocaleDateString("vi-VN")}` : ""
+                const closeTime = item.quiz.closeTime ? `Đóng: ${new Date(item.quiz.closeTime).toLocaleDateString("vi-VN")}` : ""
+                metaType = "clock"
+                meta = openTime + ", " + closeTime
+              }
+
+              return {
+                id: item.id?.toString() || "",
+                itemId: item.itemId?.toString() || "",
+                type,
+                title,
+                meta,
+                metaType,
+                isVisibleToStudents: item.isVisibleToStudents ?? (item.isHidden === false),
+              }
+            }),
+          }
+        })
+      },
+      providesTags: (result, error, classId) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Create a new section in a class curriculum
+    createCurriculumSection: builder.mutation({
+      query: ({ classId, name, description, isVisibleToStudents = true }) => ({
+        url: `/teacher/classes/${classId}/curriculum/sections`,
+        method: "POST",
+        body: {
+          name,
+          description: description || null,
+          isVisibleToStudents,
+        },
+      }),
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "ClassDetail", id: classId },
+        { type: "Curriculum", id: classId },
+      ],
+    }),
+
+    // Update a section in a class curriculum
+    updateCurriculumSection: builder.mutation({
+      query: ({ classId, sectionId, name, description, isVisibleToStudents = true }) => ({
+        url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}`,
+        method: "PUT",
+        body: { name, description, isVisibleToStudents },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Delete a section in a class curriculum
+    deleteCurriculumSection: builder.mutation({
+      query: ({ classId, sectionId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Create a bulletin board in a section
+    createBulletinBoard: builder.mutation({
+      query: ({ classId, sectionId, title, content, allowStudentReply = true, isVisibleToStudents = true }) => ({
+        url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/bulletin-boards`,
+        method: "POST",
+        body: { title, content, allowStudentReply, isVisibleToStudents },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Update a bulletin board in a section
+    updateBulletinBoard: builder.mutation({
+      query: ({ classId, boardId, title, content, allowStudentReply, isVisibleToStudents }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}`,
+        method: "PUT",
+        body: { title, content, allowStudentReply, isVisibleToStudents },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Get a bulletin board detail
+    getBulletinBoardDetail: builder.query({
+      query: ({ classId, boardId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Upload material to a section
+    uploadMaterialToSection: builder.mutation({
+      query: ({ classId, sectionId, files, title, isVisibleToStudents = true }) => {
+        const formData = new FormData()
+        files.forEach(file => {
+          formData.append("Files", file)
+        })
+        if (title) formData.append("Title", title)
+        formData.append("IsVisibleToStudents", isVisibleToStudents)
+        return {
+          url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/materials`,
+          method: "POST",
+          body: formData
+        }
+      },
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Add link to a section
+    addLinkToSection: builder.mutation({
+      query: ({ classId, sectionId, title, url, isVisibleToStudents = true }) => ({
+        url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/links`,
+        method: "POST",
+        body: {
+          title,
+          url,
+          isVisibleToStudents,
+        },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Add assignment to a section
+    addAssignmentToSection: builder.mutation({
+      query: ({ classId, sectionId, assignmentId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/assignments`,
+        method: "POST",
+        body: { assignmentId },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Add quiz to a section
+    addQuizToSection: builder.mutation({
+      query: ({ classId, sectionId, quizId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/quizzes`,
+        method: "POST",
+        body: { quizId },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Change visibility of an item in a section
+    changeVisibilityOfItem: builder.mutation({
+      query: ({ classId, itemId, isVisibleToStudents }) => ({
+        url: `/teacher/classes/${classId}/curriculum/items/${itemId}/visibility?isVisible=${isVisibleToStudents}`,
+        method: "PUT",
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Delete item in a section
+    deleteItemInCurriculum: builder.mutation({
+      query: ({ classId, itemId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/items/${itemId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Get list posts in a bulletin board
+    getListPostsInBulletinBoard: builder.query({
+      query: ({ classId, boardId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Create a post in a bulletin board
+    createPostInBulletinBoard: builder.mutation({
+      query: ({ classId, boardId, formData }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+        method: "POST",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Get post detail
+    getPostDetail: builder.query({
+      query: ({ classId, postId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Update a post in a bulletin board
+    updatePostInBulletinBoard: builder.mutation({
+      query: ({ classId, postId, formData }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
+        method: "PUT",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Delete a post in a bulletin board
+    deletePostInBulletinBoard: builder.mutation({
+      query: ({ classId, postId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Create comment in a bulletin board
+    createCommentInBulletinBoard: builder.mutation({
+      query: ({ classId, postId, content }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}/replies`,
+        method: "POST",
+        body: {
+          content,
+        },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Get comment detail
+    getCommentDetail: builder.query({
+      query: ({ classId, commentId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Update a comment in a bulletin board
+    updateCommentInBulletinBoard: builder.mutation({
+      query: ({ classId, commentId, content, isVisibleToStudents = true }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
+        method: "PUT",
+        body: {
+          content,
+          isVisibleToStudents,
+        },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Delete a comment in a bulletin board
+    deleteCommentInBulletinBoard: builder.mutation({
+      query: ({ classId, commentId }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Create a reply in a comment
+    createReplyInComment: builder.mutation({
+      query: ({ classId, commentId, content, isVisibleToStudents = true }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}/replies`,
+        method: "POST",
+        body: {
+          content,
+          isVisibleToStudents,
+        },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
   }),
 })
 
@@ -916,6 +1247,7 @@ export const {
   useGetClassFeedQuery,
   useCreateClassPostMutation,
   useGetTeacherAssignmentsQuery,
+  useGetTeacherQuizzesQuery,
   useGetStudentAssignmentsQuery,
   useGetStudentAssignmentByIdQuery,
   useGetMyAssignmentSubmissionQuery,
@@ -939,4 +1271,27 @@ export const {
   useGetCommissionQuery,
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
+  useGetCurriculumByClassQuery,
+  useCreateCurriculumSectionMutation,
+  useUpdateCurriculumSectionMutation,
+  useDeleteCurriculumSectionMutation,
+  useUploadMaterialToSectionMutation,
+  useAddLinkToSectionMutation,
+  useCreateBulletinBoardMutation,
+  useUpdateBulletinBoardMutation,
+  useGetBulletinBoardDetailQuery,
+  useAddAssignmentToSectionMutation,
+  useAddQuizToSectionMutation,
+  useChangeVisibilityOfItemMutation,
+  useDeleteItemInCurriculumMutation,
+  useGetListPostsInBulletinBoardQuery,
+  useCreatePostInBulletinBoardMutation,
+  useGetPostDetailQuery,
+  useUpdatePostInBulletinBoardMutation,
+  useDeletePostInBulletinBoardMutation,
+  useCreateCommentInBulletinBoardMutation,
+  useGetCommentDetailQuery,
+  useUpdateCommentInBulletinBoardMutation,
+  useDeleteCommentInBulletinBoardMutation,
+  useCreateReplyInCommentMutation,
 } = coursesApi

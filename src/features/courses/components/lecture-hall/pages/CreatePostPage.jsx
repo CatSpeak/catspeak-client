@@ -1,439 +1,396 @@
 import React, { useState, useRef } from "react"
-import { useNavigate } from "react-router-dom"
 import {
-    Upload,
-    CloudUpload,
-    FileText,
-    Image as ImageIcon,
-    FileCode,
-    File as FileIcon,
-    X,
-    Trash2,
-    Send,
-    Pin,
-    MessageSquare,
-    Eye,
+  Upload,
+  CloudUpload,
+  FileText,
+  Image as ImageIcon,
+  FileCode,
+  File as FileIcon,
+  X,
+  Trash2,
+  Send,
+  Pin,
+  MessageSquare,
+  Eye,
 } from "lucide-react"
+import { Editor } from "@tinymce/tinymce-react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
-import Switch from "@/shared/components/ui/inputs/Switch"
 import { PillButton } from "@/shared/components/ui/buttons"
+import FileAttachmentItem from "../components/ui/FileAttachmentItem"
+import ToggleOption from "../components/ui/ToggleOption"
+import { useParams, useNavigate } from "react-router-dom"
+import { useCreatePostInBulletinBoardMutation } from "@/store/api/coursesApi"
+import toast from "react-hot-toast"
 
 // ─── Helpers (reused pattern from CreatePostModal / AddMaterialModal) ────────
 
-const formatFileSize = (bytes) => {
-    if (!bytes || bytes === 0) return "0 B"
-    const k = 1024
-    const sizes = ["B", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
-}
-
-const getFileIcon = (fileName) => {
-    if (!fileName) return <FileText size={20} className="text-[#72000d]" />
-    const ext = fileName.split(".").pop().toLowerCase()
-    if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext)) {
-        return <ImageIcon size={20} className="text-amber-600" />
-    }
-    if (["pdf", "doc", "docx"].includes(ext)) {
-        return <FileText size={20} className="text-[#72000d]" />
-    }
-    if (["pptx", "ppt", "xlsx", "xls"].includes(ext)) {
-        return <FileCode size={20} className="text-blue-600" />
-    }
-    return <FileIcon size={20} className="text-gray-600" />
-}
-
 const MAX_ATTACHMENTS = 5
-const MAX_DESCRIPTION_WORDS = 250
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
 const CreatePostPage = () => {
-    const navigate = useNavigate()
+  const { id: classId, boardId } = useParams()
+  const navigate = useNavigate()
+  const [createPost, { isLoading }] = useCreatePostInBulletinBoardMutation()
 
-    // Form state
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [isPinned, setIsPinned] = useState(true)
-    const [allowReply, setAllowReply] = useState(true)
-    const [visibleToStudents, setVisibleToStudents] = useState(true)
+  // Form state
+  const [title, setTitle] = useState("")
+  const [content, setContent] = useState("")
+  const [isPinned, setIsPinned] = useState(true)
+  const [allowReply, setAllowReply] = useState(true)
+  const [visibleToStudents, setVisibleToStudents] = useState(true)
 
-    // Avatar / thumbnail image
-    const [avatarPreview, setAvatarPreview] = useState("")
-    const avatarInputRef = useRef(null)
+  // Avatar / thumbnail image
+  const [avatarPreview, setAvatarPreview] = useState("")
+  const [avatarFile, setAvatarFile] = useState(null)
+  const avatarInputRef = useRef(null)
 
-    // Attachments (multiple files)
-    const [attachments, setAttachments] = useState([])
-    const [attachDragActive, setAttachDragActive] = useState(false)
-    const attachInputRef = useRef(null)
+  // Attachments (multiple files)
+  const [attachments, setAttachments] = useState([])
+  const [attachDragActive, setAttachDragActive] = useState(false)
+  const attachInputRef = useRef(null)
 
-    // ─── Avatar handlers (pattern from CreateCoursePage) ──────────────────────
+  // ─── Avatar handlers (pattern from CreateCoursePage) ──────────────────────
 
-    const handleAvatarClick = () => {
-        avatarInputRef.current?.click()
+  const handleAvatarClick = () => {
+    avatarInputRef.current?.click()
+  }
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 50 * 1024 * 1024) {
+      alert("Kích cỡ tệp phải dưới 50MB")
+      return
+    }
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result)
+    }
+    reader.readAsDataURL(file)
+    setAvatarFile(file)
+  }
+
+  // ─── Attachment handlers (pattern from AddMaterialModal) ──────────────────
+
+  const handleAttachDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setAttachDragActive(true)
+    } else if (e.type === "dragleave") {
+      setAttachDragActive(false)
+    }
+  }
+
+  const handleAttachDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setAttachDragActive(false)
+    const files = Array.from(e.dataTransfer.files || [])
+    addAttachments(files)
+  }
+
+  const handleAttachChange = (e) => {
+    const files = Array.from(e.target.files || [])
+    addAttachments(files)
+    // Reset input value so the same file can be re-selected
+    if (attachInputRef.current) attachInputRef.current.value = ""
+  }
+
+  const addAttachments = (files) => {
+    setAttachments((prev) => {
+      const remaining = MAX_ATTACHMENTS - prev.length
+      const toAdd = files.slice(0, remaining)
+      return [...prev, ...toAdd]
+    })
+  }
+
+  const removeAttachment = (index) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // ─── Submit ───────────────────────────────────────────────────────────────
+
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      toast.error("Vui lòng nhập tiêu đề bài viết")
+      return
     }
 
-    const handleAvatarChange = (e) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-        if (file.size > 50 * 1024 * 1024) {
-            alert("Kích cỡ tệp phải dưới 50MB")
-            return
-        }
-        const reader = new FileReader()
-        reader.onloadend = () => {
-            setAvatarPreview(reader.result)
-        }
-        reader.readAsDataURL(file)
+    if (!content.trim()) {
+      toast.error("Vui lòng nhập nội dung bài viết")
+      return
     }
 
-    // ─── Attachment handlers (pattern from AddMaterialModal) ──────────────────
+    const formData = new FormData()
+    formData.append("Title", title)
+    formData.append("Content", content)
+    formData.append("IsPinned", isPinned)
+    formData.append("AllowReply", allowReply)
+    formData.append("IsVisibleToStudents", visibleToStudents)
 
-    const handleAttachDrag = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        if (e.type === "dragenter" || e.type === "dragover") {
-            setAttachDragActive(true)
-        } else if (e.type === "dragleave") {
-            setAttachDragActive(false)
-        }
+    if (avatarFile) {
+      formData.append("Thumbnail", avatarFile)
     }
 
-    const handleAttachDrop = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setAttachDragActive(false)
-        const files = Array.from(e.dataTransfer.files || [])
-        addAttachments(files)
+    attachments.forEach((file) => {
+      formData.append("Attachments", file)
+    })
+
+    try {
+      await createPost({ classId, boardId, formData }).unwrap()
+      navigate(-1)
+    } catch (err) {
+      console.error("Failed to create post", err)
+      alert("Đã xảy ra lỗi khi tạo bài viết")
     }
+  }
 
-    const handleAttachChange = (e) => {
-        const files = Array.from(e.target.files || [])
-        addAttachments(files)
-        // Reset input value so the same file can be re-selected
-        if (attachInputRef.current) attachInputRef.current.value = ""
-    }
+  const handleDelete = () => {
+    setTitle("")
+    setContent("")
+    setAvatarPreview("")
+    setAvatarFile(null)
+    setAttachments([])
+    setIsPinned(true)
+    setAllowReply(true)
+    setVisibleToStudents(true)
+    if (avatarInputRef.current) avatarInputRef.current.value = ""
+    if (attachInputRef.current) attachInputRef.current.value = ""
+  }
 
-    const addAttachments = (files) => {
-        setAttachments((prev) => {
-            const remaining = MAX_ATTACHMENTS - prev.length
-            const toAdd = files.slice(0, remaining)
-            return [...prev, ...toAdd]
-        })
-    }
+  return (
+    <div className="min-h-screen p-6 space-y-6">
+      {/* ─── Breadcrumb ───────────────────────────────────────────────── */}
+      <Breadcrumb
+        className="text-[#7B7979] text-sm"
+        items={[
+          { label: "Trang chủ", href: "/" },
+          { label: "Khóa học của tôi", href: "/workspace/courses" },
+          { label: "Toàn bộ khóa học", href: "/workspace/courses" },
+          { label: "Chi tiết khóa học", href: "#" },
+          { label: "Chi tiết lớp học", href: "#" },
+          { label: "Chi tiết bảng tin", href: "#" },
+          { label: "Thêm bài viết", active: true },
+        ]}
+      />
 
-    const removeAttachment = (index) => {
-        setAttachments((prev) => prev.filter((_, i) => i !== index))
-    }
+      <div className="w-full space-y-6">
+        {/* ─── Page Title ─────────────────────────────────────────────── */}
+        <h1 className="text-[40px] font-semibold text-[#1A1A1A]">
+          Thêm bài viết
+        </h1>
 
-    // ─── Description word count ───────────────────────────────────────────────
+        {/* ─── Form Card ──────────────────────────────────────────────── */}
+        <div className="bg-white rounded-3xl p-6 space-y-6 shadow-faq-card">
+          <h2 className="text-xl font-semibold text-[#1A1A1A]">
+            Thông tin bài viết
+          </h2>
 
-    const descriptionWordCount = description.trim()
-        ? description.trim().split(/\s+/).length
-        : 0
+          {/* ── Avatar upload (pattern from CreateCoursePage) ── */}
+          <div className="space-y-3">
+            <label className="block text-base font-medium text-[#191C1D]">
+              Ảnh đại diện
+            </label>
+            <div
+              onClick={handleAvatarClick}
+              className="group relative border border-[#E2E2E2] rounded-xl bg-[#F8F9FA] hover:bg-[#F2F2F2] flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[294px]"
+            >
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/png, image/jpeg, image/svg+xml"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+              {avatarPreview ? (
+                <div className="relative w-full max-h-[260px] flex justify-center overflow-hidden rounded-xl p-4">
+                  <img
+                    src={avatarPreview}
+                    alt="Preview"
+                    className="object-contain max-h-[240px] rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl">
+                    Thay đổi hình ảnh
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-10">
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#5B403C]">
+                    <Upload size={24} />
+                  </div>
+                  <div className="text-center text-xs text-[#5B403C] space-y-1">
+                    <p>Hỗ trợ định dạng png, jpeg và svg.</p>
+                    <p>Kích cỡ dưới 50mb</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-    // ─── Submit ───────────────────────────────────────────────────────────────
+          {/* ── Title input ── */}
+          <div className="space-y-2">
+            <label className="block text-base font-medium text-[#191C1D]">
+              Tiêu đề
+            </label>
+            <TextInput
+              value={title}
+              required
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Nhập tiêu đề"
+              className="rounded-xl !h-[50px] px-4 text-sm"
+            />
+          </div>
 
-    const handleSubmit = () => {
-        if (!title.trim()) {
-            alert("Vui lòng nhập tiêu đề bài viết")
-            return
-        }
-        console.log("Submit post", {
-            title,
-            description,
-            avatarPreview,
-            attachments,
-            isPinned,
-            allowReply,
-            visibleToStudents,
-        })
-    }
+          {/* ── Content input ── */}
+          <div className="space-y-2">
+            <label className="block text-base font-medium text-[#191C1D]">
+              Nội dung
+            </label>
+            <Editor
+              tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+              value={content}
+              onEditorChange={(newContent) => setContent(newContent)}
+              init={{
+                height: 300,
+                menubar: false,
+                statusbar: false,
+                plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                toolbar:
+                  "bold italic underline strikethrough | emoticons link | bullist numlist",
+                placeholder: "Viết nội dung ở đây...",
+                skin: "oxide",
+              }}
+            />
+          </div>
 
-    const handleDelete = () => {
-        setTitle("")
-        setDescription("")
-        setAvatarPreview("")
-        setAttachments([])
-        setIsPinned(true)
-        setAllowReply(true)
-        setVisibleToStudents(true)
-        if (avatarInputRef.current) avatarInputRef.current.value = ""
-        if (attachInputRef.current) attachInputRef.current.value = ""
-    }
+          {/* ── Attachments upload (pattern from CreatePostModal / AddMaterialModal) ── */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-base font-medium text-[#191C1D]">
+                Tài liệu đính kèm
+              </label>
+              <span className="text-xs text-[#5B403C]">
+                Tối đa {MAX_ATTACHMENTS} file
+              </span>
+            </div>
 
-    return (
-        <div className="min-h-screen">
-            {/* ─── Breadcrumb ───────────────────────────────────────────────── */}
-            <Breadcrumb
-                className="text-[#7B7979] text-sm"
-                items={[
-                    { label: "Trang chủ", href: "/" },
-                    { label: "Khóa học của tôi", href: "/workspace/courses" },
-                    { label: "Toàn bộ khóa học", href: "/workspace/courses" },
-                    { label: "Chi tiết khóa học", href: "#" },
-                    { label: "Chi tiết lớp học", href: "#" },
-                    { label: "Chi tiết bảng tin", href: "#" },
-                    { label: "Thêm bài viết", active: true },
-                ]}
+            <input
+              type="file"
+              ref={attachInputRef}
+              onChange={handleAttachChange}
+              accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png"
+              className="hidden"
+              multiple
             />
 
-            <div className="max-w-4xl p-8">
-                {/* ─── Page Title ─────────────────────────────────────────────── */}
-                <h1 className="text-3xl font-bold text-[#191C1D] mb-8">
-                    Thêm bài viết
-                </h1>
-
-                {/* ─── Form Card ──────────────────────────────────────────────── */}
-                <div className="bg-white rounded-2xl border border-[#E2E2E2] p-8 space-y-8">
-                    <h2 className="text-xl font-bold text-[#191C1D]">
-                        Thông tin bài viết
-                    </h2>
-
-                    {/* ── Avatar upload (pattern from CreateCoursePage) ── */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-[#191C1D]">
-                            Ảnh đại diện
-                        </label>
-                        <div
-                            onClick={handleAvatarClick}
-                            className="group relative border border-[#E2E2E2] rounded-xl bg-[#F8F9FA] hover:bg-[#F2F2F2] flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[200px]"
-                        >
-                            <input
-                                ref={avatarInputRef}
-                                type="file"
-                                accept="image/png, image/jpeg, image/svg+xml"
-                                className="hidden"
-                                onChange={handleAvatarChange}
-                            />
-                            {avatarPreview ? (
-                                <div className="relative w-full max-h-[260px] flex justify-center overflow-hidden rounded-xl p-4">
-                                    <img
-                                        src={avatarPreview}
-                                        alt="Preview"
-                                        className="object-contain max-h-[240px] rounded-lg"
-                                    />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl">
-                                        Thay đổi hình ảnh
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center gap-3 py-10">
-                                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#5B403C]">
-                                        <Upload size={24} />
-                                    </div>
-                                    <div className="text-center text-xs text-[#5B403C] space-y-1">
-                                        <p>Hỗ trợ định dạng png, jpeg và svg.</p>
-                                        <p>Kích cỡ dưới 50mb</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* ── Title input ── */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-[#191C1D]">
-                            Tiêu đề
-                        </label>
-                        <TextInput
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Nhập tiêu đề"
-                            className="rounded-xl !h-[50px] px-4 text-sm"
-                        />
-                    </div>
-
-                    {/* ── Description input ── */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-[#191C1D]">
-                            Mô tả
-                        </label>
-                        <TextInput
-                            multiline
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Nhập mô tả"
-                            className="rounded-xl px-4 text-sm !min-h-[80px]"
-                        />
-                        <p className="text-xs text-[#5B403C] text-right">
-                            Tối đa {MAX_DESCRIPTION_WORDS} từ
-                        </p>
-                    </div>
-
-                    {/* ── Attachments upload (pattern from CreatePostModal / AddMaterialModal) ── */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-semibold text-[#191C1D]">
-                                Tài liệu đính kèm
-                            </label>
-                            <span className="text-xs text-[#5B403C]">
-                                Tối đa {MAX_ATTACHMENTS} file
-                            </span>
-                        </div>
-
-                        <input
-                            type="file"
-                            ref={attachInputRef}
-                            onChange={handleAttachChange}
-                            accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png"
-                            className="hidden"
-                            multiple
-                        />
-
-                        {/* Drop zone */}
-                        {attachments.length < MAX_ATTACHMENTS && (
-                            <div
-                                onDragEnter={handleAttachDrag}
-                                onDragLeave={handleAttachDrag}
-                                onDragOver={handleAttachDrag}
-                                onDrop={handleAttachDrop}
-                                onClick={() => attachInputRef.current?.click()}
-                                className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all space-y-3 ${attachDragActive
-                                        ? "border-[#750000] bg-red-50/40"
-                                        : "border-[#E2E2E2] hover:border-[#C6C6C6] bg-[#F8F9FA]"
-                                    }`}
-                            >
-                                <div className="w-12 h-12 bg-white text-[#750000] rounded-full flex items-center justify-center mx-auto shadow-sm">
-                                    <CloudUpload size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-sm text-[#750000] font-bold mb-1">
-                                        Nhấn để tải lên hoặc kéo thả file vào đây
-                                    </p>
-                                    <p className="text-[11px] text-[#5B403C]">
-                                        Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG (Max 50MB/file)
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Attached file list */}
-                        {attachments.length > 0 && (
-                            <div className="space-y-2">
-                                {attachments.map((file, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="border border-[#E2E2E2] bg-white rounded-xl px-4 py-3 flex items-center justify-between"
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-10 h-10 bg-red-100/70 text-[#72000d] rounded-xl flex items-center justify-center shrink-0">
-                                                {getFileIcon(file.name)}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-semibold text-[#191C1D] truncate">
-                                                    {file.name}
-                                                </p>
-                                                <p className="text-xs text-[#5B403C]">
-                                                    {formatFileSize(file.size)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => removeAttachment(idx)}
-                                            className="p-1.5 hover:bg-gray-100 rounded-full text-[#5B403C] hover:text-[#191C1D] transition-colors"
-                                            title="Xóa tệp"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* ── Toggle options (pattern from CreatePostModal) ── */}
-                    <div className="space-y-0">
-                        {/* Pin */}
-                        <ToggleOption
-                            icon={<Pin size={20} className="text-[#FEA53F]" />}
-                            iconBg="bg-[#FFF3E0]"
-                            title="Ghim bài viết"
-                            description="Giữ bài viết luôn ở đầu bảng tin"
-                            checked={isPinned}
-                            onChange={(e) => setIsPinned(e.target.checked)}
-                        />
-
-                        {/* Allow reply */}
-                        <ToggleOption
-                            icon={<MessageSquare size={20} className="text-[#750000]" />}
-                            iconBg="bg-[#FFDAD4]"
-                            title="Phản hồi công khai"
-                            description="Cho phép học viên có thể bình luận về bài viết"
-                            checked={allowReply}
-                            onChange={(e) => setAllowReply(e.target.checked)}
-                        />
-
-                        {/* Visible */}
-                        <ToggleOption
-                            icon={<Eye size={20} className="text-[#750000]" />}
-                            iconBg="bg-[#FFDAD4]"
-                            title="Hiển thị với học viên"
-                            description="Tùy chỉnh độ hiển thị với học viên"
-                            checked={visibleToStudents}
-                            onChange={(e) => setVisibleToStudents(e.target.checked)}
-                        />
-                    </div>
+            {/* Drop zone */}
+            {attachments.length < MAX_ATTACHMENTS && (
+              <div
+                onDragEnter={handleAttachDrag}
+                onDragLeave={handleAttachDrag}
+                onDragOver={handleAttachDrag}
+                onDrop={handleAttachDrop}
+                onClick={() => attachInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all space-y-3 ${attachDragActive
+                  ? "border-[#750000] bg-red-50/40"
+                  : "border-[#E2E2E2] hover:border-[#C6C6C6] bg-[#F8F9FA]"
+                  }`}
+              >
+                <div className="w-12 h-12 bg-white text-[#750000] rounded-full flex items-center justify-center mx-auto shadow-sm">
+                  <CloudUpload size={24} />
                 </div>
-
-                {/* ─── Action Buttons ─────────────────────────────────────────── */}
-                <div className="grid grid-cols-2 gap-4 mt-8">
-                    <PillButton
-                        variant="secondary-no-outline"
-                        onClick={handleDelete}
-                        bgColor="white"
-                        textColor="#750000"
-                        borderColor="#750000"
-                        className="!rounded-xl !h-12 font-semibold text-sm w-full justify-center"
-                    >
-                        <Trash2 size={16} className="mr-2" /> Xóa
-                    </PillButton>
-
-                    <PillButton
-                        onClick={handleSubmit}
-                        bgColor="#750000"
-                        textColor="white"
-                        className="!rounded-xl !h-12 font-semibold text-sm w-full justify-center"
-                    >
-                        Đăng bảng tin <Send size={16} className="ml-2" />
-                    </PillButton>
+                <div>
+                  <p className="text-sm text-[#750000] font-bold mb-1">
+                    Nhấn để tải lên hoặc kéo thả file vào đây
+                  </p>
+                  <p className="text-[11px] text-[#5B403C]">
+                    Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG (Max 50MB/file)
+                  </p>
                 </div>
-            </div>
+              </div>
+            )}
+
+            {/* Attached file list */}
+            {attachments.length > 0 && (
+              <div className="space-y-2">
+                {attachments.map((file, idx) => (
+                  <FileAttachmentItem
+                    key={idx}
+                    file={file}
+                    onRemove={() => removeAttachment(idx)}
+                    variant="default"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Toggle options (pattern from CreatePostModal) ── */}
+          <div className="space-y-0">
+            {/* Pin */}
+            <ToggleOption
+              icon={<Pin size={20} className="text-[#E2B60A]" />}
+              iconBg="bg-[#FFF9CC]"
+              title="Ghim bài viết"
+              description="Giữ bài viết luôn ở đầu bảng tin"
+              checked={isPinned}
+              onChange={(e) => setIsPinned(e.target.checked)}
+            />
+
+            {/* Allow reply */}
+            <ToggleOption
+              icon={<MessageSquare size={20} className="text-[#0E6EEC]" />}
+              iconBg="bg-[#8ECAFF]"
+              title="Phản hồi công khai"
+              description="Cho phép học viên có thể bình luận về bài viết"
+              checked={allowReply}
+              onChange={(e) => setAllowReply(e.target.checked)}
+            />
+
+            {/* Visible */}
+            <ToggleOption
+              icon={<Eye size={20} className="text-[#F83B4F]" />}
+              iconBg="bg-[#FFEAED]"
+              title="Hiển thị với học viên"
+              description="Tùy chỉnh độ hiển thị với học viên"
+              checked={visibleToStudents}
+              onChange={(e) => setVisibleToStudents(e.target.checked)}
+            />
+          </div>
         </div>
-    )
+
+        {/* ─── Action Buttons ─────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 gap-4 mt-8">
+          <PillButton
+            variant="outline"
+            onClick={handleDelete}
+            bgColor="white"
+            textColor="#750000"
+            borderColor="#750000"
+          >
+            <Trash2 size={16} className="mr-2" /> Xóa
+          </PillButton>
+
+          <PillButton
+            onClick={handleSubmit}
+            disabled={isLoading}
+            bgColor="#750000"
+            textColor="white"
+            className="!rounded-xl !h-12 font-semibold text-sm w-full justify-center disabled:opacity-50"
+          >
+            {isLoading ? "Đang đăng..." : (
+              <>Đăng bảng tin <Send size={16} className="ml-2" /></>
+            )}
+          </PillButton>
+        </div>
+      </div>
+    </div>
+  )
 }
 
-// ─── Reusable Toggle Row ──────────────────────────────────────────────────────
 
-const ToggleOption = ({
-    icon,
-    iconBg = "bg-[#FFDAD4]",
-    title,
-    description,
-    checked,
-    onChange,
-}) => (
-    <div className="flex items-center justify-between py-4 border-b border-[#F3F4F5] last:border-b-0">
-        <div className="flex items-center gap-4">
-            <div
-                className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center shrink-0`}
-            >
-                {icon}
-            </div>
-            <div>
-                <p className="font-semibold text-sm text-[#191C1D]">{title}</p>
-                <p className="text-xs text-[#5B403C]">{description}</p>
-            </div>
-        </div>
-        <Switch
-            checked={checked}
-            onChange={onChange}
-            colorClass="peer-checked:bg-[#A00000]"
-            className="!h-6"
-        />
-    </div>
-)
 
 export default CreatePostPage

@@ -1,5 +1,6 @@
 import React from "react"
 import Avatar from "@/shared/components/ui/Avatar"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
 
 /**
  * Hiển thị một bình luận đơn lẻ trong danh sách phản hồi.
@@ -17,7 +18,7 @@ import Avatar from "@/shared/components/ui/Avatar"
  * @param {function} [onReply]              - Callback khi bấm "Phản hồi"
  * @param {function} [onViewReplies]        - Callback khi bấm "Xem XX phản hồi"
  */
-const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
+const CommentItem = ({ comment = {}, }) => {
   const {
     authorName,
     authorAvatar,
@@ -26,7 +27,7 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
     image,
     content,
     link,
-    replyCount = 0,
+    // replyCount = 0,
   } = comment
 
   return (
@@ -46,7 +47,7 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
               Giáo viên
             </span>
           )}
-          <span className="text-xs text-[#5B403C]">· {time}</span>
+          <span className="text-xs text-[#5B403C]"> {time}</span>
         </div>
 
         {/* Image attachment */}
@@ -58,7 +59,7 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
 
         {/* Text content */}
         {content && (
-          <p className="text-sm text-[#191C1D] leading-relaxed mb-2">{content}</p>
+          <RenderHTML html={content} className="text-sm text-[#191C1D] leading-relaxed mb-2" />
         )}
 
         {/* Link attachment */}
@@ -72,27 +73,6 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
             {link}
           </a>
         )}
-
-        {/* Actions */}
-        <div className="flex items-center gap-3 text-sm font-semibold">
-          {replyCount > 0 && (
-            <>
-              <button
-                className="text-[#750000] hover:opacity-75 transition-opacity"
-                onClick={() => onViewReplies && onViewReplies(comment)}
-              >
-                Xem {replyCount} phản hồi
-              </button>
-              <span className="text-[#C6C6C6]">·</span>
-            </>
-          )}
-          <button
-            className="text-[#750000] hover:opacity-75 transition-opacity"
-            onClick={() => onReply && onReply(comment)}
-          >
-            Phản hồi
-          </button>
-        </div>
       </div>
     </div>
   )

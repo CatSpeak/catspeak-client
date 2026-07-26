@@ -1,37 +1,14 @@
 import React, { useRef, useState } from "react"
 import { CloudUpload, Link2, FileText, Image as ImageIcon, FileCode, File as FileIcon, X } from "lucide-react"
 import { Editor } from "@tinymce/tinymce-react"
-import Modal from "@/shared/components/ui/Modal"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { PillButton } from "@/shared/components/ui/buttons"
+import { toast } from "react-hot-toast"
+import Modal from "@/shared/components/ui/Modal"
+import FileAttachmentItem from "../ui/FileAttachmentItem"
 
-// Helper function to format file sizes cleanly
-const formatFileSize = (bytes) => {
-  if (!bytes || bytes === 0) return "0 B"
-  const k = 1024
-  const sizes = ["B", "KB", "MB", "GB"]
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
-}
-
-// Helper function to resolve dynamic file icon based on file extension
-const getFileIcon = (fileName) => {
-  if (!fileName) return <FileText size={20} className="text-[#72000d]" />
-  const ext = fileName.split(".").pop().toLowerCase()
-  if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext)) {
-    return <ImageIcon size={20} className="text-amber-600" />
-  }
-  if (["pdf", "doc", "docx"].includes(ext)) {
-    return <FileText size={20} className="text-[#72000d]" />
-  }
-  if (["js", "ts", "json", "html", "css"].includes(ext)) {
-    return <FileCode size={20} className="text-blue-600" />
-  }
-  return <FileIcon size={20} className="text-gray-600" />
-}
-
-const CreatePostModal = ({ open, onClose }) => {
+const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -90,10 +67,38 @@ const CreatePostModal = ({ open, onClose }) => {
 
   const handleCloseModal = () => {
     setSelectedFile(null)
+    setFormData({
+      title: "",
+      content: "",
+      isPinned: false,
+      allowReply: true,
+      visibleToStudents: true,
+    })
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
     onClose()
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+
+    if (!formData.title.trim()) {
+      toast.error("Vui lòng nhập tiêu đề!")
+      return
+    }
+
+    const cleanContent = formData.content.replace(/<[^>]*>?/gm, '').trim()
+    if (!cleanContent) {
+      toast.error("Vui lòng nhập nội dung!")
+      return
+    }
+
+    onSubmit({
+      ...formData,
+      file: selectedFile,
+    })
+    handleCloseModal()
   }
 
   return (
@@ -116,18 +121,13 @@ const CreatePostModal = ({ open, onClose }) => {
           >
             Hủy
           </PillButton>
-          <PillButton
-            onClick={() => {
-              console.log("Save post", formData, selectedFile)
-              handleCloseModal()
-            }}
-          >
+          <PillButton onClick={handleSubmit}>
             Lưu
           </PillButton>
         </div>
       }
     >
-      <div className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Tiêu đề */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
@@ -206,29 +206,11 @@ const CreatePostModal = ({ open, onClose }) => {
               </div>
             </div>
           ) : (
-            <div className="border border-gray-200 bg-stone-50/60 rounded-2xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 bg-red-100/70 text-[#72000d] rounded-xl flex items-center justify-center shrink-0">
-                  {getFileIcon(selectedFile.name)}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
-                    {selectedFile.name}
-                  </p>
-                  <p className="text-[11px] text-gray-500">
-                    {formatFileSize(selectedFile.size)}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleRemoveFile}
-                className="p-1.5 hover:bg-gray-200/60 rounded-full text-gray-500 hover:text-gray-800 transition-colors"
-                title="Gỡ tệp"
-              >
-                <X size={16} />
-              </button>
-            </div>
+            <FileAttachmentItem
+              file={selectedFile}
+              onRemove={handleRemoveFile}
+              variant="modal"
+            />
           )}
         </div>
 
@@ -277,7 +259,7 @@ const CreatePostModal = ({ open, onClose }) => {
             />
           </div>
         </div>
-      </div>
+      </form>
     </Modal>
   )
 }

@@ -3,8 +3,9 @@ import { Editor } from "@tinymce/tinymce-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput, Switch } from "@/shared/components/ui/inputs"
+import { toast } from "react-hot-toast"
 
-const CreateFeedModal = ({
+const CreateBulletinBoardModal = ({
   open = false,
   onClose = () => { },
   onSubmit = () => { },
@@ -17,6 +18,19 @@ const CreateFeedModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    if (!title.trim()) {
+      toast.error("Vui lòng nhập tiêu đề!")
+      return
+    }
+
+    // Check if content is empty or just <p><br></p>
+    const cleanContent = content.replace(/<[^>]*>?/gm, '').trim()
+    if (!cleanContent) {
+      toast.error("Vui lòng nhập nội dung!")
+      return
+    }
+
     onSubmit({
       title,
       content,
@@ -25,6 +39,12 @@ const CreateFeedModal = ({
       sessionName,
     })
     onClose()
+
+    // Clear form
+    setTitle("")
+    setContent("")
+    setAllowReply(true)
+    setIsVisible(true)
   }
 
   const handleEditorChange = (newContent) => {
@@ -51,7 +71,7 @@ const CreateFeedModal = ({
           >
             Hủy
           </PillButton>
-          <PillButton>
+          <PillButton onClick={handleSubmit}>
             Lưu
           </PillButton>
         </div>
@@ -137,4 +157,4 @@ const CreateFeedModal = ({
   )
 }
 
-export default CreateFeedModal
+export default CreateBulletinBoardModal

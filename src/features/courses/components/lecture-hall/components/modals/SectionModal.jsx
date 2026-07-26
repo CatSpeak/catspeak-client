@@ -2,15 +2,86 @@ import React from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput, Switch } from "@/shared/components/ui/inputs"
+import { useCreateCurriculumSectionMutation, useUpdateCurriculumSectionMutation } from "@/store/api/coursesApi"
+import { toast } from "react-hot-toast"
 
-const SectionModal = ({ sectionModal, setSectionModal, onSaveSection }) => {
-  const isVisible = !sectionModal.isHidden
+const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionCreated, onSectionUpdated, classId }) => {
+  const isVisible = sectionModal.isVisibleToStudents ?? true
+
+  const [createSection, { isLoading: isCreating }] = useCreateCurriculumSectionMutation()
+  const [updateSection, { isLoading: isUpdating }] = useUpdateCurriculumSectionMutation()
+  const isSaving = isCreating || isUpdating
 
   const handleToggleVisible = (e) => {
     setSectionModal((prev) => ({
       ...prev,
-      isHidden: !e.target.checked,
+      isVisibleToStudents: e.target.checked,
     }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (!sectionModal.name?.trim()) {
+      toast.error("Vui lòng nhập tên section")
+      return
+    }
+
+    // ── Create mode: call API ──
+    if (sectionModal.mode === "create" && classId) {
+      try {
+        await createSection({
+          classId,
+          name: sectionModal.name.trim(),
+          description: sectionModal.description?.trim() || null,
+          isVisibleToStudents: sectionModal.isVisibleToStudents ?? true,
+        }).unwrap()
+
+        toast.success("Đã tạo section mới!")
+        onSectionCreated?.()
+        setSectionModal({
+          open: false,
+          mode: "create",
+          sectionId: null,
+          name: "",
+          description: "",
+          isVisibleToStudents: true,
+        })
+      } catch (err) {
+        toast.error(err?.data?.message || err?.message || "Không thể tạo section. Vui lòng thử lại.")
+      }
+      return
+    }
+
+    // ── Edit mode: call API ──
+    if (sectionModal.mode === "edit" && classId && sectionModal.sectionId) {
+      try {
+        await updateSection({
+          classId,
+          sectionId: sectionModal.sectionId,
+          name: sectionModal.name.trim(),
+          description: sectionModal.description?.trim() || null,
+          isVisibleToStudents: sectionModal.isVisibleToStudents ?? true,
+        }).unwrap()
+
+        toast.success("Đã cập nhật section!")
+        onSectionUpdated?.()
+        setSectionModal({
+          open: false,
+          mode: "create",
+          sectionId: null,
+          name: "",
+          description: "",
+          isVisibleToStudents: true,
+        })
+      } catch (err) {
+        toast.error(err?.data?.message || err?.message || "Không thể cập nhật section. Vui lòng thử lại.")
+      }
+      return
+    }
+
+    // ── Fallback when no classId ──
+    onSaveSection && onSaveSection(e)
   }
 
   return (
@@ -30,18 +101,21 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection }) => {
             bgColor={"white"}
             textColor={"#72000d"}
             borderColor={"#E2E2E2"}
+            disabled={isSaving}
           >
             Hủy
           </PillButton>
           <PillButton
             type="submit"
+            disabled={isSaving}
+            onClick={handleSubmit}
           >
-            Lưu
+            {isSaving ? "Đang lưu..." : "Lưu"}
           </PillButton>
         </div>
       }
     >
-      <form onSubmit={onSaveSection} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Section name */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
@@ -49,9 +123,9 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection }) => {
           </label>
           <TextInput
             required
-            value={sectionModal.title}
+            value={sectionModal.name || ""}
             onChange={(e) =>
-              setSectionModal((prev) => ({ ...prev, title: e.target.value }))
+              setSectionModal((prev) => ({ ...prev, name: e.target.value }))
             }
             placeholder="Module 1 - Introduction"
             className="rounded-xl !h-[50px] px-4 text-sm"
@@ -65,9 +139,9 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection }) => {
             rows={3}
             label={"Mô tả section"}
             labelClassName="text-sm font-semibold text-[#191C1D]"
-            value={sectionModal.subtitle}
+            value={sectionModal.description || ""}
             onChange={(e) =>
-              setSectionModal((prev) => ({ ...prev, subtitle: e.target.value }))
+              setSectionModal((prev) => ({ ...prev, description: e.target.value }))
             }
             placeholder="Nhập mô tả cho section này..."
             className="rounded-xl max-h-[86px] px-4 text-sm py-3 overflow-y-auto"
@@ -91,9 +165,6 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection }) => {
             className="min-h-6"
           />
         </div>
-
-        {/* Modal Footer */}
-
       </form>
     </Modal>
   )

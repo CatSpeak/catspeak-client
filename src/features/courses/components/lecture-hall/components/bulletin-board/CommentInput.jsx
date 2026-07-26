@@ -60,7 +60,7 @@ const CommentInput = ({
             onInit={(_evt, editor) => { editorRef.current = editor }}
             onEditorChange={handleEditorChange}
             init={{
-              height: 120,
+              height: 160,
               menubar: false,
               statusbar: false,
               plugins: ["autolink", "lists", "link", "image"],
@@ -68,7 +68,6 @@ const CommentInput = ({
                 "bold italic underline | bullist numlist | link image",
               placeholder,
               skin: "oxide",
-              content_style: "body { font-size: 14px; font-family: inherit; }",
               setup: (editor) => {
                 editor.on("keydown", (e) => {
                   // Ctrl+Enter hoặc Cmd+Enter để gửi

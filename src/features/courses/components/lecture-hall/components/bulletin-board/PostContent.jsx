@@ -1,8 +1,9 @@
 import React from "react"
-import { Clock, FileText, MoreVertical } from "lucide-react"
+import { Clock, MoreVertical } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
+import { getFileIcon } from "../../utils/fileUtils"
 
 /**
  * Hiển thị nội dung chi tiết của một bài đăng bảng tin.
@@ -20,7 +21,6 @@ import RenderHTML from "@/shared/components/ui/RenderHTML"
  */
 const PostContent = ({ post = {}, onMenuClick }) => {
   const {
-    tag,
     title,
     authorName,
     authorAvatar,
@@ -31,40 +31,33 @@ const PostContent = ({ post = {}, onMenuClick }) => {
   } = post
 
   return (
-    <div className="bg-[#F8F9FA] rounded-xl p-8 border border-[#E2E2E2] shadow-faq-card mb-8">
+    <div className="bg-[#F8F9FA] rounded-xl p-6 border border-[#E2E2E2] shadow-faq-card space-y-6 mb-6">
       {/* Header: tag + menu */}
-      <div className="flex items-center justify-between mb-4">
-        {tag && (
-          <span className="inline-block px-3 py-1 bg-[#FFDAD4] text-[#410000] text-xs font-medium rounded-full">
-            {tag}
-          </span>
-        )}
+      <div className="flex items-center justify-between">
+        {/* Author info */}
+        <div className="flex items-center gap-3">
+          <Avatar
+            src={authorAvatar}
+            name={authorName}
+            alt={authorName}
+            size={48}
+          />
+          <div className="space-y-1">
+            <p className="font-semibold text-xl text-[#191C1D]">{authorName}</p>
+            <p className="flex items-center gap-1 text-sm text-[#7B7979]">
+              <Clock size={12} className="shrink-0" />
+              {date}
+            </p>
+          </div>
+        </div>
+
         <IconButton variant="ghost" onClick={onMenuClick} className="ml-auto">
           <MoreVertical size={16} />
         </IconButton>
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl font-bold text-[#191C1D] mb-4">{title}</h1>
-
-      {/* Author info */}
-      <div className="flex items-center gap-3 mb-6">
-        <Avatar
-          src={authorAvatar}
-          name={authorName}
-          alt={authorName}
-          size={48}
-        />
-        <div>
-          <p className="font-semibold text-sm text-[#191C1D]">{authorName}</p>
-          <p className="flex items-center gap-1 text-sm text-[#5B403C]">
-            <Clock size={12} className="shrink-0" />
-            {date}
-          </p>
-        </div>
-      </div>
-
-      <div className="border border-[#E2E2E2] mb-6" />
+      <h1 className="text-2xl font-bold text-[#191C1D]">{title}</h1>
 
       {/* Banner image */}
       {bannerImage && (
@@ -79,7 +72,7 @@ const PostContent = ({ post = {}, onMenuClick }) => {
 
       {/* Text content */}
       {content && (
-        <RenderHTML html={content} className="text-[#191C1D] text-sm leading-relaxed mb-6" />
+        <RenderHTML html={content} className="text-[#191C1D] text-sm leading-relaxed" />
       )}
 
       {/* Attachments */}
@@ -88,10 +81,11 @@ const PostContent = ({ post = {}, onMenuClick }) => {
           {attachments.map((file, idx) => (
             <div
               key={idx}
+              onClick={() => file.url && window.open(file.url, '_blank')}
               className="flex items-center gap-4 bg-white border border-[#E2E2E2] rounded-xl px-4 py-3 cursor-pointer hover:bg-[#FFF5F4] transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-[#B71C1C] flex items-center justify-center shrink-0">
-                <FileText size={20} className="text-white" />
+              <div className="w-10 h-10 rounded-lg bg-red-100/70 flex items-center justify-center shrink-0">
+                {getFileIcon(file.name)}
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#191C1D]">{file.name}</p>

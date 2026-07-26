@@ -5,9 +5,9 @@ import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 const SectionActionMenu = ({
   open = false,
   onClose = () => { },
-  chapter = {},
+  section = {},
   onEdit = () => { },
-  onToggleHide = () => { },
+  onToggleVisibility = () => { },
   onDelete = () => { },
   onAddContent = () => { },
 }) => {
@@ -52,15 +52,15 @@ const SectionActionMenu = ({
           icon={<Pencil size={14} className="text-[#1A1A1A]" />}
           label="Chỉnh sửa"
           onClick={() => {
-            onEdit(chapter)
+            onEdit(section)
             onClose()
           }}
         />
         <MenuItem
-          icon={chapter?.isHidden ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
+          icon={section?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
           label={"Tuỳ chỉnh ẩn/hiện"}
           onClick={() => {
-            onToggleHide(chapter.id)
+            onToggleVisibility(section.id)
             onClose()
           }}
         />
@@ -68,7 +68,7 @@ const SectionActionMenu = ({
           icon={<Trash size={15} className="text-[#1A1A1A]" />}
           label="Xoá"
           onClick={() => {
-            onDelete(chapter.id)
+            onDelete(section.id)
             onClose()
           }}
         />

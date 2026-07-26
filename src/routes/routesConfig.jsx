@@ -397,7 +397,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/class/:id/bulletin-board",
+                path: "courses/class/:id/bulletin-board/:boardId",
                 element: (
                   <LazyRoute>
                     <BulletinBoardPage />
@@ -413,7 +413,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/class/:id/bulletin-board/create-post",
+                path: "courses/class/:id/bulletin-board/:boardId/create-post",
                 element: (
                   <LazyRoute>
                     <CreatePostPage />

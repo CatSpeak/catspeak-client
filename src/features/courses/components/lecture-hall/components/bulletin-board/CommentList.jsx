@@ -51,6 +51,15 @@ const CommentList = ({
       </div>
 
       <div className="px-8 py-6">
+        {/* Comment input */}
+        {!locked && (
+          <CommentInput
+            currentUserAvatar={currentUserAvatar}
+            currentUserName={currentUserName}
+            onSubmit={onSubmit}
+          />)
+        }
+
         {/* ── Locked state ── */}
         {locked ? (
           <EmptyState
@@ -58,7 +67,7 @@ const CommentList = ({
             message="Đã khóa bình luận"
             variant="component"
           >
-            <p className="text-xs text-[#5B403C] mt-1">Tính năng bình luận đã bị khóa</p>
+            <p className="text-base text-[#7B7979] mt-4">Tính năng bình luận đã bị khóa</p>
           </EmptyState>
         ) : totalCount === 0 ? (
           /* ── No comments state ── */
@@ -67,20 +76,12 @@ const CommentList = ({
             message="Không có bình luận"
             variant="component"
           >
-            <p className="text-xs text-[#5B403C] mt-1">Không có bình luận mới ở đây</p>
+            <p className="text-base text-[#7B7979] mt-4">Không có bình luận mới ở đây</p>
           </EmptyState>
         ) : (
           /* ── Normal state: input + list ── */
           <>
-            {/* Comment input */}
-            <CommentInput
-              currentUserAvatar={currentUserAvatar}
-              currentUserName={currentUserName}
-              onSubmit={onSubmit}
-            />
-
-            <div className="border-t border-[#E2E2E2] my-6" />
-
+            <div className="border-t border-[#1A1A1A]/50 my-6" />
             {/* Comment list */}
             <div className="space-y-6">
               {visibleComments.map((comment) => (

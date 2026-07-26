@@ -1,75 +1,91 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import PostContent from "../components/bulletin-board/PostContent"
 import CommentList from "../components/bulletin-board/CommentList"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { toast } from "react-hot-toast"
+import {
+  useGetPostDetailQuery,
+  useCreateCommentInBulletinBoardMutation,
+  useCreateReplyInCommentMutation,
+} from "@/store/api/coursesApi"
+import { useSelector } from "react-redux"
+import { formatFileSize } from "../utils/fileUtils"
 
-// ─── Mock post data ───────────────────────────────────────────────────────────
-const MOCK_POST = {
-  tag: "Module 1 - Introduction",
-  title: "Thông báo lịch học tuần này",
-  authorName: "Nguyễn Thị Anh Thy",
-  authorAvatar: "https://i.pravatar.cc/150?img=5",
-  date: "23/05/2026 · 13:45",
-  content: `<p style="font-weight:600;margin-bottom:8px">Part 1: Essay</p>
-<p style="margin-bottom:12px">The evolution of language is a fascinating subject that touches upon anthropology, sociology, and linguistics. Throughout history, the way humans communicate has been heavily influenced by technological advancements. For instance, the invention of the printing press standardized spelling and grammar, while the advent of the internet has introduced a plethora of new acronyms and relaxed structural rules.</p>
-<p style="margin-bottom:12px">Furthermore, the globalization of commerce requires a lingua franca, which English has largely become. This widespread adoption, however, leads to regional variations, such as Spanglish or Chinglish, highlighting the dynamic nature of language adaptation.</p>
-<p style="font-weight:600;margin-bottom:8px">Part 2: Essay</p>
-<p style="margin-bottom:12px">The evolution of language is a fascinating subject that touches upon anthropology, sociology, and linguistics. Throughout history, the way humans communicate has been heavily influenced by technological advancements.</p>`,
-  attachments: [
-    { name: "[File's name].[format]", size: "2.5 MB" },
-    { name: "[File's name].[format]", size: "2.5 MB" },
-  ],
-}
-
-// ─── Mock comments ─────────────────────────────────────────────────────────
-const MOCK_COMMENTS = [
-  {
-    id: 1,
-    authorName: "Nguyễn Thị Anh Thy",
-    authorAvatar: "https://i.pravatar.cc/150?img=5",
-    isTeacher: false,
-    time: "13:45",
-    image: "https://picsum.photos/seed/comment1/600/200",
-    content:
-      "The evolution of language is a fascinating subject that touches upon anthropology, sociology, and linguistics. Throughout history, the way humans communicate has been heavily influenced by technological advancements.",
-    link: "gooogleai.fetzzz",
-    replyCount: 0,
-  },
-  {
-    id: 2,
-    authorName: "Nguyễn Thị Anh Thy",
-    authorAvatar: "https://i.pravatar.cc/150?img=5",
-    isTeacher: false,
-    time: "13:45",
-    content:
-      "The evolution of language is a fascinating subject that touches upon anthropology, sociology, and linguistics. Throughout history, the way humans communicate has been heavily influenced by technological advancements.",
-    replyCount: 5,
-  },
-]
-
-// ─── Page ────────────────────────────────────────────────────────────────────
 const PostDetailPage = () => {
   const navigate = useNavigate()
-  const [comments, setComments] = useState(MOCK_COMMENTS)
+  const { id: classId, postId } = useParams()
+
   const [showAll, setShowAll] = useState(false)
+  const [replyingTo, setReplyingTo] = useState(null)
 
-  // false  → hiển thị bình thường
-  // true   → khóa bình luận (demo)
-  const [locked] = useState(false)
+  const { user } = useSelector((state) => state.auth)
 
-  const handleSubmit = (text) => {
-    const newComment = {
-      id: Date.now(),
-      authorName: "Bạn",
-      authorAvatar: "https://i.pravatar.cc/150?img=1",
-      isTeacher: false,
-      time: "Vừa xong",
-      content: text,
-      replyCount: 0,
+  const { data: postDetail, isLoading } = useGetPostDetailQuery(
+    { classId, postId },
+    { skip: !classId || !postId }
+  )
+
+  const [createComment] = useCreateCommentInBulletinBoardMutation()
+  const [createReply] = useCreateReplyInCommentMutation()
+
+  const formattedPost = {
+    tag: "",
+    title: postDetail?.title || "Không có tiêu đề",
+    authorName: postDetail?.accountName || "Giảng viên",
+    authorAvatar: postDetail?.avatarImageUrl || "https://i.pravatar.cc/150",
+    date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleDateString("vi-VN") : "",
+    content: postDetail?.content || "",
+    attachments: postDetail?.attachmentsJson
+      ? JSON.parse(postDetail.attachmentsJson).map(a => ({
+        name: a.FileName,
+        url: a.FileUrl,
+        size: formatFileSize(a.FileSize)
+      }))
+      : [],
+  }
+
+  const comments = postDetail?.replies?.map((comment) => ({
+    id: comment.id,
+    authorName: comment.accountName || "Ẩn danh",
+    authorAvatar: comment.avatarImageUrl || "https://i.pravatar.cc/150",
+    isTeacher: comment.isTeacher || false,
+    time: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString("vi-VN") : "",
+    content: comment.content,
+    replyCount: comment.replyCount || 0,
+  })) || []
+
+  const handleSubmit = async (text) => {
+    try {
+      if (replyingTo) {
+        await createReply({
+          classId,
+          commentId: replyingTo.id,
+          content: text,
+        }).unwrap()
+        toast.success("Đã phản hồi bình luận")
+        setReplyingTo(null)
+      } else {
+        await createComment({
+          classId,
+          postId,
+          content: text,
+        }).unwrap()
+        toast.success("Đã gửi bình luận")
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Lỗi khi gửi bình luận")
     }
-    setComments((prev) => [newComment, ...prev])
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (
@@ -77,12 +93,12 @@ const PostDetailPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: "Trang chủ", href: "/" },
-          { label: "Khóa học của tôi", href: "/workspace/courses" },
-          { label: "Toàn bộ khóa học", href: "/workspace/courses" },
+          { label: "Trang chủ", href: "/workspace" },
+          { label: "Khóa học của tôi", href: `/courses/details/${classId}` },
+          { label: "Toàn bộ khóa học", href: "/courses" },
           { label: "Chi tiết khóa học", href: "#" },
           { label: "Chi tiết lớp học", href: "#" },
-          { label: "Chi tiết bảng tin", active: true },
+          { label: "Chi tiết bài đăng", active: true },
         ]}
       />
 
@@ -96,20 +112,20 @@ const PostDetailPage = () => {
 
         {/* ── Nội dung bài đăng ── */}
         <PostContent
-          post={MOCK_POST}
+          post={formattedPost}
           onMenuClick={() => console.log("open post menu")}
         />
 
         {/* ── Phần phản hồi ── */}
         <CommentList
           comments={comments}
-          locked={locked}
+          locked={!postDetail?.allowReply}
           showAll={showAll}
           previewCount={3}
-          currentUserAvatar="https://i.pravatar.cc/150?img=1"
-          currentUserName="Bạn"
+          currentUserAvatar={user?.avatar || "https://i.pravatar.cc/150"}
+          currentUserName={user?.fullName || "Bạn"}
           onSubmit={handleSubmit}
-          onReply={(c) => console.log("reply to", c)}
+          onReply={(c) => setReplyingTo(c)}
           onViewReplies={(c) => console.log("view replies of", c)}
           onShowAll={() => setShowAll(true)}
         />

@@ -1,73 +1,88 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Search, Plus, MoreVertical, Pin } from "lucide-react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import DataTable from "@/shared/components/ui/DataTable"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
-import CreatePostModal from "../components/modals/CreatePostModal"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
-
-const MOCK_POSTS = [
-  {
-    id: 1,
-    title: "Thông báo lịch học tuần này",
-    author: "Dr. Sarah Jenkins",
-    date: "20/07/2026",
-    replies: 3,
-    status: "Đang hiển thị",
-    isPinned: true,
-  },
-  {
-    id: 2,
-    title: "Thông báo lịch thi Mid-term",
-    author: "Dr. Sarah Jenkins",
-    date: "25/07/2026",
-    replies: 12,
-    status: "Đang hiển thị",
-    isPinned: false,
-  },
-  {
-    id: 3,
-    title: "Bài tập về nhà: Vocabulary Unit 2",
-    author: "Dr. Sarah Jenkins",
-    date: "26/07/2026",
-    replies: 8,
-    status: "Đang hiển thị",
-    isPinned: false,
-  },
-  {
-    id: 4,
-    title: "Slide bài giảng Buổi 3 - Grammar deep dive",
-    author: "Dr. Sarah Jenkins",
-    date: "27/07/2026",
-    replies: 0,
-    status: "Đang ẩn",
-    isPinned: false,
-  },
-  {
-    id: 5,
-    title: "Thảo luận: Phương pháp tự học Tiếng Anh",
-    author: "Dr. Sarah Jenkins",
-    date: "28/07/2026",
-    replies: 45,
-    status: "Đang hiển thị",
-    isPinned: false,
-  },
-  {
-    id: 6,
-    title: "Tài liệu đọc thêm: Business Ethics",
-    author: "Dr. Sarah Jenkins",
-    date: "29/07/2026",
-    replies: 5,
-    status: "Đang hiển thị",
-    isPinned: false,
-  }
-]
+import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation } from "@/store/api/coursesApi"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import { toast } from "react-hot-toast"
 
 const BulletinBoardPage = () => {
   const navigate = useNavigate()
-  const [activeFilter, setActiveFilter] = useState("all")
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const { id: classId, boardId } = useParams()
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const [updatePost] = useUpdatePostInBulletinBoardMutation()
+
+  const { data: apiPosts, isLoading: isPostsLoading } = useGetListPostsInBulletinBoardQuery(
+    { classId, boardId },
+    { skip: !classId || !boardId }
+  )
+  const isLoading = isPostsLoading
+
+  // Format data for DataTable
+  const postsArray = Array.isArray(apiPosts)
+    ? apiPosts
+    : (apiPosts?.items || apiPosts?.posts || apiPosts?.data || [])
+
+  const posts = postsArray
+    .filter((post) => post.title?.toLowerCase().includes(searchTerm.toLowerCase()))
+    .map((post) => ({
+      id: post.id,
+      title: post.title,
+      author: post.accountName,
+      date: post.createdAt ? new Date(post.createdAt).toLocaleDateString("vi-VN") : "",
+      replies: post.replyCount,
+      isPinned: post.isPinned,
+      isVisibleToStudents: post.isVisibleToStudents,
+      allowReply: post.allowReply,
+      status: post.isVisibleToStudents ? "Đang hiển thị" : "Đang ẩn",
+    }))
+
+  const handleAction = async (action, rowId) => {
+    const originalPost = postsArray.find(p => p.id === rowId)
+    if (!originalPost) return
+
+    const formData = new FormData()
+    formData.append("Title", originalPost.title || "")
+    formData.append("Content", originalPost.content || "")
+
+    let isPinned = originalPost.isPinned
+    let isVisibleToStudents = originalPost.isVisibleToStudents
+    let allowReply = originalPost.allowReply
+    let isLocked = originalPost.isLocked !== undefined ? originalPost.isLocked : false
+
+    if (action === "togglePin") isPinned = !isPinned
+    if (action === "toggleVisibility") isVisibleToStudents = !isVisibleToStudents
+    if (action === "toggleReply") allowReply = !allowReply
+
+    formData.append("IsPinned", isPinned)
+    formData.append("IsVisibleToStudents", isVisibleToStudents)
+    formData.append("AllowReply", allowReply)
+    formData.append("IsLocked", isLocked)
+
+    try {
+      await updatePost({
+        classId,
+        postId: rowId,
+        formData
+      }).unwrap()
+      toast.success("Cập nhật thành công")
+    } catch {
+      toast.error("Cập nhật thất bại")
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">
@@ -100,43 +115,14 @@ const BulletinBoardPage = () => {
               placeholder="Tìm kiếm bài viết..."
               className="!h-10 bg-[#F3F4F5] !border-[#E2E2E2] "
               containerClassName="w-full max-w-[473px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
 
             <div className="flex items-center gap-4">
               <PillButton
                 variant={`secondary-no-outline`}
-                onClick={() => setActiveFilter("all")}
-                className={`rounded-full text-sm font-semibold !h-10`}
-                bgColor={`${activeFilter === "all" ? "#FFDAD4" : "white"}`}
-                textColor={`${activeFilter === "all" ? "#750000" : "black"}`}
-                borderColor={`${activeFilter === "all" ? "#750000" : "#E2E2E2"}`}
-              >
-                Tất cả
-              </PillButton>
-              <PillButton
-                variant={`secondary-no-outline`}
-                onClick={() => setActiveFilter("teacher")}
-                className={`rounded-full text-sm font-semibold !h-10`}
-                bgColor={`${activeFilter === "teacher" ? "#FFDAD4" : "white"}`}
-                textColor={`${activeFilter === "teacher" ? "#750000" : "black"}`}
-                borderColor={`${activeFilter === "teacher" ? "#750000" : "#E2E2E2"}`}
-              >
-                Bài của giảng viên
-              </PillButton>
-              <PillButton
-                variant={`secondary-no-outline`}
-                onClick={() => setActiveFilter("student")}
-                className={`rounded-full text-sm font-semibold !h-10`}
-                bgColor={`${activeFilter === "student" ? "#FFDAD4" : "white"}`}
-                textColor={`${activeFilter === "student" ? "#750000" : "black"}`}
-                borderColor={`${activeFilter === "student" ? "#750000" : "#E2E2E2"}`}
-              >
-                Bài của học viên
-              </PillButton>
-
-              <PillButton
-                variant={`secondary-no-outline`}
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}/create-post`)}
                 bgColor={"#FEA53F"}
                 textColor={"#6C3E00"}
                 className="!rounded-lg !h-10 font-semibold text-sm"
@@ -157,25 +143,27 @@ const BulletinBoardPage = () => {
               },
               {
                 key: "title",
-                label: "Tiêu đề bài viết",
+                label: "Chủ đề",
                 render: (row) => (
-                  <span
-                    className="w-[352px] text-[#750000] font-semibold cursor-pointer"
-                    onClick={() => navigate(`posts/${row.id}`)}
+                  <div
+                    className="flex items-center cursor-pointer hover:underline w-[352px]"
+                    onClick={() => navigate(`/workspace/courses/class/${classId}/bulletin-board/posts/${row.id}`)}
                   >
-                    {row.title}
-                  </span>
+                    <span className={`font-semibold text-[#A00000]`}>
+                      {row.title}
+                    </span>
+                  </div>
                 )
               },
               {
                 key: "author",
                 label: "Người tạo",
-                className: "text-sm font-normal text-[#191C1D]"
+                className: "text-sm font-normal text-[#191C1D]",
               },
               {
                 key: "date",
                 label: "Thời gian tạo",
-                className: "text-sm font-normal text-[#191C1D]"
+                className: "text-sm font-normal text-[#191C1D]",
               },
               {
                 key: "replies",
@@ -204,31 +192,33 @@ const BulletinBoardPage = () => {
                 headerClassName: "w-12",
                 className: "text-center",
                 render: (row) => (
-                  <IconButton
-                    variant="ghost"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical size={18} color="#5B403C" />
-                  </IconButton>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Dropdown
+                      trigger={
+                        <IconButton variant="ghost">
+                          <MoreVertical size={18} color="#5B403C" />
+                        </IconButton>
+                      }
+                      options={[
+                        { value: 'toggleVisibility', label: row.isVisibleToStudents ? 'Ẩn item' : 'Hiện item' },
+                        { value: 'togglePin', label: row.isPinned ? 'Bỏ ghim' : 'Ghim' },
+                        { value: 'toggleReply', label: row.allowReply ? 'Tắt bình luận' : 'Bật bình luận' }
+                      ]}
+                      onChange={(val) => handleAction(val, row.id)}
+                      align="right"
+                      dropdownClassName="w-48"
+                    />
+                  </div>
                 )
               }
             ]}
-            data={MOCK_POSTS}
+            data={posts}
             rowKey={(row) => row.id}
             className="text-[#5B403C] text-sm font-semibold"
           />
-
-          {/* Footer */}
-          <div className="bg-[#F3F4F5] border-[#E2E2E2] px-4 py-4">
-            <span className="text-sm text-[#5B403C]">
-              Hiển thị 1 - {MOCK_POSTS.length} của {MOCK_POSTS.length} bài viết
-            </span>
-          </div>
         </div>
       </div>
-
-      <CreatePostModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
-    </div >
+    </div>
   )
 }
 

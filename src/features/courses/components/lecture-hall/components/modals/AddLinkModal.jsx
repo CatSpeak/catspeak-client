@@ -45,7 +45,10 @@ const AddLinkModal = ({
           >
             Hủy
           </PillButton>
-          <PillButton type="submit">
+          <PillButton
+            type="submit"
+            onClick={handleSubmit}
+          >
             Lưu
           </PillButton>
         </div>
