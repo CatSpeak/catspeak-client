@@ -76,6 +76,7 @@ export const navLinks = [
     path: "/resources",
     icon: Globe,
     isPrivate: true,
+    showOnHorizontalBar: false,
   },
   {
     key: "messages",
@@ -83,6 +84,7 @@ export const navLinks = [
     path: "/chat",
     icon: MessageCircle,
     isPrivate: true,
+    showOnHorizontalBar: false,
   },
   {
     key: "catSpeak",
