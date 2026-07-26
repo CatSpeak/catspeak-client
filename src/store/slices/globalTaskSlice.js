@@ -22,7 +22,17 @@ const globalTaskSlice = createSlice({
       const { id, updates } = action.payload;
       const index = state.tasks.findIndex((t) => t.id === id);
       if (index !== -1) {
-        state.tasks[index] = { ...state.tasks[index], ...updates };
+        const currentTask = state.tasks[index];
+        let newProgress = currentTask.progress;
+        if (updates.progress !== undefined) {
+          if (updates.status === "SUCCESS" || updates.status === "ERROR") {
+            newProgress = updates.progress;
+          } else {
+            // Monotonic Progress: progress never decreases during execution
+            newProgress = Math.max(currentTask.progress || 0, updates.progress);
+          }
+        }
+        state.tasks[index] = { ...currentTask, ...updates, progress: newProgress };
       }
     },
     removeTask(state, action) {

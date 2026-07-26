@@ -48,8 +48,28 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
     xhr.setRequestHeader("Authorization", `Bearer ${token}`)
   }
 
-  // When raw file bytes finish sending to server -> switch to PROCESSING
   if (xhr.upload) {
+    // 1. Real-time byte progress (0% -> 99%)
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && e.total > 0) {
+        const percent = Math.min(99, Math.floor((e.loaded / e.total) * 100))
+        const existingTask = store.getState().globalTask.tasks.find((t) => t.id === id)
+        const currentProg = existingTask?.progress || 0
+        const newProg = Math.max(currentProg, percent)
+
+        store.dispatch(
+          updateTask({
+            id,
+            updates: {
+              status: "UPLOADING",
+              progress: newProg,
+            },
+          }),
+        )
+      }
+    }
+
+    // 2. File bytes sent to server -> switch to PROCESSING
     xhr.upload.onload = () => {
       store.dispatch(
         updateTask({
