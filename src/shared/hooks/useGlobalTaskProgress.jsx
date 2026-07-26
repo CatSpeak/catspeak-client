@@ -25,14 +25,14 @@ export const useGlobalTaskProgress = () => {
     activeBackendTasks.forEach((t) => {
       const startTime = t.startedAt ? new Date(t.startedAt).getTime() : now;
       // Ignore stale tasks older than 3 minutes
-      if (now - startTime > 180000) return;
+      const elapsed = Math.max(0, now - startTime);
+      if (elapsed > 180000) return;
 
       const existingTask = store
         .getState()
         .globalTask.tasks.find((tk) => tk.id === t.taskId);
 
       if (!existingTask) {
-        const elapsed = now - startTime;
         const initialProgress = Math.min(99, Math.floor((elapsed / 60000) * 99));
 
         dispatch(
@@ -50,7 +50,7 @@ export const useGlobalTaskProgress = () => {
     });
   }, [activeBackendTasks, dispatch]);
 
-  // 2. Smooth 60s progress simulation for active tasks (0% -> 99% in 60,000ms)
+  // 2. Smooth 60s progress simulation for active tasks in PROCESSING phase
   useEffect(() => {
     const activeTasks = tasks.filter(
       (t) => t.status === "UPLOADING" || t.status === "PROCESSING"
@@ -61,8 +61,11 @@ export const useGlobalTaskProgress = () => {
     const interval = setInterval(() => {
       const now = Date.now();
       activeTasks.forEach((t) => {
+        // Skip simulation if task is actively transferring file bytes over XHR
+        if (t.status === "UPLOADING" && t.isUploadTask) return;
+
         const startTime = t.timestamp || now;
-        const elapsed = now - startTime;
+        const elapsed = Math.max(0, now - startTime);
         // Calculate smooth progress capping out at 99%
         const targetProgress = Math.min(99, Math.floor((elapsed / 60000) * 99));
 
