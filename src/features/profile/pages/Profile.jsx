@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -33,6 +33,12 @@ const Profile = () => {
     : user?.accountId
   const isOwnProfile =
     !urlAccountId || parseInt(urlAccountId, 10) === user?.accountId
+
+  useEffect(() => {
+    if (!urlAccountId && user?.accountId) {
+      navigate(`/profile/${user.accountId}`, { replace: true })
+    }
+  }, [urlAccountId, user, navigate])
 
   // Fetch private profile if own profile, otherwise skip
   const { data: privateProfileData, isLoading: loadingPrivate } =

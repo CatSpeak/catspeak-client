@@ -73,7 +73,7 @@ const ProfileDropdown = () => {
 
   const handleProfileClick = () => {
     handleCloseMenu()
-    navigate("/profile")
+    navigate(`/profile/${user?.accountId || user?.id || ""}`)
   }
 
   const handlePricingClick = () => {

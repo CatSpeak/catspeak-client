@@ -1,5 +1,6 @@
 import { useCallback } from "react"
 import toast from "react-hot-toast"
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import {
   useToggleLikeReelMutation,
   useCreateReelCommentMutation,
@@ -44,7 +45,7 @@ export const useReelInteractions = ({ reel, isAuthenticated, openAuthModal, t })
 
   const handleShare = useCallback(async () => {
     if (!reel?.id) return
-    const url = `${window.location.origin}/vi/cat-speak/reels/${reel.id}`
+    const url = getShareUrlWithVersion(`${window.location.origin}/vi/cat-speak/reels/${reel.id}`)
     try {
       if (navigator.share) {
         await navigator.share({
