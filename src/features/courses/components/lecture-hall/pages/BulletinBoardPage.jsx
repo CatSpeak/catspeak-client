@@ -5,10 +5,11 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import DataTable from "@/shared/components/ui/DataTable"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
-import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation } from "@/store/api/coursesApi"
+import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation, useDeletePostInBulletinBoardMutation } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { toast } from "react-hot-toast"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 
 const BulletinBoardPage = () => {
   const navigate = useNavigate()
@@ -16,6 +17,8 @@ const BulletinBoardPage = () => {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [updatePost] = useUpdatePostInBulletinBoardMutation()
+  const [deletePost] = useDeletePostInBulletinBoardMutation()
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, postId: null })
 
   const { data: apiPosts, isLoading: isPostsLoading } = useGetListPostsInBulletinBoardQuery(
     { classId, boardId },
@@ -43,6 +46,16 @@ const BulletinBoardPage = () => {
     }))
 
   const handleAction = async (action, rowId) => {
+    if (action === "edit") {
+      navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}/edit-post/${rowId}`)
+      return
+    }
+
+    if (action === "delete") {
+      setDeleteConfirm({ open: true, postId: rowId })
+      return
+    }
+
     const originalPost = postsArray.find(p => p.id === rowId)
     if (!originalPost) return
 
@@ -73,6 +86,18 @@ const BulletinBoardPage = () => {
       toast.success("Cập nhật thành công")
     } catch {
       toast.error("Cập nhật thất bại")
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm.postId) return
+    try {
+      await deletePost({ classId, postId: deleteConfirm.postId }).unwrap()
+      toast.success("Đã xóa bài viết")
+    } catch {
+      toast.error("Xóa bài viết thất bại")
+    } finally {
+      setDeleteConfirm({ open: false, postId: null })
     }
   }
 
@@ -202,7 +227,9 @@ const BulletinBoardPage = () => {
                       options={[
                         { value: 'toggleVisibility', label: row.isVisibleToStudents ? 'Ẩn item' : 'Hiện item' },
                         { value: 'togglePin', label: row.isPinned ? 'Bỏ ghim' : 'Ghim' },
-                        { value: 'toggleReply', label: row.allowReply ? 'Tắt bình luận' : 'Bật bình luận' }
+                        { value: 'toggleReply', label: row.allowReply ? 'Tắt bình luận' : 'Bật bình luận' },
+                        { value: 'edit', label: 'Chỉnh sửa' },
+                        { value: 'delete', label: 'Xoá' }
                       ]}
                       onChange={(val) => handleAction(val, row.id)}
                       align="right"
@@ -218,6 +245,14 @@ const BulletinBoardPage = () => {
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        open={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ open: false, postId: null })}
+        onConfirm={handleConfirmDelete}
+        title="Xác nhận xóa bài viết"
+        message="Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác."
+      />
     </div>
   )
 }

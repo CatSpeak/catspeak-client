@@ -2,16 +2,14 @@ import React, { useState, useRef } from "react"
 import {
   Upload,
   CloudUpload,
-  FileText,
   Image as ImageIcon,
-  FileCode,
   File as FileIcon,
-  X,
   Trash2,
   Send,
   Pin,
   MessageSquare,
   Eye,
+  X,
 } from "lucide-react"
 import { Editor } from "@tinymce/tinymce-react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
@@ -20,7 +18,7 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import FileAttachmentItem from "../components/ui/FileAttachmentItem"
 import ToggleOption from "../components/ui/ToggleOption"
 import { useParams, useNavigate } from "react-router-dom"
-import { useCreatePostInBulletinBoardMutation } from "@/store/api/coursesApi"
+import { useCreatePostInBulletinBoardMutation, useUpdatePostInBulletinBoardMutation, useGetPostDetailQuery } from "@/store/api/coursesApi"
 import toast from "react-hot-toast"
 
 // ─── Helpers (reused pattern from CreatePostModal / AddMaterialModal) ────────
@@ -30,9 +28,17 @@ const MAX_ATTACHMENTS = 5
 // ─── Component ──────────────────────────────────────────────────────────────
 
 const CreatePostPage = () => {
-  const { id: classId, boardId } = useParams()
+  const { id: classId, boardId, postId } = useParams()
   const navigate = useNavigate()
-  const [createPost, { isLoading }] = useCreatePostInBulletinBoardMutation()
+  const isEditMode = !!postId
+  const [createPost, { isLoading: isCreating }] = useCreatePostInBulletinBoardMutation()
+  const [updatePost, { isLoading: isUpdating }] = useUpdatePostInBulletinBoardMutation()
+  const isLoading = isCreating || isUpdating
+
+  const { data: postDetail } = useGetPostDetailQuery(
+    { classId, postId },
+    { skip: !isEditMode }
+  )
 
   // Form state
   const [title, setTitle] = useState("")
@@ -50,6 +56,22 @@ const CreatePostPage = () => {
   const [attachments, setAttachments] = useState([])
   const [attachDragActive, setAttachDragActive] = useState(false)
   const attachInputRef = useRef(null)
+
+  const [prevPostId, setPrevPostId] = useState(null)
+
+  if (isEditMode && postDetail && postId !== prevPostId) {
+    setPrevPostId(postId)
+    setTitle(postDetail.title || "")
+    setContent(postDetail.content || "")
+    setIsPinned(postDetail.isPinned ?? true)
+    setAllowReply(postDetail.allowReply ?? true)
+    setVisibleToStudents(postDetail.isVisibleToStudents ?? true)
+    if (postDetail.thumbnailUrl) {
+      setAvatarPreview(postDetail.thumbnailUrl)
+    }
+    // Note: Existing attachments would need custom handling for deletion/retention.
+    // Assuming attachments are uploaded newly if changed, or backend handles it.
+  }
 
   // ─── Avatar handlers (pattern from CreateCoursePage) ──────────────────────
 
@@ -140,25 +162,35 @@ const CreatePostPage = () => {
     })
 
     try {
-      await createPost({ classId, boardId, formData }).unwrap()
+      if (isEditMode) {
+        await updatePost({ classId, postId, formData }).unwrap()
+        toast.success("Cập nhật bài viết thành công")
+      } else {
+        await createPost({ classId, boardId, formData }).unwrap()
+        toast.success("Tạo bài viết thành công")
+      }
       navigate(-1)
     } catch (err) {
-      console.error("Failed to create post", err)
-      alert("Đã xảy ra lỗi khi tạo bài viết")
+      console.error("Failed to save post", err)
+      toast.error(isEditMode ? "Đã xảy ra lỗi khi cập nhật bài viết" : "Đã xảy ra lỗi khi tạo bài viết")
     }
   }
 
-  const handleDelete = () => {
-    setTitle("")
-    setContent("")
-    setAvatarPreview("")
-    setAvatarFile(null)
-    setAttachments([])
-    setIsPinned(true)
-    setAllowReply(true)
-    setVisibleToStudents(true)
-    if (avatarInputRef.current) avatarInputRef.current.value = ""
-    if (attachInputRef.current) attachInputRef.current.value = ""
+  // const handleDelete = () => {
+  //   setTitle("")
+  //   setContent("")
+  //   setAvatarPreview("")
+  //   setAvatarFile(null)
+  //   setAttachments([])
+  //   setIsPinned(true)
+  //   setAllowReply(true)
+  //   setVisibleToStudents(true)
+  //   if (avatarInputRef.current) avatarInputRef.current.value = ""
+  //   if (attachInputRef.current) attachInputRef.current.value = ""
+  // }
+
+  const cancelEdit = () => {
+    navigate(-1)
   }
 
   return (
@@ -173,14 +205,14 @@ const CreatePostPage = () => {
           { label: "Chi tiết khóa học", href: "#" },
           { label: "Chi tiết lớp học", href: "#" },
           { label: "Chi tiết bảng tin", href: "#" },
-          { label: "Thêm bài viết", active: true },
+          { label: isEditMode ? "Chỉnh sửa bài viết" : "Thêm bài viết", active: true },
         ]}
       />
 
       <div className="w-full space-y-6">
         {/* ─── Page Title ─────────────────────────────────────────────── */}
         <h1 className="text-[40px] font-semibold text-[#1A1A1A]">
-          Thêm bài viết
+          {isEditMode ? "Chỉnh sửa bài viết" : "Thêm bài viết"}
         </h1>
 
         {/* ─── Form Card ──────────────────────────────────────────────── */}
@@ -366,12 +398,12 @@ const CreatePostPage = () => {
         <div className="grid grid-cols-2 gap-4 mt-8">
           <PillButton
             variant="outline"
-            onClick={handleDelete}
+            onClick={cancelEdit}
             bgColor="white"
             textColor="#750000"
             borderColor="#750000"
           >
-            <Trash2 size={16} className="mr-2" /> Xóa
+            <X size={16} className="mr-2" /> Hủy
           </PillButton>
 
           <PillButton
@@ -381,8 +413,8 @@ const CreatePostPage = () => {
             textColor="white"
             className="!rounded-xl !h-12 font-semibold text-sm w-full justify-center disabled:opacity-50"
           >
-            {isLoading ? "Đang đăng..." : (
-              <>Đăng bảng tin <Send size={16} className="ml-2" /></>
+            {isLoading ? "Đang lưu..." : (
+              <>{isEditMode ? "Lưu thay đổi" : "Đăng bảng tin"} <Send size={16} className="ml-2" /></>
             )}
           </PillButton>
         </div>

@@ -25,7 +25,7 @@ const PostContent = ({ post = {}, onMenuClick }) => {
     authorName,
     authorAvatar,
     date,
-    bannerImage,
+    thumbnailUrl,
     content,
     attachments = [],
   } = post
@@ -57,22 +57,22 @@ const PostContent = ({ post = {}, onMenuClick }) => {
       </div>
 
       {/* Title */}
-      <h1 className="text-2xl font-bold text-[#191C1D]">{title}</h1>
+      <h1 className="text-[28px] font-bold text-[#191C1D]">{title}</h1>
 
       {/* Banner image */}
-      {bannerImage && (
-        <div className="rounded-xl overflow-hidden mb-6 bg-[#E2E2E2]">
+      {thumbnailUrl && (
+        <div className="rounded-xl overflow-hidden">
           <img
-            src={bannerImage}
+            src={thumbnailUrl}
             alt="banner"
-            className="w-full object-cover max-h-72"
+            className="w-full object-cover "
           />
         </div>
       )}
 
       {/* Text content */}
       {content && (
-        <RenderHTML html={content} className="text-[#191C1D] text-sm leading-relaxed" />
+        <RenderHTML html={content} className="text-[#1A1A1A] text-lg leading-relaxed" />
       )}
 
       {/* Attachments */}

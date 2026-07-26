@@ -37,6 +37,7 @@ const PostDetailPage = () => {
     authorName: postDetail?.accountName || "Giảng viên",
     authorAvatar: postDetail?.avatarImageUrl || "https://i.pravatar.cc/150",
     date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleDateString("vi-VN") : "",
+    thumbnailUrl: postDetail?.thumbnailUrl || "",
     content: postDetail?.content || "",
     attachments: postDetail?.attachmentsJson
       ? JSON.parse(postDetail.attachmentsJson).map(a => ({

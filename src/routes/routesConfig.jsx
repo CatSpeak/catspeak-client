@@ -422,6 +422,14 @@ const routesConfig = [
                 ),
               },
               {
+                path: "courses/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "courses/class/:id/links/:itemId",
                 element: (
                   <LazyRoute>
