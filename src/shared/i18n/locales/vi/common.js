@@ -6,6 +6,10 @@ export default {
   seeMore: "Xem thêm",
   back: "Quay lại",
   cancel: "Hủy",
+  reload: "Tải lại trang",
+  cancelUploadConfirmTitle: "Đang xử lý tác vụ",
+  cancelUploadConfirmDesc:
+    "Đang có tiến trình xử lý chưa hoàn tất. Nếu bạn tải lại trang, tiến trình sẽ bị hủy. Bạn có chắc chắn muốn tiếp tục?",
   scrollToTop: "Lên đầu trang",
   toggle: {
     on: "Bật",
@@ -24,7 +28,7 @@ export default {
       vi: "Tiếng Việt",
       zh: "中文",
       en: "English",
-    }
+    },
   },
   pagination: {
     range: "{{start}}-{{end}} trong số {{total}}",
@@ -113,4 +117,20 @@ export default {
     prevPage: "Trang trước",
     nextPage: "Trang tiếp",
   },
-}
+  uploadWidget: {
+    uploading: "Đang tiến hành... {{progress}}%",
+    processing: "Đang xử lý... {{progress}}%",
+    success: "Hoàn tất",
+    error: "Lỗi tác vụ",
+    itemsCount: "Xử lý {{count}} tác vụ",
+    cancelTip: "Hủy tác vụ",
+    instructorTaskTitle: "Gửi hồ sơ giảng viên",
+    recordingTaskTitle: "Đang xử lý bản ghi hình",
+  },
+  catSpeak: {
+    reels: {
+      createReelTitle: "Đăng Reel mới",
+      uploadSuccess: "Đăng Reel thành công!",
+    },
+  },
+};

@@ -6,6 +6,10 @@ export default {
   seeMore: "查看更多",
   back: "返回",
   cancel: "取消",
+  reload: "重新加载",
+  cancelUploadConfirmTitle: "正在处理任务",
+  cancelUploadConfirmDesc:
+    "当前有任务正在进行中。如果您重新加载页面，进度将会丢失。确定要继续吗？",
   scrollToTop: "回到顶部",
   toggle: {
     on: "开",
@@ -113,7 +117,24 @@ export default {
     nextPage: "下一页",
   },
   errors: {
-    maxActiveRoomsReached: "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
+    maxActiveRoomsReached:
+      "您已达到同时活跃房间数量的上限。请升级套餐或关闭现有房间。",
     generalFailed: "发生错误，请重试。",
-  }
-}
+  },
+  uploadWidget: {
+    uploading: "正在执行... {{progress}}%",
+    processing: "处理中... {{progress}}%",
+    success: "成功",
+    error: "任务失败",
+    itemsCount: "正在处理 {{count}} 个任务",
+    cancelTip: "取消任务",
+    instructorTaskTitle: "提交导师申请",
+    recordingTaskTitle: "正在处理录制文件",
+  },
+  catSpeak: {
+    reels: {
+      createReelTitle: "发布新 Reel",
+      uploadSuccess: "Reel 发布成功！",
+    },
+  },
+};

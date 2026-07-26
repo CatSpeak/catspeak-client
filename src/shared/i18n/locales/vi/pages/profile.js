@@ -121,6 +121,8 @@ export default {
     pdfDocument: "Tài liệu PDF",
     remove: "Xóa",
     requiredField: "Trường này là bắt buộc",
+    selectLanguagesError: "Vui lòng chọn ngôn ngữ giảng dạy",
+    selectLevelError: "Vui lòng chọn trình độ cho từng ngôn ngữ",
     certifyError: "Vui lòng xác nhận và đồng ý với các quy định của nền tảng.",
     formInvalid: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi gửi.",
   },

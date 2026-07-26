@@ -6,9 +6,9 @@ import {
   useStopRecordingMutation,
 } from "@/store/api/recordingsApi"
 import { setPiP } from "@/store/slices/videoCallSlice"
-import { addRecording } from "@/store/slices/recordingProcessSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
 
 /**
  * useRecording — manages recording state for a video call session.
@@ -21,6 +21,7 @@ import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 export function useRecording(lkRoom = null, syncState = {}) {
   const dispatch = useDispatch()
   const { t } = useLanguage()
+  const { startTask } = useGlobalTask()
   const {
     isRecording,
     setIsRecording,
@@ -28,7 +29,7 @@ export function useRecording(lkRoom = null, syncState = {}) {
     setEgressId,
     startedByAccountId,
     setStartedByAccountId,
-    sessionId
+    sessionId,
   } = syncState
 
   const [isTogglingRecording, setIsTogglingRecording] = useState(false)
@@ -75,9 +76,17 @@ export function useRecording(lkRoom = null, syncState = {}) {
           return
         }
 
-        console.log("[Recording Debug] Starting recording for room:", roomName, "sessionId:", sessionId)
+        console.log(
+          "[Recording Debug] Starting recording for room:",
+          roomName,
+          "sessionId:",
+          sessionId,
+        )
         const result = await startRecording({ roomName, sessionId }).unwrap()
-        console.log("[Recording Debug] Start response:", JSON.stringify(result))
+        console.log(
+          "[Recording Debug] Start response:",
+          JSON.stringify(result),
+        )
         console.log("[Recording Debug] egressId received:", result.egressId)
 
         if (!result.egressId) {
@@ -93,7 +102,8 @@ export function useRecording(lkRoom = null, syncState = {}) {
 
         if (setEgressId) setEgressId(result.egressId)
         if (setIsRecording) setIsRecording(true)
-        if (setStartedByAccountId) setStartedByAccountId(lkRoom?.localParticipant?.identity)
+        if (setStartedByAccountId)
+          setStartedByAccountId(lkRoom?.localParticipant?.identity)
 
         toast.success(
           t.recordings?.actions?.startSuccess || "Recording started",
@@ -146,23 +156,33 @@ export function useRecording(lkRoom = null, syncState = {}) {
     } finally {
       setIsTogglingRecording(false)
     }
-  }, [lkRoom, isRecording, isTogglingRecording, startRecording, stopRecording, egressId, setIsRecording, setEgressId, setStartedByAccountId, sessionId])
+  }, [
+    lkRoom,
+    isRecording,
+    isTogglingRecording,
+    startRecording,
+    stopRecording,
+    egressId,
+    setIsRecording,
+    setEgressId,
+    setStartedByAccountId,
+    sessionId,
+  ])
 
   const confirmStopRecording = async () => {
     setShowStopModal(false)
     setIsTogglingRecording(true)
     try {
       if (egressId) {
-        const result = await stopRecording(egressId).unwrap()
-        console.log("[Recording Debug] Stop response:", JSON.stringify(result))
-        if (result && result.egressId) {
-          dispatch(
-            addRecording({
-              egressId: result.egressId,
-              meetingId: result.meetingId || "Room Recording",
-            })
-          )
-        }
+        const targetEgressId = egressId;
+        startTask({
+          id: targetEgressId,
+          title: t?.uploadWidget?.recordingTitle || "Bản ghi hình cuộc họp",
+          taskType: "VideoRecording",
+          taskFn: async () => {
+            return await stopRecording(targetEgressId).unwrap();
+          },
+        });
       }
       if (setEgressId) setEgressId(null)
       if (setIsRecording) setIsRecording(false)

@@ -15,6 +15,9 @@ import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { LanguageProvider } from "@/shared/context/LanguageContext"
 import { ScrollToTopButton } from "@/shared/components/ui/buttons"
+import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
+import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
+import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 
 function App() {
   return (
@@ -31,6 +34,9 @@ function App() {
                 <ScrollToTopButton />
                 <AppRouter />
                 <PiPWidget />
+                <GlobalTaskProgressWidget />
+                <RecordingPoller />
+                <GlobalTaskSync />
               </GlobalPresenceProvider>
             </ConversationSignalRProvider>
           </SidebarProvider>

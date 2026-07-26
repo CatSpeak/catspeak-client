@@ -6,6 +6,10 @@ export default {
   seeMore: "See more",
   back: "Back",
   cancel: "Cancel",
+  reload: "Reload page",
+  cancelUploadConfirmTitle: "Processing Tasks",
+  cancelUploadConfirmDesc:
+    "There is a task processing in progress. If you reload the page, the task will be cancelled. Are you sure you want to continue?",
   scrollToTop: "Scroll to top",
   toggle: {
     on: "On",
@@ -112,5 +116,21 @@ export default {
     of: "of",
     prevPage: "Previous page",
     nextPage: "Next page",
+  },
+  uploadWidget: {
+    uploading: "Executing... {{progress}}%",
+    processing: "Processing... {{progress}}%",
+    success: "Success",
+    error: "Task Failed",
+    itemsCount: "Processing {{count}} tasks",
+    cancelTip: "Cancel task",
+    instructorTaskTitle: "Submitting instructor application",
+    recordingTaskTitle: "Processing recording",
+  },
+  catSpeak: {
+    reels: {
+      createReelTitle: "Upload Reel",
+      uploadSuccess: "Reel posted successfully!",
+    },
   },
 };

@@ -30,16 +30,7 @@ const RecordingsPage = () => {
     isFetching: isFetchingRecordings,
     error: recordingsError,
     refetch: refetchRecordings,
-  } = useGetMyRecordingsQuery(undefined, {
-    pollingInterval: hasActiveRecordings ? 5000 : 0,
-  })
-
-  useEffect(() => {
-    const hasActive = recordings.some(
-      (r) => r.status === "started" || r.status === "stopping"
-    )
-    setHasActiveRecordings(hasActive)
-  }, [recordings])
+  } = useGetMyRecordingsQuery()
 
   const { data: storage, isLoading: isLoadingStorage } = useGetStorageQuery()
 

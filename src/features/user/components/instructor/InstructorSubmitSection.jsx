@@ -20,10 +20,11 @@ const InstructorSubmitSection = ({
   return (
     <FluentCard className="sm:flex-row items-center justify-between gap-6 mb-32">
       {/* Terms */}
-      <label id="field-agreed" className="flex items-start gap-3 cursor-pointer group flex-1">
+      <label id="field-agreed" className={`flex items-start gap-3 group flex-1 ${isDisabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
         <Checkbox
           checked={agreed}
-          onChange={(e) => onAgreeChange(e.target.checked)}
+          onChange={(e) => !isDisabled && onAgreeChange(e.target.checked)}
+          disabled={isDisabled}
           className="mt-0.5 shrink-0"
         />
         <span className={`text-[13px] leading-relaxed transition-colors ${errors.agreed ? "text-red-500" : "text-gray-500 group-hover:text-gray-800"}`}>

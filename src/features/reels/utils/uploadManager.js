@@ -1,31 +1,39 @@
 import { store } from "@/store"
 import {
-  addUpload,
-  updateProgress,
-  uploadSuccess,
-  uploadFailed,
-  removeUpload,
-} from "@/store/slices/reelUploadSlice"
+  addTask,
+  updateTask,
+  removeTask,
+} from "@/store/slices/globalTaskSlice"
 import { reelsApi } from "@/store/api/reelsApi"
 
 const fileCache = new Map()
 const xhrCache = new Map()
 
 export const uploadReelInBackground = (formData, file, coverFile) => {
-  const id = "reel-upload-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7)
+  const id =
+    "reel-upload-" +
+    Date.now() +
+    "-" +
+    Math.random().toString(36).substring(2, 7)
 
   // Store raw files in memory cache for preview/retry purposes
   fileCache.set(id, { file, coverFile })
 
-  const title = formData.get("Title") || "Untitled Reel"
-  const size = file.size
+  const title = formData.get("TaskTitle") || "Đăng Reel mới"
   const challengeId = formData.get("ChallengeId")
+  formData.append("TaskId", id)
 
-  // Generate cover preview url
-  const coverUrl = coverFile ? URL.createObjectURL(coverFile) : null
-
-  // 1. Dispatch start to Redux
-  store.dispatch(addUpload({ id, title, size, coverUrl }))
+  // 1. Dispatch start to globalTaskSlice
+  store.dispatch(
+    addTask({
+      id,
+      title,
+      status: "UPLOADING",
+      progress: 0,
+      timestamp: Date.now(),
+      isUploadTask: true,
+    }),
+  )
 
   // 2. Perform native XHR upload
   const xhr = new XMLHttpRequest()
@@ -40,17 +48,53 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
     xhr.setRequestHeader("Authorization", `Bearer ${token}`)
   }
 
-  xhr.upload.onprogress = (e) => {
-    if (e.lengthComputable && e.total > 0) {
-      const progress = Math.round((e.loaded / e.total) * 100)
-      // Limit to 99% during transfer, 100% is set on response load
-      store.dispatch(updateProgress({ id, progress: Math.min(progress, 99) }))
+  if (xhr.upload) {
+    // 1. Real-time byte progress (0% -> 99%)
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && e.total > 0) {
+        const percent = Math.min(99, Math.floor((e.loaded / e.total) * 100))
+        const existingTask = store.getState().globalTask.tasks.find((t) => t.id === id)
+        const currentProg = existingTask?.progress || 0
+        const newProg = Math.max(currentProg, percent)
+
+        store.dispatch(
+          updateTask({
+            id,
+            updates: {
+              status: "UPLOADING",
+              progress: newProg,
+            },
+          }),
+        )
+      }
+    }
+
+    // 2. File bytes sent to server -> switch to PROCESSING
+    xhr.upload.onload = () => {
+      store.dispatch(
+        updateTask({
+          id,
+          updates: {
+            status: "PROCESSING",
+          },
+        }),
+      )
     }
   }
 
   xhr.onload = () => {
     if (xhr.status >= 200 && xhr.status < 300) {
-      store.dispatch(uploadSuccess({ id }))
+      store.dispatch(
+        updateTask({
+          id,
+          updates: {
+            progress: 100,
+            status: "SUCCESS",
+            stepName: "COMPLETED",
+          },
+        }),
+      )
+
       // Invalidate reels query cache to auto-reload feeds
       const tags = [
         { type: "Reels", id: "FEED" },
@@ -61,24 +105,31 @@ export const uploadReelInBackground = (formData, file, coverFile) => {
       }
       store.dispatch(reelsApi.util.invalidateTags(tags))
     } else {
-      let errorMsg = "Upload failed"
+      let errMsg = "Tải lên thất bại"
       try {
-        const resJson = JSON.parse(xhr.responseText)
-        errorMsg = resJson.message || errorMsg
-      } catch (err) {}
-      store.dispatch(uploadFailed({ id, error: errorMsg }))
+        const res = JSON.parse(xhr.responseText)
+        errMsg = res.message || errMsg
+      } catch {}
+      store.dispatch(
+        updateTask({ id, updates: { status: "ERROR", error: errMsg } }),
+      )
     }
     cleanupCache(id)
   }
 
   xhr.onerror = () => {
-    store.dispatch(uploadFailed({ id, error: "Network error encountered." }))
+    store.dispatch(
+      updateTask({
+        id,
+        updates: { status: "ERROR", error: "Lỗi kết nối mạng" },
+      }),
+    )
     cleanupCache(id)
-  };
+  }
 
   xhr.onabort = () => {
     cleanupCache(id)
-  };
+  }
 
   xhr.send(formData)
 }
@@ -88,7 +139,7 @@ export const cancelReelUpload = (id) => {
   if (xhr) {
     xhr.abort()
   }
-  store.dispatch(removeUpload(id))
+  store.dispatch(removeTask(id))
   cleanupCache(id)
 }
 

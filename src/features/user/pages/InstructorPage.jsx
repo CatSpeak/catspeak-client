@@ -8,12 +8,16 @@ import React, {
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetUserProfileQuery } from "@/store/api/userApi";
+import { store } from "@/store";
 import {
+  instructorApi,
+  buildInstructorFormData,
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
 } from "@/store/api/instructorApi";
 import { parsePhoneData } from "@/shared/constants/countriesOptions";
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 
 import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
 import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
@@ -116,6 +120,7 @@ function getApplicationStatus(app) {
 const InstructorPage = () => {
   const { t } = useLanguage();
   const ins = t.profile?.instructor || {};
+  const { startTask } = useGlobalTask();
 
   // --- API hooks ---
   const {
@@ -174,6 +179,7 @@ const InstructorPage = () => {
   const [hasPreFilled, setHasPreFilled] = useState(false);
   const [errors, setErrors] = useState({});
   const [isReapplying, setIsReapplying] = useState(false);
+  const [isTaskSubmitting, setIsTaskSubmitting] = useState(false);
 
   // Snapshot of the original form data to detect changes
   const originalFormDataRef = useRef(null);
@@ -249,12 +255,12 @@ const InstructorPage = () => {
 
     if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
       newErrors.languagesTeach =
-        ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
+        ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
     } else {
       for (const lang of formData.languagesTeach) {
         if (!lang.language || !lang.level) {
-          newErrors.languagesTeach =
-            ins.requiredField || "Vui lòng chọn đầy đủ ngôn ngữ và trình độ";
+          newErrors.languagesTeachLevel =
+            ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
           break;
         }
       }
@@ -301,6 +307,7 @@ const InstructorPage = () => {
       if (!canEdit) return;
       setFormData((prev) => ({ ...prev, languagesTeach: languages }));
       clearError("languagesTeach");
+      clearError("languagesTeachLevel");
     },
     [canEdit],
   );
@@ -425,17 +432,43 @@ const InstructorPage = () => {
 
     try {
       if (isRequestEdit || isReapplying) {
-        // PUT /my for resubmission
+        // PUT /my for resubmission — simple RTK Query
         await updateInstructor(buildPayload()).unwrap();
         toast.success(ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!");
+        setShowForm(false);
+        setAgreed(false);
+        setErrors({});
+        setIsReapplying(false);
       } else {
-        // POST /apply for new applications
-        await applyInstructor(buildPayload()).unwrap();
+        // POST /apply for new applications — Task Progress Bar
+        const rawPayload = buildPayload();
+        const formData = buildInstructorFormData(rawPayload);
+
+        // Lock form immediately
+        setIsTaskSubmitting(true);
+
+        startTask({
+          title: t?.uploadWidget?.instructorTaskTitle || "Gửi hồ sơ giảng viên",
+          taskType: "InstructorApplication",
+          isUploadTask: true,
+          url: "/InstructorProfile/apply",
+          method: "POST",
+          data: formData,
+          onSuccess: () => {
+            toast.success(ins.statusPendingDesc || "Đã gửi đơn đăng ký thành công!");
+            setIsTaskSubmitting(false);
+            setShowForm(false);
+            setAgreed(false);
+            setErrors({});
+            setIsReapplying(false);
+            store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
+          },
+          onError: (err) => {
+            setIsTaskSubmitting(false);
+            toast.error(err?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
+          },
+        });
       }
-      setShowForm(false);
-      setAgreed(false);
-      setErrors({});
-      setIsReapplying(false);
     } catch (err) {
       console.error("Failed to submit instructor application:", err);
       toast.error(err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
@@ -450,6 +483,7 @@ const InstructorPage = () => {
     updateInstructor,
     buildPayload,
     ins,
+    t,
   ]);
 
   // --- Render ---
@@ -475,13 +509,23 @@ const InstructorPage = () => {
   }
 
   // Determine readOnly for section components
-  const readOnly = !canEdit;
+  const readOnly = !canEdit || isSubmitting || isTaskSubmitting;
 
   return (
     <div className="flex flex-col gap-6">
       <PageTitle>
         {t.nav?.instructor || "Giảng viên"}
       </PageTitle>
+
+      {/* Task submitting banner */}
+      {isTaskSubmitting && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 animate-pulse">
+          <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+          <span className="font-medium">
+            {t?.uploadWidget?.instructorSubmitting || "Đang gửi hồ sơ giảng viên, vui lòng chờ..."}
+          </span>
+        </div>
+      )}
 
       {/* Status Banner — shown when an application exists */}
       {applicationStatus && (
@@ -551,8 +595,8 @@ const InstructorPage = () => {
             if (val) clearError("agreed");
           }}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          disabled={isSubmitting}
+          isSubmitting={isSubmitting || isTaskSubmitting}
+          disabled={isSubmitting || isTaskSubmitting}
           errors={errors}
           submitLabel={isRequestEdit || isReapplying ? ins.resubmit : undefined}
           updatingLabel={isRequestEdit || isReapplying ? ins.updating : undefined}

@@ -26,6 +26,7 @@ export default {
     titleRequiredError: "需要标题。",
     uploadFailed: "短视频上传失败。请重试。",
     uploadSuccess: "短视频上传成功",
+    monthlyQuotaExceeded: "您已达到本月最多上传 5 个 Reels 的限制。请升级至 Pro 套餐以上传更多 Reels！",
     uploadFailedTitle: "上传失败",
     uploadFailedDesc: "发生错误。请检查您的文件格式和网络。",
     foryou: "推荐",
