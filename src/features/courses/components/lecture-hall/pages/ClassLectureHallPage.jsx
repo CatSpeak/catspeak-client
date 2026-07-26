@@ -23,6 +23,9 @@ import AddActivityModal from "../components/modals/AddActivityModal"
 import AddLinkModal from "../components/modals/AddLinkModal"
 import SectionModal from "../components/modals/SectionModal"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+
+const generateTempId = () => `sec-${Date.now()}`;
+
 const ClassLectureHallPage = ({ id, isStudent }) => {
   const {
     data: apiSections = [],
@@ -30,7 +33,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
     isError,
     error,
   } = useGetCurriculumByClassQuery(id, { skip: !id })
-  console.log(apiSections);
 
   const [deleteSection] = useDeleteCurriculumSectionMutation()
   const [updateSection] = useUpdateCurriculumSectionMutation()
@@ -45,6 +47,8 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
 
   const [sectionsOverride, setSectionsOverride] = useState(null)
   const sections = sectionsOverride ?? apiSections
+  console.log(sections);
+
 
   const updateSections = (updater) => {
     setSectionsOverride((prev) => {
@@ -86,8 +90,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   }
 
   const handleEditItem = (sectionId, item) => {
-    console.log(item);
-
     if (item.type === "bulletinBoard") {
       setTargetSectionId(sectionId)
       const targetSec = sections.find((s) => s.id === sectionId)
@@ -237,22 +239,30 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
 
     if (id) {
       try {
-        await Promise.all(
-          activities.map((act) => {
-            if (act._activityType === "quiz") {
-              return addQuiz({
-                classId: id,
-                sectionId: targetSectionId,
-                quizId: act.id,
-              }).unwrap()
-            }
-            return addAssignment({
+        const quizIds = activities.filter(act => act._activityType === "quiz").map(act => act.id)
+        const assignmentIds = activities.filter(act => act._activityType !== "quiz").map(act => act.id)
+
+        const promises = []
+        if (quizIds.length > 0) {
+          promises.push(
+            addQuiz({
               classId: id,
               sectionId: targetSectionId,
-              assignmentId: act.id,
+              quizIds,
             }).unwrap()
-          })
-        )
+          )
+        }
+        if (assignmentIds.length > 0) {
+          promises.push(
+            addAssignment({
+              classId: id,
+              sectionId: targetSectionId,
+              assignmentIds,
+            }).unwrap()
+          )
+        }
+        await Promise.all(promises)
+
         toast.success(`Đã thêm ${activities.length} hoạt động học tập!`)
         setSectionsOverride(null)
       } catch (err) {
@@ -348,7 +358,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
 
     if (sectionModal.mode === "create") {
       const newSection = {
-        id: `sec-${Date.now()}`,
+        id: generateTempId(),
         name: sectionModal.name.trim(),
         description: sectionModal.description.trim(),
         isVisibleToStudents: sectionModal.isVisibleToStudents,
@@ -613,6 +623,13 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         onSubmit={handleSaveActivities}
         sessionName={targetSectionName}
         classId={id}
+        existingActivityIds={
+          sections.flatMap(s =>
+            (s.items || [])
+              .filter(it => it.type === "assignment" || it.type === "quiz")
+              .map(it => `${it.type}-${it.itemId}`)
+          )
+        }
       />
 
       {/* 4. Add Link Modal */}

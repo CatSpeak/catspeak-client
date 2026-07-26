@@ -1086,22 +1086,22 @@ export const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
     }),
 
-    // Add assignment to a section
+    // Add assignments to a section
     addAssignmentToSection: builder.mutation({
-      query: ({ classId, sectionId, assignmentId }) => ({
+      query: ({ classId, sectionId, assignmentIds }) => ({
         url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/assignments`,
         method: "POST",
-        body: { assignmentId },
+        body: { assignmentIds },
       }),
       invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
     }),
 
-    // Add quiz to a section
+    // Add quizzes to a section
     addQuizToSection: builder.mutation({
-      query: ({ classId, sectionId, quizId }) => ({
+      query: ({ classId, sectionId, quizIds }) => ({
         url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/quizzes`,
         method: "POST",
-        body: { quizId },
+        body: { quizIds },
       }),
       invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
     }),

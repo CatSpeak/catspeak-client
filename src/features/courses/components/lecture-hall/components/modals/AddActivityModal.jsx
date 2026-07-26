@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { Checkbox, TextInput } from "@/shared/components/ui/inputs"
@@ -7,21 +7,31 @@ import { useGetTeacherAssignmentsQuery, useGetTeacherQuizzesQuery } from "@/stor
 import { getAssignmentTitle, getAssignmentStatus } from "../../../../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import toast from "react-hot-toast"
 
 const AddActivityModal = ({
   open = false,
   onClose = () => { },
   onSubmit = () => { },
-  sessionName = "Buổi 1: Introduction & Greetings",
   classId,
+  existingActivityIds = [],
 }) => {
   const { language } = useLanguage()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedIds, setSelectedIds] = useState([])
+  const [prevOpen, setPrevOpen] = useState(open)
 
-  const handleToggleSelect = (id) => {
+  if (open !== prevOpen) {
+    setPrevOpen(open)
+    if (open) {
+      setSearchQuery("")
+      setSelectedIds([])
+    }
+  }
+
+  const handleToggleSelect = (uid) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(uid) ? prev.filter((item) => item !== uid) : [...prev, uid]
     )
   }
 
@@ -37,7 +47,7 @@ const AddActivityModal = ({
 
   const isLoading = isLoadingAssignments || isLoadingQuizzes
 
-  const activities = React.useMemo(() => {
+  const activities = useMemo(() => {
     const rawAssignments = assignmentsResponse?.data || assignmentsResponse || []
     const assignmentsList = (Array.isArray(rawAssignments) ? rawAssignments : []).map(a => ({ ...a, _activityType: "assignment" }))
 
@@ -48,14 +58,22 @@ const AddActivityModal = ({
   }, [assignmentsResponse, quizzesResponse])
 
   const filteredActivities = activities.filter((act) => {
+    const uid = `${act._activityType}-${act.id}`
+    if (existingActivityIds.includes(uid)) return false
     const title = act._activityType === "quiz" ? (act.title || act.name || "Bài kiểm tra") : getAssignmentTitle(act)
     const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesSearch
   })
 
   const handleSubmit = () => {
+
+    if (selectedIds.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một hoạt động")
+      return
+    }
+
     const chosenActivities = activities
-      .filter((a) => selectedIds.includes(a.id))
+      .filter((a) => selectedIds.includes(`${a._activityType}-${a.id}`))
       .map((act) => ({
         id: act.id,
         _activityType: act._activityType,
@@ -74,7 +92,6 @@ const AddActivityModal = ({
         return "bg-[#FFDAD6] text-[#93000A]"
       case "quiz":
         return "bg-[#FFDCBD] text-[#2C1600]"
-      case "forum":
       default:
         return "bg-[#FFDBCF] text-[#380D00]"
     }
@@ -113,11 +130,6 @@ const AddActivityModal = ({
       }
     >
       <div className="space-y-5">
-        {/* Banner session info */}
-        <div className="bg-[#F9FAFB] text-[#4B5563] text-sm p-3 rounded-xl font-medium">
-          Đang thêm vào: <span className="font-semibold text-[#111827]">{sessionName}</span>
-        </div>
-
         {/* Filter Tabs & Search Bar Row */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="relative w-full">
@@ -143,7 +155,8 @@ const AddActivityModal = ({
             </div>
           ) : (
             filteredActivities.map((act) => {
-              const isChecked = selectedIds.includes(act.id)
+              const uid = `${act._activityType}-${act.id}`
+              const isChecked = selectedIds.includes(uid)
               const title = act._activityType === "quiz" ? (act.title || act.name || "Bài kiểm tra") : getAssignmentTitle(act)
               const status = act._activityType === "quiz" ? (act.status || "published") : getAssignmentStatus(act)
               const statusLabel = status === "published" ? "Đã phát hành" : (status === "draft" ? "Nháp" : "Đóng")
@@ -156,11 +169,11 @@ const AddActivityModal = ({
 
               return (
                 <div
-                  key={act.id}
-                  onClick={() => handleToggleSelect(act.id)}
-                  className={`border rounded-lg p-4 flex items-center justify-between cursor-pointer transition-all ${isChecked
-                    ? "border-cath-red-700 shadow-faq-card"
-                    : "border-[#E2E2E2] bg-white hover:border-[#F3F4F5]"
+                  key={uid}
+                  onClick={() => handleToggleSelect(uid)}
+                  className={`border rounded-lg p-4 flex items-center justify-between transition-all ${isChecked
+                    ? "border-cath-red-700 shadow-faq-card cursor-pointer"
+                    : "border-[#E2E2E2] bg-white hover:border-[#F3F4F5] cursor-pointer"
                     }`}
                 >
                   {/* Checkbox & Left info */}

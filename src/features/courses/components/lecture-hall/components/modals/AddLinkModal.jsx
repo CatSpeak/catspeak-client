@@ -3,12 +3,12 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput, Switch } from "@/shared/components/ui/inputs"
 import { Link2 } from "lucide-react"
+import toast from "react-hot-toast"
 
 const AddLinkModal = ({
   open = false,
   onClose = () => { },
   onSubmit = () => { },
-  sessionName = "Buổi 1: Introduction & Greetings",
 }) => {
   const [title, setTitle] = useState("")
   const [url, setUrl] = useState("")
@@ -16,11 +16,16 @@ const AddLinkModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    if (!title || !url) {
+      toast.error("Vui lòng nhập tên hiển thị và đường dẫn liên kết")
+      return
+    }
+
     onSubmit({
       title,
       url,
       isVisible,
-      sessionName,
     })
     onClose()
   }
@@ -55,10 +60,6 @@ const AddLinkModal = ({
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Banner session info */}
-        <div className="bg-[#F9FAFB] text-[#4B5563] text-sm p-3 rounded-xl font-medium">
-          Đang thêm vào: <span className="font-semibold text-[#111827]">{sessionName}</span>
-        </div>
 
         {/* Display Title Input */}
         <div>
