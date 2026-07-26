@@ -373,6 +373,7 @@ export default {
     overview: "Overview",
     classmates: "Classmates",
     members: "Members",
+    lectureHall: "Lecture Hall",
     feed: "Feed",
     grading: "Grading & Management",
     myGrades: "Assignments & Grades",

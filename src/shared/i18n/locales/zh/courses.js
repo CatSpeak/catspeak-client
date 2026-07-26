@@ -374,6 +374,7 @@ export default {
     classmates: "同学",
     members: "成员管理",
     feed: "班级动态",
+    lectureHall: "演讲厅",
     grading: "打分与管理",
     myGrades: "作业与成绩",
     materials: "课程材料",

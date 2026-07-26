@@ -374,6 +374,7 @@ export default {
     classmates: "Bạn học",
     members: "Quản lý thành viên",
     feed: "Bảng tin",
+    lectureHall: "Giảng đường",
     grading: "Chấm điểm & quản lý",
     myGrades: "Bài tập & Điểm số",
     materials: "Tài liệu học tập",
