@@ -7,6 +7,7 @@ import {
   Hand,
   UserPlus,
   Crown,
+  Ellipsis,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useLanguage } from "@/shared/context/LanguageContext"

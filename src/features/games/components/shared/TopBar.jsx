@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from "react"
 import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { motion } from "framer-motion"
-import { Gamepad2, LogOut, Menu, MessageSquare, Mic, MicOff } from "lucide-react"
-import { PillButton } from "@/shared/components/ui/buttons"
+import { Gamepad2, Menu } from "lucide-react"
 import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import { useParticipants } from "@livekit/components-react"
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { motion } from "framer-motion"
 
-const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
+const TopBar = ({ onOpenMobileLeaderboard }) => {
   const { currentRound, timer: initialTimer, gameState, gameType, pictureIt, currentUserId } = useGame()
   const { t } = useLanguage()
   const [timeLeft, setTimeLeft] = useState(0)
   const participants = useParticipants()
-  const { micOn, handleToggleMic } = useGlobalVideoCall()
 
   useEffect(() => {
     setTimeLeft(initialTimer)
@@ -62,8 +59,6 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
   const isPictureIt = gameType === "picture_it" || gameType === "picture-it"
   const gameName = isPictureIt ? "Picture IT" : (t.rooms?.game?.crackIt?.title || "Crack It")
 
-  const isSpectator = pictureIt?.isSpectator
-  const isDescriber = pictureIt?.describerId === currentUserId
   const topBar = isPictureIt ? (t.rooms?.game?.pictureIt?.topBar || {}) : {}
 
   // Describer User
@@ -79,6 +74,29 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
       } catch (e) { }
     }
   }
+
+  // Timer cho Picture IT (Describe 30s countdown & Rating countdown)
+  const describeStartTimeMs = pictureIt?.describeStartTime
+    ? new Date(pictureIt.describeStartTime).getTime()
+    : null
+
+  useEffect(() => {
+    let interval
+    if (isPictureIt && gameState === "playing") {
+      if (pictureIt?.ratingOpen) {
+        setTimeLeft(pictureIt?.ratingCountdownSec || 0)
+      } else if (describeStartTimeMs) {
+        const updateTimer = () => {
+          const elapsed = Math.floor((Date.now() - describeStartTimeMs) / 1000)
+          const remaining = Math.max(0, 30 - elapsed)
+          setTimeLeft(remaining)
+        }
+        updateTimer()
+        interval = setInterval(updateTimer, 300)
+      }
+    }
+    return () => clearInterval(interval)
+  }, [isPictureIt, gameState, pictureIt?.ratingOpen, pictureIt?.ratingCountdownSec, describeStartTimeMs])
 
   const isLowTime = timeLeft <= 10
 
@@ -117,62 +135,18 @@ const TopBar = ({ onOpenMobileLeaderboard, onOpenMobileChat, onLeaveGame }) => {
           </div>
         )}
 
-        <div className="flex-1 flex justify-center">
-          {!isPictureIt && currentRound && (
-            <motion.div
-              transition={isLowTime ? { repeat: Infinity, duration: 1 } : {}}
-              className={`text-2xl md:text-3xl font-black tabular-nums ${isLowTime ? "text-cath-red-600 drop-shadow-sm" : "text-slate-800"}`}
-            >
-              00:{timeLeft.toString().padStart(2, "0")}
-            </motion.div>
+        <div className="flex-1 flex justify-center items-center">
+          {currentRound && (
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <motion.div
+                transition={isLowTime ? { repeat: Infinity, duration: 1 } : {}}
+                className={`text-2xl md:text-3xl font-black tabular-nums ${isLowTime ? "text-cath-red-600 drop-shadow-sm" : "text-slate-800"}`}
+              >
+                00:{timeLeft.toString().padStart(2, "0")}
+              </motion.div>
+            </div>
           )}
         </div>
-      </div>
-
-      <div className="flex items-center justify-end gap-1.5 md:gap-4 shrink-0">
-        {/* {isPictureIt && isSpectator !== undefined && (
-          isSpectator ? (
-            <span className="text-[10px] md:text-xs font-semibold px-2 md:px-2.5 py-1 rounded-full border border-gray-400 text-gray-500 bg-gray-50 hidden sm:inline-block">
-              {topBar.spectator || 'Spectator'}
-            </span>
-          ) : (
-            <span
-              className={`text-[10px] md:text-xs font-semibold px-2 md:px-2.5 py-1 rounded-full border hidden sm:inline-block ${isDescriber
-                ? 'border-cath-red-700 text-cath-red-700 bg-cath-red-700/5'
-                : 'border-[#f08d1d] text-[#f08d1d] bg-orange-50'
-                }`}
-            >
-              {isDescriber ? (topBar.roleDescriber || 'Describer') : (topBar.roleRater || 'Rater')}
-            </span>
-          )
-        )} */}
-
-        <button
-          className={`p-1.5 rounded-xl border border-gray-200 shadow-sm transition-colors ${micOn ? 'text-cath-red-700 bg-red-50 hover:bg-red-100' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-          onClick={handleToggleMic}
-          title={micOn ? "Tắt mic" : "Bật mic"}
-        >
-          {micOn ? <Mic size={20} /> : <MicOff size={20} />}
-        </button>
-
-        {onOpenMobileChat && (
-          <button
-            className="lg:hidden text-slate-500 hover:text-cath-red-600 hover:bg-red-50 p-1.5 rounded-xl border border-gray-200 shadow-sm"
-            onClick={onOpenMobileChat}
-            title="Chat"
-          >
-            <MessageSquare size={20} />
-          </button>
-        )}
-
-        {onLeaveGame && (
-          <button
-            className="h-7 px-2 md:h-8 md:px-3 py-4 w-full border border-red-500 text-red-500 hover:bg-red-50 flex items-center justify-center font-bold rounded-xl shadow-sm"
-            onClick={onLeaveGame}
-          >
-            <LogOut size={20} />
-          </button>
-        )}
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion'
-import { Flag, ImageOff, Loader2, Mic } from 'lucide-react'
+import { ImageOff, Loader2, Mic } from 'lucide-react'
 import { CategoryBadge } from './round-result'
 import { useLanguage } from '@/shared/context/LanguageContext'
 
@@ -15,9 +15,6 @@ const PictureItImageCard = ({
   imageBlurred,
   hasDescribeStarted,
   category,
-  forbiddenWords = [],
-  flagCount,
-  raterCount
 }) => {
   const { t } = useLanguage()
   const ic = t.rooms?.game?.pictureIt?.imageCard || {}
@@ -63,8 +60,8 @@ const PictureItImageCard = ({
           <img
             src={displayImageUrl}
             alt="Picture IT"
-            className={`h-full w-full object-cover transition-all duration-500 ${imgLoading ? 'opacity-0' : 'opacity-100'
-              } ${!isDescriber && imageBlurred ? 'blur-xl scale-110' : 'blur-0 scale-100'
+            className={`max-h-full max-w-full w-auto h-auto object-contain transition-all duration-500 ${imgLoading ? 'opacity-0' : 'opacity-100'
+              } ${!isDescriber && imageBlurred ? 'blur-xl' : 'blur-0'
               }`}
           />
         )}
@@ -104,40 +101,9 @@ const PictureItImageCard = ({
           </div>
         )}
 
-        {category && (
-          <CategoryBadge category={category} className="absolute bottom-4 left-4 z-10" />
-        )}
       </div>
 
-      {/* Forbidden words */}
-      {forbiddenWords.length > 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-1 shrink-0">
-          <div className="shrink-0">
-            <div className="text-sm font-semibold text-headingColor">{ic.forbiddenWordsTitle || 'Forbidden words'}</div>
-            <p className="text-xs text-secondary">{ic.forbiddenWordsDesc || 'Do NOT use these words'}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {forbiddenWords?.map((word) => (
-              <span
-                key={word}
-                className="text-xs font-medium px-3 py-1 rounded-full border border-cath-red-700/30 bg-cath-red-700/5 text-cath-red-700"
-              >
-                {word}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Flag counter */}
-      {flagCount > 0 && (
-        <div className="flex items-center gap-2 px-1 text-orange-600 text-sm font-medium">
-          <Flag size={14} />
-          <span>
-            {(ic.flaggedCount || '{0} / {1} flagged').replace('{0}', flagCount).replace('{1}', raterCount)}
-          </span>
-        </div>
-      )}
+      {/* Forbidden words + flag UI đã bỏ — game dùng cơ chế 30s tự động end describe. */}
     </div>
   )
 }

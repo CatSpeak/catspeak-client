@@ -31,12 +31,10 @@ import BreakoutSidebarPanel from "@/features/video-call/components/breakout-room
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
 import { GameProvider } from "@/features/games/context/GameContext"
-import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
 import { isBreakoutSupported, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
-import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay"
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage()
@@ -210,11 +208,6 @@ const VideoCallRoomContent = () => {
       )}
       {/* Top Bar */}
       <RoomHeader />
-
-      {/* Game Overlay */}
-      <CrackItOverlay />
-
-      <PictureITOverlay />
 
       {/* Main Content Area */}
       <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-[#F3F3F3] bg-white">

@@ -795,6 +795,10 @@ export default {
       selectLanguage: "Language",
       langEn: "English",
       langZh: "Chinese",
+      langVi: "Vietnamese",
+      languageLockedByCommunity:
+        "Game language follows the community's language.",
+      lockedHint: "Locked",
       selectLevel: "Difficulty",
       levelEasy: "Easy",
       levelMedium: "Medium",

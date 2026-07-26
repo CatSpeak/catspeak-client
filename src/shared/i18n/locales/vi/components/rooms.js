@@ -777,6 +777,10 @@ export default {
       selectLanguage: "Ngôn ngữ",
       langEn: "Tiếng Anh",
       langZh: "Tiếng Trung",
+      langVi: "Tiếng Việt",
+      languageLockedByCommunity:
+        "Ngôn ngữ trò chơi ăn theo ngôn ngữ của cộng đồng.",
+      lockedHint: "Đã khóa",
       selectLevel: "Mức độ",
       levelEasy: "Dễ",
       levelMedium: "Trung bình",

@@ -122,7 +122,7 @@ export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "systemConfig", path: "/setting/system", icon: Settings },
-];
+]
 
 export const footerLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard },
