@@ -19,9 +19,7 @@ const BaseGameOverlay = ({
    */
   mode = "fullscreen",
 }) => {
-  const { gameState, gameType, countdown, currentUserId, leftPlayers } = useGame();
-
-  const hasLeft = Boolean(currentUserId && leftPlayers?.has(currentUserId?.toString()))
+  const { gameState, gameType, countdown } = useGame();
 
   const normalizeType = (t) => t?.toLowerCase()?.replace(/-/g, "_")
   const normCurrent = normalizeType(gameType)
@@ -30,12 +28,15 @@ const BaseGameOverlay = ({
     ? expectedGameType.map(normalizeType).includes(normCurrent)
     : normalizeType(expectedGameType) === normCurrent;
 
-  if (!matchesGameType || hasLeft) {
+  if (!matchesGameType) {
     return null
   }
 
-  // Allow passing force_stopped if needed, but typically handle it inside overlays or wrapper
-  if (gameState === "idle") {
+  // Khi user đã từng out (`leftPlayers` chứa họ) nhưng game vẫn đang chơi,
+  // nghĩa là user vừa reconnect vào phòng có ván đang diễn ra → vẫn cho xem overlay
+  // (với tư cách spectator) thay vì màn hình đen.
+  // Chỉ ẩn khi game thực sự kết thúc (idle / force_stopped).
+  if (gameState === "idle" || gameState === "force_stopped") {
     return null;
   }
 

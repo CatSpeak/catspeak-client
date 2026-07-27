@@ -178,15 +178,30 @@ const GameSidebar = ({ embedded = false, hideTitle = false, onClose = null }) =>
 
   if (gameState !== "idle") {
     // Game đang chơi (setup/playing/result/game_over/force_stopped):
-    // chỉ hiển thị những người chơi đã đăng ký từ đầu (original_players),
-    // loại bỏ người vô sau hoặc người đã thoát rời phòng/game.
-    if (gamePlayers && gamePlayers.size > 0) {
-      gamePlayers.forEach((id) => {
-        const idStr = id.toString()
-        if (leftPlayers && leftPlayers.has(idStr)) return
-        allPlayerIds.add(idStr)
-      })
+    // Gom union từ mọi nguồn để danh sách BXH không bao giờ rỗng khi game đang chạy:
+    // 1. `gamePlayers` (original_players) — luôn có nếu BE sync đúng.
+    // 2. `scores` — có khi có người ghi điểm (Picture IT: người đã rate; Crack IT: người đoán đúng).
+    // 3. `pictureIt.leaderboard` — cho Picture IT, BE build sẵn theo score.
+    // 4. `participants` (LiveKit room) — fallback cuối, đảm bảo luôn thấy ai đang trong phòng.
+    // 5. Loại bỏ `leftPlayers` (người đã thoát).
+    const addIfNotLeft = (id) => {
+      if (id == null) return
+      const idStr = id.toString()
+      if (leftPlayers && leftPlayers.has(idStr)) return
+      allPlayerIds.add(idStr)
     }
+
+    if (gamePlayers && gamePlayers.size > 0) {
+      gamePlayers.forEach(addIfNotLeft)
+    }
+    Object.keys(scores || {}).forEach(addIfNotLeft)
+    if (isPictureIt && pictureIt?.leaderboard) {
+      pictureIt.leaderboard.forEach((p) => addIfNotLeft(p?.id))
+    }
+    // Fallback cuối cùng: LiveKit participants trong phòng.
+    participants.forEach((p) => {
+      if (p.identity) addIfNotLeft(p.identity)
+    })
   } else {
     // Game idle: mọi người trong phòng đều hiện
     if (currentUserId) allPlayerIds.add(currentUserId.toString())
