@@ -42,10 +42,10 @@ const RecordingsPage = () => {
   const [deleteTarget, setDeleteTarget] = useState(null)
 
   // ── Calculated Storage Limits ──
-  const maxStorageMb = limits.maxStorageMb || 200
+  const maxStorageMb = limits.maxRecordingStorageMb || limits.maxStorageMb || storage?.limitMb || 0
   const usedMb = storage?.usedMb ?? 0
   const usagePercent = maxStorageMb > 0 ? Math.min(100, Math.round((usedMb / maxStorageMb) * 100)) : 0
-  const isQuotaExceeded = usedMb >= maxStorageMb
+  const isQuotaExceeded = maxStorageMb > 0 ? usedMb >= maxStorageMb : true
 
   // ── Handlers ──
   const handlePlay = (recording) => {
