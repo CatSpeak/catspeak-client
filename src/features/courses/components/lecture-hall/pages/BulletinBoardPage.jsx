@@ -5,7 +5,8 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import DataTable from "@/shared/components/ui/DataTable"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
-import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation, useDeletePostInBulletinBoardMutation, useGetClassDetailQuery } from "@/store/api/coursesApi"
+import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation, useDeletePostInBulletinBoardMutation, useGetStudentClassDetailQuery } from "@/store/api/coursesApi"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { toast } from "react-hot-toast"
@@ -14,8 +15,21 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 const BulletinBoardPage = () => {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
-  const { data: detailResponse } = useGetClassDetailQuery(classId, { skip: !classId })
+
+  const { data: profileResponse } = useGetUserProfileQuery()
+  const profile = profileResponse?.data || profileResponse || {}
+  const currentUserId = profile.accountId?.toString() || ""
+
+  const { data: detailResponse } = useGetStudentClassDetailQuery(classId, { skip: !classId })
   const classData = detailResponse?.data || detailResponse || {}
+
+  const isOwner = currentUserId && (
+    classData.instructorId?.toString() === currentUserId ||
+    classData.instructor?.id?.toString() === currentUserId ||
+    classData.teacherId?.toString() === currentUserId
+  )
+  const isStudent = !isOwner
+  const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}`
 
   const [searchTerm, setSearchTerm] = useState("")
   const [updatePost] = useUpdatePostInBulletinBoardMutation()
@@ -49,7 +63,7 @@ const BulletinBoardPage = () => {
 
   const handleAction = async (action, rowId) => {
     if (action === "edit") {
-      navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}/edit-post/${rowId}`)
+      navigate(`${basePath}/class/${classId}/bulletin-board/${boardId}/edit-post/${rowId}`)
       return
     }
 
@@ -117,17 +131,17 @@ const BulletinBoardPage = () => {
         className="text-[#7B7979] text-sm"
         items={[
           { label: "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
-          { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
-          { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
-          { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
+          { label: "Khóa học của tôi", onClick: () => navigate(basePath) },
+          { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
+          { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+          { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
           { label: "Chi tiết bảng tin", active: true },
         ]}
       />
 
       <div className="min-w-6xl p-8 w-full">
         <button
-          onClick={() => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`)}
+          onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
           <ArrowLeft size={16} /> Quay lại
@@ -146,18 +160,20 @@ const BulletinBoardPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
 
-            <div className="flex items-center gap-4">
-              <PillButton
-                variant={`secondary-no-outline`}
-                onClick={() => navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}/create-post`)}
-                bgColor={"#FEA53F"}
-                textColor={"#6C3E00"}
-                className="!rounded-lg !h-10 font-semibold text-sm"
-                startIcon={<Plus size={8} color="#6C3E00" />}
-              >
-                Thêm bài viết
-              </PillButton>
-            </div>
+            {!isStudent && (
+              <div className="flex items-center gap-4">
+                <PillButton
+                  variant={`secondary-no-outline`}
+                  onClick={() => navigate(`${basePath}/class/${classId}/bulletin-board/${boardId}/create-post`)}
+                  bgColor={"#FEA53F"}
+                  textColor={"#6C3E00"}
+                  className="!rounded-lg !h-10 font-semibold text-sm"
+                  startIcon={<Plus size={8} color="#6C3E00" />}
+                >
+                  Thêm bài viết
+                </PillButton>
+              </div>
+            )}
           </div>
 
           {/* Table */}
@@ -174,7 +190,7 @@ const BulletinBoardPage = () => {
                 render: (row) => (
                   <div
                     className="flex items-center cursor-pointer hover:underline w-[352px]"
-                    onClick={() => navigate(`/workspace/courses/class/${classId}/bulletin-board/posts/${row.id}`)}
+                    onClick={() => navigate(`${basePath}/class/${classId}/bulletin-board/posts/${row.id}`)}
                   >
                     <span className={`font-semibold text-[#A00000]`}>
                       {row.title}
@@ -203,43 +219,46 @@ const BulletinBoardPage = () => {
                   </span>
                 )
               },
-              {
-                key: "status",
-                label: "Trạng thái",
-                render: (row) => (
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${row.status === 'Đang hiển thị' ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
-                    <span className={`font-medium ${row.status === 'Đang hiển thị' ? 'text-[#750000]' : 'text-[#5B403C]'}`}>{row.status}</span>
-                  </div>
-                )
-              },
-              {
-                key: "action",
-                label: "",
-                headerClassName: "w-12",
-                className: "text-center",
-                render: (row) => (
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Dropdown
-                      trigger={
-                        <IconButton variant="ghost">
-                          <MoreVertical size={18} color="#5B403C" />
-                        </IconButton>
-                      }
-                      options={[
-                        { value: 'toggleVisibility', label: row.isVisibleToStudents ? 'Ẩn item' : 'Hiện item' },
-                        { value: 'togglePin', label: row.isPinned ? 'Bỏ ghim' : 'Ghim' },
-                        { value: 'toggleReply', label: row.allowReply ? 'Tắt bình luận' : 'Bật bình luận' },
-                        { value: 'edit', label: 'Chỉnh sửa' },
-                        { value: 'delete', label: 'Xoá' }
-                      ]}
-                      onChange={(val) => handleAction(val, row.id)}
-                      align="right"
-                      dropdownClassName="w-48"
-                    />
-                  </div>
-                )
-              }
+              // Teacher-only columns
+              ...(!isStudent ? [
+                {
+                  key: "status",
+                  label: "Trạng thái",
+                  render: (row) => (
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${row.status === 'Đang hiển thị' ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
+                      <span className={`font-medium ${row.status === 'Đang hiển thị' ? 'text-[#750000]' : 'text-[#5B403C]'}`}>{row.status}</span>
+                    </div>
+                  )
+                },
+                {
+                  key: "action",
+                  label: "",
+                  headerClassName: "w-12",
+                  className: "text-center",
+                  render: (row) => (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Dropdown
+                        trigger={
+                          <IconButton variant="ghost">
+                            <MoreVertical size={18} color="#5B403C" />
+                          </IconButton>
+                        }
+                        options={[
+                          { value: 'toggleVisibility', label: row.isVisibleToStudents ? 'Ẩn item' : 'Hiện item' },
+                          { value: 'togglePin', label: row.isPinned ? 'Bỏ ghim' : 'Ghim' },
+                          { value: 'toggleReply', label: row.allowReply ? 'Tắt bình luận' : 'Bật bình luận' },
+                          { value: 'edit', label: 'Chỉnh sửa' },
+                          { value: 'delete', label: 'Xoá' }
+                        ]}
+                        onChange={(val) => handleAction(val, row.id)}
+                        align="right"
+                        dropdownClassName="w-48"
+                      />
+                    </div>
+                  )
+                }
+              ] : []),
             ]}
             data={posts}
             rowKey={(row) => row.id}

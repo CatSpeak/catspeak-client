@@ -5,6 +5,7 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import {
   useGetCurriculumByClassQuery,
+  useGetStudentCurriculumByClassQuery,
   useDeleteCurriculumSectionMutation,
   useUpdateCurriculumSectionMutation,
   useUploadMaterialToSectionMutation,
@@ -27,13 +28,12 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 const generateTempId = () => `sec-${Date.now()}`;
 
 const ClassLectureHallPage = ({ id, isStudent }) => {
-  const {
-    data: apiSections = [],
-    isLoading,
-    isError,
-    error,
-  } = useGetCurriculumByClassQuery(id, { skip: !id })
+  // Use the appropriate API based on role
+  const teacherQuery = useGetCurriculumByClassQuery(id, { skip: !id || isStudent })
+  const studentQuery = useGetStudentCurriculumByClassQuery(id, { skip: !id || !isStudent })
+  const { data: apiSections = [], isLoading, isError, error } = isStudent ? studentQuery : teacherQuery
 
+  // Teacher-only mutations (no-op for students)
   const [deleteSection] = useDeleteCurriculumSectionMutation()
   const [updateSection] = useUpdateCurriculumSectionMutation()
   const [uploadMaterial] = useUploadMaterialToSectionMutation()
@@ -546,7 +546,15 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           <div className="space-y-6">
             {sections.length === 0 ? (
               <div className="text-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-                Chưa có section nào. Hãy tạo section đầu tiên cho lớp học này.
+                {isStudent ? (
+                  <p>
+                    Chưa có bài học nào.
+                  </p>
+                ) : (
+                  <p>
+                    Chưa có section nào. Hãy tạo section đầu tiên cho lớp học này.
+                  </p>
+                )}
               </div>
             ) : (
               sections.map((section, secIdx) => (

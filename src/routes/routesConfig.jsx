@@ -470,6 +470,46 @@ const routesConfig = [
                 ),
               },
               {
+                path: "learning/class/:id/bulletin-board/:boardId",
+                element: (
+                  <LazyRoute>
+                    <BulletinBoardPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/bulletin-board/posts/:postId",
+                element: (
+                  <LazyRoute>
+                    <PostDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/bulletin-board/:boardId/create-post",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/links/:itemId",
+                element: (
+                  <LazyRoute>
+                    <LinkYoutubePage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "recordings",
                 element: <RecordingsPage />,
               },

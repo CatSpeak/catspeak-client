@@ -10,16 +10,31 @@ import {
   useGetPostDetailQuery,
   useCreateCommentInBulletinBoardMutation,
   useCreateReplyInCommentMutation,
-  useGetClassDetailQuery,
+  useGetStudentClassDetailQuery,
 } from "@/store/api/coursesApi"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useSelector } from "react-redux"
 import { formatFileSize } from "../utils/fileUtils"
 
 const PostDetailPage = () => {
   const navigate = useNavigate()
   const { id: classId, postId } = useParams()
-  const { data: detailResponse } = useGetClassDetailQuery(classId, { skip: !classId })
+
+  // Robust role check
+  const { data: profileResponse } = useGetUserProfileQuery()
+  const profile = profileResponse?.data || profileResponse || {}
+  const currentUserId = profile.accountId?.toString() || ""
+
+  const { data: detailResponse } = useGetStudentClassDetailQuery(classId, { skip: !classId })
   const classData = detailResponse?.data || detailResponse || {}
+
+  const isOwner = currentUserId && (
+    classData.instructorId?.toString() === currentUserId ||
+    classData.instructor?.id?.toString() === currentUserId ||
+    classData.teacherId?.toString() === currentUserId
+  )
+  const isStudent = !isOwner
+  const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}`
 
   const [showAll, setShowAll] = useState(false)
   const [replyingTo, setReplyingTo] = useState(null)
@@ -98,17 +113,17 @@ const PostDetailPage = () => {
         className="text-[#7B7979] text-sm"
         items={[
           { label: "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
-          { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
-          { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
-          { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
+          { label: "Khóa học của tôi", onClick: () => navigate(basePath) },
+          { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
+          { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+          { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
           { label: "Chi tiết bảng tin", active: true },
         ]}
       />
 
       <div className="min-w-6xl p-8">
         <button
-          onClick={() => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`)}
+          onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
           <ArrowLeft size={16} /> Quay lại

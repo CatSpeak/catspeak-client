@@ -1,17 +1,36 @@
 import React, { useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useGetClassDetailQuery, useGetCurriculumByClassQuery } from '@/store/api/coursesApi'
+import { useGetCurriculumByClassQuery, useGetStudentClassDetailQuery, useGetStudentCurriculumByClassQuery } from '@/store/api/coursesApi'
+import { useGetUserProfileQuery } from '@/store/api/userApi'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 const LinkYoutubePage = () => {
   const { id: classId, itemId } = useParams()
-  const { data: detailResponse } = useGetClassDetailQuery(classId, { skip: !classId })
-  const classData = detailResponse?.data || detailResponse || {}
   const navigate = useNavigate()
 
-  const { data: curriculum, isLoading } = useGetCurriculumByClassQuery(classId, { skip: !classId })
+  // Robust role check using accountId
+  const { data: profileResponse } = useGetUserProfileQuery()
+  const profile = profileResponse?.data || profileResponse || {}
+  const currentUserId = profile.accountId?.toString() || ""
+
+  const { data: detailResponse } = useGetStudentClassDetailQuery(classId, { skip: !classId })
+  const classData = detailResponse?.data || detailResponse || {}
+
+  const isOwner = currentUserId && (
+    classData.instructorId?.toString() === currentUserId ||
+    classData.instructor?.id?.toString() === currentUserId ||
+    classData.teacherId?.toString() === currentUserId
+  )
+  const isStudent = !isOwner
+  const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}`
+
+  const { data: teacherCurriculum, isLoading: teacherLoading } = useGetCurriculumByClassQuery(classId, { skip: !classId || isStudent })
+  const { data: studentCurriculum, isLoading: studentLoading } = useGetStudentCurriculumByClassQuery(classId, { skip: !classId || !isStudent })
+
+  const curriculum = isStudent ? studentCurriculum : teacherCurriculum
+  const isLoading = isStudent ? studentLoading : teacherLoading
 
   const linkItem = useMemo(() => {
     if (!curriculum) return null
@@ -58,6 +77,9 @@ const LinkYoutubePage = () => {
     )
   }
 
+  console.log(linkItem);
+
+
   if (!linkItem) {
     return (
       <div className="p-6 max-w-[1200px] mx-auto w-full">
@@ -81,17 +103,17 @@ const LinkYoutubePage = () => {
             className="text-[#7B7979] text-sm"
             items={[
               { label: "Trang chủ", onClick: () => navigate("/workspace") },
-              { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
-              { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
-              { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
-              { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
-              { label: "Chi tiết bảng tin", active: true },
+              { label: "Khóa học của tôi", onClick: () => navigate(basePath) },
+              { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
+              { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+              { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
+              { label: "Tài liệu", active: true },
             ]}
           />
 
           <div
             className="inline-flex items-center gap-2 text-sm text-[#5B403C] hover:text-[#D94C38] cursor-pointer transition-colors w-fit font-medium"
-            onClick={() => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`)}
+            onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
           >
             <ArrowLeft size={16} /> Quay lại
           </div>

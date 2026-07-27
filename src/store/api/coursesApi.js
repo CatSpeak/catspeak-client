@@ -989,6 +989,88 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: (result, error, classId) => [{ type: "Curriculum", id: classId }],
     }),
 
+    // Get curriculum by class (Student view)
+    getStudentCurriculumByClass: builder.query({
+      query: (classId) => ({
+        url: `/student/classes/${classId}/curriculum`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        if (!data) return []
+
+        const rawSections = data.sections
+          ?? data.items
+          ?? (Array.isArray(data) ? data : [])
+
+        return rawSections.map((section) => {
+          const rawItems = section.items
+            ?? section.contents
+            ?? section.lessons
+            ?? []
+
+          return {
+            id: section.id?.toString() || "",
+            name: section.name || section.title || "Untitled Section",
+            description: section.description || section.subtitle || "",
+            isVisibleToStudents: section.isVisibleToStudents ?? true,
+            items: rawItems.map((item) => {
+              const itemTypeMap = {
+                "BulletinBoard": "bulletinBoard",
+                "Link": "link",
+                "Material": "material",
+                "Assignment": "assignment",
+                "Quiz": "quiz",
+              }
+              const type = item.itemType ? itemTypeMap[item.itemType] || item.itemType.toLowerCase() : (item.type || item.contentType || "material").toLowerCase()
+
+              let title = item.title || item.name || "Untitled"
+              let meta = item.meta || item.description || ""
+              let metaType = item.metaType || "none"
+              let content = item.content || ""
+
+              if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
+                title = item.bulletinBoard.title || title
+                metaType = "clock"
+                content = item.bulletinBoard.content
+              } else if (item.itemType === "Link" && item.link) {
+                title = item.link.title || title
+                meta = item.link.url || meta
+              } else if (item.itemType === "Material" && item.material) {
+                title = item.material.title || item.material.name || title
+                const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
+                const size = item.material.size ? `${(item.material.size / (1024 * 1024)).toFixed(1)} MB` : ""
+                meta = size ? `${ext} • ${size}` : ext
+                metaType = "file"
+              } else if (item.itemType === "Assignment" && item.assignment) {
+                title = item.assignment.name
+                meta = item.assignment.dueDate ? `Hạn nộp: ${new Date(item.assignment.dueDate).toLocaleDateString("vi-VN")}` : meta
+                metaType = "clock"
+              } else if (item.itemType === "Quiz" && item.quiz) {
+                title = item.quiz.name
+                const openTime = item.quiz.openTime ? `Mở: ${new Date(item.quiz.openTime).toLocaleDateString("vi-VN")}` : ""
+                const closeTime = item.quiz.closeTime ? `Đóng: ${new Date(item.quiz.closeTime).toLocaleDateString("vi-VN")}` : ""
+                metaType = "clock"
+                meta = openTime + ", " + closeTime
+              }
+
+              return {
+                id: item.id?.toString() || "",
+                itemId: item.itemId?.toString() || "",
+                type,
+                content,
+                title,
+                meta,
+                metaType,
+                isVisibleToStudents: item.isVisibleToStudents ?? true,
+              }
+            }),
+          }
+        })
+      },
+      providesTags: (result, error, classId) => [{ type: "Curriculum", id: classId }],
+    }),
+
     // Create a new section in a class curriculum
     createCurriculumSection: builder.mutation({
       query: ({ classId, name, description, isVisibleToStudents = true }) => ({
@@ -1275,6 +1357,7 @@ export const {
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
   useGetCurriculumByClassQuery,
+  useGetStudentCurriculumByClassQuery,
   useCreateCurriculumSectionMutation,
   useUpdateCurriculumSectionMutation,
   useDeleteCurriculumSectionMutation,

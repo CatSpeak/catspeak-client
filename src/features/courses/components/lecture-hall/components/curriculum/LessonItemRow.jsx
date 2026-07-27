@@ -48,7 +48,7 @@ const getItemConfig = (type) => {
 
 const LessonItemRow = ({
   item = {},
-  isEdit = true,
+  // isEdit = true,
   isStudent = false,
   isMenuOpen = false,
   onToggleMenu = () => { },
@@ -84,18 +84,27 @@ const LessonItemRow = ({
         <div className="min-w-0 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
             <h4
-              className={`text-base font-semibold ${displayData.type === "bulletinBoard" || displayData.type === "link" ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
+              className={`text-base font-semibold ${["bulletinBoard", "link", "assignment", "quiz"].includes(displayData.type) ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
               onClick={() => {
+                const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
                 if (displayData.type === "bulletinBoard") {
-                  navigate(`/workspace/courses/class/${classId}/bulletin-board/${displayData.realItemId}`)
+                  navigate(`${basePath}/bulletin-board/${displayData.realItemId}`)
                 } else if (isYoutubeLink) {
-                  navigate(`/workspace/courses/class/${classId}/links/${displayData.realItemId}`)
+                  navigate(`${basePath}/links/${displayData.realItemId}`)
                 } else if (displayData.type === "link") {
                   let urlToOpen = displayData.meta
                   if (urlToOpen && !/^https?:\/\//i.test(urlToOpen)) {
                     urlToOpen = 'https://' + urlToOpen
                   }
                   window.open(urlToOpen, "_blank")
+                } else if (displayData.type === "assignment") {
+                  navigate(`${basePath}?tab=grading&assignmentId=${displayData.realItemId}`)
+                } else if (displayData.type === "quiz") {
+                  if (isStudent) {
+                    navigate(`/workspace/courses/class/${classId}/quiz/${displayData.realItemId}/take`)
+                  } else {
+                    navigate(`/workspace/courses/class/${classId}/quiz/${displayData.realItemId}`)
+                  }
                 }
               }}
             >
@@ -122,7 +131,7 @@ const LessonItemRow = ({
       </div>
 
       {/* Right section: 3-dots Menu Button */}
-      {isEdit && (
+      {!isStudent && (
         <div className="lesson-dropdown-container relative shrink-0">
           <IconButton
             size="xs"

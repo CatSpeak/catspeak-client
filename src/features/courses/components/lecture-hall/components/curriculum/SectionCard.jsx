@@ -80,30 +80,34 @@ const SectionCard = ({
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </IconButton>
 
-          <IconButton
-            variant="ghost"
-            size="xs"
-            onClick={() => {
-              setIsSectionMenuOpen(!isSectionMenuOpen)
-            }}
-            title="Tuỳ chọn section"
-          >
-            <MoreVertical size={16} />
-          </IconButton>
+          {!isStudent && (
+            <>
+              <IconButton
+                variant="ghost"
+                size="xs"
+                onClick={() => {
+                  setIsSectionMenuOpen(!isSectionMenuOpen)
+                }}
+                title="Tuỳ chọn section"
+              >
+                <MoreVertical size={16} />
+              </IconButton>
 
-          {/* Section Action Menu */}
-          <SectionActionMenu
-            open={isSectionMenuOpen}
-            onClose={() => setIsSectionMenuOpen(false)}
-            section={section}
-            secIdx={secIdx}
-            totalSections={totalSections}
-            onEdit={onEditSection}
-            onToggleVisibility={onToggleSectionVisibility}
-            onMove={onMoveSection}
-            onDelete={onDeleteSection}
-            onAddContent={(type) => onOpenAddItem(section.id, type)}
-          />
+              {/* Section Action Menu */}
+              <SectionActionMenu
+                open={isSectionMenuOpen}
+                onClose={() => setIsSectionMenuOpen(false)}
+                section={section}
+                secIdx={secIdx}
+                totalSections={totalSections}
+                onEdit={onEditSection}
+                onToggleVisibility={onToggleSectionVisibility}
+                onMove={onMoveSection}
+                onDelete={onDeleteSection}
+                onAddContent={(type) => onOpenAddItem(section.id, type)}
+              />
+            </>
+          )}
         </div>
 
       </div>
