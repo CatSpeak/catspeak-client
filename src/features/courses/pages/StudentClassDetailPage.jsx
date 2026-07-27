@@ -1,16 +1,23 @@
-import React, { lazy, Suspense, useState } from "react"
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Video } from "lucide-react"
 
 import {
   useGetStudentClassDetailQuery,
+  useGetStudentCourseDetailQuery,
   useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
-import { formatCurrency } from "../utils/courseUtils"
+import {
+  formatCurrency,
+  getClassEnrollmentIssue,
+  getClassEnrollmentIssueLabel,
+  getClassEnrollmentIssueMessage,
+  getSafeMediaUrl,
+} from "../utils/courseUtils"
 import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
@@ -19,12 +26,20 @@ import StudentClassOverviewTab from "../components/overview/StudentClassOverview
 
 const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
-const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
 )
+
+const GRADING_DETAIL_PARAM_KEYS = [
+  "assignmentId",
+  "quizId",
+  "studentId",
+  "submissionId",
+]
+const VALID_TABS = ["overview", "members", "lecture-hall", "feed", "grading"]
+const ENROLLED_ONLY_TABS = new Set(["members", "lecture-hall", "feed", "grading"])
 
 const StudentClassDetailPage = () => {
   const { id } = useParams()
@@ -34,66 +49,202 @@ const StudentClassDetailPage = () => {
   const cd = c.classDetail || {}
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
+  const quizId = searchParams.get("quizId")
+  const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
-  const tabParam = searchParams.get("tab") || "overview"
-
-  const activeTab = assignmentId ? "grading" : tabParam
+  const urlTab = searchParams.get("tab")
+  const requestedTab = (urlTab && VALID_TABS.includes(urlTab))
+    ? urlTab
+    : "overview"
+  const hasLockedTabDeepLink = ENROLLED_ONLY_TABS.has(requestedTab)
 
   const handleTabChange = (tab) => {
-    const nextSearchParams = new URLSearchParams(searchParams)
-    nextSearchParams.set("tab", tab)
-    if (assignmentId) {
-      nextSearchParams.delete("assignmentId")
-    }
-    setSearchParams(nextSearchParams, { replace: true })
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set("tab", tab)
+    GRADING_DETAIL_PARAM_KEYS.forEach((key) => nextParams.delete(key))
+    setSearchParams(nextParams)
   }
 
   // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
-  const { data: detailResponse, isLoading: isDetailLoading, error: detailError } = useGetStudentClassDetailQuery(id, { skip: !id })
+  const {
+    currentData: detailResponse,
+    isLoading: isDetailLoading,
+    isFetching: isDetailFetching,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useGetStudentClassDetailQuery(id, { skip: !id })
   const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}
-  const currentUserId = profile.id?.toString() || ""
+  const currentUserId = (
+    profile.accountId
+    ?? profile.id
+    ?? ""
+  ).toString()
 
   // Process data for rendering
-  const classData = detailResponse?.data || detailResponse || {}
-  const isOwner = currentUserId && (classData.instructorId === currentUserId || classData.instructor?.id === currentUserId || classData.teacherId === currentUserId)
+  const classData = (
+    detailResponse
+    && typeof detailResponse === "object"
+    && !Array.isArray(detailResponse)
+    && detailResponse.id
+  )
+    ? detailResponse
+    : null
+  const isEnrolled = classData?.isEnrolled === true
+  const {
+    currentData: enrollmentCourseResponse,
+    isLoading: isEnrollmentCourseLoading,
+    isFetching: isEnrollmentCourseFetching,
+    error: enrollmentCourseError,
+  } = useGetStudentCourseDetailQuery(
+    classData?.courseId,
+    { skip: !classData?.courseId || isEnrolled },
+  )
+  const enrollmentCourseData = (
+    enrollmentCourseResponse
+    && typeof enrollmentCourseResponse === "object"
+    && !Array.isArray(enrollmentCourseResponse)
+    && enrollmentCourseResponse.id
+  )
+    ? enrollmentCourseResponse
+    : null
+  const isEnrollmentEligibilityLoading = (
+    !isEnrolled
+    && Boolean(classData?.courseId)
+    && (
+      isEnrollmentCourseLoading
+      || (
+        isEnrollmentCourseFetching
+        && enrollmentCourseResponse === undefined
+      )
+    )
+  )
+  const hasUnavailableEnrollmentContext = (
+    !isEnrolled
+    && (
+      !classData?.courseId
+      || Boolean(enrollmentCourseError)
+      || (
+        enrollmentCourseResponse !== undefined
+        && !enrollmentCourseData
+      )
+    )
+  )
+  const enrollmentIssue = isEnrolled
+    ? null
+    : (
+      hasUnavailableEnrollmentContext
+        ? "unavailable"
+        : getClassEnrollmentIssue({
+          classData,
+          enrolledClassId: enrollmentCourseData?.enrolledClassId,
+        })
+    )
+  const isOwner = Boolean(
+    currentUserId
+    && [
+      classData?.instructorId,
+      classData?.instructor?.id,
+      classData?.teacherId,
+    ].some((ownerId) => ownerId != null && String(ownerId) === currentUserId)
+  )
 
   // Enrollment Status
-  const isEnrolled = !!classData.isEnrolled
+  const activeTab = isEnrolled
+    ? (hasGradingDeepLink ? "grading" : requestedTab)
+    : "overview"
+
+  useEffect(() => {
+    if (
+      isDetailLoading ||
+      isDetailFetching ||
+      detailError ||
+      !classData ||
+      isEnrolled ||
+      (!hasGradingDeepLink && !hasLockedTabDeepLink)
+    ) {
+      return
+    }
+
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set("tab", "overview")
+    GRADING_DETAIL_PARAM_KEYS.forEach((key) => nextParams.delete(key))
+    setSearchParams(nextParams, { replace: true })
+  }, [
+    classData,
+    detailError,
+    hasGradingDeepLink,
+    hasLockedTabDeepLink,
+    isDetailFetching,
+    isDetailLoading,
+    isEnrolled,
+    searchParams,
+    setSearchParams,
+  ])
 
   // State Management for UI Actions
   const [showEnrollConfirm, setShowEnrollConfirm] = useState(false)
+  const enrollmentGuardRef = useRef(false)
 
   // Enroll in class handler
   const handleEnroll = async () => {
+    if (enrollmentGuardRef.current || isEnrolling || !classData?.id) return
     if (isOwner) {
       toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
       return
     }
+    if (isEnrollmentEligibilityLoading || enrollmentIssue) {
+      toast.error(
+        isEnrollmentEligibilityLoading
+          ? (
+            c.student?.checkingEnrollment
+            || "Enrollment availability is still being checked."
+          )
+          : getClassEnrollmentIssueMessage(enrollmentIssue, c.student),
+      )
+      return
+    }
+    enrollmentGuardRef.current = true
     try {
-      const result = await enrollInCourse({ classId: id }).unwrap()
-      if (result.checkoutUrl) {
+      const result = await enrollInCourse({
+        classId: id,
+        courseId: classData.courseId,
+      }).unwrap()
+      const resultPayload = (
+        result
+        && typeof result === "object"
+        && !Array.isArray(result)
+        && Object.prototype.hasOwnProperty.call(result, "data")
+      )
+        ? result.data
+        : result
+      if (!resultPayload || typeof resultPayload !== "object" || Array.isArray(resultPayload)) {
+        throw new Error("Unexpected enrollment response")
+      }
+      if (resultPayload.checkoutUrl) {
+        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
+        if (!checkoutUrl) throw new Error("Invalid checkout URL")
         toast.success(
           cd.toastRedirectingToPayment || "Redirecting to payment..."
         )
-        window.location.href = result.checkoutUrl
-      } else {
+        window.location.assign(checkoutUrl)
+      } else if (resultPayload.classId || resultPayload.enrollmentId) {
         toast.success(
           cd.toastEnrollSuccess
             ? cd.toastEnrollSuccess.replace("{{title}}", classData.title || "")
             : `Successfully enrolled in ${classData.title || ""}!`
         )
+        refetchDetail()
+      } else {
+        throw new Error("Missing enrollment confirmation")
       }
-    } catch (err) {
-      toast.error(err.data?.message || err.message || "Failed to enroll in class.")
+    } catch {
+      toast.error(c.student?.enrollFailed || "Enrollment could not be completed. Please try again.")
     } finally {
+      enrollmentGuardRef.current = false
       setShowEnrollConfirm(false)
     }
-  }
-
-  const notifyInDevelopment = () => {
-    toast.success("Tính năng đang phát triển")
   }
 
   const handleLockedTabSelect = (tab) => {
@@ -101,7 +252,6 @@ const StudentClassDetailPage = () => {
       members: c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!",
       "lecture-hall": c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view lecture hall!",
       grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
-      materials: c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!",
     }
     toast.error(messages[tab])
   }
@@ -111,36 +261,59 @@ const StudentClassDetailPage = () => {
     { value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled },
     { value: "lecture-hall", label: c.student?.lectureHall || "Lecture Hall", locked: !isEnrolled },
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
-    { value: "materials", label: c.student?.materials || "Materials", locked: !isEnrolled },
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData, language || "en")
+  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData || {}, language || "en")
 
-  if (isDetailLoading) {
+  if (
+    isDetailLoading
+    || (isDetailFetching && detailResponse === undefined)
+  ) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
   }
 
-  if (detailError) {
+  if (detailError || !id || !classData) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Error loading class detail: {detailError.data?.message || detailError.message || "Class not found"}
+      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+        <span>{c.student?.classLoadFailed || "This class could not be loaded. Please try again."}</span>
+        {id && (
+          <button type="button" onClick={refetchDetail} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
+            {c.student?.retry || "Try again"}
+          </button>
+        )}
       </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
+      {isDetailFetching && (
+        <span role="status" className="sr-only">
+          {c.student?.refreshing || "Refreshing class details"}
+        </span>
+      )}
 
       {/* ─── Breadcrumb ─── */}
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.allCourses?.title || "All Courses"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.allCourses?.title || "All Courses"}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/learning/details/${classData.courseId || ""}`)}>{c.student?.courseDetails || "Course Details"}</span>
+          <button
+            type="button"
+            className="cursor-pointer hover:underline"
+            disabled={!classData.courseId}
+            onClick={() => {
+              if (classData.courseId) {
+                navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`)
+              }
+            }}
+          >
+            {c.student?.courseDetails || "Course Details"}
+          </button>
           <span>/</span>
           <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
         </div>
@@ -155,26 +328,62 @@ const StudentClassDetailPage = () => {
         <div className="flex items-center gap-3">
           {!isEnrolled ? (
             <button
-              onClick={() => {
-                if (isOwner) {
-                  toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
-                  return
-                }
-                setShowEnrollConfirm(true)
-              }}
-              disabled={isEnrolling}
+              type="button"
+              onClick={handleEnroll}
+              disabled={
+                isEnrolling
+                || isOwner
+                || isEnrollmentEligibilityLoading
+                || Boolean(enrollmentIssue)
+              }
+              title={
+                isOwner
+                  ? (
+                    c.student?.cannotEnrollOwn
+                    || "You cannot enroll in your own course or class."
+                  )
+                  : (
+                    enrollmentIssue
+                      ? getClassEnrollmentIssueMessage(
+                        enrollmentIssue,
+                        c.student,
+                      )
+                      : undefined
+                  )
+              }
               className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
             >
-              <span>{c.student?.enrollAndPay || "Enroll & Pay Tuition"}</span>
+              <span>
+                {isEnrollmentEligibilityLoading
+                  ? (c.student?.checkingEnrollment || "Checking...")
+                  : enrollmentIssue
+                    ? getClassEnrollmentIssueLabel(
+                      enrollmentIssue,
+                      c.student,
+                    )
+                    : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
+              </span>
             </button>
           ) : (
-            <button
-              onClick={notifyInDevelopment}
-              className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
-            >
-              <MessageSquare size={14} className="fill-white" />
-              <span>{c.student?.chat || "Chat"}</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigate(`/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
+              >
+                <Video size={14} className="fill-white" />
+                <span>{c.student?.joinRoom || c.joinRoom || "Vào phòng học"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/chat")}
+                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
+              >
+                <MessageSquare size={14} className="fill-[#990011]" />
+                <span>{c.student?.chat || "Chat"}</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -199,12 +408,15 @@ const StudentClassDetailPage = () => {
             upcomingSessionLabel={c.student?.upcomingSession || "Upcoming Session"}
             joinRoomLabel={c.joinRoom || "Join Room"}
             noUpcomingLabel={c.student?.noUpcomingSessions || "No upcoming sessions"}
-            onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
+            onJoinRoom={() => navigate(
+              `/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`
+            )}
           />
         )}
 
         {activeTab === "members" && isEnrolled && (
           <ClassMembersTab
+            classData={classData}
             isStudent={true}
           />
         )}
@@ -213,8 +425,6 @@ const StudentClassDetailPage = () => {
           <ClassLectureHallPage
             id={id}
             isStudent={true}
-            language={language}
-            cd={cd}
           />
         )}
 
@@ -226,23 +436,16 @@ const StudentClassDetailPage = () => {
             cd={cd}
           />
         )}
-
-        {activeTab === "materials" && isEnrolled && (
-          <ClassMaterialsTab
-            id={id}
-            isStudent={true}
-            language={language}
-            cd={cd}
-            cancelText={c.createClass?.cancel || "Hủy"}
-          />
-        )}
       </Suspense>
 
       {/* Confirmation Modals */}
       <ConfirmationModal
         open={showEnrollConfirm}
-        onClose={() => setShowEnrollConfirm(false)}
+        onClose={() => {
+          if (!isEnrolling) setShowEnrollConfirm(false)
+        }}
         onConfirm={handleEnroll}
+        isPending={isEnrolling}
         title={c.student?.confirmEnrollment || "Confirm Class Enrollment"}
         message={
           c.student?.enrollmentConfirmRedirectMsg

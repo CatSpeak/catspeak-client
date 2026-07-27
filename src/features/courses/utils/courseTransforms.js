@@ -5,15 +5,22 @@ import {
   formatUTCDate,
   getCourseGradientAndIcon,
 } from "./courseUtils"
-
-export const STUDENT_AVATARS = [
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=80&h=80",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=80&h=80",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=80&h=80",
-]
+import { toLocalDateString } from "./dateUtils"
 
 const SHORT_DATE_OPTIONS = { day: "2-digit", month: "short", year: "numeric" }
 const NUMERIC_DATE_OPTIONS = { day: "2-digit", month: "2-digit", year: "numeric" }
+
+const toNonNegativeNumber = (value) => {
+  if (value === null || value === undefined || value === "") return null
+  const number = Number(value)
+  return Number.isFinite(number) && number >= 0 ? number : null
+}
+
+const toDisplayCount = (value) => toNonNegativeNumber(value) ?? "—"
+
+const formatPrice = (value) => (
+  toNonNegativeNumber(value) === null ? "TBA" : formatCurrencyVND(value)
+)
 
 export const getScheduleRange = (daysAhead = 180) => {
   const today = new Date()
@@ -21,19 +28,26 @@ export const getScheduleRange = (daysAhead = 180) => {
   future.setDate(today.getDate() + daysAhead)
 
   return {
-    from: today.toISOString().split("T")[0],
-    to: future.toISOString().split("T")[0],
+    from: toLocalDateString(today),
+    to: toLocalDateString(future),
   }
 }
 
 export const getProgressPercent = (progress) => {
-  if (!progress?.totalSessions) return 0
-  return Math.round((progress.completedSessions / progress.totalSessions) * 100)
+  const completedSessions = toNonNegativeNumber(progress?.completedSessions)
+  const totalSessions = toNonNegativeNumber(progress?.totalSessions)
+  if (completedSessions === null || totalSessions === null || totalSessions === 0) {
+    return null
+  }
+  return Math.min(100, Math.round((completedSessions / totalSessions) * 100))
 }
 
 export const filterByStatus = (list, statusFilter) => {
+  if (!Array.isArray(list)) return []
   if (statusFilter === "all") return list
-  return list.filter((item) => item.status?.toLowerCase() === statusFilter)
+  return list.filter((item) => (
+    String(item?.status || "").toLowerCase() === statusFilter
+  ))
 }
 
 export const mapTeacherCourseSummary = (course, index) => {
@@ -42,12 +56,19 @@ export const mapTeacherCourseSummary = (course, index) => {
   return {
     id: course.id,
     title: course.name || course.title,
-    language: course.language || "English",
+    language: course.language || "",
     description: course.description || "",
-    classCount: course.classCount || 0,
-    students: `${course.studentCount || course.totalStudents || 0} student${(course.studentCount || course.totalStudents || 0) !== 1 ? "s" : ""}`,
+    classCount: toDisplayCount(course.classCount),
+    students: (() => {
+      const studentCount = toNonNegativeNumber(
+        course.studentCount ?? course.totalStudents
+      )
+      return studentCount === null
+        ? "—"
+        : `${studentCount} student${studentCount === 1 ? "" : "s"}`
+    })(),
     createdAt: formatUTCDate(course.createdAt, "en-GB", SHORT_DATE_OPTIONS),
-    status: course.status || "OPEN",
+    status: course.status || "",
     icon,
     gradient,
     thumbnailUrl: course.thumbnailUrl,
@@ -60,20 +81,23 @@ export const mapTeacherClassSummary = (cls, index) => {
 
   return {
     id: cls.id,
+    courseId: cls.courseId,
     title: cls.name || cls.title,
     courseTitle: cls.courseName || cls.courseTitle || "N/A",
-    language: cls.language || "English",
-    levels: cls.levels || [],
+    language: cls.language || "",
+    levels: Array.isArray(cls.levels) ? cls.levels : [],
     schedule: cls.schedule?.days?.join(" - ") || "TBA",
-    time: cls.schedule ? `${cls.schedule.startTime} - ${cls.schedule.endTime}` : "TBA",
-    students: `${cls.studentCount || cls.enrolledStudents || 0} / ${cls.slots || 10} students`,
-    slots: cls.slots || 0,
+    time: cls.schedule?.startTime && cls.schedule?.endTime
+      ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
+      : "TBA",
+    students: `${toDisplayCount(cls.studentCount ?? cls.enrolledStudents)} / ${toDisplayCount(cls.slots)} students`,
+    slots: toNonNegativeNumber(cls.slots),
     progress,
-    progressText: `${cls.progress?.completedSessions || 0}/${cls.progress?.totalSessions || 24}`,
+    progressText: `${toDisplayCount(cls.progress?.completedSessions)}/${toDisplayCount(cls.progress?.totalSessions)}`,
     startDate: formatUTCDate(cls.startDate, "en-GB", SHORT_DATE_OPTIONS),
     endDate: formatUTCDate(cls.endDate, "en-GB", SHORT_DATE_OPTIONS),
-    price: formatCurrencyVND(cls.tuitionFee),
-    status: cls.status || "OPEN",
+    price: formatPrice(cls.tuitionFee),
+    status: cls.status || "",
     icon,
     gradient,
     thumbnailUrl: cls.thumbnailUrl,
@@ -82,18 +106,22 @@ export const mapTeacherClassSummary = (cls, index) => {
 
 export const mapCourseTableRow = (course, index, labels = {}) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
-  const classCount = course.classCount || 0
-  const totalStudents = course.totalStudents || course.studentCount || 0
+  const classCount = toDisplayCount(course.classCount)
+  const totalStudents = toDisplayCount(course.totalStudents ?? course.studentCount)
+  const minimumPrice = toNonNegativeNumber(course.priceRange?.min)
+  const maximumPrice = toNonNegativeNumber(course.priceRange?.max)
 
   return {
     id: course.id,
     title: course.title || course.name,
     classCount: (labels.classCount || "{{count}} classes").replace("{{count}}", classCount),
     students: (labels.studentsCount || "{{count}} students").replace("{{count}}", totalStudents),
-    progress: course.status === "ARCHIVED" ? 100 : course.status === "OPEN" ? 0 : 54,
+    progress: getProgressPercent(course.progress),
     startDate: formatUTCDate(course.startDate, "en-GB", NUMERIC_DATE_OPTIONS),
     endDate: formatUTCDate(course.endDate, "en-GB", NUMERIC_DATE_OPTIONS),
-    price: `${formatCurrencyVND(course.priceRange?.min)} - ${formatCurrencyVND(course.priceRange?.max)}`,
+    price: minimumPrice !== null && maximumPrice !== null
+      ? `${formatCurrencyVND(minimumPrice)} - ${formatCurrencyVND(maximumPrice)}`
+      : "TBA",
     status: course.status,
     icon,
     gradient,
@@ -103,22 +131,27 @@ export const mapCourseTableRow = (course, index, labels = {}) => {
 
 export const mapClassTableRow = (cls, index, labels = {}) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
-  const progress = cls.totalSessions ? Math.round((cls.completedSessions / cls.totalSessions) * 100) : 0
+  const progress = getProgressPercent({
+    completedSessions: cls.completedSessions ?? cls.progress?.completedSessions,
+    totalSessions: cls.totalSessions ?? cls.progress?.totalSessions,
+  })
 
   return {
     id: cls.id,
-    courseTitle: cls.courseTitle || cls.courseName || "N/A",
+    courseTitle: cls.courseTitle || cls.courseName || "—",
     classTitle: cls.title || cls.name,
     status: cls.status,
     schedule: cls.schedule?.days?.join(", ") || "TBA",
     students: (labels.studentsRatio || "{{enrolled}} / {{slots}} students")
-      .replace("{{enrolled}}", cls.enrolledStudents || cls.studentCount || 0)
-      .replace("{{slots}}", cls.slots || 0),
-    time: cls.schedule ? `${cls.schedule.startTime} - ${cls.schedule.endTime}` : "TBA",
+      .replace("{{enrolled}}", String(toDisplayCount(cls.enrolledStudents ?? cls.studentCount)))
+      .replace("{{slots}}", String(toDisplayCount(cls.slots))),
+    time: cls.schedule?.startTime && cls.schedule?.endTime
+      ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
+      : "TBA",
     progress,
     startDate: formatUTCDate(cls.startDate, "en-GB", NUMERIC_DATE_OPTIONS),
     endDate: formatUTCDate(cls.endDate, "en-GB", NUMERIC_DATE_OPTIONS),
-    price: formatCurrencyVND(cls.tuitionFee),
+    price: formatPrice(cls.tuitionFee),
     icon,
     gradient,
     thumbnailUrl: cls.thumbnailUrl,
@@ -126,11 +159,16 @@ export const mapClassTableRow = (cls, index, labels = {}) => {
 }
 
 export const mapUpcomingSession = (session, index, classes = []) => {
+  if (!session || typeof session !== "object" || Array.isArray(session)) {
+    return null
+  }
   const classId = session.class?.id?.toString() || ""
+  if (!classId) return null
   const matchedClass = classes.find((cls) => String(cls.id) === classId)
-  const sessionLanguage = session.class?.language
-    ? session.class.language.charAt(0) + session.class.language.slice(1).toLowerCase()
-    : matchedClass?.language || "English"
+  const rawSessionLanguage = session.class?.language
+  const sessionLanguage = typeof rawSessionLanguage === "string"
+    ? rawSessionLanguage.charAt(0) + rawSessionLanguage.slice(1).toLowerCase()
+    : matchedClass?.language || ""
 
   return {
     id: `sess-${classId}-${session.sessionNumber || index}`,
@@ -138,16 +176,37 @@ export const mapUpcomingSession = (session, index, classes = []) => {
     title: session.class?.name || matchedClass?.title || matchedClass?.name || "Untitled Session",
     time: `${formatTime12h(session.startTime)} - ${formatTime12h(session.endTime)}`,
     date: formatDateDayMonth(session.date),
-    status: session.class?.status || matchedClass?.status || "UPCOMING",
+    status: session.class?.status || matchedClass?.status || "",
     language: sessionLanguage,
-    levels: matchedClass?.levels || ["B2"],
-    avatars: STUDENT_AVATARS,
-    studentCount: matchedClass?.slots || matchedClass?.studentCount || 0,
+    levels: Array.isArray(matchedClass?.levels) ? matchedClass.levels : [],
+    studentCount: toNonNegativeNumber(matchedClass?.studentCount),
   }
 }
 
 export const mapUpcomingSessions = (sessions = [], classes = [], limit = 3) => (
-  sessions.slice(0, limit).map((session, index) => mapUpcomingSession(session, index, classes))
+  (Array.isArray(sessions) ? sessions : [])
+    .slice()
+    .sort((left, right) => {
+      const getStartTime = (session) => {
+        const directTime = new Date(session?.startTime || "").getTime()
+        if (Number.isFinite(directTime)) return directTime
+
+        const date = String(session?.date || "").slice(0, 10)
+        const time = String(session?.startTime || "").slice(0, 8)
+        const combinedTime = new Date(`${date}T${time}`).getTime()
+        return Number.isFinite(combinedTime)
+          ? combinedTime
+          : Number.POSITIVE_INFINITY
+      }
+      return getStartTime(left) - getStartTime(right)
+    })
+    .map((session, index) => mapUpcomingSession(
+      session,
+      index,
+      Array.isArray(classes) ? classes : [],
+    ))
+    .filter(Boolean)
+    .slice(0, limit)
 )
 
 const matchesSearch = (item, query, keys) => {

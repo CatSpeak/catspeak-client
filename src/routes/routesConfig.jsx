@@ -1,6 +1,5 @@
 import { lazy } from "react"
 import { MainLayout, VideoCallLayout } from "@layouts"
-import { PageNotFound, ForbiddenPage } from "@/shared/pages"
 
 // Guest Pages
 import PolicyPage from "@/features/auth/pages/PolicyPage"
@@ -22,7 +21,7 @@ import CalendarPage from "@/features/calendar/pages/CalendarPage"
 import CreateEventPage from "@/features/calendar/pages/CreateEventPage"
 
 // Shared Pages
-import { ComingSoonPage } from "@/shared/pages"
+import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages"
 
 // User & Admin Pages
 import UserDashboard from "@/features/user/pages/UserDashboard"
@@ -34,6 +33,7 @@ import { LazyRoute, RootLayout, RootRoute } from "./RouteShells"
 
 import { Navigate } from "react-router-dom"
 import { AuthGuard } from "@/shared/components"
+import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect"
 import { WebsitePage, ResourcesHubPage } from "@/features/websites"
@@ -125,13 +125,12 @@ const CustomRoomsPage = lazy(
   () => import("@/features/rooms/pages/CustomRoomsPage"),
 )
 
-import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
-import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary"
-
-const WorkspaceIndex = () => {
-  const { isStudent } = useRoleOverride()
-  return <Navigate to={isStudent ? "learning" : "courses"} replace />
-}
+const CreateExamPage = lazy(
+  () => import("@/features/courses/pages/CreateExamPage"),
+)
+const StudentTakeQuizView = lazy(
+  () => import("@/features/courses/components/grading/StudentTakeQuizView"),
+)
 
 const routesConfig = [
   {
@@ -334,6 +333,16 @@ const routesConfig = [
           },
         ],
       },
+      {
+        path: "/workspace/courses/class/:classId/quiz/:quizId/take",
+        element: (
+          <AuthGuard>
+            <LazyRoute>
+              <StudentTakeQuizView />
+            </LazyRoute>
+          </AuthGuard>
+        ),
+      },
       // Workspace routes
       {
         path: "/workspace",
@@ -467,6 +476,54 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <LinkYoutubePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/assignment/:assignmentId",
+                element: (
+                  <LazyRoute>
+                    <CreateAssignmentPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/assignment/:assignmentId/edit",
+                element: (
+                  <LazyRoute>
+                    <CreateAssignmentPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/create-exam",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/quiz/:quizId",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/quiz/:quizId/submission/:studentId",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/quiz/:quizId/edit",
+                element: (
+                  <LazyRoute>
+                    <CreateExamPage />
                   </LazyRoute>
                 ),
               },

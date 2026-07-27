@@ -1,6 +1,5 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-hot-toast"
+import React from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { useGetAllClassesQuery } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -20,7 +19,8 @@ const AllClassesPage = () => {
   const ac = c.allClasses || {}
   const navigate = useNavigate()
 
-  const [activeTab, setActiveTab] = useState("all")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get("tab") || "all"
   const {
     currentPage,
     debouncedSearchQuery,
@@ -29,15 +29,26 @@ const AllClassesPage = () => {
     setSearchQuery,
   } = usePaginatedSearch()
 
-  const { data, isLoading, error } = useGetAllClassesQuery({
+  const {
+    currentData: data,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetAllClassesQuery({
     search: debouncedSearchQuery,
     status: activeTab === "all" ? "" : activeTab.toUpperCase(),
     page: currentPage,
     pageSize: 5,
   })
 
-  const classes = (data?.data || []).map((cls, index) => mapClassTableRow(cls, index, ac))
+  const classes = (Array.isArray(data?.data) ? data.data : [])
+    .map((cls, index) => mapClassTableRow(cls, index, ac))
   const pagination = data?.pagination || { page: 1, pageSize: 5, totalItems: 0, totalPages: 1 }
+  const isInitialLoading = (
+    isLoading
+    || (isFetching && data === undefined)
+  )
   const tabs = [
     { value: "all", label: ac.tabAll || "All" },
     { value: "teaching", label: ac.tabTeaching || "Teaching" },
@@ -46,7 +57,11 @@ const AllClassesPage = () => {
   ]
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("tab", tab)
+      return next
+    })
     setCurrentPage(1)
   }
 
@@ -54,12 +69,13 @@ const AllClassesPage = () => {
     setSearchQuery(value)
   }
 
-  const handleAction = () => {
-    toast.success("Tính năng đang phát triển")
-  }
-
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
+      {isFetching && !isInitialLoading && (
+        <span role="status" className="sr-only">
+          {ac.refreshing || "Refreshing classes"}
+        </span>
+      )}
       <Breadcrumb
         items={[
           { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
@@ -84,18 +100,27 @@ const AllClassesPage = () => {
         className="gap-6 border-b border-gray-100 pb-px"
       />
 
-      {isLoading ? (
+      {error && data !== undefined && (
+        <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
+          {ac.refreshFailed || "The latest class data could not be loaded. The displayed list may be out of date."}
+        </div>
+      )}
+
+      {isInitialLoading ? (
         <LoadingSpinner className="flex justify-center items-center py-12" />
-      ) : error ? (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-          Error loading classes: {error.message || "Unknown error"}
+      ) : error && data === undefined ? (
+        <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+          <span>{ac.loadFailed || "Classes could not be loaded. Please try again."}</span>
+          <button type="button" onClick={refetch} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
+            {ac.retry || "Try again"}
+          </button>
         </div>
       ) : classes.length > 0 ? (
         <div className="flex flex-col gap-2">
           <ClassTable
             classes={classes}
             t={t}
-            handleAction={handleAction}
+            onEdit={(item) => navigate(`/workspace/courses/edit-class/${encodeURIComponent(String(item.id))}`)}
           />
 
           <TablePagination

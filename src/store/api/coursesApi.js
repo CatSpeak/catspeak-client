@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi"
+import { buildQuizFormData, buildQuestionFormData } from "@/features/courses/utils/quizUtils"
 
 // ─── Helpers for UTC to Local conversion ───────────────────────────────
 const parseToLocalTimeStr = (isoString) => {
@@ -8,7 +9,7 @@ const parseToLocalTimeStr = (isoString) => {
     return isoString
   }
   const date = new Date(isoString)
-  if (isNaN(date.getTime())) return isoString
+  if (isNaN(date.getTime())) return ""
   const hrs = String(date.getHours()).padStart(2, "0")
   const mins = String(date.getMinutes()).padStart(2, "0")
   return `${hrs}:${mins}`
@@ -21,7 +22,7 @@ const parseToLocalDateStr = (isoString) => {
     return isoString
   }
   const date = new Date(isoString)
-  if (isNaN(date.getTime())) return isoString
+  if (isNaN(date.getTime())) return ""
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, "0")
   const d = String(date.getDate()).padStart(2, "0")
@@ -29,132 +30,235 @@ const parseToLocalDateStr = (isoString) => {
 }
 
 const transformNextSession = (data) => {
-  let nextSession = null
-  if (data?.nextSession) {
-    const startLocal = new Date(data.nextSession.startTime)
-    const endLocal = new Date(data.nextSession.endTime)
-    if (!isNaN(startLocal.getTime()) && !isNaN(endLocal.getTime())) {
-      // Compute countdown
-      const diffMs = startLocal.getTime() - Date.now()
-      const diffSec = diffMs > 0 ? Math.floor(diffMs / 1000) : 0
-      const days = Math.floor(diffSec / (24 * 3600))
-      const hours = Math.floor((diffSec % (24 * 3600)) / 3600)
-      const minutes = Math.floor((diffSec % 3600) / 60)
+  if (!data?.nextSession?.startTime) return null
 
-      const formattedDate = startLocal.getFullYear() + "-" +
-        String(startLocal.getMonth() + 1).padStart(2, "0") + "-" +
-        String(startLocal.getDate()).padStart(2, "0")
+  const startLocal = new Date(data.nextSession.startTime)
+  if (isNaN(startLocal.getTime())) return null
 
-      const formatTimeDigits = (dateObj) => {
-        const h = String(dateObj.getHours()).padStart(2, "0")
-        const m = String(dateObj.getMinutes()).padStart(2, "0")
-        return `${h}:${m}`
-      }
-
-      nextSession = {
-        date: formattedDate,
-        startTime: formatTimeDigits(startLocal),
-        endTime: formatTimeDigits(endLocal),
-        isLive: data.class?.status === "LIVE" || data.status === "LIVE",
-        countdown: { days, hours, minutes }
-      }
-    }
+  const endLocal = data.nextSession.endTime
+    ? new Date(data.nextSession.endTime)
+    : null
+  const hasValidEnd = endLocal && !isNaN(endLocal.getTime())
+  const formatTimeDigits = (dateObj) => {
+    const hours = String(dateObj.getHours()).padStart(2, "0")
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0")
+    return `${hours}:${minutes}`
   }
 
-  if (!nextSession) {
-    nextSession = {
-      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      startTime: data?.schedule?.[0]?.startTime || "19:00",
-      endTime: data?.schedule?.[0]?.endTime || "21:00",
-      isLive: false,
-      countdown: { days: 2, hours: 0, minutes: 0 }
-    }
+  return {
+    ...data.nextSession,
+    date: [
+      startLocal.getFullYear(),
+      String(startLocal.getMonth() + 1).padStart(2, "0"),
+      String(startLocal.getDate()).padStart(2, "0"),
+    ].join("-"),
+    startTime: formatTimeDigits(startLocal),
+    endTime: hasValidEnd ? formatTimeDigits(endLocal) : "",
+    isLive: data.class?.status === "LIVE" || data.status === "LIVE",
   }
-  return nextSession
 }
 
 // ─── Transformers & Data Mappers ──────────────────────────────────────
 
-const transformCourse = (course) => {
-  if (!course) return null
-  const resolvedTitle = course.name || course.title || "Untitled Course"
-  const resolvedStudents = course.studentCount !== undefined ? course.studentCount : (course.totalStudents || 0)
+const isRecord = (value) => (
+  value !== null
+  && typeof value === "object"
+  && !Array.isArray(value)
+)
+
+const toText = (value) => {
+  if (typeof value === "string") return value
+  if (typeof value === "number" && Number.isFinite(value)) return String(value)
+  return ""
+}
+
+const toNullableNumber = (value, { nonNegative = false } = {}) => {
+  if (value === null || value === undefined || value === "") return null
+  const number = Number(value)
+  if (!Number.isFinite(number) || (nonNegative && number < 0)) return null
+  return number
+}
+
+const toTextList = (value) => (
+  Array.isArray(value)
+    ? value.map(toText).filter(Boolean)
+    : []
+)
+
+const transformPerson = (person) => {
+  if (!isRecord(person)) return null
 
   return {
-    id: course.id?.toString() || "",
+    ...person,
+    id: toText(person.id),
+    accountId: toText(person.accountId),
+    name: toText(person.name),
+    fullName: toText(person.fullName),
+    title: toText(person.title),
+    introduction: toText(person.introduction),
+    description: toText(person.description),
+    avatar: toText(person.avatar),
+    avatarUrl: toText(person.avatarUrl),
+    avatarImageUrl: toText(person.avatarImageUrl),
+  }
+}
+
+const transformTeachingProgress = (data) => {
+  const source = isRecord(data?.teachingProgress)
+    ? data.teachingProgress
+    : {}
+  const completed = toNullableNumber(
+    source.completed ?? data?.completedSessions,
+    { nonNegative: true },
+  )
+  const total = toNullableNumber(
+    source.total ?? data?.totalSessions,
+    { nonNegative: true },
+  )
+  const percentage = toNullableNumber(source.percentage, { nonNegative: true })
+
+  return {
+    completed,
+    total,
+    percentage: percentage === null
+      ? (
+        completed !== null && total !== null && total > 0
+          ? Math.min(100, Math.round((completed / total) * 100))
+          : null
+      )
+      : Math.min(100, percentage),
+  }
+}
+
+const transformCourse = (course) => {
+  if (!isRecord(course)) return null
+  const id = toText(course.id)
+  if (!id) return null
+  const resolvedTitle = toText(course.name) || toText(course.title) || "Untitled Course"
+  const resolvedStudents = toNullableNumber(
+    course.studentCount ?? course.totalStudents,
+    { nonNegative: true },
+  )
+  const teacher = transformPerson(course.teacher)
+  const priceRange = isRecord(course.priceRange)
+    ? {
+      min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
+      max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
+    }
+    : null
+
+  return {
+    ...course,
+    id,
     name: resolvedTitle,
     title: resolvedTitle,
-    language: course.language || "English",
-    levels: course.levels || ["A1"],
-    description: course.description || "",
-    totalSessions: course.totalSessions || 24,
-    enrollmentStart: course.enrollmentStart || "",
-    enrollmentEnd: course.enrollmentEnd || "",
-    classCount: course.classCount || 0,
+    language: toText(course.language),
+    levels: toTextList(course.levels),
+    description: toText(course.description),
+    totalSessions: toNullableNumber(course.totalSessions, { nonNegative: true }),
+    enrollmentStart: toText(course.enrollmentStart),
+    enrollmentEnd: toText(course.enrollmentEnd),
+    classCount: toNullableNumber(course.classCount, { nonNegative: true }),
     studentCount: resolvedStudents,
     totalStudents: resolvedStudents,
-    status: course.status || "OPEN",
-    startDate: course.startDate || "",
-    endDate: course.endDate || "",
-    priceRange: course.priceRange || { min: 0, max: 0 },
-    thumbnailUrl: course.thumbnailUrl || "",
-    createdAt: course.createdAt || "",
-    teacher: course.teacher || null,
-    teacherId: course.teacher?.accountId?.toString() || course.accountId?.toString() || ""
+    status: toText(course.status),
+    startDate: toText(course.startDate),
+    endDate: toText(course.endDate),
+    priceRange,
+    thumbnailUrl: toText(course.thumbnailUrl),
+    createdAt: toText(course.createdAt),
+    teacher,
+    teacherId:
+      teacher?.accountId
+      || toText(course.teacherId)
+      || toText(course.accountId),
   }
 }
 
 const transformClass = (cls) => {
-  if (!cls) return null
-  const resolvedCourseTitle = cls.courseName || cls.courseTitle || "Course"
-  const resolvedClassTitle = cls.name || cls.title || "Untitled Class"
-  const resolvedStudentCount = cls.studentCount !== undefined ? cls.studentCount : (cls.enrolledStudents || 0)
-  const resolvedProgress = cls.progress || {
-    completedSessions: cls.completedSessions || 0,
-    totalSessions: cls.totalSessions || 24
+  if (!isRecord(cls)) return null
+  const id = toText(cls.id)
+  if (!id) return null
+  const resolvedCourseTitle = toText(cls.courseName) || toText(cls.courseTitle) || "Course"
+  const resolvedClassTitle = toText(cls.name) || toText(cls.title) || "Untitled Class"
+  const resolvedStudentCount = toNullableNumber(
+    cls.studentCount ?? cls.enrolledStudents,
+    { nonNegative: true },
+  )
+  const progressSource = isRecord(cls.progress) ? cls.progress : {}
+  const resolvedProgress = {
+    ...progressSource,
+    completedSessions: toNullableNumber(
+      progressSource.completedSessions ?? cls.completedSessions,
+      { nonNegative: true },
+    ),
+    totalSessions: toNullableNumber(
+      progressSource.totalSessions ?? cls.totalSessions,
+      { nonNegative: true },
+    ),
+    percentage: toNullableNumber(progressSource.percentage, { nonNegative: true }),
   }
+  if (resolvedProgress.percentage !== null) {
+    resolvedProgress.percentage = Math.min(100, resolvedProgress.percentage)
+  }
+  const teacher = transformPerson(cls.teacher)
+  const scheduleEntries = Array.isArray(cls.schedule)
+    ? cls.schedule.filter(isRecord)
+    : []
+  const normalizedScheduleEntries = scheduleEntries.map((entry) => ({
+    dayOfWeek: toText(entry.dayOfWeek),
+    startTime: toText(entry.startTime),
+    endTime: toText(entry.endTime),
+  }))
+  const firstSchedule = normalizedScheduleEntries[0]
+  const nextSessionStart = parseToLocalTimeStr(toText(cls.nextSession?.startTime))
+  const nextSessionEnd = parseToLocalTimeStr(toText(cls.nextSession?.endTime))
 
   return {
-    id: cls.id?.toString() || "",
-    courseId: cls.courseId?.toString() || null,
+    ...cls,
+    id,
+    courseId: toText(cls.courseId) || null,
     courseName: resolvedCourseTitle,
     courseTitle: resolvedCourseTitle,
     name: resolvedClassTitle,
     title: resolvedClassTitle,
-    language: cls.language || "English",
-    levels: cls.levels || ["A1"],
-    description: cls.description || "",
+    language: toText(cls.language),
+    levels: toTextList(cls.levels),
+    description: toText(cls.description),
     progress: resolvedProgress,
     totalSessions: resolvedProgress.totalSessions,
     completedSessions: resolvedProgress.completedSessions,
-    enrollmentStart: cls.enrollmentStart || "",
-    enrollmentEnd: cls.enrollmentEnd || "",
-    startDate: cls.startDate || "",
-    endDate: cls.endDate || "",
-    schedule: cls.schedule ? {
-      days: cls.schedule.map(s => s.dayOfWeek),
-      startTime: parseToLocalTimeStr(cls.schedule[0]?.startTime) || "00:00",
-      endTime: parseToLocalTimeStr(cls.schedule[0]?.endTime) || "00:00"
-    } : (cls.nextSession ? {
+    enrollmentStart: toText(cls.enrollmentStart),
+    enrollmentEnd: toText(cls.enrollmentEnd),
+    startDate: toText(cls.startDate),
+    endDate: toText(cls.endDate),
+    schedule: normalizedScheduleEntries.length > 0 ? {
+      days: normalizedScheduleEntries.map((entry) => entry.dayOfWeek).filter(Boolean),
+      startTime: parseToLocalTimeStr(firstSchedule?.startTime),
+      endTime: parseToLocalTimeStr(firstSchedule?.endTime),
+    } : (isRecord(cls.nextSession) ? {
       days: [],
-      startTime: parseToLocalTimeStr(cls.nextSession.startTime) || "00:00",
-      endTime: parseToLocalTimeStr(cls.nextSession.endTime) || "00:00"
-    } : { days: [], startTime: "00:00", endTime: "00:00" }),
-    rawSchedule: Array.isArray(cls.schedule) ? cls.schedule.map(s => ({
-      dayOfWeek: s.dayOfWeek,
-      startTime: parseToLocalTimeStr(s.startTime) || "00:00",
-      endTime: parseToLocalTimeStr(s.endTime) || "00:00"
-    })) : [],
-    slots: cls.capacity || cls.slots || 10,
+      startTime: nextSessionStart,
+      endTime: nextSessionEnd,
+    } : { days: [], startTime: "", endTime: "" }),
+    rawSchedule: normalizedScheduleEntries.map((entry) => ({
+      dayOfWeek: entry.dayOfWeek,
+      startTime: parseToLocalTimeStr(entry.startTime),
+      endTime: parseToLocalTimeStr(entry.endTime),
+    })),
+    slots: toNullableNumber(cls.capacity ?? cls.slots, { nonNegative: true }),
     studentCount: resolvedStudentCount,
     enrolledStudents: resolvedStudentCount,
-    tuitionFee: cls.price !== undefined ? cls.price : (cls.tuitionFee !== undefined ? cls.tuitionFee : 0),
-    status: cls.status || "OPEN",
-    roomId: cls.roomId?.toString() || "",
-    roomName: cls.roomName || "",
-    thumbnailUrl: cls.thumbnailUrl || "",
-    teacher: cls.teacher || null,
-    teacherId: cls.teacher?.accountId?.toString() || cls.accountId?.toString() || ""
+    tuitionFee: toNullableNumber(cls.price ?? cls.tuitionFee, { nonNegative: true }),
+    status: toText(cls.status),
+    roomId: toText(cls.roomId),
+    roomName: toText(cls.roomName),
+    thumbnailUrl: toText(cls.thumbnailUrl),
+    teacher,
+    teacherId:
+      teacher?.accountId
+      || toText(cls.teacherId)
+      || toText(cls.accountId),
   }
 }
 
@@ -163,20 +267,78 @@ const transformPaginatedResponse = (response, itemTransformer) => {
     return { data: [], pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 } }
   }
 
-  const responseData = response.data !== undefined ? response.data : response
-  const rawItems = responseData.items || responseData.data || (Array.isArray(responseData) ? responseData : [])
-  const data = rawItems.map(itemTransformer)
-
-  const page = responseData.pagination?.page || responseData.page || 1
-  const pageSize = responseData.pagination?.pageSize || responseData.pageSize || 10
-  const totalItems = responseData.pagination?.totalItems || responseData.pagination?.total || responseData.totalCount || rawItems.length
-  const totalPages = responseData.pagination?.totalPages || Math.ceil(totalItems / pageSize) || 1
+  const outerRecord = isRecord(response) ? response : {}
+  const responseData = Object.hasOwn(outerRecord, "data")
+    ? outerRecord.data
+    : response
+  const responseRecord = isRecord(responseData) ? responseData : {}
+  const rawItems = Array.isArray(responseData)
+    ? responseData
+    : Array.isArray(responseRecord.items)
+      ? responseRecord.items
+      : Array.isArray(responseRecord.data)
+        ? responseRecord.data
+        : []
+  const data = rawItems.map(itemTransformer).filter(Boolean)
+  const toPositiveInteger = (value, fallback) => {
+    const number = Number(value)
+    return Number.isFinite(number) && number > 0
+      ? Math.floor(number)
+      : fallback
+  }
+  const toNonNegativeInteger = (value, fallback) => {
+    const number = Number(value)
+    return Number.isFinite(number) && number >= 0
+      ? Math.floor(number)
+      : fallback
+  }
+  const page = toPositiveInteger(
+    responseRecord.pagination?.page
+    ?? outerRecord.pagination?.page
+    ?? responseRecord.page
+    ?? outerRecord.page,
+    1,
+  )
+  const pageSize = toPositiveInteger(
+    responseRecord.pagination?.pageSize
+    ?? outerRecord.pagination?.pageSize
+    ?? responseRecord.pageSize
+    ?? outerRecord.pageSize,
+    Math.max(1, rawItems.length || 10),
+  )
+  const totalItems = toNonNegativeInteger(
+    responseRecord.pagination?.totalItems
+    ?? outerRecord.pagination?.totalItems
+    ?? responseRecord.totalCount
+    ?? outerRecord.totalCount,
+    rawItems.length,
+  )
+  const totalPages = toPositiveInteger(
+    responseRecord.pagination?.totalPages
+    ?? outerRecord.pagination?.totalPages
+    ?? responseRecord.totalPages
+    ?? outerRecord.totalPages,
+    Math.max(1, Math.ceil(totalItems / pageSize)),
+  )
 
   return {
     data,
     pagination: { page, pageSize, totalItems, totalPages }
   }
 }
+
+const encodePathSegment = (value) => encodeURIComponent(String(value))
+const getQuizListTagId = (classId) => `class:${String(classId)}:list`
+const getQuizTagId = (classId, quizId) =>
+  `class:${String(classId)}:quiz:${String(quizId)}`
+const getQuizListInvalidationTags = (classId) => [
+  { type: "Quizzes", id: getQuizListTagId(classId) },
+  { type: "StudentQuizzes", id: getQuizListTagId(classId) },
+]
+const getQuizContentInvalidationTags = (classId, quizId) => [
+  { type: "QuizDetail", id: getQuizTagId(classId, quizId) },
+  ...getQuizListInvalidationTags(classId),
+]
 
 // ─── API Injector Slice ───────────────────────────────────────────────
 
@@ -230,6 +392,7 @@ const buildFormData = (fields) => {
 const buildCreateCourseFormData = (data) => buildFormData({
   Name: data.title,
   Language: data.language ? data.language.toUpperCase() : "",
+  Levels: Array.isArray(data.levels) ? data.levels : [],
   Description: data.description,
   Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null
 })
@@ -237,13 +400,14 @@ const buildCreateCourseFormData = (data) => buildFormData({
 const buildUpdateCourseFormData = (data) => buildFormData({
   Name: data.title,
   Language: data.language ? data.language.toUpperCase() : "",
+  Levels: Array.isArray(data.levels) ? data.levels : [],
   Description: data.description,
   Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
   ThumbnailUrl: typeof data.thumbnailUrl === "string" ? data.thumbnailUrl : null
 })
 
 const mapToStandardDayOfWeek = (day) => {
-  if (!day) return "MON"
+  if (!day) return null
   const dayStr = String(day).trim().toUpperCase()
   const mapping = {
     "MON": "MON",
@@ -261,40 +425,61 @@ const mapToStandardDayOfWeek = (day) => {
     "SATURDAY": "SAT",
     "SUNDAY": "SUN"
   }
-  return mapping[dayStr] || "MON"
+  return mapping[dayStr] || null
 }
 
 const getClassSchedule = (data) => {
-  if (data.schedule) {
-    return data.schedule.map(s => ({
-      dayOfWeek: mapToStandardDayOfWeek(s.dayOfWeek),
-      startTime: s.startTime,
-      endTime: s.endTime
-    }))
+  if (Array.isArray(data.schedule)) {
+    return data.schedule
+      .map((scheduleEntry) => ({
+        dayOfWeek: mapToStandardDayOfWeek(scheduleEntry?.dayOfWeek),
+        startTime: scheduleEntry?.startTime || "",
+        endTime: scheduleEntry?.endTime || "",
+      }))
+      .filter((scheduleEntry) => scheduleEntry.dayOfWeek)
   }
 
-  return (data.scheduleDays || []).map(day => ({
-    dayOfWeek: mapToStandardDayOfWeek(day),
-    startTime: data.scheduleStartTime || "19:00",
-    endTime: data.scheduleEndTime || "21:00"
-  }))
+  return (Array.isArray(data.scheduleDays) ? data.scheduleDays : [])
+    .map((day) => ({
+      dayOfWeek: mapToStandardDayOfWeek(day),
+      startTime: data.scheduleStartTime || "",
+      endTime: data.scheduleEndTime || "",
+    }))
+    .filter((scheduleEntry) => scheduleEntry.dayOfWeek)
+}
+
+const parseIntegerOrNull = (value) => {
+  const parsed = Number.parseInt(value, 10)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+const parseNumberOrNull = (value) => {
+  const parsed = Number.parseFloat(value)
+  return Number.isFinite(parsed) ? parsed : null
 }
 
 const buildCreateClassFormData = (data) => buildFormData({
-  CourseId: data.courseId ? parseInt(data.courseId) : null,
+  CourseId: parseIntegerOrNull(data.courseId),
   Name: data.title,
   Language: data.language ? data.language.toUpperCase() : "",
   Levels: data.levels || [],
   Description: data.description,
-  TotalSessions: parseInt(data.totalSessions || 24),
+  TotalSessions: data.totalSessions === "" || data.totalSessions == null
+    ? null
+    : parseIntegerOrNull(data.totalSessions),
   EnrollmentStart: data.enrollmentStart || null,
   EnrollmentEnd: data.enrollmentEnd || null,
   StartDate: data.startDate || null,
-  Capacity: parseInt(data.slots || 10),
-  Price: parseFloat(data.tuitionFee || 0),
+  Capacity: data.slots === "" || data.slots == null
+    ? null
+    : parseIntegerOrNull(data.slots),
+  Price: data.tuitionFee === "" || data.tuitionFee == null
+    ? null
+    : parseNumberOrNull(data.tuitionFee),
   Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
   Schedule: getClassSchedule(data),
-  CommissionPercent: data.commissionPercent != null ? parseFloat(data.commissionPercent) : null
+  CommissionPercent: parseNumberOrNull(data.commissionPercent),
+  Status: data.status || null,
 })
 
 export const coursesApi = baseApi.injectEndpoints({
@@ -312,42 +497,92 @@ export const coursesApi = baseApi.injectEndpoints({
         },
       }),
       transformResponse: (response) => {
-        const paginated = transformPaginatedResponse(response, transformCourse)
-        return paginated.data
+        return transformPaginatedResponse(response, transformCourse)
       },
       providesTags: ["StudentCourses"]
     }),
 
     getStudentJoinedClasses: builder.query({
-      query: (params) => ({
-        url: "/student/classes/my-enrollments",
-        method: "GET",
-        params: {
-          page: params?.page || 1,
-          pageSize: params?.pageSize || 100,
-        },
-      }),
-      transformResponse: (response) => {
-        const paginated = transformPaginatedResponse(response, transformClass)
-        return paginated.data
+      async queryFn(params, queryApi, extraOptions, baseQuery) {
+        const pageSize = params?.pageSize || 100
+        const fetchPage = async (page) => {
+          const result = await baseQuery({
+            url: "/student/classes/my-enrollments",
+            method: "GET",
+            params: { page, pageSize },
+          }, queryApi, extraOptions)
+          if (result.error) return result
+          return {
+            data: transformPaginatedResponse(result.data, transformClass),
+          }
+        }
+
+        const firstPage = await fetchPage(params?.all === true ? 1 : (params?.page || 1))
+        if (firstPage.error || params?.all !== true) return firstPage
+
+        const totalPages = firstPage.data.pagination.totalPages
+        if (totalPages > 100) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR",
+              error: "The enrollment list is too large to aggregate safely.",
+            },
+          }
+        }
+
+        const items = [...firstPage.data.data]
+        for (let page = 2; page <= totalPages; page += 1) {
+          const nextPage = await fetchPage(page)
+          if (nextPage.error) return nextPage
+          items.push(...nextPage.data.data)
+        }
+
+        const uniqueItems = []
+        const seenIds = new Set()
+        items.forEach((item) => {
+          const itemId = item?.id
+          if (!itemId || seenIds.has(itemId)) return
+          seenIds.add(itemId)
+          uniqueItems.push(item)
+        })
+
+        return {
+          data: {
+            data: uniqueItems,
+            pagination: {
+              page: 1,
+              pageSize: uniqueItems.length || pageSize,
+              totalItems: uniqueItems.length,
+              totalPages: 1,
+            },
+          },
+        }
       },
       providesTags: ["StudentClasses"]
     }),
 
     getStudentCourseDetail: builder.query({
       query: (id) => ({
-        url: `/student/courses/${id}`,
+        url: `/student/courses/${encodePathSegment(id)}`,
         method: "GET",
       }),
       transformResponse: (response) => {
-        const data = response?.data || response
-        if (!data) return null
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
         const transformedCourse = transformCourse(data)
-        const transformedClasses = (data.classes || []).map(cls => ({
-          ...transformClass(cls),
-          isEnrolled: cls.isEnrolled || false,
-          enrolledCount: cls.enrolledCount || 0
-        }))
+        if (!transformedCourse) return null
+        const transformedClasses = Array.isArray(data.classes)
+          ? data.classes.map((cls) => {
+            const transformedClass = transformClass(cls)
+            return transformedClass
+              ? {
+                ...transformedClass,
+                isEnrolled: cls.isEnrolled === true,
+                enrolledCount: cls.enrolledCount ?? null,
+              }
+              : null
+          }).filter(Boolean)
+          : []
         const enrolledClass = transformedClasses.find(cls => cls.isEnrolled)
         return {
           ...transformedCourse,
@@ -356,46 +591,66 @@ export const coursesApi = baseApi.injectEndpoints({
           classes: transformedClasses
         }
       },
-      providesTags: (result, error, id) => [{ type: "CourseDetail", id }]
+      providesTags: (result, error, id) => [{ type: "CourseDetail", id: String(id) }]
     }),
 
     getStudentClassDetail: builder.query({
       query: (id) => ({
-        url: `/student/classes/${id}`,
+        url: `/student/classes/${encodePathSegment(id)}`,
         method: "GET",
       }),
       transformResponse: (response) => {
-        const data = response?.data || response
-        if (!data) return null
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        const transformedClass = transformClass(data)
+        if (!transformedClass) return null
         return {
-          ...transformClass(data),
-          isEnrolled: data.isEnrolled || false,
-          enrolledCount: data.enrolledCount || 0,
+          ...transformedClass,
+          isEnrolled: data.isEnrolled === true,
+          enrolledCount: data.enrolledCount ?? null,
           nextSession: transformNextSession(data),
-          teachingProgress: data.teachingProgress || {
-            completed: data.completedSessions || 0,
-            total: data.totalSessions || 24,
-            percentage: Math.round(((data.completedSessions || 0) / (data.totalSessions || 24)) * 100)
-          }
+          teachingProgress: transformTeachingProgress(data),
         }
       },
-      providesTags: (result, error, id) => [{ type: "ClassDetail", id }]
+      providesTags: (result, error, id) => [{ type: "ClassDetail", id: String(id) }]
     }),
 
     enrollInCourse: builder.mutation({
-      query: ({ classId }) => ({
-        url: "/v1/Payments/checkout",
-        method: "POST",
-        body: {
-          paymentType: "ClassEnrollment",
-          classId: parseInt(classId),
-          pendingClassData: "",
-          returnUrl: window.location.origin + `/workspace/courses/class/${classId}`,
-          cancelUrl: window.location.href,
-          planId: 0,
-        },
-      }),
-      invalidatesTags: ["StudentCourses", "StudentClasses"]
+      async queryFn({ classId }, _queryApi, _extraOptions, baseQuery) {
+        const numericClassId = Number(classId)
+
+        if (!Number.isSafeInteger(numericClassId) || numericClassId <= 0) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR",
+              error: "A valid class ID is required to enroll.",
+            },
+          }
+        }
+
+        return baseQuery({
+          url: "/v1/Payments/checkout",
+          method: "POST",
+          body: {
+            paymentType: "ClassEnrollment",
+            classId: numericClassId,
+            pendingClassData: "",
+            returnUrl:
+              window.location.origin +
+              `/workspace/learning/class/${encodePathSegment(numericClassId)}`,
+            cancelUrl: window.location.origin + window.location.pathname,
+            planId: 0,
+          },
+        })
+      },
+      invalidatesTags: (result, error, { classId, courseId }) => [
+        "StudentCourses",
+        "StudentClasses",
+        { type: "ClassDetail", id: String(classId) },
+        ...(courseId == null
+          ? []
+          : [{ type: "CourseDetail", id: String(courseId) }]),
+      ]
     }),
 
     // 2. Get All Courses
@@ -436,45 +691,46 @@ export const coursesApi = baseApi.injectEndpoints({
     // 4. Get Course Detail
     getCourseDetail: builder.query({
       query: (id) => ({
-        url: `/teacher/courses/${id}`,
+        url: `/teacher/courses/${encodePathSegment(id)}`,
         method: "GET",
       }),
       transformResponse: (response) => {
-        const data = response?.data || response
-        if (!data) return null
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        const transformedCourse = transformCourse(data)
+        if (!transformedCourse) return null
         return {
-          ...transformCourse(data),
-          classes: (data.classes || []).map(transformClass)
+          ...transformedCourse,
+          classes: Array.isArray(data.classes)
+            ? data.classes.map(transformClass).filter(Boolean)
+            : [],
         }
       },
-      providesTags: (result, error, id) => [{ type: "CourseDetail", id }],
+      providesTags: (result, error, id) => [{ type: "CourseDetail", id: String(id) }],
     }),
 
     // 5. Get Class Detail
     getClassDetail: builder.query({
       query: (id) => ({
-        url: `/teacher/classes/${id}`,
+        url: `/teacher/classes/${encodePathSegment(id)}`,
         method: "GET",
       }),
       transformResponse: (response) => {
-        const data = response?.data || response
-        if (!data) return null
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        const transformedClass = transformClass(data)
+        if (!transformedClass) return null
 
         const nextSession = transformNextSession(data)
-
-        const teachingProgress = data.teachingProgress || {
-          completed: data.completedSessions || 0,
-          total: data.totalSessions || 24,
-          percentage: Math.round(((data.completedSessions || 0) / (data.totalSessions || 24)) * 100)
-        }
+        const teachingProgress = transformTeachingProgress(data)
 
         return {
-          ...transformClass(data),
+          ...transformedClass,
           nextSession,
           teachingProgress
         }
       },
-      providesTags: (result, error, id) => [{ type: "ClassDetail", id }],
+      providesTags: (result, error, id) => [{ type: "ClassDetail", id: String(id) }],
     }),
 
     // 9. Create Course
@@ -492,14 +748,14 @@ export const coursesApi = baseApi.injectEndpoints({
     // 9b. Update Course
     updateCourse: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/teacher/courses/${id}`,
+        url: `/teacher/courses/${encodePathSegment(id)}`,
         method: "PUT",
         body: buildUpdateCourseFormData(data),
         formData: true,
       }),
       transformResponse: (response) => transformCourse(response?.data || response),
       invalidatesTags: (result, error, { id }) => [
-        { type: "CourseDetail", id },
+        { type: "CourseDetail", id: String(id) },
         "Courses",
       ],
     }),
@@ -507,7 +763,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 9c. Delete Course
     deleteCourse: builder.mutation({
       query: (id) => ({
-        url: `/teacher/courses/${id}`,
+        url: `/teacher/courses/${encodePathSegment(id)}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Courses"],
@@ -521,8 +777,20 @@ export const coursesApi = baseApi.injectEndpoints({
     createClass: builder.mutation({
       query: (data) => {
         const schedule = getClassSchedule(data)
+        const fallbackCancelUrl = window.location.origin + window.location.pathname
+        let cancelUrl = fallbackCancelUrl
+        if (typeof data.cancelUrl === "string" && data.cancelUrl.trim()) {
+          try {
+            const parsedCancelUrl = new URL(data.cancelUrl, window.location.origin)
+            if (parsedCancelUrl.origin === window.location.origin) {
+              cancelUrl = parsedCancelUrl.href
+            }
+          } catch {
+            // Fall back to the current same-origin form URL.
+          }
+        }
         const pendingClassData = {
-          courseId: data.courseId ? parseInt(data.courseId) : null,
+          courseId: parseIntegerOrNull(data.courseId),
           name: data.title || data.name,
           language: data.language ? data.language.toUpperCase() : "",
           levels: data.levels || [],
@@ -530,9 +798,9 @@ export const coursesApi = baseApi.injectEndpoints({
           enrollmentEnd: data.enrollmentEnd || null,
           startDate: data.startDate || null,
           schedule,
-          capacity: parseInt(data.slots || data.capacity || 10),
-          totalSessions: parseInt(data.totalSessions || 24),
-          price: parseFloat(data.tuitionFee || data.price || 0),
+          capacity: parseIntegerOrNull(data.slots ?? data.capacity),
+          totalSessions: parseIntegerOrNull(data.totalSessions),
+          price: parseNumberOrNull(data.tuitionFee ?? data.price),
           description: data.description || "",
           timezone: data.timezone || "Asia/Ho_Chi_Minh",
         }
@@ -543,43 +811,72 @@ export const coursesApi = baseApi.injectEndpoints({
             paymentType: "ClassOpeningFee",
             pendingClassData: JSON.stringify(pendingClassData),
             returnUrl: window.location.origin + "/workspace/courses/all-classes",
-            cancelUrl: window.location.href,
+            cancelUrl,
             planId: 0,
             classId: 0,
           },
         }
       },
-      invalidatesTags: ["Classes", "Courses"],
+      invalidatesTags: (result, error, data) => [
+        "Classes",
+        "Courses",
+        "Schedule",
+        { type: "CourseDetail", id: String(data.courseId) },
+      ],
     }),
 
     // 11. Update Class
     updateClass: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/teacher/classes/${id}`,
+        url: `/teacher/classes/${encodePathSegment(id)}`,
         method: "PUT",
         body: buildCreateClassFormData(data),
         formData: true,
       }),
       transformResponse: (response) => transformClass(response?.data || response),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "ClassDetail", id },
+      invalidatesTags: (result, error, { id, courseId, data }) => [
+        { type: "ClassDetail", id: String(id) },
+        ...((courseId ?? data?.courseId) == null
+          ? []
+          : [{
+            type: "CourseDetail",
+            id: String(courseId ?? data.courseId),
+          }]),
         "Classes",
+        "StudentClasses",
+        "Schedule",
       ],
     }),
 
     // 12. Delete Class
     deleteClass: builder.mutation({
-      query: (id) => ({
-        url: `/teacher/classes/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Classes", "Courses"],
+      query: (arg) => {
+        const id = isRecord(arg) ? arg.id : arg
+        return {
+          url: `/teacher/classes/${encodePathSegment(id)}`,
+          method: "DELETE",
+        }
+      },
+      invalidatesTags: (result, error, arg) => {
+        const id = isRecord(arg) ? arg.id : arg
+        const courseId = isRecord(arg) ? arg.courseId : null
+        return [
+          "Classes",
+          "Courses",
+          "StudentClasses",
+          "Schedule",
+          { type: "ClassDetail", id: String(id) },
+          ...(courseId == null
+            ? []
+            : [{ type: "CourseDetail", id: String(courseId) }]),
+        ]
+      },
     }),
 
     // 13. Join Class Room
     joinClassRoom: builder.mutation({
       query: (classId) => ({
-        url: `/teacher/classes/${classId}/join-room`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/join-room`,
         method: "POST",
       }),
     }),
@@ -587,55 +884,27 @@ export const coursesApi = baseApi.injectEndpoints({
     // 13b. Join Student Class Room
     joinStudentClassRoom: builder.mutation({
       query: (classId) => ({
-        url: `/student/classes/${classId}/join-room`,
+        url: `/student/classes/${encodePathSegment(classId)}/join-room`,
         method: "POST",
       }),
     }),
 
 
-    // 14. Get Class Feed
-    getClassFeed: builder.query({
-      query: (classId) => ({
-        url: `/teacher/classes/${classId}/feed`,
-        method: "GET",
-      }),
-      providesTags: (result, error, classId) => [{ type: "ClassFeed", id: classId }],
-    }),
-
-    // 15. Create Class Post
-    createClassPost: builder.mutation({
-      query: ({ classId, content }) => ({
-        url: `/teacher/classes/${classId}/feed`,
-        method: "POST",
-        body: { content },
-      }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassFeed", id: classId }],
-    }),
 
     // 16. Get Teacher Assignments
     getTeacherAssignments: builder.query({
       query: ({ classId, status, search, onlyUnassigned }) => ({
-        url: `/teacher/classes/${classId}/assignments`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments`,
         method: "GET",
         params: { status, search, onlyUnassigned },
       }),
       providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-${classId}` }],
     }),
 
-    // Get Teacher Quizzes
-    getTeacherQuizzes: builder.query({
-      query: ({ classId, search, onlyUnassigned }) => ({
-        url: `/teacher/classes/${classId}/quizzes`,
-        method: "GET",
-        params: { search, onlyUnassigned },
-      }),
-      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-quizzes-${classId}` }],
-    }),
-
     // 17. Get Student Assignments
     getStudentAssignments: builder.query({
       query: ({ classId }) => ({
-        url: `/student/classes/${classId}/assignments`,
+        url: `/student/classes/${encodePathSegment(classId)}/assignments`,
         method: "GET",
       }),
       providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `student-${classId}` }],
@@ -644,7 +913,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 18. Get Student Assignment By ID
     getStudentAssignmentById: builder.query({
       query: ({ classId, assignmentId }) => ({
-        url: `/student/classes/${classId}/assignments/${assignmentId}`,
+        url: `/student/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}`,
         method: "GET",
       }),
       providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `student-assignment-${assignmentId}` }],
@@ -653,7 +922,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 19. Get Current Student Submission
     getMyAssignmentSubmission: builder.query({
       query: ({ classId, assignmentId }) => ({
-        url: `/student/classes/${classId}/assignments/${assignmentId}/my-submission`,
+        url: `/student/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/my-submission`,
         method: "GET",
       }),
       providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `my-submission-${assignmentId}` }],
@@ -662,7 +931,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 20. Submit / Resubmit Assignment
     submitAssignment: builder.mutation({
       query: ({ classId, assignmentId, formData }) => ({
-        url: `/student/classes/${classId}/assignments/${assignmentId}/submit`,
+        url: `/student/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/submit`,
         method: "POST",
         body: formData,
       }),
@@ -675,7 +944,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 21. Get Assignment By ID
     getAssignmentById: builder.query({
       query: ({ classId, assignmentId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}`,
         method: "GET",
       }),
       providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `assignment-${assignmentId}` }],
@@ -684,7 +953,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 22. Create Assignment (multipart/form-data)
     createAssignment: builder.mutation({
       query: ({ classId, formData }) => ({
-        url: `/teacher/classes/${classId}/assignments`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments`,
         method: "POST",
         body: formData,
       }),
@@ -698,7 +967,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 23. Update Assignment (multipart/form-data)
     updateAssignment: builder.mutation({
       query: ({ classId, assignmentId, formData }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}`,
         method: "PUT",
         body: formData,
       }),
@@ -714,7 +983,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 24. Close Assignment
     closeAssignment: builder.mutation({
       query: ({ classId, assignmentId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}/close`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/close`,
         method: "POST",
       }),
       invalidatesTags: (result, error, { classId, assignmentId }) => [
@@ -726,7 +995,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 25. Open/Reopen Assignment
     openAssignment: builder.mutation({
       query: ({ classId, assignmentId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}/open`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/open`,
         method: "POST",
       }),
       invalidatesTags: (result, error, { classId, assignmentId }) => [
@@ -738,7 +1007,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // Delete Assignment
     deleteAssignment: builder.mutation({
       query: ({ classId, assignmentId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, { classId, assignmentId }) => [
@@ -750,7 +1019,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 26. Get Assignment Submissions
     getAssignmentSubmissions: builder.query({
       query: ({ classId, assignmentId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}/submissions`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/submissions`,
         method: "GET",
       }),
       providesTags: (result, error, { assignmentId }) => [
@@ -761,7 +1030,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 27. Grade Submission
     gradeSubmission: builder.mutation({
       query: ({ classId, assignmentId, submissionId, grade, comment }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}/submissions/${submissionId}/grade`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/submissions/${encodePathSegment(submissionId)}/grade`,
         method: "POST",
         body: { grade, comment },
       }),
@@ -774,7 +1043,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 28. Return Submission
     returnSubmission: builder.mutation({
       query: ({ classId, assignmentId, submissionId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}/submissions/${submissionId}/return`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/submissions/${encodePathSegment(submissionId)}/return`,
         method: "POST",
       }),
       invalidatesTags: (result, error, { assignmentId }) => [
@@ -786,7 +1055,7 @@ export const coursesApi = baseApi.injectEndpoints({
     // 29. Bulk Return Submissions
     bulkReturnSubmissions: builder.mutation({
       query: ({ classId, assignmentId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}/bulk-return`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/bulk-return`,
         method: "POST",
       }),
       invalidatesTags: (result, error, { assignmentId }) => [
@@ -797,7 +1066,7 @@ export const coursesApi = baseApi.injectEndpoints({
 
     downloadAssignmentGradeSheet: builder.mutation({
       query: ({ classId, assignmentId }) => ({
-        url: `/teacher/classes/${classId}/assignments/${assignmentId}/grade-sheet`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/grade-sheet`,
         method: "GET",
         responseHandler: (response) => response.blob(),
       }),
@@ -806,26 +1075,10 @@ export const coursesApi = baseApi.injectEndpoints({
     // ─── Materials Management ───────────────────────────────────────
 
     getClassMaterials: builder.query({
-      async queryFn(classId, _queryApi, _extraOptions, baseQuery) {
-        if (typeof classId === "string" && (classId.startsWith("c") || classId.startsWith("mock"))) {
-          const mockFiles = [
-            { id: "m1", name: "Syllabus_Introduction.pdf", size: 1024 * 350, fileUrl: "#", uploadedAt: "2026-06-25T10:00:00Z" },
-            { id: "m2", name: "Vocabulary_Lesson_1_Travel.docx", size: 1024 * 120, fileUrl: "#", uploadedAt: "2026-06-26T12:00:00Z" },
-            { id: "m3", name: "Homework_Reading_Passage.pdf", size: 1024 * 1800, fileUrl: "#", uploadedAt: "2026-06-27T15:30:00Z" }
-          ]
-          return { data: mockFiles }
-        }
-        try {
-          const result = await baseQuery({
-            url: `/teacher/classes/${classId}/materials`,
-            method: "GET"
-          })
-          if (result.error) return { error: result.error }
-          return { data: result.data?.data || result.data }
-        } catch (error) {
-          return { error: { status: 400, message: error.message } }
-        }
-      },
+      query: (classId) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/materials`,
+        method: "GET",
+      }),
       providesTags: (result, error, classId) => [{ type: "ClassMaterials", id: classId }]
     }),
 
@@ -834,7 +1087,7 @@ export const coursesApi = baseApi.injectEndpoints({
         const formData = new FormData()
         formData.append("file", file)
         return {
-          url: `/teacher/classes/${classId}/materials`,
+          url: `/teacher/classes/${encodePathSegment(classId)}/materials`,
           method: "POST",
           body: formData
         }
@@ -844,7 +1097,7 @@ export const coursesApi = baseApi.injectEndpoints({
 
     deleteClassMaterial: builder.mutation({
       query: ({ classId, materialId }) => ({
-        url: `/teacher/classes/${classId}/materials/${materialId}`,
+        url: `/teacher/classes/${encodePathSegment(classId)}/materials/${encodePathSegment(materialId)}`,
         method: "DELETE"
       }),
       invalidatesTags: (result, error, { classId }) => [{ type: "ClassMaterials", id: classId }]
@@ -859,10 +1112,17 @@ export const coursesApi = baseApi.injectEndpoints({
         params: { from, to, classId },
       }),
       transformResponse: (response) => {
-        const rawDates = response?.dates || response?.data?.dates || (Array.isArray(response) ? response : [])
-        const converted = rawDates.map(dStr => parseToLocalDateStr(dStr))
+        const responseRecord = isRecord(response) ? response : {}
+        const rawDates = Array.isArray(responseRecord.dates)
+          ? responseRecord.dates
+          : Array.isArray(responseRecord.data?.dates)
+            ? responseRecord.data.dates
+            : (Array.isArray(response) ? response : [])
+        const converted = rawDates
+          .map((dateValue) => parseToLocalDateStr(dateValue))
+          .filter(Boolean)
         return {
-          ...response,
+          ...responseRecord,
           dates: converted
         }
       },
@@ -876,8 +1136,13 @@ export const coursesApi = baseApi.injectEndpoints({
         params: { from, to, classId, language, status },
       }),
       transformResponse: (response) => {
-        const rawSessions = response?.data || response?.items || (Array.isArray(response) ? response : [])
-        const converted = rawSessions.map(session => ({
+        const responseRecord = isRecord(response) ? response : {}
+        const rawSessions = Array.isArray(responseRecord.data)
+          ? responseRecord.data
+          : Array.isArray(responseRecord.items)
+            ? responseRecord.items
+            : (Array.isArray(response) ? response : [])
+        const converted = rawSessions.filter(isRecord).map(session => ({
           ...session,
           startTime: parseToLocalTimeStr(session.startTime),
           endTime: parseToLocalTimeStr(session.endTime),
@@ -888,7 +1153,7 @@ export const coursesApi = baseApi.injectEndpoints({
           } : null
         }))
         return {
-          ...response,
+          ...responseRecord,
           data: converted
         }
       },
@@ -1360,6 +1625,294 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
     }),
+
+    // ─── Teacher Quiz Endpoints ────────────────────────────────────────
+
+    getTeacherQuizzes: builder.query({
+      query: ({ classId, search, onlyUnassigned }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes`,
+        method: "GET",
+        params: { search, onlyUnassigned },
+      }),
+      providesTags: (result, error, { classId }) => {
+        const listTag = {
+          type: "Quizzes",
+          id: getQuizListTagId(classId),
+        }
+        if (!Array.isArray(result?.data)) return [listTag]
+
+        const quizTags = result.data
+          .filter((quiz) => quiz?.id != null)
+          .map((quiz) => ({
+            type: "Quizzes",
+            id: getQuizTagId(classId, quiz.id),
+          }))
+
+        return [...quizTags, listTag]
+      },
+    }),
+
+    getTeacherQuizDetail: builder.query({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId, quizId }) => [
+        { type: "QuizDetail", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    createTeacherQuiz: builder.mutation({
+      query: ({ classId, ...body }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes`,
+        method: "POST",
+        body: buildQuizFormData(body),
+      }),
+      invalidatesTags: (result, error, { classId }) => (
+        getQuizListInvalidationTags(classId)
+      ),
+    }),
+
+    updateTeacherQuiz: builder.mutation({
+      query: ({ classId, quizId, ...body }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}`,
+        method: "PUT",
+        body: buildQuizFormData(body, { isUpdate: true }),
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    deleteTeacherQuiz: builder.mutation({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => [
+        ...getQuizContentInvalidationTags(classId, quizId),
+        { type: "QuizGrading", id: getQuizTagId(classId, quizId) },
+        { type: "QuizStats", id: getQuizTagId(classId, quizId) },
+        { type: "QuizStudents", id: getQuizTagId(classId, quizId) },
+        { type: "StudentQuizResult", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    addTeacherQuestion: builder.mutation({
+      query: ({ classId, quizId, ...body }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions`,
+        method: "POST",
+        body: buildQuestionFormData(body),
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    updateTeacherQuestion: builder.mutation({
+      query: ({ classId, quizId, questionId, ...body }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/${encodePathSegment(questionId)}`,
+        method: "PUT",
+        body: buildQuestionFormData(body),
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    deleteTeacherQuestion: builder.mutation({
+      query: ({ classId, quizId, questionId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/${encodePathSegment(questionId)}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    reorderTeacherQuestions: builder.mutation({
+      query: ({ classId, quizId, questionIds }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/reorder`,
+        method: "PUT",
+        body: questionIds,
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    cloneTeacherQuestion: builder.mutation({
+      query: ({ classId, quizId, questionId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/${encodePathSegment(questionId)}/clone`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    publishTeacherQuiz: builder.mutation({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/publish`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    closeTeacherQuiz: builder.mutation({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/close`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    previewTeacherQuiz: builder.mutation({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/preview`,
+        method: "POST",
+      }),
+    }),
+
+    downloadQuizTemplate: builder.mutation({
+      query: () => ({
+        url: `/teacher/quizzes/template`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    importTeacherQuestions: builder.mutation({
+      query: ({ classId, quizId, formData }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/import`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => (
+        getQuizContentInvalidationTags(classId, quizId)
+      ),
+    }),
+
+    getTeacherQuizGrading: builder.query({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/grading`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId, quizId }) => [
+        { type: "QuizGrading", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    gradeTeacherEssay: builder.mutation({
+      query: ({ classId, quizId, questionId, ...body }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/grading/${encodePathSegment(questionId)}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => [
+        { type: "QuizGrading", id: getQuizTagId(classId, quizId) },
+        { type: "QuizStats", id: getQuizTagId(classId, quizId) },
+        { type: "QuizStudents", id: getQuizTagId(classId, quizId) },
+        { type: "StudentQuizResult", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    getTeacherQuizStats: builder.query({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/stats`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId, quizId }) => [
+        { type: "QuizStats", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    getTeacherQuizStudents: builder.query({
+      query: ({ classId, quizId, search = "", page = 1, pageSize = 20 }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/students`,
+        method: "GET",
+        params: { search, page, pageSize },
+      }),
+      providesTags: (result, error, { classId, quizId }) => [
+        { type: "QuizStudents", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    exportTeacherQuizReport: builder.mutation({
+      query: ({ classId, quizId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/export`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    getTeacherStudentAttempt: builder.query({
+      query: ({ classId, quizId, studentId }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/students/${encodePathSegment(studentId)}/attempt`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId, quizId }) => [
+        { type: "QuizStudents", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    // ─── Student Quiz Endpoints ────────────────────────────────────────
+
+    getStudentQuizzes: builder.query({
+      query: ({ classId }) => ({
+        url: `/student/classes/${encodePathSegment(classId)}/quizzes`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { classId }) => [
+        { type: "StudentQuizzes", id: getQuizListTagId(classId) },
+      ],
+    }),
+
+    startStudentQuizAttempt: builder.mutation({
+      query: ({ classId, quizId }) => ({
+        url: `/student/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/start`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => [
+        { type: "StudentQuizzes", id: getQuizListTagId(classId) },
+        { type: "StudentQuizResult", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    saveStudentQuizAnswers: builder.mutation({
+      query: ({ classId, quizId, answers }) => ({
+        url: `/student/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/answer`,
+        method: "PUT",
+        body: { answers },
+      }),
+    }),
+
+    submitStudentQuizAttempt: builder.mutation({
+      query: ({ classId, quizId, ...body }) => ({
+        url: `/student/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/submit`,
+        method: "POST",
+        body: body || {},
+      }),
+      invalidatesTags: (result, error, { classId, quizId }) => [
+        { type: "StudentQuizzes", id: getQuizListTagId(classId) },
+        { type: "StudentQuizResult", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
+
+    getStudentQuizResult: builder.query({
+      query: ({ classId, quizId, attempt }) => ({
+        url: `/student/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/result`,
+        method: "GET",
+        params: attempt != null ? { attempt } : undefined,
+      }),
+      providesTags: (result, error, { classId, quizId }) => [
+        { type: "StudentQuizResult", id: getQuizTagId(classId, quizId) },
+      ],
+    }),
   }),
 })
 
@@ -1379,10 +1932,8 @@ export const {
   useCreateClassMutation,
   useUpdateClassMutation,
   useDeleteClassMutation,
-  useGetClassFeedQuery,
-  useCreateClassPostMutation,
+
   useGetTeacherAssignmentsQuery,
-  useGetTeacherQuizzesQuery,
   useGetStudentAssignmentsQuery,
   useGetStudentAssignmentByIdQuery,
   useGetMyAssignmentSubmissionQuery,
@@ -1438,4 +1989,33 @@ export const {
   useGetStudentListPostsInBulletinBoardQuery,
   useGetStudentPostDetailQuery,
   useCreateStudentCommentInBulletinBoardMutation,
+  // Teacher Quiz Hooks
+  useGetTeacherQuizzesQuery,
+  useGetTeacherQuizDetailQuery,
+  useCreateTeacherQuizMutation,
+  useUpdateTeacherQuizMutation,
+  useDeleteTeacherQuizMutation,
+  useAddTeacherQuestionMutation,
+  useUpdateTeacherQuestionMutation,
+  useDeleteTeacherQuestionMutation,
+  useReorderTeacherQuestionsMutation,
+  useCloneTeacherQuestionMutation,
+  usePublishTeacherQuizMutation,
+  useCloseTeacherQuizMutation,
+  usePreviewTeacherQuizMutation,
+  useDownloadQuizTemplateMutation,
+  useImportTeacherQuestionsMutation,
+  useGetTeacherQuizGradingQuery,
+  useGradeTeacherEssayMutation,
+  useGetTeacherQuizStatsQuery,
+  useGetTeacherQuizStudentsQuery,
+  useGetTeacherStudentAttemptQuery,
+  useExportTeacherQuizReportMutation,
+  // Student Quiz Hooks
+  useGetStudentQuizzesQuery,
+  useStartStudentQuizAttemptMutation,
+  useSaveStudentQuizAnswersMutation,
+  useSubmitStudentQuizAttemptMutation,
+  useGetStudentQuizResultQuery,
+  useLazyGetStudentQuizResultQuery,
 } = coursesApi

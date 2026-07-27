@@ -26,11 +26,10 @@ const DesktopNavItems = () => {
   return (
     <LayoutGroup id="sidebarNav">
       <div
-        className={`flex-1 ${
-          isDesktopSidebarDocked
-            ? "overflow-visible"
-            : "overflow-y-auto overflow-x-hidden"
-        }`}
+        className={`flex-1 ${isDesktopSidebarDocked
+          ? "overflow-visible"
+          : "overflow-y-auto overflow-x-hidden"
+          }`}
       >
         {isSettingsPage ? (
           <div className="flex flex-col gap-1 w-full p-4">

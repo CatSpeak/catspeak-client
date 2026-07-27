@@ -22,6 +22,33 @@ const getStatusLabel = (status, translations) => {
   return labels[status] || status
 }
 
+const getVisiblePages = (currentPage, totalPages) => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1)
+  }
+  if (currentPage <= 4) return [1, 2, 3, 4, 5, "end-ellipsis", totalPages]
+  if (currentPage >= totalPages - 3) {
+    return [
+      1,
+      "start-ellipsis",
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ]
+  }
+  return [
+    1,
+    "start-ellipsis",
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    "end-ellipsis",
+    totalPages,
+  ]
+}
+
 const AssignmentSubmissionsTable = ({
   students,
   assignmentMaxScore,
@@ -125,8 +152,14 @@ const AssignmentSubmissionsTable = ({
           <ChevronLeft size={14} />
         </button>
 
-        {Array.from({ length: totalPages }).map((_, index) => {
-          const page = index + 1
+        {getVisiblePages(currentPage, totalPages).map((page) => {
+          if (typeof page !== "number") {
+            return (
+              <span key={page} aria-hidden="true" className="px-1 text-gray-400">
+                …
+              </span>
+            )
+          }
           const isActive = currentPage === page
           return (
             <button

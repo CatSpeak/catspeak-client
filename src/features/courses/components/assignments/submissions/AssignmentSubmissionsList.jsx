@@ -1,12 +1,10 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
-  AlertTriangle,
   Calendar,
   ChevronDown,
   Download,
   Edit,
-  ExternalLink,
   FileCheck,
   Lock,
   MoreVertical,
@@ -45,6 +43,9 @@ const AssignmentSubmissionsList = ({
   onBulkReturn,
   onDeleteAssignment,
   isDeletingAssignment,
+  isTogglingSubmissionsLock,
+  isDownloadingGradeSheet,
+  isBulkReturning,
   onSelectStudent,
   onStudentSearchChange,
   onActiveFilterChange,
@@ -56,6 +57,15 @@ const AssignmentSubmissionsList = ({
   const gradingTranslations = coursesTranslations.grading || {}
   const [showMoreMenu, setShowMoreMenu] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  useEffect(() => {
+    if (!showMoreMenu) return undefined
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setShowMoreMenu(false)
+    }
+    document.addEventListener("keydown", closeOnEscape)
+    return () => document.removeEventListener("keydown", closeOnEscape)
+  }, [showMoreMenu])
 
   const stats = useMemo(() => getSubmissionStats(students), [students])
   const filteredStudents = useMemo(() => (
@@ -86,15 +96,13 @@ const AssignmentSubmissionsList = ({
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.title || "Khóa học của tôi"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.title || "Khóa học của tôi"}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.allCourses?.title || "All Courses"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.allCourses?.title || "All Courses"}</button>
           <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/details/${classId}`)}>{coursesTranslations.student?.courseDetails || "Chi tiết khóa học"}</span>
-          <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={onBack}>{coursesTranslations.student?.classDetails || "Chi tiết lớp học"}</span>
+          <button type="button" className="cursor-pointer hover:underline" onClick={onBack}>{coursesTranslations.student?.classDetails || "Chi tiết lớp học"}</button>
           <span>/</span>
           <span className="text-[#990011] font-semibold">{assignmentTitle}</span>
         </div>
@@ -133,20 +141,15 @@ const AssignmentSubmissionsList = ({
                 </span>
               )}
 
-              <button
-                type="button"
-                className="text-[#990011] hover:underline text-[11px] font-extrabold flex items-center gap-1 ml-2 transition-colors"
-              >
-                <span>{gradingTranslations.viewPost || "Xem bài đăng"}</span>
-                <ExternalLink size={12} />
-              </button>
             </div>
           </div>
 
           <div className="flex items-center gap-3 self-end md:self-start">
             <button
               type="button"
-              onClick={() => navigate(`/workspace/courses/class/${classId}/create-assignment?assignmentId=${assignmentId}`)}
+              onClick={() => {
+                navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}/assignment/${encodeURIComponent(String(assignmentId))}`)
+              }}
               className="h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
             >
               <Edit size={14} className="text-gray-500" />
@@ -156,7 +159,9 @@ const AssignmentSubmissionsList = ({
             <button
               type="button"
               onClick={onToggleSubmissionsLock}
-              className={`h-10 px-4 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-sm text-white ${assignmentClosed
+              disabled={isTogglingSubmissionsLock}
+              aria-busy={isTogglingSubmissionsLock || undefined}
+              className={`h-10 px-4 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-sm text-white disabled:cursor-not-allowed disabled:opacity-50 ${assignmentClosed
                 ? "bg-[#990011] hover:bg-[#80000e]"
                 : "bg-gray-800 hover:bg-gray-900"
                 }`}
@@ -181,6 +186,7 @@ const AssignmentSubmissionsList = ({
                 className="w-10 h-10 border border-gray-200 hover:bg-gray-50 rounded-xl flex items-center justify-center text-gray-500 transition-colors shadow-2xs cursor-pointer"
                 aria-label="More assignment actions"
                 aria-expanded={showMoreMenu}
+                aria-haspopup="menu"
               >
                 <MoreVertical size={16} />
               </button>
@@ -188,9 +194,11 @@ const AssignmentSubmissionsList = ({
               {showMoreMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
-                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-150 rounded-2xl shadow-xl py-2 z-50 text-xs font-bold text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div role="menu" className="absolute right-0 mt-2 w-56 bg-white border border-gray-150 rounded-2xl shadow-xl py-2 z-50 text-xs font-bold text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
                     <button
                       type="button"
+                      role="menuitem"
+                      disabled={isDownloadingGradeSheet}
                       onClick={() => {
                         setShowMoreMenu(false)
                         onDownloadGradeSheet()
@@ -198,10 +206,16 @@ const AssignmentSubmissionsList = ({
                       className="w-full text-left px-4 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer"
                     >
                       <Download size={14} className="text-[#990011]" />
-                      <span>{gradingTranslations.downloadGradeSheet || "Tải bảng điểm (.xlsx)"}</span>
+                      <span>
+                        {isDownloadingGradeSheet
+                          ? (gradingTranslations.downloading || "Downloading...")
+                          : (gradingTranslations.downloadGradeSheet || "Tải bảng điểm (.xlsx)")}
+                      </span>
                     </button>
                     <button
                       type="button"
+                      role="menuitem"
+                      disabled={isBulkReturning}
                       onClick={() => {
                         setShowMoreMenu(false)
                         onBulkReturn()
@@ -209,10 +223,16 @@ const AssignmentSubmissionsList = ({
                       className="w-full text-left px-4 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2 text-green-700 cursor-pointer"
                     >
                       <FileCheck size={14} />
-                      <span>{gradingTranslations.bulkReturnGrade || "Trả điểm toàn bộ"}</span>
+                      <span>
+                        {isBulkReturning
+                          ? (gradingTranslations.returning || "Returning...")
+                          : (gradingTranslations.bulkReturnGrade || "Trả điểm toàn bộ")}
+                      </span>
                     </button>
                     <button
                       type="button"
+                      role="menuitem"
+                      disabled={isDeletingAssignment}
                       onClick={() => {
                         setShowMoreMenu(false)
                         setShowDeleteModal(true)
@@ -279,6 +299,7 @@ const AssignmentSubmissionsList = ({
               type="text"
               value={studentSearch}
               onChange={(event) => onStudentSearchChange(event.target.value)}
+              aria-label={gradingTranslations.searchStudentsPlaceholder || "Search students"}
               placeholder={gradingTranslations.searchStudentsPlaceholder || "Tìm kiếm học viên..."}
               className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
             />
@@ -292,6 +313,7 @@ const AssignmentSubmissionsList = ({
                   key={filter.id}
                   type="button"
                   onClick={() => onActiveFilterChange(filter.id)}
+                  aria-pressed={isActive}
                   className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all active:scale-95 ${isActive
                     ? "bg-[#990011] border-[#990011] text-white shadow-2xs"
                     : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
@@ -307,6 +329,7 @@ const AssignmentSubmissionsList = ({
             <select
               value={activeFilter}
               onChange={(event) => onActiveFilterChange(event.target.value)}
+              aria-label={gradingTranslations.filterLabel || "Filter submissions"}
               className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all appearance-none cursor-pointer"
             >
               {filters.map((filter) => (
@@ -332,7 +355,9 @@ const AssignmentSubmissionsList = ({
       {/* Delete Assignment Modal Confirmation */}
       <ConfirmationModal
         open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={() => {
+          if (!isDeletingAssignment) setShowDeleteModal(false)
+        }}
         onConfirm={async () => {
           if (onDeleteAssignment && !isDeletingAssignment) {
             await onDeleteAssignment()
@@ -349,6 +374,7 @@ const AssignmentSubmissionsList = ({
           : (gradingTranslations.deleteConfirmBtn || "Xóa bài tập")}
         cancelText={t.common?.cancel || "Hủy"}
         confirmVariant="destructive"
+        isPending={isDeletingAssignment}
       />
     </div>
   )

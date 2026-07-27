@@ -33,7 +33,7 @@ const normalizeDay = (day) => String(day || "").toUpperCase()
 const getLocalizedDayName = (day, language) => {
   const dayNames = DAY_NAMES_BY_LANGUAGE[language] || DAY_NAMES_BY_LANGUAGE.en
   const normalizedDay = normalizeDay(day)
-  return dayNames[normalizedDay] || day
+  return dayNames[normalizedDay] || normalizedDay
 }
 
 export const formatWeeklyScheduleText = (classData, language = "en") => {
@@ -47,22 +47,28 @@ export const formatWeeklyScheduleText = (classData, language = "en") => {
 
   if (scheduleItems && scheduleItems.length > 0) {
     const groups = scheduleItems.reduce((acc, item) => {
-      const start = item.startTime || "00:00"
-      const end = item.endTime || "00:00"
-      const timeKey = `${start} - ${end}`
+      if (!item || typeof item !== "object" || Array.isArray(item)) return acc
+      const start = typeof item.startTime === "string" ? item.startTime : ""
+      const end = typeof item.endTime === "string" ? item.endTime : ""
+      const timeKey = start && end ? `${start} - ${end}` : ""
       const dayLabel = getLocalizedDayName(item.dayOfWeek, language)
+      if (!dayLabel) return acc
 
-      if (!acc[timeKey]) {
-        acc[timeKey] = []
+      if (!acc.has(timeKey)) {
+        acc.set(timeKey, [])
       }
-      acc[timeKey].push(dayLabel)
+      acc.get(timeKey).push(dayLabel)
 
       return acc
-    }, {})
+    }, new Map())
 
-    return Object.entries(groups)
-      .map(([timeKey, days]) => `${days.join(", ")} (${timeKey})`)
+    const formattedGroups = [...groups.entries()]
+      .map(([timeKey, days]) => (
+        timeKey ? `${days.join(", ")} (${timeKey})` : days.join(", ")
+      ))
+      .filter(Boolean)
       .join("; ")
+    if (formattedGroups) return formattedGroups
   }
 
   const schedule = classData?.schedule

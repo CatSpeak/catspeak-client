@@ -11,14 +11,13 @@ const ConfirmationModal = ({
   cancelText = "Cancel",
   confirmText = "Confirm",
   confirmVariant = "destructive", // "primary" | "destructive"
+  isPending = false,
   children,
 }) => {
-  const isDestructive = confirmVariant === "destructive"
-
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={isPending ? undefined : onClose}
       title={title}
       showCloseButton={false}
       fullScreenOnMobile={false}
@@ -27,10 +26,15 @@ const ConfirmationModal = ({
       footerClassName="p-4 sm:p-6"
       footer={
         <div className="flex justify-end gap-2">
-          <PillButton variant="secondary" onClick={onClose}>
+          <PillButton variant="secondary" onClick={onClose} disabled={isPending}>
             {cancelText}
           </PillButton>
-          <PillButton variant="primary" onClick={onConfirm}>
+          <PillButton
+            variant="primary"
+            data-confirm-variant={confirmVariant}
+            onClick={onConfirm}
+            loading={isPending}
+          >
             {confirmText}
           </PillButton>
         </div>

@@ -1,6 +1,6 @@
 import React from "react"
 import { Calendar, Tag, Clock } from "lucide-react"
-import { formatDateRange, formatCurrencyVND } from "../utils/courseUtils"
+import { formatDateRange, formatCurrencyVND, getSafeMediaUrl } from "../utils/courseUtils"
 import CourseStatusPill from "./CourseStatusPill"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -16,11 +16,25 @@ const ClassCard = ({
 }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
-  const progress = cls.totalSessions ? Math.round((cls.completedSessions / cls.totalSessions) * 100) : 0
+  const completedSessions = Number(cls.completedSessions)
+  const totalSessions = Number(cls.totalSessions)
+  const progress = (
+    Number.isFinite(completedSessions)
+    && completedSessions >= 0
+    && Number.isFinite(totalSessions)
+    && totalSessions > 0
+  )
+    ? Math.min(100, Math.round((completedSessions / totalSessions) * 100))
+    : null
+  const thumbnailUrl = getSafeMediaUrl(cls.thumbnailUrl)
+  const tuitionLabel = cls.tuitionFee == null
+    ? "TBA"
+    : formatCurrencyVND(cls.tuitionFee)
 
   return (
     <div
-      onClick={onClick}
+      onClick={isLocked ? undefined : onClick}
+      aria-disabled={isLocked || undefined}
       className={`bg-white border rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between ${isClassEnrolled
         ? "border-green-300 ring-2 ring-green-50/50"
         : isLocked
@@ -30,10 +44,10 @@ const ClassCard = ({
     >
       {/* Image Thumbnail Placeholder Area */}
       <div className="relative h-44 bg-[#D9D9D9] flex items-center justify-center overflow-hidden shrink-0">
-        {cls.thumbnailUrl ? (
+        {thumbnailUrl ? (
           <img
-            src={cls.thumbnailUrl}
-            alt={cls.title}
+            src={thumbnailUrl}
+            alt={cls.title || ""}
             className="w-full h-full object-cover"
             loading="lazy"
             decoding="async"
@@ -68,7 +82,17 @@ const ClassCard = ({
       <div className="p-6 flex flex-col flex-1 justify-between">
         <div>
           <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-1 hover:text-[#b20a1c] transition-colors" title={cls.title}>
-            {cls.title}
+            <button
+              type="button"
+              disabled={isLocked}
+              className="text-left disabled:cursor-not-allowed"
+              onClick={(event) => {
+                event.stopPropagation()
+                onClick?.()
+              }}
+            >
+              {cls.title}
+            </button>
           </h4>
           <span className="text-xs text-gray-400 font-bold mt-1 block">
             {c.course ? `${c.course} ${courseTitle}` : `Course ${courseTitle}`}
@@ -77,7 +101,7 @@ const ClassCard = ({
           <div className="mt-4 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Tag size={13} className="text-gray-400" />
-              <span className="text-gray-900 font-extrabold">{formatCurrencyVND(cls.tuitionFee)}</span>
+              <span className="text-gray-900 font-extrabold">{tuitionLabel}</span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={13} className="text-gray-400" />
@@ -97,10 +121,10 @@ const ClassCard = ({
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs font-bold text-gray-500">
                   <span>{progressLabel}</span>
-                  <span>{progress}%</span>
+                  <span>{progress == null ? "—" : `${progress}%`}</span>
                 </div>
                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${progress}%` }} />
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${progress ?? 0}%` }} />
                 </div>
               </div>
             )}
@@ -108,6 +132,7 @@ const ClassCard = ({
             <div className="flex justify-end items-center gap-4">
               {isClassEnrolled ? (
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     onClick()
@@ -121,6 +146,7 @@ const ClassCard = ({
                 <span className="text-xs text-gray-400 font-bold italic">Other batch selected</span>
               ) : (
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     onEnroll(e)
@@ -138,10 +164,10 @@ const ClassCard = ({
             <div className="mt-5">
               <div className="flex justify-between items-center text-xs font-bold text-gray-500">
                 <span>{progressLabel}</span>
-                <span>{progress}%</span>
+                <span>{progress == null ? "—" : `${progress}%`}</span>
               </div>
               <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
-                <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+                <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${progress ?? 0}%` }} />
               </div>
             </div>
           </>

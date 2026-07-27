@@ -1,7 +1,6 @@
 import React from "react"
-import { Calendar, Clock } from "lucide-react"
+import { Calendar, Clock, Users } from "lucide-react"
 import { formatDateDayMonth, formatTime12h } from "../../utils/courseUtils"
-import { STUDENT_AVATARS } from "../../utils/courseTransforms"
 import CourseStatusPill from "../CourseStatusPill"
 
 const UpcomingSessionCard = ({
@@ -25,12 +24,14 @@ const UpcomingSessionCard = ({
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-              {nextClass.language || courseData.language}
+              {nextClass.language || courseData?.language || "—"}
             </span>
             <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-              {nextClass.levels?.[0] || courseData.level}
+              {nextClass.levels?.[0] || courseData?.levels?.[0] || "—"}
             </span>
-            <CourseStatusPill status={nextClass.status || "TEACHING"} className="ml-auto" />
+            {nextClass.status && (
+              <CourseStatusPill status={nextClass.status} className="ml-auto" />
+            )}
           </div>
 
           <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-2">
@@ -50,17 +51,10 @@ const UpcomingSessionCard = ({
 
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-1.5">
-              <div className="flex -space-x-2 overflow-hidden shrink-0">
-                {STUDENT_AVATARS.map((src) => (
-                  <img
-                    key={src}
-                    className="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover"
-                    src={src}
-                    alt="Student"
-                  />
-                ))}
-              </div>
-              <span className="text-[11px] font-bold text-gray-400 font-sans">{nextClass.slots || 10}</span>
+              <Users size={14} className="text-gray-400" aria-hidden="true" />
+              <span className="text-[11px] font-bold text-gray-400 font-sans">
+                {nextClass.studentCount ?? "—"}
+              </span>
             </div>
 
             <button

@@ -21,6 +21,9 @@ const CourseActionMenu = ({ item, labels, onEdit, onDelete }) => {
     <div ref={menuRef} className="relative" onClick={(event) => event.stopPropagation()}>
       <button
         type="button"
+        aria-label={labels.actions || `Actions for ${item.title || "course"}`}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         onClick={(event) => {
           event.stopPropagation()
           setIsOpen((current) => !current)
@@ -31,9 +34,10 @@ const CourseActionMenu = ({ item, labels, onEdit, onDelete }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-150 rounded-2xl shadow-lg py-1 z-30 text-left">
+        <div role="menu" className="absolute right-0 mt-1 w-36 bg-white border border-gray-150 rounded-2xl shadow-lg py-1 z-30 text-left">
           <button
             type="button"
+            role="menuitem"
             onClick={(event) => {
               event.stopPropagation()
               setIsOpen(false)
@@ -46,6 +50,7 @@ const CourseActionMenu = ({ item, labels, onEdit, onDelete }) => {
           </button>
           <button
             type="button"
+            role="menuitem"
             onClick={(event) => {
               event.stopPropagation()
               setIsOpen(false)
@@ -102,7 +107,16 @@ const CourseManagementCard = ({
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
             <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-1 hover:text-[#b20a1c] transition-colors" title={item.title}>
-              {item.title}
+              <button
+                type="button"
+                className="text-left"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onOpen(item)
+                }}
+              >
+                {item.title}
+              </button>
             </h4>
 
             {isGrid && isCourse && (
@@ -142,7 +156,7 @@ const CourseManagementCard = ({
                 <MetaRow icon={Clock}>{item.startDate} - {item.endDate}</MetaRow>
               </div>
 
-              {item.status !== "OPEN" && (
+              {item.status !== "OPEN" && item.progress != null && (
                 <div className="mt-5">
                   <div className="flex justify-between items-center text-xs font-bold text-gray-500">
                     <span>{labels.progress}</span>

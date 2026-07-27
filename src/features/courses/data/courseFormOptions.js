@@ -22,5 +22,3 @@ export const DEFAULT_CLASS_FEE_TIERS = [
   { minSlots: 21, maxSlots: 50, openingFee: 500000, commissionRate: 15 },
   { minSlots: 51, maxSlots: Infinity, openingFee: 0, commissionRate: 20 },
 ]
-
-export const DEFAULT_TEACHER_IS_VERIFIED = true
