@@ -17,7 +17,7 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ClassDetailTabs from "../components/ClassDetailTabs"
 import StudentClassOverviewTab from "../components/overview/StudentClassOverviewTab"
 
-const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
+const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
 const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
@@ -35,20 +35,17 @@ const StudentClassDetailPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
 
-  const [selectedTab, setSelectedTab] = useState("overview")
-  const activeTab = assignmentId ? "grading" : selectedTab
+  const tabParam = searchParams.get("tab") || "overview"
 
-  const clearAssignmentParam = () => {
-    if (!assignmentId) return
-
-    const nextParams = new URLSearchParams(searchParams)
-    nextParams.delete("assignmentId")
-    setSearchParams(nextParams, { replace: true })
-  }
+  const activeTab = assignmentId ? "grading" : tabParam
 
   const handleTabChange = (tab) => {
-    setSelectedTab(tab)
-    clearAssignmentParam()
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.set("tab", tab)
+    if (assignmentId) {
+      nextSearchParams.delete("assignmentId")
+    }
+    setSearchParams(nextSearchParams, { replace: true })
   }
 
   // Fetch Class Details conditionally via RTK Query (Student view is always studentDetail)
@@ -102,7 +99,7 @@ const StudentClassDetailPage = () => {
   const handleLockedTabSelect = (tab) => {
     const messages = {
       members: c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!",
-      feed: c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view feed!",
+      "lecture-hall": c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view lecture hall!",
       grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
       materials: c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!",
     }
@@ -112,7 +109,7 @@ const StudentClassDetailPage = () => {
   const tabs = [
     { value: "overview", label: c.student?.overview || "Overview" },
     { value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled },
-    { value: "feed", label: c.student?.feed || "Feed", locked: !isEnrolled },
+    { value: "lecture-hall", label: c.student?.lectureHall || "Lecture Hall", locked: !isEnrolled },
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
     { value: "materials", label: c.student?.materials || "Materials", locked: !isEnrolled },
   ]
@@ -193,51 +190,51 @@ const StudentClassDetailPage = () => {
       {/* ─── Tab Contents ─── */}
       <Suspense fallback={<TabLoadingFallback />}>
         {activeTab === "overview" && (
-        <StudentClassOverviewTab
-          classData={classData}
-          isEnrolled={isEnrolled}
-          language={language}
-          formatCurrency={formatCurrency}
-          getWeeklyScheduleText={getWeeklyScheduleText}
-          upcomingSessionLabel={c.student?.upcomingSession || "Upcoming Session"}
-          joinRoomLabel={c.joinRoom || "Join Room"}
-          noUpcomingLabel={c.student?.noUpcomingSessions || "No upcoming sessions"}
-          onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
-        />
-      )}
+          <StudentClassOverviewTab
+            classData={classData}
+            isEnrolled={isEnrolled}
+            language={language}
+            formatCurrency={formatCurrency}
+            getWeeklyScheduleText={getWeeklyScheduleText}
+            upcomingSessionLabel={c.student?.upcomingSession || "Upcoming Session"}
+            joinRoomLabel={c.joinRoom || "Join Room"}
+            noUpcomingLabel={c.student?.noUpcomingSessions || "No upcoming sessions"}
+            onJoinRoom={() => navigate(`/${language || "vi"}/meet/class-${id}`)}
+          />
+        )}
 
         {activeTab === "members" && isEnrolled && (
-        <ClassMembersTab
-          isStudent={true}
-        />
-      )}
+          <ClassMembersTab
+            isStudent={true}
+          />
+        )}
 
-        {activeTab === "feed" && isEnrolled && (
-        <ClassFeedTab
-          id={id}
-          isStudent={true}
-          language={language}
-          cd={cd}
-        />
-      )}
+        {activeTab === "lecture-hall" && isEnrolled && (
+          <ClassLectureHallPage
+            id={id}
+            isStudent={true}
+            language={language}
+            cd={cd}
+          />
+        )}
 
         {activeTab === "grading" && isEnrolled && (
-        <ClassGradingTab
-          id={id}
-          isStudent={true}
-          language={language}
-          cd={cd}
-        />
-      )}
+          <ClassGradingTab
+            id={id}
+            isStudent={true}
+            language={language}
+            cd={cd}
+          />
+        )}
 
         {activeTab === "materials" && isEnrolled && (
-        <ClassMaterialsTab
-          id={id}
-          isStudent={true}
-          language={language}
-          cd={cd}
-          cancelText={c.createClass?.cancel || "Hủy"}
-        />
+          <ClassMaterialsTab
+            id={id}
+            isStudent={true}
+            language={language}
+            cd={cd}
+            cancelText={c.createClass?.cancel || "Hủy"}
+          />
         )}
       </Suspense>
 

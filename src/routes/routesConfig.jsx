@@ -37,6 +37,10 @@ import { AuthGuard } from "@/shared/components"
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect"
 import { WebsitePage, ResourcesHubPage } from "@/features/websites"
+import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/BulletinBoardPage";
+import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage";
+import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage";
+import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage";
 
 const Profile = lazy(() => import("@/features/profile/pages/Profile"))
 const AccountInfoPage = lazy(
@@ -429,6 +433,46 @@ const routesConfig = [
                 ),
               },
               {
+                path: "courses/class/:id/bulletin-board/:boardId",
+                element: (
+                  <LazyRoute>
+                    <BulletinBoardPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/bulletin-board/posts/:postId",
+                element: (
+                  <LazyRoute>
+                    <PostDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/bulletin-board/:boardId/create-post",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "courses/class/:id/links/:itemId",
+                element: (
+                  <LazyRoute>
+                    <LinkYoutubePage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "courses/details/:id",
                 element: (
                   <LazyRoute>
@@ -457,6 +501,46 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <StudentClassDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/bulletin-board/:boardId",
+                element: (
+                  <LazyRoute>
+                    <BulletinBoardPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/bulletin-board/posts/:postId",
+                element: (
+                  <LazyRoute>
+                    <PostDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/bulletin-board/:boardId/create-post",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                element: (
+                  <LazyRoute>
+                    <CreatePostPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/links/:itemId",
+                element: (
+                  <LazyRoute>
+                    <LinkYoutubePage />
                   </LazyRoute>
                 ),
               },
