@@ -80,6 +80,10 @@ const ControlBarMoreMenu = ({
   const [showGameHistory, setShowGameHistory] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
 
+  const { gameState } = useGame();
+  // Disable nút "Trò chơi" khi đang có ván game trong phòng (mọi state != "idle")
+  const isGameInProgress = gameState && gameState !== "idle";
+
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall);
 
   const { closingRemainingSeconds } = useVideoCallContext()
@@ -152,11 +156,15 @@ const ControlBarMoreMenu = ({
                       <div className="hidden md:flex flex-col">
                         <MenuItem
                           onClick={() => {
+                            if (isGameInProgress) return;
                             setShowMoreMenu(false);
                             setShowGameSetup(true);
                           }}
+                          disabled={isGameInProgress}
+                          className={isGameInProgress ? "opacity-50 cursor-not-allowed" : ""}
                           icon={<Gamepad2 size={20} />}
                           label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
+                          title={isGameInProgress ? "Đang có trò chơi trong phòng, không thể mở thêm" : undefined}
                         />
 
                         <MenuItem
@@ -424,11 +432,15 @@ const ControlBarMoreMenu = ({
 
                               <MenuItem
                                 onClick={() => {
+                                  if (isGameInProgress) return;
                                   setShowMoreMenu(false);
                                   setShowGameSetup(true);
                                 }}
+                                disabled={isGameInProgress}
+                                className={isGameInProgress ? "opacity-50 cursor-not-allowed" : ""}
                                 icon={<Gamepad2 size={20} />}
                                 label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
+                                title={isGameInProgress ? "Đang có trò chơi trong phòng, không thể mở thêm" : undefined}
                                 hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
                               />
                               <MenuItem

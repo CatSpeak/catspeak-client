@@ -1,4 +1,5 @@
 import React from "react"
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion"
 import { Trophy } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"

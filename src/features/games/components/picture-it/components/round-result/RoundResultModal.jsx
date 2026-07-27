@@ -5,7 +5,7 @@ import LeaderboardCard from "./LeaderboardCard"
 import RoundResultOverlay from "@/features/games/components/shared/RoundResultOverlay"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const RoundResultModal = ({ open, onClose, result }) => {
+const RoundResultModal = ({ open, result }) => {
   const { t } = useLanguage();
   if (!result) return null
 

@@ -1,5 +1,4 @@
 import React from "react"
-import { motion } from "framer-motion"
 import { Star } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"

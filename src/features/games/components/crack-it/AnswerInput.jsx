@@ -85,7 +85,7 @@ const AnswerInput = ({ isMain = true }) => {
   }
 
   return (
-    <div className="relative shrink-0">
+    <div className="relative shrink-0 border-t border-slate-100 px-2 md:px-3 py-2 flex items-center justify-center w-full min-h-[52px] md:min-h-[60px] bg-white">
       {/* Cửa sổ nháy flash khi có người trả lời đúng - Đưa lên góc trên bên phải */}
       <AnimatePresence mode="wait">
         {showFlash && lastCorrectAnswer && (
@@ -113,10 +113,10 @@ const AnswerInput = ({ isMain = true }) => {
         )}
       </AnimatePresence>
 
-      {/* Lịch sử lần thử sai (Toast tự mất) */}
+      {/* Lịch sử lần thử sai (Toast tự mất) — canh giữa ngay trên input */}
       <AnimatePresence>
         {wrongToasts.length > 0 && !isCorrect && (
-          <motion.div className="absolute bottom-full mb-3 left-4 flex flex-row-reverse items-center gap-2 z-[10] pointer-events-none">
+          <motion.div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 flex flex-row-reverse items-center gap-2 z-[10] pointer-events-none">
             {wrongToasts.map((toast) => (
               <motion.div
                 key={toast.id}
@@ -139,7 +139,7 @@ const AnswerInput = ({ isMain = true }) => {
         onSubmit={handleSubmit}
         animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
         transition={{ duration: 0.4 }}
-        className={`flex items-center rounded-full shadow-sm border-2 p-1.5  transition-all ${shake
+        className={`flex items-center w-full rounded-full shadow-sm border-2 p-1.5  transition-all ${shake
             ? "bg-red-50 border-red-500 shadow-red-100"
             : isCorrect
               ? "bg-green-50 border-green-500 shadow-green-100"
