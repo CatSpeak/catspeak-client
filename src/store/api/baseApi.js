@@ -291,7 +291,6 @@ export const baseApi = createApi({
     "StudentClasses",
     "CourseDetail",
     "ClassDetail",
-    "ClassFeed",
     "ClassGrading",
     "ClassMaterials",
     "Schedule",

@@ -26,7 +26,6 @@ import StudentClassOverviewTab from "../components/overview/StudentClassOverview
 
 const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
-const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
 
 const TabLoadingFallback = () => (
@@ -39,8 +38,8 @@ const GRADING_DETAIL_PARAM_KEYS = [
   "studentId",
   "submissionId",
 ]
-const VALID_TABS = ["overview", "members", "feed", "grading", "materials"]
-const ENROLLED_ONLY_TABS = new Set(["members", "feed", "grading", "materials"])
+const VALID_TABS = ["overview", "members", "feed", "grading"]
+const ENROLLED_ONLY_TABS = new Set(["members", "feed", "grading"])
 
 const StudentClassDetailPage = () => {
   const { id } = useParams()
@@ -253,7 +252,6 @@ const StudentClassDetailPage = () => {
       members: c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!",
       feed: c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view feed!",
       grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
-      materials: c.student?.toastEnrollToViewMaterials || "Please enroll and pay tuition to view materials!",
     }
     toast.error(messages[tab])
   }
@@ -263,7 +261,6 @@ const StudentClassDetailPage = () => {
     { value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled },
     { value: "feed", label: c.student?.feed || "Feed", locked: !isEnrolled },
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
-    { value: "materials", label: c.student?.materials || "Materials", locked: !isEnrolled },
   ]
 
   const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData || {}, language || "en")
@@ -332,27 +329,7 @@ const StudentClassDetailPage = () => {
           {!isEnrolled ? (
             <button
               type="button"
-              onClick={() => {
-                if (isOwner) {
-                  toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
-                  return
-                }
-                if (isEnrollmentEligibilityLoading || enrollmentIssue) {
-                  toast.error(
-                    isEnrollmentEligibilityLoading
-                      ? (
-                        c.student?.checkingEnrollment
-                        || "Enrollment availability is still being checked."
-                      )
-                      : getClassEnrollmentIssueMessage(
-                        enrollmentIssue,
-                        c.student,
-                      ),
-                  )
-                  return
-                }
-                setShowEnrollConfirm(true)
-              }}
+              onClick={handleEnroll}
               disabled={
                 isEnrolling
                 || isOwner
@@ -400,11 +377,10 @@ const StudentClassDetailPage = () => {
 
               <button
                 type="button"
-                disabled
-                title={c.student?.chatUnavailable || "Class chat is not available yet."}
-                className="h-10 px-5 bg-gray-200 text-gray-500 font-extrabold text-xs rounded-full flex items-center gap-2 cursor-not-allowed"
+                onClick={() => navigate("/chat")}
+                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
-                <MessageSquare size={14} className="fill-white" />
+                <MessageSquare size={14} className="fill-[#990011]" />
                 <span>{c.student?.chat || "Chat"}</span>
               </button>
             </div>
@@ -460,16 +436,6 @@ const StudentClassDetailPage = () => {
             isStudent={true}
             language={language}
             cd={cd}
-          />
-        )}
-
-        {activeTab === "materials" && isEnrolled && (
-          <ClassMaterialsTab
-            id={id}
-            isStudent={true}
-            language={language}
-            cd={cd}
-            cancelText={c.createClass?.cancel || "Hủy"}
           />
         )}
       </Suspense>

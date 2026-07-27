@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetTeacherQuizDetailQuery,
   useGetTeacherQuizStudentsQuery,
@@ -1184,6 +1185,9 @@ const QuestionDetailCard = ({ question, index }) => {
 
 // Main Teacher Quiz Detail View Component
 const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
+  const { language, t } = useLanguage()
+  const c = t?.courses || {}
+  const cg = c?.grading || {}
   const navigate = useNavigate()
   const routeParams = useParams()
   const [searchParams, setSearchParams] = useSearchParams()

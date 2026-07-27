@@ -122,10 +122,10 @@ const transformTeachingProgress = (data) => {
     total,
     percentage: percentage === null
       ? (
-          completed !== null && total !== null && total > 0
-            ? Math.min(100, Math.round((completed / total) * 100))
-            : null
-        )
+        completed !== null && total !== null && total > 0
+          ? Math.min(100, Math.round((completed / total) * 100))
+          : null
+      )
       : Math.min(100, percentage),
   }
 }
@@ -142,9 +142,9 @@ const transformCourse = (course) => {
   const teacher = transformPerson(course.teacher)
   const priceRange = isRecord(course.priceRange)
     ? {
-        min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
-        max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
-      }
+      min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
+      max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
+    }
     : null
 
   return {
@@ -294,30 +294,30 @@ const transformPaginatedResponse = (response, itemTransformer) => {
   }
   const page = toPositiveInteger(
     responseRecord.pagination?.page
-      ?? outerRecord.pagination?.page
-      ?? responseRecord.page
-      ?? outerRecord.page,
+    ?? outerRecord.pagination?.page
+    ?? responseRecord.page
+    ?? outerRecord.page,
     1,
   )
   const pageSize = toPositiveInteger(
     responseRecord.pagination?.pageSize
-      ?? outerRecord.pagination?.pageSize
-      ?? responseRecord.pageSize
-      ?? outerRecord.pageSize,
+    ?? outerRecord.pagination?.pageSize
+    ?? responseRecord.pageSize
+    ?? outerRecord.pageSize,
     Math.max(1, rawItems.length || 10),
   )
   const totalItems = toNonNegativeInteger(
     responseRecord.pagination?.totalItems
-      ?? outerRecord.pagination?.totalItems
-      ?? responseRecord.totalCount
-      ?? outerRecord.totalCount,
+    ?? outerRecord.pagination?.totalItems
+    ?? responseRecord.totalCount
+    ?? outerRecord.totalCount,
     rawItems.length,
   )
   const totalPages = toPositiveInteger(
     responseRecord.pagination?.totalPages
-      ?? outerRecord.pagination?.totalPages
-      ?? responseRecord.totalPages
-      ?? outerRecord.totalPages,
+    ?? outerRecord.pagination?.totalPages
+    ?? responseRecord.totalPages
+    ?? outerRecord.totalPages,
     Math.max(1, Math.ceil(totalItems / pageSize)),
   )
 
@@ -573,15 +573,15 @@ export const coursesApi = baseApi.injectEndpoints({
         if (!transformedCourse) return null
         const transformedClasses = Array.isArray(data.classes)
           ? data.classes.map((cls) => {
-              const transformedClass = transformClass(cls)
-              return transformedClass
-                ? {
-                    ...transformedClass,
-                    isEnrolled: cls.isEnrolled === true,
-                    enrolledCount: cls.enrolledCount ?? null,
-                  }
-                : null
-            }).filter(Boolean)
+            const transformedClass = transformClass(cls)
+            return transformedClass
+              ? {
+                ...transformedClass,
+                isEnrolled: cls.isEnrolled === true,
+                enrolledCount: cls.enrolledCount ?? null,
+              }
+              : null
+          }).filter(Boolean)
           : []
         const enrolledClass = transformedClasses.find(cls => cls.isEnrolled)
         return {
@@ -839,9 +839,9 @@ export const coursesApi = baseApi.injectEndpoints({
         ...((courseId ?? data?.courseId) == null
           ? []
           : [{
-              type: "CourseDetail",
-              id: String(courseId ?? data.courseId),
-            }]),
+            type: "CourseDetail",
+            id: String(courseId ?? data.courseId),
+          }]),
         "Classes",
         "StudentClasses",
         "Schedule",
@@ -890,24 +890,6 @@ export const coursesApi = baseApi.injectEndpoints({
     }),
 
 
-    // 14. Get Class Feed
-    getClassFeed: builder.query({
-      query: (classId) => ({
-        url: `/teacher/classes/${encodePathSegment(classId)}/feed`,
-        method: "GET",
-      }),
-      providesTags: (result, error, classId) => [{ type: "ClassFeed", id: classId }],
-    }),
-
-    // 15. Create Class Post
-    createClassPost: builder.mutation({
-      query: ({ classId, content }) => ({
-        url: `/teacher/classes/${encodePathSegment(classId)}/feed`,
-        method: "POST",
-        body: { content },
-      }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassFeed", id: classId }],
-    }),
 
     // 16. Get Teacher Assignments
     getTeacherAssignments: builder.query({
@@ -1493,8 +1475,7 @@ export const {
   useCreateClassMutation,
   useUpdateClassMutation,
   useDeleteClassMutation,
-  useGetClassFeedQuery,
-  useCreateClassPostMutation,
+
   useGetTeacherAssignmentsQuery,
   useGetStudentAssignmentsQuery,
   useGetStudentAssignmentByIdQuery,

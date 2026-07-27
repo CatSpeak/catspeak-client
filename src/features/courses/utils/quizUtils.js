@@ -284,50 +284,62 @@ const QUIZ_ERROR_MESSAGES = {
   QuizNameRequired: {
     en: "Enter a quiz name before continuing.",
     vi: "Vui lòng nhập tên bài kiểm tra trước khi tiếp tục.",
+    zh: "在继续之前请输入测试名称。",
   },
   QuizNoQuestions: {
     en: "Add at least one question before publishing the quiz.",
     vi: "Vui lòng thêm ít nhất một câu hỏi trước khi đăng bài kiểm tra.",
+    zh: "在发布测试之前请至少添加一道题目。",
   },
   QuizInvalidCloseTime: {
     en: "Choose a closing time after the opening time and the current time.",
     vi: "Vui lòng chọn thời gian đóng sau thời gian mở và thời điểm hiện tại.",
+    zh: "请选择在开放时间和当前时间之后的关闭时间。",
   },
   QuizHasSubmissions: {
     en: "This quiz cannot be deleted because it already has submissions.",
     vi: "Không thể xóa bài kiểm tra vì đã có bài nộp.",
+    zh: "无法删除此测试，因为已存在提交记录。",
   },
   QuizAlreadyPublished: {
     en: "This quiz has already been published.",
     vi: "Bài kiểm tra này đã được đăng.",
+    zh: "此测试已发布。",
   },
   QuizClosedFieldRestricted: {
     en: "Closed quizzes cannot change their schedule, late-submission setting, time limit, questions, grading scale, or result-release mode.",
     vi: "Bài kiểm tra đã đóng không thể thay đổi lịch, nộp muộn, thời lượng, câu hỏi, thang điểm hoặc chế độ trả kết quả.",
+    zh: "已关闭的测试无法更改安排、迟交设置、时间限制、题目、评分标准或结果公布模式。",
   },
   QuizNotOpen: {
     en: "This quiz is not currently open.",
     vi: "Bài kiểm tra hiện không ở trạng thái đang mở.",
+    zh: "此测试目前未开放。",
   },
   QuizMaxAttemptsReached: {
     en: "You have used all available attempts for this quiz.",
     vi: "Bạn đã sử dụng hết số lần làm bài cho phép.",
+    zh: "您已用完此测试的所有允许尝试次数。",
   },
   QuizNoActiveAttempt: {
     en: "No active quiz attempt was found. Start or resume the quiz and try again.",
     vi: "Không tìm thấy lượt làm bài đang hoạt động. Hãy bắt đầu hoặc tiếp tục bài rồi thử lại.",
+    zh: "未找到进行中的测试。请开始或继续测试后重试。",
   },
   QuizNotFound: {
     en: "The quiz could not be found.",
     vi: "Không tìm thấy bài kiểm tra.",
+    zh: "未找到该测试。",
   },
   ClassNotFound: {
     en: "The class could not be found.",
     vi: "Không tìm thấy lớp học.",
+    zh: "未找到该班级。",
   },
   Forbidden: {
     en: "You do not have permission to perform this action.",
-    vi: "Bạn không có quyền thực hiện thao tác này.",
+    vi: "Vui lòng không có quyền thực hiện thao tác này.",
+    zh: "您没有权限执行此操作。",
   },
 }
 
@@ -931,9 +943,9 @@ export const buildQuizAnswerPayload = (
           : (isRecord(value) && hasOwn(value, "isMarkedForReview"))
             ? value.isMarkedForReview
             : question?.isMarkedForReview
-              ?? question?.isFlagged
-              ?? question?.isMarked
-              ?? false,
+            ?? question?.isFlagged
+            ?? question?.isMarked
+            ?? false,
       )
 
       if (type === "FillInBlank" || type === "Essay") {
@@ -1003,16 +1015,16 @@ export const getQuizTimeRemaining = (deadlineMs, nowMs = Date.now()) => {
 }
 
 export const getQuizErrorMessage = (error, language = "en", fallback) => {
-  const locale = language === "vi" ? "vi" : "en"
+  const locale = language === "vi" ? "vi" : (language === "zh" ? "zh" : "en")
   const code = getErrorCode(error)
   const knownMessage = code ? QUIZ_ERROR_MESSAGES[code]?.[locale] : undefined
 
   if (knownMessage) return knownMessage
   if (typeof fallback === "string" && fallback.trim()) return fallback
 
-  return locale === "vi"
-    ? "Không thể hoàn tất thao tác. Vui lòng thử lại."
-    : "The action could not be completed. Please try again."
+  if (locale === "vi") return "Không thể hoàn tất thao tác. Vui lòng thử lại."
+  if (locale === "zh") return "无法完成操作，请重试。"
+  return "The action could not be completed. Please try again."
 }
 
 export const mergeQuizResultQuestions = (resultQuestions, attemptQuestions) => {

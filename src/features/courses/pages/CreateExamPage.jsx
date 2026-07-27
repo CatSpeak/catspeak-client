@@ -63,6 +63,48 @@ const VI_VALIDATION_MESSAGES = {
   QuizInvalidMaxWordCount: "Giới hạn từ phải là số nguyên dương.",
 }
 
+const EN_VALIDATION_MESSAGES = {
+  QuizNameRequired: "Please enter the quiz title.",
+  QuizInvalidTimeLimit: "Time limit must be greater than 0.",
+  QuizInvalidMaxAttempts: "Maximum attempts must be a positive integer.",
+  QuizInvalidPassPercent: "Passing percentage must be between 0 and 100.",
+  QuizInvalidOpenTime: "Please select a valid open time.",
+  QuizOpenTimeRequired: "Please select an open time before publishing.",
+  QuizInvalidCloseTime: "Close time must be valid and after open time.",
+  QuizCloseTimeRequired: "Please select a close time before publishing.",
+  QuizCloseTimeInPast: "Close time must be in the future.",
+  QuizNoQuestions: "Please add at least one question before publishing.",
+  QuizInvalidQuestion: "One or more questions are invalid.",
+  QuizInvalidQuestionType: "Please select a valid question type.",
+  QuizQuestionContentRequired: "Please enter content for all questions.",
+  QuizInvalidQuestionPoints: "Question points must be non-negative.",
+  QuizInvalidQuestionOptions: "Each multiple-choice question requires at least 2 non-empty options.",
+  QuizInvalidCorrectAnswers: "Please select valid correct answers.",
+  QuizCorrectAnswerRequired: "Please enter the correct answer.",
+  QuizInvalidMaxWordCount: "Max word count must be a positive integer.",
+}
+
+const ZH_VALIDATION_MESSAGES = {
+  QuizNameRequired: "请输入测试名称。",
+  QuizInvalidTimeLimit: "答题时间限制必须大于0。",
+  QuizInvalidMaxAttempts: "最大尝试次数必须为正整数。",
+  QuizInvalidPassPercent: "及格率必须在0到100之间。",
+  QuizInvalidOpenTime: "请选择有效的开放时间。",
+  QuizOpenTimeRequired: "发布前请选择开放时间。",
+  QuizInvalidCloseTime: "关闭时间必须有效且晚于开放时间。",
+  QuizCloseTimeRequired: "发布前请选择关闭时间。",
+  QuizCloseTimeInPast: "关闭时间必须在将来。",
+  QuizNoQuestions: "发布前请至少添加一道题目。",
+  QuizInvalidQuestion: "存在无效题目。",
+  QuizInvalidQuestionType: "请选择有效的题目类型。",
+  QuizQuestionContentRequired: "请为所有题目填写内容。",
+  QuizInvalidQuestionPoints: "题目分值不能为负数。",
+  QuizInvalidQuestionOptions: "每道选择题至少需要两个非空选项。",
+  QuizInvalidCorrectAnswers: "请选择有效的正确答案。",
+  QuizCorrectAnswerRequired: "请输入正确答案。",
+  QuizInvalidMaxWordCount: "字数限制必须为正整数。",
+}
+
 const CLOSED_QUIZ_RESTRICTED_FIELDS = new Set([
   "openTime",
   "closeTime",
@@ -79,8 +121,12 @@ const getValidationMessage = (validation, language) => {
     return VI_VALIDATION_MESSAGES[firstError?.code]
       || "Thông tin bài kiểm tra chưa hợp lệ. Vui lòng kiểm tra lại."
   }
-
-  return validation.firstError || "Check the quiz details and try again."
+  if (language === "zh") {
+    return ZH_VALIDATION_MESSAGES[firstError?.code]
+      || "测试信息无效，请检查后重试。"
+  }
+  return EN_VALIDATION_MESSAGES[firstError?.code]
+    || "Quiz information is invalid. Please double check."
 }
 
 const createUnexpectedResponseError = () => {
@@ -389,11 +435,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              mediaFile: file,
-              mediaUrl: previewUrl,
-              clearMedia: false,
-            }
+            ...q,
+            mediaFile: file,
+            mediaUrl: previewUrl,
+            clearMedia: false,
+          }
           : q
       )
     )
@@ -411,11 +457,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              audioFile: file,
-              audioUrl: previewUrl,
-              clearAudio: false,
-            }
+            ...q,
+            audioFile: file,
+            audioUrl: previewUrl,
+            clearAudio: false,
+          }
           : q
       )
     )
@@ -427,11 +473,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              mediaFile: null,
-              mediaUrl: null,
-              clearMedia: true,
-            }
+            ...q,
+            mediaFile: null,
+            mediaUrl: null,
+            clearMedia: true,
+          }
           : q
       )
     )
@@ -442,11 +488,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              audioFile: null,
-              audioUrl: null,
-              clearAudio: true,
-            }
+            ...q,
+            audioFile: null,
+            audioUrl: null,
+            clearAudio: true,
+          }
           : q
       )
     )

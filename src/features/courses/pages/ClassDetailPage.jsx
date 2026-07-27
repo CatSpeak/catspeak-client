@@ -20,7 +20,6 @@ import CreatePostTypeModal from "../components/CreatePostTypeModal"
 
 const ClassFeedTab = lazy(() => import("../components/grading/ClassFeedTab"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
-const ClassMaterialsTab = lazy(() => import("../components/materials/ClassMaterialsTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
 
 const TabLoadingFallback = () => (
@@ -47,7 +46,7 @@ const ClassDetailPage = () => {
   const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
   const urlTab = searchParams.get("tab")
-  const VALID_TABS = ["overview", "members", "feed", "grading", "materials"]
+  const VALID_TABS = ["overview", "members", "feed", "grading"]
   const initialTab = (urlTab && VALID_TABS.includes(urlTab)) ? urlTab : "overview"
   const activeTab = hasGradingDeepLink ? "grading" : initialTab
 
@@ -137,7 +136,6 @@ const ClassDetailPage = () => {
     { value: "members", label: cd.members || "Members" },
     { value: "feed", label: cd.feed || "Feed" },
     { value: "grading", label: cd.grading || "Grading" },
-    { value: "materials", label: cd.materials || "Materials" },
   ]
 
   const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData || {}, language || "en")
@@ -218,11 +216,10 @@ const ClassDetailPage = () => {
               {/* Trò chuyện button */}
               <button
                 type="button"
-                disabled
-                title={cd.chatUnavailable || "Class chat is not available yet."}
-                className="h-10 px-5 bg-gray-200 text-gray-500 font-extrabold text-xs rounded-full flex items-center gap-2 cursor-not-allowed"
+                onClick={() => navigate("/chat")}
+                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
-                <MessageSquare size={14} className="fill-white" />
+                <MessageSquare size={14} className="fill-[#990011]" />
                 <span>{c.student?.chat || "Chat"}</span>
               </button>
 
@@ -304,16 +301,6 @@ const ClassDetailPage = () => {
             isStudent={false}
             language={language}
             cd={cd}
-          />
-        )}
-
-        {activeTab === "materials" && (
-          <ClassMaterialsTab
-            id={id}
-            isStudent={false}
-            language={language}
-            cd={cd}
-            cancelText={c.createClass?.cancel || "Hủy"}
           />
         )}
       </Suspense>
