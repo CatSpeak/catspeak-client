@@ -1,8 +1,8 @@
-import React from "react"
-import { AnimatePresence } from "framer-motion"
-import { ThumbsUp, Heart, Smile } from "lucide-react"
-import IconButton from "@/shared/components/ui/buttons/IconButton"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import React from "react";
+import { AnimatePresence } from "framer-motion";
+import { ThumbsUp, Heart, Smile } from "lucide-react";
+import IconButton from "@/shared/components/ui/buttons/IconButton";
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 
 export const DEFAULT_REACTIONS = [
   {
@@ -29,7 +29,7 @@ export const DEFAULT_REACTIONS = [
     colorClass: "text-yellow-700 fill-yellow-400",
     hoverBgClass: "group-hover/icon:bg-yellow-50",
   },
-]
+];
 
 export const COMMENT_REACTIONS = [
   {
@@ -56,7 +56,7 @@ export const COMMENT_REACTIONS = [
     colorClass: "text-yellow-600 fill-yellow-400",
     hoverBgClass: "group-hover/icon:bg-yellow-50",
   },
-]
+];
 
 const ReactionsPopover = ({
   show = false,
@@ -75,14 +75,14 @@ const ReactionsPopover = ({
           <FluentAnimation direction="up" distance={10} duration={0.2} exit>
             <div className="bg-white rounded-full shadow-lg border border-[#e5e5e5] p-1 flex items-center">
               {reactions.map((item) => {
-                const IconComp = item.icon
+                const IconComp = item.icon;
                 return (
                   <IconButton
                     key={item.type ?? item.value}
                     onClick={(e) => {
-                      e.stopPropagation()
-                      if (onClose) onClose()
-                      if (onSelect) onSelect(e, item.value ?? item.type)
+                      e.stopPropagation();
+                      if (onClose) onClose();
+                      if (onSelect) onSelect(e, item.value ?? item.type);
                     }}
                     size={size}
                     variant="transparent"
@@ -92,15 +92,15 @@ const ReactionsPopover = ({
                   >
                     <IconComp className={item.colorClass} />
                   </IconButton>
-                )
+                );
               })}
             </div>
           </FluentAnimation>
         </div>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};
 
 export const ReactionIcon = ({
   reaction,
@@ -115,7 +115,7 @@ export const ReactionIcon = ({
         strokeWidth={strokeWidth}
         className={`text-red-700 fill-red-400 ${className}`}
       />
-    )
+    );
   }
   if (reaction === "Haha" || reaction === 3) {
     return (
@@ -124,7 +124,7 @@ export const ReactionIcon = ({
         strokeWidth={strokeWidth}
         className={`text-yellow-700 fill-yellow-400 ${className}`}
       />
-    )
+    );
   }
   if (reaction === "Like" || reaction === 1) {
     return (
@@ -133,15 +133,15 @@ export const ReactionIcon = ({
         strokeWidth={strokeWidth}
         className={`text-blue-700 fill-blue-400 ${className}`}
       />
-    )
+    );
   }
   return (
     <ThumbsUp
       size={size}
       strokeWidth={strokeWidth}
-      className={`text-[#7b7979] ${className}`}
+      className={`text-cath-red-700 ${className}`}
     />
-  )
-}
+  );
+};
 
-export default ReactionsPopover
+export default ReactionsPopover;
