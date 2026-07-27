@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import PostContent from "../components/bulletin-board/PostContent"
@@ -8,7 +8,9 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
 import {
   useGetPostDetailQuery,
+  useGetStudentPostDetailQuery,
   useCreateCommentInBulletinBoardMutation,
+  useCreateStudentCommentInBulletinBoardMutation,
   useCreateReplyInCommentMutation,
   useGetStudentClassDetailQuery,
 } from "@/store/api/coursesApi"
@@ -19,6 +21,7 @@ import { formatFileSize } from "../utils/fileUtils"
 const PostDetailPage = () => {
   const navigate = useNavigate()
   const { id: classId, postId } = useParams()
+  const location = useLocation()
 
   // Robust role check
   const { data: profileResponse } = useGetUserProfileQuery()
@@ -41,19 +44,28 @@ const PostDetailPage = () => {
 
   const { user } = useSelector((state) => state.auth)
 
-  const { data: postDetail, isLoading } = useGetPostDetailQuery(
+  const teacherDetailQuery = useGetPostDetailQuery(
     { classId, postId },
-    { skip: !classId || !postId }
+    { skip: !classId || !postId || isStudent }
+  )
+  const studentDetailQuery = useGetStudentPostDetailQuery(
+    { classId, postId },
+    { skip: !classId || !postId || !isStudent }
   )
 
-  const [createComment] = useCreateCommentInBulletinBoardMutation()
+  const { data: postDetail, isLoading } = isStudent ? studentDetailQuery : teacherDetailQuery
+
+  const [createTeacherComment] = useCreateCommentInBulletinBoardMutation()
+  const [createStudentComment] = useCreateStudentCommentInBulletinBoardMutation()
+  const createComment = isStudent ? createStudentComment : createTeacherComment
+
   const [createReply] = useCreateReplyInCommentMutation()
 
   const formattedPost = {
     tag: "",
     title: postDetail?.title || "Không có tiêu đề",
     authorName: postDetail?.accountName || "Giảng viên",
-    authorAvatar: postDetail?.avatarImageUrl || "https://i.pravatar.cc/150",
+    authorAvatar: postDetail?.avatarImageUrl || "",
     date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleDateString("vi-VN") : "",
     thumbnailUrl: postDetail?.thumbnailUrl || "",
     content: postDetail?.content || "",
@@ -69,7 +81,7 @@ const PostDetailPage = () => {
   const comments = postDetail?.replies?.map((comment) => ({
     id: comment.id,
     authorName: comment.accountName || "Ẩn danh",
-    authorAvatar: comment.avatarImageUrl || "https://i.pravatar.cc/150",
+    authorAvatar: comment.avatarImageUrl || "",
     isTeacher: comment.isTeacher || false,
     time: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString("vi-VN") : "",
     content: comment.content,
@@ -99,6 +111,18 @@ const PostDetailPage = () => {
     }
   }
 
+  const boardId = location.state?.boardId || postDetail?.bulletinBoardId || postDetail?.boardId
+
+  const handleBack = () => {
+    if (boardId) {
+      navigate(`${basePath}/class/${classId}/bulletin-board/${boardId}`)
+    } else if (window.history.length > 2) {
+      navigate(-1)
+    } else {
+      navigate(`${basePath}/class/${classId}?tab=lecture-hall`)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -117,13 +141,13 @@ const PostDetailPage = () => {
           { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
           { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
           { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
-          { label: "Chi tiết bảng tin", active: true },
+          { label: "Chi tiết bài viết", active: true },
         ]}
       />
 
       <div className="min-w-6xl p-8">
         <button
-          onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
+          onClick={handleBack}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
           <ArrowLeft size={16} /> Quay lại
@@ -141,7 +165,7 @@ const PostDetailPage = () => {
           locked={!postDetail?.allowReply}
           showAll={showAll}
           previewCount={3}
-          currentUserAvatar={user?.avatarImageUrl || "https://i.pravatar.cc/150"}
+          currentUserAvatar={user?.avatarImageUrl || ""}
           currentUserName={user?.fullName || "Bạn"}
           onSubmit={handleSubmit}
           onReply={(c) => setReplyingTo(c)}

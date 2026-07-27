@@ -169,7 +169,7 @@ const transformPaginatedResponse = (response, itemTransformer) => {
 
   const page = responseData.pagination?.page || responseData.page || 1
   const pageSize = responseData.pagination?.pageSize || responseData.pageSize || 10
-  const totalItems = responseData.pagination?.totalItems || responseData.totalCount || rawItems.length
+  const totalItems = responseData.pagination?.totalItems || responseData.pagination?.total || responseData.totalCount || rawItems.length
   const totalPages = responseData.pagination?.totalPages || Math.ceil(totalItems / pageSize) || 1
 
   return {
@@ -1218,12 +1218,44 @@ export const coursesApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
     }),
 
-    // Get list posts in a bulletin board
-    getListPostsInBulletinBoard: builder.query({
-      query: ({ classId, boardId }) => ({
-        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+    // Get list posts in a bulletin board (Student)
+    getStudentListPostsInBulletinBoard: builder.query({
+      query: ({ classId, boardId, page = 1, pageSize = 10 }) => ({
+        url: `/student/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+        method: "GET",
+        params: { page, pageSize },
+      }),
+      transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
+      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Get post detail (Student)
+    getStudentPostDetail: builder.query({
+      query: ({ classId, postId }) => ({
+        url: `/student/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
         method: "GET",
       }),
+      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Create comment in a bulletin board (Student)
+    createStudentCommentInBulletinBoard: builder.mutation({
+      query: ({ classId, postId, content }) => ({
+        url: `/student/classes/${classId}/curriculum/bulletin-boards/posts/${postId}/replies`,
+        method: "POST",
+        body: { content },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Get list posts in a bulletin board
+    getListPostsInBulletinBoard: builder.query({
+      query: ({ classId, boardId, page = 1, pageSize = 10 }) => ({
+        url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
+        method: "GET",
+        params: { page, pageSize },
+      }),
+      transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
       providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
     }),
 
@@ -1392,4 +1424,7 @@ export const {
   useUpdateCommentInBulletinBoardMutation,
   useDeleteCommentInBulletinBoardMutation,
   useCreateReplyInCommentMutation,
+  useGetStudentListPostsInBulletinBoardQuery,
+  useGetStudentPostDetailQuery,
+  useCreateStudentCommentInBulletinBoardMutation,
 } = coursesApi

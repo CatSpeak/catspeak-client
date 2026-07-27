@@ -5,12 +5,13 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import DataTable from "@/shared/components/ui/DataTable"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
-import { useGetListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation, useDeletePostInBulletinBoardMutation, useGetStudentClassDetailQuery } from "@/store/api/coursesApi"
+import { useGetListPostsInBulletinBoardQuery, useGetStudentListPostsInBulletinBoardQuery, useUpdatePostInBulletinBoardMutation, useDeletePostInBulletinBoardMutation, useGetStudentClassDetailQuery } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Pagination from "@/shared/components/ui/navigation/Pagination"
 
 const BulletinBoardPage = () => {
   const navigate = useNavigate()
@@ -32,20 +33,36 @@ const BulletinBoardPage = () => {
   const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}`
 
   const [searchTerm, setSearchTerm] = useState("")
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(10)
   const [updatePost] = useUpdatePostInBulletinBoardMutation()
   const [deletePost] = useDeletePostInBulletinBoardMutation()
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, postId: null })
 
-  const { data: apiPosts, isLoading: isPostsLoading } = useGetListPostsInBulletinBoardQuery(
-    { classId, boardId },
-    { skip: !classId || !boardId }
+  const teacherQuery = useGetListPostsInBulletinBoardQuery(
+    { classId, boardId, page, pageSize },
+    { skip: !classId || !boardId || isStudent }
   )
+  const studentQuery = useGetStudentListPostsInBulletinBoardQuery(
+    { classId, boardId, page, pageSize },
+    { skip: !classId || !boardId || !isStudent }
+  )
+
+  const { data: apiPosts, isLoading: isPostsLoading } = isStudent ? studentQuery : teacherQuery
   const isLoading = isPostsLoading
 
+  const paginationRaw = apiPosts?.pagination || {}
+  const pagination = {
+    page: paginationRaw.page || 1,
+    pageSize: paginationRaw.pageSize || 10,
+    totalPages: paginationRaw.totalPages || Math.ceil((paginationRaw.totalItems || paginationRaw.total || 0) / (paginationRaw.pageSize || 10)) || 1,
+    total: paginationRaw.totalItems || paginationRaw.total || 0
+  }
+
   // Format data for DataTable
-  const postsArray = Array.isArray(apiPosts)
-    ? apiPosts
-    : (apiPosts?.items || apiPosts?.posts || apiPosts?.data || [])
+  const postsArray = Array.isArray(apiPosts?.data || apiPosts)
+    ? (apiPosts?.data || apiPosts)
+    : (apiPosts?.items || apiPosts?.posts || [])
 
   const posts = postsArray
     .filter((post) => post.title?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -190,7 +207,7 @@ const BulletinBoardPage = () => {
                 render: (row) => (
                   <div
                     className="flex items-center cursor-pointer hover:underline w-[352px]"
-                    onClick={() => navigate(`${basePath}/class/${classId}/bulletin-board/posts/${row.id}`)}
+                    onClick={() => navigate(`${basePath}/class/${classId}/bulletin-board/posts/${row.id}`, { state: { boardId } })}
                   >
                     <span className={`font-semibold text-[#A00000]`}>
                       {row.title}
@@ -264,6 +281,15 @@ const BulletinBoardPage = () => {
             rowKey={(row) => row.id}
             className="text-[#5B403C] text-sm font-semibold"
           />
+          {pagination.totalPages > 1 && (
+            <div className="p-6 border-t border-[#E2E2E2] flex justify-end">
+              <Pagination
+                page={pagination.page}
+                totalPages={pagination.totalPages}
+                onChangePage={setPage}
+              />
+            </div>
+          )}
         </div>
       </div>
 
