@@ -19,7 +19,7 @@ const LessonActionMenu = ({
   return (
     <div className="absolute right-0 top-10 z-30 animate-fadeIn">
       <MenuList className="w-44 rounded-xl shadow-faq-card text-sm text-[#1A1A1A]">
-        {item?.type === "bulletinBoard" && (
+        {(item?.type === "bulletinBoard" || item?.type === "link") && (
           <MenuItem
             icon={<Pencil size={15} className="text-[#1A1A1A]" />}
             label={dict.edit || "Chỉnh sửa"}

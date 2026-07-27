@@ -635,7 +635,8 @@ export default {
       emptyStateHint: "Bắt đầu bằng cách thêm các mục và bài học.",
       toastDeleteSuccess: "Đã xoá thành công",
       toastDeleteError: "Lỗi khi xoá",
-      addLinkSuccess: "Thêm liên kết YouTube thành công!",
+      addLinkSuccess: "Thêm liên kết thành công!",
+      updateLinkSuccess: "Cập nhật liên kết thành công!",
       addLinkError: "Lỗi khi thêm liên kết",
       addActivitySuccess: "Thêm hoạt động thành công!",
       addMaterialSuccess: "Tải tài liệu lên thành công!",
@@ -673,13 +674,15 @@ export default {
         dueDate: "Hạn nộp",
       },
       addLink: {
-        title: "Thêm liên kết Youtube",
+        title: "Thêm liên kết",
         linkName: "Tên liên kết",
         linkPlaceholder: "VD: Bài giảng...",
         url: "URL",
         urlPlaceholder: "Dán link video tại đây",
         cancel: "Hủy",
-        add: "Thêm"
+        add: "Thêm",
+        editTitle: "Cập nhật liên kết",
+        save: "Lưu thay đổi",
       },
       addMaterial: {
         title: "Thêm tài liệu",

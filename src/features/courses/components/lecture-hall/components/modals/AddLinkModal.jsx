@@ -10,6 +10,8 @@ const AddLinkModal = ({
   open = false,
   onClose = () => { },
   onSubmit = () => { },
+  mode = "create",
+  initialData = null,
 }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.modals.addLink || {}
@@ -17,6 +19,22 @@ const AddLinkModal = ({
   const [title, setTitle] = useState("")
   const [url, setUrl] = useState("")
   const [isVisible, setIsVisible] = useState(true)
+  const [prevOpen, setPrevOpen] = useState(open)
+
+  if (open !== prevOpen) {
+    setPrevOpen(open)
+    if (open) {
+      if (mode === "edit" && initialData) {
+        setTitle(initialData.title || "")
+        setUrl(initialData.url || "")
+        setIsVisible(initialData.isVisibleToStudents ?? true)
+      } else {
+        setTitle("")
+        setUrl("")
+        setIsVisible(true)
+      }
+    }
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -38,7 +56,7 @@ const AddLinkModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title={dict.title || "Thêm liên kết Youtube"}
+      title={mode === "edit" ? (dict.editTitle || "Cập nhật liên kết") : (dict.title || "Thêm liên kết Youtube")}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -54,11 +72,8 @@ const AddLinkModal = ({
           >
             {dict.cancel || "Hủy"}
           </PillButton>
-          <PillButton
-            type="submit"
-            onClick={handleSubmit}
-          >
-            {dict.add || "Lưu"}
+          <PillButton type="submit" onClick={handleSubmit}>
+            {mode === "edit" ? (dict.save || "Lưu") : (dict.add || "Thêm")}
           </PillButton>
         </div>
       }

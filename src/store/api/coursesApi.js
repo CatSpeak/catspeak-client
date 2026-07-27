@@ -1171,11 +1171,17 @@ export const coursesApi = baseApi.injectEndpoints({
       query: ({ classId, sectionId, title, url, isVisibleToStudents = true }) => ({
         url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/links`,
         method: "POST",
-        body: {
-          title,
-          url,
-          isVisibleToStudents,
-        },
+        body: { title, url, isVisibleToStudents },
+      }),
+      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+    }),
+
+    // Update a link in a curriculum section
+    updateCurriculumLink: builder.mutation({
+      query: ({ classId, linkId, ...data }) => ({
+        url: `/teacher/classes/${classId}/curriculum/links/${linkId}`,
+        method: "PUT",
+        body: data,
       }),
       invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
     }),
@@ -1405,6 +1411,11 @@ export const {
   useCreateCurriculumSectionMutation,
   useUpdateCurriculumSectionMutation,
   useDeleteCurriculumSectionMutation,
+  useCreateCurriculumBulletinBoardMutation,
+  useUpdateCurriculumBulletinBoardMutation,
+  useCreateCurriculumMaterialMutation,
+  useUpdateCurriculumLinkMutation,
+  useCreateCurriculumAssignmentMutation,
   useUploadMaterialToSectionMutation,
   useAddLinkToSectionMutation,
   useCreateBulletinBoardMutation,

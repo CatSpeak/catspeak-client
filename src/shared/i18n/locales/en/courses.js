@@ -636,6 +636,7 @@ export default {
       toastDeleteSuccess: "Deleted successfully",
       toastDeleteError: "Failed to delete",
       addLinkSuccess: "YouTube link added successfully!",
+      updateLinkSuccess: "YouTube link updated successfully!",
       addLinkError: "Failed to add link",
       addActivitySuccess: "Activity added successfully!",
       addMaterialSuccess: "Material uploaded successfully!",
@@ -680,7 +681,9 @@ export default {
         url: "URL",
         urlPlaceholder: "Paste video URL here",
         cancel: "Cancel",
-        add: "Add"
+        add: "Add",
+        editTitle: "Update Link",
+        save: "Save changes",
       },
       addMaterial: {
         title: "Add Material",

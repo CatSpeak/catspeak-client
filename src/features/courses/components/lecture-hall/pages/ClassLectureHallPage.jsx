@@ -11,6 +11,7 @@ import {
   useUpdateCurriculumSectionMutation,
   useUploadMaterialToSectionMutation,
   useAddLinkToSectionMutation,
+  useUpdateCurriculumLinkMutation,
   useCreateBulletinBoardMutation,
   useUpdateBulletinBoardMutation,
   useAddAssignmentToSectionMutation,
@@ -41,6 +42,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const [updateSection] = useUpdateCurriculumSectionMutation()
   const [uploadMaterial] = useUploadMaterialToSectionMutation()
   const [addLink] = useAddLinkToSectionMutation()
+  const [updateLink] = useUpdateCurriculumLinkMutation()
   const [createBulletinBoard] = useCreateBulletinBoardMutation()
   const [updateBulletinBoard] = useUpdateBulletinBoardMutation()
   const [addAssignment] = useAddAssignmentToSectionMutation()
@@ -93,12 +95,14 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   }
 
   const handleEditItem = (sectionId, item) => {
+    setTargetSectionId(sectionId)
+    const targetSec = sections.find((s) => s.id === sectionId)
+    setTargetSectionName(targetSec?.title || "Unknown Section")
+    setEditItemData(item)
     if (item.type === "bulletinBoard") {
-      setTargetSectionId(sectionId)
-      const targetSec = sections.find((s) => s.id === sectionId)
-      setTargetSectionName(targetSec?.title || "Unknown Section")
-      setEditItemData(item)
       setActiveModal("announcement")
+    } else if (item.type === "link") {
+      setActiveModal("link")
     }
   }
 
@@ -295,37 +299,82 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   // 4. Add Link
   const handleSaveLink = async (data) => {
     if (id) {
-      try {
-        await addLink({
-          classId: id,
-          sectionId: targetSectionId,
-          title: data.title,
-          url: data.url,
-          isVisibleToStudents: data.isVisible,
-        }).unwrap()
-        toast.success(dict.curriculum.addLinkSuccess || "Đã thêm liên kết mới!")
-        setSectionsOverride(null)
-      } catch (err) {
-        toast.error(err?.data?.message || err?.message || dict.curriculum.addLinkError || "Lỗi khi thêm liên kết.")
+      if (editItemData) {
+        // Edit mode
+        try {
+          await updateLink({
+            classId: id,
+            linkId: editItemData.itemId,
+            title: data.title,
+            url: data.url,
+            isVisibleToStudents: data.isVisible,
+          }).unwrap()
+
+          if (editItemData.isVisibleToStudents !== data.isVisible) {
+            await changeItemVisibility({
+              classId: id,
+              itemId: editItemData.id,
+              isVisibleToStudents: data.isVisible,
+            }).unwrap()
+          }
+
+          toast.success(dict.curriculum.updateLinkSuccess || "Đã cập nhật liên kết!")
+          setSectionsOverride(null)
+        } catch (err) {
+          toast.error(err?.data?.message || err?.message || dict.curriculum.addLinkError || "Lỗi khi cập nhật liên kết.")
+        }
+      } else {
+        // Create mode
+        try {
+          await addLink({
+            classId: id,
+            sectionId: targetSectionId,
+            title: data.title,
+            url: data.url,
+            isVisibleToStudents: data.isVisible,
+          }).unwrap()
+          toast.success(dict.curriculum.addLinkSuccess || "Đã thêm liên kết mới!")
+          setSectionsOverride(null)
+        } catch (err) {
+          toast.error(err?.data?.message || err?.message || dict.curriculum.addLinkError || "Lỗi khi thêm liên kết.")
+        }
       }
     } else {
-      const newItem = {
-        id: `item-${Date.now()}`,
-        type: "link",
-        title: data.title,
-        meta: data.url || "",
-        metaType: "none",
-        isVisibleToStudents: data.isVisible,
-      }
-
-      updateSections((prev) =>
-        prev.map((sec) =>
-          sec.id === targetSectionId
-            ? { ...sec, items: [...sec.items, newItem] }
-            : sec
+      if (editItemData) {
+        updateSections((prev) =>
+          prev.map((sec) =>
+            sec.id === targetSectionId
+              ? {
+                ...sec,
+                items: sec.items.map((it) =>
+                  it.id === editItemData.id
+                    ? { ...it, title: data.title, meta: data.url, isVisibleToStudents: data.isVisible }
+                    : it
+                ),
+              }
+              : sec
+          )
         )
-      )
-      toast.success(dict.curriculum.addLinkSuccess || "Đã thêm liên kết mới!")
+        toast.success(dict.curriculum.addLinkSuccess || "Đã cập nhật liên kết!")
+      } else {
+        const newItem = {
+          id: `item-${Date.now()}`,
+          type: "link",
+          title: data.title,
+          meta: data.url || "",
+          metaType: "none",
+          isVisibleToStudents: data.isVisible,
+        }
+
+        updateSections((prev) =>
+          prev.map((sec) =>
+            sec.id === targetSectionId
+              ? { ...sec, items: [...sec.items, newItem] }
+              : sec
+          )
+        )
+        toast.success(dict.curriculum.addLinkSuccess || "Đã thêm liên kết mới!")
+      }
     }
   }
 
@@ -642,7 +691,20 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
       {/* 4. Add Link Modal */}
       <AddLinkModal
         open={activeModal === "link"}
-        onClose={() => setActiveModal(null)}
+        mode={editItemData ? "edit" : "create"}
+        initialData={
+          editItemData
+            ? {
+              title: editItemData.title,
+              url: editItemData.link?.url || editItemData.meta || "",
+              isVisibleToStudents: editItemData.isVisibleToStudents,
+            }
+            : null
+        }
+        onClose={() => {
+          setActiveModal(null)
+          setEditItemData(null)
+        }}
         onSubmit={handleSaveLink}
         sessionName={targetSectionName}
       />

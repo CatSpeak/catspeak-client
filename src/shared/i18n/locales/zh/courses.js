@@ -636,6 +636,7 @@ export default {
       toastDeleteSuccess: "删除成功",
       toastDeleteError: "删除失败",
       addLinkSuccess: "添加 YouTube 链接成功！",
+      updateLinkSuccess: "更新 YouTube 链接成功！",
       addLinkError: "添加链接失败",
       addActivitySuccess: "添加活动成功！",
       addMaterialSuccess: "材料上传成功！",
@@ -679,7 +680,9 @@ export default {
         url: "网址 (URL)",
         urlPlaceholder: "在此粘贴视频链接",
         cancel: "取消",
-        add: "添加"
+        add: "添加",
+        editTitle: "更新链接",
+        save: "保存更改",
       },
       addMaterial: {
         title: "添加材料",
