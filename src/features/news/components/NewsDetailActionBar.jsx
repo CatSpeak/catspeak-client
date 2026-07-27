@@ -59,10 +59,14 @@ const NewsDetailActionBar = ({
                   ? "bg-yellow-50 text-yellow-600 border-cath-red-700"
                   : newsItem?.currentUserReaction === "Like"
                     ? "bg-blue-50 text-blue-600 border-cath-red-700"
-                    : "bg-white text-cath-red-700 border-cath-red-700 hover:bg-cath-red-50"
+                    : "bg-white text-cath-red-700 border-cath-red-700 hover:bg-gray-100"
             }`}
           >
-            <ReactionIcon reaction={newsItem?.currentUserReaction} size={16} />
+            <ReactionIcon
+              reaction={newsItem?.currentUserReaction}
+              size={16}
+              color={!newsItem?.currentUserReaction ? "cath-cath-red-700" : undefined}
+            />
             <span className="font-medium text-base">{getReactionLabel()}</span>
           </button>
 
@@ -72,6 +76,7 @@ const NewsDetailActionBar = ({
             onClose={() => setShowReactions(false)}
             onSelect={(_, type) => handleReact(type)}
             iconSize={18}
+            color={!newsItem?.currentUserReaction ? "cath-cath-red-700" : undefined}
             className="mb-2"
           />
         </div>

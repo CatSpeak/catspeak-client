@@ -65,6 +65,7 @@ const ReactionsPopover = ({
   reactions = DEFAULT_REACTIONS,
   className = "",
   size = "sm",
+  color,
 }) => {
   return (
     <AnimatePresence>
@@ -107,6 +108,7 @@ export const ReactionIcon = ({
   size = 16,
   strokeWidth = 1.5,
   className = "",
+  color,
 }) => {
   if (reaction === "Love" || reaction === 2) {
     return (
@@ -135,11 +137,19 @@ export const ReactionIcon = ({
       />
     );
   }
+
+  const getColorClass = (c) => {
+    if (!c) return "text-[#7b7979]";
+    if (c.startsWith("text-")) return c;
+    const cleaned = c.replace(/^cath-/, "");
+    return `text-${cleaned}`;
+  };
+
   return (
     <ThumbsUp
       size={size}
       strokeWidth={strokeWidth}
-      className={`text-cath-red-700 ${className}`}
+      className={`${getColorClass(color)} ${className}`}
     />
   );
 };
