@@ -3,6 +3,7 @@ import { MessageSquareOff, MessageSquare } from "lucide-react"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import CommentItem from "./CommentItem"
 import CommentInput from "./CommentInput"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * Section "Phản hồi" hoàn chỉnh: header, ô nhập, danh sách bình luận.
@@ -34,6 +35,9 @@ const CommentList = ({
   onViewReplies,
   onShowAll,
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.postDetail
+
   const totalCount = comments.length
   const visibleComments = showAll ? comments : comments.slice(0, previewCount)
   const hasMore = !showAll && totalCount > previewCount
@@ -42,7 +46,7 @@ const CommentList = ({
     <div className="bg-[#F8F9FA] rounded-xl border border-[#E2E2E2] shadow-faq-card">
       {/* ── Header ── */}
       <div className="flex items-center gap-3 px-8 py-5 border-b border-[#E2E2E2]">
-        <span className="text-xl font-bold text-[#191C1D]">Phản hồi</span>
+        <span className="text-xl font-bold text-[#191C1D]">{dict.replies || "Phản hồi"}</span>
         {totalCount > 0 && (
           <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#FEA53F] text-[#6C3E00] text-xs font-bold">
             {totalCount}
@@ -57,6 +61,7 @@ const CommentList = ({
             currentUserAvatar={currentUserAvatar}
             currentUserName={currentUserName}
             onSubmit={onSubmit}
+            placeholder={dict.inputPlaceholder || "Nhập phản hồi"}
           />)
         }
 
@@ -64,19 +69,19 @@ const CommentList = ({
         {locked ? (
           <EmptyState
             icon={MessageSquareOff}
-            message="Đã khóa bình luận"
+            message={dict.lockedComments || "Đã khóa bình luận"}
             variant="component"
           >
-            <p className="text-base text-[#7B7979] mt-4">Tính năng bình luận đã bị khóa</p>
+            <p className="text-base text-[#7B7979] mt-4">{dict.lockedCommentsDesc || "Tính năng bình luận đã bị khóa"}</p>
           </EmptyState>
         ) : totalCount === 0 ? (
           /* ── No comments state ── */
           <EmptyState
             icon={MessageSquare}
-            message="Không có bình luận"
+            message={dict.noComments || "Không có bình luận"}
             variant="component"
           >
-            <p className="text-base text-[#7B7979] mt-4">Không có bình luận mới ở đây</p>
+            <p className="text-base text-[#7B7979] mt-4">{dict.noCommentsDesc || "Không có bình luận mới ở đây"}</p>
           </EmptyState>
         ) : (
           /* ── Normal state: input + list ── */
@@ -101,7 +106,7 @@ const CommentList = ({
                   className="text-sm font-semibold text-[#750000] hover:opacity-75 transition-opacity"
                   onClick={onShowAll}
                 >
-                  Xem tất cả
+                  {dict.viewAll || "Xem tất cả"}
                 </button>
               </div>
             )}

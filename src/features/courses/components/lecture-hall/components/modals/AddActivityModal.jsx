@@ -16,7 +16,8 @@ const AddActivityModal = ({
   classId,
   existingActivityIds = [],
 }) => {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
+  const dict = t.courses.lectureHall.modals.addActivity || {}
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedIds, setSelectedIds] = useState([])
   const [prevOpen, setPrevOpen] = useState(open)
@@ -101,7 +102,7 @@ const AddActivityModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title="Thêm hoạt động học tập"
+      title={dict.title || "Thêm hoạt động học tập"}
       className="md:max-w-[900px] rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -116,7 +117,7 @@ const AddActivityModal = ({
             borderColor={"#E2E2E2"}
             className="flex-1"
           >
-            Hủy
+            {dict.cancel || "Hủy"}
           </PillButton>
           <PillButton
             type="button"
@@ -124,7 +125,7 @@ const AddActivityModal = ({
             disabled={selectedIds.length === 0}
             className="flex-1"
           >
-            Thêm các hoạt động đã chọn ({selectedIds.length})
+            {dict.add || "Thêm các hoạt động đã chọn"} ({selectedIds.length})
           </PillButton>
         </div>
       }
@@ -137,7 +138,7 @@ const AddActivityModal = ({
               icon={Search}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm kiếm hoạt động..."
+              placeholder={dict.searchPlaceholder || "Tìm kiếm bằng ID hoặc tiêu đề..."}
               className="rounded-xl !h-[40px] px-4 text-sm"
             />
           </div>
@@ -151,21 +152,21 @@ const AddActivityModal = ({
             </div>
           ) : filteredActivities.length === 0 ? (
             <div className="text-center py-8 text-sm text-gray-500">
-              Không tìm thấy bài tập nào.
+              {dict.noActivitiesFound || "Không tìm thấy bài tập nào."}
             </div>
           ) : (
             filteredActivities.map((act) => {
               const uid = `${act._activityType}-${act.id}`
               const isChecked = selectedIds.includes(uid)
-              const title = act._activityType === "quiz" ? (act.title || act.name || "Bài kiểm tra") : getAssignmentTitle(act)
+              const title = act._activityType === "quiz" ? (act.title || act.name || dict.defaultQuizName || "Bài kiểm tra") : getAssignmentTitle(act)
               const status = act._activityType === "quiz" ? (act.status || "published") : getAssignmentStatus(act)
-              const statusLabel = status === "published" ? "Đã phát hành" : (status === "draft" ? "Nháp" : "Đóng")
+              const statusLabel = status === "published" ? (dict.statusPublished || "Đã phát hành") : (status === "draft" ? (dict.statusDraft || "Nháp") : (dict.statusClosed || "Đóng"))
 
               const type = act._activityType === "quiz" ? "quiz" : "submission"
-              const typeLabel = act._activityType === "quiz" ? "Bài kiểm tra" : "Bài tập"
+              const typeLabel = act._activityType === "quiz" ? (dict.typeQuiz || "Bài kiểm tra") : (dict.typeSubmission || "Bài tập")
               const dueDateLabel = act.dueDate
-                ? new Date(act.dueDate).toLocaleString(language === "vi" ? "vi-VN" : "en-US")
-                : "Chưa thiết lập"
+                ? new Date(act.dueDate).toLocaleString(language === "vi" ? "vi-VN" : (language === "zh" ? "zh-CN" : "en-US"))
+                : (dict.noDueDate || "Chưa thiết lập")
 
               return (
                 <div
@@ -210,7 +211,7 @@ const AddActivityModal = ({
                   {/* Right info (Due Date) */}
                   <div className="text-right">
                     <span className="text-xs text-[#5B403C] block font-medium">
-                      Hạn nộp
+                      {dict.dueDate || "Hạn nộp"}
                     </span>
                     <span className="text-sm text-[#191C1D] font-normal">
                       {dueDateLabel}

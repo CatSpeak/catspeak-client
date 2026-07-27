@@ -14,6 +14,7 @@ import {
 import { IconButton } from "@/shared/components/ui/buttons"
 import LessonActionMenu from "./LessonActionMenu"
 import { getDisplayData } from "../../utils/curriculumUtils"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Helper function to resolve icon, background, and left accent border based on item type
 const getItemConfig = (type) => {
@@ -57,6 +58,9 @@ const LessonItemRow = ({
   onDeleteItem = () => { },
   className = "",
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.curriculum
+
   const navigate = useNavigate()
   const { id: classId } = useParams()
 
@@ -117,7 +121,7 @@ const LessonItemRow = ({
             </h4>
             {item.isVisibleToStudents === false && (
               <span className="inline-flex items-center gap-1 bg-[#E1E3E4] text-[#5B403C] text-xs px-2 py-0.5 rounded-full font-medium">
-                <EyeOff size={12} /> <span className="font-medium">Đang ẩn</span>
+                <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus || "Đang ẩn"}</span>
               </span>
             )}
           </div>
@@ -142,7 +146,7 @@ const LessonItemRow = ({
             size="xs"
             variant="ghost"
             onClick={onToggleMenu}
-            title="Tùy chọn bài học"
+            title={dict.lessonOptionsTooltip || "Tùy chọn bài học"}
           >
             <MoreVertical size={16} />
           </IconButton>

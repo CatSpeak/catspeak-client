@@ -5,10 +5,13 @@ import { useGetUserProfileQuery } from '@/store/api/userApi'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const LinkYoutubePage = () => {
   const { id: classId, itemId } = useParams()
   const navigate = useNavigate()
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall
 
   // Robust role check using accountId
   const { data: profileResponse } = useGetUserProfileQuery()
@@ -85,7 +88,7 @@ const LinkYoutubePage = () => {
       <div className="p-6 max-w-[1200px] mx-auto w-full">
         <button onClick={() => navigate(`/workspace/courses/class/${classId}`)} className="flex items-center gap-2 text-[#5B403C] hover:text-[#D94C38] transition-colors mb-6 font-medium">
           <ArrowLeft size={16} />
-          <span>Quay lại lớp học</span>
+          <span>{dict.postDetail.back || "Quay lại lớp học"}</span>
         </button>
         <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
           Không tìm thấy link này.
@@ -102,12 +105,12 @@ const LinkYoutubePage = () => {
           <Breadcrumb
             className="text-[#7B7979] text-sm"
             items={[
-              { label: "Trang chủ", onClick: () => navigate("/workspace") },
-              { label: isStudent ? "Khóa học & Học tập của tôi" : "Khóa học của tôi", onClick: () => navigate(basePath) },
-              { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
-              { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
-              { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
-              { label: "Tài liệu", active: true },
+              { label: dict.postDetail.breadcrumbs.home || "Trang chủ", onClick: () => navigate("/workspace") },
+              { label: isStudent ? (dict.postDetail.breadcrumbs.myLearning || "Khóa học & Học tập của tôi") : (dict.postDetail.breadcrumbs.myCourses || "Khóa học của tôi"), onClick: () => navigate(basePath) },
+              { label: dict.postDetail.breadcrumbs.allCourses || "Toàn bộ khóa học", onClick: () => navigate(basePath) },
+              { label: dict.postDetail.breadcrumbs.courseDetail || "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+              { label: dict.postDetail.breadcrumbs.classDetail || "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
+              { label: dict.curriculum.link || "Tài liệu", active: true },
             ]}
           />
 
@@ -115,7 +118,7 @@ const LinkYoutubePage = () => {
             className="inline-flex items-center gap-2 text-sm text-[#5B403C] hover:text-[#D94C38] cursor-pointer transition-colors w-fit font-medium"
             onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
           >
-            <ArrowLeft size={16} /> Quay lại
+            <ArrowLeft size={16} /> {dict.postDetail.back || "Quay lại"}
           </div>
         </div>
 

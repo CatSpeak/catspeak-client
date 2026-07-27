@@ -1,6 +1,7 @@
 import React from "react"
 import { Pencil, EyeOff, Trash, FilePlusCorner, Folder, BookOpen, Link2, Eye, ArrowUp, ArrowDown } from "lucide-react"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const SectionActionMenu = ({
   open = false,
@@ -11,6 +12,9 @@ const SectionActionMenu = ({
   onDelete = () => { },
   onAddContent = () => { },
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.curriculum
+
   if (!open) return null
 
   return (
@@ -18,7 +22,7 @@ const SectionActionMenu = ({
       <MenuList className="w-[218px] rounded-xl shadow-faq-card text-sm text-[#1A1A1A]">
         <MenuItem
           icon={<FilePlusCorner size={14} className="text-[#1A1A1A]" />}
-          label="Tạo bảng tin"
+          label={dict.createBoard || "Tạo bảng tin"}
           onClick={() => {
             onAddContent("announcement")
             onClose()
@@ -26,7 +30,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Folder size={14} className="text-[#1A1A1A]" />}
-          label="Thêm tài liệu"
+          label={dict.addMaterial || "Thêm tài liệu"}
           onClick={() => {
             onAddContent("material")
             onClose()
@@ -34,7 +38,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<BookOpen size={14} className="text-[#1A1A1A]" />}
-          label="Thêm hoạt động học tập"
+          label={dict.addActivity || "Thêm hoạt động học tập"}
           onClick={() => {
             onAddContent("assignment")
             onClose()
@@ -42,7 +46,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Link2 size={14} className="text-[#1A1A1A]" />}
-          label="Thêm liên kết"
+          label={dict.addLink || "Thêm liên kết"}
           onClick={() => {
             onAddContent("link")
             onClose()
@@ -50,7 +54,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Pencil size={14} className="text-[#1A1A1A]" />}
-          label="Chỉnh sửa"
+          label={dict.edit || "Chỉnh sửa"}
           onClick={() => {
             onEdit(section)
             onClose()
@@ -58,7 +62,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={section?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
-          label={"Tuỳ chỉnh ẩn/hiện"}
+          label={dict.toggleVisibility || "Tuỳ chỉnh ẩn/hiện"}
           onClick={() => {
             onToggleVisibility(section.id)
             onClose()
@@ -66,7 +70,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Trash size={15} className="text-[#1A1A1A]" />}
-          label="Xoá"
+          label={dict.delete || "Xoá"}
           onClick={() => {
             onDelete(section.id)
             onClose()

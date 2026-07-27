@@ -7,8 +7,11 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import { toast } from "react-hot-toast"
 import Modal from "@/shared/components/ui/Modal"
 import FileAttachmentItem from "../ui/FileAttachmentItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.createPost || {}
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -105,7 +108,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
     <Modal
       open={open}
       onClose={handleCloseModal}
-      title="Thêm bài viết"
+      title={dict.title || "Thêm bài viết"}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -119,10 +122,10 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
             textColor={"#72000d"}
             borderColor={"#E2E2E2"}
           >
-            Hủy
+            {dict.cancel || "Hủy"}
           </PillButton>
           <PillButton onClick={handleSubmit}>
-            Lưu
+            {dict.save || "Lưu"}
           </PillButton>
         </div>
       }
@@ -131,13 +134,13 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
         {/* Tiêu đề */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            Tiêu đề bài viết <span className="text-[#EF4444]">*</span>
+            {dict.postName || "Tiêu đề bài viết"} <span className="text-[#EF4444]">*</span>
           </label>
           <TextInput
             required
             value={formData.title}
             onChange={(e) => handleChange("title", e.target.value)}
-            placeholder="Nhập tiêu đề..."
+            placeholder={dict.postNamePlaceholder || "Nhập tiêu đề..."}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
         </div>
@@ -145,7 +148,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
         {/* Nội dung */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            Nội dung <span className="text-[#EF4444]">*</span>
+            {dict.content || "Nội dung"} <span className="text-[#EF4444]">*</span>
           </label>
           <Editor
             tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
@@ -158,7 +161,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
               plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
               toolbar:
                 "bold italic underline strikethrough | emoticons link | bullist numlist",
-              placeholder: "Viết nội dung ở đây...",
+              placeholder: dict.contentPlaceholder || "Viết nội dung ở đây...",
               skin: "oxide",
               setup: (editor) => {
                 editor.on("focus", () => { })
@@ -170,7 +173,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
         {/* Tệp đính kèm */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            Tệp tải lên ({selectedFile ? "1/1" : "0/1"})
+            {dict.attachments || "Tệp tải lên"} ({selectedFile ? "1/1" : "0/1"})
           </label>
 
           <input
@@ -198,10 +201,10 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
               </div>
               <div>
                 <p className="text-xs sm:text-sm text-[#72000d] font-bold mb-1">
-                  Kéo thả tệp hoặc nhấp để tải lên
+                  {dict.attachmentsDesc || "Kéo thả tệp hoặc nhấp để tải lên"}
                 </p>
                 <p className="text-[11px] text-gray-500 mt-1">
-                  Hỗ trợ PDF, DOCX, PPTX, JPG, PNG (Tối đa 10MB)
+                  {dict.supportedFiles || "Hỗ trợ PDF, DOCX, PPTX, JPG, PNG (Tối đa 10MB)"}
                 </p>
               </div>
             </div>
@@ -248,7 +251,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-semibold text-[#191C1D] text-sm">Hiển thị với học viên</p>
+              <p className="font-semibold text-[#191C1D] text-sm">{dict.visibleToStudents || "Hiển thị với học viên"}</p>
               <p className="text-sm text-[#6B7280]">Bài viết được công khai trên bảng tin lớp học</p>
             </div>
             <Switch

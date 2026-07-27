@@ -4,12 +4,16 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput, Switch } from "@/shared/components/ui/inputs"
 import { Link2 } from "lucide-react"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const AddLinkModal = ({
   open = false,
   onClose = () => { },
   onSubmit = () => { },
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.modals.addLink || {}
+
   const [title, setTitle] = useState("")
   const [url, setUrl] = useState("")
   const [isVisible, setIsVisible] = useState(true)
@@ -34,7 +38,7 @@ const AddLinkModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title="Thêm liên kết"
+      title={dict.title || "Thêm liên kết Youtube"}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -48,13 +52,13 @@ const AddLinkModal = ({
             textColor={"#72000d"}
             borderColor={"#E2E2E2"}
           >
-            Hủy
+            {dict.cancel || "Hủy"}
           </PillButton>
           <PillButton
             type="submit"
             onClick={handleSubmit}
           >
-            Lưu
+            {dict.add || "Lưu"}
           </PillButton>
         </div>
       }
@@ -64,13 +68,13 @@ const AddLinkModal = ({
         {/* Display Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            Tên hiển thị <span className="text-[#EF4444]">*</span>
+            {dict.linkName || "Tên liên kết"} <span className="text-[#EF4444]">*</span>
           </label>
           <TextInput
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ví dụ: Video bài giảng, Tài liệu đọc thêm..."
+            placeholder={dict.linkPlaceholder || "Ví dụ: Video bài giảng, Tài liệu đọc thêm..."}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
         </div>
@@ -78,7 +82,7 @@ const AddLinkModal = ({
         {/* URL Link Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            Đường dẫn liên kết (URL) <span className="text-[#EF4444]">*</span>
+            {dict.url || "URL"} <span className="text-[#EF4444]">*</span>
           </label>
           <TextInput
             required
@@ -86,7 +90,7 @@ const AddLinkModal = ({
             icon={Link2}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
+            placeholder={dict.urlPlaceholder || "Dán link video tại đây"}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
         </div>
@@ -95,10 +99,10 @@ const AddLinkModal = ({
         <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl px-4 py-3 flex items-center justify-between">
           <div className="space-y-0.5">
             <p className="text-sm font-semibold text-[#111827]">
-              Hiển thị với học viên
+              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
             </p>
             <p className="text-xs text-[#6B7280] font-normal">
-              Học viên có thể nhìn thấy liên kết này ngay lập tức
+              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
             </p>
           </div>
           <Switch

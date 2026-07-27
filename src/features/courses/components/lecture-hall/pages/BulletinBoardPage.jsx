@@ -12,10 +12,13 @@ import Dropdown from "@/shared/components/ui/Dropdown"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Pagination from "@/shared/components/ui/navigation/Pagination"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
-const BulletinBoardPage = () => {
+export default function BulletinBoardPage() {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
+  const { t, language } = useLanguage()
+  const dict = t.courses.lectureHall
 
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}
@@ -70,12 +73,12 @@ const BulletinBoardPage = () => {
       id: post.id,
       title: post.title,
       author: post.accountName,
-      date: post.createdAt ? new Date(post.createdAt).toLocaleDateString("vi-VN") : "",
+      date: post.createdAt ? new Date(post.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
       replies: post.replyCount,
       isPinned: post.isPinned,
       isVisibleToStudents: post.isVisibleToStudents,
       allowReply: post.allowReply,
-      status: post.isVisibleToStudents ? "Đang hiển thị" : "Đang ẩn",
+      status: post.isVisibleToStudents ? (dict.bulletinBoard.visibility.visible || "Đang hiển thị") : (dict.bulletinBoard.visibility.hidden || "Đang ẩn"),
     }))
 
   const handleAction = async (action, rowId) => {
@@ -116,9 +119,9 @@ const BulletinBoardPage = () => {
         postId: rowId,
         formData
       }).unwrap()
-      toast.success("Cập nhật thành công")
+      toast.success(dict.createPost.toastUpdateSuccess || "Cập nhật thành công")
     } catch {
-      toast.error("Cập nhật thất bại")
+      toast.error(dict.createPost.toastError || "Cập nhật thất bại")
     }
   }
 
@@ -126,9 +129,9 @@ const BulletinBoardPage = () => {
     if (!deleteConfirm.postId) return
     try {
       await deletePost({ classId, postId: deleteConfirm.postId }).unwrap()
-      toast.success("Đã xóa bài viết")
+      toast.success(dict.bulletinBoard.toastDeleteSuccess || "Đã xóa bài viết")
     } catch {
-      toast.error("Xóa bài viết thất bại")
+      toast.error(dict.bulletinBoard.toastDeleteFailed || "Xóa bài viết thất bại")
     } finally {
       setDeleteConfirm({ open: false, postId: null })
     }
@@ -147,12 +150,12 @@ const BulletinBoardPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: isStudent ? "Khóa học & Học tập của tôi" : "Khóa học của tôi", onClick: () => navigate(basePath) },
-          { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
-          { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
-          { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
-          { label: "Chi tiết bảng tin", active: true },
+          { label: dict.postDetail.breadcrumbs.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: isStudent ? (dict.postDetail.breadcrumbs.myLearning || "Khóa học & Học tập của tôi") : (dict.postDetail.breadcrumbs.myCourses || "Khóa học của tôi"), onClick: () => navigate(basePath) },
+          { label: dict.postDetail.breadcrumbs.allCourses || "Toàn bộ khóa học", onClick: () => navigate(basePath) },
+          { label: dict.postDetail.breadcrumbs.courseDetail || "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+          { label: dict.postDetail.breadcrumbs.classDetail || "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
+          { label: dict.postDetail.breadcrumbs.boardDetail || "Chi tiết bảng tin", active: true },
         ]}
       />
 
@@ -161,7 +164,7 @@ const BulletinBoardPage = () => {
           onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
-          <ArrowLeft size={16} /> Quay lại
+          <ArrowLeft size={16} /> {dict.postDetail.back || "Quay lại"}
         </button>
 
         {/* Main Card */}
@@ -170,7 +173,7 @@ const BulletinBoardPage = () => {
           <div className="flex items-center justify-between p-6 gap-4 border-b border-[#E2E2E2]">
             <TextInput
               icon={Search}
-              placeholder="Tìm kiếm bài viết..."
+              placeholder={dict.bulletinBoard.searchPlaceholder || "Tìm kiếm bài viết..."}
               className="!h-10 bg-[#F3F4F5] !border-[#E2E2E2] "
               containerClassName="w-full max-w-[473px]"
               value={searchTerm}
@@ -187,7 +190,7 @@ const BulletinBoardPage = () => {
                   className="!rounded-lg !h-10 font-semibold text-sm"
                   startIcon={<Plus size={8} color="#6C3E00" />}
                 >
-                  Thêm bài viết
+                  {dict.bulletinBoard.addPost || "Thêm bài viết"}
                 </PillButton>
               </div>
             )}
@@ -203,7 +206,7 @@ const BulletinBoardPage = () => {
               },
               {
                 key: "title",
-                label: "Chủ đề",
+                label: dict.bulletinBoard.topic || "Chủ đề",
                 render: (row) => (
                   <div
                     className="flex items-center cursor-pointer hover:underline w-[352px]"
@@ -217,17 +220,17 @@ const BulletinBoardPage = () => {
               },
               {
                 key: "author",
-                label: "Người tạo",
+                label: dict.bulletinBoard.creator || "Người tạo",
                 className: "text-sm font-normal text-[#191C1D]",
               },
               {
                 key: "date",
-                label: "Thời gian tạo",
+                label: dict.bulletinBoard.createdAt || "Thời gian tạo",
                 className: "text-sm font-normal text-[#191C1D]",
               },
               {
                 key: "replies",
-                label: "Phản hồi",
+                label: dict.bulletinBoard.replies || "Phản hồi",
                 headerClassName: "text-center",
                 className: "text-center",
                 render: (row) => (
@@ -240,11 +243,11 @@ const BulletinBoardPage = () => {
               ...(!isStudent ? [
                 {
                   key: "status",
-                  label: "Trạng thái",
+                  label: dict.bulletinBoard.status || "Trạng thái",
                   render: (row) => (
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${row.status === 'Đang hiển thị' ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
-                      <span className={`font-medium ${row.status === 'Đang hiển thị' ? 'text-[#750000]' : 'text-[#5B403C]'}`}>{row.status}</span>
+                      <div className={`w-2 h-2 rounded-full ${row.status === (dict.bulletinBoard.visibility.visible || 'Đang hiển thị') ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
+                      <span className={`font-medium ${row.status === (dict.bulletinBoard.visibility.visible || 'Đang hiển thị') ? 'text-[#750000]' : 'text-[#5B403C]'}`}>{row.status}</span>
                     </div>
                   )
                 },
@@ -262,11 +265,11 @@ const BulletinBoardPage = () => {
                           </IconButton>
                         }
                         options={[
-                          { value: 'toggleVisibility', label: row.isVisibleToStudents ? 'Ẩn item' : 'Hiện item' },
-                          { value: 'togglePin', label: row.isPinned ? 'Bỏ ghim' : 'Ghim' },
-                          { value: 'toggleReply', label: row.allowReply ? 'Tắt bình luận' : 'Bật bình luận' },
-                          { value: 'edit', label: 'Chỉnh sửa' },
-                          { value: 'delete', label: 'Xoá' }
+                          { value: 'toggleVisibility', label: row.isVisibleToStudents ? (dict.bulletinBoard.visibility.hideItem || 'Ẩn item') : (dict.bulletinBoard.visibility.showItem || 'Hiện item') },
+                          { value: 'togglePin', label: row.isPinned ? (dict.bulletinBoard.visibility.unpin || 'Bỏ ghim') : (dict.bulletinBoard.visibility.pin || 'Ghim') },
+                          { value: 'toggleReply', label: row.allowReply ? (dict.bulletinBoard.visibility.disableReply || 'Tắt bình luận') : (dict.bulletinBoard.visibility.enableReply || 'Bật bình luận') },
+                          { value: 'edit', label: dict.bulletinBoard.edit || 'Chỉnh sửa' },
+                          { value: 'delete', label: dict.bulletinBoard.delete || 'Xoá' }
                         ]}
                         onChange={(val) => handleAction(val, row.id)}
                         align="right"
@@ -297,11 +300,9 @@ const BulletinBoardPage = () => {
         open={deleteConfirm.open}
         onClose={() => setDeleteConfirm({ open: false, postId: null })}
         onConfirm={handleConfirmDelete}
-        title="Xác nhận xóa bài viết"
-        message="Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác."
+        title={dict.bulletinBoard.confirmDelete || "Xác nhận xóa bài viết"}
+        message={dict.bulletinBoard.confirmDeleteMsg || "Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác."}
       />
     </div>
   )
 }
-
-export default BulletinBoardPage

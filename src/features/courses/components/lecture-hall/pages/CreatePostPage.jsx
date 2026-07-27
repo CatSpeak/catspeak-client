@@ -20,6 +20,7 @@ import ToggleOption from "../components/ui/ToggleOption"
 import { useParams, useNavigate } from "react-router-dom"
 import { useCreatePostInBulletinBoardMutation, useUpdatePostInBulletinBoardMutation, useGetPostDetailQuery, useGetClassDetailQuery } from "@/store/api/coursesApi"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // ─── Helpers (reused pattern from CreatePostModal / AddMaterialModal) ────────
 
@@ -30,6 +31,9 @@ const MAX_ATTACHMENTS = 5
 const CreatePostPage = () => {
   const { id: classId, boardId, postId } = useParams()
   const navigate = useNavigate()
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall
+  
   const isEditMode = !!postId
   const [createPost, { isLoading: isCreating }] = useCreatePostInBulletinBoardMutation()
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostInBulletinBoardMutation()
@@ -148,12 +152,12 @@ const CreatePostPage = () => {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error("Vui lòng nhập tiêu đề bài viết")
+      toast.error(dict.createPost.toastTitleRequired || "Vui lòng nhập tiêu đề bài viết")
       return
     }
 
     if (!content.trim()) {
-      toast.error("Vui lòng nhập nội dung bài viết")
+      toast.error(dict.createPost.toastContentRequired || "Vui lòng nhập nội dung bài viết")
       return
     }
 
@@ -175,15 +179,15 @@ const CreatePostPage = () => {
     try {
       if (isEditMode) {
         await updatePost({ classId, postId, formData }).unwrap()
-        toast.success("Cập nhật bài viết thành công")
+        toast.success(dict.createPost.toastUpdateSuccess || "Cập nhật bài viết thành công")
       } else {
         await createPost({ classId, boardId, formData }).unwrap()
-        toast.success("Tạo bài viết thành công")
+        toast.success(dict.createPost.toastSuccess || "Tạo bài viết thành công")
       }
       navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}`)
     } catch (err) {
       console.error("Failed to save post", err)
-      toast.error(isEditMode ? "Đã xảy ra lỗi khi cập nhật bài viết" : "Đã xảy ra lỗi khi tạo bài viết")
+      toast.error(dict.createPost.toastError || (isEditMode ? "Đã xảy ra lỗi khi cập nhật bài viết" : "Đã xảy ra lỗi khi tạo bài viết"))
     }
   }
 
@@ -210,32 +214,32 @@ const CreatePostPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
-          { label: "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
-          { label: "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
-          { label: "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
-          { label: "Chi tiết bảng tin", onClick: () => navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}`) },
-          { label: isEditMode ? "Chỉnh sửa bài viết" : "Thêm bài viết", active: true },
+          { label: dict.postDetail.breadcrumbs.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: dict.postDetail.breadcrumbs.myCourses || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: dict.postDetail.breadcrumbs.allCourses || "Toàn bộ khóa học", onClick: () => navigate(`/workspace/courses/`) },
+          { label: dict.postDetail.breadcrumbs.courseDetail || "Chi tiết khóa học", onClick: () => navigate(`/workspace/courses/details/${classData?.courseId || ''}`) },
+          { label: dict.postDetail.breadcrumbs.classDetail || "Chi tiết lớp học", onClick: () => navigate(`/workspace/courses/class/${classId}?tab=lecture-hall`) },
+          { label: dict.postDetail.breadcrumbs.boardDetail || "Chi tiết bảng tin", onClick: () => navigate(`/workspace/courses/class/${classId}/bulletin-board/${boardId}`) },
+          { label: isEditMode ? (dict.createPost.editTitle || "Chỉnh sửa bài viết") : (dict.createPost.title || "Thêm bài viết"), active: true },
         ]}
       />
 
       <div className="w-full space-y-6">
         {/* ─── Page Title ─────────────────────────────────────────────── */}
         <h1 className="text-[40px] font-semibold text-[#1A1A1A]">
-          {isEditMode ? "Chỉnh sửa bài viết" : "Thêm bài viết"}
+          {isEditMode ? (dict.createPost.editTitle || "Chỉnh sửa bài viết") : (dict.createPost.title || "Thêm bài viết")}
         </h1>
 
         {/* ─── Form Card ──────────────────────────────────────────────── */}
         <div className="bg-white rounded-3xl p-6 space-y-6 shadow-faq-card">
           <h2 className="text-xl font-semibold text-[#1A1A1A]">
-            Thông tin bài viết
+            {dict.createPost.postInfo || "Thông tin bài viết"}
           </h2>
 
           {/* ── Avatar upload (pattern from CreateCoursePage) ── */}
           <div className="space-y-3">
             <label className="block text-base font-medium text-[#191C1D]">
-              Ảnh đại diện
+              {dict.createPost.avatar || "Ảnh đại diện"}
             </label>
             <div
               onClick={handleAvatarClick}
@@ -256,7 +260,7 @@ const CreatePostPage = () => {
                     className="object-contain max-h-[240px] rounded-lg"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl pointer-events-none">
-                    Thay đổi hình ảnh
+                    {dict.createPost.changeImage || "Thay đổi hình ảnh"}
                   </div>
                   <button
                     type="button"
@@ -272,8 +276,8 @@ const CreatePostPage = () => {
                     <Upload size={24} />
                   </div>
                   <div className="text-center text-xs text-[#5B403C] space-y-1">
-                    <p>Hỗ trợ định dạng png, jpeg và svg.</p>
-                    <p>Kích cỡ dưới 50mb</p>
+                    <p>{dict.createPost.avatarDesc1 || "Hỗ trợ định dạng png, jpeg và svg."}</p>
+                    <p>{dict.createPost.avatarDesc2 || "Kích cỡ dưới 50mb"}</p>
                   </div>
                 </div>
               )}
@@ -283,13 +287,13 @@ const CreatePostPage = () => {
           {/* ── Title input ── */}
           <div className="space-y-2">
             <label className="block text-base font-medium text-[#191C1D]">
-              Tiêu đề
+              {dict.createPost.postName || "Tiêu đề"}
             </label>
             <TextInput
               value={title}
               required
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Nhập tiêu đề"
+              placeholder={dict.createPost.postNamePlaceholder || "Nhập tiêu đề"}
               className="rounded-xl !h-[50px] px-4 text-sm"
             />
           </div>
@@ -297,7 +301,7 @@ const CreatePostPage = () => {
           {/* ── Content input ── */}
           <div className="space-y-2">
             <label className="block text-base font-medium text-[#191C1D]">
-              Nội dung
+              {dict.createPost.content || "Nội dung"}
             </label>
             <Editor
               tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
@@ -310,7 +314,7 @@ const CreatePostPage = () => {
                 plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
                 toolbar:
                   "bold italic underline strikethrough | emoticons link | bullist numlist",
-                placeholder: "Viết nội dung ở đây...",
+                placeholder: dict.createPost.contentPlaceholder || "Viết nội dung ở đây...",
                 skin: "oxide",
               }}
             />
@@ -320,7 +324,7 @@ const CreatePostPage = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="block text-base font-medium text-[#191C1D]">
-                Tài liệu đính kèm
+                {dict.createPost.attachments || "Tài liệu đính kèm"}
               </label>
               <span className="text-xs text-[#5B403C]">
                 Tối đa {MAX_ATTACHMENTS} file
@@ -354,10 +358,10 @@ const CreatePostPage = () => {
                 </div>
                 <div>
                   <p className="text-sm text-[#750000] font-bold mb-1">
-                    Nhấn để tải lên hoặc kéo thả file vào đây
+                    {dict.createPost.attachmentsDesc || "Nhấn để tải lên hoặc kéo thả file vào đây"}
                   </p>
                   <p className="text-[11px] text-[#5B403C]">
-                    Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG (Max 50MB/file)
+                    {dict.createPost.supportedFiles || "Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG (Max 50MB/file)"}
                   </p>
                 </div>
               </div>
@@ -384,8 +388,8 @@ const CreatePostPage = () => {
             <ToggleOption
               icon={<Pin size={20} className="text-[#E2B60A]" />}
               iconBg="bg-[#FFF9CC]"
-              title="Ghim bài viết"
-              description="Giữ bài viết luôn ở đầu bảng tin"
+              title={dict.createPost.pinTitle || "Ghim bài viết"}
+              description={dict.createPost.pinDesc || "Giữ bài viết luôn ở đầu bảng tin"}
               checked={isPinned}
               onChange={(e) => setIsPinned(e.target.checked)}
             />
@@ -394,8 +398,8 @@ const CreatePostPage = () => {
             <ToggleOption
               icon={<MessageSquare size={20} className="text-[#0E6EEC]" />}
               iconBg="bg-[#8ECAFF]"
-              title="Phản hồi công khai"
-              description="Cho phép học viên có thể bình luận về bài viết"
+              title={dict.createPost.allowReplyTitle || "Phản hồi công khai"}
+              description={dict.createPost.allowReplyDesc || "Cho phép học viên có thể bình luận về bài viết"}
               checked={allowReply}
               onChange={(e) => setAllowReply(e.target.checked)}
             />
@@ -404,8 +408,8 @@ const CreatePostPage = () => {
             <ToggleOption
               icon={<Eye size={20} className="text-[#F83B4F]" />}
               iconBg="bg-[#FFEAED]"
-              title="Hiển thị với học viên"
-              description="Tùy chỉnh độ hiển thị với học viên"
+              title={dict.createPost.visibleTitle || "Hiển thị với học viên"}
+              description={dict.createPost.visibleDesc || "Tùy chỉnh độ hiển thị với học viên"}
               checked={visibleToStudents}
               onChange={(e) => setVisibleToStudents(e.target.checked)}
             />
@@ -421,7 +425,7 @@ const CreatePostPage = () => {
             textColor="#750000"
             borderColor="#750000"
           >
-            <X size={16} className="mr-2" /> Hủy
+            <X size={16} className="mr-2" /> {dict.createPost.cancel || "Hủy"}
           </PillButton>
 
           <PillButton
@@ -431,8 +435,8 @@ const CreatePostPage = () => {
             textColor="white"
             className="!rounded-xl !h-12 font-semibold text-sm w-full justify-center disabled:opacity-50"
           >
-            {isLoading ? "Đang lưu..." : (
-              <>{isEditMode ? "Lưu thay đổi" : "Đăng bảng tin"} <Send size={16} className="ml-2" /></>
+            {isLoading ? "..." : (
+              <>{isEditMode ? (dict.createPost.save || "Lưu thay đổi") : (dict.createPost.post || "Đăng bài")} <Send size={16} className="ml-2" /></>
             )}
           </PillButton>
         </div>

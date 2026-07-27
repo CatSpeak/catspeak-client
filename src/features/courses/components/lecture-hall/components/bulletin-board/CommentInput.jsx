@@ -3,6 +3,7 @@ import { Editor } from "@tinymce/tinymce-react"
 import { SendHorizonal } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * Phần nhập bình luận sử dụng TinyMCE rich-text editor.
@@ -15,9 +16,12 @@ import { IconButton } from "@/shared/components/ui/buttons"
 const CommentInput = ({
   // currentUserAvatar,
   // currentUserName,
-  placeholder = "Nhập phản hồi",
+  // placeholder = "Nhập phản hồi",
   onSubmit,
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.postDetail
+
   const [value, setValue] = useState("")
   const editorRef = useRef(null)
 
@@ -66,7 +70,7 @@ const CommentInput = ({
               plugins: ["autolink", "lists", "link", "image"],
               toolbar:
                 "bold italic underline | bullist numlist | link image",
-              placeholder,
+              placeholder: dict.inputPlaceholder,
               skin: "oxide",
               setup: (editor) => {
                 editor.on("keydown", (e) => {
@@ -87,7 +91,7 @@ const CommentInput = ({
           size="xs"
           onClick={handleSubmit}
           disabled={!hasContent}
-          title="Gửi (Ctrl+Enter)"
+          title={dict.sendTooltip || "Gửi (Ctrl+Enter)"}
         >
           <SendHorizonal size={15} />
         </IconButton>

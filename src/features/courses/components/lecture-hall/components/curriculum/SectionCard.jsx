@@ -3,6 +3,7 @@ import { MoreVertical, EyeOff, ChevronUp, ChevronDown } from "lucide-react"
 import LessonItemRow from "./LessonItemRow"
 import { IconButton } from "@/shared/components/ui/buttons"
 import SectionActionMenu from "./SectionActionMenu"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const SectionCard = ({
   section = {},
@@ -20,6 +21,8 @@ const SectionCard = ({
   onDeleteItem = () => { },
   className = "",
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.curriculum
 
   const [isSectionMenuOpen, setIsSectionMenuOpen] = useState(false)
   const [openItemMenuId, setOpenItemMenuId] = useState(null)
@@ -58,7 +61,7 @@ const SectionCard = ({
             </span>
             {section.isVisibleToStudents === false && (
               <span className="inline-flex items-center gap-1 bg-[#E1E3E4] text-[#5B403C] text-xs px-2 py-0.5 rounded-full font-medium">
-                <EyeOff size={12} /> <span className="font-medium">Đang ẩn</span>
+                <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus || "Đang ẩn"}</span>
               </span>
             )}
           </div>
@@ -75,7 +78,7 @@ const SectionCard = ({
             variant="ghost"
             size="xs"
             onClick={() => setIsExpanded(!isExpanded)}
-            title={isExpanded ? "Thu gọn section" : "Mở rộng section"}
+            title={isExpanded ? (dict.collapseSection || "Thu gọn section") : (dict.expandSection || "Mở rộng section")}
           >
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </IconButton>
@@ -88,7 +91,7 @@ const SectionCard = ({
                 onClick={() => {
                   setIsSectionMenuOpen(!isSectionMenuOpen)
                 }}
-                title="Tuỳ chọn section"
+                title={dict.sectionOptionsTooltip || "Tuỳ chọn section"}
               >
                 <MoreVertical size={16} />
               </IconButton>
@@ -133,7 +136,7 @@ const SectionCard = ({
             ))
           ) : (
             <div className="text-center py-6 text-xs text-gray-400 border border-dashed border-gray-200 rounded-xl">
-              Chưa có bài học nào trong section này
+              {dict.noLessons || "Chưa có bài học nào trong section này"}
             </div>
           )}
         </div>

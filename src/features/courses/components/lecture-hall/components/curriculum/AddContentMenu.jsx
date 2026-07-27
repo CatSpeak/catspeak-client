@@ -1,8 +1,11 @@
 import React from "react"
 import { MessageSquareText, Folder, ClipboardList, Link2 } from "lucide-react"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { } }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.curriculum
   if (!open) return null
 
   const labelClassName = "text-sm font-semibold text-[#191C1D]"
@@ -17,7 +20,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <MessageSquareText size={16} />
             </div>
           }
-          label={<span className={labelClassName}>Tạo bảng tin</span>}
+          label={<span className={labelClassName}>{dict.createBoard || "Tạo bảng tin"}</span>}
           onClick={() => {
             onSelect("announcement")
             onClose()
@@ -29,7 +32,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <Folder size={16} />
             </div>
           }
-          label={<span className={labelClassName}>Thêm học liệu</span>}
+          label={<span className={labelClassName}>{dict.addMaterial || "Thêm học liệu"}</span>}
           onClick={() => {
             onSelect("material")
             onClose()
@@ -41,7 +44,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <ClipboardList size={16} />
             </div>
           }
-          label={<span className={labelClassName}>Thêm hoạt động học tập</span>}
+          label={<span className={labelClassName}>{dict.addActivity || "Thêm hoạt động học tập"}</span>}
           onClick={() => {
             onSelect("assignment")
             onClose()
@@ -53,7 +56,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <Link2 size={16} />
             </div>
           }
-          label={<span className={labelClassName}>Thêm liên kết</span>}
+          label={<span className={labelClassName}>{dict.addLink || "Thêm liên kết"}</span>}
           onClick={() => {
             onSelect("link")
             onClose()

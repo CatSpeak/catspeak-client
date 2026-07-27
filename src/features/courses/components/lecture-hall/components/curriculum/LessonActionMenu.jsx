@@ -1,6 +1,7 @@
 import React from "react"
 import { Pencil, EyeOff, Eye, Trash } from "lucide-react"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const LessonActionMenu = ({
   open = false,
@@ -10,6 +11,9 @@ const LessonActionMenu = ({
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.curriculum
+
   if (!open) return null
 
   return (
@@ -18,7 +22,7 @@ const LessonActionMenu = ({
         {item?.type === "bulletinBoard" && (
           <MenuItem
             icon={<Pencil size={15} className="text-[#1A1A1A]" />}
-            label="Chỉnh sửa"
+            label={dict.edit || "Chỉnh sửa"}
             onClick={() => {
               onEdit(item)
               onClose()
@@ -27,7 +31,7 @@ const LessonActionMenu = ({
         )}
         <MenuItem
           icon={item?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
-          label={"Tuỳ chỉnh ẩn/hiện"}
+          label={dict.toggleVisibility || "Tuỳ chỉnh ẩn/hiện"}
           onClick={() => {
             onToggleItemVisibility(item.id)
             onClose()
@@ -35,7 +39,7 @@ const LessonActionMenu = ({
         />
         <MenuItem
           icon={<Trash size={15} className="text-[#1A1A1A]" />}
-          label={"Xoá"}
+          label={dict.delete || "Xoá"}
           onClick={() => {
             onDeleteItem(item.id)
             onClose()

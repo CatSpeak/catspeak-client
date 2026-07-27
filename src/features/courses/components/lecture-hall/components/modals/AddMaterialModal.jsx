@@ -4,12 +4,16 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput, Switch } from "@/shared/components/ui/inputs"
 import { UploadCloud, X } from "lucide-react"
 import FileAttachmentItem from "../ui/FileAttachmentItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const AddMaterialModal = ({
   open = false,
   onClose = () => { },
   onSubmit = () => { },
 }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.modals.addMaterial || {}
+
   const [title, setTitle] = useState("")
   const [selectedFiles, setSelectedFiles] = useState([])
   const [dragActive, setDragActive] = useState(false)
@@ -83,7 +87,7 @@ const AddMaterialModal = ({
     <Modal
       open={open}
       onClose={handleCloseModal}
-      title="Thêm học liệu"
+      title={dict.title || "Thêm học liệu"}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -97,10 +101,10 @@ const AddMaterialModal = ({
             textColor={"#72000d"}
             borderColor={"#E2E2E2"}
           >
-            Hủy
+            {dict.cancel || "Hủy"}
           </PillButton>
           <PillButton type="submit" onClick={handleSubmit}>
-            Lưu
+            {dict.add || "Lưu"}
           </PillButton>
         </div>
       }
@@ -109,13 +113,13 @@ const AddMaterialModal = ({
         {/* Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            Tiêu đề
+            {dict.materialName || "Tiêu đề"}
           </label>
           <TextInput
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Nhập tiêu đề..."
+            placeholder={dict.materialPlaceholder || "Nhập tiêu đề..."}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
         </div>
@@ -123,7 +127,7 @@ const AddMaterialModal = ({
         {/* Upload File Zone */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            Tệp tải lên ({selectedFiles.length}/5)
+            {(dict.uploadFile || "Tệp tải lên")} ({selectedFiles.length}/5)
           </label>
 
           <input
@@ -152,13 +156,13 @@ const AddMaterialModal = ({
               </div>
               <div>
                 <p className="text-xs sm:text-sm text-gray-800 font-medium">
-                  Kéo thả tệp vào đây hoặc{" "}
+                  {dict.dragDrop || "Kéo thả tệp vào đây hoặc"}{" "}
                   <span className="text-[#72000d] font-bold hover:underline">
-                    chọn thêm tệp
+                    {dict.selectFile || "chọn thêm tệp"}
                   </span>
                 </p>
                 <p className="text-[11px] text-gray-500 mt-1">
-                  Hỗ trợ PDF, DOCX, PPTX, JPG, PNG (Tối đa 50MB/file)
+                  {dict.supportedFiles || "Hỗ trợ PDF, DOCX, PPTX, JPG, PNG (Tối đa 50MB/file)"}
                 </p>
               </div>
             </div>
@@ -176,10 +180,10 @@ const AddMaterialModal = ({
         <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl px-4 py-3 flex items-center justify-between">
           <div className="space-y-0.5">
             <h5 className="text-sm font-semibold text-[#111827]">
-              Hiển thị với học viên
+              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
             </h5>
             <p className="text-xs text-[#6B7280] font-normal">
-              Học viên có thể nhìn thấy liên kết này ngay lập tức
+              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
             </p>
           </div>
           <Switch

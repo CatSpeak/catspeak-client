@@ -17,11 +17,14 @@ import {
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useSelector } from "react-redux"
 import { formatFileSize } from "../utils/fileUtils"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PostDetailPage = () => {
   const navigate = useNavigate()
   const { id: classId, postId } = useParams()
   const location = useLocation()
+  const { t, language } = useLanguage()
+  const dict = t.courses.lectureHall.postDetail
 
   // Robust role check
   const { data: profileResponse } = useGetUserProfileQuery()
@@ -63,10 +66,10 @@ const PostDetailPage = () => {
 
   const formattedPost = {
     tag: "",
-    title: postDetail?.title || "Không có tiêu đề",
-    authorName: postDetail?.accountName || "Giảng viên",
+    title: postDetail?.title || dict.noTitle || "Không có tiêu đề",
+    authorName: postDetail?.accountName || dict.teacher || "Giảng viên",
     authorAvatar: postDetail?.avatarImageUrl || "",
-    date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleDateString("vi-VN") : "",
+    date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
     thumbnailUrl: postDetail?.thumbnailUrl || "",
     content: postDetail?.content || "",
     attachments: postDetail?.attachmentsJson
@@ -80,10 +83,10 @@ const PostDetailPage = () => {
 
   const comments = postDetail?.replies?.map((comment) => ({
     id: comment.id,
-    authorName: comment.accountName || "Ẩn danh",
+    authorName: comment.accountName || dict.anonymous || "Ẩn danh",
     authorAvatar: comment.avatarImageUrl || "",
     isTeacher: comment.isTeacher || false,
-    time: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString("vi-VN") : "",
+    time: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
     content: comment.content,
     replyCount: comment.replyCount || 0,
   })) || []
@@ -96,7 +99,7 @@ const PostDetailPage = () => {
           commentId: replyingTo.id,
           content: text,
         }).unwrap()
-        toast.success("Đã phản hồi bình luận")
+        toast.success(dict.toastReplySuccess || "Đã phản hồi bình luận")
         setReplyingTo(null)
       } else {
         await createComment({
@@ -104,10 +107,10 @@ const PostDetailPage = () => {
           postId,
           content: text,
         }).unwrap()
-        toast.success("Đã gửi bình luận")
+        toast.success(dict.toastCommentSuccess || "Đã gửi bình luận")
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Lỗi khi gửi bình luận")
+      toast.error(error?.data?.message || dict.toastError || "Lỗi khi gửi bình luận")
     }
   }
 
@@ -136,12 +139,12 @@ const PostDetailPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: "Khóa học của tôi", onClick: () => navigate(basePath) },
-          { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
-          { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
-          { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
-          { label: "Chi tiết bài viết", active: true },
+          { label: dict.breadcrumbs.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: dict.breadcrumbs.myCourses || "Khóa học của tôi", onClick: () => navigate(basePath) },
+          { label: dict.breadcrumbs.allCourses || "Toàn bộ khóa học", onClick: () => navigate(basePath) },
+          { label: dict.breadcrumbs.courseDetail || "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+          { label: dict.breadcrumbs.classDetail || "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
+          { label: dict.breadcrumbs.postDetail || "Chi tiết bài viết", active: true },
         ]}
       />
 
@@ -150,7 +153,7 @@ const PostDetailPage = () => {
           onClick={handleBack}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
-          <ArrowLeft size={16} /> Quay lại
+          <ArrowLeft size={16} /> {dict.back || "Quay lại"}
         </button>
 
         {/* ── Nội dung bài đăng ── */}
@@ -166,7 +169,7 @@ const PostDetailPage = () => {
           showAll={showAll}
           previewCount={3}
           currentUserAvatar={user?.avatarImageUrl || ""}
-          currentUserName={user?.fullName || "Bạn"}
+          currentUserName={user?.fullName || dict.you || "Bạn"}
           onSubmit={handleSubmit}
           onReply={(c) => setReplyingTo(c)}
           onViewReplies={(c) => console.log("view replies of", c)}

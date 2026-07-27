@@ -1,6 +1,7 @@
 import React from "react"
 import Avatar from "@/shared/components/ui/Avatar"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * Hiển thị một bình luận đơn lẻ trong danh sách phản hồi.
@@ -30,6 +31,9 @@ const CommentItem = ({ comment = {}, }) => {
     // replyCount = 0,
   } = comment
 
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.postDetail
+
   return (
     <div className="flex gap-4">
       {/* Avatar */}
@@ -44,7 +48,7 @@ const CommentItem = ({ comment = {}, }) => {
           <span className="font-semibold text-sm text-[#191C1D]">{authorName}</span>
           {isTeacher && (
             <span className="bg-[#750000] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-              Giáo viên
+              {dict.teacher || "Giáo viên"}
             </span>
           )}
           <span className="text-xs text-[#5B403C]"> {time}</span>
