@@ -51,8 +51,6 @@ export const useGameSignaling = (handlers = {}) => {
       "PLAYER_LEFT",
       "SYNC_GAME_STATE",
       "GAME_FORCE_STOP",
-      "GAME_ALREADY_STARTED",
-      "JOINED_AS_SPECTATOR",
       "ROUND_START_DESCRIBER",
       "DESCRIBE_STARTED",
       "DESCRIBE_ENDED",

@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
-import { isBreakoutSupported, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers";
+import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
@@ -51,7 +51,6 @@ const ControlBarMoreMenu = ({
 }) => {
   const { id: roomId } = useParams();
   const { t } = useLanguage();
-  const { ongoingGame, spectateGame } = useGame();
   const {
     showParticipants,
     setShowParticipants,
@@ -82,6 +81,10 @@ const ControlBarMoreMenu = ({
   const [showGameHistory, setShowGameHistory] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
 
+  const { gameState } = useGame();
+  // Disable nút "Trò chơi" khi đang có ván game trong phòng (mọi state != "idle")
+  const isGameInProgress = gameState && gameState !== "idle";
+
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall);
 
   const { closingRemainingSeconds } = useVideoCallContext()
@@ -109,14 +112,20 @@ const ControlBarMoreMenu = ({
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
 
-  const allParticipants = useParticipants();
-  const { localParticipant } = useLocalParticipant();
-
+  // Host được xác định dựa trên creatorId khớp với accountId hiện tại —
+  // áp dụng cho cả phòng thường (Group/AI/Class) và phòng Custom.
   const isHost =
-    isCustomRoom(room?.roomType) &&
     room?.creatorId != null &&
     user?.accountId != null &&
     String(room.creatorId) === String(user.accountId);
+
+  // Chỉ host mới được mở/bắt đầu trò chơi VÀ game phải đang idle
+  const canStartGame = isHost && !isGameInProgress;
+  const gameDisabledReason = isGameInProgress
+    ? "Đang có trò chơi trong phòng, không thể mở thêm"
+    : !isHost
+      ? "Chỉ host của phòng mới có thể bắt đầu trò chơi"
+      : null;
 
 
   const handleCopyLink = () => {
@@ -157,19 +166,15 @@ const ControlBarMoreMenu = ({
                       <div className="hidden md:flex flex-col">
                         <MenuItem
                           onClick={() => {
+                            if (!canStartGame) return;
                             setShowMoreMenu(false);
-                            if (ongoingGame) {
-                              spectateGame();
-                            } else {
-                              if (!isHost) return;
-                              setShowGameSetup(true);
-                            }
+                            setShowGameSetup(true);
                           }}
-                          disabled={!isHost && !ongoingGame}
-                          hoverBg={!isHost && !ongoingGame ? "hover:bg-transparent" : "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2]"}
-                          className={!isHost && !ongoingGame ? "!text-[#8F8F8F]" : ""}
+                          disabled={!canStartGame}
+                          className={!canStartGame ? "opacity-50 cursor-not-allowed" : ""}
                           icon={<Gamepad2 size={20} />}
-                          label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
+                          label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
+                          title={gameDisabledReason || undefined}
                         />
 
                         <MenuItem
@@ -437,13 +442,16 @@ const ControlBarMoreMenu = ({
 
                               <MenuItem
                                 onClick={() => {
+                                  if (!canStartGame) return;
                                   setShowMoreMenu(false);
-                                  if (ongoingGame) spectateGame();
-                                  else if (isHost) setShowGameSetup(true);
+                                  setShowGameSetup(true);
                                 }}
-                                disabled={!isHost && !ongoingGame}
+                                disabled={!canStartGame}
+                                className={!canStartGame ? "opacity-50 cursor-not-allowed" : ""}
                                 icon={<Gamepad2 size={20} />}
-                                label={ongoingGame ? "Xem trò chơi" : (t?.rooms?.videoCall?.controls?.playGames || "Play Games")}
+                                label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
+                                title={gameDisabledReason || undefined}
+                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
                               />
                               <MenuItem
                                 onClick={() => { setShowMoreMenu(false); setShowGameHistory(true); }}
@@ -451,7 +459,10 @@ const ControlBarMoreMenu = ({
                                 label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
                                 hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
                               />
-                              {!isAISession && (isHost || isBreakoutActive) && (
+                              {
+                                // [TEMP-DISABLE-HOST-CHECK] Test xong thì mở lại:
+                                //   !isAISession && (isHost || isBreakoutActive) && (
+                                !isAISession && (true /* Tạm thời: bỏ check host để test */ || isBreakoutActive) && (
                                 <MenuItem
                                   onClick={() => { setShowBreakout(!showBreakout); setShowMoreMenu(false); }}
                                   icon={<Split size={20} />}
