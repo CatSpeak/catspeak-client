@@ -14,7 +14,6 @@ const AddActivityModal = ({
   onClose = () => { },
   onSubmit = () => { },
   classId,
-  existingActivityIds = [],
 }) => {
   const { t, language } = useLanguage()
   const dict = t.courses.lectureHall.modals.addActivity || {}
@@ -37,12 +36,12 @@ const AddActivityModal = ({
   }
 
   const { data: assignmentsResponse, isLoading: isLoadingAssignments } = useGetTeacherAssignmentsQuery(
-    { classId },
+    { classId, onlyUnassigned: true },
     { skip: !classId || !open }
   )
 
   const { data: quizzesResponse, isLoading: isLoadingQuizzes } = useGetTeacherQuizzesQuery(
-    { classId },
+    { classId, onlyUnassigned: true },
     { skip: !classId || !open }
   )
 
@@ -59,8 +58,6 @@ const AddActivityModal = ({
   }, [assignmentsResponse, quizzesResponse])
 
   const filteredActivities = activities.filter((act) => {
-    const uid = `${act._activityType}-${act.id}`
-    if (existingActivityIds.includes(uid)) return false
     const title = act._activityType === "quiz" ? (act.title || act.name || "Bài kiểm tra") : getAssignmentTitle(act)
     const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesSearch

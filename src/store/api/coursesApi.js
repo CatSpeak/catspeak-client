@@ -614,20 +614,20 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // 16. Get Teacher Assignments
     getTeacherAssignments: builder.query({
-      query: ({ classId, status, search }) => ({
+      query: ({ classId, status, search, onlyUnassigned }) => ({
         url: `/teacher/classes/${classId}/assignments`,
         method: "GET",
-        params: { status, search },
+        params: { status, search, onlyUnassigned },
       }),
       providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-${classId}` }],
     }),
 
     // Get Teacher Quizzes
     getTeacherQuizzes: builder.query({
-      query: ({ classId, search }) => ({
+      query: ({ classId, search, onlyUnassigned }) => ({
         url: `/teacher/classes/${classId}/quizzes`,
         method: "GET",
-        params: { search },
+        params: { search, onlyUnassigned },
       }),
       providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-quizzes-${classId}` }],
     }),

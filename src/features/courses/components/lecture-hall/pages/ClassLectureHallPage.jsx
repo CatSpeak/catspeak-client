@@ -679,13 +679,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         onSubmit={handleSaveActivities}
         sessionName={targetSectionName}
         classId={id}
-        existingActivityIds={
-          sections.flatMap(s =>
-            (s.items || [])
-              .filter(it => it.type === "assignment" || it.type === "quiz")
-              .map(it => `${it.type}-${it.itemId}`)
-          )
-        }
       />
 
       {/* 4. Add Link Modal */}
