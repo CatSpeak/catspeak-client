@@ -63,9 +63,9 @@ const resources = [
   },
   // 2. Nền tảng học tổng hợp miễn phí
   {
-    id: "usa-learns",
+    id: "fluentez",
     lang: "en",
-    url: "https://www.usalearns.org/",
+    url: "https://fluentez.com/",
   },
   // 3. Luyện nghe
   {
@@ -87,6 +87,16 @@ const resources = [
     id: "esl-podcast",
     lang: "en",
     url: "https://www.eslpod.com/",
+  },
+  {
+    id: "listeninenglish",
+    lang: "en",
+    url: "https://www.listeninenglish.com/",
+  },
+  {
+    id: "dailydictation",
+    lang: "en",
+    url: "https://dailydictation.com/",
   },
 
   // 4. Luyện ngữ pháp
@@ -111,6 +121,11 @@ const resources = [
     id: "quizlet",
     lang: "en",
     url: "https://quizlet.com/",
+  },
+  {
+    id: "gamestolearnenglish",
+    lang: "en",
+    url: "https://www.gamestolearnenglish.com/",
   },
 
   // 6. Luyện phát âm
