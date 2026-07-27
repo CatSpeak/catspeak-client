@@ -13,6 +13,16 @@ import {
   FileText,
   Timer,
   RotateCcw,
+  LayoutGrid,
+  List,
+  CheckCircle2,
+  AlertCircle,
+  Award,
+  Calendar,
+  Filter,
+  Sparkles,
+  ArrowRight,
+  X,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import {
@@ -80,7 +90,7 @@ const getTimestamp = (value) => {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
-// ─── Student Assignment Row ──────────────────────────────────────────
+// ─── Student Assignment Row (Table View) ──────────────────────────────
 const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect }) => {
   const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
     || Object.prototype.hasOwnProperty.call(assignment, "submission")
@@ -136,24 +146,26 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
   return (
     <tr
       onClick={() => onSelect(assignment.id)}
-      className="hover:bg-gray-50/50 transition-colors cursor-pointer"
+      className="group hover:bg-amber-50/30 transition-colors cursor-pointer"
     >
-      <td className="p-4 pl-6 font-extrabold text-gray-850 flex items-center gap-2">
-        <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide shrink-0">
-          BÀI TẬP
-        </span>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation()
-            onSelect(assignment.id)
-          }}
-          className="truncate max-w-xs text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
-        >
-          {getAssignmentTitle(assignment)}
-        </button>
+      <td className="p-4 pl-6 font-extrabold text-gray-850">
+        <div className="flex items-center gap-2.5">
+          <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
+            BÀI TẬP
+          </span>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onSelect(assignment.id)
+            }}
+            className="truncate max-w-sm text-left font-bold text-gray-900 group-hover:text-[#990011] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
+          >
+            {getAssignmentTitle(assignment)}
+          </button>
+        </div>
       </td>
-      <td className="p-4 text-gray-400">{dueLabel}</td>
+      <td className="p-4 text-gray-500 font-semibold">{dueLabel}</td>
       <td className="p-4">
         {isLoading && !hasEmbeddedSubmission ? (
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
@@ -162,19 +174,19 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
         ) : (
           <>
             {displayStatus === "not_submitted" && (
-              <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-100 uppercase tracking-wide">
+              <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 uppercase tracking-wider">
                 {cd.statusNotSubmitted || "Chưa nộp"}
               </span>
             )}
             {(displayStatus === "submitted" || displayStatus === "late") && (
-              <span className="bg-orange-50 text-orange-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-100 uppercase tracking-wide">
+              <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-blue-100 uppercase tracking-wider">
                 {displayStatus === "late"
                   ? (cg.filterLate || "Nộp muộn")
-                  : (cd.statusNeedsGrading || "Chưa chấm")}
+                  : (cd.statusNeedsGrading || "Đã nộp")}
               </span>
             )}
             {displayStatus === "returned" && (
-              <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-100 uppercase tracking-wide">
+              <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">
                 {cg.filterReturned || cd.statusGraded || "Đã trả bài"}
               </span>
             )}
@@ -182,13 +194,21 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
         )}
       </td>
       <td className="p-4 pr-6 text-center font-black text-sm text-gray-900">
-        {isLoading && !hasEmbeddedSubmission ? "—" : gradeLabel}
+        {isLoading && !hasEmbeddedSubmission ? (
+          "—"
+        ) : isReleased && gradeLabel !== "—" ? (
+          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg inline-block">
+            {gradeLabel}
+          </span>
+        ) : (
+          <span className="text-gray-400 font-normal">—</span>
+        )}
       </td>
     </tr>
   )
 }
 
-// ─── Student Quiz Row ────────────────────────────────────────────────
+// ─── Student Quiz Row (Table View) ───────────────────────────────────
 const StudentQuizRow = ({ quiz, language, onSelect }) => {
   const closeTimeFormatted = formatDateTime(quiz.closeTime, language, {
     day: "2-digit",
@@ -218,40 +238,43 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
   return (
     <tr
       onClick={() => onSelect && onSelect(quiz.id)}
-      className="hover:bg-red-50/20 transition-colors cursor-pointer"
+      className="group hover:bg-red-50/30 transition-colors cursor-pointer"
     >
-      <td className="p-4 pl-6 font-extrabold text-gray-850 flex items-center gap-2">
-        <span className="bg-red-50 text-[#990011] border border-red-100 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide shrink-0 flex items-center gap-1">
-          <Timer size={10} />
-          QUIZ
-        </span>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation()
-            onSelect?.(quiz.id)
-          }}
-          className="truncate max-w-xs text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
-        >
-          {quiz.name || quiz.title || (language === "vi" ? "Bài kiểm tra" : "Quiz")}
-        </button>
+      <td className="p-4 pl-6 font-extrabold text-gray-850">
+        <div className="flex items-center gap-2.5">
+          <span className="bg-red-50 text-[#990011] border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 flex items-center gap-1">
+            <Timer size={10} />
+            QUIZ
+          </span>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onSelect?.(quiz.id)
+            }}
+            className="truncate max-w-sm text-left font-bold text-gray-900 group-hover:text-[#990011] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
+          >
+            {quiz.name || quiz.title || (language === "vi" ? "Bài kiểm tra" : "Quiz")}
+          </button>
+        </div>
       </td>
-      <td className="p-4 text-gray-400 font-semibold">{closeTimeFormatted}</td>
+      <td className="p-4 text-gray-500 font-semibold">{closeTimeFormatted}</td>
       <td className="p-4 flex items-center gap-2">
         {recordStatus === "submitted" ? (
-          <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-100 uppercase tracking-wide">
+          <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">
             Đã nộp
           </span>
         ) : recordStatus === "inprogress" ? (
-          <span className="bg-orange-50 text-orange-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-100 uppercase tracking-wide">
+          <span className="bg-amber-50 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-wider flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
             Đang làm
           </span>
         ) : hasKnownRecordStatus ? (
-          <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-100 uppercase tracking-wide">
+          <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 uppercase tracking-wider">
             Chưa làm
           </span>
         ) : (
-          <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-gray-200 uppercase tracking-wide">
+          <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-gray-200 uppercase tracking-wider">
             {language === "vi" ? "Không xác định" : "Unavailable"}
           </span>
         )}
@@ -275,19 +298,320 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
               event.stopPropagation()
               onSelect?.(quiz.id)
             }}
-            className="ml-auto px-2.5 py-1 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+            className="ml-auto px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
           >
             <RotateCcw size={11} />
             <span>{language === "vi" ? "Làm tiếp" : "Continue"}</span>
           </button>
         )}
       </td>
-      <td className="p-4 pr-6 text-center font-black text-xs text-gray-900">
+      <td className="p-4 pr-6 text-center font-bold text-xs text-gray-600">
         {hasTimeLimit
           ? `${quiz.timeLimitMinutes} ${language === "vi" ? "phút" : "mins"}`
           : "—"}
       </td>
     </tr>
+  )
+}
+
+// ─── Student Assignment Card (Grid View) ─────────────────────────────
+const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect, nowMs }) => {
+  const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
+    || Object.prototype.hasOwnProperty.call(assignment, "submission")
+  const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
+  const {
+    currentData: submissionResponse,
+    isLoading,
+  } = useGetMyAssignmentSubmissionQuery(
+    { classId, assignmentId: assignment.id },
+    { skip: !classId || !assignment?.id || hasEmbeddedSubmission },
+  )
+
+  const responsePayload = (
+    isRecord(submissionResponse)
+    && Object.prototype.hasOwnProperty.call(submissionResponse, "data")
+  )
+    ? submissionResponse.data
+    : submissionResponse
+  const submission = hasEmbeddedSubmission
+    ? embeddedSubmission
+    : (isRecord(responsePayload) ? responsePayload : null)
+
+  const submissionStatus = getSubmissionStatus(submission)
+  const parsedMaxScore = Number(assignment.maxScore)
+  const maxScore = (
+    assignment.maxScore !== null
+    && assignment.maxScore !== undefined
+    && assignment.maxScore !== ""
+    && Number.isFinite(parsedMaxScore)
+    && parsedMaxScore >= 0
+  )
+    ? parsedMaxScore
+    : null
+
+  const isReleased = submission?.status?.toLowerCase() === "returned"
+  const grade = isReleased ? submission?.grade : null
+  const gradeLabel = grade !== null && grade !== undefined
+    ? (maxScore === null ? String(grade) : `${grade} / ${maxScore}`)
+    : null
+
+  const dueLabel = formatDateTime(assignment.dueDate, language, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+
+  const submittedAtMs = getTimestamp(submission?.submittedAt)
+  const dueAtMs = getTimestamp(assignment?.dueDate)
+  const isSubmissionLate = submittedAtMs > 0 && dueAtMs > 0 ? submittedAtMs > dueAtMs : false
+
+  const displayStatus = submissionStatus === "graded"
+    ? (isSubmissionLate ? "late" : "submitted")
+    : submissionStatus
+
+  const { isExpired } = getAssignmentTimeline(assignment, nowMs)
+
+  return (
+    <div
+      onClick={() => onSelect(assignment.id)}
+      className="group relative bg-white border border-gray-200 hover:border-amber-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-amber-500 overflow-hidden"
+    >
+      <div>
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="bg-amber-50 text-amber-700 border border-amber-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+            <FileText size={12} className="text-amber-600" />
+            {language === "vi" ? "BÀI TẬP" : "ASSIGNMENT"}
+          </span>
+
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+            {isLoading && !hasEmbeddedSubmission ? (
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">...</span>
+            ) : (
+              <>
+                {displayStatus === "not_submitted" && (
+                  <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border uppercase tracking-wider ${isExpired
+                      ? "bg-red-50 text-red-655 border-red-200"
+                      : "bg-amber-50 text-amber-700 border-amber-200"
+                    }`}>
+                    {isExpired
+                      ? (cg.badgeExpired || "Quá hạn")
+                      : (cd.statusNotSubmitted || "Chưa nộp")}
+                  </span>
+                )}
+                {(displayStatus === "submitted" || displayStatus === "late") && (
+                  <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    {displayStatus === "late"
+                      ? (cg.filterLate || "Nộp muộn")
+                      : (cd.statusNeedsGrading || "Đã nộp")}
+                  </span>
+                )}
+                {displayStatus === "returned" && (
+                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    {cg.filterReturned || cd.statusGraded || "Đã trả bài"}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Title */}
+        <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
+          {getAssignmentTitle(assignment)}
+        </h4>
+
+        {/* Info badges / Due date */}
+        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 mb-4">
+          <div className="flex items-center gap-2 text-gray-600">
+            <Clock size={13} className={isExpired && displayStatus === "not_submitted" ? "text-red-500 shrink-0" : "text-gray-400 shrink-0"} />
+            <span className={`truncate text-xs ${isExpired && displayStatus === "not_submitted" ? "text-red-600 font-extrabold" : ""}`}>
+              {cg.dueDateLabel || "Hạn nộp: "}{dueLabel}
+            </span>
+          </div>
+
+          {maxScore !== null && (
+            <div className="flex items-center gap-2 text-gray-500">
+              <Award size={13} className="text-amber-500 shrink-0" />
+              <span>{language === "vi" ? `Thang điểm: ${maxScore}` : `Max score: ${maxScore}`}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Grade Banner or Action Footer */}
+      <div>
+        {gradeLabel && (
+          <div className="bg-emerald-50 border border-emerald-200/60 rounded-xl p-2.5 mb-3 flex items-center justify-between text-xs">
+            <span className="font-extrabold text-emerald-800 flex items-center gap-1.5">
+              <Award size={14} className="text-emerald-600" />
+              {language === "vi" ? "Điểm số:" : "Score:"}
+            </span>
+            <span className="font-black text-emerald-700 text-sm bg-white px-2.5 py-0.5 rounded-md border border-emerald-200 shadow-2xs">
+              {gradeLabel}
+            </span>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onSelect(assignment.id)
+          }}
+          className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer ${displayStatus === "returned"
+              ? "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
+              : displayStatus === "submitted" || displayStatus === "late"
+                ? "bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200"
+                : isExpired
+                  ? "bg-red-50 hover:bg-red-100 text-red-700 border border-red-200"
+                  : "bg-[#990011] hover:bg-[#80000e] text-white shadow-xs"
+            }`}
+        >
+          <span>
+            {displayStatus === "returned"
+              ? (language === "vi" ? "Xem kết quả" : "View Grade")
+              : displayStatus === "submitted" || displayStatus === "late"
+                ? (language === "vi" ? "Xem bài nộp" : "View Submission")
+                : (language === "vi" ? "Nộp bài ngay" : "Submit Assignment")}
+          </span>
+          <ArrowRight size={13} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Student Quiz Card (Grid View) ──────────────────────────────────
+const StudentQuizCard = ({ quiz, language, onSelect }) => {
+  const closeTimeFormatted = formatDateTime(quiz.closeTime, language, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+
+  const recordStatus = typeof quiz.recordStatus === "string"
+    ? quiz.recordStatus.trim().toLowerCase()
+    : quiz.recordStatus
+
+  const hasTimeLimit = (
+    quiz.timeLimitMinutes !== null
+    && quiz.timeLimitMinutes !== undefined
+    && quiz.timeLimitMinutes !== ""
+    && Number.isFinite(Number(quiz.timeLimitMinutes))
+    && Number(quiz.timeLimitMinutes) >= 0
+  )
+
+  const embeddedQuestionCount = Array.isArray(quiz.questions)
+    ? quiz.questions.length
+    : undefined
+  const parsedQuestionCount = Number(quiz.questionCount)
+  const questionCount = embeddedQuestionCount
+    ?? (Number.isFinite(parsedQuestionCount) ? parsedQuestionCount : null)
+
+  return (
+    <div
+      onClick={() => onSelect && onSelect(quiz.id)}
+      className="group relative bg-white border border-gray-200 hover:border-red-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-[#990011] overflow-hidden"
+    >
+      <div>
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="bg-red-50 text-[#990011] border border-red-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+            <Timer size={12} className="text-[#990011]" />
+            {language === "vi" ? "BÀI KIỂM TRA" : "QUIZ"}
+          </span>
+
+          <div className="flex items-center gap-1.5">
+            {recordStatus === "submitted" ? (
+              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                {language === "vi" ? "Đã nộp" : "Submitted"}
+              </span>
+            ) : recordStatus === "inprogress" ? (
+              <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                {language === "vi" ? "Đang làm" : "In Progress"}
+              </span>
+            ) : (
+              <span className="bg-red-50 text-red-655 border border-red-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                {language === "vi" ? "Chưa làm" : "To Do"}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Title */}
+        <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
+          {quiz.name || quiz.title || (language === "vi" ? "Bài kiểm tra" : "Quiz")}
+        </h4>
+
+        {/* Info Grid */}
+        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 mb-4">
+          <div className="flex items-center gap-2 text-gray-600">
+            <Clock size={13} className="text-gray-400 shrink-0" />
+            <span className="truncate">{language === "vi" ? `Hạn đóng: ${closeTimeFormatted}` : `Closes: ${closeTimeFormatted}`}</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-gray-500 text-xs">
+            {hasTimeLimit && (
+              <span className="inline-flex items-center gap-1.5">
+                <Timer size={13} className="text-red-500 shrink-0" />
+                {quiz.timeLimitMinutes} {language === "vi" ? "phút" : "mins"}
+              </span>
+            )}
+            {questionCount !== null && (
+              <span className="inline-flex items-center gap-1.5">
+                <FileText size={13} className="text-blue-500 shrink-0" />
+                {questionCount} {language === "vi" ? "câu hỏi" : "questions"}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Footer Button */}
+      <div>
+        {recordStatus === "submitted" ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onSelect?.(quiz.id, "result")
+            }}
+            className="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
+          >
+            <Eye size={13} />
+            <span>{language === "vi" ? "Xem kết quả" : "See Result"}</span>
+          </button>
+        ) : recordStatus === "inprogress" ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onSelect?.(quiz.id)
+            }}
+            className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
+          >
+            <RotateCcw size={13} />
+            <span>{language === "vi" ? "Tiếp tục làm bài" : "Continue Quiz"}</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onSelect?.(quiz.id)
+            }}
+            className="w-full py-2.5 px-4 bg-[#990011] hover:bg-[#80000e] text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
+          >
+            <span>{language === "vi" ? "Bắt đầu làm bài" : "Start Quiz"}</span>
+            <ArrowRight size={13} />
+          </button>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -503,8 +827,9 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("newest")
+  const [sortBy, setSortBy] = useState("dueSoon")
   const [contentType, setContentType] = useState("all") // "all" | "assignments" | "quizzes"
+  const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [studentPage, setStudentPage] = useState(1)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
@@ -632,24 +957,136 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const showAssignments = contentType === "all" || contentType === "assignments"
   const showQuizzes = contentType === "all" || contentType === "quizzes"
 
+  // Student Metrics Computation
+  const totalAssignmentsCount = assignments.length
+  const totalQuizzesCount = quizzes.length
+  const totalItemsCount = totalAssignmentsCount + totalQuizzesCount
+
+  const pendingStudentItemsCount = useMemo(() => {
+    let count = 0
+    assignments.forEach((assignment) => {
+      const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
+      const status = getSubmissionStatus(embeddedSubmission)
+      if (status === "not_submitted") count++
+    })
+    quizzes.forEach((quiz) => {
+      const recordStatus = typeof quiz.recordStatus === "string" ? quiz.recordStatus.trim().toLowerCase() : quiz.recordStatus
+      if (recordStatus !== "submitted") count++
+    })
+    return count
+  }, [assignments, quizzes])
+
+  const completedStudentItemsCount = useMemo(() => {
+    let count = 0
+    assignments.forEach((assignment) => {
+      const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
+      const status = getSubmissionStatus(embeddedSubmission)
+      if (status === "submitted" || status === "graded" || status === "returned") count++
+    })
+    quizzes.forEach((quiz) => {
+      const recordStatus = typeof quiz.recordStatus === "string" ? quiz.recordStatus.trim().toLowerCase() : quiz.recordStatus
+      if (recordStatus === "submitted") count++
+    })
+    return count
+  }, [assignments, quizzes])
+
+  const gradedStudentItemsCount = useMemo(() => {
+    let count = 0
+    assignments.forEach((assignment) => {
+      const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
+      const status = getSubmissionStatus(embeddedSubmission)
+      if (status === "returned") count++
+    })
+    quizzes.forEach((quiz) => {
+      const recordStatus = typeof quiz.recordStatus === "string" ? quiz.recordStatus.trim().toLowerCase() : quiz.recordStatus
+      if (recordStatus === "submitted") count++
+    })
+    return count
+  }, [assignments, quizzes])
+
   const studentItems = useMemo(() => {
     const items = []
+    const normalizedSearch = searchTerm.trim().toLocaleLowerCase()
+
     if (showAssignments) {
-      filteredAssignments.forEach((assignment) => {
-        items.push({ type: "assignment", value: assignment })
+      assignments.forEach((assignment) => {
+        const title = String(getAssignmentTitle(assignment, "")).toLocaleLowerCase()
+        const matchesSearch = !normalizedSearch || title.includes(normalizedSearch)
+
+        const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
+        const submissionStatus = getSubmissionStatus(embeddedSubmission)
+        const { isExpired } = getAssignmentTimeline(assignment, nowMs)
+
+        let matchesStatus = true
+        if (statusFilter === "pending") {
+          matchesStatus = submissionStatus === "not_submitted" && !isExpired
+        } else if (statusFilter === "submitted") {
+          matchesStatus = submissionStatus === "submitted" || submissionStatus === "late"
+        } else if (statusFilter === "graded") {
+          matchesStatus = submissionStatus === "returned" || submissionStatus === "graded"
+        } else if (statusFilter === "overdue") {
+          matchesStatus = (submissionStatus === "not_submitted" && isExpired) || submissionStatus === "late"
+        }
+
+        if (matchesSearch && matchesStatus) {
+          items.push({
+            type: "assignment",
+            value: assignment,
+            dueDate: getTimestamp(assignment.dueDate),
+            createdAt: getTimestamp(assignment.createdAt),
+          })
+        }
       })
     }
+
     if (showQuizzes) {
-      filteredQuizzes.forEach((quiz) => {
-        items.push({ type: "quiz", value: quiz })
+      quizzes.forEach((quiz) => {
+        const title = String(quiz.name ?? quiz.title ?? "").toLocaleLowerCase()
+        const matchesSearch = !normalizedSearch || title.includes(normalizedSearch)
+
+        const recordStatus = typeof quiz.recordStatus === "string" ? quiz.recordStatus.trim().toLowerCase() : quiz.recordStatus
+        const closeTimestamp = getTimestamp(quiz.closeTime)
+
+        let matchesStatus = true
+        if (statusFilter === "pending") {
+          matchesStatus = recordStatus !== "submitted"
+        } else if (statusFilter === "submitted" || statusFilter === "graded") {
+          matchesStatus = recordStatus === "submitted"
+        } else if (statusFilter === "overdue") {
+          matchesStatus = recordStatus !== "submitted" && closeTimestamp > 0 && closeTimestamp < nowMs
+        }
+
+        if (matchesSearch && matchesStatus) {
+          items.push({
+            type: "quiz",
+            value: quiz,
+            dueDate: closeTimestamp,
+            createdAt: getTimestamp(quiz.createdAt),
+          })
+        }
       })
     }
-    return items
+
+    return items.sort((a, b) => {
+      if (sortBy === "dueSoon") {
+        const dateA = a.dueDate > 0 ? a.dueDate : Infinity
+        const dateB = b.dueDate > 0 ? b.dueDate : Infinity
+        return dateA - dateB
+      } else if (sortBy === "oldest") {
+        return a.createdAt - b.createdAt
+      } else {
+        return b.createdAt - a.createdAt
+      }
+    })
   }, [
-    filteredAssignments,
-    filteredQuizzes,
+    assignments,
+    quizzes,
     showAssignments,
     showQuizzes,
+    searchTerm,
+    statusFilter,
+    sortBy,
+    nowMs,
   ])
 
   const totalStudentItems = studentItems.length
@@ -748,43 +1185,188 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   // ─── Sub-View: Student personal grades view ───
   if (isStudent) {
     return (
-      <div className="bg-white border border-gray-150 rounded-2xl overflow-hidden shadow-xs p-6 flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h3 className="text-sm font-extrabold text-gray-900">{c.student?.myGrades || "Bài tập & Điểm số"}</h3>
+      <div className="flex flex-col gap-6">
 
-          {/* Content Type Filter */}
-          <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
+        {/* ─── 1. Student Dashboard Overview Metrics (4 Cards) ─── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Card 1: Total Items */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+            <div className="w-11 h-11 rounded-xl bg-red-50 text-[#990011] flex items-center justify-center shrink-0 border border-red-100">
+              <FileText size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{totalItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500">{language === "vi" ? "Tổng số bài" : "Total Items"}</p>
+            </div>
+          </div>
+
+          {/* Card 2: Action Required / Pending */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${pendingStudentItemsCount > 0
+                ? "bg-amber-50 text-amber-700 border-amber-200"
+                : "bg-gray-100 text-gray-500 border-gray-200"
+              }`}>
+              <Clock size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{pendingStudentItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500">{language === "vi" ? "Bài cần làm" : "To Do / Pending"}</p>
+            </div>
+          </div>
+
+          {/* Card 3: Completed */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{completedStudentItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500">{language === "vi" ? "Đã hoàn thành" : "Completed"}</p>
+            </div>
+          </div>
+
+          {/* Card 4: Graded / Returned */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200">
+              <Award size={20} />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-gray-900 leading-none mb-1">{gradedStudentItemsCount}</p>
+              <p className="text-xs font-bold text-gray-500">{language === "vi" ? "Bài đã chấm" : "Graded Items"}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── 2. Rich Control Bar (Search, Tabs, Filter, Sort, View Mode Toggle) ─── */}
+        <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+
+          {/* Left: Content Type Tabs with Counts */}
+          <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl shrink-0">
             <button
               type="button"
               onClick={() => selectContentType("all")}
               aria-pressed={contentType === "all"}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${contentType === "all" ? "bg-white text-[#990011] shadow-xs" : "text-gray-500 hover:text-gray-700"
+              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 ${contentType === "all" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
                 }`}
             >
-              {language === "vi" ? "Tất cả" : "All"}
+              <span>{language === "vi" ? "Tất cả" : "All"}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "all" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
+                }`}>
+                {totalItemsCount}
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => selectContentType("assignments")}
               aria-pressed={contentType === "assignments"}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${contentType === "assignments" ? "bg-white text-[#990011] shadow-xs" : "text-gray-500 hover:text-gray-700"
+              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 ${contentType === "assignments" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
                 }`}
             >
-              {language === "vi" ? "Bài tập" : "Assignments"}
+              <FileText size={13} />
+              <span>{language === "vi" ? "Bài tập" : "Assignments"}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "assignments" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
+                }`}>
+                {totalAssignmentsCount}
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => selectContentType("quizzes")}
               aria-pressed={contentType === "quizzes"}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${contentType === "quizzes" ? "bg-white text-[#990011] shadow-xs" : "text-gray-500 hover:text-gray-700"
+              className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 ${contentType === "quizzes" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
                 }`}
             >
-              <Timer size={12} />
+              <Timer size={13} />
               <span>{language === "vi" ? "Bài kiểm tra" : "Quizzes"}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "quizzes" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
+                }`}>
+                {totalQuizzesCount}
+              </span>
             </button>
+          </div>
+
+          {/* Right Controls: Search, Status Filter, Sort, View Toggle */}
+          <div className="flex flex-wrap items-center gap-3 flex-1 lg:justify-end">
+
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[200px] max-w-full lg:max-w-[260px]">
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder={language === "vi" ? "Tìm theo tên bài..." : "Search by title..."}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-xs font-semibold text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Status Filter */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => selectStatusOption(e.target.value)}
+                className="bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
+              >
+                <option value="all">{language === "vi" ? "Tất cả trạng thái" : "All Status"}</option>
+                <option value="pending">{language === "vi" ? "Chưa làm / Chưa nộp" : "To Do / Pending"}</option>
+                <option value="submitted">{language === "vi" ? "Đã nộp / Đang chờ" : "Submitted"}</option>
+                <option value="graded">{language === "vi" ? "Đã trả bài / Có điểm" : "Graded"}</option>
+                <option value="overdue">{language === "vi" ? "Quá hạn / Nộp muộn" : "Overdue / Late"}</option>
+              </select>
+              <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
+
+            {/* Sort Selection */}
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => selectSortOption(e.target.value)}
+                className="bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
+              >
+                <option value="dueSoon">{language === "vi" ? "Hạn gần nhất" : "Due Soonest"}</option>
+                <option value="newest">{language === "vi" ? "Mới nhất" : "Newest"}</option>
+                <option value="oldest">{language === "vi" ? "Cũ nhất" : "Oldest"}</option>
+              </select>
+              <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
+
+            {/* View Mode Toggle Switcher */}
+            <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl border border-gray-200/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                title={language === "vi" ? "Xem dạng Thẻ (Grid)" : "Grid View"}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === "grid" ? "bg-white text-[#990011] shadow-2xs font-bold" : "text-gray-500 hover:text-gray-800"
+                  }`}
+              >
+                <LayoutGrid size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                title={language === "vi" ? "Xem dạng Danh sách (Table)" : "List View"}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === "list" ? "bg-white text-[#990011] shadow-2xs font-bold" : "text-gray-500 hover:text-gray-800"
+                  }`}
+              >
+                <List size={15} />
+              </button>
+            </div>
+
           </div>
         </div>
 
+        {/* Errors & Loading Warnings */}
         {hasVisibleListError && (
           <div
             role="alert"
@@ -807,53 +1389,100 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
           </p>
         )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
-            <thead>
-              <tr className="border-b border-gray-150 bg-gray-50 text-gray-700 font-extrabold uppercase tracking-wider">
-                <th className="p-4 pl-6">Nội dung</th>
-                <th className="p-4">Hạn nộp / Đóng</th>
-                <th className="p-4">Trạng thái</th>
-                <th className="p-4 pr-6 text-center">Điểm số / Giới hạn</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-gray-750">
-              {totalStudentItems === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-400 font-bold">
-                    {hasVisibleListError
-                      ? listErrorMessage
-                      : (cg.noDataLabel || "Chưa có số liệu / Không tìm thấy mục nào.")}
-                  </td>
-                </tr>
+        {/* ─── 3. Main Content (Grid View or List View) ─── */}
+        {totalStudentItems === 0 ? (
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+              <FileText size={24} />
+            </div>
+            <p className="text-sm font-bold text-gray-700">
+              {searchTerm || statusFilter !== "all"
+                ? (language === "vi" ? "Không tìm thấy bài tập hoặc bài kiểm tra nào phù hợp." : "No matching assignments or quizzes found.")
+                : (cg.noDataLabel || "Chưa có bài tập hoặc bài kiểm tra nào trong lớp này.")}
+            </p>
+            {(searchTerm || statusFilter !== "all") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm("")
+                  setStatusFilter("all")
+                }}
+                className="mt-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs rounded-xl transition-colors"
+              >
+                {language === "vi" ? "Xóa bộ lọc" : "Clear Filters"}
+              </button>
+            )}
+          </div>
+        ) : viewMode === "grid" ? (
+          /* Grid View Layout */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {visibleStudentItems.map((item) => (
+              item.type === "assignment" ? (
+                <StudentAssignmentCard
+                  key={`assign-${item.value.id}`}
+                  assignment={item.value}
+                  classId={classId}
+                  cd={cd}
+                  cg={cg}
+                  language={language}
+                  nowMs={nowMs}
+                  onSelect={(id) => setSearchParams({ tab: "grading", assignmentId: id })}
+                />
               ) : (
-                visibleStudentItems.map((item) => (
-                  item.type === "assignment" ? (
-                    <StudentAssignmentRow
-                      key={`assign-${item.value.id}`}
-                      assignment={item.value}
-                      classId={classId}
-                      cd={cd}
-                      cg={cg}
-                      language={language}
-                      onSelect={(id) => setSearchParams({ tab: "grading", assignmentId: id })}
-                    />
-                  ) : (
-                    <StudentQuizRow
-                      key={`quiz-${item.value.id}`}
-                      quiz={item.value}
-                      language={language}
-                      onSelect={(id, step) => navigate(
-                        `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(id)}/take${step ? `?step=${step}` : ""}`
-                      )}
-                    />
-                  )
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                <StudentQuizCard
+                  key={`quiz-${item.value.id}`}
+                  quiz={item.value}
+                  language={language}
+                  onSelect={(id, step) => navigate(
+                    `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(id)}/take${step ? `?step=${step}` : ""}`
+                  )}
+                />
+              )
+            ))}
+          </div>
+        ) : (
+          /* Table List View Layout */
+          <div className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden shadow-2xs">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50/80 text-gray-700 font-extrabold uppercase tracking-wider">
+                    <th className="p-4 pl-6">Nội dung</th>
+                    <th className="p-4">Hạn nộp / Đóng</th>
+                    <th className="p-4">Trạng thái</th>
+                    <th className="p-4 pr-6 text-center">Điểm số / Giới hạn</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 text-gray-800">
+                  {visibleStudentItems.map((item) => (
+                    item.type === "assignment" ? (
+                      <StudentAssignmentRow
+                        key={`assign-${item.value.id}`}
+                        assignment={item.value}
+                        classId={classId}
+                        cd={cd}
+                        cg={cg}
+                        language={language}
+                        onSelect={(id) => setSearchParams({ tab: "grading", assignmentId: id })}
+                      />
+                    ) : (
+                      <StudentQuizRow
+                        key={`quiz-${item.value.id}`}
+                        quiz={item.value}
+                        language={language}
+                        onSelect={(id, step) => navigate(
+                          `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(id)}/take${step ? `?step=${step}` : ""}`
+                        )}
+                      />
+                    )
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
+        {/* Pagination */}
         {totalStudentItems > STUDENT_PAGE_SIZE && (
           <TablePagination
             currentPage={activeStudentPage}
