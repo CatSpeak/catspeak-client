@@ -58,8 +58,8 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
     setCommunityOpen(false);
 
     const isInsideEcosystem =
-      location.pathname.startsWith(`/${currentCommunity}/community`) ||
-      location.pathname.startsWith(`/${currentCommunity}/cat-speak`);
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`);
 
     if (isInsideEcosystem) {
       const newPath = location.pathname.replace(
