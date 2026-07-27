@@ -322,6 +322,7 @@ export const baseApi = createApi({
     "ClassMaterials",
     "Schedule",
     "Commission",
+    "Curriculum",
     "Breakout",
     "CustomRooms",
   ],
