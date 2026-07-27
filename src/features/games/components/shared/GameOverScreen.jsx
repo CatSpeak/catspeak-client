@@ -1,4 +1,5 @@
 import React from "react"
+// eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from "framer-motion"
 import Confetti from "react-confetti"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -34,7 +35,7 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
                 <div className="absolute w-12 h-12 bg-yellow-500/20 rounded-full blur-xl animate-pulse" />
                 <span className="text-3xl md:text-5xl">🏆</span>
               </motion.div>
-              <h2 className="text-2xl md:text-4xl font-black text-cath-red-600 mt-2 uppercase tracking-widest drop-shadow-sm shrink-0">
+              <h2 className="text-2xl md:text-3xl font-black text-cath-red-600 mt-2 uppercase tracking-widest drop-shadow-sm shrink-0">
                 {title || t.rooms?.game?.crackIt?.gameOver || "KẾT THÚC!"}
               </h2>
             </div>

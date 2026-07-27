@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
-import { isBreakoutSupported, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers";
+import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
@@ -88,6 +88,10 @@ const ControlBarMoreMenu = ({
   const [showGameHistory, setShowGameHistory] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
 
+  const { gameState } = useGame();
+  // Disable nút "Trò chơi" khi đang có ván game trong phòng (mọi state != "idle")
+  const isGameInProgress = gameState && gameState !== "idle";
+
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall);
 
   const { closingRemainingSeconds } = useVideoCallContext()
@@ -116,11 +120,20 @@ const ControlBarMoreMenu = ({
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
 
+  // Host được xác định dựa trên creatorId khớp với accountId hiện tại —
+  // áp dụng cho cả phòng thường (Group/AI/Class) và phòng Custom.
   const isHost =
-    isCustomRoom(room?.roomType) &&
     room?.creatorId != null &&
     user?.accountId != null &&
     String(room.creatorId) === String(user.accountId);
+
+  // Chỉ host mới được mở/bắt đầu trò chơi VÀ game phải đang idle
+  const canStartGame = isHost && !isGameInProgress;
+  const gameDisabledReason = isGameInProgress
+    ? "Đang có trò chơi trong phòng, không thể mở thêm"
+    : !isHost
+      ? "Chỉ host của phòng mới có thể bắt đầu trò chơi"
+      : null;
 
 
   const handleCopyLink = () => {
@@ -161,11 +174,15 @@ const ControlBarMoreMenu = ({
                       <div className="hidden md:flex flex-col">
                         <MenuItem
                           onClick={() => {
+                            if (!canStartGame) return;
                             setShowMoreMenu(false);
                             setShowGameSetup(true);
                           }}
+                          disabled={!canStartGame}
+                          className={!canStartGame ? "opacity-50 cursor-not-allowed" : ""}
                           icon={<Gamepad2 size={20} />}
                           label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
+                          title={gameDisabledReason || undefined}
                         />
 
                         <MenuItem
@@ -454,11 +471,15 @@ const ControlBarMoreMenu = ({
 
                               <MenuItem
                                 onClick={() => {
+                                  if (!canStartGame) return;
                                   setShowMoreMenu(false);
                                   setShowGameSetup(true);
                                 }}
+                                disabled={!canStartGame}
+                                className={!canStartGame ? "opacity-50 cursor-not-allowed" : ""}
                                 icon={<Gamepad2 size={20} />}
                                 label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
+                                title={gameDisabledReason || undefined}
                                 hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
                               />
                               <MenuItem

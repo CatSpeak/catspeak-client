@@ -137,7 +137,7 @@ const PictureITOverlay = ({ mode = "fullscreen", isMain = true }) => {
       animationKey="picture-it-overlay"
       mode={mode}
       gameContent={
-        <div className="flex flex-col flex-1 gap-3 md:gap-4 h-full min-h-0 overflow-y-auto pr-1">
+        <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-hidden w-full p-2 md:p-3">
           <PictureItImageCard
             isDescriber={isDescriber}
             imgLoading={imgLoading}
@@ -148,6 +148,7 @@ const PictureITOverlay = ({ mode = "fullscreen", isMain = true }) => {
             imageBlurred={imageBlurred}
             hasDescribeStarted={hasDescribeStarted}
             category={pictureIt?.category}
+            describerName={describerUser?.name}
           />
           <PictureItActionPanel
             isDescriber={isDescriber}

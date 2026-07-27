@@ -1,5 +1,4 @@
 import React from "react"
-import { motion } from "framer-motion"
 import { Star } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -7,6 +6,7 @@ import RoleBadge from "./RoleBadge"
 import useCountUp from "./useCountUp"
 import { fluentEaseOut } from "@/shared/utils/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { motion } from "framer-motion"
 
 /**
  * RoundScoreCard

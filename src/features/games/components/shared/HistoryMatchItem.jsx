@@ -11,8 +11,6 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
     return date.toLocaleString()
   }
 
-  const hasWinners = match.winners && match.winners.length > 0
-
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200" >
       <div
