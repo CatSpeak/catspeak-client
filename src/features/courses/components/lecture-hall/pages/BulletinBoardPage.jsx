@@ -131,7 +131,7 @@ const BulletinBoardPage = () => {
         className="text-[#7B7979] text-sm"
         items={[
           { label: "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: "Khóa học của tôi", onClick: () => navigate(basePath) },
+          { label: isStudent ? "Khóa học & Học tập của tôi" : "Khóa học của tôi", onClick: () => navigate(basePath) },
           { label: "Toàn bộ khóa học", onClick: () => navigate(basePath) },
           { label: "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
           { label: "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },

@@ -141,7 +141,7 @@ const PostDetailPage = () => {
           locked={!postDetail?.allowReply}
           showAll={showAll}
           previewCount={3}
-          currentUserAvatar={user?.avatar || "https://i.pravatar.cc/150"}
+          currentUserAvatar={user?.avatarImageUrl || "https://i.pravatar.cc/150"}
           currentUserName={user?.fullName || "Bạn"}
           onSubmit={handleSubmit}
           onReply={(c) => setReplyingTo(c)}

@@ -946,6 +946,8 @@ export const coursesApi = baseApi.injectEndpoints({
               let meta = item.meta || item.description || ""
               let metaType = item.metaType || "none"
               let content = item.content || ""
+              let fileUrl = ""
+              let fileName = ""
 
               if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
                 title = item.bulletinBoard.title || title
@@ -955,11 +957,14 @@ export const coursesApi = baseApi.injectEndpoints({
                 title = item.link.title || title
                 meta = item.link.url || meta
               } else if (item.itemType === "Material" && item.material) {
-                title = item.material.title || item.material.name || title
+                // title = item.material.title || item.material.name || title
+                title = item.material.fileName
                 const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
                 const size = item.material.size ? `${(item.material.size / (1024 * 1024)).toFixed(1)} MB` : ""
                 meta = size ? `${ext} • ${size}` : ext
                 metaType = "file"
+                fileUrl = item.material.fileUrl || item.material.url || ""
+                fileName = item.material.fileName || item.material.name || ""
               } else if (item.itemType === "Assignment" && item.assignment) {
                 title = item.assignment.name
                 meta = item.assignment.dueDate ? `Hạn nộp: ${new Date(item.assignment.dueDate).toLocaleDateString("vi-VN")}` : meta
@@ -980,6 +985,8 @@ export const coursesApi = baseApi.injectEndpoints({
                 title,
                 meta,
                 metaType,
+                fileUrl,
+                fileName,
                 isVisibleToStudents: item.isVisibleToStudents ?? (item.isHidden === false),
               }
             }),
@@ -1028,6 +1035,8 @@ export const coursesApi = baseApi.injectEndpoints({
               let meta = item.meta || item.description || ""
               let metaType = item.metaType || "none"
               let content = item.content || ""
+              let fileUrl = ""
+
 
               if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
                 title = item.bulletinBoard.title || title
@@ -1037,11 +1046,13 @@ export const coursesApi = baseApi.injectEndpoints({
                 title = item.link.title || title
                 meta = item.link.url || meta
               } else if (item.itemType === "Material" && item.material) {
-                title = item.material.title || item.material.name || title
+                // title = item.material.title || item.material.name || title
+                title = item.material.fileName
                 const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
                 const size = item.material.size ? `${(item.material.size / (1024 * 1024)).toFixed(1)} MB` : ""
                 meta = size ? `${ext} • ${size}` : ext
                 metaType = "file"
+                fileUrl = item.material.fileUrl || item.material.url || ""
               } else if (item.itemType === "Assignment" && item.assignment) {
                 title = item.assignment.name
                 meta = item.assignment.dueDate ? `Hạn nộp: ${new Date(item.assignment.dueDate).toLocaleDateString("vi-VN")}` : meta
@@ -1062,6 +1073,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 title,
                 meta,
                 metaType,
+                fileUrl,
                 isVisibleToStudents: item.isVisibleToStudents ?? true,
               }
             }),

@@ -13,8 +13,8 @@ import { IconButton } from "@/shared/components/ui/buttons"
  * @param {function} [onSubmit]          - Callback(htmlContent) khi gửi bình luận
  */
 const CommentInput = ({
-  currentUserAvatar,
-  currentUserName,
+  // currentUserAvatar,
+  // currentUserName,
   placeholder = "Nhập phản hồi",
   onSubmit,
 }) => {
@@ -42,14 +42,14 @@ const CommentInput = ({
   return (
     <div className="flex items-start gap-4">
       {/* Current user avatar */}
-      <div className="shrink-0 pt-1">
+      {/* <div className="shrink-0 pt-1">
         <Avatar
           src={currentUserAvatar}
           name={currentUserName}
           alt={currentUserName || "Bạn"}
           size={40}
         />
-      </div>
+      </div> */}
 
       {/* Editor + Send */}
       <div className="flex-1 flex items-end gap-2">

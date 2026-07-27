@@ -84,7 +84,7 @@ const LessonItemRow = ({
         <div className="min-w-0 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
             <h4
-              className={`text-base font-semibold ${["bulletinBoard", "link", "assignment", "quiz"].includes(displayData.type) ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
+              className={`text-base font-semibold ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
               onClick={() => {
                 const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
                 if (displayData.type === "bulletinBoard") {
@@ -104,6 +104,11 @@ const LessonItemRow = ({
                     navigate(`/workspace/courses/class/${classId}/quiz/${displayData.realItemId}/take`)
                   } else {
                     navigate(`/workspace/courses/class/${classId}/quiz/${displayData.realItemId}`)
+                  }
+                } else if (displayData.type === "material") {
+                  const fileUrl = item.material?.fileUrl || item.material?.url || item.material?.FileUrl || item.fileUrl;
+                  if (fileUrl) {
+                    window.open(fileUrl, "_blank")
                   }
                 }
               }}
