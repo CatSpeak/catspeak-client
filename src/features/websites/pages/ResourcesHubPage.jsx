@@ -132,7 +132,7 @@ const ResourcesHubPage = () => {
     <FluentAnimation className="min-h-screen bg-[#f3f3f3] flex flex-col p-0 sm:p-6 gap-4 sm:gap-6">
       {/* ── Dashboard Hero Banner ── */}
 
-      <div className="relative overflow-hidden rounded-none sm:rounded-xl bg-gradient-to-br from-[#3b0712] via-[#6b1428] to-[#2d050d] text-white py-8 px-4 sm:py-12 sm:px-8 shadow-lg shadow-rose-950/30 border-b sm:border border-rose-500/25">
+      <div className="relative rounded-none sm:rounded-xl bg-gradient-to-br from-[#3b0712] via-[#6b1428] to-[#2d050d] text-white py-8 px-4 sm:py-12 sm:px-8 shadow-lg shadow-rose-950/30 border-b sm:border border-rose-500/25 z-20">
         <div className="relative max-w-4xl mx-auto text-center space-y-4 sm:space-y-5">
           {/* Title */}
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white drop-shadow-sm min-h-[1.2em]">
@@ -146,7 +146,7 @@ const ResourcesHubPage = () => {
           </p>
 
           {/* Search Input Bar */}
-          <div className="max-w-xl mx-auto pt-2">
+          <div className="relative max-w-xl mx-auto pt-2 z-30">
             <ResourceSearchInput
               value={searchInput}
               onChange={handleInputChange}
