@@ -14,6 +14,7 @@ import {
   getScheduleRange,
   mapUpcomingSessions,
 } from "@/features/courses/utils/courseTransforms"
+import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const WorkspaceCalendarPage = () => {
   const { language, t } = useLanguage()
@@ -83,7 +84,7 @@ const WorkspaceCalendarPage = () => {
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
-      <div className="flex justify-between items-center flex-wrap gap-2">
+      {/* <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
           <button
             type="button"
@@ -95,7 +96,13 @@ const WorkspaceCalendarPage = () => {
           <span>/</span>
           <span className="text-[#990011] font-semibold">{t.nav?.calendar || "Calendar"}</span>
         </div>
-      </div>
+      </div> */}
+      <Breadcrumb
+        items={[
+          { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
+          { label: t.nav.calendar || "Calendar" }
+        ]}
+      />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
@@ -113,7 +120,7 @@ const WorkspaceCalendarPage = () => {
             emptyLabel={c.noUpcomingClasses || "No upcoming classes yet"}
             viewClassLabel={c.viewClass || "View class"}
             joinRoomLabel={c.joinRoom || "Join room"}
-            onViewSchedule={() => navigate("/workspace/courses/schedule")}
+            onViewSchedule={() => navigate("/workspace/calendar/schedule")}
             onOpenSession={(item) => {
               const targetId = item.classId
               if (targetId) {

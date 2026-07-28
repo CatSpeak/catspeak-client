@@ -393,6 +393,14 @@ const routesConfig = [
                 ),
               },
               {
+                path: "calendar/schedule",
+                element: (
+                  <LazyRoute>
+                    <SchedulePage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "analytics",
                 element: (
                   <LazyRoute>
@@ -400,14 +408,6 @@ const routesConfig = [
                   </LazyRoute>
                 ),
               },
-              // {
-              //   path: "/schedule/teaching",
-              //   element: (
-              //     <LazyRoute>
-              //       <SchedulePage />
-              //     </LazyRoute>
-              //   ),
-              // },
               {
                 path: "courses/all",
                 element: (
