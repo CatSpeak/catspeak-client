@@ -56,9 +56,12 @@ const ChatPage = () => {
 
   const {
     replyingTo,
+    pendingUpload,
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
+    handleRetryUpload,
+    handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
   } = useChatMessageActions(selectedId)
@@ -170,6 +173,9 @@ const ChatPage = () => {
           onCancelReply={handleCancelReply}
           onDeleteForMe={handleDeleteForMe}
           onRecall={handleRecall}
+          pendingUpload={pendingUpload}
+          onRetryUpload={handleRetryUpload}
+          onCancelUpload={handleCancelUpload}
         />
       ) : (
         <EmptyState
