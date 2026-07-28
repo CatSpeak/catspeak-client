@@ -7,14 +7,15 @@ import { useParticipants, useIsSpeaking } from "@livekit/components-react"
 // eslint-disable-next-line no-unused-vars
 import { motion, animate, AnimatePresence } from "framer-motion"
 import { ParticipantVolumePopover } from "@/features/video-call/components/ParticipantVolumePopover"
+import Avatar from "@/shared/components/ui/Avatar"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 
-// Try to read avatarUrl from participant metadata JSON.
+// Try to read meetingAvatarUrl / avatarUrl from participant metadata JSON.
 const getParticipantAvatar = (participant) => {
   if (!participant?.metadata) return null
   try {
     const meta = JSON.parse(participant.metadata)
-    return meta.avatarImageUrl || meta.avatarUrl || null
+    return meta.meetingAvatarUrl || meta.avatarImageUrl || meta.avatarUrl || null
   } catch {
     return null
   }
@@ -44,29 +45,17 @@ const AnimatedScore = ({ value, suffix }) => {
 
 const SpeakingAvatar = ({ participant, name, embedded = false }) => {
   const isSpeaking = useIsSpeaking(participant)
-  const sizeClass = embedded ? "w-10 h-10" : "w-9 h-9"
-  const ringClass = isSpeaking
-    ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white"
-    : "ring-0 ring-transparent"
-
   const avatarUrl = getParticipantAvatar(participant)
-
-  if (avatarUrl) {
-    return (
-      <div className={`${sizeClass} rounded-full overflow-hidden bg-gray-100 shrink-0 transition-all duration-200 ${ringClass}`}>
-        <img
-          src={getImageUrl(avatarUrl)}
-          alt={name || ""}
-          className="w-full h-full object-cover"
-        />
-      </div>
-    )
-  }
+  const size = embedded ? 40 : 36
 
   return (
-    <div className={`${sizeClass} rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0 transition-all duration-200 ${ringClass}`}>
-      {(name || "?").charAt(0).toUpperCase()}
-    </div>
+    <Avatar
+      size={size}
+      src={avatarUrl ? getImageUrl(avatarUrl) : null}
+      name={name}
+      speaking={isSpeaking}
+      className="shrink-0"
+    />
   )
 }
 
@@ -91,22 +80,13 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
       {/* Avatar */}
       {participant ? (
         <SpeakingAvatar participant={participant} name={player.name} embedded={embedded} />
-      ) : fallbackAvatarUrl ? (
-        <div className={`rounded-full overflow-hidden bg-gray-100 shrink-0 ring-0 ring-transparent ${
-          embedded ? "w-10 h-10" : "w-9 h-9"
-        }`}>
-          <img
-            src={getImageUrl(fallbackAvatarUrl)}
-            alt={player.name || ""}
-            className="w-full h-full object-cover"
-          />
-        </div>
       ) : (
-        <div className={`rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0 ring-0 ring-transparent ${
-          embedded ? "w-10 h-10 text-sm" : "w-9 h-9"
-        }`}>
-          {(player.name || "?").charAt(0).toUpperCase()}
-        </div>
+        <Avatar
+          size={embedded ? 40 : 36}
+          src={fallbackAvatarUrl ? getImageUrl(fallbackAvatarUrl) : null}
+          name={player.name}
+          className="shrink-0"
+        />
       )}
 
       {/* Info */}
