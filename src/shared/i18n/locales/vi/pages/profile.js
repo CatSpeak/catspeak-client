@@ -125,5 +125,7 @@ export default {
     selectLevelError: "Vui lòng chọn trình độ cho từng ngôn ngữ",
     certifyError: "Vui lòng xác nhận và đồng ý với các quy định của nền tảng.",
     formInvalid: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi gửi.",
+    credentialSizeLimit: "Mỗi chứng chỉ phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
+    videoSizeLimit: "Video phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
   },
 }

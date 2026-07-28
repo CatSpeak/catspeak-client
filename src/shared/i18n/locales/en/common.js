@@ -129,6 +129,9 @@ export default {
     cancelTip: "Cancel task",
     instructorTaskTitle: "Submitting instructor application",
     recordingTaskTitle: "Processing recording",
+    close: "Close",
+    expand: "Expand",
+    collapse: "Collapse",
   },
   catSpeak: {
     reels: {

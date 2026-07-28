@@ -345,6 +345,21 @@ const InstructorPage = () => {
       if (!canEdit) return;
       const files = Array.from(e.target.files || []);
       if (!files.length) return;
+      const CRED_MAX_MB = 100;
+      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024);
+      if (oversized) {
+        const actualMb = (oversized.size / 1024 / 1024).toFixed(1);
+        setErrors((prev) => ({
+          ...prev,
+          credentials:
+            ins.credentialSizeLimit
+              ?.replace("{max}", CRED_MAX_MB)
+              ?.replace("{actual}", actualMb) ||
+            `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`,
+        }));
+        e.target.value = "";
+        return;
+      }
       setFormData((prev) => ({
         ...prev,
         credentials: [...prev.credentials, ...files],
@@ -352,7 +367,7 @@ const InstructorPage = () => {
       clearError("credentials");
       e.target.value = "";
     },
-    [canEdit],
+    [canEdit, ins],
   );
 
   const handleSelectVideo = useCallback(() => {
@@ -365,10 +380,24 @@ const InstructorPage = () => {
       if (!canEdit) return;
       const file = e.target.files?.[0];
       if (!file) return;
+      const VIDEO_MAX_MB = 500;
+      if (file.size > VIDEO_MAX_MB * 1024 * 1024) {
+        const actualMb = (file.size / 1024 / 1024).toFixed(1);
+        setErrors((prev) => ({
+          ...prev,
+          videoFile:
+            ins.videoSizeLimit
+              ?.replace("{max}", VIDEO_MAX_MB)
+              ?.replace("{actual}", actualMb) ||
+            `Video phải nhỏ hơn ${VIDEO_MAX_MB}MB (hiện tại ${actualMb}MB).`,
+        }));
+        e.target.value = "";
+        return;
+      }
       setFormData((prev) => ({ ...prev, videoFile: file }));
       clearError("videoFile");
     },
-    [canEdit],
+    [canEdit, ins],
   );
 
   const handleRemoveCredential = useCallback(

@@ -119,5 +119,7 @@ export default {
     selectLevelError: "请选择每种语言的熟练程度",
     certifyError: "请选中复选框以同意我们的条款。",
     formInvalid: "提交前请填写所有必填字段。",
+    credentialSizeLimit: "每份证书必须小于 {max}MB（当前 {actual}MB）。",
+    videoSizeLimit: "视频必须小于 {max}MB（当前 {actual}MB）。",
   },
 }

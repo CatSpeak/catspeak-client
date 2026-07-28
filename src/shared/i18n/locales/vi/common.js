@@ -129,6 +129,9 @@ export default {
     cancelTip: "Hủy tác vụ",
     instructorTaskTitle: "Gửi hồ sơ giảng viên",
     recordingTaskTitle: "Đang xử lý bản ghi hình",
+    close: "Đóng",
+    expand: "Mở rộng",
+    collapse: "Thu gọn",
   },
   catSpeak: {
     reels: {

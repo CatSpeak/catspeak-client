@@ -133,6 +133,9 @@ export default {
     cancelTip: "取消任务",
     instructorTaskTitle: "提交导师申请",
     recordingTaskTitle: "正在处理录制文件",
+    close: "关闭",
+    expand: "展开",
+    collapse: "收起",
   },
   catSpeak: {
     reels: {
