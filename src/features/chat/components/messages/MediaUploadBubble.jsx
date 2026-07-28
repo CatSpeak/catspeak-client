@@ -1,13 +1,12 @@
 import React from "react"
-import { X, RotateCw } from "lucide-react"
+import { X, RotateCw, Loader2 } from "lucide-react"
 import { getFileIcon } from "@/features/courses/components/lecture-hall/utils/fileUtils"
 import ListItem from "@/shared/components/ui/ListItem"
-import ProgressBar from "@/shared/components/ui/ProgressBar"
 import { IconButton } from "@/shared/components/ui/buttons"
 
 /**
  * MediaUploadBubble — renders a pending/uploading media card in the chat stream.
- * Styled identically to MediaAttachment.jsx's attachment card with ProgressBar replacing file size.
+ * Displays "Đang gửi..." with a spinning loading indicator during upload.
  */
 const MediaUploadBubble = ({ pendingUpload, onRetry, onCancel }) => {
   if (!pendingUpload) return null
@@ -15,7 +14,6 @@ const MediaUploadBubble = ({ pendingUpload, onRetry, onCancel }) => {
   const {
     fileName = "Attachment",
     status = "uploading",
-    progress = 100,
     errorMsg = null,
   } = pendingUpload
 
@@ -27,10 +25,16 @@ const MediaUploadBubble = ({ pendingUpload, onRetry, onCancel }) => {
       <div className="flex flex-col w-full max-w-[360px]">
         <ListItem
           lines={2}
-          className={`bg-[#F3F3F3] rounded-2xl overflow-hidden text-left`}
+          className="bg-[#F3F3F3] rounded-2xl overflow-hidden text-left"
           leftContent={getFileIcon(fileName)}
           rightContent={
             <div className="flex items-center gap-1">
+              {isUploading && (
+                <div className="p-2 text-[#990011]">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                </div>
+              )}
+
               {isError && onRetry && (
                 <IconButton
                   type="button"
@@ -58,9 +62,9 @@ const MediaUploadBubble = ({ pendingUpload, onRetry, onCancel }) => {
           <p className="font-semibold truncate m-0">{fileName}</p>
 
           {isUploading ? (
-            <ProgressBar progress={progress} />
+            <p className="text-xs text-[#606060] m-0">Đang gửi...</p>
           ) : isError ? (
-            <p className="text-sm text-red-500 font-semibold truncate">
+            <p className="text-sm text-red-500 font-semibold truncate m-0">
               {errorMsg || "Upload failed"}
             </p>
           ) : null}

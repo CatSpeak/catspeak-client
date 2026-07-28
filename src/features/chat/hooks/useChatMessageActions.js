@@ -22,6 +22,11 @@ import {
 export const useChatMessageActions = (conversationId) => {
   const [replyingTo, setReplyingTo] = useState(null)
   const [pendingUpload, setPendingUpload] = useState(null)
+  const [isFileSizeModalOpen, setIsFileSizeModalOpen] = useState(false)
+
+  const closeFileSizeModal = useCallback(() => {
+    setIsFileSizeModalOpen(false)
+  }, [])
 
   const [sendMessageMutation, { isLoading: isSendingText }] =
     useSendMessageMutation()
@@ -49,6 +54,12 @@ export const useChatMessageActions = (conversationId) => {
       const parentId = replyingTo?.id || replyingTo?.messageId || null
 
       if (file) {
+        const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
+        if (file.size > MAX_FILE_SIZE) {
+          setIsFileSizeModalOpen(true)
+          return
+        }
+
         setPendingUpload({
           conversationId,
           file,
@@ -56,7 +67,6 @@ export const useChatMessageActions = (conversationId) => {
           fileSize: file.size,
           text: text || "",
           status: "uploading",
-          progress: 100,
           errorMsg: null,
         })
       }
@@ -89,7 +99,24 @@ export const useChatMessageActions = (conversationId) => {
         setReplyingTo(null)
       } catch (err) {
         console.error("Failed to send message:", err)
-        if (file) {
+
+        const errPayload =
+          typeof err?.data === "string"
+            ? err.data
+            : JSON.stringify(err?.data || err || {})
+
+        const isFileSizeExceeded =
+          errPayload.includes("25MB") ||
+          errPayload.includes("dung lượng") ||
+          errPayload.includes("vượt quá") ||
+          errPayload.includes("ArgumentException") ||
+          err?.status === 413 ||
+          err?.originalStatus === 413
+
+        if (isFileSizeExceeded) {
+          setIsFileSizeModalOpen(true)
+          setPendingUpload(null)
+        } else if (file) {
           const errorMsg =
             err?.data?.message || err?.message || "Tải lên thất bại."
           setPendingUpload((prev) =>
@@ -152,6 +179,8 @@ export const useChatMessageActions = (conversationId) => {
       pendingUpload && String(pendingUpload.conversationId) === String(conversationId)
         ? pendingUpload
         : null,
+    isFileSizeModalOpen,
+    closeFileSizeModal,
     handleReply,
     handleCancelReply,
     handleSend,

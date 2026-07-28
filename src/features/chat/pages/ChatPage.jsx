@@ -5,6 +5,7 @@ import ChatSidebar from "../components/ChatSidebar"
 import ChatArea from "../components/ChatArea"
 import ChatUserPanel from "../components/ChatUserPanel"
 import NewChatModal from "../components/modals/NewChatModal"
+import FileSizeLimitModal from "../components/modals/FileSizeLimitModal"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { conversationsApi } from "@/store/api/social/conversationsApi"
@@ -57,6 +58,8 @@ const ChatPage = () => {
   const {
     replyingTo,
     pendingUpload,
+    isFileSizeModalOpen,
+    closeFileSizeModal,
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
@@ -237,6 +240,12 @@ const ChatPage = () => {
         open={isNewChatOpen}
         onClose={() => setIsNewChatOpen(false)}
         onConversationCreated={handleSelectConversation}
+      />
+
+      {/* ── File Size Limit Modal ────────────────────── */}
+      <FileSizeLimitModal
+        open={isFileSizeModalOpen}
+        onClose={closeFileSizeModal}
       />
     </FluentAnimation>
   )
