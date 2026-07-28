@@ -635,6 +635,8 @@ export default {
       score: "Điểm",
       matchDate: "Ngày chơi",
       winner: "Người chiến thắng",
+      startDateLabel: "Từ ngày",
+      endDateLabel: "Đến ngày",
     },
     setup: {
       title: "Thiết lập Trò chơi",

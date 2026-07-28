@@ -175,9 +175,16 @@ export const roomsApi = baseApi.injectEndpoints({
     
     // Get game history for a specific room
     getGameHistory: builder.query({
-      query: (roomId) => ({
-        url: `/games/${roomId}/history`,
-      }),
+      query: ({ roomId, page = 1, pageSize = 4, startDate = null, endDate = null }) => {
+        const params = new URLSearchParams()
+        params.set("page", String(page))
+        params.set("pageSize", String(pageSize))
+        if (startDate) params.set("startDate", startDate)
+        if (endDate) params.set("endDate", endDate)
+        return {
+          url: `/games/${roomId}/history?${params.toString()}`,
+        }
+      },
     }),
 
     // --- Pro Custom Rooms ---
