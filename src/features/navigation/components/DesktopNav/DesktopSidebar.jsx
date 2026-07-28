@@ -340,7 +340,7 @@ const DesktopSidebar = () => {
                             return false
                           if (item.isPrivate && !isAuthenticated) return false
 
-                          const teacherTabs = ["myCourses", "myClass", "analytics", "calendar"]
+                          const teacherTabs = ["myCourses", "myClass", "analytics", "schedule"]
                           if (teacherTabs.includes(item.key) && isStudent) return false
 
                           if (item.key === "myLearning" && isTeacher) return false

@@ -385,7 +385,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "calendar",
+                path: "schedule",
                 element: (
                   <LazyRoute>
                     <WorkspaceCalendarPage />
@@ -393,7 +393,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "calendar/schedule",
+                path: "schedule/teaching-schedule",
                 element: (
                   <LazyRoute>
                     <SchedulePage />

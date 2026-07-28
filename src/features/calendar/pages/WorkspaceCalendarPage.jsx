@@ -120,7 +120,7 @@ const WorkspaceCalendarPage = () => {
             emptyLabel={c.noUpcomingClasses || "No upcoming classes yet"}
             viewClassLabel={c.viewClass || "View class"}
             joinRoomLabel={c.joinRoom || "Join room"}
-            onViewSchedule={() => navigate("/workspace/calendar/schedule")}
+            onViewSchedule={() => navigate("/workspace/schedule/teaching-schedule")}
             onOpenSession={(item) => {
               const targetId = item.classId
               if (targetId) {

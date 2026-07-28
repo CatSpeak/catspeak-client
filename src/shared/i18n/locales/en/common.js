@@ -54,6 +54,7 @@ export default {
     allCourses: "All Courses",
     myCourses: "My Courses",
     myClass: "My Classes",
+    schedule: "Schedule",
     myLearning: "My Learning",
     messages: "Messages",
     settings: "Settings",

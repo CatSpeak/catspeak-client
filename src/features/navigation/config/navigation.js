@@ -62,7 +62,7 @@ export const navSections = [
     items: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
-      { key: "calendar", path: "/workspace/calendar", icon: Calendar },
+      { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
@@ -111,7 +111,7 @@ export const navLinks = [
     subItems: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
-      { key: "calendar", path: "/workspace/calendar", icon: Calendar },
+      { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
