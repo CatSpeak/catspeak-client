@@ -49,9 +49,9 @@ const StoryInputBar = ({
       : t.catSpeak?.mail?.sortOldest;
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 w-full py-1 mb-2 sm:mb-3">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 w-full px-4 sm:px-6 py-1 mb-2 sm:mb-3">
       {/* Left: text input + send button */}
-      <div className="flex w-full md:w-auto justify-center items-start gap-2.5 flex-1 min-w-0">
+      <div className="flex w-full md:w-auto justify-center md:justify-start items-start gap-2.5 flex-1 min-w-0">
         <TextInput
           value={inputValue}
           onChange={onChange}
