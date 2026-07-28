@@ -19,6 +19,7 @@ import {
   filterByStatus,
   mapTeacherClassSummary,
 } from "../utils/courseTransforms"
+import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All Status" },
@@ -153,7 +154,7 @@ const MyClassesPage = () => {
           {mc.refreshFailed || "Some overview data could not be refreshed. The displayed information may be out of date."}
         </div>
       )}
-      <div className="flex justify-between items-center flex-wrap gap-2">
+      {/* <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
           <button
             type="button"
@@ -165,7 +166,12 @@ const MyClassesPage = () => {
           <span>/</span>
           <span className="text-[#990011] font-semibold">{c.myClassesTab || "My Classes"}</span>
         </div>
-      </div>
+      </div> */}
+      <Breadcrumb
+        items={[
+          { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
+          { label: c.myClassesTab || "My Classes" }
+        ]} />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
@@ -173,7 +179,7 @@ const MyClassesPage = () => {
         </h1>
         <button
           type="button"
-          onClick={() => navigate("/workspace/courses/create-class")}
+          onClick={() => navigate("/workspace/classes/create-class")}
           className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
         >
           <Plus size={16} />
@@ -222,7 +228,7 @@ const MyClassesPage = () => {
         {filteredDisplayList.length > 0 && (
           <button
             type="button"
-            onClick={() => navigate("/workspace/courses/all-classes")}
+            onClick={() => navigate("/workspace/classes/all")}
             className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2"
           >
             {c.myCourses?.viewAll || "View all"}

@@ -226,7 +226,7 @@ const SchedulePage = () => {
         </h1>
         <button
           type="button"
-          onClick={() => navigate("/workspace/courses/create-class")}
+          onClick={() => navigate("/workspace/classes/create-class")}
           className="flex items-center justify-center gap-2 bg-[#990011] hover:bg-[#80000e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 shadow-sm hover:scale-[1.01] active:scale-95"
         >
           <Plus size={16} />

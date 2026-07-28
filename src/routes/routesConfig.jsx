@@ -417,7 +417,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/all-classes",
+                path: "classes/all",
                 element: (
                   <LazyRoute>
                     <AllClassesPage />
@@ -441,7 +441,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/create-class",
+                path: "classes/create-class",
                 element: (
                   <LazyRoute>
                     <CreateClassPage />

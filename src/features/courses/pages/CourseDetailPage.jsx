@@ -240,7 +240,7 @@ const CourseDetailPage = () => {
               </h3>
 
               <button
-                onClick={() => navigate("/workspace/courses/create-class", { state: { courseId: rawCourse.id } })}
+                onClick={() => navigate("/workspace/classes/create-class", { state: { courseId: rawCourse.id } })}
                 className="px-4 py-1.5 border border-[#b20a1c] hover:bg-red-50/50 text-[#b20a1c] text-xs font-black rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
               >
                 <span>{addNewClassLabel}</span>

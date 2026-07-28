@@ -151,7 +151,7 @@ const ClassOverviewTab = ({
                           role="menuitem"
                           onClick={() => {
                             setShowActionsDropdown(false)
-                            navigate(`/workspace/courses/create-class`, { state: { recoverClassId: id } })
+                            navigate(`/workspace/classes/create-class`, { state: { recoverClassId: id } })
                           }}
                           className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold text-[#b20a1c] transition-colors"
                         >
