@@ -836,6 +836,32 @@ export default {
         cancel: "取消",
         save: "保存"
       }
+    },
+    notifications: {
+      class_update: {
+        title: "班级更新",
+        body: '班级 "{className}" 已更新'
+      },
+      schedule_change: {
+        title: "日程已更改",
+        body: '班级 "{className}" 的日程已调整'
+      },
+      assignment_new: {
+        title: "新作业",
+        body: '作业 "{assignmentName}" 已发布'
+      },
+      assignment_graded: {
+        title: "作业已评分",
+        body: '作业 "{assignmentName}" 的结果已公布'
+      },
+      assignment_regraded: {
+        title: "结果已更新",
+        body: '作业 "{assignmentName}" 的结果已更新'
+      },
+      quiz_regraded: {
+        title: "测验结果已更新",
+        body: '测验 "{quizName}" 的结果已更新'
+      }
     }
   }
 }

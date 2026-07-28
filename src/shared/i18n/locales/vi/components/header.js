@@ -8,6 +8,7 @@ export default {
   community: "Cộng đồng",
   notifications: "Thông báo",
   noNewNotifications: "Không có thông báo mới",
+  markAllRead: "Đánh dấu tất cả đã đọc",
   searchPlaceholder: "Tìm kiếm phòng",
   languages: {
     vi: "Tiếng Việt",
