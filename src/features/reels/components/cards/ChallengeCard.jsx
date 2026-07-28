@@ -2,6 +2,7 @@ import React from "react"
 import { Clock, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { formatCompactCount, formatDaysLeft } from "../../utils/formatters"
+import fallbackChallengeCard from "@/shared/assets/images/reels/ChallengeCard.png"
 
 export default function ChallengeCard({
   challenge,
@@ -17,10 +18,6 @@ export default function ChallengeCard({
 
   const participantCount = challenge.participantCount || 0
 
-
-
-
-
   const participantsStr = t.catSpeak.reels.participants || "{{count}} người tham gia"
   
   return (
@@ -35,12 +32,12 @@ export default function ChallengeCard({
       {/* Thumbnail Container */}
       <div className="relative h-24 sm:h-28 md:h-32 w-full overflow-hidden bg-gray-100">
         <img
-          src={bannerUrl || "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"}
+          src={bannerUrl || fallbackChallengeCard}
           alt={name || hashtag}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           onError={(e) => {
-            e.currentTarget.src = "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"
+            e.currentTarget.src = fallbackChallengeCard
           }}
         />
         

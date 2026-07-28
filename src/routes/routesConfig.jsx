@@ -99,6 +99,15 @@ const CreateCoursePage = lazy(
 const AllCoursesPage = lazy(
   () => import("@/features/courses/pages/AllCoursesPage"),
 )
+const MyClassesPage = lazy(
+  () => import("@/features/courses/pages/MyClassesPage"),
+)
+const WorkspaceAnalyticsPage = lazy(
+  () => import("@/features/courses/components/WorkspaceAnalyticsPage"),
+)
+const WorkspaceCalendarPage = lazy(
+  () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
+)
 const AllClassesPage = lazy(
   () => import("@/features/courses/pages/AllClassesPage"),
 )
@@ -269,10 +278,6 @@ const routesConfig = [
                     element: <CalendarPage />,
                   },
                   {
-                    path: "calendar/create",
-                    element: <CreateEventPage />,
-                  },
-                  {
                     path: "website/:id",
                     element: (
                       <AuthGuard>
@@ -368,6 +373,38 @@ const routesConfig = [
                 ),
               },
               {
+                path: "classes",
+                element: (
+                  <LazyRoute>
+                    <MyClassesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "schedule",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceCalendarPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "schedule/teaching-schedule",
+                element: (
+                  <LazyRoute>
+                    <SchedulePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "analytics",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceAnalyticsPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "courses/all",
                 element: (
                   <LazyRoute>
@@ -376,7 +413,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/all-classes",
+                path: "classes/all",
                 element: (
                   <LazyRoute>
                     <AllClassesPage />
@@ -400,7 +437,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/create-class",
+                path: "classes/create-class",
                 element: (
                   <LazyRoute>
                     <CreateClassPage />
@@ -628,6 +665,10 @@ const routesConfig = [
                     <WorkspaceEventsPage />
                   </LazyRoute>
                 ),
+              },
+              {
+                path: "events/create",
+                element: <CreateEventPage />,
               },
               {
                 path: "rooms",

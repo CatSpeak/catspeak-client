@@ -10,6 +10,14 @@ const SearchInput = ({
   inputClassName = "",
   buttonClassName = "",
   focusBorder = true,
+  onKeyDown,
+  onFocus,
+  onBlur,
+  inputRef,
+  ariaExpanded,
+  ariaControls,
+  role,
+  id,
 }) => {
   return (
     <div
@@ -18,12 +26,22 @@ const SearchInput = ({
       } ${className}`}
     >
       <input
+        ref={inputRef}
+        id={id}
+        role={role}
+        aria-expanded={ariaExpanded}
+        aria-controls={ariaControls}
         type="text"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onFocus={onFocus}
+        onBlur={onBlur}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && onSearch) {
+          if (onKeyDown) {
+            onKeyDown(e)
+          }
+          if (!e.defaultPrevented && e.key === "Enter" && onSearch) {
             onSearch()
           }
         }}

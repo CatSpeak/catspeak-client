@@ -5,6 +5,7 @@ import { useGetChallengeLeaderboardQuery } from "@/store/api/reelsApi"
 import RankRow from "./RankRow"
 import PodiumItem from "./PodiumItem"
 import { formatChallengeDate } from "../../utils/formatters"
+import fallbackChallengeCard from "@/shared/assets/images/reels/ChallengeCard.png"
 
 
 export default function PastChallengeLeaderboardView({ 
@@ -40,36 +41,41 @@ export default function PastChallengeLeaderboardView({
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-gray-100 flex items-center gap-4">
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100">
-          <img 
-            src={selectedChallenge.bannerUrl || selectedChallenge.thumbnailUrl || selectedChallenge.coverUrl || "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"} 
-            alt={selectedChallenge.hashtag || selectedChallenge.name} 
-            className="w-full h-full object-cover" 
-            onError={(e) => {
-              e.currentTarget.src = "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"
-            }}
-          />
-        </div>
-        <div className="flex flex-col flex-1 min-w-0 pt-0.5">
-          <h2 className="text-[17px] sm:text-[18px] font-bold text-gray-900 truncate mb-1">
-            {selectedChallenge.hashtag || selectedChallenge.name}
-          </h2>
-          <div className="flex items-center gap-1.5 text-gray-500 text-[13px] font-medium mb-1.5">
-            <Calendar size={14} />
-            <span>
-              {formatChallengeDate(selectedChallenge.startDate)} - {formatChallengeDate(selectedChallenge.endDate)}
-            </span>
+      <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-red-50/40 to-white">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100 bg-gray-100">
+            <img 
+              src={selectedChallenge.bannerUrl || selectedChallenge.thumbnailUrl || selectedChallenge.coverUrl || fallbackChallengeCard} 
+              alt={selectedChallenge.hashtag || selectedChallenge.name} 
+              className="w-full h-full object-cover" 
+              onError={(e) => {
+                e.currentTarget.src = fallbackChallengeCard
+              }}
+            />
           </div>
-          <div className="flex items-center gap-1 text-gray-500 text-[12px] bg-gray-100 px-2 py-0.5 rounded-md w-max">
-            <Lock size={12} />
-            <span>{t?.catSpeak?.reels?.leaderboard?.votingClosed || "Đã đóng cổng bình chọn"}</span>
+          <div className="flex flex-col min-w-0">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">
+              {selectedChallenge.hashtag || selectedChallenge.name}
+            </h2>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium whitespace-nowrap">
+                <Calendar size={13} className="text-gray-400 shrink-0" />
+                <span className="whitespace-nowrap">
+                  {formatChallengeDate(selectedChallenge.startDate)} - {formatChallengeDate(selectedChallenge.endDate)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md shrink-0">
+                <Lock size={11} />
+                <span>{t?.catSpeak?.reels?.leaderboard?.votingClosed || "Đã đóng cổng bình chọn"}</span>
+              </div>
+            </div>
           </div>
         </div>
         
         {/* Kết quả chung cuộc Badge */}
-        <div className="hidden sm:flex items-center gap-1.5 bg-[#FEF3C7] px-3 py-1.5 rounded-full border border-[#FDE68A] text-[#92400E] font-bold text-[13px] shrink-0">
-          <Trophy size={14} /> {t?.catSpeak?.reels?.leaderboard?.finalResults || "Kết quả chung cuộc"}
+        <div className="flex items-center gap-1.5 bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs px-3 py-1.5 rounded-full shrink-0 self-start sm:self-center">
+          <Trophy size={14} className="text-amber-600" />
+          <span>{t?.catSpeak?.reels?.leaderboard?.finalResults || "Kết quả chung cuộc"}</span>
         </div>
       </div>
 

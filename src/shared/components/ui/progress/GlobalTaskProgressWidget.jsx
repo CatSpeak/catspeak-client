@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
   ListTodo,
+  X,
 } from "lucide-react";
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 import { useGlobalTaskProgress } from "@/shared/hooks/useGlobalTaskProgress.jsx";
@@ -138,11 +139,22 @@ export const GlobalTaskProgressWidget = () => {
   const { tasks, removeTask } = useGlobalTask();
   const { t } = useLanguage();
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [lastTaskCount, setLastTaskCount] = useState(0);
 
   const visibleTasks = tasks ? tasks.filter((t) => !t.isHidden) : [];
 
-  // If user is not logged in or there are no visible tasks, don't show the widget
-  if (!token || visibleTasks.length === 0) return null;
+  // Auto re-show when a new task is added after the user dismissed the widget.
+  useEffect(() => {
+    if (visibleTasks.length > lastTaskCount) {
+      setIsDismissed(false);
+      setIsMinimized(false);
+    }
+    setLastTaskCount(visibleTasks.length);
+  }, [visibleTasks.length, lastTaskCount]);
+
+  // If user is not logged in, dismissed, or there are no visible tasks, don't show the widget
+  if (!token || isDismissed || visibleTasks.length === 0) return null;
 
   return (
     <AnimatePresence>
@@ -153,11 +165,11 @@ export const GlobalTaskProgressWidget = () => {
         className="fixed z-[9999] bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 w-auto sm:w-80 rounded-xl shadow-2xl border border-gray-100 backdrop-blur-xl bg-white/90 overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
-        >
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100">
+          <div
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+          >
             <ListTodo className="w-5 h-5 text-cath-red-700" />
             <span className="font-semibold text-gray-900 text-sm">
               {t?.uploadWidget?.itemsCount?.replace(
@@ -166,13 +178,31 @@ export const GlobalTaskProgressWidget = () => {
               )}
             </span>
           </div>
-          <button className="text-gray-500 hover:text-gray-700">
-            {isMinimized ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsMinimized(!isMinimized)}
+              className="text-gray-500 hover:text-gray-700 p-1 rounded transition-colors"
+              title={
+                isMinimized
+                  ? t?.uploadWidget?.expand || "Mở rộng"
+                  : t?.uploadWidget?.collapse || "Thu gọn"
+              }
+            >
+              {isMinimized ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </button>
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="text-gray-500 hover:text-red-500 p-1 rounded transition-colors"
+              title={t?.uploadWidget?.close || "Đóng"}
+              aria-label={t?.uploadWidget?.close || "Đóng"}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Task List */}

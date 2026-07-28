@@ -61,14 +61,11 @@ const WorkspaceEventsContent = ({ userId }) => {
   const handleFetchReady = useCallback(
     (fullEvent) => {
       setEditFetch(null)
-      const basePath = currentLang
-        ? `/${currentLang}/cat-speak/calendar`
-        : "/cat-speak/calendar"
-      navigate(`${basePath}/create`, {
+      navigate(`/workspace/events/create`, {
         state: { editEvent: fullEvent, from: window.location.pathname },
       })
     },
-    [navigate, currentLang]
+    [navigate]
   )
 
   const handleFetchError = useCallback(
@@ -108,13 +105,10 @@ const WorkspaceEventsContent = ({ userId }) => {
   }, [])
 
   const handleCreateEvent = useCallback(() => {
-    const basePath = currentLang
-      ? `/${currentLang}/cat-speak/calendar`
-      : "/cat-speak/calendar"
-    navigate(`${basePath}/create`, {
+    navigate(`/workspace/events/create`, {
       state: { from: window.location.pathname }
     })
-  }, [navigate, currentLang])
+  }, [navigate])
 
   return (
     <div className="flex flex-col gap-5 text-gray-800">

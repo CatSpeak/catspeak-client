@@ -33,10 +33,10 @@ const JoinRoomModal = ({ open, onCancel }) => {
     if (open) resetForm()
   }, [open])
 
-  const handleJoin = (e) => {
+  const handleJoin = async (e) => {
     if (e) e.preventDefault()
     const proceed = () => submitJoin(onCancel)
-    if (!intercept(proceed)) proceed()
+    if (!(await intercept(proceed))) proceed()
   }
 
   return (

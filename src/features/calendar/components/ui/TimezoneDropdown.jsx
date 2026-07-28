@@ -34,7 +34,7 @@ const TimezoneDropdown = ({ value, onChange, activeColor }) => {
       }}
 
       activeColor={activeColor}
-      className="h-full"
+      className="w-full h-full"
       dropdownClassName="w-full min-w-[180px]"
     />
   )

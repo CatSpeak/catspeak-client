@@ -14,7 +14,9 @@ export const userApi = baseApi.injectEndpoints({
         url: `/Account/${accountId}`,
         method: "GET",
       }),
-      providesTags: (result, error, accountId) => [{ type: "PublicProfile", id: accountId }],
+      providesTags: (result, error, accountId) => [
+        { type: "PublicProfile", id: accountId },
+      ],
     }),
     updateUserProfile: builder.mutation({
       query: (data) => ({

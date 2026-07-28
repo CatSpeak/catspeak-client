@@ -272,6 +272,7 @@ export default {
     sortOldest: "Oldest",
     displayGrid: "Grid",
     displayFloat: "Float",
+    emptyInputError: "Please enter content before sending.",
   },
   newsLoginPrompt: "Please log in to see the latest posts from the community.",
   sidebar: {

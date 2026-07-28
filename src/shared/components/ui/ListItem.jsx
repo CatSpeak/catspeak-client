@@ -58,16 +58,16 @@ const ListItem = ({
               {children}
             </div>
           )}
-        </div>
 
-        {(rightText !== undefined || rightContent) && (
-          <div className="flex items-center shrink-0 ml-2">
-            {rightText !== undefined && (
-              <span className="text-xs mr-2">{rightText}</span>
-            )}
-            {rightContent}
-          </div>
-        )}
+          {(rightText !== undefined || rightContent) && (
+            <div className="flex items-center shrink-0">
+              {rightText !== undefined && (
+                <span className="text-xs mr-2">{rightText}</span>
+              )}
+              {rightContent}
+            </div>
+          )}
+        </div>
       </div>
     </Wrapper>
   )

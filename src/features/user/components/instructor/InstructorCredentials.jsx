@@ -25,7 +25,7 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
       </div>
 
       <p className="text-[11px] text-cath-red-700">
-        {ins.credentialsNote || "Bạn phải cung cấp bằng chứng hoặc chứng chỉ phù hợp với trình độ đã chọn ở trên. Tệp tải lên phải ở định dạng PDF, rõ ràng và chi tiết. NGHIÊM CẤM: Mọi hình thức chứng chỉ giả mạo."}
+        {ins.credentialsNote || "Bạn phải cung cấp bằng chứng hoặc chứng chỉ phù hợp với trình độ đã chọn ở trên. Tệp tải lên phải ở định dạng PDF, rõ ràng và chi tiết, mỗi tệp dưới 100MB. NGHIÊM CẤM: Mọi hình thức chứng chỉ giả mạo."}
       </p>
 
       <div className="flex flex-col gap-3 mt-2">

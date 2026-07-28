@@ -80,6 +80,7 @@ export default {
       intermediate: "Intermediate",
       advanced: "Advanced",
     },
+    levelLabel: "Level",
     categories: {
       random: "Random Connection",
       exam: "Exam Prep",
@@ -654,6 +655,8 @@ export default {
       score: "Score",
       matchDate: "Date Played",
       winner: "Winner",
+      startDateLabel: "From date",
+      endDateLabel: "To date",
     },
     setup: {
       title: "Game Setup",

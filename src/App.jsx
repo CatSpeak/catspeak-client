@@ -16,12 +16,14 @@ import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { LanguageProvider } from "@/shared/context/LanguageContext"
 import { ScrollToTopButton } from "@/shared/components/ui/buttons"
 import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
+import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 
 function App() {
   return (
     <Provider store={store}>
+      <AuthVisibilitySync />
       <LanguageProvider>
         <GlobalVideoCallProvider>
           <NavigationProgress />

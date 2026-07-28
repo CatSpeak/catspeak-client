@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useCreateRoomMutation } from "@/store/api/roomsApi"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
+import { useAuth } from "@/features/auth"
 
 const getLanguageName = (langCode) => {
   switch (langCode) {
@@ -17,6 +18,7 @@ const getLanguageName = (langCode) => {
 }
 
 export const useCreateRoomForm = () => {
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
     name: "",
     topics: [],
@@ -57,7 +59,9 @@ export const useCreateRoomForm = () => {
     if (!selectedLanguage) return
 
     const data = new FormData()
-    data.append("Name", formData.name.trim() || "")
+    if (formData.name.trim()) {
+      data.append("Name", formData.name.trim())
+    }
     data.append("RoomType", "Group")
     data.append("LanguageType", selectedLanguage)
     data.append("RequiredLevel", formData.selectedLevel || "")
@@ -74,7 +78,8 @@ export const useCreateRoomForm = () => {
       const result = await createRoom(data).unwrap()
       if (onSuccess) onSuccess()
       if (result.roomId) {
-        const communityLang = lang || localStorage.getItem("communityLanguage") || "en"
+        const communityLang =
+          lang || localStorage.getItem("communityLanguage") || "en"
         navigate(`/${communityLang}/meet/${result.roomId}`)
       }
     } catch (err) {
@@ -91,8 +96,7 @@ export const useCreateRoomForm = () => {
     }
   }
 
-  const isCreateDisabled =
-    !selectedLanguage || isCreating || !formData.name.trim()
+  const isCreateDisabled = !selectedLanguage || isCreating
 
   return {
     formData,

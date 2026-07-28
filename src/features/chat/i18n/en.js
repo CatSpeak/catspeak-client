@@ -71,6 +71,10 @@ export default {
       newChatTitle: "Start a new chat",
       directMessage: "Direct Message",
       newGroup: "New Group",
+      fileSizeLimitTitle: "File size exceeds limit",
+      fileSizeLimitDesc: "Your file exceeds the maximum allowed limit of 25MB for your current account. Upgrade your plan to enjoy larger upload limits and more premium features.",
+      close: "Close",
+      viewPricingPlans: "View pricing plans",
     },
   },
 }

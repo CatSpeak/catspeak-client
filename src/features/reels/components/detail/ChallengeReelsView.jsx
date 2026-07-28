@@ -7,6 +7,7 @@ import ReelGridSkeleton from "../grid/ReelGridSkeleton"
 import { useGetReelsByChallengeQuery } from "@/store/api/reelsApi"
 import { mapReelDtoToFrontend } from "../../utils/mappers"
 import { formatCompactCount } from "../../utils/formatters"
+import fallbackChallengeCard from "@/shared/assets/images/reels/ChallengeCard.png"
 
 export default function ChallengeReelsView({ challengeId, selectedChallenge, challengeStatus, onReelClick }) {
   const { t } = useLanguage()
@@ -77,11 +78,11 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
             <img 
-              src={selectedChallenge.bannerUrl || "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"} 
+              src={selectedChallenge.bannerUrl || fallbackChallengeCard} 
               alt="" 
               className="w-full h-full object-cover" 
               onError={(e) => {
-                e.currentTarget.src = "https://res.cloudinary.com/di8uvvqf2/image/upload/v1780664239/catspeak/uploads/jt8dilomjdizdwkut1qv.png"
+                e.currentTarget.src = fallbackChallengeCard
               }}
             />
           </div>

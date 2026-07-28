@@ -173,7 +173,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
 
   return (
     <LiveKitRoom
-      key={livekitToken}
+      key={callInfo?.sessionId}
       serverUrl={livekitServerUrl}
       token={livekitToken}
       connect={true}

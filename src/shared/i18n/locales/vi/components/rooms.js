@@ -81,6 +81,7 @@ export default {
       intermediate: "Trung cấp",
       advanced: "Nâng cao",
     },
+    levelLabel: "Trình độ",
     categories: {
       random: "Kết nối ngẫu hứng",
       exam: "Luyện thi",
@@ -634,6 +635,8 @@ export default {
       score: "Điểm",
       matchDate: "Ngày chơi",
       winner: "Người chiến thắng",
+      startDateLabel: "Từ ngày",
+      endDateLabel: "Đến ngày",
     },
     setup: {
       title: "Thiết lập Trò chơi",

@@ -228,7 +228,7 @@ const DaySchedule = ({
   };
 
   return (
-    <div className="relative flex flex-col h-full lg:h-auto">
+    <div className="relative flex flex-col h-full">
       <div className={`flex-col h-full ${selectedEvent ? "flex lg:hidden" : "flex"}`}>
         {isMonthView ? (
           <DayScheduleMonthView

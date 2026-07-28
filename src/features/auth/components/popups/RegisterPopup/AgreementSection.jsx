@@ -82,6 +82,19 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
             </p>
           )}
         </div>
+
+        {/* Email Notification Opt-in */}
+        <div>
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <Checkbox
+              checked={formData.isEmailNotificationEnabled ?? true}
+              onChange={onChange("isEmailNotificationEnabled")}
+            />
+            <span className="text-sm text-gray-700 font-medium">
+              {authText.emailOptIn || "Tôi muốn nhận email thông báo & tin tức cập nhật từ CatSpeak"}
+            </span>
+          </label>
+        </div>
       </div>
 
       <PolicyModal
