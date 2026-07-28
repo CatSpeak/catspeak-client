@@ -46,9 +46,12 @@ const MessageWidget = () => {
   // ── Chat Message Actions Hook ──────────────────────────
   const {
     replyingTo,
+    pendingUpload,
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
+    handleRetryUpload,
+    handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
     isSending,
@@ -302,6 +305,9 @@ const MessageWidget = () => {
             onCancelReply={handleCancelReply}
             onDeleteForMe={handleDeleteForMe}
             onRecall={handleRecall}
+            pendingUpload={pendingUpload}
+            onRetryUpload={handleRetryUpload}
+            onCancelUpload={handleCancelUpload}
           />
         )}
       </MessageModal>

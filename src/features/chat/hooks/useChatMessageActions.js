@@ -21,6 +21,7 @@ import {
  */
 export const useChatMessageActions = (conversationId) => {
   const [replyingTo, setReplyingTo] = useState(null)
+  const [pendingUpload, setPendingUpload] = useState(null)
 
   const [sendMessageMutation, { isLoading: isSendingText }] =
     useSendMessageMutation()
@@ -37,11 +38,28 @@ export const useChatMessageActions = (conversationId) => {
     setReplyingTo(null)
   }, [])
 
+  const handleCancelUpload = useCallback(() => {
+    setPendingUpload(null)
+  }, [])
+
   const handleSend = useCallback(
     async (text, file) => {
       if ((!text && !file) || !conversationId) return
 
       const parentId = replyingTo?.id || replyingTo?.messageId || null
+
+      if (file) {
+        setPendingUpload({
+          conversationId,
+          file,
+          fileName: file.name,
+          fileSize: file.size,
+          text: text || "",
+          status: "uploading",
+          progress: 100,
+          errorMsg: null,
+        })
+      }
 
       try {
         if (file) {
@@ -54,6 +72,7 @@ export const useChatMessageActions = (conversationId) => {
             conversationId,
             formData,
           }).unwrap()
+          setPendingUpload(null)
         } else {
           const messageData = {
             messageContent: text,
@@ -70,11 +89,28 @@ export const useChatMessageActions = (conversationId) => {
         setReplyingTo(null)
       } catch (err) {
         console.error("Failed to send message:", err)
+        if (file) {
+          const errorMsg =
+            err?.data?.message || err?.message || "Tải lên thất bại."
+          setPendingUpload((prev) =>
+            prev ? { ...prev, status: "error", errorMsg } : null,
+          )
+        }
         throw err
       }
     },
     [conversationId, replyingTo, sendMessageMutation, sendMediaMessageMutation],
   )
+
+  const handleRetryUpload = useCallback(async () => {
+    if (!pendingUpload || !pendingUpload.file) return
+    const { text, file } = pendingUpload
+    try {
+      await handleSend(text, file)
+    } catch {
+      // Error handled inside handleSend
+    }
+  }, [pendingUpload, handleSend])
 
   const handleDeleteForMe = useCallback(
     async (msg) => {
@@ -112,9 +148,15 @@ export const useChatMessageActions = (conversationId) => {
 
   return {
     replyingTo,
+    pendingUpload:
+      pendingUpload && String(pendingUpload.conversationId) === String(conversationId)
+        ? pendingUpload
+        : null,
     handleReply,
     handleCancelReply,
     handleSend,
+    handleRetryUpload,
+    handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
     isSending: isSendingText || isSendingMedia,
