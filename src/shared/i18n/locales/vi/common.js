@@ -69,6 +69,8 @@ export default {
     back: "Quay lại",
     accountInfo: "Thông tin tài khoản",
     systemConfig: "Thiết lập hệ thống",
+    emailNotifyTitle: "Nhận email thông báo & tin tức từ CatSpeak",
+    emailNotifyDesc: "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
     websites: "Trang web",
     test: "Test trình độ tiếng Anh",
     platform: "Nền tảng học tổng hợp",
