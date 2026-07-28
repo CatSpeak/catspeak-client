@@ -29,11 +29,6 @@ import {
 } from "@/features/video-call/services/callBroadcastChannel";
 
 const RoomsPage = () => {
-  const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false);
-  const [createRoomMode, setCreateRoomMode] = useState("custom");
-  const [isJoinRoomModalOpen, setJoinRoomModalOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
 
@@ -85,7 +80,7 @@ const RoomsPage = () => {
   const proceedCreateStudyGroup = async () => {
     const action = () => {
       actions.handleCreateStudyGroupSession(() => {
-        setCreateRoomModalOpen(true);
+        actions.openJoinRoomModal();
       });
     };
     if (await checkAndIntercept(action)) return;
@@ -95,8 +90,7 @@ const RoomsPage = () => {
   const handleCreateCustomRoom = async () => {
     const action = () => {
       actions.handleCreateCustomRoomSession(() => {
-        setCreateRoomMode("group");
-        setCreateRoomModalOpen(true);
+        actions.openCreateRoomModal("group");
       });
     };
     if (await checkAndIntercept(action)) return;
@@ -122,7 +116,7 @@ const RoomsPage = () => {
   };
 
   const handleCreateAI = async (settings) => {
-    setIsSettingsModalOpen(false);
+    actions.closeAISettingsModal();
     const action = () => {
       actions.handleCreateAISession(async () => {
         try {
@@ -214,19 +208,19 @@ const RoomsPage = () => {
         onConfirm={handleConfirmSwitch}
       />
       <CreateRoomModal
-        open={isCreateRoomModalOpen}
-        initialMode={createRoomMode}
-        onCancel={() => setCreateRoomModalOpen(false)}
+        open={state.isCreateRoomModalOpen}
+        initialMode={state.createRoomMode}
+        onCancel={actions.closeCreateRoomModal}
       />
       <JoinRoomModal
-        open={isJoinRoomModalOpen}
-        onCancel={() => setJoinRoomModalOpen(false)}
+        open={state.isJoinRoomModalOpen}
+        onCancel={actions.closeJoinRoomModal}
       />
       <AISessionSettingsModal
-        open={isSettingsModalOpen}
+        open={state.isSettingsModalOpen}
         urlLang={lang}
         onConfirm={handleCreateAI}
-        onCancel={() => setIsSettingsModalOpen(false)}
+        onCancel={actions.closeAISettingsModal}
       />
       <AnimatePresence mode="wait">
         <FluentAnimation
@@ -243,7 +237,7 @@ const RoomsPage = () => {
                   sessionProps={{
                     handleCreateOneOnOneSession: proceedCreateOneOnOne,
                     handleCreateStudyGroupSession: proceedCreateStudyGroup,
-                    handleCreateAISession: () => setIsSettingsModalOpen(true),
+                    handleCreateAISession: () => actions.openAISettingsModal(),
                     handleCreateCustomRoomSession: handleCreateCustomRoom,
                     isCreatingOneOnOne: state.isCreatingOneOnOne,
                     isCreatingStudyGroup: state.isCreatingStudyGroup,
