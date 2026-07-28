@@ -71,6 +71,8 @@ export default {
     back: "返回",
     accountInfo: "账户信息",
     systemConfig: "系统设置",
+    emailNotifyTitle: "接收来自 CatSpeak 的电子邮件通知和最新消息",
+    emailNotifyDesc: "允许系统通过电子邮件发送重要更新、新功能和账户通知。",
     websites: "网站",
     test: "英语水平测试",
     platform: "综合学习平台",
