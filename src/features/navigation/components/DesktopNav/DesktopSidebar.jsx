@@ -100,7 +100,7 @@ const DesktopSidebar = () => {
   const { pathname } = useLocation();
   const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
-  const { isStudent } = useRoleOverride();
+  const { isStudent, isTeacher } = useRoleOverride();
   const { resolvePath, currentLang } = useActiveLink();
   const {
     isDesktopExpanded,
@@ -317,8 +317,11 @@ const DesktopSidebar = () => {
                               t.nav?.[item.key] || item.label || item.key;
                             return (
                               <motion.div
+                                layout
                                 key={item.key}
                                 variants={itemVariants}
+                                initial="hidden"
+                                animate="visible"
                                 className="w-full"
                               >
                                 <DesktopNavItem
@@ -340,8 +343,12 @@ const DesktopSidebar = () => {
                               return false;
                             if (item.isPrivate && !isAuthenticated)
                               return false;
-                            if (item.key === "myCourses" && isStudent)
-                              return false;
+
+                            const teacherTabs = ["myCourses", "myClass", "analytics", "calendar"];
+                            if (teacherTabs.includes(item.key) && isStudent) return false;
+
+                            if (item.key === "myLearning" && isTeacher) return false;
+
                             return true;
                           })
                           .map((item) => {
@@ -349,8 +356,11 @@ const DesktopSidebar = () => {
                               t.nav?.[item.key] || item.label || item.key;
                             return (
                               <motion.div
+                                layout
                                 key={item.key}
                                 variants={itemVariants}
+                                initial="hidden"
+                                animate="visible"
                                 className="w-full"
                               >
                                 <DesktopNavItem
