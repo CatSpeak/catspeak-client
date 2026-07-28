@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { Breadcrumb } from "@/shared/components/ui/navigation";
 import useStories from "../hooks/useStories";
@@ -47,7 +48,15 @@ const LiveMessages = ({ languageCommunity }) => {
 
   const myCount = myStories.length;
   const totalCount = stories.length + myStories.length;
-  const handleSend = () => handleCreate(inputValue);
+  const handleSend = () => {
+    if (!inputValue || !inputValue.trim()) {
+      toast.error(
+        t.catSpeak?.mail?.emptyInputError || "Please enter content before sending."
+      );
+      return;
+    }
+    handleCreate(inputValue);
+  };
 
   const isLoading = loadingStories || loadingMyStories;
   const isEmpty = !isLoading && combinedStories.length === 0;
@@ -84,15 +93,15 @@ const LiveMessages = ({ languageCommunity }) => {
   ];
 
   return (
-    <div className="flex w-full max-w-full flex-col">
+    <div className="flex w-full max-w-full flex-col p-4 sm:p-6 text-gray-800">
       {/* Breadcrumb */}
-      <div className="md:px-6 pb-6 text-sm">
+      <div className="text-sm mb-3 sm:mb-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
 
       {/* Main content */}
       <div
-        className="relative flex w-full max-w-full flex-col"
+        className="relative flex w-full max-w-full flex-col gap-4"
         style={{ minHeight: "78vh", maxHeight: "fit-content" }}
       >
         <StoryInputBar
