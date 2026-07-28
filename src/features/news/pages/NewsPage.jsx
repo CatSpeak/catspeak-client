@@ -1,69 +1,93 @@
-import React, { useState, useRef, useMemo, useEffect } from "react"
-import { Newspaper } from "lucide-react"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPostsQuery } from "@/store/api/social/postsApi"
-import NewsCard from "../components/NewsCard"
-import NewsCardSkeleton from "../components/NewsCardSkeleton"
-import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"
-import EmptyState from "@/shared/components/ui/indicators/EmptyState"
-import useColumnCount from "@/shared/hooks/useColumnCount"
+import React, { useState, useRef, useMemo, useEffect } from "react";
+import { Newspaper } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useGetPostsQuery } from "@/store/api/social/postsApi";
+import NewsCard from "../components/NewsCard";
+import NewsCardSkeleton from "../components/NewsCardSkeleton";
+import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
+import EmptyState from "@/shared/components/ui/indicators/EmptyState";
+import useColumnCount from "@/shared/hooks/useColumnCount";
 
-/* ------------------------------------------------------------------ */
-/*  NewsPage                                                           */
-/* ------------------------------------------------------------------ */
+const getCommunityName = (code) => {
+  if (!code) return "English";
+  const c = code.toLowerCase();
+  if (c === "zh" || c === "cn" || c === "china" || c === "chinese")
+    return "Chinese";
+  if (c === "en" || c === "eng" || c === "uk" || c === "english")
+    return "English";
+  if (c === "vi" || c === "vn" || c === "vietnam" || c === "vietnamese")
+    return "Vietnamese";
+  return code;
+};
 
 const NewsPage = ({ postType = "1" }) => {
-  const { t } = useLanguage()
+  const { lang } = useParams();
+  const { t, language } = useLanguage();
 
-  const [page, setPage] = useState(1)
-  const pageSize = 26
+  const currentCommunity = useMemo(() => {
+    return getCommunityName(
+      lang || localStorage.getItem("communityLanguage") || language || "en",
+    );
+  }, [lang, language]);
+
+  const [page, setPage] = useState(1);
+  const pageSize = 26;
 
   const { data, error, isLoading, isFetching } = useGetPostsQuery({
     page,
     pageSize,
     postType,
-  })
+  });
 
-  // Only public posts
+  // Public posts filtered by current language community or "All"
   const publicPosts = useMemo(() => {
-    return data?.data?.filter((post) => post.privacy === "Public") || []
-  }, [data?.data])
+    if (!data?.data) return [];
+    const targetCommunity = currentCommunity.toLowerCase();
 
-  const columnsCount = useColumnCount()
+    return data.data.filter((post) => {
+      if (post.privacy !== "Public") return false;
+
+      const postCommunity = (post.languageCommunity || "All").toLowerCase();
+      return postCommunity === "all" || postCommunity === targetCommunity;
+    });
+  }, [data?.data, currentCommunity]);
+
+  const columnsCount = useColumnCount();
 
   // Distribute posts into masonry columns
   const columns = useMemo(() => {
-    const colsArray = Array.from({ length: columnsCount }, () => [])
+    const colsArray = Array.from({ length: columnsCount }, () => []);
     publicPosts.forEach((post, i) => {
-      colsArray[i % columnsCount].push(post)
-    })
-    return colsArray
-  }, [publicPosts, columnsCount])
+      colsArray[i % columnsCount].push(post);
+    });
+    return colsArray;
+  }, [publicPosts, columnsCount]);
 
   // Infinite scroll observer — trigger fetch when the second-to-last post appears
-  const secondLastPostElementRef = useRef(null)
+  const secondLastPostElementRef = useRef(null);
   useEffect(() => {
-    if (!secondLastPostElementRef.current) return
+    if (!secondLastPostElementRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setPage((p) => p + 1)
+          setPage((p) => p + 1);
         }
       },
       {
         rootMargin: "200px",
       },
-    )
-    observer.observe(secondLastPostElementRef.current)
-    return () => observer.disconnect()
-  }, [publicPosts])
+    );
+    observer.observe(secondLastPostElementRef.current);
+    return () => observer.disconnect();
+  }, [publicPosts]);
 
   // ── Initial Loading State ─────────────────────────────────────────
   if (isLoading && publicPosts.length === 0) {
-    const skeletonCols = Array.from({ length: columnsCount }, () => [])
-    const totalSkeletons = columnsCount * 3
+    const skeletonCols = Array.from({ length: columnsCount }, () => []);
+    const totalSkeletons = columnsCount * 3;
     for (let i = 0; i < totalSkeletons; i++) {
-      skeletonCols[i % columnsCount].push(i)
+      skeletonCols[i % columnsCount].push(i);
     }
 
     return (
@@ -78,7 +102,7 @@ const NewsPage = ({ postType = "1" }) => {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   // ── Error State ───────────────────────────────────────────────────
@@ -96,12 +120,14 @@ const NewsPage = ({ postType = "1" }) => {
             variant="page"
           />
         </div>
-      )
+      );
     }
     if (error?.status === 401) {
-      return <EmptyState message={t.catSpeak?.newsLoginPrompt} variant="page" />
+      return (
+        <EmptyState message={t.catSpeak?.newsLoginPrompt} variant="page" />
+      );
     }
-    return <ErrorMessage message="Error loading posts" />
+    return <ErrorMessage message="Error loading posts" />;
   }
 
   // ── Empty State ───────────────────────────────────────────────────
@@ -118,12 +144,12 @@ const NewsPage = ({ postType = "1" }) => {
           variant="page"
         />
       </div>
-    )
+    );
   }
 
   const secondLastPostId =
     publicPosts[publicPosts.length - 2]?.postId ??
-    publicPosts[publicPosts.length - 1]?.postId
+    publicPosts[publicPosts.length - 1]?.postId;
 
   // ── Render ────────────────────────────────────────────────────────
   return (
@@ -133,7 +159,7 @@ const NewsPage = ({ postType = "1" }) => {
         {columns.map((col, colIndex) => (
           <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
             {col.map((post) => {
-              const isSecondLast = post.postId === secondLastPostId
+              const isSecondLast = post.postId === secondLastPostId;
               return (
                 <div
                   ref={isSecondLast ? secondLastPostElementRef : null}
@@ -141,7 +167,7 @@ const NewsPage = ({ postType = "1" }) => {
                 >
                   <NewsCard news={post} />
                 </div>
-              )
+              );
             })}
           </div>
         ))}
@@ -154,8 +180,7 @@ const NewsPage = ({ postType = "1" }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default NewsPage
-
+export default NewsPage;
