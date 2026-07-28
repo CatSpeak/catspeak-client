@@ -79,6 +79,7 @@ export default {
       intermediate: "中级",
       advanced: "高级",
     },
+    levelLabel: "等级",
     categories: {
       random: "随机连接",
       exam: "备考",

@@ -80,6 +80,7 @@ export default {
       intermediate: "Intermediate",
       advanced: "Advanced",
     },
+    levelLabel: "Level",
     categories: {
       random: "Random Connection",
       exam: "Exam Prep",

@@ -18,7 +18,7 @@ import Modal from "@/shared/components/ui/Modal";
 import RoomFullModal from "./RoomFullModal";
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png";
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png";
-import { getTopicIcon } from "../utils/getTopicIcon";
+import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon";
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
 
@@ -133,13 +133,34 @@ const RoomCard = ({ room }) => {
           {/* Top Left: Badges */}
           <div className="absolute left-2 top-2 max-w-[55%] flex items-center gap-1.5 z-10 p-1">
             {room.requiredLevel && (
-              <div className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate">
+              <div
+                className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate cursor-default"
+                title={
+                  t?.rooms?.filters?.levels?.[room.requiredLevel?.toLowerCase()] ||
+                  `${t?.rooms?.filters?.levelLabel || "Trình độ"}: ${room.requiredLevel}`
+                }
+              >
                 {room.requiredLevel}
               </div>
             )}
-            <div className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10">
-              {getTopicIcon(room.topic)}
-            </div>
+            {(() => {
+              // Tooltip hiện theo locale hiện tại của user.
+              // i18n key path: t.rooms.filters.topics.<topicKey>  (e.g. rooms.filters.topics.history)
+              const { topicKey } = getTopicMeta(room.topic)
+              const topicLabel =
+                t?.rooms?.filters?.topics?.[topicKey] ||
+                room.topic ||
+                t?.rooms?.filters?.topics?.other ||
+                "Khác"
+              return (
+                <div
+                  className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10 cursor-default"
+                  title={topicLabel}
+                >
+                  {getTopicIcon(room.topic)}
+                </div>
+              )
+            })()}
           </div>
 
           {/* Top Right: Actions & Status */}

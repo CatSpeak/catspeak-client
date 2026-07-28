@@ -125,5 +125,7 @@ export default {
     selectLevelError: "Please select proficiency level for each language",
     certifyError: "Please check the box to agree with our terms.",
     formInvalid: "Please fill all required fields before submitting.",
+    credentialSizeLimit: "Each credential must be smaller than {max}MB (current {actual}MB).",
+    videoSizeLimit: "Video must be smaller than {max}MB (current {actual}MB).",
   },
 }
