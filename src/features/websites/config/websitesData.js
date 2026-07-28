@@ -435,6 +435,7 @@ export const websites = [
         key: "improve-mandarin-hsk-practice-tests",
         label: "ImproveMandarin – HSK Tests",
         path: "/website/improve-mandarin-hsk-practice-tests",
+        color: "#47a6d6",
         img: "https://improvemandarin.com/wp-content/uploads/cropped-improvemandarin-favicon-1-192x192.png",
         description:
           "Complete online HSK 1–6 practice tests with answers and listening audio.",
@@ -443,6 +444,7 @@ export const websites = [
         key: "mandarin-bean-hsk-test",
         label: "HSK Test - MandarinBean",
         path: "/website/mandarin-bean-hsk-test",
+        color: "#08735f",
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description: "Free online HSK level mock tests and vocabulary lists.",
       },
@@ -450,6 +452,7 @@ export const websites = [
         key: "hsk-mock-test",
         label: "HSKMockTest.com",
         path: "/website/hsk-mock-test",
+        color: "#1778ff",
         img: "https://hskmocktest.com/img/favicon.png",
         description:
           "Simulated HSK exam environment to practice timing and scoring.",
@@ -474,6 +477,7 @@ export const websites = [
         key: "mandarin-bean",
         label: "MandarinBean",
         path: "/website/mandarin-bean",
+        color: "#08735f",
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description:
           "Comprehensive Chinese learning portal covering grammar, reading, and listening.",
@@ -482,6 +486,7 @@ export const websites = [
         key: "improve-mandarin-chinese-lessons",
         label: "ImproveMandarin Lessons",
         path: "/website/improve-mandarin-chinese-lessons",
+        color: "#47a6d6",
         img: "https://improvemandarin.com/wp-content/uploads/cropped-improvemandarin-favicon-1-192x192.png",
         description:
           "Bite-sized Chinese grammar guides, pinyin tips, and culture articles.",
@@ -498,6 +503,7 @@ export const websites = [
         key: "mandarin-bean-all-lessons",
         label: "All Lessons - MandarinBean",
         path: "/website/mandarin-bean-all-lessons",
+        color: "#08735f",
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description:
           "Graded listening audio lessons with pinyin and English translations.",
@@ -506,6 +512,7 @@ export const websites = [
         key: "chinese-extensive-listening",
         label: "Chinese Extensive Listening (汉语泛听)",
         path: "/website/chinese-extensive-listening",
+        color: "#212121",
         img: "https://hanyufanting.com/wp-content/uploads/2017/06/profile-picture-2.jpg?w=192",
         description:
           "Authentic audio practice for upper-intermediate Chinese learners.",
@@ -522,6 +529,7 @@ export const websites = [
         key: "chinese-grammar-wiki",
         label: "Chinese Grammar Wiki",
         path: "/website/chinese-grammar-wiki",
+        color: "#24ade3",
         img: "https://resources.allsetlearning.com/favicon.ico",
         description:
           "The premier free reference guide for Mandarin grammar rules and sentence structures.",
@@ -530,6 +538,7 @@ export const websites = [
         key: "mandarin-bean-grammar-points",
         label: "Grammar Points - MandarinBean",
         path: "/website/mandarin-bean-grammar-points",
+        color: "#08735f",
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description:
           "Grammar points categorized by HSK levels with practical examples.",
@@ -538,6 +547,7 @@ export const websites = [
         key: "mandarin-bean-grammar-test",
         label: "Grammar Test - MandarinBean",
         path: "/website/mandarin-bean-grammar-test",
+        color: "#08735f",
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description:
           "Test your Mandarin grammar accuracy across different difficulty levels.",
@@ -562,6 +572,7 @@ export const websites = [
         key: "chinese-pronunciation-wiki",
         label: "Chinese Pronunciation Wiki",
         path: "/website/chinese-pronunciation-wiki",
+        color: "#24ade3",
         img: "https://resources.allsetlearning.com/favicon.ico",
         description:
           "Complete guide to Pinyin, initials, finals, and tone change rules.",
@@ -629,6 +640,15 @@ export const websites = [
         description:
           "Popular online English-Chinese dictionary with Pinyin, audio, and character lookups.",
       },
+      {
+        key: "hanzii",
+        label: "Hanzii",
+        path: "/website/hanzii",
+        color: "#47619e",
+        img: "https://hanzii.net/assets/images/ic_logo.ico",
+        description:
+          "Online Chinese dictionary for words, meanings, examples, writing, grammar, and free HSK & TOCFL practice tests.",
+      },
     ],
   },
   {
@@ -641,6 +661,7 @@ export const websites = [
         key: "mandarin-bean-graded-reading",
         label: "MandarinBean Graded Reading",
         path: "/website/mandarin-bean-graded-reading",
+        color: "#08735f",
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description: "Short Chinese stories categorized from HSK 1 to HSK 6.",
       },
@@ -659,6 +680,15 @@ export const websites = [
         color: "#870430",
         description:
           "Website tự học tiếng Trung giao diện tiếng Việt dễ hiểu cho người mới bắt đầu.",
+      },
+      {
+        key: "tiengtrungthuonghai",
+        label: "Trung tâm tiếng Trung Thượng Hải",
+        path: "/website/tiengtrungthuonghai",
+        color: "#4aba7f",
+        img: "https://tiengtrungthuonghai.vn/wp-content/themes/tiengtrungthuonghai/favicon.ico",
+        description:
+          "Trung tâm tiếng Trung uy tín và chất lượng tại Mỹ Đình, Hà Nội. Chúng tôi tự hào đã giúp hàng nghìn học viên giao tiếp tiếng Trung thành thạo và thi đỗ HSK điểm cao",
       },
     ],
   },

@@ -336,6 +336,11 @@ const resources = [
     lang: "zh",
     url: "https://www.mdbg.net/chinese/dictionary",
   },
+  {
+    id: "hanzii",
+    lang: "zh",
+    url: "https://hanzii.net/",
+  },
 
   // 9. Đọc theo trình độ (Graded reading)
   {
@@ -349,5 +354,10 @@ const resources = [
     id: "tieng-trung-tai-nha",
     lang: "zh",
     url: "https://tiengtrungtainha.com/",
+  },
+  {
+    id: "tiengtrungthuonghai",
+    lang: "zh",
+    url: "https://tiengtrungthuonghai.vn/",
   },
 ];
