@@ -193,6 +193,8 @@ const GlobalCallContent = ({
           toast.error(
             err?.data?.message || "Failed to start speaking assistant",
           )
+          setSpeakingAssistantEnabled(false)
+          prevEnabled.current = false
         }
       } else {
         const dispatchIdToStop = activeDispatchId || assistantStatus?.dispatchId
@@ -221,6 +223,7 @@ const GlobalCallContent = ({
     }
   }, [
     speakingAssistantEnabled,
+    setSpeakingAssistantEnabled,
     isConnected,
     sessionId,
     activeDispatchId,
