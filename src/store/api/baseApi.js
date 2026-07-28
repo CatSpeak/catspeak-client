@@ -41,6 +41,10 @@ const baseQuery = fetchBaseQuery({
       headers.set("X-Community-Lang", match[1])
     }
 
+    // Attach local timezone offset in minutes (JS returns negative for UTC+X, e.g. -420 for UTC+7)
+    // We send the negative value to match C# logic (e.g. UTC + 420 minutes = Local)
+    headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
+
     return headers
   },
 })
@@ -57,6 +61,10 @@ const instructorBaseQuery = fetchBaseQuery({
     if (match) {
       headers.set("X-Community-Lang", match[1])
     }
+
+    // Attach local timezone offset in minutes (JS returns negative for UTC+X, e.g. -420 for UTC+7)
+    // We send the negative value to match C# logic (e.g. UTC + 420 minutes = Local)
+    headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
 
     return headers
   },

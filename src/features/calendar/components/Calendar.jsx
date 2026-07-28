@@ -48,14 +48,20 @@ const Calendar = ({ currentDate }) => {
   // Build a day-of-month → totalEvents map from the API response
   const eventCountsByDay = useMemo(() => {
     if (!eventCountsData?.counts) return {};
+
+    const displayMonth = currentDate.month(); // 0-indexed
+    const displayYear = currentDate.year();
+
     return eventCountsData.counts.reduce((acc, item) => {
-      // Backend already applied our timezone offset, so item.date is a
-      // plain "YYYY-MM-DD" representing the correct LOCAL date.
-      const day = parseInt(item.date.split("-")[2], 10);
+      // Parse as local date and only include days that belong to the displayed month
+      const d = dayjs(item.date);
+      if (d.month() !== displayMonth || d.year() !== displayYear) return acc;
+
+      const day = d.date();
       acc[day] = (acc[day] ?? 0) + item.totalEvents;
       return acc;
     }, {});
-  }, [eventCountsData]);
+  }, [eventCountsData, currentDate]);
 
   const selectedIndex = dates.findIndex(
     (d) => d.isCurrentMonth && d.day === selectedDate,

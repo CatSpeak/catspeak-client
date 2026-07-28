@@ -72,6 +72,7 @@ export default {
   conditionsPlaceholder: "Nhập điều kiện, phân cách bằng dấu phẩy",
   ticketPrice: "Giá vé",
   free: "Miễn phí",
+  paidEventComingSoon: "Chức năng sự kiện thu phí đang phát triển.",
   edit: "Chỉnh sửa",
   createEvent: "Tạo sự kiện",
   editEvent: "Chỉnh sửa sự kiện",

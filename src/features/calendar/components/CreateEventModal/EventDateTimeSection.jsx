@@ -30,8 +30,8 @@ const EventDateTimeSection = ({
           <span className="text-base w-[150px] shrink-0 font-medium">
             {cal.startTime}
           </span>
-          <div className="flex flex-col gap-1 flex-1">
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-6">
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
               <DatePicker
                 value={toDate(startTime)}
                 onChange={(d) => {
@@ -81,8 +81,8 @@ const EventDateTimeSection = ({
           <span className="text-base w-[150px] shrink-0 mt-3 font-medium">
             {cal.endTime}
           </span>
-          <div className="flex flex-col gap-1 flex-1">
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-6">
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
               <DatePicker
                 value={toDate(endTime)}
                 onChange={(d) => {
@@ -128,7 +128,7 @@ const EventDateTimeSection = ({
           <span className="text-base w-[150px] shrink-0">
             {cal.timezone || "Timezone"}
           </span>
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 w-full sm:w-auto">
+          <div className="flex-1 min-w-0">
             <TimezoneDropdown
               value={selectedTimezone}
               onChange={onTimezoneChange}

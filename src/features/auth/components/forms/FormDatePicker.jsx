@@ -21,10 +21,10 @@ const FormDatePicker = ({
   const portalRef = useRef(null);
 
   const [date, setDate] = useState(value ? dayjs(value) : null);
+  const [inputValue, setInputValue] = useState(value ? dayjs(value).format("DD/MM/YYYY") : "");
   const [currentViewDate, setCurrentViewDate] = useState(
     value ? dayjs(value).startOf("month") : dayjs().startOf("month"),
   );
-  // Neo cho lưới năm (đầu mỗi khối 12 năm)
   const [yearBlockStart, setYearBlockStart] = useState(
     Math.floor((value ? dayjs(value).year() : dayjs().year()) / 12) * 12,
   );
@@ -50,8 +50,10 @@ const FormDatePicker = ({
       setDate(newDate);
       setCurrentViewDate(newDate.startOf("month"));
       setYearBlockStart(Math.floor(newDate.year() / 12) * 12);
+      setInputValue(newDate.format("DD/MM/YYYY"));
     } else {
       setDate(null);
+      setInputValue("");
     }
   }, [value]);
 
@@ -98,6 +100,50 @@ const FormDatePicker = ({
     }
   }, [isOpen]);
 
+  const handleInputChange = (e) => {
+    let val = e.target.value.replace(/[^0-9/]/g, "");
+    
+    // Auto-format DD/MM/YYYY
+    if (e.nativeEvent.inputType !== "deleteContentBackward") {
+      let clean = val.replace(/\D/g, "");
+      if (clean.length > 8) clean = clean.slice(0, 8);
+      
+      if (clean.length >= 5) {
+        val = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4)}`;
+      } else if (clean.length >= 3) {
+        val = `${clean.slice(0, 2)}/${clean.slice(2)}`;
+      } else if (clean.length === 2) {
+        val = `${clean}/`;
+      } else {
+        val = clean;
+      }
+    }
+    
+    setInputValue(val);
+    
+    const parts = val.split("/");
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+      
+      if (year >= 1900 && year <= 2100 && month >= 0 && month < 12 && day > 0 && day <= 31) {
+        const newD = dayjs(new Date(year, month, day));
+        if (newD.isValid()) {
+          setDate(newD);
+          setCurrentViewDate(newD.startOf("month"));
+          setYearBlockStart(Math.floor(newD.year() / 12) * 12);
+          emitChange(newD);
+        }
+      }
+    } else if (val === "") {
+       setDate(null);
+       if (onChange) {
+         onChange({ target: { value: "", type: "text" } });
+       }
+    }
+  };
+
   const emitChange = (selectedDate) => {
     if (onChange) {
       onChange({
@@ -127,7 +173,6 @@ const FormDatePicker = ({
     setCurrentViewDate(currentViewDate.add(1, "month"));
   };
 
-  // --- Chọn nhanh năm ---
   const openYearPicker = (e) => {
     e.stopPropagation();
     setYearBlockStart(Math.floor(currentViewDate.year() / 12) * 12);
@@ -150,20 +195,6 @@ const FormDatePicker = ({
   };
 
   const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
-
-  const formatVietnameseDate = (d) => {
-    const dayOfWeek = d.day();
-    const dayNames = [
-      "Chủ nhật",
-      "Thứ 2",
-      "Thứ 3",
-      "Thứ 4",
-      "Thứ 5",
-      "Thứ 6",
-      "Thứ 7",
-    ];
-    return `${dayNames[dayOfWeek]}, ${d.format("DD/MM/YYYY")}`;
-  };
 
   const generateDays = () => {
     const days = [];
@@ -188,24 +219,36 @@ const FormDatePicker = ({
       ref={dropdownRef}
       className={`relative inline-block w-full ${className}`}
     >
-      <button
-        type="button"
-        onClick={() => {
-          if (!disabled) setIsOpen(!isOpen);
-        }}
-        disabled={disabled}
-        className={`h-[56px] w-full flex items-center justify-between rounded-3xl border px-4 text-sm text-left outline-none transition-colors
-        focus:border-[${color}] hover:border-[${color}]
-        ${error ? "border-red-500 focus:border-red-500" : "border-[#e5e5e5]"}
+      <div
+        className={`h-[56px] w-full flex items-center justify-between rounded-3xl border px-4 text-sm text-left transition-colors focus-within:border-[${color}] hover:border-[${color}]
+        ${error ? "border-red-500 focus-within:border-red-500" : "border-[#e5e5e5]"}
         ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "bg-white"}`}
+        onClick={() => {
+          if (!disabled && !isOpen) setIsOpen(true);
+        }}
       >
-        <span
-          className={!date ? "text-[#9e9e9e] font-normal" : "text-gray-800"}
+        <input
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={() => {
+            if (!disabled) setIsOpen(true);
+          }}
+          placeholder={`${placeholder} (dd/mm/yyyy)`}
+          disabled={disabled}
+          className="w-full h-full outline-none bg-transparent text-gray-800 placeholder-[#9e9e9e]"
+        />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!disabled) setIsOpen(!isOpen);
+          }}
+          className="p-1 outline-none"
         >
-          {date ? formatVietnameseDate(date) : placeholder}
-        </span>
-        <Calendar size={18} className="text-gray-400 shrink-0" />
-      </button>
+          <Calendar size={18} className="text-gray-400 shrink-0" />
+        </button>
+      </div>
       {helperText && <p className="mt-1 text-xs text-red-600">{helperText}</p>}
 
       {typeof document !== "undefined" &&

@@ -6,6 +6,8 @@ import {
   useGetCountriesQuery,
   useGetCitiesByCountryIdQuery,
 } from "@/store/api/locationsApi";
+import { TriangleAlert } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 const EventDetailsSection = ({
   title,
@@ -239,29 +241,18 @@ const EventDetailsSection = ({
         <div className="w-[150px] shrink-0 max-[425px]:w-full pt-[10px] max-[425px]:pt-0">
           {cal.ticketPrice}
         </div>
-        <div className="flex flex-col w-full min-w-0">
+        <div className="flex  gap-2 w-full min-w-0">
           <div className="flex items-center gap-3">
-            <TextInput
-              type="text"
-              inputMode="numeric"
-              value={ticketPrice ?? ""}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (val === "" || /^\d+$/.test(val)) {
-                  onTicketPriceChange(val === "" ? null : Number(val));
-                }
-              }}
-              variant="square"
-              color={eventColor}
-              placeholder={"0"}
-              className="text-center !px-2"
-              containerClassName="w-24"
-            />
-            <span className="text-[#606060] text-sm">
-              {ticketPrice == null || ticketPrice === 0
-                ? `(${cal.free || "Miễn phí"})`
-                : "k"}
-            </span>
+            <div className="flex items-center gap-2 h-[56px] px-4 rounded-md border border-[#C6C6C6] bg-gray-50 text-sm text-gray-400 cursor-not-allowed select-none">
+              <span>{cal.free || "Miễn phí"}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2   px-3 py-2">
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-yellow-500" />
+            <p className="text-xs text-yellow-700 leading-relaxed">
+              {cal.paidEventComingSoon ||
+                "Chức năng sự kiện thu phí đang phát triển."}
+            </p>
           </div>
         </div>
       </div>
