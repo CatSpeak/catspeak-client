@@ -17,14 +17,15 @@ function decodeJwtPayload(token) {
 }
 
 /** Seconds until the token expires (negative = already expired) */
-function tokenSecondsRemaining(token) {
+export function tokenSecondsRemaining(token) {
+  if (!token) return -1
   const payload = decodeJwtPayload(token)
   if (!payload?.exp) return -1
   return payload.exp - Date.now() / 1000
 }
 
 // How many seconds before expiry we proactively refresh
-const PROACTIVE_REFRESH_BUFFER = 60
+export const PROACTIVE_REFRESH_BUFFER = 60
 
 // ─── Base Query ─────────────────────────────────────────────────────
 const baseQuery = fetchBaseQuery({
@@ -73,10 +74,30 @@ export function getRefreshPromise() {
 /**
  * Attempt to refresh the token. Returns true on success.
  * Uses a mutex so only one refresh happens at a time.
+ * If requestToken is provided and the token in Redux has already changed,
+ * it returns true immediately without calling the backend refresh endpoint.
  */
-async function ensureRefresh(api, extraOptions, reason) {
+export async function ensureRefresh(
+  api,
+  extraOptions,
+  reason,
+  requestToken = null,
+) {
+  const currentToken = api.getState?.().auth?.token
+
+  // If this request failed with requestToken, but the store's token has ALREADY been updated
+  // by another concurrent refresh call, skip initiating a second refresh call.
+  if (requestToken && currentToken && currentToken !== requestToken) {
+    console.info(
+      AUTH_LOG,
+      "Token already updated by another call — skipping duplicate refresh",
+      { reason },
+    )
+    return true
+  }
+
   if (refreshPromise) {
-    console.info(AUTH_LOG, "Refresh already in progress, waiting…")
+    console.info(AUTH_LOG, "Refresh already in progress, waiting…", { reason })
     return refreshPromise
   }
 
@@ -174,95 +195,110 @@ async function ensureRefresh(api, extraOptions, reason) {
   return refreshPromise
 }
 
-// ─── Custom base query ──────────────────────────────────────────────
-const baseQueryWithReauth = async (args, api, extraOptions) => {
-  const url = typeof args === "string" ? args : args?.url
+/**
+ * Higher-order baseQuery function that adds proactive token refresh,
+ * 401 interceptor mutex re-authentication, and server health check handling.
+ */
+export function createReauthBaseQuery(queryResolver) {
+  return async (args, api, extraOptions) => {
+    const url = typeof args === "string" ? args : args?.url
+    const isAuthEndpoint =
+      url === "/Auth/refresh-token" || url === "/Auth/login"
 
-  // Choose the query client based on routing prefixes
-  const isCoursesRoute =
-    url &&
-    (url.toLowerCase().startsWith("/teacher/") ||
-      url.toLowerCase().startsWith("/student/"))
-  const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
+    const requestToken = api.getState().auth.token
 
-  // Skip proactive refresh for auth endpoints
-  const isAuthEndpoint = url === "/Auth/refresh-token" || url === "/Auth/login"
-
-  // ── Proactive refresh: if token is close to expiring, refresh first ──
-  if (!isAuthEndpoint) {
-    const currentToken = api.getState().auth.token
-    if (currentToken) {
-      const remaining = tokenSecondsRemaining(currentToken)
+    // ── Proactive refresh: if token is close to expiring, refresh first ──
+    if (!isAuthEndpoint && requestToken) {
+      const remaining = tokenSecondsRemaining(requestToken)
       if (remaining < PROACTIVE_REFRESH_BUFFER) {
         console.info(
           AUTH_LOG,
           `Token nearing expiry — proactively refreshing before ${url}`,
         )
-        await ensureRefresh(api, extraOptions, "proactive")
+        await ensureRefresh(api, extraOptions, "proactive", requestToken)
       }
     }
-  }
 
-  // ── Execute the actual request ────────────────────────────────────
-  let result = await activeQuery(args, api, extraOptions)
+    // ── Execute the actual request ────────────────────────────────────
+    let result = await queryResolver(args, api, extraOptions)
 
-  // ── Handle 401 ────────────────────────────────────────────────────
-  if (result.error?.status === 401) {
-    console.warn(AUTH_LOG, `401 on ${url}`)
+    // ── Handle 401 ────────────────────────────────────────────────────
+    if (result.error?.status === 401) {
+      console.warn(AUTH_LOG, `401 on ${url}`)
 
-    // Never retry auth endpoints to avoid infinite loops
-    if (isAuthEndpoint) {
-      return result
+      // Never retry auth endpoints to avoid infinite loops
+      if (isAuthEndpoint) {
+        return result
+      }
+
+      const success = await ensureRefresh(
+        api,
+        extraOptions,
+        `401 on ${url}`,
+        requestToken,
+      )
+
+      if (success) {
+        // Retry the original request with the new token
+        result = await queryResolver(args, api, extraOptions)
+        if (result.error) {
+          console.error(
+            AUTH_LOG,
+            `Retry of ${url} still failed with status ${result.error.status}`,
+          )
+        }
+      }
     }
 
-    const success = await ensureRefresh(api, extraOptions, `401 on ${url}`)
+    // ── Handle server-down / network errors ─────────────────────────
+    const isAborted =
+      api.signal.aborted || result.error?.name === "AbortError"
 
-    if (success) {
-      // Retry the original request with the new token
-      result = await activeQuery(args, api, extraOptions)
-      if (result.error) {
-        console.error(
+    const status = result.error?.status
+    const isServerError =
+      status === "FETCH_ERROR" || (typeof status === "number" && status >= 500)
+
+    if (!isAborted && isServerError) {
+      const isHealthy = await checkIsServerHealthy()
+      if (!isHealthy) {
+        console.warn(
           AUTH_LOG,
-          `Retry of ${url} still failed with status ${result.error.status}`,
+          `Server unreachable for ${url} (health check failed) — not an auth issue, skipping logout`,
+        )
+        api.dispatch(setServerDown())
+      } else {
+        console.warn(
+          AUTH_LOG,
+          `Fetch error on ${url} but server is healthy — not setting server down`,
         )
       }
     }
-  }
 
-  // ── Handle server-down / network errors ─────────────────────────
-  const isAborted = api.signal.aborted || result.error?.name === "AbortError"
-
-  const status = result.error?.status
-  const isServerError =
-    status === "FETCH_ERROR" || (typeof status === "number" && status >= 500)
-
-  if (!isAborted && isServerError) {
-    const isHealthy = await checkIsServerHealthy()
-    if (!isHealthy) {
-      console.warn(
+    // ── Recovery: clear server-down flag when a request succeeds ───
+    if (!result.error && api.getState().serverStatus.isServerDown) {
+      console.info(
         AUTH_LOG,
-        `Server unreachable for ${url} (health check failed) — not an auth issue, skipping logout`,
+        "Server is reachable again — clearing server-down flag",
       )
-      api.dispatch(setServerDown())
-    } else {
-      console.warn(
-        AUTH_LOG,
-        `Fetch error on ${url} but server is healthy — not setting server down`,
-      )
+      api.dispatch(setServerUp())
     }
-  }
 
-  // ── Recovery: clear server-down flag when a request succeeds ───
-  if (!result.error && api.getState().serverStatus.isServerDown) {
-    console.info(
-      AUTH_LOG,
-      "Server is reachable again — clearing server-down flag",
-    )
-    api.dispatch(setServerUp())
+    return result
   }
-
-  return result
 }
+
+// ─── Main base query with reauth ────────────────────────────────────
+const baseQueryWithReauth = createReauthBaseQuery(
+  async (args, api, extraOptions) => {
+    const url = typeof args === "string" ? args : args?.url
+    const isCoursesRoute =
+      url &&
+      (url.toLowerCase().startsWith("/teacher/") ||
+        url.toLowerCase().startsWith("/student/"))
+    const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
+    return activeQuery(args, api, extraOptions)
+  },
+)
 
 // ─── Base API slice ─────────────────────────────────────────────────
 export const baseApi = createApi({
