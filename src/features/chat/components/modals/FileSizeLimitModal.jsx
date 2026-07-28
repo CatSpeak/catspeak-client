@@ -1,6 +1,6 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
-import { AlertCircle, Sparkles } from "lucide-react"
+import { AlertCircle } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -12,11 +12,6 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 const FileSizeLimitModal = ({ open, onClose }) => {
   const navigate = useNavigate()
   const { t } = useLanguage()
-
-  const handleGoToPricing = () => {
-    onClose?.()
-    navigate("/pricing")
-  }
 
   const modalsT = t?.chat?.modals || {}
 
@@ -39,9 +34,9 @@ const FileSizeLimitModal = ({ open, onClose }) => {
           {modalsT.fileSizeLimitDesc || (
             <>
               Tệp tin của bạn vượt quá dung lượng tối đa cho phép là{" "}
-              <strong className="text-black font-semibold">25MB</strong> đối với tài
-              khoản hiện tại. Nâng cấp gói dịch vụ để tận hưởng giới hạn dung lượng
-              tải lên lớn hơn và nhiều tính năng cao cấp khác.
+              <strong className="text-black font-semibold">25MB</strong> đối với
+              tài khoản hiện tại. Nâng cấp gói dịch vụ để tận hưởng giới hạn
+              dung lượng tải lên lớn hơn và nhiều tính năng cao cấp khác.
             </>
           )}
         </p>
@@ -53,14 +48,6 @@ const FileSizeLimitModal = ({ open, onClose }) => {
             className="w-full sm:flex-1"
           >
             {modalsT.close || "Đóng"}
-          </PillButton>
-          <PillButton
-            variant="primary"
-            startIcon={<Sparkles />}
-            onClick={handleGoToPricing}
-            className="w-full sm:flex-1"
-          >
-            {modalsT.viewPricingPlans || "Xem các gói dịch vụ"}
           </PillButton>
         </div>
       </div>
