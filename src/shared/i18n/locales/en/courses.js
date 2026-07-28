@@ -836,6 +836,32 @@ export default {
         cancel: "Cancel",
         save: "Save"
       }
+    },
+    notifications: {
+      class_update: {
+        title: "Class update",
+        body: 'Class "{className}" has been updated'
+      },
+      schedule_change: {
+        title: "Schedule changed",
+        body: 'Schedule for class "{className}" has been adjusted'
+      },
+      assignment_new: {
+        title: "New assignment",
+        body: 'Assignment "{assignmentName}" has been published'
+      },
+      assignment_graded: {
+        title: "Assignment graded",
+        body: 'Result for "{assignmentName}" has been released'
+      },
+      assignment_regraded: {
+        title: "Result updated",
+        body: 'Result for "{assignmentName}" has been updated'
+      },
+      quiz_regraded: {
+        title: "Quiz result updated",
+        body: 'Result for quiz "{quizName}" has been updated'
+      }
     }
   }
 }

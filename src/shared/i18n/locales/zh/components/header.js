@@ -8,6 +8,7 @@ export default {
   community: "社区",
   notifications: "通知",
   noNewNotifications: "没有新通知",
+  markAllRead: "标记全部已读",
   searchPlaceholder: "搜索房间",
   languages: {
     vi: "越南语 (国语)",

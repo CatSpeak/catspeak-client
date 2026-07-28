@@ -835,6 +835,32 @@ export default {
         cancel: "Hủy",
         save: "Lưu"
       }
+    },
+    notifications: {
+      class_update: {
+        title: "Cập nhật lớp học",
+        body: 'Thông tin lớp "{className}" đã được cập nhật'
+      },
+      schedule_change: {
+        title: "Lịch dạy đã thay đổi",
+        body: 'Lịch dạy của lớp "{className}" đã được điều chỉnh'
+      },
+      assignment_new: {
+        title: "Bài nộp mới",
+        body: 'Bài nộp "{assignmentName}" đã được phát hành'
+      },
+      assignment_graded: {
+        title: "Bài nộp đã được chấm",
+        body: 'Kết quả bài nộp "{assignmentName}" đã được công bố'
+      },
+      assignment_regraded: {
+        title: "Kết quả đã chỉnh sửa",
+        body: 'Kết quả bài nộp "{assignmentName}" đã được cập nhật'
+      },
+      quiz_regraded: {
+        title: "Kết quả bài kiểm tra đã chỉnh sửa",
+        body: 'Kết quả bài kiểm tra "{quizName}" đã được cập nhật'
+      }
     }
   }
 }
