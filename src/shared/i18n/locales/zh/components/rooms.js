@@ -608,6 +608,8 @@ export default {
       score: "分数",
       matchDate: "比赛日期",
       winner: "获胜者",
+      startDateLabel: "起始日期",
+      endDateLabel: "结束日期",
     },
     setup: {
       title: "游戏设置",
