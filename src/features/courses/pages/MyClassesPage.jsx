@@ -1,8 +1,12 @@
-import React, { useMemo } from "react"
+import React, { useMemo, useRef, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Plus } from "lucide-react"
+import { toast } from "react-hot-toast"
 
-import { useGetAllCoursesQuery } from "@/store/api/coursesApi"
+import {
+  useDeleteClassMutation,
+  useGetAllClassesQuery,
+} from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
@@ -11,10 +15,9 @@ import CourseManagementCard from "../components/CourseManagementCard"
 import CourseSelectFilter from "../components/CourseSelectFilter"
 import EmptyCoursesState from "../components/EmptyCoursesState"
 import ViewModeToggle from "../components/shared/ViewModeToggle"
-import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import {
   filterByStatus,
-  mapTeacherCourseSummary,
+  mapTeacherClassSummary,
 } from "../utils/courseTransforms"
 
 const STATUS_OPTIONS = [
@@ -24,7 +27,7 @@ const STATUS_OPTIONS = [
   { value: "archived", label: "Archived" },
 ]
 
-const MyCoursesPage = () => {
+const MyClassesPage = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const c = t.courses || {}
@@ -50,36 +53,38 @@ const MyCoursesPage = () => {
     })
   }
 
-  const deleteHelper = useDeleteCourse(t)
+  const [classDeleteTarget, setClassDeleteTarget] = useState(null)
+  const classDeleteGuardRef = useRef(false)
+  const [deleteClass, { isLoading: isDeletingClass }] = useDeleteClassMutation()
 
   const {
-    currentData: coursesData,
-    isLoading: isCoursesLoading,
-    isFetching: isCoursesFetching,
-    error: coursesError,
-    refetch: refetchCourses,
-  } = useGetAllCoursesQuery({
+    currentData: classesData,
+    isLoading: isClassesLoading,
+    isFetching: isClassesFetching,
+    error: classesError,
+    refetch: refetchClasses,
+  } = useGetAllClassesQuery({
     page: 1,
     pageSize: 6,
     status: statusFilter === "all" ? undefined : statusFilter.toUpperCase(),
   })
 
-  const coursesRaw = useMemo(
-    () => (Array.isArray(coursesData?.data) ? coursesData.data : []),
-    [coursesData],
+  const classesRaw = useMemo(
+    () => (Array.isArray(classesData?.data) ? classesData.data : []),
+    [classesData],
   )
 
-  const isLoading = isCoursesLoading || (isCoursesFetching && coursesData === undefined)
-  const isRefreshing = isCoursesFetching
-  const error = coursesData === undefined && coursesError
-  const refreshError = coursesError
+  const isLoading = isClassesLoading || (isClassesFetching && classesData === undefined)
+  const isRefreshing = isClassesFetching
+  const error = classesData === undefined && classesError
+  const refreshError = classesError
 
-  const courseList = useMemo(() => coursesRaw.map(mapTeacherCourseSummary), [coursesRaw])
-  const filteredDisplayList = useMemo(() => filterByStatus(courseList, statusFilter), [courseList, statusFilter])
+  const classList = useMemo(() => classesRaw.map(mapTeacherClassSummary), [classesRaw])
+  const filteredDisplayList = useMemo(() => filterByStatus(classList, statusFilter), [classList, statusFilter])
 
-  const cardLabels = {
-    editCourse: c.editCourse || "Edit Course",
-    deleteCourse: c.courseDetail?.deleteCourse || "Delete Course",
+  const classCardLabels = {
+    editCourse: c.editClass || "Edit Class",
+    deleteCourse: c.classDetail?.deleteClass || "Delete Class",
     createdDate: c.createdDate || "Created Date",
     manageDetails: c.manageDetails || "Manage Details",
     progress: c.progress || "Progress",
@@ -94,10 +99,10 @@ const MyCoursesPage = () => {
   if (error) {
     return (
       <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
-        <span>{mc.loadFailed || "The course overview could not be loaded. Please try again."}</span>
+        <span>{mc.loadFailed || "The class overview could not be loaded. Please try again."}</span>
         <button
           type="button"
-          onClick={() => refetchCourses()}
+          onClick={() => refetchClasses()}
           className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
         >
           {mc.retry || "Try again"}
@@ -106,16 +111,41 @@ const MyCoursesPage = () => {
     )
   }
 
+  const handleConfirmClassDelete = async () => {
+    if (!classDeleteTarget?.id || classDeleteGuardRef.current) return
+
+    classDeleteGuardRef.current = true
+    try {
+      await deleteClass({
+        id: classDeleteTarget.id,
+        courseId: classDeleteTarget.courseId,
+      }).unwrap()
+      const successMessage = (
+        c.classDetail?.toastCancelSuccess
+        || "Class deleted successfully!"
+      )
+      toast.success(successMessage)
+    } catch {
+      toast.error(
+        c.classDetail?.toastCancelFailed
+        || "Failed to delete class!",
+      )
+    } finally {
+      classDeleteGuardRef.current = false
+      setClassDeleteTarget(null)
+    }
+  }
+
   const handleCloseDeleteModal = () => {
-    if (deleteHelper.isDeleting) return
-    deleteHelper.handleCancel()
+    if (isDeletingClass) return
+    setClassDeleteTarget(null)
   }
 
   return (
     <div className="flex flex-col gap-4 text-[#2e2e2e]">
       {isRefreshing && (
         <span role="status" className="sr-only">
-          {mc.refreshing || "Refreshing course overview"}
+          {mc.refreshing || "Refreshing class overview"}
         </span>
       )}
       {refreshError && !error && (
@@ -133,21 +163,21 @@ const MyCoursesPage = () => {
             {t.nav?.home || "Home"}
           </button>
           <span>/</span>
-          <span className="text-[#990011] font-semibold">{c.title || "My Courses"}</span>
+          <span className="text-[#990011] font-semibold">{c.myClassesTab || "My Classes"}</span>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-          {c.title || "My Courses"}
+          {c.myClassesTab || "My Classes"}
         </h1>
         <button
           type="button"
-          onClick={() => navigate("/workspace/courses/create")}
+          onClick={() => navigate("/workspace/courses/create-class")}
           className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
         >
           <Plus size={16} />
-          <span>{c.createCourse?.title || "Create Course"}</span>
+          <span>{c.createClass?.title || "Create Class"}</span>
         </button>
       </div>
 
@@ -165,7 +195,7 @@ const MyCoursesPage = () => {
       <div className="flex flex-col gap-4">
         {filteredDisplayList.length === 0 ? (
           <EmptyCoursesState
-            message={c.myCourses?.noCourses || "No courses yet"}
+            message={c.myCourses?.noClasses || "No classes yet"}
           />
         ) : (
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>
@@ -173,13 +203,16 @@ const MyCoursesPage = () => {
               <CourseManagementCard
                 key={item.id}
                 item={item}
-                type="course"
+                type="class"
                 viewMode={viewMode}
-                labels={cardLabels}
-                onOpen={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(item.id))}`)}
-                onEdit={() => navigate(`/workspace/courses/edit/${encodeURIComponent(String(item.id))}`)}
+                labels={classCardLabels}
+                onOpen={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(item.id))}`)}
+                onEdit={() => navigate(`/workspace/courses/edit-class/${encodeURIComponent(String(item.id))}`)}
                 onDelete={() => {
-                  deleteHelper.setTargetId(item.id)
+                  setClassDeleteTarget({
+                    id: item.id,
+                    courseId: item.courseId,
+                  })
                 }}
               />
             ))}
@@ -189,7 +222,7 @@ const MyCoursesPage = () => {
         {filteredDisplayList.length > 0 && (
           <button
             type="button"
-            onClick={() => navigate("/workspace/courses/all")}
+            onClick={() => navigate("/workspace/courses/all-classes")}
             className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2"
           >
             {c.myCourses?.viewAll || "View all"}
@@ -198,17 +231,17 @@ const MyCoursesPage = () => {
       </div>
 
       <ConfirmationModal
-        open={deleteHelper.isOpen}
+        open={Boolean(classDeleteTarget)}
         onClose={handleCloseDeleteModal}
-        onConfirm={deleteHelper.handleConfirm}
-        isPending={deleteHelper.isDeleting}
-        title={c.courseDetail?.deleteCourse || "Delete Course"}
-        message={c.courseDetail?.confirmDeleteCourse || "Are you sure you want to delete this course? All associated classes will also be affected."}
-        confirmText={c.courseDetail?.deleteCourse || "Delete"}
+        onConfirm={handleConfirmClassDelete}
+        isPending={isDeletingClass}
+        title={c.classDetail?.deleteClass || "Delete Class"}
+        message={c.classDetail?.confirmDeleteClass || "Are you sure you want to delete this class?"}
+        confirmText={c.classDetail?.deleteClass || "Delete"}
         cancelText={c.createClass?.cancel || "Cancel"}
       />
     </div>
   )
 }
 
-export default MyCoursesPage
+export default MyClassesPage

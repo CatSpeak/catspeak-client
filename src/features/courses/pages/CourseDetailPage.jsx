@@ -115,16 +115,16 @@ const CourseDetailPage = () => {
     : null
   const nextClass = nextSessionStart
     ? {
-        ...nextSessionClass,
-        startDate: toLocalDateString(nextSessionStart),
-        schedule: {
-          ...nextSessionClass.schedule,
-          startTime: nextSessionStart.toTimeString().slice(0, 5),
-          endTime: nextSessionEnd && !Number.isNaN(nextSessionEnd.getTime())
-            ? nextSessionEnd.toTimeString().slice(0, 5)
-            : "",
-        },
-      }
+      ...nextSessionClass,
+      startDate: toLocalDateString(nextSessionStart),
+      schedule: {
+        ...nextSessionClass.schedule,
+        startTime: nextSessionStart.toTimeString().slice(0, 5),
+        endTime: nextSessionEnd && !Number.isNaN(nextSessionEnd.getTime())
+          ? nextSessionEnd.toTimeString().slice(0, 5)
+          : "",
+      },
+    }
     : null
 
   // Localized Labels

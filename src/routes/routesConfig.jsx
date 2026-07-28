@@ -99,6 +99,15 @@ const CreateCoursePage = lazy(
 const AllCoursesPage = lazy(
   () => import("@/features/courses/pages/AllCoursesPage"),
 )
+const MyClassesPage = lazy(
+  () => import("@/features/courses/pages/MyClassesPage"),
+)
+const WorkspaceAnalyticsPage = lazy(
+  () => import("@/features/courses/components/WorkspaceAnalyticsPage"),
+)
+const WorkspaceCalendarPage = lazy(
+  () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
+)
 const AllClassesPage = lazy(
   () => import("@/features/courses/pages/AllClassesPage"),
 )
@@ -367,6 +376,38 @@ const routesConfig = [
                   </LazyRoute>
                 ),
               },
+              {
+                path: "classes",
+                element: (
+                  <LazyRoute>
+                    <MyClassesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "calendar",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceCalendarPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "analytics",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceAnalyticsPage />
+                  </LazyRoute>
+                ),
+              },
+              // {
+              //   path: "/schedule/teaching",
+              //   element: (
+              //     <LazyRoute>
+              //       <SchedulePage />
+              //     </LazyRoute>
+              //   ),
+              // },
               {
                 path: "courses/all",
                 element: (

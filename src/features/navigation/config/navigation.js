@@ -17,6 +17,8 @@ import {
   MessageCircle,
   DoorOpen,
   Globe,
+  Users,
+  BarChart,
 } from "lucide-react"
 
 export const navSections = [
@@ -59,11 +61,14 @@ export const navSections = [
     maxInitial: 5,
     items: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myClass", path: "/workspace/classes", icon: Users },
+      { key: "calendar", path: "/workspace/calendar", icon: Calendar },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "workspaceReels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
+      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
     ],
   },
 ]
@@ -105,11 +110,14 @@ export const navLinks = [
     requiresAuth: true,
     subItems: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myClass", path: "/workspace/classes", icon: Users },
+      { key: "calendar", path: "/workspace/calendar", icon: Calendar },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "events", path: "/workspace/events", icon: Calendar },
+      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
     ],
   },
   {
