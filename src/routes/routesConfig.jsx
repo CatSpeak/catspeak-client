@@ -381,10 +381,18 @@ const routesConfig = [
                 ),
               },
               {
-                path: "calendar",
+                path: "schedule",
                 element: (
                   <LazyRoute>
                     <WorkspaceCalendarPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "schedule/teaching-schedule",
+                element: (
+                  <LazyRoute>
+                    <SchedulePage />
                   </LazyRoute>
                 ),
               },
@@ -396,14 +404,6 @@ const routesConfig = [
                   </LazyRoute>
                 ),
               },
-              // {
-              //   path: "/schedule/teaching",
-              //   element: (
-              //     <LazyRoute>
-              //       <SchedulePage />
-              //     </LazyRoute>
-              //   ),
-              // },
               {
                 path: "courses/all",
                 element: (
@@ -413,7 +413,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/all-classes",
+                path: "classes/all",
                 element: (
                   <LazyRoute>
                     <AllClassesPage />
@@ -437,7 +437,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/create-class",
+                path: "classes/create-class",
                 element: (
                   <LazyRoute>
                     <CreateClassPage />

@@ -208,7 +208,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 flex flex-col gap-1 scrollbar-none">
           {(activeDrilldownItem?.subItems || [])
             .filter((sub) => {
-              const teacherTabs = ["myCourses", "myClass", "analytics", "calendar"]
+              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule"]
               if (teacherTabs.includes(sub.key) && isStudent) return false
               if (sub.key === "myLearning" && isTeacher) return false
               if (sub.lang && sub.lang !== currentLang) return false

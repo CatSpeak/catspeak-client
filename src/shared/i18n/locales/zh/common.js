@@ -54,6 +54,7 @@ export default {
     allCourses: "所有课程",
     myCourses: "我的课程",
     myClass: "我的班级",
+    schedule: "教学日程",
     myLearning: "我的学习",
     messages: "消息",
     settings: "设置",
