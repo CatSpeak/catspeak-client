@@ -245,10 +245,29 @@ const CreateCoursePage = () => {
       }
 
       navigate("/workspace/courses")
-    } catch {
-      toast.error(isEditMode
-        ? (cc.toastUpdateFailed || "Course update failed!")
-        : (cc.toastCreateFailed || "Course creation failed!"))
+    } catch (err) {
+      const errData = err?.data
+      const errCode = errData?.errorCode || errData?.code || errData?.error
+      const errMsg = errData?.message || errData?.detail || errData?.title || ""
+
+      const isLanguageNotAllowed =
+        errCode === "LANGUAGE_NOT_ALLOWED" ||
+        err?.status === 422 ||
+        (typeof errMsg === "string" && (errMsg.includes("LANGUAGE_NOT_ALLOWED") || errMsg.toLowerCase().includes("language not allowed"))) ||
+        (typeof errCode === "string" && errCode.includes("LANGUAGE_NOT_ALLOWED"))
+
+      let displayMessage
+      if (isLanguageNotAllowed) {
+        displayMessage = cc.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
+      } else if (typeof errMsg === "string" && errMsg.trim().length > 0) {
+        displayMessage = errMsg
+      } else {
+        displayMessage = isEditMode
+          ? (cc.toastUpdateFailed || "Course update failed!")
+          : (cc.toastCreateFailed || "Course creation failed!")
+      }
+
+      toast.error(displayMessage)
     } finally {
       submitGuardRef.current = false
     }

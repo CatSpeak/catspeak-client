@@ -221,6 +221,7 @@ export default {
     toastUpdateSuccess: "Đã cập nhật khóa học thành công!",
     toastUpdateFailed: "Cập nhật khóa học thất bại!",
     toastCreateFailed: "Tạo khóa học thất bại!",
+    languageNotAllowed: "Ngôn ngữ hoặc trình độ không theo hồ sơ giảng viên của bạn",
     toastClearSuccess: "Đã xóa thông tin form",
     changeImage: "Thay đổi hình ảnh"
   },

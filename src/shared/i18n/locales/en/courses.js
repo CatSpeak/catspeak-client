@@ -221,6 +221,7 @@ export default {
     toastUpdateSuccess: "Course updated successfully!",
     toastUpdateFailed: "Course update failed!",
     toastCreateFailed: "Course creation failed!",
+    languageNotAllowed: "The selected language or level is not matched with your instructor profile",
     toastClearSuccess: "Cleared form inputs",
     changeImage: "Change image"
   },

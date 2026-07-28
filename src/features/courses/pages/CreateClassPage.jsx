@@ -121,17 +121,17 @@ const CreateClassPage = () => {
   } = useGetClassDetailQuery(recoverClassId, { skip: !isRecoverMode })
   const isDetailsLoading = isEditMode
     ? (
-        isEditDetailsLoading
-        || (isEditDetailsFetching && classDetailResponse === undefined)
-      )
+      isEditDetailsLoading
+      || (isEditDetailsFetching && classDetailResponse === undefined)
+    )
     : (
-        isRecoverMode
-          ? (
-              isRecoverLoading
-              || (isRecoverFetching && recoverClassResponse === undefined)
-            )
-          : false
-      )
+      isRecoverMode
+        ? (
+          isRecoverLoading
+          || (isRecoverFetching && recoverClassResponse === undefined)
+        )
+        : false
+    )
   const [deleteClass, { isLoading: isDeleting }] = useDeleteClassMutation()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -594,10 +594,10 @@ const CreateClassPage = () => {
             isRecoverMode
               ? `?recoverClassId=${encodeURIComponent(String(recoverClassId))}`
               : (
-                  courseId
-                    ? `?courseId=${encodeURIComponent(String(courseId))}`
-                    : ""
-                )
+                courseId
+                  ? `?courseId=${encodeURIComponent(String(courseId))}`
+                  : ""
+              )
           )
         ),
       }
@@ -659,9 +659,28 @@ const CreateClassPage = () => {
       ) {
         return
       }
-      toast.error(isEditMode
-        ? (cc.toastUpdateFail || "Failed to update class!")
-        : (cc.toastCreateFail || "Failed to create class!"))
+      const errData = error?.data
+      const errCode = errData?.errorCode || errData?.code || errData?.error
+      const errMsg = errData?.message || errData?.detail || error?.message || ""
+
+      const isLanguageNotAllowed =
+        errCode === "LANGUAGE_NOT_ALLOWED" ||
+        error?.status === 422 ||
+        (typeof errMsg === "string" && (errMsg.includes("LANGUAGE_NOT_ALLOWED") || errMsg.toLowerCase().includes("language not allowed"))) ||
+        (typeof errCode === "string" && errCode.includes("LANGUAGE_NOT_ALLOWED"))
+
+      let displayMessage
+      if (isLanguageNotAllowed) {
+        displayMessage = cc.languageNotAllowed || c.createCourse?.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
+      } else if (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("Missing")) {
+        displayMessage = errMsg
+      } else {
+        displayMessage = isEditMode
+          ? (cc.toastUpdateFail || "Failed to update class!")
+          : (cc.toastCreateFail || "Failed to create class!")
+      }
+
+      toast.error(displayMessage)
     } finally {
       if (activeMutationRequestRef.current === request) {
         activeMutationRequestRef.current = null
@@ -1104,18 +1123,18 @@ const CreateClassPage = () => {
                 aria-disabled={!isEditMode}
                 title={!isEditMode
                   ? (
-                      cc.thumbnailEditOnly
-                      || "The checkout API does not accept a class thumbnail. You can change it after the class is created."
-                    )
+                    cc.thumbnailEditOnly
+                    || "The checkout API does not accept a class thumbnail. You can change it after the class is created."
+                  )
                   : undefined}
                 onClick={isEditMode ? handleThumbnailClick : undefined}
                 onKeyDown={isEditMode
                   ? (event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault()
-                        handleThumbnailClick()
-                      }
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault()
+                      handleThumbnailClick()
                     }
+                  }
                   : undefined}
                 className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${!isEditMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
                   }`}
@@ -1136,9 +1155,9 @@ const CreateClassPage = () => {
                       {isEditMode
                         ? (cc.changeThumbnail || "Change image")
                         : (
-                            cc.thumbnailEditOnly
-                            || "Thumbnail changes are available after creation."
-                          )}
+                          cc.thumbnailEditOnly
+                          || "Thumbnail changes are available after creation."
+                        )}
                     </div>
                   </div>
                 ) : (
@@ -1150,9 +1169,9 @@ const CreateClassPage = () => {
                       <p>{isEditMode
                         ? (c.avatarDesc1 || "Supports PNG, JPEG, and WebP.")
                         : (
-                            cc.thumbnailEditOnly
-                            || "Thumbnail changes are available after creation."
-                          )}</p>
+                          cc.thumbnailEditOnly
+                          || "Thumbnail changes are available after creation."
+                        )}</p>
                       <p>{c.avatarDesc2 || "File size must be under 50mb"}</p>
                     </div>
                   </div>

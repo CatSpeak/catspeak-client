@@ -221,6 +221,7 @@ export default {
     toastUpdateSuccess: "成功更新课程！",
     toastUpdateFailed: "更新课程失败！",
     toastCreateFailed: "创建课程失败！",
+    languageNotAllowed: "根据您的教师资料，所选的语言或级别不受允许。",
     toastClearSuccess: "已清空表单输入",
     changeImage: "更改图片"
   },
