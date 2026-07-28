@@ -177,7 +177,7 @@ const MyClassesPage = () => {
           className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
         >
           <Plus size={16} />
-          <span>{c.createClass?.title || "Create Class"}</span>
+          <span>{c.createClass?.createClass || "Create Class"}</span>
         </button>
       </div>
 
