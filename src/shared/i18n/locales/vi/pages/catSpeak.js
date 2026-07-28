@@ -230,6 +230,7 @@ export default {
     sortOldest: "Cũ nhất",
     displayGrid: "Lưới",
     displayFloat: "Trôi nổi",
+    emptyInputError: "Vui lòng nhập nội dung trước khi gửi.",
   },
   newsLoginPrompt:
     "Vui lòng đăng nhập để xem những bài viết mới nhất từ cộng đồng.",

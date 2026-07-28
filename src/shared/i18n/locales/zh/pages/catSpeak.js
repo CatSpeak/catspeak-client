@@ -257,6 +257,7 @@ export default {
     sortOldest: "最旧",
     displayGrid: "网格",
     displayFloat: "漂浮",
+    emptyInputError: "发送前请输入内容。",
   },
   newsLoginPrompt: "请登录后查看社区的最新帖子。",
   sidebar: {
