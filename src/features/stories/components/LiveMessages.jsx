@@ -51,7 +51,8 @@ const LiveMessages = ({ languageCommunity }) => {
   const handleSend = () => {
     if (!inputValue || !inputValue.trim()) {
       toast.error(
-        t.catSpeak?.mail?.emptyInputError || "Please enter content before sending."
+        t.catSpeak?.mail?.emptyInputError ||
+          "Please enter content before sending.",
       );
       return;
     }
@@ -93,9 +94,9 @@ const LiveMessages = ({ languageCommunity }) => {
   ];
 
   return (
-    <div className="flex w-full max-w-full flex-col p-4 sm:p-6 text-gray-800">
+    <div className="flex w-full max-w-full flex-col pt-4 sm:pt-6 text-gray-800">
       {/* Breadcrumb */}
-      <div className="text-sm mb-3 sm:mb-4">
+      <div className="text-sm mb-3 px-4 sm:mb-4 sm:px-6">
         <Breadcrumb items={breadcrumbItems} />
       </div>
 
