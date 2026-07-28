@@ -278,10 +278,6 @@ const routesConfig = [
                     element: <CalendarPage />,
                   },
                   {
-                    path: "calendar/create",
-                    element: <CreateEventPage />,
-                  },
-                  {
                     path: "website/:id",
                     element: (
                       <AuthGuard>
@@ -669,6 +665,10 @@ const routesConfig = [
                     <WorkspaceEventsPage />
                   </LazyRoute>
                 ),
+              },
+              {
+                path: "events/create",
+                element: <CreateEventPage />,
               },
               {
                 path: "rooms",

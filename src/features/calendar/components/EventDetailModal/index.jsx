@@ -170,8 +170,7 @@ const EventDetailModal = ({ event, onClose }) => {
                   event={ev}
                   onClose={onClose}
                   onEdit={() => {
-                    const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
-                    navigate(`${basePath}/create`, {
+                    navigate(`/workspace/events/create`, {
                       state: { editEvent: ev },
                     });
                     onClose();

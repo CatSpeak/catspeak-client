@@ -172,49 +172,50 @@ const CalendarPage = () => {
         <CalendarFilterChips chips={filterChips} onRemove={removeFilter} />
 
         {/* Calendar + Schedule grid */}
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 mt-10 lg:items-start">
-          {/* LEFT: Calendar & Map */}
-          <div className="contents lg:flex lg:flex-col lg:gap-6">
-            <div className="order-1 lg:order-none">
-              <CalendarMonthPanel
-                currentDate={currentDate}
-                selectedDate={selectedDate}
-                eventCountsByDay={eventCountsByDay}
-                localizedMonth={localizedMonth}
-                todayLegend={cal.todayLegend || "Ngày hôm nay"}
-                selectedDayLegend={cal.selectedDayLegend || "Ngày được chọn"}
-                onPrevMonth={handlePrevMonth}
-                onNextMonth={handleNextMonth}
-                onSelectDate={(d) => {
-                  setSelectedDate(d);
-                  setSelectedEvent(null);
-                }}
-                viewType={viewType}
-                onChangeView={setViewType}
-              />
-            </div>
-            {/* Desktop only Map, or both, but Image shows it below the calendar */}
-            <div className="order-3 lg:order-none relative z-0 rounded-3xl overflow-hidden bg-white p-3 shadow-sm w-full h-full">
-              <MapView dayEvents={dayEvents} selectedEvent={selectedEvent} />
-            </div>
-          </div>
-
-          {/* RIGHT: Day Schedule */}
-          <div className="order-2 lg:order-none flex flex-col">
-            <DaySchedule
-              selectedDate={selectedDate}
+        <div className="flex flex-col lg:flex-row gap-6 mt-10 lg:items-stretch">
+          {/* LEFT: Calendar */}
+          <div className="w-full lg:w-1/2 flex-shrink-0">
+            <CalendarMonthPanel
               currentDate={currentDate}
-              activeFilters={activeFilters}
-              selectedEvent={selectedEvent}
-              onEventSelect={setSelectedEvent}
-              onEventsUpdate={setDayEvents}
+              selectedDate={selectedDate}
               eventCountsByDay={eventCountsByDay}
+              localizedMonth={localizedMonth}
+              todayLegend={cal.todayLegend || "Ngày hôm nay"}
+              selectedDayLegend={cal.selectedDayLegend || "Ngày được chọn"}
+              onPrevMonth={handlePrevMonth}
+              onNextMonth={handleNextMonth}
               onSelectDate={(d) => {
                 setSelectedDate(d);
                 setSelectedEvent(null);
               }}
+              viewType={viewType}
+              onChangeView={setViewType}
             />
           </div>
+
+          {/* RIGHT: Day Schedule */}
+          <div className="w-full lg:w-1/2 relative flex flex-col min-h-[400px] lg:min-h-0">
+            <div className="lg:absolute lg:inset-0 w-full h-full flex flex-col">
+              <DaySchedule
+                selectedDate={selectedDate}
+                currentDate={currentDate}
+                activeFilters={activeFilters}
+                selectedEvent={selectedEvent}
+                onEventSelect={setSelectedEvent}
+                onEventsUpdate={setDayEvents}
+                eventCountsByDay={eventCountsByDay}
+                onSelectDate={(d) => {
+                  setSelectedDate(d);
+                  setSelectedEvent(null);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* FULL WIDTH MAP */}
+        <div className="relative z-0 rounded-3xl overflow-hidden bg-white p-3 shadow-sm w-full  mt-6">
+          <MapView dayEvents={dayEvents} selectedEvent={selectedEvent} />
         </div>
       </div>
 
