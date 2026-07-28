@@ -71,6 +71,10 @@ export default {
       newChatTitle: "Bắt đầu cuộc trò chuyện mới",
       directMessage: "Tin nhắn trực tiếp",
       newGroup: "Nhóm mới",
+      fileSizeLimitTitle: "Dung lượng tệp vượt quá giới hạn",
+      fileSizeLimitDesc: "Tệp tin của bạn vượt quá dung lượng tối đa cho phép là 25MB đối với tài khoản hiện tại. Nâng cấp gói dịch vụ để tận hưởng giới hạn dung lượng tải lên lớn hơn và nhiều tính năng cao cấp khác.",
+      close: "Đóng",
+      viewPricingPlans: "Xem các gói dịch vụ",
     },
   },
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react"
 import ChatBubble from "../messages/ChatBubble"
+import MediaUploadBubble from "../messages/MediaUploadBubble"
 import ChatInput from "../ChatInput"
 import DateSeparator from "../messages/DateSeparator"
 import SystemMessage from "../messages/SystemMessage"
@@ -26,6 +27,9 @@ const ConversationDetail = ({
   onCancelReply,
   onDeleteForMe,
   onRecall,
+  pendingUpload = null,
+  onRetryUpload,
+  onCancelUpload,
 }) => {
   const scrollRef = useRef(null)
   const { t } = useLanguage()
@@ -37,12 +41,12 @@ const ConversationDetail = ({
     isLoading,
   })
 
-  // Auto-scroll to bottom on new messages or typing indicator changes
+  // Auto-scroll to bottom on new messages, pending uploads, or typing indicator changes
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [messages, typingUsers])
+  }, [messages, typingUsers, pendingUpload])
 
   if (!conversation) {
     return (
@@ -102,6 +106,13 @@ const ConversationDetail = ({
           <>
             <div className="flex-1" />
             {renderMessages()}
+            {pendingUpload && (
+              <MediaUploadBubble
+                pendingUpload={pendingUpload}
+                onRetry={onRetryUpload}
+                onCancel={onCancelUpload}
+              />
+            )}
             {typingUsers &&
               typingUsers.map((u) => {
                 const participant = conversation?.participants?.find(
