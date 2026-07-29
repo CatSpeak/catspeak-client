@@ -24,16 +24,18 @@ export function tokenSecondsRemaining(token) {
   return payload.exp - Date.now() / 1000
 }
 
-// How many seconds before expiry we proactively refresh
-export const PROACTIVE_REFRESH_BUFFER = 60
+// How many seconds before expiry we proactively refresh (0 = refresh when expired)
+export const PROACTIVE_REFRESH_BUFFER = 0
 
 // ─── Base Query ─────────────────────────────────────────────────────
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
-  prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth.token
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`)
+  prepareHeaders: (headers, { getState, extraOptions }) => {
+    if (!extraOptions?.skipAuthHeader) {
+      const token = getState().auth.token
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`)
+      }
     }
 
     // Extract community language from URL (e.g., /zh/cat-speak/...)
@@ -113,15 +115,20 @@ export async function ensureRefresh(
   // update them — so we send a matched token + refreshToken pair.
   const { token, refreshToken } = api.getState().auth
   const lsToken = token || localStorage.getItem("token")
-  const lsRefresh = refreshToken || localStorage.getItem("refreshToken")
+  const lsRefreshToken = refreshToken || localStorage.getItem("refreshToken")
 
-  if (!lsRefresh || !lsToken) {
+  if (!lsRefreshToken || !lsToken) {
     console.warn(AUTH_LOG, "No refresh token available — logging out")
     api.dispatch(logout())
     return false
   }
 
-  console.info(AUTH_LOG, `Starting token refresh (reason: ${reason})`)
+  console.info(
+    AUTH_LOG,
+    `Starting token refresh (reason: ${reason})`,
+    `token prefix: ${lsToken?.substring(0, 12)}...`,
+    `refreshPrefix: ${lsRefreshToken?.substring(0, 12)}...`,
+  )
 
   refreshPromise = (async () => {
     try {
@@ -129,10 +136,10 @@ export async function ensureRefresh(
         {
           url: "/Auth/refresh-token",
           method: "POST",
-          body: { token: lsToken, refreshToken: lsRefresh },
+          body: { token: lsToken, refreshToken: lsRefreshToken },
         },
         api,
-        extraOptions,
+        { ...extraOptions, skipAuthHeader: true },
       )
 
       if (refreshResult.error) {
@@ -163,6 +170,16 @@ export async function ensureRefresh(
           return false
         }
 
+        const remaining = tokenSecondsRemaining(lsToken)
+        if (reason === "proactive" || remaining > 0) {
+          console.warn(
+            AUTH_LOG,
+            `Refresh returned status ${status} during proactive check, but access token is still valid (${Math.round(remaining)}s remaining) — skipping premature logout`,
+            { reason },
+          )
+          return false
+        }
+
         console.error(
           AUTH_LOG,
           `Refresh failed with status ${status} — logging out`,
@@ -180,7 +197,10 @@ export async function ensureRefresh(
             user: refreshResult.data.user || user,
           }),
         )
-        console.info(AUTH_LOG, "Token refresh successful")
+        console.info(
+          AUTH_LOG,
+          "Token refresh successful — new credentials stored",
+        )
         return true
       }
 
