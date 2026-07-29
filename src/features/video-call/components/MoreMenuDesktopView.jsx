@@ -17,7 +17,6 @@ import {
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useRecordingStatus } from "@/features/video-call/hooks/useRecordingStatus"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
@@ -54,16 +53,13 @@ const MoreMenuDesktopView = ({
     confirmStopRecording,
     setShowRoomSettings,
     setActiveSettingsTab,
+    isSubtitleActive,
+    isStartingSubtitles,
+    stopSubtitles,
   } = useGlobalVideoCall()
 
   const { isBreakoutActive } = useSelector((s) => s.videoCall)
   const { isHost, canStartGame, gameDisabledReason } = useGameControlStatus()
-
-  const {
-    isSubtitleActive,
-    isStarting,
-    stopSubtitles,
-  } = useSubtitleControls()
 
   const {
     formattedTime,
@@ -196,9 +192,9 @@ const MoreMenuDesktopView = ({
             }
           }
         }}
-        disabled={!isAISession && isStarting}
+        disabled={!isAISession && isStartingSubtitles}
         icon={
-          !isAISession && isStarting ? (
+          !isAISession && isStartingSubtitles ? (
             <Loader2 size={20} className="animate-spin" />
           ) : (
             <Captions size={20} />

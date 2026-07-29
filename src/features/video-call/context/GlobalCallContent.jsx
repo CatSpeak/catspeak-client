@@ -35,6 +35,7 @@ import {
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
 
@@ -358,6 +359,13 @@ const GlobalCallContent = ({
     sessionId,
   })
 
+  const subtitleControls = useSubtitleControls({
+    sessionId,
+    room: roomData,
+    setShowRoomSubtitles,
+    setSubtitleSelectedLanguage,
+  })
+
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
   // ── Participants ──
@@ -550,6 +558,12 @@ const GlobalCallContent = ({
     setShowRoomSubtitles,
     subtitleSelectedLanguage,
     setSubtitleSelectedLanguage,
+    isSubtitleActive: subtitleControls.isSubtitleActive,
+    isStartingSubtitles: subtitleControls.isStarting,
+    isStoppingSubtitles: subtitleControls.isStopping,
+    subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,
+    startSubtitles: subtitleControls.startSubtitles,
+    stopSubtitles: subtitleControls.stopSubtitles,
 
     // Chat
     messages: chatMessages,
