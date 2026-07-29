@@ -1,6 +1,7 @@
 import React from "react"
 import Modal from "./Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ConfirmationModal = ({
   open,
@@ -8,12 +9,17 @@ const ConfirmationModal = ({
   onConfirm,
   title,
   message,
-  cancelText = "Cancel",
-  confirmText = "Confirm",
+  cancelText,
+  confirmText,
   confirmVariant = "destructive", // "primary" | "destructive"
   isPending = false,
   children,
 }) => {
+  const { t } = useLanguage()
+
+  const finalCancelText = cancelText || t.cancel || "Cancel"
+  const finalConfirmText = confirmText || t.confirm || "Confirm"
+
   return (
     <Modal
       open={open}
@@ -27,15 +33,15 @@ const ConfirmationModal = ({
       footer={
         <div className="flex justify-end gap-2">
           <PillButton variant="secondary" onClick={onClose} disabled={isPending}>
-            {cancelText}
+            {finalCancelText}
           </PillButton>
           <PillButton
             variant="primary"
-            data-confirm-variant={confirmVariant}
+            bgColor={confirmVariant === "destructive" ? "#dc2626" : undefined}
             onClick={onConfirm}
             loading={isPending}
           >
-            {confirmText}
+            {finalConfirmText}
           </PillButton>
         </div>
       }
