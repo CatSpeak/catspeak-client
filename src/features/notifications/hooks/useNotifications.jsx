@@ -68,8 +68,8 @@ export function useNotifications() {
                 >
                   {resolved.icon && <resolved.icon className={`mt-0.5 h-5 w-5 shrink-0 ${resolved.color}`} />}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">{resolved.resolvedTitle}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">{resolved.resolvedBody}</p>
+                    <p className="text-sm font-medium text-gray-900">{resolved.resolvedTitle || t.header?.newNotificationTitle || "Thông báo mới"}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{resolved.resolvedBody || t.header?.newNotificationBody || "Bạn có một thông báo mới cần xem."}</p>
                   </div>
                 </div>
               ),
