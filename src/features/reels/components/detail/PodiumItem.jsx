@@ -1,5 +1,6 @@
 import React from "react"
 import { Heart } from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
 import { formatScore } from "../../utils/formatters"
 
 export default function PodiumItem({ entry, rank, onClick }) {
@@ -15,12 +16,6 @@ export default function PodiumItem({ entry, rank, onClick }) {
     2: "h-24 sm:h-32",
     3: "h-20 sm:h-24"
   }
-  
-  const avatarSizes = {
-    1: "w-14 h-14 sm:w-16 sm:h-16",
-    2: "w-12 h-12 sm:w-14 sm:h-14",
-    3: "w-12 h-12 sm:w-14 sm:h-14"
-  }
 
   const isRank1 = rank === 1
 
@@ -30,8 +25,14 @@ export default function PodiumItem({ entry, rank, onClick }) {
       onClick={onClick}
     >
       <div className="flex flex-col items-center mb-3 px-1">
-        <div className={`${avatarSizes[rank]} rounded-full bg-gray-200 overflow-hidden border-2 ${isRank1 ? "border-[#F59E0B]" : "border-gray-200"} shadow-sm mb-2 relative z-10`}>
-          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} alt="" className="w-full h-full object-cover" />
+        <div className="mb-2 relative z-10">
+          <Avatar
+            size={isRank1 ? 56 : 48}
+            name={username || handle}
+            src={entry.reel?.avatarUrl}
+            accountId={entry.reel?.accountId}
+            className={`border-2 ${isRank1 ? "border-[#F59E0B]" : "border-gray-200"} shadow-sm`}
+          />
         </div>
         <span className="font-bold text-gray-900 text-[12px] sm:text-[13px] text-center leading-tight mb-0.5 break-words max-w-[100px]">{username}</span>
         <span className="text-gray-500 text-[10px] sm:text-[11px] text-center leading-tight break-words max-w-[100px]">@{handle}</span>

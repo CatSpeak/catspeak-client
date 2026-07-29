@@ -1,4 +1,5 @@
 import { memo, useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { X, LogOut, ArrowLeft } from "lucide-react"
 import GroupAvatar from "./GroupAvatar"
 import { useRemoveParticipantMutation } from "@/store/api/social/conversationsApi"
@@ -11,6 +12,7 @@ import AddMembersModal from "./modals/AddMembersModal"
 import MemberProfileView from "./MemberProfileView"
 import GroupMemberList from "./GroupMemberList"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getProfilePath } from "@/shared/utils/navigation"
 
 /**
  * ChatUserPanel — toggleable right-side info panel.
@@ -24,6 +26,7 @@ const ChatUserPanel = ({
   isDrawer = false,
 }) => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const [removeParticipant] = useRemoveParticipantMutation()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState(null)
@@ -43,6 +46,7 @@ const ChatUserPanel = ({
 
   const isGroup = conversation.isGroup
   const otherUser = conversation.friend
+  const friendId = otherUser?.accountId || otherUser?.id || conversation?.friendId
   const name = conversation.name
   const memberCount = conversation.participants?.length || 0
   const statusText = isGroup
@@ -132,6 +136,7 @@ const ChatUserPanel = ({
                   size={80}
                   name={otherUser?.username}
                   src={otherUser?.avatarImageUrl}
+                  accountId={friendId}
                   className={
                     getParticipantTheme(
                       otherUser?.accountId || otherUser?.username || "",
@@ -140,7 +145,16 @@ const ChatUserPanel = ({
                 />
               )}
 
-              <h2 className="mt-3 font-semibold text-center">{name}</h2>
+              {!isGroup && friendId ? (
+                <h2
+                  onClick={() => navigate(getProfilePath(friendId))}
+                  className="mt-3 font-semibold text-center hover:underline hover:text-primary transition-colors cursor-pointer"
+                >
+                  {name}
+                </h2>
+              ) : (
+                <h2 className="mt-3 font-semibold text-center">{name}</h2>
+              )}
               {statusText && (
                 <p className="text-xs text-[#606060] flex items-center gap-1.5">
                   {statusText}
