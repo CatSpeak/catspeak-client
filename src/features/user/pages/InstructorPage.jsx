@@ -180,9 +180,12 @@ const InstructorPage = () => {
   const [errors, setErrors] = useState({});
   const [isReapplying, setIsReapplying] = useState(false);
   const [isTaskSubmitting, setIsTaskSubmitting] = useState(false);
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false);
 
   // Snapshot of the original form data to detect changes
   const originalFormDataRef = useRef(null);
+  const personalInfoBackupRef = useRef(null);
 
   // Populate form from existing application
   useEffect(() => {
@@ -229,6 +232,41 @@ const InstructorPage = () => {
 
   // Can edit when: new form (no existing application) OR RequestEdit status OR Reapplying
   const canEdit = (showForm && !existingApplication) || isRequestEdit || isReapplying;
+
+  // Can section edit "Thông tin của bạn" (5 fields) ONLY when the instructor application is Approved ("Approved")
+  const canSectionEdit = applicationStatus === "Approved" && !canEdit;
+
+  // Handlers for section editing "Thông tin của bạn"
+  const handleStartEditPersonalInfo = useCallback(() => {
+    personalInfoBackupRef.current = {
+      fullName: formData.fullName,
+      email: formData.email,
+      address: formData.address,
+      phoneNumber: formData.phoneNumber,
+      phonePrefix: formData.phonePrefix,
+      nationality: formData.nationality,
+    };
+    setIsEditingPersonalInfo(true);
+  }, [formData]);
+
+  const handleCancelEditPersonalInfo = useCallback(() => {
+    if (personalInfoBackupRef.current) {
+      setFormData((prev) => ({
+        ...prev,
+        ...personalInfoBackupRef.current,
+      }));
+    }
+    setIsEditingPersonalInfo(false);
+    setErrors((prev) => {
+      const newErr = { ...prev };
+      delete newErr.fullName;
+      delete newErr.email;
+      delete newErr.address;
+      delete newErr.phoneNumber;
+      delete newErr.nationality;
+      return newErr;
+    });
+  }, []);
 
   // Detect if user has made any changes from the original data
   const hasChanges = useMemo(() => {
@@ -294,12 +332,12 @@ const InstructorPage = () => {
 
   const handleChange = useCallback(
     (e) => {
-      if (!canEdit) return;
+      if (!canEdit && !isEditingPersonalInfo) return;
       const { name, value } = e.target;
       setFormData((prev) => ({ ...prev, [name]: value }));
       clearError(name);
     },
-    [canEdit],
+    [canEdit, isEditingPersonalInfo],
   );
 
   const handleLanguagesChange = useCallback(
@@ -402,6 +440,38 @@ const InstructorPage = () => {
     }),
     [formData],
   );
+
+  const handleSavePersonalInfo = useCallback(async () => {
+    const personalErrors = {};
+    if (!formData.fullName?.trim())
+      personalErrors.fullName = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.email?.trim())
+      personalErrors.email = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.address?.trim())
+      personalErrors.address = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.phoneNumber?.trim())
+      personalErrors.phoneNumber = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.nationality?.trim())
+      personalErrors.nationality = ins.requiredField || "Trường này là bắt buộc";
+
+    if (Object.keys(personalErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...personalErrors }));
+      return;
+    }
+
+    setIsSavingPersonalInfo(true);
+    try {
+      await updateInstructor(buildPayload()).unwrap();
+      toast.success("Cập nhật thông tin giảng viên thành công!");
+      setIsEditingPersonalInfo(false);
+      store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
+    } catch (err) {
+      console.error("Failed to update personal info:", err);
+      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.");
+    } finally {
+      setIsSavingPersonalInfo(false);
+    }
+  }, [formData, ins, updateInstructor, buildPayload]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;
@@ -551,6 +621,12 @@ const InstructorPage = () => {
           readOnly={readOnly}
           errors={errors}
           t={t}
+          canSectionEdit={canSectionEdit}
+          isSectionEditing={isEditingPersonalInfo}
+          onStartSectionEdit={handleStartEditPersonalInfo}
+          onCancelSectionEdit={handleCancelEditPersonalInfo}
+          onSaveSectionEdit={handleSavePersonalInfo}
+          isSavingSection={isSavingPersonalInfo}
         />
         <InstructorLanguages
           formData={formData}
