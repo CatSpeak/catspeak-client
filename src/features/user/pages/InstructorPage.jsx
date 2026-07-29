@@ -564,13 +564,29 @@ const InstructorPage = () => {
           },
           onError: (err) => {
             setIsTaskSubmitting(false);
-            toast.error(err?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
+            const msg = err?.message || err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.";
+            if (msg.toLowerCase().includes("email")) {
+              setErrors((prev) => ({ ...prev, email: msg }));
+              setTimeout(() => {
+                const el = document.getElementById("field-email");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 0);
+            }
+            toast.error(msg);
           },
         });
       }
     } catch (err) {
       console.error("Failed to submit instructor application:", err);
-      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
+      const msg = err?.data?.message || err?.data?.title || "Đã có lỗi xảy ra khi gửi đơn đăng ký.";
+      if (msg.toLowerCase().includes("email")) {
+        setErrors((prev) => ({ ...prev, email: msg }));
+        setTimeout(() => {
+          const el = document.getElementById("field-email");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 0);
+      }
+      toast.error(msg);
     }
   }, [
     agreed,
