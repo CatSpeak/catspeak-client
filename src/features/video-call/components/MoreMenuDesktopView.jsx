@@ -19,7 +19,7 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useRecordingStatus } from "@/features/video-call/hooks/useRecordingStatus"
-import { useGame } from "@/features/games/context/GameContext"
+import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
 import MenuItem from "@/shared/components/ui/MenuItem"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
@@ -57,8 +57,7 @@ const MoreMenuDesktopView = ({
   } = useGlobalVideoCall()
 
   const { isBreakoutActive } = useSelector((s) => s.videoCall)
-  const { gameState } = useGame()
-  const isGameInProgress = gameState && gameState !== "idle"
+  const { isHost, canStartGame, gameDisabledReason } = useGameControlStatus()
 
   const {
     isSubtitleActive,
@@ -74,18 +73,6 @@ const MoreMenuDesktopView = ({
     isDanger,
     isWarning,
   } = useRecordingStatus(isRecording, confirmStopRecording)
-
-  const isHost =
-    room?.creatorId != null &&
-    user?.accountId != null &&
-    String(room.creatorId) === String(user.accountId)
-
-  const canStartGame = isHost && !isGameInProgress
-  const gameDisabledReason = isGameInProgress
-    ? "Đang có trò chơi trong phòng, không thể mở thêm"
-    : !isHost
-      ? "Chỉ host của phòng mới có thể bắt đầu trò chơi"
-      : null
 
   return (
     <div className="hidden md:flex flex-col py-[2px]">

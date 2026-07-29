@@ -129,7 +129,7 @@ const VideoCallControlBar = () => {
           iconActive={<Mic className={iconClass} />}
           iconInactive={<MicOff className={iconClass} />}
           className="z-10"
-          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
         />
 
         <ControlButton
@@ -143,7 +143,7 @@ const VideoCallControlBar = () => {
           }
           iconActive={<Video className={iconClass} />}
           iconInactive={<VideoOff className={iconClass} />}
-          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
         />
 
         <ControlButton
@@ -158,7 +158,7 @@ const VideoCallControlBar = () => {
           iconActive={<MonitorOff className={iconClass} />}
           iconInactive={<MonitorUp className={iconClass} />}
           className="hidden md:flex"
-          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
         />
 
         <div className="relative hidden min-[769px]:block z-50">
@@ -180,7 +180,7 @@ const VideoCallControlBar = () => {
               iconActive={<Split className={iconClass} />}
               iconInactive={<Split className={iconClass} />}
               className="hidden min-[769px]:flex"
-              inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
+              inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
             />
           )}
 
@@ -191,7 +191,7 @@ const VideoCallControlBar = () => {
           title={isHandRaised ? "Lower hand" : "Raise hand"}
           iconActive={<Hand className={iconClass} />}
           iconInactive={<Hand className={iconClass} />}
-          inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
+          inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
         />
 
         {/* <ControlBarSubtitles className="hidden min-[426px]:flex" /> */}
@@ -203,7 +203,7 @@ const VideoCallControlBar = () => {
             title={t?.rooms?.videoCall?.moreOptions || "More options"}
             iconActive={<MoreVertical className={iconClass} />}
             iconInactive={<MoreVertical className={iconClass} />}
-            inactiveClassOverride="bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
+            inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
           />
           <ControlBarMoreMenu
             showMoreMenu={showMoreMenu}
