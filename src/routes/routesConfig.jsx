@@ -417,7 +417,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "classes/all",
+                path: "classes/all-classes",
                 element: (
                   <LazyRoute>
                     <AllClassesPage />

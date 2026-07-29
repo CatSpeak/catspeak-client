@@ -121,17 +121,17 @@ const CreateClassPage = () => {
   } = useGetClassDetailQuery(recoverClassId, { skip: !isRecoverMode })
   const isDetailsLoading = isEditMode
     ? (
-        isEditDetailsLoading
-        || (isEditDetailsFetching && classDetailResponse === undefined)
-      )
+      isEditDetailsLoading
+      || (isEditDetailsFetching && classDetailResponse === undefined)
+    )
     : (
-        isRecoverMode
-          ? (
-              isRecoverLoading
-              || (isRecoverFetching && recoverClassResponse === undefined)
-            )
-          : false
-      )
+      isRecoverMode
+        ? (
+          isRecoverLoading
+          || (isRecoverFetching && recoverClassResponse === undefined)
+        )
+        : false
+    )
   const [deleteClass, { isLoading: isDeleting }] = useDeleteClassMutation()
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -594,10 +594,10 @@ const CreateClassPage = () => {
             isRecoverMode
               ? `?recoverClassId=${encodeURIComponent(String(recoverClassId))}`
               : (
-                  courseId
-                    ? `?courseId=${encodeURIComponent(String(courseId))}`
-                    : ""
-                )
+                courseId
+                  ? `?courseId=${encodeURIComponent(String(courseId))}`
+                  : ""
+              )
           )
         ),
       }
@@ -618,7 +618,7 @@ const CreateClassPage = () => {
           return
         }
         toast.success(cc.toastUpdateSuccess || "Class updated successfully!")
-        navigate("/workspace/courses/all-classes")
+        navigate("/workspace/classes/all-classes")
       } else {
         request = createClass(payload)
         activeMutationRequestRef.current = request
@@ -646,7 +646,7 @@ const CreateClassPage = () => {
         } else if (resultPayload.classId) {
           // Free flow (capacity ≤ 6): class created immediately
           toast.success(cc.toastCreateSuccess || "Class created successfully!")
-          navigate("/workspace/courses/all-classes")
+          navigate("/workspace/classes/all-classes")
         } else {
           throw new Error("Missing class ID or checkout URL")
         }
@@ -688,7 +688,7 @@ const CreateClassPage = () => {
         return
       }
       toast.success(cc.toastDeleteSuccess || "Class deleted successfully!")
-      navigate("/workspace/courses/all-classes")
+      navigate("/workspace/classes/all-classes")
     } catch (error) {
       if (
         !mountedRef.current
@@ -782,7 +782,7 @@ const CreateClassPage = () => {
         <span>/</span>
         <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
         <span>/</span>
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
+        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/classes/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
         <span>/</span>
         <span className="text-[#990011] font-semibold">{pageTitle}</span>
       </div>
@@ -1104,18 +1104,18 @@ const CreateClassPage = () => {
                 aria-disabled={!isEditMode}
                 title={!isEditMode
                   ? (
-                      cc.thumbnailEditOnly
-                      || "The checkout API does not accept a class thumbnail. You can change it after the class is created."
-                    )
+                    cc.thumbnailEditOnly
+                    || "The checkout API does not accept a class thumbnail. You can change it after the class is created."
+                  )
                   : undefined}
                 onClick={isEditMode ? handleThumbnailClick : undefined}
                 onKeyDown={isEditMode
                   ? (event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault()
-                        handleThumbnailClick()
-                      }
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault()
+                      handleThumbnailClick()
                     }
+                  }
                   : undefined}
                 className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${!isEditMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
                   }`}
@@ -1136,9 +1136,9 @@ const CreateClassPage = () => {
                       {isEditMode
                         ? (cc.changeThumbnail || "Change image")
                         : (
-                            cc.thumbnailEditOnly
-                            || "Thumbnail changes are available after creation."
-                          )}
+                          cc.thumbnailEditOnly
+                          || "Thumbnail changes are available after creation."
+                        )}
                     </div>
                   </div>
                 ) : (
@@ -1150,9 +1150,9 @@ const CreateClassPage = () => {
                       <p>{isEditMode
                         ? (c.avatarDesc1 || "Supports PNG, JPEG, and WebP.")
                         : (
-                            cc.thumbnailEditOnly
-                            || "Thumbnail changes are available after creation."
-                          )}</p>
+                          cc.thumbnailEditOnly
+                          || "Thumbnail changes are available after creation."
+                        )}</p>
                       <p>{c.avatarDesc2 || "File size must be under 50mb"}</p>
                     </div>
                   </div>
@@ -1260,7 +1260,7 @@ const CreateClassPage = () => {
             )}
             <button
               type="button"
-              onClick={() => navigate("/workspace/courses/all-classes")}
+              onClick={() => navigate("/workspace/classes/all-classes")}
               disabled={isFormBusy}
               className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
             >
