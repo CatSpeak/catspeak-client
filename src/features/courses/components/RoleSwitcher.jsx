@@ -32,7 +32,7 @@ export const useRoleOverride = () => {
           window.dispatchEvent(new Event(ROLE_CHANGE_EVENT))
         }
       } else if (!storedRole) {
-        localStorage.setItem(ROLE_STORAGE_KEY, "Teacher")
+        localStorage.setItem(ROLE_STORAGE_KEY, "Student")
         window.dispatchEvent(new Event(ROLE_CHANGE_EVENT))
       }
     }
