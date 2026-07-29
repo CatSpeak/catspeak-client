@@ -26,16 +26,16 @@ export const navSections = [
     items: [
       { key: "community", path: "/community", icon: Home },
       {
-        key: "learningResources",
-        label: "Resource Hub",
-        path: "/resources",
-        icon: Globe,
-      },
-      {
         key: "messages",
         label: "Chat",
         path: "/chat",
         icon: MessageCircle,
+      },
+      {
+        key: "learningResources",
+        label: "Resource Hub",
+        path: "/resources",
+        icon: Globe,
       },
     ],
   },
@@ -71,22 +71,6 @@ export const navSections = [
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
   {
-    key: "learningResources",
-    label: "Resource Hub",
-    path: "/resources",
-    icon: Globe,
-    isPrivate: true,
-    showOnHorizontalBar: false,
-  },
-  {
-    key: "messages",
-    label: "Chat",
-    path: "/chat",
-    icon: MessageCircle,
-    isPrivate: true,
-    showOnHorizontalBar: false,
-  },
-  {
     key: "catSpeak",
     hasDropdown: true,
     icon: LayoutDashboard,
@@ -97,6 +81,14 @@ export const navLinks = [
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
+  },
+  {
+    key: "messages",
+    label: "Chat",
+    path: "/chat",
+    icon: MessageCircle,
+    isPrivate: true,
+    showOnHorizontalBar: false,
   },
   {
     key: "workspace",
@@ -116,6 +108,14 @@ export const navLinks = [
     key: "horizontalBar",
     label: "Horizontal bar",
     isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: Globe,
+    isPrivate: true,
     showOnHorizontalBar: false,
   },
 ]
