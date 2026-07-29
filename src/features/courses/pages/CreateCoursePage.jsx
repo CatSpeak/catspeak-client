@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -15,8 +15,9 @@ import {
   useUpdateCourseMutation,
   useDeleteCourseMutation
 } from "@/store/api/coursesApi"
+import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { COURSE_FORM_LANGUAGES, getLocalizedLanguageName } from "../data/courseFormOptions"
+import { getInstructorFormLanguages, getLocalizedLanguageName } from "../data/courseFormOptions"
 import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
@@ -31,6 +32,9 @@ const CreateCoursePage = () => {
   const submitGuardRef = useRef(false)
   const previousFormInstanceKeyRef = useRef(null)
   const hydratedCourseKeyRef = useRef(null)
+
+  const { data: instructorProfileData } = useGetInstructorProfileQuery()
+  const instructorProfile = instructorProfileData?.data || instructorProfileData
 
   const [createCourse, { isLoading: isCreating }] = useCreateCourseMutation()
   const [updateCourse, { isLoading: isUpdating }] = useUpdateCourseMutation()
@@ -64,7 +68,10 @@ const CreateCoursePage = () => {
     }
   }
 
-  const languagesList = COURSE_FORM_LANGUAGES
+  const languagesList = useMemo(
+    () => getInstructorFormLanguages(instructorProfile),
+    [instructorProfile]
+  )
 
   // Form states
   const [avatar, setAvatar] = useState(null)
@@ -185,10 +192,6 @@ const CreateCoursePage = () => {
     setErrors({})
   }
 
-  const handleClear = () => {
-    setShowClearModal(true)
-  }
-
   const handleConfirmClear = () => {
     resetFormInputs()
     setShowClearModal(false)
@@ -259,8 +262,6 @@ const CreateCoursePage = () => {
       let displayMessage
       if (isLanguageNotAllowed) {
         displayMessage = cc.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
-      } else if (typeof errMsg === "string" && errMsg.trim().length > 0) {
-        displayMessage = errMsg
       } else {
         displayMessage = isEditMode
           ? (cc.toastUpdateFailed || "Course update failed!")
@@ -357,7 +358,8 @@ const CreateCoursePage = () => {
             }}
             role="button"
             tabIndex={0}
-            className="group relative border border-dashed border-gray-200 hover:border-gray-300 rounded-2xl p-6 bg-[#F8F9FA] hover:bg-[#F2F2F2]/60 flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 text-center min-h-[140px]"
+            aria-label={cc.selectImage || "Select course cover image"}
+            className="group relative border border-dashed border-gray-200 hover:border-gray-300 rounded-2xl p-6 bg-white hover:bg-gray-50/80 flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 text-center min-h-[140px]"
           >
             <input
               ref={fileInputRef}
@@ -368,9 +370,13 @@ const CreateCoursePage = () => {
             />
             {avatarPreview ? (
               <div className="relative w-full max-h-[220px] flex justify-center overflow-hidden rounded-xl">
-                <img src={avatarPreview} alt="Avatar preview" className="object-contain max-h-[200px]" />
+                <img
+                  src={avatarPreview}
+                  alt={cc.avatarPreviewAlt || "Course cover preview"}
+                  className="object-contain max-h-[200px]"
+                />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl">
-                  Thay đổi hình ảnh
+                  {cc.changeImage || "Change image"}
                 </div>
               </div>
             ) : (
@@ -398,7 +404,7 @@ const CreateCoursePage = () => {
               setCourseName(e.target.value)
               clearError("courseName")
             }}
-            className={`w-full h-11 px-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.courseName ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400`}
+            className={`w-full h-11 px-4 bg-white border ${errors.courseName ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400`}
           />
         </div>
 
@@ -409,9 +415,9 @@ const CreateCoursePage = () => {
             <select
               value={selectedLanguage}
               onChange={handleLanguageChange}
-              className={`w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer`}
+              className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer`}
             >
-              <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
+              <option value="" disabled hidden>{c.languagePlaceholder}</option>
               {languagesList.map((lang) => (
                 <option key={lang.id} value={lang.name}>
                   {getLocalizedLanguageName(lang.name, t)}
@@ -435,7 +441,7 @@ const CreateCoursePage = () => {
               setDescription(e.target.value)
               clearError("description")
             }}
-            className={`w-full p-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.description ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 resize-none`}
+            className={`w-full p-4 bg-white border ${errors.description ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 resize-none`}
           />
           <span className="text-[10px] text-gray-400 font-bold self-end">
             {c.descriptionLimitNote || "Nội dung không được quá 150 từ"}
@@ -462,13 +468,6 @@ const CreateCoursePage = () => {
           >
             <ArrowLeft size={13} />
             <span>{t.common?.back || "Quay lại"}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleClear}
-            className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center"
-          >
-            {c.clearBtn || "Xóa"}
           </button>
           <button
             type="submit"

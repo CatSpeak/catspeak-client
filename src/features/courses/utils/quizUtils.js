@@ -338,7 +338,7 @@ const QUIZ_ERROR_MESSAGES = {
   },
   Forbidden: {
     en: "You do not have permission to perform this action.",
-    vi: "Vui lòng không có quyền thực hiện thao tác này.",
+      vi: "Bạn không có quyền thực hiện thao tác này.",
     zh: "您没有权限执行此操作。",
   },
 }

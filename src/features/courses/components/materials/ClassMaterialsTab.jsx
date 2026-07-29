@@ -5,6 +5,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { toast } from "react-hot-toast"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
 import { getFileMeta, getSafeFileUrl } from "../../utils/assignmentUtils"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const MAX_MATERIAL_SIZE_BYTES = 15 * 1024 * 1024
 const MATERIAL_DOCUMENT_EXTENSIONS = new Set(["pdf", "docx", "xlsx"])
@@ -70,13 +71,13 @@ const validateMaterialFile = (file) => {
   return isSupportedDocument || isSupportedImage ? null : "type"
 }
 
-const formatMaterialDate = (value) => {
+const formatMaterialDate = (value, locale) => {
   if (!value) return ""
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ""
 
-  return date.toLocaleDateString("en-GB", { timeZone: "UTC" })
+  return date.toLocaleDateString(locale, { timeZone: "UTC" })
 }
 
 const formatMaterialSize = (value) => {
@@ -87,6 +88,13 @@ const formatMaterialSize = (value) => {
 }
 
 const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
+  const { language, t } = useLanguage()
+  const cm = t.courses?.classMaterials || {}
+  const dateLocale = language === "vi"
+    ? "vi-VN"
+    : language === "zh"
+      ? "zh-CN"
+      : "en-GB"
   const fileInputRef = useRef(null)
   const deleteInFlightRef = useRef(false)
   const uploadInFlightRef = useRef(false)
@@ -135,22 +143,22 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
     const selectedFiles = Array.from(files || [])
     if (selectedFiles.length === 0) return
     if (selectedFiles.length > 1) {
-      toast.error(cd.toastSingleFile || "Please select one material at a time.")
+      toast.error(cm.toastSingleFile || cd.toastSingleFile || "Please select one material at a time.")
       return
     }
 
     const file = selectedFiles[0]
     const validationError = validateMaterialFile(file)
     if (validationError === "size") {
-      toast.error(cd.toastFileTooLarge || "The file must be 15MB or smaller.")
+      toast.error(cm.toastFileTooLarge || cd.toastFileTooLarge || "The file must be 15MB or smaller.")
       return
     }
     if (validationError === "type") {
-      toast.error(cd.toastInvalidFileType || "Use a PDF, DOCX, XLSX, or image file.")
+      toast.error(cm.toastInvalidFileType || cd.toastInvalidFileType || "Use a PDF, DOCX, XLSX, or image file.")
       return
     }
     if (validationError) {
-      toast.error(cd.toastInvalidFile || "Please select a non-empty file.")
+      toast.error(cm.toastInvalidFile || cd.toastInvalidFile || "Please select a non-empty file.")
       return
     }
 
@@ -189,9 +197,9 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
     try {
       await uploadMaterial({ classId: id, file: selectedUploadFile }).unwrap()
       setSelectedUploadFile(null)
-      toast.success(cd.toastUploadSuccess || "Material uploaded successfully!")
+      toast.success(cm.toastUploadSuccess || cd.toastUploadSuccess || "Material uploaded successfully!")
     } catch {
-      toast.error(cd.toastUploadFailed || "Failed to upload material!")
+      toast.error(cm.toastUploadFailed || cd.toastUploadFailed || "Failed to upload material!")
     } finally {
       uploadInFlightRef.current = false
     }
@@ -211,9 +219,9 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
         classId: id,
         materialId: deleteMaterialData.id,
       }).unwrap()
-      toast.success(cd.toastDeleteSuccess || "Material deleted successfully!")
+      toast.success(cm.toastDeleteSuccess || cd.toastDeleteSuccess || "Material deleted successfully!")
     } catch {
-      toast.error(cd.toastDeleteFailed || "Failed to delete material!")
+      toast.error(cm.toastDeleteFailed || cd.toastDeleteFailed || "Failed to delete material!")
     } finally {
       deleteInFlightRef.current = false
       setDeleteMaterialData(null)
@@ -229,15 +237,15 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
             <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
-              {cd.materialsList || "Danh sách tài liệu"}
+              {cm.materialsList || cd.materialsList || "Materials List"}
             </h3>
           </div>
 
           {!isStudent && <div className="relative w-full sm:w-64">
             <input
               type="text"
-              aria-label={cd.searchMaterials || "Search materials"}
-              placeholder={cd.searchMaterials || "Tìm tài liệu..."}
+              aria-label={cm.searchMaterialsLabel || cd.searchMaterials || "Search materials"}
+              placeholder={cm.searchMaterials || cd.searchMaterials || "Search materials..."}
               value={materialSearch}
               onChange={(e) => setMaterialSearch(e.target.value)}
               className="w-full h-9 pl-9 pr-4 bg-gray-50 hover:bg-gray-100/70 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400"
@@ -260,10 +268,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 <FileText size={24} />
               </div>
               <h4 className="text-sm font-bold text-gray-800 mb-1">
-                {cd.materialsUnavailable || "Student materials are not available yet"}
+                {cm.materialsUnavailable || "Student materials are not available yet"}
               </h4>
               <p className="text-xs font-semibold text-gray-400 max-w-[320px]">
-                {cd.studentMaterialsApiMissing || "The current API only exposes teacher material endpoints."}
+                {cm.materialsUnavailableDescription || "Materials will appear here when they become available."}
               </p>
             </div>
           ) : (
@@ -273,7 +281,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                   role="alert"
                   className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800"
                 >
-                  {cd.someMaterialsUnavailable || "Some materials could not be displayed."}
+                  {cm.someMaterialsUnavailable || "Some materials could not be displayed."}
                 </div>
               )}
               {isMaterialsLoading ? (
@@ -283,7 +291,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 >
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]" />
                   <span className="text-xs font-bold text-gray-400">
-                    {cd.loadingMaterials || "Đang tải..."}
+                    {cm.loadingMaterials || cd.loadingMaterials || "Loading materials..."}
                   </span>
                 </div>
               ) : !id || isMaterialsError || hasMalformedResponse ? (
@@ -295,10 +303,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                     <FileText size={24} />
                   </div>
                   <h4 className="text-sm font-bold text-gray-800 mb-1">
-                    {cd.materialsLoadFailed || "Unable to load materials"}
+                    {cm.materialsLoadFailed || "Unable to load materials"}
                   </h4>
                   <p className="text-xs font-semibold text-gray-400 max-w-[280px]">
-                    {cd.materialsLoadRetry || "Please check your connection and try again."}
+                    {cm.materialsLoadRetry || "Please check your connection and try again."}
                   </p>
                   {id && (
                     <button
@@ -306,7 +314,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                       onClick={() => refetchMaterials()}
                       className="mt-4 rounded-xl border border-[#990011] px-4 py-2 text-xs font-extrabold text-[#990011] hover:bg-red-50"
                     >
-                      {cd.retry || "Try again"}
+                      {cm.retry || "Try again"}
                     </button>
                   )}
                 </div>
@@ -317,13 +325,13 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                   </div>
                   <h4 className="text-sm font-bold text-gray-800 mb-1">
                     {normalizedSearch && materialsList.length > 0
-                      ? (cd.noMatchingMaterials || "No matching materials")
-                      : (cd.noMaterials || "Chưa có tài liệu")}
+                      ? (cm.noMatchingMaterials || "No matching materials")
+                      : (cm.noMaterials || cd.noMaterials || "No materials yet")}
                   </h4>
                   <p className="text-xs font-semibold text-gray-400 max-w-[280px]">
                     {normalizedSearch && materialsList.length > 0
-                      ? (cd.tryAnotherMaterialSearch || "Try a different search term.")
-                      : (cd.startUploading || "Tải tài liệu lên ngay!")}
+                      ? (cm.tryAnotherMaterialSearch || "Try a different search term.")
+                      : (cm.startUploading || cd.startUploading || "Upload a material to get started.")}
                   </p>
                 </div>
               ) : (
@@ -333,11 +341,11 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                       name: rawFileName,
                       url: fileUrl,
                       size: fileSize,
-                    } = getFileMeta(file)
+                    } = getFileMeta(file, cm.unnamedFile)
                     const fileName = (
                       typeof rawFileName === "string" && rawFileName.trim()
                         ? rawFileName
-                        : (cd.unnamedFile || "Unnamed file")
+                        : (cm.unnamedFile || "Unnamed file")
                     )
                     const material = isRecord(file) ? file : {}
                     const materialId = ["string", "number"].includes(typeof material.id)
@@ -345,7 +353,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                       : null
                     const safeFileUrl = getSafeFileUrl(fileUrl)
                     const fileDate = material.createdAt || material.uploadedAt
-                    const formattedFileDate = formatMaterialDate(fileDate)
+                    const formattedFileDate = formatMaterialDate(fileDate, dateLocale)
                     const itemKey = materialId ?? `${fileName}-${index}`
 
                     return (
@@ -375,18 +383,18 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                               target="_blank"
                               rel="noopener noreferrer"
                               referrerPolicy="no-referrer"
-                              aria-label={`${cd.viewFile || "View file"}: ${fileName}`}
+                              aria-label={`${cm.viewFile || "View file"}: ${fileName}`}
                               className="p-2 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-xl transition-all"
-                              title="View File"
+                              title={cm.viewFile || "View file"}
                             >
                               <Eye size={15} />
                             </a>
                           )}
                           {fileUrl && !safeFileUrl && (
                             <span
-                              aria-label={`${fileName}: ${cd.fileUnavailable || "File unavailable"}`}
+                              aria-label={`${fileName}: ${cm.fileUnavailable || "File unavailable"}`}
                               className="p-2 text-gray-300 cursor-not-allowed"
-                              title={cd.fileUnavailable || "File unavailable"}
+                              title={cm.fileUnavailable || "File unavailable"}
                             >
                               <Eye size={15} />
                             </span>
@@ -397,9 +405,9 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                               onClick={() => {
                                 setDeleteMaterialData(material)
                               }}
-                              aria-label={`${cd.deleteFile || "Delete file"}: ${fileName}`}
+                              aria-label={`${cm.deleteFile || "Delete file"}: ${fileName}`}
                               className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-55 rounded-xl transition-all"
-                              title="Delete File"
+                              title={cm.deleteFile || "Delete file"}
                             >
                               <Trash2 size={15} />
                             </button>
@@ -422,7 +430,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
             <div className="flex items-center gap-2 border-b border-gray-50 pb-2.5">
               <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
               <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
-                {cd.uploadMaterial || "Tải lên tài liệu"}
+                {cm.uploadMaterial || cd.uploadMaterial || "Upload Material"}
               </h3>
             </div>
 
@@ -445,20 +453,20 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label={cd.selectFile || "Select a material file"}
+                aria-label={cm.selectFileLabel || "Select a material file"}
                 aria-describedby="material-upload-limits"
               >
                 <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] mb-3">
                   <Upload size={18} />
                 </div>
                 <span className="text-xs font-bold text-gray-800">
-                  {cd.selectFile || "Chọn tệp tin hoặc kéo thả"}
+                  {cm.selectFile || cd.selectFile || "Select a file or drag and drop"}
                 </span>
                 <span
                   id="material-upload-limits"
                   className="text-[10px] text-gray-400 font-semibold mt-1"
                 >
-                  Support PDF, DOCX, XLSX, images (Max 15MB)
+                  {cm.supportedFiles || "Supports PDF, DOCX, XLSX, and images (max 15 MB)"}
                 </span>
               </div>
               <input
@@ -486,7 +494,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                   <button
                     type="button"
                     onClick={() => setSelectedUploadFile(null)}
-                    aria-label={cd.removeSelectedFile || "Remove selected file"}
+                    aria-label={cm.removeSelectedFile || "Remove selected file"}
                     className="p-1 hover:bg-gray-200 rounded-lg text-gray-400 hover:text-gray-600 transition-all"
                   >
                     <X size={14} />
@@ -505,7 +513,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 ) : (
                   <>
                     <Upload size={13} />
-                    <span>{cd.uploadNow || "Tải lên ngay"}</span>
+                    <span>{cm.uploadNow || "Upload Now"}</span>
                   </>
                 )}
               </button>
@@ -521,10 +529,10 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
           if (!deleteInFlightRef.current) setDeleteMaterialData(null)
         }}
         onConfirm={handleDeleteMaterial}
-        title="Delete Material"
-        message={cd.confirmDeleteMaterial || "Bạn có chắc chắn muốn xóa tài liệu này?"}
-        confirmText="Delete"
-        cancelText={cancelText || "Hủy"}
+        title={cm.deleteMaterial || "Delete Material"}
+        message={cm.confirmDeleteMaterial || cd.confirmDeleteMaterial || "Are you sure you want to delete this material?"}
+        confirmText={cm.delete || "Delete"}
+        cancelText={cancelText || cm.cancel || "Cancel"}
       />
     </div>
   )

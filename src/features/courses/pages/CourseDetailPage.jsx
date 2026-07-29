@@ -1,12 +1,19 @@
-import React, { useMemo } from "react"
+import React, { useState, useRef, useEffect, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { toast } from "react-hot-toast"
 import {
   useGetCourseDetailQuery,
   useGetTeacherCourseTeachingTasksCombinedQuery,
+  useDeleteCourseMutation,
 } from "@/store/api/coursesApi"
-import { Pencil } from "lucide-react"
-import { formatDateRange, getSafeMediaUrl } from "../utils/courseUtils"
+import { Pencil, Trash2 } from "lucide-react"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import {
+  formatDateRange,
+  getCourseLocale,
+  getSafeMediaUrl,
+} from "../utils/courseUtils"
 import { mapTeachingTask } from "../utils/courseTransforms"
 import { toLocalDateString } from "../utils/dateUtils"
 
@@ -18,8 +25,39 @@ import UpcomingSessionCard from "../components/sessions/UpcomingSessionCard"
 const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const c = t.courses || {}
+  const ui = c.workspaceUi || {}
+  const taskText = c.grading || {}
+
+  const [showMenu, setShowMenu] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const menuRef = useRef(null)
+
+  const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const handleDeleteCourse = async () => {
+    if (!id || isDeleting) return
+    try {
+      await deleteCourse(id).unwrap()
+      toast.success(c.courseDetail?.toastDeleteSuccess || "Course deleted successfully!")
+      navigate("/workspace/courses")
+    } catch {
+      toast.error(c.courseDetail?.toastDeleteFailed || "Failed to delete course!")
+    } finally {
+      setShowDeleteModal(false)
+    }
+  }
 
   // Fetch course details
   const {
@@ -36,9 +74,24 @@ const CourseDetailPage = () => {
 
   const teachingTasks = useMemo(() => {
     return Array.isArray(rawTasks)
-      ? rawTasks.map(mapTeachingTask).filter(Boolean)
+      ? rawTasks.map((task) => mapTeachingTask(task, {
+        pendingCount: taskText.teachingTaskPendingCount,
+        urgent: taskText.teachingTaskUrgent,
+        required: taskText.teachingTaskRequired,
+        gradeQuiz: taskText.teachingTaskGradeQuiz,
+        gradeAssignment: taskText.teachingTaskGradeAssignment,
+        unknown: taskText.statusUnknown,
+      })).filter(Boolean)
       : []
-  }, [rawTasks])
+  }, [
+    rawTasks,
+    taskText.teachingTaskGradeAssignment,
+    taskText.teachingTaskGradeQuiz,
+    taskText.teachingTaskPendingCount,
+    taskText.teachingTaskRequired,
+    taskText.teachingTaskUrgent,
+    taskText.statusUnknown,
+  ])
 
   const handleTaskAction = (task) => {
     if (!task) return
@@ -75,14 +128,14 @@ const CourseDetailPage = () => {
         className="flex flex-col items-start gap-3 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold"
         role="alert"
       >
-        <span>Could not load the course details.</span>
+        <span>{c.courseDetail?.loadFailed || "Could not load the course details."}</span>
         <button
           type="button"
           onClick={refetch}
           disabled={isFetching}
           className="rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-extrabold disabled:opacity-50"
         >
-          Retry
+          {c.courseDetail?.retry || "Try again"}
         </button>
       </div>
     )
@@ -101,21 +154,36 @@ const CourseDetailPage = () => {
     ? parsedHours
     : null
   const durationParts = []
-  if (totalSessions > 0) durationParts.push(`${totalSessions} Sessions`)
-  if (totalHours !== null) durationParts.push(`${totalHours} Hours`)
-  const durationText = durationParts.join(" • ") || "TBA"
+  if (totalSessions > 0) {
+    durationParts.push(
+      (ui.sessionsCount || "{{count}} sessions")
+        .replace("{{count}}", String(totalSessions)),
+    )
+  }
+  if (totalHours !== null) {
+    durationParts.push(
+      (ui.hoursCount || "{{count}} hours")
+        .replace("{{count}}", String(totalHours)),
+    )
+  }
+  const durationText = durationParts.join(" • ") || ui.tba || "TBA"
 
   const courseData = {
     id: rawCourse.id,
     title: rawCourse.title,
-    language: rawCourse.language || "N/A",
+    language: rawCourse.language || ui.notAvailable || "N/A",
     levels: Array.isArray(rawCourse.levels) ? rawCourse.levels : [],
     level: Array.isArray(rawCourse.levels) && rawCourse.levels.length > 0
       ? rawCourse.levels.join(", ")
-      : "N/A",
+      : ui.notAvailable || "N/A",
     admissionPeriod: rawCourse.enrollmentStart && rawCourse.enrollmentEnd
-      ? formatDateRange(rawCourse.enrollmentStart, rawCourse.enrollmentEnd)
-      : "TBA",
+      ? formatDateRange(
+        rawCourse.enrollmentStart,
+        rawCourse.enrollmentEnd,
+        getCourseLocale(language),
+        ui.tba,
+      )
+      : ui.tba || "TBA",
     duration: durationText,
     description: rawCourse.description || "",
     thumbnailUrl: getSafeMediaUrl(rawCourse.thumbnailUrl)
@@ -150,41 +218,11 @@ const CourseDetailPage = () => {
     }
     : null
 
-  // Localized Labels
-  const courseDetailTitle = c.student?.courseDetails || "Course Details"
-  const allCoursesLabel = c.allCourses?.title || "All Courses"
-
-  const languageLabel = c.languageLabel || "Language"
-  const levelLabel = c.levelLabel || "Level"
-  const admissionPeriodLabel = c.courseDetail?.admission || "Admission Period"
-  const durationLabel = c.courseDetail?.duration || "Duration"
-  const descriptionLabel = c.courseDetail?.description || "Description"
-
-  const customizeLabel = c.editCourse || "Customize"
-
-  const currentClassesLabel = c.courseDetail?.currentClasses || "Current Classes"
-  const addNewClassLabel = c.courseDetail?.addNewClass || "Add New Class"
-  const noClassesYetLabel = c.courseDetail?.noClassesYet || "No classes created yet"
-  const startByAddingLabel = c.courseDetail?.startByAdding || "Start by adding your first class to this course."
-
-  const progressLabel = c.progress || "Progress"
-
-  const upcomingSessionLabel = c.courseDetail?.upcomingSession || "Upcoming Session"
-  const joinRoomLabel = c.joinRoom || "Join Room"
-  const viewAllLabel = c.viewAll || "View All"
-  const noUpcomingLabel = c.courseDetail?.noUpcoming || "No upcoming sessions"
-  const createClassToScheduleLabel = c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."
-
-  const teachingTasksLabel = c.teachingTasks || "Teaching Tasks"
-  const gradeAssignmentLabel = c.gradeAssignment || "Grade homework"
-  const giveFeedbackLabel = c.giveFeedback || "Give feedback"
-  const prepareLessonLabel = c.prepareLesson || "Prepare lesson plan"
-
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       {isFetching && (
         <span role="status" className="sr-only">
-          Refreshing course details
+          {c.courseDetail?.refreshing || "Refreshing course details"}
         </span>
       )}
       {/* ─── Breadcrumb ─── */}
@@ -194,39 +232,42 @@ const CourseDetailPage = () => {
           <span>/</span>
           <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
           <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{allCoursesLabel}</button>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</button>
           <span>/</span>
-          <span className="text-[#990011] font-semibold">{courseDetailTitle}</span>
+          <span className="text-[#990011] font-semibold">{c.student?.courseDetails || "Course Details"}</span>
         </div>
       </div>
 
       {/* ─── Page Heading ─── */}
       <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-        {courseDetailTitle}
+        {c.student?.courseDetails || "Course Details"}
       </h1>
 
       {/* ─── Grid Content (2 Columns) ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* LEFT COLUMN: Visual Banner, Information Card & Current Classes */}
-        <div className="lg:col-span-2 flex flex-col gap-8">
+        <div className="lg:col-span-2 flex flex-col gap-4">
 
           {/* ─── Visual Banner ─── */}
           <div
-            className="relative overflow-hidden rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm bg-gray-700 text-white"
+            className="relative rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm bg-gray-700 text-white"
           >
-            {courseData.thumbnailUrl && (
-              <img
-                src={courseData.thumbnailUrl}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            )}
-            {/* Dark overlay for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
+            {/* Background image & gradient overlay container */}
+            <div className="absolute inset-0 overflow-hidden rounded-3xl">
+              {courseData.thumbnailUrl && (
+                <img
+                  src={courseData.thumbnailUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              {/* Dark overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
+            </div>
 
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
               {/* Course Title */}
@@ -234,39 +275,76 @@ const CourseDetailPage = () => {
                 {courseData.title}
               </h2>
 
-              {/* Tùy chỉnh button */}
-              <button
-                type="button"
-                onClick={() => navigate(`/workspace/courses/edit/${encodeURIComponent(String(id))}`)}
-                className="shrink-0 h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
-              >
-                <Pencil size={14} />
-                <span>{customizeLabel}</span>
-              </button>
+              {/* Menu button (Edit / Delete course) */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  aria-label={c.courseDetail?.courseActions || "Course actions"}
+                  aria-haspopup="menu"
+                  aria-expanded={showMenu}
+                  onClick={() => setShowMenu((prev) => !prev)}
+                  className="shrink-0 h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Pencil size={14} />
+                  <span>{c.editCourse || "Customize"}</span>
+                </button>
+
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMenu(false)
+                        navigate(`/workspace/courses/edit/${encodeURIComponent(String(id))}`)
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+                    >
+                      <Pencil size={14} className="text-gray-500" />
+                      <span>{c.courseDetail?.editCourse || c.createCourse?.updateCourse || "Chỉnh sửa khóa học"}</span>
+                    </button>
+
+                    <div className="my-1 border-t border-gray-100" />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMenu(false)
+                        setShowDeleteModal(true)
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+                    >
+                      <Trash2 size={14} className="text-red-500" />
+                      <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           <CourseInfoCard
             courseData={courseData}
-            languageLabel={languageLabel}
-            levelLabel={levelLabel}
-            admissionPeriodLabel={admissionPeriodLabel}
-            durationLabel={durationLabel}
-            descriptionLabel={descriptionLabel}
+            languageLabel={c.languageLabel || "Language"}
+            levelLabel={c.levelLabel || "Level"}
+            admissionPeriodLabel={c.courseDetail?.admission || "Admission Period"}
+            durationLabel={c.courseDetail?.duration || "Duration"}
+            descriptionLabel={c.courseDetail?.description || "Description"}
+            noDescriptionText={c.courseDetail?.noDescription || "No description provided."}
           />
 
           {/* Current Classes Section */}
           <div className="flex flex-col gap-5">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-black text-gray-950 tracking-tight">
-                {currentClassesLabel}
+                {c.courseDetail?.currentClasses || "Current Classes"}
               </h3>
 
               <button
+                type="button"
                 onClick={() => navigate("/workspace/classes/create-class", { state: { courseId: rawCourse.id } })}
                 className="px-4 py-1.5 border border-[#b20a1c] hover:bg-red-50/50 text-[#b20a1c] text-xs font-black rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
               >
-                <span>{addNewClassLabel}</span>
+                <span>{c.courseDetail?.addNewClass || "Add New Class"}</span>
                 <span className="text-sm font-light">+</span>
               </button>
             </div>
@@ -281,7 +359,7 @@ const CourseDetailPage = () => {
                       cls={cls}
                       isStudent={false}
                       onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)}
-                      progressLabel={progressLabel}
+                      progressLabel={c.progress || "Progress"}
                       courseTitle={courseData.title}
                     />
                   )
@@ -293,9 +371,9 @@ const CourseDetailPage = () => {
                     <Pencil size={24} className="stroke-[1.5]" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <h4 className="font-extrabold text-sm text-gray-800">{noClassesYetLabel}</h4>
+                    <h4 className="font-extrabold text-sm text-gray-800">{c.courseDetail?.noClassesYet || "No classes created yet"}</h4>
                     <p className="text-xs text-gray-400 font-bold max-w-[240px] leading-relaxed">
-                      {startByAddingLabel}
+                      {c.courseDetail?.startByAdding || "Start by adding your first class to this course."}
                     </p>
                   </div>
                 </div>
@@ -306,15 +384,15 @@ const CourseDetailPage = () => {
         </div>
 
         {/* RIGHT COLUMN: Instructor details and Syllabus outlines */}
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
           <UpcomingSessionCard
             nextClass={nextClass}
             courseData={courseData}
-            upcomingSessionLabel={upcomingSessionLabel}
-            noUpcomingLabel={noUpcomingLabel}
-            createClassToScheduleLabel={createClassToScheduleLabel}
-            joinRoomLabel={joinRoomLabel}
-            viewAllLabel={viewAllLabel}
+            upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
+            noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
+            createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
+            joinRoomLabel={c.joinRoom || "Join Room"}
+            viewAllLabel={c.viewAll || "View All"}
             onJoin={() => {
               if (nextClass?.id) {
                 navigate(`/workspace/courses/class/${encodeURIComponent(String(nextClass.id))}`)
@@ -324,8 +402,8 @@ const CourseDetailPage = () => {
           />
 
           <TeachingTasksSection
-            teachingTasksLabel={teachingTasksLabel}
-            viewAllLabel={viewAllLabel}
+            teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
+            viewAllLabel={c.viewAll || "View All"}
             tasks={teachingTasks}
             isLoading={isLoadingTasks}
             onViewAll={() => navigate("/workspace/courses/schedule")}
@@ -333,6 +411,19 @@ const CourseDetailPage = () => {
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={() => {
+          if (!isDeleting) setShowDeleteModal(false)
+        }}
+        onConfirm={handleDeleteCourse}
+        isPending={isDeleting}
+        title={c.courseDetail?.deleteCourse || "Delete Course"}
+        message={c.courseDetail?.confirmDeleteCourse || "Are you sure you want to delete this course? All associated classes will also be affected."}
+        confirmText={c.courseDetail?.deleteCourse || "Delete"}
+        cancelText={c.createClass?.cancel || "Cancel"}
+      />
     </div>
   )
 }

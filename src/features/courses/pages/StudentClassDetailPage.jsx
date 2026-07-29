@@ -47,6 +47,8 @@ const StudentClassDetailPage = () => {
   const { language, t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
+  const scd = c.studentCourseDetail || {}
+  const ui = c.workspaceUi || {}
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
   const quizId = searchParams.get("quizId")
@@ -198,7 +200,7 @@ const StudentClassDetailPage = () => {
       toast.error(
         isEnrollmentEligibilityLoading
           ? (
-            c.student?.checkingEnrollment
+            scd.checkingEnrollment
             || "Enrollment availability is still being checked."
           )
           : getClassEnrollmentIssueMessage(enrollmentIssue, c.student),
@@ -240,7 +242,7 @@ const StudentClassDetailPage = () => {
         throw new Error("Missing enrollment confirmation")
       }
     } catch {
-      toast.error(c.student?.enrollFailed || "Enrollment could not be completed. Please try again.")
+      toast.error(scd.enrollFailed || "Enrollment could not be completed. Please try again.")
     } finally {
       enrollmentGuardRef.current = false
       setShowEnrollConfirm(false)
@@ -250,7 +252,7 @@ const StudentClassDetailPage = () => {
   const handleLockedTabSelect = (tab) => {
     const messages = {
       members: c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!",
-      "lecture-hall": c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view lecture hall!",
+      "lecture-hall": scd.toastEnrollToViewLectureHall || c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view lecture hall!",
       grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
     }
     toast.error(messages[tab])
@@ -263,7 +265,11 @@ const StudentClassDetailPage = () => {
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData || {}, language || "en")
+  const getWeeklyScheduleText = () => formatWeeklyScheduleText(
+    classData || {},
+    language || "en",
+    ui.tba,
+  )
 
   if (
     isDetailLoading
@@ -275,10 +281,10 @@ const StudentClassDetailPage = () => {
   if (detailError || !id || !classData) {
     return (
       <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
-        <span>{c.student?.classLoadFailed || "This class could not be loaded. Please try again."}</span>
+        <span>{scd.classLoadFailed || "This class could not be loaded. Please try again."}</span>
         {id && (
           <button type="button" onClick={refetchDetail} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
-            {c.student?.retry || "Try again"}
+            {scd.retry || "Try again"}
           </button>
         )}
       </div>
@@ -289,7 +295,7 @@ const StudentClassDetailPage = () => {
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       {isDetailFetching && (
         <span role="status" className="sr-only">
-          {c.student?.refreshing || "Refreshing class details"}
+          {scd.refreshingClass || "Refreshing class details"}
         </span>
       )}
 
@@ -355,7 +361,7 @@ const StudentClassDetailPage = () => {
             >
               <span>
                 {isEnrollmentEligibilityLoading
-                  ? (c.student?.checkingEnrollment || "Checking...")
+                  ? (scd.checkingEnrollmentShort || "Checking...")
                   : enrollmentIssue
                     ? getClassEnrollmentIssueLabel(
                       enrollmentIssue,
@@ -411,7 +417,7 @@ const StudentClassDetailPage = () => {
             language={language}
             formatCurrency={formatCurrency}
             getWeeklyScheduleText={getWeeklyScheduleText}
-            upcomingSessionLabel={c.student?.upcomingSession || "Upcoming Session"}
+            upcomingSessionLabel={scd.upcomingSession || "Upcoming Session"}
             joinRoomLabel={c.joinRoom || "Join Room"}
             noUpcomingLabel={c.student?.noUpcomingSessions || "No upcoming sessions"}
             onJoinRoom={() => navigate(

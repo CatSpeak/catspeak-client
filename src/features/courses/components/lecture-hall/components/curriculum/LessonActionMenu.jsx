@@ -22,7 +22,7 @@ const LessonActionMenu = ({
         {(item?.type === "bulletinBoard" || item?.type === "link") && (
           <MenuItem
             icon={<Pencil size={15} className="text-[#1A1A1A]" />}
-            label={dict.edit || "Chỉnh sửa"}
+            label={dict.edit}
             onClick={() => {
               onEdit(item)
               onClose()
@@ -31,7 +31,7 @@ const LessonActionMenu = ({
         )}
         <MenuItem
           icon={item?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
-          label={dict.toggleVisibility || "Tuỳ chỉnh ẩn/hiện"}
+          label={dict.toggleVisibility}
           onClick={() => {
             onToggleItemVisibility(item.id)
             onClose()
@@ -39,7 +39,7 @@ const LessonActionMenu = ({
         />
         <MenuItem
           icon={<Trash size={15} className="text-[#1A1A1A]" />}
-          label={dict.delete || "Xoá"}
+          label={dict.delete}
           onClick={() => {
             onDeleteItem(item.id)
             onClose()

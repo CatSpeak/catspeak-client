@@ -61,7 +61,7 @@ const SectionCard = ({
             </span>
             {section.isVisibleToStudents === false && (
               <span className="inline-flex items-center gap-1 bg-[#E1E3E4] text-[#5B403C] text-xs px-2 py-0.5 rounded-full font-medium">
-                <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus || "Đang ẩn"}</span>
+                <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus}</span>
               </span>
             )}
           </div>
@@ -78,7 +78,8 @@ const SectionCard = ({
             variant="ghost"
             size="xs"
             onClick={() => setIsExpanded(!isExpanded)}
-            title={isExpanded ? (dict.collapseSection || "Thu gọn section") : (dict.expandSection || "Mở rộng section")}
+            title={isExpanded ? dict.collapseSection : dict.expandSection}
+            aria-label={isExpanded ? dict.collapseSection : dict.expandSection}
           >
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </IconButton>
@@ -91,7 +92,8 @@ const SectionCard = ({
                 onClick={() => {
                   setIsSectionMenuOpen(!isSectionMenuOpen)
                 }}
-                title={dict.sectionOptionsTooltip || "Tuỳ chọn section"}
+                title={dict.sectionOptionsTooltip}
+                aria-label={dict.sectionOptionsTooltip}
               >
                 <MoreVertical size={16} />
               </IconButton>
@@ -136,7 +138,7 @@ const SectionCard = ({
             ))
           ) : (
             <div className="text-center py-6 text-xs text-gray-400 border border-dashed border-gray-200 rounded-xl">
-              {dict.noLessons || "Chưa có bài học nào trong section này"}
+              {dict.noLessons}
             </div>
           )}
         </div>

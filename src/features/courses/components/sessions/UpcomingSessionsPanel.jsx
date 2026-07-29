@@ -1,6 +1,8 @@
 import React from "react"
 import { Calendar, Clock, Users } from "lucide-react"
 import CourseStatusPill from "../CourseStatusPill"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const UpcomingSessionsPanel = ({
   title,
@@ -13,6 +15,8 @@ const UpcomingSessionsPanel = ({
   onViewSchedule,
   onOpenSession,
 }) => {
+  const { t } = useLanguage()
+
   return (
     <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xs flex flex-col gap-5 h-full">
       <div className="flex justify-between items-center">
@@ -51,7 +55,7 @@ const UpcomingSessionsPanel = ({
               <div className="flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-                    {item.language}
+                    {getLocalizedLanguageName(item.language, t)}
                   </span>
                   <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
                     {item.levels?.[0]}

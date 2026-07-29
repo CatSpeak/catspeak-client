@@ -14,9 +14,10 @@ import TablePagination from "../components/shared/TablePagination"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapCourseTableRow } from "../utils/courseTransforms"
+import { getCourseLocale } from "../utils/courseUtils"
 
 const AllCoursesPage = () => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const c = t.courses || {}
   const ac = c.allCourses || {}
   const navigate = useNavigate()
@@ -44,7 +45,16 @@ const AllCoursesPage = () => {
   })
 
   const courses = (Array.isArray(data?.data) ? data.data : [])
-    .map((course, index) => mapCourseTableRow(course, index, c))
+    .map((course, index) => mapCourseTableRow(
+      course,
+      index,
+      {
+        classCount: c.classCount,
+        studentsCount: c.studentsCount,
+        tba: c.workspaceUi?.tba,
+      },
+      getCourseLocale(language),
+    ))
   const deleteHelper = useDeleteCourse(t, () => {
     if (courses.length === 1 && currentPage > 1) {
       setCurrentPage((page) => Math.max(1, page - 1))
@@ -140,7 +150,7 @@ const AllCoursesPage = () => {
         </div>
       ) : (
         <div className="text-center py-12 text-sm text-gray-400 font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-          No courses found.
+          {ac.noResults || "No courses found."}
         </div>
       )}
 

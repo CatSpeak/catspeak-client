@@ -24,6 +24,10 @@ import {
 import AssignmentSubmissionsTable from "./AssignmentSubmissionsTable"
 
 const ITEMS_PER_PAGE = 4
+const interpolate = (template, values) => Object.entries(values).reduce(
+  (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
+  template || "",
+)
 
 const AssignmentSubmissionsList = ({
   assignmentId,
@@ -84,25 +88,25 @@ const AssignmentSubmissionsList = ({
     template: gradingTranslations.paginationShowing,
   })
   const filters = [
-    { id: "all", label: gradingTranslations.filterAll || "Tất cả" },
-    { id: "not_submitted", label: gradingTranslations.filterNotSubmitted || "Chưa nộp" },
-    { id: "submitted", label: gradingTranslations.filterSubmitted || "Đã nộp" },
-    { id: "late", label: gradingTranslations.filterLate || "Nộp muộn" },
-    { id: "graded", label: gradingTranslations.filterGraded || "Đã chấm" },
-    { id: "returned", label: gradingTranslations.filterReturned || "Đã trả bài" },
+    { id: "all", label: gradingTranslations.filterAll },
+    { id: "not_submitted", label: gradingTranslations.filterNotSubmitted },
+    { id: "submitted", label: gradingTranslations.filterSubmitted },
+    { id: "late", label: gradingTranslations.filterLate },
+    { id: "graded", label: gradingTranslations.filterGraded },
+    { id: "returned", label: gradingTranslations.filterReturned },
   ]
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{coursesTranslations.home}</button>
           <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.title || "Khóa học của tôi"}</button>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.title}</button>
           <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.allCourses?.title || "All Courses"}</button>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.allCourses?.title}</button>
           <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={onBack}>{coursesTranslations.student?.classDetails || "Chi tiết lớp học"}</button>
+          <button type="button" className="cursor-pointer hover:underline" onClick={onBack}>{coursesTranslations.student?.classDetails}</button>
           <span>/</span>
           <span className="text-[#990011] font-semibold">{assignmentTitle}</span>
         </div>
@@ -110,7 +114,7 @@ const AssignmentSubmissionsList = ({
 
       <div className="flex items-center gap-3">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-          {gradingTranslations.viewSubmissionsTitle || "Xem bài nộp"}
+          {gradingTranslations.viewSubmissionsTitle}
         </h1>
       </div>
 
@@ -123,21 +127,21 @@ const AssignmentSubmissionsList = ({
             <div className="flex flex-wrap items-center gap-2">
               {assignmentClosed ? (
                 <span className="bg-gray-100 text-gray-500 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
-                  {gradingTranslations.badgeClosed || "ĐÃ ĐÓNG"}
+                  {gradingTranslations.badgeClosed}
                 </span>
               ) : (
                 <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
-                  {gradingTranslations.badgePublished || "ĐÃ ĐĂNG"}
+                  {gradingTranslations.badgePublished}
                 </span>
               )}
 
               {assignmentExpired ? (
                 <span className="bg-red-50 border border-red-100 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
-                  {gradingTranslations.badgeExpired || "HẾT HẠN"}
+                  {gradingTranslations.badgeExpired}
                 </span>
               ) : (
                 <span className="bg-orange-50 border border-orange-100 text-orange-600 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
-                  {gradingTranslations.badgeUpcoming || "SẮP ĐẾN HẠN"}
+                  {gradingTranslations.badgeUpcoming}
                 </span>
               )}
 
@@ -153,7 +157,7 @@ const AssignmentSubmissionsList = ({
               className="h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
             >
               <Edit size={14} className="text-gray-500" />
-              <span>{gradingTranslations.editBtn || "Chỉnh sửa"}</span>
+              <span>{gradingTranslations.editBtn}</span>
             </button>
 
             <button
@@ -169,12 +173,12 @@ const AssignmentSubmissionsList = ({
               {assignmentClosed ? (
                 <>
                   <Unlock size={14} />
-                  <span>{gradingTranslations.openSubmissions || "Mở bài nộp"}</span>
+                  <span>{gradingTranslations.openSubmissions}</span>
                 </>
               ) : (
                 <>
                   <Lock size={14} />
-                  <span>{gradingTranslations.lockSubmissions || "Khóa bài nộp"}</span>
+                  <span>{gradingTranslations.lockSubmissions}</span>
                 </>
               )}
             </button>
@@ -184,7 +188,7 @@ const AssignmentSubmissionsList = ({
                 type="button"
                 onClick={() => setShowMoreMenu((isOpen) => !isOpen)}
                 className="w-10 h-10 border border-gray-200 hover:bg-gray-50 rounded-xl flex items-center justify-center text-gray-500 transition-colors shadow-2xs cursor-pointer"
-                aria-label="More assignment actions"
+                aria-label={gradingTranslations.moreAssignmentActions}
                 aria-expanded={showMoreMenu}
                 aria-haspopup="menu"
               >
@@ -208,8 +212,8 @@ const AssignmentSubmissionsList = ({
                       <Download size={14} className="text-[#990011]" />
                       <span>
                         {isDownloadingGradeSheet
-                          ? (gradingTranslations.downloading || "Downloading...")
-                          : (gradingTranslations.downloadGradeSheet || "Tải bảng điểm (.xlsx)")}
+                          ? gradingTranslations.downloading
+                          : gradingTranslations.downloadGradeSheet}
                       </span>
                     </button>
                     <button
@@ -225,8 +229,8 @@ const AssignmentSubmissionsList = ({
                       <FileCheck size={14} />
                       <span>
                         {isBulkReturning
-                          ? (gradingTranslations.returning || "Returning...")
-                          : (gradingTranslations.bulkReturnGrade || "Trả điểm toàn bộ")}
+                          ? gradingTranslations.returning
+                          : gradingTranslations.bulkReturnGrade}
                       </span>
                     </button>
                     <button
@@ -240,7 +244,7 @@ const AssignmentSubmissionsList = ({
                       className="w-full text-left px-4 py-2.5 hover:bg-red-50 transition-colors flex items-center gap-2 text-red-600 cursor-pointer border-t border-gray-100"
                     >
                       <Trash2 size={14} />
-                      <span>{gradingTranslations.deleteAssignment || "Xóa bài tập"}</span>
+                      <span>{gradingTranslations.deleteAssignment}</span>
                     </button>
                   </div>
                 </>
@@ -254,7 +258,7 @@ const AssignmentSubmissionsList = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="flex flex-col gap-2">
             <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
-              {gradingTranslations.deadlineHeader || "HẠN NỘP"}
+              {gradingTranslations.deadlineHeader}
             </span>
             <div className="flex items-center gap-2.5 text-gray-800">
               <Calendar size={18} className="text-[#990011]" />
@@ -264,11 +268,11 @@ const AssignmentSubmissionsList = ({
 
           <div className="flex flex-col gap-2">
             <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
-              {gradingTranslations.submittedHeader || "BÀI ĐÃ NỘP"}
+              {gradingTranslations.submittedHeader}
             </span>
             <div className="flex flex-col gap-1.5">
               <div className="text-base font-extrabold text-gray-800 font-sans">
-                {stats.submitted} <span className="text-xs font-semibold text-gray-400">/ {stats.total} {gradingTranslations.totalLabel || "Tổng số"}</span>
+                {stats.submitted} <span className="text-xs font-semibold text-gray-400">/ {stats.total} {gradingTranslations.totalLabel}</span>
               </div>
               <div className="w-48 h-2 bg-gray-150 rounded-full overflow-hidden">
                 <div
@@ -281,7 +285,7 @@ const AssignmentSubmissionsList = ({
 
           <div className="flex flex-col gap-2">
             <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
-              {gradingTranslations.needsGradingHeader || "CẦN CHẤM"}
+              {gradingTranslations.needsGradingHeader}
             </span>
             <div className="flex items-center gap-2.5 text-amber-600">
               <FileCheck size={18} />
@@ -299,8 +303,8 @@ const AssignmentSubmissionsList = ({
               type="text"
               value={studentSearch}
               onChange={(event) => onStudentSearchChange(event.target.value)}
-              aria-label={gradingTranslations.searchStudentsPlaceholder || "Search students"}
-              placeholder={gradingTranslations.searchStudentsPlaceholder || "Tìm kiếm học viên..."}
+              aria-label={gradingTranslations.searchStudentsPlaceholder}
+              placeholder={gradingTranslations.searchStudentsPlaceholder}
               className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
             />
           </div>
@@ -329,7 +333,7 @@ const AssignmentSubmissionsList = ({
             <select
               value={activeFilter}
               onChange={(event) => onActiveFilterChange(event.target.value)}
-              aria-label={gradingTranslations.filterLabel || "Filter submissions"}
+              aria-label={gradingTranslations.filterLabel}
               className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all appearance-none cursor-pointer"
             >
               {filters.map((filter) => (
@@ -364,15 +368,14 @@ const AssignmentSubmissionsList = ({
           }
           setShowDeleteModal(false)
         }}
-        title={gradingTranslations.deleteModalTitle || "Xóa bài tập"}
-        message={
-          gradingTranslations.deleteModalConfirmMsg ||
-          `Bạn có chắc chắn muốn xóa bài tập "${assignmentTitle}"? Tất cả bài làm và điểm số của học sinh liên quan đến bài tập sẽ bị xóa vĩnh viễn và không thể khôi phục.`
-        }
+        title={gradingTranslations.deleteModalTitle}
+        message={interpolate(gradingTranslations.deleteModalConfirmMsg, {
+          assignmentTitle,
+        })}
         confirmText={isDeletingAssignment
-          ? (gradingTranslations.deletingLabel || "Deleting...")
-          : (gradingTranslations.deleteConfirmBtn || "Xóa bài tập")}
-        cancelText={t.common?.cancel || "Hủy"}
+          ? gradingTranslations.deletingLabel
+          : gradingTranslations.deleteConfirmBtn}
+        cancelText={gradingTranslations.cancelBtn}
         confirmVariant="destructive"
         isPending={isDeletingAssignment}
       />

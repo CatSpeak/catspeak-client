@@ -5,6 +5,7 @@ import {
   formatCurrencyVND,
   getSafeMediaUrl,
 } from "../../utils/courseUtils"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const StudentCourseCard = ({
   course,
@@ -24,9 +25,9 @@ const StudentCourseCard = ({
   const hasMaximumPrice = Number.isFinite(maximumPrice) && maximumPrice >= minimumPrice
   const priceText = hasMinimumPrice && hasMaximumPrice
     ? minimumPrice === 0 && maximumPrice === 0
-      ? sc.priceFree || "Free"
+      ? sc.priceFree
       : `${formatCurrencyVND(minimumPrice)} - ${formatCurrencyVND(maximumPrice)}`
-    : "TBA"
+    : sc.toBeAnnounced
   const classCount = course.classCount != null && course.classCount !== "" && Number.isFinite(Number(course.classCount))
     ? Number(course.classCount)
     : "—"
@@ -44,8 +45,8 @@ const StudentCourseCard = ({
   )
     ? Math.min(100, Math.round((completedSessions / progressTotal) * 100))
     : null
-  const formatCountLabel = (template, fallback, count) => (
-    (typeof template === "string" ? template : fallback).replace("{{count}}", String(count))
+  const formatCountLabel = (template, count) => (
+    template.replace("{{count}}", String(count))
   )
   if (viewMode === "list") {
     return (
@@ -74,7 +75,7 @@ const StudentCourseCard = ({
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <span className="bg-[#fcf8e3] border border-amber-200/50 text-[#b28730] font-black text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                {sc.languages?.[course.language] || course.language}
+                {getLocalizedLanguageName(course.language, t)}
               </span>
               {Array.isArray(course.levels) && course.levels.map((lvl) => (
                 <span key={lvl} className="bg-red-50 text-[#990011] font-black text-[9px] px-2.5 py-0.5 rounded-full uppercase border border-red-100/50">
@@ -97,11 +98,11 @@ const StudentCourseCard = ({
           <div className="flex items-center gap-4 text-xs font-bold text-gray-500">
             <div className="flex items-center gap-1">
               <BookOpen size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.batchesCount, "{{count}} Batch(es)", classCount)}</span>
+              <span>{formatCountLabel(sc.batchesCount, classCount)}</span>
             </div>
             <div className="flex items-center gap-1">
               <Clock size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.sessionsCount, "{{count}} sessions", totalSessions)}</span>
+              <span>{formatCountLabel(sc.sessionsCount, totalSessions)}</span>
             </div>
           </div>
 
@@ -109,11 +110,11 @@ const StudentCourseCard = ({
             <div className="text-sm font-black text-gray-950 pr-2">
               {isEnrolled ? (
                 <span className="text-green-700 font-black text-xs bg-green-50 px-3 py-1 rounded-full border border-green-100 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> {sc.enrolledStatus || "Enrolled"}
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> {sc.enrolledStatus}
                 </span>
               ) : (
                 <div className="flex flex-col text-right">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">{sc.tuition || "Tuition"}</span>
+                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">{sc.tuition}</span>
                   <span className="text-sm font-black text-[#990011] leading-none">{priceText}</span>
                 </div>
               )}
@@ -129,7 +130,7 @@ const StudentCourseCard = ({
                 : "bg-[#990011] hover:bg-[#b20a1c] text-white"
                 }`}
             >
-              <span>{isEnrolled ? (sc.details || "Details") : (sc.joinCourse || "Join")}</span>
+              <span>{isEnrolled ? sc.details : sc.joinCourse}</span>
               <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
@@ -145,7 +146,7 @@ const StudentCourseCard = ({
       className="bg-white rounded-3xl border border-gray-150 hover:border-[#990011]/20 overflow-hidden shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.06)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[450px] group"
     >
       {/* Thumbnail / Icon area */}
-      <div className="relative h-44 w-full bg-[#D9D9D9] flex items-center justify-center shrink-0 overflow-hidden border-b border-gray-100">
+      <div className="relative h-60 w-full bg-[#D9D9D9] flex items-center justify-center shrink-0 overflow-hidden border-b border-gray-100">
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
@@ -164,7 +165,7 @@ const StudentCourseCard = ({
         <div className="absolute top-3 left-3 flex gap-1.5">
           <span className="bg-white/95 backdrop-blur-xs border border-gray-100 text-gray-800 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider">
             <Languages size={10} className="text-gray-500" />
-            <span>{sc.languages?.[course.language] || course.language}</span>
+            <span>{getLocalizedLanguageName(course.language, t)}</span>
           </span>
           {Array.isArray(course.levels) && course.levels.slice(0, 2).map((lvl) => (
             <span key={lvl} className="bg-[#990011]/90 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm">
@@ -175,7 +176,7 @@ const StudentCourseCard = ({
 
         {isEnrolled && (
           <div className="absolute top-3 right-3 bg-green-600 border border-green-500/20 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
-            {sc.enrolledStatus || "Enrolled"}
+            {sc.enrolledStatus}
           </div>
         )}
       </div>
@@ -189,7 +190,7 @@ const StudentCourseCard = ({
 
           <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-extrabold uppercase tracking-wide">
             <User size={12} className="text-gray-400" />
-            <span>{sc.instructor || "Instructor"}: {instructorName}</span>
+            <span>{sc.instructor}: {instructorName}</span>
           </div>
 
           <p className="text-xs text-gray-500 font-semibold line-clamp-3 leading-relaxed mt-2" title={course.description}>
@@ -200,11 +201,11 @@ const StudentCourseCard = ({
           <div className="mt-4 flex flex-col gap-2 text-xs font-bold text-gray-500 bg-slate-50 p-3 rounded-2xl border border-gray-100">
             <div className="flex items-center gap-2">
               <BookOpen size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.batchesAvailable, "{{count}} Batch(es) Available", classCount)}</span>
+              <span>{formatCountLabel(sc.batchesAvailable, classCount)}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.sessionsCount, "{{count}} sessions", totalSessions)}</span>
+              <span>{formatCountLabel(sc.sessionsCount, totalSessions)}</span>
             </div>
           </div>
         </div>
@@ -214,7 +215,7 @@ const StudentCourseCard = ({
           {isEnrolled ? (
             <div className="w-full">
               <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-                <span>{sc.progress || "Progress"}</span>
+                <span>{sc.progress}</span>
                 <span>{progressPercent == null ? "—" : `${progressPercent}%`}</span>
               </div>
               <div className="h-1.5 w-full bg-gray-100 rounded-full mt-1.5 overflow-hidden">
@@ -222,20 +223,20 @@ const StudentCourseCard = ({
                   className="h-full bg-green-500 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent ?? 0}%` }}
                   role="progressbar"
-                  aria-label={sc.progress || "Progress"}
+                  aria-label={sc.progress}
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={progressPercent ?? 0}
                 />
               </div>
               <div className="text-[10px] font-bold text-gray-500 mt-1 truncate">
-                {sc.classLabel || "Class: "}{course.enrolledClassName || "—"}
+                {sc.classLabel}{course.enrolledClassName || "—"}
               </div>
             </div>
           ) : (
             <div className="flex justify-between items-center w-full">
               <div className="flex flex-col">
-                <span className="text-gray-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-black">{sc.tuition || "Tuition"}</span>
+                <span className="text-gray-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-black">{sc.tuition}</span>
                 <span className="text-gray-950 font-black text-sm">{priceText}</span>
               </div>
               <button
@@ -249,7 +250,7 @@ const StudentCourseCard = ({
                   : "bg-[#990011] hover:bg-[#b20a1c] text-white shadow-md hover:shadow-lg"
                   }`}
               >
-                <span>{isEnrolled ? (sc.details || "Details") : (sc.joinCourse || "Join")}</span>
+                <span>{isEnrolled ? sc.details : sc.joinCourse}</span>
                 <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>

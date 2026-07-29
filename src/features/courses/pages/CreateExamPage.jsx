@@ -336,7 +336,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         required: true,
       }
     ])
-    toast.success(language === "vi" ? "Đã thêm câu hỏi mới" : "New question added")
+    toast.success(ce.toastQuestionAdded || "New question added")
   }
 
   const handleCopyQuestion = (index) => {
@@ -352,12 +352,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     const updated = [...questions]
     updated.splice(index + 1, 0, copiedQ)
     setFormField("questions", updated)
-    toast.success(language === "vi" ? "Đã sao chép câu hỏi" : "Question copied")
+    toast.success(ce.toastQuestionCopied || "Question copied")
   }
 
   const handleDeleteQuestion = (index) => {
     setFormField("questions", (prev) => prev.filter((_, i) => i !== index))
-    toast.success(language === "vi" ? "Đã xóa câu hỏi" : "Question deleted")
+    toast.success(ce.toastQuestionDeleted || "Question deleted")
   }
 
   const handleQuestionTypeChange = (index, type) => {
@@ -427,7 +427,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const handleMediaUpload = (index, file) => {
     if (!file) return
     if (!file.type.startsWith("image/")) {
-      toast.error(language === "vi" ? "Vui lòng chọn file hình ảnh hợp lệ" : "Please select a valid image file")
+      toast.error(ce.toastInvalidImage || "Please select a valid image file")
       return
     }
     const previewUrl = URL.createObjectURL(file)
@@ -443,13 +443,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           : q
       )
     )
-    toast.success(language === "vi" ? "Đã chọn hình ảnh" : "Image selected")
+    toast.success(ce.toastImageSelected || "Image selected")
   }
 
   const handleAudioUpload = (index, file) => {
     if (!file) return
     if (!file.type.startsWith("audio/")) {
-      toast.error(language === "vi" ? "Vui lòng chọn file âm thanh hợp lệ" : "Please select a valid audio file")
+      toast.error(ce.toastInvalidAudio || "Please select a valid audio file")
       return
     }
     const previewUrl = URL.createObjectURL(file)
@@ -465,7 +465,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           : q
       )
     )
-    toast.success(language === "vi" ? "Đã chọn file âm thanh" : "Audio selected")
+    toast.success(ce.toastAudioSelected || "Audio selected")
   }
 
   const handleRemoveMedia = (index) => {
@@ -517,7 +517,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) => {
         if (i !== qIdx) return q
         if (q.options.length <= 2) {
-          toast.error(language === "vi" ? "Phải có ít nhất 2 đáp án" : "Must have at least 2 options")
+          toast.error(ce.toastMinOptions || "There must be at least 2 options")
           return q
         }
         const updatedOptions = q.options.filter((_, idx) => idx !== optIdx)
@@ -743,8 +743,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       )
       toast.success(
         isExistingPublishedQuiz
-          ? (language === "vi" ? "Đã lưu thay đổi" : "Changes saved")
-          : (language === "vi" ? "Đã lưu bản nháp bài kiểm tra" : "Quiz draft saved")
+          ? (ce.toastChangesSaved || "Changes saved")
+          : (ce.successDraft || "Quiz draft saved")
       )
       const targetId = persistedQuiz?.quizId || effectiveQuizId
       if (targetId) {
@@ -758,9 +758,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       toast.error(getQuizErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể lưu bài kiểm tra. Vui lòng thử lại."
-          : "The quiz could not be saved. Please try again."
+        ce.errorSave || "The quiz could not be saved. Please try again."
       ))
     } finally {
       submissionGuardRef.current = false
@@ -801,35 +799,20 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           const publishError = getQuizErrorMessage(
             error,
             language,
-            language === "vi"
-              ? "Không thể đăng bài kiểm tra. Vui lòng kiểm tra thông tin và thử lại."
-              : "The quiz could not be published. Check its details and try again."
+            ce.errorPublish || "The quiz could not be published. Check its details and try again."
           )
           toast.error(
-            language === "vi"
-              ? `Bản nháp đã được lưu nhưng chưa được đăng. ${publishError}`
-              : `The draft was saved but not published. ${publishError}`
+            (ce.draftSavedPublishFailed || "The draft was saved but not published. {{error}}")
+              .replace("{{error}}", publishError)
           )
           return
         }
 
-        toast.success(
-          language === "vi"
-            ? "Đã đăng bài kiểm tra thành công."
-            : "Quiz published successfully."
-        )
+        toast.success(ce.toastPublishSuccess || "Quiz published successfully.")
       } else if (wantsPublish) {
-        toast.success(
-          language === "vi"
-            ? "Đã lưu thay đổi."
-            : "Changes saved."
-        )
+        toast.success(ce.toastChangesSaved || "Changes saved.")
       } else {
-        toast.success(
-          language === "vi"
-            ? "Đã lưu bản nháp bài kiểm tra."
-            : "Quiz draft saved."
-        )
+        toast.success(ce.successDraft || "Quiz draft saved.")
       }
 
       const targetId = persistedQuiz?.quizId || effectiveQuizId
@@ -844,9 +827,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       toast.error(getQuizErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể lưu bài kiểm tra. Vui lòng thử lại."
-          : "The quiz could not be saved. Please try again."
+        ce.errorSave || "The quiz could not be saved. Please try again."
       ))
     } finally {
       submissionGuardRef.current = false
@@ -943,6 +924,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     || isLocallyCreatedQuiz
   )
   const isClosedQuiz = quizDetail?.status === "Closed"
+  const localizedQuizStatus = {
+    draft: ce.draftStatus,
+    published: ce.publishedStatus,
+    open: ce.openStatus,
+    closed: ce.closedStatus,
+  }[String(quizDetail?.status || "published").toLowerCase()] || ce.unknownStatus
   const hasBlockingQuizError = Boolean(
     effectiveQuizId
     && !isLocallyCreatedQuiz
@@ -978,17 +965,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       >
         <p className="text-sm font-semibold text-gray-700">
           {hasMalformedQuizResponse
-            ? (
-              language === "vi"
-                ? "Dữ liệu bài kiểm tra trả về không hợp lệ."
-                : "The quiz response was invalid."
-            )
+            ? (ce.invalidResponse || "The quiz response was invalid.")
             : getQuizErrorMessage(
               quizDetailError,
               language,
-              language === "vi"
-                ? "Không thể tải bài kiểm tra."
-                : "The quiz could not be loaded."
+              ce.loadFailed || "The quiz could not be loaded."
             )}
         </p>
         <button
@@ -996,7 +977,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           onClick={refetchQuiz}
           className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
         >
-          {language === "vi" ? "Thử lại" : "Try again"}
+          {ce.retry || "Try again"}
         </button>
       </div>
     )
@@ -1044,12 +1025,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               className="px-5 py-2 bg-[#990011] hover:bg-[#80000e] text-white rounded-full transition-all active:scale-95 font-bold text-xs shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting
-                ? (language === "vi" ? "Đang lưu..." : "Saving...")
+                ? (ce.saving || "Saving...")
                 : !canUseDraftActions
-                  ? (language === "vi" ? "Lưu thay đổi" : "Save changes")
+                  ? (ce.saveChanges || "Save changes")
                   : publishStatus === "draft"
-                    ? (language === "vi" ? "Lưu nháp" : "Save draft")
-                    : (p.confirmPublish || (language === "vi" ? "Xác nhận đăng" : "Confirm publish"))}
+                    ? (ce.saveDraft || "Save draft")
+                    : (p.confirmPublish || "Confirm publish")}
             </button>
           </div>
         </div>
@@ -1098,7 +1079,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 {/* Card Title & Score info */}
                 <div className="flex justify-between items-center border-b border-gray-100 pb-4 select-none">
                   <h2 className="text-lg font-black text-[#990011] tracking-tight">
-                    {language === "vi" ? `Câu hỏi ${previewCurrentIndex + 1}` : `${p.questionsList} ${previewCurrentIndex + 1}`}
+                    {(ce.questionNumber || "Question {{number}}")
+                      .replace("{{number}}", previewCurrentIndex + 1)}
                   </h2>
                   <span className="px-3.5 py-1.5 bg-gray-50 border border-gray-150 rounded-xl text-xs font-bold text-gray-500">
                     {currentQuestion.score} {p.points}
@@ -1110,7 +1092,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   <div className="rounded-2xl overflow-hidden border border-gray-150 bg-gray-50 flex items-center justify-center p-2">
                     <img
                       src={currentQuestion.mediaUrl}
-                      alt={`Minh họa câu hỏi ${previewCurrentIndex + 1}`}
+                      alt={(ce.questionImageAlt || "Illustration for question {{number}}")
+                        .replace("{{number}}", previewCurrentIndex + 1)}
                       className="max-h-48 max-w-xs sm:max-w-sm w-auto h-auto object-contain rounded-xl"
                     />
                   </div>
@@ -1130,7 +1113,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 <RenderHTML
                   html={currentQuestion.content}
                   className="text-sm font-semibold text-gray-800 leading-relaxed"
-                  fallback={language === "vi" ? "Chưa có nội dung câu hỏi." : "No question content yet."}
+                  fallback={ce.noQuestionContent || "No question content yet."}
                 />
 
                 {/* Options/Answers selection list */}
@@ -1217,7 +1200,9 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             {isSelected && <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />}
                           </span>
                           <span className={`text-xs font-bold ${isSelected ? "text-[#990011]" : "text-gray-700"}`}>
-                            {opt}
+                            {optIdx === 0
+                              ? (ce.trueLabel || "True")
+                              : (ce.falseLabel || "False")}
                           </span>
                         </button>
                       )
@@ -1226,19 +1211,19 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 ) : currentQuestion.type === "FillInBlank" ? (
                   <input
                     type="text"
-                    aria-label={language === "vi" ? "Câu trả lời" : "Answer"}
+                    aria-label={ce.answerLabel || "Answer"}
                     value={previewAnswers[currentQuestion.id] || ""}
                     onChange={(e) => {
                       const val = e.target.value
                       setPreviewAnswers((prev) => ({ ...prev, [currentQuestion.id]: val }))
                     }}
-                    placeholder={language === "vi" ? "Nhập câu trả lời vào đây..." : "Enter answer here..."}
+                    placeholder={ce.answerPlaceholder || "Enter answer here..."}
                     className="w-full p-4 border border-gray-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011]"
                   />
                 ) : (
                   /* Essay Answer Area */
                   <textarea
-                    aria-label={language === "vi" ? "Câu trả lời tự luận" : "Essay answer"}
+                    aria-label={ce.essayAnswerLabel || "Essay answer"}
                     value={previewAnswers[currentQuestion.id] || ""}
                     onChange={(e) => {
                       const val = e.target.value
@@ -1268,11 +1253,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     key={q.id}
                     type="button"
                     aria-current={previewCurrentIndex === idx ? "step" : undefined}
-                    aria-label={
-                      language === "vi"
-                        ? `Câu hỏi ${idx + 1}`
-                        : `Question ${idx + 1}`
-                    }
+                    aria-label={(ce.questionNumber || "Question {{number}}")
+                      .replace("{{number}}", idx + 1)}
                     onClick={() => setPreviewCurrentIndex(idx)}
                     className={getQuestionBtnClass(q.id, idx)}
                   >
@@ -1360,16 +1342,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900"
         >
           <span>
-            {language === "vi"
-              ? "Bản nháp đã được lưu, nhưng chưa thể tải lại dữ liệu mới nhất."
-              : "The draft was saved, but its latest data could not be reloaded."}
+            {ce.draftReloadFailed || "The draft was saved, but its latest data could not be reloaded."}
           </span>
           <button
             type="button"
             onClick={refetchQuiz}
             className="font-extrabold underline"
           >
-            {language === "vi" ? "Thử tải lại" : "Retry"}
+            {ce.retry || "Retry"}
           </button>
         </div>
       )}
@@ -1403,14 +1383,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           </button>
           <ChevronRight size={12} className="text-gray-300" />
           <span className="text-[#990011] font-semibold">
-            {effectiveQuizId ? (language === "vi" ? "Chỉnh sửa bài kiểm tra" : "Edit Exam") : (ce.pageTitle || "Tạo bài kiểm tra")}
+            {effectiveQuizId ? (ce.editTitle || "Edit Exam") : (ce.pageTitle || "Create Exam")}
           </span>
         </div>
       </div>
 
       {/* ─── Page Title ─── */}
       <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-        {effectiveQuizId ? (language === "vi" ? "Chỉnh sửa bài kiểm tra" : "Edit Exam") : (ce.pageTitle || "Tạo bài kiểm tra mới")}
+        {effectiveQuizId ? (ce.editTitle || "Edit Exam") : (ce.pageTitle || "Create New Exam")}
       </h1>
 
       {isClosedQuiz && (
@@ -1418,9 +1398,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           role="note"
           className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900"
         >
-          {language === "vi"
-            ? "Bài kiểm tra đã đóng. Thời gian mở/đóng, nộp muộn, thời lượng, câu hỏi, thang điểm và chế độ trả kết quả không thể thay đổi."
-            : "This quiz is closed. Its schedule, late-submission setting, time limit, questions, grading scale, and result-release mode can no longer be changed."}
+          {ce.closedNotice || "This quiz is closed. Its schedule, late-submission setting, time limit, questions, grading scale, and result-release mode can no longer be changed."}
         </div>
       )}
 
@@ -1459,7 +1437,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
                   toolbar:
                     "bold italic underline strikethrough | emoticons link | bullist numlist",
-                  placeholder: ce.descriptionPlaceholder || "Nhập hướng dẫn chi tiết cho học sinh...",
+                  // placeholder: ce.descriptionPlaceholder,
                   skin: "oxide",
                   setup: (editor) => {
                     editor.on("focus", () => { })
@@ -1500,6 +1478,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     type="button"
                     onClick={() => handleMoveQuestion(idx, "up")}
                     disabled={idx === 0}
+                    aria-label={ce.moveQuestionUp || "Move question up"}
                     className={`p-1 rounded hover:bg-gray-200 transition-colors ${idx === 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-500"}`}
                   >
                     <ChevronUp size={16} />
@@ -1509,7 +1488,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     onMouseUp={() => setDraggableIndex(null)}
                     onMouseLeave={() => setDraggableIndex(null)}
                     className="text-gray-300 cursor-grab active:cursor-grabbing p-1"
-                    title="Drag to reorder"
+                    title={ce.dragToReorder || "Drag to reorder"}
                   >
                     <Menu size={16} />
                   </div>
@@ -1517,6 +1496,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     type="button"
                     onClick={() => handleMoveQuestion(idx, "down")}
                     disabled={idx === questions.length - 1}
+                    aria-label={ce.moveQuestionDown || "Move question down"}
                     className={`p-1 rounded hover:bg-gray-200 transition-colors ${idx === questions.length - 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-500"}`}
                   >
                     <ChevronDown size={16} />
@@ -1533,7 +1513,9 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                         type="button"
                         onClick={() => toggleCollapse(q.id)}
                         className="p-1 hover:bg-gray-150 rounded-lg text-gray-500 hover:text-gray-700 transition-colors cursor-pointer shrink-0"
-                        title={collapsedQuestions[q.id] ? "Mở rộng" : "Thu gọn"}
+                        title={collapsedQuestions[q.id]
+                          ? (ce.expandQuestion || "Expand question")
+                          : (ce.collapseQuestion || "Collapse question")}
                       >
                         {collapsedQuestions[q.id] ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
                       </button>
@@ -1563,10 +1545,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       {/* Media Image Upload Icon Button */}
                       <label
                         className="p-1.5 border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
-                        title={language === "vi" ? "Tải lên hình ảnh" : "Upload Image"}
+                        title={ce.uploadImage || "Upload image"}
                       >
                         <ImageIcon size={15} className="text-[#990011]" />
-                        <span className="hidden sm:inline text-[11px]">{language === "vi" ? "Ảnh" : "Image"}</span>
+                        <span className="hidden sm:inline text-[11px]">{ce.image || "Image"}</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -1583,10 +1565,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       {/* Audio Upload Icon Button */}
                       <label
                         className="p-1.5 border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
-                        title={language === "vi" ? "Tải lên âm thanh" : "Upload Audio"}
+                        title={ce.uploadAudio || "Upload audio"}
                       >
                         <MusicIcon size={15} className="text-[#990011]" />
-                        <span className="hidden sm:inline text-[11px]">{language === "vi" ? "Âm thanh" : "Audio"}</span>
+                        <span className="hidden sm:inline text-[11px]">{ce.audio || "Audio"}</span>
                         <input
                           type="file"
                           accept="audio/*"
@@ -1617,7 +1599,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   {collapsedQuestions[q.id] ? (
                     /* Collapsed summary of question text */
                     <div className="text-xs font-semibold text-gray-450 truncate max-w-[280px] sm:max-w-md md:max-w-2xl pl-8 leading-tight select-none italic pb-2">
-                      {q.content ? q.content : (language === "vi" ? "(Chưa nhập nội dung câu hỏi)" : "(No question content yet)")}
+                      {q.content ? q.content : (ce.noQuestionContentParenthetical || "(No question content yet)")}
                     </div>
                   ) : (
                     /* Expanded full editor fields */
@@ -1627,14 +1609,15 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                         <div className="relative rounded-2xl overflow-hidden max-h-64 border border-gray-200 bg-gray-50 flex items-center justify-center p-2 group/img">
                           <img
                             src={q.mediaUrl}
-                            alt={`Hình ảnh câu hỏi ${idx + 1}`}
+                            alt={(ce.questionImageAlt || "Illustration for question {{number}}")
+                              .replace("{{number}}", idx + 1)}
                             className="max-h-60 max-w-full object-contain rounded-xl"
                           />
                           <button
                             type="button"
                             onClick={() => handleRemoveMedia(idx)}
                             className="absolute top-3 right-3 p-1.5 bg-black/60 hover:bg-red-600 text-white rounded-full transition-colors cursor-pointer shadow-md"
-                            title={language === "vi" ? "Xóa ảnh" : "Remove Image"}
+                            title={ce.removeImage || "Remove image"}
                           >
                             <X size={14} />
                           </button>
@@ -1654,7 +1637,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             type="button"
                             onClick={() => handleRemoveAudio(idx)}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer shrink-0"
-                            title={language === "vi" ? "Xóa âm thanh" : "Remove Audio"}
+                            title={ce.removeAudio || "Remove audio"}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -1665,7 +1648,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       <textarea
                         value={q.content}
                         onChange={(e) => handleQuestionContentChange(idx, e.target.value)}
-                        placeholder={language === "vi" ? "Nhập nội dung câu hỏi..." : "Enter question content..."}
+                        placeholder={ce.questionContentPlaceholder || "Enter question content..."}
                         className="w-full p-3 border border-gray-150 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] resize-none h-18 transition-all"
                       />
 
@@ -1673,7 +1656,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       {q.type === "MultipleChoiceSingle" || q.type === "mcq" ? (
                         <div className="flex flex-col gap-3 pl-2">
                           <span className="text-xs font-bold text-gray-500">
-                            {language === "vi" ? "Các đáp án (Tích chọn 1 đáp án đúng):" : "Options (Select 1 correct answer):"}
+                            {ce.singleChoiceInstruction || "Options (select 1 correct answer):"}
                           </span>
                           {(q.options || []).map((opt, optIdx) => {
                             const isCorrect = (q.correctAnswers || []).includes(String(optIdx))
@@ -1696,7 +1679,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                   type="text"
                                   value={opt}
                                   onChange={(e) => handleOptionTextChange(idx, optIdx, e.target.value)}
-                                  placeholder={`Đáp án ${String.fromCharCode(65 + optIdx)}`}
+                                  placeholder={(ce.optionPlaceholder || "Option {{letter}}")
+                                    .replace("{{letter}}", String.fromCharCode(65 + optIdx))}
                                   className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
                                     ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                                     : "border-gray-200 focus:ring-1 focus:ring-red-100 focus:border-gray-300"
@@ -1708,7 +1692,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                   type="button"
                                   onClick={() => handleRemoveOption(idx, optIdx)}
                                   className="text-gray-400 hover:text-red-600 transition-colors p-1"
-                                  title="Delete option"
+                                  title={ce.deleteOption || "Delete option"}
                                 >
                                   <X size={14} />
                                 </button>
@@ -1721,7 +1705,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             type="button"
                             role="switch"
                             aria-checked={q.required}
-                            aria-label={language === "vi" ? "Câu hỏi bắt buộc" : "Required question"}
+                            aria-label={ce.requiredQuestion || "Required question"}
                             onClick={() => handleAddOption(idx)}
                             className="text-xs font-bold text-[#990011] flex items-center gap-1.5 hover:underline pl-8"
                           >
@@ -1732,7 +1716,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       ) : q.type === "MultipleChoiceMultiple" ? (
                         <div className="flex flex-col gap-3 pl-2">
                           <span className="text-xs font-bold text-gray-500">
-                            {language === "vi" ? "Các đáp án (Tích chọn 1 hoặc nhiều đáp án đúng):" : "Options (Select 1 or more correct answers):"}
+                            {ce.multipleChoiceInstruction || "Options (select 1 or more correct answers):"}
                           </span>
                           {(q.options || []).map((opt, optIdx) => {
                             const isCorrect = (q.correctAnswers || []).includes(String(optIdx))
@@ -1748,7 +1732,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                   type="text"
                                   value={opt}
                                   onChange={(e) => handleOptionTextChange(idx, optIdx, e.target.value)}
-                                  placeholder={`Đáp án ${String.fromCharCode(65 + optIdx)}`}
+                                  placeholder={(ce.optionPlaceholder || "Option {{letter}}")
+                                    .replace("{{letter}}", String.fromCharCode(65 + optIdx))}
                                   className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
                                     ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                                     : "border-gray-200 focus:ring-1 focus:ring-red-100 focus:border-gray-300"
@@ -1758,7 +1743,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                   type="button"
                                   onClick={() => handleRemoveOption(idx, optIdx)}
                                   className="text-gray-400 hover:text-red-600 transition-colors p-1"
-                                  title="Delete option"
+                                  title={ce.deleteOption || "Delete option"}
                                 >
                                   <X size={14} />
                                 </button>
@@ -1777,7 +1762,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       ) : q.type === "TrueFalse" ? (
                         <div className="flex flex-col gap-3 pl-2">
                           <span className="text-xs font-bold text-gray-500">
-                            {language === "vi" ? "Chọn đáp án đúng:" : "Select correct answer:"}
+                            {ce.selectCorrectAnswer || "Select the correct answer:"}
                           </span>
                           <div className="flex items-center gap-6">
                             <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
@@ -1788,7 +1773,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                 onChange={() => handleSingleCorrectAnswer(idx, 0)}
                                 className="w-4 h-4 text-[#990011] focus:ring-[#990011]"
                               />
-                              <span>Đúng (True)</span>
+                              <span>{ce.trueLabel || "True"}</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
                               <input
@@ -1798,20 +1783,20 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                 onChange={() => handleSingleCorrectAnswer(idx, 1)}
                                 className="w-4 h-4 text-[#990011] focus:ring-[#990011]"
                               />
-                              <span>Sai (False)</span>
+                              <span>{ce.falseLabel || "False"}</span>
                             </label>
                           </div>
                         </div>
                       ) : q.type === "FillInBlank" ? (
                         <div className="flex flex-col gap-2 pl-2">
                           <label className="text-xs font-bold text-gray-700">
-                            {language === "vi" ? "Đáp án đúng cho chỗ trống:" : "Correct answer for blank:"}
+                            {ce.fillBlankCorrectAnswer || "Correct answer for the blank:"}
                           </label>
                           <input
                             type="text"
                             value={(q.correctAnswers || [""])[0] || ""}
                             onChange={(e) => handleFillInBlankAnswerChange(idx, e.target.value)}
-                            placeholder={language === "vi" ? "Nhập đáp án đúng cần điền..." : "Enter correct blank answer..."}
+                            placeholder={ce.fillBlankPlaceholder || "Enter the correct answer..."}
                             className="w-full max-w-md px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                           />
                         </div>
@@ -1820,7 +1805,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                         <div className="flex flex-col gap-3 pl-2">
                           <div className="flex items-center gap-3">
                             <label className="text-xs font-bold text-gray-700">
-                              {language === "vi" ? "Số từ tối đa:" : "Max word count:"}
+                              {ce.maxWordCount || "Maximum word count:"}
                             </label>
                             <input
                               type="number"
@@ -1830,7 +1815,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             />
                           </div>
                           <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs text-gray-400 font-medium italic">
-                            {language === "vi" ? "Vùng học viên nhập câu trả lời tự luận." : "Student essay response area."}
+                            {ce.essayResponseHelp || "Student essay response area."}
                           </div>
                         </div>
                       )}
@@ -1840,7 +1825,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                         {/* Skill Tag */}
                         <div className="flex flex-col gap-1">
                           <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                            {language === "vi" ? "Kỹ năng / Chủ đề" : "Skill Tag / Topic"}
+                            {ce.skillTag || "Skill tag / topic"}
                           </label>
                           <input
                             type="text"
@@ -1853,7 +1838,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                 return next
                               })
                             }}
-                            placeholder={language === "vi" ? "VD: Ngữ pháp, Từ vựng..." : "e.g. Grammar, Vocabulary..."}
+                            placeholder={ce.skillTagPlaceholder || "e.g. Grammar, Vocabulary..."}
                             className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                           />
                         </div>
@@ -1861,7 +1846,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                         {/* Tip Text */}
                         <div className="flex flex-col gap-1">
                           <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                            {language === "vi" ? "Gợi ý / Mẹo làm bài" : "Tip / Hint Text"}
+                            {ce.tipText || "Tip / hint"}
                           </label>
                           <input
                             type="text"
@@ -1874,7 +1859,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                 return next
                               })
                             }}
-                            placeholder={language === "vi" ? "Gợi ý cho học sinh..." : "Hint for students..."}
+                            placeholder={ce.tipTextPlaceholder || "Hint for students..."}
                             className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                           />
                         </div>
@@ -1890,7 +1875,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             type="button"
                             onClick={() => handleCopyQuestion(idx)}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all"
-                            title="Copy question"
+                            title={ce.copyQuestion || "Copy question"}
                           >
                             <Copy size={16} />
                           </button>
@@ -1899,7 +1884,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             type="button"
                             onClick={() => handleDeleteQuestion(idx)}
                             className="p-2 text-gray-400 hover:text-red-650 hover:bg-red-55/20 rounded-xl transition-all"
-                            title="Delete question"
+                            title={ce.deleteQuestion || "Delete question"}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -1912,6 +1897,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                           </span>
                           <button
                             type="button"
+                            aria-label={ce.addOption || "Add option"}
                             onClick={() => handleRequiredToggle(idx)}
                             className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${q.required ? "bg-[#990011]" : "bg-gray-200"
                               }`}
@@ -1964,14 +1950,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               value={duration}
               onChange={(e) => setFormField("duration", e.target.value)}
               className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] font-bold"
-              placeholder="Min"
+              placeholder={ce.minutesPlaceholder || "Minutes"}
             />
           </div>
 
           {/* Max Attempts Dropdown */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-gray-800">
-              {language === "vi" ? "Số lượt làm bài tối đa" : "Max Attempts"}
+              {ce.maxAttempts || "Maximum attempts"}
             </label>
             <div className="relative">
               <select
@@ -1984,15 +1970,17 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   && ![1, 2, 3, 5].includes(Number(maxAttempts))
                   && (
                     <option value={Number(maxAttempts)}>
-                      {language === "vi"
-                        ? `${maxAttempts} lượt`
-                        : `${maxAttempts} attempts`}
+                      {(ce.attemptsCount || "{{count}} attempts")
+                        .replace("{{count}}", maxAttempts)}
                     </option>
                   )}
-                <option value={1}>{language === "vi" ? "1 lượt" : "1 attempt"}</option>
-                <option value={2}>{language === "vi" ? "2 lượt" : "2 attempts"}</option>
-                <option value={3}>{language === "vi" ? "3 lượt" : "3 attempts"}</option>
-                <option value={5}>{language === "vi" ? "5 lượt" : "5 attempts"}</option>
+                <option value={1}>{ce.oneAttempt || "1 attempt"}</option>
+                {[2, 3, 5].map((count) => (
+                  <option key={count} value={count}>
+                    {(ce.attemptsCount || "{{count}} attempts")
+                      .replace("{{count}}", count)}
+                  </option>
+                ))}
               </select>
               <ChevronDown size={14} className="absolute right-3.5 top-2.5 text-gray-400 pointer-events-none" />
             </div>
@@ -2002,7 +1990,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between items-center">
               <label className="text-xs font-bold text-gray-800">
-                {language === "vi" ? "Tỷ lệ điểm đạt (%)" : "Pass Score (%)"}
+                {ce.passScore || "Pass score (%)"}
               </label>
               <span className="text-xs font-extrabold text-[#990011]">{passPercent}%</span>
             </div>
@@ -2027,7 +2015,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               onChange={(date) => setFormField("openDate", date)}
               mode="datetime"
               color="#990011"
-              placeholder="DD/MM/YYYY, --:--"
+              placeholder={ce.dateTimePlaceholder || "DD/MM/YYYY, --:--"}
               className="w-full"
             />
           </div>
@@ -2042,7 +2030,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               onChange={(date) => setFormField("closeDate", date)}
               mode="datetime"
               color="#990011"
-              placeholder="DD/MM/YYYY, --:--"
+              placeholder={ce.dateTimePlaceholder || "DD/MM/YYYY, --:--"}
               className="w-full"
             />
           </div>
@@ -2058,13 +2046,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             {/* Allow Late Submission */}
             <div className="flex justify-between items-center gap-3">
               <span className="text-xs font-semibold text-gray-750">
-                {language === "vi" ? "Cho phép nộp muộn" : "Allow late submission"}
+                {ce.allowLateSubmission || "Allow late submission"}
               </span>
               <button
                 type="button"
                 role="switch"
                 aria-checked={allowLateSubmission}
-                aria-label={language === "vi" ? "Cho phép nộp muộn" : "Allow late submission"}
+                aria-label={ce.allowLateSubmission || "Allow late submission"}
                 onClick={() => setFormField("allowLateSubmission", !allowLateSubmission)}
                 className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowLateSubmission ? "bg-[#990011]" : "bg-gray-200"
                   }`}
@@ -2250,9 +2238,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               </div>
             ) : (
               <span className="rounded-xl bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-700">
-                {language === "vi"
-                  ? `Trạng thái hiện tại: ${quizDetail?.status || "Đã đăng"}`
-                  : `Current status: ${quizDetail?.status || "Published"}`}
+                {(ce.currentStatus || "Current status: {{status}}")
+                  .replace("{{status}}", localizedQuizStatus)}
               </span>
             )}
           </div>
@@ -2264,6 +2251,9 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             </span>
             <button
               type="button"
+              role="switch"
+              aria-checked={postToFeed}
+              aria-label={ce.postToFeed || "Post to class feed"}
               onClick={() => setFormField("postToFeed", !postToFeed)}
               className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${postToFeed ? "bg-[#990011]" : "bg-gray-200"
                 }`}
@@ -2295,7 +2285,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             disabled={isSubmitting}
             onClick={handlePreview}
             className="p-2.5 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
-            title={language === "vi" ? "Xem trước" : "Preview"}
+            title={ce.previewLabel || "Preview"}
           >
             <Eye size={18} />
           </button>
@@ -2304,9 +2294,6 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {canUseDraftActions && (
             <button
               type="button"
-              role="switch"
-              aria-checked={postToFeed}
-              aria-label={ce.postToFeed || "Post to class feed"}
               disabled={isSubmitting}
               onClick={handleSaveDraft}
               className="h-10 px-5 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
@@ -2323,14 +2310,14 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting
-              ? (language === "vi" ? "Đang lưu..." : "Saving...")
+              ? (ce.saving || "Saving...")
               : !canUseDraftActions
-                ? (language === "vi" ? "Lưu thay đổi" : "Save Changes")
+                ? (ce.saveChanges || "Save Changes")
                 : publishStatus === "draft"
-                  ? (language === "vi" ? "Lưu nháp" : "Save Draft")
+                  ? (ce.saveDraft || "Save Draft")
                   : effectiveQuizId
-                    ? (language === "vi" ? "Đăng bài kiểm tra" : "Publish Quiz")
-                    : (ce.btnCreate || "Tạo bài kiểm tra")}
+                    ? (ce.publishQuiz || "Publish Quiz")
+                    : (ce.btnCreate || "Create Exam")}
           </button>
         </div>
       </div>
@@ -2342,6 +2329,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 const CreateExamPage = () => {
   const { id } = useParams()
   const { language, t } = useLanguage()
+  const ce = t.courses?.createExam || {}
 
   const {
     currentData: detailResponse,
@@ -2386,9 +2374,7 @@ const CreateExamPage = () => {
           {getQuizErrorMessage(
             classDetailError,
             language,
-            language === "vi"
-              ? "Không thể tải thông tin lớp học."
-              : "The class details could not be loaded."
+            ce.classLoadFailed || "The class details could not be loaded."
           )}
         </p>
         <button
@@ -2396,7 +2382,7 @@ const CreateExamPage = () => {
           onClick={refetchClass}
           className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
         >
-          {language === "vi" ? "Thử lại" : "Try again"}
+          {ce.retry || "Try again"}
         </button>
       </div>
     )

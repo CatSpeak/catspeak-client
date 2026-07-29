@@ -66,8 +66,8 @@ const PostDetailPage = () => {
 
   const formattedPost = {
     tag: "",
-    title: postDetail?.title || dict.noTitle || "Không có tiêu đề",
-    authorName: postDetail?.accountName || dict.teacher || "Giảng viên",
+    title: postDetail?.title || dict.noTitle,
+    authorName: postDetail?.accountName || dict.teacher,
     authorAvatar: postDetail?.avatarImageUrl || "",
     date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
     thumbnailUrl: postDetail?.thumbnailUrl || "",
@@ -83,7 +83,7 @@ const PostDetailPage = () => {
 
   const comments = postDetail?.replies?.map((comment) => ({
     id: comment.id,
-    authorName: comment.accountName || dict.anonymous || "Ẩn danh",
+    authorName: comment.accountName || dict.anonymous,
     authorAvatar: comment.avatarImageUrl || "",
     isTeacher: comment.isTeacher || false,
     time: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
@@ -99,7 +99,7 @@ const PostDetailPage = () => {
           commentId: replyingTo.id,
           content: text,
         }).unwrap()
-        toast.success(dict.toastReplySuccess || "Đã phản hồi bình luận")
+        toast.success(dict.toastReplySuccess)
         setReplyingTo(null)
       } else {
         await createComment({
@@ -107,10 +107,10 @@ const PostDetailPage = () => {
           postId,
           content: text,
         }).unwrap()
-        toast.success(dict.toastCommentSuccess || "Đã gửi bình luận")
+        toast.success(dict.toastCommentSuccess)
       }
-    } catch (error) {
-      toast.error(error?.data?.message || dict.toastError || "Lỗi khi gửi bình luận")
+    } catch {
+      toast.error(dict.toastError)
     }
   }
 
@@ -129,7 +129,7 @@ const PostDetailPage = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner text={t.courses.lectureHall.loading} />
       </div>
     )
   }
@@ -139,12 +139,12 @@ const PostDetailPage = () => {
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
-          { label: dict.breadcrumbs.home || "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: dict.breadcrumbs.myCourses || "Khóa học của tôi", onClick: () => navigate(basePath) },
-          { label: dict.breadcrumbs.allCourses || "Toàn bộ khóa học", onClick: () => navigate(basePath) },
-          { label: dict.breadcrumbs.courseDetail || "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
-          { label: dict.breadcrumbs.classDetail || "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
-          { label: dict.breadcrumbs.postDetail || "Chi tiết bài viết", active: true },
+          { label: dict.breadcrumbs.home, onClick: () => navigate("/workspace") },
+          { label: isStudent ? dict.breadcrumbs.myLearning : dict.breadcrumbs.myCourses, onClick: () => navigate(basePath) },
+          { label: dict.breadcrumbs.allCourses, onClick: () => navigate(basePath) },
+          { label: dict.breadcrumbs.courseDetail, onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+          { label: dict.breadcrumbs.classDetail, onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
+          { label: dict.breadcrumbs.postDetail, active: true },
         ]}
       />
 
@@ -153,7 +153,7 @@ const PostDetailPage = () => {
           onClick={handleBack}
           className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
         >
-          <ArrowLeft size={16} /> {dict.back || "Quay lại"}
+          <ArrowLeft size={16} /> {dict.back}
         </button>
 
         {/* ── Nội dung bài đăng ── */}
@@ -169,7 +169,7 @@ const PostDetailPage = () => {
           showAll={showAll}
           previewCount={3}
           currentUserAvatar={user?.avatarImageUrl || ""}
-          currentUserName={user?.fullName || dict.you || "Bạn"}
+          currentUserName={user?.fullName || dict.you}
           onSubmit={handleSubmit}
           onReply={(c) => setReplyingTo(c)}
           onViewReplies={(c) => console.log("view replies of", c)}

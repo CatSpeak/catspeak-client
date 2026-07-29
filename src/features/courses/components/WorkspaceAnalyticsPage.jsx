@@ -1,9 +1,12 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { BarChart, Construction } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const WorkspaceAnalyticsPage = () => {
   const navigate = useNavigate()
+  const { t } = useLanguage()
+  const analytics = t.courses?.analytics || {}
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e] h-full">
@@ -15,17 +18,19 @@ const WorkspaceAnalyticsPage = () => {
             className="cursor-pointer hover:underline"
             onClick={() => navigate("/workspace")}
           >
-            Home
+            {t.nav?.home || "Home"}
           </button>
           <span>/</span>
-          <span className="text-[#990011] font-semibold">Analytics</span>
+          <span className="text-[#990011] font-semibold">
+            {analytics.title || "Analytics"}
+          </span>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight flex items-center gap-2">
           <BarChart className="text-[#990011]" size={32} />
-          Analytics
+          {analytics.title || "Analytics"}
         </h1>
       </div>
 
@@ -35,17 +40,17 @@ const WorkspaceAnalyticsPage = () => {
           <Construction className="text-gray-400" size={40} />
         </div>
         <h2 className="text-xl font-bold text-gray-800 mb-2">
-          Feature Under Construction
+          {analytics.underConstruction || "Feature Under Construction"}
         </h2>
         <p className="text-gray-500 text-center max-w-md text-sm leading-relaxed mb-6">
-          The Analytics dashboard is currently being developed. Soon you will be able to track your course performance, student engagement, and revenue here.
+          {analytics.description || "The Analytics dashboard is currently being developed. Soon you will be able to track your course performance, student engagement, and revenue here."}
         </p>
         <button
           type="button"
           onClick={() => navigate("/workspace")}
           className="px-6 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white font-semibold rounded-xl transition-all active:scale-95 text-sm"
         >
-          Return to Workspace
+          {analytics.returnToWorkspace || "Return to Workspace"}
         </button>
       </div>
     </div>

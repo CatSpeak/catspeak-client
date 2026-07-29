@@ -16,19 +16,19 @@ import {
   filterByStatus,
   mapTeacherCourseSummary,
 } from "../utils/courseTransforms"
-
-const STATUS_OPTIONS = [
-  { value: "all", label: "All Status" },
-  { value: "teaching", label: "Teaching" },
-  { value: "open", label: "Open" },
-  { value: "archived", label: "Archived" },
-]
+import { getCourseLocale } from "../utils/courseUtils"
 
 const MyCoursesPage = () => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const navigate = useNavigate()
   const c = t.courses || {}
   const mc = c.myCourses || {}
+  const statusOptions = [
+    { value: "all", label: mc.statusAll || "All Status" },
+    { value: "teaching", label: c.teachingStatus || "Teaching" },
+    { value: "open", label: c.openEnrollmentStatus || "Open" },
+    { value: "archived", label: c.archive || "Archived" },
+  ]
 
   const [searchParams, setSearchParams] = useSearchParams()
   const viewMode = searchParams.get("view") || "grid"
@@ -74,7 +74,18 @@ const MyCoursesPage = () => {
   const error = coursesData === undefined && coursesError
   const refreshError = coursesError
 
-  const courseList = useMemo(() => coursesRaw.map(mapTeacherCourseSummary), [coursesRaw])
+  const courseList = useMemo(
+    () => coursesRaw.map((course, index) => mapTeacherCourseSummary(
+      course,
+      index,
+      {
+        studentsCount: c.studentsCount,
+        tba: c.workspaceUi?.tba,
+      },
+      getCourseLocale(language),
+    )),
+    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, language],
+  )
   const filteredDisplayList = useMemo(() => filterByStatus(courseList, statusFilter), [courseList, statusFilter])
 
   const cardLabels = {
@@ -85,6 +96,8 @@ const MyCoursesPage = () => {
     progress: c.progress || "Progress",
     courseLabel: c.course || "Course",
     classLabel: c.class || "Class",
+    classCount: c.classCount || "{{count}} classes",
+    actionsFor: c.actionsForCourse || "Actions for {{title}}",
   }
 
   if (isLoading) {
@@ -94,7 +107,7 @@ const MyCoursesPage = () => {
   if (error) {
     return (
       <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
-        <span>{mc.loadFailed || "The course overview could not be loaded. Please try again."}</span>
+        <span>{mc.loadCoursesFailed || "The course overview could not be loaded. Please try again."}</span>
         <button
           type="button"
           onClick={() => refetchCourses()}
@@ -115,12 +128,12 @@ const MyCoursesPage = () => {
     <div className="flex flex-col gap-4 text-[#2e2e2e]">
       {isRefreshing && (
         <span role="status" className="sr-only">
-          {mc.refreshing || "Refreshing course overview"}
+          {mc.refreshingCourses || "Refreshing course overview"}
         </span>
       )}
       {refreshError && !error && (
         <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
-          {mc.refreshFailed || "Some overview data could not be refreshed. The displayed information may be out of date."}
+          {mc.refreshCoursesFailed || "Some course data could not be refreshed. The displayed information may be out of date."}
         </div>
       )}
       <div className="flex justify-between items-center flex-wrap gap-2">
@@ -156,7 +169,7 @@ const MyCoursesPage = () => {
           <CourseSelectFilter
             value={statusFilter}
             onChange={setStatusFilter}
-            options={STATUS_OPTIONS}
+            options={statusOptions}
           />
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </div>

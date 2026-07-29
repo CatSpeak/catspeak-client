@@ -12,9 +12,10 @@ import CourseTabs from "../components/CourseTabs"
 import TablePagination from "../components/shared/TablePagination"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapClassTableRow } from "../utils/courseTransforms"
+import { getCourseLocale } from "../utils/courseUtils"
 
 const AllClassesPage = () => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const c = t.courses || {}
   const ac = c.allClasses || {}
   const navigate = useNavigate()
@@ -43,7 +44,15 @@ const AllClassesPage = () => {
   })
 
   const classes = (Array.isArray(data?.data) ? data.data : [])
-    .map((cls, index) => mapClassTableRow(cls, index, ac))
+    .map((cls, index) => mapClassTableRow(
+      cls,
+      index,
+      {
+        studentsRatio: ac.studentsRatio,
+        tba: c.workspaceUi?.tba,
+      },
+      getCourseLocale(language),
+    ))
   const pagination = data?.pagination || { page: 1, pageSize: 5, totalItems: 0, totalPages: 1 }
   const isInitialLoading = (
     isLoading
@@ -134,7 +143,7 @@ const AllClassesPage = () => {
         </div>
       ) : (
         <div className="text-center py-12 text-sm text-gray-400 font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-          No classes found.
+          {ac.noResults || "No classes found."}
         </div>
       )}
     </div>

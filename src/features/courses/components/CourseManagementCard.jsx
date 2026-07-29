@@ -21,7 +21,8 @@ const CourseActionMenu = ({ item, labels, onEdit, onDelete }) => {
     <div ref={menuRef} className="relative" onClick={(event) => event.stopPropagation()}>
       <button
         type="button"
-        aria-label={labels.actions || `Actions for ${item.title || "course"}`}
+        aria-label={(labels.actionsFor || "Actions for {{title}}")
+          .replace("{{title}}", item.title || labels.courseLabel || "course")}
         aria-expanded={isOpen}
         aria-haspopup="menu"
         onClick={(event) => {
@@ -140,7 +141,10 @@ const CourseManagementCard = ({
                 </p>
               )}
               <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
-                <MetaRow icon={BookOpen}>{item.classCount} class{item.classCount !== 1 ? "es" : ""}</MetaRow>
+                <MetaRow icon={BookOpen}>
+                  {(labels.classCount || "{{count}} classes")
+                    .replace("{{count}}", String(item.classCount))}
+                </MetaRow>
                 <MetaRow icon={Users}>{item.students}</MetaRow>
               </div>
             </>

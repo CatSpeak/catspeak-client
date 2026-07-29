@@ -105,11 +105,17 @@ const formatSubmissionFileSize = (value) => {
     : "—"
 }
 
+const interpolate = (template, values) => Object.entries(values).reduce(
+  (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
+  template || "",
+)
+
 const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignmentId: assignmentIdProp, classId, onBack }) => {
   const { language, t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const cg = c.grading || {}
+  const sa = cg.studentAssignment || {}
   const ca = c.createAssignment || {}
 
   const assignmentId = assignmentIdProp ?? initialAssignment?.id
@@ -345,11 +351,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     if (isSubmitting || files.length === 0 || maxFiles === null) return
 
     if (selectedFiles.length + files.length > maxFiles) {
-      toast.error(
-        language === "vi"
-          ? `Tối đa ${maxFiles} tệp tin cho phép`
-          : `Maximum of ${maxFiles} files allowed`
-      )
+      toast.error(interpolate(sa.maxFilesAllowed, { maxFiles }))
       return
     }
 
@@ -360,35 +362,26 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
     for (const file of files) {
       if (!file || typeof file.name !== "string") {
-        toast.error(language === "vi" ? "Tệp đã chọn không hợp lệ." : "The selected file is invalid.")
+        toast.error(sa.invalidSelectedFile)
         return
       }
 
       const extension = getFileExtension(file.name)
       if (allowedFileTypes.length > 0 && !allowedFileTypes.includes(extension)) {
-        toast.error(
-          language === "vi"
-            ? `Định dạng tệp ${extension || "(không có)"} không hợp lệ. Chỉ chấp nhận: ${allowedFileTypes.join(", ")}`
-            : `File format ${extension || "(none)"} is not allowed. Supported: ${allowedFileTypes.join(", ")}`
-        )
+        toast.error(interpolate(sa.fileFormatNotAllowed, {
+          extension: extension || sa.noFileExtension,
+          formats: allowedFileTypes.join(", "),
+        }))
         return
       }
 
       const fileSize = Number(file.size)
       if (!Number.isFinite(fileSize) || fileSize <= 0) {
-        toast.error(
-          language === "vi"
-            ? `Tệp ${file.name} bị rỗng hoặc không hợp lệ`
-            : `File ${file.name} is empty or invalid`
-        )
+        toast.error(interpolate(sa.fileEmptyOrInvalid, { fileName: file.name }))
         return
       }
       if (fileSize > MAX_FILE_SIZE_BYTES) {
-        toast.error(
-          language === "vi"
-            ? `Kích thước tệp ${file.name} vượt quá 50MB`
-            : `File ${file.name} exceeds the 50MB limit`
-        )
+        toast.error(interpolate(sa.fileExceedsLimit, { fileName: file.name }))
         return
       }
 
@@ -397,11 +390,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
         existingFingerprints.has(fingerprint)
         || selectionFingerprints.has(fingerprint)
       ) {
-        toast.error(
-          language === "vi"
-            ? `Tệp ${file.name} đã được chọn`
-            : `File ${file.name} has already been selected`
-        )
+        toast.error(interpolate(sa.fileAlreadySelected, { fileName: file.name }))
         return
       }
       selectionFingerprints.add(fingerprint)
@@ -433,11 +422,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
       && !allowsLateSubmission
     )
     if (!allowSubmission || deadlineHasPassed) {
-      toast.error(
-        language === "vi"
-          ? "Bài nộp đã khóa hoặc hết hạn nộp!"
-          : "Submissions are closed or expired!"
-      )
+      toast.error(sa.submissionsClosedOrExpired)
       return
     }
 
@@ -449,29 +434,17 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     const hasTextChanged = currentText !== originalText
 
     if (!submission && !hasText && !hasNewFiles) {
-      toast.error(
-        language === "vi"
-          ? "Vui lòng nhập nội dung hoặc tải lên ít nhất một tệp."
-          : "Enter submission text or upload at least one file."
-      )
+      toast.error(sa.contentOrFileRequired)
       return
     }
 
     if (submission && !hasTextChanged && !hasNewFiles) {
-      toast.error(
-        language === "vi"
-          ? "Hãy thay đổi nội dung hoặc chọn tệp mới trước khi nộp lại."
-          : "Change the text or select a new file before resubmitting."
-      )
+      toast.error(sa.changeBeforeResubmit)
       return
     }
 
     if (!hasText && !hasNewFiles && !hasExistingFiles) {
-      toast.error(
-        language === "vi"
-          ? "Bài nộp không được để trống."
-          : "The submission cannot be empty."
-      )
+      toast.error(sa.submissionCannotBeEmpty)
       return
     }
 
@@ -496,11 +469,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
       if (!componentActiveRef.current) return
 
-      toast.success(
-        language === "vi"
-          ? "Nộp bài tập thành công!"
-          : "Successfully submitted assignment!"
-      )
+      toast.success(sa.submitSuccess)
       setSelectedFiles([])
       setLastSubmittedText(currentText)
       setTextDraft(currentText)
@@ -510,9 +479,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
       toast.error(getSafeSubmissionErrorMessage(
         err,
         language,
-        language === "vi"
-          ? "Không thể nộp bài. Vui lòng kiểm tra nội dung và thử lại."
-          : "The assignment could not be submitted. Check your work and try again."
+        sa.submitError
       ))
     } finally {
       submitInFlightRef.current = false
@@ -523,7 +490,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     return (
       <div
         role="status"
-        aria-label={language === "vi" ? "Đang tải bài tập" : "Loading assignment"}
+        aria-label={sa.loadingAssignment}
         className="flex justify-center items-center min-h-[400px]"
       >
         <LoadingSpinner />
@@ -558,17 +525,11 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
             ? getSafeSubmissionErrorMessage(
               requestError,
               language,
-              language === "vi"
-                ? "Không thể tải bài tập hoặc bài nộp."
-                : "The assignment or submission could not be loaded."
+              sa.loadAssignmentError
             )
             : isDraftAssignment
-              ? (language === "vi"
-                ? "Bài tập này chưa được xuất bản."
-                : "This assignment has not been published.")
-              : (language === "vi"
-                ? "Dữ liệu bài tập hoặc bài nộp không hợp lệ."
-                : "The assignment or submission data is invalid.")}
+              ? sa.assignmentNotPublished
+              : sa.invalidAssignmentSubmissionData}
         </span>
         {classId && assignmentId && (
           <div className="flex flex-wrap gap-2">
@@ -582,7 +543,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               }}
               className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
             >
-              {language === "vi" ? "Thử lại" : "Try again"}
+              {sa.retry}
             </button>
             {typeof onBack === "function" && (
               <button
@@ -590,7 +551,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 onClick={onBack}
                 className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
               >
-                {language === "vi" ? "Quay lại" : "Go back"}
+                {sa.goBack}
               </button>
             )}
           </div>
@@ -603,7 +564,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     if (!submission) {
       return (
         <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 uppercase tracking-wide">
-          {cd.statusNotSubmitted || "Chưa nộp"}
+          {cd.statusNotSubmitted}
         </span>
       )
     }
@@ -617,30 +578,30 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     if (displayStatus === "returned") {
       return (
         <span className="bg-emerald-50 text-emerald-650 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 uppercase tracking-wide">
-          {cg.filterReturned || cd.statusGraded || "Đã trả bài"}
+          {cg.filterReturned}
         </span>
       )
     }
     if (displayStatus === "late") {
       return (
         <span className="bg-red-50 text-red-650 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 uppercase tracking-wide">
-          {cg.filterLate || "Nộp muộn"}
+          {cg.filterLate}
         </span>
       )
     }
     return (
       <span className="bg-orange-50 text-orange-655 text-[10px] font-extrabold px-2.5 py-1 rounded border border-orange-100 uppercase tracking-wide">
-        {cd.statusNeedsGrading || "Đã nộp"}
+        {cd.statusNeedsGrading}
       </span>
     )
   }
 
   // File rendering function
   const renderFileRow = (file, index, isPending = false) => {
-    const { name: rawName, url, size } = getFileMeta(file)
+    const { name: rawName, url, size } = getFileMeta(file, sa.unnamedFile)
     const name = typeof rawName === "string" && rawName.trim()
       ? rawName
-      : (language === "vi" ? "Tệp không tên" : "Unnamed file")
+      : sa.unnamedFile
     const safeUrl = getSafeFileUrl(url)
 
     return (
@@ -662,9 +623,9 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               target="_blank"
               rel="noopener noreferrer"
               referrerPolicy="no-referrer"
-              aria-label={`${language === "vi" ? "Xem tệp" : "View file"}: ${name}`}
+              aria-label={interpolate(sa.viewFileNamed, { fileName: name })}
               className="p-1.5 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-lg transition-colors"
-              title={language === "vi" ? "Xem trực tiếp" : "View file"}
+              title={sa.viewFile}
             >
               <Eye size={14} />
             </a>
@@ -674,9 +635,9 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               type="button"
               onClick={() => removePendingFile(index)}
               disabled={isSubmitting}
-              aria-label={`${language === "vi" ? "Xóa tệp" : "Remove file"}: ${name}`}
+              aria-label={interpolate(sa.removeFileNamed, { fileName: name })}
               className="p-1.5 text-gray-400 hover:text-red-655 hover:bg-red-50 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              title="Xóa"
+              title={sa.removeFile}
             >
               <Trash2 size={14} />
             </button>
@@ -695,9 +656,9 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
           <button
             type="button"
             onClick={onBack}
-            aria-label={language === "vi" ? "Quay lại" : "Go back"}
+            aria-label={sa.goBack}
             className="p-2.5 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl transition-all cursor-pointer shadow-2xs"
-            title="Quay lại"
+            title={sa.goBack}
           >
             <ChevronLeft size={16} />
           </button>
@@ -705,7 +666,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
             <h1 className="text-2xl font-black text-gray-950 tracking-tight leading-tight">
               {typeof assignment.name === "string" && assignment.name.trim()
                 ? assignment.name
-                : (language === "vi" ? "Bài tập chưa đặt tên" : "Untitled assignment")}
+                : sa.untitledAssignment}
             </h1>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {getStatusBadge()}
@@ -714,23 +675,23 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 <span className="bg-gray-150 text-gray-500 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide flex items-center gap-1">
                   <Lock size={10} />
                   {isClosed
-                    ? (cg.badgeClosed || "Đã đóng")
-                    : (cg.badgeDraft || (language === "vi" ? "Nháp" : "Draft"))}
+                    ? cg.badgeClosed
+                    : cg.badgeDraft}
                 </span>
               ) : (
                 <span className="bg-emerald-50 text-emerald-600 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 uppercase tracking-wide flex items-center gap-1">
                   <Unlock size={10} />
-                  {language === "vi" ? "MỞ" : "OPEN"}
+                  {sa.badgeOpen}
                 </span>
               )}
 
               {dueDateMs !== null && (isExpired ? (
                 <span className="bg-red-50 border border-red-100 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
-                  {cg.badgeExpired || "Hết hạn"}
+                  {cg.badgeExpired}
                 </span>
               ) : (
                 <span className="bg-orange-50 border border-orange-100 text-orange-600 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
-                  {cg.badgeUpcoming || "Sắp đến hạn"}
+                  {cg.badgeUpcoming}
                 </span>
               ))}
             </div>
@@ -742,11 +703,13 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
           <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 border border-gray-150 rounded-xl px-4 py-2.5 w-fit">
             <Calendar size={14} className="text-gray-400" />
             <span className="font-semibold">
-              {language === "vi" ? "Hạn nộp:" : "Deadline:"}{" "}
+              {sa.deadlineLabel}{" "}
               <strong className="text-gray-700 font-extrabold">
                 {formatSubmissionDate(
                   assignment.dueDate,
-                  language === "vi" ? "vi-VN" : "en-US"
+                  language === "vi"
+                    ? "vi-VN"
+                    : (language === "zh" ? "zh-CN" : "en-US")
                 )}
               </strong>
             </span>
@@ -762,7 +725,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
             <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
               <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
               <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
-                {ca.descriptionLabel || "Mô tả / Hướng dẫn bài tập"}
+                {ca.descriptionLabel}
               </h3>
             </div>
 
@@ -771,7 +734,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               className="text-xs font-semibold text-gray-700 min-h-[80px]"
               fallback={
                 <span className="italic text-gray-400 font-medium text-xs">
-                  {language === "vi" ? "Không có mô tả chi tiết." : "No detailed description provided."}
+                  {sa.noDetailedDescription}
                 </span>
               }
             />
@@ -781,7 +744,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               <div className="mt-4 border-t border-gray-100 pt-4">
                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                   <Paperclip size={12} />
-                  {ca.attachmentsLabel || "Tài liệu đính kèm từ giáo viên"}
+                  {ca.attachmentsLabel}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 animate-fadeIn">
                   {parsedTeacherAttachments.map((file, idx) => renderFileRow(file, idx))}
@@ -800,7 +763,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               <div className="flex items-center gap-2 border-b border-gray-50 pb-3">
                 <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
                 <h3 className="text-sm font-extrabold text-[#990011] uppercase tracking-wider">
-                  {submission ? (language === "vi" ? "NỘP LẠI BÀI" : "RESUBMIT") : (language === "vi" ? "NỘP BÀI" : "SUBMIT ASSIGNMENT")}
+                  {submission ? sa.resubmitHeading : sa.submitHeading}
                 </h3>
               </div>
 
@@ -811,7 +774,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                     htmlFor="assignment-text-submission"
                     className="text-[10px] font-black text-gray-400 tracking-wider uppercase flex justify-between"
                   >
-                    <span>{ca.directInput || "Nội dung bài làm"}</span>
+                    <span>{ca.directInput}</span>
                   </label>
                   <div className="assignment-editor overflow-hidden transition-all">
                     <Editor
@@ -827,7 +790,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                         plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
                         toolbar:
                           "bold italic underline strikethrough | emoticons link | bullist numlist",
-                        placeholder: language === "vi" ? "Nhập nội dung bài làm của bạn tại đây..." : "Type your submission here...",
+                        placeholder: sa.textSubmissionPlaceholder,
                         skin: "oxide",
                       }}
                     />
@@ -839,12 +802,13 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               {allowsFileSubmission && (
                 <div className="flex flex-col gap-2.5">
                   <label className="text-[10px] font-black text-gray-400 tracking-wider uppercase leading-none">
-                    {ca.uploadFile || "Tải lên tệp tin"}
+                    {ca.uploadFile}
                   </label>
                   <div className="text-[10px] text-gray-400 font-semibold leading-normal">
-                    {language === "vi"
-                      ? `Hỗ trợ: ${allowedFileTypes.join(", ") || "Tất cả"} (Tối đa ${maxFiles} tệp, tối đa 50MB/tệp)`
-                      : `Supported formats: ${allowedFileTypes.join(", ") || "Any"} (Max ${maxFiles} files, 50MB max each)`}
+                    {interpolate(sa.supportedFilesSummary, {
+                      formats: allowedFileTypes.join(", ") || sa.anyFileFormat,
+                      maxFiles,
+                    })}
                   </div>
 
                   <div
@@ -867,7 +831,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                     role="button"
                     tabIndex={isSubmitting ? -1 : 0}
                     aria-disabled={isSubmitting}
-                    aria-label={ca.dropzoneMainText || "Select submission files"}
+                    aria-label={ca.dropzoneMainText}
                     className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all ${isSubmitting
                       ? "cursor-not-allowed opacity-60"
                       : "cursor-pointer"
@@ -878,7 +842,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   >
                     <Upload size={24} className="text-gray-400 mb-2" />
                     <span className="text-xs font-bold text-gray-700 leading-snug">
-                      {ca.dropzoneMainText || "Nhấn để chọn tệp hoặc kéo thả vào đây"}
+                      {ca.dropzoneMainText}
                     </span>
                   </div>
                   <input
@@ -897,7 +861,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   {selectedFiles.length > 0 && (
                     <div className="flex flex-col gap-2 mt-2">
                       <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider leading-none mb-1">
-                        {language === "vi" ? "Tệp chuẩn bị tải lên:" : "Files pending upload:"}
+                        {sa.filesPendingUpload}
                       </span>
                       {selectedFiles.map((file, idx) => renderFileRow(file, idx, true))}
                     </div>
@@ -919,16 +883,14 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                       className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"
                     />
                     <span className="sr-only">
-                      {language === "vi" ? "Đang nộp bài" : "Submitting assignment"}
+                      {sa.submittingAssignment}
                     </span>
                   </>
                 ) : (
                   <>
                     <Upload size={14} />
                     <span>
-                      {submission
-                        ? (language === "vi" ? "NỘP LẠI BÀI" : "RESUBMIT ASSIGNMENT")
-                        : (language === "vi" ? "NỘP BÀI TẬP" : "SUBMIT ASSIGNMENT")}
+                      {submission ? sa.resubmitButton : sa.submitButton}
                     </span>
                   </>
                 )}
@@ -938,14 +900,14 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
             <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-4 border-t-4 border-t-red-500 animate-fadeIn">
               <h3 className="text-xs font-black text-red-500 uppercase tracking-wider flex items-center gap-1.5 leading-none">
                 <AlertTriangle size={14} />
-                {language === "vi" ? "BÀI NỘP ĐÃ KHÓA" : "SUBMISSIONS CLOSED"}
+                {sa.submissionsClosedHeading}
               </h3>
               <p className="text-xs font-semibold text-gray-500 leading-relaxed">
                 {isClosed
-                  ? (language === "vi" ? "Giảng viên đã khóa hoặc đóng bài tập này, học viên không thể nộp bài hoặc chỉnh sửa bài làm." : "The instructor has locked submissions for this assignment. You cannot submit or edit.")
+                  ? sa.submissionsLockedDescription
                   : !isPublishedAssignment
-                    ? (language === "vi" ? "Bài tập này chưa sẵn sàng để nộp." : "This assignment is not available for submission.")
-                    : (language === "vi" ? "Hạn nộp bài đã qua và nộp muộn không được cho phép đối với bài tập này." : "The submission deadline has passed and late submissions are not allowed for this assignment.")}
+                    ? sa.assignmentUnavailableDescription
+                    : sa.deadlinePassedDescription}
               </p>
             </div>
           )}
@@ -957,7 +919,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
           {submission && submissionStatus === "returned" && (
             <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
               <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
-                {language === "vi" ? "KẾT QUẢ ĐÁNH GIÁ" : "GRADING DETAILS"}
+                {sa.gradingDetails}
               </h3>
 
               <div className="flex items-center gap-4 bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 shadow-2xs">
@@ -971,12 +933,12 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-gray-400 leading-none">
-                    {language === "vi"
-                      ? `Thang điểm tối đa ${displayMaxScore ?? "—"}`
-                      : `Out of ${displayMaxScore ?? "—"}`}
+                    {interpolate(sa.outOfScore, {
+                      maxScore: displayMaxScore ?? "—",
+                    })}
                   </span>
                   <span className="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider mt-2 inline-block w-fit">
-                    {cg.filterReturned || "ĐÃ TRẢ BÀI"}
+                    {cg.filterReturned}
                   </span>
                 </div>
               </div>
@@ -984,7 +946,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               {/* Feedback comment */}
               <div className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider leading-none">
-                  {cg.generalFeedback || "Nhận xét của giáo viên"}
+                  {cg.generalFeedback}
                 </span>
                 {submissionComment ? (
                   <p className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750 leading-relaxed whitespace-pre-line">
@@ -992,7 +954,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   </p>
                 ) : (
                   <p className="italic text-gray-400 text-xs font-medium pl-1">
-                    {language === "vi" ? "Chưa có nhận xét chi tiết." : "No feedback comments provided."}
+                    {sa.noFeedback}
                   </p>
                 )}
               </div>
@@ -1005,12 +967,12 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               <div className="flex items-center gap-2">
                 <span className={`w-1.5 h-4 rounded-full ${submission ? "bg-emerald-500" : "bg-gray-300"}`} />
                 <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
-                  {cg.mySubmission || (language === "vi" ? "Bài làm của tôi" : "My Submission")}
+                  {cg.mySubmission}
                 </h3>
               </div>
               {submission ? (
                 <span className="text-[10px] text-gray-400 font-semibold">
-                  {cg.submittedAtLabel || (language === "vi" ? "Nộp lúc: " : "Submitted on: ")}
+                  {cg.submittedAtLabel}
                   <strong className="text-gray-600 font-extrabold">
                     {submission.submittedAt
                       ? formatSubmissionDate(
@@ -1024,7 +986,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 </span>
               ) : (
                 <span className="text-[9px] bg-gray-100 text-gray-500 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
-                  {cg.filterNotSubmitted || (language === "vi" ? "Chưa nộp" : "Not Submitted")}
+                  {cg.filterNotSubmitted}
                 </span>
               )}
             </div>
@@ -1035,14 +997,14 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 {allowsTextSubmission && (
                   <div className="mt-2">
                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2.5">
-                      {cg.textResponseHeader || (language === "vi" ? "Nội dung bài viết" : "Text Response")}
+                      {cg.textResponseHeader}
                     </h4>
                     <RenderHTML
                       html={displayedSubmissionText}
                       className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750"
                       fallback={
                         <span className="italic text-gray-400 text-xs font-medium">
-                          {cg.noTextResponse || (language === "vi" ? "Không có nội dung trả lời trực tiếp." : "No text response provided.")}
+                          {cg.noTextResponse}
                         </span>
                       }
                     />
@@ -1054,7 +1016,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   <div className="border-t border-gray-50">
                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <Paperclip size={12} />
-                      {cg.submittedFilesHeader || (language === "vi" ? "Các tệp tin đã nộp" : "Submitted Files")}
+                      {cg.submittedFilesHeader}
                     </h4>
                     <div className="grid grid-cols-1 gap-3">
                       {parsedSubmissionFiles.map((file, idx) => renderFileRow(file, idx))}
@@ -1069,13 +1031,10 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 </div>
                 <div className="flex flex-col gap-1 max-w-[260px]">
                   <span className="text-xs font-extrabold text-gray-700">
-                    {cg.noSubmissionYetTitle || (language === "vi" ? "Chưa có bài nộp" : "No Submission Yet")}
+                    {cg.noSubmissionYetTitle}
                   </span>
                   <p className="text-[11px] font-medium text-gray-400 leading-relaxed">
-                    {cg.noSubmissionYetMsg ||
-                      (language === "vi"
-                        ? "Bạn chưa gửi bài làm cho bài tập này. Hãy nhập nội dung và nhấn Nộp bài."
-                        : "You haven't submitted your response for this assignment yet. Complete your work and click Submit.")}
+                    {cg.noSubmissionYetMsg}
                   </p>
                 </div>
               </div>

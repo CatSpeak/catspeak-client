@@ -38,14 +38,14 @@ const CreateBulletinBoardModal = ({
     e.preventDefault()
 
     if (!title.trim()) {
-      toast.error("Vui lòng nhập tiêu đề!")
+      toast.error(dict.toastTitleRequired)
       return
     }
 
     // Check if content is empty or just <p><br></p>
     const cleanContent = content.replace(/<[^>]*>?/gm, '').trim()
     if (!cleanContent) {
-      toast.error("Vui lòng nhập nội dung!")
+      toast.error(dict.toastContentRequired)
       return
     }
 
@@ -66,7 +66,7 @@ const CreateBulletinBoardModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title={initialData ? (dict.editTitle || "Chỉnh sửa bảng tin") : (dict.title || "Tạo bảng tin")}
+      title={initialData ? dict.editTitle : dict.title}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -80,10 +80,10 @@ const CreateBulletinBoardModal = ({
             textColor={"#72000d"}
             borderColor={"#E2E2E2"}
           >
-            {dict.cancel || "Hủy"}
+            {dict.cancel}
           </PillButton>
           <PillButton onClick={handleSubmit}>
-            {dict.add || "Lưu"}
+            {initialData ? dict.save : dict.create}
           </PillButton>
         </div>
       }
@@ -93,13 +93,13 @@ const CreateBulletinBoardModal = ({
         {/* Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            {dict.boardName || "Tiêu đề"} <span className="text-[#EF4444]">*</span>
+            {dict.boardName} <span className="text-[#EF4444]">*</span>
           </label>
           <TextInput
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={dict.boardPlaceholder || "Nhập tiêu đề..."}
+            placeholder={dict.boardPlaceholder}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
         </div>
@@ -107,7 +107,7 @@ const CreateBulletinBoardModal = ({
         {/* Content Input + TinyMCE Rich Text Editor */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            {dict.content || "Nội dung"}
+            {dict.content}
           </label>
           <Editor
             tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
@@ -120,7 +120,7 @@ const CreateBulletinBoardModal = ({
               plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
               toolbar:
                 "bold italic underline strikethrough | emoticons link | bullist numlist",
-              placeholder: dict.contentPlaceholder || "Viết nội dung ở đây...",
+              placeholder: dict.contentPlaceholder,
               skin: "oxide",
               setup: (editor) => {
                 editor.on("focus", () => { })
@@ -135,7 +135,7 @@ const CreateBulletinBoardModal = ({
           {/* Allow Reply Toggle */}
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-[#191C1D]">
-              {dict.allowReply || "Cho phép học viên phản hồi"}
+              {dict.allowReply}
             </span>
             <Switch
               checked={allowReply}
@@ -148,7 +148,7 @@ const CreateBulletinBoardModal = ({
           {/* Visible to Students Toggle */}
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-[#191C1D]">
-              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
+              {dict.visibleToStudents}
             </span>
             <Switch
               checked={isVisible}
