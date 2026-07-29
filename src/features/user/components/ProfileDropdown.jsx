@@ -17,102 +17,103 @@ import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= breakpoint,
-  )
+  );
 
   useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`)
-    const handler = (e) => setIsMobile(e.matches)
-    mql.addEventListener("change", handler)
-    return () => mql.removeEventListener("change", handler)
-  }, [breakpoint])
+    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = (e) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, [breakpoint]);
 
-  return isMobile
-}
+  return isMobile;
+};
 
 const ProfileDropdown = () => {
-  const { t } = useLanguage()
-  const navigate = useNavigate()
-  const { user: authUser, isAuthenticated } = useAuth()
-  const [logoutApi] = useLogoutMutation()
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+  const { user: authUser, isAuthenticated } = useAuth();
+  const [logoutApi] = useLogoutMutation();
   const { data: userData, isLoading } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
-  })
+  });
   const { data: detailedProfile } = useGetUserProfileQuery(undefined, {
     skip: !isAuthenticated,
-  })
-  const [isOpen, setIsOpen] = useState(false)
-  const [showLogoutWarning, setShowLogoutWarning] = useState(false)
-  const menuRef = useRef(null)
-  const isMobile = useIsMobile(425)
-  const { isInCall } = useSelector((state) => state.videoCall)
-  const { isTeacher, isStudent, switchRole, isTeacherProfile } = useRoleOverride()
+  });
+  const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutWarning, setShowLogoutWarning] = useState(false);
+  const menuRef = useRef(null);
+  const isMobile = useIsMobile(425);
+  const { isInCall } = useSelector((state) => state.videoCall);
 
-  const user = { ...(userData?.data ?? authUser ?? {}), ...(detailedProfile?.data ?? {}) }
-
+  const user = {
+    ...(userData?.data ?? authUser ?? {}),
+    ...(detailedProfile?.data ?? {}),
+  };
 
   const handleToggleMenu = () => {
-    setIsOpen((prev) => !prev)
-  }
+    setIsOpen((prev) => !prev);
+  };
 
   const handleCloseMenu = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleLogout = () => {
     if (isInCall) {
-      setShowLogoutWarning(true)
+      setShowLogoutWarning(true);
     } else {
-      executeLogout()
+      executeLogout();
     }
-  }
+  };
 
   const executeLogout = () => {
-    setShowLogoutWarning(false)
-    logoutApi()
-    handleCloseMenu()
-    navigate("/")
-  }
+    setShowLogoutWarning(false);
+    logoutApi();
+    handleCloseMenu();
+    navigate("/");
+  };
 
   const handleProfileClick = () => {
-    handleCloseMenu()
-    navigate(`/profile/${user?.accountId || user?.id || ""}`)
-  }
+    handleCloseMenu();
+    navigate(`/profile/${user?.accountId || user?.id || ""}`);
+  };
 
   const handlePricingClick = () => {
-    handleCloseMenu()
-    navigate("/pricing")
-  }
+    handleCloseMenu();
+    navigate("/pricing");
+  };
 
   const handleSettingsClick = () => {
-    handleCloseMenu()
-    navigate("/setting")
-  }
+    handleCloseMenu();
+    navigate("/setting");
+  };
 
   const handleInstructorClick = () => {
-    handleCloseMenu()
-    navigate("/setting/instructor")
-  }
+    handleCloseMenu();
+    navigate("/setting/instructor");
+  };
 
   const handleBillingClick = () => {
-    handleCloseMenu()
-    navigate("/billing")
-  }
+    handleCloseMenu();
+    navigate("/billing");
+  };
 
   // Click outside to close (desktop only)
-  useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile })
+  useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile });
 
   // Lock body scroll when fullscreen on mobile
-  useScrollLock(isOpen && isMobile)
+  useScrollLock(isOpen && isMobile);
 
   const getInitials = (name) => {
-    return name ? name.charAt(0).toUpperCase() : "U"
-  }
+    return name ? name.charAt(0).toUpperCase() : "U";
+  };
 
   const menuItemClass =
-    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm hover:bg-[#F6F6F6]"
+    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm hover:bg-[#F6F6F6]";
 
   const menuItemDisabledClass =
-    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-[#7A7574] cursor-not-allowed"
+    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-[#7A7574] cursor-not-allowed";
 
   const dropdownContent = (
     <>
@@ -138,21 +139,12 @@ const ProfileDropdown = () => {
         />
 
         <div className="min-w-0 flex flex-col justify-center">
-          <p className="m-0 truncate text-base font-medium flex items-center gap-1">
-            {user?.nickname ? (
-              <>
-                <span>{user.nickname}</span>
-                <span className="text-sm font-medium text-gray-700">
-                  ({t.profile?.personalInfo?.nickname || "Biệt danh"})
-                </span>
-              </>
-            ) : (
-              user?.fullName || user?.username || "User"
-            )}
+          <p className="m-0 truncate text-base font-semibold text-gray-900">
+            {user?.fullName || user?.username || "User"}
           </p>
-          {user?.nickname && (user?.fullName || user?.username) && (
-            <p className="m-0 truncate text-sm text-gray-500">
-              {user.fullName || user.username}
+          {user?.nickname && (
+            <p className="m-0 truncate text-xs text-gray-500 mt-0.5">
+              {user.nickname} ({t.profile?.personalInfo?.nickname || "Biệt danh"})
             </p>
           )}
         </div>
@@ -189,7 +181,6 @@ const ProfileDropdown = () => {
       <div className="border-t border-[#e5e5e5]" />
 
       <div className="flex flex-col gap-1 p-1">
-
         <button onClick={handleProfileClick} className={menuItemClass}>
           <User size={20} />
           <span>{t.header?.personalPage || "Trang cá nhân"}</span>
@@ -220,7 +211,7 @@ const ProfileDropdown = () => {
         </button>
       </div>
     </>
-  )
+  );
 
   // Mobile: fullscreen portal
   const mobileDropdown = createPortal(
@@ -247,7 +238,7 @@ const ProfileDropdown = () => {
       )}
     </AnimatePresence>,
     document.body,
-  )
+  );
 
   return (
     <div className="relative" ref={menuRef}>
@@ -305,7 +296,7 @@ const ProfileDropdown = () => {
         confirmVariant="destructive"
       />
     </div>
-  )
-}
+  );
+};
 
-export default ProfileDropdown
+export default ProfileDropdown;
