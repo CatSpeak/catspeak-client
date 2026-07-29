@@ -98,7 +98,7 @@ const ClassDetailPage = () => {
     try {
       await deleteClass({ id, courseId: classData?.courseId }).unwrap()
       toast.success(cd.toastCancelSuccess || "Class cancelled successfully")
-      navigate("/workspace/courses")
+      navigate("/workspace/classes")
     } catch {
       toast.error("Failed to cancel class")
     } finally {

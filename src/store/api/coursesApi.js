@@ -810,7 +810,7 @@ export const coursesApi = baseApi.injectEndpoints({
           body: {
             paymentType: "ClassOpeningFee",
             pendingClassData: JSON.stringify(pendingClassData),
-            returnUrl: window.location.origin + "/workspace/courses/all-classes",
+            returnUrl: window.location.origin + "/workspace/classes/all-classes",
             cancelUrl,
             planId: 0,
             classId: 0,

@@ -228,7 +228,7 @@ const MyClassesPage = () => {
         {filteredDisplayList.length > 0 && (
           <button
             type="button"
-            onClick={() => navigate("/workspace/classes/all")}
+            onClick={() => navigate("/workspace/classes/all-classes")}
             className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2"
           >
             {c.myCourses?.viewAll || "View all"}

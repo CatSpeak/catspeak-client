@@ -88,6 +88,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               if (item.lang && item.lang !== currentLang) return false
               if (isHorizontal && item.showOnHorizontalBar === false) return false
               if (item.isPrivate && !isAuthenticated) return false
+              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule"]
+              if (teacherTabs.includes(item.key) && isStudent) return false
               return true
             })
             .map((item) => {

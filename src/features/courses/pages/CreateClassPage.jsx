@@ -618,7 +618,7 @@ const CreateClassPage = () => {
           return
         }
         toast.success(cc.toastUpdateSuccess || "Class updated successfully!")
-        navigate("/workspace/courses/all-classes")
+        navigate("/workspace/classes/all-classes")
       } else {
         request = createClass(payload)
         activeMutationRequestRef.current = request
@@ -646,7 +646,7 @@ const CreateClassPage = () => {
         } else if (resultPayload.classId) {
           // Free flow (capacity ≤ 6): class created immediately
           toast.success(cc.toastCreateSuccess || "Class created successfully!")
-          navigate("/workspace/courses/all-classes")
+          navigate("/workspace/classes/all-classes")
         } else {
           throw new Error("Missing class ID or checkout URL")
         }
@@ -707,7 +707,7 @@ const CreateClassPage = () => {
         return
       }
       toast.success(cc.toastDeleteSuccess || "Class deleted successfully!")
-      navigate("/workspace/courses/all-classes")
+      navigate("/workspace/classes/all-classes")
     } catch (error) {
       if (
         !mountedRef.current
@@ -801,7 +801,7 @@ const CreateClassPage = () => {
         <span>/</span>
         <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
         <span>/</span>
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
+        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/classes/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
         <span>/</span>
         <span className="text-[#990011] font-semibold">{pageTitle}</span>
       </div>
@@ -1279,7 +1279,7 @@ const CreateClassPage = () => {
             )}
             <button
               type="button"
-              onClick={() => navigate("/workspace/courses/all-classes")}
+              onClick={() => navigate("/workspace/classes/all-classes")}
               disabled={isFormBusy}
               className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
             >
