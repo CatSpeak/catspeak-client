@@ -4,6 +4,7 @@ import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { getFileIcon } from "../../utils/fileUtils"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * Hiển thị nội dung chi tiết của một bài đăng bảng tin.
@@ -20,6 +21,8 @@ import { getFileIcon } from "../../utils/fileUtils"
  * @param {function} [onMenuClick]          - Callback khi nhấn nút "..."
  */
 const PostContent = ({ post = {}, onMenuClick }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall.postDetail
   const {
     title,
     authorName,
@@ -51,7 +54,13 @@ const PostContent = ({ post = {}, onMenuClick }) => {
           </div>
         </div>
 
-        <IconButton variant="ghost" onClick={onMenuClick} className="ml-auto">
+        <IconButton
+          variant="ghost"
+          onClick={onMenuClick}
+          className="ml-auto"
+          title={dict.postOptionsTooltip}
+          aria-label={dict.postOptionsTooltip}
+        >
           <MoreVertical size={16} />
         </IconButton>
       </div>
@@ -64,7 +73,7 @@ const PostContent = ({ post = {}, onMenuClick }) => {
         <div className="rounded-xl overflow-hidden">
           <img
             src={thumbnailUrl}
-            alt="banner"
+            alt={dict.bannerAlt}
             className="w-full object-cover "
           />
         </div>
@@ -82,6 +91,15 @@ const PostContent = ({ post = {}, onMenuClick }) => {
             <div
               key={idx}
               onClick={() => file.url && window.open(file.url, '_blank')}
+              onKeyDown={(event) => {
+                if (file.url && (event.key === "Enter" || event.key === " ")) {
+                  event.preventDefault()
+                  window.open(file.url, "_blank")
+                }
+              }}
+              role={file.url ? "button" : undefined}
+              tabIndex={file.url ? 0 : undefined}
+              title={dict.openAttachmentTooltip.replace("{{name}}", file.name)}
               className="flex items-center gap-4 bg-white border border-[#E2E2E2] rounded-xl px-4 py-3 cursor-pointer hover:bg-[#FFF5F4] transition-colors"
             >
               <div className="w-10 h-10 rounded-lg bg-red-100/70 flex items-center justify-center shrink-0">

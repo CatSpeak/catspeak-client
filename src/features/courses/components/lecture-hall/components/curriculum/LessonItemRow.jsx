@@ -1,7 +1,6 @@
 import React from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
-  GripVertical,
   MoreVertical,
   MessageSquareText,
   ClipboardList,
@@ -58,7 +57,7 @@ const LessonItemRow = ({
   onDeleteItem = () => { },
   className = "",
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const dict = t.courses.lectureHall.curriculum
 
   const navigate = useNavigate()
@@ -66,7 +65,15 @@ const LessonItemRow = ({
 
   if (isStudent && !item.isVisibleToStudents) return null
 
-  const displayData = getDisplayData(item)
+  const locale = language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US"
+  const displayData = getDisplayData(
+    item,
+    {
+      ...dict,
+      noTitle: t.courses.lectureHall.postDetail.noTitle,
+    },
+    locale,
+  )
   const isYoutubeLink = displayData.type === "link" && displayData.meta && (displayData.meta.includes("youtube.com") || displayData.meta.includes("youtu.be"))
   const config = getItemConfig(displayData.type || "assignment")
   const IconComponent = config.Icon
@@ -121,7 +128,7 @@ const LessonItemRow = ({
             </h4>
             {item.isVisibleToStudents === false && (
               <span className="inline-flex items-center gap-1 bg-[#E1E3E4] text-[#5B403C] text-xs px-2 py-0.5 rounded-full font-medium">
-                <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus || "Đang ẩn"}</span>
+                <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus}</span>
               </span>
             )}
           </div>
@@ -146,7 +153,8 @@ const LessonItemRow = ({
             size="xs"
             variant="ghost"
             onClick={onToggleMenu}
-            title={dict.lessonOptionsTooltip || "Tùy chọn bài học"}
+            title={dict.lessonOptionsTooltip}
+            aria-label={dict.lessonOptionsTooltip}
           >
             <MoreVertical size={16} />
           </IconButton>

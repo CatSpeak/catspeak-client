@@ -17,6 +17,10 @@ export function getCourseGradientAndIcon(index) {
   }
 }
 
+export const getCourseLocale = (language) => (
+  language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US"
+)
+
 export function formatToYYYYMMDD(isoStr) {
   if (!isoStr) return ""
   try {
@@ -62,19 +66,25 @@ export function utcToLocalDateStr(isoStr) {
  * @param {string} isoStr - UTC ISO string (e.g. "2026-10-15T00:00:00Z")
  * @param {string} [locales] - Locale parameter, defaults to "en-GB"
  * @param {object} [options] - Additional Intl options
- * @returns {string} Formatted date or "TBA"
+ * @param {string} [fallback] - Text returned when the date is missing or invalid
+ * @returns {string} Formatted date or the provided fallback
  */
-export function formatUTCDate(isoStr, locales = "en-GB", options = {}) {
-  if (!isoStr) return "TBA"
+export function formatUTCDate(
+  isoStr,
+  locales = "en-GB",
+  options = {},
+  fallback = "—",
+) {
+  if (!isoStr) return fallback
   try {
     const d = new Date(isoStr)
-    if (isNaN(d.getTime())) return "TBA"
+    if (isNaN(d.getTime())) return fallback
     return d.toLocaleDateString(locales, {
       timeZone: "UTC",
       ...options
     })
   } catch {
-    return "TBA"
+    return fallback
   }
 }
 
@@ -179,21 +189,21 @@ export function formatCurrencyVND(amount) {
  * Status display config
  */
 export const CLASS_STATUS_CONFIG = {
-  LIVE: { label: "LIVE", bgClass: "bg-[#FFE4E6]", textClass: "text-[#E11D48]", dotClass: "bg-[#E11D48]", hasPing: true },
-  TEACHING: { label: "TEACHING", bgClass: "bg-[#E8F8F0]", textClass: "text-[#15803D]", dotClass: null, hasPing: false },
-  OPEN: { label: "ENROLLING", bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
-  OPEN_FOR_ENROLLMENT: { label: "ENROLLING", bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
-  UPCOMING: { label: "UPCOMING", bgClass: "bg-[#EEF2FF]", textClass: "text-[#4F46E5]", dotClass: null, hasPing: false },
-  ARCHIVED: { label: "ARCHIVED", bgClass: "bg-[#F3F4F6]", textClass: "text-[#6B7280]", dotClass: null, hasPing: false },
+  LIVE: { bgClass: "bg-[#FFE4E6]", textClass: "text-[#E11D48]", dotClass: "bg-[#E11D48]", hasPing: true },
+  TEACHING: { bgClass: "bg-[#E8F8F0]", textClass: "text-[#15803D]", dotClass: null, hasPing: false },
+  OPEN: { bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
+  OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
+  UPCOMING: { bgClass: "bg-[#EEF2FF]", textClass: "text-[#4F46E5]", dotClass: null, hasPing: false },
+  ARCHIVED: { bgClass: "bg-[#F3F4F6]", textClass: "text-[#6B7280]", dotClass: null, hasPing: false },
 }
 
 /**
  * Attendance status config (BR14)
  */
 export const ATTENDANCE_STATUS = {
-  PRESENT: { label: "Có mặt", color: "#22C55E" },
-  ABSENT_EXCUSED: { label: "Vắng có phép", color: "#3B82F6" },
-  ABSENT_UNEXCUSED: { label: "Vắng không phép", color: "#EF4444" },
+  PRESENT: { color: "#22C55E" },
+  ABSENT_EXCUSED: { color: "#3B82F6" },
+  ABSENT_UNEXCUSED: { color: "#EF4444" },
 }
 
 const SHORT_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -206,45 +216,88 @@ const getOrdinalSuffix = (day) => {
   return "th"
 }
 
+const formatLocalizedDay = (date, locale, dayFirst = false) => {
+  if (String(locale).toLowerCase().startsWith("en")) {
+    const day = date.getUTCDate()
+    const month = SHORT_MONTH_NAMES[date.getUTCMonth()]
+    return dayFirst
+      ? `${day}${getOrdinalSuffix(day)} ${month}`
+      : `${month} ${day}${getOrdinalSuffix(day)}`
+  }
+
+  return date.toLocaleDateString(locale, {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  })
+}
+
 // Date range formatter helper (e.g. Jan 15th - Feb 16th)
-export const formatDateRange = (start, end) => {
-  if (!start || !end) return "TBA"
+export const formatDateRange = (
+  start,
+  end,
+  locale = "en-US",
+  fallback = "—",
+) => {
+  if (!start || !end) return fallback
 
   const parseDate = (dStr) => {
     const d = new Date(dStr)
     if (isNaN(d.getTime())) return null
-    const day = d.getUTCDate()
-    const month = SHORT_MONTH_NAMES[d.getUTCMonth()]
-    return `${month} ${day}${getOrdinalSuffix(day)}`
+    return formatLocalizedDay(d, locale)
   }
   const startLabel = parseDate(start)
   const endLabel = parseDate(end)
-  return startLabel && endLabel ? `${startLabel} - ${endLabel}` : "TBA"
+  return startLabel && endLabel ? `${startLabel} - ${endLabel}` : fallback
 }
 
-export const formatDateDayMonth = (dateStr) => {
-  if (!dateStr) return "TBA"
+export const formatDateDayMonth = (
+  dateStr,
+  locale = "en-US",
+  fallback = "—",
+) => {
+  if (!dateStr) return fallback
   const d = new Date(dateStr)
-  if (isNaN(d.getTime())) return "TBA"
-  const day = d.getUTCDate()
-  const month = SHORT_MONTH_NAMES[d.getUTCMonth()]
-  return `${day}${getOrdinalSuffix(day)} ${month}`
+  if (isNaN(d.getTime())) return fallback
+  return formatLocalizedDay(d, locale, true)
 }
 
-export const formatTime12h = (timeStr) => {
-  if (!timeStr) return "TBA"
+export const formatTime12h = (
+  timeStr,
+  locale = "en-US",
+  fallback = "—",
+) => {
+  if (!timeStr) return fallback
   const value = String(timeStr).trim()
-  if (/^(?:0?[1-9]|1[0-2]):[0-5]\d\s?(?:AM|PM)$/i.test(value)) {
-    return value
+  const twelveHourMatch = value.match(/^(0?[1-9]|1[0-2]):([0-5]\d)\s?(AM|PM)$/i)
+  const twentyFourHourMatch = value.match(/^(\d{1,2}):(\d{2})$/)
+  if (!twelveHourMatch && !twentyFourHourMatch) return fallback
+
+  let hours
+  let minutes
+  if (twelveHourMatch) {
+    hours = Number(twelveHourMatch[1]) % 12
+    if (twelveHourMatch[3].toUpperCase() === "PM") hours += 12
+    minutes = Number(twelveHourMatch[2])
+  } else {
+    hours = Number(twentyFourHourMatch[1])
+    minutes = Number(twentyFourHourMatch[2])
   }
-  const match = value.match(/^(\d{1,2}):(\d{2})$/)
-  if (!match) return "TBA"
-  const hours = Number(match[1])
-  const minutes = Number(match[2])
-  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return "TBA"
+
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return fallback
+  if (!String(locale).toLowerCase().startsWith("en")) {
+    const time = new Date(Date.UTC(2000, 0, 1, hours, minutes))
+    return time.toLocaleTimeString(locale, {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "UTC",
+    })
+  }
+
   const ampm = hours >= 12 ? "PM" : "AM"
   const displayHours = hours % 12 || 12
-  return `${displayHours}:${match[2]} ${ampm}`
+  return `${displayHours}:${String(minutes).padStart(2, "0")} ${ampm}`
 }
 
 export const getSafeMediaUrl = (value) => {
@@ -363,43 +416,37 @@ export const getClassEnrollmentIssue = ({
 export const getClassEnrollmentIssueMessage = (issue, studentText = {}) => {
   const messages = {
     already_enrolled_in_course:
-      studentText.alreadyEnrolledInCourse
-      || "You are already enrolled in another class for this course.",
+      studentText.alreadyEnrolledInCourse,
     not_open:
-      studentText.enrollmentNotOpen
-      || "This class is not open for enrollment.",
+      studentText.enrollmentNotOpen,
     full:
-      studentText.classFull
-      || "This class is full.",
+      studentText.classFull,
     not_started:
-      studentText.enrollmentNotStarted
-      || "Enrollment has not started yet.",
+      studentText.enrollmentNotStarted,
     closed:
-      studentText.enrollmentClosed
-      || "The enrollment period has ended.",
+      studentText.enrollmentClosed,
     unavailable:
-      studentText.enrollmentUnavailable
-      || "Enrollment availability cannot be confirmed right now.",
+      studentText.enrollmentUnavailable,
   }
-  return messages[issue] || messages.unavailable
+  return messages[issue] || messages.unavailable || ""
 }
 
 export const getClassEnrollmentIssueLabel = (issue, studentText = {}) => {
   const labels = {
     already_enrolled_in_course:
-      studentText.alreadyEnrolled || "Already enrolled",
+      studentText.alreadyEnrolled,
     not_open:
-      studentText.notOpen || "Not open",
+      studentText.notOpen,
     full:
-      studentText.full || "Full",
+      studentText.full,
     not_started:
-      studentText.notStarted || "Not started",
+      studentText.notStarted,
     closed:
-      studentText.closed || "Closed",
+      studentText.closed,
     unavailable:
-      studentText.unavailable || "Unavailable",
+      studentText.unavailable,
   }
-  return labels[issue] || labels.unavailable
+  return labels[issue] || labels.unavailable || ""
 }
 
 export const formatFileSize = (bytes) => {

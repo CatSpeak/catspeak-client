@@ -114,7 +114,7 @@ const ClassTable = ({ classes, t, onEdit }) => {
               <td className="p-4 text-center">
                 <button
                   type="button"
-                  aria-label={c.editClass || `Edit ${item.classTitle || item.title || "class"}`}
+                  aria-label={c.editClass || "Edit class"}
                   onClick={(e) => {
                     e.stopPropagation()
                     onEdit?.(item)

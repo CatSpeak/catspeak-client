@@ -1,10 +1,15 @@
 import React from "react"
 import { Calendar, Clock } from "lucide-react"
 import CountdownTicker from "../CountdownTicker"
-import { formatDateDayMonth, getSafeMediaUrl } from "../../utils/courseUtils"
+import {
+  formatDateDayMonth,
+  getCourseLocale,
+  getSafeMediaUrl,
+} from "../../utils/courseUtils"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const StudentClassOverviewTab = ({
   classData,
@@ -15,9 +20,11 @@ const StudentClassOverviewTab = ({
   noUpcomingLabel,
   onJoinRoom
 }) => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
+  const scd = c.studentCourseDetail || {}
+  const ui = c.workspaceUi || {}
 
   const completedValue = (classData.progress
     ? classData.progress.completedSessions
@@ -87,11 +94,14 @@ const StudentClassOverviewTab = ({
           <div className="relative z-10 flex flex-col gap-3">
             {(classData.language || classData.levels?.[0]) && (
               <span className="bg-red-500 text-white font-bold text-[9px] px-2.5 py-0.5 rounded-full w-max uppercase tracking-wider">
-                {[classData.language, classData.levels?.[0]].filter(Boolean).join(" • ")}
+                {[
+                  getLocalizedLanguageName(classData.language, t),
+                  classData.levels?.[0],
+                ].filter(Boolean).join(" • ")}
               </span>
             )}
             <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight max-w-xl">
-              {classData.title || "Untitled Batch"}
+              {classData.title || scd.untitledBatch || "Untitled Batch"}
             </h2>
           </div>
         </div>
@@ -106,7 +116,7 @@ const StudentClassOverviewTab = ({
             <div className="flex items-center gap-3">
               <Calendar size={18} className="text-gray-400 shrink-0" />
               <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] text-gray-400 font-bold uppercase">Weekly Schedule</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase">{cd.weeklySchedule || "Weekly Schedule"}</span>
                 <span className="text-gray-800 font-extrabold text-xs">{getWeeklyScheduleText()}</span>
               </div>
             </div>
@@ -114,10 +124,17 @@ const StudentClassOverviewTab = ({
             <div className="flex items-center gap-3">
               <Clock size={18} className="text-gray-400 shrink-0" />
               <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] text-gray-400 font-bold uppercase">Start Date & Duration</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase">{cd.schedulePeriod || "Start Date & Duration"}</span>
                 <span className="text-gray-800 font-extrabold text-xs">
-                  {formatDateDayMonth(classData.startDate)}
-                  {totalSessions > 0 ? ` • ${totalSessions} Sessions` : ""}
+                  {formatDateDayMonth(
+                    classData.startDate,
+                    getCourseLocale(language),
+                    ui.tba,
+                  )}
+                  {totalSessions > 0
+                    ? ` • ${(ui.sessionsCount || "{{count}} sessions")
+                      .replace("{{count}}", String(totalSessions))}`
+                    : ""}
                 </span>
               </div>
             </div>
@@ -172,12 +189,22 @@ const StudentClassOverviewTab = ({
                     <div className="flex items-center gap-2">
                       <Clock size={14} className="text-gray-400" />
                       <span>
-                        Time: {[sessionStartTime, sessionEndTime].filter(Boolean).join(" - ") || "TBA"}
+                        {scd.timeLabel || "Time"}:{" "}
+                        {[sessionStartTime, sessionEndTime].filter(Boolean).join(" - ")
+                          || ui.tba
+                          || "TBA"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-gray-400" />
-                      <span>Session Date: {formatDateDayMonth(sessionDate)}</span>
+                      <span>
+                        {scd.sessionDateLabel || "Session Date"}:{" "}
+                        {formatDateDayMonth(
+                          sessionDate,
+                          getCourseLocale(language),
+                          ui.tba,
+                        )}
+                      </span>
                     </div>
                   </div>
 
@@ -232,7 +259,9 @@ const StudentClassOverviewTab = ({
 
             <div className="flex flex-col gap-1">
               <span className="text-sm font-black text-gray-900">
-                {completedSessions ?? "—"} / {totalSessions || "—"} Lessons Completed
+                {(scd.lessonsCompleted || "{{completed}} / {{total}} lessons completed")
+                  .replace("{{completed}}", String(completedSessions ?? "—"))
+                  .replace("{{total}}", String(totalSessions || "—"))}
               </span>
             </div>
           </div>

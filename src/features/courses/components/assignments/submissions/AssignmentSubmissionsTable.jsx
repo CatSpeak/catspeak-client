@@ -12,14 +12,14 @@ const STATUS_STYLES = {
 
 const getStatusLabel = (status, translations) => {
   const labels = {
-    not_submitted: translations.filterNotSubmitted || "Chưa nộp",
-    submitted: translations.filterSubmitted || "Đã nộp",
-    late: translations.filterLate || "Nộp muộn",
-    graded: translations.filterGraded || "Đã chấm",
-    returned: translations.filterReturned || "Đã trả bài",
+    not_submitted: translations.filterNotSubmitted,
+    submitted: translations.filterSubmitted,
+    late: translations.filterLate,
+    graded: translations.filterGraded,
+    returned: translations.filterReturned,
   }
 
-  return labels[status] || status
+  return labels[status] || translations.statusUnknown
 }
 
 const getVisiblePages = (currentPage, totalPages) => {
@@ -65,18 +65,18 @@ const AssignmentSubmissionsTable = ({
         <table className="min-w-[650px] w-full border-collapse text-left text-xs font-semibold text-gray-500">
           <thead>
             <tr className="border-b border-gray-150 bg-gray-50 text-gray-700 font-extrabold uppercase tracking-wider">
-              <th className="p-4 pl-6">{translations.thStudent || "Học viên"}</th>
-              <th className="p-4">{translations.thStatus || "Trạng thái"}</th>
-              <th className="p-4">{translations.thSubmittedTime || "Thời gian nộp"}</th>
-              <th className="p-4 text-center">{translations.thGrade || "Điểm số"}</th>
-              <th className="p-4 pr-6 text-center">{translations.thActions || "Thao tác"}</th>
+              <th className="p-4 pl-6">{translations.thStudent}</th>
+              <th className="p-4">{translations.thStatus}</th>
+              <th className="p-4">{translations.thSubmittedTime}</th>
+              <th className="p-4 text-center">{translations.thGrade}</th>
+              <th className="p-4 pr-6 text-center">{translations.thActions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-gray-750">
             {students.length === 0 ? (
               <tr>
                 <td colSpan={5} className="p-8 text-center text-gray-400 font-bold">
-                  {translations.noStudentsFound || "Không tìm thấy học viên nào."}
+                  {translations.noStudentsFound}
                 </td>
               </tr>
             ) : (
@@ -92,7 +92,10 @@ const AssignmentSubmissionsTable = ({
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 text-xs font-extrabold uppercase shadow-2xs font-sans">
-                          {getStudentInitials(student.name)}
+                          {getStudentInitials(
+                            student.name,
+                            translations.studentInitials,
+                          )}
                         </div>
                       )}
                       <div className="flex flex-col">
@@ -127,7 +130,7 @@ const AssignmentSubmissionsTable = ({
                       className="h-8 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-lg flex items-center gap-1.5 justify-center transition-colors shadow-2xs mx-auto"
                     >
                       <Eye size={12} className="text-gray-400" />
-                      <span>{translations.btnView || "Xem"}</span>
+                      <span>{translations.btnView}</span>
                     </button>
                   </td>
                 </tr>
@@ -147,7 +150,7 @@ const AssignmentSubmissionsTable = ({
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           className="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
-          aria-label="Previous page"
+          aria-label={translations.previousPage}
         >
           <ChevronLeft size={14} />
         </button>
@@ -182,7 +185,7 @@ const AssignmentSubmissionsTable = ({
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
           className="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
-          aria-label="Next page"
+          aria-label={translations.nextPage}
         >
           <ChevronRight size={14} />
         </button>

@@ -11,6 +11,7 @@ import { useGetUserProfileQuery } from "@/store/api/userApi"
 import {
   formatCurrencyVND,
   formatDateDayMonth,
+  getCourseLocale,
   getClassEnrollmentIssue,
   getClassEnrollmentIssueLabel,
   getClassEnrollmentIssueMessage,
@@ -18,12 +19,15 @@ import {
 } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { Calendar, Mail, CheckCircle2, BookOpen, FileText, Award, Globe, User, Radio, Users, Clock, Video } from "lucide-react"
+import { formatScheduleDays } from "../utils/scheduleUtils"
 
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const c = t.courses || {}
+  const scd = c.studentCourseDetail || {}
+  const ui = c.workspaceUi || {}
 
   // Fetch course details
   const {
@@ -82,7 +86,7 @@ const StudentCourseDetailPage = () => {
       return
     }
     if (!isRecord(cls) || !cls.id) {
-      toast.error(c.student?.classUnavailable || "This class is not available for enrollment.")
+      toast.error(scd.classUnavailable || "This class is not available for enrollment.")
       return
     }
     const enrollmentIssue = getClassEnrollmentIssue({
@@ -142,7 +146,7 @@ const StudentCourseDetailPage = () => {
         throw new Error("Missing enrollment confirmation")
       }
     } catch {
-      toast.error(c.student?.enrollFailed || "Enrollment could not be completed. Please try again.")
+      toast.error(scd.enrollFailed || "Enrollment could not be completed. Please try again.")
     } finally {
       enrollmentGuardRef.current = false
     }
@@ -167,13 +171,13 @@ const StudentCourseDetailPage = () => {
         role="alert"
         className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
       >
-        <span>{c.student?.courseLoadFailed || "This course could not be loaded. Please try again."}</span>
+        <span>{scd.courseLoadFailed || "This course could not be loaded. Please try again."}</span>
         <button
           type="button"
           onClick={refetch}
           className="rounded-full bg-[#990011] px-4 py-2 text-xs font-black text-white"
         >
-          {c.student?.retry || "Try again"}
+          {scd.retry || "Try again"}
         </button>
       </div>
     )
@@ -182,7 +186,7 @@ const StudentCourseDetailPage = () => {
   if (!rawCourse) {
     return (
       <div role="status" className="p-8 text-center text-sm font-semibold text-gray-500">
-        {c.student?.courseUnavailable || "Course details are unavailable."}
+        {scd.courseUnavailable || "Course details are unavailable."}
       </div>
     )
   }
@@ -199,7 +203,7 @@ const StudentCourseDetailPage = () => {
     <div className="flex flex-col gap-8 text-[#2e2e2e] bg-gray-50/30 -mx-4 sm:-mx-6 px-4 sm:px-6">
       {isFetching && (
         <span className="sr-only" role="status">
-          {c.student?.refreshing || "Refreshing course details"}
+          {scd.refreshing || "Refreshing course details"}
         </span>
       )}
 
@@ -323,7 +327,7 @@ const StudentCourseDetailPage = () => {
                   const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
                   const tuitionLabel = cls.tuitionFee == null
-                    ? "TBA"
+                    ? ui.tba || "TBA"
                     : formatCurrencyVND(cls.tuitionFee)
                   const sessionCount = cls.progress?.totalSessions ?? cls.totalSessions ?? null
                   const enrollmentIssue = isClassEnrolled
@@ -378,7 +382,11 @@ const StudentCourseDetailPage = () => {
                           </div>
 
                           <h3 className="font-black text-base text-gray-950 group-hover:text-[#990011] transition-colors leading-snug">
-                            {cls.schedule?.days?.join(" - ") || "TBA"}
+                            {formatScheduleDays(
+                              cls.schedule?.days,
+                              language,
+                              ui.tba,
+                            )}
                             {cls.schedule?.startTime && cls.schedule?.endTime
                               ? ` | ${cls.schedule.startTime} - ${cls.schedule.endTime}`
                               : ""}
@@ -389,10 +397,22 @@ const StudentCourseDetailPage = () => {
                               <Calendar size={12} className="text-gray-400" />
                               <span>
                                 {cls.startDate && cls.endDate
-                                  ? `${formatDateDayMonth(cls.startDate)} – ${formatDateDayMonth(cls.endDate)}`
+                                  ? `${formatDateDayMonth(
+                                    cls.startDate,
+                                    getCourseLocale(language),
+                                    ui.tba,
+                                  )} – ${formatDateDayMonth(
+                                    cls.endDate,
+                                    getCourseLocale(language),
+                                    ui.tba,
+                                  )}`
                                   : cls.startDate
-                                    ? `${c.student?.startsOn || "Starts"} ${formatDateDayMonth(cls.startDate)}`
-                                    : "TBA"}
+                                    ? `${c.student?.startsOn || "Starts"} ${formatDateDayMonth(
+                                      cls.startDate,
+                                      getCourseLocale(language),
+                                      ui.tba,
+                                    )}`
+                                    : ui.tba || "TBA"}
                               </span>
                             </div>
                           </div>
@@ -475,7 +495,14 @@ const StudentCourseDetailPage = () => {
                               <div className="flex flex-wrap gap-2">
                                 {cls.rawSchedule.map((s, idx) => (
                                   <span key={idx} className="bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-lg text-sm font-semibold">
-                                    <strong className="text-gray-950">{s.dayOfWeek}:</strong> {s.startTime} - {s.endTime}
+                                    <strong className="text-gray-950">
+                                      {formatScheduleDays(
+                                        [s.dayOfWeek],
+                                        language,
+                                        ui.tba,
+                                      )}:
+                                    </strong>{" "}
+                                    {s.startTime} - {s.endTime}
                                   </span>
                                 ))}
                               </div>
@@ -489,7 +516,7 @@ const StudentCourseDetailPage = () => {
                               <span>{c.student?.description || "Description"}</span>
                             </span>
                             <p className="text-gray-600 font-medium text-sm leading-relaxed">
-                              {cls.description || c.student?.noClassDescription || "No description provided."}
+                              {cls.description || scd.noClassDescription || "No description provided."}
                             </p>
                           </div>
                         </div>
@@ -526,7 +553,7 @@ const StudentCourseDetailPage = () => {
               )}
               <div className="flex flex-col gap-0.5 min-w-0">
                 <h3 className="font-black text-gray-950 text-base truncate">
-                  {teacher.name || c.student?.instructorUnavailable || "Instructor not provided"}
+                  {teacher.name || scd.instructorUnavailable || "Instructor not provided"}
                 </h3>
                 {teacher.title && (
                   <span className="text-[12px] text-[#b20a1c] font-bold uppercase truncate">
@@ -547,6 +574,7 @@ const StudentCourseDetailPage = () => {
 
             <div className="flex items-center gap-2 pt-1">
               <button
+                type="button"
                 onClick={() => {
                   const teacherId = teacher.accountId || teacher.id
                   if (teacherId) {
@@ -563,7 +591,7 @@ const StudentCourseDetailPage = () => {
               <button
                 type="button"
                 disabled
-                title={c.student?.contactUnavailable || "Contact is not available yet."}
+                title={scd.contactUnavailable || "Contact is not available yet."}
                 className="flex-1 h-10 border border-gray-200 text-gray-400 text-sm font-black rounded-full flex items-center justify-center gap-1.5 shadow-2xs cursor-not-allowed"
               >
                 <Mail size={14} />
@@ -585,6 +613,7 @@ const StudentCourseDetailPage = () => {
         success={enrollSuccess}
         onSuccessClose={handleSuccessClose}
         t={t}
+        language={language}
       />
     </div>
   )

@@ -1,6 +1,6 @@
 import { toLocalDateString } from "./dateUtils.js"
 
-export const getAssignmentTitle = (assignment, fallback = "Untitled assignment") => {
+export const getAssignmentTitle = (assignment, fallback = "") => {
   const title = [assignment?.name, assignment?.title]
     .find((value) => typeof value === "string" && value.trim())
   return title?.trim() || fallback
@@ -38,25 +38,25 @@ export const getSubmissionStatus = (submission) => {
   return String(submission.status || "submitted").toLowerCase()
 }
 
-export const getAssignmentErrorMessage = (error, fallback) => {
+export const getAssignmentErrorMessage = (error, fallback, messages = {}) => {
   const status = error?.status
   if (status === 401 || status === 403) {
-    return "You do not have permission to perform this assignment action."
+    return messages.errorForbidden || fallback || messages.errorGeneric || ""
   }
   if (status === 404) {
-    return "The assignment or class could not be found."
+    return messages.errorNotFound || fallback || messages.errorGeneric || ""
   }
   if (status === 413) {
-    return "An attachment exceeds the server's file-size limit."
+    return messages.errorFileTooLarge || fallback || messages.errorGeneric || ""
   }
   if (status === 415) {
-    return "An attachment type is not supported."
+    return messages.errorFileTypeUnsupported || fallback || messages.errorGeneric || ""
   }
   if (status === "FETCH_ERROR" || status === "TIMEOUT_ERROR") {
-    return "The server could not be reached. Check your connection and try again."
+    return messages.errorNetwork || fallback || messages.errorGeneric || ""
   }
 
-  return fallback || "The assignment action could not be completed. Please try again."
+  return fallback || messages.errorGeneric || ""
 }
 
 export const parseAttachmentList = (raw, onError) => {
@@ -76,7 +76,7 @@ export const parseAttachmentList = (raw, onError) => {
   return []
 }
 
-export const getFileMeta = (file, fallbackName = "Unnamed file") => {
+export const getFileMeta = (file, fallbackName = "") => {
   if (typeof file === "string") {
     const pathWithoutQuery = file.split(/[?#]/, 1)[0]
     const encodedName = pathWithoutQuery.split("/").pop() || ""

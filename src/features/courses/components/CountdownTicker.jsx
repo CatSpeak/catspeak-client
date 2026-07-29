@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const CountdownTicker = ({ targetDate }) => {
+  const { t } = useLanguage()
+  const ui = t.courses?.workspaceUi || {}
   const countdownTargetMs = useMemo(() => {
     if (!targetDate) return null
     const parsed = new Date(targetDate)
@@ -53,7 +56,7 @@ const CountdownTicker = ({ targetDate }) => {
   if (countdownTargetMs === null || !countdownTime) {
     return (
       <div role="status" className="py-6 text-center text-xs font-semibold text-gray-500">
-        TBA
+        {ui.tba || "TBA"}
       </div>
     )
   }
@@ -62,17 +65,23 @@ const CountdownTicker = ({ targetDate }) => {
     <div className="flex justify-around items-center text-center py-3 border-b border-gray-100 select-none">
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.days}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">Days</span>
+        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+          {ui.days || "Days"}
+        </span>
       </div>
       <span className="text-2xl font-bold text-gray-300 -mt-5">:</span>
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.hours}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">Hours</span>
+        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+          {ui.hours || "Hours"}
+        </span>
       </div>
       <span className="text-2xl font-bold text-gray-300 -mt-5">:</span>
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.mins}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">Mins</span>
+        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+          {ui.minutesShort || "Mins"}
+        </span>
       </div>
     </div>
   )

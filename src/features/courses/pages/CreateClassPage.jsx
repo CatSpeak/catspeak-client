@@ -19,11 +19,13 @@ import {
   useUpdateClassMutation,
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
+import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import {
   COURSE_FORM_LANGUAGES,
   DEFAULT_CLASS_FEE_TIERS,
+  getInstructorFormLanguages,
   getLocalizedLanguageName,
 } from "../data/courseFormOptions"
 import {
@@ -150,7 +152,13 @@ const CreateClassPage = () => {
     }
   }, [])
 
-  const languagesList = COURSE_FORM_LANGUAGES
+  const { data: instructorProfileData } = useGetInstructorProfileQuery()
+  const instructorProfile = instructorProfileData?.data || instructorProfileData
+
+  const languagesList = useMemo(
+    () => getInstructorFormLanguages(instructorProfile),
+    [instructorProfile]
+  )
   const coursesList = useMemo(
     () => (Array.isArray(coursesData?.data) ? coursesData.data : []),
     [coursesData],
@@ -233,8 +241,41 @@ const CreateClassPage = () => {
     })
   }, [minFee, isEditMode, isRecoverMode])
 
-  const selectedLanguageObj = languagesList.find((l) => (l.name || "").toLowerCase() === (selectedLanguage || "").toLowerCase())
-  const levelsList = selectedLanguageObj?.levels || []
+  const selectedCourse = useMemo(
+    () => coursesList.find((c) => String(c.id) === String(courseId)),
+    [coursesList, courseId]
+  )
+
+  const levelsList = useMemo(() => {
+    // 1. If selected course has levels defined
+    if (selectedCourse && Array.isArray(selectedCourse.levels) && selectedCourse.levels.length > 0) {
+      return selectedCourse.levels.map((lvl, index) => {
+        if (typeof lvl === "object" && lvl !== null) {
+          return { id: lvl.id || index + 1, name: lvl.name || String(lvl) }
+        }
+        return { id: index + 1, name: String(lvl) }
+      })
+    }
+
+    // 2. Look up language in languagesList or COURSE_FORM_LANGUAGES
+    const normLang = (selectedLanguage || "").trim().toLowerCase()
+    if (normLang) {
+      const matched =
+        languagesList.find((l) => (l.name || "").trim().toLowerCase() === normLang) ||
+        COURSE_FORM_LANGUAGES.find((l) => (l.name || "").trim().toLowerCase() === normLang)
+
+      if (matched && Array.isArray(matched.levels) && matched.levels.length > 0) {
+        return matched.levels
+      }
+    }
+
+    // 3. Fallback level list based on language name or general default
+    if (normLang.includes("chinese") || normLang.includes("zh") || normLang.includes("trung")) {
+      return ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"].map((name, index) => ({ id: index + 1, name }))
+    }
+
+    return ["A1", "A2", "B1", "B2", "C1", "C2"].map((name, index) => ({ id: index + 1, name }))
+  }, [selectedCourse, selectedLanguage, languagesList])
 
   // Handlers
   const handleCourseChange = useCallback((id) => {
@@ -402,15 +443,10 @@ const CreateClassPage = () => {
   ])
 
   const handleThumbnailClick = () => {
-    if (!isEditMode) return
     fileInputRef.current?.click()
   }
 
   const handleThumbnailFileChange = (e) => {
-    if (!isEditMode) {
-      e.target.value = ""
-      return
-    }
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -604,6 +640,7 @@ const CreateClassPage = () => {
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
+        thumbnailUrl: thumbnailFile || thumbnailPreview || "",
         timezone: "Asia/Ho_Chi_Minh",
         cancelUrl: (
           window.location.origin
@@ -865,8 +902,8 @@ const CreateClassPage = () => {
                 <select
                   value={courseId}
                   onChange={(e) => handleCourseChange(e.target.value)}
-                  disabled={isEditMode || isRecoverMode}
-                  className={`w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed`}
+                  disabled={isEditMode || isRecoverMode || !!initialCourseId}
+                  className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                 >
                   <option value="">{cc.selectCourseOption || "-- Select Course --"}</option>
                   {isEditMode || isRecoverMode ? (
@@ -893,7 +930,7 @@ const CreateClassPage = () => {
                 }}
                 disabled={isRecoverMode}
                 placeholder={cc.placeholderClassName || "Enter class name"}
-                className={`w-full h-11 px-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.className ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed`}
+                className={`w-full h-11 px-4 bg-white border ${errors.className ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
               />
             </div>
 
@@ -909,8 +946,8 @@ const CreateClassPage = () => {
                       setLevel("")
                       clearError("selectedLanguage")
                     }}
-                    disabled={isRecoverMode}
-                    className={`w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed`}
+                    disabled={isRecoverMode || !!initialCourseId || !!courseId}
+                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
                     {languagesList.map((lang) => (
@@ -933,12 +970,18 @@ const CreateClassPage = () => {
                       clearError("level")
                     }}
                     disabled={!selectedLanguage || isRecoverMode}
-                    className={`w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed`}
+                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
-                    {levelsList.map((lvl) => (
-                      <option key={lvl.id || lvl.name} value={lvl.name}>{lvl.name}</option>
-                    ))}
+                    {levelsList.map((lvl) => {
+                      const lvlName = typeof lvl === "object" && lvl !== null ? (lvl.name || String(lvl)) : String(lvl)
+                      const lvlKey = typeof lvl === "object" && lvl !== null ? (lvl.id || lvl.name) : String(lvl)
+                      return (
+                        <option key={lvlKey} value={lvlName}>
+                          {lvlName}
+                        </option>
+                      )
+                    })}
                   </select>
                   <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
@@ -959,7 +1002,7 @@ const CreateClassPage = () => {
                       }}
                       mode="date"
                       color="#990011"
-                      placeholder="DD/MM/YYYY"
+                      placeholder="dd/MM/yyyy"
                       minDate={isEditMode ? null : tomorrow}
                       className={`w-full ${errors.admissionStart ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                     />
@@ -974,7 +1017,7 @@ const CreateClassPage = () => {
                       }}
                       mode="date"
                       color="#990011"
-                      placeholder="DD/MM/YYYY"
+                      placeholder="dd/MM/yyyy"
                       minDate={isEditMode ? null : tomorrow}
                       className={`w-full ${errors.admissionEnd ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                     />
@@ -992,7 +1035,7 @@ const CreateClassPage = () => {
                   }}
                   mode="date"
                   color="#990011"
-                  placeholder="DD/MM/YYYY"
+                  placeholder="dd/MM/yyyy"
                   minDate={isEditMode ? null : tomorrow}
                   className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                 />
@@ -1004,7 +1047,7 @@ const CreateClassPage = () => {
               {/* Number of Sessions */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.numberOfSessions} <span className="text-[#990011]">*</span></label>
-                <div className={`flex items-center bg-[#F2F2F2]/60 border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus-within:border-gray-200"} rounded-xl overflow-hidden h-11 focus-within:bg-white transition-all`}>
+                <div className={`flex items-center bg-white border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
                     onClick={() => setSessions(prev => Math.max(1, (parseInt(prev, 10) || 1) - 1))}
@@ -1034,7 +1077,7 @@ const CreateClassPage = () => {
               {/* Capacity */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.capacity} <span className="text-[#990011]">*</span></label>
-                <div className={`flex items-center bg-[#F2F2F2]/60 border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus-within:border-gray-200"} rounded-xl overflow-hidden h-11 focus-within:bg-white transition-all`}>
+                <div className={`flex items-center bg-white border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
                     onClick={() => setCapacity(prev => Math.max(1, (parseInt(prev, 10) || 1) - 1))}
@@ -1067,7 +1110,7 @@ const CreateClassPage = () => {
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.teachingSchedule}</label>
 
               {/* Outer Gray Container */}
-              <div className={`bg-[#F2F2F2]/45 rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-transparent"} flex flex-col gap-4`}>
+              <div className={`bg-white rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"} flex flex-col gap-4`}>
                 <span className="text-xs font-bold text-gray-500">
                   {cc.chooseDays || "Choose days of the week"}
                 </span>
@@ -1084,7 +1127,7 @@ const CreateClassPage = () => {
                           }`}
                       >
                         <span className={`text-[10px] font-black uppercase tracking-wider ${isChecked ? "text-[#990011]" : "text-gray-400"}`}>
-                          {day.label}
+                          {cc.days?.[day.key]?.short || cc.days?.[day.key]?.code || day.label}
                         </span>
                         <div className="flex justify-center">
                           <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${isChecked
@@ -1115,10 +1158,10 @@ const CreateClassPage = () => {
                         {/* Day badge & label */}
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-[#990011] text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
-                            {day.code}
+                            {cc.days?.[day.key]?.code || cc.days?.[day.key]?.short || day.code}
                           </div>
                           <span className="text-sm font-bold text-gray-800">
-                            {day.fullName}
+                            {cc.days?.[day.key]?.full || day.fullName}
                           </span>
                         </div>
 
@@ -1159,26 +1202,16 @@ const CreateClassPage = () => {
                 {cc.thumbnailLabel || c.avatarLabel || "Thumbnail"}
               </label>
               <div
-                role={isEditMode ? "button" : undefined}
-                tabIndex={isEditMode ? 0 : undefined}
-                aria-disabled={!isEditMode}
-                title={!isEditMode
-                  ? (
-                    cc.thumbnailEditOnly
-                    || "The checkout API does not accept a class thumbnail. You can change it after the class is created."
-                  )
-                  : undefined}
-                onClick={isEditMode ? handleThumbnailClick : undefined}
-                onKeyDown={isEditMode
-                  ? (event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault()
-                      handleThumbnailClick()
-                    }
+                role="button"
+                tabIndex={0}
+                onClick={handleThumbnailClick}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    handleThumbnailClick()
                   }
-                  : undefined}
-                className={`group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-[#F8F9FA] flex flex-col items-center justify-center text-center min-h-[150px] ${!isEditMode ? "opacity-75 cursor-not-allowed" : "hover:border-gray-300 hover:bg-[#F2F2F2]/60 cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
-                  }`}
+                }}
+                className="group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-white hover:border-gray-300 hover:bg-gray-50/80 flex flex-col items-center justify-center text-center min-h-[150px] cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
               >
                 <input
                   ref={fileInputRef}
@@ -1186,19 +1219,12 @@ const CreateClassPage = () => {
                   accept="image/png,image/jpeg,image/webp"
                   className="hidden"
                   onChange={handleThumbnailFileChange}
-                  disabled={!isEditMode}
                 />
                 {thumbnailPreview ? (
                   <div className="relative w-full max-h-[190px] flex justify-center overflow-hidden rounded-xl">
                     <img src={thumbnailPreview} alt="Class thumbnail preview" className="object-contain max-h-[180px]" />
-                    <div className={`absolute inset-0 bg-black/40 opacity-0 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl ${isEditMode ? "group-hover:opacity-100 group-focus:opacity-100" : ""
-                      }`}>
-                      {isEditMode
-                        ? (cc.changeThumbnail || "Change image")
-                        : (
-                          cc.thumbnailEditOnly
-                          || "Thumbnail changes are available after creation."
-                        )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-focus:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl">
+                      {cc.changeThumbnail || "Change image"}
                     </div>
                   </div>
                 ) : (
@@ -1207,23 +1233,12 @@ const CreateClassPage = () => {
                       <Upload size={20} />
                     </div>
                     <div className="text-xs text-gray-400 font-semibold space-y-1">
-                      <p>{isEditMode
-                        ? (c.avatarDesc1 || "Supports PNG, JPEG, and WebP.")
-                        : (
-                          cc.thumbnailEditOnly
-                          || "Thumbnail changes are available after creation."
-                        )}</p>
+                      <p>{c.avatarDesc1 || "Supports PNG, JPEG, and WebP."}</p>
                       <p>{c.avatarDesc2 || "File size must be under 50mb"}</p>
                     </div>
                   </div>
                 )}
               </div>
-              {!isEditMode && (
-                <p className="text-[11px] font-semibold leading-relaxed text-gray-500">
-                  {cc.thumbnailEditOnly
-                    || "The checkout API does not accept a class thumbnail. You can change it after the class is created."}
-                </p>
-              )}
             </div>
 
             {/* Class Description */}
@@ -1238,7 +1253,7 @@ const CreateClassPage = () => {
                   clearError("description")
                 }}
                 placeholder={cc.placeholderDescription || "Enter class description (optional)"}
-                className={`w-full p-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.description ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed`}
+                className={`w-full p-4 bg-white border ${errors.description ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
               />
             </div>
 
@@ -1252,7 +1267,7 @@ const CreateClassPage = () => {
                     value={fee ? parseInt(fee).toLocaleString("vi-VN") : ""}
                     onChange={(e) => formatFeeInput(e.target.value)}
                     placeholder="850.000"
-                    className="w-full h-11 pl-4 pr-12 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400"
+                    className="w-full h-11 pl-4 pr-12 bg-white border border-gray-200 hover:border-gray-300 focus:border-[#990011] outline-none rounded-xl text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-extrabold text-xs">VND</span>
                 </div>

@@ -101,7 +101,7 @@ const getExistingAttachmentReference = (file) => {
   }
 }
 
-const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, language, t }) => {
+const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, t }) => {
   const navigate = useNavigate()
   const c = t.courses || {}
   const ca = c.createAssignment || {}
@@ -214,21 +214,21 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       .map(getAttachmentValidationError)
       .find(Boolean)
     if (validationError === "size") {
-      toast.error(ca.toastFileTooLarge || "Mỗi tệp phải có dung lượng tối đa 50MB")
+      toast.error(ca.toastFileTooLarge || "Each file must be 50 MB or smaller")
       return
     }
     if (validationError === "type") {
-      toast.error(ca.toastInvalidFileType || "Định dạng tệp không được hỗ trợ")
+      toast.error(ca.toastInvalidFileType || "This file type is not supported")
       return
     }
     if (validationError) {
-      toast.error(ca.toastInvalidFile || "Vui lòng chọn tệp không rỗng")
+      toast.error(ca.toastInvalidFile || "Please select a non-empty file")
       return
     }
 
     const fingerprints = new Set(attachedFiles.map(getAttachmentFingerprint))
     if (files.some((file) => fingerprints.has(getAttachmentFingerprint(file)))) {
-      toast.error(ca.toastDuplicateFile || "Tệp này đã được đính kèm")
+      toast.error(ca.toastDuplicateFile || "This file is already attached")
       return
     }
 
@@ -239,7 +239,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       selectionFingerprints.add(fingerprint)
       return false
     })) {
-      toast.error(ca.toastDuplicateFile || "Tệp này đã được đính kèm")
+      toast.error(ca.toastDuplicateFile || "This file is already attached")
       return
     }
 
@@ -300,7 +300,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       toast.success(ca.successDraft || "Đã lưu bản nháp bài nộp")
       navigate(`/workspace/courses/class/${id}`)
     } catch (err) {
-      toast.error(getAssignmentErrorMessage(err, "Lỗi khi lưu bản nháp bài nộp"))
+      toast.error(getAssignmentErrorMessage(err, ca.errorSaveDraft, ca))
     }
   }
 
@@ -341,7 +341,13 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       }
       navigate(`/workspace/courses/class/${id}`)
     } catch (err) {
-      toast.error(getAssignmentErrorMessage(err, assignmentId ? "Lỗi khi cập nhật bài nộp" : "Lỗi khi tạo bài nộp"))
+      toast.error(getAssignmentErrorMessage(
+        err,
+        assignmentId
+          ? ca.errorUpdate
+          : ca.errorCreate,
+        ca,
+      ))
     }
   }
 
@@ -376,12 +382,20 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
             {classData.name || c.student?.classDetails || "Chi tiết lớp học"}
           </button>
           <ChevronRight size={12} className="text-gray-300" />
-          <span className="text-[#990011] font-semibold">{assignmentId ? (language === "vi" ? "Chỉnh sửa bài nộp" : "Edit Assignment") : (ca.pageTitle || "Tạo bài nộp")}</span>
+          <span className="text-[#990011] font-semibold">
+            {assignmentId
+              ? ca.editTitle || "Edit Assignment"
+              : ca.pageTitle || "Create Assignment"}
+          </span>
         </div>
       </div>
 
       {/* ─── Heading ─── */}
-      <h1 className="text-3xl font-black text-gray-950 tracking-tight">{assignmentId ? (language === "vi" ? "Chỉnh sửa bài nộp" : "Edit Assignment") : (ca.pageTitle || "Tạo bài nộp")}</h1>
+      <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+        {assignmentId
+          ? ca.editTitle || "Edit Assignment"
+          : ca.pageTitle || "Create Assignment"}
+      </h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
@@ -420,7 +434,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                     plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
                     toolbar:
                       "bold italic underline strikethrough | emoticons link | bullist numlist",
-                    placeholder: ca.descriptionPlaceholder || "Nhập hướng dẫn chi tiết cho học sinh...",
+                    // placeholder: ca.descriptionPlaceholder || "Nhập hướng dẫn chi tiết cho học sinh...",
                     skin: "oxide",
                     setup: (editor) => {
                       editor.on("focus", () => { })
@@ -481,7 +495,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 <div className="flex flex-col gap-2 mt-2">
                   {/* Existing attachments */}
                   {existingAttachments.map((file, idx) => {
-                    const { name, size } = getFileMeta(file)
+                    const { name, size } = getFileMeta(file, ca.unnamedFile)
                     const fileId = file.id || `existing-${idx}`
                     const numericSize = Number(size)
                     return (
@@ -508,7 +522,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                           type="button"
                           onClick={() => setExistingAttachments(prev => prev.filter((_, i) => i !== idx))}
                           className="p-1.5 text-gray-400 hover:text-red-655 hover:bg-red-50 rounded-lg transition-all"
-                          title="Delete file"
+                          title={ca.deleteFile || "Delete file"}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -539,7 +553,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                         type="button"
                         onClick={() => removeFile(file.id)}
                         className="p-1.5 text-gray-400 hover:text-red-650 hover:bg-red-50 rounded-lg transition-all"
-                        title="Delete file"
+                        title={ca.deleteFile || "Delete file"}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -561,7 +575,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   onChange={(date) => setDueDate(date ? toLocalDateString(date) : "")}
                   mode="date"
                   color="#990011"
-                  placeholder="DD/MM/YYYY"
+                  placeholder="dd/MM/yyyy"
                   className="w-full"
                 />
               </div>
@@ -899,7 +913,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               disabled={isSaving}
               className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {assignmentId ? (language === "vi" ? "Lưu thay đổi" : "Save Changes") : (ca.btnCreate || "Tạo bài nộp")}
+              {assignmentId
+                ? ca.btnSaveChanges || "Save Changes"
+                : ca.btnCreate || "Create Assignment"}
             </button>
           </div>
         </div>
@@ -917,7 +933,8 @@ const CreateAssignmentPage = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const assignmentId = params.assignmentId || searchParams.get("assignmentId")
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
+  const ca = t.courses?.createAssignment || {}
 
   // Redirect legacy /create-assignment?assignmentId=X to /assignment/X
   useEffect(() => {
@@ -979,9 +996,10 @@ const CreateAssignmentPage = () => {
           {classError || assignmentError
             ? getAssignmentErrorMessage(
               classError || assignmentError,
-              "Failed to load assignment form data"
+              ca.loadFailed,
+              ca,
             )
-            : "Failed to load assignment form data"}
+            : ca.loadFailed || "Failed to load assignment form data"}
         </span>
         {id && (
           <button
@@ -992,7 +1010,7 @@ const CreateAssignmentPage = () => {
             }}
             className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
           >
-            {language === "vi" ? "Thử lại" : "Try again"}
+            {ca.retry || "Try again"}
           </button>
         )}
       </div>
@@ -1006,7 +1024,6 @@ const CreateAssignmentPage = () => {
       assignmentId={assignmentId}
       classData={classData}
       initialAssignment={assignmentData}
-      language={language}
       t={t}
     />
   )

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGetCurriculumByClassQuery, useGetStudentClassDetailQuery, useGetStudentCurriculumByClassQuery } from '@/store/api/coursesApi'
 import { useGetUserProfileQuery } from '@/store/api/userApi'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -75,23 +75,20 @@ const LinkYoutubePage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">
-        <LoadingSpinner />
+        <LoadingSpinner text={dict.loading} />
       </div>
     )
   }
 
-  console.log(linkItem);
-
-
   if (!linkItem) {
     return (
       <div className="p-6 max-w-[1200px] mx-auto w-full">
-        <button onClick={() => navigate(`/workspace/courses/class/${classId}`)} className="flex items-center gap-2 text-[#5B403C] hover:text-[#D94C38] transition-colors mb-6 font-medium">
+        <button onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)} className="flex items-center gap-2 text-[#5B403C] hover:text-[#D94C38] transition-colors mb-6 font-medium">
           <ArrowLeft size={16} />
-          <span>{dict.postDetail.back || "Quay lại lớp học"}</span>
+          <span>{dict.postDetail.back}</span>
         </button>
         <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
-          Không tìm thấy link này.
+          {dict.linkPage.notFound}
         </div>
       </div>
     )
@@ -105,12 +102,12 @@ const LinkYoutubePage = () => {
           <Breadcrumb
             className="text-[#7B7979] text-sm"
             items={[
-              { label: dict.postDetail.breadcrumbs.home || "Trang chủ", onClick: () => navigate("/workspace") },
-              { label: isStudent ? (dict.postDetail.breadcrumbs.myLearning || "Khóa học & Học tập của tôi") : (dict.postDetail.breadcrumbs.myCourses || "Khóa học của tôi"), onClick: () => navigate(basePath) },
-              { label: dict.postDetail.breadcrumbs.allCourses || "Toàn bộ khóa học", onClick: () => navigate(basePath) },
-              { label: dict.postDetail.breadcrumbs.courseDetail || "Chi tiết khóa học", onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
-              { label: dict.postDetail.breadcrumbs.classDetail || "Chi tiết lớp học", onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
-              { label: dict.curriculum.link || "Tài liệu", active: true },
+              { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
+              { label: isStudent ? dict.postDetail.breadcrumbs.myLearning : dict.postDetail.breadcrumbs.myCourses, onClick: () => navigate(basePath) },
+              { label: dict.postDetail.breadcrumbs.allCourses, onClick: () => navigate(basePath) },
+              { label: dict.postDetail.breadcrumbs.courseDetail, onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
+              { label: dict.postDetail.breadcrumbs.classDetail, onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
+              { label: dict.curriculum.link, active: true },
             ]}
           />
 
@@ -118,7 +115,7 @@ const LinkYoutubePage = () => {
             className="inline-flex items-center gap-2 text-sm text-[#5B403C] hover:text-[#D94C38] cursor-pointer transition-colors w-fit font-medium"
             onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
           >
-            <ArrowLeft size={16} /> {dict.postDetail.back || "Quay lại"}
+            <ArrowLeft size={16} /> {dict.postDetail.back}
           </div>
         </div>
 
@@ -128,17 +125,17 @@ const LinkYoutubePage = () => {
               <iframe
                 className="w-full h-full"
                 src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
-                title={linkItem.title}
+                title={linkItem.title || dict.linkPage.videoTitle}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />
             </div>
           ) : (
             <div className="p-12 text-center text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-              Đây không phải là một đường dẫn YouTube hợp lệ.
+              {dict.linkPage.invalidYoutube}
               <br />
               <a href={linkItem.url} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline mt-2 inline-block font-medium">
-                Mở liên kết trong thẻ mới
+                {dict.linkPage.openInNewTab}
               </a>
             </div>
           )}

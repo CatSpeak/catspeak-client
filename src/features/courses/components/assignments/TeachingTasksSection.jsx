@@ -1,5 +1,6 @@
 import React from "react"
 import { Calendar, Clock, FileText, Award } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getTaskStatusClass = (status) => {
   const norm = String(status || "").trim().toLowerCase()
@@ -9,22 +10,28 @@ const getTaskStatusClass = (status) => {
 }
 
 const TeachingTasksSection = ({
-  teachingTasksLabel = "Teaching Tasks",
-  viewAllLabel = "View all",
+  teachingTasksLabel,
+  viewAllLabel,
   tasks,
   isLoading = false,
   onViewAll,
   onTaskAction,
-  emptyLabel = "No teaching tasks available",
+  emptyLabel,
 }) => {
+  const { t } = useLanguage()
+  const courses = t.courses || {}
+  const grading = courses.grading || {}
   const resolvedTasks = Array.isArray(tasks) ? tasks : []
   const hasViewAllAction = typeof onViewAll === "function"
+  const resolvedTeachingTasksLabel = teachingTasksLabel || courses.teachingTasks
+  const resolvedViewAllLabel = viewAllLabel || courses.viewAll
+  const resolvedEmptyLabel = emptyLabel || grading.noTeachingTasks
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-4 h-fit">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-black text-gray-950 tracking-tight">
-          {teachingTasksLabel}
+          {resolvedTeachingTasksLabel}
         </h3>
         {hasViewAllAction && (
           <button
@@ -32,7 +39,7 @@ const TeachingTasksSection = ({
             onClick={onViewAll}
             className="text-xs font-black text-[#b20a1c] hover:underline cursor-pointer"
           >
-            {viewAllLabel}
+            {resolvedViewAllLabel}
           </button>
         )}
       </div>
@@ -40,11 +47,11 @@ const TeachingTasksSection = ({
       <div className="flex flex-col gap-2 flex-1">
         {isLoading ? (
           <div className="rounded-2xl border border-gray-100 p-6 text-center text-xs font-bold text-gray-400 animate-pulse">
-            Loading tasks...
+            {grading.loadingTasks}
           </div>
         ) : resolvedTasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-xs font-bold text-gray-400">
-            {emptyLabel}
+          <div className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm font-bold text-gray-400">
+            {resolvedEmptyLabel}
           </div>
         ) : (
           resolvedTasks.map((task) => {

@@ -314,7 +314,7 @@ const normalizeCollection = (value, normalizeItem) => {
 }
 
 const StudentDashboard = ({ t, language }) => {
-  const sc = t?.courses?.student || {}
+  const sc = useMemo(() => t?.courses?.student || {}, [t])
   const navigate = useNavigate()
   const normalizedLanguage = toText(language).toLowerCase()
   const routeLanguage = SUPPORTED_ROUTE_LANGUAGES.has(normalizedLanguage)
@@ -555,16 +555,16 @@ const StudentDashboard = ({ t, language }) => {
     : classesQuery.currentData
   const isActiveListLoading = activeTab === "explore"
     ? (
-        availableCoursesQuery.isLoading
-        || (
-          availableCoursesQuery.isFetching
-          && activeCurrentData === undefined
-        )
+      availableCoursesQuery.isLoading
+      || (
+        availableCoursesQuery.isFetching
+        && activeCurrentData === undefined
       )
+    )
     : (
-        classesQuery.isLoading
-        || (classesQuery.isFetching && activeCurrentData === undefined)
-      )
+      classesQuery.isLoading
+      || (classesQuery.isFetching && activeCurrentData === undefined)
+    )
   const isActiveListFetching = activeTab === "explore"
     ? availableCoursesQuery.isFetching
     : classesQuery.isFetching
@@ -594,10 +594,10 @@ const StudentDashboard = ({ t, language }) => {
   const parsedTotalPages = Number(activePagination?.totalPages)
   const activeTotalPages = activeTab === "explore"
     ? (
-        Number.isFinite(parsedTotalPages)
-          ? Math.max(1, Math.floor(parsedTotalPages))
-          : 1
-      )
+      Number.isFinite(parsedTotalPages)
+        ? Math.max(1, Math.floor(parsedTotalPages))
+        : 1
+    )
     : localTotalPages
   const activeTotalItems = activeTab === "explore"
     ? serverTotalItems
@@ -916,9 +916,9 @@ const StudentDashboard = ({ t, language }) => {
                   disabled={activeTab === "explore"}
                   title={activeTab === "explore"
                     ? (
-                        sc.catalogLevelFilterUnavailable
-                        || "Level filtering is unavailable for the paginated catalog."
-                      )
+                      sc.catalogLevelFilterUnavailable
+                      || "Level filtering is unavailable for the paginated catalog."
+                    )
                     : undefined}
                 />
               </label>

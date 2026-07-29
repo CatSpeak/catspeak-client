@@ -20,7 +20,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <MessageSquareText size={16} />
             </div>
           }
-          label={<span className={labelClassName}>{dict.createBoard || "Tạo bảng tin"}</span>}
+          label={<span className={labelClassName}>{dict.createBoard}</span>}
           onClick={() => {
             onSelect("announcement")
             onClose()
@@ -32,7 +32,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <Folder size={16} />
             </div>
           }
-          label={<span className={labelClassName}>{dict.addMaterial || "Thêm học liệu"}</span>}
+          label={<span className={labelClassName}>{dict.addMaterial}</span>}
           onClick={() => {
             onSelect("material")
             onClose()
@@ -44,7 +44,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <ClipboardList size={16} />
             </div>
           }
-          label={<span className={labelClassName}>{dict.addActivity || "Thêm hoạt động học tập"}</span>}
+          label={<span className={labelClassName}>{dict.addActivity}</span>}
           onClick={() => {
             onSelect("assignment")
             onClose()
@@ -56,7 +56,7 @@ const AddContentMenu = ({ open = false, onClose = () => { }, onSelect = () => { 
               <Link2 size={16} />
             </div>
           }
-          label={<span className={labelClassName}>{dict.addLink || "Thêm liên kết"}</span>}
+          label={<span className={labelClassName}>{dict.addLink}</span>}
           onClick={() => {
             onSelect("link")
             onClose()

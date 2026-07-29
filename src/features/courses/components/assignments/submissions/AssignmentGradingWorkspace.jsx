@@ -21,6 +21,11 @@ const getDisplayFileName = (value, fallback) => (
   typeof value === "string" && value.trim() ? value : fallback
 )
 
+const interpolate = (template, values) => Object.entries(values).reduce(
+  (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
+  template || "",
+)
+
 const AssignmentGradingWorkspace = ({
   assignmentTitle,
   assignmentMaxScore,
@@ -31,7 +36,7 @@ const AssignmentGradingWorkspace = ({
   isSaving,
   isReleasing,
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const cg = t.courses?.grading || {}
   const [score, setScore] = useState(() => (
     student.score !== null
@@ -51,17 +56,17 @@ const AssignmentGradingWorkspace = ({
   const getScoreError = (val, maxScore) => {
     const trimmed = (val ?? "").toString().trim()
     if (!trimmed) {
-      return cg.scoreRequired || "Vui lòng nhập điểm số"
+      return cg.scoreRequired
     }
     const num = Number(trimmed)
     if (Number.isNaN(num) || !/^\d+(\.\d+)?$/.test(trimmed)) {
-      return cg.scoreInvalidNumber || "Điểm số phải là một số hợp lệ"
+      return cg.scoreInvalidNumber
     }
     if (num < 0) {
-      return cg.scoreMinError || "Điểm số không được nhỏ hơn 0"
+      return cg.scoreMinError
     }
     if (num > maxScore) {
-      return (cg.scoreMaxError || "Điểm số không được vượt quá {{maxScore}}")
+      return cg.scoreMaxError
         .replace("{{maxScore}}", maxScore)
     }
     return null
@@ -82,33 +87,29 @@ const AssignmentGradingWorkspace = ({
   }
   const studentName = typeof student.name === "string" && student.name.trim()
     ? student.name.trim()
-    : (language === "vi" ? "Học viên" : "Student")
-  const studentInitials = getStudentInitials(studentName)
+    : cg.studentLabel
+  const studentInitials = getStudentInitials(studentName, cg.studentInitials)
   const submissionFiles = Array.isArray(student.files) ? student.files : []
-  const firstFile = submissionFiles[0] ? getFileMeta(submissionFiles[0]) : null
+  const firstFile = submissionFiles[0]
+    ? getFileMeta(submissionFiles[0], cg.unnamedFile)
+    : null
   const firstFileUrl = getSafeFileUrl(firstFile?.url)
   const firstFileName = getDisplayFileName(
     firstFile?.name,
-    language === "vi" ? "Tệp không tên" : "Unnamed file"
+    cg.unnamedFile
   )
-  const submissionHeader = language === "vi"
-    ? "Bài nộp"
-    : (language === "zh" ? "提交内容" : "Submission")
+  const submissionHeader = cg.submissionHeader
   const safeAssignmentTitle = typeof assignmentTitle === "string"
     && assignmentTitle.trim()
     ? assignmentTitle.trim()
-    : (language === "vi" ? "Bài tập chưa đặt tên" : "Untitled assignment")
+    : cg.untitledAssignment
   const submissionText = typeof student.submissionText === "string"
     ? student.submissionText
     : ""
   const safeAvatarUrl = getSafeFileUrl(student.avatar)
   const scoreInputLabel = assignmentMaxScore === 10
-    ? (cg.scoreTenSystem || "Điểm (Hệ số 10)")
-    : language === "zh"
-      ? `分数 (满分 ${assignmentMaxScore})`
-      : language === "vi"
-        ? `Điểm (Tối đa ${assignmentMaxScore})`
-        : `Score (max ${assignmentMaxScore})`
+    ? cg.scoreTenSystem
+    : interpolate(cg.scoreMaxLabel, { maxScore: assignmentMaxScore })
   const inputIdSuffix = String(student.submissionId || student.id || "student")
     .replace(/[^a-zA-Z0-9_-]/g, "-")
   const scoreInputId = `assignment-score-${inputIdSuffix}`
@@ -131,9 +132,9 @@ const AssignmentGradingWorkspace = ({
               <button
                 type="button"
                 onClick={() => setZoomLevel((value) => Math.max(50, value - 10))}
-                aria-label={language === "vi" ? "Thu nhỏ bài nộp" : "Zoom out submission"}
+                aria-label={cg.zoomOutSubmission}
                 className="hover:text-gray-700 transition-colors"
-                title="Zoom Out"
+                title={cg.zoomOutSubmission}
               >
                 <ZoomOut size={14} />
               </button>
@@ -143,9 +144,9 @@ const AssignmentGradingWorkspace = ({
               <button
                 type="button"
                 onClick={() => setZoomLevel((value) => Math.min(200, value + 10))}
-                aria-label={language === "vi" ? "Phóng to bài nộp" : "Zoom in submission"}
+                aria-label={cg.zoomInSubmission}
                 className="hover:text-gray-700 transition-colors"
-                title="Zoom In"
+                title={cg.zoomInSubmission}
               >
                 <ZoomIn size={14} />
               </button>
@@ -156,9 +157,9 @@ const AssignmentGradingWorkspace = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 referrerPolicy="no-referrer"
-                aria-label={`${language === "vi" ? "Xem tệp" : "View file"}: ${firstFileName}`}
+                aria-label={interpolate(cg.viewFileNamed, { fileName: firstFileName })}
                 className="hover:text-gray-700 transition-colors flex items-center justify-center text-gray-400"
-                title="View"
+                title={cg.viewFile}
               >
                 <Eye size={14} />
               </a>
@@ -171,7 +172,7 @@ const AssignmentGradingWorkspace = ({
             <div className="w-full max-w-[620px] bg-white rounded-2xl shadow-sm border border-gray-150 p-12 text-center flex flex-col items-center justify-center gap-3">
               <X size={44} className="text-red-500 bg-red-50 p-2 rounded-full" />
               <h4 className="text-base font-extrabold text-gray-900">
-                {cg.modalNotSubmittedMsg || "Học viên chưa nộp bài tập này."}
+                {cg.modalNotSubmittedMsg}
               </h4>
             </div>
           ) : (
@@ -184,33 +185,33 @@ const AssignmentGradingWorkspace = ({
                   {safeAssignmentTitle}
                 </h3>
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-400 mt-2">
-                  <span>Student: <strong className="text-gray-700 font-extrabold">{studentName}</strong></span>
+                  <span>{cg.studentLabel}: <strong className="text-gray-700 font-extrabold">{studentName}</strong></span>
                 </div>
               </div>
 
               <div className="text-xs font-semibold text-gray-750 flex flex-col gap-4">
                 <span className="text-sm font-black text-gray-900">
-                  {cg.textResponseHeader || (language === "vi" ? "Nội dung bài làm" : "Text response")}
+                  {cg.textResponseHeader}
                 </span>
 
                 <RenderHTML
                   html={submissionText}
                   className="font-sans font-medium text-gray-700 text-xs"
-                  fallback={<p className="italic text-gray-400">No content provided.</p>}
+                  fallback={<p className="italic text-gray-400">{cg.noContentProvided}</p>}
                 />
 
                 {submissionFiles.length > 0 && (
                   <div className="mt-4 border-t border-gray-150 pt-4 flex flex-col gap-3">
                     <span className="text-sm font-black text-gray-900">
-                      {cg.submittedFilesHeader || (language === "vi" ? "Tệp đã nộp" : "Submitted files")}
+                      {cg.submittedFilesHeader}
                     </span>
                     <div className="grid grid-cols-1 gap-3">
                       {submissionFiles.map((file, index) => {
-                        const { name, url, size } = getFileMeta(file)
+                        const { name, url, size } = getFileMeta(file, cg.unnamedFile)
                         const safeUrl = getSafeFileUrl(url)
                         const displayName = getDisplayFileName(
                           name,
-                          language === "vi" ? "Tệp không tên" : "Unnamed file"
+                          cg.unnamedFile
                         )
                         return (
                           <div
@@ -230,9 +231,9 @@ const AssignmentGradingWorkspace = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 referrerPolicy="no-referrer"
-                                aria-label={`${language === "vi" ? "Xem tệp" : "View file"}: ${displayName}`}
+                                aria-label={interpolate(cg.viewFileNamed, { fileName: displayName })}
                                 className="p-1.5 text-gray-400 hover:text-[#990011] hover:bg-[#990011]/5 rounded-lg transition-colors"
-                                title={language === "vi" ? "Xem trực tiếp" : "View file"}
+                                title={cg.viewFile}
                               >
                                 <Eye size={14} />
                               </a>
@@ -252,7 +253,7 @@ const AssignmentGradingWorkspace = ({
       <div className="w-full md:w-[350px] lg:w-[380px] bg-white flex flex-col justify-between border-t md:border-t-0 md:border-l border-gray-200 min-h-0 md:h-full">
         <div className="p-6 flex flex-col gap-6 overflow-y-visible md:overflow-y-auto">
           <h2 className="text-lg font-black text-gray-950 tracking-tight">
-            {cg.gradingAndComment || "Chấm điểm & Nhận xét"}
+            {cg.gradingAndComment}
           </h2>
 
           <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 flex items-center gap-3">
@@ -273,8 +274,8 @@ const AssignmentGradingWorkspace = ({
               <span className="font-extrabold text-gray-900 text-sm leading-snug">{studentName}</span>
               <span className="text-[10px] text-gray-400 font-semibold mt-0.5">
                 {isSubmitted
-                  ? `Đã nộp: ${typeof student.time === "string" ? student.time : "—"}`
-                  : (cg.filterNotSubmitted || "Chưa nộp")}
+                  ? `${cg.submittedAtLabel}${typeof student.time === "string" ? student.time : "—"}`
+                  : cg.filterNotSubmitted}
               </span>
             </div>
           </div>
@@ -288,7 +289,7 @@ const AssignmentGradingWorkspace = ({
             </label>
             {!isSubmitted ? (
               <div className="text-xs font-bold text-gray-400 italic bg-gray-50 border border-dashed border-gray-200 rounded-xl p-4">
-                {cg.modalNotSubmittedMsg || "Học viên chưa nộp bài tập này."}
+                {cg.modalNotSubmittedMsg}
               </div>
             ) : (
               <div className="flex flex-col gap-1">
@@ -336,14 +337,14 @@ const AssignmentGradingWorkspace = ({
                 htmlFor={feedbackInputId}
                 className="text-xs font-black text-gray-400 tracking-wider uppercase"
               >
-                {cg.generalFeedback || "Nhận xét chung"}
+                {cg.generalFeedback}
               </label>
               <textarea
                 id={feedbackInputId}
                 value={feedback}
                 disabled={isMutating}
                 onChange={(event) => setFeedback(event.target.value)}
-                placeholder={cg.modalFeedbackPlaceholder || "Ghi nhận xét cho học viên..."}
+                placeholder={cg.modalFeedbackPlaceholder}
                 rows={6}
                 className="w-full px-4 py-3 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-750 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] shadow-2xs resize-none leading-relaxed disabled:cursor-not-allowed disabled:opacity-60"
               />
@@ -361,7 +362,7 @@ const AssignmentGradingWorkspace = ({
               disabled={isSaving || isReleasing}
               className="w-full py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {cg.btnRelease || "Trả về kết quả"}
+              {cg.btnRelease}
             </button>
           )}
           <div className="flex gap-3 w-full">
@@ -373,7 +374,7 @@ const AssignmentGradingWorkspace = ({
               disabled={isMutating}
               className="flex-1 py-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl text-center transition-colors shadow-2xs uppercase tracking-wider disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {cg.btnBack || "Quay về"}
+              {cg.btnBack}
             </button>
             {isSubmitted && (
               <button
@@ -383,8 +384,8 @@ const AssignmentGradingWorkspace = ({
                 className="flex-1 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl text-center transition-all shadow-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {studentStatus === "graded" || studentStatus === "returned"
-                  ? (cg.btnRegrade || "Chấm lại bài")
-                  : (cg.modalBtnSave || "Lưu điểm")}
+                  ? cg.btnRegrade
+                  : cg.modalBtnSave}
               </button>
             )}
           </div>

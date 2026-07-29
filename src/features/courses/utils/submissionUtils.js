@@ -360,8 +360,8 @@ export const getSubmissionStats = (students) => {
   }
 }
 
-export const getStudentInitials = (name) => {
-  if (typeof name !== "string" || !name.trim()) return "ST"
+export const getStudentInitials = (name, fallback = "") => {
+  if (typeof name !== "string" || !name.trim()) return fallback
 
   return name
     .trim()
@@ -396,5 +396,5 @@ export const formatPaginationShowingText = ({
       .replace("{{total}}", safeTotal)
   }
 
-  return `Hiển thị ${start} đến ${end} trong tổng số ${safeTotal} học viên`
+  return `${start}–${end} / ${safeTotal}`
 }

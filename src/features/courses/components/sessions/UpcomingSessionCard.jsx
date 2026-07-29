@@ -1,7 +1,13 @@
 import React from "react"
 import { Calendar, Clock, Users } from "lucide-react"
-import { formatDateDayMonth, formatTime12h } from "../../utils/courseUtils"
+import {
+  formatDateDayMonth,
+  formatTime12h,
+  getCourseLocale,
+} from "../../utils/courseUtils"
 import CourseStatusPill from "../CourseStatusPill"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const UpcomingSessionCard = ({
   nextClass,
@@ -14,6 +20,10 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
+  const { language, t } = useLanguage()
+  const ui = t.courses?.workspaceUi || {}
+  const locale = getCourseLocale(language)
+
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
       <h3 className="text-lg font-black text-gray-950 tracking-tight">
@@ -24,7 +34,10 @@ const UpcomingSessionCard = ({
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-              {nextClass.language || courseData?.language || "—"}
+              {getLocalizedLanguageName(
+                nextClass.language || courseData?.language,
+                t,
+              ) || "—"}
             </span>
             <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
               {nextClass.levels?.[0] || courseData?.levels?.[0] || "—"}
@@ -41,11 +54,15 @@ const UpcomingSessionCard = ({
           <div className="flex flex-col gap-2 border-b border-gray-50 pb-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Clock size={14} className="text-gray-400" />
-              <span>{formatTime12h(nextClass.schedule?.startTime)}</span>
+              <span>
+                {formatTime12h(nextClass.schedule?.startTime, locale, ui.tba)}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={14} className="text-gray-400" />
-              <span>{formatDateDayMonth(nextClass.startDate)}</span>
+              <span>
+                {formatDateDayMonth(nextClass.startDate, locale, ui.tba)}
+              </span>
             </div>
           </div>
 
@@ -68,13 +85,13 @@ const UpcomingSessionCard = ({
           </div>
         </div>
       ) : (
-        <div className="bg-[#FCFCFC] border border-gray-150 rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-2.5 min-h-[140px]">
+        <div className="bg-[#FCFCFC] border border-gray-150 rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
           <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
             <Calendar size={18} />
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="font-extrabold text-xs text-gray-700">{noUpcomingLabel}</span>
-            <p className="text-[10px] text-gray-400 font-semibold max-w-[200px] leading-relaxed">
+            <span className="font-extrabold text-base text-gray-700">{noUpcomingLabel}</span>
+            <p className="text-sm text-gray-400 font-semibold max-w-[200px] leading-relaxed">
               {createClassToScheduleLabel}
             </p>
           </div>
