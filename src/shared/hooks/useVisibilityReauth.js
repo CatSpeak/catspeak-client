@@ -25,7 +25,7 @@ export function useVisibilityReauth() {
       if (!token) return
 
       const remaining = tokenSecondsRemaining(token)
-      if (remaining < PROACTIVE_REFRESH_BUFFER) {
+      if (remaining <= PROACTIVE_REFRESH_BUFFER) {
         console.info(
           "[AuthVisibilitySync] Tab resumed/focused with token near or past expiry — triggering proactive refresh",
           { remainingSeconds: remaining },
