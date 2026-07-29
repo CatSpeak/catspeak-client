@@ -312,7 +312,8 @@ export default {
     systemDefaultSpeaker: "系统默认扬声器",
     speakerNotSupported: "您的浏览器不支持选择扬声器。",
     selectCamera: "选择摄像头",
-    testMic: "测试麦克风 (回放)",
+    testMic: "测试麦克风",
+    stopTest: "停止测试",
     unknownDevice: "未知设备",
   },
   videoCall: {
@@ -341,6 +342,11 @@ export default {
       description:
         "如果您遇到延迟、视频卡顿或音频中断的情况，请尝试强制重新连接。在重新建立连接期间，您的通话将短暂暂停。",
       forceReconnect: "强制重新连接",
+    },
+    general: {
+      receiveSystemMsgs: "接收系统消息通知",
+      receiveSystemMsgsDesc:
+        "在会议期间显示系统自动发出的通知消息。",
     },
     copyLink: "复制会议链接",
     linkCopied: "已复制！",

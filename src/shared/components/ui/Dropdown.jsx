@@ -28,6 +28,7 @@ const Dropdown = ({
   className = "",
   dropdownClassName = "min-w-[260px] max-w-[260px]",
   triggerClassName = "",
+  roundedClass = "rounded-full",
   align = "left", // 'left' | 'right' | 'center'
   maxHeightClass = "max-h-[250px]",
   activeColor = colors.primaryRed,
@@ -174,6 +175,7 @@ const Dropdown = ({
       onClick={() => !disabled && setIsOpen(!isOpen)}
       disabled={disabled}
       variant="secondary"
+      roundedClass={roundedClass}
       startIcon={selectedOption?.icon}
       endIcon={
         <ChevronDown

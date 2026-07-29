@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-import { Users, MessageSquare, LayoutGrid } from "lucide-react";
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import ControlButton from "./ControlButton";
-import ChooseLayoutModal from "./ChooseLayoutModal";
+import React, { useState } from "react"
+import { Users, MessageSquare, LayoutGrid } from "lucide-react"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import ControlButton from "./ControlButton"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import ChooseLayoutModal from "./ChooseLayoutModal"
 
 const RightSideControls = ({ className = "" }) => {
-  const { t } = useLanguage();
+  const { t } = useLanguage()
   const {
     showParticipants,
     setShowParticipants,
@@ -15,30 +16,28 @@ const RightSideControls = ({ className = "" }) => {
     participants,
     unreadRoomChat,
     unreadAiChat,
-  } = useGlobalVideoCall();
+  } = useGlobalVideoCall()
 
-  const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
+  const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false)
 
-  const unreadMessages = (unreadRoomChat || 0) + (unreadAiChat || 0);
+  const unreadMessages = (unreadRoomChat || 0) + (unreadAiChat || 0)
 
   return (
     <div className={`flex justify-end ${className}`}>
-      <div className="relative text-base">
-        <ControlButton
-          isActive={showParticipants}
+      <div className="relative text-base pr-2">
+        <PillButton
           onClick={() => setShowParticipants(!showParticipants)}
           title={t.rooms?.videoCall?.controls?.participants || "Participants"}
-          iconActive={<Users size={20} />}
-          iconInactive={<Users size={20} />}
-          className="w-[58px]"
-          inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
+          startIcon={<Users />}
+          variant={showParticipants ? "primary" : "secondary-no-outline"}
+          className={
+            showParticipants
+              ? "[&>div]:!bg-cath-red-600 [&>div]:hover:!bg-cath-red-700 [&>div]:!text-white"
+              : "[&>div]:!bg-transparent [&>div]:hover:!bg-[#D9D9D9] [&>div]:!text-black"
+          }
         >
-          {participants?.length > 0 && (
-            <div className={`${showParticipants ? "text-white" : "text-black"} ml-1.5 text-base font-medium`}>
-              {participants.length}
-            </div>
-          )}
-        </ControlButton>
+          {participants?.length > 0 ? participants.length : null}
+        </PillButton>
       </div>
 
       <div className="relative">
@@ -46,8 +45,8 @@ const RightSideControls = ({ className = "" }) => {
           isActive={showChat}
           onClick={() => setShowChat(!showChat)}
           title={t.rooms?.videoCall?.controls?.chat || "Chat"}
-          iconActive={<MessageSquare size={20} />}
-          iconInactive={<MessageSquare size={20} />}
+          iconActive={<MessageSquare />}
+          iconInactive={<MessageSquare />}
           inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
         />
         {unreadMessages > 0 && (
@@ -60,14 +59,17 @@ const RightSideControls = ({ className = "" }) => {
       <ControlButton
         isActive={false}
         onClick={() => setIsLayoutModalOpen(true)}
-        iconActive={<LayoutGrid size={20} />}
-        iconInactive={<LayoutGrid size={20} />}
+        iconActive={<LayoutGrid />}
+        iconInactive={<LayoutGrid />}
         inactiveClassOverride="bg-transparent hover:bg-[#D9D9D9] text-black"
       />
 
-      <ChooseLayoutModal open={isLayoutModalOpen} onClose={() => setIsLayoutModalOpen(false)} />
+      <ChooseLayoutModal
+        open={isLayoutModalOpen}
+        onClose={() => setIsLayoutModalOpen(false)}
+      />
     </div>
-  );
-};
+  )
+}
 
-export default RightSideControls;
+export default RightSideControls
