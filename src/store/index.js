@@ -10,6 +10,7 @@ import notificationReducer from "./slices/notificationSlice"
 import reelUploadReducer from "./slices/reelUploadSlice"
 import recordingProcessReducer from "./slices/recordingProcessSlice"
 import globalTaskReducer from "./slices/globalTaskSlice"
+import newsReducer from "./slices/newsSlice"
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     reelUpload: reelUploadReducer,
     recordingProcess: recordingProcessReducer,
     globalTask: globalTaskReducer,
+    news: newsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(baseApi.middleware, socialApi.middleware),
