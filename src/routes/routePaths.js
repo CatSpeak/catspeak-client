@@ -16,6 +16,7 @@ export const ROUTE_PATHS = {
 
   // Chat
   CHAT: "/chat",
+  CHAT_DETAIL: "/chat/:id",
 
   // Admin routes
   ADMIN: "/admin",

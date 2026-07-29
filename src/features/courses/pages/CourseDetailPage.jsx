@@ -1,9 +1,13 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetCourseDetailQuery } from "@/store/api/coursesApi"
+import {
+  useGetCourseDetailQuery,
+  useGetTeacherCourseTeachingTasksCombinedQuery,
+} from "@/store/api/coursesApi"
 import { Pencil } from "lucide-react"
 import { formatDateRange, getSafeMediaUrl } from "../utils/courseUtils"
+import { mapTeachingTask } from "../utils/courseTransforms"
 import { toLocalDateString } from "../utils/dateUtils"
 
 import ClassCard from "../components/ClassCard"
@@ -25,6 +29,29 @@ const CourseDetailPage = () => {
     error,
     refetch,
   } = useGetCourseDetailQuery(id, { skip: !id })
+
+  // Fetch teaching tasks (Combined API)
+  const { data: rawTasks = [], isLoading: isLoadingTasks } =
+    useGetTeacherCourseTeachingTasksCombinedQuery(id, { skip: !id })
+
+  const teachingTasks = useMemo(() => {
+    return Array.isArray(rawTasks)
+      ? rawTasks.map(mapTeachingTask).filter(Boolean)
+      : []
+  }, [rawTasks])
+
+  const handleTaskAction = (task) => {
+    if (!task) return
+    const targetClassId = task.classId
+    if (!targetClassId) return
+    let targetUrl = `/workspace/courses/class/${encodeURIComponent(String(targetClassId))}?tab=grading`
+    if (task.assignmentId) {
+      targetUrl += `&assignmentId=${encodeURIComponent(String(task.assignmentId))}`
+    } else if (task.quizId) {
+      targetUrl += `&quizId=${encodeURIComponent(String(task.quizId))}`
+    }
+    navigate(targetUrl)
+  }
   const rawCourse = (
     data
     && typeof data === "object"
@@ -93,10 +120,6 @@ const CourseDetailPage = () => {
     description: rawCourse.description || "",
     thumbnailUrl: getSafeMediaUrl(rawCourse.thumbnailUrl)
   }
-
-
-
-
 
   // Only show an upcoming session when the API provides one.
   const nextSessionCandidate = classes
@@ -303,13 +326,10 @@ const CourseDetailPage = () => {
           <TeachingTasksSection
             teachingTasksLabel={teachingTasksLabel}
             viewAllLabel={viewAllLabel}
-            gradeAssignmentLabel={gradeAssignmentLabel}
-            giveFeedbackLabel={giveFeedbackLabel}
-            prepareLessonLabel={prepareLessonLabel}
-            taskSpeakingSubtitle={c.taskSpeakingSubtitle}
-            taskWritingSubtitle={c.taskWritingSubtitle}
+            tasks={teachingTasks}
+            isLoading={isLoadingTasks}
             onViewAll={() => navigate("/workspace/courses/schedule")}
-            onTaskAction={() => navigate("/workspace/courses/schedule")}
+            onTaskAction={handleTaskAction}
           />
         </div>
       </div>

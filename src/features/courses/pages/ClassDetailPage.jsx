@@ -216,7 +216,13 @@ const ClassDetailPage = () => {
               {/* Trò chuyện button */}
               <button
                 type="button"
-                onClick={() => navigate("/chat")}
+                onClick={() => {
+                  if (classData?.chatGroupId) {
+                    navigate(`/chat/${classData.chatGroupId}`)
+                  } else {
+                    navigate("/chat")
+                  }
+                }}
                 className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
                 <MessageSquare size={14} className="fill-[#990011]" />

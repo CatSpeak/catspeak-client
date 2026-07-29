@@ -1,9 +1,11 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users } from "lucide-react"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
 import TeachingTasksSection from "../assignments/TeachingTasksSection"
+import { useGetTeacherClassTeachingTasksCombinedQuery } from "@/store/api/coursesApi"
+import { mapTeachingTask } from "../../utils/courseTransforms"
 import {
   formatDateRange,
   formatDateDayMonth,
@@ -62,6 +64,30 @@ const ClassOverviewTab = ({
   const studentCount = Number.isFinite(studentCountValue)
     ? Math.max(0, Math.floor(studentCountValue))
     : null
+
+  const { data: rawTasks = [], isLoading: isLoadingTasks } =
+    useGetTeacherClassTeachingTasksCombinedQuery(id, { skip: !id || isStudent })
+
+  const teachingTasks = useMemo(() => {
+    return Array.isArray(rawTasks)
+      ? rawTasks.map(mapTeachingTask).filter(Boolean)
+      : []
+  }, [rawTasks])
+
+  const handleTaskAction = (task) => {
+    if (onTaskAction) {
+      onTaskAction(task)
+      return
+    }
+    const targetClassId = task.classId || id
+    let targetUrl = `/workspace/courses/class/${encodeURIComponent(String(targetClassId))}?tab=grading`
+    if (task.assignmentId) {
+      targetUrl += `&assignmentId=${encodeURIComponent(String(task.assignmentId))}`
+    } else if (task.quizId) {
+      targetUrl += `&quizId=${encodeURIComponent(String(task.quizId))}`
+    }
+    navigate(targetUrl)
+  }
 
   const showRightColumn = !isStudent || isEnrolled
   const normalizedStatus = String(classData.status || "").trim().toUpperCase()
@@ -408,9 +434,10 @@ const ClassOverviewTab = ({
               gradeAssignmentLabel={gradeAssignmentLabel}
               giveFeedbackLabel={giveFeedbackLabel}
               prepareLessonLabel={prepareLessonLabel}
+              tasks={teachingTasks}
+              isLoading={isLoadingTasks}
               onViewAll={onViewTasks}
-              onTaskAction={onTaskAction}
-              actionIcon="plus"
+              onTaskAction={handleTaskAction}
             />
           )}
         </div>

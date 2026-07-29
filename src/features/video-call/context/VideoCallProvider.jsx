@@ -425,8 +425,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           }
         } else if (status === 400 || errorBody === "ROOM_NOT_CREATED") {
           errorMsg = language === "vi"
-            ? "Lớp học ảo chưa được tạo. Vui lòng liên hệ hỗ trợ."
-            : "Virtual classroom was not created. Please contact support."
+            ? "Chưa đến giờ lớp học bắt đầu"
+            : "It's not time for class yet."
         }
       }
 

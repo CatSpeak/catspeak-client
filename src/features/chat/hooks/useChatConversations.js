@@ -76,7 +76,7 @@ export default function useChatConversations(selectedId, accumulatedMessagesCoun
           },
         ),
       )
-      markConversationAsRead(selectedId).catch(() => {})
+      markConversationAsRead(selectedId).catch(() => { })
     }
   }, [
     selectedId,
@@ -87,7 +87,16 @@ export default function useChatConversations(selectedId, accumulatedMessagesCoun
   ])
 
   const activeConversationRaw = useMemo(() => {
-    return conversations.find((c) => c.conversationId === selectedId) || null
+    if (!selectedId) return null
+    return (
+      conversations.find((c) => {
+        const cId = c.conversationId ?? c.id
+        return (
+          Number(cId) === Number(selectedId) ||
+          String(cId) === String(selectedId)
+        )
+      }) || null
+    )
   }, [conversations, selectedId])
 
   const activeConversation = useMemo(() => {

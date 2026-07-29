@@ -1913,6 +1913,32 @@ export const coursesApi = baseApi.injectEndpoints({
         { type: "StudentQuizResult", id: getQuizTagId(classId, quizId) },
       ],
     }),
+
+    getTeacherClassTeachingTasksCombined: builder.query({
+      query: (classId) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/teaching-tasks/combined`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const list = Array.isArray(response)
+          ? response
+          : response?.data || []
+        return list
+      },
+    }),
+
+    getTeacherCourseTeachingTasksCombined: builder.query({
+      query: (courseId) => ({
+        url: `/teacher/courses/${encodePathSegment(courseId)}/teaching-tasks/combined`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const list = Array.isArray(response)
+          ? response
+          : response?.data || []
+        return list
+      },
+    }),
   }),
 })
 
@@ -2018,4 +2044,7 @@ export const {
   useSubmitStudentQuizAttemptMutation,
   useGetStudentQuizResultQuery,
   useLazyGetStudentQuizResultQuery,
+  // Teaching Tasks Hooks
+  useGetTeacherClassTeachingTasksCombinedQuery,
+  useGetTeacherCourseTeachingTasksCombinedQuery,
 } = coursesApi

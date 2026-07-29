@@ -800,6 +800,14 @@ const routesConfig = [
               </LazyRoute>
             ),
           },
+          {
+            path: ":id",
+            element: (
+              <LazyRoute>
+                <ChatPage />
+              </LazyRoute>
+            ),
+          },
         ],
       },
       {

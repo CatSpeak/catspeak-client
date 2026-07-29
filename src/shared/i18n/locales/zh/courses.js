@@ -223,7 +223,12 @@ export default {
     toastCreateFailed: "创建课程失败！",
     languageNotAllowed: "根据您的教师资料，所选的语言或级别不受允许。",
     toastClearSuccess: "已清空表单输入",
-    changeImage: "更改图片"
+    changeImage: "更改图片",
+    toastEnterCourseName: "请输入课程名称！",
+    toastSelectLanguage: "请选择语言！",
+    toastEnterDescription: "请输入课程描述！",
+    toastUploadAvatar: "请上传课程封面图片！",
+    toastCreateSuccess: "成功创建课程！"
   },
   createClass: {
     createClass: "创建班级",

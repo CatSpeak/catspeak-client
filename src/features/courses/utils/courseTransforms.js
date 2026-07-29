@@ -239,3 +239,34 @@ export const filterStudentClasses = (classes, filters) => (
     matchesLanguage(cls, filters.langFilter)
   ))
 )
+
+export const mapTeachingTask = (task) => {
+  if (!task || typeof task !== "object") return null
+  const isQuiz = task.taskType === "QuizGrading" || Boolean(task.quizId)
+
+  const pendingText = task.pendingCount
+    ? `${task.pendingCount} pending`
+    : ""
+  const subtitleParts = [task.className, pendingText].filter(Boolean)
+  const displayStatus = task.status || "Urgent"
+
+  return {
+    id: `${task.taskType || "task"}-${task.assignmentId || 0}-${task.quizId || 0}-${task.classId || 0}-${task.createdAt || ""}`,
+    title: task.taskName || (isQuiz ? "Chấm bài kiểm tra" : "Chấm bài nộp"),
+    subtitle: subtitleParts.join(" • "),
+    status: displayStatus,
+    badge: displayStatus,
+    badgeClass: String(displayStatus).toLowerCase() === "urgent"
+      ? "bg-[#FFE4E6] text-[#E11D48]"
+      : String(displayStatus).toLowerCase() === "required"
+        ? "bg-[#FEF3C7] text-[#D97706]"
+        : "bg-[#E8F8F0] text-[#15803D]",
+    iconColor: isQuiz ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600",
+    taskType: task.taskType,
+    assignmentId: task.assignmentId,
+    quizId: task.quizId,
+    classId: task.classId,
+    courseId: task.courseId,
+    rawTask: task,
+  }
+}

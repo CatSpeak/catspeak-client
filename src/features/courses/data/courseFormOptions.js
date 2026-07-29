@@ -22,3 +22,14 @@ export const DEFAULT_CLASS_FEE_TIERS = [
   { minSlots: 21, maxSlots: 50, openingFee: 500000, commissionRate: 15 },
   { minSlots: 51, maxSlots: Infinity, openingFee: 0, commissionRate: 20 },
 ]
+
+export const getLocalizedLanguageName = (langName, t) => {
+  if (!langName) return ""
+  const key = String(langName).trim().toLowerCase()
+  const langMap = t?.courses?.student?.languages || {}
+  if (key === "english") return langMap.English || "English"
+  if (key === "chinese") return langMap.Chinese || "Chinese"
+  if (key === "vietnamese") return langMap.Vietnamese || "Vietnamese"
+  if (key === "japanese") return langMap.Japanese || "Japanese"
+  return langName
+}

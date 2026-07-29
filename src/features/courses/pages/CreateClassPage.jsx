@@ -24,6 +24,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import {
   COURSE_FORM_LANGUAGES,
   DEFAULT_CLASS_FEE_TIERS,
+  getLocalizedLanguageName,
 } from "../data/courseFormOptions"
 import {
   calculateFees,
@@ -162,6 +163,11 @@ const CreateClassPage = () => {
   }, [])
 
   // Form State
+  const [errors, setErrors] = useState({})
+  const clearError = useCallback((field) => {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: false } : prev))
+  }, [])
+
   const [courseId, setCourseId] = useState(initialCourseId)
   const [className, setClassName] = useState("")
   const [selectedLanguage, setSelectedLanguage] = useState("English")
@@ -195,6 +201,7 @@ const CreateClassPage = () => {
     activeMutationRequestRef.current = null
 
     setShowDeleteModal(false)
+    setErrors({})
     setCourseId(initialCourseId)
     setClassName("")
     setSelectedLanguage("English")
@@ -232,13 +239,26 @@ const CreateClassPage = () => {
   // Handlers
   const handleCourseChange = useCallback((id) => {
     setCourseId(id)
+    clearError("courseId")
     const selectedCourse = coursesList.find(c => String(c.id) === String(id))
     if (selectedCourse) {
-      setSelectedLanguage(selectedCourse.language)
-      setLevel(selectedCourse.levels?.[0] || "")
-      setSessions(selectedCourse.totalSessions ?? "")
-
-
+      if (selectedCourse.language) {
+        const matchedLang = languagesList.find(l => (l.name || "").toLowerCase() === selectedCourse.language.toLowerCase())
+        setSelectedLanguage(matchedLang ? matchedLang.name : selectedCourse.language)
+        clearError("selectedLanguage")
+      }
+      if (Array.isArray(selectedCourse.levels) && selectedCourse.levels.length > 0) {
+        const firstLevel = selectedCourse.levels[0]
+        const rawLevel = typeof firstLevel === "object" ? firstLevel.name : firstLevel
+        if (rawLevel) {
+          setLevel(rawLevel)
+          clearError("level")
+        }
+      }
+      if (selectedCourse.totalSessions) {
+        setSessions(parseInt(selectedCourse.totalSessions, 10) || 24)
+        clearError("sessions")
+      }
 
       setAdmissionStart(formatToYYYYMMDD(selectedCourse.enrollmentStart))
       setAdmissionEnd(formatToYYYYMMDD(selectedCourse.enrollmentEnd))
@@ -248,7 +268,7 @@ const CreateClassPage = () => {
       setThumbnailFile(null)
       setThumbnailPreview("")
     }
-  }, [coursesList])
+  }, [coursesList, languagesList, clearError])
 
   // Auto-fill course details if navigated from course details page
   useEffect(() => {
@@ -429,6 +449,7 @@ const CreateClassPage = () => {
       ...prev,
       [day]: !prev[day]
     }))
+    clearError("checkedDays")
   }
 
   const handleTimeChange = (day, field, value) => {
@@ -463,41 +484,43 @@ const CreateClassPage = () => {
     e.preventDefault()
     if (submitGuardRef.current || isCreating || isUpdating) return
 
-    if (!courseId) {
-      toast.error(cc.toastSelectCourseFirst || "Please select a course first!")
+    const newErrors = {}
+    if (!courseId) newErrors.courseId = true
+    if (!className.trim()) newErrors.className = true
+    if (!selectedLanguage) newErrors.selectedLanguage = true
+    if (!level) newErrors.level = true
+    if (!admissionStart) newErrors.admissionStart = true
+    if (!admissionEnd) newErrors.admissionEnd = true
+    if (!startDate) newErrors.startDate = true
+
+    const sessionCount = parseInt(sessions, 10) || 0
+    const classCapacity = parseInt(capacity, 10) || 0
+    if (!Number.isSafeInteger(sessionCount) || sessionCount <= 0) newErrors.sessions = true
+    if (!Number.isSafeInteger(classCapacity) || classCapacity <= 0) newErrors.capacity = true
+
+    const checkedDaysList = Object.keys(checkedDays).filter(k => checkedDays[k])
+    if (checkedDaysList.length === 0) newErrors.checkedDays = true
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      if (newErrors.courseId) toast.error(cc.toastSelectCourseFirst || "Please select a course first!")
+      else if (newErrors.className) toast.error(cc.toastEnterClassName || "Please enter class name!")
+      else if (newErrors.selectedLanguage) toast.error(cc.toastSelectLanguage || "Please select a language!")
+      else if (newErrors.level) toast.error(cc.toastSelectLevel || "Please select a level!")
+      else if (newErrors.admissionStart || newErrors.admissionEnd || newErrors.startDate) toast.error(cc.toastAdmissionAndStart || "Please enter admission period and start date!")
+      else if (newErrors.sessions) toast.error(cc.toastEnterSessions || "Please enter valid number of sessions!")
+      else if (newErrors.capacity) toast.error(cc.toastEnterCapacity || "Please enter valid class capacity!")
+      else if (newErrors.checkedDays) toast.error(cc.toastSelectSchedule || "Please select at least one teaching day!")
       return
     }
 
-    if (!className.trim()) {
-      toast.error(cc.toastEnterClassName || "Please enter class name!")
-      return
-    }
-
-    if (!admissionStart || !admissionEnd || !startDate) {
-      toast.error(cc.toastAdmissionAndStart || "Please enter admission period and start date!")
-      return
-    }
+    setErrors({})
 
     const start = parseLocalDateString(startDate)
     const enrollStart = parseLocalDateString(admissionStart)
     const enrollEnd = parseLocalDateString(admissionEnd)
     if (!start || !enrollStart || !enrollEnd) {
       toast.error(cc.toastInvalidDates || "Enter valid enrollment and class dates.")
-      return
-    }
-
-    const sessionCount = Number(sessions)
-    const classCapacity = Number(capacity)
-    if (!Number.isSafeInteger(sessionCount) || sessionCount <= 0) {
-      toast.error(cc.toastInvalidSessions || "Enter a valid number of sessions.")
-      return
-    }
-    if (!Number.isSafeInteger(classCapacity) || classCapacity <= 0) {
-      toast.error(cc.toastInvalidCapacity || "Enter a valid class capacity.")
-      return
-    }
-    if (!selectedLanguage || !level) {
-      toast.error(cc.toastLanguageLevelRequired || "Select a language and level.")
       return
     }
 
@@ -535,11 +558,6 @@ const CreateClassPage = () => {
       return
     }
 
-    const checkedDaysList = Object.keys(checkedDays).filter(k => checkedDays[k])
-    if (checkedDaysList.length === 0) {
-      toast.error(cc.toastSelectSchedule || "Please select at least one teaching day!")
-      return
-    }
     const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/
     const invalidScheduleDay = checkedDaysList.find((day) => {
       const slot = timeSlots[day]
@@ -638,17 +656,16 @@ const CreateClassPage = () => {
           throw new Error("Unexpected create-class response")
         }
 
-        if (resultPayload.checkoutUrl) {
-          const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
-          if (!checkoutUrl) throw new Error("Invalid checkout URL")
+        const rawCheckoutUrl = resultPayload.checkoutUrl || resultPayload.paymentUrl || resultPayload.checkout_url
+        const checkoutUrl = rawCheckoutUrl ? getSafeMediaUrl(rawCheckoutUrl) : null
+
+        if (checkoutUrl) {
           toast.success(cc.toastRedirectPayment || "Redirecting to payment...")
           window.location.assign(checkoutUrl)
-        } else if (resultPayload.classId) {
-          // Free flow (capacity ≤ 6): class created immediately
+        } else {
+          // Class created (free flow or direct creation)
           toast.success(cc.toastCreateSuccess || "Class created successfully!")
           navigate("/workspace/classes/all-classes")
-        } else {
-          throw new Error("Missing class ID or checkout URL")
         }
       }
     } catch (error) {
@@ -790,7 +807,7 @@ const CreateClassPage = () => {
     ? (cc.classInformation || "Class Information")
     : isRecoverMode
       ? (cc.recoverClassInfo || "Recover Class Information")
-      : (c.courseInfoTitle || "Thông tin khóa học")
+      : (cc.classInfoTitle || cc.classInformation || "Thông tin lớp học")
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -849,7 +866,7 @@ const CreateClassPage = () => {
                   value={courseId}
                   onChange={(e) => handleCourseChange(e.target.value)}
                   disabled={isEditMode || isRecoverMode}
-                  className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                  className={`w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed`}
                 >
                   <option value="">{cc.selectCourseOption || "-- Select Course --"}</option>
                   {isEditMode || isRecoverMode ? (
@@ -870,10 +887,13 @@ const CreateClassPage = () => {
               <input
                 type="text"
                 value={className}
-                onChange={(e) => setClassName(e.target.value)}
+                onChange={(e) => {
+                  setClassName(e.target.value)
+                  clearError("className")
+                }}
                 disabled={isRecoverMode}
                 placeholder={cc.placeholderClassName || "Enter class name"}
-                className="w-full h-11 px-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed"
+                className={`w-full h-11 px-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.className ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed`}
               />
             </div>
 
@@ -887,13 +907,16 @@ const CreateClassPage = () => {
                     onChange={(e) => {
                       setSelectedLanguage(e.target.value)
                       setLevel("")
+                      clearError("selectedLanguage")
                     }}
                     disabled={isRecoverMode}
-                    className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                    className={`w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed`}
                   >
                     <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
                     {languagesList.map((lang) => (
-                      <option key={lang.id} value={lang.name}>{lang.name}</option>
+                      <option key={lang.id} value={lang.name}>
+                        {getLocalizedLanguageName(lang.name, t)}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -905,13 +928,16 @@ const CreateClassPage = () => {
                 <div className="relative">
                   <select
                     value={level}
-                    onChange={(e) => setLevel(e.target.value)}
+                    onChange={(e) => {
+                      setLevel(e.target.value)
+                      clearError("level")
+                    }}
                     disabled={!selectedLanguage || isRecoverMode}
-                    className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                    className={`w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed`}
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
                     {levelsList.map((lvl) => (
-                      <option key={lvl.id} value={lvl.name}>{lvl.name}</option>
+                      <option key={lvl.id || lvl.name} value={lvl.name}>{lvl.name}</option>
                     ))}
                   </select>
                   <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -927,24 +953,30 @@ const CreateClassPage = () => {
                   <div className="flex-1">
                     <DatePicker
                       value={admissionStart}
-                      onChange={(date) => setAdmissionStart(date ? toLocalDateString(date) : "")}
+                      onChange={(date) => {
+                        setAdmissionStart(date ? toLocalDateString(date) : "")
+                        clearError("admissionStart")
+                      }}
                       mode="date"
                       color="#990011"
                       placeholder="DD/MM/YYYY"
                       minDate={isEditMode ? null : tomorrow}
-                      className="w-full"
+                      className={`w-full ${errors.admissionStart ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                     />
                   </div>
                   <span className="text-gray-300 text-xs font-bold">-</span>
                   <div className="flex-1">
                     <DatePicker
                       value={admissionEnd}
-                      onChange={(date) => setAdmissionEnd(date ? toLocalDateString(date) : "")}
+                      onChange={(date) => {
+                        setAdmissionEnd(date ? toLocalDateString(date) : "")
+                        clearError("admissionEnd")
+                      }}
                       mode="date"
                       color="#990011"
                       placeholder="DD/MM/YYYY"
                       minDate={isEditMode ? null : tomorrow}
-                      className="w-full"
+                      className={`w-full ${errors.admissionEnd ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                     />
                   </div>
                 </div>
@@ -954,12 +986,15 @@ const CreateClassPage = () => {
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.startDate} <span className="text-[#990011]">*</span></label>
                 <DatePicker
                   value={startDate}
-                  onChange={(date) => setStartDate(date ? toLocalDateString(date) : "")}
+                  onChange={(date) => {
+                    setStartDate(date ? toLocalDateString(date) : "")
+                    clearError("startDate")
+                  }}
                   mode="date"
                   color="#990011"
                   placeholder="DD/MM/YYYY"
                   minDate={isEditMode ? null : tomorrow}
-                  className="w-full"
+                  className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                 />
               </div>
             </div>
@@ -969,24 +1004,27 @@ const CreateClassPage = () => {
               {/* Number of Sessions */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.numberOfSessions} <span className="text-[#990011]">*</span></label>
-                <div className="flex items-center bg-[#F2F2F2]/60 border border-transparent rounded-xl overflow-hidden h-11 focus-within:border-gray-200 focus-within:bg-white transition-all">
+                <div className={`flex items-center bg-[#F2F2F2]/60 border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus-within:border-gray-200"} rounded-xl overflow-hidden h-11 focus-within:bg-white transition-all`}>
                   <button
                     type="button"
-                    onClick={() => setSessions(prev => Math.max(1, prev - 1))}
-                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95"
+                    onClick={() => setSessions(prev => Math.max(1, (parseInt(prev, 10) || 1) - 1))}
+                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Minus size={14} />
                   </button>
                   <input
                     type="number"
                     value={sessions}
-                    onChange={(e) => setSessions(Math.max(1, parseInt(e.target.value) || 1))}
+                    onChange={(e) => {
+                      setSessions(Math.max(1, parseInt(e.target.value, 10) || 1))
+                      clearError("sessions")
+                    }}
                     className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
                   />
                   <button
                     type="button"
-                    onClick={() => setSessions(prev => prev + 1)}
-                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95"
+                    onClick={() => setSessions(prev => (parseInt(prev, 10) || 0) + 1)}
+                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Plus size={14} />
                   </button>
@@ -996,24 +1034,27 @@ const CreateClassPage = () => {
               {/* Capacity */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.capacity} <span className="text-[#990011]">*</span></label>
-                <div className="flex items-center bg-[#F2F2F2]/60 border border-transparent rounded-xl overflow-hidden h-11 focus-within:border-gray-200 focus-within:bg-white transition-all">
+                <div className={`flex items-center bg-[#F2F2F2]/60 border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus-within:border-gray-200"} rounded-xl overflow-hidden h-11 focus-within:bg-white transition-all`}>
                   <button
                     type="button"
-                    onClick={() => setCapacity(prev => Math.max(1, prev - 1))}
-                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95"
+                    onClick={() => setCapacity(prev => Math.max(1, (parseInt(prev, 10) || 1) - 1))}
+                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Minus size={14} />
                   </button>
                   <input
                     type="number"
                     value={capacity}
-                    onChange={(e) => setCapacity(Math.max(1, parseInt(e.target.value) || 1))}
+                    onChange={(e) => {
+                      setCapacity(Math.max(1, parseInt(e.target.value, 10) || 1))
+                      clearError("capacity")
+                    }}
                     className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
                   />
                   <button
                     type="button"
-                    onClick={() => setCapacity(prev => prev + 1)}
-                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95"
+                    onClick={() => setCapacity(prev => (parseInt(prev, 10) || 0) + 1)}
+                    className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Plus size={14} />
                   </button>
@@ -1026,7 +1067,7 @@ const CreateClassPage = () => {
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.teachingSchedule}</label>
 
               {/* Outer Gray Container */}
-              <div className="bg-[#F2F2F2]/45 rounded-2xl p-4 border border-transparent flex flex-col gap-4">
+              <div className={`bg-[#F2F2F2]/45 rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-transparent"} flex flex-col gap-4`}>
                 <span className="text-xs font-bold text-gray-500">
                   {cc.chooseDays || "Choose days of the week"}
                 </span>
@@ -1192,9 +1233,12 @@ const CreateClassPage = () => {
                 rows={5}
                 value={description}
                 disabled={isRecoverMode}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value)
+                  clearError("description")
+                }}
                 placeholder={cc.placeholderDescription || "Enter class description (optional)"}
-                className="w-full p-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed"
+                className={`w-full p-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border ${errors.description ? "border-red-500 ring-2 ring-red-200" : "border-transparent focus:border-gray-200"} outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed`}
               />
             </div>
 
