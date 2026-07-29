@@ -32,9 +32,10 @@ export const userApi = baseApi.injectEndpoints({
       }),
     }),
     requestUserProfileOtp: builder.mutation({
-      query: () => ({
+      query: (body) => ({
         url: "/user-profile/request-otp",
         method: "POST",
+        body,
       }),
     }),
     requestPhoneUpdateOtp: builder.mutation({
