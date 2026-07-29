@@ -7,6 +7,7 @@ export { default as VideoTile } from "./components/VideoTile"
 export { default as ScreenShareTile } from "./components/ScreenShareTile"
 export { default as PiPWidget } from "./components/pip/PiPWidget"
 export { default as RoomHeader } from "./components/RoomHeader"
+export { default as RoomSettingsModal } from "./components/settings/RoomSettingsModal"
 
 // Hooks
 export { useVideoCall } from "./hooks/useVideoCall"

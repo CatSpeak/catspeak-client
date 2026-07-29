@@ -14,6 +14,7 @@ const PillButton = ({
   textColor,
   borderColor,
   className = "",
+  roundedClass = "rounded-full",
   ...props
 }) => {
   const isSecondary = variant === "secondary"
@@ -69,7 +70,7 @@ const PillButton = ({
     >
       <div
         style={customStyle}
-        className={`w-full h-10 px-4 text-sm rounded-full font-medium flex items-center justify-center gap-2 transition whitespace-nowrap ${variantStyles} ${disabledStyles}`}
+        className={`w-full h-10 px-4 text-sm font-medium flex items-center justify-center gap-2 transition whitespace-nowrap ${roundedClass} ${variantStyles} ${disabledStyles}`}
       >
         {loading ? (
           <>

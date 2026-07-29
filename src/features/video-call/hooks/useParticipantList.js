@@ -13,6 +13,24 @@ export const parseMetadata = (metadata) => {
   }
 }
 
+// Set to false (or set MOCK_PARTICIPANTS to []) when done testing to disable completely
+const ENABLE_MOCK_PARTICIPANTS = false
+
+export const MOCK_PARTICIPANTS = ENABLE_MOCK_PARTICIPANTS
+  ? Array.from({ length: 4 }, (_, i) => ({
+      identity: `mock-user-${i + 1}`,
+      name: `Mock Participant ${i + 1}`,
+      isLocal: false,
+      isMicrophoneEnabled: i % 2 === 0,
+      isCameraEnabled: false,
+      isScreenShareEnabled: false,
+      metadata: "{}",
+      getTrackPublication: () => null,
+      on: () => {},
+      off: () => {},
+    }))
+  : []
+
 /**
  * Deduplicates and sorts the participant list.
  *
@@ -39,17 +57,24 @@ export const useParticipantList = (allParticipants, localParticipant) => {
       // Filter out the STT agent — check both metadata flag and identity prefix
       // (identity prefix is the fallback for when metadata hasn't been set yet)
       const meta = parseMetadata(p.metadata)
-      const isAgent = 
-        meta.is_stt_agent === true || 
-        p.identity?.startsWith("agent-")
-        
+      const isAgent =
+        meta.is_stt_agent === true || p.identity?.startsWith("agent-")
+
       if (isAgent) return
-      
+
       seenIdentities.add(p.identity)
       list.push(p)
     })
 
-    // Sort: raised hands first (by time), then local user, then others
+    // Append mock participants for layout testing
+    MOCK_PARTICIPANTS.forEach((mockP) => {
+      if (!seenIdentities.has(mockP.identity)) {
+        seenIdentities.add(mockP.identity)
+        list.push(mockP)
+      }
+    })
+
+    // Sort: raised hands first (by time), active speakers (top left), then local user, then others
     list.sort((a, b) => {
       const metaA = parseMetadata(a.metadata)
       const metaB = parseMetadata(b.metadata)
@@ -66,7 +91,14 @@ export const useParticipantList = (allParticipants, localParticipant) => {
         return timeA - timeB // Ascending
       }
 
-      // Both not raised, keep local user first
+      // Currently speaking participants sort to top left
+      const aSpeaking = a.isSpeaking === true
+      const bSpeaking = b.isSpeaking === true
+
+      if (aSpeaking && !bSpeaking) return -1
+      if (!aSpeaking && bSpeaking) return 1
+
+      // Both not raised and not speaking, keep local user first
       if (a.isLocal && !b.isLocal) return -1
       if (!a.isLocal && b.isLocal) return 1
 

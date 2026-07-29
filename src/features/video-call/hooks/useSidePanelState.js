@@ -1,6 +1,5 @@
 import { useState } from "react"
 
-
 /**
  * Manages the exclusive side-panel state for the video call UI.
  *

@@ -346,7 +346,8 @@ export default {
     systemDefaultSpeaker: "System Default Speaker",
     speakerNotSupported: "Speaker selection is not supported in your browser.",
     selectCamera: "Select Camera",
-    testMic: "Test Microphone (Playback)",
+    testMic: "Test mic",
+    stopTest: "Stop testing",
     unknownDevice: "Unknown Device",
   },
   videoCall: {
@@ -377,6 +378,11 @@ export default {
       description:
         "If you're experiencing lag, frozen video, or audio dropouts, try forcing a full reconnection. Your call will pause briefly while we re-establish the connection.",
       forceReconnect: "Force Reconnect",
+    },
+    general: {
+      receiveSystemMsgs: "Receive system notifications",
+      receiveSystemMsgsDesc:
+        "Display automatic system notifications during the meeting.",
     },
     copyLink: "Copy meeting link",
     linkCopied: "Link copied!",

@@ -1,22 +1,17 @@
 import React, { useEffect } from "react"
-import {
-  Settings,
-  Sparkles,
-} from "lucide-react"
+import { Settings, Sparkles } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import Popover from "@/shared/components/ui/Popover"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
-import { PillButton } from "@/shared/components/ui/buttons"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
+import ListItem from "@/shared/components/ui/ListItem"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+import MenuList from "@/shared/components/ui/MenuList"
 
-const ChatBox = ({
-  messages,
-  onSendMessage,
-  isConnected,
-  className = "",
-}) => {
+const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   const { t } = useLanguage()
   const {
     aiMessages = [],
@@ -45,94 +40,93 @@ const ChatBox = ({
   }, [activeChatTab, setIsChatCollapsed, setIsAiCollapsed])
 
   const settingsPopoverContent = (
-    <div className="bg-white rounded-lg shadow-lg border border-[#E5E5E5] p-3 w-max">
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm whitespace-nowrap">
+    <MenuList className="w-[320px]">
+      <ListItem
+        lines={1}
+        rightContent={
+          <Switch
+            checked={receiveSystemMsgs}
+            onChange={(e) => setReceiveSystemMsgs(e.target.checked)}
+            colorClass="peer-checked:bg-green-500"
+          />
+        }
+      >
+        <span className="text-sm font-medium text-black truncate">
           {t.rooms?.chatBox?.showSystemMessages ||
             "Show Cat Speak suggestion messages"}
         </span>
-        <Switch
-          checked={receiveSystemMsgs}
-          onChange={(e) => setReceiveSystemMsgs(e.target.checked)}
-          colorClass="peer-checked:bg-green-500"
-        />
-      </div>
-    </div>
+      </ListItem>
+    </MenuList>
   )
 
   const settingsPopover = (
     <Popover
       trigger={
-        <Settings
-          size={18}
-          className="text-gray-400 hover:text-gray-700 transition-colors"
-        />
+        <IconButton variant="ghost" aria-label="Settings">
+          <Settings />
+        </IconButton>
       }
       content={settingsPopoverContent}
-      placement="bottom-right"
+      placement="bottom-left"
     />
   )
 
   const roomLabel = t.rooms?.chatBox?.title || "Tin nhắn phòng"
   const aiLabel = t.rooms?.chatBox?.aiAssistant || "Trợ lý Cat Speak"
 
+  const chatTabs = [
+    {
+      id: "room",
+      label: `${roomLabel} (${messages?.length || 0})`,
+      badge:
+        activeChatTab !== "room" && unreadRoomChat > 0
+          ? unreadRoomChat > 9
+            ? "9+"
+            : unreadRoomChat
+          : null,
+    },
+    {
+      id: "ai",
+      label: `${aiLabel} (${aiMessages?.length || 0})`,
+      badge:
+        activeChatTab !== "ai" && unreadAiChat > 0
+          ? unreadAiChat > 9
+            ? "9+"
+            : unreadAiChat
+          : null,
+    },
+  ]
+
   return (
     <div className={`relative flex h-full flex-col bg-white ${className}`}>
       {/* Tab Bar */}
-      <div className="flex items-center justify-center shrink-0">
-        <div className="flex items-center justify-center gap-5 md:gap-2 md:bg-transparent rounded-xl px-2.5 py-1.5 bg-[#F5F5F5]">
-          {/* Room Chat Tab */}
-          <PillButton
-            onClick={() => setActiveChatTab("room")}
-            variant={activeChatTab === "room" ? "primary" : "secondary-no-outline"}
-          >
-            {roomLabel}
-            <span className={activeChatTab === "room" ? "text-white" : "text-[#999]"}>
-              ({messages?.length || 0})
-            </span>
-            {activeChatTab !== "room" && unreadRoomChat > 0 && (
-              <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
-                {unreadRoomChat > 9 ? "9+" : unreadRoomChat}
-              </span>
-            )}
-          </PillButton>
-
-          {/* AI Chat Tab */}
-          <PillButton
-            onClick={() => setActiveChatTab("ai")}
-            variant={activeChatTab === "ai" ? "primary" : "secondary-no-outline"}
-          >
-            {aiLabel}
-            <span className={activeChatTab === "ai" ? "text-white" : "text-[#999]"}>
-              ({aiMessages?.length || 0})
-            </span>
-            {activeChatTab !== "ai" && unreadAiChat > 0 && (
-              <span className="ml-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
-                {unreadAiChat > 9 ? "9+" : unreadAiChat}
-              </span>
-            )}
-          </PillButton>
-        </div>
-      </div>
+      <Tabs
+        tabs={chatTabs}
+        activeTab={activeChatTab}
+        onChange={setActiveChatTab}
+        fullWidth={true}
+        className="shrink-0"
+      />
 
       {/* Tab Content */}
-      <div className="flex-1 flex flex-col min-h-0 border m-2 rounded-xl">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* AI Tab Content */}
         {activeChatTab === "ai" && (
           <>
-            <div className="flex items-center justify-between px-4 py-2 border-b border-[#FFDADE] shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-7 h-7 rounded-full bg-cath-red-700/10">
-                  <Sparkles size={14} className="text-cath-red-700" />
+            <ListItem
+              lines={1}
+              className="border-b border-[#E5E5E5] shrink-0"
+              leftContent={<Sparkles className="text-cath-red-700" />}
+              rightContent={
+                <div onClick={(e) => e.stopPropagation()}>
+                  {settingsPopover}
                 </div>
-                <span className="text-sm font-medium text-black">
-                  {t.rooms?.chatBox?.aiSuggestion || "Gợi ý từ AI"}
-                </span>
-              </div>
-              <div onClick={(e) => e.stopPropagation()}>
-                {settingsPopover}
-              </div>
-            </div>
+              }
+            >
+              <span className="font-semibold">
+                {t.rooms?.chatBox?.aiSuggestion || "Gợi ý từ AI"}
+              </span>
+            </ListItem>
 
             <MessageList
               messages={aiMessages}

@@ -324,7 +324,8 @@ export default {
     systemDefaultSpeaker: "Loa Mặc Định Hệ Thống",
     speakerNotSupported: "Trình duyệt của bạn không hỗ trợ chọn loa.",
     selectCamera: "Chọn Camera",
-    testMic: "Kiểm tra Micro (Phát lại)",
+    testMic: "Kiểm tra mic",
+    stopTest: "Dừng kiểm tra",
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
@@ -355,6 +356,11 @@ export default {
       description:
         "Nếu bạn gặp tình trạng giật lag, video bị đóng băng hoặc mất âm thanh, hãy thử buộc kết nối lại. Cuộc gọi của bạn sẽ tạm dừng một chút trong khi chúng tôi thiết lập lại kết nối.",
       forceReconnect: "Buộc kết nối lại",
+    },
+    general: {
+      receiveSystemMsgs: "Nhận thông báo tin nhắn hệ thống",
+      receiveSystemMsgsDesc:
+        "Hiển thị các thông báo tự động từ hệ thống trong khi cuộc họp đang diễn ra.",
     },
     copyLink: "Sao chép liên kết phòng",
     linkCopied: "Đã sao chép!",
