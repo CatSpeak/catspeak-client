@@ -5,6 +5,8 @@ import { useParams, useLocation } from "react-router-dom"
 import { LANGUAGE_CONFIG } from "@/features/navigation"
 import Dropdown from "@/shared/components/ui/Dropdown"
 
+import { getSwitchCommunityPath } from "@/shared/utils/navigation"
+
 const DEFAULT_COMMUNITY = "zh"
 
 const MobileCommunitySwitcher = () => {
@@ -26,12 +28,7 @@ const MobileCommunitySwitcher = () => {
       return
     }
     localStorage.setItem("communityLanguage", newCode)
-    
-    if (location.pathname.startsWith(`/${currentCommunity}`)) {
-      window.location.href = location.pathname.replace(`/${currentCommunity}`, `/${newCode}`)
-    } else {
-      window.location.href = `/${newCode}`
-    }
+    window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
   }
 
   const options = LANGUAGE_CONFIG

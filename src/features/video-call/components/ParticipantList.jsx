@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Mic,
   MicOff,
@@ -25,6 +26,7 @@ import toast from "react-hot-toast"
  */
 const ParticipantItem = ({ participant }) => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const {
     micOn: localMicOn,
     cameraOn: localCameraOn,
@@ -70,7 +72,7 @@ const ParticipantItem = ({ participant }) => {
         <div
           className={`rounded-full my-1 ml-1 transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}
         >
-          <Avatar size={36} name={name} src={avatarUrl} />
+          <Avatar size={36} name={name} src={avatarUrl} accountId={accountId} />
         </div>
       }
       rightContent={
@@ -83,7 +85,15 @@ const ParticipantItem = ({ participant }) => {
     >
       {/* Name */}
       <div className="flex items-center gap-2 m-0">
-        <p className="text-sm leading-5 truncate m-0">
+        <p
+          onClick={(e) => {
+            if (accountId) {
+              e.stopPropagation()
+              navigate(`/profile/${accountId}`)
+            }
+          }}
+          className={`text-sm leading-5 truncate m-0 ${accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+        >
           {name} {isLocal && pl.youSuffix}
         </p>
         {isParticipantHost && (
