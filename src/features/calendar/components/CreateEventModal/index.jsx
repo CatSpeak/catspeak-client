@@ -73,25 +73,25 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                 selectedTimezone={form.selectedTimezone}
                 onTimezoneChange={form.setSelectedTimezone}
                 errors={form.errors}
-              />
-
-              <EventRecurrenceSection
-                isEditing={!!editEvent}
-                eventColor={form.eventColor}
-                startTime={form.startTime}
-                recurrenceOption={form.recurrenceOption}
-                onRecurrenceChange={form.setRecurrenceOption}
-                recurrenceInterval={form.recurrenceInterval}
-                onRecurrenceIntervalChange={form.setRecurrenceInterval}
-                selectedDays={form.selectedDays}
-                onSelectedDaysChange={form.setSelectedDays}
-                recurrenceEndDate={form.recurrenceEndDate}
-                onRecurrenceEndDateChange={form.setRecurrenceEndDate}
-                recurrenceEndType={form.recurrenceEndType}
-                onRecurrenceEndTypeChange={form.setRecurrenceEndType}
-                occurrenceCount={form.occurrenceCount}
-                onOccurrenceCountChange={form.setOccurrenceCount}
-              />
+              >
+                <EventRecurrenceSection
+                  isEditing={!!editEvent}
+                  eventColor={form.eventColor}
+                  startTime={form.startTime}
+                  recurrenceOption={form.recurrenceOption}
+                  onRecurrenceChange={form.setRecurrenceOption}
+                  recurrenceInterval={form.recurrenceInterval}
+                  onRecurrenceIntervalChange={form.setRecurrenceInterval}
+                  selectedDays={form.selectedDays}
+                  onSelectedDaysChange={form.setSelectedDays}
+                  recurrenceEndDate={form.recurrenceEndDate}
+                  onRecurrenceEndDateChange={form.setRecurrenceEndDate}
+                  recurrenceEndType={form.recurrenceEndType}
+                  onRecurrenceEndTypeChange={form.setRecurrenceEndType}
+                  occurrenceCount={form.occurrenceCount}
+                  onOccurrenceCountChange={form.setOccurrenceCount}
+                />
+              </EventDateTimeSection>
 
               <EventDetailsSection
                 title={form.title}

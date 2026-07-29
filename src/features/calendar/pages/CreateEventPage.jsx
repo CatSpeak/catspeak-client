@@ -510,7 +510,24 @@ const CreateEventPage = () => {
               selectedTimezone={form.selectedTimezone}
               onTimezoneChange={form.setSelectedTimezone}
               errors={form.errors}
-            />
+            >
+              <EventRecurrenceSection
+                eventColor={form.eventColor || "#990011"}
+                startTime={form.startTime}
+                recurrenceOption={form.recurrenceOption}
+                onRecurrenceChange={form.setRecurrenceOption}
+                recurrenceInterval={form.recurrenceInterval}
+                onRecurrenceIntervalChange={form.setRecurrenceInterval}
+                selectedDays={form.selectedDays}
+                onSelectedDaysChange={form.setSelectedDays}
+                recurrenceEndDate={form.recurrenceEndDate}
+                onRecurrenceEndDateChange={form.setRecurrenceEndDate}
+                recurrenceEndType={form.recurrenceEndType}
+                onRecurrenceEndTypeChange={form.setRecurrenceEndType}
+                occurrenceCount={form.occurrenceCount}
+                onOccurrenceCountChange={form.setOccurrenceCount}
+              />
+            </EventDateTimeSection>
 
             <EventDetailsSection
               title={form.title}
@@ -559,23 +576,6 @@ const CreateEventPage = () => {
               onTicketPriceChange={form.setTicketPrice}
               isOnline={form.isOnline}
               errors={form.errors}
-            />
-
-            <EventRecurrenceSection
-              eventColor={form.eventColor || "#990011"}
-              startTime={form.startTime}
-              recurrenceOption={form.recurrenceOption}
-              onRecurrenceChange={form.setRecurrenceOption}
-              recurrenceInterval={form.recurrenceInterval}
-              onRecurrenceIntervalChange={form.setRecurrenceInterval}
-              selectedDays={form.selectedDays}
-              onSelectedDaysChange={form.setSelectedDays}
-              recurrenceEndDate={form.recurrenceEndDate}
-              onRecurrenceEndDateChange={form.setRecurrenceEndDate}
-              recurrenceEndType={form.recurrenceEndType}
-              onRecurrenceEndTypeChange={form.setRecurrenceEndType}
-              occurrenceCount={form.occurrenceCount}
-              onOccurrenceCountChange={form.setOccurrenceCount}
             />
 
             {/* Event type (online/offline) dropdown note */}
