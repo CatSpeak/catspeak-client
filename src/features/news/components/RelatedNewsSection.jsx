@@ -1,18 +1,27 @@
 import React, { useState, useRef, useMemo, useEffect } from "react"
+import { useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import NewsCard from "./NewsCard"
 import NewsCardSkeleton from "./NewsCardSkeleton"
 import useColumnCount from "@/shared/hooks/useColumnCount"
+import { getCommunityName } from "../utils/newsUtils"
 
 /**
  * RelatedNewsSection — displays related news in responsive masonry columns with infinite scroll.
  */
-const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
-  const { t } = useLanguage()
+const RelatedNewsSection = ({ currentPostId, postType = "1", initialPage = 2 }) => {
+  const { lang } = useParams()
+  const { t, language } = useLanguage()
   const newsDetail = t.news?.newsDetail
 
-  const [page, setPage] = useState(1)
+  const currentCommunity = useMemo(() => {
+    return getCommunityName(
+      lang || localStorage.getItem("communityLanguage") || language || "en",
+    )
+  }, [lang, language])
+
+  const [page, setPage] = useState(initialPage)
   const pageSize = 26
 
   const { data, isLoading, isFetching } = useGetPostsQuery({
@@ -21,14 +30,19 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
     postType,
   })
 
-  // Filter out current post and non-public posts
+  // Filter out current post, non-public posts, and filter by current language community or "All"
   const relatedPosts = useMemo(() => {
-    return (
-      data?.data?.filter(
-        (post) => post.postId !== currentPostId && post.privacy === "Public",
-      ) || []
-    )
-  }, [data?.data, currentPostId])
+    if (!data?.data) return []
+    const targetCommunity = currentCommunity.toLowerCase()
+
+    return data.data.filter((post) => {
+      if (post.postId === currentPostId) return false
+      if (post.privacy !== "Public") return false
+
+      const postCommunity = (post.languageCommunity || "All").toLowerCase()
+      return postCommunity === "all" || postCommunity === targetCommunity
+    })
+  }, [data?.data, currentPostId, currentCommunity])
 
   const columnsCount = useColumnCount()
 
