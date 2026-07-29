@@ -89,6 +89,7 @@ export function useNotifications() {
 
     return () => {
       cancelled = true
+      isInitialLoad.current = true
       unsubAuth()
       unsubList?.()
       unsubCount?.()
