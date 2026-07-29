@@ -14,10 +14,10 @@ export const parseMetadata = (metadata) => {
 }
 
 // Set to false (or set MOCK_PARTICIPANTS to []) when done testing to disable completely
-const ENABLE_MOCK_PARTICIPANTS = true
+const ENABLE_MOCK_PARTICIPANTS = false
 
 export const MOCK_PARTICIPANTS = ENABLE_MOCK_PARTICIPANTS
-  ? Array.from({ length: 100 }, (_, i) => ({
+  ? Array.from({ length: 4 }, (_, i) => ({
       identity: `mock-user-${i + 1}`,
       name: `Mock Participant ${i + 1}`,
       isLocal: false,

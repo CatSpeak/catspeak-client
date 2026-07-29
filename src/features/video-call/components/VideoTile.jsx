@@ -112,7 +112,7 @@ const VideoTileInner = ({ participant, onClick }) => {
         playsInline
         muted={isLocal}
         ref={videoRef}
-        className={`h-full w-full object-contain ${
+        className={`h-full w-full object-cover ${
           isVideoVisible ? "block" : "hidden"
         }`}
       />
