@@ -1,8 +1,10 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useRef, useMemo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Newspaper } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetPostsQuery } from "@/store/api/social/postsApi";
+import { incrementPage, selectNewsPage } from "@/store/slices/newsSlice";
 import NewsCard from "../components/NewsCard";
 import NewsCardSkeleton from "../components/NewsCardSkeleton";
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
@@ -13,6 +15,7 @@ import { getCommunityName } from "../utils/newsUtils";
 const NewsPage = ({ postType = "1" }) => {
   const { lang } = useParams();
   const { t, language } = useLanguage();
+  const dispatch = useDispatch();
 
   const currentCommunity = useMemo(() => {
     return getCommunityName(
@@ -20,7 +23,7 @@ const NewsPage = ({ postType = "1" }) => {
     );
   }, [lang, language]);
 
-  const [page, setPage] = useState(1);
+  const page = useSelector(selectNewsPage);
   const pageSize = 26;
 
   const { data, error, isLoading, isFetching } = useGetPostsQuery({
@@ -60,7 +63,7 @@ const NewsPage = ({ postType = "1" }) => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setPage((p) => p + 1);
+          dispatch(incrementPage());
         }
       },
       {
@@ -69,7 +72,7 @@ const NewsPage = ({ postType = "1" }) => {
     );
     observer.observe(secondLastPostElementRef.current);
     return () => observer.disconnect();
-  }, [publicPosts]);
+  }, [publicPosts, dispatch]);
 
   // ── Initial Loading State ─────────────────────────────────────────
   if (isLoading && publicPosts.length === 0) {
