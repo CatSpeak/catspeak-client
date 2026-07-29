@@ -21,11 +21,10 @@ const NotificationDropdown = ({ onClose, isMobile, notifications, unreadCount, m
 
   return (
     <div
-      className={`flex flex-col bg-white ${
-        isMobile
-          ? "h-full"
-          : "rounded-xl shadow-lg ring-1 ring-black ring-opacity-5"
-      }`}
+      className={`flex flex-col bg-white ${isMobile
+        ? "h-full"
+        : "rounded-xl shadow-lg ring-1 ring-black ring-opacity-5"
+        }`}
     >
       <div className="flex items-center gap-3 border-b border-gray-100 p-4">
         {isMobile && (
@@ -65,18 +64,17 @@ const NotificationDropdown = ({ onClose, isMobile, notifications, unreadCount, m
             {notifications.map((n) => (
               <li
                 key={n.id}
-                className={`cursor-pointer border-b border-gray-50 px-4 py-3 transition-colors hover:bg-gray-50 ${
-                  n.isRead ? "" : "bg-blue-50/50"
-                }`}
+                className={`cursor-pointer border-b border-gray-50 px-4 py-3 transition-colors hover:bg-gray-50 ${n.isRead ? "" : "bg-blue-50/50"
+                  }`}
                 onClick={() => handleClickItem(n)}
               >
                 <div className="flex items-start gap-3">
                   {getIcon(n)}
                   <div className="min-w-0 flex-1">
                     <p className={`truncate text-sm ${n.isRead ? "text-gray-600" : "font-medium text-gray-900"}`}>
-                      {n.resolvedTitle}
+                      {n?.metadata?.assignmentName || t.header?.newNotificationTitle || "Thông báo mới"}
                     </p>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{n.resolvedBody}</p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{n?.resolvedBody}</p>
                     <p className="mt-1 text-[10px] text-gray-400">
                       {n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
                     </p>
