@@ -3,6 +3,7 @@ import { Mic, Settings } from "lucide-react"
 import { motion, LayoutGroup } from "framer-motion"
 import Modal from "@/shared/components/ui/Modal"
 import ListItem from "@/shared/components/ui/ListItem"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import AudioVideoTab from "./AudioVideoTab"
@@ -32,12 +33,12 @@ const RoomSettingsModal = ({
     {
       id: "audio-video",
       label: waitingT.deviceSettings || "Audio & Video",
-      icon: <Mic size={20} />,
+      icon: Mic,
     },
     {
       id: "general",
       label: "General",
-      icon: <Settings size={20} />,
+      icon: Settings,
     },
   ]
 
@@ -46,15 +47,27 @@ const RoomSettingsModal = ({
       open={open}
       onClose={onClose}
       title={waitingT.deviceSettings || "Cài đặt phòng họp"}
-      className="md:max-w-[920px] w-full flex flex-col h-[560px] md:h-[560px] max-h-[80vh]"
+      className="md:max-w-[920px] w-full flex flex-col h-full md:!h-[560px] max-h-none md:max-h-[80vh]"
       headerClassName="flex items-center justify-between p-4 sm:p-6 border-b border-[#E5E5E5] shrink-0"
-      bodyClassName="p-0 flex-1 overflow-hidden flex flex-col md:flex-row min-h-0"
+      bodyClassName="p-0 flex-1 overflow-hidden flex flex-col min-h-0"
+      fullScreenOnMobile={true}
     >
-      <div className="flex flex-col md:flex-row w-full h-full min-h-0 overflow-hidden">
-        {/* Left Sidebar Navigation matching DesktopSidebar */}
-        <div className="w-full md:w-[300px] bg-white md:border-r border-b md:border-b-0 border-[#E5E5E5] p-4 flex md:flex-col gap-1 shrink-0 overflow-x-auto md:overflow-y-auto">
+      {/* Mobile Navigation Tabs */}
+      <div className="block md:hidden bg-white shrink-0">
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          className="px-4"
+        />
+      </div>
+
+      <div className="flex flex-col md:flex-row w-full h-full min-h-0 overflow-hidden flex-1">
+        {/* Left Sidebar Navigation (Desktop Only) */}
+        <div className="hidden md:flex w-[300px] bg-white border-r border-[#E5E5E5] p-4 flex-col gap-1 shrink-0 overflow-y-auto">
           <LayoutGroup id="roomSettingsSidebarNav">
             {tabs.map((tab) => {
+              const Icon = tab.icon
               const isActive = activeTab === tab.id
               return (
                 <div
@@ -75,7 +88,7 @@ const RoomSettingsModal = ({
                   <ListItem
                     onClick={() => setActiveTab(tab.id)}
                     lines={1}
-                    leftContent={<span>{tab.icon}</span>}
+                    leftContent={<span>{Icon && <Icon size={20} />}</span>}
                     className="w-full rounded-xl transition-all duration-200"
                     contentClassName={`rounded-xl transition-all duration-200 px-4 ${
                       isActive
@@ -93,7 +106,7 @@ const RoomSettingsModal = ({
           </LayoutGroup>
         </div>
 
-        {/* Right Content Area with fixed height & vertical scroll */}
+        {/* Content Area */}
         <div className="bg-[#f3f3f3] flex-1 p-4 sm:p-6 overflow-y-auto min-h-0 h-full">
           {activeTab === "audio-video" && (
             <AudioVideoTab

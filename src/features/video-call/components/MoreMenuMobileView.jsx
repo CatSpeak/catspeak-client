@@ -23,7 +23,7 @@ import {
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
-import { useGame } from "@/features/games/context/GameContext"
+import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 import { useSessionTimer } from "../hooks/useSessionTimer"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import MenuItem from "@/shared/components/ui/MenuItem"
@@ -71,8 +71,7 @@ const MoreMenuMobileView = ({
   } = useGlobalVideoCall()
 
   const { isBreakoutActive } = useSelector((s) => s.videoCall)
-  const { gameState } = useGame()
-  const isGameInProgress = gameState && gameState !== "idle"
+  const { isHost, canStartGame, gameDisabledReason } = useGameControlStatus()
 
   const { formattedRemaining, formattedMax, hasDuration } =
     useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
@@ -80,18 +79,6 @@ const MoreMenuMobileView = ({
   const { isSubtitleActive, stopSubtitles } = useSubtitleControls()
 
   const unreadMessages = (unreadRoomChat || 0) + (unreadAiChat || 0)
-
-  const isHost =
-    room?.creatorId != null &&
-    user?.accountId != null &&
-    String(room.creatorId) === String(user.accountId)
-
-  const canStartGame = isHost && !isGameInProgress
-  const gameDisabledReason = isGameInProgress
-    ? "Đang có trò chơi trong phòng, không thể mở thêm"
-    : !isHost
-      ? "Chỉ host của phòng mới có thể bắt đầu trò chơi"
-      : null
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(getShareUrlWithVersion(window.location.href))
@@ -256,11 +243,7 @@ const MoreMenuMobileView = ({
               </button>
 
               <button
-                onClick={() => {
-                  setActiveSettingsTab?.("audio-video")
-                  setShowRoomSettings(true)
-                  setShowMoreMenu(false)
-                }}
+                onClick={() => setShowMobileSettings(true)}
                 className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"
               >
                 <Settings size={24} />
@@ -343,6 +326,17 @@ const MoreMenuMobileView = ({
               label={
                 t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"
               }
+              hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
+            />
+
+            <MenuItem
+              onClick={() => {
+                setActiveSettingsTab?.("audio-video")
+                setShowRoomSettings(true)
+                setShowMoreMenu(false)
+              }}
+              icon={<Settings size={20} />}
+              label={t?.rooms?.waitingScreen?.deviceSettings || "Cài đặt"}
               hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
             />
           </motion.div>
