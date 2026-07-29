@@ -39,11 +39,14 @@ const CommunitySwitcher = () => {
     localStorage.setItem("communityLanguage", newCode)
     setIsOpen(false)
     
-    if (location.pathname.startsWith(`/${currentCommunity}`)) {
+    const isInsideEcosystem =
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`)
+
+    if (isInsideEcosystem) {
       window.location.href = location.pathname.replace(`/${currentCommunity}`, `/${newCode}`)
     } else {
-      // Trường hợp path không có lang prefix (rất hiếm)
-      window.location.href = `/${newCode}`
+      window.location.href = `/${newCode}/community`
     }
   }
 

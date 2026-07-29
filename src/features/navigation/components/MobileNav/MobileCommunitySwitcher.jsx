@@ -27,10 +27,14 @@ const MobileCommunitySwitcher = () => {
     }
     localStorage.setItem("communityLanguage", newCode)
     
-    if (location.pathname.startsWith(`/${currentCommunity}`)) {
+    const isInsideEcosystem =
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`)
+
+    if (isInsideEcosystem) {
       window.location.href = location.pathname.replace(`/${currentCommunity}`, `/${newCode}`)
     } else {
-      window.location.href = `/${newCode}`
+      window.location.href = `/${newCode}/community`
     }
   }
 

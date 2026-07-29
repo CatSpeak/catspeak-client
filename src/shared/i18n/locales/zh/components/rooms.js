@@ -79,6 +79,7 @@ export default {
       intermediate: "中级",
       advanced: "高级",
     },
+    levelLabel: "等级",
     categories: {
       random: "随机连接",
       exam: "备考",
@@ -608,6 +609,8 @@ export default {
       score: "分数",
       matchDate: "比赛日期",
       winner: "获胜者",
+      startDateLabel: "起始日期",
+      endDateLabel: "结束日期",
     },
     setup: {
       title: "游戏设置",

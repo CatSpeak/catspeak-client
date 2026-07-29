@@ -119,13 +119,12 @@ const ControlBarMoreMenu = ({
     user?.accountId != null &&
     String(room.creatorId) === String(user.accountId);
 
-  // Chỉ host mới được mở/bắt đầu trò chơi VÀ game phải đang idle
-  const canStartGame = isHost && !isGameInProgress;
+  // Game là free — bất kỳ ai trong phòng đều có thể bắt đầu,
+  // chỉ cần game đang idle (không có game nào đang chạy).
+  const canStartGame = !isGameInProgress;
   const gameDisabledReason = isGameInProgress
     ? "Đang có trò chơi trong phòng, không thể mở thêm"
-    : !isHost
-      ? "Chỉ host của phòng mới có thể bắt đầu trò chơi"
-      : null;
+    : null;
 
 
   const handleCopyLink = () => {

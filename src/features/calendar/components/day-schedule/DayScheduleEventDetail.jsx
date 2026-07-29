@@ -31,10 +31,7 @@ const DayScheduleEventDetail = ({
     "";
 
   const handleEdit = () => {
-    const basePath = lang
-      ? `/${lang}/cat-speak/calendar`
-      : "/cat-speak/calendar";
-    navigate(`${basePath}/create`, { state: { editEvent: ev } });
+    navigate(`/workspace/events/create`, { state: { editEvent: ev } });
     onClose && onClose();
   };
 

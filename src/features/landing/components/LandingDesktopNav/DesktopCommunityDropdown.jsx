@@ -68,8 +68,8 @@ const DesktopCommunityDropdown = ({ navKey }) => {
     setIsOpen(false)
 
     const isInsideEcosystem =
-      location.pathname.startsWith(`/${currentCommunity}/community`) ||
-      location.pathname.startsWith(`/${currentCommunity}/cat-speak`)
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`)
 
     if (isInsideEcosystem) {
       // Replace only the first segment

@@ -79,8 +79,8 @@ const AllClassesPage = () => {
       <Breadcrumb
         items={[
           { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
-          { label: c.title || "My Courses", onClick: () => navigate("/workspace/courses") },
-          { label: ac.title || "All Classes" },
+          { label: c.myClassesTab || "My Classes", onClick: () => navigate("/workspace/classes") },
+          { label: ac.tabAll || "All Classes" },
         ]}
       />
 
@@ -90,7 +90,7 @@ const AllClassesPage = () => {
         onSearchChange={handleSearchChange}
         searchPlaceholder={ac.searchPlaceholder || "Search..."}
         createLabel={c.createClass?.createClass || "Create Class"}
-        onCreate={() => navigate("/workspace/courses/create-class")}
+        onCreate={() => navigate("/workspace/classes/create-class")}
       />
 
       <CourseTabs

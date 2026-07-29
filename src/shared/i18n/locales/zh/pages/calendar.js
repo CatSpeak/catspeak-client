@@ -72,6 +72,7 @@ export default {
   conditionsPlaceholder: "输入条件，用逗号分隔",
   ticketPrice: "票价",
   free: "免费",
+  paidEventComingSoon: "收费活动功能正在开发中。",
   edit: "编辑",
   createEvent: "创建活动",
   editEvent: "编辑活动",

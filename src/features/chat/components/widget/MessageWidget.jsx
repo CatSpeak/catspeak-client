@@ -30,6 +30,7 @@ import ConversationListHeader from "./ConversationListHeader"
 import ConversationDetailHeader from "./ConversationDetailHeader"
 import ConversationList from "./ConversationList"
 import ConversationDetail from "./ConversationDetail"
+import FileSizeLimitModal from "../modals/FileSizeLimitModal"
 
 const MessageWidget = () => {
   const dispatch = useDispatch()
@@ -46,9 +47,14 @@ const MessageWidget = () => {
   // ── Chat Message Actions Hook ──────────────────────────
   const {
     replyingTo,
+    pendingUpload,
+    isFileSizeModalOpen,
+    closeFileSizeModal,
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
+    handleRetryUpload,
+    handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
     isSending,
@@ -302,6 +308,9 @@ const MessageWidget = () => {
             onCancelReply={handleCancelReply}
             onDeleteForMe={handleDeleteForMe}
             onRecall={handleRecall}
+            pendingUpload={pendingUpload}
+            onRetryUpload={handleRetryUpload}
+            onCancelUpload={handleCancelUpload}
           />
         )}
       </MessageModal>
@@ -324,6 +333,12 @@ const MessageWidget = () => {
           </span>
         )}
       </button>
+
+      {/* ── File Size Limit Modal ────────────────────── */}
+      <FileSizeLimitModal
+        open={isFileSizeModalOpen}
+        onClose={closeFileSizeModal}
+      />
     </div>
   )
 }

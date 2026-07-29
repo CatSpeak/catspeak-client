@@ -3,7 +3,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi"
 import IconButton from "../buttons/IconButton"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const Pagination = ({ page, totalPages, onChangePage }) => {
+const Pagination = ({ page, totalPages, onChangePage, className = "" }) => {
   const { t, language } = useLanguage()
   const p = t.common?.pagination || {}
 
@@ -21,11 +21,11 @@ const Pagination = ({ page, totalPages, onChangePage }) => {
       </>
 
   return (
-    <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-gray-600">
+    <div className={`mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:items-center sm:justify-between w-full ${className}`}>
+      <p className="text-sm text-gray-600 text-center sm:text-left">
         {pageInfoText}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
         <IconButton
           onClick={goPrevPage}
           disabled={page === 1}

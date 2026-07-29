@@ -3,7 +3,9 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import ReelCard from "../cards/ReelCard"
 
 /**
- * Pinterest-style masonry grid of reel cards.
+ * Pinterest-style masonry grid of reel cards. Mỗi reel bị giới hạn max-width
+ * (~280px) để không bao giờ chiếm full viewport width — kể cả khi chỉ có 1
+ * reel. Container căn giữa theo chiều ngang.
  *
  * @param {{ reels: Reel[], onReelClick: (reel: Reel) => void }} props
  */
@@ -36,17 +38,23 @@ const ReelGrid = memo(function ReelGrid({ reels, onReelClick }) {
   }
 
   return (
-    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6 w-full">
+    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6 w-full mx-auto">
       {reels.map((reel, index) => (
         <div
           key={reel.id}
-          className="break-inside-avoid pb-3 sm:pb-4 md:pb-5 lg:pb-6 inline-block w-full"
+          className="break-inside-avoid pb-3 sm:pb-4 md:pb-5 lg:pb-6"
         >
-          <ReelCard
-            reel={reel}
-            index={index}
-            onSelect={onReelClick}
-          />
+          {/*
+            Mỗi reel bị giới hạn max-width để không bao giờ full-width viewport.
+            Masonry columns sẽ tự sắp xếp các reel vào các cột theo viewport.
+          */}
+          <div className="mx-auto" style={{ maxWidth: "280px" }}>
+            <ReelCard
+              reel={reel}
+              index={index}
+              onSelect={onReelClick}
+            />
+          </div>
         </div>
       ))}
     </div>

@@ -20,9 +20,10 @@ export default function SharedChallengeLayout({
   const { t } = useLanguage();
 
   // Responsive Pagination Logic
-  const isXl = useMediaQuery("(min-width: 1280px)");
+  const isUltraWide = useMediaQuery("(min-width: 1800px)");
   const isLg = useMediaQuery("(min-width: 1024px)");
-  const itemsPerPage = isXl ? 5 : isLg ? 4 : 2;
+  const isMd = useMediaQuery("(min-width: 768px)");
+  const itemsPerPage = isUltraWide ? 5 : isLg ? 4 : isMd ? 3 : 2;
 
   const [page, setPage] = useState(0);
 

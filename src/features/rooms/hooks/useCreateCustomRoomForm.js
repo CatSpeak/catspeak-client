@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
+import { useAuth } from "@/features/auth"
 import {
   useGetMyCustomRoomsQuery,
   useCreateCustomRoomMutation,
@@ -20,6 +21,7 @@ const getLanguageName = (langCode) => {
 }
 
 export const useCreateCustomRoomForm = (open = true) => {
+  const { user } = useAuth()
   const { lang } = useParams()
   const navigate = useNavigate()
 
@@ -72,7 +74,9 @@ export const useCreateCustomRoomForm = (open = true) => {
   const submitCreate = async (onSuccess) => {
     try {
       const data = new FormData()
-      data.append("Name", formData.name.trim())
+      if (formData.name.trim()) {
+        data.append("Name", formData.name.trim())
+      }
       data.append("LanguageType", selectedLanguage)
       if (formData.selectedLevel) {
         data.append("RequiredLevel", formData.selectedLevel)
@@ -104,10 +108,7 @@ export const useCreateCustomRoomForm = (open = true) => {
     }
   }
 
-  const isCreateDisabled =
-    !formData.name.trim() ||
-    isCreating ||
-    isQuotaFull
+  const isCreateDisabled = isCreating || isQuotaFull
 
   return {
     formData,

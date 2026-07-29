@@ -19,6 +19,7 @@ import {
 
 import { formatUTCDate } from "../utils/courseUtils"
 import { toLocalDateString } from "../utils/dateUtils"
+import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const SchedulePage = () => {
   const { language, t } = useLanguage()
@@ -127,11 +128,11 @@ const SchedulePage = () => {
     () => (
       Array.isArray(classesData?.data)
         ? classesData.data.filter((item) => (
-            item !== null
-            && typeof item === "object"
-            && !Array.isArray(item)
-            && item.id
-          ))
+          item !== null
+          && typeof item === "object"
+          && !Array.isArray(item)
+          && item.id
+        ))
         : []
     ),
     [classesData],
@@ -140,10 +141,10 @@ const SchedulePage = () => {
     () => (
       Array.isArray(scheduleSessionsData?.data)
         ? scheduleSessionsData.data.filter((session) => (
-            session !== null
-            && typeof session === "object"
-            && !Array.isArray(session)
-          ))
+          session !== null
+          && typeof session === "object"
+          && !Array.isArray(session)
+        ))
         : []
     ),
     [scheduleSessionsData],
@@ -202,7 +203,7 @@ const SchedulePage = () => {
       )}
 
       {/* ─── Breadcrumbs ─── */}
-      <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
+      {/* <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
         <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
           {c.home || "Home"}
         </button>
@@ -210,7 +211,13 @@ const SchedulePage = () => {
         <span className="text-[#990011] font-semibold">
           {c.teachingSchedule || "Teaching Schedule"}
         </span>
-      </div>
+      </div> */}
+      <Breadcrumb
+        items={[
+          { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
+          { label: t.nav.calendar || "Calendar", onClick: () => navigate("/workspace/calendar") },
+          { label: c.teachingSchedule || "Teaching Schedule" }
+        ]} />
 
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">
@@ -219,7 +226,7 @@ const SchedulePage = () => {
         </h1>
         <button
           type="button"
-          onClick={() => navigate("/workspace/courses/create-class")}
+          onClick={() => navigate("/workspace/classes/create-class")}
           className="flex items-center justify-center gap-2 bg-[#990011] hover:bg-[#80000e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 shadow-sm hover:scale-[1.01] active:scale-95"
         >
           <Plus size={16} />

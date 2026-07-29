@@ -18,6 +18,7 @@ const initialFormData = {
   country: "",
   termsAgreement: false,
   policyAgreement: false,
+  isEmailNotificationEnabled: true,
 };
 
 const RegisterPopup = ({ open, onClose, onSwitchMode }) => {

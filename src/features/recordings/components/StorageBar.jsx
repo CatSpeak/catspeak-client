@@ -9,7 +9,7 @@ import { AlertTriangle } from "lucide-react"
  */
 const StorageBar = ({
   usedMb = 0,
-  limitMb = 200,
+  limitMb = 0,
   usagePercent = 0,
   isQuotaExceeded = false,
   isLoading = false,
@@ -20,8 +20,8 @@ const StorageBar = ({
 
   // Format storage helper
   const formatStorage = (mb) => {
-    if (mb >= 1000) {
-      const gb = mb / 1000
+    if (mb >= 1024) {
+      const gb = mb / 1024
       return `${gb % 1 === 0 ? gb : gb.toFixed(1)} GB`
     }
     return `${Math.round(mb)} MB`

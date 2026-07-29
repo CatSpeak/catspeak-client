@@ -11,6 +11,8 @@ import { Star } from "lucide-react"
  * @param {object}  player          - LeaderboardPlayer data
  */
 
+import { getImageUrl } from "@/shared/utils/imageUtils"
+
 const LeaderboardRow = ({ player, index }) => {
   return (
     <motion.div
@@ -27,7 +29,7 @@ const LeaderboardRow = ({ player, index }) => {
       {/* Avatar */}
       <Avatar
         size={32}
-        src={player.avatar}
+        src={player.avatar ? getImageUrl(player.avatar) : null}
         name={player.name}
         alt={player.name}
       />

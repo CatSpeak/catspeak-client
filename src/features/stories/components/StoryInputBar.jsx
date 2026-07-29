@@ -49,15 +49,21 @@ const StoryInputBar = ({
       : t.catSpeak?.mail?.sortOldest;
 
   return (
-    <div className="md:mb-2 flex flex-col md:flex-row items-center justify-between gap-3 md:px-6 pt-1 -mx-1 -mt-1 md:pb-5 pb-2">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 w-full px-4 sm:px-6 py-1 mb-2 sm:mb-3">
       {/* Left: text input + send button */}
-      <div className="flex w-full items-start gap-2">
+      <div className="flex w-full md:w-auto justify-center md:justify-start items-start gap-2.5 flex-1 min-w-0">
         <TextInput
           value={inputValue}
           onChange={onChange}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onSend();
+            }
+          }}
           maxLength={200}
           placeholder={t.catSpeak.mail.placeholder}
-          containerClassName="flex-1 lg:max-w-[500px] xl:max-w-[540px] md:max-w-[320px] md:flex-none w-full"
+          containerClassName="w-full flex-1 md:flex-initial md:w-[250px] lg:w-[440px] xl:w-[520px] min-w-0"
           className="!border-[#c38300]/70 focus:!border-cath-red-700 focus:!ring-cath-red-700 hover:!border-cath-red-700 !h-10"
           showCount
         />
@@ -72,8 +78,8 @@ const StoryInputBar = ({
       </div>
 
       {/* Right: sort + display mode + counter */}
-      <div className="flex flex-col shrink-0 items-end gap-2">
-        <div className="flex gap-4">
+      <div className="flex flex-col items-center justify-center w-full md:w-auto md:items-end gap-2 shrink-0">
+        <div className="flex flex-wrap items-center justify-center md:justify-end gap-2.5 sm:gap-3">
           {/* Sort dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -149,7 +155,7 @@ const StoryInputBar = ({
         </div>
 
         {/* Counter */}
-        <div className="text-sm whitespace-nowrap text-[#7A7574]">
+        <div className="text-sm whitespace-nowrap text-[#7A7574] text-center md:text-right">
           <span className="font-semibold">{myCount}</span>{" "}
           {t.catSpeak.mail.yours} |{" "}
           <span className="font-semibold">{totalCount}</span>{" "}

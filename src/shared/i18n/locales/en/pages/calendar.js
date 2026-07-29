@@ -72,6 +72,7 @@ export default {
   conditionsPlaceholder: "Enter conditions, separated by commas",
   ticketPrice: "Ticket price",
   free: "Free",
+  paidEventComingSoon: "Paid event feature is coming soon.",
   edit: "Edit",
   createEvent: "Create Event",
   editEvent: "Edit Event",

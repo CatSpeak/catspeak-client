@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Lock } from "lucide-react"
+import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -27,30 +28,32 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
 
   const [mode, setMode] = useState(initialMode)
 
-  useEffect(() => {
-    if (open) {
-      setMode(initialMode)
-    }
-  }, [open, initialMode])
-
   // Custom Room Form Hook
   const customForm = useCreateCustomRoomForm(open && mode === "custom")
 
   // Group Room Form Hook
   const groupForm = useCreateRoomForm()
 
+  useEffect(() => {
+    if (open) {
+      setMode(initialMode)
+      groupForm.resetForm()
+      customForm.resetForm()
+    }
+  }, [open, initialMode])
+
   // Call interceptor
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =
     useCallInterceptor()
 
-  const handleCreateCustom = () => {
+  const handleCreateCustom = async () => {
     const proceed = () => customForm.submitCreate(onCancel)
-    if (!intercept(proceed)) proceed()
+    if (!(await intercept(proceed))) proceed()
   }
 
-  const handleCreateGroup = () => {
+  const handleCreateGroup = async () => {
     const proceed = () => groupForm.submitCreate(onCancel)
-    if (!intercept(proceed)) proceed()
+    if (!(await intercept(proceed))) proceed()
   }
 
   const handleModeChange = (newMode) => {
@@ -68,7 +71,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const isCreating =
     mode === "custom" ? customForm.isCreating : groupForm.isCreating
   const isCreateDisabled =
-    mode === "custom" ? customForm.isCreateDisabled : groupForm.isCreateDisabled
+    isCreating || (mode === "custom" && customForm.isQuotaFull)
 
   const handleCreateSubmit = () => {
     if (mode === "custom") {
