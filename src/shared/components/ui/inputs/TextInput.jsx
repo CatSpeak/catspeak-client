@@ -47,7 +47,7 @@ const TextInput = ({
   const passwordPadding = isPassword ? "!pr-10" : ""
 
   const errorClass = error
-    ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500"
+    ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500 animate-shake"
     : ""
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
@@ -62,9 +62,9 @@ const TextInput = ({
   }
 
   return (
-    <div className={`flex flex-col gap-2 ${containerClassName}`}>
+    <div className={`flex flex-col gap-1 ${containerClassName}`}>
       {label && !floatingLabel && (
-        <span className={labelClassName}>{label}</span>
+        <span className={`mb-1 ${labelClassName}`}>{label}</span>
       )}
       <div className="relative">
         {leftContent && (
@@ -148,7 +148,7 @@ const TextInput = ({
         )}
       </div>
       {(showCount && props.maxLength) || error ? (
-        <div className="flex justify-between items-start px-1">
+        <div className="flex justify-between items-start px-4 pt-1 w-full">
           <div className="flex-1">
             {error && (
               <span className="text-xs text-red-500 block">{error}</span>

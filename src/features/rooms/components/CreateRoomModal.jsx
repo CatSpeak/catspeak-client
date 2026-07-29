@@ -71,7 +71,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const isCreating =
     mode === "custom" ? customForm.isCreating : groupForm.isCreating
   const isCreateDisabled =
-    isCreating || (mode === "custom" && customForm.isQuotaFull)
+    isCreating || activeForm.isCreateDisabled || (mode === "custom" && customForm.isQuotaFull)
 
   const handleCreateSubmit = () => {
     if (mode === "custom") {
@@ -138,6 +138,8 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
           handleTopicChange={activeForm.handleTopicChange}
           isQuotaFull={customForm.isQuotaFull}
           selectedLanguage={activeForm.selectedLanguage}
+          nameError={activeForm.nameError ? t.rooms?.createRoom?.nameRequired || activeForm.nameError : ""}
+          passwordError={activeForm.passwordError}
           t={t}
         />
       </Modal>

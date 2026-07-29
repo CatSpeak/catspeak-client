@@ -1,7 +1,7 @@
 import React from "react"
 import OptionGroupSelect from "@/shared/components/ui/OptionGroupSelect"
 
-const TopicSelect = ({ value, onChange, options, t }) => {
+const TopicSelect = ({ value, onChange, options, disabled, t }) => {
   const handleChange = (newTopics) => {
     onChange({ target: { value: newTopics } })
   }
@@ -15,6 +15,7 @@ const TopicSelect = ({ value, onChange, options, t }) => {
       onChange={handleChange}
       multiple={true}
       maxSelect={3}
+      disabled={disabled}
       getOptionLabel={(topic) => t.rooms.createRoom.topics[topic.toLowerCase()] || topic}
       getOptionValue={(topic) => topic}
     />

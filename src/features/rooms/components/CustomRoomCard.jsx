@@ -17,15 +17,14 @@ const CustomRoomCard = ({
   onJoin,
   copiedId,
   isDeleting,
-  ct = {},
+  ct: propsCt = {},
 }) => {
   const { t } = useLanguage()
+  const customRooms = { ...(t.rooms?.customRooms || {}), ...propsCt }
   const roomId = room.id || room.roomId
   const isCopied = copiedId === roomId
   const [imageError, setImageError] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-
-  console.log(room)
 
   // Thumbnail fallback handling
   const fallbackThumbnail = room.languageType === "Chinese" ? ZHThumbnail : ENThumbnail
@@ -39,8 +38,7 @@ const CustomRoomCard = ({
       ? [room.topic]
       : []
 
-  // Privacy & Password
-  const isPrivate = room.isPrivate || room.privacy === "Private"
+  // Password check
   const hasPassword =
     room.hasPassword || room.isPasswordProtected || !!room.password
 
@@ -48,7 +46,7 @@ const CustomRoomCard = ({
   const durationText =
     room.duration && room.duration > 0
       ? `${room.duration} mins`
-      : ct.unlimited || "Unlimited"
+      : customRooms.unlimited || "Unlimited"
 
   // Participant count calculation
   const participants = Array.isArray(room.currentParticipants)
@@ -59,6 +57,11 @@ const CustomRoomCard = ({
     room.maxParticipants && room.maxParticipants > 0
       ? room.maxParticipants
       : null
+
+  const deleteConfirmMessage = (
+    customRooms.deleteConfirmMessage ||
+    `Are you sure you want to delete "${room.name}"? This action cannot be undone.`
+  ).replace("{{name}}", room.name || "")
 
   return (
     <div
@@ -76,7 +79,7 @@ const CustomRoomCard = ({
         <img
           src={displayThumbnail}
           onError={() => setImageError(true)}
-          alt={room.name || "Room Thumbnail"}
+          alt={room.name || "Room thumbnail"}
           className={`relative z-10 h-full w-full ${!imageError && room.thumbnailUrl ? "object-contain" : "object-cover"}`}
         />
       </div>
@@ -93,8 +96,8 @@ const CustomRoomCard = ({
             <Users size={16} />
             <span>
               {maxParticipantsDisplay
-                ? `${currentCount}/${maxParticipantsDisplay} ${ct.people || "people"}`
-                : `${currentCount} ${ct.people || "people"}`}
+                ? `${currentCount}/${maxParticipantsDisplay} ${customRooms.people || "people"}`
+                : `${currentCount} ${customRooms.people || "people"}`}
             </span>
           </div>
 
@@ -105,17 +108,14 @@ const CustomRoomCard = ({
           </div>
         </div>
 
-        {/* Level, Topic, Private & Password Chips */}
-        {(isPrivate || hasPassword || room.requiredLevel || topicsList.length > 0) && (
+        {/* Level, Topic & Password Chips */}
+        {(hasPassword || room.requiredLevel || topicsList.length > 0) && (
           <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-            {/* Private Chip */}
-            {isPrivate && (
-              <Badge color="dark">{ct.private || "Private"}</Badge>
-            )}
-
             {/* Password Chip */}
             {hasPassword && (
-              <Badge color="dark">{ct.passwordRequired || "Password Required"}</Badge>
+              <Badge color="dark">
+                {customRooms.passwordRequired || "Password required"}
+              </Badge>
             )}
 
             {/* Level Chip */}
@@ -146,7 +146,7 @@ const CustomRoomCard = ({
               onCopyLink(roomId)
             }}
             variant="ghost"
-            title={ct.copyLink || "Copy Link"}
+            title={customRooms.copyLink || "Copy link"}
           >
             {isCopied ? <Check className="text-emerald-500" /> : <Copy />}
           </IconButton>
@@ -158,7 +158,7 @@ const CustomRoomCard = ({
               onEdit(room)
             }}
             variant="ghost"
-            title={ct.edit || "Edit"}
+            title={customRooms.edit || "Edit"}
           >
             <Pencil />
           </IconButton>
@@ -170,7 +170,7 @@ const CustomRoomCard = ({
               setIsDeleteModalOpen(true)
             }}
             variant="ghost"
-            title={ct.delete || "Delete"}
+            title={customRooms.delete || "Delete"}
           >
             <Trash2 />
           </IconButton>
@@ -185,13 +185,10 @@ const CustomRoomCard = ({
           onDelete(roomId)
           setIsDeleteModalOpen(false)
         }}
-        title={ct.deleteConfirm || "Delete room?"}
-        message={
-          ct.deleteConfirmMessage ||
-          `Are you sure you want to delete "${room.name}"? This action cannot be undone.`
-        }
-        cancelText={ct.cancel || "Cancel"}
-        confirmText={isDeleting ? "..." : ct.delete || "Delete"}
+        title={customRooms.deleteConfirmTitle || customRooms.deleteConfirm || "Delete room?"}
+        message={deleteConfirmMessage}
+        cancelText={customRooms.cancel || t.cancel || "Cancel"}
+        confirmText={isDeleting ? "..." : customRooms.delete || "Delete"}
         confirmVariant="destructive"
       />
     </div>
