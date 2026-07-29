@@ -18,6 +18,7 @@ const EventDateTimeSection = ({
   selectedTimezone,
   onTimezoneChange,
   errors,
+  children,
 }) => {
   const { t } = useLanguage();
   const cal = t.calendar;
@@ -123,6 +124,8 @@ const EventDateTimeSection = ({
             )}
           </div>
         </div>
+
+        {children}
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
           <span className="text-base w-[150px] shrink-0">
