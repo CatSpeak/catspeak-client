@@ -41,6 +41,7 @@ export default {
   player: {
     title: "录音",
     videoNotAvailable: "视频文件不可用。",
+    browserNotSupported: "您的浏览器不支持视频标签。",
     urlExpiry: "链接在 60 分钟后失效",
     meetingIdFallback: "录音 #{{id}}",
   },

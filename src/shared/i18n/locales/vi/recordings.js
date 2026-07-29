@@ -46,6 +46,7 @@ export default {
   player: {
     title: "Bản ghi hình",
     videoNotAvailable: "Không có video.",
+    browserNotSupported: "Trình duyệt của bạn không hỗ trợ thẻ video.",
     urlExpiry: "Liên kết hết hạn sau 60 phút",
     meetingIdFallback: "Bản ghi #{{id}}",
   },

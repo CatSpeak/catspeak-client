@@ -45,6 +45,7 @@ export default {
   player: {
     title: "Recording",
     videoNotAvailable: "Video file is not available.",
+    browserNotSupported: "Your browser does not support the video tag.",
     urlExpiry: "URL expires in 60 min",
     meetingIdFallback: "Recording #{{id}}",
   },
