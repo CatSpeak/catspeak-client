@@ -138,6 +138,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
               name={
                 user?.fullName || user?.firstName || user?.username || "User"
               }
+              accountId={user?.accountId || user?.id}
               className="shrink-0"
             />
             <div className="flex-1 relative">
