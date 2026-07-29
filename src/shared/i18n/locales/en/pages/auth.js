@@ -54,7 +54,7 @@ export default {
   usernameLabel: "Username",
   usernamePlaceholder: "Enter your username",
   dateOfBirthLabel: "Date of Birth",
-  dateOfBirthPlaceholder: "Select date",
+  dateOfBirthPlaceholder: "Enter your date of birth",
   levelLabel: "Level",
   levelBeginner: "Beginner",
   levelIntermediate: "Intermediate",

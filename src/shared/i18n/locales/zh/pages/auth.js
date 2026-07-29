@@ -52,7 +52,7 @@ export default {
   usernameLabel: "用户名",
   usernamePlaceholder: "输入用户名",
   dateOfBirthLabel: "出生日期",
-  dateOfBirthPlaceholder: "选择日期",
+  dateOfBirthPlaceholder: "输入您的出生日期",
   levelLabel: "等级",
   levelBeginner: "初学者",
   levelIntermediate: "中级",
