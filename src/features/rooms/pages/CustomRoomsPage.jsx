@@ -16,15 +16,14 @@ import {
 } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import PageTitle from "@/shared/components/ui/PageTitle"
-import { EmptyState } from "@/shared/components/ui/indicators"
+import { EmptyState, PlanRequiredState } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
 import {
   useGetMyCustomRoomsQuery,
   useUpdateCustomRoomMutation,
   useDeleteCustomRoomMutation,
 } from "@/store/api/roomsApi"
-import { useGetUserProfileQuery } from "@/store/api/userApi"
-import { useAuth } from "@/features/auth"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import CreateRoomModal from "../components/CreateRoomModal"
 import EditRoomModal from "../components/EditRoomModal"
 import CustomRoomCard from "../components/CustomRoomCard"
@@ -50,12 +49,7 @@ const CustomRoomsPage = () => {
   const { lang } = useParams()
   const navigate = useNavigate()
   const ct = t.rooms?.customRooms || {}
-  const { isAuthenticated } = useAuth()
-
-  const { data: profileResponse, isLoading: isLoadingProfile } =
-    useGetUserProfileQuery(undefined, { skip: !isAuthenticated })
-  const userTier = profileResponse?.data?.tier?.toLowerCase()
-  const isPro = userTier === "pro"
+  const { limits, isLoading: isPlanLoading } = usePlanFeatures()
 
   const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
   const selectedLanguage = getLanguageName(supportedLangCode)
@@ -102,41 +96,14 @@ const CustomRoomsPage = () => {
     }
   }
 
-  const handleUpgradeNavigation = () => {
-    navigate("/pricing", {
-      state: { highlightPlan: "pro", featureName: "Custom Rooms" },
-    })
-  }
-
-  if (!isLoadingProfile && !isPro) {
+  if (!isPlanLoading && !limits.allowCustomRooms) {
     return (
-      <AnimatePresence mode="wait">
-        <FluentAnimation
-          animationKey="custom-rooms-pro-required"
-          direction="up"
-          className="w-full"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <PageTitle>{ct.myRoomsTitle || "My Custom Rooms"}</PageTitle>
-          </div>
-
-          <EmptyState
-            icon={Crown}
-            iconClassName="w-12 h-12 mb-4 text-amber-500"
-            title="Pro Plan Required"
-            subtext="Custom rooms allow you to create persistent, customizable rooms for your community. Upgrade to CatSpeak Pro to unlock custom rooms!"
-            action={
-              <PillButton
-                onClick={handleUpgradeNavigation}
-                startIcon={<Crown size={18} />}
-              >
-                Upgrade to Pro
-              </PillButton>
-            }
-            fullPage
-          />
-        </FluentAnimation>
-      </AnimatePresence>
+      <PlanRequiredState
+        pageTitle={ct.myRoomsTitle || "My Custom Rooms"}
+        subtext="Custom rooms allow you to create persistent, customizable rooms for your community. Upgrade to CatSpeak Pro to unlock custom rooms!"
+        featureName="Custom Rooms"
+        animationKey="custom-rooms-pro-required"
+      />
     )
   }
 
