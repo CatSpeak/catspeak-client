@@ -93,6 +93,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                   <img
                     src={m.mediaUrl}
                     alt="media"
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                 ) : m.mediaType === "Video" ? (
