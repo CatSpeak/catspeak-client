@@ -1,4 +1,4 @@
-import { BookOpen, CalendarClock, PenSquare, CheckCircle2, RotateCw } from "lucide-react"
+import { BookOpen, CalendarClock, PenSquare, CheckCircle2, RotateCw, Megaphone, Zap } from "lucide-react"
 
 const replaceVars = (text, m) => {
   if (!text) return text;
@@ -72,9 +72,79 @@ export const NOTIFICATION_TYPES = {
     // resolveUrl: (m) => `/classes/${m.classId}/quizzes/${m.quizId}`,
     resolveUrl: (m) => `/workspace/courses/class/${m.classId}/quiz/${m.quizId}/take`,
   },
+  room_invite: {
+    icon: CalendarClock, 
+    color: "text-blue-500",
+    resolveTitle: (m, t) => t.rooms?.notifications?.room_invite?.title || "Lời mời tham gia phòng",
+    resolveBody: (m, t) => {
+      const baseText = t.rooms?.notifications?.room_invite?.body?.replace("{inviterName}", m.inviterName) 
+        || `${m.inviterName || 'Ai đó'} đã mời bạn tham gia phòng họp`;
+      return m.roomName ? `${baseText}: ${m.roomName}` : baseText;
+    },
+    resolveUrl: (m) => {
+      const match = window?.location?.pathname?.match(/^\/([a-z]{2})(?:\/|$)/i)
+      const lang = match ? match[1] : "vi"
+      return `/${lang}/meet/${m.roomId}`
+    },
+  },
+  friend_request: {
+    icon: CalendarClock, // Or UserPlus if imported
+    color: "text-pink-500",
+    resolveTitle: (m, t) => t.profile?.notifications?.friend_request?.title || "Yêu cầu kết bạn mới",
+    resolveBody: (m, t) => {
+      const name = m.userName || m.requesterName || m.RequesterName || m.senderName || m.SenderName || m.name;
+      return t.profile?.notifications?.friend_request?.body?.replace("{requesterName}", name) 
+        || `${name || 'Ai đó'} đã gửi cho bạn yêu cầu kết bạn.`;
+    },
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.requesterId || m.RequesterId || m.senderId || m.SenderId}?tab=friends`
+    },
+  },
+  FriendRequest: {
+    icon: CalendarClock, 
+    color: "text-pink-500",
+    resolveTitle: (m, t) => t.profile?.notifications?.friend_request?.title || "Yêu cầu kết bạn mới",
+    resolveBody: (m, t) => {
+      const name = m.userName || m.requesterName || m.RequesterName || m.senderName || m.SenderName || m.name;
+      return t.profile?.notifications?.friend_request?.body?.replace("{requesterName}", name) 
+        || `${name || 'Ai đó'} đã gửi cho bạn yêu cầu kết bạn.`;
+    },
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.requesterId || m.RequesterId || m.senderId || m.SenderId}?tab=friends`
+    },
+  },
+  new_post: {
+    icon: Megaphone,
+    color: "text-violet-500",
+    resolveTitle: (m, t) => t.notifications?.new_post?.title || "Bài viết mới từ CatSpeak",
+    resolveBody: (m, t) => t.notifications?.new_post?.body?.replace("{postTitle}", m.title)
+      || `${m.title ? `Có bài viết mới: "${m.title}"` : "Có bài viết mới vừa được đăng!"}`,
+    resolveUrl: (m) => {
+      const match = window?.location?.pathname?.match(/^\/([a-z]{2})(?:\/|$)/i)
+      const lang = match ? match[1] : "vi"
+      return m.slug
+        ? `/${lang}/cat-speak/news/${m.slug}`
+        : `/${lang}/cat-speak/news`
+    },
+  },
+  new_challenge: {
+    icon: Zap,
+    color: "text-amber-500",
+    resolveTitle: (m, t) => t.notifications?.new_challenge?.title || "Thử thách mới!",
+    resolveBody: (m, t) => t.notifications?.new_challenge?.body?.replace("{challengeTitle}", m.name)
+      || `${m.name ? `Thử thách mới: "${m.name}"${m.hashtag ? ` (${m.hashtag})` : ''} đang chờ bạn!` : "Một thử thách từ vựng mới vừa được tạo!"}`,
+    resolveUrl: (m) => {
+      const match = window?.location?.pathname?.match(/^\/([a-z]{2})(?:\/|$)/i)
+      const lang = match ? match[1] : "vi"
+      return m.challengeId
+        ? `/${lang}/cat-speak/reels?challenge=${m.challengeId}`
+        : `/${lang}/cat-speak/reels`
+    },
+  },
 }
 
 export function resolveNotification(notif, t) {
+  console.log(notif);
   const cfg = NOTIFICATION_TYPES[notif.type]
   if (!cfg) return { ...notif, resolvedTitle: notif.title, resolvedBody: notif.body, resolvedUrl: notif.actionUrl }
 

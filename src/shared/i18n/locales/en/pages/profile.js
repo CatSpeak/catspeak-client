@@ -139,4 +139,10 @@ export default {
     credentialSizeLimit: "Each credential must be smaller than {max}MB (current {actual}MB).",
     videoSizeLimit: "Video must be smaller than {max}MB (current {actual}MB).",
   },
+  notifications: {
+    friend_request: {
+      title: "New Friend Request",
+      body: "{requesterName} sent you a friend request.",
+    }
+  }
 }

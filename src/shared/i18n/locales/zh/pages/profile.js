@@ -133,4 +133,10 @@ export default {
     credentialSizeLimit: "每份证书必须小于 {max}MB（当前 {actual}MB）。",
     videoSizeLimit: "视频必须小于 {max}MB（当前 {actual}MB）。",
   },
+  notifications: {
+    friend_request: {
+      title: "新好友请求",
+      body: "{requesterName} 向您发送了好友请求。",
+    }
+  }
 }

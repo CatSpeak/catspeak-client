@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom"
 import React, { useMemo } from "react"
 import {
   Mic,
@@ -20,6 +19,8 @@ import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import toast from "react-hot-toast"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import InviteParticipantModal from "./InviteParticipantModal"
+import { useNavigate } from "react-router-dom"
 
 /**
  * A single row in the participant list.
@@ -78,11 +79,10 @@ const ParticipantItem = ({ participant }) => {
         size={40}
         name={name}
         src={avatarUrl}
-        className={`${
-          isSpeaking
-            ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white transition-all duration-200"
-            : ""
-        } ${theme?.avatarClass || ""}`}
+        className={`${isSpeaking
+          ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white transition-all duration-200"
+          : ""
+          } ${theme?.avatarClass || ""}`}
       />
     </div>
   )
@@ -149,7 +149,8 @@ const ParticipantItem = ({ participant }) => {
  */
 const ParticipantList = ({ hideTitle }) => {
   const { t } = useLanguage()
-  const { participants } = useVideoCallContext()
+  const { participants, id: roomId } = useVideoCallContext()
+  const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
   const pl = t.rooms.videoCall.participantList
 
   const parseMetadata = (metadata) => {
@@ -174,10 +175,23 @@ const ParticipantList = ({ hideTitle }) => {
   return (
     <div className="flex flex-col h-full w-full bg-white">
       {!hideTitle && (
-        <ListItem lines={1} className="border-b border-[#E5E5E5] shrink-0">
-          <span className="font-semibold">
-            {pl.title} ({participants.length})
-          </span>
+        <ListItem
+          lines={1}
+          className="border-b border-[#E5E5E5] shrink-0"
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-semibold">
+              {pl.title} ({participants.length})
+            </span>
+            <IconButton
+              variant="ghost"
+              size="xs"
+              onClick={() => setIsInviteModalOpen(true)}
+            >
+              <UserPlus size={22} />
+            </IconButton>
+            {/* <IconButton variant="ghost" size="xs"><Ellipsis size={22} /></IconButton> */}
+          </div>
         </ListItem>
       )}
       <div className="flex-1 overflow-y-auto p-1">
@@ -209,8 +223,14 @@ const ParticipantList = ({ hideTitle }) => {
           </ul>
         )}
       </div>
+
+      <InviteParticipantModal
+        open={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        roomId={roomId}
+      />
     </div>
-  )
+  );
 }
 
 export default ParticipantList
