@@ -277,6 +277,13 @@ const CreateClassPage = () => {
     return ["A1", "A2", "B1", "B2", "C1", "C2"].map((name, index) => ({ id: index + 1, name }))
   }, [selectedCourse, selectedLanguage, languagesList])
 
+  const editingClassData = useMemo(() => {
+    if (!isEditMode) return null
+    const responseData = classDetailResponse?.data || classDetailResponse
+    if (!responseData || typeof responseData !== "object" || Array.isArray(responseData)) return null
+    return responseData
+  }, [isEditMode, classDetailResponse])
+
   // Handlers
   const handleCourseChange = useCallback((id) => {
     setCourseId(id)
@@ -627,11 +634,26 @@ const CreateClassPage = () => {
     const submittedFormKey = formInstanceKey
     let request = null
     try {
+      const originalLevels = (
+        isEditMode
+        && Array.isArray(editingClassData?.levels)
+        && editingClassData.levels.length > 0
+      )
+        ? editingClassData.levels
+        : null
+
+      const initialHydratedLevel = editingClassData?.levels?.[0] || ""
+      const isLevelUnchanged = isEditMode && level === initialHydratedLevel
+
+      const payloadLevels = (isEditMode && originalLevels && isLevelUnchanged)
+        ? originalLevels
+        : [level]
+
       const payload = {
         courseId,
         title: className.trim(),
         language: selectedLanguage,
-        levels: [level],
+        levels: payloadLevels,
         description,
         totalSessions: sessionCount,
         enrollmentStart: admissionStart ? `${admissionStart}T00:00:00Z` : "",
@@ -719,13 +741,41 @@ const CreateClassPage = () => {
 
       const isLanguageNotAllowed =
         errCode === "LANGUAGE_NOT_ALLOWED" ||
-        error?.status === 422 ||
         (typeof errMsg === "string" && (errMsg.includes("LANGUAGE_NOT_ALLOWED") || errMsg.toLowerCase().includes("language not allowed"))) ||
         (typeof errCode === "string" && errCode.includes("LANGUAGE_NOT_ALLOWED"))
+
+      const isScheduleLocked =
+        errCode === "SCHEDULE_LOCKED" ||
+        (typeof errMsg === "string" && (errMsg.includes("SCHEDULE_LOCKED") || errMsg.toLowerCase().includes("schedule_locked"))) ||
+        (typeof errCode === "string" && errCode.includes("SCHEDULE_LOCKED"))
+
+      const isLevelsLocked =
+        errCode === "LEVELS_LOCKED" ||
+        (typeof errMsg === "string" && (errMsg.includes("LEVELS_LOCKED") || errMsg.toLowerCase().includes("levels_locked"))) ||
+        (typeof errCode === "string" && errCode.includes("LEVELS_LOCKED"))
+
+      const isScheduleConflict =
+        errCode === "SESSION_CONFLICT" ||
+        errCode === "SCHEDULE_CONFLICT" ||
+        (typeof errMsg === "string" && (
+          errMsg.includes("SESSION_CONFLICT") ||
+          errMsg.includes("SCHEDULE_CONFLICT") ||
+          errMsg.toLowerCase().includes("session_conflict") ||
+          errMsg.toLowerCase().includes("schedule_conflict")
+        )) ||
+        (typeof errCode === "string" && (errCode.includes("SESSION_CONFLICT") || errCode.includes("SCHEDULE_CONFLICT")))
 
       let displayMessage
       if (isLanguageNotAllowed) {
         displayMessage = cc.languageNotAllowed || c.createCourse?.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
+      } else if (isScheduleLocked) {
+        displayMessage = cc.scheduleLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Teaching schedule cannot be changed for this class.")
+      } else if (isLevelsLocked) {
+        displayMessage = cc.levelsLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Class level cannot be changed for this class.")
+      } else if (isScheduleConflict) {
+        displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT"))
+          ? errMsg
+          : (cc.toastScheduleConflictDefault || "Schedule conflict detected with another class!")
       } else if (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("Missing")) {
         displayMessage = errMsg
       } else {
@@ -1310,16 +1360,26 @@ const CreateClassPage = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100">
           {/* Left Side: Fee detail */}
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#990011]/5 flex items-center justify-center text-[#990011]">
+            <div className="w-8 h-8 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D]">
               <Info size={16} />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">
-                {cc.classOpeningFee}
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-none">
+                {cc.classOpeningFee || "CLASS OPENING FEE"}
               </span>
-              <span className="text-[#990011] font-black text-lg leading-none">
-                {formatCurrencyVND(feeDetails.openingFee)}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                {feeDetails.openingFee > 0 && (
+                  <span className="text-gray-400 line-through font-bold text-sm leading-none">
+                    {formatCurrencyVND(feeDetails.openingFee)}
+                  </span>
+                )}
+                <span className="text-[#15803D] font-black text-xl leading-none">
+                  {formatCurrencyVND(0)}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E8F8F0] text-[#15803D] border border-[#15803D]/20">
+                  {cc.currentlyFreeNote || "Currently free to open classes"}
+                </span>
+              </div>
             </div>
           </div>
 

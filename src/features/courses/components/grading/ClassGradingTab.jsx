@@ -239,6 +239,15 @@ const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
     && Number(quiz.timeLimitMinutes) >= 0
   )
 
+  const remainingAttemptsNum = Number(quiz?.remainingAttempts ?? quiz?.remainingAttempt ?? quiz?.attemptsLeft)
+  const hasRemainingAttempts = (
+    quiz?.remainingAttempts === undefined &&
+    quiz?.remainingAttempt === undefined &&
+    quiz?.attemptsLeft === undefined
+  )
+    ? true
+    : (Number.isFinite(remainingAttemptsNum) ? remainingAttemptsNum > 0 : true)
+
   return (
     <tr
       onClick={() => onSelect && onSelect(quiz.id)}
@@ -283,17 +292,32 @@ const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
           </span>
         )}
         {recordStatus === "submitted" && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation()
-              onSelect?.(quiz.id, "result")
-            }}
-            className="ml-auto px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
-          >
-            <Eye size={11} />
-            <span>{cg.seeQuizResultBtn}</span>
-          </button>
+          <div className="ml-auto flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                onSelect?.(quiz.id, "result")
+              }}
+              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+            >
+              <Eye size={11} />
+              <span>{cg.seeQuizResultBtn}</span>
+            </button>
+            {hasRemainingAttempts && (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onSelect?.(quiz.id, "intro")
+                }}
+                className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              >
+                <RotateCcw size={11} />
+                <span>{cg.retakeQuizBtn || "Retake Quiz"}</span>
+              </button>
+            )}
+          </div>
         )}
         {recordStatus === "inprogress" && (
           <button
@@ -305,7 +329,7 @@ const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
             className="ml-auto px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
           >
             <RotateCcw size={11} />
-            <span>{cg.continueQuizBtn}</span>
+            <span>{cg.continueQuizBtn || "Continue Quiz"}</span>
           </button>
         )}
       </td>
@@ -515,6 +539,15 @@ const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
   const questionCount = embeddedQuestionCount
     ?? (Number.isFinite(parsedQuestionCount) ? parsedQuestionCount : null)
 
+  const remainingAttemptsNum = Number(quiz?.remainingAttempts ?? quiz?.remainingAttempt ?? quiz?.attemptsLeft)
+  const hasRemainingAttempts = (
+    quiz?.remainingAttempts === undefined &&
+    quiz?.remainingAttempt === undefined &&
+    quiz?.attemptsLeft === undefined
+  )
+    ? true
+    : (Number.isFinite(remainingAttemptsNum) ? remainingAttemptsNum > 0 : true)
+
   return (
     <div
       onClick={() => onSelect && onSelect(quiz.id)}
@@ -578,17 +611,32 @@ const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
       {/* Action Footer Button */}
       <div>
         {recordStatus === "submitted" ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onSelect?.(quiz.id, "result")
-            }}
-            className="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
-          >
-            <Eye size={13} />
-            <span>{cg.seeQuizResultBtn}</span>
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onSelect?.(quiz.id, "result")
+              }}
+              className={`w-full py-2.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs ${!hasRemainingAttempts ? "col-span-2" : ""}`}
+            >
+              <Eye size={13} />
+              <span>{cg.seeQuizResultBtn}</span>
+            </button>
+            {hasRemainingAttempts && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onSelect?.(quiz.id, "intro")
+                }}
+                className="w-full py-2.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
+              >
+                <RotateCcw size={13} />
+                <span>{cg.retakeQuizBtn || "Retake Quiz"}</span>
+              </button>
+            )}
+          </div>
         ) : recordStatus === "inprogress" ? (
           <button
             type="button"
@@ -599,7 +647,7 @@ const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
             className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
           >
             <RotateCcw size={13} />
-            <span>{cg.continueQuizBtn}</span>
+            <span>{cg.continueQuizBtn || "Continue Quiz"}</span>
           </button>
         ) : (
           <button

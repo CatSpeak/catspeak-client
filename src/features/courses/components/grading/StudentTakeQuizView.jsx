@@ -982,10 +982,22 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             <span className="text-sm font-black text-gray-900 text-center sm:text-left">
               {recordStatus === "InProgress" || recordStatus === "inprogress"
                 ? sq.resumeAttemptPrompt
-                : sq.startQuizPrompt}
+                : (recordStatus === "Submitted" || recordStatus === "submitted"
+                  ? (sq.retakeQuizPrompt || "You have submitted this quiz. Would you like to view results or retake?")
+                  : sq.startQuizPrompt)}
             </span>
 
             <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+              {(recordStatus === "Submitted" || recordStatus === "submitted") && (
+                <button
+                  type="button"
+                  onClick={() => setStepOverride("result")}
+                  className="flex-1 sm:flex-none px-4 py-3 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Eye size={14} />
+                  <span>{sq.seeResults || "View Results"}</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleBack}
@@ -999,7 +1011,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 onClick={handleConfirmStart}
                 className="flex-1 sm:flex-none px-6 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-2xl shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
-                {(recordStatus === "InProgress" || recordStatus === "inprogress") && <RotateCcw size={14} />}
+                {(recordStatus === "InProgress" || recordStatus === "inprogress" || recordStatus === "Submitted" || recordStatus === "submitted") && <RotateCcw size={14} />}
                 <span>
                   {isStarting
                     ? sq.loading
@@ -1008,8 +1020,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                         ? sq.notOpenYet
                         : sq.unavailable)
                       : (recordStatus === "InProgress" || recordStatus === "inprogress"
-                        ? sq.continueQuiz
-                        : sq.startQuiz))}
+                        ? (sq.continueQuiz || "Continue Quiz")
+                        : (recordStatus === "Submitted" || recordStatus === "submitted"
+                          ? (sq.retakeQuiz || "Retake Quiz")
+                          : sq.startQuiz)))}
                 </span>
               </button>
             </div>
