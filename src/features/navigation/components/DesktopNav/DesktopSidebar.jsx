@@ -198,23 +198,11 @@ const DesktopSidebar = () => {
 
         {/* Dock Section Icons */}
         <div className="flex-1 flex flex-col gap-3 w-full px-3">
-          {mainDockItems
-            .filter((item) => {
-              const teacherTabs = [
-                "myCourses",
-                "myClass",
-                "analytics",
-                "schedule",
-                "teachingTasks",
-              ]
-              if (teacherTabs.includes(item.key) && isStudent) return false
-              return true
-            })
-            .map((item) => {
-              const Icon = item.icon
-              const isActive = activeDockSection === item.key
-              const label = t.nav?.[item.key] || item.key
-              const targetPath = getDockItemPath(item)
+          {mainDockItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeDockSection === item.key
+            const label = t.nav?.[item.key] || item.key
+            const targetPath = getDockItemPath(item)
 
               return (
                 <div key={item.key} className="relative group/dock">
