@@ -136,4 +136,21 @@ export default {
       uploadSuccess: "Reel posted successfully!",
     },
   },
+
+  common: {
+    email: "Email",
+    emailRequired: "Please enter email",
+    errorOccurred: "An error occurred",
+    sending: "Sending...",
+  },
+  notifications: {
+    new_post: {
+      title: "New Post from CatSpeak",
+      body: "New post: \"{postTitle}\"",
+    },
+    new_challenge: {
+      title: "New Challenge!",
+      body: "New challenge: \"{challengeTitle}\" is waiting for you!",
+    },
+  },
 };

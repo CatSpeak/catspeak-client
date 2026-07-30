@@ -126,4 +126,10 @@ export default {
     certifyError: "Please check the box to agree with our terms.",
     formInvalid: "Please fill all required fields before submitting.",
   },
+  notifications: {
+    friend_request: {
+      title: "New Friend Request",
+      body: "{requesterName} sent you a friend request.",
+    }
+  }
 }

@@ -120,4 +120,10 @@ export default {
     certifyError: "请选中复选框以同意我们的条款。",
     formInvalid: "提交前请填写所有必填字段。",
   },
+  notifications: {
+    friend_request: {
+      title: "新好友请求",
+      body: "{requesterName} 向您发送了好友请求。",
+    }
+  }
 }

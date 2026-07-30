@@ -140,4 +140,21 @@ export default {
       uploadSuccess: "Reel 发布成功！",
     },
   },
+
+  common: {
+    email: "电子邮件",
+    emailRequired: "请输入电子邮件",
+    errorOccurred: "发生错误",
+    sending: "发送中...",
+  },
+  notifications: {
+    new_post: {
+      title: "CatSpeak 新文章",
+      body: "新文章：\"{postTitle}\"",
+    },
+    new_challenge: {
+      title: "新挑战！",
+      body: "新挑战：\"{challengeTitle}\" 等着您！",
+    },
+  },
 };

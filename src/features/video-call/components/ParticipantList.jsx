@@ -18,6 +18,7 @@ import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import toast from "react-hot-toast"
+import InviteParticipantModal from "./InviteParticipantModal"
 
 /**
  * A single row in the participant list.
@@ -124,7 +125,8 @@ const ParticipantItem = ({ participant }) => {
  */
 const ParticipantList = ({ hideTitle }) => {
   const { t } = useLanguage()
-  const { participants } = useVideoCallContext()
+  const { participants, id: roomId } = useVideoCallContext()
+  const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
   const pl = t.rooms.videoCall.participantList
 
   const parseMetadata = (metadata) => {
@@ -157,9 +159,7 @@ const ParticipantList = ({ hideTitle }) => {
             <IconButton
               variant="ghost"
               size="xs"
-              onClick={() => {
-                toast.success(t?.comingSoon.title)
-              }}
+              onClick={() => setIsInviteModalOpen(true)}
             >
               <UserPlus size={22} />
             </IconButton>
@@ -196,6 +196,12 @@ const ParticipantList = ({ hideTitle }) => {
           </ul>
         )}
       </div>
+
+      <InviteParticipantModal
+        open={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        roomId={roomId}
+      />
     </div>
   )
 }

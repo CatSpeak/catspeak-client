@@ -30,9 +30,14 @@ const ReelsPage = () => {
   const lang = paramLang || language || "vi";
 
   // State for Tabs
-  const [activeTab, setActiveTab] = useState("foryou"); // "foryou" | "challenges" | "leaderboard"
+  const [activeTab, setActiveTab] = useState(() => {
+    return (searchParams.get("challenge") || searchParams.get("challengeId")) ? "challenges" : "foryou";
+  }); // "foryou" | "challenges" | "leaderboard"
   const [challengeStatus, setChallengeStatus] = useState("active"); // "active" | "past"
-  const [challengeId, setChallengeId] = useState(null);
+  const [challengeId, setChallengeId] = useState(() => {
+    const id = searchParams.get("challenge") || searchParams.get("challengeId");
+    return id ? parseInt(id, 10) : null;
+  });
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const isLg = useMediaQuery("(min-width: 1024px)");
 

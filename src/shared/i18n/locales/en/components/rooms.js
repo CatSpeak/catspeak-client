@@ -349,6 +349,9 @@ export default {
     unknownDevice: "Unknown Device",
   },
   videoCall: {
+    inviteParticipant: "Invite participant",
+    sendInvite: "Send invite",
+    inviteDescription: "Enter the email address of the person you want to invite to this room. They will receive a notification with a link to join.",
     changeLayout: {
       title: "Change layout",
       auto: "Auto",
@@ -460,6 +463,13 @@ export default {
       step2: "Open Chrome or Safari",
       step3: "Paste the link and join the call",
     },
+    inviteParticipant: "Invite participant",
+    sendInvite: "Send invite",
+    inviteDescription:
+      "Enter the email address of the person you want to invite to this room. They will receive a notification with a link to join.",
+  },
+  notifications: {
+    inviteSent: "Invite sent",
   },
   roomFullModal: {
     title: "Room is full",
@@ -744,4 +754,12 @@ export default {
       },
     },
   },
-}
+
+  notifications: {
+    inviteSent: "Invite sent",
+    room_invite: {
+      title: "Room Invitation",
+      body: "{inviterName} invited you to join a room",
+    }
+  }
+};
