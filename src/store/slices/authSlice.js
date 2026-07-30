@@ -36,17 +36,19 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action) => {
       const { user, token, refreshToken } = action.payload
-      state.user = user
-      state.token = token
-      state.refreshToken = refreshToken || state.refreshToken
+
+      if (user !== undefined) state.user = user
+      if (token) state.token = token
+      if (refreshToken) state.refreshToken = refreshToken
       state.status = "succeeded"
 
-      localStorage.setItem("user", JSON.stringify(user))
-      localStorage.setItem("token", token)
-      if (refreshToken) localStorage.setItem("refreshToken", refreshToken)
+      if (state.user) localStorage.setItem("user", JSON.stringify(state.user))
+      if (state.token) localStorage.setItem("token", state.token)
+      if (state.refreshToken)
+        localStorage.setItem("refreshToken", state.refreshToken)
 
       // Diagnostic: log token expiry so we can correlate with 401 events
-      const exp = decodeJwtExp(token)
+      const exp = decodeJwtExp(state.token)
       if (exp) {
         console.info(
           AUTH_LOG,
