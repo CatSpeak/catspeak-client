@@ -42,7 +42,7 @@ const GlobalNewsPage = () => {
   }, [posts, data?.hasMore, isFetching])
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto h-[calc(100vh-112px)] p-4 sm:p-6">
+    <div className="flex flex-col w-full max-w-3xl mx-auto p-4 sm:p-6">
       <PostFeedList
         posts={posts}
         isLoading={isLoading && page === 1}
