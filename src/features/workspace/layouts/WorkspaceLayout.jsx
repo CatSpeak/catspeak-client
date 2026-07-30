@@ -11,7 +11,7 @@ const WorkspaceLayout = () => {
   useEffect(() => {
     if (isRoleResolved && isStudent) {
       // Teacher-only routes based on the features specified
-      const teacherRoutes = ["/workspace/courses", "/workspace/classes", "/workspace/calendar", "/workspace/analytics"]
+      const teacherRoutes = ["/workspace/courses", "/workspace/classes", "/workspace/schedule", "/workspace/teaching-tasks", "/workspace/analytics"]
 
       const isTeacherRoute = teacherRoutes.some(route => location.pathname.includes(route))
 

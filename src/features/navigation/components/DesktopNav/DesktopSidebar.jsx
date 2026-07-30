@@ -46,10 +46,6 @@ const dockItems = [
     path: "/chat",
     hasSublinks: false,
   },
-  { key: "myCourses", icon: GraduationCap, path: "/workspace/courses", hasSublinks: false },
-  { key: "myClass", icon: Users, path: "/workspace/classes", hasSublinks: false },
-  { key: "schedule", icon: Calendar, path: "/workspace/schedule", hasSublinks: false },
-  { key: "analytics", icon: BarChart, path: "/workspace/analytics", hasSublinks: false },
   {
     key: "catSpeak",
     icon: LayoutDashboard,
@@ -72,10 +68,6 @@ const normalizePath = (path) => {
 const getActiveDockSection = (pathname) => {
   if (pathname.includes("/setting")) return "settings"
   if (pathname.includes("/cat-speak")) return "catSpeak"
-  if (pathname.includes("/workspace/courses")) return "myCourses"
-  if (pathname.includes("/workspace/classes")) return "myClass"
-  if (pathname.includes("/workspace/schedule")) return "schedule"
-  if (pathname.includes("/workspace/analytics")) return "analytics"
   if (pathname.includes("/workspace") || pathname.includes("/profile"))
     return "workspace"
   if (pathname.includes("/chat")) return "messages"
@@ -205,7 +197,7 @@ const DesktopSidebar = () => {
         <div className="flex-1 flex flex-col gap-3 w-full px-3">
           {dockItems
             .filter((item) => {
-              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule"]
+              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
               if (teacherTabs.includes(item.key) && isStudent) return false
               return true
             })
@@ -358,7 +350,7 @@ const DesktopSidebar = () => {
                             return false
                           if (item.isPrivate && !isAuthenticated) return false
 
-                          const teacherTabs = ["myCourses", "myClass", "analytics", "schedule"]
+                          const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
                           if (teacherTabs.includes(item.key) && isStudent) return false
 
                           if (item.key === "myLearning" && isTeacher) return false
@@ -386,6 +378,9 @@ const DesktopSidebar = () => {
                                 isDocked={false}
                                 sectionId={currentSectionKey}
                               />
+                              {item.key === "analytics" && (
+                                <div className="my-1.5 mx-3 border-b border-black" />
+                              )}
                             </motion.div>
                           )
                         })}
