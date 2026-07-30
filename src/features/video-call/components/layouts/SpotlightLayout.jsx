@@ -69,7 +69,7 @@ const SpotlightLayout = ({
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-1 sm:p-2">
+    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden">
       {/* Main: spotlighted tile */}
       <div className="flex-[3] md:flex-[4] min-h-0 min-w-0 relative">
         {isSpotlightGame ? (
@@ -101,10 +101,12 @@ const SpotlightLayout = ({
 
       {/* Sidebar: all other tiles — ẩn trên mobile khi game đang active */}
       {hasSidebarItems && (
-        <div className={`min-h-0 min-w-0 ${isGameActive ? "hidden md:flex flex-1" : "flex flex-1"}`}>
+        <div
+          className={`min-h-0 min-w-0 ${isGameActive ? "hidden md:flex flex-1" : "flex flex-1"}`}
+        >
           <div
             className={`
-              flex flex-1 gap-1 min-h-0 min-w-0
+              flex flex-1 gap-1 min-h-0 min-w-0 pr-1
               flex-row overflow-x-auto
               md:flex-col md:overflow-y-auto md:overflow-x-hidden
               ${scrollbarClasses}
@@ -115,9 +117,7 @@ const SpotlightLayout = ({
               <div className={getSidebarItemClass()}>
                 <GameTile
                   isMain={false}
-                  onClick={() =>
-                    handleTileClick({ type: GAME_SPOTLIGHT_TYPE })
-                  }
+                  onClick={() => handleTileClick({ type: GAME_SPOTLIGHT_TYPE })}
                 />
               </div>
             )}

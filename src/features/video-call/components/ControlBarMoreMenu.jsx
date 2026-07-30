@@ -1,137 +1,29 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import {
-  MonitorUp,
-  MonitorOff,
-  Users,
-  Circle,
-  Loader2,
-  Copy,
-  Sparkles,
-  UserCircle,
-  Captions,
-  Check,
-  RefreshCcw,
-  Gamepad2,
-  History,
-  Split,
-  Volume2,
-  Settings,
-  Info,
-  ChevronLeft
-} from "lucide-react";
-import { useSelector } from "react-redux";
-import { toast } from "react-hot-toast";
-import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers";
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
-import { AnimatePresence, motion } from "framer-motion";
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls";
-import SubtitleLanguagePicker from "./SubtitleLanguagePicker";
-import { useRecordingStatus } from "@/features/video-call/hooks/useRecordingStatus";
-import ProgressBar from "@/shared/components/ui/ProgressBar";
-import {
-  useParticipants,
-  useLocalParticipant,
-} from "@livekit/components-react";
-import GameSetupModal from "@/features/games/components/shared/GameSetupModal";
-import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal";
-import { useGame } from "@/features/games/context/GameContext";
-import MenuItem from "@/shared/components/ui/MenuItem";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
-import { useSessionTimer } from "../hooks/useSessionTimer";
-import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
+import React, { useState } from "react"
+import { useParams } from "react-router-dom"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { AnimatePresence } from "framer-motion"
+import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
+import GameSetupModal from "@/features/games/components/shared/GameSetupModal"
+import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal"
+import MoreMenuDesktopView from "./MoreMenuDesktopView"
+import MoreMenuMobileView from "./MoreMenuMobileView"
 
 const ControlBarMoreMenu = ({
   showMoreMenu,
   setShowMoreMenu,
   setShowGameModal,
 }) => {
-  const { id: roomId } = useParams();
-  const { t } = useLanguage();
-  const {
-    showParticipants,
-    setShowParticipants,
-    showVirtualBackground,
-    setShowVirtualBackground,
-    showAvatarPicker,
-    setShowAvatarPicker,
-    setShowCC,
-    isAISession,
-    enterPiP,
-    lkRoom,
-    showTroubleshoot,
-    setShowTroubleshoot,
-    room,
-    user,
-    showBreakout,
-    setShowBreakout,
-    isRecording,
-    isTogglingRecording,
-    handleToggleRecording,
-    confirmStopRecording,
-    isLocalScreenShare,
-    isTogglingScreenShare,
-    handleToggleScreenShare,
-  } = useGlobalVideoCall();
+  const { id: roomId } = useParams()
+  const { t } = useLanguage()
+  const { isAISession, subtitleSupportedLangs, startSubtitles } =
+    useGlobalVideoCall()
 
-  const [showGameSetup, setShowGameSetup] = useState(false);
-  const [showGameHistory, setShowGameHistory] = useState(false);
-  const [showMobileSettings, setShowMobileSettings] = useState(false);
-
-  const { gameState } = useGame();
-  // Disable nút "Trò chơi" khi đang có ván game trong phòng (mọi state != "idle")
-  const isGameInProgress = gameState && gameState !== "idle";
-
-  const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall);
-
-  const { closingRemainingSeconds } = useVideoCallContext()
-  const { formattedRemaining, formattedMax, hasDuration, formattedElapsed } = useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
-
-  // Need to import useGetBreakoutStatusQuery, oh wait, I didn't import it in the file! I will just use the one from videoCall context if possible?
-  // Let me just import it manually here in the chunk by fixing the top imports.
-
-  const {
-    isSubtitleActive,
-    isStarting,
-    subtitleSupportedLangs,
-    startSubtitles,
-    stopSubtitles,
-  } = useSubtitleControls();
-
-  const {
-    formattedTime,
-    totalUsedMb,
-    limitMb,
-    usagePercent,
-    isDanger,
-    isWarning,
-  } = useRecordingStatus(isRecording, confirmStopRecording);
-
-  const [showSubtitlePicker, setShowSubtitlePicker] = useState(false);
-
-  // Host được xác định dựa trên creatorId khớp với accountId hiện tại —
-  // áp dụng cho cả phòng thường (Group/AI/Class) và phòng Custom.
-  const isHost =
-    room?.creatorId != null &&
-    user?.accountId != null &&
-    String(room.creatorId) === String(user.accountId);
-
-  // Game là free — bất kỳ ai trong phòng đều có thể bắt đầu,
-  // chỉ cần game đang idle (không có game nào đang chạy).
-  const canStartGame = !isGameInProgress;
-  const gameDisabledReason = isGameInProgress
-    ? "Đang có trò chơi trong phòng, không thể mở thêm"
-    : null;
-
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(getShareUrlWithVersion(window.location.href));
-    toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!");
-    setShowMoreMenu(false);
-  };
+  const [showGameSetup, setShowGameSetup] = useState(false)
+  const [showGameHistory, setShowGameHistory] = useState(false)
+  const [showMobileSettings, setShowMobileSettings] = useState(false)
+  const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
 
   return (
     <>
@@ -152,7 +44,7 @@ const ControlBarMoreMenu = ({
             >
               <div className="w-full overflow-hidden rounded-t-[24px] md:rounded-lg border border-[#E5E5E5] bg-white shadow-lg pb-safe md:pb-0">
                 <AnimatePresence mode="wait" initial={false}>
-                  {!showSubtitlePicker || isSubtitleActive || isAISession ? (
+                  {!showSubtitlePicker ? (
                     <FluentAnimation
                       key="main-menu"
                       animationKey="main-menu"
@@ -162,329 +54,21 @@ const ControlBarMoreMenu = ({
                       duration={0.2}
                       className="w-full"
                     >
-                      <div className="hidden md:flex flex-col">
-                        <MenuItem
-                          onClick={() => {
-                            if (!canStartGame) return;
-                            setShowMoreMenu(false);
-                            setShowGameSetup(true);
-                          }}
-                          disabled={!canStartGame}
-                          className={!canStartGame ? "opacity-50 cursor-not-allowed" : ""}
-                          icon={<Gamepad2 size={20} />}
-                          label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
-                          title={gameDisabledReason || undefined}
-                        />
+                      <MoreMenuDesktopView
+                        setShowMoreMenu={setShowMoreMenu}
+                        setShowGameSetup={setShowGameSetup}
+                        setShowGameHistory={setShowGameHistory}
+                        setShowSubtitlePicker={setShowSubtitlePicker}
+                      />
 
-                        <MenuItem
-                          onClick={() => {
-                            setShowMoreMenu(false);
-                            setShowGameHistory(true);
-                          }}
-                          icon={<History size={20} />}
-                          label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
-                        />
-
-                        <div className="border-t border-[#E5E5E5]"></div>
-                        <MenuItem
-                          onClick={() => {
-                            setShowParticipants(!showParticipants);
-                            setShowMoreMenu(false);
-                          }}
-                          icon={<Users size={20} />}
-                          label={t.rooms?.videoCall?.controls?.participants || "Participants"}
-                        />
-
-                        {!isAISession && isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive) && (
-                          <MenuItem
-                            onClick={() => {
-                              setShowBreakout(!showBreakout);
-                              setShowMoreMenu(false);
-                            }}
-                            icon={<Split size={20} />}
-                            label={t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
-                          />
-                        )}
-
-                        <div className="flex flex-col">
-                          <MenuItem
-                            onClick={() => {
-                              if (isRecording) {
-                                confirmStopRecording();
-                              } else {
-                                handleToggleRecording();
-                              }
-                              setShowMoreMenu(false);
-                            }}
-                            disabled={isTogglingRecording}
-                            icon={
-                              isTogglingRecording ? (
-                                <Loader2 size={20} className="animate-spin" />
-                              ) : isRecording ? (
-                                <Circle size={20} className="text-red-600 fill-red-600 animate-pulse" />
-                              ) : (
-                                <Circle size={20} />
-                              )
-                            }
-                            label={
-                              isRecording
-                                ? (t?.rooms?.videoCall?.controls?.recordOff || "Stop recording")
-                                : (t?.rooms?.videoCall?.controls?.recordOn || "Start recording")
-                            }
-                            rightText={isRecording ? <span className="font-semibold text-red-600">{formattedTime}</span> : undefined}
-                          />
-                          {isRecording && (
-                            <div className="px-4 pb-2 pt-1">
-                              <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
-                                <span>Storage</span>
-                                <span>{totalUsedMb.toFixed(1)}MB / {limitMb.toFixed(0)}MB</span>
-                              </div>
-                              <ProgressBar
-                                progress={usagePercent}
-                                heightClass="h-1.5"
-                                trackColorClass="bg-[#F2F2F2]"
-                                colorClass={isDanger ? "bg-red-500 animate-pulse" : isWarning ? "bg-amber-500" : "bg-emerald-500"}
-                              />
-                            </div>
-                          )}
-                        </div>
-                        {/* <div className="border-t border-[#E5E5E5]"></div> */}
-
-                        <MenuItem
-                          onClick={() => {
-                            if (isAISession) {
-                              setShowCC(!showCC);
-                              setShowMoreMenu(false);
-                            } else {
-                              if (isSubtitleActive) {
-                                stopSubtitles();
-                                setShowMoreMenu(false);
-                              } else {
-                                setShowSubtitlePicker((v) => !v);
-                              }
-                            }
-                          }}
-                          disabled={!isAISession && isStarting}
-                          icon={!isAISession && isStarting ? (
-                            <Loader2 size={20} className="animate-spin" />
-                          ) : (
-                            <Captions size={20} />
-                          )}
-                          label={(isAISession ? showCC : isSubtitleActive)
-                            ? t?.rooms?.videoCall?.controls?.captionsOff ||
-                            "Turn off captions"
-                            : t?.rooms?.videoCall?.controls?.captionsOn ||
-                            "Turn on captions"}
-                        />
-
-                        <div className="border-t border-[#E5E5E5]"></div>
-                        <MenuItem
-                          onClick={() => {
-                            setShowVirtualBackground(!showVirtualBackground);
-                            setShowMoreMenu(false);
-                          }}
-                          icon={<Sparkles size={20} className="shrink-0" />}
-                          label={
-                            t?.rooms?.videoCall?.backgroundsAndEffects ||
-                            "Backgrounds and effects"}
-                        />
-
-                        <MenuItem
-                          onClick={() => {
-                            setShowAvatarPicker(!showAvatarPicker);
-                            setShowMoreMenu(false);
-                          }}
-                          icon={<UserCircle size={20} />}
-                          label={
-                            t?.rooms?.videoCall?.changeAvatar ||
-                            "Change meeting avatar"}
-                        />
-
-                        {"documentPictureInPicture" in window && (
-                          <MenuItem
-                            onClick={() => {
-                              enterPiP?.();
-                              setShowMoreMenu(false);
-                            }}
-                            icon={<MonitorUp size={20} />}
-                            label={t?.rooms?.videoCall?.pictureInPicture ||
-                              "Picture-in-Picture"}
-                          />
-                        )}
-
-                        {/* <MenuItem
-                          onClick={handleCopyLink}
-                          icon={<Copy size={20} />}
-                          label={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
-                        /> */}
-
-                        <MenuItem
-                          onClick={() => {
-                            setShowTroubleshoot(!showTroubleshoot);
-                            setShowMoreMenu(false);
-                          }}
-                          icon={<RefreshCcw size={20} className="shrink-0" />}
-                          label={
-                            t?.rooms?.videoCall?.reconnect ||
-                            "Troubleshoot connection"
-                          }
-                        />
-                      </div>
-
-                      {/* MOBILE VIEW */}
-                      <div className="flex md:hidden flex-col px-4 pb-6 pt-2 w-full">
-                        <div className="w-full flex justify-center pb-4 cursor-pointer shrink-0" onClick={() => setShowMoreMenu(false)}>
-                          <div className="w-10 h-1.5 bg-[#D9D9D9] rounded-full" />
-                        </div>
-
-                        <AnimatePresence mode="wait">
-                          {!showMobileSettings ? (
-                            <motion.div
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: -20 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex flex-col gap-3"
-                            >
-                              {hasDuration && (
-                                <div className="flex items-center justify-center text-lg font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-12 w-full">
-                                  {t?.rooms?.videoCall?.remainingTime || "Thời gian còn lại"}: {formattedRemaining} / {formattedMax}
-                                </div>
-                              )}
-
-                              <div className="grid grid-cols-3 gap-3">
-                                <button
-                                  onClick={() => {
-                                    handleToggleScreenShare();
-                                    setShowMoreMenu(false);
-                                  }}
-                                  disabled={isTogglingScreenShare}
-                                  className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${isLocalScreenShare ? 'bg-red-100 text-red-600' : 'bg-[#F5F5F5]'}`}
-                                >
-                                  {isLocalScreenShare ? <MonitorOff size={24} /> : <MonitorUp size={24} />}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (isAISession) {
-                                      setShowCC(!showCC);
-                                      setShowMoreMenu(false);
-                                    } else {
-                                      if (isSubtitleActive) {
-                                        stopSubtitles();
-                                        setShowMoreMenu(false);
-                                      } else {
-                                        setShowSubtitlePicker(true);
-                                      }
-                                    }
-                                  }}
-                                  className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${(isAISession ? showCC : isSubtitleActive) ? 'bg-red-100 text-red-600' : 'bg-[#F5F5F5]'}`}
-                                >
-                                  <Captions size={24} />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (isRecording) {
-                                      confirmStopRecording();
-                                    } else {
-                                      handleToggleRecording();
-                                    }
-                                    setShowMoreMenu(false);
-                                  }}
-                                  disabled={isTogglingRecording}
-                                  className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${isRecording ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-[#F5F5F5]'}`}
-                                >
-                                  {isTogglingRecording ? <Loader2 size={24} className="animate-spin" /> : <Circle size={24} className={isRecording ? 'fill-red-600 text-red-600' : ''} />}
-                                </button>
-                              </div>
-
-                              <button
-                                onClick={handleCopyLink}
-                                className="w-full h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center gap-2 font-medium"
-                              >
-                                <Copy size={20} />
-                                {t?.rooms?.videoCall?.copyLink || "Sao chép liên kết"}
-                              </button>
-
-                              <div className="grid grid-cols-2 gap-3">
-                                <button
-                                  onClick={() => setShowMobileSettings(true)}
-                                  className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"
-                                >
-                                  <Settings size={24} />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setShowTroubleshoot(!showTroubleshoot);
-                                    setShowMoreMenu(false);
-                                  }}
-                                  className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"
-                                >
-                                  <Info size={24} />
-                                </button>
-                              </div>
-                            </motion.div>
-                          ) : (
-                            <motion.div
-                              // key="mobile-settings"
-                              initial={{ opacity: 0, x: 20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: 20 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex flex-col"
-                            >
-                              <button
-                                onClick={() => setShowMobileSettings(false)}
-                                className="flex items-center gap-2 font-semibold text-base pb-3 border-b border-[#e5e5e5] mb-2"
-                              >
-                                <ChevronLeft size={20} /> {t?.rooms?.videoCall?.backBtn || "Back"}
-                              </button>
-
-                              <MenuItem
-                                onClick={() => {
-                                  if (!canStartGame) return;
-                                  setShowMoreMenu(false);
-                                  setShowGameSetup(true);
-                                }}
-                                disabled={!canStartGame}
-                                className={!canStartGame ? "opacity-50 cursor-not-allowed" : ""}
-                                icon={<Gamepad2 size={20} />}
-                                label={t?.rooms?.videoCall?.controls?.playGames || "Trò chơi"}
-                                title={gameDisabledReason || undefined}
-                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
-                              />
-                              <MenuItem
-                                onClick={() => { setShowMoreMenu(false); setShowGameHistory(true); }}
-                                icon={<History size={20} />}
-                                label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
-                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
-                              />
-                              {
-                                // [TEMP-DISABLE-HOST-CHECK] Test xong thì mở lại:
-                                //   !isAISession && (isHost || isBreakoutActive) && (
-                                !isAISession && (true /* Tạm thời: bỏ check host để test */ || isBreakoutActive) && (
-                                <MenuItem
-                                  onClick={() => { setShowBreakout(!showBreakout); setShowMoreMenu(false); }}
-                                  icon={<Split size={20} />}
-                                  label={t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
-                                  hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
-                                />
-                              )}
-                              <MenuItem
-                                onClick={() => { setShowVirtualBackground(!showVirtualBackground); setShowMoreMenu(false); }}
-                                icon={<Sparkles size={20} />}
-                                label={t?.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"}
-                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
-                              />
-                              <MenuItem
-                                onClick={() => { setShowAvatarPicker(!showAvatarPicker); setShowMoreMenu(false); }}
-                                icon={<UserCircle size={20} />}
-                                label={t?.rooms?.videoCall?.changeAvatar || "Change meeting avatar"}
-                                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
-                              />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
+                      <MoreMenuMobileView
+                        setShowMoreMenu={setShowMoreMenu}
+                        showMobileSettings={showMobileSettings}
+                        setShowMobileSettings={setShowMobileSettings}
+                        setShowGameSetup={setShowGameSetup}
+                        setShowGameHistory={setShowGameHistory}
+                        setShowSubtitlePicker={setShowSubtitlePicker}
+                      />
                     </FluentAnimation>
                   ) : (
                     <FluentAnimation
@@ -500,16 +84,16 @@ const ControlBarMoreMenu = ({
                         languages={subtitleSupportedLangs}
                         selectedLanguage={null}
                         onSelect={(lang) => {
-                          startSubtitles(lang);
-                          setShowSubtitlePicker(false);
-                          setShowMoreMenu(false);
+                          startSubtitles(lang)
+                          setShowSubtitlePicker(false)
+                          setShowMoreMenu(false)
                         }}
                         onBack={() => setShowSubtitlePicker(false)}
                         backLabel={
                           t?.rooms?.videoCall?.controls?.back || "Back"
                         }
                         onClose={() => setShowSubtitlePicker(false)}
-                        className="w-full bg-white"
+                        className="w-full bg-[#FFFFFF]"
                       />
                     </FluentAnimation>
                   )}
@@ -520,7 +104,6 @@ const ControlBarMoreMenu = ({
         )}
       </AnimatePresence>
 
-      {/* Game Setup Modal */}
       <GameSetupModal
         open={showGameSetup}
         onClose={() => setShowGameSetup(false)}
@@ -532,8 +115,7 @@ const ControlBarMoreMenu = ({
         roomName={roomId}
       />
     </>
-  );
-};
+  )
+}
 
-export default ControlBarMoreMenu;
-
+export default ControlBarMoreMenu

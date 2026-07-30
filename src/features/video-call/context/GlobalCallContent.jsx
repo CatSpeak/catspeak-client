@@ -35,6 +35,9 @@ import {
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
+import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
+import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -80,7 +83,9 @@ const GlobalCallContent = ({
           return parsed.layoutMode
         }
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return "auto"
   })
   const [maxTiles, setMaxTiles] = useState(() => {
@@ -95,7 +100,9 @@ const GlobalCallContent = ({
           }
         }
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return 16
   })
   const [hideEmptyTiles, setHideEmptyTiles] = useState(() => {
@@ -103,22 +110,28 @@ const GlobalCallContent = ({
       const saved = localStorage.getItem("catspeak_video_layout_settings")
       if (saved) {
         const parsed = JSON.parse(saved)
-        if (typeof parsed.hideEmptyTiles === "boolean") return parsed.hideEmptyTiles
+        if (typeof parsed.hideEmptyTiles === "boolean")
+          return parsed.hideEmptyTiles
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return false
   })
 
   useEffect(() => {
     try {
       const settings = { layoutMode, maxTiles, hideEmptyTiles }
-      localStorage.setItem("catspeak_video_layout_settings", JSON.stringify(settings))
+      localStorage.setItem(
+        "catspeak_video_layout_settings",
+        JSON.stringify(settings),
+      )
     } catch (e) {
       console.error("Failed to save layout settings", e)
     }
   }, [layoutMode, maxTiles, hideEmptyTiles])
 
-  // ── LiveKit hooks ──
+  // ── LiveKit hooks & Device Selection ──
   let lkRoom = null
   try {
     lkRoom = useRoomContext()
@@ -126,9 +139,96 @@ const GlobalCallContent = ({
     lkRoom = null
   }
 
+  const deviceSelection = useDeviceSelection()
+  const [showRoomSettings, setShowRoomSettings] = useState(false)
+  const [activeSettingsTab, setActiveSettingsTab] = useState("audio-video")
+
   const allParticipants = useParticipants()
   const localPart = useLocalParticipant()
   const localParticipant = localPart?.localParticipant ?? null
+
+  // Refresh hardware device list & sync active devices with LiveKit when settings modal opens
+  useEffect(() => {
+    if (!lkRoom) return
+
+    const syncActiveDevices = async () => {
+      try {
+        deviceSelection.refreshDevices?.()
+
+        const activeMic =
+          (await lkRoom.getActiveDevice?.("audioinput")) ||
+          localParticipant
+            ?.getTrackPublication?.("microphone")
+            ?.track?.mediaStreamTrack?.getSettings()?.deviceId
+
+        const activeSpeaker = await lkRoom.getActiveDevice?.("audiooutput")
+
+        const activeCam =
+          (await lkRoom.getActiveDevice?.("videoinput")) ||
+          localParticipant
+            ?.getTrackPublication?.("camera")
+            ?.track?.mediaStreamTrack?.getSettings()?.deviceId
+
+        if (activeMic && activeMic !== deviceSelection.selectedMic) {
+          deviceSelection.setSelectedMic(activeMic)
+        }
+        if (
+          activeSpeaker &&
+          activeSpeaker !== deviceSelection.selectedSpeaker
+        ) {
+          deviceSelection.setSelectedSpeaker(activeSpeaker)
+        }
+        if (activeCam && activeCam !== deviceSelection.selectedCamera) {
+          deviceSelection.setSelectedCamera(activeCam)
+        }
+      } catch (err) {
+        console.warn("[GlobalCallContent] Sync active devices warning:", err)
+      }
+    }
+
+    if (showRoomSettings) {
+      syncActiveDevices()
+    }
+  }, [lkRoom, showRoomSettings, localParticipant])
+
+  useEffect(() => {
+    if (lkRoom && deviceSelection?.selectedMic) {
+      lkRoom
+        .switchActiveDevice("audioinput", deviceSelection.selectedMic)
+        .catch((err) => {
+          console.error(
+            "[GlobalCallContent] Failed to switch audio input:",
+            err,
+          )
+        })
+    }
+  }, [lkRoom, deviceSelection?.selectedMic])
+
+  useEffect(() => {
+    if (lkRoom && deviceSelection?.selectedSpeaker) {
+      lkRoom
+        .switchActiveDevice("audiooutput", deviceSelection.selectedSpeaker)
+        .catch((err) => {
+          console.error(
+            "[GlobalCallContent] Failed to switch audio output:",
+            err,
+          )
+        })
+    }
+  }, [lkRoom, deviceSelection?.selectedSpeaker])
+
+  useEffect(() => {
+    if (lkRoom && deviceSelection?.selectedCamera) {
+      lkRoom
+        .switchActiveDevice("videoinput", deviceSelection.selectedCamera)
+        .catch((err) => {
+          console.error(
+            "[GlobalCallContent] Failed to switch video input:",
+            err,
+          )
+        })
+    }
+  }, [lkRoom, deviceSelection?.selectedCamera])
 
   const connectionState = useConnectionState()
   const isConnected = connectionState === ConnectionState.Connected
@@ -259,6 +359,13 @@ const GlobalCallContent = ({
     sessionId,
   })
 
+  const subtitleControls = useSubtitleControls({
+    sessionId,
+    room: roomData,
+    setShowRoomSubtitles,
+    setSubtitleSelectedLanguage,
+  })
+
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
   // ── Participants ──
@@ -343,12 +450,17 @@ const GlobalCallContent = ({
       try {
         const decoded = new TextDecoder().decode(payload)
         const data = JSON.parse(decoded)
-        const currentAccId = user?.accountId != null ? String(user.accountId) : null
-        const localIdent = localParticipant?.identity != null ? String(localParticipant.identity) : null
+        const currentAccId =
+          user?.accountId != null ? String(user.accountId) : null
+        const localIdent =
+          localParticipant?.identity != null
+            ? String(localParticipant.identity)
+            : null
 
         const isTarget =
           (data.targetId != null && String(data.targetId) === currentAccId) ||
-          (data.targetIdentity != null && String(data.targetIdentity) === localIdent)
+          (data.targetIdentity != null &&
+            String(data.targetIdentity) === localIdent)
 
         if (!isTarget) return
 
@@ -374,7 +486,6 @@ const GlobalCallContent = ({
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
     }
   }, [lkRoom, localParticipant, user?.accountId, actions])
-
 
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
@@ -447,6 +558,12 @@ const GlobalCallContent = ({
     setShowRoomSubtitles,
     subtitleSelectedLanguage,
     setSubtitleSelectedLanguage,
+    isSubtitleActive: subtitleControls.isSubtitleActive,
+    isStartingSubtitles: subtitleControls.isStarting,
+    isStoppingSubtitles: subtitleControls.isStopping,
+    subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,
+    startSubtitles: subtitleControls.startSubtitles,
+    stopSubtitles: subtitleControls.stopSubtitles,
 
     // Chat
     messages: chatMessages,
@@ -493,6 +610,12 @@ const GlobalCallContent = ({
     setMaxTiles,
     hideEmptyTiles,
     setHideEmptyTiles,
+
+    deviceSelection,
+    showRoomSettings,
+    setShowRoomSettings,
+    activeSettingsTab,
+    setActiveSettingsTab,
   }
 
   return (
@@ -502,6 +625,11 @@ const GlobalCallContent = ({
       <RoomClosingWarningModal
         remainingSeconds={closingRemainingSeconds}
         t={t}
+      />
+      <RoomSettingsModal
+        open={showRoomSettings}
+        onClose={() => setShowRoomSettings(false)}
+        initialTab={activeSettingsTab}
       />
     </ContextProvider>
   )

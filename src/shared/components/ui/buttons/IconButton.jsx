@@ -14,7 +14,7 @@ const IconButton = ({
   const sizeClasses = {
     sm: {
       button: "w-12 h-12",
-      inner: "w-10 h-10 [&>svg]:!w-5 [&>svg]:!h-5",
+      inner: "w-10 h-10 [&>svg]:!w-6 [&>svg]:!h-6",
     },
     md: {
       button: "w-14 h-14",

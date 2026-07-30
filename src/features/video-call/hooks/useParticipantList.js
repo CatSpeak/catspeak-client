@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 
 /**
  * Parses a LiveKit participant metadata JSON string.
@@ -13,43 +13,82 @@ export const parseMetadata = (metadata) => {
   }
 }
 
+// Set to false (or set MOCK_PARTICIPANTS to []) when done testing to disable completely
+const ENABLE_MOCK_PARTICIPANTS = false
+
+export const MOCK_PARTICIPANTS = ENABLE_MOCK_PARTICIPANTS
+  ? Array.from({ length: 4 }, (_, i) => ({
+      identity: `mock-user-${i + 1}`,
+      name: `Mock Participant ${i + 1}`,
+      isLocal: false,
+      isMicrophoneEnabled: i % 2 === 0,
+      isCameraEnabled: false,
+      isScreenShareEnabled: false,
+      metadata: "{}",
+      getTrackPublication: () => null,
+      on: () => {},
+      off: () => {},
+    }))
+  : []
+
 /**
  * Deduplicates and sorts the participant list.
  *
- * - Local participant is always first (unless someone has a raised hand).
  * - Hand-raised participants are sorted to the top, ordered by raise time.
+ * - Recent speakers stay at the top (sticky LRU order) without popping back when speech stops.
+ * - Local participant comes next if no recent speech.
  * - Also derives `isHandRaised` for the local user.
  *
  * @param {Array} allParticipants - All participants from useParticipants()
  * @param {object|null} localParticipant - From useLocalParticipant()
  */
 export const useParticipantList = (allParticipants, localParticipant) => {
+  const lastSpokeRef = useRef(new Map())
+
   const participants = useMemo(() => {
     const seenIdentities = new Set()
     const list = []
 
+    const processParticipant = (p) => {
+      if (!p || seenIdentities.has(p.identity)) return
+      // Filter out STT agent — check both metadata flag and identity prefix
+      const meta = parseMetadata(p.metadata)
+      const isAgent =
+        meta.is_stt_agent === true || p.identity?.startsWith("agent-")
+
+      if (isAgent) return
+
+      seenIdentities.add(p.identity)
+      list.push(p)
+
+      // Update timestamp if currently speaking (sticky speaker order)
+      if (p.isSpeaking === true) {
+        lastSpokeRef.current.set(p.identity, Date.now())
+      }
+    }
+
     if (localParticipant) {
-      seenIdentities.add(localParticipant.identity)
-      list.push(localParticipant)
+      processParticipant(localParticipant)
     }
 
     allParticipants.forEach((p) => {
       if (p.identity === localParticipant?.identity) return
-      if (seenIdentities.has(p.identity)) return
-      // Filter out the STT agent — check both metadata flag and identity prefix
-      // (identity prefix is the fallback for when metadata hasn't been set yet)
-      const meta = parseMetadata(p.metadata)
-      const isAgent = 
-        meta.is_stt_agent === true || 
-        p.identity?.startsWith("agent-")
-        
-      if (isAgent) return
-      
-      seenIdentities.add(p.identity)
-      list.push(p)
+      processParticipant(p)
     })
 
-    // Sort: raised hands first (by time), then local user, then others
+    // Append mock participants for layout testing
+    MOCK_PARTICIPANTS.forEach((mockP) => {
+      processParticipant(mockP)
+    })
+
+    // Clean up identities of left participants from lastSpokeRef map
+    for (const id of lastSpokeRef.current.keys()) {
+      if (!seenIdentities.has(id)) {
+        lastSpokeRef.current.delete(id)
+      }
+    }
+
+    // Sort: raised hands first (by time), recent speakers (descending timestamp), then local user, then others
     list.sort((a, b) => {
       const metaA = parseMetadata(a.metadata)
       const metaB = parseMetadata(b.metadata)
@@ -66,7 +105,15 @@ export const useParticipantList = (allParticipants, localParticipant) => {
         return timeA - timeB // Ascending
       }
 
-      // Both not raised, keep local user first
+      // Recent speaker sticky sorting (descending by lastSpokeAt)
+      const spokeA = lastSpokeRef.current.get(a.identity) || 0
+      const spokeB = lastSpokeRef.current.get(b.identity) || 0
+
+      if (spokeA !== spokeB) {
+        return spokeB - spokeA // Most recent speaker comes first
+      }
+
+      // Keep local user first if neither has spoken
       if (a.isLocal && !b.isLocal) return -1
       if (!a.isLocal && b.isLocal) return 1
 

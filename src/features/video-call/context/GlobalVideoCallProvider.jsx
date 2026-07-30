@@ -27,27 +27,29 @@ export { GlobalVideoCallContext as VideoCallContext }
 // Re-export navigate bridge (used by routesConfig RootLayout)
 export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
+import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
+
 // --- Idle context (no active call) ------------------------------------------
 
 const IDLE_VALUE = {
   isInCall: false,
   isPiP: false,
-  enterPiP: () => { },
-  exitPiP: () => { },
-  returnToCall: () => { },
+  enterPiP: () => {},
+  exitPiP: () => {},
+  returnToCall: () => {},
 
   showLeaveModal: false,
-  promptLeaveCall: () => { },
-  cancelLeaveCall: () => { },
+  promptLeaveCall: () => {},
+  cancelLeaveCall: () => {},
 
-  participants: [],
+  participants: MOCK_PARTICIPANTS,
   messages: [],
   aiMessages: [],
-  addOptimisticAiMessage: () => { },
-  chatPublicAi: async () => { },
-  chatPrivateAi: async () => { },
-  startNewThread: () => { },
-  continueThread: () => { },
+  addOptimisticAiMessage: () => {},
+  chatPublicAi: async () => {},
+  chatPrivateAi: async () => {},
+  startNewThread: () => {},
+  continueThread: () => {},
   getConversationThread: () => [],
 
   isConnected: false,
@@ -58,16 +60,16 @@ const IDLE_VALUE = {
   isTogglingScreenShare: false,
 
   activeSidePanel: null,
-  setActiveSidePanel: () => { },
+  setActiveSidePanel: () => {},
 
   showChat: false,
-  setShowChat: () => { },
+  setShowChat: () => {},
   showParticipants: false,
-  setShowParticipants: () => { },
+  setShowParticipants: () => {},
   showVirtualBackground: false,
-  setShowVirtualBackground: () => { },
+  setShowVirtualBackground: () => {},
   showAvatarPicker: false,
-  setShowAvatarPicker: () => { },
+  setShowAvatarPicker: () => {},
 
   beautyOptions: {
     smoothing: 0,
@@ -79,35 +81,47 @@ const IDLE_VALUE = {
     eyeBrighten: 0,
     teethWhiten: 0,
   },
-  setBeautyOptions: () => { },
-  switchBeauty: () => { },
+  setBeautyOptions: () => {},
+  switchBeauty: () => {},
   processorStatus: "idle",
 
   isAISession: false,
   showCC: false,
-  setShowCC: () => { },
+  setShowCC: () => {},
   showRoomSubtitles: false,
-  setShowRoomSubtitles: () => { },
+  setShowRoomSubtitles: () => {},
   subtitleSelectedLanguage: null,
-  setSubtitleSelectedLanguage: () => { },
+  setSubtitleSelectedLanguage: () => {},
+  isSubtitleActive: false,
+  isStartingSubtitles: false,
+  isStoppingSubtitles: false,
+  subtitleSupportedLangs: ["en", "vi"],
+  startSubtitles: async () => {},
+  stopSubtitles: async () => {},
 
   lkRoomName: null,
   unreadRoomChat: 0,
   unreadAiChat: 0,
   isChatCollapsed: false,
   isAiCollapsed: true,
-  setUnreadRoomChat: () => { },
-  setUnreadAiChat: () => { },
-  setIsChatCollapsed: () => { },
-  setIsAiCollapsed: () => { },
+  setUnreadRoomChat: () => {},
+  setUnreadAiChat: () => {},
+  setIsChatCollapsed: () => {},
+  setIsAiCollapsed: () => {},
   activeChatTab: "room",
-  setActiveChatTab: () => { },
+  setActiveChatTab: () => {},
   layoutMode: "auto",
-  setLayoutMode: () => { },
+  setLayoutMode: () => {},
   maxTiles: 16,
-  setMaxTiles: () => { },
+  setMaxTiles: () => {},
   hideEmptyTiles: false,
-  setHideEmptyTiles: () => { },
+  setHideEmptyTiles: () => {},
+
+  showRoomSettings: false,
+  setShowRoomSettings: () => {},
+  activeSettingsTab: "audio-video",
+  setActiveSettingsTab: () => {},
+  deviceSelection: null,
 }
 
 const IdleCallContent = ({

@@ -1,5 +1,4 @@
-import React from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useMemo } from "react"
 import {
   Mic,
   MicOff,
@@ -19,6 +18,7 @@ import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import toast from "react-hot-toast"
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 
 /**
  * A single row in the participant list.
@@ -66,63 +66,73 @@ const ParticipantItem = ({ participant }) => {
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
 
+  const theme = useMemo(
+    () => getParticipantTheme(participant.identity || name),
+    [participant.identity, name],
+  )
+
+  const leftContent = (
+    <div className="relative shrink-0 p-1">
+      <Avatar
+        size={40}
+        name={name}
+        src={avatarUrl}
+        className={`${
+          isSpeaking
+            ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white transition-all duration-200"
+            : ""
+        } ${theme?.avatarClass || ""}`}
+      />
+    </div>
+  )
+
+  const rightContent = (
+    <div className="flex items-center gap-2 shrink-0">
+      {isHandRaised && (
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50">
+          <Hand size={18} className="text-amber-500" />
+        </span>
+      )}
+      {isMicOn ? (
+        <Mic size={20} className="text-cath-red-700" />
+      ) : (
+        <MicOff size={20} className="text-[#8E8E93]" />
+      )}
+      {isCameraOn ? (
+        <Video size={20} className="text-cath-red-700" />
+      ) : (
+        <VideoOff size={20} className="text-[#8E8E93]" />
+      )}
+    </div>
+  )
+
   return (
     <ListItem
-      leftContent={
-        <div
-          className={`rounded-full my-1 ml-1 transition-all duration-200 ${isSpeaking ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white" : "ring-0 ring-transparent"}`}
-        >
-          <Avatar size={36} name={name} src={avatarUrl} accountId={accountId} />
-        </div>
-      }
-      rightContent={
-        isHandRaised ? (
-          <div className="h-9 w-9 flex items-center justify-center">
-            <Hand size={20} className="text-yellow-500 shrink-0" />
-          </div>
-        ) : null
-      }
+      lines={1}
+      hoverEffect={true}
+      className="rounded-xl cursor-pointer"
+      contentClassName="rounded-xl"
+      leftContent={leftContent}
+      rightContent={rightContent}
     >
-      {/* Name */}
-      <div className="flex items-center gap-2 m-0">
-        <p
+      <div className="flex items-center gap-1.5 truncate">
+        <span
           onClick={(e) => {
             if (accountId) {
               e.stopPropagation()
-              navigate(`/profile/${accountId}`)
+              window.open(`/profile/${accountId}`, "_blank", "noopener,noreferrer")
             }
           }}
-          className={`text-sm leading-5 truncate m-0 ${accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+          className={`truncate ${accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
         >
           {name} {isLocal && pl.youSuffix}
-        </p>
+        </span>
         {isParticipantHost && (
           <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-full shrink-0">
-            <Crown size={12} className="text-amber-500 fill-amber-400" />
+            <Crown size={11} className="text-amber-500 fill-amber-400" />
             Host
           </span>
         )}
-      </div>
-
-      {/* Mic + Camera UNDER name */}
-      <div className="flex items-center gap-1 mt-1">
-        {/* Camera (indicator only) */}
-        <div className="flex items-center justify-center">
-          {isCameraOn ? (
-            <Video size={16} className="text-cath-red-700" />
-          ) : (
-            <VideoOff size={16} className="text-[#606060]" />
-          )}
-        </div>
-
-        {/* Mic (indicator only) */}
-        <div className="flex items-center justify-center">
-          {isMicOn ? (
-            <Mic size={16} className="text-cath-red-700" />
-          ) : (
-            <MicOff size={16} className="text-[#606060]" />
-          )}
-        </div>
       </div>
     </ListItem>
   )
@@ -159,25 +169,13 @@ const ParticipantList = ({ hideTitle }) => {
   return (
     <div className="flex flex-col h-full w-full bg-white">
       {!hideTitle && (
-        <div className="px-4 py-3 border-b border-[#FFDADE] flex items-center justify-between">
-          <h3 className="text-black text-base font-semibold m-0">
+        <ListItem lines={1} className="border-b border-[#E5E5E5] shrink-0">
+          <span className="font-semibold">
             {pl.title} ({participants.length})
-          </h3>
-          <div className="">
-            <IconButton
-              variant="ghost"
-              size="xs"
-              onClick={() => {
-                toast.success(t?.comingSoon.title)
-              }}
-            >
-              <UserPlus size={22} />
-            </IconButton>
-            {/* <IconButton variant="ghost" size="xs"><Ellipsis size={22} /></IconButton> */}
-          </div>
-        </div>
+          </span>
+        </ListItem>
       )}
-      <div className="flex-1 overflow-y-auto p-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
+      <div className="flex-1 overflow-y-auto p-1">
         {raisedHandParticipants.length > 0 && (
           <ul className="flex flex-col gap-1">
             {raisedHandParticipants.map((participant) => (

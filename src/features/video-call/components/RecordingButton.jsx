@@ -38,31 +38,38 @@ const RecordingButton = ({
         onClick={onToggleRecording}
         disabled={isTogglingRecording}
         title={title}
-        className={`flex items-center justify-center rounded-full transition-all duration-300 shadow-sm h-12 relative overflow-hidden ${isTogglingRecording
-          ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black w-12"
-          : isRecording
-            ? "bg-red-600 hover:bg-red-700 text-white px-4"
-            : "hover:bg-[#D9D9D9] text-black w-12"
-          }`}
+        className={`inline-flex items-center justify-center rounded-full focus:outline-none shrink-0 ${
+          isRecording ? "h-12" : "w-12 h-12"
+        }`}
       >
-        {isTogglingRecording ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="animate-spin origin-center w-6 h-6" />
-          </div>
-        ) : isRecording ? (
-          <div className="flex items-center justify-center gap-2 w-full">
-            <span className="relative flex h-5 w-5 flex-shrink-0 items-center justify-center">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-            </span>
+        <span
+          className={`relative inline-flex items-center justify-center rounded-full transition-colors shadow-sm overflow-hidden [&>svg]:!w-6 [&>svg]:!h-6 ${
+            isTogglingRecording
+              ? "w-10 h-10 cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black"
+              : isRecording
+                ? "bg-red-600 hover:bg-red-700 text-white px-4 h-10"
+                : "w-10 h-10 bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
+          }`}
+        >
+          {isTogglingRecording ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="animate-spin origin-center w-6 h-6" />
+            </div>
+          ) : isRecording ? (
+            <div className="flex items-center justify-center gap-2 w-full">
+              <span className="relative flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+              </span>
 
-            <span className="text-sm font-semibold tracking-wider">
-              {formattedTime}
-            </span>
-          </div>
-        ) : (
-          <Circle className={`${iconClass} fill-none`} />
-        )}
+              <span className="text-sm font-semibold tracking-wider">
+                {formattedTime}
+              </span>
+            </div>
+          ) : (
+            <Circle className={`${iconClass} fill-none`} />
+          )}
+        </span>
       </button>
 
       {/* Hover Popover (Storage Details) */}
