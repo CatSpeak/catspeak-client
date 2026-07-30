@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import {
   Mic,
   MicOff,
@@ -18,6 +18,7 @@ import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import toast from "react-hot-toast"
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 
 /**
  * A single row in the participant list.
@@ -64,17 +65,22 @@ const ParticipantItem = ({ participant }) => {
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
 
+  const theme = useMemo(
+    () => getParticipantTheme(participant.identity || name),
+    [participant.identity, name],
+  )
+
   const leftContent = (
-    <div className="relative shrink-0">
+    <div className="relative shrink-0 p-1">
       <Avatar
         size={40}
         name={name}
         src={avatarUrl}
-        className={
+        className={`${
           isSpeaking
             ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white transition-all duration-200"
             : ""
-        }
+        } ${theme?.avatarClass || ""}`}
       />
     </div>
   )
@@ -101,7 +107,7 @@ const ParticipantItem = ({ participant }) => {
 
   return (
     <ListItem
-      lines={2}
+      lines={1}
       hoverEffect={true}
       className="rounded-xl cursor-pointer"
       contentClassName="rounded-xl"
@@ -113,10 +119,10 @@ const ParticipantItem = ({ participant }) => {
           onClick={(e) => {
             if (accountId) {
               e.stopPropagation()
-              navigate(`/profile/${accountId}`)
+              window.open(`/profile/${accountId}`, "_blank", "noopener,noreferrer")
             }
           }}
-          className={`font-semibold truncate ${accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+          className={`truncate ${accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
         >
           {name} {isLocal && pl.youSuffix}
         </span>
@@ -127,10 +133,6 @@ const ParticipantItem = ({ participant }) => {
           </span>
         )}
       </div>
-
-      <span className="text-sm text-[#606060] truncate">
-        {isSpeaking ? "Speaking..." : isLocal ? "You" : "Participant"}
-      </span>
     </ListItem>
   )
 }

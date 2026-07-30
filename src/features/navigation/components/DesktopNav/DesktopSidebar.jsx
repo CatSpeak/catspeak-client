@@ -64,8 +64,8 @@ const normalizePath = (path) => {
 const getActiveDockSection = (pathname) => {
   if (pathname.includes("/setting")) return "settings"
   if (pathname.includes("/cat-speak")) return "catSpeak"
-  if (pathname.includes("/workspace") || pathname.includes("/profile"))
-    return "workspace"
+  if (pathname.includes("/workspace")) return "workspace"
+  if (pathname.includes("/profile")) return "profile"
   if (pathname.includes("/chat")) return "messages"
   if (pathname.includes("/resources")) return "learningResources"
   if (pathname.includes("/community")) return "community"

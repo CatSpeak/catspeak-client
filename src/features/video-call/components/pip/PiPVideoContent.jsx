@@ -48,8 +48,6 @@ const DominantVideo = ({ participant }) => {
     return () => cameraTrack.detach(el)
   }, [cameraTrack])
 
-
-
   return (
     <div className="relative w-full h-full [container-type:inline-size]">
       {isVideoVisible ? (
@@ -58,7 +56,7 @@ const DominantVideo = ({ participant }) => {
           autoPlay
           playsInline
           muted={isLocal}
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover ${isLocal ? "-scale-x-100" : ""}`}
         />
       ) : (
         <div
@@ -79,7 +77,9 @@ const DominantVideo = ({ participant }) => {
               />
             </>
           )}
-          <div className={`${avatarUrl ? "relative z-10" : ""} flex items-center justify-center`}>
+          <div
+            className={`${avatarUrl ? "relative z-10" : ""} flex items-center justify-center`}
+          >
             <Avatar
               size={64}
               src={avatarUrl}
@@ -167,7 +167,10 @@ const PiPVideoContent = ({ activeScreenShare, dominant }) => {
 
   const theme = getParticipantTheme("", "?")
   return (
-    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[#2d2d2d] to-[#1a1a1a] [container-type:inline-size]" style={{ background: theme.bg }}>
+    <div
+      className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[#2d2d2d] to-[#1a1a1a] [container-type:inline-size]"
+      style={{ background: theme.bg }}
+    >
       <Avatar
         size={64}
         name="?"

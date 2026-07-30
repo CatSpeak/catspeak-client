@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 
 /**
  * Parses a LiveKit participant metadata JSON string.
@@ -34,28 +34,24 @@ export const MOCK_PARTICIPANTS = ENABLE_MOCK_PARTICIPANTS
 /**
  * Deduplicates and sorts the participant list.
  *
- * - Local participant is always first (unless someone has a raised hand).
  * - Hand-raised participants are sorted to the top, ordered by raise time.
+ * - Recent speakers stay at the top (sticky LRU order) without popping back when speech stops.
+ * - Local participant comes next if no recent speech.
  * - Also derives `isHandRaised` for the local user.
  *
  * @param {Array} allParticipants - All participants from useParticipants()
  * @param {object|null} localParticipant - From useLocalParticipant()
  */
 export const useParticipantList = (allParticipants, localParticipant) => {
+  const lastSpokeRef = useRef(new Map())
+
   const participants = useMemo(() => {
     const seenIdentities = new Set()
     const list = []
 
-    if (localParticipant) {
-      seenIdentities.add(localParticipant.identity)
-      list.push(localParticipant)
-    }
-
-    allParticipants.forEach((p) => {
-      if (p.identity === localParticipant?.identity) return
-      if (seenIdentities.has(p.identity)) return
-      // Filter out the STT agent — check both metadata flag and identity prefix
-      // (identity prefix is the fallback for when metadata hasn't been set yet)
+    const processParticipant = (p) => {
+      if (!p || seenIdentities.has(p.identity)) return
+      // Filter out STT agent — check both metadata flag and identity prefix
       const meta = parseMetadata(p.metadata)
       const isAgent =
         meta.is_stt_agent === true || p.identity?.startsWith("agent-")
@@ -64,17 +60,35 @@ export const useParticipantList = (allParticipants, localParticipant) => {
 
       seenIdentities.add(p.identity)
       list.push(p)
+
+      // Update timestamp if currently speaking (sticky speaker order)
+      if (p.isSpeaking === true) {
+        lastSpokeRef.current.set(p.identity, Date.now())
+      }
+    }
+
+    if (localParticipant) {
+      processParticipant(localParticipant)
+    }
+
+    allParticipants.forEach((p) => {
+      if (p.identity === localParticipant?.identity) return
+      processParticipant(p)
     })
 
     // Append mock participants for layout testing
     MOCK_PARTICIPANTS.forEach((mockP) => {
-      if (!seenIdentities.has(mockP.identity)) {
-        seenIdentities.add(mockP.identity)
-        list.push(mockP)
-      }
+      processParticipant(mockP)
     })
 
-    // Sort: raised hands first (by time), active speakers (top left), then local user, then others
+    // Clean up identities of left participants from lastSpokeRef map
+    for (const id of lastSpokeRef.current.keys()) {
+      if (!seenIdentities.has(id)) {
+        lastSpokeRef.current.delete(id)
+      }
+    }
+
+    // Sort: raised hands first (by time), recent speakers (descending timestamp), then local user, then others
     list.sort((a, b) => {
       const metaA = parseMetadata(a.metadata)
       const metaB = parseMetadata(b.metadata)
@@ -91,14 +105,15 @@ export const useParticipantList = (allParticipants, localParticipant) => {
         return timeA - timeB // Ascending
       }
 
-      // Currently speaking participants sort to top left
-      const aSpeaking = a.isSpeaking === true
-      const bSpeaking = b.isSpeaking === true
+      // Recent speaker sticky sorting (descending by lastSpokeAt)
+      const spokeA = lastSpokeRef.current.get(a.identity) || 0
+      const spokeB = lastSpokeRef.current.get(b.identity) || 0
 
-      if (aSpeaking && !bSpeaking) return -1
-      if (!aSpeaking && bSpeaking) return 1
+      if (spokeA !== spokeB) {
+        return spokeB - spokeA // Most recent speaker comes first
+      }
 
-      // Both not raised and not speaking, keep local user first
+      // Keep local user first if neither has spoken
       if (a.isLocal && !b.isLocal) return -1
       if (!a.isLocal && b.isLocal) return 1
 
