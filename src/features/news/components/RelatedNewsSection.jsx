@@ -1,70 +1,92 @@
-import React, { useState, useRef, useMemo, useEffect } from "react"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPostsQuery } from "@/store/api/social/postsApi"
-import NewsCard from "./NewsCard"
-import NewsCardSkeleton from "./NewsCardSkeleton"
-import useColumnCount from "@/shared/hooks/useColumnCount"
+import React, { useRef, useMemo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useGetPostsQuery } from "@/store/api/social/postsApi";
+import { incrementPage, selectNewsPage } from "@/store/slices/newsSlice";
+import NewsCard from "./NewsCard";
+import NewsCardSkeleton from "./NewsCardSkeleton";
+import useColumnCount from "@/shared/hooks/useColumnCount";
+import { getCommunityName } from "../utils/newsUtils";
 
 /**
  * RelatedNewsSection — displays related news in responsive masonry columns with infinite scroll.
  */
 const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
-  const { t } = useLanguage()
-  const newsDetail = t.news?.newsDetail
+  const { lang } = useParams();
+  const { t, language } = useLanguage();
+  const newsDetail = t.news?.newsDetail;
+  const dispatch = useDispatch();
 
-  const [page, setPage] = useState(1)
-  const pageSize = 26
+  const currentCommunity = useMemo(() => {
+    return getCommunityName(
+      lang || localStorage.getItem("communityLanguage") || language || "en",
+    );
+  }, [lang, language]);
+
+  const page = useSelector(selectNewsPage);
+  const pageSize = 26;
 
   const { data, isLoading, isFetching } = useGetPostsQuery({
     page,
     pageSize,
     postType,
-  })
+  });
 
-  // Filter out current post and non-public posts
+  // Filter out current post, non-public posts, and filter by current language community or "All"
   const relatedPosts = useMemo(() => {
-    return (
-      data?.data?.filter(
-        (post) => post.postId !== currentPostId && post.privacy === "Public",
-      ) || []
-    )
-  }, [data?.data, currentPostId])
+    if (!data?.data) return [];
+    const targetCommunity = currentCommunity.toLowerCase();
 
-  const columnsCount = useColumnCount()
+    return data.data.filter((post) => {
+      if (post.postId === currentPostId) return false;
+      if (post.privacy !== "Public") return false;
+
+      const postCommunity = (post.languageCommunity || "All").toLowerCase();
+      return postCommunity === "all" || postCommunity === targetCommunity;
+    });
+  }, [data?.data, currentPostId, currentCommunity]);
+
+  const columnsCount = useColumnCount();
 
   // Distribute posts into masonry columns
   const columns = useMemo(() => {
-    const colsArray = Array.from({ length: columnsCount }, () => [])
+    const colsArray = Array.from({ length: columnsCount }, () => []);
     relatedPosts.forEach((post, i) => {
-      colsArray[i % columnsCount].push(post)
-    })
-    return colsArray
-  }, [relatedPosts, columnsCount])
+      colsArray[i % columnsCount].push(post);
+    });
+    return colsArray;
+  }, [relatedPosts, columnsCount]);
 
   // Infinite scroll observer — trigger fetch when the second-to-last post appears
-  const secondLastPostElementRef = useRef(null)
+  const secondLastPostElementRef = useRef(null);
   useEffect(() => {
-    if (!secondLastPostElementRef.current || isFetching || data?.hasMore === false) return
+    if (
+      !secondLastPostElementRef.current ||
+      isFetching ||
+      data?.hasMore === false
+    )
+      return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setPage((p) => p + 1)
+          dispatch(incrementPage());
         }
       },
       {
         rootMargin: "200px",
       },
-    )
-    observer.observe(secondLastPostElementRef.current)
-    return () => observer.disconnect()
-  }, [relatedPosts, isFetching, data?.hasMore])
+    );
+    observer.observe(secondLastPostElementRef.current);
+    return () => observer.disconnect();
+  }, [relatedPosts, isFetching, data?.hasMore, dispatch]);
 
   // ── Initial Loading State ─────────────────────────────────────────
   if (isLoading && relatedPosts.length === 0) {
-    const skeletonCols = Array.from({ length: columnsCount }, () => [])
-    const totalSkeletons = columnsCount * 3
+    const skeletonCols = Array.from({ length: columnsCount }, () => []);
+    const totalSkeletons = columnsCount * 3;
     for (let i = 0; i < totalSkeletons; i++) {
-      skeletonCols[i % columnsCount].push(i)
+      skeletonCols[i % columnsCount].push(i);
     }
 
     return (
@@ -84,7 +106,7 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
           ))}
         </div>
       </section>
-    )
+    );
   }
 
   // ── Empty State ───────────────────────────────────────────────────
@@ -100,12 +122,12 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
           {newsDetail?.noRelatedNews || "Không có bản tin liên quan."}
         </p>
       </section>
-    )
+    );
   }
 
   const secondLastPostId =
     relatedPosts[relatedPosts.length - 2]?.postId ??
-    relatedPosts[relatedPosts.length - 1]?.postId
+    relatedPosts[relatedPosts.length - 1]?.postId;
 
   // ── Main Layout with Masonry Grid & Infinite Scroll Spinner ────────
   return (
@@ -122,7 +144,7 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
         {columns.map((col, colIndex) => (
           <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
             {col.map((post) => {
-              const isSecondLast = post.postId === secondLastPostId
+              const isSecondLast = post.postId === secondLastPostId;
               return (
                 <div
                   ref={isSecondLast ? secondLastPostElementRef : null}
@@ -130,7 +152,7 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
                 >
                   <NewsCard news={post} />
                 </div>
-              )
+              );
             })}
           </div>
         ))}
@@ -143,8 +165,7 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
         </div>
       )}
     </section>
-  )
-}
+  );
+};
 
-export default RelatedNewsSection
-
+export default RelatedNewsSection;
