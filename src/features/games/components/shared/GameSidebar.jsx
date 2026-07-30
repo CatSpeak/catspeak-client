@@ -15,14 +15,16 @@ const getParticipantAvatar = (participant) => {
   if (!participant?.metadata) return null
   try {
     const meta = JSON.parse(participant.metadata)
-    return meta.meetingAvatarUrl || meta.avatarImageUrl || meta.avatarUrl || null
+    return (
+      meta.meetingAvatarUrl || meta.avatarImageUrl || meta.avatarUrl || null
+    )
   } catch {
     return null
   }
 }
 
 const AnimatedScore = ({ value, suffix }) => {
-  const safeValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+  const safeValue = typeof value === "number" && !isNaN(value) ? value : 0
   const [displayValue, setDisplayValue] = React.useState(safeValue)
   const prevValueRef = React.useRef(safeValue)
 
@@ -33,13 +35,15 @@ const AnimatedScore = ({ value, suffix }) => {
       onUpdate(v) {
         setDisplayValue(Math.round(v))
         prevValueRef.current = v
-      }
+      },
     })
     return () => controls.stop()
   }, [safeValue])
 
   return (
-    <span>{displayValue} {suffix}</span>
+    <span>
+      {displayValue} {suffix}
+    </span>
   )
 }
 
@@ -59,19 +63,38 @@ const SpeakingAvatar = ({ participant, name, embedded = false }) => {
   )
 }
 
-const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participant, fallbackAvatarUrl, embedded = false }) => {
+const PlayerItemContent = ({
+  player,
+  index,
+  gameState,
+  t,
+  isPictureIt,
+  participant,
+  fallbackAvatarUrl,
+  embedded = false,
+}) => {
   return (
     <>
       {/* Rank badge */}
-      <div className={embedded ? "w-5 shrink-0" : "w-6 flex items-center justify-center shrink-0"}>
+      <div
+        className={
+          embedded
+            ? "w-5 shrink-0"
+            : "w-6 flex items-center justify-center shrink-0"
+        }
+      >
         {player.score === 0 ? (
-          <div className={`rounded-full border border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold ${
-            embedded ? "w-4 h-4 text-[10px]" : "w-5 h-5 text-[10px]"
-          }`}>
+          <div
+            className={`rounded-full border border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold ${
+              embedded ? "w-4 h-4 text-[10px]" : "w-5 h-5 text-[10px]"
+            }`}
+          >
             ?
           </div>
         ) : (
-          <div className={`font-semibold text-slate-400 text-center ${embedded ? "text-xs" : "text-sm"}`}>
+          <div
+            className={`font-semibold text-slate-400 text-center ${embedded ? "text-xs" : "text-sm"}`}
+          >
             {index + 1}
           </div>
         )}
@@ -79,7 +102,11 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
 
       {/* Avatar */}
       {participant ? (
-        <SpeakingAvatar participant={participant} name={player.name} embedded={embedded} />
+        <SpeakingAvatar
+          participant={participant}
+          name={player.name}
+          embedded={embedded}
+        />
       ) : (
         <Avatar
           size={embedded ? 40 : 36}
@@ -90,18 +117,34 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
       )}
 
       {/* Info */}
-      <div className={`flex-1 min-w-0 ${player.hasLeft ? 'opacity-40' : ''}`}>
-        <div className={`font-semibold text-slate-800 flex items-center gap-1 min-w-0 ${embedded ? "text-sm" : "text-sm"}`}>
-          <span className="truncate min-w-0 max-w-full" title={player.name}>{player.name}</span>
+      <div className={`flex-1 min-w-0 ${player.hasLeft ? "opacity-40" : ""}`}>
+        <div
+          className={`font-semibold text-slate-800 flex items-center gap-1 min-w-0 ${embedded ? "text-sm" : "text-sm"}`}
+        >
+          <span className="truncate min-w-0 max-w-full" title={player.name}>
+            {player.name}
+          </span>
           {player.isYou && (
-            <span className={`font-normal text-slate-500 shrink-0 ${embedded ? "text-[10px]" : "text-xs"}`}>
+            <span
+              className={`font-normal text-slate-500 shrink-0 ${embedded ? "text-[10px]" : "text-xs"}`}
+            >
               ({t.rooms?.game?.crackIt?.you || "Bạn"})
             </span>
           )}
         </div>
-        <div className={`text-slate-500 font-medium mt-0.5 flex items-center gap-1 ${embedded ? "text-xs" : "text-xs"}`}>
-          <AnimatedScore value={player.score} suffix={isPictureIt ? "" : "pts"} />
-          {isPictureIt && <Star size={embedded ? 11 : 12} className="text-yellow-400 fill-yellow-400 -mt-0.5" />}
+        <div
+          className={`text-slate-500 font-medium mt-0.5 flex items-center gap-1 ${embedded ? "text-xs" : "text-xs"}`}
+        >
+          <AnimatedScore
+            value={player.score}
+            suffix={isPictureIt ? "" : "pts"}
+          />
+          {isPictureIt && (
+            <Star
+              size={embedded ? 11 : 12}
+              className="text-yellow-400 fill-yellow-400 -mt-0.5"
+            />
+          )}
         </div>
       </div>
 
@@ -122,9 +165,11 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
 
       {player.hasLeft && (
         <div className="shrink-0 ml-1 md:ml-2">
-          <span className={`uppercase font-bold text-slate-400 bg-slate-100 rounded-md ${
-            embedded ? "text-[10px] px-1.5 py-0.5" : "text-[10px] px-2 py-1"
-          }`}>
+          <span
+            className={`uppercase font-bold text-slate-400 bg-slate-100 rounded-md ${
+              embedded ? "text-[10px] px-1.5 py-0.5" : "text-[10px] px-2 py-1"
+            }`}
+          >
             {t.rooms?.game?.crackIt?.out || "Thoát"}
           </span>
         </div>
@@ -134,7 +179,10 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
       {gameState === "result" && (
         <div className="shrink-0 ml-1 md:ml-2">
           {player.isCorrect && (
-            <div className="text-green-500 flex items-center justify-center" title="+ Điểm">
+            <div
+              className="text-green-500 flex items-center justify-center"
+              title="+ Điểm"
+            >
               <TrendingUp size={embedded ? 16 : 20} strokeWidth={2.5} />
             </div>
           )}
@@ -144,111 +192,154 @@ const PlayerItemContent = ({ player, index, gameState, t, isPictureIt, participa
   )
 }
 
-const GameSidebar = ({ embedded = false, hideTitle = false, onClose = null }) => {
-  const { scores, correctPlayers, gameState, currentUserId, playerNames, leftPlayers, gameType, pictureIt, gamePlayers } = useGame()
+const isObserverParticipant = (participant) => {
+  if (!participant) return false
+  if (participant.metadata) {
+    try {
+      const meta = JSON.parse(participant.metadata)
+      if (
+        meta.isObserver === true ||
+        meta.role === "Observer" ||
+        meta.role === "spectator" ||
+        meta.isSpectator === true
+      ) {
+        return true
+      }
+    } catch {
+      // Ignore parse error
+    }
+  }
+  return false
+}
+
+const GameSidebar = ({
+  embedded = false,
+  hideTitle = false,
+  onClose = null,
+}) => {
+  const {
+    scores,
+    correctPlayers,
+    gameState,
+    currentUserId,
+    playerNames,
+    leftPlayers,
+    gameType,
+    pictureIt,
+    gamePlayers,
+    spectatorIds,
+  } = useGame()
   const { t } = useLanguage()
   const participants = useParticipants()
 
   const isPictureIt = gameType === "picture_it" || gameType === "picture-it"
 
-  // Khi embedded, chỉ hiển thị top 4 để tiết kiệm chiều cao
-  const maxPlayers = embedded ? 4 : null
-
   const allPlayerIds = new Set()
 
-  if (gameState !== "idle") {
-    // Game đang chơi (setup/playing/result/game_over/force_stopped):
-    // Gom union từ mọi nguồn để danh sách BXH không bao giờ rỗng khi game đang chạy:
-    // 1. `gamePlayers` (original_players) — luôn có nếu BE sync đúng.
-    // 2. `scores` — có khi có người ghi điểm (Picture IT: người đã rate; Crack IT: người đoán đúng).
-    // 3. `pictureIt.leaderboard` — cho Picture IT, BE build sẵn theo score.
-    // 4. `participants` (LiveKit room) — fallback cuối, đảm bảo luôn thấy ai đang trong phòng.
-    // 5. Loại bỏ `leftPlayers` (người đã thoát).
-    const addIfNotLeft = (id) => {
-      if (id == null) return
-      const idStr = id.toString()
-      if (leftPlayers && leftPlayers.has(idStr)) return
-      allPlayerIds.add(idStr)
-    }
-
-    if (gamePlayers && gamePlayers.size > 0) {
-      gamePlayers.forEach(addIfNotLeft)
-    }
-    Object.keys(scores || {}).forEach(addIfNotLeft)
-    if (isPictureIt && pictureIt?.leaderboard) {
-      pictureIt.leaderboard.forEach((p) => addIfNotLeft(p?.id))
-    }
-    // Fallback cuối cùng: LiveKit participants trong phòng.
-    participants.forEach((p) => {
-      if (p.identity) addIfNotLeft(p.identity)
-    })
-  } else {
-    // Game idle: mọi người trong phòng đều hiện
-    if (currentUserId) allPlayerIds.add(currentUserId.toString())
-    participants.forEach(p => {
-      if (p.identity) allPlayerIds.add(p.identity)
-    })
-    Object.keys(scores).forEach(id => {
-      allPlayerIds.add(id.toString())
-    })
+  const addIfNotLeftOrObserver = (id) => {
+    if (id == null) return
+    const idStr = id.toString()
+    if (leftPlayers && leftPlayers.has(idStr)) return
+    if (spectatorIds && spectatorIds.has(idStr)) return
+    const p = participants.find((part) => String(part.identity) === idStr)
+    if (p && isObserverParticipant(p)) return
+    allPlayerIds.add(idStr)
   }
 
+  // Always include current user
+  if (currentUserId) addIfNotLeftOrObserver(currentUserId.toString())
+
+  // Include original gamePlayers if set
+  if (gamePlayers && gamePlayers.size > 0) {
+    gamePlayers.forEach(addIfNotLeftOrObserver)
+  }
+
+  // Include all players in scores or pictureIt leaderboard
+  Object.keys(scores || {}).forEach(addIfNotLeftOrObserver)
+  if (isPictureIt && pictureIt?.leaderboard) {
+    pictureIt.leaderboard.forEach((p) => addIfNotLeftOrObserver(p?.id))
+  }
+
+  // Always include all non-observer LiveKit participants in the room
+  participants.forEach((p) => {
+    if (p.identity) addIfNotLeftOrObserver(p.identity)
+  })
+
   // Create an array of players
-  const players = Array.from(allPlayerIds).map(idStr => {
-    let name
-    let score = 0
-    const isYou = idStr === currentUserId?.toString()
+  const players = Array.from(allPlayerIds)
+    .map((idStr) => {
+      let name
+      let score = 0
+      const isYou = idStr === currentUserId?.toString()
 
-    score = scores[idStr] || 0
+      score = scores[idStr] || 0
 
-    if (isPictureIt && pictureIt?.leaderboard) {
-      const pData = pictureIt.leaderboard.find(p => p.id.toString() === idStr)
-      
-      if (pData && pData.name) {
-        name = pData.name
+      if (isPictureIt && pictureIt?.leaderboard) {
+        const pData = pictureIt.leaderboard.find(
+          (p) => p.id.toString() === idStr,
+        )
+
+        if (pData && pData.name) {
+          name = pData.name
+        } else {
+          const p = participants.find((p) => p.identity === idStr)
+          name = p?.name || `Người chơi ${idStr}`
+        }
       } else {
-        const p = participants.find(p => p.identity === idStr)
-        name = p?.name || `Người chơi ${idStr}`
+        if (playerNames[idStr]) {
+          name = playerNames[idStr]
+        } else {
+          const p = participants.find((p) => p.identity === idStr)
+          name =
+            p?.name ||
+            (t.rooms?.game?.crackIt?.playerX
+              ? t.rooms.game.crackIt.playerX.replace("{0}", idStr)
+              : `Người chơi ${idStr}`)
+        }
       }
-    } else {
-      
-      if (playerNames[idStr]) {
-        name = playerNames[idStr]
-      } else {
-        const p = participants.find(p => p.identity === idStr)
-        name = p?.name || (t.rooms?.game?.crackIt?.playerX ? t.rooms.game.crackIt.playerX.replace('{0}', idStr) : `Người chơi ${idStr}`)
+
+      return {
+        id: idStr,
+        name,
+        isYou,
+        score,
+        isCorrect: isPictureIt ? false : correctPlayers.has(idStr),
+        hasLeft: leftPlayers?.has(idStr) || false,
       }
-    }
+    })
+    .sort((a, b) => b.score - a.score)
 
-    return {
-      id: idStr,
-      name,
-      isYou,
-      score,
-      isCorrect: isPictureIt ? false : correctPlayers.has(idStr),
-      hasLeft: leftPlayers?.has(idStr) || false,
-    }
-  }).sort((a, b) => b.score - a.score)
+  const title = isPictureIt
+    ? t.rooms?.game?.pictureIt?.leaderboard?.title || "Leaderboard"
+    : t.rooms?.game?.crackIt?.leaderboard || "Bảng xếp hạng"
 
-  const title = isPictureIt ? (t.rooms?.game?.pictureIt?.leaderboard?.title || "Leaderboard") : (t.rooms?.game?.crackIt?.leaderboard || "Bảng xếp hạng")
-
-  // Embedded chỉ hiện top N; fullscreen hiện tất cả
-  const visiblePlayers = maxPlayers ? players.slice(0, maxPlayers) : players
+  // Always show all players with vertical scroll
+  const visiblePlayers = players
 
   return (
-    <div className="h-full w-full flex flex-col gap-2 pt-2.5">
+    <div
+      className={`w-full flex flex-col min-h-0 ${
+        embedded ? "h-full" : "h-full md:w-80 shrink-0"
+      }`}
+    >
       {/* LEADERBOARD CARD */}
-      <div className={`flex-1 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col min-h-0 ${
-        embedded ? "py-2 px-1.5" : "py-4 px-2 md:py-6 md:px-3"
-      }`}>
+      <div
+        className={`flex-1 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col min-h-0 ${
+          embedded ? "py-2 px-1.5" : "py-4 px-2 md:py-6 md:px-3"
+        }`}
+      >
         <div className={`shrink-0 ${embedded ? "px-1.5" : "px-2 md:px-3"}`}>
           {!hideTitle && (
-            <div className={`flex items-center justify-between gap-2 border-b border-gray-200 ${
-              embedded ? "mb-2.5 pb-2" : "mb-6 pb-4"
-            }`}>
-              <h3 className={`font-black text-cath-red-700 uppercase tracking-[0.2em] truncate ${
-                embedded ? "text-xs tracking-[0.18em]" : "text-lg"
-              }`}>
+            <div
+              className={`flex items-center justify-between gap-2 border-b border-gray-200 ${
+                embedded ? "mb-2.5 pb-2" : "mb-6 pb-4"
+              }`}
+            >
+              <h3
+                className={`font-black text-cath-red-700 uppercase tracking-[0.2em] truncate ${
+                  embedded ? "text-xs tracking-[0.18em]" : "text-lg"
+                }`}
+              >
                 {title}
               </h3>
               {onClose && (
@@ -267,7 +358,9 @@ const GameSidebar = ({ embedded = false, hideTitle = false, onClose = null }) =>
         <div className="flex flex-col overflow-y-auto flex-1 min-h-0 relative">
           <AnimatePresence mode="popLayout">
             {visiblePlayers.map((player, index) => {
-              const participant = player.hasLeft ? undefined : participants.find(p => String(p.identity) === player.id)
+              const participant = player.hasLeft
+                ? undefined
+                : participants.find((p) => String(p.identity) === player.id)
 
               const innerContent = (
                 <PlayerItemContent
@@ -293,9 +386,11 @@ const GameSidebar = ({ embedded = false, hideTitle = false, onClose = null }) =>
                 >
                   {participant && !player.isYou && !player.hasLeft ? (
                     <ParticipantVolumePopover participant={participant}>
-                      <div className={`group flex items-center gap-2 md:gap-3 border-b border-transparent last:border-0 w-full h-full cursor-pointer transition-colors border-b-gray-100 hover:border-transparent relative rounded-xl ${
-                        embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
-                      }`}>
+                      <div
+                        className={`group flex items-center gap-2 md:gap-3 border-b border-transparent last:border-0 w-full h-full cursor-pointer transition-colors border-b-gray-100 hover:border-transparent relative rounded-xl ${
+                          embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
+                        }`}
+                      >
                         {innerContent}
                         <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center pointer-events-none">
                           <div className="w-4 h-8 bg-gradient-to-r from-transparent to-[#F2F2F2]"></div>
@@ -306,9 +401,11 @@ const GameSidebar = ({ embedded = false, hideTitle = false, onClose = null }) =>
                       </div>
                     </ParticipantVolumePopover>
                   ) : (
-                    <div className={`flex items-center gap-2 md:gap-3 border-b border-gray-100 last:border-0 w-full h-full relative rounded-xl ${
-                      embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 md:gap-3 border-b border-gray-100 last:border-0 w-full h-full relative rounded-xl ${
+                        embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
+                      }`}
+                    >
                       {innerContent}
                     </div>
                   )}
@@ -318,22 +415,17 @@ const GameSidebar = ({ embedded = false, hideTitle = false, onClose = null }) =>
           </AnimatePresence>
 
           {visiblePlayers.length === 0 && (
-            <div className={`flex-1 flex items-center justify-center text-gray-500 font-medium text-center ${
-              embedded ? "text-[10px] px-1.5" : "text-sm px-2 md:px-3"
-            }`}>
-              {t.rooms?.game?.crackIt?.waitingPlayers || "Đang đợi người chơi..."}
-            </div>
-          )}
-
-          {/* Embedded: nếu còn người ngoài top N, hiển thị dấu +N để gợi ý */}
-          {embedded && players.length > maxPlayers && (
-            <div className="text-[10px] text-slate-400 text-center py-1 shrink-0">
-              +{players.length - maxPlayers}
+            <div
+              className={`flex-1 flex items-center justify-center text-gray-500 font-medium text-center ${
+                embedded ? "text-[10px] px-1.5" : "text-sm px-2 md:px-3"
+              }`}
+            >
+              {t.rooms?.game?.crackIt?.waitingPlayers ||
+                "Đang đợi người chơi..."}
             </div>
           )}
         </div>
       </div>
-
     </div>
   )
 }
