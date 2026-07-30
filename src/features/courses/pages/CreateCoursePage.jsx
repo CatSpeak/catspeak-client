@@ -16,12 +16,16 @@ import {
   useDeleteCourseMutation
 } from "@/store/api/coursesApi"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { TextInput } from "@/shared/components/ui/inputs"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { COURSE_FORM_LANGUAGES } from "../data/courseFormOptions"
 import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
   const { t } = useLanguage()
   const c = t.courses || {}
+  const cc = c.createCourse || {}
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditMode = !!id
@@ -73,9 +77,12 @@ const CreateCoursePage = () => {
   const [level, setLevel] = useState("")
   const [description, setDescription] = useState("")
 
-  const cc = c.createCourse || {}
-  const labelCourseAction = isEditMode ? (cc.updateCourse || "Update Course") : (c.createCourseTitle || "Tạo khóa học")
-  const labelCourseInfoTitle = isEditMode ? (cc.updateCourseInfo || "Update Course Information") : (c.courseInfoTitle || "Thông tin khóa học")
+  const labelCourseAction = isEditMode
+    ? (cc.updateCourse || "Cập nhật khóa học")
+    : (cc.title || c.createCourseTitle || "Tạo khóa học")
+  const labelCourseInfoTitle = isEditMode
+    ? (cc.updateCourseInfo || "Thông tin khóa học cập nhật")
+    : (c.courseInfoTitle || "Thông tin khóa học")
 
   // Populate data when in edit mode
   useEffect(() => {
@@ -144,12 +151,6 @@ const CreateCoursePage = () => {
     fileInputRef.current?.click()
   }
 
-  const handleLanguageChange = (e) => {
-    const newLang = e.target.value
-    setSelectedLanguage(newLang)
-    setLevel("")
-  }
-
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -159,7 +160,7 @@ const CreateCoursePage = () => {
         return
       }
       if (file.size > 50 * 1024 * 1024) {
-        toast.error(c.avatarDesc2 || "Kích cỡ dưới 50mb")
+        toast.error(cc.avatarDesc2 || c.avatarDesc2 || "Kích cỡ dưới 50MB")
         e.target.value = ""
         return
       }
@@ -198,7 +199,7 @@ const CreateCoursePage = () => {
   const handleConfirmClear = () => {
     resetFormInputs()
     setShowClearModal(false)
-    toast.success("Cleared form inputs")
+    toast.success(cc.toastClearSuccess || "Cleared form inputs")
   }
 
   const handleSubmit = async (e) => {
@@ -207,15 +208,15 @@ const CreateCoursePage = () => {
 
     // Quick validation
     if (!courseName.trim()) {
-      toast.error("Vui lòng điền tên khóa học!")
+      toast.error(cc.enterCourseNameToast || "Vui lòng điền tên khóa học!")
       return
     }
     if (!selectedLanguage) {
-      toast.error("Vui lòng chọn ngôn ngữ!")
+      toast.error(cc.selectLanguageToast || "Vui lòng chọn ngôn ngữ!")
       return
     }
     if (!level) {
-      toast.error("Vui lòng chọn trình độ!")
+      toast.error(cc.selectLevelToast || "Vui lòng chọn trình độ!")
       return
     }
     const descriptionWordCount = description.trim()
@@ -319,159 +320,225 @@ const CreateCoursePage = () => {
       </div>
 
       {/* ─── Form Container ─── */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm flex flex-col gap-6">
 
-        <h2 className="text-lg font-bold text-gray-900 border-b border-gray-50 pb-2">
+        <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
           {labelCourseInfoTitle}
         </h2>
 
-        {/* ─── Avatar upload box ─── */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.avatarLabel || "Ảnh đại diện"}</label>
-          <div
-            onClick={handleAvatarClick}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault()
-                handleAvatarClick()
-              }
-            }}
-            role="button"
-            tabIndex={0}
-            className="group relative border border-dashed border-gray-200 hover:border-gray-300 rounded-2xl p-6 bg-[#F8F9FA] hover:bg-[#F2F2F2]/60 flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 text-center min-h-[140px]"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            {avatarPreview ? (
-              <div className="relative w-full max-h-[220px] flex justify-center overflow-hidden rounded-xl">
-                <img src={avatarPreview} alt="Avatar preview" className="object-contain max-h-[200px]" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-sm transition-opacity rounded-xl">
-                  Thay đổi hình ảnh
+        {/* ─── 2-Column Split Layout ─── */}
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+
+          {/* Left Column: Course Avatar / Thumbnail Card */}
+          <div className="w-full lg:w-72 xl:w-80 shrink-0 flex flex-col gap-2.5">
+            <label className="text-sm font-semibold text-gray-800">
+              {cc.avatarLabel || c.avatarLabel || "Ảnh đại diện khóa học"}
+            </label>
+
+            <div
+              onClick={handleAvatarClick}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault()
+                  handleAvatarClick()
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              className="group relative w-full aspect-[4/3] rounded-xl border border-dashed border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-gray-100/50 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden shadow-2xs"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              {avatarPreview ? (
+                <div className="relative w-full h-full">
+                  <img
+                    src={avatarPreview}
+                    alt="Course Thumbnail"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 text-white font-semibold text-xs transition-opacity p-4 text-center">
+                    <div className="flex items-center gap-1.5 bg-black/70 px-3 py-1.5 rounded-lg backdrop-blur-xs hover:bg-black/90 transition-colors">
+                      <Upload size={14} />
+                      <span>{cc.changeImage || "Thay đổi ảnh"}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setAvatar(null)
+                        setAvatarPreview("")
+                      }}
+                      className="px-2.5 py-1.5 bg-red-600/90 hover:bg-red-600 rounded-lg transition-colors text-white text-xs font-medium flex items-center gap-1"
+                    >
+                      <Trash2 size={13} />
+                      <span>{cc.removeImage || "Xóa ảnh"}</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform">
-                  <Upload size={20} />
+              ) : (
+                <div className="flex flex-col items-center gap-2 p-4 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 shadow-2xs flex items-center justify-center text-gray-400 group-hover:text-[#990011] group-hover:scale-105 transition-all">
+                    <Upload size={18} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-semibold text-gray-800">
+                      {cc.avatarDesc1 || c.avatarDesc1 || "Kéo & thả hoặc bấm để chọn ảnh"}
+                    </p>
+                    <p className="text-[11px] text-gray-400 font-medium">
+                      {cc.avatarDesc2 || c.avatarDesc2 || "PNG, JPG, WEBP (tối đa 50MB)"}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-400 font-semibold space-y-1">
-                  <p>{c.avatarDesc1 || "Supports PNG, JPEG, and WebP."}</p>
-                  <p>{c.avatarDesc2 || "Kích cỡ dưới 50mb"}</p>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            <p className="text-[11px] text-gray-400 font-medium text-center">
+              {cc.avatarHint || "Khuyên dùng hình ảnh tỉ lệ 4:3 sắc nét để hiển thị tối ưu nhất."}
+            </p>
           </div>
-        </div>
 
-        {/* ─── Course Name ─── */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.courseNameLabel || "Tên khóa học"} <span className="text-[#990011]">*</span></label>
-          <input
-            type="text"
-            placeholder={c.courseNamePlaceholder || "Tên sự kiện"}
-            value={courseName}
-            onChange={(e) => setCourseName(e.target.value)}
-            className="w-full h-11 px-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400"
-          />
-        </div>
+          {/* Right Column: Form Inputs */}
+          <div className="flex-1 w-full flex flex-col gap-5">
 
-        {/* ─── Language & Level ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.languageLabel || "Ngôn ngữ"}</label>
-            <div className="relative">
-              <select
-                value={selectedLanguage}
-                onChange={handleLanguageChange}
-                className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer"
-              >
-                <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
-                {languagesList.map((lang) => (
-                  <option key={lang.id} value={lang.name}>{lang.name}</option>
-                ))}
-              </select>
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                <ChevronDown size={14} />
+            {/* Course Name */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-800">
+                {cc.courseNameLabel || c.courseNameLabel || "Tên khóa học"} <span className="text-[#990011]">*</span>
+              </label>
+              <TextInput
+                placeholder={cc.courseNamePlaceholder || c.courseNamePlaceholder || "Nhập tên khóa học..."}
+                value={courseName}
+                onChange={(e) => setCourseName(e.target.value)}
+                variant="semi-round"
+                className="!h-11 !rounded-xl bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 text-sm font-medium text-gray-800"
+                containerClassName="!gap-0"
+              />
+            </div>
+
+            {/* Language & Level Side-by-Side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-800">
+                  {cc.languageLabel || c.languageLabel || "Ngôn ngữ"} <span className="text-[#990011]">*</span>
+                </label>
+                <Dropdown
+                  options={languagesList.map((lang) => ({
+                    value: lang.name,
+                    label: lang.name,
+                  }))}
+                  value={selectedLanguage}
+                  onChange={(val) => {
+                    setSelectedLanguage(val)
+                    setLevel("")
+                  }}
+                  placeholder={cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ"}
+                  dropdownClassName="w-full"
+                  trigger={(isOpen, selectedOption, toggle) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      className="w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border border-gray-100 text-gray-800 hover:bg-gray-100/50 cursor-pointer text-sm font-medium"
+                    >
+                      <span className={selectedLanguage ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
+                        {selectedLanguage || (cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ")}
+                      </span>
+                      <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-800">
+                  {cc.levelLabel || c.levelLabel || "Trình độ"} <span className="text-[#990011]">*</span>
+                </label>
+                <Dropdown
+                  options={levelsList.map((lvl) => ({
+                    value: lvl.name,
+                    label: lvl.name,
+                  }))}
+                  value={level}
+                  onChange={(val) => setLevel(val)}
+                  disabled={!selectedLanguage}
+                  placeholder={cc.levelPlaceholder || c.levelPlaceholder || "Chọn trình độ"}
+                  dropdownClassName="w-full"
+                  trigger={(isOpen, selectedOption, toggle) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      disabled={!selectedLanguage}
+                      className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition text-sm font-medium border ${
+                        !selectedLanguage
+                          ? "bg-gray-50/50 border-gray-100 text-gray-400 cursor-not-allowed opacity-60"
+                          : "bg-gray-50/50 border-gray-100 text-gray-800 hover:bg-gray-100/50 cursor-pointer"
+                      }`}
+                    >
+                      <span className={level ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
+                        {level || (cc.levelPlaceholder || c.levelPlaceholder || "Chọn trình độ")}
+                      </span>
+                      <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                />
               </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.levelLabel || "Trình độ"}</label>
-            <div className="relative">
-              <select
-                value={level}
-                onChange={(e) => setLevel(e.target.value)}
-                disabled={!selectedLanguage}
-                className="w-full h-11 pl-4 pr-10 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
-                {levelsList.map((lvl) => (
-                  <option key={lvl.id || lvl.name} value={lvl.name}>{lvl.name}</option>
-                ))}
-              </select>
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                <ChevronDown size={14} />
+            {/* Description Textarea */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-gray-800">
+                  {cc.descriptionLabel || c.descriptionLabel || "Mô tả khóa học (tùy chọn)"}
+                </label>
+                <span className="text-xs text-gray-400 font-medium">
+                  {cc.descriptionLimitNote || c.descriptionLimitNote || "Nội dung không quá 150 từ"}
+                </span>
               </div>
+              <textarea
+                rows={4}
+                placeholder={cc.descriptionPlaceholder || c.descriptionPlaceholder || "Nhập thông tin mô tả tổng quan về khóa học..."}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-3.5 bg-gray-50/50 hover:bg-gray-100/50 focus:bg-white border border-gray-100 focus:border-gray-200 outline-none rounded-xl text-sm font-medium text-gray-800 transition-all resize-y min-h-[110px] placeholder:text-gray-400 placeholder:font-normal"
+              />
             </div>
-          </div>
-        </div>
 
-        {/* ─── Description ─── */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{c.descriptionLabel || "Mô tả khóa học (tùy chọn)"}</label>
-          <textarea
-            rows={4}
-            placeholder={c.descriptionPlaceholder || "Nội dung"}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-4 bg-[#F2F2F2]/60 hover:bg-[#F2F2F2]/80 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400"
-          />
-          <span className="text-[10px] text-gray-400 font-bold self-end">
-            {c.descriptionLimitNote || "Nội dung không được quá 150 từ"}
-          </span>
+          </div>
+
         </div>
 
         {/* ─── Action Buttons ─── */}
         <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-2 w-full">
           {isEditMode && (
-            <button
+            <PillButton
               type="button"
+              variant="outline"
               onClick={() => setShowDeleteModal(true)}
               disabled={isDeleting}
-              className="mr-auto h-11 px-6 bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-1.5 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+              className="mr-auto !border-red-500 !text-red-600 hover:!bg-red-50"
             >
-              <Trash2 size={13} />
-              <span>{c.courseDetail?.deleteCourse || "Delete Course"}</span>
-            </button>
+              <Trash2 size={16} />
+              <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>
+            </PillButton>
           )}
-          <button
+          <PillButton
             type="button"
-            onClick={() => navigate(-1)}
-            className="flex-1 sm:flex-initial h-11 px-6 border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <ArrowLeft size={13} />
-            <span>{t.common?.back || "Quay lại"}</span>
-          </button>
-          <button
-            type="button"
+            variant="secondary"
             onClick={handleClear}
-            className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center"
           >
-            {c.clearBtn || "Xóa"}
-          </button>
-          <button
+            {cc.clear || c.clearBtn || "Làm mới"}
+          </PillButton>
+          <PillButton
             type="submit"
+            variant="primary"
             disabled={isCreating || isUpdating}
-            className="flex-1 sm:flex-initial h-11 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {labelCourseAction}
-          </button>
+          </PillButton>
         </div>
 
       </form>
@@ -483,20 +550,20 @@ const CreateCoursePage = () => {
         }}
         onConfirm={handleDeleteCourse}
         isPending={isDeleting}
-        title={c.courseDetail?.deleteCourse || "Delete Course"}
-        message={c.courseDetail?.confirmDeleteCourse || "Are you sure you want to delete this course? All associated classes will also be affected."}
-        confirmText={c.courseDetail?.deleteCourse || "Delete"}
-        cancelText={c.createClass?.cancel || "Cancel"}
+        title={c.courseDetail?.deleteCourse || "Xóa khóa học"}
+        message={c.courseDetail?.confirmDeleteCourse || "Bạn có chắc chắn muốn xóa khóa học này? Tất cả các lớp học liên quan cũng sẽ bị ảnh hưởng."}
+        confirmText={c.courseDetail?.deleteCourse || "Xóa"}
+        cancelText={c.createClass?.cancel || t.common?.cancel || "Hủy"}
       />
 
       <ConfirmationModal
         open={showClearModal}
         onClose={() => setShowClearModal(false)}
         onConfirm={handleConfirmClear}
-        title={c.clearBtn || "Clear"}
+        title={cc.clear || c.clearBtn || "Làm mới"}
         message={c.deleteConfirm || "Bạn có chắc chắn muốn xóa tất cả thông tin đã điền?"}
-        confirmText={c.clearBtn || "Clear"}
-        cancelText={c.createClass?.cancel || "Cancel"}
+        confirmText={cc.clear || c.clearBtn || "Làm mới"}
+        cancelText={c.createClass?.cancel || t.common?.cancel || "Hủy"}
       />
     </div>
   )
