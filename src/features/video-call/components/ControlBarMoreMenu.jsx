@@ -4,7 +4,6 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useLanguage } from "@/shared/context/LanguageContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { AnimatePresence } from "framer-motion"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
 import GameSetupModal from "@/features/games/components/shared/GameSetupModal"
 import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal"
@@ -18,15 +17,13 @@ const ControlBarMoreMenu = ({
 }) => {
   const { id: roomId } = useParams()
   const { t } = useLanguage()
-  const { isAISession } = useGlobalVideoCall()
+  const { isAISession, subtitleSupportedLangs, startSubtitles } =
+    useGlobalVideoCall()
 
   const [showGameSetup, setShowGameSetup] = useState(false)
   const [showGameHistory, setShowGameHistory] = useState(false)
   const [showMobileSettings, setShowMobileSettings] = useState(false)
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
-
-  const { isSubtitleActive, subtitleSupportedLangs, startSubtitles } =
-    useSubtitleControls()
 
   return (
     <>
@@ -47,7 +44,7 @@ const ControlBarMoreMenu = ({
             >
               <div className="w-full overflow-hidden rounded-t-[24px] md:rounded-lg border border-[#E5E5E5] bg-white shadow-lg pb-safe md:pb-0">
                 <AnimatePresence mode="wait" initial={false}>
-                  {!showSubtitlePicker || isSubtitleActive || isAISession ? (
+                  {!showSubtitlePicker ? (
                     <FluentAnimation
                       key="main-menu"
                       animationKey="main-menu"

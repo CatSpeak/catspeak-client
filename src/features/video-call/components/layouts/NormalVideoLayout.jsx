@@ -79,7 +79,7 @@ const NormalVideoLayout = ({
   // 1 Participant: Full Container
   if (totalItems === 1 && allItems.length === 1) {
     return (
-      <div className="relative h-full w-full p-1 overflow-hidden">
+      <div className="relative h-full w-full overflow-hidden">
         {renderTile(allItems[0], "w-full h-full")}
       </div>
     )
@@ -88,7 +88,7 @@ const NormalVideoLayout = ({
   // 2 Participants: Side by side (Desktop) / Stacked (Mobile)
   if (totalItems === 2 && allItems.length === 2) {
     return (
-      <div className="relative h-full w-full p-1 overflow-hidden grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div className="relative h-full w-full overflow-hidden grid grid-cols-1 sm:grid-cols-2 gap-2">
         {allItems.map((item) => renderTile(item, "w-full h-full"))}
       </div>
     )
@@ -97,7 +97,7 @@ const NormalVideoLayout = ({
   // 3 Participants: 3 Equal Columns (Desktop) / Stacked (Mobile)
   if (totalItems === 3 && allItems.length === 3) {
     return (
-      <div className="relative h-full w-full p-1 overflow-hidden grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div className="relative h-full w-full overflow-hidden grid grid-cols-1 sm:grid-cols-3 gap-2">
         {allItems.map((item) => renderTile(item, "w-full h-full"))}
       </div>
     )
@@ -106,7 +106,7 @@ const NormalVideoLayout = ({
   // 4 Participants: 2x2 Grid
   if (totalItems === 4 && allItems.length === 4) {
     return (
-      <div className="relative h-full w-full p-1 overflow-hidden grid grid-cols-2 grid-rows-2 gap-2">
+      <div className="relative h-full w-full overflow-hidden grid grid-cols-2 grid-rows-2 gap-2">
         {allItems.map((item) => renderTile(item, "w-full h-full"))}
       </div>
     )
@@ -115,14 +115,21 @@ const NormalVideoLayout = ({
   // 5 Participants: Top 3, Bottom 2 centered
   if (totalItems === 5 && allItems.length === 5) {
     return (
-      <div className="relative h-full w-full p-1 overflow-hidden flex flex-col gap-2">
+      <div className="relative h-full w-full overflow-hidden flex flex-col gap-2">
         <div className="grid grid-cols-3 gap-2 h-1/2 w-full">
-          {allItems.slice(0, 3).map((item) => renderTile(item, "w-full h-full"))}
+          {allItems
+            .slice(0, 3)
+            .map((item) => renderTile(item, "w-full h-full"))}
         </div>
         <div className="flex gap-2 h-1/2 w-full justify-center">
-          {allItems.slice(3, 5).map((item) =>
-            renderTile(item, "w-full sm:w-[calc(33.333%-0.5rem)] h-full flex-1 sm:flex-initial"),
-          )}
+          {allItems
+            .slice(3, 5)
+            .map((item) =>
+              renderTile(
+                item,
+                "w-full sm:w-[calc(33.333%-0.5rem)] h-full flex-1 sm:flex-initial",
+              ),
+            )}
         </div>
       </div>
     )
@@ -132,7 +139,7 @@ const NormalVideoLayout = ({
   return (
     <div className="relative h-full w-full overflow-hidden">
       <div
-        className={`h-full w-full overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-1 auto-rows-max ${scrollbarClasses}`}
+        className={`h-full w-full overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-max ${scrollbarClasses}`}
       >
         {allItems.map((item) => renderTile(item, "w-full aspect-video"))}
       </div>

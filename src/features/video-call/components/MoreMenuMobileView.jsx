@@ -22,7 +22,6 @@ import {
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 import { useSessionTimer } from "../hooks/useSessionTimer"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
@@ -68,6 +67,8 @@ const MoreMenuMobileView = ({
     showAvatarPicker,
     setShowAvatarPicker,
     closingRemainingSeconds,
+    isSubtitleActive,
+    stopSubtitles,
   } = useGlobalVideoCall()
 
   const { isBreakoutActive } = useSelector((s) => s.videoCall)
@@ -75,8 +76,6 @@ const MoreMenuMobileView = ({
 
   const { formattedRemaining, formattedMax, hasDuration } =
     useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
-
-  const { isSubtitleActive, stopSubtitles } = useSubtitleControls()
 
   const unreadMessages = (unreadRoomChat || 0) + (unreadAiChat || 0)
 

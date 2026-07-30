@@ -92,6 +92,12 @@ const IDLE_VALUE = {
   setShowRoomSubtitles: () => {},
   subtitleSelectedLanguage: null,
   setSubtitleSelectedLanguage: () => {},
+  isSubtitleActive: false,
+  isStartingSubtitles: false,
+  isStoppingSubtitles: false,
+  subtitleSupportedLangs: ["en", "vi"],
+  startSubtitles: async () => {},
+  stopSubtitles: async () => {},
 
   lkRoomName: null,
   unreadRoomChat: 0,

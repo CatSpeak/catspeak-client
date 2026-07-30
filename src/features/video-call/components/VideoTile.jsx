@@ -114,7 +114,7 @@ const VideoTileInner = ({ participant, onClick }) => {
         ref={videoRef}
         className={`h-full w-full object-cover ${
           isVideoVisible ? "block" : "hidden"
-        }`}
+        } ${isLocal ? "-scale-x-100" : ""}`}
       />
 
       {/* Avatar fallback when no video */}
