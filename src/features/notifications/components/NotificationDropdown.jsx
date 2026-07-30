@@ -72,7 +72,7 @@ const NotificationDropdown = ({ onClose, isMobile, notifications, unreadCount, m
                   {getIcon(n)}
                   <div className="min-w-0 flex-1">
                     <p className={`truncate text-sm ${n.isRead ? "text-gray-600" : "font-medium text-gray-900"}`}>
-                      {n?.metadata?.assignmentName || t.header?.newNotificationTitle || "Thông báo mới"}
+                      {n?.resolvedTitle || t.header?.newNotificationTitle || "Thông báo mới"}
                     </p>
                     <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{n?.resolvedBody}</p>
                     <p className="mt-1 text-[10px] text-gray-400">
