@@ -137,6 +137,9 @@ const NewsCard = ({ news }) => {
       {/* ── Content ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-1 p-4">
         <h3 className="font-bold line-clamp-2">{news.title}</h3>
+        {news.excerpt && (
+          <p className="text-sm text-[#4a4a4a] line-clamp-2">{news.excerpt}</p>
+        )}
         {/* Inline dot-separated metadata row */}
         <div className="flex items-center text-sm gap-1.5 text-[#606060]">
           <span>
