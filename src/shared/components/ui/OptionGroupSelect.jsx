@@ -10,6 +10,7 @@ const OptionGroupSelect = ({
   onChange,
   multiple = false,
   maxSelect = Infinity,
+  disabled = false,
   getOptionLabel = (option) =>
     typeof option === "object" ? option.label : option,
   getOptionValue = (option) =>
@@ -17,6 +18,7 @@ const OptionGroupSelect = ({
   className = "",
 }) => {
   const handleSelect = (optValue) => {
+    if (disabled) return
     if (multiple) {
       const currentValues = Array.isArray(value) ? value : []
       const isSelected = currentValues.includes(optValue)
@@ -58,6 +60,7 @@ const OptionGroupSelect = ({
             ? Array.isArray(value) && value.includes(optValue)
             : value === optValue
           const isDisabled =
+            disabled ||
             option?.disabled ||
             (!isSelected && multiple && (value?.length || 0) >= maxSelect)
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useUpdateCustomRoomMutation } from "@/store/api/roomsApi"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getLanguageName = (langCode) => {
   switch (langCode) {
@@ -18,6 +19,7 @@ const getLanguageName = (langCode) => {
 
 export const useEditCustomRoomForm = (room, open, onClose) => {
   const { lang } = useParams()
+  const { t } = useLanguage()
   const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
   const selectedLanguage = room?.languageType || getLanguageName(supportedLangCode)
 
@@ -32,6 +34,8 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     password: "",
   })
   const [thumbnailFile, setThumbnailFile] = useState(null)
+  const [nameError, setNameError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
 
   // Populate form fields whenever room or open state changes
   useEffect(() => {
@@ -42,22 +46,32 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
           ? [room.topic]
           : []
 
-      const isPrivate =
-        room.isPrivate || room.privacy === "Private"
+      const isPrivate = Boolean(room.hasPassword || room.privacy === "Private")
 
       setFormData({
         name: room.name || "",
         topics: topicsList,
         selectedLevel: room.requiredLevel || "",
         isPrivate: isPrivate,
-        password: "", // Security: Do not prefill password
+        password: room.password || "",
       })
       setThumbnailFile(room.thumbnailUrl || null)
+      setNameError("")
+      setPasswordError("")
     }
   }, [open, room])
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    if (field === "name" && value.trim()) {
+      setNameError("")
+    }
+    if (field === "password" && value.trim()) {
+      setPasswordError("")
+    }
+    if (field === "isPrivate" && !value) {
+      setPasswordError("")
+    }
   }
 
   const handleTopicChange = (e) => {
@@ -68,7 +82,27 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
   }
 
   const submitUpdate = async () => {
-    if (!room || !formData.name.trim()) return
+    if (!room) return
+    let hasError = false
+
+    if (!formData.name.trim()) {
+      setNameError(t.rooms?.createRoom?.nameRequired || "Room name is required")
+      hasError = true
+    } else {
+      setNameError("")
+    }
+
+    if (formData.isPrivate && !formData.password.trim()) {
+      setPasswordError(
+        t.rooms?.createRoom?.passwordRequiredMessage ||
+          "Private room requires a password.",
+      )
+      hasError = true
+    } else {
+      setPasswordError("")
+    }
+
+    if (hasError) return
 
     try {
       const roomId = room.id || room.roomId
@@ -82,8 +116,8 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
 
       data.append("Privacy", formData.isPrivate ? "Private" : "Public")
 
-      // Only append Password if user actually entered a new password
-      if (formData.password.trim()) {
+      // Only append Password if private and user actually entered a new password
+      if (formData.isPrivate && formData.password.trim()) {
         data.append("Password", formData.password.trim())
       }
 
@@ -101,13 +135,21 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
       if (onClose) onClose()
     } catch (err) {
       console.error("Failed to update custom room:", err)
-      toast.error(err?.data?.message || "Failed to update room")
+      const msg = err?.data?.message || err?.message || ""
+      if (
+        msg.includes("mật khẩu") ||
+        msg.toLowerCase().includes("password")
+      ) {
+        setPasswordError(msg)
+      } else {
+        toast.error(msg || "Failed to update room")
+      }
     }
   }
 
-  const isDisabled = !formData.name.trim() || isUpdating
+  const isDisabled = isUpdating
 
-  const passwordPlaceholder = "Leave blank to keep current password"
+  const passwordPlaceholder = "Enter room password"
 
   return {
     formData,
@@ -120,5 +162,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     isDisabled,
     selectedLanguage,
     passwordPlaceholder,
+    nameError,
+    passwordError,
   }
 }

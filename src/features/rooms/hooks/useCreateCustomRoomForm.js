@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useAuth } from "@/features/auth"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetMyCustomRoomsQuery,
   useCreateCustomRoomMutation,
@@ -24,6 +25,7 @@ export const useCreateCustomRoomForm = (open = true) => {
   const { user } = useAuth()
   const { lang } = useParams()
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -33,6 +35,8 @@ export const useCreateCustomRoomForm = (open = true) => {
     password: "",
   })
   const [thumbnailFile, setThumbnailFile] = useState(null)
+  const [nameError, setNameError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
 
   const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
   const selectedLanguage = getLanguageName(supportedLangCode)
@@ -54,6 +58,8 @@ export const useCreateCustomRoomForm = (open = true) => {
       password: "",
     })
     setThumbnailFile(null)
+    setNameError("")
+    setPasswordError("")
   }
 
   useEffect(() => {
@@ -64,6 +70,15 @@ export const useCreateCustomRoomForm = (open = true) => {
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    if (field === "name" && value.trim()) {
+      setNameError("")
+    }
+    if (field === "password" && value.trim()) {
+      setPasswordError("")
+    }
+    if (field === "isPrivate" && !value) {
+      setPasswordError("")
+    }
   }
 
   const handleTopicChange = (e) => {
@@ -72,17 +87,36 @@ export const useCreateCustomRoomForm = (open = true) => {
   }
 
   const submitCreate = async (onSuccess) => {
+    let hasError = false
+
+    if (!formData.name.trim()) {
+      setNameError(t.rooms?.createRoom?.nameRequired || "Room name is required")
+      hasError = true
+    } else {
+      setNameError("")
+    }
+
+    if (formData.isPrivate && !formData.password.trim()) {
+      setPasswordError(
+        t.rooms?.createRoom?.passwordRequiredMessage ||
+          "Private room requires a password.",
+      )
+      hasError = true
+    } else {
+      setPasswordError("")
+    }
+
+    if (hasError) return
+
     try {
       const data = new FormData()
-      if (formData.name.trim()) {
-        data.append("Name", formData.name.trim())
-      }
+      data.append("Name", formData.name.trim())
       data.append("LanguageType", selectedLanguage)
       if (formData.selectedLevel) {
         data.append("RequiredLevel", formData.selectedLevel)
       }
       data.append("Privacy", formData.isPrivate ? "Private" : "Public")
-      if (formData.password.trim()) {
+      if (formData.isPrivate && formData.password.trim()) {
         data.append("Password", formData.password.trim())
       }
 
@@ -104,7 +138,15 @@ export const useCreateCustomRoomForm = (open = true) => {
       }
     } catch (err) {
       console.error("Failed to create custom room:", err)
-      toast.error(err?.data?.message || "Failed to create room")
+      const msg = err?.data?.message || err?.message || ""
+      if (
+        msg.includes("mật khẩu") ||
+        msg.toLowerCase().includes("password")
+      ) {
+        setPasswordError(msg)
+      } else {
+        toast.error(msg || "Failed to create room")
+      }
     }
   }
 
@@ -122,5 +164,7 @@ export const useCreateCustomRoomForm = (open = true) => {
     isQuotaFull,
     isCreateDisabled,
     selectedLanguage,
+    nameError,
+    passwordError,
   }
 }

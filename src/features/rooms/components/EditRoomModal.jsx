@@ -20,6 +20,8 @@ const EditRoomModal = ({ open, room, onClose }) => {
     isDisabled,
     selectedLanguage,
     passwordPlaceholder,
+    nameError,
+    passwordError,
   } = useEditCustomRoomForm(room, open, onClose)
 
   return (
@@ -56,6 +58,8 @@ const EditRoomModal = ({ open, room, onClose }) => {
         isQuotaFull={false}
         selectedLanguage={selectedLanguage}
         passwordPlaceholder={passwordPlaceholder}
+        nameError={nameError ? t.rooms?.createRoom?.nameRequired || nameError : ""}
+        passwordError={passwordError}
         t={t}
       />
     </Modal>
