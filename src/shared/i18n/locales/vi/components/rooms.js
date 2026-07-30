@@ -334,6 +334,9 @@ export default {
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
+    inviteParticipant: "Mời tham gia phòng",
+    sendInvite: "Gửi lời mời",
+    inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
     changeLayout: {
       title: "Điều chỉnh chế độ xem",
       auto: "Tự động (linh động)",
@@ -450,6 +453,12 @@ export default {
       step2: "Mở Chrome hoặc Safari",
       step3: "Dán liên kết và tham gia cuộc gọi",
     },
+    inviteParticipant: "Mời tham gia phòng",
+    sendInvite: "Gửi lời mời",
+    inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
+  },
+  notifications: {
+    inviteSent: "Đã gửi lời mời",
   },
   roomFullModal: {
     title: "Phòng đã đầy",
@@ -738,4 +747,12 @@ export default {
       },
     },
   },
+
+  notifications: {
+    inviteSent: "Đã gửi lời mời",
+    room_invite: {
+      title: "Lời mời tham gia phòng",
+      body: "{inviterName} đã mời bạn tham gia phòng họp",
+    }
+  }
 }
