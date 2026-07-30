@@ -2,19 +2,10 @@ import React, { useState, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { COLORS } from "@/shared/constants/constants";
-import {
-  Share,
-  Bookmark,
-  ThumbsUp,
-  Heart,
-  Smile,
-  MessageSquare,
-  Eye,
-} from "lucide-react";
+import { Share, MessageSquare } from "lucide-react";
 import { useReactToPostMutation } from "@/store/api/social/postsApi";
 import useSharePost from "@/shared/hooks/useSharePost";
 import ShareModal from "./ShareModal";
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
 import Carousel from "@/shared/components/ui/Carousel";
 import { getImageUrl } from "@/shared/utils/imageUtils";
 import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
@@ -49,7 +40,6 @@ const NewsCard = ({ news }) => {
 
   /* ── Local state ───────────────────────────────────────────────── */
   const [showReactions, setShowReactions] = useState(false);
-  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
   const holdTimer = useRef(null);
 
   /* ── Derived ───────────────────────────────────────────────────── */
@@ -117,14 +107,15 @@ const NewsCard = ({ news }) => {
               images={carouselImages}
               autoPlay
               interval={5000}
-              className="w-full h-full rounded-t-xl rounded-b-none aspect-video!"
+              className="w-full rounded-t-xl rounded-b-none aspect-video"
               objectFit="contain"
               showIndicators={false}
+              lockToFirstImage={true}
             />
           </div>
         ) : (
           <div
-            className="w-full h-full rounded-t-xl flex items-center justify-center p-6"
+            className="w-full h-full rounded-t-xl flex items-center justify-center p-6 min-h-[160px]"
             style={{ backgroundColor: fallbackColor }}
           >
             <span className="text-white/30 font-bold text-3xl select-none text-center leading-tight">
@@ -227,10 +218,6 @@ const NewsCard = ({ news }) => {
           open={isShareModalOpen}
           onClose={() => setIsShareModalOpen(false)}
           shareUrl={shareUrl}
-        />
-        <InDevelopmentModal
-          open={isDevModalOpen}
-          onCancel={() => setIsDevModalOpen(false)}
         />
       </div>
     </div>
