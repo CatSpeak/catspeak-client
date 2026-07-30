@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   CreditCard,
   GraduationCap,
+  BookOpen,
 } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
@@ -24,6 +25,7 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext";
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 import { useGetUserProfileQuery } from "@/store/api/userApi";
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -51,6 +53,7 @@ const ProfileDropdown = () => {
   const { data: detailedProfile } = useGetUserProfileQuery(undefined, {
     skip: !isAuthenticated,
   });
+  const { isTeacherProfile, isTeacher, isStudent, switchRole } = useRoleOverride();
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutWarning, setShowLogoutWarning] = useState(false);
   const menuRef = useRef(null);
