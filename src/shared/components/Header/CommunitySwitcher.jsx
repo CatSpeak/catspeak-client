@@ -8,6 +8,8 @@ import { LANGUAGE_CONFIG } from "@/features/navigation"
 import LanguageMenuItem from "./LanguageMenuItem"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 
+import { getSwitchCommunityPath } from "@/shared/utils/navigation"
+
 const DEFAULT_COMMUNITY = "zh"
 
 const CommunitySwitcher = () => {
@@ -38,16 +40,7 @@ const CommunitySwitcher = () => {
     if (newCode === currentCommunity) { setIsOpen(false); return }
     localStorage.setItem("communityLanguage", newCode)
     setIsOpen(false)
-    
-    const isInsideEcosystem =
-      location.pathname === `/${currentCommunity}` ||
-      location.pathname.startsWith(`/${currentCommunity}/`)
-
-    if (isInsideEcosystem) {
-      window.location.href = location.pathname.replace(`/${currentCommunity}`, `/${newCode}`)
-    } else {
-      window.location.href = `/${newCode}/community`
-    }
+    window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
   }
 
   return (

@@ -21,7 +21,7 @@ export const mapReelDtoToFrontend = (dto) => {
   const author = {
     id: dto.accountId ? String(dto.accountId) : "",
     name: dto.nickname || dto.username || "Anonymous",
-    avatarUrl: dto.avatarUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${dto.username || 'user'}`,
+    avatarUrl: dto.avatarUrl || null,
     verified: false // Set verified default to false, or map if available later
   }
 

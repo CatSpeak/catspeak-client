@@ -1,8 +1,9 @@
 import React from "react"
 import { Heart, Play } from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
 import { formatScore } from "../../utils/formatters"
 
-export default function RankRow({ rank, username, handle, score, coverUrl, onClick }) {
+export default function RankRow({ rank, username, handle, score, coverUrl, onClick, avatarUrl, accountId }) {
   const getRankBadge = (r) => {
     if (r <= 3) {
       return (
@@ -27,9 +28,7 @@ export default function RankRow({ rank, username, handle, score, coverUrl, onCli
         <div className="w-8 flex justify-center shrink-0">
           {getRankBadge(rank)}
         </div>
-        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-100">
-          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`} alt="" className="w-full h-full object-cover" />
-        </div>
+        <Avatar size={40} name={username || handle} src={avatarUrl} accountId={accountId} />
         <div className="flex flex-col min-w-0">
           <span className="font-semibold text-gray-900 text-[14px] truncate">{username}</span>
           <span className="text-gray-500 text-[12px] truncate">@{handle}</span>

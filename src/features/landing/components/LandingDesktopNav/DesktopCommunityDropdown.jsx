@@ -9,6 +9,8 @@ import LanguageMenuItem from "@/shared/components/Header/LanguageMenuItem"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
 
+import { getSwitchCommunityPath } from "@/shared/utils/navigation"
+
 const DEFAULT_COMMUNITY = "zh"
 
 const DesktopCommunityDropdown = ({ navKey }) => {
@@ -72,12 +74,7 @@ const DesktopCommunityDropdown = ({ navKey }) => {
       location.pathname.startsWith(`/${currentCommunity}/`)
 
     if (isInsideEcosystem) {
-      // Replace only the first segment
-      const newPath = location.pathname.replace(
-        `/${currentCommunity}`,
-        `/${newCode}`,
-      )
-      window.location.href = newPath
+      window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
     } else {
       window.location.href = `/${newCode}/community`
     }

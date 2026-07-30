@@ -9,6 +9,74 @@ import {
 } from "@/store/api/userApi"
 import { buildProfilePayload, validatePhoneInput } from "../utils/profileValidation"
 
+/**
+ * Maps API error responses to localized error messages and target form fields.
+ */
+const parseProfileApiError = (err, t, fallbackField) => {
+  const apiMessage = err?.data?.message || err?.data?.title || ""
+  const errCode = err?.data?.errorCode || ""
+  const lowerMsg = apiMessage.toLowerCase()
+
+  if (errCode === "RATE_LIMIT_EXCEEDED" || lowerMsg.includes("rate_limit_exceeded")) {
+    return {
+      field: fallbackField,
+      message: t.profile?.personalInfo?.phoneRateLimit || "Bạn chỉ có thể thực hiện 1 lần trong khoảng thời gian cho phép.",
+    }
+  }
+
+  if (lowerMsg.includes("username")) {
+    return { field: "username", message: t.auth?.usernameExists || apiMessage }
+  }
+
+  if (lowerMsg.includes("email") || errCode === "EMAIL_ALREADY_EXISTS") {
+    return {
+      field: "email",
+      message: apiMessage || t.auth?.emailExists || "Email này đã được sử dụng bởi một tài khoản khác",
+    }
+  }
+
+  if (lowerMsg.includes("phone") && (lowerMsg.includes("already exists") || lowerMsg.includes("sử dụng") || errCode === "PHONE_ALREADY_EXISTS")) {
+    return {
+      field: "phoneNumber",
+      message: apiMessage || t.auth?.phoneExists || "Số điện thoại này đã được sử dụng bởi một tài khoản khác",
+    }
+  }
+
+  if (lowerMsg.includes("phone") && (lowerMsg.includes("invalid") || lowerMsg.includes("hợp lệ"))) {
+    return {
+      field: "phoneNumber",
+      message: t.auth?.validationPhoneInvalid || apiMessage,
+    }
+  }
+
+  return {
+    field: fallbackField,
+    message: apiMessage || "Không thể cập nhật thông tin. Vui lòng thử lại sau.",
+  }
+}
+
+/**
+ * Validates field inputs before triggering API requests.
+ */
+const validateFieldInput = (field, formData, t) => {
+  if (field === "phoneNumber" && formData.phoneNumber) {
+    if (!validatePhoneInput(formData.phoneNumber, formData.phonePrefix)) {
+      return { phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" }
+    }
+  }
+
+  if (field === "email") {
+    if (!formData.email) {
+      return { email: t.auth?.validationEmailRequired || "Vui lòng nhập email!" }
+    }
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      return { email: t.auth?.validationEmailInvalid || "Vui lòng nhập email hợp lệ!" }
+    }
+  }
+
+  return null
+}
+
 export const useProfileMutations = (t, profileData, stateHooks) => {
   const {
     formData,
@@ -17,7 +85,6 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     setEditingField,
     setErrors,
     setIsOtpModalOpen,
-    parsePhoneData
   } = stateHooks
 
   const [updateProfile, { isLoading: isUpdatingProfile }] = useUpdateUserProfileMutation()
@@ -29,147 +96,77 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
 
   const isUpdating = isUpdatingProfile || isSendingOtp || isSendingPhoneOtp
 
+  // Handles Email update requiring OTP verification
+  const handleEmailSaveWithOtp = async () => {
+    try {
+      await requestUserProfileOtp({ newEmail: formData.email }).unwrap()
+      setIsOtpModalOpen(true)
+    } catch (err) {
+      console.error("Failed to request OTP for email update", err)
+      const { field: errField, message } = parseProfileApiError(err, t, editingField)
+      setErrors((prev) => ({ ...prev, [errField]: message }))
+      toast.error(message)
+    }
+  }
+
+  // Handles direct update for non-email fields (Username, Nickname, Phone, Address, etc.)
+  const handleDirectProfileSave = async () => {
+    try {
+      await updateProfile(buildProfilePayload(editingField, formData)).unwrap()
+      toast.success(t.profile?.personalInfo?.accountUpdateSuccess || "Cập nhật thông tin tài khoản thành công!")
+      setEditingField(null)
+    } catch (err) {
+      console.error("Failed to update profile", err)
+      const { field: errField, message } = parseProfileApiError(err, t, editingField)
+      setErrors((prev) => ({ ...prev, [errField]: message }))
+      toast.error(message)
+    }
+  }
+
   const handleSave = async () => {
     if (isUpdating) return
     setErrors({})
-    const field = editingField
 
-    if (field === "phoneNumber") {
-      if (formData.phoneNumber && !validatePhoneInput(formData.phoneNumber, formData.phonePrefix)) {
-        setErrors({ phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" })
-        return
-      }
+    const validationError = validateFieldInput(editingField, formData, t)
+    if (validationError) {
+      setErrors(validationError)
+      return
     }
 
-    if (field === "email") {
-      if (!formData.email) {
-        setErrors({ email: t.auth?.validationEmailRequired || "Vui lòng nhập email!" })
-        return
-      }
-      if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        setErrors({ email: t.auth?.validationEmailInvalid || "Vui lòng nhập email hợp lệ!" })
-        return
-      }
-    }
+    const origEmail = (profileData?.email || "").toLowerCase()
+    const newEmail = (formData.email || "").toLowerCase()
+    const isEmailChanged = (editingField === "email" || editingField === "securityInfo") && origEmail !== newEmail
 
-    // Determine if sensitive fields are modified
-    let isSensitiveChange = false
-    let isPhoneChanged = false
-
-    if (field === "email" || field === "securityInfo") {
-      const origEmail = (profileData?.email || "").toLowerCase()
-      const newEmail = (formData.email || "").toLowerCase()
-      if (origEmail !== newEmail) {
-        isSensitiveChange = true
-      }
-    }
-    
-    if (field === "phoneNumber" || field === "securityInfo") {
-      const { phoneNumber: strippedOrigPhone } = parsePhoneData(profileData?.phoneNumber)
-      const cleanPhone = formData.phoneNumber || ""
-      if (strippedOrigPhone !== cleanPhone) {
-        isSensitiveChange = true
-        isPhoneChanged = true
-      }
-    }
-
-    if (isSensitiveChange) {
-      try {
-        if (isPhoneChanged) {
-          const fullPhone = `${formData.phonePrefix || "+84"}${formData.phoneNumber}`
-          await requestPhoneUpdateOtp({ newPhoneNumber: fullPhone }).unwrap()
-        } else {
-          await requestUserProfileOtp().unwrap()
-        }
-        setIsOtpModalOpen(true)
-      } catch (err) {
-        console.error("Failed to request OTP for profile update", err)
-        const apiMessage = err?.data?.message || err?.data?.title || ""
-        const errCode = err?.data?.errorCode || ""
-
-        if (errCode === "RATE_LIMIT_EXCEEDED" || apiMessage.includes("RATE_LIMIT_EXCEEDED")) {
-          setErrors({
-            [field]: t.profile?.personalInfo?.phoneRateLimit || "Bạn chỉ có thể thay đổi số điện thoại 1 lần trong vòng 30 ngày.",
-          })
-          toast.error(t.profile?.personalInfo?.phoneRateLimit || "Bạn chỉ có thể thay đổi số điện thoại 1 lần trong vòng 30 ngày.")
-        } else {
-          const fallbackMsg = "Không thể gửi OTP. Vui lòng thử lại sau.";
-          setErrors({ [field]: apiMessage || fallbackMsg })
-          if (isPhoneChanged && errCode === "PHONE_ALREADY_EXISTS") {
-            setErrors(prev => ({ ...prev, phoneNumber: apiMessage }))
-          }
-          toast.error(apiMessage || fallbackMsg)
-        }
-      }
+    if (isEmailChanged) {
+      await handleEmailSaveWithOtp()
     } else {
-      // Non-sensitive update, or sensitive field didn't change
-      try {
-        await updateProfile(buildProfilePayload(editingField, formData)).unwrap()
-        toast.success(t.profile?.personalInfo?.profileUpdateSuccess || "Cập nhật thông tin thành công!")
-        setEditingField(null)
-      } catch (err) {
-        console.error("Failed to update profile", err)
-        const apiMessage = err?.data?.message || err?.data?.title
-        if (apiMessage) {
-          const lowerMsg = apiMessage.toLowerCase()
-          if (lowerMsg.includes("email") && lowerMsg.includes("already exists")) {
-            setErrors({ email: t.auth?.emailExists || "Email đã tồn tại" })
-          } else if (lowerMsg.includes("phone") && lowerMsg.includes("already exists")) {
-            setErrors({ phoneNumber: t.auth?.phoneExists || "Số điện thoại đã tồn tại" })
-          } else if (lowerMsg.includes("phone") && (lowerMsg.includes("invalid") || lowerMsg.includes("hợp lệ"))) {
-            setErrors({ phoneNumber: t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng" })
-          } else {
-            setErrors({ [field]: apiMessage })
-          }
-        }
-      }
+      await handleDirectProfileSave()
     }
   }
 
   const handleOtpVerify = async (otpValue, { setError: setModalError }) => {
     try {
-      // If we are updating a section that contains phone, and phone was changed, we might need to send it differently, 
-      // but the API requestPhoneUpdateOtp returns an OTP for the phone update specifically.
-      if (editingField === "phoneNumber" || (editingField === "securityInfo" && formData.phoneNumber)) {
-        const fullPhone = `${formData.phonePrefix || "+84"}${formData.phoneNumber}`
-        await updatePhoneNumber({
-          otpCode: otpValue,
-          newPhoneNumber: fullPhone,
-        }).unwrap()
-        toast.success(t.profile?.personalInfo?.phoneUpdateSuccess || "Cập nhật số điện thoại thành công!")
-      } else {
-        await updateProfile(buildProfilePayload(editingField, formData, { OtpCode: otpValue })).unwrap()
-        toast.success(t.profile?.personalInfo?.profileUpdateSuccess || "Cập nhật thông tin thành công!")
-      }
+      await updateProfile(buildProfilePayload(editingField, formData, { OtpCode: otpValue })).unwrap()
+      toast.success(t.profile?.personalInfo?.accountUpdateSuccess || "Cập nhật thông tin tài khoản thành công!")
       setIsOtpModalOpen(false)
       setEditingField(null)
     } catch (err) {
       console.error("Failed to update profile with OTP", err)
-      const apiMessage = err?.data?.message || err?.data?.title
-      if (apiMessage) {
-        const lowerMsg = apiMessage.toLowerCase()
-        if (lowerMsg.includes("otp") || lowerMsg.includes("mã otp")) {
-          setModalError(t.profile?.personalInfo?.otpInvalid || "Mã OTP không hợp lệ hoặc đã hết hạn")
-        } else if (lowerMsg.includes("email") && lowerMsg.includes("already exists")) {
-          setModalError(t.auth?.emailExists || "Email đã tồn tại")
-        } else if (lowerMsg.includes("phone") && lowerMsg.includes("already exists")) {
-          setModalError(t.auth?.phoneExists || "Số điện thoại đã tồn tại")
-        } else {
-          setModalError(apiMessage)
-        }
+      const apiMessage = err?.data?.message || err?.data?.title || ""
+      const lowerMsg = apiMessage.toLowerCase()
+
+      if (lowerMsg.includes("otp") || lowerMsg.includes("mã otp")) {
+        setModalError(t.profile?.personalInfo?.otpInvalid || "Mã OTP không hợp lệ hoặc đã hết hạn")
+      } else if (lowerMsg.includes("email")) {
+        setModalError(apiMessage || t.auth?.emailExists || "Email này đã được sử dụng bởi một tài khoản khác")
       } else {
-        setModalError("Có lỗi xảy ra, vui lòng thử lại.")
+        setModalError(apiMessage || "Có lỗi xảy ra, vui lòng thử lại.")
       }
     }
   }
 
   const handleOtpResend = async () => {
-    if (editingField === "phoneNumber" || editingField === "securityInfo") {
-      const fullPhone = `${formData.phonePrefix || "+84"}${formData.phoneNumber}`
-      await requestPhoneUpdateOtp({ newPhoneNumber: fullPhone }).unwrap()
-    } else {
-      await requestUserProfileOtp().unwrap()
-    }
+    await requestUserProfileOtp({ newEmail: formData.email }).unwrap()
   }
 
   const handleCountryChange = async (val) => {
@@ -183,9 +180,9 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
 
   const handleUpdateAvatarFile = async (file) => {
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      await updateAvatar(formData).unwrap()
+      const data = new FormData()
+      data.append("file", file)
+      await updateAvatar(data).unwrap()
       toast.success(t?.profile?.personalInfo?.avatarUpdated || "Avatar updated successfully")
     } catch (err) {
       console.error("Failed to update avatar", err)
@@ -202,6 +199,6 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     handleOtpVerify,
     handleOtpResend,
     handleCountryChange,
-    handleUpdateAvatarFile
+    handleUpdateAvatarFile,
   }
 }

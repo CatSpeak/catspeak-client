@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import {
   ThumbsUp,
@@ -62,6 +63,7 @@ const CommentItem = ({
 }) => {
   const { user } = useAuth()
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const [showReactions, setShowReactions] = useState(false)
   const [isReplying, setIsReplying] = useState(false)
   const [replyContent, setReplyContent] = useState("")
@@ -70,6 +72,7 @@ const CommentItem = ({
   const [editContent, setEditContent] = useState("")
 
   const isOwner = user?.accountId === comment.accountId
+  const authorAccountId = comment.accountId || comment.authorId || comment.userId
 
   const currentReaction = REACTION_TYPES[comment.currentUserReaction]
   const ReactionIcon = currentReaction?.icon || ThumbsUp
@@ -104,6 +107,7 @@ const CommentItem = ({
           size={32}
           src={comment.avatarUrl ? getImageUrl(comment.avatarUrl) : null}
           name={comment.authorName || "User"}
+          accountId={comment.accountId || comment.authorId || comment.userId}
           className="shrink-0"
         />
         {/* L-shaped connector: vertical line down + horizontal turn right */}
@@ -123,7 +127,15 @@ const CommentItem = ({
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <span className="font-medium text-lg text-[#7b7979] leading-[1.4]">
+              <span
+                onClick={(e) => {
+                  if (authorAccountId) {
+                    e.stopPropagation()
+                    navigate(`/profile/${authorAccountId}`)
+                  }
+                }}
+                className={`font-medium text-lg text-[#7b7979] leading-[1.4] ${authorAccountId ? "cursor-pointer hover:underline hover:text-black transition-all" : ""}`}
+              >
                 {comment.authorName}
               </span>
               <span className="text-base text-[#7b7979] leading-[1.4]">

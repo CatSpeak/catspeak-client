@@ -31,11 +31,8 @@ const ReelCaption = React.memo(({ reel, isMobile = false }) => {
             src={reel.author?.avatarUrl}
             name={reel.author?.name}
             alt={reel.author?.name}
-            className="shadow-sm rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (reel.author?.id) navigate(`/profile/${reel.author.id}`)
-            }}
+            accountId={reel.author?.id || reel.author?.accountId}
+            className="shadow-sm rounded-full overflow-hidden"
           />
           <div className="flex flex-col">
             <span 
