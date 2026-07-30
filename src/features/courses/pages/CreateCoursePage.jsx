@@ -255,13 +255,14 @@ const CreateCoursePage = () => {
 
       const isLanguageNotAllowed =
         errCode === "LANGUAGE_NOT_ALLOWED" ||
-        err?.status === 422 ||
         (typeof errMsg === "string" && (errMsg.includes("LANGUAGE_NOT_ALLOWED") || errMsg.toLowerCase().includes("language not allowed"))) ||
         (typeof errCode === "string" && errCode.includes("LANGUAGE_NOT_ALLOWED"))
 
       let displayMessage
       if (isLanguageNotAllowed) {
         displayMessage = cc.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
+      } else if (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("Missing")) {
+        displayMessage = errMsg
       } else {
         displayMessage = isEditMode
           ? (cc.toastUpdateFailed || "Course update failed!")
