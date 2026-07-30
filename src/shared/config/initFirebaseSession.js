@@ -4,7 +4,8 @@ import { auth as firebaseAuth } from "./firebase";
 export async function initFirebaseSession(internalJwt) {
   if (firebaseAuth.currentUser) return;
   try {
-    const res = await fetch("/api/firebase/token", {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
+    const res = await fetch(`${baseUrl}/firebase/token`, {
       headers: { Authorization: `Bearer ${internalJwt}` },
     });
 
