@@ -222,13 +222,12 @@ const SchedulePage = () => {
       <Breadcrumb
         items={[
           { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
-          { label: t.nav.calendar || "Calendar", onClick: () => navigate("/workspace/schedule") },
           { label: c.teachingSchedule || "Teaching Schedule" }
         ]} />
 
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+        <h1 className="text-3xl font-black text-gray-950 tracking-tight">
           {c.teachingSchedule || "Teaching Schedule"}
         </h1>
         <button
