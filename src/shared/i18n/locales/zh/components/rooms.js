@@ -323,6 +323,9 @@ export default {
     unknownDevice: "未知设备",
   },
   videoCall: {
+    inviteParticipant: "邀请参加房间",
+    sendInvite: "发送邀请",
+    inviteDescription: "输入您想邀请参加此房间的人的电子邮件地址。他们将收到带有链接的通知以加入。",
     changeLayout: {
       title: "更改布局",
       auto: "自动",
@@ -435,6 +438,12 @@ export default {
       step2: "打开 Chrome 或 Safari",
       step3: "粘贴链接并加入通话",
     },
+    inviteParticipant: "邀请参加房间",
+    sendInvite: "发送邀请",
+    inviteDescription: "输入您想邀请参加此房间的人的电子邮件地址。他们将收到带有链接的通知以加入。",
+  },
+  notifications: {
+    inviteSent: "已发送邀请",
   },
   roomFullModal: {
     title: "房间已满",
@@ -710,4 +719,12 @@ export default {
       },
     },
   },
+
+  notifications: {
+    inviteSent: "已发送邀请",
+    room_invite: {
+      title: "房间邀请",
+      body: "{inviterName} 邀请您加入会议室",
+    }
+  }
 }

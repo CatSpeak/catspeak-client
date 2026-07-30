@@ -245,6 +245,15 @@ export const roomsApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+
+    // Invite user to a room
+    inviteToRoom: builder.mutation({
+      query: ({ roomId, email }) => ({
+        url: `/rooms/${roomId}/invite`,
+        method: "POST",
+        body: { email },
+      }),
+    }),
   }),
 })
 
@@ -274,5 +283,6 @@ export const {
   // Host Moderation
   useKickParticipantMutation,
   useMuteParticipantMutation,
+  useInviteToRoomMutation,
 } = roomsApi
 

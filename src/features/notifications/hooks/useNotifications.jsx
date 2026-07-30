@@ -19,9 +19,18 @@ export function useNotifications() {
   const isInitialLoad = useRef(true)
 
   useEffect(() => {
-    if (!token) return
+    if (!token) {
+      setNotifications([])
+      setUnreadCount(0)
+      return
+    }
     let cancelled = false
     let unsubList, unsubCount
+
+    // Reset state immediately when token changes (account switch)
+    setNotifications([])
+    setUnreadCount(0)
+    isInitialLoad.current = true
 
     const unsubAuth = onAuthStateChanged(firebaseAuth, async (user) => {
       if (cancelled) return

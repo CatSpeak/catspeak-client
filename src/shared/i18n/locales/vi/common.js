@@ -145,4 +145,21 @@ export default {
       uploadSuccess: "Đăng Reel thành công!",
     },
   },
+
+  common: {
+    email: "Email",
+    emailRequired: "Vui lòng nhập email",
+    errorOccurred: "Đã có lỗi xảy ra",
+    sending: "Đang gửi...",
+  },
+  notifications: {
+    new_post: {
+      title: "Bài viết mới từ CatSpeak",
+      body: "Có bài viết mới: \"{postTitle}\"",
+    },
+    new_challenge: {
+      title: "Thử thách mới!",
+      body: "Thử thách mới: \"{challengeTitle}\" đang chờ bạn!",
+    },
+  },
 };

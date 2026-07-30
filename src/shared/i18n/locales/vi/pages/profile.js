@@ -134,9 +134,18 @@ export default {
     requiredField: "Trường này là bắt buộc",
     selectLanguagesError: "Vui lòng chọn ngôn ngữ giảng dạy",
     selectLevelError: "Vui lòng chọn trình độ cho từng ngôn ngữ",
+    selectAtLeastOneTag: "Vui lòng chọn ít nhất 1 thẻ",
+    tagsUpdatedSuccess: "Cập nhật thẻ thành công",
+    tagsUpdatedError: "Lỗi khi cập nhật thẻ",
     certifyError: "Vui lòng xác nhận và đồng ý với các quy định của nền tảng.",
     formInvalid: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi gửi.",
     credentialSizeLimit: "Mỗi chứng chỉ phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
     videoSizeLimit: "Video phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
   },
+  notifications: {
+    friend_request: {
+      title: "Yêu cầu kết bạn mới",
+      body: "{requesterName} đã gửi cho bạn yêu cầu kết bạn.",
+    }
+  }
 }
