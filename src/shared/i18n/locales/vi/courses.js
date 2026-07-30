@@ -846,20 +846,32 @@ export default {
         body: 'Lịch dạy của lớp "{className}" đã được điều chỉnh'
       },
       assignment_new: {
-        title: "Bài nộp mới",
-        body: 'Bài nộp "{assignmentName}" đã được phát hành'
+        title: "Lớp {className}",
+        body: "Giảng viên đã thêm một bài nộp mới - {assignmentName}."
+      },
+      assignment_update: {
+        title: "Lớp {className}",
+        body: "{assignmentName} đã dời lịch nộp bài."
       },
       assignment_graded: {
-        title: "Bài nộp đã được chấm",
-        body: 'Kết quả bài nộp "{assignmentName}" đã được công bố'
+        title: "Lớp {className}",
+        body: "Kết quả {assignmentName} đã có."
       },
       assignment_regraded: {
-        title: "Kết quả đã chỉnh sửa",
-        body: 'Kết quả bài nộp "{assignmentName}" đã được cập nhật'
+        title: "Lớp {className}",
+        body: "{assignmentName} của bạn đã được chấm lại."
+      },
+      quiz_new: {
+        title: "Lớp {className}",
+        body: "Giảng viên đã thêm một bài kiểm tra mới - {quizName}."
+      },
+      quiz_update: {
+        title: "Lớp {className}",
+        body: "{quizName} đã dời lịch đóng."
       },
       quiz_regraded: {
-        title: "Kết quả bài kiểm tra đã chỉnh sửa",
-        body: 'Kết quả bài kiểm tra "{quizName}" đã được cập nhật'
+        title: "Lớp {className}",
+        body: "{quizName} của bạn đã được chấm lại."
       }
     }
   }

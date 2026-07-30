@@ -846,20 +846,32 @@ export default {
         body: '班级 "{className}" 的日程已调整'
       },
       assignment_new: {
-        title: "新作业",
-        body: '作业 "{assignmentName}" 已发布'
+        title: "班级 {className}",
+        body: "讲师已添加新作业 - {assignmentName}。"
+      },
+      assignment_update: {
+        title: "班级 {className}",
+        body: "{assignmentName} 截止日期已更改。"
       },
       assignment_graded: {
-        title: "作业已评分",
-        body: '作业 "{assignmentName}" 的结果已公布'
+        title: "班级 {className}",
+        body: "{assignmentName} 成绩已发布。"
       },
       assignment_regraded: {
-        title: "结果已更新",
-        body: '作业 "{assignmentName}" 的结果已更新'
+        title: "班级 {className}",
+        body: "您的 {assignmentName} 已重新评分。"
+      },
+      quiz_new: {
+        title: "班级 {className}",
+        body: "讲师已添加新测验 - {quizName}。"
+      },
+      quiz_update: {
+        title: "班级 {className}",
+        body: "{quizName} 截止时间已更改。"
       },
       quiz_regraded: {
-        title: "测验结果已更新",
-        body: '测验 "{quizName}" 的结果已更新'
+        title: "班级 {className}",
+        body: "您的 {quizName} 已重新评分。"
       }
     }
   }
