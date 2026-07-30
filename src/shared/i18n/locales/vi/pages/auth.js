@@ -54,7 +54,7 @@ export default {
   usernameLabel: "Tên đăng nhập",
   usernamePlaceholder: "Nhập tên đăng nhập",
   dateOfBirthLabel: "Ngày sinh",
-  dateOfBirthPlaceholder: "Chọn ngày",
+  dateOfBirthPlaceholder: "Nhập ngày sinh",
   levelLabel: "Trình độ",
   levelBeginner: "Người mới",
   levelIntermediate: "Trung bình",

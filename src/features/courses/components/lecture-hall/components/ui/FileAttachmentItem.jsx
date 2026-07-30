@@ -1,8 +1,11 @@
 import React from "react"
 import { Trash2, X } from "lucide-react"
 import { formatFileSize, getFileIcon } from "../../utils/fileUtils"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const FileAttachmentItem = ({ file, onRemove, variant = "default" }) => {
+  const { t } = useLanguage()
+  const dict = t.courses.lectureHall
   const isModal = variant === "modal"
 
   return (
@@ -38,7 +41,8 @@ const FileAttachmentItem = ({ file, onRemove, variant = "default" }) => {
           ? "hover:bg-gray-200/60 text-gray-500 hover:text-gray-800"
           : "hover:bg-gray-100 text-[#5B403C] hover:text-[#191C1D]"
           }`}
-        title="Xóa tệp"
+        title={dict.removeFileTooltip}
+        aria-label={dict.removeFileTooltip}
       >
         {isModal ? <X size={16} /> : <Trash2 size={16} />}
       </button>

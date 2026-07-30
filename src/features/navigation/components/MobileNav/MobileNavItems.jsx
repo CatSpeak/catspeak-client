@@ -88,6 +88,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               if (item.lang && item.lang !== currentLang) return false
               if (isHorizontal && item.showOnHorizontalBar === false) return false
               if (item.isPrivate && !isAuthenticated) return false
+              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+              if (teacherTabs.includes(item.key) && isStudent) return false
               return true
             })
             .map((item) => {
@@ -208,7 +210,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 flex flex-col gap-1 scrollbar-none">
           {(activeDrilldownItem?.subItems || [])
             .filter((sub) => {
-              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule"]
+              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
               if (teacherTabs.includes(sub.key) && isStudent) return false
               if (sub.key === "myLearning" && isTeacher) return false
               if (sub.lang && sub.lang !== currentLang) return false
@@ -225,15 +227,19 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               }
 
               return (
-                <DesktopNavItem
-                  key={sub.key}
-                  to={resolvePath(subPath)}
-                  icon={SubIconComponent}
-                  label={subLabel}
-                  color={sub.color}
-                  img={sub.img}
-                  onClick={() => setIsMobileOpen?.(false)}
-                />
+                <div key={sub.key} className="w-full">
+                  <DesktopNavItem
+                    to={resolvePath(subPath)}
+                    icon={SubIconComponent}
+                    label={subLabel}
+                    color={sub.color}
+                    img={sub.img}
+                    onClick={() => setIsMobileOpen?.(false)}
+                  />
+                  {sub.key === "analytics" && (
+                    <div className="my-1.5 mx-3 border-b border-black" />
+                  )}
+                </div>
               )
             })}
         </div>

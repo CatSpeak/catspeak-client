@@ -379,7 +379,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "schedule",
+                path: "teaching-tasks",
                 element: (
                   <LazyRoute>
                     <WorkspaceCalendarPage />
@@ -387,7 +387,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "schedule/teaching-schedule",
+                path: "schedule",
                 element: (
                   <LazyRoute>
                     <SchedulePage />
@@ -411,7 +411,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "classes/all",
+                path: "classes/all-classes",
                 element: (
                   <LazyRoute>
                     <AllClassesPage />
@@ -792,6 +792,14 @@ const routesConfig = [
         children: [
           {
             index: true,
+            element: (
+              <LazyRoute>
+                <ChatPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: ":id",
             element: (
               <LazyRoute>
                 <ChatPage />

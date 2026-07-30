@@ -48,7 +48,7 @@ const CommentItem = ({ comment = {}, }) => {
           <span className="font-semibold text-sm text-[#191C1D]">{authorName}</span>
           {isTeacher && (
             <span className="bg-[#750000] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-              {dict.teacher || "Giáo viên"}
+              {dict.teacher}
             </span>
           )}
           <span className="text-xs text-[#5B403C]"> {time}</span>
@@ -57,7 +57,11 @@ const CommentItem = ({ comment = {}, }) => {
         {/* Image attachment */}
         {image && (
           <div className="rounded-xl overflow-hidden mb-3 bg-[#E2E2E2]">
-            <img src={image} alt="attachment" className="w-full object-cover max-h-60" />
+            <img
+              src={image}
+              alt={dict.commentAttachmentAlt}
+              className="w-full object-cover max-h-60"
+            />
           </div>
         )}
 

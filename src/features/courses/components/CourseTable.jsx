@@ -113,8 +113,10 @@ const CourseTable = ({ courses, t, onDelete }) => {
                 <div className="inline-block" ref={activeDropdown === item.id ? dropdownRef : null}>
                   <button
                     type="button"
-                    aria-label={c.actionsForCourse || `Actions for ${item.title || "course"}`}
+                    aria-label={(c.actionsForCourse || "Actions for {{title}}")
+                      .replace("{{title}}", item.title || c.course || "course")}
                     aria-expanded={activeDropdown === item.id}
+                    aria-haspopup="menu"
                     onClick={(e) => {
                       e.stopPropagation();
                       setActiveDropdown(activeDropdown === item.id ? null : item.id);
@@ -124,9 +126,10 @@ const CourseTable = ({ courses, t, onDelete }) => {
                     <MoreVertical size={16} />
                   </button>
                   {activeDropdown === item.id && (
-                    <div className="absolute right-4 mt-1 w-36 bg-white border border-gray-250 rounded-xl shadow-lg py-1 z-30 text-left">
+                    <div role="menu" className="absolute right-4 mt-1 w-36 bg-white border border-gray-250 rounded-xl shadow-lg py-1 z-30 text-left">
                       <button
                         type="button"
+                        role="menuitem"
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveDropdown(null);
@@ -139,6 +142,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                       </button>
                       <button
                         type="button"
+                        role="menuitem"
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveDropdown(null);

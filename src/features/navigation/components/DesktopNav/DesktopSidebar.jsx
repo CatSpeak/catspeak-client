@@ -1,6 +1,18 @@
 import React, { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
+import React, { useEffect } from "react"
+import { Link, useLocation } from "react-router-dom"
 // eslint-disable-next-line no-unused-vars
+import { LayoutGroup, motion, AnimatePresence } from "framer-motion"
+import { useSelector } from "react-redux"
+import { LandingPageIcon } from "@/features/landing/assets"
+import { useSidebar } from "@/shared/context/SidebarContext"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { useGetConversationsQuery } from "@/store/api/social/conversationsApi"
+import { selectTotalUnread } from "@/store/slices/notificationSlice"
+import { useActiveLink } from "../../hooks/useActiveLink"
 import { LayoutGroup, motion, AnimatePresence } from "framer-motion"
 import { useSelector } from "react-redux"
 import { LandingPageIcon } from "@/features/landing/assets"
@@ -15,6 +27,7 @@ import {
   navSections,
   footerLinks,
   settingNavLinks,
+} from "../../config/navigation"
 } from "../../config/navigation"
 import {
   Home,
@@ -45,9 +58,10 @@ const mainDockItems = [
   {
     key: "workspace",
     icon: Briefcase,
-    path: "/workspace/courses",
+    path: "/workspace",
     hasSublinks: true,
   },
+]
 ]
 
 const secondaryDockItems = [
@@ -60,6 +74,9 @@ const secondaryDockItems = [
 ]
 
 const normalizePath = (path) => {
+  if (!path) return path
+  return path.replace(/^\/(?:zh|en|vi)(?=\/|$)/, "")
+}
   if (!path) return path
   return path.replace(/^\/(?:zh|en|vi)(?=\/|$)/, "")
 }
@@ -86,6 +103,7 @@ const listContainerVariants = {
     },
   },
 }
+}
 
 const itemVariants = {
   hidden: { opacity: 0, y: 6 },
@@ -98,8 +116,14 @@ const itemVariants = {
     },
   },
 }
+}
 
 const DesktopSidebar = () => {
+  const { pathname } = useLocation()
+  const { t } = useLanguage()
+  const { isAuthenticated } = useAuth()
+  const { isStudent, isTeacher } = useRoleOverride()
+  const { resolvePath, currentLang } = useActiveLink()
   const { pathname } = useLocation()
   const { t } = useLanguage()
   const { isAuthenticated } = useAuth()
@@ -111,7 +135,9 @@ const DesktopSidebar = () => {
     lastSublinks,
     setLastSublink,
   } = useSidebar()
+  } = useSidebar()
 
+  const activeDockSection = getActiveDockSection(pathname)
   const activeDockSection = getActiveDockSection(pathname)
 
   // Unread chat messages counter
@@ -119,58 +145,81 @@ const DesktopSidebar = () => {
     skip: !isAuthenticated,
   })
   const totalUnreadCountRedux = useSelector(selectTotalUnread)
+  })
+  const totalUnreadCountRedux = useSelector(selectTotalUnread)
   const totalUnreadCountServer = conversations.reduce(
     (sum, c) => sum + (c.unreadCount || 0),
     0,
   )
   const unreadChatCount = totalUnreadCountServer || totalUnreadCountRedux || 0
+  )
+  const unreadChatCount = totalUnreadCountServer || totalUnreadCountRedux || 0
 
+  const isSettingsPage = pathname.includes("/setting")
   const isSettingsPage = pathname.includes("/setting")
 
   // Record last selected sublink on route change
   useEffect(() => {
     const cleanPath = normalizePath(pathname)
+    const cleanPath = normalizePath(pathname)
     if (pathname.includes("/setting")) {
+      setLastSublink("settings", cleanPath)
       setLastSublink("settings", cleanPath)
     } else if (pathname.includes("/cat-speak")) {
       setLastSublink("catSpeak", cleanPath)
+      setLastSublink("catSpeak", cleanPath)
     } else if (pathname.includes("/workspace")) {
       setLastSublink("workspace", cleanPath)
+      setLastSublink("workspace", cleanPath)
     }
+  }, [pathname, setLastSublink])
   }, [pathname, setLastSublink])
 
   // Get current active section metadata
   const currentSectionData = navSections.find(
     (s) => s.key === activeDockSection,
   )
+  )
   const currentHasSublinks =
     activeDockSection === "settings" ||
+    Boolean(currentSectionData?.items?.length)
     Boolean(currentSectionData?.items?.length)
 
   const handleDockClick = (item) => {
     if (item.hasSublinks) {
       if (activeDockSection === item.key && isDesktopExpanded) {
         setIsDesktopExpanded(false)
+        setIsDesktopExpanded(false)
       } else {
+        setIsDesktopExpanded(true)
         setIsDesktopExpanded(true)
       }
     } else {
       setIsDesktopExpanded(false)
+      setIsDesktopExpanded(false)
     }
+  }
   }
 
   const getDockItemPath = (item) => {
+    return resolvePath(item.path)
+  }
     return resolvePath(item.path)
   }
 
   const getFooterLinkPath = (item) => {
     if (item.key === "settings" && lastSublinks?.settings) {
       return resolvePath(lastSublinks.settings)
+      return resolvePath(lastSublinks.settings)
     }
+    return resolvePath(item.path)
+  }
     return resolvePath(item.path)
   }
 
   // Determine if secondary sidebar panel should be open
+  const isPanelOpen = isDesktopExpanded && currentHasSublinks
+  const currentSectionKey = isSettingsPage ? "settings" : activeDockSection
   const isPanelOpen = isDesktopExpanded && currentHasSublinks
   const currentSectionKey = isSettingsPage ? "settings" : activeDockSection
 
@@ -246,6 +295,11 @@ const DesktopSidebar = () => {
                       ? "bg-white text-cath-red-700 shadow-md"
                       : "text-white/80 hover:text-white hover:bg-white/15"
                   }`}
+                  className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${
+                    isActive
+                      ? "bg-white text-cath-red-700 shadow-md"
+                      : "text-white/80 hover:text-white hover:bg-white/15"
+                  }`}
                 >
                   <Icon />
                 </Link>
@@ -263,8 +317,12 @@ const DesktopSidebar = () => {
         <div className="flex flex-col gap-3 w-full px-3 pt-4 border-t border-white/20">
           {footerLinks.map((item) => {
             const Icon = item.icon || Settings
+            const Icon = item.icon || Settings
             const isActive =
               activeDockSection === item.key ||
+              (item.key === "settings" && isSettingsPage)
+            const label = t.nav?.[item.key] || item.key
+            const targetPath = getFooterLinkPath(item)
               (item.key === "settings" && isSettingsPage)
             const label = t.nav?.[item.key] || item.key
             const targetPath = getFooterLinkPath(item)
@@ -276,14 +334,19 @@ const DesktopSidebar = () => {
                   onClick={() => {
                     if (activeDockSection === item.key && isDesktopExpanded) {
                       setIsDesktopExpanded(false)
+                      setIsDesktopExpanded(false)
                     } else {
+                      setIsDesktopExpanded(true)
                       setIsDesktopExpanded(true)
                     }
                   }}
                   className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer ${
                     isActive
+                  className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer ${
+                    isActive
                       ? "bg-white text-cath-red-700 shadow-md scale-105"
                       : "text-white/80 hover:text-white hover:bg-white/15"
+                  }`}
                   }`}
                 >
                   <Icon />
@@ -294,6 +357,7 @@ const DesktopSidebar = () => {
                   {label}
                 </div>
               </div>
+            )
             )
           })}
         </div>
@@ -322,6 +386,8 @@ const DesktopSidebar = () => {
                     : currentSectionData?.defaultLabel ||
                       t.nav?.[activeDockSection] ||
                       "Navigation"}
+                      t.nav?.[activeDockSection] ||
+                      "Navigation"}
                 </span>
               </ListItem>
 
@@ -338,6 +404,37 @@ const DesktopSidebar = () => {
                   <LayoutGroup id={`secondaryNav-${currentSectionKey}`}>
                     {isSettingsPage
                       ? settingNavLinks
+                          .filter((item) => {
+                            if (item.hideInSidebar) return false
+                            if (item.lang && item.lang !== currentLang)
+                              return false
+                            if (item.isPrivate && !isAuthenticated) return false
+                            return true
+                          })
+                          .map((item) => {
+                            const label =
+                              t.nav?.[item.key] || item.label || item.key
+                            return (
+                              <motion.div
+                                layout
+                                key={item.key}
+                                variants={itemVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="w-full"
+                              >
+                                <DesktopNavItem
+                                  to={resolvePath(item.path)}
+                                  icon={item.icon}
+                                  label={label}
+                                  color={item.color}
+                                  img={item.img}
+                                  isDocked={false}
+                                  sectionId={currentSectionKey}
+                                />
+                              </motion.div>
+                            )
+                          })
                           .filter((item) => {
                             if (item.hideInSidebar) return false
                             if (item.lang && item.lang !== currentLang)
@@ -424,5 +521,8 @@ const DesktopSidebar = () => {
     </aside>
   )
 }
+  )
+}
 
+export default DesktopSidebar
 export default DesktopSidebar

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getLocalizedLanguageName } from "../data/courseFormOptions"
 import {
   useGetAllClassesQuery,
   useGetScheduleSessionsQuery
@@ -24,7 +25,13 @@ import { Breadcrumb } from "@/shared/components/ui/navigation"
 const SchedulePage = () => {
   const { language, t } = useLanguage()
   const c = t.courses || {}
+  const ui = c.workspaceUi || {}
   const navigate = useNavigate()
+  const dateLocale = language === "vi"
+    ? "vi-VN"
+    : language === "zh"
+      ? "zh-CN"
+      : "en-GB"
 
   // Local State
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -215,13 +222,12 @@ const SchedulePage = () => {
       <Breadcrumb
         items={[
           { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
-          { label: t.nav.calendar || "Calendar", onClick: () => navigate("/workspace/calendar") },
           { label: c.teachingSchedule || "Teaching Schedule" }
         ]} />
 
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+        <h1 className="text-3xl font-black text-gray-950 tracking-tight">
           {c.teachingSchedule || "Teaching Schedule"}
         </h1>
         <button
@@ -322,7 +328,7 @@ const SchedulePage = () => {
                   return (
                     <button
                       type="button"
-                      aria-label={date.toLocaleDateString(language || "en-US")}
+                    aria-label={date.toLocaleDateString(dateLocale)}
                       aria-pressed={active}
                       key={idx}
                       onClick={() => setSelectedDate(date)}
@@ -390,13 +396,13 @@ const SchedulePage = () => {
                 <span className="text-[11px] font-black text-gray-400 uppercase tracking-wider">
                   {viewMode === "grid"
                     ? `${MONTHS[month]} ${year}`
-                    : `${c.date || "Date"} ${selectedDate.toLocaleDateString(language || "en-US", { day: "numeric", month: "numeric" })}`}
+                    : `${c.date || "Date"} ${selectedDate.toLocaleDateString(dateLocale, { day: "numeric", month: "numeric" })}`}
                 </span>
 
                 {selectedDateClasses.map((cls) => {
                   const scheduleTime = cls.startTime && cls.endTime
                     ? `${cls.startTime} - ${cls.endTime}`
-                    : "TBA"
+                    : ui.tba || "TBA"
 
                   return (
                     <div
@@ -413,7 +419,7 @@ const SchedulePage = () => {
                         <div className="flex flex-wrap gap-1.5">
                           {cls.language && (
                             <span className="bg-[#F59E0B] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
-                              {cls.language}
+                              {getLocalizedLanguageName(cls.language, t)}
                             </span>
                           )}
                           {cls.levels && cls.levels.map((lvl, index) => (
@@ -428,12 +434,12 @@ const SchedulePage = () => {
                           {cls.status === "LIVE" && (
                             <span className="bg-[#FFE4E6] text-[#E11D48] font-bold text-[9px] px-2 py-0.5 rounded-md flex items-center gap-1">
                               <span className="w-1 h-1 rounded-full bg-[#E11D48] animate-ping" />
-                              LIVE
+                              {c.liveStatus || "Live"}
                             </span>
                           )}
                           {cls.status === "TEACHING" && (
                             <span className="bg-[#E8F8F0] text-[#15803D] font-bold text-[9px] px-2 py-0.5 rounded-md">
-                              TEACHING
+                              {c.teachingStatus || "Teaching"}
                             </span>
                           )}
                         </div>
@@ -457,7 +463,12 @@ const SchedulePage = () => {
                               ? (c.sessionOf
                                 ? c.sessionOf.replace("{{session}}", cls.sessionNumber).replace("{{total}}", cls.totalSessions)
                                 : `Session ${cls.sessionNumber} of ${cls.totalSessions}`)
-                              : formatUTCDate(cls.date || cls.startDate, "en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                              : formatUTCDate(
+                                cls.date || cls.startDate,
+                                dateLocale,
+                                { day: "2-digit", month: "short", year: "numeric" },
+                                ui.tba,
+                              )
                             }
                           </span>
                         </div>
@@ -470,7 +481,8 @@ const SchedulePage = () => {
                           <span className="text-[10px] text-gray-400 font-bold">
                             {cls.studentCount == null
                               ? "—"
-                              : `${cls.studentCount} student${cls.studentCount === 1 ? "" : "s"}`}
+                              : (c.studentsCount || "{{count}} students")
+                                .replace("{{count}}", String(cls.studentCount))}
                           </span>
                         </div>
 

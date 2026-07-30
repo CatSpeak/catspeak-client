@@ -60,6 +60,10 @@ import {
 const SUBMISSIONS_PAGE_SIZE = 20
 
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value)
+const interpolate = (template, values) => Object.entries(values).reduce(
+  (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
+  template || "",
+)
 
 const getFirstPositiveNumber = (sources, keys) => {
   for (const source of sources) {
@@ -172,34 +176,36 @@ const formatStatistic = (value, suffix = "") => {
 }
 
 // Question Type Label Helper
-const getQuestionTypeLabel = (typeRaw) => {
+const getQuestionTypeLabel = (typeRaw, qg) => {
   const type = String(typeRaw || "").trim()
   if (type === "MultipleChoiceSingle" || type === "mcq") {
-    return "Trắc nghiệm (1 đáp án)"
+    return qg.questionTypeSingleChoice
   }
   if (type === "MultipleChoiceMultiple") {
-    return "Trắc nghiệm (Nhiều đáp án)"
+    return qg.questionTypeMultipleChoice
   }
   if (type === "TrueFalse") {
-    return "Đúng / Sai"
+    return qg.questionTypeTrueFalse
   }
   if (type === "FillInBlank") {
-    return "Điền vào chỗ trống"
+    return qg.questionTypeFillBlank
   }
   if (type === "Essay" || type === "essay") {
-    return "Tự luận"
+    return qg.questionTypeEssay
   }
-  return type || "Trắc nghiệm"
+  return type || qg.questionTypeDefault
 }
 
 // Custom Recharts Tooltip
 const CustomChartTooltip = ({ active, payload, label }) => {
+  const { t } = useLanguage()
+  const qg = t.courses?.grading?.teacherQuiz || {}
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-2.5 rounded-xl shadow-lg border border-gray-100 text-xs">
-        <p className="font-bold text-gray-900">Khoảng điểm: {label}</p>
+        <p className="font-bold text-gray-900">{qg.scoreRange}: {label}</p>
         <p className="text-[#990011] font-semibold mt-0.5">
-          Số học sinh: {payload[0].value}
+          {qg.studentCount}: {payload[0].value}
         </p>
       </div>
     )
@@ -209,12 +215,14 @@ const CustomChartTooltip = ({ active, payload, label }) => {
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
+  const { t } = useLanguage()
+  const qg = t.courses?.grading?.teacherQuiz || {}
   const lower = String(status || "").toLowerCase()
   if (lower === "published" || lower === "open" || lower === "đang mở") {
     return (
       <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-        Đang mở
+        {qg.statusOpen}
       </span>
     )
   }
@@ -222,21 +230,21 @@ const StatusBadge = ({ status }) => {
     return (
       <span className="bg-amber-50 text-amber-600 border border-amber-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-        Bản nháp
+        {qg.statusDraft}
       </span>
     )
   }
   return (
     <span className="bg-gray-100 text-gray-600 border border-gray-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
       <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-      Đã đóng
+      {qg.statusClosed}
     </span>
   )
 }
 
 // Date Range Formatter
-const formatDateRange = (openTime, closeTime) => {
-  if (!openTime && !closeTime) return "Không giới hạn"
+const formatDateRange = (openTime, closeTime, qg) => {
+  if (!openTime && !closeTime) return qg.noTimeLimit
   const format = (dStr) => {
     if (!dStr) return ""
     const d = new Date(dStr)
@@ -248,30 +256,30 @@ const formatDateRange = (openTime, closeTime) => {
   const start = format(openTime)
   const end = format(closeTime)
   if (start && end) return `${start} - ${end}`
-  if (start) return `Từ ${start}`
-  if (end) return `Hạn ${end}`
-  return "N/A"
+  if (start) return interpolate(qg.fromDate, { date: start })
+  if (end) return interpolate(qg.dueDate, { date: end })
+  return qg.notAvailable
 }
 
 // Relative Time Helper ("Last update: 3 min ago")
-const formatTimeAgo = (dateStr) => {
-  if (!dateStr) return "Không rõ"
+const formatTimeAgo = (dateStr, qg) => {
+  if (!dateStr) return qg.timeUnknown
   const d = new Date(dateStr)
-  if (Number.isNaN(d.getTime())) return "Không rõ"
+  if (Number.isNaN(d.getTime())) return qg.timeUnknown
   const diffMs = Date.now() - d.getTime()
-  if (diffMs < 0) return "Trong tương lai"
+  if (diffMs < 0) return qg.inFuture
   const diffMins = Math.floor(diffMs / 60000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins} min ago`
+  if (diffMins < 1) return qg.justNow
+  if (diffMins < 60) return interpolate(qg.minutesAgo, { count: diffMins })
   const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`
+  if (diffHours < 24) return interpolate(qg.hoursAgo, { count: diffHours })
   const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`
+  return interpolate(qg.daysAgo, { count: diffDays })
 }
 
 // Student Initials Helper
-const getStudentInitials = (name) => {
-  if (!name || typeof name !== "string") return "HS"
+const getStudentInitials = (name, fallback) => {
+  if (!name || typeof name !== "string") return fallback
   const parts = name.trim().split(/\s+/)
   if (parts.length >= 2) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
@@ -280,10 +288,10 @@ const getStudentInitials = (name) => {
 }
 
 // Submission Status Helper
-const getSubmissionStatus = (student) => {
+const getSubmissionStatus = (student, qg) => {
   const statusRaw = String(student.submissionStatus || student.status || "").toLowerCase()
   if (statusRaw.includes("muộn") || statusRaw.includes("late")) {
-    return { label: "Nộp muộn", style: "bg-[#FDF2F2] text-[#E02424] border border-pink-100" }
+    return { label: qg.submissionLate, style: "bg-[#FDF2F2] text-[#E02424] border border-pink-100" }
   }
   if (
     statusRaw.includes("chưa") ||
@@ -291,13 +299,13 @@ const getSubmissionStatus = (student) => {
     statusRaw.includes("unsubmitted") ||
     (student.score == null && !statusRaw.includes("nộp") && !statusRaw.includes("submitted"))
   ) {
-    return { label: "Chưa nộp", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+    return { label: qg.submissionNotSubmitted, style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
   }
-  return { label: "Đã nộp", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+  return { label: qg.submissionSubmitted, style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
 }
 
 // Grading Status Helper
-const getGradingStatus = (student) => {
+const getGradingStatus = (student, qg) => {
   const gradingRaw = String(student.gradingStatus || student.essayStatus || "").toLowerCase()
   if (
     gradingRaw.includes("chưa") ||
@@ -305,7 +313,7 @@ const getGradingStatus = (student) => {
     gradingRaw.includes("draft") ||
     gradingRaw.includes("chờ")
   ) {
-    return { label: "Chưa chấm", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+    return { label: qg.gradingNotGraded, style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
   }
   if (
     gradingRaw.includes("đã") ||
@@ -313,13 +321,15 @@ const getGradingStatus = (student) => {
     gradingRaw.includes("finalized") ||
     (student.score !== null && student.score !== undefined && student.score !== "–")
   ) {
-    return { label: "Đã chấm", style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
+    return { label: qg.gradingGraded, style: "bg-[#ECFDF5] text-[#059669] border border-emerald-100" }
   }
-  return { label: "Chưa chấm", style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
+  return { label: qg.gradingNotGraded, style: "bg-[#FFFBEB] text-[#D97706] border border-amber-100" }
 }
 
 // Custom Audio Player Bar
 const AudioPlayerBar = ({ src }) => {
+  const { t } = useLanguage()
+  const qg = t.courses?.grading?.teacherQuiz || {}
   const audioRef = React.useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -359,7 +369,7 @@ const AudioPlayerBar = ({ src }) => {
         type="button"
         onClick={togglePlay}
         className="w-10 h-10 rounded-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-sm active:scale-95"
-        aria-label={isPlaying ? "Tạm dừng" : "Phát âm thanh"}
+        aria-label={isPlaying ? qg.pauseAudio : qg.playAudio}
       >
         {isPlaying ? (
           <Pause className="w-4 h-4 fill-current text-white" />
@@ -403,14 +413,18 @@ const TeacherAttemptState = ({
   onClose,
   onRetry,
   isLoading = false,
-}) => (
-  <div className="min-h-[450px] bg-gray-100 flex flex-col">
+}) => {
+  const { t } = useLanguage()
+  const qg = t.courses?.grading?.teacherQuiz || {}
+
+  return (
+    <div className="min-h-[450px] bg-gray-100 flex flex-col">
     <div className="pb-4 flex items-center gap-3">
       <button
         type="button"
         onClick={onClose}
         className="w-9 h-9 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
-        title="Quay lại"
+        title={qg.goBack}
       >
         <ArrowLeft className="w-5 h-5" />
       </button>
@@ -431,15 +445,18 @@ const TeacherAttemptState = ({
           onClick={onRetry}
           className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e]"
         >
-          Thử lại
+          {qg.retry}
         </button>
       )}
     </div>
-  </div>
-)
+    </div>
+  )
+}
 
 // Full-Page Student Attempt Grading View for Teacher
 const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, quizId }) => {
+  const { t } = useLanguage()
+  const qg = t.courses?.grading?.teacherQuiz || {}
   const studentId = submission.studentId || submission.id || submission.studentCode
   const {
     data: attemptResponse,
@@ -459,13 +476,13 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
   const [essayComments, setEssayComments] = useState({})
   const [isSaving, setIsSaving] = useState(false)
 
-  const attemptTitle = quizDetail?.name || quizDetail?.title || "Chi tiết bài kiểm tra"
+  const attemptTitle = quizDetail?.name || quizDetail?.title || qg.quizDetails
 
   if (!studentId) {
     return (
       <TeacherAttemptState
         title={attemptTitle}
-        message="Không xác định được học viên để tải bài làm."
+        message={qg.studentNotIdentified}
         onClose={onClose}
       />
     )
@@ -475,7 +492,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
     return (
       <TeacherAttemptState
         title={attemptTitle}
-        message="Đang tải bài làm của học viên..."
+        message={qg.loadingStudentAttempt}
         onClose={onClose}
         isLoading
       />
@@ -486,7 +503,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
     return (
       <TeacherAttemptState
         title={attemptTitle}
-        message="Không thể tải bài làm của học viên. Vui lòng thử lại."
+        message={qg.loadStudentAttemptError}
         onClose={onClose}
         onRetry={refetchAttempt}
       />
@@ -497,7 +514,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
     return (
       <TeacherAttemptState
         title={attemptTitle}
-        message="Dữ liệu bài làm không khả dụng."
+        message={qg.attemptDataUnavailable}
         onClose={onClose}
         onRetry={refetchAttempt}
       />
@@ -512,15 +529,15 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
     return (
       <TeacherAttemptState
         title={attemptTitle}
-        message="Bài làm này chưa có dữ liệu câu hỏi để xem hoặc chấm điểm."
+        message={qg.attemptQuestionsUnavailable}
         onClose={onClose}
         onRetry={refetchAttempt}
       />
     )
   }
 
-  const studentName = attemptData?.studentName || submission.studentName || submission.name || "Học viên"
-  const studentCode = attemptData?.studentCode || submission.studentCode || submission.studentId || "N/A"
+  const studentName = attemptData?.studentName || submission.studentName || submission.name || qg.student
+  const studentCode = attemptData?.studentCode || submission.studentCode || submission.studentId || qg.notAvailable
   const submissionTime = attemptData?.submittedAt || submission.submittedAt || submission.createdAt || submission.date
 
   const currentQuestion = displayQuestions[selectedQuestionIndex] || displayQuestions[0] || null
@@ -597,14 +614,14 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
 
   const handleSaveGrade = async (isDraft = false) => {
     if (!isCurrentEssay) {
-      toast.error("Chỉ câu hỏi tự luận mới có thể chấm điểm thủ công")
+      toast.error(qg.onlyEssayManualGrading)
       return
     }
 
     const targetStudentId = attemptData.studentId ?? submission.studentId ?? submission.id ?? studentId
     const targetAttemptNumber = Number(attemptData.attemptNumber ?? submission.attemptNumber)
     if (!targetStudentId || !Number.isInteger(targetAttemptNumber) || targetAttemptNumber <= 0) {
-      toast.error("Thiếu thông tin lượt làm bài để lưu điểm")
+      toast.error(qg.missingAttemptInfo)
       return
     }
 
@@ -663,17 +680,17 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
     })
 
     if (hasMissingScore) {
-      toast.error("Vui lòng nhập điểm cho câu tự luận trước khi lưu")
+      toast.error(qg.essayScoreRequired)
       return
     }
 
     if (hasInvalidScore) {
-      toast.error("Điểm tự luận không hợp lệ")
+      toast.error(qg.invalidEssayScore)
       return
     }
 
     if (questionsToGrade.length === 0) {
-      toast.error("Hãy nhập điểm hoặc nhận xét trước khi lưu")
+      toast.error(qg.scoreOrCommentRequired)
       return
     }
 
@@ -695,8 +712,11 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
       )
 
       const msg = questionsToGrade.length === 1
-        ? (isDraft ? "Đã lưu nháp điểm" : "Đã hoàn tất chấm điểm")
-        : (isDraft ? `Đã lưu nháp điểm ${questionsToGrade.length} câu hỏi` : `Đã hoàn tất chấm điểm ${questionsToGrade.length} câu hỏi`)
+        ? (isDraft ? qg.gradeDraftSaved : qg.gradingCompleted)
+        : interpolate(
+          isDraft ? qg.gradeDraftSavedMultiple : qg.gradingCompletedMultiple,
+          { count: questionsToGrade.length },
+        )
 
       toast.success(msg)
 
@@ -706,8 +726,8 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
       if (refetchAttempt) {
         await refetchAttempt()
       }
-    } catch (err) {
-      toast.error(err?.data?.message || err?.message || "Không thể lưu điểm chấm")
+    } catch {
+      toast.error(qg.saveGradeError)
     } finally {
       setIsSaving(false)
     }
@@ -722,7 +742,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             type="button"
             onClick={onClose}
             className="w-9 h-9 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
-            title="Quay lại"
+            title={qg.goBack}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -735,8 +755,13 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end gap-0.5">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Đã chấm</span>
-              <span className="text-xs font-black text-gray-800">{gradedQuestionsCount}/{totalQuestionsCount} câu</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">{qg.graded}</span>
+              <span className="text-xs font-black text-gray-800">
+                {interpolate(qg.gradedQuestionsCount, {
+                  graded: gradedQuestionsCount,
+                  total: totalQuestionsCount,
+                })}
+              </span>
             </div>
             <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
@@ -747,7 +772,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
           </div>
 
           <div className="bg-red-50 border border-red-100 rounded-2xl px-4 py-2 flex items-center gap-2">
-            <span className="text-xs font-bold text-gray-500">Điểm</span>
+            <span className="text-xs font-bold text-gray-500">{qg.score}</span>
             <span className="text-xl md:text-2xl font-black text-[#990011]">
               {scoreDisplay}{maxScore !== null && maxScore !== undefined ? `/${maxScore}` : ""}
             </span>
@@ -763,16 +788,18 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             {/* Question Header */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <h2 className="text-xl md:text-2xl font-black text-[#990011] tracking-tight">
-                Câu hỏi {currentQuestionIndex + 1}
+                {interpolate(qg.questionNumber, { number: currentQuestionIndex + 1 })}
               </h2>
               <span className="px-3.5 py-1 bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-700">
-                {pointsMax !== null ? `${pointsMax} điểm` : "Chưa có điểm tối đa"}
+                {pointsMax !== null
+                  ? interpolate(qg.points, { count: pointsMax })
+                  : qg.noMaximumScore}
               </span>
             </div>
 
             {/* Question Type Label */}
             <div className="text-sm font-bold text-gray-700">
-              <span className="font-extrabold text-gray-900">{getQuestionTypeLabel(currentQuestion.type)}</span>
+              <span className="font-extrabold text-gray-900">{getQuestionTypeLabel(currentQuestion.type, qg)}</span>
             </div>
 
             {/* Question Prompt */}
@@ -787,7 +814,9 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
               <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
                 <img
                   src={currentQuestion.mediaUrl || currentQuestion.imageUrl}
-                  alt={`Minh họa câu hỏi ${currentQuestionIndex + 1}`}
+                  alt={interpolate(qg.questionIllustration, {
+                    number: currentQuestionIndex + 1,
+                  })}
                   className="max-h-80 max-w-full w-auto h-auto object-contain rounded-xl shadow-xs"
                 />
               </div>
@@ -801,27 +830,27 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             {/* Student Answer Box */}
             <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
               <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wide">
-                Câu trả lời:
+                {qg.answerLabel}
               </span>
 
               {isCurrentEssay ? (
                 <div className="bg-gray-50/80 border border-gray-200 rounded-2xl p-5 text-sm font-medium text-gray-800 leading-relaxed min-h-[120px] whitespace-pre-wrap">
-                  {currentQuestion.studentFillText || currentQuestion.answerText || "(Học sinh chưa nhập bài làm)"}
+                  {currentQuestion.studentFillText || currentQuestion.answerText || qg.noStudentEssayAnswer}
                 </div>
               ) : currentQuestion.type === "FillInBlank" ? (
                 <div className="flex flex-col gap-3 text-xs">
                   <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
-                    <span className="font-bold text-gray-500 block mb-1">Câu trả lời của học sinh:</span>
+                    <span className="font-bold text-gray-500 block mb-1">{qg.studentAnswer}</span>
                     <p className="text-gray-900 font-bold whitespace-pre-wrap">
-                      {currentQuestion.studentFillText || currentQuestion.answerText || currentQuestion.fillText || "(Chưa có câu trả lời)"}
+                      {currentQuestion.studentFillText || currentQuestion.answerText || currentQuestion.fillText || qg.noAnswer}
                     </p>
                   </div>
                   <div className="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 text-emerald-900">
-                    <span className="font-bold text-emerald-700 block mb-1">Đáp án đúng:</span>
+                    <span className="font-bold text-emerald-700 block mb-1">{qg.correctAnswer}</span>
                     <p className="font-extrabold text-emerald-950">
                       {Array.isArray(currentQuestion.correctAnswers)
                         ? currentQuestion.correctAnswers.join(" / ")
-                        : (currentQuestion.correctAnswer || "Chưa có đáp án")}
+                        : (currentQuestion.correctAnswer || qg.noCorrectAnswer)}
                     </p>
                   </div>
                 </div>
@@ -867,7 +896,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                           )}
                           <span className="font-semibold">{String.fromCharCode(65 + optIdx)}. {opt}</span>
                         </div>
-                        {isStudentPick && <span className="text-[10px] font-black uppercase tracking-wider">(Đã chọn)</span>}
+                        {isStudentPick && <span className="text-[10px] font-black uppercase tracking-wider">{qg.selected}</span>}
                       </div>
                     )
                   })}
@@ -877,7 +906,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
           </div>
         ) : (
           <div className="bg-white rounded-3xl p-12 text-center text-gray-400 font-bold border border-gray-150">
-            Không tìm thấy thông tin câu hỏi.
+            {qg.questionInformationNotFound}
           </div>
         )}
 
@@ -886,7 +915,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
           {/* Card 1: Questions List Navigation Grid */}
           <div className="bg-white rounded-3xl p-6 border border-gray-150 shadow-xs flex flex-col gap-4">
             <h3 className="text-base font-black text-center text-gray-900 tracking-tight">
-              Danh sách câu hỏi
+              {qg.questionsList}
             </h3>
             <div className="border-b border-gray-150" />
 
@@ -922,7 +951,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
           {/* Card 2: Grading & Feedback Panel */}
           <div className="bg-white rounded-3xl p-6 border border-gray-150 shadow-xs flex flex-col gap-5">
             <h3 className="text-base font-black text-center text-gray-900 tracking-tight">
-              {isCurrentEssay ? "Chấm điểm & nhận xét" : "Kết quả chấm tự động"}
+              {isCurrentEssay ? qg.gradingAndFeedback : qg.automaticGradingResult}
             </h3>
             <div className="border-b border-gray-150" />
 
@@ -933,9 +962,11 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="font-extrabold text-gray-900 text-sm truncate">{studentName}</span>
-                <span className="text-xs text-gray-500 font-medium">Mã học viên: {studentCode}</span>
+                <span className="text-xs text-gray-500 font-medium">{qg.studentCode}: {studentCode}</span>
                 <span className="text-xs text-gray-400 font-medium">
-                  {submissionTime ? `Nộp bài: ${formatTimeAgo(submissionTime)}` : "Chưa có thời gian nộp"}
+                  {submissionTime
+                    ? `${qg.submitted}: ${formatTimeAgo(submissionTime, qg)}`
+                    : qg.noSubmissionTime}
                 </span>
               </div>
             </div>
@@ -944,13 +975,13 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
               <>
                 {/* Score Stepper */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Điểm</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{qg.score}</label>
                   <div className="flex items-center rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 p-1">
                     <button
                       type="button"
                       onClick={() => handleStepScore(-0.5)}
                       className="w-10 h-10 rounded-xl bg-gray-700 hover:bg-gray-800 text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
-                      aria-label="Giảm điểm"
+                      aria-label={qg.decreaseScore}
                     >
                       <Minus className="w-4 h-4" />
                     </button>
@@ -962,7 +993,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                         min="0"
                         value={currentScoreVal}
                         onChange={(e) => handleScoreInputChange(e.target.value)}
-                        placeholder="Nhập điểm"
+                        placeholder={qg.scorePlaceholder}
                         className="w-20 text-center font-black text-red-700 bg-transparent focus:outline-none"
                       />
                       <span className="text-gray-400 font-bold">
@@ -973,7 +1004,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                       type="button"
                       onClick={() => handleStepScore(0.5)}
                       className="w-10 h-10 rounded-xl bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
-                      aria-label="Tăng điểm"
+                      aria-label={qg.increaseScore}
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -982,7 +1013,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
 
                 {/* Feedback Textarea */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Nhận xét</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{qg.feedback}</label>
                   <textarea
                     value={currentCommentVal}
                     onChange={(e) => {
@@ -990,7 +1021,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                         setEssayComments((prev) => ({ ...prev, [currentQId]: e.target.value }))
                       }
                     }}
-                    placeholder="Nhập nhận xét của giáo viên cho câu hỏi này..."
+                    placeholder={qg.feedbackPlaceholder}
                     className="w-full p-4 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-800 bg-gray-50/50 min-h-[110px] resize-y focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
                   />
                 </div>
@@ -1006,13 +1037,13 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                   }
                   className="bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-sm py-3.5 rounded-2xl w-full shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
                 >
-                  {isSaving ? "Đang lưu..." : "Lưu"}
+                  {isSaving ? qg.saving : qg.save}
                 </button>
               </>
             ) : (
               <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-center">
                 <p className="text-xs font-semibold text-blue-800">
-                  Câu hỏi này được hệ thống chấm tự động.
+                  {qg.automaticallyGradedNotice}
                 </p>
                 <p className="mt-2 text-lg font-black text-gray-900">
                   {currentQuestion.pointsEarned ?? "—"}
@@ -1020,7 +1051,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                 </p>
                 {typeof currentQuestion.isCorrect === "boolean" && (
                   <p className={`mt-1 text-xs font-bold ${currentQuestion.isCorrect ? "text-emerald-600" : "text-red-600"}`}>
-                    {currentQuestion.isCorrect ? "Đúng" : "Sai"}
+                    {currentQuestion.isCorrect ? qg.correct : qg.incorrect}
                   </p>
                 )}
               </div>
@@ -1034,6 +1065,8 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
 
 // Single Question Display Card
 const QuestionDetailCard = ({ question, index }) => {
+  const { t } = useLanguage()
+  const qg = t.courses?.grading?.teacherQuiz || {}
   const [isFlagged, setIsFlagged] = useState(false)
 
   const points = question.points ?? question.score ?? 5
@@ -1065,11 +1098,11 @@ const QuestionDetailCard = ({ question, index }) => {
       {/* Header Row */}
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-lg font-bold text-[#990011]">
-          Câu hỏi {index + 1}
+          {interpolate(qg.questionNumber, { number: index + 1 })}
         </h4>
         <div className="flex items-center gap-3">
           <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-lg">
-            {points} điểm
+            {interpolate(qg.points, { count: points })}
           </span>
           <button
             type="button"
@@ -1078,7 +1111,7 @@ const QuestionDetailCard = ({ question, index }) => {
               ? "border-red-500 bg-red-50 text-red-500"
               : "border-red-200 text-red-500 hover:bg-red-50"
               }`}
-            title="Đánh dấu"
+            title={isFlagged ? qg.unflag : qg.flag}
           >
             <Flag className={`w-3.5 h-3.5 ${isFlagged ? "fill-red-500" : ""}`} />
           </button>
@@ -1087,7 +1120,7 @@ const QuestionDetailCard = ({ question, index }) => {
 
       {/* Question Type Info */}
       <div className="text-sm font-bold text-gray-700 mb-2">
-        <span className="font-extrabold text-gray-900">{getQuestionTypeLabel(type)}</span>
+        <span className="font-extrabold text-gray-900">{getQuestionTypeLabel(type, qg)}</span>
       </div>
 
       {/* Content / Prompt */}
@@ -1102,7 +1135,7 @@ const QuestionDetailCard = ({ question, index }) => {
         <div className="mb-3 rounded-2xl overflow-hidden border border-gray-100 flex justify-center bg-gray-50 p-2">
           <img
             src={imageUrl}
-            alt={`Minh họa câu hỏi ${index + 1}`}
+            alt={interpolate(qg.questionIllustration, { number: index + 1 })}
             className="max-h-48 max-w-xs sm:max-w-sm w-auto h-auto object-contain rounded-xl"
           />
         </div>
@@ -1167,7 +1200,7 @@ const QuestionDetailCard = ({ question, index }) => {
             <span className="font-extrabold text-emerald-800">
               {correctAnswers.length > 0
                 ? correctAnswers.join(" / ")
-                : "Chưa có đáp án"}
+                : qg.noCorrectAnswer}
             </span>
           </div>
         </div>
@@ -1176,7 +1209,9 @@ const QuestionDetailCard = ({ question, index }) => {
       {/* Essay / Text Question info */}
       {type === "Essay" && (
         <div className="mt-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-500 font-medium">
-          Câu hỏi tự luận (Chấm thủ công) • Giới hạn từ: {question.maxWordCount || 500} từ
+          {interpolate(qg.essayManualWordLimit, {
+            count: question.maxWordCount || 500,
+          })}
         </div>
       )}
     </div>
@@ -1185,9 +1220,10 @@ const QuestionDetailCard = ({ question, index }) => {
 
 // Main Teacher Quiz Detail View Component
 const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const c = t?.courses || {}
   const cg = c?.grading || {}
+  const qg = cg.teacherQuiz || {}
   const navigate = useNavigate()
   const routeParams = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -1267,7 +1303,11 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
   if (isQuizLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[450px]">
+      <div
+        role="status"
+        aria-label={qg.loadingQuizDetails}
+        className="flex justify-center items-center min-h-[450px]"
+      >
         <LoadingSpinner />
       </div>
     )
@@ -1278,7 +1318,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       <div className="mx-auto flex min-h-[400px] max-w-md flex-col items-center justify-center gap-4 text-center">
         <AlertCircle className="w-10 h-10 text-red-500" />
         <p className="text-sm font-semibold text-gray-700">
-          Không thể tải thông tin bài kiểm tra.
+          {qg.loadQuizDetailsError}
         </p>
         <div className="flex items-center gap-3">
           <button
@@ -1286,14 +1326,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             onClick={onBack}
             className="rounded-xl border border-gray-300 px-4 py-2 text-xs font-bold text-gray-700"
           >
-            Quay lại
+            {qg.goBack}
           </button>
           <button
             type="button"
             onClick={refetchQuiz}
             className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
           >
-            Thử lại
+            {qg.retry}
           </button>
         </div>
       </div>
@@ -1348,32 +1388,32 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
   const handlePublish = async () => {
     try {
       await publishQuiz({ classId, quizId }).unwrap()
-      toast.success("Đã đăng bài kiểm tra thành công")
+      toast.success(qg.publishSuccess)
       refetchQuiz()
     } catch {
-      toast.error("Không thể đăng bài kiểm tra")
+      toast.error(qg.publishError)
     }
   }
 
   const handleClose = async () => {
     try {
       await closeQuiz({ classId, quizId }).unwrap()
-      toast.success("Đã đóng bài kiểm tra")
+      toast.success(qg.closeSuccess)
       refetchQuiz()
     } catch {
-      toast.error("Không thể đóng bài kiểm tra")
+      toast.error(qg.closeError)
     }
   }
 
   const handleDelete = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa bài kiểm tra này?")) {
+    if (window.confirm(qg.deleteConfirm)) {
       try {
         await deleteQuiz({ classId, quizId }).unwrap()
-        toast.success("Đã xóa bài kiểm tra")
+        toast.success(qg.deleteSuccess)
         if (onBack) onBack()
         else navigate(`/workspace/courses/class/${classId}`)
       } catch {
-        toast.error("Không thể xóa bài kiểm tra")
+        toast.error(qg.deleteError)
       }
     }
   }
@@ -1384,14 +1424,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `Thong_ke_quiz_${quizId}.xlsx`
+      a.download = interpolate(qg.reportFileName, { quizId })
       document.body.appendChild(a)
       a.click()
       a.remove()
       window.URL.revokeObjectURL(url)
-      toast.success("Đã xuất báo cáo thành công")
+      toast.success(qg.exportSuccess)
     } catch {
-      toast.error("Không thể xuất báo cáo")
+      toast.error(qg.exportError)
     }
   }
 
@@ -1401,15 +1441,15 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       <div className="mb-4">
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
           <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-            Trang chủ
+            {qg.home}
           </button>
           <span>/</span>
           <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>
-            Khóa học của tôi
+            {qg.myCourses}
           </button>
           <span>/</span>
           <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses/all")}>
-            Toàn bộ khóa học
+            {qg.allCourses}
           </button>
           <span>/</span>
           <button
@@ -1423,7 +1463,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               }
             }}
           >
-            Chi tiết khóa học
+            {qg.courseDetails}
           </button>
           <span>/</span>
           <button
@@ -1431,11 +1471,11 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             className="cursor-pointer hover:underline"
             onClick={onBack || (() => navigate(`/workspace/courses/class/${classId}`))}
           >
-            Chi tiết lớp học
+            {qg.classDetails}
           </button>
           <span>/</span>
           <span className="text-[#990011] font-semibold truncate max-w-xs sm:max-w-md">
-            {quizDetail.name || quizDetail.title || "Chi tiết bài kiểm tra"}
+            {quizDetail.name || quizDetail.title || qg.quizDetails}
           </span>
         </div>
       </div>
@@ -1446,7 +1486,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-              {quizDetail.name || quizDetail.title || "Chi tiết bài kiểm tra"}
+              {quizDetail.name || quizDetail.title || qg.quizDetails}
             </h1>
             <StatusBadge status={quizDetail.status} />
           </div>
@@ -1459,7 +1499,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               className="border border-[#990011]/30 hover:border-[#990011] text-[#990011] bg-white hover:bg-red-50/50 px-4 py-2 rounded-full flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all active:scale-98"
             >
               <Pencil className="w-3.5 h-3.5 text-[#990011]" />
-              <span>Chỉnh sửa</span>
+              <span>{qg.edit}</span>
             </button>
 
             {/* Ellipsis Menu */}
@@ -1468,7 +1508,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
-                aria-label="Tùy chọn khác"
+                aria-label={qg.moreOptions}
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
@@ -1486,7 +1526,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-emerald-600 flex items-center gap-2 disabled:opacity-50"
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Đăng bài kiểm tra</span>
+                      <span>{qg.publishQuiz}</span>
                     </button>
                   )}
                   {quizDetail.status !== "Closed" && (
@@ -1500,7 +1540,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-amber-600 flex items-center gap-2 disabled:opacity-50"
                     >
                       <XCircle className="w-4 h-4" />
-                      <span>Đóng bài kiểm tra</span>
+                      <span>{qg.closeQuiz}</span>
                     </button>
                   )}
                   <button
@@ -1513,7 +1553,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     className="w-full text-left px-4 py-2.5 hover:bg-red-50 text-red-600 flex items-center gap-2 disabled:opacity-50"
                   >
                     <Trash2 className="w-4 h-4" />
-                    <span>Xóa bài kiểm tra</span>
+                    <span>{qg.deleteQuiz}</span>
                   </button>
                 </div>
               )}
@@ -1529,9 +1569,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Số câu hỏi</p>
+              <p className="text-xs text-gray-400 font-medium">{qg.questionCountLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
-                {totalQuestions} câu
+                {interpolate(qg.questionCountValue, { count: totalQuestions })}
               </p>
             </div>
           </div>
@@ -1542,11 +1582,11 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Thời gian</p>
+              <p className="text-xs text-gray-400 font-medium">{qg.durationLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
                 {timeLimit !== null && timeLimit !== undefined
-                  ? `${timeLimit} phút`
-                  : "Không giới hạn"}
+                  ? interpolate(qg.minutes, { count: timeLimit })
+                  : qg.noTimeLimit}
               </p>
             </div>
           </div>
@@ -1557,9 +1597,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Thời hạn</p>
+              <p className="text-xs text-gray-400 font-medium">{qg.deadlineLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
-                {formatDateRange(quizDetail.openTime, quizDetail.closeTime)}
+                {formatDateRange(quizDetail.openTime, quizDetail.closeTime, qg)}
               </p>
             </div>
           </div>
@@ -1570,7 +1610,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <CheckSquare className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">Số lần nộp</p>
+              <p className="text-xs text-gray-400 font-medium">{qg.attemptCountLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
                 {maxAttempts ?? "—"}
               </p>
@@ -1589,7 +1629,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             : "text-gray-500 hover:text-gray-700"
             }`}
         >
-          Tổng quan
+          {qg.overview}
         </button>
         <button
           type="button"
@@ -1599,7 +1639,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             : "text-gray-500 hover:text-gray-700"
             }`}
         >
-          Danh sách nộp bài
+          {qg.submissions}
         </button>
         <button
           type="button"
@@ -1609,7 +1649,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             : "text-gray-500 hover:text-gray-700"
             }`}
         >
-          Thống kê
+          {qg.statistics}
         </button>
         <button
           type="button"
@@ -1619,7 +1659,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             : "text-gray-500 hover:text-gray-700"
             }`}
         >
-          Chỉnh sửa
+          {qg.edit}
         </button>
       </div>
 
@@ -1630,12 +1670,12 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           <div className="lg:col-span-8 space-y-6">
             {/* Mô tả Card */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-base font-bold text-gray-900 mb-3">Mô tả</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-3">{qg.description}</h3>
               <div className="text-sm text-gray-600 leading-relaxed">
                 {quizDetail.description ? (
                   <RenderHTML html={quizDetail.description} />
                 ) : (
-                  <span className="text-gray-400">Chưa có mô tả.</span>
+                  <span className="text-gray-400">{qg.noDescription}</span>
                 )}
               </div>
             </div>
@@ -1645,14 +1685,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               {/* Header line */}
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-base font-bold text-gray-900">
-                  Danh sách câu hỏi ({totalQuestions})
+                  {interpolate(qg.questionsListWithCount, { count: totalQuestions })}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setIsQuestionsCollapsed(!isQuestionsCollapsed)}
                   className="text-xs text-gray-500 hover:text-gray-700 font-medium flex items-center gap-1 cursor-pointer"
                 >
-                  <span>{isQuestionsCollapsed ? "Mở rộng" : "Thu gọn"}</span>
+                  <span>{isQuestionsCollapsed ? qg.expand : qg.collapse}</span>
                   {isQuestionsCollapsed ? (
                     <ChevronDown className="w-3.5 h-3.5" />
                   ) : (
@@ -1670,7 +1710,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     ))
                   ) : (
                     <div className="rounded-3xl border border-gray-100 bg-white p-8 text-center text-sm font-medium text-gray-400">
-                      Bài kiểm tra chưa có câu hỏi.
+                      {qg.quizHasNoQuestions}
                     </div>
                   )}
 
@@ -1683,7 +1723,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         className="text-xs font-bold text-[#990011] inline-flex items-center gap-1 hover:underline cursor-pointer"
                       >
                         <span>
-                          Xem thêm {totalQuestions - visibleQuestionsCount} câu hỏi
+                          {interpolate(qg.viewMoreQuestions, {
+                            count: totalQuestions - visibleQuestionsCount,
+                          })}
                         </span>
                         <ChevronDown className="w-3.5 h-3.5" />
                       </button>
@@ -1695,7 +1737,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         onClick={() => setVisibleQuestionsCount(1)}
                         className="text-xs font-bold text-gray-500 inline-flex items-center gap-1 hover:underline cursor-pointer"
                       >
-                        <span>Thu gọn danh sách câu hỏi</span>
+                        <span>{qg.collapseQuestionList}</span>
                         <ChevronUp className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -1709,13 +1751,13 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           <div className="lg:col-span-4">
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
               <h3 className="text-base font-bold text-gray-900 mb-4">
-                Cấu hình bài kiểm tra
+                {qg.quizConfiguration}
               </h3>
 
               <div className="divide-y divide-gray-100 text-xs">
                 {/* Xáo trộn câu hỏi */}
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-600 font-medium">Xáo trộn câu hỏi</span>
+                  <span className="text-gray-600 font-medium">{qg.shuffleQuestions}</span>
                   <span
                     className={
                       quizDetail.shuffleQuestions
@@ -1723,13 +1765,13 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         : "text-gray-900 font-bold"
                     }
                   >
-                    {quizDetail.shuffleQuestions ? "Có" : "Không"}
+                    {quizDetail.shuffleQuestions ? qg.yes : qg.no}
                   </span>
                 </div>
 
                 {/* Xáo trộn đáp án */}
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-600 font-medium">Xáo trộn đáp án</span>
+                  <span className="text-gray-600 font-medium">{qg.shuffleAnswers}</span>
                   <span
                     className={
                       quizDetail.shuffleOptions
@@ -1737,14 +1779,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         : "text-gray-900 font-bold"
                     }
                   >
-                    {quizDetail.shuffleOptions ? "Có" : "Không"}
+                    {quizDetail.shuffleOptions ? qg.yes : qg.no}
                   </span>
                 </div>
 
                 {/* Hiển thị đáp án sau khi nộp */}
                 <div className="flex items-center justify-between py-3">
                   <span className="text-gray-600 font-medium">
-                    Hiển thị đáp án sau khi nộp
+                    {qg.showAnswersAfterSubmission}
                   </span>
                   <span
                     className={
@@ -1753,13 +1795,13 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         : "text-gray-900 font-bold"
                     }
                   >
-                    {quizDetail.showAnswersAfterSubmission ? "Có" : "Không"}
+                    {quizDetail.showAnswersAfterSubmission ? qg.yes : qg.no}
                   </span>
                 </div>
 
                 {/* Cho phép nộp muộn */}
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-gray-600 font-medium">Cho phép nộp muộn</span>
+                  <span className="text-gray-600 font-medium">{qg.allowLateSubmission}</span>
                   <span
                     className={
                       quizDetail.allowLateSubmission
@@ -1767,7 +1809,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         : "text-gray-900 font-bold"
                     }
                   >
-                    {quizDetail.allowLateSubmission ? "Có" : "Không"}
+                    {quizDetail.allowLateSubmission ? qg.yes : qg.no}
                   </span>
                 </div>
               </div>
@@ -1782,7 +1824,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           {/* Header & Search */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <h3 className="text-base font-bold text-gray-900">
-              Danh sách nộp bài
+              {qg.submissions}
             </h3>
             <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
@@ -1793,28 +1835,28 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                   setSubmissionSearch(e.target.value)
                   setSubmissionPage(1)
                 }}
-                placeholder="Tìm kiếm học sinh..."
+                placeholder={qg.searchStudentsPlaceholder}
                 className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#990011]"
               />
             </div>
           </div>
 
           {isStudentsLoading || isStudentsFetching ? (
-            <div className="py-12 text-center">
+            <div role="status" aria-label={qg.loadingSubmissions} className="py-12 text-center">
               <LoadingSpinner />
             </div>
           ) : isStudentsError ? (
             <div className="flex flex-col items-center gap-3 py-12 text-center">
               <AlertCircle className="h-8 w-8 text-red-500" />
               <p className="text-xs font-semibold text-gray-600">
-                Không thể tải danh sách nộp bài.
+                {qg.loadSubmissionsError}
               </p>
               <button
                 type="button"
                 onClick={refetchStudents}
                 className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
               >
-                Thử lại
+                {qg.retry}
               </button>
             </div>
           ) : (
@@ -1825,42 +1867,42 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     <tr className="bg-[#F9FAFB] text-gray-700 font-semibold border-b border-gray-200">
                       <th className="py-4 px-5 border-r border-gray-200">
                         <div className="flex items-center justify-between gap-2">
-                          <span>Thông tin học viên</span>
+                          <span>{qg.studentInformation}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
                         </div>
                       </th>
                       <th className="py-4 px-5 border-r border-gray-200">
                         <div className="flex items-center justify-center gap-2">
-                          <span>Trạng thái nộp</span>
+                          <span>{qg.submissionStatus}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
                         </div>
                       </th>
                       <th className="py-4 px-5 border-r border-gray-200">
                         <div className="flex items-center justify-center gap-2">
-                          <span>Thời gian chấm</span>
+                          <span>{qg.gradingStatus}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
                         </div>
                       </th>
                       <th className="py-4 px-5 border-r border-gray-200">
                         <div className="flex items-center justify-center gap-2">
-                          <span>Điểm số</span>
+                          <span>{qg.score}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
                         </div>
                       </th>
                       <th className="py-4 px-5 text-center">
-                        <span>Hành động</span>
+                        <span>{qg.actions}</span>
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {studentsList.length > 0 ? (
                       studentsList.map((st, idx) => {
-                        const subStatus = getSubmissionStatus(st)
-                        const gradStatus = getGradingStatus(st)
+                        const subStatus = getSubmissionStatus(st, qg)
+                        const gradStatus = getGradingStatus(st, qg)
                         const studentNumber = ((submissionPage - 1) * SUBMISSIONS_PAGE_SIZE) + idx + 1
-                        const studentName = st.studentName || st.name || `Học viên ${studentNumber}`
-                        const initials = getStudentInitials(studentName)
-                        const timeAgo = formatTimeAgo(st.updatedAt || st.submittedAt)
+                        const studentName = st.studentName || st.name || interpolate(qg.studentNumber, { number: studentNumber })
+                        const initials = getStudentInitials(studentName, qg.studentInitials)
+                        const timeAgo = formatTimeAgo(st.updatedAt || st.submittedAt, qg)
                         const targetStudentId = st.studentId ?? st.id
                         const displayScore =
                           st.score !== null && st.score !== undefined && st.score !== ""
@@ -1892,7 +1934,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                                   </h5>
                                   <div className="text-xs text-gray-400 font-medium flex items-center gap-1 mt-0.5">
                                     <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                    <span>Last update: {timeAgo}</span>
+                                    <span>{interpolate(qg.lastUpdateAt, { time: timeAgo })}</span>
                                   </div>
                                 </div>
                               </div>
@@ -1931,7 +1973,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                                   navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quizId)}/submission/${encodeURIComponent(targetStudentId)}`)
                                 }}
                                 className="w-8 h-8 rounded-full text-[#990011] hover:bg-red-50 inline-flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-                                title="Xem bài làm"
+                                title={qg.viewAttempt}
                               >
                                 <Eye className="w-4.5 h-4.5 text-[#990011]" />
                               </button>
@@ -1946,8 +1988,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                           className="py-12 text-center text-gray-400 text-xs font-medium"
                         >
                           {submissionSearch
-                            ? "Không tìm thấy học viên phù hợp"
-                            : "Chưa có học sinh nào nộp bài"}
+                            ? qg.noMatchingStudents
+                            : qg.noStudentSubmissions}
                         </td>
                       </tr>
                     )}
@@ -1958,10 +2000,12 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               {(submissionPage > 1 || studentsPageData.hasNextPage || (studentsPageData.totalPages ?? 0) > 1) && (
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-xs font-medium text-gray-500">
-                    Trang {studentsPageData.page}
-                    {studentsPageData.totalPages ? ` / ${studentsPageData.totalPages}` : ""}
+                    {interpolate(qg.pageLabel, { page: studentsPageData.page })}
+                    {studentsPageData.totalPages
+                      ? interpolate(qg.totalPagesSuffix, { totalPages: studentsPageData.totalPages })
+                      : ""}
                     {studentsPageData.totalItems !== null
-                      ? ` · ${studentsPageData.totalItems} học viên`
+                      ? interpolate(qg.studentsTotalSuffix, { count: studentsPageData.totalItems })
                       : ""}
                   </p>
                   <div className="flex items-center gap-2">
@@ -1971,7 +2015,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       onClick={() => setSubmissionPage((page) => Math.max(1, page - 1))}
                       className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      Trang trước
+                      {qg.previousPage}
                     </button>
                     <button
                       type="button"
@@ -1979,7 +2023,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       onClick={() => setSubmissionPage((page) => page + 1)}
                       className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e] disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      Trang sau
+                      {qg.nextPage}
                     </button>
                   </div>
                 </div>
@@ -1997,7 +2041,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             className="flex min-h-[320px] items-center justify-center rounded-3xl border border-gray-100 bg-white"
           >
             <LoadingSpinner />
-            <span className="sr-only">Đang tải thống kê bài kiểm tra</span>
+            <span className="sr-only">{qg.loadingStatistics}</span>
           </div>
         ) : isStatsError ? (
           <div
@@ -2006,14 +2050,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           >
             <AlertCircle className="h-10 w-10 text-red-500" />
             <p className="text-sm font-semibold text-gray-600">
-              Không thể tải thống kê bài kiểm tra.
+              {qg.loadStatisticsError}
             </p>
             <button
               type="button"
               onClick={refetchStats}
               className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e]"
             >
-              Thử lại
+              {qg.retry}
             </button>
           </div>
         ) : !statsData ? (
@@ -2023,14 +2067,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           >
             <BarChart2 className="h-10 w-10 text-gray-300" />
             <p className="text-sm font-semibold text-gray-500">
-              Dữ liệu thống kê chưa khả dụng.
+              {qg.statisticsUnavailable}
             </p>
           </div>
         ) : (
           <div className="space-y-6">
             {isStatsFetching && (
               <span role="status" className="sr-only">
-                Đang cập nhật thống kê bài kiểm tra
+                {qg.updatingStatistics}
               </span>
             )}
             {/* Header Card */}
@@ -2038,7 +2082,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               {/* Title & Export Row */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <h2 className="text-xl md:text-2xl font-bold text-gray-900">
-                  Thống kê: {quizDetail.name || quizDetail.title || "Bài kiểm tra"}
+                  {interpolate(qg.statisticsTitle, {
+                    quizTitle: quizDetail.name || quizDetail.title || qg.quiz,
+                  })}
                 </h2>
                 <button
                   type="button"
@@ -2047,7 +2093,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                   className="bg-[#990011] hover:bg-[#80000e] text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
                 >
                   <Download className="w-4 h-4 text-white" />
-                  <span>{isExporting ? "Đang xuất..." : "Xuất báo cáo"}</span>
+                  <span>{isExporting ? qg.exporting : qg.exportReport}</span>
                 </button>
               </div>
 
@@ -2059,7 +2105,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     Σ
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">Điểm TB</p>
+                    <p className="text-xs text-gray-400 font-medium">{qg.averageScore}</p>
                     <p className="text-base font-bold text-gray-900 mt-0.5">
                       {formatStatistic(statsData.averageScore)}
                     </p>
@@ -2072,7 +2118,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     <CheckCircle2 className="w-5 h-5 text-[#990011]" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">Tỷ lệ hoàn thành</p>
+                    <p className="text-xs text-gray-400 font-medium">{qg.completionRate}</p>
                     <p className="text-base font-bold text-gray-900 mt-0.5">
                       {formatStatistic(statsData.completionRate, "%")}
                     </p>
@@ -2085,7 +2131,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     <TrendingUp className="w-5 h-5 text-[#990011]" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">Điểm cao nhất</p>
+                    <p className="text-xs text-gray-400 font-medium">{qg.highestScore}</p>
                     <p className="text-base font-bold text-gray-900 mt-0.5">
                       {formatStatistic(statsData.highestScore)}
                     </p>
@@ -2098,7 +2144,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     <TrendingDown className="w-5 h-5 text-gray-700" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium">Điểm thấp nhất</p>
+                    <p className="text-xs text-gray-400 font-medium">{qg.lowestScore}</p>
                     <p className="text-base font-bold text-gray-900 mt-0.5">
                       {formatStatistic(statsData.lowestScore)}
                     </p>
@@ -2112,7 +2158,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               {/* Left Column: Phân bố điểm số */}
               <div className="lg:col-span-8 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
                 <h3 className="text-base font-bold text-gray-900 mb-4">
-                  Phân bố điểm số
+                  {qg.scoreDistribution}
                 </h3>
 
                 {/* Recharts Bar Chart */}
@@ -2155,7 +2201,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                   </div>
                 ) : (
                   <div className="flex h-64 items-center justify-center text-xs font-semibold text-gray-400">
-                    Chưa có dữ liệu phân bố điểm.
+                    {qg.noScoreDistributionData}
                   </div>
                 )}
               </div>
@@ -2163,7 +2209,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               {/* Right Column: Câu hỏi sai nhiều nhất */}
               <div className="lg:col-span-4 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col">
                 <h3 className="text-base font-bold text-gray-900 mb-6">
-                  Câu hỏi sai nhiều nhất
+                  {qg.mostMissedQuestions}
                 </h3>
 
                 {topMissedList.length > 0 ? (
@@ -2172,10 +2218,10 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       <div key={idx} className="pt-3 first:pt-0">
                         <div className="flex items-center justify-between">
                           <h4 className="text-sm font-bold text-gray-900">
-                            Câu {q.questionNumber}
+                            {interpolate(qg.questionShort, { number: q.questionNumber })}
                           </h4>
                           <span className="text-xs font-bold text-[#990011]">
-                            {q.correctPercent}% đúng
+                            {interpolate(qg.percentCorrect, { percent: q.correctPercent })}
                           </span>
                         </div>
                         <p className="text-xs text-gray-500 font-medium line-clamp-1 mt-1">
@@ -2186,7 +2232,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                   </div>
                 ) : (
                   <p className="text-xs text-gray-400 text-center py-8">
-                    Không có câu hỏi sai nhiều
+                    {qg.noFrequentlyMissedQuestions}
                   </p>
                 )}
               </div>

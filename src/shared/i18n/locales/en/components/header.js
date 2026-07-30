@@ -8,6 +8,9 @@ export default {
   community: "Community",
   notifications: "Notifications",
   noNewNotifications: "No new notifications",
+  markAllRead: "Mark all as read",
+  newNotificationTitle: "New Notification",
+  newNotificationBody: "You have a new notification to view.",
   searchPlaceholder: "Search rooms",
   languages: {
     vi: "Vietnamese",

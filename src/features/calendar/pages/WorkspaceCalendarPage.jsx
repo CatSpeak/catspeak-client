@@ -100,13 +100,13 @@ const WorkspaceCalendarPage = () => {
       <Breadcrumb
         items={[
           { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
-          { label: t.nav.calendar || "Calendar" }
+          { label: c.teachingTasks || "Teaching Tasks" }
         ]}
       />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-          {t.nav?.calendar || "Calendar"}
+          {c.teachingTasks || "Teaching Tasks"}
         </h1>
       </div>
 
@@ -120,7 +120,7 @@ const WorkspaceCalendarPage = () => {
             emptyLabel={c.noUpcomingClasses || "No upcoming classes yet"}
             viewClassLabel={c.viewClass || "View class"}
             joinRoomLabel={c.joinRoom || "Join room"}
-            onViewSchedule={() => navigate("/workspace/schedule/teaching-schedule")}
+            onViewSchedule={() => navigate("/workspace/schedule")}
             onOpenSession={(item) => {
               const targetId = item.classId
               if (targetId) {

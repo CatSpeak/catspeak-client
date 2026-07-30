@@ -1,12 +1,18 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users } from "lucide-react"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
 import TeachingTasksSection from "../assignments/TeachingTasksSection"
+import { useGetTeacherClassTeachingTasksCombinedQuery } from "@/store/api/coursesApi"
+import { mapTeachingTask } from "../../utils/courseTransforms"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import CourseStatusPill from "../CourseStatusPill"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import {
   formatDateRange,
   formatDateDayMonth,
+  getCourseLocale,
   getSafeMediaUrl,
 } from "../../utils/courseUtils"
 
@@ -34,6 +40,11 @@ const ClassOverviewTab = ({
   onViewTasks,
   cd = {}
 }) => {
+  const { language, t } = useLanguage()
+  const c = t.courses || {}
+  const ui = c.workspaceUi || {}
+  const taskText = c.grading || {}
+
   const completedValue = (classData.progress
     ? classData.progress.completedSessions
     : (classData.completedSessions ?? classData.teachingProgress?.completed))
@@ -63,6 +74,45 @@ const ClassOverviewTab = ({
     ? Math.max(0, Math.floor(studentCountValue))
     : null
 
+  const { data: rawTasks = [], isLoading: isLoadingTasks } =
+    useGetTeacherClassTeachingTasksCombinedQuery(id, { skip: !id || isStudent })
+
+  const teachingTasks = useMemo(() => {
+    return Array.isArray(rawTasks)
+      ? rawTasks.map((task) => mapTeachingTask(task, {
+        pendingCount: taskText.teachingTaskPendingCount,
+        urgent: taskText.teachingTaskUrgent,
+        required: taskText.teachingTaskRequired,
+        gradeQuiz: taskText.teachingTaskGradeQuiz,
+        gradeAssignment: taskText.teachingTaskGradeAssignment,
+        unknown: taskText.statusUnknown,
+      })).filter(Boolean)
+      : []
+  }, [
+    rawTasks,
+    taskText.teachingTaskGradeAssignment,
+    taskText.teachingTaskGradeQuiz,
+    taskText.teachingTaskPendingCount,
+    taskText.teachingTaskRequired,
+    taskText.teachingTaskUrgent,
+    taskText.statusUnknown,
+  ])
+
+  const handleTaskAction = (task) => {
+    if (onTaskAction) {
+      onTaskAction(task)
+      return
+    }
+    const targetClassId = task.classId || id
+    let targetUrl = `/workspace/courses/class/${encodeURIComponent(String(targetClassId))}?tab=grading`
+    if (task.assignmentId) {
+      targetUrl += `&assignmentId=${encodeURIComponent(String(task.assignmentId))}`
+    } else if (task.quizId) {
+      targetUrl += `&quizId=${encodeURIComponent(String(task.quizId))}`
+    }
+    navigate(targetUrl)
+  }
+
   const showRightColumn = !isStudent || isEnrolled
   const normalizedStatus = String(classData.status || "").trim().toUpperCase()
   const isArchivedClass = normalizedStatus === "ARCHIVED"
@@ -86,7 +136,7 @@ const ClassOverviewTab = ({
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
             <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight max-w-xl">
-              {classData.title || "Untitled class"}
+              {classData.title || ui.untitledClass || "Untitled class"}
             </h2>
 
             {!isStudent && (
@@ -177,10 +227,15 @@ const ClassOverviewTab = ({
           <div className="flex items-center gap-1.5 text-xl font-black text-[#990011]">
             <span>
               {classData.tuitionFee !== undefined && classData.tuitionFee !== null
-                ? `${formatCurrency(classData.tuitionFee)} VNĐ`
+                ? `${formatCurrency(classData.tuitionFee)} ${ui.currencyVnd || "VND"}`
                 : "—"}
             </span>
-            <span className="w-5 h-5 rounded-full border border-gray-300 text-gray-400 text-xs flex items-center justify-center cursor-help shrink-0 font-medium" title="Phí mở lớp học">?</span>
+            <span
+              className="w-5 h-5 rounded-full border border-gray-300 text-gray-400 text-xs flex items-center justify-center cursor-help shrink-0 font-medium"
+              title={cd.classFeeHelp || "Tuition fee charged per student"}
+            >
+              ?
+            </span>
           </div>
         </div>
 
@@ -192,8 +247,10 @@ const ClassOverviewTab = ({
                 <Globe size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{cd.language || "Language"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">{classData.language || "—"}</span>
+                <span className="text-sm text-gray-400 font-bold">{cd.language || "Language"}</span>
+                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                  {getLocalizedLanguageName(classData.language, t) || "—"}
+                </span>
               </div>
             </div>
 
@@ -202,7 +259,7 @@ const ClassOverviewTab = ({
                 <GraduationCap size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{cd.level || "Level"}</span>
+                <span className="text-sm text-gray-400 font-bold">{cd.level || "Level"}</span>
                 <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-black text-white bg-[#EAB308] rounded-full w-fit">
                   {classData.levels?.join(", ") || "—"}
                 </span>
@@ -214,11 +271,16 @@ const ClassOverviewTab = ({
                 <Calendar size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{cd.enrollmentPeriod || "Admission Period"}</span>
+                <span className="text-sm text-gray-400 font-bold">{cd.enrollmentPeriod || "Admission Period"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
                   {classData.enrollmentStart && classData.enrollmentEnd
-                    ? formatDateRange(classData.enrollmentStart, classData.enrollmentEnd)
-                    : "TBA"}
+                    ? formatDateRange(
+                      classData.enrollmentStart,
+                      classData.enrollmentEnd,
+                      getCourseLocale(language),
+                      ui.tba,
+                    )
+                    : ui.tba || "TBA"}
                 </span>
               </div>
             </div>
@@ -228,11 +290,16 @@ const ClassOverviewTab = ({
                 <Calendar size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{cd.schedulePeriod || "Period"}</span>
+                <span className="text-sm text-gray-400 font-bold">{cd.schedulePeriod || "Period"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
                   {classData.startDate && classData.endDate
-                    ? formatDateRange(classData.startDate, classData.endDate)
-                    : "TBA"}
+                    ? formatDateRange(
+                      classData.startDate,
+                      classData.endDate,
+                      getCourseLocale(language),
+                      ui.tba,
+                    )
+                    : ui.tba || "TBA"}
                 </span>
               </div>
             </div>
@@ -242,7 +309,7 @@ const ClassOverviewTab = ({
                 <Users size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">{cd.classSize || "Class Size"}</span>
+                <span className="text-sm text-gray-400 font-bold">{cd.classSize || "Class Size"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
                   {classData.slots ?? "—"} {cd.studentsLabel || "students"}
                 </span>
@@ -254,7 +321,7 @@ const ClassOverviewTab = ({
                 <Clock size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold">
+                <span className="text-sm text-gray-400 font-bold">
                   {cd.weeklySchedule || "Weekly Schedule"}
                 </span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">{getWeeklyScheduleText()}</span>
@@ -267,9 +334,9 @@ const ClassOverviewTab = ({
               <AlignLeft size={18} />
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-400 font-bold">{cd.description || "Description"}</span>
-              <p className="text-gray-600 font-medium text-xs leading-relaxed mt-0.5">
-                {classData.description || "No description provided."}
+              <span className="text-sm text-gray-400 font-bold">{cd.description || "Description"}</span>
+              <p className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5">
+                {classData.description || cd.noDescription || "No description provided."}
               </p>
             </div>
           </div>
@@ -334,7 +401,7 @@ const ClassOverviewTab = ({
                   <div className="flex flex-wrap items-center gap-1.5">
                     {classData.language && (
                       <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-                        {classData.language}
+                        {getLocalizedLanguageName(classData.language, t)}
                       </span>
                     )}
                     {classData.levels?.[0] && (
@@ -343,24 +410,28 @@ const ClassOverviewTab = ({
                       </span>
                     )}
                     {classData.status && (
-                      <span className="ml-auto bg-[#E8F8F0] text-[#15803D] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-                        {String(classData.status).replaceAll("_", " ")}
-                      </span>
+                      <CourseStatusPill status={classData.status} className="ml-auto" />
                     )}
                   </div>
 
                   <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-2">
-                    {classData.title || "Untitled class"}
+                    {classData.title || ui.untitledClass || "Untitled class"}
                   </h4>
 
                   <div className="flex flex-col gap-2 border-b border-gray-55 pb-4 text-xs font-semibold text-gray-500">
                     <div className="flex items-center gap-2">
                       <Clock size={14} className="text-gray-400" />
-                      <span>{sessionStartTime || "TBA"}</span>
+                      <span>{sessionStartTime || ui.tba || "TBA"}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-gray-400" />
-                      <span>{formatDateDayMonth(sessionDate)}</span>
+                      <span>
+                        {formatDateDayMonth(
+                          sessionDate,
+                          getCourseLocale(language),
+                          ui.tba,
+                        )}
+                      </span>
                     </div>
                   </div>
 
@@ -386,7 +457,7 @@ const ClassOverviewTab = ({
             ) : (
               <div className="rounded-2xl bg-gray-50 p-5 flex flex-col items-center gap-3 text-center">
                 <p className="text-xs font-semibold text-gray-500">
-                  {cd.noUpcomingSessions || "No upcoming sessions"}
+                  {cd.noUpcomingSession || "No upcoming sessions"}
                 </p>
                 <button
                   type="button"
@@ -408,9 +479,10 @@ const ClassOverviewTab = ({
               gradeAssignmentLabel={gradeAssignmentLabel}
               giveFeedbackLabel={giveFeedbackLabel}
               prepareLessonLabel={prepareLessonLabel}
+              tasks={teachingTasks}
+              isLoading={isLoadingTasks}
               onViewAll={onViewTasks}
-              onTaskAction={onTaskAction}
-              actionIcon="plus"
+              onTaskAction={handleTaskAction}
             />
           )}
         </div>

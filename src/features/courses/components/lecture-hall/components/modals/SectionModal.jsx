@@ -26,7 +26,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
     e.preventDefault()
 
     if (!sectionModal.name?.trim()) {
-      toast.error("Vui lòng nhập tên section")
+      toast.error(dict.toastNameRequired)
       return
     }
 
@@ -40,7 +40,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
           isVisibleToStudents: sectionModal.isVisibleToStudents ?? true,
         }).unwrap()
 
-        toast.success(dict.toastCreateSuccess || "Đã tạo section mới!")
+        toast.success(dict.toastCreateSuccess)
         onSectionCreated?.()
         setSectionModal({
           open: false,
@@ -50,8 +50,8 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
           description: "",
           isVisibleToStudents: true,
         })
-      } catch (err) {
-        toast.error(err?.data?.message || err?.message || dict.toastCreateError || "Không thể tạo section. Vui lòng thử lại.")
+      } catch {
+        toast.error(dict.toastCreateError)
       }
       return
     }
@@ -67,7 +67,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
           isVisibleToStudents: sectionModal.isVisibleToStudents ?? true,
         }).unwrap()
 
-        toast.success(dict.toastUpdateSuccess || "Đã cập nhật section!")
+        toast.success(dict.toastUpdateSuccess)
         onSectionUpdated?.()
         setSectionModal({
           open: false,
@@ -77,8 +77,8 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
           description: "",
           isVisibleToStudents: true,
         })
-      } catch (err) {
-        toast.error(err?.data?.message || err?.message || dict.toastUpdateError || "Không thể cập nhật section. Vui lòng thử lại.")
+      } catch {
+        toast.error(dict.toastUpdateError)
       }
       return
     }
@@ -91,7 +91,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
     <Modal
       open={sectionModal.open}
       onClose={() => setSectionModal((prev) => ({ ...prev, open: false }))}
-      title={sectionModal.mode === "create" ? (dict.createTitle || "Tạo section") : (dict.editTitle || "Chỉnh sửa section")}
+      title={sectionModal.mode === "create" ? dict.createTitle : dict.editTitle}
       className="md:max-w-md rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -106,14 +106,14 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
             borderColor={"#E2E2E2"}
             disabled={isSaving}
           >
-            {dict.cancel || "Hủy"}
+            {dict.cancel}
           </PillButton>
           <PillButton
             type="submit"
             disabled={isSaving}
             onClick={handleSubmit}
           >
-            {isSaving ? (dict.saving || "Đang lưu...") : (dict.save || "Lưu")}
+            {isSaving ? dict.saving : dict.save}
           </PillButton>
         </div>
       }
@@ -122,7 +122,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
         {/* Section name */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            {dict.sectionName || "Tên section"} <span className="text-[#EF4444]">*</span>
+            {dict.sectionName} <span className="text-[#EF4444]">*</span>
           </label>
           <TextInput
             required
@@ -130,7 +130,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
             onChange={(e) =>
               setSectionModal((prev) => ({ ...prev, name: e.target.value }))
             }
-            placeholder="Module 1 - Introduction"
+            placeholder={dict.namePlaceholder}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
         </div>
@@ -140,13 +140,13 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
           <TextInput
             multiline
             rows={3}
-            label={dict.sectionDesc || "Mô tả section"}
+            label={dict.sectionDesc}
             labelClassName="text-sm font-semibold text-[#191C1D]"
             value={sectionModal.description || ""}
             onChange={(e) =>
               setSectionModal((prev) => ({ ...prev, description: e.target.value }))
             }
-            placeholder={dict.descPlaceholder || "Nhập mô tả cho section này..."}
+            placeholder={dict.descPlaceholder}
             className="rounded-xl max-h-[86px] px-4 text-sm py-3 overflow-y-auto"
           />
         </div>
@@ -155,10 +155,10 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
         <div className="bg-[#EDEEEF] rounded-xl px-4 py-3 flex items-center justify-between">
           <div className="space-y-0.5">
             <h5 className="text-sm font-semibold text-[#111827]">
-              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
+              {dict.visibleToStudents}
             </h5>
             <p className="text-xs text-[#6B7280] font-normal">
-              {dict.visibleToStudentsDesc || "Bật để học viên có thể nhìn thấy section này."}
+              {dict.visibleToStudentsDesc}
             </p>
           </div>
           <Switch

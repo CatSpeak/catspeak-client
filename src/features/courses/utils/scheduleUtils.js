@@ -31,12 +31,30 @@ const DAY_NAMES_BY_LANGUAGE = {
 const normalizeDay = (day) => String(day || "").toUpperCase()
 
 const getLocalizedDayName = (day, language) => {
-  const dayNames = DAY_NAMES_BY_LANGUAGE[language] || DAY_NAMES_BY_LANGUAGE.en
+  const languageKey = String(language || "en").split("-")[0].toLowerCase()
+  const dayNames = DAY_NAMES_BY_LANGUAGE[languageKey] || DAY_NAMES_BY_LANGUAGE.en
   const normalizedDay = normalizeDay(day)
   return dayNames[normalizedDay] || normalizedDay
 }
 
-export const formatWeeklyScheduleText = (classData, language = "en") => {
+export const formatScheduleDays = (
+  days,
+  language = "en",
+  fallback = "—",
+  separator = " - ",
+) => {
+  if (!Array.isArray(days) || days.length === 0) return fallback
+  const formattedDays = days
+    .map((day) => getLocalizedDayName(day, language))
+    .filter(Boolean)
+  return formattedDays.length > 0 ? formattedDays.join(separator) : fallback
+}
+
+export const formatWeeklyScheduleText = (
+  classData,
+  language = "en",
+  fallback = "—",
+) => {
   let scheduleItems = null
 
   if (Array.isArray(classData?.rawSchedule) && classData.rawSchedule.length > 0) {
@@ -73,12 +91,12 @@ export const formatWeeklyScheduleText = (classData, language = "en") => {
 
   const schedule = classData?.schedule
   if (!schedule || typeof schedule !== "object" || Array.isArray(schedule)) {
-    return "TBA"
+    return fallback
   }
 
   const { days, startTime, endTime } = schedule
   if (!Array.isArray(days) || days.length === 0) {
-    return "TBA"
+    return fallback
   }
 
   const formattedDays = days

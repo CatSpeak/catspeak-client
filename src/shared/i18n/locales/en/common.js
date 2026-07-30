@@ -55,6 +55,7 @@ export default {
     myCourses: "My Courses",
     myClass: "My Classes",
     schedule: "Schedule",
+    teachingTasks: "Teaching Tasks",
     myLearning: "My Learning",
     messages: "Messages",
     settings: "Settings",

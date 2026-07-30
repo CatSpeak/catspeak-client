@@ -120,7 +120,11 @@ const ParticipantItem = ({ participant }) => {
           onClick={(e) => {
             if (accountId) {
               e.stopPropagation()
-              window.open(`/profile/${accountId}`, "_blank", "noopener,noreferrer")
+              window.open(
+                `/profile/${accountId}`,
+                "_blank",
+                "noopener,noreferrer",
+              )
             }
           }}
           className={`truncate ${accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}

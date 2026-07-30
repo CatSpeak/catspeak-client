@@ -273,7 +273,7 @@ const MessageWidget = () => {
             />
             {/* Link to full chat page */}
             <Link
-              to="/chat"
+              to={activeConversationId ? `/chat/${activeConversationId}` : "/chat"}
               onClick={() => dispatch(closeWidget())}
               className="h-12 flex items-center justify-center gap-2 border-t border-[#e5e5e5] px-4 text-sm text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
             >

@@ -132,7 +132,7 @@ const getGradingSearchParams = (
   return nextParams
 }
 
-const sanitizeDownloadName = (value) => {
+const sanitizeDownloadName = (value, fallback) => {
   const unsafeCharacters = '<>:"/\\|?*'
   const safeName = [...String(value || "")].map((character) => {
     const codePoint = character.codePointAt(0)
@@ -143,7 +143,7 @@ const sanitizeDownloadName = (value) => {
       : character
   }).join("").trim()
 
-  return safeName.slice(0, 100) || "grades"
+  return safeName.slice(0, 100) || fallback
 }
 
 const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdProp, onBack, classId }) => {
@@ -225,12 +225,12 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
   const rawAssignmentTitle = currentAssignment
     ? getAssignmentTitle(
       currentAssignment,
-      language === "vi" ? "Bài tập chưa đặt tên" : "Untitled assignment"
+      gradingTranslations.untitledAssignment
     )
     : ""
   const assignmentTitle = typeof rawAssignmentTitle === "string"
     ? rawAssignmentTitle
-    : (language === "vi" ? "Bài tập chưa đặt tên" : "Untitled assignment")
+    : gradingTranslations.untitledAssignment
   const assignmentStatus = getAssignmentStatus(currentAssignment)
   const assignmentClosed = assignmentStatus === "closed"
   const isDraftAssignment = assignmentStatus === "draft"
@@ -262,7 +262,13 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     members: assignmentMembers,
     submissions,
     language,
-  }), [assignmentMembers, submissions, language])
+    fallbackName: gradingTranslations.studentLabel,
+  }), [
+    assignmentMembers,
+    gradingTranslations.studentLabel,
+    language,
+    submissions,
+  ])
   const activeStudent = useMemo(() => {
     if (activeSubmissionId) {
       const found = students.find((student) => String(student.submissionId) === String(activeSubmissionId))
@@ -341,11 +347,11 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       if (assignmentClosed) {
         await openAssignment({ classId, assignmentId }).unwrap()
         if (!componentActiveRef.current) return
-        toast.success(gradingTranslations.toastOpenSuccess || "Đã mở lại bài nộp thành công!")
+        toast.success(gradingTranslations.toastOpenSuccess)
       } else {
         await closeAssignment({ classId, assignmentId }).unwrap()
         if (!componentActiveRef.current) return
-        toast.success(gradingTranslations.toastLockSuccess || "Đã khóa bài nộp thành công!")
+        toast.success(gradingTranslations.toastLockSuccess)
       }
     } catch (error) {
       if (!componentActiveRef.current) return
@@ -353,9 +359,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       toast.error(getSafeSubmissionErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể thay đổi trạng thái bài nộp. Vui lòng thử lại."
-          : "The submission status could not be changed. Please try again."
+        gradingTranslations.toastToggleSubmissionError
       ))
     } finally {
       toggleInFlightRef.current = false
@@ -372,12 +376,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     }
 
     if (!assignmentClosed) {
-      const errorMessage = language === "vi"
-        ? "Cần khóa bài nộp trước khi chấm điểm!"
-        : language === "zh"
-          ? "评分前需要关闭作业！"
-          : "Submissions must be closed before grading!"
-      toast.error(errorMessage)
+      toast.error(gradingTranslations.closeBeforeGrading)
       return
     }
 
@@ -392,21 +391,14 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       || numericScore > assignmentMaxScore
     ) {
       const errorMessage = gradingTranslations.scoreRangeError
-        ? gradingTranslations.scoreRangeError.replace("{{maxScore}}", assignmentMaxScore)
-        : language === "vi"
-          ? `Vui lòng nhập điểm từ 0 đến ${assignmentMaxScore}`
-          : language === "zh"
-            ? `请输入0至${assignmentMaxScore}之间的得分`
-            : `Please enter a score between 0 and ${assignmentMaxScore}`
+        .replace("{{maxScore}}", assignmentMaxScore)
       toast.error(errorMessage)
       return
     }
 
     if (!activeStudent.submissionId) {
       toast.error(
-        language === "vi"
-          ? "Không tìm thấy bài nộp của học viên này."
-          : "This student's submission could not be found."
+        gradingTranslations.submissionNotFound
       )
       return
     }
@@ -415,7 +407,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     const targetStudentId = activeStudent.studentId ?? activeStudent.id
     const targetStudentName = typeof activeStudent.name === "string"
       ? activeStudent.name
-      : (language === "vi" ? "học viên" : "student")
+      : gradingTranslations.studentLabel
     const normalizedFeedback = typeof feedback === "string" ? feedback : ""
 
     gradeInFlightRef.current = true
@@ -431,10 +423,8 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       if (!componentActiveRef.current) return
 
       const successMessage = gradingTranslations.toastGradeSaved
-        ? gradingTranslations.toastGradeSaved
-          .replace("{{score}}", numericScore)
-          .replace("{{student}}", targetStudentName)
-        : `Đã chấm ${numericScore} điểm cho ${targetStudentName}`
+        .replace("{{score}}", numericScore)
+        .replace("{{student}}", targetStudentName)
       toast.success(successMessage)
       setSearchParams((currentParams) => {
         const routeAssignmentId = currentParams.get("assignmentId")
@@ -462,9 +452,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       toast.error(getSafeSubmissionErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể lưu điểm. Vui lòng tải lại và thử lại."
-          : "The grade could not be saved. Refresh and try again."
+        gradingTranslations.toastSaveGradeError
       ))
     } finally {
       gradeInFlightRef.current = false
@@ -496,7 +484,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
         || responseType.includes("json")
         || responseType.startsWith("text/")
       ) {
-        throw new Error("Invalid grade sheet response")
+        throw new Error(gradingTranslations.invalidGradeSheetResponse)
       }
 
       if (!componentActiveRef.current) return
@@ -504,22 +492,24 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       downloadUrl = window.URL.createObjectURL(blob)
       downloadLink = document.createElement("a")
       downloadLink.href = downloadUrl
-      downloadLink.download = `${sanitizeDownloadName(assignmentTitle)}_grades.xlsx`
+      downloadLink.download = gradingTranslations.gradeSheetDownloadName.replace(
+        "{{assignmentTitle}}",
+        sanitizeDownloadName(
+          assignmentTitle,
+          gradingTranslations.gradeSheetFileName,
+        ),
+      )
       downloadLink.style.display = "none"
       document.body.appendChild(downloadLink)
       downloadLink.click()
-      toast.success(gradingTranslations.toastDownloadSuccess || "Tải xuống bảng điểm thành công!")
+      toast.success(gradingTranslations.toastDownloadSuccess)
     } catch (error) {
       if (!componentActiveRef.current) return
 
       toast.error(getSafeSubmissionErrorMessage(
         error,
         language,
-        gradingTranslations.toastDownloadError || (
-          language === "vi"
-            ? "Không thể tải bảng điểm. Vui lòng thử lại."
-            : "The grade sheet could not be downloaded. Please try again."
-        )
+        gradingTranslations.toastDownloadError
       ))
     } finally {
       downloadLink?.remove()
@@ -548,27 +538,12 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       const payload = unwrapResponse(response)
       const returnedCount = Number(payload?.returnedCount)
       const hasReturnedCount = Number.isInteger(returnedCount) && returnedCount >= 0
-      const translatedSuccess = gradingTranslations.toastBulkReturnSuccess
-      const successMessage = (
-        hasReturnedCount
-        && typeof translatedSuccess === "string"
-      )
-        ? translatedSuccess.replace(
+      const successMessage = hasReturnedCount
+        ? gradingTranslations.toastBulkReturnSuccess.replace(
           "{{count}}",
-          returnedCount
+          returnedCount,
         )
-        : (
-          typeof translatedSuccess === "string"
-          && !translatedSuccess.includes("{{count}}")
-        )
-          ? translatedSuccess
-          : hasReturnedCount
-            ? (language === "vi"
-              ? `Đã trả bài cho ${returnedCount} học viên`
-              : `Returned ${returnedCount} submissions`)
-            : (language === "vi"
-              ? "Đã hoàn tất trả bài."
-              : "Submissions were returned.")
+        : gradingTranslations.toastBulkReturnComplete
       toast.success(successMessage)
     } catch (error) {
       if (!componentActiveRef.current) return
@@ -576,9 +551,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       toast.error(getSafeSubmissionErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể trả bài hàng loạt. Vui lòng thử lại."
-          : "The submissions could not be returned. Please try again."
+        gradingTranslations.toastBulkReturnError
       ))
     } finally {
       bulkReturnInFlightRef.current = false
@@ -598,7 +571,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     const targetStudentId = activeStudent.studentId ?? activeStudent.id
     const targetStudentName = typeof activeStudent.name === "string"
       ? activeStudent.name
-      : (language === "vi" ? "học viên" : "student")
+      : gradingTranslations.studentLabel
 
     returnInFlightRef.current = true
     try {
@@ -611,8 +584,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       if (!componentActiveRef.current) return
 
       const successMessage = gradingTranslations.toastGradeReturned
-        ? gradingTranslations.toastGradeReturned.replace("{{student}}", targetStudentName)
-        : `Đã trả bài chấm cho học viên ${targetStudentName}`
+        .replace("{{student}}", targetStudentName)
       toast.success(successMessage)
       setSearchParams((currentParams) => {
         const routeAssignmentId = currentParams.get("assignmentId")
@@ -640,9 +612,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       toast.error(getSafeSubmissionErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể trả kết quả. Vui lòng thử lại."
-          : "The result could not be released. Please try again."
+        gradingTranslations.toastReleaseResultError
       ))
     } finally {
       returnInFlightRef.current = false
@@ -653,7 +623,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     return (
       <div
         role="status"
-        aria-label={language === "vi" ? "Đang tải bài nộp" : "Loading submissions"}
+        aria-label={gradingTranslations.loadingSubmissions}
         className="flex justify-center items-center min-h-[400px]"
       >
         <LoadingSpinner />
@@ -684,17 +654,11 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
             ? getSafeSubmissionErrorMessage(
               assignmentError || submissionsError,
               language,
-              language === "vi"
-                ? "Không thể tải danh sách bài nộp."
-                : "Failed to load assignment submissions."
+              gradingTranslations.loadSubmissionsError
             )
             : isDraftAssignment
-              ? (language === "vi"
-                ? "Bài tập này chưa được xuất bản."
-                : "This assignment has not been published.")
-              : (language === "vi"
-                ? "Dữ liệu bài tập hoặc bài nộp không hợp lệ."
-                : "The assignment or submission data is invalid.")}
+              ? gradingTranslations.assignmentNotPublished
+              : gradingTranslations.invalidAssignmentSubmissionData}
         </span>
         {classId && assignmentId && (
           <div className="flex flex-wrap gap-2">
@@ -706,7 +670,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
               }}
               className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
             >
-              {language === "vi" ? "Thử lại" : "Try again"}
+              {gradingTranslations.retry}
             </button>
             {typeof onBack === "function" && (
               <button
@@ -714,7 +678,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
                 onClick={onBack}
                 className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-extrabold text-red-700 hover:bg-red-50"
               >
-                {language === "vi" ? "Quay lại" : "Go back"}
+                {gradingTranslations.btnBack}
               </button>
             )}
           </div>
@@ -756,7 +720,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       await deleteAssignment({ classId, assignmentId }).unwrap()
       if (!componentActiveRef.current) return
 
-      toast.success(gradingTranslations.toastDeleteSuccess || "Đã xóa bài tập thành công!")
+      toast.success(gradingTranslations.toastDeleteSuccess)
       if (onBack) {
         onBack()
       } else {
@@ -768,9 +732,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
       toast.error(getSafeSubmissionErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể xóa bài tập. Vui lòng thử lại."
-          : "The assignment could not be deleted. Please try again."
+        gradingTranslations.toastDeleteError
       ))
     } finally {
       deleteInFlightRef.current = false

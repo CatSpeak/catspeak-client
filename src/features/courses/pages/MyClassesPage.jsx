@@ -19,20 +19,20 @@ import {
   filterByStatus,
   mapTeacherClassSummary,
 } from "../utils/courseTransforms"
+import { getCourseLocale } from "../utils/courseUtils"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 
-const STATUS_OPTIONS = [
-  { value: "all", label: "All Status" },
-  { value: "teaching", label: "Teaching" },
-  { value: "open", label: "Open" },
-  { value: "archived", label: "Archived" },
-]
-
 const MyClassesPage = () => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const navigate = useNavigate()
   const c = t.courses || {}
   const mc = c.myCourses || {}
+  const statusOptions = [
+    { value: "all", label: mc.statusAll || "All Status" },
+    { value: "teaching", label: c.teachingStatus || "Teaching" },
+    { value: "open", label: c.openEnrollmentStatus || "Open" },
+    { value: "archived", label: c.archive || "Archived" },
+  ]
 
   const [searchParams, setSearchParams] = useSearchParams()
   const viewMode = searchParams.get("view") || "grid"
@@ -80,17 +80,37 @@ const MyClassesPage = () => {
   const error = classesData === undefined && classesError
   const refreshError = classesError
 
-  const classList = useMemo(() => classesRaw.map(mapTeacherClassSummary), [classesRaw])
+  const classList = useMemo(
+    () => classesRaw.map((cls, index) => mapTeacherClassSummary(
+      cls,
+      index,
+      {
+        notAvailable: c.workspaceUi?.notAvailable,
+        studentsRatio: c.allClasses?.studentsRatio,
+        tba: c.workspaceUi?.tba,
+      },
+      getCourseLocale(language),
+    )),
+    [
+      classesRaw,
+      c.allClasses?.studentsRatio,
+      c.workspaceUi?.notAvailable,
+      c.workspaceUi?.tba,
+      language,
+    ],
+  )
   const filteredDisplayList = useMemo(() => filterByStatus(classList, statusFilter), [classList, statusFilter])
 
   const classCardLabels = {
     editCourse: c.editClass || "Edit Class",
-    deleteCourse: c.classDetail?.deleteClass || "Delete Class",
+    deleteCourse: c.createClass?.deleteClass || "Delete Class",
     createdDate: c.createdDate || "Created Date",
     manageDetails: c.manageDetails || "Manage Details",
     progress: c.progress || "Progress",
     courseLabel: c.course || "Course",
     classLabel: c.class || "Class",
+    classCount: c.classCount || "{{count}} classes",
+    actionsFor: c.actionsForCourse || "Actions for {{title}}",
   }
 
   if (isLoading) {
@@ -100,7 +120,7 @@ const MyClassesPage = () => {
   if (error) {
     return (
       <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
-        <span>{mc.loadFailed || "The class overview could not be loaded. Please try again."}</span>
+        <span>{mc.loadClassesFailed || "The class overview could not be loaded. Please try again."}</span>
         <button
           type="button"
           onClick={() => refetchClasses()}
@@ -146,12 +166,12 @@ const MyClassesPage = () => {
     <div className="flex flex-col gap-4 text-[#2e2e2e]">
       {isRefreshing && (
         <span role="status" className="sr-only">
-          {mc.refreshing || "Refreshing class overview"}
+          {mc.refreshingClasses || "Refreshing class overview"}
         </span>
       )}
       {refreshError && !error && (
         <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
-          {mc.refreshFailed || "Some overview data could not be refreshed. The displayed information may be out of date."}
+          {mc.refreshClassesFailed || "Some class data could not be refreshed. The displayed information may be out of date."}
         </div>
       )}
       {/* <div className="flex justify-between items-center flex-wrap gap-2">
@@ -192,7 +212,7 @@ const MyClassesPage = () => {
           <CourseSelectFilter
             value={statusFilter}
             onChange={setStatusFilter}
-            options={STATUS_OPTIONS}
+            options={statusOptions}
           />
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </div>
@@ -228,7 +248,7 @@ const MyClassesPage = () => {
         {filteredDisplayList.length > 0 && (
           <button
             type="button"
-            onClick={() => navigate("/workspace/classes/all")}
+            onClick={() => navigate("/workspace/classes/all-classes")}
             className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2"
           >
             {c.myCourses?.viewAll || "View all"}
@@ -241,9 +261,9 @@ const MyClassesPage = () => {
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmClassDelete}
         isPending={isDeletingClass}
-        title={c.classDetail?.deleteClass || "Delete Class"}
-        message={c.classDetail?.confirmDeleteClass || "Are you sure you want to delete this class?"}
-        confirmText={c.classDetail?.deleteClass || "Delete"}
+        title={c.createClass?.deleteClass || "Delete Class"}
+        message={c.createClass?.confirmDeleteClassMsg || "Are you sure you want to delete this class?"}
+        confirmText={c.createClass?.deleteConfirmButton || "Delete"}
         cancelText={c.createClass?.cancel || "Cancel"}
       />
     </div>

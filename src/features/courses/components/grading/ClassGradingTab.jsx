@@ -47,6 +47,10 @@ import {
 } from "../../utils/quizUtils"
 
 const STUDENT_PAGE_SIZE = 10
+const interpolate = (template, values) => Object.entries(values).reduce(
+  (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
+  template || "",
+)
 
 const getArrayFromResponse = (response) => {
   const data = response?.data ?? response
@@ -151,7 +155,7 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
       <td className="p-4 pl-6 font-extrabold text-gray-850">
         <div className="flex items-center gap-2.5">
           <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
-            BÀI TẬP
+            {cg.badgeAssignment}
           </span>
           <button
             type="button"
@@ -161,7 +165,7 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
             }}
             className="truncate max-w-sm text-left font-bold text-gray-900 group-hover:text-[#990011] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
           >
-            {getAssignmentTitle(assignment)}
+            {getAssignmentTitle(assignment, cg.untitledAssignment)}
           </button>
         </div>
       </td>
@@ -169,25 +173,25 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
       <td className="p-4">
         {isLoading && !hasEmbeddedSubmission ? (
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
-            {cg.loading || "Loading"}
+            {cg.loading}
           </span>
         ) : (
           <>
             {displayStatus === "not_submitted" && (
               <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 uppercase tracking-wider">
-                {cd.statusNotSubmitted || "Chưa nộp"}
+                {cd.statusNotSubmitted}
               </span>
             )}
             {(displayStatus === "submitted" || displayStatus === "late") && (
               <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-blue-100 uppercase tracking-wider">
                 {displayStatus === "late"
-                  ? (cg.filterLate || "Nộp muộn")
-                  : (cd.statusNeedsGrading || "Đã nộp")}
+                  ? cg.filterLate
+                  : cd.statusNeedsGrading}
               </span>
             )}
             {displayStatus === "returned" && (
               <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">
-                {cg.filterReturned || cd.statusGraded || "Đã trả bài"}
+                {cg.filterReturned}
               </span>
             )}
           </>
@@ -209,7 +213,7 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
 }
 
 // ─── Student Quiz Row (Table View) ───────────────────────────────────
-const StudentQuizRow = ({ quiz, language, onSelect }) => {
+const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
   const closeTimeFormatted = formatDateTime(quiz.closeTime, language, {
     day: "2-digit",
     month: "2-digit",
@@ -235,6 +239,15 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
     && Number(quiz.timeLimitMinutes) >= 0
   )
 
+  const remainingAttemptsNum = Number(quiz?.remainingAttempts ?? quiz?.remainingAttempt ?? quiz?.attemptsLeft)
+  const hasRemainingAttempts = (
+    quiz?.remainingAttempts === undefined &&
+    quiz?.remainingAttempt === undefined &&
+    quiz?.attemptsLeft === undefined
+  )
+    ? true
+    : (Number.isFinite(remainingAttemptsNum) ? remainingAttemptsNum > 0 : true)
+
   return (
     <tr
       onClick={() => onSelect && onSelect(quiz.id)}
@@ -244,7 +257,7 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
         <div className="flex items-center gap-2.5">
           <span className="bg-red-50 text-[#990011] border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 flex items-center gap-1">
             <Timer size={10} />
-            QUIZ
+            {cg.badgeQuiz}
           </span>
           <button
             type="button"
@@ -254,7 +267,7 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
             }}
             className="truncate max-w-sm text-left font-bold text-gray-900 group-hover:text-[#990011] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] rounded"
           >
-            {quiz.name || quiz.title || (language === "vi" ? "Bài kiểm tra" : "Quiz")}
+            {quiz.name || quiz.title || cg.untitledQuiz}
           </button>
         </div>
       </td>
@@ -262,34 +275,49 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
       <td className="p-4 flex items-center gap-2">
         {recordStatus === "submitted" ? (
           <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">
-            Đã nộp
+            {cg.quizStatusSubmitted}
           </span>
         ) : recordStatus === "inprogress" ? (
           <span className="bg-amber-50 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-wider flex items-center gap-1">
             <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            Đang làm
+            {cg.quizStatusInProgress}
           </span>
         ) : hasKnownRecordStatus ? (
           <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100 uppercase tracking-wider">
-            Chưa làm
+            {cg.quizStatusToDo}
           </span>
         ) : (
           <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-gray-200 uppercase tracking-wider">
-            {language === "vi" ? "Không xác định" : "Unavailable"}
+            {cg.statusUnavailable}
           </span>
         )}
         {recordStatus === "submitted" && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation()
-              onSelect?.(quiz.id, "result")
-            }}
-            className="ml-auto px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
-          >
-            <Eye size={11} />
-            <span>{language === "vi" ? "Xem kết quả" : "See Result"}</span>
-          </button>
+          <div className="ml-auto flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                onSelect?.(quiz.id, "result")
+              }}
+              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+            >
+              <Eye size={11} />
+              <span>{cg.seeQuizResultBtn}</span>
+            </button>
+            {hasRemainingAttempts && (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onSelect?.(quiz.id, "intro")
+                }}
+                className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              >
+                <RotateCcw size={11} />
+                <span>{cg.retakeQuizBtn || "Retake Quiz"}</span>
+              </button>
+            )}
+          </div>
         )}
         {recordStatus === "inprogress" && (
           <button
@@ -301,13 +329,13 @@ const StudentQuizRow = ({ quiz, language, onSelect }) => {
             className="ml-auto px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
           >
             <RotateCcw size={11} />
-            <span>{language === "vi" ? "Làm tiếp" : "Continue"}</span>
+            <span>{cg.continueQuizBtn || "Continue Quiz"}</span>
           </button>
         )}
       </td>
       <td className="p-4 pr-6 text-center font-bold text-xs text-gray-600">
         {hasTimeLimit
-          ? `${quiz.timeLimitMinutes} ${language === "vi" ? "phút" : "mins"}`
+          ? interpolate(cg.minsLabel, { mins: quiz.timeLimitMinutes })
           : "—"}
       </td>
     </tr>
@@ -382,7 +410,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
         <div className="flex items-center justify-between gap-2 mb-3">
           <span className="bg-amber-50 text-amber-700 border border-amber-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
             <FileText size={12} className="text-amber-600" />
-            {language === "vi" ? "BÀI TẬP" : "ASSIGNMENT"}
+            {cg.badgeAssignment}
           </span>
 
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
@@ -396,20 +424,20 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
                     : "bg-amber-50 text-amber-700 border-amber-200"
                     }`}>
                     {isExpired
-                      ? (cg.badgeExpired || "Quá hạn")
-                      : (cd.statusNotSubmitted || "Chưa nộp")}
+                      ? cg.badgeExpired
+                      : cd.statusNotSubmitted}
                   </span>
                 )}
                 {(displayStatus === "submitted" || displayStatus === "late") && (
                   <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                     {displayStatus === "late"
-                      ? (cg.filterLate || "Nộp muộn")
-                      : (cd.statusNeedsGrading || "Đã nộp")}
+                      ? cg.filterLate
+                      : cd.statusNeedsGrading}
                   </span>
                 )}
                 {displayStatus === "returned" && (
                   <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    {cg.filterReturned || cd.statusGraded || "Đã trả bài"}
+                    {cg.filterReturned}
                   </span>
                 )}
               </>
@@ -419,7 +447,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
 
         {/* Title */}
         <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
-          {getAssignmentTitle(assignment)}
+          {getAssignmentTitle(assignment, cg.untitledAssignment)}
         </h4>
 
         {/* Info badges / Due date */}
@@ -427,14 +455,14 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
           <div className="flex items-center gap-2 text-gray-600">
             <Clock size={13} className={isExpired && displayStatus === "not_submitted" ? "text-red-500 shrink-0" : "text-gray-400 shrink-0"} />
             <span className={`truncate text-xs ${isExpired && displayStatus === "not_submitted" ? "text-red-600 font-extrabold" : ""}`}>
-              {cg.dueDateLabel || "Hạn nộp: "}{dueLabel}
+              {cg.dueDateLabel}{dueLabel}
             </span>
           </div>
 
           {maxScore !== null && (
             <div className="flex items-center gap-2 text-gray-500">
               <Award size={13} className="text-amber-500 shrink-0" />
-              <span>{language === "vi" ? `Thang điểm: ${maxScore}` : `Max score: ${maxScore}`}</span>
+              <span>{interpolate(cg.maxScoreLabel, { score: maxScore })}</span>
             </div>
           )}
         </div>
@@ -446,7 +474,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
           <div className="bg-emerald-50 border border-emerald-200/60 rounded-xl p-2.5 mb-3 flex items-center justify-between text-xs">
             <span className="font-extrabold text-emerald-800 flex items-center gap-1.5">
               <Award size={14} className="text-emerald-600" />
-              {language === "vi" ? "Điểm số:" : "Score:"}
+              {cg.scoreLabel}
             </span>
             <span className="font-black text-emerald-700 text-sm bg-white px-2.5 py-0.5 rounded-md border border-emerald-200 shadow-2xs">
               {gradeLabel}
@@ -471,10 +499,10 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
         >
           <span>
             {displayStatus === "returned"
-              ? (language === "vi" ? "Xem kết quả" : "View Grade")
+              ? cg.viewGradeBtn
               : displayStatus === "submitted" || displayStatus === "late"
-                ? (language === "vi" ? "Xem bài nộp" : "View Submission")
-                : (language === "vi" ? "Nộp bài ngay" : "Submit Assignment")}
+                ? cg.viewSubmissionBtn
+                : cg.submitAssignmentBtn}
           </span>
           <ArrowRight size={13} />
         </button>
@@ -484,7 +512,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
 }
 
 // ─── Student Quiz Card (Grid View) ──────────────────────────────────
-const StudentQuizCard = ({ quiz, language, onSelect }) => {
+const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
   const closeTimeFormatted = formatDateTime(quiz.closeTime, language, {
     month: "short",
     day: "numeric",
@@ -511,6 +539,15 @@ const StudentQuizCard = ({ quiz, language, onSelect }) => {
   const questionCount = embeddedQuestionCount
     ?? (Number.isFinite(parsedQuestionCount) ? parsedQuestionCount : null)
 
+  const remainingAttemptsNum = Number(quiz?.remainingAttempts ?? quiz?.remainingAttempt ?? quiz?.attemptsLeft)
+  const hasRemainingAttempts = (
+    quiz?.remainingAttempts === undefined &&
+    quiz?.remainingAttempt === undefined &&
+    quiz?.attemptsLeft === undefined
+  )
+    ? true
+    : (Number.isFinite(remainingAttemptsNum) ? remainingAttemptsNum > 0 : true)
+
   return (
     <div
       onClick={() => onSelect && onSelect(quiz.id)}
@@ -521,22 +558,22 @@ const StudentQuizCard = ({ quiz, language, onSelect }) => {
         <div className="flex items-center justify-between gap-2 mb-3">
           <span className="bg-red-50 text-[#990011] border border-red-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
             <Timer size={12} className="text-[#990011]" />
-            {language === "vi" ? "BÀI KIỂM TRA" : "QUIZ"}
+            {cg.badgeQuiz}
           </span>
 
           <div className="flex items-center gap-1.5">
             {recordStatus === "submitted" ? (
               <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                {language === "vi" ? "Đã nộp" : "Submitted"}
+                {cg.quizStatusSubmitted}
               </span>
             ) : recordStatus === "inprogress" ? (
               <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                {language === "vi" ? "Đang làm" : "In Progress"}
+                {cg.quizStatusInProgress}
               </span>
             ) : (
               <span className="bg-red-50 text-red-655 border border-red-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                {language === "vi" ? "Chưa làm" : "To Do"}
+                {cg.quizStatusToDo}
               </span>
             )}
           </div>
@@ -544,27 +581,27 @@ const StudentQuizCard = ({ quiz, language, onSelect }) => {
 
         {/* Title */}
         <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
-          {quiz.name || quiz.title || (language === "vi" ? "Bài kiểm tra" : "Quiz")}
+          {quiz.name || quiz.title || cg.untitledQuiz}
         </h4>
 
         {/* Info Grid */}
         <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 mb-4">
           <div className="flex items-center gap-2 text-gray-600">
             <Clock size={13} className="text-gray-400 shrink-0" />
-            <span className="truncate">{language === "vi" ? `Hạn đóng: ${closeTimeFormatted}` : `Closes: ${closeTimeFormatted}`}</span>
+            <span className="truncate">{interpolate(cg.closesLabel, { time: closeTimeFormatted })}</span>
           </div>
 
           <div className="flex items-center gap-4 text-gray-500 text-xs">
             {hasTimeLimit && (
               <span className="inline-flex items-center gap-1.5">
                 <Timer size={13} className="text-red-500 shrink-0" />
-                {quiz.timeLimitMinutes} {language === "vi" ? "phút" : "mins"}
+                {interpolate(cg.minsLabel, { mins: quiz.timeLimitMinutes })}
               </span>
             )}
             {questionCount !== null && (
               <span className="inline-flex items-center gap-1.5">
                 <FileText size={13} className="text-blue-500 shrink-0" />
-                {questionCount} {language === "vi" ? "câu hỏi" : "questions"}
+                {interpolate(cg.questionsLabel, { count: questionCount })}
               </span>
             )}
           </div>
@@ -574,17 +611,32 @@ const StudentQuizCard = ({ quiz, language, onSelect }) => {
       {/* Action Footer Button */}
       <div>
         {recordStatus === "submitted" ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onSelect?.(quiz.id, "result")
-            }}
-            className="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
-          >
-            <Eye size={13} />
-            <span>{language === "vi" ? "Xem kết quả" : "See Result"}</span>
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onSelect?.(quiz.id, "result")
+              }}
+              className={`w-full py-2.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs ${!hasRemainingAttempts ? "col-span-2" : ""}`}
+            >
+              <Eye size={13} />
+              <span>{cg.seeQuizResultBtn}</span>
+            </button>
+            {hasRemainingAttempts && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onSelect?.(quiz.id, "intro")
+                }}
+                className="w-full py-2.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
+              >
+                <RotateCcw size={13} />
+                <span>{cg.retakeQuizBtn || "Retake Quiz"}</span>
+              </button>
+            )}
+          </div>
         ) : recordStatus === "inprogress" ? (
           <button
             type="button"
@@ -595,7 +647,7 @@ const StudentQuizCard = ({ quiz, language, onSelect }) => {
             className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
           >
             <RotateCcw size={13} />
-            <span>{language === "vi" ? "Tiếp tục làm bài" : "Continue Quiz"}</span>
+            <span>{cg.continueQuizBtn || "Continue Quiz"}</span>
           </button>
         ) : (
           <button
@@ -606,7 +658,7 @@ const StudentQuizCard = ({ quiz, language, onSelect }) => {
             }}
             className="w-full py-2.5 px-4 bg-[#990011] hover:bg-[#80000e] text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
           >
-            <span>{language === "vi" ? "Bắt đầu làm bài" : "Start Quiz"}</span>
+            <span>{cg.startQuizBtn}</span>
             <ArrowRight size={13} />
           </button>
         )}
@@ -648,14 +700,12 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
     publishGuardRef.current = true
     try {
       await publishTeacherQuiz({ classId, quizId: quiz.id }).unwrap()
-      toast.success(language === "vi" ? "Đã xuất bản bài kiểm tra!" : "Quiz published!")
+      toast.success(cg.quizPublishedToast)
     } catch (err) {
       toast.error(getQuizErrorMessage(
         err,
         language,
-        language === "vi"
-          ? "Không thể đăng bài kiểm tra. Vui lòng kiểm tra nội dung và thử lại."
-          : "Could not publish the quiz. Check its content and try again.",
+        cg.quizPublishErrorToast,
       ))
     } finally {
       publishGuardRef.current = false
@@ -680,28 +730,28 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
             {/* Quiz Type Badge */}
             <span className="bg-red-50 text-[#990011] border border-red-100 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide flex items-center gap-1">
               <Timer size={10} />
-              {language === "vi" ? "BÀI KIỂM TRA" : "QUIZ"}
+              {cg.badgeQuiz}
             </span>
 
             {/* Status Badge */}
             {isDraft && (
               <span className="bg-gray-100 text-gray-600 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                {cg.badgeDraft || "NHÁP"}
+                {cg.badgeDraft}
               </span>
             )}
             {isOpen && (
               <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                {language === "vi" ? "ĐANG MỞ" : "OPEN"}
+                {cg.badgeOpen}
               </span>
             )}
             {isUpcoming && (
               <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                {cg.badgeUpcoming || "SẮP MỞ"}
+                {cg.badgeUpcoming}
               </span>
             )}
             {isClosed && (
               <span className="bg-gray-100 text-gray-400 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                {cg.badgeClosed || "ĐÃ ĐÓNG"}
+                {cg.badgeClosed}
               </span>
             )}
           </div>
@@ -713,7 +763,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
               `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
             )}
             className="p-1 text-gray-400 hover:text-[#990011] hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-            title={language === "vi" ? "Xem chi tiết bài kiểm tra" : "View Quiz Details"}
+            title={cg.viewQuizDetails}
           >
             <Eye size={16} />
           </button>
@@ -725,9 +775,9 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
             `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
           )}
           className="text-sm font-extrabold text-gray-900 leading-snug line-clamp-2 mb-2 hover:text-[#990011] hover:underline cursor-pointer transition-colors"
-          title={language === "vi" ? "Xem chi tiết bài kiểm tra" : "View Quiz Details"}
+          title={cg.viewQuizDetails}
         >
-          {quiz.name || quiz.title || (language === "vi" ? "Bài kiểm tra chưa đặt tên" : "Untitled quiz")}
+          {quiz.name || quiz.title || cg.untitledQuiz}
         </h4>
 
         {/* Subtitle / Timeline info */}
@@ -735,19 +785,19 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
           <div className="flex items-center gap-1.5 leading-none">
             <Clock size={12} className="text-gray-400 shrink-0" />
             <span className="truncate">
-              {language === "vi" ? `Hạn đóng: ${closeTimeFormatted}` : `Closes: ${closeTimeFormatted}`}
+              {interpolate(cg.closesLabel, { time: closeTimeFormatted })}
             </span>
           </div>
           <div className="flex items-center gap-3 text-[11px] text-gray-500 font-bold mt-1">
             <span className="inline-flex items-center gap-1">
               <Timer size={13} className="text-gray-400 shrink-0" />
               {Number.isFinite(Number(quiz.timeLimitMinutes))
-                ? `${quiz.timeLimitMinutes} ${language === "vi" ? "phút" : "mins"}`
+                ? interpolate(cg.minsLabel, { mins: quiz.timeLimitMinutes })
                 : "—"}
             </span>
             <span className="inline-flex items-center gap-1">
               <FileText size={13} className="text-gray-400 shrink-0" />
-              {questionCount ?? "—"} {language === "vi" ? "câu hỏi" : "questions"}
+              {interpolate(cg.questionsLabel, { count: questionCount ?? "—" })}
             </span>
           </div>
         </div>
@@ -757,19 +807,19 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
       <div>
         <div className="bg-gray-50 border border-gray-100 rounded-xl p-2.5 flex justify-between items-center mb-3 text-[10px] font-extrabold text-gray-600">
           <span>
-            Thang điểm: {
-              quiz.gradingScale === "Hundred"
+            {interpolate(cg.scoreScaleLabel, {
+              score: quiz.gradingScale === "Hundred"
                 ? 100
-                : (quiz.gradingScale === "Ten" ? 10 : "—")
-            }
+                : (quiz.gradingScale === "Ten" ? 10 : "—"),
+            })}
           </span>
           <span>
             {
               quiz.autoGradingEnabled === true
-                ? "Tự động chấm"
+                ? cg.autoGraded
                 : (
                   quiz.autoGradingEnabled === false
-                    ? "Chấm thủ công"
+                    ? cg.manualGraded
                     : "—"
                 )
             }
@@ -785,7 +835,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
               )}
               className="flex-1 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-[10px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider cursor-pointer"
             >
-              {cg.btnContinueEditing || "Chỉnh sửa"}
+              {cg.btnContinueEditing}
             </button>
             <button
               type="button"
@@ -794,7 +844,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
               aria-busy={isPublishing}
               className="flex-1 py-2 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-[10px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider cursor-pointer disabled:opacity-50"
             >
-              {isPublishing ? "Đang đăng..." : "Đăng bài"}
+              {isPublishing ? cg.publishingQuiz : cg.publishQuiz}
             </button>
           </div>
         ) : (
@@ -805,7 +855,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
             )}
             className="w-full py-2 border border-gray-200 hover:bg-gray-50 text-gray-655 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider cursor-pointer"
           >
-            {language === "vi" ? "Xem chi tiết bài kiểm tra" : "View Quiz Details"}
+            {cg.viewQuizDetails}
           </button>
         )}
       </div>
@@ -910,9 +960,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const listErrorMessage = getQuizErrorMessage(
     quizzesQuery.error,
     language,
-    language === "vi"
-      ? "Không thể tải đầy đủ nội dung. Bạn có thể thử lại."
-      : "Some course content could not be loaded. You can try again.",
+    cg.loadContentError,
   )
 
   const filteredAssignments = useMemo(() => {
@@ -1166,7 +1214,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
       <div
         className="flex justify-center items-center min-h-[400px]"
         role="status"
-        aria-label={language === "vi" ? "Đang tải nội dung" : "Loading course content"}
+        aria-label={cg.loadingCourseContent}
       >
         <LoadingSpinner />
       </div>
@@ -1196,7 +1244,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
             <div>
               <p className="text-2xl font-black text-gray-900 leading-none mb-1">{totalItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.totalItems || "Tổng số bài"}</p>
+              <p className="text-xs font-bold text-gray-500">{cg.totalItems}</p>
             </div>
           </div>
 
@@ -1210,7 +1258,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
             <div>
               <p className="text-2xl font-black text-gray-900 leading-none mb-1">{pendingStudentItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.pendingWork || "Bài cần làm"}</p>
+              <p className="text-xs font-bold text-gray-500">{cg.pendingWork}</p>
             </div>
           </div>
 
@@ -1221,7 +1269,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
             <div>
               <p className="text-2xl font-black text-gray-900 leading-none mb-1">{completedStudentItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.completedWork || "Đã hoàn thành"}</p>
+              <p className="text-xs font-bold text-gray-500">{cg.completedWork}</p>
             </div>
           </div>
 
@@ -1232,7 +1280,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
             <div>
               <p className="text-2xl font-black text-gray-900 leading-none mb-1">{gradedStudentItemsCount}</p>
-              <p className="text-xs font-bold text-gray-500">{cg.gradedWork || "Bài đã chấm"}</p>
+              <p className="text-xs font-bold text-gray-500">{cg.gradedWork}</p>
             </div>
           </div>
         </div>
@@ -1249,7 +1297,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 ${contentType === "all" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
                 }`}
             >
-              <span>{cg.filterAll || "Tất cả"}</span>
+              <span>{cg.filterAll}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "all" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
                 }`}>
                 {totalItemsCount}
@@ -1264,7 +1312,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 }`}
             >
               <FileText size={13} />
-              <span>{cg.postTypeModalAssignmentTitle || "Bài tập"}</span>
+              <span>{cg.contentAssignments}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "assignments" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
                 }`}>
                 {totalAssignmentsCount}
@@ -1279,7 +1327,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 }`}
             >
               <Timer size={13} />
-              <span>{cg.postTypeModalExamTitle || "Bài kiểm tra"}</span>
+              <span>{cg.contentQuizzes}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${contentType === "quizzes" ? "bg-red-50 text-[#990011]" : "bg-gray-200 text-gray-600"
                 }`}>
                 {totalQuizzesCount}
@@ -1297,7 +1345,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder={cg.searchByTitlePlaceholder || "Tìm theo tên bài..."}
+                placeholder={cg.searchByTitlePlaceholder}
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-xs font-semibold text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
               />
               {searchTerm && (
@@ -1318,11 +1366,11 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 onChange={(e) => selectStatusOption(e.target.value)}
                 className="bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
               >
-                <option value="all">{cg.statusAllOptions || "Tất cả trạng thái"}</option>
-                <option value="pending">{cg.statusPendingOption || "Chưa làm / Chưa nộp"}</option>
-                <option value="submitted">{cg.statusSubmittedOption || "Đã nộp / Đang chờ"}</option>
-                <option value="graded">{cg.statusGradedOption || "Đã trả bài / Có điểm"}</option>
-                <option value="overdue">{cg.statusOverdueOption || "Quá hạn / Nộp muộn"}</option>
+                <option value="all">{cg.statusAllOptions}</option>
+                <option value="pending">{cg.statusPendingOption}</option>
+                <option value="submitted">{cg.statusSubmittedOption}</option>
+                <option value="graded">{cg.statusGradedOption}</option>
+                <option value="overdue">{cg.statusOverdueOption}</option>
               </select>
               <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -1334,9 +1382,9 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 onChange={(e) => selectSortOption(e.target.value)}
                 className="bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
               >
-                <option value="dueSoon">{cg.sortDueSoon || "Hạn gần nhất"}</option>
-                <option value="newest">{cg.sortNewest || "Mới nhất"}</option>
-                <option value="oldest">{cg.sortOldest || "Cũ nhất"}</option>
+                <option value="dueSoon">{cg.sortDueSoon}</option>
+                <option value="newest">{cg.sortNewest}</option>
+                <option value="oldest">{cg.sortOldest}</option>
               </select>
               <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -1346,7 +1394,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
-                title={cg.viewModeGrid || "Xem dạng Thẻ (Grid)"}
+                title={cg.viewModeGrid}
                 className={`p-1.5 rounded-lg transition-all ${viewMode === "grid" ? "bg-white text-[#990011] shadow-2xs font-bold" : "text-gray-500 hover:text-gray-800"
                   }`}
               >
@@ -1355,7 +1403,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                title={cg.viewModeList || "Xem dạng Danh sách (Table)"}
+                title={cg.viewModeList}
                 className={`p-1.5 rounded-lg transition-all ${viewMode === "list" ? "bg-white text-[#990011] shadow-2xs font-bold" : "text-gray-500 hover:text-gray-800"
                   }`}
               >
@@ -1378,14 +1426,14 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               onClick={retryFailedLists}
               className="self-start sm:self-auto rounded-lg border border-red-300 bg-white px-3 py-1.5 font-extrabold hover:bg-red-100"
             >
-              {language === "vi" ? "Thử lại" : (language === "zh" ? "重试" : "Retry")}
+              {cg.retry}
             </button>
           </div>
         )}
 
         {isPartiallyLoading && (
           <p className="text-xs font-semibold text-gray-500" role="status" aria-live="polite">
-            {language === "vi" ? "Đang tải thêm nội dung…" : (language === "zh" ? "正在加载更多内容…" : "Loading more content…")}
+            {cg.loadingMoreContent}
           </p>
         )}
 
@@ -1397,8 +1445,8 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
             <p className="text-sm font-bold text-gray-700">
               {searchTerm || statusFilter !== "all"
-                ? (cg.noMatchingItems || "Không tìm thấy bài tập hoặc bài kiểm tra nào phù hợp.")
-                : (cg.noDataLabel || "Chưa có bài tập hoặc bài kiểm tra nào trong lớp này.")}
+                ? cg.noMatchingItems
+                : cg.noDataLabel}
             </p>
             {(searchTerm || statusFilter !== "all") && (
               <button
@@ -1409,7 +1457,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 }}
                 className="mt-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs rounded-xl transition-colors"
               >
-                {language === "vi" ? "Xóa bộ lọc" : "Clear Filters"}
+                {cg.clearFiltersBtn}
               </button>
             )}
           </div>
@@ -1432,6 +1480,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 <StudentQuizCard
                   key={`quiz-${item.value.id}`}
                   quiz={item.value}
+                  cg={cg}
                   language={language}
                   onSelect={(id, step) => navigate(
                     `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(id)}/take${step ? `?step=${step}` : ""}`
@@ -1447,10 +1496,10 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50/80 text-gray-700 font-extrabold uppercase tracking-wider">
-                    <th className="p-4 pl-6">Nội dung</th>
-                    <th className="p-4">Hạn nộp / Đóng</th>
-                    <th className="p-4">Trạng thái</th>
-                    <th className="p-4 pr-6 text-center">Điểm số / Giới hạn</th>
+                    <th className="p-4 pl-6">{cg.contentHeader}</th>
+                    <th className="p-4">{cg.deadlineCloseHeader}</th>
+                    <th className="p-4">{cg.thStatus}</th>
+                    <th className="p-4 pr-6 text-center">{cg.scoreLimitHeader}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-800">
@@ -1469,6 +1518,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       <StudentQuizRow
                         key={`quiz-${item.value.id}`}
                         quiz={item.value}
+                        cg={cg}
                         language={language}
                         onSelect={(id, step) => navigate(
                           `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(id)}/take${step ? `?step=${step}` : ""}`
@@ -1515,7 +1565,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all ${contentType === "all" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
               }`}
           >
-            {language === "vi" ? "Tất cả" : "All"}
+            {cg.filterAll}
           </button>
           <button
             type="button"
@@ -1524,7 +1574,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             className={`flex-1 md:flex-initial px-4 py-2 text-xs font-extrabold rounded-lg transition-all ${contentType === "assignments" ? "bg-white text-[#990011] shadow-xs" : "text-gray-600 hover:text-gray-900"
               }`}
           >
-            {language === "vi" ? "Bài tập" : "Assignments"}
+            {cg.contentAssignments}
           </button>
           <button
             type="button"
@@ -1534,7 +1584,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               }`}
           >
             <Timer size={14} />
-            <span>{language === "vi" ? "Bài kiểm tra" : "Quizzes"}</span>
+            <span>{cg.contentQuizzes}</span>
           </button>
         </div>
 
@@ -1545,8 +1595,8 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
-            placeholder={cg.searchPlaceholder || "Tìm kiếm bài nộp..."}
-            aria-label={cg.searchPlaceholder || (language === "vi" ? "Tìm kiếm nội dung" : "Search content")}
+            placeholder={cg.searchPlaceholder}
+            aria-label={cg.searchContent}
             className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
           />
         </div>
@@ -1560,10 +1610,10 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               onChange={(e) => selectStatusOption(e.target.value)}
               className="w-full bg-white border border-gray-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
             >
-              <option value="all">{cg.statusFilter || "Trạng thái"}</option>
-              <option value="published">{cg.badgePublished || "Đã đăng"}</option>
-              <option value="draft">{cg.badgeDraft || "Nháp"}</option>
-              <option value="closed">{cg.badgeClosed || "Đã đóng"}</option>
+              <option value="all">{cg.statusFilter}</option>
+              <option value="published">{cg.badgePublished}</option>
+              <option value="draft">{cg.badgeDraft}</option>
+              <option value="closed">{cg.badgeClosed}</option>
             </select>
             <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
@@ -1575,8 +1625,8 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               onChange={(e) => selectSortOption(e.target.value)}
               className="w-full bg-white border border-gray-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
             >
-              <option value="newest">{cg.sortNewest || "Sắp xếp: Mới nhất"}</option>
-              <option value="oldest">{cg.sortOldest || "Sắp xếp: Cũ nhất"}</option>
+              <option value="newest">{cg.sortNewest}</option>
+              <option value="oldest">{cg.sortOldest}</option>
             </select>
             <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
@@ -1595,14 +1645,14 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             onClick={retryFailedLists}
             className="self-start sm:self-auto rounded-lg border border-red-300 bg-white px-3 py-1.5 font-extrabold hover:bg-red-100"
           >
-            {language === "vi" ? "Thử lại" : "Retry"}
+            {cg.retry}
           </button>
         </div>
       )}
 
       {isPartiallyLoading && (
         <p className="text-xs font-semibold text-gray-500" role="status" aria-live="polite">
-          {language === "vi" ? "Đang tải thêm nội dung…" : "Loading more content…"}
+          {cg.loadingMoreContent}
         </p>
       )}
 
@@ -1611,7 +1661,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
         <div className="text-center py-16 bg-white border border-gray-150 rounded-3xl p-6 shadow-xs text-xs text-gray-400 font-bold">
           {hasVisibleListError
             ? listErrorMessage
-            : (cg.noDataLabel || "Chưa có số liệu / Không tìm thấy mục nào.")}
+            : cg.noDataLabel}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1647,7 +1697,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               ? Math.max(enrolledCount - submittedCount, 0)
               : null
             const { isExpired, isUpcoming } = getAssignmentTimeline(assignment, nowMs)
-            const title = getAssignmentTitle(assignment)
+            const title = getAssignmentTitle(assignment, cg.untitledAssignment)
             const dueDate = formatDateTime(assignment.dueDate, language)
 
             return (
@@ -1667,35 +1717,35 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                     <div className="flex gap-1.5 items-center flex-wrap">
                       {/* Assignment Type Badge */}
                       <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide">
-                        BÀI TẬP
+                        {cg.badgeAssignment}
                       </span>
 
                       {/* Badge status */}
                       {status === "published" && (
                         <span className="bg-gray-100 text-gray-500 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                          {cg.badgePublished || "ĐÃ ĐĂNG"}
+                          {cg.badgePublished}
                         </span>
                       )}
                       {status === "draft" && (
                         <span className="bg-gray-100 text-gray-500 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                          {cg.badgeDraft || "NHÁP"}
+                          {cg.badgeDraft}
                         </span>
                       )}
                       {status === "closed" && (
                         <span className="bg-gray-100 text-gray-400 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                          {cg.badgeClosed || "ĐÃ ĐÓNG"}
+                          {cg.badgeClosed}
                         </span>
                       )}
 
                       {/* Badge timeline */}
                       {isUpcoming && (
                         <span className="bg-orange-50 border border-orange-100 text-orange-600 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                          {cg.badgeUpcoming || "SẮP ĐẾN HẠN"}
+                          {cg.badgeUpcoming}
                         </span>
                       )}
                       {isExpired && (
                         <span className="bg-red-50 border border-red-100 text-red-655 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wide">
-                          {cg.badgeExpired || "HẾT HẠN"}
+                          {cg.badgeExpired}
                         </span>
                       )}
                     </div>
@@ -1713,13 +1763,13 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       <>
                         <Clock size={12} className={isExpired ? "text-red-500" : "text-gray-400"} />
                         <span className={isExpired ? "text-red-500" : ""}>
-                          {cg.dueDateLabel || "Hạn nộp: "}{dueDate}
+                          {cg.dueDateLabel}{dueDate}
                         </span>
                       </>
                     ) : (
                       <>
                         <EyeOff size={12} />
-                        <span>{cg.notPublishedLabel || "Chưa đăng tải cho học viên"}</span>
+                        <span>{cg.notPublishedLabel}</span>
                       </>
                     )}
                   </div>
@@ -1732,7 +1782,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       {/* Bar metrics */}
                       <div className="flex justify-between items-center text-[10px] text-gray-500 font-extrabold leading-none">
                         <span>
-                          {cg.submittedLabel || "Đã nộp: "}{submittedCount}/{enrolledCount}
+                          {cg.submittedLabel}{submittedCount}/{enrolledCount}
                         </span>
                         <span>{statsPercentage}%</span>
                       </div>
@@ -1753,13 +1803,13 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                         {needsGradingCount !== null && needsGradingCount > 0 ? (
                           <span className="text-[#990011] flex items-center gap-1">
                             <span className="w-1.5 h-1.5 bg-[#990011] rounded-full inline-block" />
-                            {cg.needsGradingLabel || "Cần chấm: "}{needsGradingCount}
+                            {cg.needsGradingLabel}{needsGradingCount}
                           </span>
                         ) : (
                           <span />
                         )}
                         <span className="text-red-700">
-                          {cg.notSubmittedLabel || "Chưa nộp: "}{notSubmittedCount}
+                          {cg.notSubmittedLabel}{notSubmittedCount}
                         </span>
                       </div>
                     </div>
@@ -1769,8 +1819,8 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       <FileText size={14} className="text-gray-400" />
                       <span className="text-[10px] text-gray-400 font-bold leading-none">
                         {isDraft
-                          ? (cg.noDataLabel || "Chưa có số liệu")
-                          : (cg.statsUnavailableLabel || "Số liệu chưa khả dụng")}
+                          ? cg.noDataLabel
+                          : cg.statsUnavailableLabel}
                       </span>
                     </div>
                   )}
@@ -1782,7 +1832,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       onClick={() => navigate(`/workspace/courses/class/${classId}/assignment/${assignment.id}`)}
                       className="w-full py-2 border border-[#990011] hover:bg-red-50/50 text-[#990011] font-extrabold text-[11px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider"
                     >
-                      {cg.btnContinueEditing || "Tiếp tục chỉnh sửa"}
+                      {cg.btnContinueEditing}
                     </button>
                   ) : (
                     <button
@@ -1790,7 +1840,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                       onClick={() => setSearchParams({ tab: "grading", assignmentId: assignment.id })}
                       className="w-full py-2 border border-gray-200 hover:bg-gray-50 text-gray-650 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider"
                     >
-                      {cg.btnViewSubmissions || "Xem bài nộp"}
+                      {cg.btnViewSubmissions}
                     </button>
                   )}
                 </div>

@@ -55,6 +55,7 @@ export default {
     myCourses: "Khóa học của tôi",
     myClass: "Lớp học của tôi",
     schedule: "Lịch giảng dạy",
+    teachingTasks: "Công việc giảng dạy",
     myLearning: "Góc học tập",
     messages: "Tin nhắn",
     settings: "Cài đặt",

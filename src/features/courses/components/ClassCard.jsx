@@ -1,8 +1,14 @@
 import React from "react"
 import { Calendar, Tag, Clock } from "lucide-react"
-import { formatDateRange, formatCurrencyVND, getSafeMediaUrl } from "../utils/courseUtils"
+import {
+  formatDateRange,
+  formatCurrencyVND,
+  getCourseLocale,
+  getSafeMediaUrl,
+} from "../utils/courseUtils"
 import CourseStatusPill from "./CourseStatusPill"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { formatScheduleDays } from "../utils/scheduleUtils"
 
 const ClassCard = ({
   cls,
@@ -14,8 +20,10 @@ const ClassCard = ({
   progressLabel,
   courseTitle
 }) => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const c = t.courses || {}
+  const scd = c.studentCourseDetail || {}
+  const ui = c.workspaceUi || {}
   const completedSessions = Number(cls.completedSessions)
   const totalSessions = Number(cls.totalSessions)
   const progress = (
@@ -28,7 +36,7 @@ const ClassCard = ({
     : null
   const thumbnailUrl = getSafeMediaUrl(cls.thumbnailUrl)
   const tuitionLabel = cls.tuitionFee == null
-    ? "TBA"
+    ? ui.tba || "TBA"
     : formatCurrencyVND(cls.tuitionFee)
 
   return (
@@ -43,7 +51,7 @@ const ClassCard = ({
         }`}
     >
       {/* Image Thumbnail Placeholder Area */}
-      <div className="relative h-44 bg-[#D9D9D9] flex items-center justify-center overflow-hidden shrink-0">
+      <div className="relative h-60 bg-[#D9D9D9] flex items-center justify-center overflow-hidden shrink-0">
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
@@ -54,22 +62,20 @@ const ClassCard = ({
           />
         ) : null}
 
-
-
         {/* Top-right status pill */}
         <div className="absolute top-3 right-3">
           {isStudent ? (
             isClassEnrolled ? (
               <span className="text-[10px] font-black px-3 py-1 rounded-full bg-green-100 text-green-700">
-                Enrolled
+                {c.student?.enrolled || "Enrolled"}
               </span>
             ) : isLocked ? (
               <span className="text-[10px] font-black px-3 py-1 rounded-full bg-gray-200 text-gray-500">
-                Locked
+                {scd.locked || "Locked"}
               </span>
             ) : (
               <span className="text-[10px] font-black px-3 py-1 rounded-full bg-blue-105 text-blue-700">
-                Open
+                {scd.open || "Open"}
               </span>
             )
           ) : (
@@ -105,11 +111,24 @@ const ClassCard = ({
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={13} className="text-gray-400" />
-              <span>{cls.schedule?.days?.join(" - ") || "TBA"}</span>
+              <span>
+                {formatScheduleDays(
+                  cls.schedule?.days,
+                  language,
+                  ui.tba,
+                )}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Clock size={13} className="text-gray-400" />
-              <span>{formatDateRange(cls.startDate, cls.endDate)}</span>
+              <span>
+                {formatDateRange(
+                  cls.startDate,
+                  cls.endDate,
+                  getCourseLocale(language),
+                  ui.tba,
+                )}
+              </span>
             </div>
           </div>
         </div>
@@ -139,11 +158,13 @@ const ClassCard = ({
                   }}
                   className="h-8 px-4 bg-green-600 hover:bg-green-700 text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
                 >
-                  <span>Go to Class</span>
+                  <span>{scd.goToClass || "Go to Class"}</span>
                   <span>→</span>
                 </button>
               ) : isLocked ? (
-                <span className="text-xs text-gray-400 font-bold italic">Other batch selected</span>
+                <span className="text-xs text-gray-400 font-bold italic">
+                  {scd.otherBatchSelected || "Other batch selected"}
+                </span>
               ) : (
                 <button
                   type="button"
@@ -153,7 +174,7 @@ const ClassCard = ({
                   }}
                   className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
                 >
-                  <span>Enroll</span>
+                  <span>{c.student?.enroll || "Enroll"}</span>
                 </button>
               )}
             </div>

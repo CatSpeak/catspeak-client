@@ -40,8 +40,15 @@ import {
   getStudentQuizAttemptFromResponse,
   mergeQuizResultQuestions,
 } from "../../utils/quizUtils"
+import { getCourseLocale } from "../../utils/courseUtils"
 
 const AUTOSAVE_DELAY_MS = 1000
+
+const interpolate = (template, values = {}) =>
+  Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{{${key}}}`, String(value)),
+    template || "",
+  )
 
 const formatTimer = (totalSeconds) => {
   const safeSeconds = Number.isFinite(totalSeconds)
@@ -127,24 +134,24 @@ const getQuestionAudioUrl = (q) => {
   return null
 }
 
-const getQuestionTypeLabel = (typeRaw, lang = "vi") => {
+const getQuestionTypeLabel = (typeRaw, translations = {}) => {
   const type = String(typeRaw || "").trim()
   if (type === "MultipleChoiceSingle" || type === "mcq") {
-    return lang === "vi" ? "Trắc nghiệm (1 đáp án)" : "Single Choice"
+    return translations.questionTypeSingleChoice
   }
   if (type === "MultipleChoiceMultiple") {
-    return lang === "vi" ? "Trắc nghiệm (Nhiều đáp án)" : "Multiple Choice"
+    return translations.questionTypeMultipleChoice
   }
   if (type === "TrueFalse") {
-    return lang === "vi" ? "Đúng / Sai" : "True / False"
+    return translations.questionTypeTrueFalse
   }
   if (type === "FillInBlank") {
-    return lang === "vi" ? "Điền vào chỗ trống" : "Fill in the blank"
+    return translations.questionTypeFillBlank
   }
   if (type === "Essay" || type === "essay") {
-    return lang === "vi" ? "Tự luận" : "Essay"
+    return translations.questionTypeEssay
   }
-  return type || (lang === "vi" ? "Trắc nghiệm" : "Multiple Choice")
+  return type || translations.questionTypeDefault
 }
 
 const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBack }) => {
@@ -163,7 +170,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     }
   }
 
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
+  const sq = useMemo(() => t?.courses?.grading?.studentQuiz || {}, [t])
 
   // ─── API Queries & Mutations ─────────────────────────────────────────
   const {
@@ -417,7 +425,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             }
 
             setLastSavedTimeStr(
-              new Date().toLocaleTimeString([], {
+              new Date().toLocaleTimeString(getCourseLocale(language), {
                 hour: "2-digit",
                 minute: "2-digit",
                 second: "2-digit",
@@ -439,9 +447,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               getQuizErrorMessage(
                 error,
                 language,
-                language === "vi"
-                  ? "Không thể tự động lưu. Vui lòng kiểm tra kết nối và thử lại."
-                  : "Autosave failed. Check your connection and try again.",
+                sq.autosaveError,
               ),
               { id: "quiz-autosave-error" },
             )
@@ -454,7 +460,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
       return saveQueueRef.current
     },
-    [classId, language, quizId, quizKey, saveAnswers],
+    [classId, language, quizId, quizKey, saveAnswers, sq.autosaveError],
   )
 
   const scheduleAnswerSave = useCallback(
@@ -549,13 +555,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         // Ignore refetch error fallback
       }
       hotToast.success(
-        language === "vi"
-          ? timedOut
-            ? "Đã tự động nộp bài kiểm tra."
-            : "Nộp bài kiểm tra thành công!"
-          : timedOut
-            ? "The quiz was submitted automatically."
-            : "Exam submitted successfully!",
+        timedOut ? sq.autoSubmitSuccess : sq.submitSuccess,
       )
     } catch (error) {
       if (!mountedRef.current) return
@@ -565,39 +565,31 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       const errorMessage = getQuizErrorMessage(
         error,
         language,
-        language === "vi"
-          ? "Không thể nộp bài. Câu trả lời vẫn còn trên màn hình; vui lòng thử lại."
-          : "Could not submit. Your answers are still on screen; please try again.",
+        sq.submitError,
       )
       setSubmissionError(errorMessage)
       hotToast.error(errorMessage)
     }
-  }, [classId, language, quizId, refetchQuizResult, submitAttempt])
+  }, [classId, language, quizId, refetchQuizResult, sq, submitAttempt])
 
   const handleAutoSubmitOnTimeOut = useCallback(async () => {
     if (autoSubmitTriggeredRef.current) return
     autoSubmitTriggeredRef.current = true
     hotToast(
-      language === "vi"
-        ? "Hết giờ làm bài. Hệ thống đang tự động nộp bài..."
-        : "Time is up. Submitting automatically...",
+      sq.timeUpAutoSubmitting,
       { id: "quiz-timeout" },
     )
     await executeSubmit({ timedOut: true })
-  }, [executeSubmit, language])
+  }, [executeSubmit, sq.timeUpAutoSubmitting])
 
   // ─── Step 1: Start Attempt Trigger ──────────────────────────────────
   const handleConfirmStart = async () => {
     if (!classId || !quizId) {
-      hotToast.error(language === "vi" ? "Không tìm thấy mã bài kiểm tra hoặc mã lớp!" : "Missing classId or quizId")
+      hotToast.error(sq.missingQuizOrClassId)
       return
     }
     if (!canStart) {
-      hotToast.error(
-        language === "vi"
-          ? "Bài kiểm tra hiện không thể bắt đầu."
-          : "This quiz is not currently available to start.",
-      )
+      hotToast.error(sq.quizUnavailableToStart)
       return
     }
     if (startGuardRef.current) return
@@ -677,13 +669,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       setStepOverride("taking")
       const isInProgress = String(quiz?.recordStatus ?? "").toLowerCase() === "inprogress"
       hotToast.success(
-        language === "vi"
-          ? isInProgress
-            ? "Đã tiếp tục lượt làm bài đang dở."
-            : "Bắt đầu làm bài kiểm tra!"
-          : isInProgress
-            ? "Resumed your in-progress attempt."
-            : "Exam started!",
+        isInProgress ? sq.resumeAttemptSuccess : sq.startSuccess,
       )
     } catch (error) {
       if (
@@ -698,9 +684,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         getQuizErrorMessage(
           error,
           language,
-          language === "vi"
-            ? "Không thể bắt đầu bài kiểm tra."
-            : "Could not start the quiz.",
+          sq.startError,
         ),
       )
     } finally {
@@ -777,10 +761,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
   const isLowTime =
     Number.isFinite(timeRemaining) && timeRemaining >= 0 && timeRemaining < 300
   const quizStatusLabel = {
-    open: language === "vi" ? "ĐANG MỞ" : "OPEN",
-    upcoming: language === "vi" ? "SẮP MỞ" : "UPCOMING",
-    closed: language === "vi" ? "ĐÃ ĐÓNG" : "CLOSED",
-  }[quizStatus] ?? (language === "vi" ? "KHÔNG XÁC ĐỊNH" : "UNKNOWN")
+    open: sq.statusOpen,
+    upcoming: sq.statusUpcoming,
+    closed: sq.statusClosed,
+  }[quizStatus] ?? sq.statusUnknown
 
   const handleRetake = () => {
     setFlowQuizKey(quizKey)
@@ -808,6 +792,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         className="min-h-screen bg-white flex justify-center items-center"
         role="status"
         aria-live="polite"
+        aria-label={sq.loadingQuiz}
       >
         <LoadingSpinner />
       </div>
@@ -822,17 +807,13 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           role="alert"
         >
           <h1 className="text-lg font-black text-gray-900">
-            {language === "vi"
-              ? "Không thể tải bài kiểm tra"
-              : "Could not load the quiz"}
+            {sq.loadQuizErrorTitle}
           </h1>
           <p className="mt-2 text-sm font-semibold text-gray-600">
             {getQuizErrorMessage(
               quizzesError,
               language,
-              language === "vi"
-                ? "Dữ liệu bài kiểm tra không hợp lệ hoặc kết nối đã bị gián đoạn."
-                : "The quiz data was invalid or the connection was interrupted.",
+              sq.loadQuizErrorDescription,
             )}
           </p>
           <div className="mt-5 flex justify-center gap-3">
@@ -841,7 +822,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               onClick={handleBack}
               className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold"
             >
-              {language === "vi" ? "Quay lại" : "Back"}
+              {sq.back}
             </button>
             <button
               type="button"
@@ -849,7 +830,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               disabled={isQuizzesFetching}
               className="px-4 py-2 bg-[#990011] text-white rounded-xl text-sm font-bold disabled:opacity-50"
             >
-              {language === "vi" ? "Thử lại" : "Retry"}
+              {sq.retry}
             </button>
           </div>
         </div>
@@ -865,16 +846,14 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           role="alert"
         >
           <h1 className="text-lg font-black text-gray-900">
-            {language === "vi"
-              ? "Không tìm thấy bài kiểm tra"
-              : "Quiz not found"}
+            {sq.quizNotFound}
           </h1>
           <button
             type="button"
             onClick={handleBack}
             className="mt-5 px-4 py-2 bg-[#990011] text-white rounded-xl text-sm font-bold"
           >
-            {language === "vi" ? "Quay lại" : "Back"}
+            {sq.back}
           </button>
         </div>
       </div>
@@ -893,7 +872,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             <div className="flex items-center gap-2 flex-wrap">
               <span className="bg-red-50 text-[#990011] border border-red-100 text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
                 <Timer size={12} />
-                {language === "vi" ? "BÀI KIỂM TRA" : "QUIZ"}
+                {sq.quizBadge}
               </span>
               <span
                 className={`text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider border ${quizStatus === "open"
@@ -907,7 +886,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-gray-950 tracking-tight leading-tight">
-              {quiz?.name || "Bài kiểm tra chưa đặt tên"}
+              {quiz?.name || sq.untitledQuiz}
             </h1>
           </div>
 
@@ -915,50 +894,53 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/70 border border-gray-150 p-4 rounded-2xl">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                {language === "vi" ? "Thời gian làm bài" : "Time Limit"}
+                {sq.timeLimit}
               </span>
               <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
                 <Clock size={14} className="text-[#990011]" />
-                {quiz?.timeLimitMinutes ?? "—"} {quiz?.timeLimitMinutes != null ? (language === "vi" ? "phút" : "mins") : ""}
+                {quiz?.timeLimitMinutes != null
+                  ? interpolate(sq.minutes, { count: quiz.timeLimitMinutes })
+                  : "—"}
               </span>
             </div>
 
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                {language === "vi" ? "Tổng số câu" : "Total Questions"}
+                {sq.totalQuestions}
               </span>
               <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
                 <HelpCircle size={14} className="text-[#990011]" />
-                {quiz?.totalQuestions ?? quiz?.totalQuestion ?? quiz?.questionCount ?? quiz?.questionsCount ?? (Array.isArray(quiz?.questions) ? quiz.questions.length : (Array.isArray(attemptData?.questions) ? attemptData.questions.length : "—"))}
                 {(quiz?.totalQuestions ?? quiz?.totalQuestion ?? quiz?.questionCount ?? quiz?.questionsCount ?? quiz?.questions?.length ?? attemptData?.questions?.length) != null
-                  ? ` ${language === "vi" ? "câu" : "questions"}`
-                  : ""}
+                  ? interpolate(sq.questionCount, {
+                    count: quiz?.totalQuestions ?? quiz?.totalQuestion ?? quiz?.questionCount ?? quiz?.questionsCount ?? quiz?.questions?.length ?? attemptData?.questions?.length,
+                  })
+                  : "—"}
               </span>
             </div>
 
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                {language === "vi" ? "Lượt còn lại" : "Remaining Attempts"}
+                {sq.remainingAttempts}
               </span>
               <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
                 <RotateCcw size={14} className="text-[#990011]" />
-                {quiz?.remainingAttempts ?? (quiz?.maxAttempts != null ? quiz.maxAttempts : "—")}
                 {quiz?.remainingAttempts != null || quiz?.maxAttempts != null
-                  ? ` ${language === "vi" ? "lần" : "times"}`
-                  : ""}
+                  ? interpolate(sq.attemptCount, {
+                    count: quiz?.remainingAttempts ?? quiz?.maxAttempts,
+                  })
+                  : "—"}
               </span>
             </div>
 
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                {language === "vi" ? "Lượt làm" : "Max Attempts"}
+                {sq.maxAttempts}
               </span>
               <span className="text-sm font-black text-gray-850 flex items-center gap-1.5">
                 <Layers size={14} className="text-[#990011]" />
-                {quiz?.maxAttempts ?? "—"}
                 {quiz?.maxAttempts != null
-                  ? ` ${language === "vi" ? "lần" : "times"}`
-                  : ""}
+                  ? interpolate(sq.attemptCount, { count: quiz.maxAttempts })
+                  : "—"}
               </span>
             </div>
           </div>
@@ -967,7 +949,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           {quiz?.description && (
             <div className="flex flex-col gap-2">
               <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">
-                {language === "vi" ? "Hướng dẫn làm bài:" : "Instructions:"}
+                {sq.instructions}
               </h3>
               <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-700 leading-relaxed">
                 <RenderHTML html={quiz.description} />
@@ -980,17 +962,15 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
             <div className="flex flex-col gap-1 text-xs font-medium leading-relaxed">
               <span className="font-extrabold text-amber-950 text-sm">
-                {language === "vi" ? "Lưu ý quan trọng trước khi làm bài:" : "Important exam notice:"}
+                {sq.importantNotice}
               </span>
               <ul className="list-disc pl-4 space-y-0.5">
-                <li>{language === "vi" ? "Thời gian làm bài sẽ đếm ngược ngay sau khi bạn nhấn nút Bắt đầu." : "The countdown timer begins immediately after clicking Start."}</li>
-                <li>{language === "vi" ? "Hệ thống sẽ tự động lưu nháp câu trả lời và tự động nộp bài khi hết giờ." : "Answers are auto-saved and the test will auto-submit when the timer reaches zero."}</li>
-                <li>{language === "vi" ? "Vui lòng giữ kết nối internet ổn định trong quá trình làm bài." : "Please ensure a stable internet connection throughout the test."}</li>
+                <li>{sq.noticeCountdown}</li>
+                <li>{sq.noticeAutosave}</li>
+                <li>{sq.noticeStableConnection}</li>
                 {recordStatus === "InProgress" && (
                   <li className="font-bold">
-                    {language === "vi"
-                      ? "Lượt làm và đồng hồ cũ sẽ tiếp tục. Các câu trả lời đã lưu trước đó có thể chưa hiển thị lại; hãy kiểm tra kỹ trước khi thay đổi hoặc nộp bài."
-                      : "Your existing attempt and timer will resume. Previously saved answers may not be shown again, so review carefully before changing or submitting answers."}
+                    {sq.noticeResumeAttempt}
                   </li>
                 )}
               </ul>
@@ -1001,17 +981,29 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-100">
             <span className="text-sm font-black text-gray-900 text-center sm:text-left">
               {recordStatus === "InProgress" || recordStatus === "inprogress"
-                ? (language === "vi" ? "Bạn có một lượt làm bài đang dở. Tiến hành làm tiếp?" : "You have an in-progress attempt. Proceed to continue?")
-                : (language === "vi" ? "Bạn có muốn tiến hành làm bài kiểm tra này không?" : "Do you want to proceed to start this quiz?")}
+                ? sq.resumeAttemptPrompt
+                : (recordStatus === "Submitted" || recordStatus === "submitted"
+                  ? (sq.retakeQuizPrompt || "You have submitted this quiz. Would you like to view results or retake?")
+                  : sq.startQuizPrompt)}
             </span>
 
             <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+              {(recordStatus === "Submitted" || recordStatus === "submitted") && (
+                <button
+                  type="button"
+                  onClick={() => setStepOverride("result")}
+                  className="flex-1 sm:flex-none px-4 py-3 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Eye size={14} />
+                  <span>{sq.seeResults || "View Results"}</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleBack}
                 className="flex-1 sm:flex-none px-4 py-3 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-2xl transition-all cursor-pointer"
               >
-                {language === "vi" ? "Hủy bỏ" : "Cancel"}
+                {sq.cancel}
               </button>
               <button
                 type="button"
@@ -1019,17 +1011,19 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 onClick={handleConfirmStart}
                 className="flex-1 sm:flex-none px-6 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-2xl shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
-                {(recordStatus === "InProgress" || recordStatus === "inprogress") && <RotateCcw size={14} />}
+                {(recordStatus === "InProgress" || recordStatus === "inprogress" || recordStatus === "Submitted" || recordStatus === "submitted") && <RotateCcw size={14} />}
                 <span>
                   {isStarting
-                    ? (language === "vi" ? "Đang tải..." : "Loading...")
+                    ? sq.loading
                     : (!canStart
                       ? (quizStatus === "upcoming"
-                        ? (language === "vi" ? "Chưa đến giờ mở" : "Not open yet")
-                        : (language === "vi" ? "Không thể bắt đầu" : "Unavailable"))
+                        ? sq.notOpenYet
+                        : sq.unavailable)
                       : (recordStatus === "InProgress" || recordStatus === "inprogress"
-                        ? (language === "vi" ? "Tiếp tục làm bài" : "Continue Quiz")
-                        : (language === "vi" ? "Bắt đầu làm bài" : "Start Quiz")))}
+                        ? (sq.continueQuiz || "Continue Quiz")
+                        : (recordStatus === "Submitted" || recordStatus === "submitted"
+                          ? (sq.retakeQuiz || "Retake Quiz")
+                          : sq.startQuiz)))}
                 </span>
               </button>
             </div>
@@ -1058,9 +1052,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           <div className="flex flex-col items-center gap-3 text-sm font-bold text-gray-500">
             <LoadingSpinner />
             <span>
-              {language === "vi"
-                ? "Đang tải kết quả bài kiểm tra..."
-                : "Loading quiz result..."}
+              {sq.loadingQuizResult}
             </span>
           </div>
         </div>
@@ -1075,17 +1067,13 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             role="alert"
           >
             <h1 className="text-lg font-black text-gray-900">
-              {language === "vi"
-                ? "Không thể tải kết quả"
-                : "Could not load the result"}
+              {sq.loadResultErrorTitle}
             </h1>
             <p className="mt-2 text-sm font-semibold text-gray-600">
               {getQuizErrorMessage(
                 quizResultError,
                 language,
-                language === "vi"
-                  ? "Kết quả chưa sẵn sàng hoặc dữ liệu trả về không hợp lệ."
-                  : "The result is not ready or the response was invalid.",
+                sq.loadResultErrorDescription,
               )}
             </p>
             <div className="mt-5 flex justify-center gap-3">
@@ -1094,7 +1082,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 onClick={handleBack}
                 className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold"
               >
-                {language === "vi" ? "Quay lại" : "Back"}
+                {sq.back}
               </button>
               <button
                 type="button"
@@ -1106,7 +1094,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   size={14}
                   className={isQuizResultFetching ? "animate-spin" : ""}
                 />
-                {language === "vi" ? "Thử lại" : "Retry"}
+                {sq.retry}
               </button>
             </div>
           </div>
@@ -1120,17 +1108,18 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       resultData?.maxDisplayScore ?? resultData?.maxScore ?? null
     const isPassed =
       typeof resultData?.passed === "boolean" ? resultData.passed : null
-    const passStatusStr =
-      resultData?.passStatus ||
-      resultData?.status ||
-      (language === "vi" ? "Đang chờ chấm" : "Pending grading")
+    const passStatusStr = isPassed === true
+      ? sq.resultPassed
+      : isPassed === false
+        ? sq.resultFailed
+        : sq.pendingGrading
 
     const submittedAtMs = resultData?.submittedAt
       ? new Date(resultData.submittedAt).getTime()
       : Number.NaN
     const submittedDateStr = Number.isFinite(submittedAtMs)
       ? new Date(submittedAtMs).toLocaleString(
-        language === "vi" ? "vi-VN" : "en-US",
+        language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US",
         {
           hour: "2-digit",
           minute: "2-digit",
@@ -1143,9 +1132,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
     const timeSpentSecs = Number(resultData?.timeSpentSeconds)
     const timeSpentFormatted = Number.isFinite(timeSpentSecs)
-      ? `${Math.floor(Math.max(0, timeSpentSecs) / 60)} ${language === "vi" ? "phút" : "mins"
-      } ${Math.floor(Math.max(0, timeSpentSecs) % 60)} ${language === "vi" ? "giây" : "secs"
-      }`
+      ? interpolate(sq.timeSpentDuration, {
+        minutes: Math.floor(Math.max(0, timeSpentSecs) / 60),
+        seconds: Math.floor(Math.max(0, timeSpentSecs) % 60),
+      })
       : "—"
 
     const rawResultQuestions = Array.isArray(resultData?.questions)
@@ -1171,11 +1161,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               role="alert"
             >
-              <span>
-                {language === "vi"
-                  ? "Bản tóm tắt đã nộp đang được hiển thị; chưa thể tải kết quả chi tiết mới nhất."
-                  : "Showing the submission summary; the latest detailed result could not be loaded."}
-              </span>
+              <span>{sq.resultSummaryFallback}</span>
               <button
                 type="button"
                 onClick={refetchQuizResult}
@@ -1186,7 +1172,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   size={14}
                   className={isQuizResultFetching ? "animate-spin" : ""}
                 />
-                {language === "vi" ? "Thử lại" : "Retry"}
+                {sq.retry}
               </button>
             </div>
           )}
@@ -1199,18 +1185,18 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             {/* Title & Metadata */}
             <div className="flex flex-col gap-2 pl-2">
               <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
-                {language === "vi" ? "Kết quả bài kiểm tra" : "Exam Result"}
+                {sq.examResult}
               </h1>
 
               <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 flex-wrap">
                 <span className="flex items-center gap-1.5">
                   <Calendar size={14} className="text-gray-400" />
-                  <span>{language === "vi" ? `Đã nộp: ${submittedDateStr}` : `Submitted: ${submittedDateStr}`}</span>
+                  <span>{interpolate(sq.submittedAt, { date: submittedDateStr })}</span>
                 </span>
                 <span className="text-gray-300">•</span>
                 <span className="flex items-center gap-1.5">
                   <Clock size={14} className="text-gray-400" />
-                  <span>{language === "vi" ? `Thời gian làm bài: ${timeSpentFormatted}` : `Time spent: ${timeSpentFormatted}`}</span>
+                  <span>{interpolate(sq.timeSpent, { duration: timeSpentFormatted })}</span>
                 </span>
               </div>
             </div>
@@ -1220,7 +1206,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               {/* Score Display */}
               <div className="flex flex-col gap-0.5">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  {language === "vi" ? "ĐIỂM SỐ" : "SCORE"}
+                  {sq.score}
                 </span>
                 <div className="flex items-baseline">
                   <span className="text-3xl md:text-4xl font-black text-[#990011] tracking-tight">
@@ -1240,7 +1226,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               {/* Pass Status Display */}
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  {language === "vi" ? "TRẠNG THÁI" : "STATUS"}
+                  {sq.status}
                 </span>
                 {isPassed === true ? (
                   <span className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
@@ -1265,7 +1251,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           {/* ─── Question Details Section Header ─── */}
           <div className="flex flex-col gap-1 mt-2">
             <h2 className="text-base font-extrabold text-gray-900 pb-2 border-b border-gray-200">
-              {language === "vi" ? "Chi tiết câu hỏi" : "Question Details"}
+              {sq.questionDetails}
             </h2>
           </div>
 
@@ -1273,9 +1259,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           <div className="flex flex-col gap-5">
             {resultQuestions.length === 0 ? (
               <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-sm font-semibold text-gray-500">
-                {language === "vi"
-                  ? "Chưa có chi tiết câu hỏi để hiển thị."
-                  : "Question details are not available yet."}
+                {sq.questionDetailsUnavailable}
               </div>
             ) : resultQuestions.map((q, qIdx) => {
               const isCorrect = q.isCorrect === true
@@ -1311,7 +1295,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               const options = rawOptions.length > 0
                 ? rawOptions
                 : q.type === "TrueFalse"
-                  ? ["Đúng", "Sai"]
+                  ? [sq.trueOption, sq.falseOption]
                   : []
 
               const studentAnswers = [
@@ -1341,32 +1325,32 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       }`}
                   >
                     <span className={`text-sm font-extrabold ${isWrong ? "text-red-950" : isPending ? "text-gray-900" : "text-emerald-950"}`}>
-                      {language === "vi" ? `Câu ${qIdx + 1}` : `Question ${qIdx + 1}`}
+                      {interpolate(sq.questionNumber, { number: qIdx + 1 })}
                     </span>
 
                     <div>
                       {isCorrect && (
                         <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <CheckCircle2 size={14} />
-                          <span>{language === "vi" ? `Đúng (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Correct (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
+                          <span>{interpolate(sq.correctScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
                       )}
                       {isWrong && (
                         <span className="bg-red-100/70 text-red-700 border border-red-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <XCircle size={14} />
-                          <span>{language === "vi" ? `Sai (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Incorrect (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
+                          <span>{interpolate(sq.incorrectScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
                       )}
                       {!isCorrect && !isWrong && isGraded && (
                         <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <CheckCircle2 size={14} />
-                          <span>{language === "vi" ? `Đã chấm (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Graded (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
+                          <span>{interpolate(sq.gradedScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
                       )}
                       {isPending && (
                         <span className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
                           <Clock size={14} />
-                          <span>{language === "vi" ? `Chờ chấm (${pointsEarnedVal}/${pointsMaxVal} điểm)` : `Pending (${pointsEarnedVal}/${pointsMaxVal} pts)`}</span>
+                          <span>{interpolate(sq.pendingScore, { earned: pointsEarnedVal, max: pointsMaxVal })}</span>
                         </span>
                       )}
                     </div>
@@ -1374,7 +1358,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
                   {/* Question Type Info (Above question content) */}
                   <div className="px-5 pt-4 text-base font-black text-gray-950">
-                    {getQuestionTypeLabel(q?.type, language)}
+                    {getQuestionTypeLabel(q?.type, sq)}
                   </div>
 
                   {/* Question Content / Prompt */}
@@ -1387,7 +1371,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     <div className="mx-5 mt-2 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
                       <img
                         src={getQuestionImageUrl(q)}
-                        alt={`Minh họa câu hỏi ${qIdx + 1}`}
+                        alt={interpolate(sq.questionIllustration, { number: qIdx + 1 })}
                         className="max-h-56 max-w-full w-auto h-auto object-contain rounded-xl shadow-xs"
                       />
                     </div>
@@ -1476,9 +1460,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   {options.length === 0 && studentAnswers.length > 0 && (
                     <div className="px-5 pb-4 text-xs font-semibold text-gray-700">
                       <span className="font-extrabold">
-                        {language === "vi"
-                          ? "Lựa chọn của bạn: "
-                          : "Your selection: "}
+                        {sq.yourSelection}
                       </span>
                       {studentAnswers
                         .map((answer) => {
@@ -1495,7 +1477,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   {(q.type === "Essay" || q.type === "FillInBlank") && (
                     <div className="px-5 py-4 flex flex-col gap-2">
                       <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wide">
-                        {language === "vi" ? "Câu trả lời của bạn:" : "Your Answer:"}
+                        {sq.yourAnswer}
                       </span>
                       <div
                         className={`p-4 border rounded-xl text-xs md:text-sm flex items-center justify-between gap-3 ${q.type === "Essay"
@@ -1510,7 +1492,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                         <span>
                           {q.studentFillText ||
                             (typeof q.studentAnswer === "string" && q.studentAnswer.trim() ? q.studentAnswer : null) ||
-                            (language === "vi" ? "(Chưa nhập câu trả lời)" : "(No answer provided)")}
+                            sq.noAnswerProvided}
                         </span>
                         {q.type !== "Essay" && isCorrect && <Check size={18} className="text-emerald-600 shrink-0" />}
                         {q.type !== "Essay" && isWrong && <X size={18} className="text-red-600 shrink-0" />}
@@ -1522,7 +1504,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   {(q.essayComment || q.comment || q.feedback) && (
                     <div className="mx-5 mb-5 bg-blue-50/80 border-l-4 border-blue-600 rounded-r-xl p-4 text-xs font-semibold text-blue-950 leading-relaxed">
                       <span className="font-extrabold text-blue-900 mr-1.5">
-                        {language === "vi" ? "Nhận xét của giáo viên:" : "Teacher's Feedback:"}
+                        {sq.teacherFeedback}
                       </span>
                       <span>{q.essayComment || q.comment || q.feedback}</span>
                     </div>
@@ -1533,7 +1515,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     <div className="mx-5 mb-5 p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-900 flex items-center gap-2.5 shadow-2xs">
                       <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
                       <span>
-                        {language === "vi" ? "Đáp án đúng: " : "Correct Answer: "}
+                        {sq.correctAnswer}
                         <strong className="text-emerald-950 font-extrabold">
                           {correctAnswers
                             .map((ans) => {
@@ -1561,7 +1543,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   {q.explanation && (
                     <div className="mx-5 mb-5 bg-gray-100/90 border-l-4 border-[#990011] rounded-r-xl p-4 text-xs font-semibold text-gray-700 leading-relaxed">
                       <span className="font-extrabold text-gray-900 mr-1.5">
-                        {language === "vi" ? "Giải thích:" : "Explanation:"}
+                        {sq.explanation}
                       </span>
                       <span>{q.explanation}</span>
                     </div>
@@ -1580,7 +1562,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             onClick={handleBack}
             className="px-6 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
           >
-            {language === "vi" ? "Quay lại" : "Back"}
+            {sq.back}
           </button>
 
           {canRetake && (
@@ -1590,7 +1572,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               className="px-6 py-2.5 bg-[#6b000b] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer active:scale-95 flex items-center gap-2"
             >
               <RotateCcw size={14} />
-              <span>{language === "vi" ? "Làm lại bài kiểm tra" : "Retake Quiz"}</span>
+              <span>{sq.retakeQuiz}</span>
             </button>
           )}
         </div>
@@ -1608,11 +1590,11 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         {/* Header Left: Title + Online/Status Pill */}
         <div className="flex items-center gap-4">
           <h1 className="text-base md:text-xl font-black text-gray-950 tracking-tight truncate max-w-xs sm:max-w-md md:max-w-xl">
-            {quiz?.name || (language === "vi" ? "Bài kiểm tra" : "Quiz")}
+            {quiz?.name || sq.quiz}
           </h1>
           <span className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-extrabold tracking-wide">
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span>{language === "vi" ? "ĐANG LÀM BÀI" : "IN PROGRESS"}</span>
+            <span>{sq.inProgress}</span>
           </span>
         </div>
 
@@ -1631,18 +1613,12 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             />
             <span>
               {saveStatus === "error"
-                ? language === "vi"
-                  ? "Lưu tự động thất bại"
-                  : "Autosave failed"
+                ? sq.autosaveFailed
                 : saveStatus === "pending" || saveStatus === "saving"
-                  ? language === "vi"
-                    ? "Đang lưu..."
-                    : "Saving..."
+                  ? sq.saving
                   : lastSavedTimeStr
-                    ? `${language === "vi" ? "Đã lưu lúc " : "Saved at "}${lastSavedTimeStr}`
-                    : language === "vi"
-                      ? "Tự động lưu khi trả lời"
-                      : "Answers autosave"}
+                    ? interpolate(sq.savedAt, { time: lastSavedTimeStr })
+                    : sq.answersAutosave}
             </span>
             {saveStatus === "error" && (
               <button
@@ -1650,7 +1626,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 onClick={retryAnswerSave}
                 className="underline underline-offset-2"
               >
-                {language === "vi" ? "Thử lại" : "Retry"}
+                {sq.retry}
               </button>
             )}
           </div>
@@ -1680,8 +1656,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             className="shrink-0 rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-extrabold hover:bg-red-100 disabled:opacity-50"
           >
             {isSubmitting
-              ? (language === "vi" ? "Đang nộp..." : "Submitting...")
-              : (language === "vi" ? "Thử nộp lại" : "Retry submission")}
+              ? sq.submitting
+              : sq.retrySubmission}
           </button>
         </div>
       )}
@@ -1693,7 +1669,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         <div className="flex-1 flex flex-col gap-6">
           {questions.length === 0 ? (
             <div className="bg-white rounded-3xl border border-gray-150 p-12 text-center text-gray-400 font-bold shadow-xs">
-              {language === "vi" ? "Không có câu hỏi nào." : "No questions available."}
+              {sq.noQuestions}
             </div>
           ) : (
             <div className="bg-white rounded-3xl border border-gray-150 p-6 md:p-8 flex flex-col gap-6 shadow-xs relative">
@@ -1701,7 +1677,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               {/* Question Header: Number + Skill Tag Badge */}
               <div className="flex justify-between items-center border-b border-gray-100 pb-4 select-none">
                 <h2 className="text-xl md:text-2xl font-black text-gray-950 tracking-tight">
-                  {language === "vi" ? `Câu ${currentIndex + 1}` : `Question ${currentIndex + 1}`}
+                  {interpolate(sq.questionNumber, { number: currentIndex + 1 })}
                 </h2>
 
                 <div className="flex items-center gap-2">
@@ -1711,7 +1687,9 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     </span>
                   )}
                   <span className="px-3.5 py-1 bg-red-50 border border-red-100 rounded-xl text-xs font-black text-[#990011]">
-                    {currentQuestion?.points ?? "—"} {language === "vi" ? "điểm" : "pts"}
+                    {currentQuestion?.points != null
+                      ? interpolate(sq.points, { count: currentQuestion.points })
+                      : "—"}
                   </span>
                   <button
                     type="button"
@@ -1722,8 +1700,8 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       }`}
                     title={
                       markedQuestions[currentQuestion?.id]
-                        ? (language === "vi" ? "Bỏ đánh dấu câu hỏi" : "Unflag question")
-                        : (language === "vi" ? "Đánh dấu xem lại" : "Flag for review")
+                        ? sq.unflagQuestion
+                        : sq.flagForReview
                     }
                   >
                     <Flag className={`w-4 h-4 ${markedQuestions[currentQuestion?.id] ? "fill-red-500" : ""}`} />
@@ -1733,7 +1711,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
               {/* Question Type Info (Bold, bigger text, above question content and media) */}
               <div className="text-base md:text-lg font-black text-gray-950">
-                {getQuestionTypeLabel(currentQuestion?.type, language)}
+                {getQuestionTypeLabel(currentQuestion?.type, sq)}
               </div>
 
               {/* Question Content / Prompt */}
@@ -1741,7 +1719,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 {currentQuestion?.content ? (
                   <RenderHTML html={currentQuestion.content} />
                 ) : (
-                  <span>{language === "vi" ? "Chưa có nội dung câu hỏi." : "No question content."}</span>
+                  <span>{sq.noQuestionContent}</span>
                 )}
               </div>
 
@@ -1750,7 +1728,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
                   <img
                     src={getQuestionImageUrl(currentQuestion)}
-                    alt={`Minh họa câu hỏi ${currentIndex + 1}`}
+                    alt={interpolate(sq.questionIllustration, { number: currentIndex + 1 })}
                     className="max-h-56 max-w-full w-auto h-auto object-contain rounded-xl shadow-xs"
                   />
                 </div>
@@ -1768,7 +1746,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3.5 flex items-start gap-2 text-xs font-semibold text-amber-900">
                   <HelpCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-extrabold text-amber-950 mr-1">{language === "vi" ? "Gợi ý:" : "Hint:"}</span>
+                    <span className="font-extrabold text-amber-950 mr-1">{sq.hint}</span>
                     <span>{currentQuestion.tipText}</span>
                   </div>
                 </div>
@@ -1850,9 +1828,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       {(Array.isArray(currentQuestion.options)
                         && currentQuestion.options.length >= 2
                         ? currentQuestion.options
-                        : language === "vi"
-                          ? ["Đúng", "Sai"]
-                          : ["True", "False"]
+                        : [sq.trueOption, sq.falseOption]
                       ).map((opt, optIdx) => {
                         const isSelected = userAnswers[currentQuestion.id] === optIdx
                         return (
@@ -1886,14 +1862,14 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                         htmlFor={`quiz-answer-${currentIndex}`}
                         className="text-xs font-extrabold text-gray-500 uppercase tracking-wide"
                       >
-                        {language === "vi" ? "Câu trả lời của bạn:" : "Your answer:"}
+                        {sq.yourAnswer}
                       </label>
                       <input
                         id={`quiz-answer-${currentIndex}`}
                         type="text"
                         value={userAnswers[currentQuestion.id] || ""}
                         onChange={(e) => handleTextAnswerChange(currentQuestion.id, e.target.value)}
-                        placeholder={language === "vi" ? "Nhập câu trả lời của bạn vào đây..." : "Enter your answer here..."}
+                        placeholder={sq.answerPlaceholder}
                         className="w-full p-4 border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
                       />
                     </div>
@@ -1907,15 +1883,18 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                           htmlFor={`quiz-essay-${currentIndex}`}
                           className="text-xs font-extrabold text-gray-500 uppercase tracking-wide"
                         >
-                          {language === "vi" ? "Bài luận của bạn:" : "Your essay answer:"}
+                          {sq.yourEssayAnswer}
                         </label>
                         <span className="text-[11px] font-bold text-gray-400">
-                          {(userAnswers[currentQuestion.id] || "").trim().split(/\s+/).filter(Boolean).length}
                           {Number.isFinite(Number(currentQuestion.maxWordCount))
                             && Number(currentQuestion.maxWordCount) > 0
-                            ? ` / ${currentQuestion.maxWordCount}`
-                            : ""}{" "}
-                          {language === "vi" ? "từ" : "words"}
+                            ? interpolate(sq.wordCountWithLimit, {
+                              count: (userAnswers[currentQuestion.id] || "").trim().split(/\s+/).filter(Boolean).length,
+                              max: currentQuestion.maxWordCount,
+                            })
+                            : interpolate(sq.wordCount, {
+                              count: (userAnswers[currentQuestion.id] || "").trim().split(/\s+/).filter(Boolean).length,
+                            })}
                         </span>
                       </div>
                       <textarea
@@ -1936,7 +1915,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             handleTextAnswerChange(currentQuestion.id, nextValue)
                           }
                         }}
-                        placeholder={language === "vi" ? "Nhập nội dung bài làm của bạn ở đây..." : "Type your essay answer here..."}
+                        placeholder={sq.essayPlaceholder}
                         className="w-full p-4 border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] min-h-[180px] resize-y transition-all"
                       />
                     </div>
@@ -1956,7 +1935,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             {/* Sidebar Title */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="text-sm font-black text-gray-900 tracking-tight">
-                {language === "vi" ? "Danh sách câu hỏi" : "Questions List"}
+                {sq.questionsList}
               </h3>
               <span className="text-xs font-extrabold text-gray-400">
                 {answeredCount}/{questions.length}
@@ -1967,19 +1946,19 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex-wrap gap-1">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
-                <span>{language === "vi" ? "Đã làm" : "Done"}</span>
+                <span>{sq.done}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full border border-gray-400 bg-white inline-block" />
-                <span>{language === "vi" ? "Chưa làm" : "Unanswered"}</span>
+                <span>{sq.unanswered}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#990011] inline-block" />
-                <span>{language === "vi" ? "Đang làm" : "Current"}</span>
+                <span>{sq.current}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Flag className="w-3 h-3 text-red-500 fill-red-500" />
-                <span>{language === "vi" ? "Đánh dấu" : "Flagged"}</span>
+                <span>{sq.flagged}</span>
               </div>
             </div>
 
@@ -2002,11 +1981,13 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     key={q.id || idx}
                     type="button"
                     onClick={() => setCurrentIndex(idx)}
-                    aria-label={
-                      language === "vi"
-                        ? `Đi đến câu ${idx + 1}${isAnswered ? ", đã trả lời" : ", chưa trả lời"}${isMarked ? ", đã đánh dấu xem lại" : ""}`
-                        : `Go to question ${idx + 1}${isAnswered ? ", answered" : ", unanswered"}${isMarked ? ", flagged for review" : ""}`
-                    }
+                    aria-label={interpolate(sq.goToQuestion, {
+                      number: idx + 1,
+                      answerState: isAnswered
+                        ? sq.questionAnsweredState
+                        : sq.questionUnansweredState,
+                      flaggedState: isMarked ? sq.questionFlaggedState : "",
+                    })}
                     aria-current={isCurrent ? "step" : undefined}
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs transition-all cursor-pointer active:scale-95 relative ${btnStyle}`}
                   >
@@ -2037,7 +2018,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           className="px-5 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
         >
           <ArrowLeft size={16} />
-          <span>{language === "vi" ? "Câu trước" : "Previous"}</span>
+          <span>{sq.previousQuestion}</span>
         </button>
 
         {/* Right: Next Question & Submit Action */}
@@ -2048,7 +2029,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
             className="px-5 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
-            <span>{language === "vi" ? "Câu sau" : "Next"}</span>
+            <span>{sq.nextQuestion}</span>
             <ArrowRight size={16} />
           </button>
 
@@ -2059,7 +2040,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             className="px-6 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send size={14} />
-            <span>{language === "vi" ? "Nộp bài" : "Submit"}</span>
+            <span>{sq.submit}</span>
           </button>
         </div>
 
@@ -2114,12 +2095,13 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
             <div className="flex flex-col gap-1.5">
               <h3 id="quiz-submit-title" className="text-lg font-black text-gray-950">
-                {language === "vi" ? "Xác nhận nộp bài kiểm tra?" : "Confirm Exam Submission?"}
+                {sq.confirmSubmissionTitle}
               </h3>
               <p id="quiz-submit-description" className="text-xs font-bold text-gray-500">
-                {language === "vi"
-                  ? `Bạn đã làm ${answeredCount}/${questions.length} câu hỏi. Bạn có chắc chắn muốn nộp bài ngay bây giờ?`
-                  : `You answered ${answeredCount}/${questions.length} questions. Are you sure you want to submit now?`}
+                {interpolate(sq.confirmSubmissionDescription, {
+                  answered: answeredCount,
+                  total: questions.length,
+                })}
               </p>
             </div>
 
@@ -2131,7 +2113,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 onClick={() => setShowSubmitConfirmModal(false)}
                 className="flex-1 py-3 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
               >
-                {language === "vi" ? "Hủy, tiếp tục làm" : "Cancel"}
+                {sq.cancelContinue}
               </button>
               <button
                 type="button"
@@ -2139,7 +2121,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 onClick={() => executeSubmit()}
                 className="flex-1 py-3 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
               >
-                {isSubmitting ? (language === "vi" ? "Đang nộp..." : "Submitting...") : (language === "vi" ? "Xác nhận Nộp" : "Confirm Submit")}
+                {isSubmitting ? sq.submitting : sq.confirmSubmit}
               </button>
             </div>
           </div>

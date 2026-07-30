@@ -6,6 +6,7 @@ import {
   getCourseGradientAndIcon,
 } from "./courseUtils"
 import { toLocalDateString } from "./dateUtils"
+import { formatScheduleDays } from "./scheduleUtils"
 
 const SHORT_DATE_OPTIONS = { day: "2-digit", month: "short", year: "numeric" }
 const NUMERIC_DATE_OPTIONS = { day: "2-digit", month: "2-digit", year: "numeric" }
@@ -18,8 +19,15 @@ const toNonNegativeNumber = (value) => {
 
 const toDisplayCount = (value) => toNonNegativeNumber(value) ?? "—"
 
-const formatPrice = (value) => (
-  toNonNegativeNumber(value) === null ? "TBA" : formatCurrencyVND(value)
+const fillTemplate = (template, values) => (
+  Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{{${key}}}`, String(value)),
+    String(template || ""),
+  )
+)
+
+const formatPrice = (value, fallback = "") => (
+  toNonNegativeNumber(value) === null ? fallback : formatCurrencyVND(value)
 )
 
 export const getScheduleRange = (daysAhead = 180) => {
@@ -50,7 +58,12 @@ export const filterByStatus = (list, statusFilter) => {
   ))
 }
 
-export const mapTeacherCourseSummary = (course, index) => {
+export const mapTeacherCourseSummary = (
+  course,
+  index,
+  labels = {},
+  locale = "en-GB",
+) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
 
   return {
@@ -65,9 +78,14 @@ export const mapTeacherCourseSummary = (course, index) => {
       )
       return studentCount === null
         ? "—"
-        : `${studentCount} student${studentCount === 1 ? "" : "s"}`
+        : fillTemplate(labels.studentsCount, { count: studentCount })
     })(),
-    createdAt: formatUTCDate(course.createdAt, "en-GB", SHORT_DATE_OPTIONS),
+    createdAt: formatUTCDate(
+      course.createdAt,
+      locale,
+      SHORT_DATE_OPTIONS,
+      labels.tba,
+    ),
     status: course.status || "",
     icon,
     gradient,
@@ -75,7 +93,12 @@ export const mapTeacherCourseSummary = (course, index) => {
   }
 }
 
-export const mapTeacherClassSummary = (cls, index) => {
+export const mapTeacherClassSummary = (
+  cls,
+  index,
+  labels = {},
+  locale = "en-GB",
+) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const progress = getProgressPercent(cls.progress)
 
@@ -83,20 +106,23 @@ export const mapTeacherClassSummary = (cls, index) => {
     id: cls.id,
     courseId: cls.courseId,
     title: cls.name || cls.title,
-    courseTitle: cls.courseName || cls.courseTitle || "N/A",
+    courseTitle: cls.courseName || cls.courseTitle || labels.notAvailable || "—",
     language: cls.language || "",
     levels: Array.isArray(cls.levels) ? cls.levels : [],
-    schedule: cls.schedule?.days?.join(" - ") || "TBA",
+    schedule: formatScheduleDays(cls.schedule?.days, locale, labels.tba),
     time: cls.schedule?.startTime && cls.schedule?.endTime
       ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
-      : "TBA",
-    students: `${toDisplayCount(cls.studentCount ?? cls.enrolledStudents)} / ${toDisplayCount(cls.slots)} students`,
+      : labels.tba,
+    students: fillTemplate(labels.studentsRatio, {
+      enrolled: toDisplayCount(cls.studentCount ?? cls.enrolledStudents),
+      slots: toDisplayCount(cls.slots),
+    }),
     slots: toNonNegativeNumber(cls.slots),
     progress,
     progressText: `${toDisplayCount(cls.progress?.completedSessions)}/${toDisplayCount(cls.progress?.totalSessions)}`,
-    startDate: formatUTCDate(cls.startDate, "en-GB", SHORT_DATE_OPTIONS),
-    endDate: formatUTCDate(cls.endDate, "en-GB", SHORT_DATE_OPTIONS),
-    price: formatPrice(cls.tuitionFee),
+    startDate: formatUTCDate(cls.startDate, locale, SHORT_DATE_OPTIONS, labels.tba),
+    endDate: formatUTCDate(cls.endDate, locale, SHORT_DATE_OPTIONS, labels.tba),
+    price: formatPrice(cls.tuitionFee, labels.tba),
     status: cls.status || "",
     icon,
     gradient,
@@ -104,7 +130,12 @@ export const mapTeacherClassSummary = (cls, index) => {
   }
 }
 
-export const mapCourseTableRow = (course, index, labels = {}) => {
+export const mapCourseTableRow = (
+  course,
+  index,
+  labels = {},
+  locale = "en-GB",
+) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const classCount = toDisplayCount(course.classCount)
   const totalStudents = toDisplayCount(course.totalStudents ?? course.studentCount)
@@ -114,14 +145,14 @@ export const mapCourseTableRow = (course, index, labels = {}) => {
   return {
     id: course.id,
     title: course.title || course.name,
-    classCount: (labels.classCount || "{{count}} classes").replace("{{count}}", classCount),
-    students: (labels.studentsCount || "{{count}} students").replace("{{count}}", totalStudents),
+    classCount: fillTemplate(labels.classCount, { count: classCount }),
+    students: fillTemplate(labels.studentsCount, { count: totalStudents }),
     progress: getProgressPercent(course.progress),
-    startDate: formatUTCDate(course.startDate, "en-GB", NUMERIC_DATE_OPTIONS),
-    endDate: formatUTCDate(course.endDate, "en-GB", NUMERIC_DATE_OPTIONS),
+    startDate: formatUTCDate(course.startDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
+    endDate: formatUTCDate(course.endDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
     price: minimumPrice !== null && maximumPrice !== null
       ? `${formatCurrencyVND(minimumPrice)} - ${formatCurrencyVND(maximumPrice)}`
-      : "TBA",
+      : labels.tba,
     status: course.status,
     icon,
     gradient,
@@ -129,7 +160,12 @@ export const mapCourseTableRow = (course, index, labels = {}) => {
   }
 }
 
-export const mapClassTableRow = (cls, index, labels = {}) => {
+export const mapClassTableRow = (
+  cls,
+  index,
+  labels = {},
+  locale = "en-GB",
+) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const progress = getProgressPercent({
     completedSessions: cls.completedSessions ?? cls.progress?.completedSessions,
@@ -141,17 +177,18 @@ export const mapClassTableRow = (cls, index, labels = {}) => {
     courseTitle: cls.courseTitle || cls.courseName || "—",
     classTitle: cls.title || cls.name,
     status: cls.status,
-    schedule: cls.schedule?.days?.join(", ") || "TBA",
-    students: (labels.studentsRatio || "{{enrolled}} / {{slots}} students")
-      .replace("{{enrolled}}", String(toDisplayCount(cls.enrolledStudents ?? cls.studentCount)))
-      .replace("{{slots}}", String(toDisplayCount(cls.slots))),
+    schedule: formatScheduleDays(cls.schedule?.days, locale, labels.tba, ", "),
+    students: fillTemplate(labels.studentsRatio, {
+      enrolled: toDisplayCount(cls.enrolledStudents ?? cls.studentCount),
+      slots: toDisplayCount(cls.slots),
+    }),
     time: cls.schedule?.startTime && cls.schedule?.endTime
       ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
-      : "TBA",
+      : labels.tba,
     progress,
-    startDate: formatUTCDate(cls.startDate, "en-GB", NUMERIC_DATE_OPTIONS),
-    endDate: formatUTCDate(cls.endDate, "en-GB", NUMERIC_DATE_OPTIONS),
-    price: formatPrice(cls.tuitionFee),
+    startDate: formatUTCDate(cls.startDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
+    endDate: formatUTCDate(cls.endDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
+    price: formatPrice(cls.tuitionFee, labels.tba),
     icon,
     gradient,
     thumbnailUrl: cls.thumbnailUrl,
@@ -173,7 +210,7 @@ export const mapUpcomingSession = (session, index, classes = []) => {
   return {
     id: `sess-${classId}-${session.sessionNumber || index}`,
     classId,
-    title: session.class?.name || matchedClass?.title || matchedClass?.name || "Untitled Session",
+    title: session.class?.name || matchedClass?.title || matchedClass?.name || "—",
     time: `${formatTime12h(session.startTime)} - ${formatTime12h(session.endTime)}`,
     date: formatDateDayMonth(session.date),
     status: session.class?.status || matchedClass?.status || "",
@@ -239,3 +276,40 @@ export const filterStudentClasses = (classes, filters) => (
     matchesLanguage(cls, filters.langFilter)
   ))
 )
+
+export const mapTeachingTask = (task, labels = {}) => {
+  if (!task || typeof task !== "object") return null
+  const isQuiz = task.taskType === "QuizGrading" || Boolean(task.quizId)
+
+  const pendingText = task.pendingCount
+    ? fillTemplate(labels.pendingCount, { count: task.pendingCount })
+    : ""
+  const subtitleParts = [task.className, pendingText].filter(Boolean)
+  const rawStatus = String(task.status || "urgent").trim()
+  const normalizedStatus = rawStatus.toLowerCase()
+  const displayStatus = normalizedStatus === "urgent"
+    ? labels.urgent
+    : normalizedStatus === "required"
+      ? labels.required
+      : labels.unknown
+
+  return {
+    id: `${task.taskType || "task"}-${task.assignmentId || 0}-${task.quizId || 0}-${task.classId || 0}-${task.createdAt || ""}`,
+    title: task.taskName || (isQuiz ? labels.gradeQuiz : labels.gradeAssignment),
+    subtitle: subtitleParts.join(" • "),
+    status: displayStatus,
+    badge: displayStatus,
+    badgeClass: normalizedStatus === "urgent"
+      ? "bg-[#FFE4E6] text-[#E11D48]"
+      : normalizedStatus === "required"
+        ? "bg-[#FEF3C7] text-[#D97706]"
+        : "bg-[#E8F8F0] text-[#15803D]",
+    iconColor: isQuiz ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600",
+    taskType: task.taskType,
+    assignmentId: task.assignmentId,
+    quizId: task.quizId,
+    classId: task.classId,
+    courseId: task.courseId,
+    rawTask: task,
+  }
+}

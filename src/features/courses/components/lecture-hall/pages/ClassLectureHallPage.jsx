@@ -32,10 +32,11 @@ const generateTempId = () => `sec-${Date.now()}`;
 const ClassLectureHallPage = ({ id, isStudent }) => {
   const { t, language } = useLanguage()
   const dict = t.courses.lectureHall
+  const sectionDict = dict.modals.section
   // Use the appropriate API based on role
   const teacherQuery = useGetCurriculumByClassQuery(id, { skip: !id || isStudent })
   const studentQuery = useGetStudentCurriculumByClassQuery(id, { skip: !id || !isStudent })
-  const { data: apiSections = [], isLoading, isError, error } = isStudent ? studentQuery : teacherQuery
+  const { data: apiSections = [], isLoading, isError } = isStudent ? studentQuery : teacherQuery
 
   // Teacher-only mutations (no-op for students)
   const [deleteSection] = useDeleteCurriculumSectionMutation()
@@ -89,7 +90,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const handleOpenAddItemModal = (sectionId, type) => {
     setTargetSectionId(sectionId)
     const targetSec = sections.find((s) => s.id === sectionId)
-    setTargetSectionName(targetSec?.title || "Unknown Section")
+    setTargetSectionName(targetSec?.name || dict.unknownSection)
     setEditItemData(null) // Reset edit data
     setActiveModal(type)
   }
@@ -97,7 +98,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const handleEditItem = (sectionId, item) => {
     setTargetSectionId(sectionId)
     const targetSec = sections.find((s) => s.id === sectionId)
-    setTargetSectionName(targetSec?.title || "Unknown Section")
+    setTargetSectionName(targetSec?.name || dict.unknownSection)
     setEditItemData(item)
     if (item.type === "bulletinBoard") {
       setActiveModal("announcement")
@@ -121,10 +122,10 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             allowStudentReply: data.allowReply,
             isVisibleToStudents: data.isVisible,
           }).unwrap()
-          toast.success(dict.bulletinBoard.toastUpdateSuccess || "Đã cập nhật bảng tin!")
+          toast.success(dict.bulletinBoard.toastUpdateSuccess)
           setSectionsOverride(null)
-        } catch (err) {
-          toast.error(err?.data?.message || err?.message || dict.bulletinBoard.toastUpdateFailed || "Lỗi khi cập nhật bảng tin.")
+        } catch {
+          toast.error(dict.bulletinBoard.toastUpdateFailed)
         }
       } else {
         // Create mode
@@ -137,10 +138,10 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             allowStudentReply: data.allowReply,
             isVisibleToStudents: data.isVisible,
           }).unwrap()
-          toast.success(dict.bulletinBoard.toastCreateSuccess || "Đã tạo bảng tin mới!")
+          toast.success(dict.bulletinBoard.toastCreateSuccess)
           setSectionsOverride(null)
-        } catch (err) {
-          toast.error(err?.data?.message || err?.message || dict.bulletinBoard.toastCreateFailed || "Lỗi khi tạo bảng tin.")
+        } catch {
+          toast.error(dict.bulletinBoard.toastCreateFailed)
         }
       }
     } else {
@@ -166,14 +167,14 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
               : sec
           )
         )
-        toast.success(dict.bulletinBoard.toastUpdateSuccess || "Đã cập nhật bảng tin!")
+        toast.success(dict.bulletinBoard.toastUpdateSuccess)
       } else {
         // Local create mode
         const newItem = {
           id: `item-${Date.now()}`,
           type: "announcement",
           title: data.title,
-          meta: `${dict.latestPost || "Bài viết mới nhất"}: ${new Date().toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US")}`,
+          meta: `${dict.latestPost}: ${new Date().toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US")}`,
           metaType: "clock",
           isVisibleToStudents: data.isVisible,
           content: data.content,
@@ -186,7 +187,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
               : sec
           )
         )
-        toast.success(dict.bulletinBoard.toastCreateSuccess || "Đã tạo bảng tin mới!")
+        toast.success(dict.bulletinBoard.toastCreateSuccess)
       }
     }
     setEditItemData(null)
@@ -196,7 +197,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const handleSaveMaterial = async (data) => {
     if (id) {
       if (!data.files || data.files.length === 0) {
-        toast.error("Vui lòng chọn ít nhất một file học liệu.")
+        toast.error(dict.curriculum.addMaterialRequired)
         return
       }
       try {
@@ -207,10 +208,10 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           files: data.files,
           isVisibleToStudents: data.isVisible,
         }).unwrap()
-        toast.success(dict.curriculum.addMaterialSuccess || "Đã thêm học liệu thành công!")
+        toast.success(dict.curriculum.addMaterialSuccess)
         setSectionsOverride(null)
-      } catch (err) {
-        toast.error(err?.data?.message || err?.message || "Lỗi khi thêm học liệu.")
+      } catch {
+        toast.error(dict.curriculum.addMaterialError)
       }
     } else {
       const fileExt = data.file?.name
@@ -236,7 +237,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             : sec
         )
       )
-      toast.success(dict.curriculum.addMaterialSuccess || "Đã thêm học liệu thành công!")
+      toast.success(dict.curriculum.addMaterialSuccess)
     }
   }
 
@@ -270,17 +271,22 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         }
         await Promise.all(promises)
 
-        toast.success(dict.curriculum.addActivitySuccess || `Đã thêm ${activities.length} hoạt động học tập!`)
+        toast.success(
+          dict.curriculum.addActivitySuccessCount.replace(
+            "{{count}}",
+            String(activities.length),
+          ),
+        )
         setSectionsOverride(null)
-      } catch (err) {
-        toast.error(err?.data?.message || err?.message || "Lỗi khi thêm hoạt động học tập.")
+      } catch {
+        toast.error(dict.curriculum.addActivityError)
       }
     } else {
       const newItems = activities.map((act) => ({
         id: `item-${Date.now()}-${act.id}`,
         type: act._activityType === "quiz" ? "quiz" : "assignment",
         title: act.title,
-        meta: `Hạn nộp: ${act.dueDate}`,
+        meta: dict.curriculum.dueDateMeta.replace("{{date}}", act.dueDate),
         metaType: "clock",
         isVisibleToStudents: true,
       }))
@@ -292,7 +298,12 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             : sec
         )
       )
-      toast.success(dict.curriculum.addActivitySuccess || `Đã thêm ${activities.length} hoạt động học tập!`)
+      toast.success(
+        dict.curriculum.addActivitySuccessCount.replace(
+          "{{count}}",
+          String(activities.length),
+        ),
+      )
     }
   }
 
@@ -318,10 +329,10 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             }).unwrap()
           }
 
-          toast.success(dict.curriculum.updateLinkSuccess || "Đã cập nhật liên kết!")
+          toast.success(dict.curriculum.updateLinkSuccess)
           setSectionsOverride(null)
-        } catch (err) {
-          toast.error(err?.data?.message || err?.message || dict.curriculum.addLinkError || "Lỗi khi cập nhật liên kết.")
+        } catch {
+          toast.error(dict.curriculum.updateLinkError)
         }
       } else {
         // Create mode
@@ -333,10 +344,10 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             url: data.url,
             isVisibleToStudents: data.isVisible,
           }).unwrap()
-          toast.success(dict.curriculum.addLinkSuccess || "Đã thêm liên kết mới!")
+          toast.success(dict.curriculum.addLinkSuccess)
           setSectionsOverride(null)
-        } catch (err) {
-          toast.error(err?.data?.message || err?.message || dict.curriculum.addLinkError || "Lỗi khi thêm liên kết.")
+        } catch {
+          toast.error(dict.curriculum.addLinkError)
         }
       }
     } else {
@@ -355,7 +366,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
               : sec
           )
         )
-        toast.success(dict.curriculum.addLinkSuccess || "Đã cập nhật liên kết!")
+        toast.success(dict.curriculum.updateLinkSuccess)
       } else {
         const newItem = {
           id: `item-${Date.now()}`,
@@ -373,7 +384,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
               : sec
           )
         )
-        toast.success(dict.curriculum.addLinkSuccess || "Đã thêm liên kết mới!")
+        toast.success(dict.curriculum.addLinkSuccess)
       }
     }
   }
@@ -404,7 +415,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const handleSaveSectionModal = async (e) => {
     e.preventDefault()
     if (!sectionModal.name.trim()) {
-      toast.error("Vui lòng nhập tên section")
+      toast.error(sectionDict.toastNameRequired)
       return
     }
 
@@ -417,7 +428,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         items: [],
       }
       setSectionsOverride((prev) => [...(prev ?? apiSections), newSection])
-      toast.success("Đã thêm section mới!")
+      toast.success(sectionDict.toastCreateSuccess)
     } else if (sectionModal.mode === "edit") {
       if (id) {
         try {
@@ -429,9 +440,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             isVisibleToStudents: sectionModal.isVisibleToStudents,
           }).unwrap()
           setSectionsOverride(null)
-          toast.success("Đã cập nhật section!")
-        } catch (err) {
-          toast.error(err?.data?.message || err?.message || "Lỗi khi cập nhật section.")
+          toast.success(sectionDict.toastUpdateSuccess)
+        } catch {
+          toast.error(sectionDict.toastUpdateError)
           return
         }
       } else {
@@ -447,7 +458,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
               : sec
           )
         )
-        toast.success("Đã cập nhật section!")
+        toast.success(sectionDict.toastUpdateSuccess)
       }
     }
 
@@ -464,7 +475,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           sec.id === sectionId ? { ...sec, isVisibleToStudents: !sec.isVisibleToStudents } : sec
         )
       )
-      toast.success("Đã cập nhật trạng thái hiển thị section")
+      toast.success(sectionDict.toastVisibilitySuccess)
       return
     }
 
@@ -477,9 +488,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         isVisibleToStudents: !section.isVisibleToStudents,
       }).unwrap()
       setSectionsOverride(null)
-      toast.success("Đã cập nhật trạng thái hiển thị section")
-    } catch (err) {
-      toast.error(err?.data?.message || err?.message || "Không thể cập nhật section. Vui lòng thử lại.")
+      toast.success(sectionDict.toastVisibilitySuccess)
+    } catch {
+      toast.error(sectionDict.toastVisibilityError)
     }
   }
 
@@ -511,7 +522,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             : sec
         )
       )
-      toast.success("Đã cập nhật trạng thái bài học")
+      toast.success(dict.curriculum.toastVisibilitySuccess)
       return
     }
 
@@ -522,9 +533,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         isVisibleToStudents: !item.isVisibleToStudents,
       }).unwrap()
       setSectionsOverride(null)
-      toast.success("Đã cập nhật trạng thái bài học")
-    } catch (err) {
-      toast.error(err?.data?.message || err?.message || "Lỗi khi cập nhật trạng thái bài học")
+      toast.success(dict.curriculum.toastVisibilitySuccess)
+    } catch {
+      toast.error(dict.curriculum.toastVisibilityError)
     }
   }
 
@@ -542,14 +553,14 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
     if (type === "section") {
       if (!id) {
         updateSections((prev) => prev.filter((sec) => sec.id !== sectionId))
-        toast.success(dict.curriculum.toastDeleteSuccess || "Đã xóa section")
+        toast.success(dict.curriculum.toastDeleteSuccess)
       } else {
         try {
           await deleteSection({ classId: id, sectionId: sectionId }).unwrap()
           setSectionsOverride(null)
-          toast.success(dict.curriculum.toastDeleteSuccess || "Đã xóa section")
-        } catch (err) {
-          toast.error(err?.data?.message || err?.message || dict.curriculum.toastDeleteError || "Không thể xóa section.")
+          toast.success(dict.curriculum.toastDeleteSuccess)
+        } catch {
+          toast.error(dict.curriculum.toastDeleteError)
         }
       }
     } else if (type === "item") {
@@ -561,7 +572,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
               : sec
           )
         )
-        toast.success(dict.curriculum.toastDeleteSuccess || "Đã xóa bài học")
+        toast.success(dict.curriculum.toastDeleteSuccess)
       } else {
         try {
           await deleteItem({
@@ -569,9 +580,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             itemId: itemId,
           }).unwrap()
           setSectionsOverride(null)
-          toast.success(dict.curriculum.toastDeleteSuccess || "Đã xóa bài học")
-        } catch (err) {
-          toast.error(err?.data?.message || err?.message || dict.curriculum.toastDeleteError || "Lỗi khi xóa bài học")
+          toast.success(dict.curriculum.toastDeleteSuccess)
+        } catch {
+          toast.error(dict.curriculum.toastDeleteError)
         }
       }
     }
@@ -582,13 +593,13 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
     <div className="animate-fadeIn space-y-6 pb-10">
       {isLoading && (
         <div className="flex justify-center py-16">
-          <LoadingSpinner />
+          <LoadingSpinner text={dict.loading} />
         </div>
       )}
 
       {isError && (
         <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
-          {error?.data?.message || error?.message || "Không thể tải danh sách section. Vui lòng thử lại."}
+          {dict.curriculum.loadError}
         </div>
       )}
 
@@ -599,9 +610,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
             {sections.length === 0 ? (
               <div className="text-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
                 {isStudent ? (
-                  <p>{dict.curriculum.emptyState || "Chưa có bài học nào."}</p>
+                  <p>{dict.curriculum.emptyState}</p>
                 ) : (
-                  <p>{dict.curriculum.emptyStateHint || "Chưa có section nào. Hãy tạo section đầu tiên cho lớp học này."}</p>
+                  <p>{dict.curriculum.emptyStateHint}</p>
                 )}
               </div>
             ) : (
@@ -634,7 +645,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
                 endIcon={<Plus size={10} className="text-primary" />}
                 className="w-full font-semibold text-base"
               >
-                {dict.curriculum.addSection || "Tạo section mới"}
+                {dict.curriculum.addSection}
               </PillButton>
             </div>
           )
@@ -707,10 +718,10 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
         open={deleteConfirm.open}
         onClose={() => setDeleteConfirm({ ...deleteConfirm, open: false })}
         onConfirm={handleConfirmDelete}
-        title={dict.curriculum.deleteConfirmTitle || "Xác nhận xoá"}
-        message={dict.curriculum.deleteConfirmMessage || "Bạn có chắc chắn muốn xóa? Hành động này không thể hoàn tác."}
-        cancelText={dict.modals.section.cancel || "Hủy"}
-        confirmText={dict.bulletinBoard.delete || "Xóa"}
+        title={dict.curriculum.deleteConfirmTitle}
+        message={dict.curriculum.deleteConfirmMessage}
+        cancelText={dict.modals.section.cancel}
+        confirmText={dict.bulletinBoard.delete}
         confirmVariant="destructive"
       />
 

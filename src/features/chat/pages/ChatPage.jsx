@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { MessageCircle } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
 import ChatSidebar from "../components/ChatSidebar"
@@ -28,14 +29,18 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 const ChatPage = () => {
   const { t } = useLanguage()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { id: routeId } = useParams()
   const isDesktop = useMediaQuery("(min-width: 1280px)")
 
   // ── Auth & Profile ─────────────────────────────────────
   const { user: authUser } = useAuth()
   const { data: userProfile } = useGetUserProfileQuery()
 
+  // ── Route & Selection State ─────────────────────────────
+  const selectedId = routeId || null
+
   // ── UI State ───────────────────────────────────────────
-  const [selectedId, setSelectedId] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [inputValue, setInputValue] = useState("")
@@ -100,29 +105,29 @@ const ChatPage = () => {
   // ── Handlers ───────────────────────────────────────────
   const handleSelectConversation = useCallback(
     (convId) => {
-      setSelectedId(convId)
+      navigate(`/chat/${convId}`)
       setInputValue("")
       handleCancelReply()
     },
-    [handleCancelReply],
+    [navigate, handleCancelReply],
   )
 
   const handleBack = useCallback(() => {
-    setSelectedId(null)
+    navigate("/chat")
     setShowInfoPanel(false)
     handleCancelReply()
-  }, [handleCancelReply])
+  }, [navigate, handleCancelReply])
 
   const handleToggleInfo = useCallback(() => {
     setShowInfoPanel((prev) => !prev)
   }, [])
 
   const handleLeaveGroup = useCallback(() => {
-    setSelectedId(null)
+    navigate("/chat")
     setShowInfoPanel(false)
     handleCancelReply()
     dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-  }, [dispatch, handleCancelReply])
+  }, [navigate, dispatch, handleCancelReply])
 
   const handleSend = useCallback(
     async (text, file) => {

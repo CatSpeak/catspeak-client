@@ -22,3 +22,124 @@ export const DEFAULT_CLASS_FEE_TIERS = [
   { minSlots: 21, maxSlots: 50, openingFee: 500000, commissionRate: 15 },
   { minSlots: 51, maxSlots: Infinity, openingFee: 0, commissionRate: 20 },
 ]
+
+export const getLocalizedLanguageName = (langName, t) => {
+  if (!langName) return ""
+  const key = String(langName).trim().toLowerCase()
+  const langMap = t?.courses?.student?.languages || {}
+  const canonicalName = {
+    en: "English",
+    english: "English",
+    zh: "Chinese",
+    chinese: "Chinese",
+    vi: "Vietnamese",
+    vietnamese: "Vietnamese",
+    ja: "Japanese",
+    japanese: "Japanese",
+  }[key]
+  if (canonicalName && langMap[canonicalName]) return langMap[canonicalName]
+  return langName
+}
+
+/**
+ * Safely parse raw languagesTeach data from an instructor profile.
+ * Supports:
+ *  - Array of objects: [{ language: "English", level: "B2" }, ...]
+ *  - Array of strings: ["English", "Chinese"]
+ *  - JSON string representing either of the above
+ *  - Comma-separated string: "English, Chinese"
+ */
+export function extractInstructorLanguages(profile) {
+  if (!profile) return []
+  const raw =
+    profile.languagesTeach ||
+    profile.LanguagesTeach ||
+    profile.data?.languagesTeach ||
+    profile.data?.LanguagesTeach
+  if (!raw) return []
+
+  let parsed = raw
+  if (typeof raw === "string") {
+    const trimmed = raw.trim()
+    if (
+      (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+      (trimmed.startsWith("{") && trimmed.endsWith("}"))
+    ) {
+      try {
+        parsed = JSON.parse(trimmed)
+      } catch {
+        parsed = trimmed.split(",").map((s) => s.trim()).filter(Boolean)
+      }
+    } else {
+      parsed = trimmed.split(",").map((s) => s.trim()).filter(Boolean)
+    }
+  }
+
+  if (!Array.isArray(parsed)) {
+    if (typeof parsed === "string") {
+      parsed = [parsed]
+    } else if (typeof parsed === "object" && parsed !== null) {
+      parsed = [parsed]
+    } else {
+      return []
+    }
+  }
+
+  const langNames = new Set()
+  parsed.forEach((item) => {
+    if (typeof item === "string" && item.trim()) {
+      langNames.add(item.trim())
+    } else if (typeof item === "object" && item !== null) {
+      const name = item.language || item.Language || item.name || item.Name
+      if (typeof name === "string" && name.trim()) {
+        langNames.add(name.trim())
+      }
+    }
+  })
+
+  return Array.from(langNames)
+}
+
+/**
+ * Filter COURSE_FORM_LANGUAGES based on taught languages in the instructor's profile.
+ * If profile data is missing/empty, returns COURSE_FORM_LANGUAGES as fallback.
+ */
+export function getInstructorFormLanguages(profile) {
+  const taughtLanguages = extractInstructorLanguages(profile)
+  if (!taughtLanguages || taughtLanguages.length === 0) {
+    return COURSE_FORM_LANGUAGES
+  }
+
+  const result = []
+  const addedIds = new Set()
+
+  taughtLanguages.forEach((taughtLang, idx) => {
+    const normalizedTaught = taughtLang.trim().toLowerCase()
+    const matched = COURSE_FORM_LANGUAGES.find(
+      (c) => (c.name || "").trim().toLowerCase() === normalizedTaught
+    )
+
+    if (matched) {
+      if (!addedIds.has(matched.id)) {
+        result.push(matched)
+        addedIds.add(matched.id)
+      }
+    } else {
+      const customId = `custom-${idx}-${taughtLang}`
+      if (!addedIds.has(customId)) {
+        result.push({
+          id: customId,
+          name: taughtLang,
+          levels: ["A1", "A2", "B1", "B2", "C1", "C2"].map((name, i) => ({
+            id: i + 1,
+            name,
+          })),
+        })
+        addedIds.add(customId)
+      }
+    }
+  })
+
+  return result.length > 0 ? result : COURSE_FORM_LANGUAGES
+}
+

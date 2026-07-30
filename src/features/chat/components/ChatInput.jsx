@@ -233,7 +233,7 @@ const ChatInput = ({
                     onSelect={(emoji) => {
                       insertEmoji(emoji, textareaRef, value, onChange)
                       addRecent(emoji)
-                      close()
+                      if (typeof close === "function") close()
                     }}
                   />
                 )}

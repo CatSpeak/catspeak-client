@@ -39,6 +39,7 @@ const ClassDetailPage = () => {
   const { language, t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
+  const ui = c.workspaceUi || {}
 
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
@@ -98,9 +99,9 @@ const ClassDetailPage = () => {
     try {
       await deleteClass({ id, courseId: classData?.courseId }).unwrap()
       toast.success(cd.toastCancelSuccess || "Class cancelled successfully")
-      navigate("/workspace/courses")
+      navigate("/workspace/classes")
     } catch {
-      toast.error("Failed to cancel class")
+      toast.error(cd.toastCancelFailed || "Failed to cancel class")
     } finally {
       classActionGuardRef.current = false
       setShowCancelClassModal(false)
@@ -125,7 +126,7 @@ const ClassDetailPage = () => {
       }).unwrap()
       toast.success(cd.toastCompleteSuccess || "Marked class as complete")
     } catch {
-      toast.error("Failed to complete class")
+      toast.error(cd.toastCompleteFailed || "Failed to complete class")
     } finally {
       classActionGuardRef.current = false
     }
@@ -138,7 +139,11 @@ const ClassDetailPage = () => {
     { value: "grading", label: cd.grading || "Grading" },
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(classData || {}, language || "en")
+  const getWeeklyScheduleText = () => formatWeeklyScheduleText(
+    classData || {},
+    language || "en",
+    ui.tba,
+  )
 
   if (
     isDetailLoading
@@ -216,7 +221,13 @@ const ClassDetailPage = () => {
               {/* Trò chuyện button */}
               <button
                 type="button"
-                onClick={() => navigate("/chat")}
+                onClick={() => {
+                  if (classData?.chatGroupId) {
+                    navigate(`/chat/${classData.chatGroupId}`)
+                  } else {
+                    navigate("/chat")
+                  }
+                }}
                 className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
                 <MessageSquare size={14} className="fill-[#990011]" />

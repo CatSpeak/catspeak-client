@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react"
 import { Editor } from "@tinymce/tinymce-react"
 import { SendHorizonal } from "lucide-react"
-import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -13,12 +12,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * @param {string}   [placeholder]       - Placeholder cho editor
  * @param {function} [onSubmit]          - Callback(htmlContent) khi gửi bình luận
  */
-const CommentInput = ({
-  // currentUserAvatar,
-  // currentUserName,
-  // placeholder = "Nhập phản hồi",
-  onSubmit,
-}) => {
+const CommentInput = ({ onSubmit }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.postDetail
 
@@ -45,16 +39,6 @@ const CommentInput = ({
 
   return (
     <div className="flex items-start gap-4">
-      {/* Current user avatar */}
-      {/* <div className="shrink-0 pt-1">
-        <Avatar
-          src={currentUserAvatar}
-          name={currentUserName}
-          alt={currentUserName || "Bạn"}
-          size={40}
-        />
-      </div> */}
-
       {/* Editor + Send */}
       <div className="flex-1 flex items-end gap-2">
         <div className="flex-1 rounded-xl overflow-hidden border border-[#E2E2E2] bg-[#F3F4F5] focus-within:border-[#750000] transition-colors">
@@ -91,7 +75,8 @@ const CommentInput = ({
           size="xs"
           onClick={handleSubmit}
           disabled={!hasContent}
-          title={dict.sendTooltip || "Gửi (Ctrl+Enter)"}
+          title={dict.sendTooltip}
+          aria-label={dict.sendTooltip}
         >
           <SendHorizonal size={15} />
         </IconButton>

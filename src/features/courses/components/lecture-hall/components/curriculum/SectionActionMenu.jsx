@@ -1,5 +1,5 @@
 import React from "react"
-import { Pencil, EyeOff, Trash, FilePlusCorner, Folder, BookOpen, Link2, Eye, ArrowUp, ArrowDown } from "lucide-react"
+import { Pencil, EyeOff, Trash, FilePlusCorner, Folder, BookOpen, Link2, Eye } from "lucide-react"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -22,7 +22,7 @@ const SectionActionMenu = ({
       <MenuList className="w-[218px] rounded-xl shadow-faq-card text-sm text-[#1A1A1A]">
         <MenuItem
           icon={<FilePlusCorner size={14} className="text-[#1A1A1A]" />}
-          label={dict.createBoard || "Tạo bảng tin"}
+          label={dict.createBoard}
           onClick={() => {
             onAddContent("announcement")
             onClose()
@@ -30,7 +30,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Folder size={14} className="text-[#1A1A1A]" />}
-          label={dict.addMaterial || "Thêm tài liệu"}
+          label={dict.addMaterial}
           onClick={() => {
             onAddContent("material")
             onClose()
@@ -38,7 +38,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<BookOpen size={14} className="text-[#1A1A1A]" />}
-          label={dict.addActivity || "Thêm hoạt động học tập"}
+          label={dict.addActivity}
           onClick={() => {
             onAddContent("assignment")
             onClose()
@@ -46,7 +46,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Link2 size={14} className="text-[#1A1A1A]" />}
-          label={dict.addLink || "Thêm liên kết"}
+          label={dict.addLink}
           onClick={() => {
             onAddContent("link")
             onClose()
@@ -54,7 +54,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Pencil size={14} className="text-[#1A1A1A]" />}
-          label={dict.edit || "Chỉnh sửa"}
+          label={dict.edit}
           onClick={() => {
             onEdit(section)
             onClose()
@@ -62,7 +62,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={section?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
-          label={dict.toggleVisibility || "Tuỳ chỉnh ẩn/hiện"}
+          label={dict.toggleVisibility}
           onClick={() => {
             onToggleVisibility(section.id)
             onClose()
@@ -70,7 +70,7 @@ const SectionActionMenu = ({
         />
         <MenuItem
           icon={<Trash size={15} className="text-[#1A1A1A]" />}
-          label={dict.delete || "Xoá"}
+          label={dict.delete}
           onClick={() => {
             onDelete(section.id)
             onClose()

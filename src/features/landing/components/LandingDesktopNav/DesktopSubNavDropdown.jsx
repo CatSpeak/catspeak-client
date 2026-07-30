@@ -6,6 +6,7 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { useAuth } from "@/features/auth"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
 /**
  * Hover-triggered dropdown for nav items that have subItems (e.g. catSpeak, workspace).
@@ -20,8 +21,9 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
   const { t } = useLanguage()
   const { lang } = useParams()
   const navigate = useNavigate()
-  const { checkIsActive, resolvePath } = useActiveLink()
+  const { checkIsActive, resolvePath, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
+  const { isStudent, isTeacher } = useRoleOverride()
   const isActive = checkIsActive(item)
 
   // Gate: show dropdown & allow navigation only when authenticated (if requiresAuth)
@@ -64,18 +66,16 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
     >
       {/* Trigger pill */}
       <div
-        className={`flex items-center justify-center text-base tracking-wide font-bold transition-colors duration-200 ${
-          isOpen || isActive
-            ? "text-[#990011]"
-            : "text-black hover:text-[#990011]"
-        }`}
+        className={`flex items-center justify-center text-base tracking-wide font-bold transition-colors duration-200 ${isOpen || isActive
+          ? "text-[#990011]"
+          : "text-black hover:text-[#990011]"
+          }`}
       >
         {/* Clickable label */}
         <div
           onClick={handleLabelClick}
-          className={`h-10 flex items-center pl-4 pr-1 rounded-l-full transition-colors whitespace-nowrap hover:bg-gray-100/50 ${
-            isLocked ? "cursor-pointer opacity-70" : "cursor-pointer"
-          }`}
+          className={`h-10 flex items-center pl-4 pr-1 rounded-l-full transition-colors whitespace-nowrap hover:bg-gray-100/50 ${isLocked ? "cursor-pointer opacity-70" : "cursor-pointer"
+            }`}
         >
           {t.nav?.[key] || key}
         </div>
@@ -85,9 +85,8 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
           <div className="h-10 w-8 flex items-center justify-center rounded-r-full hover:bg-gray-100/50 transition-colors cursor-default">
             <ChevronDown
               size={16}
-              className={`transition-transform duration-200 ${
-                isOpen ? "rotate-180" : "rotate-0"
-              }`}
+              className={`transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"
+                }`}
             />
           </div>
         )}
@@ -105,29 +104,43 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
               className="rounded-xl border border-[#E5E5E5] shadow-xl bg-white overflow-hidden"
             >
               <div className="flex flex-col gap-0.5 p-1.5">
-                {subItems.map((sub) => {
-                  const Icon = sub.icon
-                  const href = resolvePath(sub.path) || sub.path
-                  return (
-                    <NavLink
-                      key={sub.key}
-                      to={href}
-                      onClick={() => setIsOpen(false)}
-                      className={({ isActive: linkActive }) =>
-                        `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-150 no-underline whitespace-nowrap ${
-                          linkActive
-                            ? "bg-[#990011]/8 text-[#990011]"
-                            : "text-gray-700 hover:bg-gray-100 hover:text-[#990011]"
-                        }`
-                      }
-                    >
-                      {Icon && (
-                        <Icon size={15} className="shrink-0 opacity-70" />
-                      )}
-                      <span>{t.nav?.[sub.key] || sub.key}</span>
-                    </NavLink>
-                  )
-                })}
+                {subItems
+                  .filter((sub) => {
+                    if (sub.lang && sub.lang !== currentLang) return false
+                    if (sub.isPrivate && !isAuthenticated) return false
+
+                    const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+                    if (teacherTabs.includes(sub.key) && isStudent) return false
+                    if (sub.key === "myLearning" && isTeacher) return false
+
+                    return true
+                  })
+                  .map((sub) => {
+                    const Icon = sub.icon
+                    const href = resolvePath(sub.path) || sub.path
+                    return (
+                      <React.Fragment key={sub.key}>
+                        <NavLink
+                          to={href}
+                          onClick={() => setIsOpen(false)}
+                          className={({ isActive: linkActive }) =>
+                            `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors duration-150 no-underline whitespace-nowrap ${linkActive
+                              ? "bg-[#990011]/8 text-[#990011]"
+                              : "text-gray-700 hover:bg-gray-100 hover:text-[#990011]"
+                            }`
+                          }
+                        >
+                          {Icon && (
+                            <Icon size={15} className="shrink-0 opacity-70" />
+                          )}
+                          <span>{t.nav?.[sub.key] || sub.key}</span>
+                        </NavLink>
+                        {sub.key === "analytics" && (
+                          <div className="my-1 mx-2 border-b border-black" />
+                        )}
+                      </React.Fragment>
+                    )
+                  })}
               </div>
             </FluentAnimation>
           </div>

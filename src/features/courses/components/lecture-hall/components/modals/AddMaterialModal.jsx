@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput, Switch } from "@/shared/components/ui/inputs"
-import { UploadCloud, X } from "lucide-react"
+import { UploadCloud } from "lucide-react"
 import FileAttachmentItem from "../ui/FileAttachmentItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -87,7 +87,7 @@ const AddMaterialModal = ({
     <Modal
       open={open}
       onClose={handleCloseModal}
-      title={dict.title || "Thêm học liệu"}
+      title={dict.title}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
@@ -101,10 +101,10 @@ const AddMaterialModal = ({
             textColor={"#72000d"}
             borderColor={"#E2E2E2"}
           >
-            {dict.cancel || "Hủy"}
+            {dict.cancel}
           </PillButton>
           <PillButton type="submit" onClick={handleSubmit}>
-            {dict.add || "Lưu"}
+            {dict.add}
           </PillButton>
         </div>
       }
@@ -113,13 +113,13 @@ const AddMaterialModal = ({
         {/* Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            {dict.materialName || "Tiêu đề"}
+            {dict.materialName}
           </label>
           <TextInput
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={dict.materialPlaceholder || "Nhập tiêu đề..."}
+            placeholder={dict.materialPlaceholder}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
         </div>
@@ -127,7 +127,7 @@ const AddMaterialModal = ({
         {/* Upload File Zone */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            {(dict.uploadFile || "Tệp tải lên")} ({selectedFiles.length}/5)
+            {dict.uploadFile} ({selectedFiles.length}/5)
           </label>
 
           <input
@@ -146,6 +146,15 @@ const AddMaterialModal = ({
               onDragOver={handleDrag}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault()
+                  fileInputRef.current?.click()
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={dict.uploadDesc}
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all space-y-3 ${dragActive
                 ? "border-[#72000d] bg-red-50/40"
                 : "border-gray-300 hover:border-gray-400 bg-white"
@@ -156,13 +165,13 @@ const AddMaterialModal = ({
               </div>
               <div>
                 <p className="text-xs sm:text-sm text-gray-800 font-medium">
-                  {dict.dragDrop || "Kéo thả tệp vào đây hoặc"}{" "}
+                  {dict.dragDropPrefix}{" "}
                   <span className="text-[#72000d] font-bold hover:underline">
-                    {dict.selectFile || "chọn thêm tệp"}
+                    {dict.selectFile}
                   </span>
                 </p>
                 <p className="text-[11px] text-gray-500 mt-1">
-                  {dict.supportedFiles || "Hỗ trợ PDF, DOCX, PPTX, JPG, PNG (Tối đa 50MB/file)"}
+                  {dict.supportedFiles}
                 </p>
               </div>
             </div>
@@ -180,10 +189,10 @@ const AddMaterialModal = ({
         <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl px-4 py-3 flex items-center justify-between">
           <div className="space-y-0.5">
             <h5 className="text-sm font-semibold text-[#111827]">
-              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
+              {t.courses.lectureHall.createPost.visibleToStudents}
             </h5>
             <p className="text-xs text-[#6B7280] font-normal">
-              {t.courses.lectureHall.createPost.visibleToStudents || "Hiển thị với học viên"}
+              {dict.visibleToStudentsDesc}
             </p>
           </div>
           <Switch

@@ -164,31 +164,6 @@ const ProfileDropdown = () => {
         </div>
       </div>
 
-      {isTeacherProfile && (
-        <div className="my-1 flex flex-col gap-1 p-2 bg-[#F6F6F6] rounded-lg mx-1">
-          <p className="text-xs font-semibold text-gray-500 px-2 pb-1 uppercase">{t.header?.switchRole || "Chuyển vai trò"}</p>
-          <button
-            onClick={() => {
-              switchRole("Student");
-              handleCloseMenu();
-            }}
-            className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isStudent ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
-          >
-            <BookOpen size={18} />
-            <span>{t.header?.studentRole || "Học viên"}</span>
-          </button>
-          <button
-            onClick={() => {
-              switchRole("Teacher");
-              handleCloseMenu();
-            }}
-            className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isTeacher ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
-          >
-            <GraduationCap size={18} />
-            <span>{t.header?.teacherRole || "Giảng viên"}</span>
-          </button>
-        </div>
-      )}
 
       <div className="border-t border-[#e5e5e5]" />
 

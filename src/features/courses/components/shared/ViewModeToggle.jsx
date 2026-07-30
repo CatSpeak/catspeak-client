@@ -1,15 +1,18 @@
 import React from "react"
 import { LayoutGrid, List } from "lucide-react"
-
-const VIEW_MODES = [
-  { value: "grid", icon: LayoutGrid, label: "Grid view" },
-  { value: "list", icon: List, label: "List view" },
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ViewModeToggle = ({ value, onChange, className = "" }) => {
+  const { t } = useLanguage()
+  const ui = t.courses?.workspaceUi || {}
+  const viewModes = [
+    { value: "grid", icon: LayoutGrid, label: ui.gridView || "Grid view" },
+    { value: "list", icon: List, label: ui.listView || "List view" },
+  ]
+
   return (
     <div className={`flex bg-gray-50 p-0.5 rounded-lg border border-gray-100 ${className}`}>
-      {VIEW_MODES.map(({ value: mode, icon, label }) => (
+      {viewModes.map(({ value: mode, icon, label }) => (
         <button
           key={mode}
           type="button"

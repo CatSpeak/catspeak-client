@@ -46,7 +46,7 @@ const CommentList = ({
     <div className="bg-[#F8F9FA] rounded-xl border border-[#E2E2E2] shadow-faq-card">
       {/* ── Header ── */}
       <div className="flex items-center gap-3 px-8 py-5 border-b border-[#E2E2E2]">
-        <span className="text-xl font-bold text-[#191C1D]">{dict.replies || "Phản hồi"}</span>
+        <span className="text-xl font-bold text-[#191C1D]">{dict.replies}</span>
         {totalCount > 0 && (
           <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#FEA53F] text-[#6C3E00] text-xs font-bold">
             {totalCount}
@@ -61,7 +61,7 @@ const CommentList = ({
             currentUserAvatar={currentUserAvatar}
             currentUserName={currentUserName}
             onSubmit={onSubmit}
-            placeholder={dict.inputPlaceholder || "Nhập phản hồi"}
+            placeholder={dict.inputPlaceholder}
           />)
         }
 
@@ -69,19 +69,19 @@ const CommentList = ({
         {locked ? (
           <EmptyState
             icon={MessageSquareOff}
-            message={dict.lockedComments || "Đã khóa bình luận"}
+            message={dict.lockedComments}
             variant="component"
           >
-            <p className="text-base text-[#7B7979] mt-4">{dict.lockedCommentsDesc || "Tính năng bình luận đã bị khóa"}</p>
+            <p className="text-base text-[#7B7979] mt-4">{dict.lockedCommentsDesc}</p>
           </EmptyState>
         ) : totalCount === 0 ? (
           /* ── No comments state ── */
           <EmptyState
             icon={MessageSquare}
-            message={dict.noComments || "Không có bình luận"}
+            message={dict.noComments}
             variant="component"
           >
-            <p className="text-base text-[#7B7979] mt-4">{dict.noCommentsDesc || "Không có bình luận mới ở đây"}</p>
+            <p className="text-base text-[#7B7979] mt-4">{dict.noCommentsDesc}</p>
           </EmptyState>
         ) : (
           /* ── Normal state: input + list ── */
@@ -106,7 +106,7 @@ const CommentList = ({
                   className="text-sm font-semibold text-[#750000] hover:opacity-75 transition-opacity"
                   onClick={onShowAll}
                 >
-                  {dict.viewAll || "Xem tất cả"}
+                  {dict.viewAll}
                 </button>
               </div>
             )}

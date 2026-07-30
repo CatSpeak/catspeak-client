@@ -632,7 +632,7 @@ export const websites = [
       {
         key: "hanzii",
         label: "Hanzii",
-        path: "/website/hanzii",
+        path: "/resources/hanzii",
         color: "#47619e",
         img: "https://hanzii.net/assets/images/ic_logo.ico",
         description:
@@ -672,7 +672,7 @@ export const websites = [
       {
         key: "tiengtrungthuonghai",
         label: "Trung tâm tiếng Trung Thượng Hải",
-        path: "/website/tiengtrungthuonghai",
+        path: "/resources/tiengtrungthuonghai",
         color: "#4aba7f",
         img: "https://tiengtrungthuonghai.vn/wp-content/themes/tiengtrungthuonghai/favicon.ico",
         description:

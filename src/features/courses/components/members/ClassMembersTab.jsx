@@ -41,6 +41,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
+  const classWorkspace = c.classWorkspace || {}
 
   const teacher = useMemo(() => {
     const nestedTeacher = classData?.instructor ?? classData?.teacher
@@ -122,7 +123,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-gray-200 p-5 text-center text-xs font-bold text-gray-400">
-            {cd.noInstructor || "Instructor information is not available."}
+            {classWorkspace.noInstructor || "Instructor information is not available."}
           </div>
         )}
       </section>
@@ -143,7 +144,8 @@ const ClassMembersTab = ({ classData, isStudent }) => {
           <div className="flex flex-col divide-y divide-gray-100">
             {students.map((student, index) => {
               const id = getPersonId(student)
-              const name = getPersonName(student) || (cd.unnamedStudent || "Unnamed student")
+              const name = getPersonName(student)
+                || (classWorkspace.unnamedStudent || "Unnamed student")
               const avatar = getSafeMediaUrl(student.avatarUrl ?? student.avatar)
               const attendance = typeof student.attendance === "string"
                 ? student.attendance.toUpperCase()
@@ -193,7 +195,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
 
       {!isStudent && students.length === 0 && (
         <p className="text-center text-[11px] font-semibold text-gray-400">
-          {c.devMessage || "Roster management requires a class-members API."}
+          {classWorkspace.rosterUnavailable || "Roster management is not available yet."}
         </p>
       )}
     </div>

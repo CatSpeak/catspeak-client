@@ -8,6 +8,9 @@ export default {
   community: "Cộng đồng",
   notifications: "Thông báo",
   noNewNotifications: "Không có thông báo mới",
+  markAllRead: "Đánh dấu tất cả đã đọc",
+  newNotificationTitle: "Thông báo mới",
+  newNotificationBody: "Bạn có một thông báo mới cần xem.",
   searchPlaceholder: "Tìm kiếm phòng",
   languages: {
     vi: "Tiếng Việt",
