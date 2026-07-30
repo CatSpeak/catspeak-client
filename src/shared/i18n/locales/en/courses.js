@@ -1637,20 +1637,32 @@ export default {
         body: 'Schedule for class "{className}" has been adjusted'
       },
       assignment_new: {
-        title: "New assignment",
-        body: 'Assignment "{assignmentName}" has been published'
+        title: "Class {className}",
+        body: "Instructor has added a new assignment - {assignmentName}."
+      },
+      assignment_update: {
+        title: "Class {className}",
+        body: "{assignmentName} deadline has been changed."
       },
       assignment_graded: {
-        title: "Assignment graded",
-        body: 'Result for "{assignmentName}" has been released'
+        title: "Class {className}",
+        body: "Result for {assignmentName} is available."
       },
       assignment_regraded: {
-        title: "Result updated",
-        body: 'Result for "{assignmentName}" has been updated'
+        title: "Class {className}",
+        body: "Your {assignmentName} has been regraded."
+      },
+      quiz_new: {
+        title: "Class {className}",
+        body: "Instructor has added a new quiz - {quizName}."
+      },
+      quiz_update: {
+        title: "Class {className}",
+        body: "{quizName} closing time has been changed."
       },
       quiz_regraded: {
-        title: "Quiz result updated",
-        body: 'Result for quiz "{quizName}" has been updated'
+        title: "Class {className}",
+        body: "Your {quizName} has been regraded."
       }
     }
   }
