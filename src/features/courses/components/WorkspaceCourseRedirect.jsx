@@ -54,7 +54,7 @@ const WorkspaceCourseRedirect = () => {
     )
   }
 
-  return <Navigate to={isStudent ? "learning" : "rooms"} replace />
+  return <Navigate to={isStudent ? "learning" : "courses"} replace />
 }
 
 export default WorkspaceCourseRedirect
