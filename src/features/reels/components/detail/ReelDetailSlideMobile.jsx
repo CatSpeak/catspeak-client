@@ -327,6 +327,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
                 size={48}
                 src={reel.author?.avatarUrl}
                 name={reel.author?.name}
+                accountId={reel.author?.id || reel.author?.accountId}
                 className="border-2 border-white rounded-full shadow-lg"
               />
             </div>

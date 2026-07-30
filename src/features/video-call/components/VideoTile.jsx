@@ -142,6 +142,7 @@ const VideoTileInner = ({ participant, onClick }) => {
               name={displayName || "?"}
               src={avatarUrl}
               speaking={false}
+              accountId={meta.accountId || (/^\d+$/.test(participant.identity) ? participant.identity : null)}
               className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${avatarUrl ? "shadow-xl" : ""
                 } ${theme.avatarClass}`}
             />

@@ -232,14 +232,12 @@ const AccountSettingsForm = ({
             <TextInput
               type="email"
               name="email"
-              value={formData.email}
-              onChange={() => {
-                // Email updating is locked
-              }}
-              disabled={true}
+              value={formData.email || ""}
+              onChange={onChange}
+              disabled={!isEditingSecurity || isUpdating}
               placeholder={t.profile?.personalInfo?.enterEmail || "Nhập địa chỉ email..."}
               error={errors?.email}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 border-gray-100 text-gray-500 cursor-not-allowed`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.email ? "border-red-500" : "border-gray-100"}`}
               containerClassName="!gap-0"
             />
           </div>

@@ -194,6 +194,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
               src={reel.author.avatarUrl}
               name={reel.author.name}
               alt={reel.author.name}
+              accountId={reel.author.id || reel.author.accountId}
             />
             <div className="flex flex-col">
               <span className="text-[11px] sm:text-[13px] font-medium text-gray-500 leading-none mb-1 flex items-center gap-1">

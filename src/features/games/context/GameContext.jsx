@@ -724,9 +724,31 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   // Lắng nghe event từ nút Leave call của room (sẽ thêm sau khi khai báo exitGame bên dưới).
 
+  const effectiveIsSpectator = React.useMemo(() => {
+    if (isSpectator) return true;
+    if (gameState === "idle") return false;
+    if (currentUserId != null) {
+      const idStr = currentUserId.toString();
+      if (leftPlayers && leftPlayers.has(idStr)) return true;
+      if (spectatorIds && spectatorIds.has(idStr)) return true;
+      if (gamePlayers && gamePlayers.size > 0 && !gamePlayers.has(idStr)) {
+        return true;
+      }
+    }
+    return false;
+  }, [
+    isSpectator,
+    gameState,
+    currentUserId,
+    leftPlayers,
+    spectatorIds,
+    gamePlayers,
+  ]);
+
   // Crack IT Actions
   const submitAnswer = useCallback(
     (answer) => {
+      if (effectiveIsSpectator) return;
       const payload = {
         answer,
         player_id: currentUserId,
@@ -739,29 +761,40 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       };
       connection.send("SubmitCrackItAnswer", payload);
     },
-    [connection.send, currentUserId, localParticipantName, user, roomId],
+    [
+      connection.send,
+      currentUserId,
+      localParticipantName,
+      user,
+      roomId,
+      effectiveIsSpectator,
+    ],
   );
 
   // Picture IT Actions
   // Mic được share từ room state — không tự bật/tắt mic trong game.
   const startPictureItDescribe = useCallback(() => {
+    if (effectiveIsSpectator) return;
     connection.send("PictureItDescribeStart", roomId || "general");
-  }, [connection.send, roomId]);
+  }, [connection.send, roomId, effectiveIsSpectator]);
 
   const endPictureItDescribe = useCallback(() => {
+    if (effectiveIsSpectator) return;
     connection.send("PictureItDescribeEnd", roomId || "general");
-  }, [connection.send, roomId]);
+  }, [connection.send, roomId, effectiveIsSpectator]);
 
   const submitPictureItFlag = useCallback(() => {
+    if (effectiveIsSpectator) return;
     connection.send("PictureItSubmitFlag", roomId || "general");
-  }, [connection.send, roomId]);
+  }, [connection.send, roomId, effectiveIsSpectator]);
 
   const submitPictureItRating = useCallback(
     (score) => {
+      if (effectiveIsSpectator) return;
       connection.send("PictureItSubmitRating", roomId || "general", score);
       setPictureItState((prev) => ({ ...prev, myRatingSubmitted: true }));
     },
-    [connection.send, roomId],
+    [connection.send, roomId, effectiveIsSpectator],
   );
 
   // General Exit
@@ -779,7 +812,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
   useEffect(() => {
     const handleHostLeave = () => {
       if (gameState === "idle") return;
-      if (isSpectator) {
+      if (effectiveIsSpectator) {
         setGameState("idle");
         setGameType(null);
         resetGameStates();
@@ -789,7 +822,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     };
     window.addEventListener("hostLeaveGame", handleHostLeave);
     return () => window.removeEventListener("hostLeaveGame", handleHostLeave);
-  }, [exitGame, resetGameStates, gameState, isSpectator]);
+  }, [exitGame, resetGameStates, gameState, effectiveIsSpectator]);
 
   const value = {
     gameState,
@@ -821,7 +854,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
     // Actions
     gamePlayers,
-    isSpectator,
+    isSpectator: effectiveIsSpectator,
     spectatorIds,
     startGame,
     exitGame,

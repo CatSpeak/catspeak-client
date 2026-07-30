@@ -39,6 +39,7 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
                     size={40}
                     src={user.avatarImageUrl}
                     name={user.nickname || user.username}
+                    accountId={user.accountId}
                   />
                 }
               >

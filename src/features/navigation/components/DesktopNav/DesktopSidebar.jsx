@@ -28,13 +28,13 @@ import DesktopNavItem from "./DesktopNavItem";
 import ListItem from "@/shared/components/ui/ListItem";
 
 // Primary Dock Navigation Items
-const dockItems = [
+const mainDockItems = [
   { key: "community", icon: Home, path: "/community", hasSublinks: false },
   {
-    key: "learningResources",
-    icon: Globe,
-    path: "/resources",
-    hasSublinks: false,
+    key: "catSpeak",
+    icon: LayoutDashboard,
+    path: "/cat-speak/global-news",
+    hasSublinks: true,
   },
   {
     key: "messages",
@@ -43,18 +43,21 @@ const dockItems = [
     hasSublinks: false,
   },
   {
-    key: "catSpeak",
-    icon: LayoutDashboard,
-    path: "/cat-speak/global-news",
-    hasSublinks: true,
-  },
-  {
     key: "workspace",
     icon: Briefcase,
     path: "/workspace/courses",
     hasSublinks: true,
   },
 ];
+
+const secondaryDockItems = [
+  {
+    key: "learningResources",
+    icon: Globe,
+    path: "/resources",
+    hasSublinks: false,
+  },
+]
 
 const normalizePath = (path) => {
   if (!path) return path;
@@ -191,11 +194,11 @@ const DesktopSidebar = () => {
 
         {/* Dock Section Icons */}
         <div className="flex-1 flex flex-col gap-3 w-full px-3">
-          {dockItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeDockSection === item.key;
-            const label = t.nav?.[item.key] || item.key;
-            const targetPath = getDockItemPath(item);
+          {mainDockItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeDockSection === item.key
+            const label = t.nav?.[item.key] || item.key
+            const targetPath = getDockItemPath(item)
 
             return (
               <div key={item.key} className="relative group/dock">
@@ -221,6 +224,36 @@ const DesktopSidebar = () => {
                 </div>
               </div>
             );
+          })}
+
+          {/* 1 dòng kẻ mờ (Subtle divider line) */}
+          <div className="w-8 h-[1px] bg-white/20 my-1 mx-auto shrink-0" />
+
+          {secondaryDockItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeDockSection === item.key
+            const label = t.nav?.[item.key] || item.key
+            const targetPath = getDockItemPath(item)
+
+            return (
+              <div key={item.key} className="relative group/dock">
+                <Link
+                  to={targetPath}
+                  onClick={() => handleDockClick(item)}
+                  className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
+                    ? "bg-white text-cath-red-700 shadow-md"
+                    : "text-white/80 hover:text-white hover:bg-white/15"
+                    }`}
+                >
+                  <Icon />
+                </Link>
+
+                {/* Tooltip on Hover */}
+                <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none shadow-lg">
+                  {label}
+                </div>
+              </div>
+            )
           })}
         </div>
 

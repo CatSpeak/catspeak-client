@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { MessageSquare } from "lucide-react";
@@ -20,6 +21,7 @@ dayjs.extend(relativeTime);
  * @param {Function} [props.onClick]              - Called when the card is clicked
  */
 const StoryCardItem = ({ story, onClick }) => {
+  const navigate = useNavigate();
   //  const { t } = useLanguage();
   if (!story) return null;
 
@@ -30,6 +32,8 @@ const StoryCardItem = ({ story, onClick }) => {
     // commentCount = 0,
     createDate,
   } = story;
+
+  const authorAccountId = story.accountId || story.userId || story.authorId;
 
   const relativeCreatedAt = createDate ? dayjs(createDate).fromNow() : null;
 
@@ -53,9 +57,17 @@ const StoryCardItem = ({ story, onClick }) => {
     >
       {/* Header: avatar + username */}
       <div className="flex items-center gap-2.5">
-        <Avatar src={avatarImageUrl} name={username || "Anonymous"} size={36} />
+        <Avatar src={avatarImageUrl} name={username || "Anonymous"} size={36} accountId={authorAccountId} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-[#1a1a1a]">
+          <p
+            onClick={(e) => {
+              if (authorAccountId) {
+                e.stopPropagation();
+                navigate(`/profile/${authorAccountId}`);
+              }
+            }}
+            className={`truncate text-sm font-semibold text-[#1a1a1a] ${authorAccountId ? "hover:underline hover:text-cath-red-700 transition-colors cursor-pointer" : ""}`}
+          >
             {username || "Anonymous"}
           </p>
           {username && (

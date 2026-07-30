@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import "dayjs/locale/vi"
@@ -13,8 +14,10 @@ dayjs.extend(relativeTime)
 
 const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
   const { t, language } = useLanguage()
+  const navigate = useNavigate()
   // Map app language to dayjs locale identifier (zh → zh-cn, others match directly)
   const dayjsLocale = language === "zh" ? "zh-cn" : language
+  const authorAccountId = post.accountId || post.authorId || post.userId
 
   return (
     <div className="flex gap-4 justify-between">
@@ -23,9 +26,20 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
           size={40}
           src={post.avatarUrl}
           name={post.authorName || "User"}
+          accountId={authorAccountId}
         />
         <div>
-          <h3 className="font-semibold">{post.authorName || "User"}</h3>
+          <h3
+            onClick={(e) => {
+              if (authorAccountId) {
+                e.stopPropagation()
+                navigate(`/profile/${authorAccountId}`)
+              }
+            }}
+            className={`font-semibold ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+          >
+            {post.authorName || "User"}
+          </h3>
           <p className="text-sm text-[#606060] flex items-center gap-2">
             <span className="inline-flex items-center gap-1">
               <Eye size={14} className="text-[#606060]" />

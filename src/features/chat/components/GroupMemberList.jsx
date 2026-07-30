@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { UserPlus, Trash2 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
@@ -16,6 +17,7 @@ const GroupMemberList = ({
   onOpenAddModal,
 }) => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
 
   return (
     <div>
@@ -60,6 +62,7 @@ const GroupMemberList = ({
                     size={40}
                     name={participant.username}
                     src={participant.avatarImageUrl}
+                    accountId={participant.accountId}
                     className={theme.avatarClass}
                   />
                 </div>
@@ -80,7 +83,15 @@ const GroupMemberList = ({
                 )
               }
             >
-              <span className="truncate">
+              <span
+                onClick={(e) => {
+                  if (participant.accountId) {
+                    e.stopPropagation()
+                    navigate(`/profile/${participant.accountId}`)
+                  }
+                }}
+                className={`truncate ${participant.accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+              >
                 {participant.username}
                 {isMe && <span className="text-[#606060]"> ({t?.chat?.you || "You"})</span>}
               </span>
