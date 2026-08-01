@@ -1,10 +1,12 @@
 import React, { useState, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { TextInput, Switch } from "@/shared/components/ui/inputs"
-import { UploadCloud } from "lucide-react"
+import { TextInput } from "@/shared/components/ui/inputs"
+import ToggleOption from "../ui/ToggleOption"
+import { UploadCloud, Eye } from "lucide-react"
 import FileAttachmentItem from "../ui/FileAttachmentItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import toast from "react-hot-toast"
 
 const AddMaterialModal = ({
   open = false,
@@ -18,6 +20,7 @@ const AddMaterialModal = ({
   const [selectedFiles, setSelectedFiles] = useState([])
   const [dragActive, setDragActive] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
+  const [errors, setErrors] = useState({})
   const fileInputRef = useRef(null)
 
   // Standardized Drag Event Handlers
@@ -53,6 +56,7 @@ const AddMaterialModal = ({
       const nameWithoutExt = files[0].name.replace(/\.[^/.]+$/, "")
       setTitle(nameWithoutExt)
     }
+    if (errors.files) setErrors((prev) => ({ ...prev, files: false }))
   }
 
   // Remove a specific file from the list
@@ -65,6 +69,15 @@ const AddMaterialModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    if (selectedFiles.length === 0) {
+      setErrors({ files: true })
+      toast.error(dict.toastFilesRequired || "Vui lòng chọn ít nhất 1 tệp!")
+      return
+    }
+
+    setErrors({})
+
     onSubmit({
       title,
       files: selectedFiles,
@@ -77,6 +90,7 @@ const AddMaterialModal = ({
     setTitle("")
     setSelectedFiles([])
     setIsVisible(true)
+    setErrors({})
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -111,7 +125,7 @@ const AddMaterialModal = ({
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title Input */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
             {dict.materialName}
           </label>
@@ -122,7 +136,7 @@ const AddMaterialModal = ({
             placeholder={dict.materialPlaceholder}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
-        </div>
+        </div> */}
 
         {/* Upload File Zone */}
         <div>
@@ -156,8 +170,10 @@ const AddMaterialModal = ({
               tabIndex={0}
               aria-label={dict.uploadDesc}
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all space-y-3 ${dragActive
-                ? "border-[#72000d] bg-red-50/40"
-                : "border-gray-300 hover:border-gray-400 bg-white"
+                  ? "border-[#72000d] bg-red-50/40"
+                  : errors.files
+                    ? "border-red-500 bg-red-50 ring-2 ring-red-200"
+                    : "border-gray-300 hover:border-gray-400 bg-white"
                 }`}
             >
               <div className="w-12 h-12 bg-red-100/70 text-[#72000d] rounded-full flex items-center justify-center mx-auto">
@@ -186,20 +202,14 @@ const AddMaterialModal = ({
         </div>
 
         {/* Visible to Students Card Box Toggle */}
-        <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl px-4 py-3 flex items-center justify-between">
-          <div className="space-y-0.5">
-            <h5 className="text-sm font-semibold text-[#111827]">
-              {t.courses.lectureHall.createPost.visibleToStudents}
-            </h5>
-            <p className="text-xs text-[#6B7280] font-normal">
-              {dict.visibleToStudentsDesc}
-            </p>
-          </div>
-          <Switch
+        <div className="space-y-3 pt-2">
+          <ToggleOption
+            icon={<Eye size={20} className="text-[#F83B4F]" />}
+            iconBg="bg-[#FFEAED]"
+            title={t.courses.lectureHall.createPost.visibleToStudents}
+            description={dict.visibleToStudentsDesc || ""}
             checked={isVisible}
             onChange={(e) => setIsVisible(e.target.checked)}
-            colorClass="peer-checked:bg-[#A00000]"
-            className="min-h-6"
           />
         </div>
       </form>

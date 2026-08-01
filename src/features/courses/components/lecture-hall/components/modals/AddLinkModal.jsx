@@ -1,8 +1,9 @@
 import React, { useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { TextInput, Switch } from "@/shared/components/ui/inputs"
-import { Link2 } from "lucide-react"
+import { TextInput } from "@/shared/components/ui/inputs"
+import ToggleOption from "../ui/ToggleOption"
+import { Link2, Eye } from "lucide-react"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -19,6 +20,7 @@ const AddLinkModal = ({
   const [title, setTitle] = useState("")
   const [url, setUrl] = useState("")
   const [isVisible, setIsVisible] = useState(true)
+  const [errors, setErrors] = useState({})
   const [prevOpen, setPrevOpen] = useState(open)
 
   if (open !== prevOpen) {
@@ -31,18 +33,28 @@ const AddLinkModal = ({
       } else {
         setTitle("")
         setUrl("")
+        setTitle("")
+        setUrl("")
         setIsVisible(true)
       }
+      setErrors({})
     }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (!title || !url) {
+    const newErrors = {}
+    if (!title.trim()) newErrors.title = true
+    if (!url.trim()) newErrors.url = true
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
       toast.error(dict.toastFieldsRequired)
       return
     }
+
+    setErrors({})
 
     onSubmit({
       title,
@@ -88,9 +100,13 @@ const AddLinkModal = ({
           <TextInput
             required
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value)
+              if (errors.title) setErrors((prev) => ({ ...prev, title: false }))
+            }}
+            error={errors.title}
             placeholder={dict.linkPlaceholder}
-            className="rounded-xl !h-[50px] px-4 text-sm"
+            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
@@ -104,27 +120,25 @@ const AddLinkModal = ({
             type="url"
             icon={Link2}
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(e) => {
+              setUrl(e.target.value)
+              if (errors.url) setErrors((prev) => ({ ...prev, url: false }))
+            }}
+            error={errors.url}
             placeholder={dict.urlPlaceholder}
-            className="rounded-xl !h-[50px] px-4 text-sm"
+            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.url ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
         {/* Visible to Students Card Box Toggle */}
-        <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl px-4 py-3 flex items-center justify-between">
-          <div className="space-y-0.5">
-            <p className="text-sm font-semibold text-[#111827]">
-              {t.courses.lectureHall.createPost.visibleToStudents}
-            </p>
-            <p className="text-xs text-[#6B7280] font-normal">
-              {dict.visibleToStudentsDesc}
-            </p>
-          </div>
-          <Switch
+        <div className="space-y-3 pt-2">
+          <ToggleOption
+            icon={<Eye size={20} className="text-[#F83B4F]" />}
+            iconBg="bg-[#FFEAED]"
+            title={t.courses.lectureHall.createPost.visibleToStudents}
+            description={dict.visibleToStudentsDesc || ""}
             checked={isVisible}
             onChange={(e) => setIsVisible(e.target.checked)}
-            colorClass="peer-checked:bg-[#A00000]"
-            className="min-h-6"
           />
         </div>
       </form>

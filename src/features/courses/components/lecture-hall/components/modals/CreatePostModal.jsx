@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react"
-import { CloudUpload } from "lucide-react"
+import { CloudUpload, Pin, MessageSquare, Eye } from "lucide-react"
 import { Editor } from "@tinymce/tinymce-react"
-import Switch from "@/shared/components/ui/inputs/Switch"
+import ToggleOption from "../ui/ToggleOption"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { toast } from "react-hot-toast"
@@ -19,6 +19,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
     allowReply: true,
     visibleToStudents: true,
   })
+  const [errors, setErrors] = useState({})
 
   const [selectedFile, setSelectedFile] = useState(null)
   const [dragActive, setDragActive] = useState(false)
@@ -62,6 +63,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: false }))
   }
 
   const handleEditorChange = (newContent) => {
@@ -77,6 +79,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
       allowReply: true,
       visibleToStudents: true,
     })
+    setErrors({})
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -86,16 +89,19 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (!formData.title.trim()) {
-      toast.error(dict.toastTitleRequired)
+    const newErrors = {}
+    if (!formData.title.trim()) newErrors.title = true
+    const cleanContent = formData.content.replace(/<[^>]*>?/gm, '').trim()
+    if (!cleanContent) newErrors.content = true
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      if (newErrors.title) toast.error(dict.toastTitleRequired)
+      else if (newErrors.content) toast.error(dict.toastContentRequired)
       return
     }
 
-    const cleanContent = formData.content.replace(/<[^>]*>?/gm, '').trim()
-    if (!cleanContent) {
-      toast.error(dict.toastContentRequired)
-      return
-    }
+    setErrors({})
 
     onSubmit({
       ...formData,
@@ -140,8 +146,9 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
             required
             value={formData.title}
             onChange={(e) => handleChange("title", e.target.value)}
+            error={errors.title}
             placeholder={dict.postNamePlaceholder}
-            className="rounded-xl !h-[50px] px-4 text-sm"
+            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
@@ -150,7 +157,8 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
           <label className="block text-sm font-semibold text-[#374151] mb-2">
             {dict.content} <span className="text-[#EF4444]">*</span>
           </label>
-          <Editor
+          <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
+            <Editor
             tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
             value={formData.content}
             onEditorChange={handleEditorChange}
@@ -168,6 +176,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
               },
             }}
           />
+          </div>
         </div>
 
         {/* Tệp đính kèm */}
@@ -227,49 +236,33 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
         </div>
 
         {/* Toggles */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-[#191C1D] text-sm">{dict.pinTitle}</p>
-              <p className="text-xs text-[#6B7280]">{dict.pinDesc}</p>
-            </div>
-            <Switch
-              checked={formData.isPinned}
-              onChange={(e) => handleChange("isPinned", e.target.checked)}
-              colorClass="peer-checked:bg-[#A00000]"
-              className="!h-6"
-            />
-          </div>
+        <div className="space-y-3">
+          <ToggleOption
+            icon={<Pin size={20} className="text-[#E2B60A]" />}
+            iconBg="bg-[#FFF9CC]"
+            title={dict.pinTitle}
+            description={dict.pinDesc}
+            checked={formData.isPinned}
+            onChange={(e) => handleChange("isPinned", e.target.checked)}
+          />
 
-          <div className="border-b border-[#E2E2E2]" />
+          <ToggleOption
+            icon={<MessageSquare size={20} className="text-[#0E6EEC]" />}
+            iconBg="bg-[#8ECAFF]"
+            title={dict.allowReplyTitle}
+            description={dict.allowReplyDesc}
+            checked={formData.allowReply}
+            onChange={(e) => handleChange("allowReply", e.target.checked)}
+          />
 
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-[#191C1D] text-sm">{dict.allowReplyTitle}</p>
-              <p className="text-sm text-[#6B7280]">{dict.allowReplyDesc}</p>
-            </div>
-            <Switch
-              checked={formData.allowReply}
-              onChange={(e) => handleChange("allowReply", e.target.checked)}
-              colorClass="peer-checked:bg-[#A00000]"
-              className="!h-6"
-            />
-          </div>
-
-          <div className="border-b border-[#E2E2E2]" />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-[#191C1D] text-sm">{dict.visibleTitle}</p>
-              <p className="text-sm text-[#6B7280]">{dict.visibleDesc}</p>
-            </div>
-            <Switch
-              checked={formData.visibleToStudents}
-              onChange={(e) => handleChange("visibleToStudents", e.target.checked)}
-              colorClass="peer-checked:bg-[#A00000]"
-              className="!h-6"
-            />
-          </div>
+          <ToggleOption
+            icon={<Eye size={20} className="text-[#F83B4F]" />}
+            iconBg="bg-[#FFEAED]"
+            title={dict.visibleTitle}
+            description={dict.visibleDesc}
+            checked={formData.visibleToStudents}
+            onChange={(e) => handleChange("visibleToStudents", e.target.checked)}
+          />
         </div>
       </form>
     </Modal>
