@@ -69,7 +69,7 @@ const PostDetailPage = () => {
     title: postDetail?.title || dict.noTitle,
     authorName: postDetail?.accountName || dict.teacher,
     authorAvatar: postDetail?.avatarImageUrl || "",
-    date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
+    date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "",
     thumbnailUrl: postDetail?.thumbnailUrl || "",
     content: postDetail?.content || "",
     attachments: postDetail?.attachmentsJson
@@ -86,7 +86,7 @@ const PostDetailPage = () => {
     authorName: comment.accountName || dict.anonymous,
     authorAvatar: comment.avatarImageUrl || "",
     isTeacher: comment.isTeacher || false,
-    time: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
+    time: comment.createdAt ? new Date(comment.createdAt).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "",
     content: comment.content,
     replyCount: comment.replyCount || 0,
   })) || []
@@ -116,16 +116,6 @@ const PostDetailPage = () => {
 
   const boardId = location.state?.boardId || postDetail?.bulletinBoardId || postDetail?.boardId
 
-  const handleBack = () => {
-    if (boardId) {
-      navigate(`${basePath}/class/${classId}/bulletin-board/${boardId}`)
-    } else if (window.history.length > 2) {
-      navigate(-1)
-    } else {
-      navigate(`${basePath}/class/${classId}?tab=lecture-hall`)
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -135,7 +125,7 @@ const PostDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen space-y-6">
       <Breadcrumb
         className="text-[#7B7979] text-sm"
         items={[
@@ -144,22 +134,15 @@ const PostDetailPage = () => {
           { label: dict.breadcrumbs.allCourses, onClick: () => navigate(basePath) },
           { label: dict.breadcrumbs.courseDetail, onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
           { label: dict.breadcrumbs.classDetail, onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
+          { label: "Chi tiết bảng tin", onClick: () => navigate(`${basePath}/class/${classId}/bulletin-board/${boardId}`) },
           { label: dict.breadcrumbs.postDetail, active: true },
         ]}
       />
 
-      <div className="min-w-6xl p-8">
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-[#750000] font-normal mb-8 hover:opacity-80 transition-opacity"
-        >
-          <ArrowLeft size={16} /> {dict.back}
-        </button>
-
+      <div className="min-w-6xl space-y-6">
         {/* ── Nội dung bài đăng ── */}
         <PostContent
           post={formattedPost}
-          onMenuClick={() => console.log("open post menu")}
         />
 
         {/* ── Phần phản hồi ── */}

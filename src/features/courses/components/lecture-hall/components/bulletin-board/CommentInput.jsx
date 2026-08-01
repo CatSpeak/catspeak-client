@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react"
 import { Editor } from "@tinymce/tinymce-react"
-import { SendHorizonal } from "lucide-react"
-import { IconButton } from "@/shared/components/ui/buttons"
+import { SendHorizonal, X } from "lucide-react"
+import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
@@ -40,7 +40,7 @@ const CommentInput = ({ onSubmit }) => {
   return (
     <div className="flex items-start gap-4">
       {/* Editor + Send */}
-      <div className="flex-1 flex items-end gap-2">
+      <div className="flex-1 flex flex-col gap-2">
         <div className="flex-1 rounded-xl overflow-hidden border border-[#E2E2E2] bg-[#F3F4F5] focus-within:border-[#750000] transition-colors">
           <Editor
             tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
@@ -70,16 +70,32 @@ const CommentInput = ({ onSubmit }) => {
         </div>
 
         {/* Send button */}
-        <IconButton
-          variant="primary"
-          size="xs"
-          onClick={handleSubmit}
-          disabled={!hasContent}
-          title={dict.sendTooltip}
-          aria-label={dict.sendTooltip}
-        >
-          <SendHorizonal size={15} />
-        </IconButton>
+        <div className="flex items-center justify-end gap-3">
+          <PillButton
+            variant="outline"
+            size="xs"
+            onClick={() => {
+              setValue("");
+              if (editorRef.current) {
+                editorRef.current.setContent("")
+              }
+            }}
+            title={"Huỷ"}
+            startIcon={<X size={16} />}
+          >
+            Hủy
+          </PillButton>
+          <PillButton
+            variant="primary"
+            size="xs"
+            onClick={handleSubmit}
+            disabled={!hasContent}
+            title={dict.sendTooltip}
+          >
+            <SendHorizonal size={16} />
+            Gửi bình luận
+          </PillButton>
+        </div>
       </div>
     </div>
   )

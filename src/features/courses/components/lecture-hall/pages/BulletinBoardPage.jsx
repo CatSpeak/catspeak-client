@@ -83,7 +83,7 @@ export default function BulletinBoardPage() {
       id: post.id,
       title: post.title,
       author: post.accountName,
-      date: post.createdAt ? new Date(post.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
+      date: post.createdAt ? new Date(post.createdAt).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "",
       replies: post.replyCount,
       isPinned: post.isPinned,
       isVisibleToStudents: post.isVisibleToStudents,
@@ -172,7 +172,7 @@ export default function BulletinBoardPage() {
       />
 
       <CourseTablePageHeader
-        title={language === 'vi' ? "Chi tiết bảng tin" : "Bulletin Board Details"}
+        title={"Chi tiết bảng tin"}
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder={dict.bulletinBoard.searchPlaceholder}

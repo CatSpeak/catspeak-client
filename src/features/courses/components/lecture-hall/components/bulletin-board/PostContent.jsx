@@ -18,9 +18,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * @param {string}   [post.bannerImage]     - URL ảnh banner (optional)
  * @param {string}   [post.content]         - Nội dung HTML bài viết
  * @param {Array}    [post.attachments]     - Danh sách file đính kèm [{name, size}]
- * @param {function} [onMenuClick]          - Callback khi nhấn nút "..."
  */
-const PostContent = ({ post = {}, onMenuClick }) => {
+const PostContent = ({ post = {} }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.postDetail
   const {
@@ -34,7 +33,7 @@ const PostContent = ({ post = {}, onMenuClick }) => {
   } = post
 
   return (
-    <div className="bg-[#F8F9FA] rounded-xl p-6 border border-[#E2E2E2] shadow-faq-card space-y-6 mb-6">
+    <div className="bg-[#F8F9FA] rounded-xl p-6 border border-[#E2E2E2] shadow-faq-card space-y-6">
       {/* Header: tag + menu */}
       <div className="flex items-center justify-between">
         {/* Author info */}
@@ -54,15 +53,13 @@ const PostContent = ({ post = {}, onMenuClick }) => {
           </div>
         </div>
 
-        <IconButton
+        {/* <IconButton
           variant="ghost"
-          onClick={onMenuClick}
           className="ml-auto"
           title={dict.postOptionsTooltip}
-          aria-label={dict.postOptionsTooltip}
         >
           <MoreVertical size={16} />
-        </IconButton>
+        </IconButton> */}
       </div>
 
       {/* Title */}
@@ -74,7 +71,7 @@ const PostContent = ({ post = {}, onMenuClick }) => {
           <img
             src={thumbnailUrl}
             alt={dict.bannerAlt}
-            className="w-full object-cover "
+            className="w-full object-cover max-w-3xl"
           />
         </div>
       )}
