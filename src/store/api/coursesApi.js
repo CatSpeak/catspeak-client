@@ -309,8 +309,12 @@ const transformPaginatedResponse = (response, itemTransformer) => {
   const totalItems = toNonNegativeInteger(
     responseRecord.pagination?.totalItems
     ?? outerRecord.pagination?.totalItems
+    ?? responseRecord.pagination?.total
+    ?? outerRecord.pagination?.total
     ?? responseRecord.totalCount
-    ?? outerRecord.totalCount,
+    ?? outerRecord.totalCount
+    ?? responseRecord.total
+    ?? outerRecord.total,
     rawItems.length,
   )
   const totalPages = toPositiveInteger(
@@ -1491,10 +1495,10 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // Get list posts in a bulletin board (Student)
     getStudentListPostsInBulletinBoard: builder.query({
-      query: ({ classId, boardId, page = 1, pageSize = 10 }) => ({
+      query: ({ classId, boardId, page = 1, pageSize = 10, search }) => ({
         url: `/student/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
         method: "GET",
-        params: { page, pageSize },
+        params: { page, pageSize, search },
       }),
       transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
       providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
@@ -1521,10 +1525,10 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // Get list posts in a bulletin board
     getListPostsInBulletinBoard: builder.query({
-      query: ({ classId, boardId, page = 1, pageSize = 10 }) => ({
+      query: ({ classId, boardId, page = 1, pageSize = 10, search }) => ({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
         method: "GET",
-        params: { page, pageSize },
+        params: { page, pageSize, search },
       }),
       transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
       providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
