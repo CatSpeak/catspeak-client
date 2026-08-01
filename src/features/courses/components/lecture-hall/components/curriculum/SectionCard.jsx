@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useRef } from "react"
 import { MoreVertical, EyeOff, ChevronUp, ChevronDown } from "lucide-react"
 import LessonItemRow from "./LessonItemRow"
 import { IconButton } from "@/shared/components/ui/buttons"
@@ -7,15 +7,12 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 
 const SectionCard = ({
   section = {},
-  secIdx = 0,
-  totalSections = 1,
   isEdit = true,
   isStudent = false,
   onOpenAddItem = () => { },
   onEditSection = () => { },
   onToggleSectionVisibility = () => { },
   onDeleteSection = () => { },
-  onMoveSection = () => { },
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
@@ -23,26 +20,9 @@ const SectionCard = ({
 }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.curriculum
-
-  const [isSectionMenuOpen, setIsSectionMenuOpen] = useState(false)
-  const [openItemMenuId, setOpenItemMenuId] = useState(null)
   const [isExpanded, setIsExpanded] = useState(true)
 
   const sectionRef = useRef(null)
-
-  // Close menus when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (sectionRef.current && !sectionRef.current.contains(e.target)) {
-        setIsSectionMenuOpen(false)
-      }
-      if (!e.target.closest(".lesson-dropdown-container")) {
-        setOpenItemMenuId(null)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
 
   if (isStudent && !section.isVisibleToStudents) return null
 
@@ -85,33 +65,13 @@ const SectionCard = ({
           </IconButton>
 
           {!isStudent && (
-            <>
-              <IconButton
-                variant="ghost"
-                size="xs"
-                onClick={() => {
-                  setIsSectionMenuOpen(!isSectionMenuOpen)
-                }}
-                title={dict.sectionOptionsTooltip}
-                aria-label={dict.sectionOptionsTooltip}
-              >
-                <MoreVertical size={16} />
-              </IconButton>
-
-              {/* Section Action Menu */}
-              <SectionActionMenu
-                open={isSectionMenuOpen}
-                onClose={() => setIsSectionMenuOpen(false)}
-                section={section}
-                secIdx={secIdx}
-                totalSections={totalSections}
-                onEdit={onEditSection}
-                onToggleVisibility={onToggleSectionVisibility}
-                onMove={onMoveSection}
-                onDelete={onDeleteSection}
-                onAddContent={(type) => onOpenAddItem(section.id, type)}
-              />
-            </>
+            <SectionActionMenu
+              section={section}
+              onEdit={onEditSection}
+              onToggleVisibility={onToggleSectionVisibility}
+              onDelete={onDeleteSection}
+              onAddContent={(type) => onOpenAddItem(section.id, type)}
+            />
           )}
         </div>
 
@@ -127,10 +87,6 @@ const SectionCard = ({
                 item={item}
                 isEdit={isEdit}
                 isStudent={isStudent}
-                isMenuOpen={openItemMenuId === item.id}
-                onToggleMenu={() =>
-                  setOpenItemMenuId(openItemMenuId === item.id ? null : item.id)
-                }
                 onEditItem={(it) => onEditItem(section.id, it)}
                 onToggleItemVisibility={(itemId) => onToggleItemVisibility(section.id, itemId)}
                 onDeleteItem={(itemId) => onDeleteItem(section.id, itemId)}

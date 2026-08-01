@@ -53,7 +53,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
 
   const [sectionsOverride, setSectionsOverride] = useState(null)
   const sections = sectionsOverride ?? apiSections
-  console.log(sections);
 
 
   const updateSections = (updater) => {

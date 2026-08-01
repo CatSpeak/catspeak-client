@@ -1,16 +1,14 @@
 import React from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
-  MoreVertical,
-  MessageSquareText,
   ClipboardList,
   Folder,
   Link2,
   Clock,
   FileText,
   EyeOff,
+  MessageSquare,
 } from "lucide-react"
-import { IconButton } from "@/shared/components/ui/buttons"
 import LessonActionMenu from "./LessonActionMenu"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -20,27 +18,27 @@ const getItemConfig = (type) => {
   switch (type) {
     case "bulletinBoard":
       return {
-        leftBorder: "border-l-4 border-[#72000d]",
-        iconBg: "bg-red-100/70 text-[#72000d]",
-        Icon: MessageSquareText,
+        leftBorder: "border-l-4 border-l-[#750000]",
+        iconBg: "bg-red-100/70 text-[#750000]",
+        Icon: MessageSquare,
       }
     case "material":
       return {
-        leftBorder: "border-l-4 border-[#f08d1d]",
-        iconBg: "bg-amber-100/70 text-[#f08d1d]",
+        leftBorder: "border-l-4 border-l-[#fea53f]",
+        iconBg: "bg-amber-100/70 text-[#fea53f]",
         Icon: Folder,
       }
     case "link":
       return {
-        leftBorder: "border-l-4 border-slate-300",
-        iconBg: "bg-slate-100 text-slate-500",
+        leftBorder: "border-l-4 border-l-[#750000]",
+        iconBg: "bg-red-100/70 text-[#750000]",
         Icon: Link2,
       }
     case "assignment":
     default:
       return {
-        leftBorder: "border-l-4 border-[#f08d1d]",
-        iconBg: "bg-amber-100/70 text-[#f08d1d]",
+        leftBorder: "border-l-4 border-l-[#fea53f]",
+        iconBg: "bg-amber-100/70 text-[#fea53f]",
         Icon: ClipboardList,
       }
   }
@@ -50,8 +48,6 @@ const LessonItemRow = ({
   item = {},
   // isEdit = true,
   isStudent = false,
-  isMenuOpen = false,
-  onToggleMenu = () => { },
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
@@ -64,6 +60,8 @@ const LessonItemRow = ({
   const { id: classId } = useParams()
 
   if (isStudent && !item.isVisibleToStudents) return null
+
+  const isHidden = item.isVisibleToStudents === false
 
   const locale = language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US"
   const displayData = getDisplayData(
@@ -80,13 +78,17 @@ const LessonItemRow = ({
 
   return (
     <div
-      className={`bg-[#F8F9FA] border border-[#E2E2E2] rounded-xl p-4 flex items-center justify-between gap-4 relative transition-all hover:border-primary ${config.leftBorder} ${className}`}
+      className={`rounded-xl p-4 flex items-center justify-between gap-4 relative transition-all ${isHidden
+        ? "bg-[#fbfbfc] border border-[#edeeef] border-l-4 border-l-[#d1d5db] opacity-75"
+        : `bg-[#F8F9FA] border border-[#E2E2E2] hover:border-cath-red-700 ${config.leftBorder}`
+        } ${className}`}
     >
       {/* Left section: Drag Handle + Type Icon + Title & Meta */}
       <div className="flex items-center gap-4 flex-1 min-w-0">
         {/* Type Icon Circle */}
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${config.iconBg}`}
+          className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isHidden ? "bg-[#F3F4F5] text-[#9E9E9E]" : config.iconBg
+            }`}
         >
           <IconComponent size={20} />
         </div>
@@ -95,7 +97,7 @@ const LessonItemRow = ({
         <div className="min-w-0 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
             <h4
-              className={`text-base font-semibold ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
+              className={`text-base font-semibold truncate max-w-full ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
               onClick={() => {
                 const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
                 if (displayData.type === "bulletinBoard") {
@@ -148,21 +150,9 @@ const LessonItemRow = ({
 
       {/* Right section: 3-dots Menu Button */}
       {!isStudent && (
-        <div className="lesson-dropdown-container relative shrink-0">
-          <IconButton
-            size="xs"
-            variant="ghost"
-            onClick={onToggleMenu}
-            title={dict.lessonOptionsTooltip}
-            aria-label={dict.lessonOptionsTooltip}
-          >
-            <MoreVertical size={16} />
-          </IconButton>
-
+        <div className="shrink-0">
           {/* Standalone Component: Lesson Action Menu */}
           <LessonActionMenu
-            open={isMenuOpen}
-            onClose={onToggleMenu}
             item={item}
             onEdit={onEditItem}
             onToggleItemVisibility={onToggleItemVisibility}
