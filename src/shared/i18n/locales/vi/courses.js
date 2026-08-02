@@ -1502,7 +1502,7 @@ export default {
       lesson: "Bài học",
       assignment: "Bài tập",
       material: "Tài liệu",
-      link: "Đường link",
+      link: "Liên kết",
       video: "Video",
       board: "Bảng tin",
       emptyState: "Chưa có nội dung nào trong khóa học này.",

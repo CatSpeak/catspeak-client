@@ -2,12 +2,26 @@ import { formatFileSize } from "./fileUtils"
 
 export const getDisplayData = (item, labels, locale) => {
   if (item.type) {
+    let finalMeta = item.meta
+    let finalMetaType = item.metaType
+
+    if (item.type === "assignment" && item.dueDate) {
+      const date = new Date(item.dueDate).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })
+      finalMeta = labels.dueDateMeta?.replace("{{date}}", date) || `Hạn nộp: ${date}`
+      finalMetaType = "time" // Using time maps to Clock icon
+    } else if (item.type === "quiz" && (item.openTime || item.closeTime)) {
+      const openStr = item.openTime ? `${labels.openTime || "Mở"}: ${new Date(item.openTime).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}` : ""
+      const closeStr = item.closeTime ? `${labels.closeTime || "Đóng"}: ${new Date(item.closeTime).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}` : ""
+      finalMeta = [openStr, closeStr].filter(Boolean).join(", ")
+      finalMetaType = "time"
+    }
+
     return {
       type: item.type,
       title: item.title,
-      meta: item.meta,
-      metaType: item.metaType,
-      realItemId: item.itemId,
+      meta: finalMeta,
+      metaType: finalMetaType,
+      itemId: item.itemId,
     }
   }
 
@@ -63,5 +77,5 @@ export const getDisplayData = (item, labels, locale) => {
     metaType = "none"
   }
 
-  return { type, title, meta, metaType, realItemId: item.itemId }
+  return { type, title, meta, metaType, itemId: item.itemId }
 }

@@ -95,8 +95,8 @@ const LinkYoutubePage = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#FCFCFC]">
-      <div className="flex-1 w-full min-w-7xl mx-auto p-4 md:p-8 space-y-6">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 w-full min-w-7xl mx-auto space-y-8">
         {/* ── Breadcrumb & Nút quay lại ── */}
         <div className="flex flex-col gap-4">
           <Breadcrumb
@@ -111,12 +111,12 @@ const LinkYoutubePage = () => {
             ]}
           />
 
-          <div
+          {/* <div
             className="inline-flex items-center gap-2 text-sm text-[#5B403C] hover:text-[#D94C38] cursor-pointer transition-colors w-fit font-medium"
             onClick={() => navigate(`${basePath}/class/${classId}?tab=lecture-hall`)}
           >
             <ArrowLeft size={16} /> {dict.postDetail.back}
-          </div>
+          </div> */}
         </div>
 
         <div className="flex justify-center items-center">

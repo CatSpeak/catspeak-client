@@ -14,7 +14,6 @@ import {
 import LessonActionMenu from "./LessonActionMenu"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { IconButton } from "@/shared/components/ui/buttons"
 
 // Helper function to resolve icon, background, and left accent border based on item type
 const getItemConfig = (type) => {
@@ -133,9 +132,9 @@ const LessonItemRow = ({
                 onClick={() => {
                   const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
                   if (displayData.type === "bulletinBoard") {
-                    navigate(`${basePath}/bulletin-board/${displayData.realItemId}`)
+                    navigate(`${basePath}/bulletin-board/${displayData.itemId}`)
                   } else if (isYoutubeLink) {
-                    navigate(`${basePath}/links/${displayData.realItemId}`)
+                    navigate(`${basePath}/links/${displayData.itemId}`)
                   } else if (displayData.type === "link") {
                     let urlToOpen = displayData.meta
                     if (urlToOpen && !/^https?:\/\//i.test(urlToOpen)) {
@@ -143,12 +142,12 @@ const LessonItemRow = ({
                     }
                     window.open(urlToOpen, "_blank")
                   } else if (displayData.type === "assignment") {
-                    navigate(`${basePath}?tab=grading&assignmentId=${displayData.realItemId}`)
+                    navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
                   } else if (displayData.type === "quiz") {
                     if (isStudent) {
-                      navigate(`/workspace/courses/class/${classId}/quiz/${displayData.realItemId}/take`)
+                      navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
                     } else {
-                      navigate(`/workspace/courses/class/${classId}/quiz/${displayData.realItemId}`)
+                      navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}`)
                     }
                   } else if (displayData.type === "material") {
                     const fileUrl = item.material?.fileUrl || item.material?.url || item.material?.FileUrl || item.fileUrl;
