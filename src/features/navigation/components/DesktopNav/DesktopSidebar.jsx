@@ -27,6 +27,7 @@ import {
   Users,
   Calendar,
   BarChart,
+  Compass,
 } from "lucide-react"
 import DesktopNavItem from "./DesktopNavItem"
 import ListItem from "@/shared/components/ui/ListItem"
@@ -34,6 +35,7 @@ import ListItem from "@/shared/components/ui/ListItem"
 // Primary Dock Navigation Items
 const mainDockItems = [
   { key: "community", icon: Home, path: "/community", hasSublinks: false },
+  { key: "exploreCourses", icon: Compass, path: "/explore-courses", hasSublinks: false },
   {
     key: "catSpeak",
     icon: LayoutDashboard,
@@ -74,6 +76,7 @@ const getActiveDockSection = (pathname) => {
   if (pathname.includes("/workspace")) return "workspace"
   if (pathname.includes("/profile")) return "profile"
   if (pathname.includes("/chat")) return "messages"
+  if (pathname.includes("/explore-courses")) return "exploreCourses"
   if (pathname.includes("/resources")) return "learningResources"
   if (pathname.includes("/community")) return "community"
   if (pathname.includes("/pricing")) return "pricing"

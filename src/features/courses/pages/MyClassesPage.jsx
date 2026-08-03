@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { Plus } from "lucide-react"
+import { FileText, FilterX, GraduationCap, Layers, Plus, Video } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 import {
@@ -221,7 +221,32 @@ const MyClassesPage = () => {
       <div className="flex flex-col gap-4">
         {filteredDisplayList.length === 0 ? (
           <EmptyCoursesState
-            message={c.myCourses?.noClasses || "No classes yet"}
+            icon={statusFilter !== "all" ? FilterX : GraduationCap}
+            title={
+              statusFilter !== "all"
+                ? (mc.noFilteredClassesTitle || "No matching classes found")
+                : (mc.noClassesTitle || "Ready to Set Up Your First Class?")
+            }
+            message={
+              statusFilter !== "all"
+                ? (mc.noFilteredClassesDesc || "No classes match the selected status filter. Try changing or clearing your filter to view other classes.")
+                : (mc.noClassesDesc || "You don't have any active classes right now. Create a class to schedule live sessions, track attendance, and assign coursework.")
+            }
+            isFiltered={statusFilter !== "all"}
+            onResetFilter={statusFilter !== "all" ? () => setStatusFilter("all") : undefined}
+            resetFilterLabel={mc.resetFilter || "Reset Filter"}
+            action={
+              statusFilter === "all" ? (
+                <button
+                  type="button"
+                  onClick={() => navigate("/workspace/classes/create-class")}
+                  className="h-9 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
+                >
+                  <Plus size={15} />
+                  <span>{c.createClass?.createClass || "Create Class"}</span>
+                </button>
+              ) : null
+            }
           />
         ) : (
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>

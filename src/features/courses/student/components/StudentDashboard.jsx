@@ -545,8 +545,7 @@ const StudentDashboard = ({ t, language }) => {
     ...levelsOptions.map((level) => ({ value: level, label: level })),
   ]
   const studentTabs = [
-    { value: "enrolled", label: sc.enrolledCourses || "My Enrolled Courses", icon: BookOpen },
-    { value: "explore", label: sc.exploreCourses || "Explore Catalog", icon: Compass },
+    { value: "enrolled", label: sc.enrolledCourses || "My Courses", icon: BookOpen },
     { value: "classes", label: sc.myClasses || "Joined Classes", icon: Calendar },
   ]
 
@@ -1223,8 +1222,8 @@ const StudentDashboard = ({ t, language }) => {
                   ) : activeTab === "enrolled" ? (
                     <button
                       type="button"
-                      onClick={() => handleTabChange("explore")}
-                      className="mt-2 flex h-9 items-center justify-center gap-1 rounded-full bg-[#990011] px-5 text-xs font-black text-white transition-all hover:bg-[#b20a1c] active:scale-95"
+                      onClick={() => navigate("/workspace/explore-courses")}
+                      className="mt-2 flex h-9 items-center justify-center gap-1 rounded-full bg-[#990011] px-5 text-xs font-black text-white transition-all hover:bg-[#b20a1c] active:scale-95 cursor-pointer"
                     >
                       <span>{sc.exploreMore || "Explore Courses"}</span>
                     </button>

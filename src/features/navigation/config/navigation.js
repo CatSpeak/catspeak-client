@@ -19,6 +19,7 @@ import {
   Globe,
   Users,
   BarChart,
+  Compass,
 } from "lucide-react"
 
 export const navSections = [
@@ -27,6 +28,7 @@ export const navSections = [
     labelKey: null,
     items: [
       { key: "community", path: "/community", icon: Home },
+      { key: "exploreCourses", path: "/explore-courses", icon: Compass },
       {
         key: "messages",
         label: "Chat",
@@ -76,6 +78,7 @@ export const navSections = [
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
+  { key: "exploreCourses", path: "/explore-courses", icon: Compass },
   {
     key: "catSpeak",
     hasDropdown: true,

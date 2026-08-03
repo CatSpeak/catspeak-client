@@ -93,6 +93,9 @@ const CheckoutPage = lazy(
 const MyCoursesPage = lazy(
   () => import("@/features/courses/pages/MyCoursesPage"),
 );
+const ExploreCoursesPage = lazy(
+  () => import("@/features/courses/pages/ExploreCoursesPage"),
+);
 const CreateCoursePage = lazy(
   () => import("@/features/courses/pages/CreateCoursePage"),
 );
@@ -182,6 +185,14 @@ const routesConfig = [
                   <CheckoutPage />
                 </LazyRoute>
               </AuthGuard>
+            ),
+          },
+          {
+            path: "explore-courses",
+            element: (
+              <LazyRoute>
+                <ExploreCoursesPage />
+              </LazyRoute>
             ),
           },
           {
@@ -361,6 +372,14 @@ const routesConfig = [
               {
                 index: true,
                 element: <WorkspaceCourseRedirect />,
+              },
+              {
+                path: "explore-courses",
+                element: (
+                  <LazyRoute>
+                    <ExploreCoursesPage />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "courses",
