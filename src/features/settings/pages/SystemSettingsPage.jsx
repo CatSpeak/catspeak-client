@@ -62,11 +62,9 @@ const SystemSettingsPage = () => {
 
   return (
     <div>
-      <PageTitle>
-        {t.nav?.systemConfig || "Thiết lập hệ thống"}
-      </PageTitle>
+      <PageTitle>{t.nav?.systemConfig || "Thiết lập hệ thống"}</PageTitle>
 
-      <div className="space-y-4">
+      <div className="space-y-4 mt-3">
         <FluentCard>
           <div className="flex items-center justify-between gap-5">
             <label className="text-sm font-medium">
@@ -77,7 +75,7 @@ const SystemSettingsPage = () => {
             <Switch
               checked={receiveSystemMsgs}
               onChange={(e) => setReceiveSystemMsgs(e.target.checked)}
-              colorClass="peer-checked:bg-green-500"
+              colorClass="peer-checked:bg-[#8f0d15]"
               showLabel={true}
             />
           </div>
@@ -87,10 +85,12 @@ const SystemSettingsPage = () => {
           <div className="flex items-center justify-between gap-5">
             <div>
               <label className="text-sm font-medium block">
-                {t.nav?.emailNotifyTitle || "Nhận email thông báo & tin tức từ CatSpeak"}
+                {t.nav?.emailNotifyTitle ||
+                  "Nhận email thông báo & tin tức từ CatSpeak"}
               </label>
               <p className="text-xs text-gray-500 mt-1">
-                {t.nav?.emailNotifyDesc || "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email."}
+                {t.nav?.emailNotifyDesc ||
+                  "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email."}
               </p>
             </div>
 
@@ -104,7 +104,7 @@ const SystemSettingsPage = () => {
         </FluentCard>
       </div>
     </div>
-  )
+  );
 }
 
 export default SystemSettingsPage

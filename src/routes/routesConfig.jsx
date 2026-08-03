@@ -676,6 +676,14 @@ const routesConfig = [
                   </LazyRoute>
                 ),
               },
+              {
+                path: "profile/:accountId?",
+                element: (
+                  <LazyRoute>
+                    <Profile />
+                  </LazyRoute>
+                ),
+              },
               { path: "*", element: <PageNotFound /> },
             ],
           },

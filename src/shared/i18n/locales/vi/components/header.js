@@ -2,6 +2,7 @@ export default {
   profile: "Thông tin cá nhân",
   personalPage: "Trang cá nhân",
   settings: "Cài đặt",
+  generalInfo: "Thông tin chung",
   logout: "Đăng xuất",
   soon: "Sắp ra mắt",
   language: "Ngôn ngữ",
