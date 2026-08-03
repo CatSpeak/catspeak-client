@@ -1,7 +1,6 @@
 import React from "react"
-import { Clock, MoreVertical } from "lucide-react"
+import { Clock } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { IconButton } from "@/shared/components/ui/buttons"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { getFileIcon } from "../../utils/fileUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"

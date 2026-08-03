@@ -10,6 +10,7 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronUp,
+  VideoOff,
 } from "lucide-react"
 import LessonActionMenu from "./LessonActionMenu"
 import { getDisplayData } from "../../utils/curriculumUtils"
@@ -77,6 +78,15 @@ const LessonItemRow = ({
   const IconComponent = config.Icon
 
   const [isExpanded, setIsExpanded] = useState(false)
+  const [prevIsYoutubeLink, setPrevIsYoutubeLink] = useState(isYoutubeLink)
+
+  // Reset isExpanded if the item is no longer a YouTube link
+  if (isYoutubeLink !== prevIsYoutubeLink) {
+    setPrevIsYoutubeLink(isYoutubeLink)
+    if (!isYoutubeLink) {
+      setIsExpanded(false)
+    }
+  }
 
   const youtubeId = useMemo(() => {
     if (!isYoutubeLink || !displayData.meta) return null
@@ -201,22 +211,30 @@ const LessonItemRow = ({
       </div>
 
       {/* Expanded Youtube Video */}
-      {isExpanded && (
+      {isExpanded && isYoutubeLink && (
         <div className="w-full mt-4 pt-4 border-t border-[#E2E2E2] flex justify-center items-center">
           {youtubeId ? (
-            <div className="w-full max-w-3xl aspect-video rounded-xl overflow-hidden shadow-md">
-              <iframe
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
-                title={displayData.title || t.courses.lectureHall.linkPage?.videoTitle || "Video"}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
+            <div className="flex flex-col items-center w-full">
+              <div className="w-full max-w-3xl aspect-video rounded-xl overflow-hidden shadow-md">
+                <iframe
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
+                  title={displayData.title || t.courses.lectureHall.linkPage?.videoTitle || "Video"}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              <p className="mt-3 text-sm text-[#6B7280]">
+                {t.courses.lectureHall.linkPage?.videoNotLoading || "Video không hiển thị?"}{" "}
+                <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline font-medium">
+                  {t.courses.lectureHall.linkPage?.openInNewTab || "Mở trong tab mới"}
+                </a>
+              </p>
             </div>
           ) : (
-            <div className="py-8 text-center text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-              {t.courses.lectureHall.linkPage?.invalidYoutube || "Invalid YouTube URL"}
-              <br />
+            <div className="flex flex-col items-center justify-center py-8 text-sm text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
+              <VideoOff size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
+              <p>{t.courses.lectureHall.linkPage?.invalidYoutube || "Invalid YouTube URL"}</p>
               <a href={displayData.meta} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline mt-2 inline-block font-medium">
                 {t.courses.lectureHall.linkPage?.openInNewTab || "Open in new tab"}
               </a>

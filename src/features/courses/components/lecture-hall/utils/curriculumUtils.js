@@ -1,4 +1,5 @@
 import { formatFileSize } from "./fileUtils"
+import { formatDateTime } from "@/shared/utils/dateFormatter"
 
 export const getDisplayData = (item, labels, locale) => {
   if (item.type) {
@@ -6,12 +7,12 @@ export const getDisplayData = (item, labels, locale) => {
     let finalMetaType = item.metaType
 
     if (item.type === "assignment" && item.dueDate) {
-      const date = new Date(item.dueDate).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })
+      const date = formatDateTime(item.dueDate, locale)
       finalMeta = labels.dueDateMeta?.replace("{{date}}", date) || `Hạn nộp: ${date}`
       finalMetaType = "time" // Using time maps to Clock icon
     } else if (item.type === "quiz" && (item.openTime || item.closeTime)) {
-      const openStr = item.openTime ? `${labels.openTime || "Mở"}: ${new Date(item.openTime).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}` : ""
-      const closeStr = item.closeTime ? `${labels.closeTime || "Đóng"}: ${new Date(item.closeTime).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}` : ""
+      const openStr = item.openTime ? `${labels.openTime || "Mở"}: ${formatDateTime(item.openTime, locale)}` : ""
+      const closeStr = item.closeTime ? `${labels.closeTime || "Đóng"}: ${formatDateTime(item.closeTime, locale)}` : ""
       finalMeta = [openStr, closeStr].filter(Boolean).join(", ")
       finalMetaType = "time"
     }
@@ -42,10 +43,7 @@ export const getDisplayData = (item, labels, locale) => {
     type = "assignment"
     title = item.assignment.name
     if (item.assignment.dueDate) {
-      const date = new Date(item.assignment.dueDate).toLocaleString(locale, {
-        dateStyle: "short",
-        timeStyle: "short",
-      })
+      const date = formatDateTime(item.assignment.dueDate, locale)
       meta = labels.dueDateMeta.replace("{{date}}", date)
       metaType = "time"
     }
@@ -53,10 +51,7 @@ export const getDisplayData = (item, labels, locale) => {
     type = "assignment" // Map to assignment icon
     title = item.quiz.name
     if (item.quiz.closeTime) {
-      const date = new Date(item.quiz.closeTime).toLocaleString(locale, {
-        dateStyle: "short",
-        timeStyle: "short",
-      })
+      const date = formatDateTime(item.quiz.closeTime, locale)
       meta = labels.closesAtMeta.replace("{{date}}", date)
       metaType = "time"
     }

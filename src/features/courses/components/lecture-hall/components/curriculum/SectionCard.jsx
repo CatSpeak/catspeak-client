@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react"
-import { MoreVertical, EyeOff, ChevronUp, ChevronDown } from "lucide-react"
+import { MoreVertical, EyeOff, ChevronUp, ChevronDown, Inbox } from "lucide-react"
 import LessonItemRow from "./LessonItemRow"
 import { IconButton } from "@/shared/components/ui/buttons"
 import SectionActionMenu from "./SectionActionMenu"
@@ -93,8 +93,9 @@ const SectionCard = ({
               />
             ))
           ) : (
-            <div className="text-center py-6 text-xs text-gray-400 border border-dashed border-gray-200 rounded-xl">
-              {dict.noLessons}
+            <div className="flex flex-col items-center justify-center py-6 text-sm text-[#5B403C] border border-dashed border-[#E2E2E2] rounded-xl">
+              <Inbox size={24} className="mb-2 opacity-60" />
+              <p>{dict.noLessons}</p>
             </div>
           )}
         </div>

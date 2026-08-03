@@ -7,6 +7,7 @@ import { UploadCloud, Eye } from "lucide-react"
 import FileAttachmentItem from "../ui/FileAttachmentItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
+import { getMaterialValidationError, getFileFingerprint } from "../../utils/fileUtils"
 
 const AddMaterialModal = ({
   open = false,
@@ -51,12 +52,47 @@ const AddMaterialModal = ({
 
   // Append new files to the list
   const handleFilesSelection = (files) => {
-    setSelectedFiles(prev => [...prev, ...files])
-    if (!title && files.length > 0) {
-      const nameWithoutExt = files[0].name.replace(/\.[^/.]+$/, "")
-      setTitle(nameWithoutExt)
+    const validFiles = []
+    const existingFingerprints = new Set(selectedFiles.map(getFileFingerprint))
+    let hasDuplicate = false
+
+    for (const file of files) {
+      const fingerprint = getFileFingerprint(file)
+      const validationError = getMaterialValidationError(file)
+
+      if (existingFingerprints.has(fingerprint)) {
+        hasDuplicate = true
+      } else if (validationError === "size") {
+        toast.error(dict.maxSize || "Dung lượng dưới 50MB")
+      } else if (validationError === "type") {
+        toast.error(dict.toastInvalidFileType || "Định dạng không hợp lệ")
+      } else if (validationError) {
+        toast.error(dict.toastInvalidFile || "Tệp không hợp lệ")
+      } else {
+        validFiles.push(file)
+        existingFingerprints.add(fingerprint)
+      }
     }
-    if (errors.files) setErrors((prev) => ({ ...prev, files: false }))
+
+    if (hasDuplicate) {
+      toast.error(dict.toastDuplicateFile || "Một số tệp đã tồn tại và bị bỏ qua")
+    }
+
+    if (validFiles.length > 0) {
+      const remaining = 5 - selectedFiles.length
+      if (validFiles.length > remaining) {
+        toast.error(dict.toastMaxFiles || "Chỉ được chọn tối đa 5 tệp")
+      }
+      const toAdd = validFiles.slice(0, remaining)
+
+      if (!title && toAdd.length > 0) {
+        const nameWithoutExt = toAdd[0].name.replace(/\.[^/.]+$/, "")
+        setTitle(nameWithoutExt)
+      }
+
+      setSelectedFiles(prev => [...prev, ...toAdd])
+      if (errors.files) setErrors((prev) => ({ ...prev, files: false }))
+    }
   }
 
   // Remove a specific file from the list
@@ -148,7 +184,7 @@ const AddMaterialModal = ({
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept=".pdf,.docx,.pptx,.jpg,.png"
+            accept=".pdf,.docx,.jpg,.png"
             multiple
             className="hidden"
           />
@@ -170,10 +206,10 @@ const AddMaterialModal = ({
               tabIndex={0}
               aria-label={dict.uploadDesc}
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all space-y-3 ${dragActive
-                  ? "border-[#72000d] bg-red-50/40"
-                  : errors.files
-                    ? "border-red-500 bg-red-50 ring-2 ring-red-200"
-                    : "border-gray-300 hover:border-gray-400 bg-white"
+                ? "border-[#72000d] bg-red-50/40"
+                : errors.files
+                  ? "border-red-500 bg-red-50 ring-2 ring-red-200"
+                  : "border-gray-300 hover:border-gray-400 bg-white"
                 }`}
             >
               <div className="w-12 h-12 bg-red-100/70 text-[#72000d] rounded-full flex items-center justify-center mx-auto">

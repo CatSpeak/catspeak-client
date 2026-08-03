@@ -19,6 +19,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useCreatePostInBulletinBoardMutation, useUpdatePostInBulletinBoardMutation, useGetPostDetailQuery, useGetClassDetailQuery } from "@/store/api/coursesApi"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getMaterialValidationError, getFileFingerprint } from "../utils/fileUtils"
 
 // ─── Helpers (reused pattern from CreatePostModal / AddMaterialModal) ────────
 
@@ -136,11 +137,40 @@ const CreatePostPage = () => {
   }
 
   const addAttachments = (files) => {
-    setAttachments((prev) => {
-      const remaining = MAX_ATTACHMENTS - prev.length
-      const toAdd = files.slice(0, remaining)
-      return [...prev, ...toAdd]
-    })
+    const validFiles = []
+    const addMaterialDict = t.courses?.lectureHall?.modals?.addMaterial || {}
+    const existingFingerprints = new Set(attachments.map(getFileFingerprint))
+    let hasDuplicate = false
+
+    for (const file of files) {
+      const fingerprint = getFileFingerprint(file)
+      const validationError = getMaterialValidationError(file)
+
+      if (existingFingerprints.has(fingerprint)) {
+        hasDuplicate = true
+      } else if (validationError === "size") {
+        toast.error(addMaterialDict.maxSize || "Dung lượng dưới 50MB")
+      } else if (validationError === "type") {
+        toast.error(addMaterialDict.toastInvalidFileType || "Định dạng không hợp lệ")
+      } else if (validationError) {
+        toast.error(addMaterialDict.toastInvalidFile || "Tệp không hợp lệ")
+      } else {
+        validFiles.push(file)
+        existingFingerprints.add(fingerprint)
+      }
+    }
+
+    if (hasDuplicate) {
+      toast.error(addMaterialDict.toastDuplicateFile || "Một số tệp đã tồn tại và bị bỏ qua")
+    }
+
+    const remaining = MAX_ATTACHMENTS - attachments.length
+    if (validFiles.length > remaining) {
+      toast.error(dict.toastMaxFiles || `Chỉ được tải lên tối đa ${MAX_ATTACHMENTS} tệp`)
+    }
+    const toAdd = validFiles.slice(0, remaining)
+
+    setAttachments((prev) => [...prev, ...toAdd])
   }
 
   const removeAttachment = (index) => {
@@ -214,7 +244,7 @@ const CreatePostPage = () => {
     <div className="min-h-screen space-y-6">
       {/* ─── Breadcrumb ───────────────────────────────────────────────── */}
       <Breadcrumb
-        className="text-[#7B7979] text-sm"
+        className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
         items={[
           { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
           { label: dict.postDetail.breadcrumbs.myCourses, onClick: () => navigate("/workspace/courses") },
@@ -348,7 +378,7 @@ const CreatePostPage = () => {
               type="file"
               ref={attachInputRef}
               onChange={handleAttachChange}
-              accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png"
+              accept=".pdf,.docx,.jpg,.png"
               className="hidden"
               multiple
             />

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGetCurriculumByClassQuery, useGetStudentClassDetailQuery, useGetStudentCurriculumByClassQuery } from '@/store/api/coursesApi'
 import { useGetUserProfileQuery } from '@/store/api/userApi'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, VideoOff } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -100,7 +100,7 @@ const LinkYoutubePage = () => {
         {/* ── Breadcrumb & Nút quay lại ── */}
         <div className="flex flex-col gap-4">
           <Breadcrumb
-            className="text-[#7B7979] text-sm"
+            className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
             items={[
               { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
               { label: isStudent ? dict.postDetail.breadcrumbs.myLearning : dict.postDetail.breadcrumbs.myCourses, onClick: () => navigate(basePath) },
@@ -121,19 +121,27 @@ const LinkYoutubePage = () => {
 
         <div className="flex justify-center items-center">
           {youtubeId ? (
-            <div className="w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-md">
-              <iframe
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
-                title={linkItem.title || dict.linkPage.videoTitle}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
+            <div className="flex flex-col items-center w-full">
+              <div className="w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-md">
+                <iframe
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
+                  title={linkItem.title || dict.linkPage.videoTitle}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              <p className="mt-3 text-sm text-[#6B7280]">
+                {dict.linkPage.videoNotLoading}{" "}
+                <a href={linkItem.url} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline font-medium">
+                  {dict.linkPage.openInNewTab}
+                </a>
+              </p>
             </div>
           ) : (
-            <div className="p-12 text-center text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-              {dict.linkPage.invalidYoutube}
-              <br />
+            <div className="flex flex-col items-center justify-center p-12 text-sm text-[#5B403C] w-full border border-dashed border-[#E2E2E2] rounded-xl bg-white">
+              <VideoOff size={40} className="mb-4 text-[#9CA3AF] opacity-80" />
+              <p>{dict.linkPage.invalidYoutube}</p>
               <a href={linkItem.url} target="_blank" rel="noopener noreferrer" className="text-[#D94C38] hover:underline mt-2 inline-block font-medium">
                 {dict.linkPage.openInNewTab}
               </a>

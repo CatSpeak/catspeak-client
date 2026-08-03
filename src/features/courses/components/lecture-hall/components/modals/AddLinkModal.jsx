@@ -120,9 +120,23 @@ const AddLinkModal = ({
             type="url"
             icon={Link2}
             value={url}
-            onChange={(e) => {
-              setUrl(e.target.value)
+            onChange={async (e) => {
+              const val = e.target.value
+              setUrl(val)
               if (errors.url) setErrors((prev) => ({ ...prev, url: false }))
+              
+              if (!title.trim() && (val.includes("youtube.com") || val.includes("youtu.be"))) {
+                try {
+                  const res = await fetch(`https://noembed.com/embed?dataType=json&url=${val}`)
+                  const data = await res.json()
+                  if (data.title) {
+                    setTitle(data.title)
+                    if (errors.title) setErrors((prev) => ({ ...prev, title: false }))
+                  }
+                } catch (err) {
+                  console.error("Failed to fetch youtube title", err)
+                }
+              }
             }}
             error={errors.url}
             placeholder={dict.urlPlaceholder}

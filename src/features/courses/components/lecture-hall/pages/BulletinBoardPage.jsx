@@ -9,6 +9,7 @@ import { usePaginatedSearch } from "@/features/courses/hooks/usePaginatedSearch"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import BulletinBoardTable from "../components/ui/BulletinBoardTable"
 import { FileText } from "lucide-react"
+import { formatDateTime } from "@/shared/utils/dateFormatter"
 import { useGetStudentClassDetailQuery } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import {
@@ -83,7 +84,7 @@ export default function BulletinBoardPage() {
       id: post.id,
       title: post.title,
       author: post.accountName,
-      date: post.createdAt ? new Date(post.createdAt).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "",
+      date: formatDateTime(post.createdAt, language),
       replies: post.replyCount,
       isPinned: post.isPinned,
       isVisibleToStudents: post.isVisibleToStudents,
@@ -160,7 +161,7 @@ export default function BulletinBoardPage() {
   return (
     <div className="min-h-screen space-y-6">
       <Breadcrumb
-        className="text-[#7B7979] text-sm"
+        className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
         items={[
           { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
           { label: isStudent ? dict.postDetail.breadcrumbs.myLearning : dict.postDetail.breadcrumbs.myCourses, onClick: () => navigate(basePath) },

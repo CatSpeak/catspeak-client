@@ -18,6 +18,7 @@ import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useSelector } from "react-redux"
 import { formatFileSize } from "../utils/fileUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { formatDateTime } from "@/shared/utils/dateFormatter"
 
 const PostDetailPage = () => {
   const navigate = useNavigate()
@@ -69,7 +70,7 @@ const PostDetailPage = () => {
     title: postDetail?.title || dict.noTitle,
     authorName: postDetail?.accountName || dict.teacher,
     authorAvatar: postDetail?.avatarImageUrl || "",
-    date: postDetail?.createdAt ? new Date(postDetail.createdAt).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "",
+    date: formatDateTime(postDetail?.createdAt, language),
     thumbnailUrl: postDetail?.thumbnailUrl || "",
     content: postDetail?.content || "",
     attachments: postDetail?.attachmentsJson
@@ -86,7 +87,7 @@ const PostDetailPage = () => {
     authorName: comment.accountName || dict.anonymous,
     authorAvatar: comment.avatarImageUrl || "",
     isTeacher: comment.isTeacher || false,
-    time: comment.createdAt ? new Date(comment.createdAt).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "",
+    time: formatDateTime(comment.createdAt, language),
     content: comment.content,
     replyCount: comment.replyCount || 0,
   })) || []
@@ -127,7 +128,7 @@ const PostDetailPage = () => {
   return (
     <div className="min-h-screen space-y-6">
       <Breadcrumb
-        className="text-[#7B7979] text-sm"
+        className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
         items={[
           { label: dict.breadcrumbs.home, onClick: () => navigate("/workspace") },
           { label: isStudent ? dict.breadcrumbs.myLearning : dict.breadcrumbs.myCourses, onClick: () => navigate(basePath) },

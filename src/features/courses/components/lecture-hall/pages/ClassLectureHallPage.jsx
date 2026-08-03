@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, AlertCircle, FolderOpen } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { PillButton } from "@/shared/components/ui/buttons"
@@ -597,8 +597,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
       )}
 
       {isError && (
-        <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
-          {dict.curriculum.loadError}
+        <div className="flex flex-col items-center justify-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
+          <AlertCircle size={32} className="mb-3 opacity-80" />
+          <p>{dict.curriculum.loadError}</p>
         </div>
       )}
 
@@ -607,7 +608,8 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           {/* Sections List */}
           <div className="space-y-6">
             {sections.length === 0 ? (
-              <div className="text-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
+              <div className="flex flex-col items-center justify-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
+                <FolderOpen size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
                 {isStudent ? (
                   <p>{dict.curriculum.emptyState}</p>
                 ) : (
