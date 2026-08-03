@@ -48,9 +48,11 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
   const userId = user?.accountId || user?.id || ""
 
   // Sync drilldown state when drawer opens or when navigating
+  const isSettings = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")
+
   useEffect(() => {
     if (isMobileOpen) {
-      const activeLinks = pathname.startsWith("/setting") ? settingNavLinks : navLinks
+      const activeLinks = isSettings ? settingNavLinks : navLinks
       const activeItem = activeLinks.find(
         (item) =>
           item.hasDropdown && item.subItems?.length > 0 && checkIsActive(item),
@@ -58,7 +60,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
       setActiveDrilldownItem(activeItem || null)
     } else {
       const timer = setTimeout(() => {
-        const activeLinks = pathname.startsWith("/setting") ? settingNavLinks : navLinks
+        const activeLinks = isSettings ? settingNavLinks : navLinks
         const activeItem = activeLinks.find(
           (item) =>
             item.hasDropdown &&
@@ -82,7 +84,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-1 scrollbar-none">
-          {(pathname.startsWith("/setting") ? settingNavLinks : navLinks)
+          {(isSettings ? settingNavLinks : navLinks)
             .filter((item) => {
               if (item.hideInSidebar) return false
               if (item.lang && item.lang !== currentLang) return false
@@ -223,7 +225,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               const SubIconComponent = sub.icon || Globe
               let subPath = sub.path
               if (sub.key === "profile" && userId) {
-                subPath = `/profile/${userId}`
+                subPath = `/workspace/profile/${userId}`
               }
 
               return (

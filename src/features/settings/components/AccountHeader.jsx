@@ -232,6 +232,7 @@ const AccountHeader = ({ user, formData, t }) => {
               alt={displayName}
               name={displayName}
               className="w-full h-full text-white text-base"
+              style={{ border: 'none' }}
             />
             <div
               className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
@@ -249,13 +250,13 @@ const AccountHeader = ({ user, formData, t }) => {
           </div>
 
           <div className="flex flex-col text-left pr-1">
-            <div className="flex items-center gap-1.5 text-white font-bold text-xs">
-              <Users size={13} className="text-amber-400" />
+            <div className="flex items-center gap-1.5 text-white font-bold text-xs whitespace-nowrap">
+              <Users size={13} className="text-amber-400 shrink-0" />
               <span>
                 {t.profile?.personalInfo?.meetingAvatarLabel || "Ảnh phòng họp"}
               </span>
             </div>
-            <span className="text-[10px] text-gray-200 mt-0.5 group-hover/meeting:text-white transition-colors font-medium">
+            <span className="text-[10px] text-gray-200 mt-0.5 group-hover/meeting:text-white transition-colors font-medium whitespace-nowrap">
               {isUpdatingMeetingAvatar
                 ? t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật..."
                 : t.profile?.personalInfo?.clickToChangeMeetingAvatar ||
