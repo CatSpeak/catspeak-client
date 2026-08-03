@@ -44,7 +44,7 @@ const CommentList = ({
 
   return (
     <div className="bg-[#F8F9FA] rounded-xl border border-[#E2E2E2] shadow-faq-card">
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-center gap-3 px-8 py-5 border-b border-[#E2E2E2]">
         <span className="text-xl font-bold text-[#191C1D]">{dict.replies}</span>
         {totalCount > 0 && (
@@ -65,7 +65,7 @@ const CommentList = ({
           />)
         }
 
-        {/* ── Locked state ── */}
+        {/* Locked state */}
         {locked ? (
           <EmptyState
             icon={MessageSquareOff}
@@ -74,8 +74,7 @@ const CommentList = ({
           >
             <p className="text-base text-[#7B7979] mt-4">{dict.lockedCommentsDesc}</p>
           </EmptyState>
-        ) : totalCount === 0 ? (
-          /* ── No comments state ── */
+        ) : totalCount === 0 && (
           <EmptyState
             icon={MessageSquare}
             message={dict.noComments}
@@ -83,11 +82,12 @@ const CommentList = ({
           >
             <p className="text-base text-[#7B7979] mt-4">{dict.noCommentsDesc}</p>
           </EmptyState>
-        ) : (
-          /* ── Normal state: input + list ── */
+        )}
+
+        {/* Comment List */}
+        {totalCount > 0 && (
           <>
             <div className="border-t border-[#1A1A1A]/50 my-6" />
-            {/* Comment list */}
             <div className="space-y-6">
               {visibleComments.map((comment) => (
                 <CommentItem

@@ -309,8 +309,12 @@ const transformPaginatedResponse = (response, itemTransformer) => {
   const totalItems = toNonNegativeInteger(
     responseRecord.pagination?.totalItems
     ?? outerRecord.pagination?.totalItems
+    ?? responseRecord.pagination?.total
+    ?? outerRecord.pagination?.total
     ?? responseRecord.totalCount
-    ?? outerRecord.totalCount,
+    ?? outerRecord.totalCount
+    ?? responseRecord.total
+    ?? outerRecord.total,
     rawItems.length,
   )
   const totalPages = toPositiveInteger(
@@ -1197,7 +1201,14 @@ export const coursesApi = baseApi.injectEndpoints({
             name: section.name || section.title || "Untitled Section",
             description: section.description || section.subtitle || "",
             isVisibleToStudents: section.isVisibleToStudents ?? (section.isHidden === false),
-            items: rawItems.map((item) => {
+            items: rawItems.filter((item) => {
+              if (item.itemType === "BulletinBoard" && !item.bulletinBoard) return false
+              if (item.itemType === "Link" && !item.link) return false
+              if (item.itemType === "Material" && !item.material) return false
+              if (item.itemType === "Assignment" && !item.assignment) return false
+              if (item.itemType === "Quiz" && !item.quiz) return false
+              return true
+            }).map((item) => {
               const itemTypeMap = {
                 "BulletinBoard": "bulletinBoard",
                 "Link": "link",
@@ -1225,21 +1236,23 @@ export const coursesApi = baseApi.injectEndpoints({
                 // title = item.material.title || item.material.name || title
                 title = item.material.fileName
                 const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
-                const size = item.material.size ? `${(item.material.size / (1024 * 1024)).toFixed(1)} MB` : ""
-                meta = size ? `${ext} • ${size}` : ext
+                const sizeBytes = item.material.fileSize || item.material.size || 0
+                let sizeStr = ""
+                if (sizeBytes > 0) {
+                  if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`
+                  else if (sizeBytes < 1024 * 1024) sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`
+                  else sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+                }
+                meta = sizeStr ? `${ext} - ${sizeStr}` : ext
                 metaType = "file"
                 fileUrl = item.material.fileUrl || item.material.url || ""
                 fileName = item.material.fileName || item.material.name || ""
               } else if (item.itemType === "Assignment" && item.assignment) {
                 title = item.assignment.name
-                meta = item.assignment.dueDate ? `Hạn nộp: ${new Date(item.assignment.dueDate).toLocaleDateString("vi-VN")}` : meta
                 metaType = "clock"
               } else if (item.itemType === "Quiz" && item.quiz) {
                 title = item.quiz.name
-                const openTime = item.quiz.openTime ? `Mở: ${new Date(item.quiz.openTime).toLocaleDateString("vi-VN")}` : ""
-                const closeTime = item.quiz.closeTime ? `Đóng: ${new Date(item.quiz.closeTime).toLocaleDateString("vi-VN")}` : ""
                 metaType = "clock"
-                meta = openTime + ", " + closeTime
               }
 
               return {
@@ -1253,6 +1266,9 @@ export const coursesApi = baseApi.injectEndpoints({
                 fileUrl,
                 fileName,
                 isVisibleToStudents: item.isVisibleToStudents ?? (item.isHidden === false),
+                dueDate: item.assignment?.dueDate,
+                openTime: item.quiz?.openTime,
+                closeTime: item.quiz?.closeTime,
               }
             }),
           }
@@ -1286,7 +1302,14 @@ export const coursesApi = baseApi.injectEndpoints({
             name: section.name || section.title || "Untitled Section",
             description: section.description || section.subtitle || "",
             isVisibleToStudents: section.isVisibleToStudents ?? true,
-            items: rawItems.map((item) => {
+            items: rawItems.filter((item) => {
+              if (item.itemType === "BulletinBoard" && !item.bulletinBoard) return false
+              if (item.itemType === "Link" && !item.link) return false
+              if (item.itemType === "Material" && !item.material) return false
+              if (item.itemType === "Assignment" && !item.assignment) return false
+              if (item.itemType === "Quiz" && !item.quiz) return false
+              return true
+            }).map((item) => {
               const itemTypeMap = {
                 "BulletinBoard": "bulletinBoard",
                 "Link": "link",
@@ -1314,20 +1337,22 @@ export const coursesApi = baseApi.injectEndpoints({
                 // title = item.material.title || item.material.name || title
                 title = item.material.fileName
                 const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
-                const size = item.material.size ? `${(item.material.size / (1024 * 1024)).toFixed(1)} MB` : ""
-                meta = size ? `${ext} • ${size}` : ext
+                const sizeBytes = item.material.fileSize || item.material.size || 0
+                let sizeStr = ""
+                if (sizeBytes > 0) {
+                  if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`
+                  else if (sizeBytes < 1024 * 1024) sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`
+                  else sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+                }
+                meta = sizeStr ? `${ext} • ${sizeStr}` : ext
                 metaType = "file"
                 fileUrl = item.material.fileUrl || item.material.url || ""
               } else if (item.itemType === "Assignment" && item.assignment) {
                 title = item.assignment.name
-                meta = item.assignment.dueDate ? `Hạn nộp: ${new Date(item.assignment.dueDate).toLocaleDateString("vi-VN")}` : meta
                 metaType = "clock"
               } else if (item.itemType === "Quiz" && item.quiz) {
                 title = item.quiz.name
-                const openTime = item.quiz.openTime ? `Mở: ${new Date(item.quiz.openTime).toLocaleDateString("vi-VN")}` : ""
-                const closeTime = item.quiz.closeTime ? `Đóng: ${new Date(item.quiz.closeTime).toLocaleDateString("vi-VN")}` : ""
                 metaType = "clock"
-                meta = openTime + ", " + closeTime
               }
 
               return {
@@ -1340,6 +1365,9 @@ export const coursesApi = baseApi.injectEndpoints({
                 metaType,
                 fileUrl,
                 isVisibleToStudents: item.isVisibleToStudents ?? true,
+                dueDate: item.assignment?.dueDate,
+                openTime: item.quiz?.openTime,
+                closeTime: item.quiz?.closeTime,
               }
             }),
           }
@@ -1491,10 +1519,10 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // Get list posts in a bulletin board (Student)
     getStudentListPostsInBulletinBoard: builder.query({
-      query: ({ classId, boardId, page = 1, pageSize = 10 }) => ({
+      query: ({ classId, boardId, page = 1, pageSize = 10, search }) => ({
         url: `/student/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
         method: "GET",
-        params: { page, pageSize },
+        params: { page, pageSize, search },
       }),
       transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
       providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
@@ -1521,10 +1549,10 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // Get list posts in a bulletin board
     getListPostsInBulletinBoard: builder.query({
-      query: ({ classId, boardId, page = 1, pageSize = 10 }) => ({
+      query: ({ classId, boardId, page = 1, pageSize = 10, search }) => ({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}/posts`,
         method: "GET",
-        params: { page, pageSize },
+        params: { page, pageSize, search },
       }),
       transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
       providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
@@ -1988,11 +2016,7 @@ export const {
   useCreateCurriculumSectionMutation,
   useUpdateCurriculumSectionMutation,
   useDeleteCurriculumSectionMutation,
-  useCreateCurriculumBulletinBoardMutation,
-  useUpdateCurriculumBulletinBoardMutation,
-  useCreateCurriculumMaterialMutation,
   useUpdateCurriculumLinkMutation,
-  useCreateCurriculumAssignmentMutation,
   useUploadMaterialToSectionMutation,
   useAddLinkToSectionMutation,
   useCreateBulletinBoardMutation,
