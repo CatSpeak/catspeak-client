@@ -453,6 +453,18 @@ export default {
       step2: "Mở Chrome hoặc Safari",
       step3: "Dán liên kết và tham gia cuộc gọi",
     },
+    errorBoundary: {
+      title: "Cuộc gọi video gặp lỗi",
+      defaultDescription:
+        "Đã xảy ra lỗi không mong muốn trong phiên gọi video.",
+      reloadPage: "Tải lại trang",
+      copyLog: "Sao chép nhật ký",
+      copied: "Đã sao chép!",
+      goHome: "Về trang chủ",
+      technicalDetails: "Chi tiết kỹ thuật",
+      stackTrace: "Dấu vết ngăn xếp:",
+      componentStack: "Ngăn xếp thành phần:",
+    },
     inviteParticipant: "Mời tham gia phòng",
     sendInvite: "Gửi lời mời",
     inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",

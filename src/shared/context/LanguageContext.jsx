@@ -9,7 +9,7 @@ const defaultContextValue = {
   languageName: languageNames.vi || "Tiếng Việt",
 }
 
-const LanguageContext = createContext(defaultContextValue)
+export const LanguageContext = createContext(defaultContextValue)
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState("vi")

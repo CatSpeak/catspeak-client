@@ -3,8 +3,8 @@ import { Copy, Check, ExternalLink, AlertTriangle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { isAndroid } from "@/shared/utils/isWebView"
 import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
-import "./WebViewBlockScreen.css"
 
 /**
  * Full-screen block shown when a WebView browser tries to access a video call.
@@ -14,7 +14,7 @@ import "./WebViewBlockScreen.css"
  */
 const WebViewBlockScreen = ({ appName }) => {
   const { t } = useLanguage()
-  const wb = t.rooms.videoCall.webviewBlock ?? {}
+  const wb = t?.rooms?.videoCall?.webviewBlock ?? {}
 
   const [copied, setCopied] = useState(false)
   const currentUrl = getShareUrlWithVersion(window.location.href)
@@ -48,68 +48,66 @@ const WebViewBlockScreen = ({ appName }) => {
   const displayApp = appName || wb.genericApp || "this app"
 
   return (
-    <div className="webview-block-screen">
-      <div className="webview-block-lang-switcher">
+    <div className="h-screen w-full flex flex-col items-center justify-start overflow-y-auto">
+      {/* Language Switcher */}
+      <div className="absolute top-4 right-4 z-10">
         <LanguageSwitcher />
       </div>
-      <div className="webview-block-card">
-        {/* Icon */}
-        <div className="webview-block-icon">
-          <AlertTriangle size={32} strokeWidth={1.5} />
-        </div>
+
+      {/* Main Content Area (matching VideoCallErrorBoundary layout and typography) */}
+      <div className="w-full max-w-xl p-4 sm:p-6 flex flex-col items-center text-center my-auto">
+        {/* Icon (matching EmptyState style without background circle) */}
+        <AlertTriangle className="w-14 h-14 mb-4 text-amber-500 stroke-[1.5]" />
 
         {/* Title */}
-        <h1 className="webview-block-title">
+        <h1 className="text-3xl font-bold mb-2">
           {wb.title || "Open in Browser"}
         </h1>
 
         {/* Description */}
-        <p className="webview-block-description">
-          {(wb.description || "You're using {app}'s built-in browser, which doesn't support video calls properly.").replace("{app}", displayApp)}
+        <p className="text-sm text-[#606060] mb-6 max-w-md">
+          {(
+            wb.description ||
+            "You're using {app}'s built-in browser, which doesn't support video calls properly."
+          ).replace("{app}", displayApp)}
         </p>
 
-        {/* URL display */}
-        <div className="webview-block-url-box">
-          <span className="webview-block-url-text">{currentUrl}</span>
+        {/* URL display box */}
+        <div className="w-full max-w-md h-[56px] px-4 mb-6 bg-[#F8F9FA] border border-[#e5e5e5] rounded-xl flex items-center overflow-hidden text-left">
+          <span className="whitespace-nowrap block overflow-hidden text-ellipsis select-all w-full">
+            {currentUrl}
+          </span>
         </div>
 
-        {/* Copy button */}
-        <button
-          type="button"
-          className={`webview-block-copy-btn ${copied ? "copied" : ""}`}
-          onClick={handleCopyLink}
-        >
-          {copied ? (
-            <>
-              <Check size={18} />
-              <span>{wb.copied || "Copied!"}</span>
-            </>
-          ) : (
-            <>
-              <Copy size={18} />
-              <span>{wb.copyLink || "Copy Link"}</span>
-            </>
-          )}
-        </button>
-
-        {/* Android: Open in Chrome shortcut */}
-        {isAndroid() && (
-          <button
-            type="button"
-            className="webview-block-chrome-btn"
-            onClick={handleOpenInChrome}
+        {/* Action Buttons using PillButton */}
+        <div className="w-full max-w-md flex flex-col gap-2 mb-6">
+          <PillButton
+            variant="primary"
+            className="w-full"
+            startIcon={copied ? <Check /> : <Copy />}
+            onClick={handleCopyLink}
           >
-            <ExternalLink size={18} />
-            <span>{wb.openInChrome || "Open in Chrome"}</span>
-          </button>
-        )}
+            {copied ? wb.copied || "Copied!" : wb.copyLink || "Copy Link"}
+          </PillButton>
+
+          {isAndroid() && (
+            <PillButton
+              variant="secondary"
+              className="w-full"
+              startIcon={<ExternalLink />}
+              onClick={handleOpenInChrome}
+            >
+              {wb.openInChrome || "Open in Chrome"}
+            </PillButton>
+          )}
+        </div>
 
         {/* Steps */}
-        <div className="webview-block-steps">
-          <p className="webview-block-steps-heading">
+        <div className="w-full max-w-md pt-4 sm:pt-6 border-t border-[#e5e5e5] text-left">
+          <p className="font-semibold mb-2">
             {wb.instruction || "How to join:"}
           </p>
-          <ol className="webview-block-steps-list">
+          <ol className="list-decimal list-inside text-sm text-[#606060] space-y-1">
             <li>{wb.step1 || "Copy the link above"}</li>
             <li>{wb.step2 || "Open Chrome or Safari"}</li>
             <li>{wb.step3 || "Paste the link and join the call"}</li>

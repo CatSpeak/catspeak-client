@@ -475,6 +475,18 @@ export default {
       step2: "Open Chrome or Safari",
       step3: "Paste the link and join the call",
     },
+    errorBoundary: {
+      title: "Video Call Encountered an Error",
+      defaultDescription:
+        "An unexpected error occurred during the video call session.",
+      reloadPage: "Reload Page",
+      copyLog: "Copy Log",
+      copied: "Copied!",
+      goHome: "Go to Home",
+      technicalDetails: "Technical Details",
+      stackTrace: "Stack Trace:",
+      componentStack: "Component Stack:",
+    },
     inviteParticipant: "Invite participant",
     sendInvite: "Send invite",
     inviteDescription:
