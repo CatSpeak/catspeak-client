@@ -5,7 +5,7 @@ export const config = {
 
 /* global process */
 const BOT_REGEX =
-  /facebookexternalhit|Facebot|Twitterbot|Bytespider|Zalo|TelegramBot|WhatsApp|Viber|Slackbot|Discordbot|LinkedInBot|SkypeUriPreview|Applebot|PinterestBot|ia_archiver/i
+  /facebookexternalhit|Facebot|Twitterbot|Bytespider|ZaloBot|Zalo-OpenAPI|TelegramBot|WhatsApp|Viber|Slackbot|Discordbot|LinkedInBot|SkypeUriPreview|Applebot|PinterestBot|ia_archiver/i
 
 export default async function middleware(req) {
   const userAgent = req.headers.get("user-agent") || ""
