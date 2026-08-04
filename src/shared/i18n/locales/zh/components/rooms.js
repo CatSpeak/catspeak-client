@@ -313,7 +313,7 @@ export default {
     micPermissionDenied: "麦克风访问被拒绝，请在设置中允许。",
     cameraPermissionDenied: "摄像头访问被拒绝，请在设置中允许。",
     webViewWarning: "您正在应用内浏览器（微信/Zalo/FB）中打开。请点击右上角在 Safari 中打开以使用麦克风和摄像头。",
-    iosPermissionTip: "Safari 阻止了麦克风。请点击地址栏的 'aA' 图标 -> 网站设置 -> 允许麦克风。",
+    iosPermissionTip: "麦克风已被浏览器阻止。请在地址栏的网站设置中允许使用麦克风。",
     deviceSettings: "设备设置",
     selectMicrophone: "选择麦克风",
     selectSpeaker: "选择扬声器",

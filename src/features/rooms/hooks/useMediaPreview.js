@@ -3,6 +3,10 @@ import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
 import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
+import {
+  buildAudioConstraint,
+  buildVideoConstraint,
+} from "@/shared/utils/mediaConstraintUtils"
 import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
 import { LocalVideoTrack } from "livekit-client"
 import { ProcessorWrapper } from "@livekit/track-processors"
@@ -108,16 +112,10 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       const constraints = {}
       if (audio) {
         unlockAudioContext()
-        constraints.audio =
-          customAudioId && customAudioId !== "default"
-            ? { deviceId: { exact: customAudioId } }
-            : true
+        constraints.audio = buildAudioConstraint(customAudioId)
       }
       if (video) {
-        constraints.video =
-          customVideoId && customVideoId !== "default"
-            ? { deviceId: { exact: customVideoId } }
-            : true
+        constraints.video = buildVideoConstraint(customVideoId)
       }
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
 

@@ -367,6 +367,14 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         throw new Error("Invalid LiveKit token received from backend")
       }
 
+      console.log("[VideoCallProvider] LiveKit token fetched successfully:", {
+        serverUrl,
+        sessionId,
+        tokenLength: token?.length,
+        micOn,
+        cameraOn,
+      })
+
       // Stop preview tracks before entering the call & give iOS hardware 300ms to release
       cleanupMediaPreview()
       await new Promise((resolve) => setTimeout(resolve, 300))
