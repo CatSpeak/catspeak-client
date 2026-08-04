@@ -207,6 +207,21 @@ export const GlobalVideoCallProvider = ({ children }) => {
       video={callInfo.initCamOn}
       className="contents"
       options={{ publishDefaults: { simulcast: !isMobileDevice } }}
+      onConnected={() => {
+        console.log("[GlobalVideoCallProvider] LiveKitRoom connected successfully!")
+      }}
+      onDisconnected={(reason) => {
+        console.error("[GlobalVideoCallProvider] LiveKitRoom onDisconnected:", reason)
+      }}
+      onError={(err) => {
+        console.error("[GlobalVideoCallProvider] LiveKitRoom onError:", {
+          name: err?.name,
+          message: err?.message,
+          stack: err?.stack,
+          raw: err,
+        })
+        toast.error(`LiveKit connection error: ${err?.message || err?.name || "Unknown"}`, { duration: 8000 })
+      }}
     >
       <GlobalCallContent
         ContextProvider={GlobalVideoCallContext.Provider}
