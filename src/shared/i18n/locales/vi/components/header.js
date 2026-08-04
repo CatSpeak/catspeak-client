@@ -23,6 +23,12 @@ export default {
     china: "Trung Quốc",
     english: "Anh",
   },
+  switchRole: "Chuyển vai trò",
+  studentRole: "Học viên",
+  teacherRole: "Giảng viên",
+  noPermissionTeacher: "Bạn không có quyền chuyển sang vai trò Giảng viên!",
+  switchRoleSuccess: "Chuyển vai trò thành công!",
+  switchRoleFail: "Chuyển vai trò thất bại!",
   logoutWarning: {
     title: "Kết thúc cuộc gọi & Đăng xuất",
     message: "Bạn đang trong một cuộc gọi. Đăng xuất sẽ ngắt kết nối của bạn. Bạn có chắc chắn muốn đăng xuất không?",
