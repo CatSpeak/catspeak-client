@@ -17,10 +17,9 @@ import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call
 import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
 import { IconButton } from "@/shared/components/ui/buttons"
-import toast from "react-hot-toast"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import InviteParticipantModal from "./InviteParticipantModal"
-import { useNavigate } from "react-router-dom"
 
 /**
  * A single row in the participant list.
@@ -28,7 +27,6 @@ import { useNavigate } from "react-router-dom"
  */
 const ParticipantItem = ({ participant }) => {
   const { t } = useLanguage()
-  const navigate = useNavigate()
   const {
     micOn: localMicOn,
     cameraOn: localCameraOn,
@@ -57,7 +55,7 @@ const ParticipantItem = ({ participant }) => {
   const meta = parseMetadata(participant.metadata)
   const accountId = meta.accountId || (isLocal ? user?.accountId : null)
   const isHandRaised = meta.handRaised === true
-  const avatarUrl = meta.avatarImageUrl
+  const avatarUrl = sanitizeAvatarUrl(meta.avatarImageUrl)
 
   const isParticipantHost =
     isCustomRoom(room?.roomType) &&

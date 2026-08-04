@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import {
@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast"
 import Avatar from "@/shared/components/ui/Avatar"
 import { Check } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 
@@ -20,20 +21,45 @@ const AvatarUrlPicker = ({ className = "p-4" }) => {
   const { data: profileData } = useGetUserProfileQuery(undefined, { skip: !isAuthenticated })
   const currentAvatarUrl = profileData?.data?.meetingAvatarUrl || ""
 
-  const [inputUrl, setInputUrl] = useState("")
+  const [inputUrl, setInputUrl] = useState(currentAvatarUrl)
+  const [prevAvatarUrl, setPrevAvatarUrl] = useState(currentAvatarUrl)
+
+  if (currentAvatarUrl !== prevAvatarUrl) {
+    setPrevAvatarUrl(currentAvatarUrl)
+    setInputUrl(currentAvatarUrl)
+  }
+
   const [updateMeetingAvatar, { isLoading }] = useUpdateMeetingAvatarMutation()
 
-  useEffect(() => {
-    if (currentAvatarUrl) setInputUrl(currentAvatarUrl)
-  }, [currentAvatarUrl])
-
   const handleSave = async () => {
+    const trimmed = (inputUrl || "").trim()
+
+    if (trimmed.startsWith("data:")) {
+      toast.error(
+        t?.rooms?.avatarPicker?.invalidUrl || "Base64 data URLs are not allowed. Please enter an http/https image URL."
+      )
+      return
+    }
+
+    if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+      toast.error(
+        t?.rooms?.avatarPicker?.invalidProtocol || "Image URL must start with http:// or https://"
+      )
+      return
+    }
+
     try {
-      await updateMeetingAvatar({ meetingAvatarUrl: inputUrl }).unwrap()
+      await updateMeetingAvatar({ meetingAvatarUrl: trimmed }).unwrap()
+
+      if (localParticipant) {
+        await safeSetLiveKitMetadata(localParticipant, { avatarImageUrl: trimmed })
+      }
+
       toast.success(
         t?.rooms?.avatarPicker?.success || "Avatar updated successfully",
       )
     } catch (err) {
+      console.error("Failed to save meeting avatar", err)
       toast.error(t?.rooms?.avatarPicker?.error || "Failed to update avatar")
     }
   }
