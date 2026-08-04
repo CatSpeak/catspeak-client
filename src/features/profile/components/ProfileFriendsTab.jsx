@@ -11,7 +11,6 @@ import {
   useGetFriendRecommendationsQuery,
   useRespondFriendRequestMutation,
 } from "../../../store/api/social/friendshipApi"
-} from "../../../store/api/social/friendshipApi"
 import { useNavigate, useLocation } from "react-router-dom"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import HorizontalCard from "@/shared/components/ui/HorizontalCard"
@@ -29,7 +28,6 @@ import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 const ProfileFriendsTab = ({
   targetAccountId,
   isOwnProfile,
-  defaultSubTab,
   defaultSubTab,
 }) => {
   const navigate = useNavigate()
