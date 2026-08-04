@@ -191,9 +191,24 @@ const GlobalCallContent = ({
     }
   }, [lkRoom, showRoomSettings, localParticipant])
 
+  const connectionState = useConnectionState()
+  const isConnected = connectionState === ConnectionState.Connected
+
+  // Automatically start WebAudio context if iOS Safari requires audio unlock upon connection
+  useEffect(() => {
+    if (lkRoom && isConnected && lkRoom.canPlayAudio === false) {
+      lkRoom.startAudio().catch((err) => {
+        console.warn("[GlobalCallContent] startAudio warning on connect:", err)
+      })
+    }
+  }, [lkRoom, isConnected])
+
+  // Only perform explicit device switching when room is connected and settings modal is active
   useEffect(() => {
     if (
       lkRoom &&
+      isConnected &&
+      showRoomSettings &&
       deviceSelection?.selectedMic &&
       deviceSelection.selectedMic !== "default" &&
       deviceSelection.selectedMic !== ""
@@ -207,11 +222,13 @@ const GlobalCallContent = ({
           )
         })
     }
-  }, [lkRoom, deviceSelection?.selectedMic])
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedMic])
 
   useEffect(() => {
     if (
       lkRoom &&
+      isConnected &&
+      showRoomSettings &&
       deviceSelection?.selectedSpeaker &&
       deviceSelection.selectedSpeaker !== "default" &&
       deviceSelection.selectedSpeaker !== ""
@@ -225,11 +242,13 @@ const GlobalCallContent = ({
           )
         })
     }
-  }, [lkRoom, deviceSelection?.selectedSpeaker])
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedSpeaker])
 
   useEffect(() => {
     if (
       lkRoom &&
+      isConnected &&
+      showRoomSettings &&
       deviceSelection?.selectedCamera &&
       deviceSelection.selectedCamera !== "default" &&
       deviceSelection.selectedCamera !== ""
@@ -243,10 +262,7 @@ const GlobalCallContent = ({
           )
         })
     }
-  }, [lkRoom, deviceSelection?.selectedCamera])
-
-  const connectionState = useConnectionState()
-  const isConnected = connectionState === ConnectionState.Connected
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedCamera])
 
   // ── Synchronized Recording States ──
   const sessionId =
