@@ -331,8 +331,8 @@ const DesktopSidebar = () => {
                 <span className="truncate text-lg">
                   {isSettingsPage
                     ? t.nav?.settings || "Settings"
-                    : currentSectionData?.defaultLabel ||
-                    t.nav?.[activeDockSection] ||
+                    : t.nav?.[currentSectionData?.labelKey || activeDockSection] ||
+                    currentSectionData?.defaultLabel ||
                     "Navigation"}
                 </span>
               </ListItem>
@@ -396,9 +396,6 @@ const DesktopSidebar = () => {
                             "teachingTasks",
                           ]
                           if (teacherTabs.includes(item.key) && isStudent)
-                            return false
-
-                          if (item.key === "myLearning" && isTeacher)
                             return false
 
                           return true
