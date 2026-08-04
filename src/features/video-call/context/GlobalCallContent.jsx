@@ -504,6 +504,7 @@ const GlobalCallContent = ({
     enterPiP: actions.enterPiP,
     exitPiP: actions.exitPiP,
     returnToCall: actions.returnToCall,
+    isPiPSupported: actions.isPiPSupported,
     showLeaveModal,
     promptLeaveCall,
     cancelLeaveCall,
