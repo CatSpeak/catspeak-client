@@ -44,22 +44,15 @@ const DocumentPiPWindow = ({ children }) => {
           return
         }
 
-        // Copy styles from main document to PiP document
-        const styles = Array.from(document.styleSheets)
-        styles.forEach((styleSheet) => {
+        // Copy styles from main document to PiP document using cloneNode
+        const styleElements = document.querySelectorAll(
+          'link[rel="stylesheet"], style',
+        )
+        styleElements.forEach((el) => {
           try {
-            if (styleSheet.href) {
-              const link = document.createElement("link")
-              link.rel = "stylesheet"
-              link.href = styleSheet.href
-              newPipWindow.document.head.appendChild(link)
-            } else if (styleSheet.ownerNode) {
-              const style = document.createElement("style")
-              style.textContent = styleSheet.ownerNode.textContent
-              newPipWindow.document.head.appendChild(style)
-            }
+            newPipWindow.document.head.appendChild(el.cloneNode(true))
           } catch (e) {
-            console.warn("Failed to copy stylesheet:", e)
+            console.warn("Failed to copy style element to PiP window:", e)
           }
         })
 

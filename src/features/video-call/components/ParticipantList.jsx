@@ -21,6 +21,7 @@ import toast from "react-hot-toast"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import InviteParticipantModal from "./InviteParticipantModal"
 import { useNavigate } from "react-router-dom"
+import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 /**
  * A single row in the participant list.
@@ -28,7 +29,13 @@ import { useNavigate } from "react-router-dom"
  */
 const ParticipantItem = ({ participant }) => {
   const { t } = useLanguage()
-  const navigate = useNavigate()
+  let navigate
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    navigate = useNavigate()
+  } catch {
+    navigate = getNavigate()
+  }
   const {
     micOn: localMicOn,
     cameraOn: localCameraOn,
