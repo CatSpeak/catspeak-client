@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useCallback } from "react"
-import { useNavigate, useParams, Outlet } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
+import React, { useState, useMemo, useCallback } from "react";
+import { useNavigate, useParams, Outlet } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { AnimatePresence } from "framer-motion";
+import { FluentAnimation } from "@/shared/components/ui/animations";
 import {
   Crown,
   Bookmark,
@@ -10,81 +10,81 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   DoorOpen,
-} from "lucide-react"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
-import PageTitle from "@/shared/components/ui/PageTitle"
-import SearchInput from "@/shared/components/ui/inputs/SearchInput"
-import { PlanRequiredState } from "@/shared/components/ui/indicators"
-import { toast } from "react-hot-toast"
+} from "lucide-react";
+import Tabs from "@/shared/components/ui/navigation/Tabs";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
+// import PageTitle from "@/shared/components/ui/PageTitle";
+import SearchInput from "@/shared/components/ui/inputs/SearchInput";
+// import { PlanRequiredState } from "@/shared/components/ui/indicators";
+import { toast } from "react-hot-toast";
 import {
   useGetMyCustomRoomsQuery,
   useDeleteCustomRoomMutation,
-} from "@/store/api/roomsApi"
-import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
-import CreateRoomModal from "../components/CreateRoomModal"
-import EditRoomModal from "../components/EditRoomModal"
-import CustomRoomCard from "../components/CustomRoomCard"
-import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal"
-import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal"
+} from "@/store/api/roomsApi";
+// import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
+import CreateRoomModal from "../components/CreateRoomModal";
+import EditRoomModal from "../components/EditRoomModal";
+import CustomRoomCard from "../components/CustomRoomCard";
+import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
+import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
 
 const getLanguageName = (langCode) => {
   switch (langCode) {
     case "zh":
-      return "Chinese"
+      return "Chinese";
     case "vi":
-      return "Vietnamese"
+      return "Vietnamese";
     case "en":
-      return "English"
+      return "English";
     default:
-      return "English"
+      return "English";
   }
-}
+};
 
 const WorkspaceRoomsContent = () => {
-  const { t } = useLanguage()
-  const { lang, id } = useParams()
-  const navigate = useNavigate()
-  const ct = t.rooms?.customRooms || {}
-  const { limits, isLoading: isPlanLoading } = usePlanFeatures()
+  const { t } = useLanguage();
+  const { lang, id } = useParams();
+  const navigate = useNavigate();
+  const ct = t.rooms?.customRooms || {};
+  // const { limits, isLoading: isPlanLoading } = usePlanFeatures();
 
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
 
   // Tab State
-  const [activeTab, setActiveTab] = useState("created")
+  const [activeTab, setActiveTab] = useState("created");
 
   // API Hooks
-  const { data: customRoomsData, isLoading } = useGetMyCustomRoomsQuery()
+  const { data: customRoomsData, isLoading } = useGetMyCustomRoomsQuery();
   const [deleteCustomRoom, { isLoading: isDeleting }] =
-    useDeleteCustomRoomMutation()
+    useDeleteCustomRoomMutation();
 
   const rawCustomRooms = useMemo(
     () => customRoomsData?.customRooms || [],
-    [customRoomsData]
-  )
+    [customRoomsData],
+  );
   const quota = {
     used: customRoomsData?.currentCustomRoomsCount ?? 0,
     max: customRoomsData?.maxCustomRooms ?? 3,
-  }
-  const isQuotaFull = customRoomsData?.canCreateCustomRoom === false
+  };
+  const isQuotaFull = customRoomsData?.canCreateCustomRoom === false;
 
   // Temporary bookmarked rooms data source (same API for now as requested)
-  const rawBookmarkedRooms = useMemo(() => [], [])
+  const rawBookmarkedRooms = useMemo(() => [], []);
 
   // Modals & Card Interaction States
-  const [copiedId, setCopiedId] = useState(null)
-  const [editingRoom, setEditingRoom] = useState(null)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isSortOpen, setIsSortOpen] = useState(false)
+  const [copiedId, setCopiedId] = useState(null);
+  const [editingRoom, setEditingRoom] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
 
   // Search, Filter & Sort States
-  const [searchInputValue, setSearchInputValue] = useState("")
-  const [appliedSearch, setAppliedSearch] = useState("")
-  const [appliedLevels, setAppliedLevels] = useState([])
-  const [appliedTopics, setAppliedTopics] = useState([])
-  const [appliedSortField, setAppliedSortField] = useState("createdAt")
-  const [appliedSortOrder, setAppliedSortOrder] = useState("desc")
+  const [searchInputValue, setSearchInputValue] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [appliedLevels, setAppliedLevels] = useState([]);
+  const [appliedTopics, setAppliedTopics] = useState([]);
+  const [appliedSortField, setAppliedSortField] = useState("createdAt");
+  const [appliedSortOrder, setAppliedSortOrder] = useState("desc");
 
   // Tab definition
   const tabs = useMemo(
@@ -100,92 +100,93 @@ const WorkspaceRoomsContent = () => {
         icon: Bookmark,
       },
     ],
-    [t]
-  )
+    [t],
+  );
 
   // Handle Search trigger
   const handleSearch = useCallback(() => {
-    setAppliedSearch(searchInputValue)
-  }, [searchInputValue])
+    setAppliedSearch(searchInputValue);
+  }, [searchInputValue]);
 
   // Handle Search Input Change with instant reset if cleared
   const handleSearchInputChange = useCallback((val) => {
-    setSearchInputValue(val)
+    setSearchInputValue(val);
     if (val === "") {
-      setAppliedSearch("")
+      setAppliedSearch("");
     }
-  }, [])
+  }, []);
 
   // Action handlers
   const handleCopyLink = useCallback(
     (roomId) => {
-      const link = `${window.location.origin}/${supportedLangCode}/meet/${roomId}`
-      navigator.clipboard.writeText(link)
-      setCopiedId(roomId)
-      toast.success(ct.linkCopied || "Link copied!")
-      setTimeout(() => setCopiedId(null), 2000)
+      const link = `${window.location.origin}/${supportedLangCode}/meet/${roomId}`;
+      navigator.clipboard.writeText(link);
+      setCopiedId(roomId);
+      toast.success(ct.linkCopied || "Link copied!");
+      setTimeout(() => setCopiedId(null), 2000);
     },
-    [supportedLangCode, ct.linkCopied]
-  )
+    [supportedLangCode, ct.linkCopied],
+  );
 
   const handleJoinRoom = useCallback(
     (roomId) => {
-      navigate(`/${supportedLangCode}/meet/${roomId}`)
+      navigate(`/${supportedLangCode}/meet/${roomId}`);
     },
-    [navigate, supportedLangCode]
-  )
+    [navigate, supportedLangCode],
+  );
 
   const handleEditRoom = useCallback((room) => {
-    setEditingRoom(room)
-  }, [])
+    setEditingRoom(room);
+  }, []);
 
   const handleDelete = useCallback(
     async (roomId) => {
       try {
-        await deleteCustomRoom(roomId).unwrap()
-        toast.success(ct.deleteSuccess || "Đã xóa phòng thành công")
+        await deleteCustomRoom(roomId).unwrap();
+        toast.success(ct.deleteSuccess || "Đã xóa phòng thành công");
       } catch (err) {
-        console.error("Failed to delete custom room:", err)
-        toast.error(err?.data?.message || "Failed to delete room")
+        console.error("Failed to delete custom room:", err);
+        toast.error(err?.data?.message || "Failed to delete room");
       }
     },
-    [deleteCustomRoom, ct.deleteSuccess]
-  )
+    [deleteCustomRoom, ct.deleteSuccess],
+  );
 
   // Filter & Sort Application
   const handleApplyFilter = useCallback((levels, topics) => {
-    setAppliedLevels(levels)
-    setAppliedTopics(topics)
-  }, [])
+    setAppliedLevels(levels);
+    setAppliedTopics(topics);
+  }, []);
 
   const handleApplySort = useCallback((field, order) => {
-    setAppliedSortField(field)
-    setAppliedSortOrder(order)
-  }, [])
+    setAppliedSortField(field);
+    setAppliedSortOrder(order);
+  }, []);
 
-  const activeFilterCount = appliedLevels.length + appliedTopics.length
+  const activeFilterCount = appliedLevels.length + appliedTopics.length;
 
   // Target rooms array according to active tab
-  const rawTargetRooms = activeTab === "created" ? rawCustomRooms : rawBookmarkedRooms
+  const rawTargetRooms =
+    activeTab === "created" ? rawCustomRooms : rawBookmarkedRooms;
 
   // Client-side filtering & sorting
   const filteredAndSortedRooms = useMemo(() => {
-    let list = [...rawTargetRooms]
+    let list = [...rawTargetRooms];
 
     // 1. Approximate case-insensitive search by room name
     if (appliedSearch.trim()) {
-      const query = appliedSearch.trim().toLowerCase()
+      const query = appliedSearch.trim().toLowerCase();
       list = list.filter((room) =>
-        (room.name || "").toLowerCase().includes(query)
-      )
+        (room.name || "").toLowerCase().includes(query),
+      );
     }
 
     // 2. Filter by Level
     if (appliedLevels.length > 0) {
       list = list.filter(
         (room) =>
-          room.requiredLevel && appliedLevels.includes(room.requiredLevel)
-      )
+          room.requiredLevel && appliedLevels.includes(room.requiredLevel),
+      );
     }
 
     // 3. Filter by Topic
@@ -195,39 +196,39 @@ const WorkspaceRoomsContent = () => {
           ? room.topics
           : room.topic
             ? [room.topic]
-            : []
-        return topicsList.some((tp) => appliedTopics.includes(tp))
-      })
+            : [];
+        return topicsList.some((tp) => appliedTopics.includes(tp));
+      });
     }
 
     // 4. Sort by selected column attribute
     if (appliedSortField) {
       list.sort((a, b) => {
-        let valA = a[appliedSortField]
-        let valB = b[appliedSortField]
+        let valA = a[appliedSortField];
+        let valB = b[appliedSortField];
 
         if (appliedSortField === "name") {
-          valA = (valA || "").toLowerCase()
-          valB = (valB || "").toLowerCase()
-          const cmp = valA.localeCompare(valB)
-          return appliedSortOrder === "asc" ? cmp : -cmp
+          valA = (valA || "").toLowerCase();
+          valB = (valB || "").toLowerCase();
+          const cmp = valA.localeCompare(valB);
+          return appliedSortOrder === "asc" ? cmp : -cmp;
         }
 
         if (appliedSortField === "createdAt") {
-          valA = valA ? new Date(valA).getTime() : 0
-          valB = valB ? new Date(valB).getTime() : 0
+          valA = valA ? new Date(valA).getTime() : 0;
+          valB = valB ? new Date(valB).getTime() : 0;
         } else {
-          valA = Number(valA) || 0
-          valB = Number(valB) || 0
+          valA = Number(valA) || 0;
+          valB = Number(valB) || 0;
         }
 
-        if (valA < valB) return appliedSortOrder === "asc" ? -1 : 1
-        if (valA > valB) return appliedSortOrder === "asc" ? 1 : -1
-        return 0
-      })
+        if (valA < valB) return appliedSortOrder === "asc" ? -1 : 1;
+        if (valA > valB) return appliedSortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
     }
 
-    return list
+    return list;
   }, [
     rawTargetRooms,
     appliedSearch,
@@ -235,18 +236,18 @@ const WorkspaceRoomsContent = () => {
     appliedTopics,
     appliedSortField,
     appliedSortOrder,
-  ])
+  ]);
 
-  if (!isPlanLoading && !limits.allowCustomRooms) {
-    return (
-      <PlanRequiredState
-        pageTitle={ct.myRoomsTitle || "My Custom Rooms"}
-        subtext="Custom rooms allow you to create persistent, customizable rooms for your community. Upgrade to CatSpeak Pro to unlock custom rooms!"
-        featureName="Custom Rooms"
-        animationKey="custom-rooms-pro-required"
-      />
-    )
-  }
+  // if (!isPlanLoading && !limits.allowCustomRooms) {
+  //   return (
+  //     <PlanRequiredState
+  //       pageTitle={ct.myRoomsTitle || "My Custom Rooms"}
+  //       subtext="Custom rooms allow you to create persistent, customizable rooms for your community. Upgrade to CatSpeak Pro to unlock custom rooms!"
+  //       featureName="Custom Rooms"
+  //       animationKey="custom-rooms-pro-required"
+  //     />
+  //   )
+  // }
 
   return (
     <div className="flex flex-col gap-5 text-gray-800">
@@ -396,7 +397,8 @@ const WorkspaceRoomsContent = () => {
                     ? t.rooms?.noSearchResults || "Không tìm thấy phòng phù hợp"
                     : activeTab === "created"
                       ? ct.noRooms || "Bạn chưa tạo phòng tùy chỉnh nào"
-                      : t.rooms?.noBookmarkedRooms || "Chưa có phòng nào được lưu"}
+                      : t.rooms?.noBookmarkedRooms ||
+                        "Chưa có phòng nào được lưu"}
                 </h3>
 
                 <p className="text-sm text-gray-400 mb-4 text-center max-w-sm">
@@ -443,8 +445,8 @@ const WorkspaceRoomsContent = () => {
         </AnimatePresence>
       )}
     </div>
-  )
-}
+  );
+};
 
 const RoomsListSkeleton = () => (
   <div className="flex flex-col gap-4 w-full">
@@ -467,10 +469,10 @@ const RoomsListSkeleton = () => (
       </div>
     ))}
   </div>
-)
+);
 
 const WorkspaceRoomsPage = () => {
-  return <WorkspaceRoomsContent />
-}
+  return <WorkspaceRoomsContent />;
+};
 
-export default WorkspaceRoomsPage
+export default WorkspaceRoomsPage;
