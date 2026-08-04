@@ -18,7 +18,6 @@ export const useRoleOverride = () => {
   } = useGetUserProfileQuery()
 
   const profile = profileResponse?.data ?? profileResponse
-  const accountType = user?.accountType
   const isRoleResolved = !!user
 
   // isTeacherProfile determines if the account has teacher privileges

@@ -196,6 +196,14 @@ const routesConfig = [
             ),
           },
           {
+            path: "explore-courses/details/:id",
+            element: (
+              <LazyRoute>
+                <StudentCourseDetailPage />
+              </LazyRoute>
+            ),
+          },
+          {
             path: "resources",
             element: (
               <AuthGuard>
@@ -378,6 +386,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <ExploreCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/details/:id",
+                element: (
+                  <LazyRoute>
+                    <StudentCourseDetailPage />
                   </LazyRoute>
                 ),
               },

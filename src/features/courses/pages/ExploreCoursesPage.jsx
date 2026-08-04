@@ -113,12 +113,16 @@ const ExploreCoursesPage = () => {
 
   const handleOpenCourseDetail = (course) => {
     if (!course?.id) return
-    navigate(`/workspace/learning/details/${encodeURIComponent(String(course.id))}`)
+    const courseId = encodeURIComponent(String(course.id))
+    const isWorkspace = window.location.pathname.startsWith("/workspace")
+    if (isWorkspace) {
+      navigate(`/workspace/explore-courses/details/${courseId}`)
+    } else {
+      navigate(`/explore-courses/details/${courseId}`)
+    }
   }
 
-  const handleOpenClassDetail = (_cls) => {
-    // BE is updating the API to return public class data for non-enrolled students.
-    // Temporarily disabled navigation until backend API update is ready.
+  const handleOpenClassDetail = () => {
     toast.info("Chi tiết lớp học sẽ sớm được cập nhật!")
   }
 
@@ -136,7 +140,10 @@ const ExploreCoursesPage = () => {
       {/* ─── Breadcrumbs ─── */}
       <Breadcrumb
         items={[
-          { label: dict.home || "Home", onClick: () => navigate("/explore-courses") },
+          {
+            label: dict.home || "Home",
+            onClick: () => navigate(window.location.pathname.startsWith("/workspace") ? "/workspace/explore-courses" : "/explore-courses")
+          },
           { label: dict.exploreCourses || "Explore Courses" },
         ]}
       />

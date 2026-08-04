@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import React, { useRef, useState, useContext } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -8,7 +8,10 @@ import {
 } from "@/store/api/coursesApi"
 import StudentJoinModal from "../student/components/StudentJoinModal"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useAuth } from "@/features/auth"
+import AuthModalContext from "@/shared/context/AuthModalContext"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   formatCurrencyVND,
   formatDateDayMonth,
@@ -26,9 +29,15 @@ const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { isAuthenticated } = useAuth()
+  const authModalCtx = useContext(AuthModalContext)
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
+
+  const isExploreRoute = window.location.pathname.includes("/explore-courses")
+  const isWorkspace = window.location.pathname.startsWith("/workspace")
+  const exploreHomePath = isWorkspace ? "/workspace/explore-courses" : "/explore-courses"
 
   // Fetch course details
   const {
@@ -82,6 +91,14 @@ const StudentCourseDetailPage = () => {
   }
 
   const handleOpenEnroll = (course, cls) => {
+    if (!isAuthenticated) {
+      if (authModalCtx?.openAuthModal) {
+        authModalCtx.openAuthModal("login", window.location.pathname)
+      } else {
+        toast.error(c.student?.loginRequiredTitle || "Please log in to enroll in a class.")
+      }
+      return
+    }
     if (isOwner) {
       toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
       return
@@ -196,7 +213,7 @@ const StudentCourseDetailPage = () => {
   const teacherAvatarUrl = getSafeMediaUrl(teacher.avatarImageUrl)
 
   return (
-    <div className="flex flex-col gap-8 text-[#2e2e2e] bg-gray-50/30 -mx-4 sm:-mx-6 px-4 sm:px-6">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] p-4 sm:p-6">
       {isFetching && (
         <span className="sr-only" role="status">
           {scd.refreshing || "Refreshing course details"}
@@ -204,13 +221,21 @@ const StudentCourseDetailPage = () => {
       )}
 
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-semibold flex flex-wrap items-center gap-1.5">
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Home"}</button>
-        <span>/</span>
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle || "My Learning"}</button>
-        <span>/</span>
-        <span className="text-[#990011] font-bold">{rawCourse.title}</span>
-      </div>
+      <Breadcrumb
+        items={[
+          {
+            label: t.nav?.home || "Home",
+            onClick: () => navigate(isExploreRoute ? exploreHomePath : "/workspace"),
+          },
+          {
+            label: isExploreRoute ? (t.nav?.exploreCourses || "Explore Courses") : (c.student?.dashboardTitle || "My Learning"),
+            onClick: () => navigate(isExploreRoute ? exploreHomePath : "/workspace/learning"),
+          },
+          {
+            label: rawCourse.title,
+          },
+        ]}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
         <div className="lg:col-span-2 flex flex-col gap-4">

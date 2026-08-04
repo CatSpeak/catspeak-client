@@ -548,7 +548,6 @@ const CreateClassPage = () => {
       setErrors(newErrors)
       if (newErrors.className) toast.error(cc.toastEnterClassName || "Please enter class name!")
       else if (newErrors.selectedLanguage) toast.error(cc.toastSelectLanguage || "Please select a language!")
-      else if (newErrors.selectedLanguage) toast.error(cc.toastSelectLanguage || "Please select a language!")
       else if (newErrors.level) toast.error(cc.toastSelectLevel || "Please select a level!")
       else if (newErrors.admissionStart || newErrors.admissionEnd || newErrors.startDate) toast.error(cc.toastAdmissionAndStart || "Please enter admission period and start date!")
       else if (newErrors.sessions) toast.error(cc.toastEnterSessions || "Please enter valid number of sessions!")
