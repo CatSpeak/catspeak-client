@@ -27,9 +27,11 @@ export const useGameSignaling = (handlers = {}) => {
     const newConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => store.getState().auth.token,
+        transport:
+          HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling,
       })
       .withAutomaticReconnect()
-      .configureLogging(LogLevel.Warning)
+      .configureLogging(LogLevel.None)
       .build()
 
     connectionRef.current = newConnection
