@@ -345,6 +345,10 @@ export default {
       "Microphone access denied. Please allow it in settings.",
     cameraPermissionDenied:
       "Camera access denied. Please allow it in settings.",
+    webViewWarning:
+      "You are in an in-app browser (Zalo/Facebook/Messenger). Tap '...' and select 'Open in Safari' to use your microphone and camera.",
+    iosPermissionTip:
+      "Safari blocked the microphone. Tap the 'aA' icon in the address bar -> Website Settings -> Allow Microphone.",
     deviceSettings: "Device Settings",
     selectMicrophone: "Select Microphone",
     selectSpeaker: "Select Speaker",

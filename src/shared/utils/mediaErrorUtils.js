@@ -1,4 +1,5 @@
 import toast from "react-hot-toast"
+import { detectWebView, isIOS } from "@/shared/utils/isWebView"
 
 /**
  * Centrally handle media capture errors (camera/mic).
@@ -14,14 +15,25 @@ import toast from "react-hot-toast"
 export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
   console.error(`Media error (${device}):`, err)
 
+  const webview = detectWebView()
+  if (webview.isWebView) {
+    const wvMsg = t?.rooms?.waitingScreen?.webViewWarning ??
+      "You are in an in-app browser. Please open in Safari for microphone and camera access."
+    toast.error(wvMsg, { duration: 8000 })
+    return wvMsg
+  }
+
   let type = "unknown"
-  switch (err.name) {
+  switch (err?.name) {
     case "NotAllowedError":
     case "PermissionDeniedError":
       type = "permission"
       break
     case "NotReadableError":
     case "TrackStartError":
+    case "AbortError":
+    case "OperationError":
+    case "InvalidStateError":
       type = "notReadable"
       break
     case "NotFoundError":
@@ -37,9 +49,16 @@ export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
 
   switch (type) {
     case "permission":
-      message = isMic
-        ? t.rooms.waitingScreen.micPermissionDenied
-        : t.rooms.waitingScreen.cameraPermissionDenied
+      if (isIOS()) {
+        message = t?.rooms?.waitingScreen?.iosPermissionTip ??
+          (isMic
+            ? t.rooms.waitingScreen.micPermissionDenied
+            : t.rooms.waitingScreen.cameraPermissionDenied)
+      } else {
+        message = isMic
+          ? t.rooms.waitingScreen.micPermissionDenied
+          : t.rooms.waitingScreen.cameraPermissionDenied
+      }
       break
     case "notReadable":
       message = isMic
@@ -63,6 +82,6 @@ export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
       }
   }
 
-  toast.error(message)
+  toast.error(message, { duration: 6000 })
   return message
 }

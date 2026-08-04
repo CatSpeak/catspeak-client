@@ -18,6 +18,8 @@ import EditNicknameModal from "./EditNicknameModal"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 
 import DeviceSettingsModal from "./DeviceSettingsModal"
+import { detectWebView } from "@/shared/utils/isWebView"
+import { AlertTriangle } from "lucide-react"
 
 const WaitingScreen = ({
   session,
@@ -47,6 +49,8 @@ const WaitingScreen = ({
 
   const [isEditingName, setIsEditingName] = useState(false)
 
+  const webview = detectWebView()
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(getShareUrlWithVersion(window.location.href))
     toast.success(t?.rooms?.waitingScreen?.linkCopied || "Link copied!")
@@ -60,6 +64,18 @@ const WaitingScreen = ({
       maxWidthClass="max-w-[85vw]"
       cardClassName="rounded-[12px] h-auto min-w-fit"
     >
+      {webview.isWebView && (
+        <div className="mb-4 w-full rounded-lg bg-amber-500/15 border border-amber-500/30 p-3 text-amber-200 text-sm flex items-start gap-2.5 shadow-sm">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-amber-300">
+              {t?.rooms?.waitingScreen?.webViewWarning ??
+                "You are in an in-app browser. Please tap '...' and select 'Open in Safari' to use your microphone and camera."}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row items-center w-full">
         {/* Video Preview & Participants */}
         <div className="flex w-full lg:w-3/5 flex-col items-center gap-4">
