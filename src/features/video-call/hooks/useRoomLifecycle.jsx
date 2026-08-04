@@ -163,7 +163,8 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   useEffect(() => {
     if (!lkRoom) return;
 
-    const handleDisconnected = () => {
+    const handleDisconnected = (reason) => {
+      console.error("[useRoomLifecycle] LiveKit room disconnected with reason:", reason);
       dispatch(leaveCall());
       const navigateFn = getNavigate();
       const locationObj = getLocation();
@@ -173,6 +174,8 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
           toast.error(
             t?.rooms?.callEnded?.expiredToast ?? "The session has ended",
           );
+        } else if (reason) {
+          toast.error(`Disconnected from call (${reason})`, { duration: 5000 });
         }
       }
     };

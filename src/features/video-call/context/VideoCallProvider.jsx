@@ -21,6 +21,7 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { enterCall, setPiP, leaveCall, enterBreakout } from "@/store/slices/videoCallSlice"
 import { detectWebView } from "@/shared/utils/isWebView"
+import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import {
   pingActiveCall,
@@ -307,6 +308,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     confirmedSwitch = false,
     isAutoJoin = false,
   } = {}) => {
+    // Synchronously unlock WebAudio AudioContext on user gesture for iOS Safari
+    unlockAudioContext()
+
     // If we are already in a call (local or in another tab), show switch modal
     if (!confirmedSwitch) {
       const activeRemoteCall = await pingActiveCall()
@@ -363,8 +367,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         throw new Error("Invalid LiveKit token received from backend")
       }
 
-      // Stop preview tracks before entering the call
+      // Stop preview tracks before entering the call & give iOS hardware 300ms to release
       cleanupMediaPreview()
+      await new Promise((resolve) => setTimeout(resolve, 300))
 
       setInitMicOn(micOn)
       setInitCamOn(cameraOn)

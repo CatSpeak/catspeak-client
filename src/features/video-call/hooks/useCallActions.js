@@ -50,6 +50,12 @@ export const useCallActions = ({
     try {
       await toggleAudioFn();
     } catch (err) {
+      console.error("[useCallActions] Mic toggle failed with error:", {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        raw: err,
+      });
       handleMediaError(err, "mic", t, { isToggle: true });
     }
   }, [toggleAudioFn, t]);
@@ -58,6 +64,12 @@ export const useCallActions = ({
     try {
       await toggleVideoFn();
     } catch (err) {
+      console.error("[useCallActions] Camera toggle failed with error:", {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        raw: err,
+      });
       handleMediaError(err, "camera", t, { isToggle: true });
     }
   }, [toggleVideoFn, t]);

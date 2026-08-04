@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
+import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
 import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
 import { LocalVideoTrack } from "livekit-client"
 import { ProcessorWrapper } from "@livekit/track-processors"
@@ -106,44 +107,19 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     try {
       const constraints = {}
       if (audio) {
-        constraints.audio = customAudioId
-          ? { deviceId: { exact: customAudioId } }
-          : true
+        unlockAudioContext()
+        constraints.audio =
+          customAudioId && customAudioId !== "default"
+            ? { deviceId: { exact: customAudioId } }
+            : true
       }
       if (video) {
-        constraints.video = customVideoId
-          ? { deviceId: { exact: customVideoId } }
-          : true
+        constraints.video =
+          customVideoId && customVideoId !== "default"
+            ? { deviceId: { exact: customVideoId } }
+            : true
       }
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
-
-      // When another app (e.g. Google Meet) holds exclusive mic access,
-      // getUserMedia succeeds but the audio track's `muted` property is true
-      // — meaning no audio data is flowing from the hardware.
-      if (audio && device === "mic") {
-        const audioTrack = stream.getAudioTracks()[0]
-        if (audioTrack?.muted) {
-          const unmuted = await new Promise((resolve) => {
-            const onUnmute = () => resolve(true)
-            audioTrack.addEventListener("unmute", onUnmute, { once: true })
-            setTimeout(() => {
-              audioTrack.removeEventListener("unmute", onUnmute)
-              resolve(false)
-            }, 2000)
-          })
-          if (!unmuted) {
-            console.warn(
-              "[useMediaPreview] 🔇 Mic track is muted — another app likely holds exclusive access",
-            )
-            stream.getTracks().forEach((t) => t.stop())
-            toast.error(
-              t.rooms?.waitingScreen?.micInUse ??
-                "Microphone is in use by another app.",
-            )
-            return null
-          }
-        }
-      }
 
       // Apply beauty + virtual background to video track (via CombinedVideoTransformer)
       if (video && ProcessorWrapper.isSupported) {
