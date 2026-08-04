@@ -7,6 +7,7 @@ import {
 import { ConnectionState } from "livekit-client"
 import toast from "react-hot-toast"
 import { useCombinedProcessor } from "@/features/video-call/processors/useCombinedProcessor"
+import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
 
 /**
  * Handles local mic/cam state + toggle actions using LiveKit.
@@ -32,11 +33,19 @@ export const useVideoCall = (t) => {
     if (isTogglingMic) return
     setIsTogglingMic(true)
 
+    console.log("[useVideoCall] Toggling mic from", isMicrophoneEnabled, "to", !isMicrophoneEnabled)
     try {
+      unlockAudioContext()
       if (room?.startAudio) {
-        await room.startAudio().catch(() => {})
+        await room.startAudio().catch((err) =>
+          console.warn("[useVideoCall] startAudio warning:", err),
+        )
       }
       await room.localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)
+      console.log("[useVideoCall] Mic toggle success")
+    } catch (err) {
+      console.error("[useVideoCall] Mic toggle failed:", err?.name, err?.message, err)
+      throw err
     } finally {
       setIsTogglingMic(false)
     }
@@ -47,11 +56,19 @@ export const useVideoCall = (t) => {
     if (isTogglingCam) return
     setIsTogglingCam(true)
 
+    console.log("[useVideoCall] Toggling cam from", isCameraEnabled, "to", !isCameraEnabled)
     try {
+      unlockAudioContext()
       if (room?.startAudio) {
-        await room.startAudio().catch(() => {})
+        await room.startAudio().catch((err) =>
+          console.warn("[useVideoCall] startAudio warning:", err),
+        )
       }
       await room.localParticipant.setCameraEnabled(!isCameraEnabled)
+      console.log("[useVideoCall] Cam toggle success")
+    } catch (err) {
+      console.error("[useVideoCall] Cam toggle failed:", err?.name, err?.message, err)
+      throw err
     } finally {
       setIsTogglingCam(false)
     }

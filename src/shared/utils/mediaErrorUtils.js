@@ -13,7 +13,12 @@ import { detectWebView, isIOS } from "@/shared/utils/isWebView"
  * @returns {string} The localized error message
  */
 export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
-  console.error(`Media error (${device}):`, err)
+  console.error(`Media error (${device}):`, {
+    name: err?.name,
+    message: err?.message,
+    stack: err?.stack,
+    err,
+  })
 
   const webview = detectWebView()
   if (webview.isWebView) {
@@ -24,24 +29,33 @@ export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
   }
 
   let type = "unknown"
-  switch (err?.name) {
-    case "NotAllowedError":
-    case "PermissionDeniedError":
-      type = "permission"
-      break
-    case "NotReadableError":
-    case "TrackStartError":
-    case "AbortError":
-    case "OperationError":
-    case "InvalidStateError":
-      type = "notReadable"
-      break
-    case "NotFoundError":
-    case "DevicesNotFoundError":
-      type = "notFound"
-      break
-    default:
-      type = "unknown"
+  const errName = err?.name || ""
+  const errMsg = (err?.message || "").toLowerCase()
+
+  if (
+    errName === "NotAllowedError" ||
+    errName === "PermissionDeniedError" ||
+    errMsg.includes("permission") ||
+    errMsg.includes("denied") ||
+    errMsg.includes("not allowed")
+  ) {
+    type = "permission"
+  } else if (
+    errName === "NotReadableError" ||
+    errName === "TrackStartError" ||
+    errName === "AbortError" ||
+    errName === "OperationError" ||
+    errName === "InvalidStateError" ||
+    errMsg.includes("readable") ||
+    errMsg.includes("in use")
+  ) {
+    type = "notReadable"
+  } else if (
+    errName === "NotFoundError" ||
+    errName === "DevicesNotFoundError" ||
+    errMsg.includes("not found")
+  ) {
+    type = "notFound"
   }
 
   const isMic = device === "mic"
@@ -80,6 +94,11 @@ export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
           ? t.rooms.waitingScreen.micAccessError
           : t.rooms.waitingScreen.cameraAccessError
       }
+  }
+
+  // Append error name if available so mobile QA/testers can easily report/screenshot the exact error
+  if (err?.name) {
+    message = `${message} (${err.name})`
   }
 
   toast.error(message, { duration: 6000 })

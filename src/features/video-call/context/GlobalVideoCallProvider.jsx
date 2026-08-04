@@ -185,6 +185,10 @@ export const GlobalVideoCallProvider = ({ children }) => {
     )
   }
 
+  const isMobileDevice =
+    typeof window !== "undefined" &&
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
   return (
     <LiveKitRoom
       key={callInfo?.sessionId}
@@ -194,7 +198,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
       audio={callInfo.initMicOn}
       video={callInfo.initCamOn}
       className="contents"
-      options={{ publishDefaults: { simulcast: true } }}
+      options={{ publishDefaults: { simulcast: !isMobileDevice } }}
     >
       <GlobalCallContent
         ContextProvider={GlobalVideoCallContext.Provider}
