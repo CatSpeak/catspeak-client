@@ -74,7 +74,8 @@ export default {
     accountInfo: "Thông tin tài khoản",
     systemConfig: "Thiết lập hệ thống",
     emailNotifyTitle: "Nhận email thông báo & tin tức từ CatSpeak",
-    emailNotifyDesc: "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
+    emailNotifyDesc:
+      "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
     websites: "Trang web",
     test: "Test trình độ tiếng Anh",
     platform: "Nền tảng học tổng hợp",
@@ -155,11 +156,11 @@ export default {
   notifications: {
     new_post: {
       title: "Bài viết mới từ CatSpeak",
-      body: "Có bài viết mới: \"{postTitle}\"",
+      body: 'Có bài viết mới: "{postTitle}"',
     },
     new_challenge: {
       title: "Thử thách mới!",
-      body: "Thử thách mới: \"{challengeTitle}\" đang chờ bạn!",
+      body: 'Thử thách mới: "{challengeTitle}" đang chờ bạn!',
     },
   },
 };
