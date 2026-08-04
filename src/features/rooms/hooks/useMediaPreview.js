@@ -174,6 +174,12 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
 
       return stream
     } catch (err) {
+      console.error("[useMediaPreview] getMediaStream error:", {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        err,
+      })
       handleMediaError(err, device === "mic" ? "mic" : "camera", t)
       return null
     }
@@ -181,6 +187,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
 
   // Toggle mic
   const toggleMic = async () => {
+    console.log("[useMediaPreview] Toggling mic...")
     let audioTracks = streamRef.current?.getAudioTracks() || []
 
     if (audioTracks.length === 0) {
@@ -199,10 +206,14 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       }
     }
 
-    if (audioTracks.length === 0) return false
+    if (audioTracks.length === 0) {
+      console.warn("[useMediaPreview] Toggle mic failed: no audio tracks acquired")
+      return false
+    }
 
     setMicOn((prev) => {
       const next = !prev
+      console.log("[useMediaPreview] Mic toggled to:", next)
 
       if (next) {
         audioTracks.forEach((t) => (t.enabled = true))
@@ -224,6 +235,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
 
   // Toggle camera
   const toggleCamera = async () => {
+    console.log("[useMediaPreview] Toggling camera...")
     let videoTracks = streamRef.current?.getVideoTracks() || []
 
     if (videoTracks.length === 0) {
@@ -242,10 +254,14 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       }
     }
 
-    if (videoTracks.length === 0) return false
+    if (videoTracks.length === 0) {
+      console.warn("[useMediaPreview] Toggle camera failed: no video tracks acquired")
+      return false
+    }
 
     setCameraOn((prev) => {
       const next = !prev
+      console.log("[useMediaPreview] Camera toggled to:", next)
 
       if (next) {
         videoTracks.forEach((t) => (t.enabled = true))
