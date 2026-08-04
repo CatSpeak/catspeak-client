@@ -189,6 +189,14 @@ export const GlobalVideoCallProvider = ({ children }) => {
     typeof window !== "undefined" &&
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
+  console.log("[GlobalVideoCallProvider] Rendering LiveKitRoom:", {
+    livekitServerUrl,
+    sessionId: callInfo?.sessionId,
+    initMicOn: callInfo?.initMicOn,
+    initCamOn: callInfo?.initCamOn,
+    isMobileDevice,
+  })
+
   return (
     <LiveKitRoom
       key={callInfo?.sessionId}

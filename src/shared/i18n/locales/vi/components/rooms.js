@@ -326,7 +326,7 @@ export default {
     webViewWarning:
       "Bạn đang mở trong ứng dụng (Zalo/FB/Messenger). Vui lòng nhấn '...' chọn 'Mở bằng Safari' để dùng Micro và Camera.",
     iosPermissionTip:
-      "Safari đã chặn micro. Nhấn vào biểu tượng 'aA' ở thanh địa chỉ -> Cài đặt trang web -> Bật Micro.",
+      "Microphone đã bị trình duyệt chặn. Vui lòng nhấn vào Cài đặt trang web ở thanh địa chỉ để mở Micro.",
     deviceSettings: "Cài đặt thiết bị",
     selectMicrophone: "Chọn Micro",
     selectSpeaker: "Chọn Loa",
