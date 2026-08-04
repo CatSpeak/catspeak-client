@@ -18,7 +18,7 @@ import {
   getSafeMediaUrl,
 } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { Calendar, Mail, CheckCircle2, BookOpen, FileText, Award, Globe, User, Radio, Users, Clock, Video } from "lucide-react"
+import { Calendar, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Clock, Video } from "lucide-react"
 import { formatScheduleDays } from "../utils/scheduleUtils"
 
 const StudentCourseDetailPage = () => {
@@ -91,7 +91,6 @@ const StudentCourseDetailPage = () => {
     }
     const enrollmentIssue = getClassEnrollmentIssue({
       classData: cls,
-      enrolledClassId: course?.enrolledClassId,
     })
     if (enrollmentIssue) {
       toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
@@ -106,7 +105,6 @@ const StudentCourseDetailPage = () => {
     if (!enrollTarget || enrollmentGuardRef.current || isEnrolling) return
     const enrollmentIssue = getClassEnrollmentIssue({
       classData: enrollTarget.class,
-      enrolledClassId: enrollTarget.course?.enrolledClassId,
     })
     if (enrollmentIssue) {
       toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
@@ -193,9 +191,6 @@ const StudentCourseDetailPage = () => {
 
   // Data helpers
   const languageLabel = rawCourse.language || "—"
-  const levelLabel = Array.isArray(rawCourse.levels) && rawCourse.levels.length > 0
-    ? rawCourse.levels.join(", ")
-    : "—"
   const thumbnailUrl = getSafeMediaUrl(rawCourse.thumbnailUrl)
   const teacherAvatarUrl = getSafeMediaUrl(teacher.avatarImageUrl)
 
@@ -220,15 +215,6 @@ const StudentCourseDetailPage = () => {
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* ─── 1. Course Header Block inside Left Column ─── */}
           <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider">
-                {languageLabel}
-              </span>
-              <span className="bg-red-50 text-[#990011] border border-red-100 font-bold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider">
-                {levelLabel}
-              </span>
-            </div>
-
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-950 tracking-tight leading-tight">
               {rawCourse.title}
             </h1>
@@ -285,14 +271,6 @@ const StudentCourseDetailPage = () => {
               </div>
 
               <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
-                <Award size={18} className="text-purple-600 shrink-0 mt-0.5" />
-                <div className="flex flex-col">
-                  <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.targetLevel || "Target Level"}</span>
-                  <span className="text-sm font-black text-gray-950">{levelLabel}</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
                 <Globe size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                 <div className="flex flex-col">
                   <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.languageLabel || "Language"}</span>
@@ -322,7 +300,7 @@ const StudentCourseDetailPage = () => {
             ) : (
               <div className="flex flex-col gap-4">
                 {classes.map((cls) => {
-                  const isClassEnrolled = cls.isEnrolled || rawCourse.enrolledClassId === cls.id
+                  const isClassEnrolled = Boolean(cls.isEnrolled)
                   const isExpanded = !!expandedClassIds[cls.id]
                   const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
@@ -333,9 +311,8 @@ const StudentCourseDetailPage = () => {
                   const enrollmentIssue = isClassEnrolled
                     ? null
                     : getClassEnrollmentIssue({
-                        classData: cls,
-                        enrolledClassId: rawCourse.enrolledClassId,
-                      })
+                      classData: cls,
+                    })
                   const enrollmentIssueMessage = enrollmentIssue
                     ? getClassEnrollmentIssueMessage(enrollmentIssue, c.student)
                     : ""
@@ -392,9 +369,9 @@ const StudentCourseDetailPage = () => {
                               : ""}
                           </h3>
 
-                          <div className="flex items-center gap-3 text-sm font-semibold text-gray-500">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm font-semibold text-gray-500">
                             <div className="flex items-center gap-1">
-                              <Calendar size={12} className="text-gray-400" />
+                              <Calendar size={12} className="text-gray-400 shrink-0" />
                               <span>
                                 {cls.startDate && cls.endDate
                                   ? `${formatDateDayMonth(
@@ -415,6 +392,35 @@ const StudentCourseDetailPage = () => {
                                     : ui.tba || "TBA"}
                               </span>
                             </div>
+
+                            {(cls.enrollmentStart || cls.enrollmentEnd) && (
+                              <div className="flex items-center gap-1 text-xs text-amber-800 font-bold bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80">
+                                <Clock size={11} className="text-amber-600 shrink-0" />
+                                <span>
+                                  {c.student?.registration || "Registration"}: {cls.enrollmentStart && cls.enrollmentEnd
+                                    ? `${formatDateDayMonth(
+                                      cls.enrollmentStart,
+                                      getCourseLocale(language),
+                                      ui.tba,
+                                    )} – ${formatDateDayMonth(
+                                      cls.enrollmentEnd,
+                                      getCourseLocale(language),
+                                      ui.tba,
+                                    )}`
+                                    : cls.enrollmentStart
+                                      ? `${c.student?.startsOn || "Starts"} ${formatDateDayMonth(
+                                        cls.enrollmentStart,
+                                        getCourseLocale(language),
+                                        ui.tba,
+                                      )}`
+                                      : `${c.student?.endsOn || "Ends"} ${formatDateDayMonth(
+                                        cls.enrollmentEnd,
+                                        getCourseLocale(language),
+                                        ui.tba,
+                                      )}`}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -459,13 +465,13 @@ const StudentCourseDetailPage = () => {
                       {/* Collapsible Panel */}
                       {isExpanded && (
                         <div id={`class-details-${cls.id}`} className="bg-gray-50/70 border-t border-gray-150 p-5 flex flex-col gap-4 text-sm animate-fadeIn">
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
                               <Users size={18} className="text-[#990011] shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.enrolledSlots || "Enrolled Slots"}</span>
                                 <span className="text-gray-950 font-black text-sm">
-                                  {enrolledSeats ?? "—"} / {totalSlots ?? "—"}
+                                  {enrolledSeats ?? "0"} / {totalSlots ?? "N/A"}
                                 </span>
                               </div>
                             </div>
@@ -476,6 +482,40 @@ const StudentCourseDetailPage = () => {
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.sessionCount || "Session Count"}</span>
                                 <span className="text-gray-950 font-black text-sm">
                                   {sessionCount ?? "—"} {c.student?.sessionsText || "Sessions"}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
+                              <Calendar size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                              <div className="flex flex-col gap-0.5 min-w-0">
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">
+                                  {c.student?.enrollmentPeriod || "Registration Period"}
+                                </span>
+                                <span className="text-gray-950 font-black text-sm truncate">
+                                  {cls.enrollmentStart && cls.enrollmentEnd
+                                    ? `${formatDateDayMonth(
+                                      cls.enrollmentStart,
+                                      getCourseLocale(language),
+                                      ui.tba,
+                                    )} – ${formatDateDayMonth(
+                                      cls.enrollmentEnd,
+                                      getCourseLocale(language),
+                                      ui.tba,
+                                    )}`
+                                    : cls.enrollmentStart
+                                      ? `${c.student?.startsOn || "From"} ${formatDateDayMonth(
+                                        cls.enrollmentStart,
+                                        getCourseLocale(language),
+                                        ui.tba,
+                                      )}`
+                                      : cls.enrollmentEnd
+                                        ? `${c.student?.endsUntil || "Until"} ${formatDateDayMonth(
+                                          cls.enrollmentEnd,
+                                          getCourseLocale(language),
+                                          ui.tba,
+                                        )}`
+                                        : ui.tba || "TBA"}
                                 </span>
                               </div>
                             </div>

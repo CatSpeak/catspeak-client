@@ -151,19 +151,26 @@ const DesktopSidebar = () => {
     activeDockSection === "settings" ||
     Boolean(currentSectionData?.items?.length)
 
-  const handleDockClick = (item) => {
-    if (item.hasSublinks) {
-      if (activeDockSection === item.key && isDesktopExpanded) {
-        setIsDesktopExpanded(false)
-      } else {
-        setIsDesktopExpanded(true)
+  const handleDockClick = (item, e) => {
+    if (activeDockSection === item.key) {
+      if (item.hasSublinks) {
+        e?.preventDefault();
+        setIsDesktopExpanded((prev) => !prev);
       }
     } else {
-      setIsDesktopExpanded(false)
+      if (item.hasSublinks) {
+        setIsDesktopExpanded(true);
+      } else {
+        setIsDesktopExpanded(false);
+      }
     }
   }
 
   const getDockItemPath = (item) => {
+    if (lastSublinks?.[item.key]) {
+      return resolvePath(lastSublinks[item.key])
+    }
+
     return resolvePath(item.path)
   }
 
@@ -220,10 +227,10 @@ const DesktopSidebar = () => {
                 <div key={item.key} className="relative group/dock">
                   <Link
                     to={targetPath}
-                    onClick={() => handleDockClick(item)}
+                    onClick={(e) => handleDockClick(item, e)}
                     className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
-                        ? "bg-white text-cath-red-700 shadow-md"
-                        : "text-white/80 hover:text-white hover:bg-white/15"
+                      ? "bg-white text-cath-red-700 shadow-md"
+                      : "text-white/80 hover:text-white hover:bg-white/15"
                       }`}
                   >
                     <Icon />
@@ -255,10 +262,10 @@ const DesktopSidebar = () => {
               <div key={item.key} className="relative group/dock">
                 <Link
                   to={targetPath}
-                  onClick={() => handleDockClick(item)}
+                  onClick={(e) => handleDockClick(item, e)}
                   className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
-                      ? "bg-white text-cath-red-700 shadow-md"
-                      : "text-white/80 hover:text-white hover:bg-white/15"
+                    ? "bg-white text-cath-red-700 shadow-md"
+                    : "text-white/80 hover:text-white hover:bg-white/15"
                     }`}
                 >
                   <Icon />
@@ -287,16 +294,17 @@ const DesktopSidebar = () => {
               <div key={item.key} className="relative group/dock">
                 <Link
                   to={targetPath}
-                  onClick={() => {
-                    if (activeDockSection === item.key && isDesktopExpanded) {
-                      setIsDesktopExpanded(false)
+                  onClick={(e) => {
+                    if (activeDockSection === item.key || (item.key === "settings" && isSettingsPage)) {
+                      e.preventDefault()
+                      setIsDesktopExpanded((prev) => !prev)
                     } else {
                       setIsDesktopExpanded(true)
                     }
                   }}
                   className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
-                      ? "bg-white text-cath-red-700 shadow-md scale-105"
-                      : "text-white/80 hover:text-white hover:bg-white/15"
+                    ? "bg-white text-cath-red-700 shadow-md scale-105"
+                    : "text-white/80 hover:text-white hover:bg-white/15"
                     }`}
                 >
                   <Icon />

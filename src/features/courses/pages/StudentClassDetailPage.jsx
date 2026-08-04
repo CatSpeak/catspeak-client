@@ -7,7 +7,6 @@ import { MessageSquare, Video } from "lucide-react"
 
 import {
   useGetStudentClassDetailQuery,
-  useGetStudentCourseDetailQuery,
   useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
@@ -94,55 +93,9 @@ const StudentClassDetailPage = () => {
     ? detailResponse
     : null
   const isEnrolled = classData?.isEnrolled === true
-  const {
-    currentData: enrollmentCourseResponse,
-    isLoading: isEnrollmentCourseLoading,
-    isFetching: isEnrollmentCourseFetching,
-    error: enrollmentCourseError,
-  } = useGetStudentCourseDetailQuery(
-    classData?.courseId,
-    { skip: !classData?.courseId || isEnrolled },
-  )
-  const enrollmentCourseData = (
-    enrollmentCourseResponse
-    && typeof enrollmentCourseResponse === "object"
-    && !Array.isArray(enrollmentCourseResponse)
-    && enrollmentCourseResponse.id
-  )
-    ? enrollmentCourseResponse
-    : null
-  const isEnrollmentEligibilityLoading = (
-    !isEnrolled
-    && Boolean(classData?.courseId)
-    && (
-      isEnrollmentCourseLoading
-      || (
-        isEnrollmentCourseFetching
-        && enrollmentCourseResponse === undefined
-      )
-    )
-  )
-  const hasUnavailableEnrollmentContext = (
-    !isEnrolled
-    && (
-      !classData?.courseId
-      || Boolean(enrollmentCourseError)
-      || (
-        enrollmentCourseResponse !== undefined
-        && !enrollmentCourseData
-      )
-    )
-  )
   const enrollmentIssue = isEnrolled
     ? null
-    : (
-      hasUnavailableEnrollmentContext
-        ? "unavailable"
-        : getClassEnrollmentIssue({
-          classData,
-          enrolledClassId: enrollmentCourseData?.enrolledClassId,
-        })
-    )
+    : getClassEnrollmentIssue({ classData })
   const isOwner = Boolean(
     currentUserId
     && [
@@ -196,15 +149,8 @@ const StudentClassDetailPage = () => {
       toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
       return
     }
-    if (isEnrollmentEligibilityLoading || enrollmentIssue) {
-      toast.error(
-        isEnrollmentEligibilityLoading
-          ? (
-            scd.checkingEnrollment
-            || "Enrollment availability is still being checked."
-          )
-          : getClassEnrollmentIssueMessage(enrollmentIssue, c.student),
-      )
+    if (enrollmentIssue) {
+      toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
       return
     }
     enrollmentGuardRef.current = true
@@ -339,7 +285,6 @@ const StudentClassDetailPage = () => {
               disabled={
                 isEnrolling
                 || isOwner
-                || isEnrollmentEligibilityLoading
                 || Boolean(enrollmentIssue)
               }
               title={
@@ -360,14 +305,12 @@ const StudentClassDetailPage = () => {
               className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
             >
               <span>
-                {isEnrollmentEligibilityLoading
-                  ? (scd.checkingEnrollmentShort || "Checking...")
-                  : enrollmentIssue
-                    ? getClassEnrollmentIssueLabel(
-                      enrollmentIssue,
-                      c.student,
-                    )
-                    : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
+                {enrollmentIssue
+                  ? getClassEnrollmentIssueLabel(
+                    enrollmentIssue,
+                    c.student,
+                  )
+                  : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
               </span>
             </button>
           ) : (

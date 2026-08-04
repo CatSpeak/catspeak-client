@@ -331,7 +331,6 @@ export const getSafeMediaUrl = (value) => {
 
 export const getClassEnrollmentIssue = ({
   classData,
-  enrolledClassId,
   nowMs = Date.now(),
 }) => {
   if (!classData || typeof classData !== "object" || Array.isArray(classData)) {
@@ -341,20 +340,12 @@ export const getClassEnrollmentIssue = ({
   const classId = classData.id == null ? "" : String(classData.id)
   if (!classId) return "unavailable"
 
-  if (
-    enrolledClassId !== null
-    && enrolledClassId !== undefined
-    && String(enrolledClassId) !== ""
-    && String(enrolledClassId) !== classId
-  ) {
-    return "already_enrolled_in_course"
-  }
-
   const status = typeof classData.status === "string"
     ? classData.status.trim().toUpperCase()
     : ""
-  if (!["OPEN", "OPEN_FOR_ENROLLMENT"].includes(status)) {
-    return status ? "not_open" : "unavailable"
+  const closedStatuses = ["CLOSED", "ARCHIVED", "COMPLETED", "CANCELLED"]
+  if (status && closedStatuses.includes(status)) {
+    return "closed"
   }
 
   const enrolledCountValue = (
@@ -386,7 +377,7 @@ export const getClassEnrollmentIssue = ({
     && hasCapacity
     && Number.isFinite(enrolledCount)
     && Number.isFinite(capacity)
-    && capacity >= 0
+    && capacity > 0
     && enrolledCount >= capacity
   ) {
     return "full"
@@ -398,7 +389,7 @@ export const getClassEnrollmentIssue = ({
     return "unavailable"
   }
   if (Number.isFinite(enrollmentStartMs) && nowMs < enrollmentStartMs) {
-    return "not_started"
+    return "closed"
   }
 
   const hasEnrollmentEnd = Boolean(classData.enrollmentEnd)
@@ -416,37 +407,37 @@ export const getClassEnrollmentIssue = ({
 export const getClassEnrollmentIssueMessage = (issue, studentText = {}) => {
   const messages = {
     already_enrolled_in_course:
-      studentText.alreadyEnrolledInCourse,
+      studentText.alreadyEnrolledInCourse || "You are already enrolled in a class for this course.",
     not_open:
-      studentText.enrollmentNotOpen,
+      studentText.enrollmentNotOpen || "Class enrollment is not open.",
     full:
-      studentText.classFull,
+      studentText.classFull || "This class is full.",
     not_started:
-      studentText.enrollmentNotStarted,
+      studentText.enrollmentClosed || studentText.closed || "Enrollment for this class has closed.",
     closed:
-      studentText.enrollmentClosed,
+      studentText.enrollmentClosed || studentText.closed || "Enrollment for this class has closed.",
     unavailable:
-      studentText.enrollmentUnavailable,
+      studentText.enrollmentUnavailable || "Class is not available for enrollment.",
   }
-  return messages[issue] || messages.unavailable || ""
+  return messages[issue] || messages.unavailable || "Class is not available for enrollment."
 }
 
 export const getClassEnrollmentIssueLabel = (issue, studentText = {}) => {
   const labels = {
     already_enrolled_in_course:
-      studentText.alreadyEnrolled,
+      studentText.alreadyEnrolled || "Already enrolled",
     not_open:
-      studentText.notOpen,
+      studentText.notOpen || "Not open",
     full:
-      studentText.full,
+      studentText.full || "Full",
     not_started:
-      studentText.notStarted,
+      studentText.closed || "Closed",
     closed:
-      studentText.closed,
+      studentText.closed || "Closed",
     unavailable:
-      studentText.unavailable,
+      studentText.unavailable || "Unavailable",
   }
-  return labels[issue] || labels.unavailable || ""
+  return labels[issue] || labels.unavailable || "Unavailable"
 }
 
 export const formatFileSize = (bytes) => {
