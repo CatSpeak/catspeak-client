@@ -40,7 +40,10 @@ const AudioVideoTab = ({
         } else {
           // Request temporary audio stream for testing
           const constraints = {
-            audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
+            audio:
+              selectedMic && selectedMic !== "default"
+                ? { deviceId: { exact: selectedMic } }
+                : true,
           }
           const stream = await navigator.mediaDevices.getUserMedia(constraints)
           if (cancelled) {
@@ -103,7 +106,7 @@ const AudioVideoTab = ({
 
     if (isAudio) {
       options.unshift({
-        value: "default",
+        value: "",
         label: waitingT.systemDefaultSpeaker || "System Default",
         icon: icon,
       })

@@ -39,17 +39,17 @@ export const useDeviceSelection = () => {
       setDevices(grouped)
 
       setSelectedMic((prev) => {
-        if (prev && (prev === "default" || grouped.audioinput.some((d) => d.deviceId === prev))) return prev
-        return "default"
+        if (prev && prev !== "default" && grouped.audioinput.some((d) => d.deviceId === prev)) return prev
+        return ""
       })
 
       setSelectedSpeaker((prev) => {
-        if (prev && (prev === "default" || grouped.audiooutput.some((d) => d.deviceId === prev))) return prev
-        return "default"
+        if (prev && prev !== "default" && grouped.audiooutput.some((d) => d.deviceId === prev)) return prev
+        return ""
       })
 
       setSelectedCamera((prev) => {
-        if (prev && grouped.videoinput.some((d) => d.deviceId === prev)) return prev
+        if (prev && prev !== "default" && grouped.videoinput.some((d) => d.deviceId === prev)) return prev
         return grouped.videoinput[0]?.deviceId || ""
       })
     } catch (err) {

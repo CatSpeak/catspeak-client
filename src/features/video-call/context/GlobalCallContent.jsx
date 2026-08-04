@@ -192,7 +192,12 @@ const GlobalCallContent = ({
   }, [lkRoom, showRoomSettings, localParticipant])
 
   useEffect(() => {
-    if (lkRoom && deviceSelection?.selectedMic) {
+    if (
+      lkRoom &&
+      deviceSelection?.selectedMic &&
+      deviceSelection.selectedMic !== "default" &&
+      deviceSelection.selectedMic !== ""
+    ) {
       lkRoom
         .switchActiveDevice("audioinput", deviceSelection.selectedMic)
         .catch((err) => {
@@ -205,7 +210,12 @@ const GlobalCallContent = ({
   }, [lkRoom, deviceSelection?.selectedMic])
 
   useEffect(() => {
-    if (lkRoom && deviceSelection?.selectedSpeaker) {
+    if (
+      lkRoom &&
+      deviceSelection?.selectedSpeaker &&
+      deviceSelection.selectedSpeaker !== "default" &&
+      deviceSelection.selectedSpeaker !== ""
+    ) {
       lkRoom
         .switchActiveDevice("audiooutput", deviceSelection.selectedSpeaker)
         .catch((err) => {
@@ -218,7 +228,12 @@ const GlobalCallContent = ({
   }, [lkRoom, deviceSelection?.selectedSpeaker])
 
   useEffect(() => {
-    if (lkRoom && deviceSelection?.selectedCamera) {
+    if (
+      lkRoom &&
+      deviceSelection?.selectedCamera &&
+      deviceSelection.selectedCamera !== "default" &&
+      deviceSelection.selectedCamera !== ""
+    ) {
       lkRoom
         .switchActiveDevice("videoinput", deviceSelection.selectedCamera)
         .catch((err) => {
