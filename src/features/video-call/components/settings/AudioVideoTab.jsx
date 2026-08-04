@@ -182,7 +182,7 @@ const AudioVideoTab = ({
         ref={audioRef}
         autoPlay
         playsInline
-        muted={!testMic}
+        muted={true}
         className="hidden"
       />
     </div>

@@ -205,6 +205,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     lkVideoTrack,
     toggleMic: hookToggleMic,
     toggleCamera: hookToggleCamera,
+    stopAllPreviewTracks,
   } = useMediaPreview({
     audioDeviceId: deviceSelection.selectedMic,
     videoDeviceId: deviceSelection.selectedCamera,
@@ -231,10 +232,12 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // --- Cleanup media preview tracks when transitioning to in-call ---
   const cleanupMediaPreview = useCallback(() => {
-    if (localStream) {
+    if (stopAllPreviewTracks) {
+      stopAllPreviewTracks()
+    } else if (localStream) {
       localStream.getTracks().forEach((track) => track.stop())
     }
-  }, [localStream])
+  }, [stopAllPreviewTracks, localStream])
 
   // ── Privacy verification: run once when room data is available ──
   const verifyTriggered = useRef(false)

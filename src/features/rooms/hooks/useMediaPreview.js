@@ -90,15 +90,34 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     return () => clearInterval(interval)
   }, [processorStatus])
 
+  const stopAllPreviewTracks = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
+    }
+    if (processorRef.current?.destroy) {
+      processorRef.current.destroy()
+      processorRef.current = null
+    }
+    if (lkVideoTrackRef.current) {
+      lkVideoTrackRef.current.stop()
+      lkVideoTrackRef.current = null
+    }
+    if (rawVideoTrackRef.current) {
+      rawVideoTrackRef.current.stop()
+      rawVideoTrackRef.current = null
+    }
+    setLocalStream(null)
+    setMicOn(false)
+    setCameraOn(false)
+  }, [])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      streamRef.current?.getTracks().forEach((t) => t.stop())
-      if (processorRef.current?.destroy) processorRef.current.destroy()
-      if (lkVideoTrackRef.current) lkVideoTrackRef.current.stop()
-      if (rawVideoTrackRef.current) rawVideoTrackRef.current.stop()
+      stopAllPreviewTracks()
     }
-  }, [])
+  }, [stopAllPreviewTracks])
 
   // Helper to request media
   const getMediaStream = async ({
@@ -358,5 +377,6 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     toggleCamera,
     switchBeauty,
     processorStatus,
+    stopAllPreviewTracks,
   }
 }
