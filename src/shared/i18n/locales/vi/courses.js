@@ -499,6 +499,12 @@ export default {
   student: {
     dashboardTitle: "Khóa học & Học tập của tôi",
     exploreCoursesSubtitle: "Khám phá và đăng ký các khóa học ngôn ngữ hàng đầu để bắt đầu hành trình học tập của bạn.",
+    loginRequiredTitle: "Vui lòng đăng nhập để xem danh sách khóa học & lớp học",
+    loginRequiredDesc: "Bạn cần đăng nhập tài khoản CatSpeak để khám phá và đăng ký các khóa học.",
+    loginNow: "Đăng nhập ngay",
+    tabAllCatalog: "Tất cả",
+    tabCourses: "Khóa học",
+    tabClasses: "Lớp học",
     enrolledCourses: "Khóa học đã đăng ký",
     exploreCourses: "Khám phá khóa học",
     myClasses: "Lớp học đã tham gia",

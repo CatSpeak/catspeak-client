@@ -504,6 +504,21 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: ["StudentCourses"]
     }),
 
+    getStudentAvailableClasses: builder.query({
+      query: (params) => ({
+        url: "/student/classes",
+        method: "GET",
+        params: {
+          page: params?.page || 1,
+          pageSize: params?.pageSize || 100,
+          language: params?.language ? params.language.toUpperCase() : undefined,
+          search: params?.search,
+        },
+      }),
+      transformResponse: (response) => transformPaginatedResponse(response, transformClass),
+      providesTags: ["StudentClasses"],
+    }),
+
     getStudentJoinedClasses: builder.query({
       async queryFn(params, queryApi, extraOptions, baseQuery) {
         const pageSize = params?.pageSize || 100
@@ -1946,6 +1961,7 @@ export const coursesApi = baseApi.injectEndpoints({
 
 export const {
   useGetStudentAvailableCoursesQuery,
+  useGetStudentAvailableClassesQuery,
   useGetStudentJoinedClassesQuery,
   useGetStudentCourseDetailQuery,
   useGetStudentClassDetailQuery,

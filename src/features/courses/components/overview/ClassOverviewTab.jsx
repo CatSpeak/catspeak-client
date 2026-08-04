@@ -7,6 +7,7 @@ import TeachingTasksSection from "../assignments/TeachingTasksSection"
 import { useGetTeacherClassTeachingTasksCombinedQuery } from "@/store/api/coursesApi"
 import { mapTeachingTask } from "../../utils/courseTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
 import CourseStatusPill from "../CourseStatusPill"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import {
@@ -349,11 +350,13 @@ const ClassOverviewTab = ({
             <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
               <AlignLeft size={18} />
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 w-full min-w-0">
               <span className="text-sm text-gray-400 font-bold">{cd.description || "Description"}</span>
-              <p className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5">
-                {classData.description || cd.noDescription || "No description provided."}
-              </p>
+              <RenderHTML
+                html={classData.description}
+                className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5"
+                fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5">{cd.noDescription || "No description provided."}</span>}
+              />
             </div>
           </div>
         </div>

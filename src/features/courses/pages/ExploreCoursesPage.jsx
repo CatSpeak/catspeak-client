@@ -1,13 +1,15 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useContext } from "react"
 import { useNavigate } from "react-router-dom"
-import { Compass, RefreshCw, BookOpen, GraduationCap } from "lucide-react"
+import { Compass, RefreshCw, BookOpen, GraduationCap, LogIn } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 import {
   useGetStudentAvailableCoursesQuery,
-  useGetAllClassesQuery
+  useGetStudentAvailableClassesQuery
 } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import AuthModalContext from "@/shared/context/AuthModalContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
@@ -25,6 +27,8 @@ const PAGE_SIZE = 24
 const ExploreCoursesPage = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+  const authModalCtx = useContext(AuthModalContext)
   const c = t.courses || {}
   const sc = c.student || {}
   const dict = t.nav || {}
@@ -49,9 +53,9 @@ const ExploreCoursesPage = () => {
   ]
 
   const categoryTabs = [
-    { value: "all", label: sc.allCatalog || "Tất cả", icon: Compass },
-    { value: "courses", label: sc.coursesPlaylists || "Khóa học", icon: BookOpen },
-    { value: "classes", label: sc.standaloneClasses || c.createClass?.standaloneClass || "Lớp độc lập", icon: GraduationCap },
+    { value: "all", label: sc.tabAllCatalog || "Tất cả", icon: Compass },
+    { value: "courses", label: sc.tabCourses || "Khóa học", icon: BookOpen },
+    { value: "classes", label: sc.tabClasses || "Lớp học", icon: GraduationCap },
   ]
 
   const availableCoursesQuery = useGetStudentAvailableCoursesQuery(
@@ -61,17 +65,17 @@ const ExploreCoursesPage = () => {
       language: langFilter !== "all" ? langFilter : undefined,
       search: debouncedSearchQuery.trim() || undefined,
     },
-    { skip: contentType === "classes" }
+    { skip: !isAuthenticated || contentType === "classes" }
   )
 
-  const availableClassesQuery = useGetAllClassesQuery(
+  const availableClassesQuery = useGetStudentAvailableClassesQuery(
     {
       page: currentPage,
       pageSize: PAGE_SIZE,
       language: langFilter !== "all" ? langFilter : undefined,
       search: debouncedSearchQuery.trim() || undefined,
     },
-    { skip: contentType === "courses" }
+    { skip: !isAuthenticated || contentType === "courses" }
   )
 
   const coursesList = useMemo(() => {
@@ -86,10 +90,9 @@ const ExploreCoursesPage = () => {
 
   const combinedCatalog = useMemo(() => {
     if (contentType === "courses") return coursesList
-    if (contentType === "classes") return classesList.filter(item => !item.courseId)
-    // "all": Merge courses and standalone classes
-    const standaloneClasses = classesList.filter(item => !item.courseId)
-    return [...coursesList, ...standaloneClasses]
+    if (contentType === "classes") return classesList
+    // "all": Merge courses and all available classes
+    return [...coursesList, ...classesList]
   }, [contentType, coursesList, classesList])
 
   const isLoading = contentType === "courses"
@@ -194,7 +197,29 @@ const ExploreCoursesPage = () => {
 
       {/* ─── Catalog Grid / List Section ─── */}
       <div aria-busy={isFetching}>
-        {isLoading ? (
+        {!isAuthenticated || error?.status === 401 ? (
+          <div
+            role="status"
+            className="flex min-h-[340px] flex-col items-center justify-center gap-4 rounded-3xl border border-gray-150 bg-white p-8 text-center shadow-xs"
+          >
+            <h3 className="text-xl font-extrabold text-gray-900">
+              {sc.loginRequiredTitle || "Vui lòng đăng nhập để xem danh sách khóa học & lớp học"}
+            </h3>
+            <p className="max-w-md text-sm font-semibold text-gray-600 leading-relaxed">
+              {sc.loginRequiredDesc || "Bạn cần đăng nhập tài khoản CatSpeak để khám phá và đăng ký các khóa học & lớp học."}
+            </p>
+            {authModalCtx?.openAuthModal && (
+              <button
+                type="button"
+                onClick={() => authModalCtx.openAuthModal("login", "/explore-courses")}
+                className="mt-2 h-10 px-6 rounded-full bg-[#990011] hover:bg-[#b20a1c] text-white text-xs font-black transition-all shadow-md hover:shadow-lg cursor-pointer active:scale-95 flex items-center gap-2"
+              >
+                <LogIn size={15} />
+                <span>{sc.loginNow || "Đăng nhập ngay"}</span>
+              </button>
+            )}
+          </div>
+        ) : isLoading ? (
           <div
             role="status"
             aria-live="polite"

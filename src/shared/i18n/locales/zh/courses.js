@@ -499,6 +499,12 @@ export default {
   student: {
     dashboardTitle: "我的课程和学习",
     exploreCoursesSubtitle: "探索并报名参加优质语言课程，开启您的学习之旅。",
+    loginRequiredTitle: "请登录以查看课程和班级列表",
+    loginRequiredDesc: "您需要登录 CatSpeak 账号以探索并报名课程。",
+    loginNow: "立即登录",
+    tabAllCatalog: "全部",
+    tabCourses: "课程",
+    tabClasses: "班级",
     enrolledCourses: "已注册课程",
     exploreCourses: "探索课程",
     myClasses: "已加入班级",

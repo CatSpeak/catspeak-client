@@ -8,6 +8,7 @@ import {
 } from "@/store/api/coursesApi"
 import StudentJoinModal from "../student/components/StudentJoinModal"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
 import {
   formatCurrencyVND,
   formatDateDayMonth,
@@ -222,9 +223,10 @@ const StudentCourseDetailPage = () => {
             {/* Side-by-side 50/50: Description (Left) + Thumbnail (Right) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start pt-1">
               {rawCourse.description && (
-                <div className="text-sm sm:text-sm md:text-base text-gray-600 font-medium leading-relaxed whitespace-pre-line">
-                  {rawCourse.description}
-                </div>
+                <RenderHTML
+                  html={rawCourse.description}
+                  className="text-sm sm:text-sm md:text-base text-gray-600 font-medium leading-relaxed"
+                />
               )}
 
               <div className="w-full">
@@ -555,9 +557,11 @@ const StudentCourseDetailPage = () => {
                               <FileText size={13} className="text-[#990011]" />
                               <span>{c.student?.description || "Description"}</span>
                             </span>
-                            <p className="text-gray-600 font-medium text-sm leading-relaxed">
-                              {cls.description || scd.noClassDescription || "No description provided."}
-                            </p>
+                            <RenderHTML
+                              html={cls.description}
+                              className="text-gray-600 font-medium text-sm leading-relaxed"
+                              fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed">{scd.noClassDescription || "No description provided."}</span>}
+                            />
                           </div>
                         </div>
                       )}

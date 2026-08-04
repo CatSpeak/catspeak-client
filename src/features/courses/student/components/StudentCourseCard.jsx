@@ -193,8 +193,8 @@ const StudentCourseCard = ({
             <span>{sc.instructor}: {instructorName}</span>
           </div>
 
-          <p className="text-xs text-gray-500 font-semibold line-clamp-3 leading-relaxed mt-2" title={course.description}>
-            {course.description}
+          <p className="text-xs text-gray-500 font-semibold line-clamp-3 leading-relaxed mt-2" title={course.description ? course.description.replace(/<[^>]*>/g, " ").trim() : ""}>
+            {course.description ? course.description.replace(/<[^>]*>/g, " ").trim() : ""}
           </p>
 
           {/* Key details */}

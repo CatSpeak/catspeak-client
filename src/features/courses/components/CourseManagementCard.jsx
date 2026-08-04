@@ -136,8 +136,8 @@ const CourseManagementCard = ({
                 {labels.courseLabel ? `${labels.courseLabel} ${item.title}` : `Course ${item.title}`}
               </span>
               {item.description && (
-                <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed mt-2" title={item.description}>
-                  {item.description}
+                <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed mt-2" title={item.description ? item.description.replace(/<[^>]*>/g, " ").trim() : ""}>
+                  {item.description ? item.description.replace(/<[^>]*>/g, " ").trim() : ""}
                 </p>
               )}
               <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">

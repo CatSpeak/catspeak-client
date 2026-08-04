@@ -499,6 +499,12 @@ export default {
   student: {
     dashboardTitle: "My Courses & Learning",
     exploreCoursesSubtitle: "Discover and enroll in top language courses to start your learning journey.",
+    loginRequiredTitle: "Please log in to view available courses & classes",
+    loginRequiredDesc: "You need to log in to your CatSpeak account to explore and enroll in courses.",
+    loginNow: "Log In Now",
+    tabAllCatalog: "All",
+    tabCourses: "Courses",
+    tabClasses: "Classes",
     enrolledCourses: "My Enrolled Courses",
     exploreCourses: "Explore Available Courses",
     myClasses: "My Joined Classes",

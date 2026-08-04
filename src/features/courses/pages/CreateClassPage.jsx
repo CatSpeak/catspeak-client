@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
+import { Editor } from "@tinymce/tinymce-react"
 import {
   Plus,
   Minus,
@@ -896,7 +897,7 @@ const CreateClassPage = () => {
       : (cc.classInfoTitle || cc.classInformation || "Thông tin lớp học")
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] flex-1">
 
       {/* ─── Breadcrumb ─── */}
       <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
@@ -929,7 +930,7 @@ const CreateClassPage = () => {
       <form
         onSubmit={handleSubmit}
         aria-busy={isFormBusy}
-        className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6"
+        className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6 flex-1"
       >
 
         <h2 className="text-lg font-bold text-gray-900 border-b border-gray-50 pb-2">
@@ -937,7 +938,7 @@ const CreateClassPage = () => {
         </h2>
 
         {/* Form Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-1">
 
           {/* LEFT COLUMN: Main input fields (Span 3 of 5) */}
           <div className="lg:col-span-3 flex flex-col gap-5">
@@ -1290,19 +1291,29 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Class Description */}
+            {/* Class Description TinyMCE Editor */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.classDescription}</label>
-              <textarea
-                rows={5}
+              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.classDescription || "Mô tả lớp học"}</label>
+              <Editor
+                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
                 value={description}
                 disabled={isRecoverMode}
-                onChange={(e) => {
-                  setDescription(e.target.value)
+                onEditorChange={(newContent) => {
+                  setDescription(newContent)
                   clearError("description")
                 }}
-                placeholder={cc.placeholderDescription || "Enter class description (optional)"}
-                className={`w-full p-4 bg-white border ${errors.description ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                init={{
+                  height: 220,
+                  menubar: false,
+                  statusbar: false,
+                  plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                  toolbar:
+                    "bold italic underline strikethrough | emoticons link | bullist numlist | removeformat",
+                  placeholder: cc.placeholderDescription || "Enter class description (optional)",
+                  skin: "oxide",
+                  content_style: "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                  readonly: isRecoverMode,
+                }}
               />
             </div>
 
@@ -1356,7 +1367,7 @@ const CreateClassPage = () => {
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100 mt-auto">
           {/* Left Side: Fee detail */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D]">
