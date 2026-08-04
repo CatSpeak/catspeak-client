@@ -1,5 +1,5 @@
 import React from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import "dayjs/locale/vi"
@@ -15,6 +15,7 @@ dayjs.extend(relativeTime)
 const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
   const { t, language } = useLanguage()
   const navigate = useNavigate()
+  const location = useLocation()
   // Map app language to dayjs locale identifier (zh → zh-cn, others match directly)
   const dayjsLocale = language === "zh" ? "zh-cn" : language
   const authorAccountId = post.accountId || post.authorId || post.userId
@@ -33,7 +34,8 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
             onClick={(e) => {
               if (authorAccountId) {
                 e.stopPropagation()
-                navigate(`/profile/${authorAccountId}`)
+                const isWorkspace = location.pathname.startsWith("/workspace")
+                navigate(`${isWorkspace ? "/workspace" : ""}/profile/${authorAccountId}`)
               }
             }}
             className={`font-semibold ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
