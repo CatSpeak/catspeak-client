@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { BookOpen, Calendar, Clock, ArrowRight, Compass, Play, RefreshCw } from "lucide-react"
+import { BookOpen, Calendar, Clock, ArrowRight, Play, RefreshCw } from "lucide-react"
 import {
   useGetStudentAvailableCoursesQuery,
   useGetStudentJoinedClassesQuery
@@ -11,7 +11,6 @@ import { useGetProfileQuery } from "@/features/auth"
 import CourseSearchInput from "../../components/CourseSearchInput"
 import CourseSelectFilter from "../../components/CourseSelectFilter"
 import CourseTabs from "../../components/CourseTabs"
-import ViewModeToggle from "../../components/shared/ViewModeToggle"
 import TablePagination from "../../components/shared/TablePagination"
 import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTransforms"
 
@@ -865,15 +864,6 @@ const StudentDashboard = ({ t, language }) => {
               activeTab={activeTab}
               onChange={handleTabChange}
             />
-
-            {/* Grid/List Layout toggle controls */}
-            {activeTab !== "classes" && (
-              <ViewModeToggle
-                value={viewMode}
-                onChange={setViewMode}
-                className="self-end sm:self-auto mb-2"
-              />
-            )}
           </div>
 
           {/* Search & Selection Filters bar */}

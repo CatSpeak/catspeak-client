@@ -250,22 +250,21 @@ const StudentClassDetailPage = () => {
         <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
           <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
           <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.allCourses?.title || "All Courses"}</button>
-          <span>/</span>
-          <button
-            type="button"
-            className="cursor-pointer hover:underline"
-            disabled={!classData.courseId}
-            onClick={() => {
-              if (classData.courseId) {
-                navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`)
-              }
-            }}
-          >
-            {c.student?.courseDetails || "Course Details"}
-          </button>
+          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle || "Lớp học của tôi"}</button>
+          {classData.courseId && (
+            <>
+              <span>/</span>
+              <button
+                type="button"
+                className="cursor-pointer hover:underline"
+                onClick={() => {
+                  navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`)
+                }}
+              >
+                {classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details"}
+              </button>
+            </>
+          )}
           <span>/</span>
           <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
         </div>

@@ -1,5 +1,5 @@
 import React from "react"
-import { Calendar, Tag, Clock } from "lucide-react"
+import { Calendar, Tag, Clock, Layers } from "lucide-react"
 import {
   formatDateRange,
   formatCurrencyVND,
@@ -100,9 +100,18 @@ const ClassCard = ({
               {cls.title}
             </button>
           </h4>
-          <span className="text-xs text-gray-400 font-bold mt-1 block">
-            {c.course ? `${c.course} ${courseTitle}` : `Course ${courseTitle}`}
-          </span>
+          <div className="mt-1.5 flex items-center gap-2">
+            {cls.courseId && courseTitle ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/60" title={`Course: ${courseTitle}`}>
+                <Layers size={11} className="text-blue-500 flex-shrink-0" />
+                <span className="line-clamp-1">{courseTitle}</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200/60">
+                {c.standaloneClass || "Lớp độc lập"}
+              </span>
+            )}
+          </div>
 
           <div className="mt-4 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">

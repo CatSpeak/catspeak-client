@@ -528,7 +528,6 @@ const CreateClassPage = () => {
     if (submitGuardRef.current || isCreating || isUpdating) return
 
     const newErrors = {}
-    if (!courseId) newErrors.courseId = true
     if (!className.trim()) newErrors.className = true
     if (!selectedLanguage) newErrors.selectedLanguage = true
     if (!level) newErrors.level = true
@@ -546,8 +545,8 @@ const CreateClassPage = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      if (newErrors.courseId) toast.error(cc.toastSelectCourseFirst || "Please select a course first!")
-      else if (newErrors.className) toast.error(cc.toastEnterClassName || "Please enter class name!")
+      if (newErrors.className) toast.error(cc.toastEnterClassName || "Please enter class name!")
+      else if (newErrors.selectedLanguage) toast.error(cc.toastSelectLanguage || "Please select a language!")
       else if (newErrors.selectedLanguage) toast.error(cc.toastSelectLanguage || "Please select a language!")
       else if (newErrors.level) toast.error(cc.toastSelectLevel || "Please select a level!")
       else if (newErrors.admissionStart || newErrors.admissionEnd || newErrors.startDate) toast.error(cc.toastAdmissionAndStart || "Please enter admission period and start date!")
@@ -946,7 +945,7 @@ const CreateClassPage = () => {
             {/* Course Selector */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                {cc.belongsToCourse || "Belongs to Course"} <span className="text-[#990011]">*</span>
+                {cc.belongsToCourseOptional || cc.belongsToCourse || "Belongs to Course (Optional)"}
               </label>
               <div className="relative">
                 <select
@@ -955,7 +954,7 @@ const CreateClassPage = () => {
                   disabled={isEditMode || isRecoverMode || !!initialCourseId}
                   className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                 >
-                  <option value="">{cc.selectCourseOption || "-- Select Course --"}</option>
+                  <option value="">{cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}</option>
                   {isEditMode || isRecoverMode ? (
                     courseId && <option value={courseId}>{lockedCourseTitle}</option>
                   ) : (

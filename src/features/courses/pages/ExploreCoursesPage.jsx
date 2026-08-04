@@ -1,8 +1,12 @@
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { Compass, RefreshCw } from "lucide-react"
+import { Compass, RefreshCw, BookOpen, GraduationCap } from "lucide-react"
+import { toast } from "react-hot-toast"
 
-import { useGetStudentAvailableCoursesQuery } from "@/store/api/coursesApi"
+import {
+  useGetStudentAvailableCoursesQuery,
+  useGetAllClassesQuery
+} from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
@@ -12,6 +16,8 @@ import CourseSelectFilter from "../components/CourseSelectFilter"
 import ViewModeToggle from "../components/shared/ViewModeToggle"
 import TablePagination from "../components/shared/TablePagination"
 import StudentCourseCard from "../student/components/StudentCourseCard"
+import ClassCard from "../components/ClassCard"
+import CourseTabs from "../components/CourseTabs"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 
 const PAGE_SIZE = 24
@@ -23,6 +29,7 @@ const ExploreCoursesPage = () => {
   const sc = c.student || {}
   const dict = t.nav || {}
 
+  const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
   const [langFilter, setLangFilter] = useState("all")
   const [viewMode, setViewMode] = useState("grid")
 
@@ -36,55 +43,102 @@ const ExploreCoursesPage = () => {
 
   const languageFilterOptions = [
     { value: "all", label: sc.allLanguages || "All Languages" },
-    { value: "EN", label: sc.languages?.EN || "English" },
-    { value: "VI", label: sc.languages?.VI || "Vietnamese" },
-    { value: "ZH", label: sc.languages?.ZH || "Chinese" },
+    { value: "ENGLISH", label: sc.languages?.English || sc.languages?.EN || "English" },
+    { value: "VIETNAMESE", label: sc.languages?.Vietnamese || sc.languages?.VI || "Vietnamese" },
+    { value: "CHINESE", label: sc.languages?.Chinese || sc.languages?.ZH || "Chinese" },
   ]
 
-  const availableCoursesQuery = useGetStudentAvailableCoursesQuery({
-    page: currentPage,
-    pageSize: PAGE_SIZE,
-    language: langFilter !== "all" ? langFilter : undefined,
-    search: debouncedSearchQuery.trim() || undefined,
-  })
+  const categoryTabs = [
+    { value: "all", label: sc.allCatalog || "Tất cả", icon: Compass },
+    { value: "courses", label: sc.coursesPlaylists || "Khóa học", icon: BookOpen },
+    { value: "classes", label: sc.standaloneClasses || c.createClass?.standaloneClass || "Lớp độc lập", icon: GraduationCap },
+  ]
 
-  const coursesRaw = availableCoursesQuery.currentData?.data
-  const coursesList = Array.isArray(coursesRaw) ? coursesRaw : []
-  const pagination = availableCoursesQuery.currentData?.pagination
-  const totalPages = Number(pagination?.totalPages) || 1
-  const totalItems = Number(pagination?.totalItems) || coursesList.length
-
-  const isLoading = (
-    availableCoursesQuery.isLoading ||
-    (availableCoursesQuery.isFetching && availableCoursesQuery.currentData === undefined)
+  const availableCoursesQuery = useGetStudentAvailableCoursesQuery(
+    {
+      page: currentPage,
+      pageSize: PAGE_SIZE,
+      language: langFilter !== "all" ? langFilter : undefined,
+      search: debouncedSearchQuery.trim() || undefined,
+    },
+    { skip: contentType === "classes" }
   )
-  const isFetching = availableCoursesQuery.isFetching
-  const error = availableCoursesQuery.error
 
-  const handleOpenDetail = (course) => {
+  const availableClassesQuery = useGetAllClassesQuery(
+    {
+      page: currentPage,
+      pageSize: PAGE_SIZE,
+      language: langFilter !== "all" ? langFilter : undefined,
+      search: debouncedSearchQuery.trim() || undefined,
+    },
+    { skip: contentType === "courses" }
+  )
+
+  const coursesList = useMemo(() => {
+    const raw = availableCoursesQuery.currentData?.data
+    return (Array.isArray(raw) ? raw : []).map(item => ({ ...item, isClassItem: false }))
+  }, [availableCoursesQuery.currentData])
+
+  const classesList = useMemo(() => {
+    const raw = availableClassesQuery.currentData?.data
+    return (Array.isArray(raw) ? raw : []).map(item => ({ ...item, isClassItem: true }))
+  }, [availableClassesQuery.currentData])
+
+  const combinedCatalog = useMemo(() => {
+    if (contentType === "courses") return coursesList
+    if (contentType === "classes") return classesList.filter(item => !item.courseId)
+    // "all": Merge courses and standalone classes
+    const standaloneClasses = classesList.filter(item => !item.courseId)
+    return [...coursesList, ...standaloneClasses]
+  }, [contentType, coursesList, classesList])
+
+  const isLoading = contentType === "courses"
+    ? availableCoursesQuery.isLoading
+    : contentType === "classes"
+      ? availableClassesQuery.isLoading
+      : (availableCoursesQuery.isLoading && availableClassesQuery.isLoading)
+
+  const isFetching = availableCoursesQuery.isFetching || availableClassesQuery.isFetching
+  const error = availableCoursesQuery.error || availableClassesQuery.error
+
+  const pagination = contentType === "classes"
+    ? availableClassesQuery.currentData?.pagination
+    : availableCoursesQuery.currentData?.pagination
+
+  const totalPages = Number(pagination?.totalPages) || 1
+  const totalItems = Number(pagination?.totalItems) || combinedCatalog.length
+
+  const handleOpenCourseDetail = (course) => {
     if (!course?.id) return
     navigate(`/workspace/learning/details/${encodeURIComponent(String(course.id))}`)
+  }
+
+  const handleOpenClassDetail = (_cls) => {
+    // BE is updating the API to return public class data for non-enrolled students.
+    // Temporarily disabled navigation until backend API update is ready.
+    toast.info("Chi tiết lớp học sẽ sớm được cập nhật!")
   }
 
   const handleClearFilters = () => {
     setSearchQuery("")
     setLangFilter("all")
+    setContentType("all")
     setCurrentPage(1)
   }
 
-  const hasActiveFilters = searchQuery.trim() !== "" || langFilter !== "all"
+  const hasActiveFilters = searchQuery.trim() !== "" || langFilter !== "all" || contentType !== "all"
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e] p-4 sm:p-6">
       {/* ─── Breadcrumbs ─── */}
       <Breadcrumb
         items={[
-          { label: dict.home || "Home", onClick: () => navigate("/workspace") },
+          { label: dict.home || "Home", onClick: () => navigate("/explore-courses") },
           { label: dict.exploreCourses || "Explore Courses" },
         ]}
       />
 
-      {/* ─── Header & Search/Filter Toolbar ─── */}
+      {/* ─── Header & Subtitle ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-gray-950 tracking-tight flex items-center gap-2.5">
@@ -92,16 +146,28 @@ const ExploreCoursesPage = () => {
             <span>{dict.exploreCourses || "Explore Courses"}</span>
           </h1>
           <p className="text-sm text-gray-500 font-medium mt-1">
-            {sc.exploreCoursesSubtitle || "Discover and enroll in top language courses to start your learning journey."}
+            {sc.exploreCoursesSubtitle || "Discover and enroll in top language courses and standalone classes to start your learning journey."}
           </p>
         </div>
+      </div>
+
+      {/* ─── Content Category Tabs (All / Courses / Standalone Classes) ─── */}
+      <div className="border-b border-gray-150 pb-px">
+        <CourseTabs
+          tabs={categoryTabs}
+          activeTab={contentType}
+          onChange={(tab) => {
+            setContentType(tab)
+            setCurrentPage(1)
+          }}
+        />
       </div>
 
       {/* ─── Toolbar: Search, Language Filter & View Mode ─── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between bg-white rounded-3xl p-5 border border-gray-150 shadow-xs">
         <label className="flex-1">
           <span className="sr-only">
-            {sc.searchPlaceholder || "Search courses..."}
+            {sc.searchPlaceholder || "Search..."}
           </span>
           <CourseSearchInput
             value={searchQuery}
@@ -109,7 +175,7 @@ const ExploreCoursesPage = () => {
               setSearchQuery(val)
               setCurrentPage(1)
             }}
-            placeholder={sc.searchPlaceholder || "Search courses..."}
+            placeholder={sc.searchPlaceholder || "Search courses or classes..."}
           />
         </label>
 
@@ -126,7 +192,7 @@ const ExploreCoursesPage = () => {
         </div>
       </div>
 
-      {/* ─── Course Catalog Grid / List Section ─── */}
+      {/* ─── Catalog Grid / List Section ─── */}
       <div aria-busy={isFetching}>
         {isLoading ? (
           <div
@@ -136,23 +202,26 @@ const ExploreCoursesPage = () => {
           >
             <LoadingSpinner />
             <span className="sr-only">
-              {sc.loadingLearningData || "Loading courses..."}
+              {sc.loadingLearningData || "Loading data..."}
             </span>
           </div>
-        ) : error && coursesList.length === 0 ? (
+        ) : error && combinedCatalog.length === 0 ? (
           <div
             role="alert"
             className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-6 text-center"
           >
             <h3 className="text-lg font-extrabold text-red-800">
-              {sc.loadErrorTitle || "Unable to load courses"}
+              {sc.loadErrorTitle || "Unable to load data"}
             </h3>
             <p className="max-w-sm text-sm font-semibold text-red-700">
               {sc.loadErrorDescription || "Check your connection and try again."}
             </p>
             <button
               type="button"
-              onClick={() => availableCoursesQuery.refetch()}
+              onClick={() => {
+                availableCoursesQuery.refetch?.()
+                availableClassesQuery.refetch?.()
+              }}
               disabled={isFetching}
               className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 bg-white px-5 text-xs font-extrabold text-red-700 hover:bg-red-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -160,19 +229,19 @@ const ExploreCoursesPage = () => {
               <span>{isFetching ? "Retrying..." : "Retry"}</span>
             </button>
           </div>
-        ) : coursesList.length === 0 ? (
+        ) : combinedCatalog.length === 0 ? (
           <div
             role="status"
             className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-gray-150 bg-white p-8 text-center shadow-xs"
           >
             <Compass size={52} aria-hidden="true" className="text-gray-300 stroke-[1.2]" />
             <h3 className="text-lg font-extrabold text-gray-800">
-              {hasActiveFilters ? (sc.noCoursesFound || "No Courses Found") : (sc.noAvailableCourses || "No courses available")}
+              {hasActiveFilters ? (sc.noCoursesFound || "No items found") : (sc.noAvailableCourses || "No offerings available")}
             </h3>
             <p className="max-w-xs text-sm font-semibold text-gray-500">
               {hasActiveFilters
                 ? (sc.noCoursesFoundDesc || "Try clearing your search query or language filter.")
-                : (sc.noAvailableCoursesDesc || "There are no public courses available right now.")}
+                : (sc.noAvailableCoursesDesc || "There are no public offerings available right now.")}
             </p>
             {hasActiveFilters && (
               <button
@@ -186,19 +255,33 @@ const ExploreCoursesPage = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-              {coursesList.map((course, idx) => (
-                <StudentCourseCard
-                  key={course.id}
-                  course={course}
-                  isEnrolled={false}
-                  viewMode={viewMode}
-                  onViewDetails={() => handleOpenDetail(course)}
-                  onJoin={() => handleOpenDetail(course)}
-                  t={t}
-                  index={idx}
-                />
-              ))}
+            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "flex flex-col gap-4"}>
+              {combinedCatalog.map((item, idx) => {
+                if (item.isClassItem) {
+                  return (
+                    <ClassCard
+                      key={`cls-${item.id}`}
+                      cls={item}
+                      isStudent={true}
+                      courseTitle={item.courseTitle}
+                      onClick={() => handleOpenClassDetail(item)}
+                      onEnroll={() => handleOpenClassDetail(item)}
+                    />
+                  )
+                }
+                return (
+                  <StudentCourseCard
+                    key={`crs-${item.id}`}
+                    course={item}
+                    isEnrolled={false}
+                    viewMode={viewMode}
+                    onViewDetails={() => handleOpenCourseDetail(item)}
+                    onJoin={() => handleOpenCourseDetail(item)}
+                    t={t}
+                    index={idx}
+                  />
+                )
+              })}
             </div>
 
             {totalPages > 1 && (

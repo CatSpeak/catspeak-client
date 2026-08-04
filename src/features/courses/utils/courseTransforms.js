@@ -106,7 +106,9 @@ export const mapTeacherClassSummary = (
     id: cls.id,
     courseId: cls.courseId,
     title: cls.name || cls.title,
-    courseTitle: cls.courseName || cls.courseTitle || labels.notAvailable || "—",
+    courseTitle: cls.courseId
+      ? (cls.courseName || cls.courseTitle || labels.notAvailable || "—")
+      : null,
     language: cls.language || "",
     levels: Array.isArray(cls.levels) ? cls.levels : [],
     schedule: formatScheduleDays(cls.schedule?.days, locale, labels.tba),
@@ -174,7 +176,9 @@ export const mapClassTableRow = (
 
   return {
     id: cls.id,
-    courseTitle: cls.courseTitle || cls.courseName || "—",
+    courseTitle: cls.courseId
+      ? (cls.courseTitle || cls.courseName || "—")
+      : null,
     classTitle: cls.title || cls.name,
     status: cls.status,
     schedule: formatScheduleDays(cls.schedule?.days, locale, labels.tba, ", "),

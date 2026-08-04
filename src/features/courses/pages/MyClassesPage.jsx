@@ -109,6 +109,7 @@ const MyClassesPage = () => {
     progress: c.progress || "Progress",
     courseLabel: c.course || "Course",
     classLabel: c.class || "Class",
+    standaloneClass: c.createClass?.standaloneClass || "Lớp độc lập",
     classCount: c.classCount || "{{count}} classes",
     actionsFor: c.actionsForCourse || "Actions for {{title}}",
   }

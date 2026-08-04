@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react"
-import { BookOpen, Calendar, Clock, MoreVertical, PenSquare, Tag, Trash2, Users } from "lucide-react"
+import { BookOpen, Calendar, Clock, Layers, MoreVertical, PenSquare, Tag, Trash2, Users } from "lucide-react"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import CourseStatusPill from "./CourseStatusPill"
 import CourseThumbnail from "./CourseThumbnail"
@@ -153,6 +153,19 @@ const CourseManagementCard = ({
               <span className="text-xs text-gray-400 font-bold block">
                 {labels.classLabel ? `${labels.classLabel} ${item.title}` : `Class ${item.title}`}
               </span>
+
+              <div className="mt-1.5 flex items-center gap-2">
+                {item.courseId && item.courseTitle ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/60" title={`Course: ${item.courseTitle}`}>
+                    <Layers size={11} className="text-blue-500 flex-shrink-0" />
+                    <span className="line-clamp-1">{item.courseTitle}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200/60">
+                    {labels.standaloneClass || "Lớp độc lập"}
+                  </span>
+                )}
+              </div>
 
               <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
                 <MetaRow icon={Tag} strong>{item.price}</MetaRow>

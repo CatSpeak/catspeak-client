@@ -180,22 +180,21 @@ const ClassDetailPage = () => {
             <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
               <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
               <span>/</span>
-              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
-              <span>/</span>
-              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</button>
-              <span>/</span>
-              <button
-                type="button"
-                className="cursor-pointer hover:underline"
-                disabled={!classData.courseId}
-                onClick={() => {
-                  if (classData.courseId) {
-                    navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)
-                  }
-                }}
-              >
-                {c.student?.courseDetails || "Course Details"}
-              </button>
+              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/classes/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
+              {classData.courseId && (
+                <>
+                  <span>/</span>
+                  <button
+                    type="button"
+                    className="cursor-pointer hover:underline"
+                    onClick={() => {
+                      navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)
+                    }}
+                  >
+                    {classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details"}
+                  </button>
+                </>
+              )}
               <span>/</span>
               <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
             </div>

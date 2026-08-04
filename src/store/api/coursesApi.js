@@ -179,7 +179,9 @@ const transformClass = (cls) => {
   if (!isRecord(cls)) return null
   const id = toText(cls.id)
   if (!id) return null
-  const resolvedCourseTitle = toText(cls.courseName) || toText(cls.courseTitle) || "Course"
+  const courseId = toText(cls.courseId) || null
+  const rawCourseTitle = toText(cls.courseName) || toText(cls.courseTitle)
+  const resolvedCourseTitle = courseId ? (rawCourseTitle || "Course") : (rawCourseTitle || null)
   const resolvedClassTitle = toText(cls.name) || toText(cls.title) || "Untitled Class"
   const resolvedStudentCount = toNullableNumber(
     cls.studentCount ?? cls.enrolledStudents,
@@ -217,7 +219,7 @@ const transformClass = (cls) => {
   return {
     ...cls,
     id,
-    courseId: toText(cls.courseId) || null,
+    courseId,
     courseName: resolvedCourseTitle,
     courseTitle: resolvedCourseTitle,
     name: resolvedClassTitle,
@@ -492,7 +494,7 @@ export const coursesApi = baseApi.injectEndpoints({
         params: {
           page: params?.page || 1,
           pageSize: params?.pageSize || 100,
-          language: params?.language,
+          language: params?.language ? params.language.toUpperCase() : undefined,
           search: params?.search,
         },
       }),
