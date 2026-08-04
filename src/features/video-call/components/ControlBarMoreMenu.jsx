@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -7,6 +7,7 @@ import { AnimatePresence } from "framer-motion"
 import SubtitleLanguagePicker from "./SubtitleLanguagePicker"
 import GameSetupModal from "@/features/games/components/shared/GameSetupModal"
 import GameHistoryModal from "@/features/games/components/shared/GameHistoryModal"
+import ChooseLayoutModal from "./ChooseLayoutModal"
 import MoreMenuDesktopView from "./MoreMenuDesktopView"
 import MoreMenuMobileView from "./MoreMenuMobileView"
 
@@ -24,6 +25,7 @@ const ControlBarMoreMenu = ({
   const [showGameHistory, setShowGameHistory] = useState(false)
   const [showMobileSettings, setShowMobileSettings] = useState(false)
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
+  const [showChooseLayout, setShowChooseLayout] = useState(false)
 
   return (
     <>
@@ -49,7 +51,7 @@ const ControlBarMoreMenu = ({
                       key="main-menu"
                       animationKey="main-menu"
                       direction="right"
-                      distance={20}
+                      distance={15}
                       exit={true}
                       duration={0.2}
                       className="w-full"
@@ -68,6 +70,7 @@ const ControlBarMoreMenu = ({
                         setShowGameSetup={setShowGameSetup}
                         setShowGameHistory={setShowGameHistory}
                         setShowSubtitlePicker={setShowSubtitlePicker}
+                        setShowChooseLayout={setShowChooseLayout}
                       />
                     </FluentAnimation>
                   ) : (
@@ -75,7 +78,7 @@ const ControlBarMoreMenu = ({
                       key="subtitle-picker"
                       animationKey="subtitle-picker"
                       direction="left"
-                      distance={20}
+                      distance={15}
                       exit={true}
                       duration={0.2}
                       className="flex w-full flex-col"
@@ -113,6 +116,11 @@ const ControlBarMoreMenu = ({
         open={showGameHistory}
         onClose={() => setShowGameHistory(false)}
         roomName={roomId}
+      />
+
+      <ChooseLayoutModal
+        open={showChooseLayout}
+        onClose={() => setShowChooseLayout(false)}
       />
     </>
   )

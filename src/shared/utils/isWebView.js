@@ -13,7 +13,7 @@ export const detectWebView = () => {
 
   // ── Known in-app browsers (order: most specific first) ──
   const patterns = [
-    { pattern: /ZaloTheme|Zalo/i, name: "Zalo" },
+    { pattern: /ZaloTheme|ZaloMobile|ZaloApp|ZaloWebview|Zalo/i, name: "Zalo" },
     { pattern: /FBAN|FBAV|FB_IAB/i, name: "Facebook" },
     { pattern: /\bMessenger\b/i, name: "Messenger" },
     { pattern: /\bInstagram\b/i, name: "Instagram" },

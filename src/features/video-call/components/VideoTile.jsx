@@ -3,9 +3,9 @@ import Avatar from "@/shared/components/ui/Avatar"
 import { useEffect, useRef, useReducer, useMemo } from "react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { Track, ParticipantEvent } from "livekit-client"
-import { motion } from "framer-motion"
 
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
@@ -61,7 +61,7 @@ const VideoTileInner = ({ participant, onClick }) => {
   const meta = parseMetadata(participant.metadata)
   // console.log("Participant Metadata [VideoTile]:", meta)
   const isHandRaised = meta.handRaised === true
-  const avatarUrl = meta.avatarImageUrl
+  const avatarUrl = sanitizeAvatarUrl(meta.avatarImageUrl)
 
   const theme = useMemo(
     () => getParticipantTheme(participant.identity),
