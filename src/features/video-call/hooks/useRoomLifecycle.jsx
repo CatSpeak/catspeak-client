@@ -174,8 +174,8 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
           toast.error(
             t?.rooms?.callEnded?.expiredToast ?? "The session has ended",
           );
-        } else if (reason) {
-          toast.error(`Disconnected from call (${reason})`, { duration: 5000 });
+        } else if (reason !== undefined && reason !== null) {
+          toast.error(`Disconnected from call (reason code: ${reason})`, { duration: 8000 });
         }
       }
     };

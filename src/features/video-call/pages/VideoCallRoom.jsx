@@ -140,7 +140,10 @@ const VideoCallRoomContent = () => {
   const [hasConnected, setHasConnected] = useState(false)
 
   useEffect(() => {
-    console.log("[VideoCallRoom] LiveKit connectionState changed:", connectionState)
+    console.log(
+      "[VideoCallRoom] LiveKit connectionState changed:",
+      connectionState,
+    )
     if (connectionState === ConnectionState.Connected) {
       setHasConnected(true)
     }
