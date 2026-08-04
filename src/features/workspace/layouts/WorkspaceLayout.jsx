@@ -18,10 +18,6 @@ const WorkspaceLayout = () => {
       if (isTeacherRoute) {
         navigate("/workspace/learning", { replace: true })
       }
-    } else if (isRoleResolved && isTeacher) {
-      if (location.pathname.includes("/workspace/learning")) {
-        navigate("/workspace/courses", { replace: true })
-      }
     }
   }, [isStudent, isTeacher, isRoleResolved, location.pathname, navigate])
 
