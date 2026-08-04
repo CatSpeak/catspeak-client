@@ -132,8 +132,8 @@ const SchedulePage = lazy(
 const CreateAssignmentPage = lazy(
   () => import("@/features/courses/pages/CreateAssignmentPage"),
 );
-const CustomRoomsPage = lazy(
-  () => import("@/features/rooms/pages/CustomRoomsPage"),
+const WorkspaceRoomsPage = lazy(
+  () => import("@/features/rooms/pages/WorkspaceRoomsPage"),
 );
 
 const CreateExamPage = lazy(
@@ -672,7 +672,7 @@ const routesConfig = [
                 path: "rooms",
                 element: (
                   <LazyRoute>
-                    <CustomRoomsPage />
+                    <WorkspaceRoomsPage />
                   </LazyRoute>
                 ),
               },
