@@ -112,7 +112,7 @@ const DeviceSettingsModal = ({
 
     if (isAudio) {
       options.unshift({
-        value: "default",
+        value: "",
         label: t?.rooms?.waitingScreen?.systemDefaultSpeaker || "System Default",
         icon: icon,
       })
