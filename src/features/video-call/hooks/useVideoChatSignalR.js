@@ -36,8 +36,12 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => token,
+        transport:
+          signalR.HttpTransportType.ServerSentEvents |
+          signalR.HttpTransportType.LongPolling,
       })
       .withAutomaticReconnect()
+      .configureLogging(signalR.LogLevel.None)
       .build()
 
     connection.on(
