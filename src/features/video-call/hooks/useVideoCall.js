@@ -27,59 +27,30 @@ export const useVideoCall = (t) => {
 
   const { switchBeauty, processorStatus } = useCombinedProcessor()
 
-  // Toggle mic — probes getUserMedia first to surface permission errors cleanly.
+  // Toggle mic — direct LiveKit activation with WebAudio unlock for iOS Safari
   const toggleAudio = useCallback(async () => {
     if (isTogglingMic) return
     setIsTogglingMic(true)
+
     try {
-      if (!isMicrophoneEnabled) {
-        let probe = null
-        try {
-          probe = await navigator.mediaDevices.getUserMedia({ audio: true })
-          const audioTrack = probe.getAudioTracks()[0]
-
-          if (audioTrack?.muted) {
-            const unmuted = await new Promise((resolve) => {
-              const onUnmute = () => resolve(true)
-              audioTrack.addEventListener("unmute", onUnmute, { once: true })
-              setTimeout(() => {
-                audioTrack.removeEventListener("unmute", onUnmute)
-                resolve(false)
-              }, 2000)
-            })
-            if (!unmuted) {
-              toast.error(
-                t?.rooms?.waitingScreen?.micInUse ??
-                  "Microphone is in use by another app.",
-              )
-              return
-            }
-          }
-        } finally {
-          probe?.getTracks().forEach((tr) => tr.stop())
-        }
+      if (room?.startAudio) {
+        await room.startAudio().catch(() => {})
       }
-
       await room.localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)
     } finally {
       setIsTogglingMic(false)
     }
-  }, [room, isMicrophoneEnabled, t, isTogglingMic])
+  }, [room, isMicrophoneEnabled, isTogglingMic])
 
-  // Toggle webcam — probes getUserMedia first to surface permission errors.
+  // Toggle webcam — direct LiveKit activation with WebAudio unlock for iOS Safari
   const toggleVideo = useCallback(async () => {
     if (isTogglingCam) return
     setIsTogglingCam(true)
-    try {
-      if (!isCameraEnabled) {
-        let probe = null
-        try {
-          probe = await navigator.mediaDevices.getUserMedia({ video: true })
-        } finally {
-          probe?.getTracks().forEach((tr) => tr.stop())
-        }
-      }
 
+    try {
+      if (room?.startAudio) {
+        await room.startAudio().catch(() => {})
+      }
       await room.localParticipant.setCameraEnabled(!isCameraEnabled)
     } finally {
       setIsTogglingCam(false)
