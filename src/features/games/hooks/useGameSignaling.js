@@ -3,6 +3,7 @@ import {
   HubConnectionBuilder,
   HubConnectionState,
   LogLevel,
+  HttpTransportType,
 } from "@microsoft/signalr"
 import { useAuth } from "@/features/auth"
 import { store } from "@store"
