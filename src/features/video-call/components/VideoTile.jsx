@@ -3,6 +3,8 @@ import Avatar from "@/shared/components/ui/Avatar"
 import { useEffect, useRef, useReducer, useMemo } from "react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { Track, ParticipantEvent } from "livekit-client"
+import { motion } from "framer-motion"
+
 
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"

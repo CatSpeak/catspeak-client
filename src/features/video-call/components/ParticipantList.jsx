@@ -1,4 +1,5 @@
 import React, { useMemo } from "react"
+import { motion } from "framer-motion"
 import {
   Mic,
   MicOff,
@@ -73,11 +74,8 @@ const ParticipantItem = ({ participant }) => {
         size={40}
         name={name}
         src={avatarUrl}
-        className={`${
-          isSpeaking
-            ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white transition-all duration-200"
-            : ""
-        } ${theme?.avatarClass || ""}`}
+        speaking={isSpeaking}
+        className={theme?.avatarClass || ""}
       />
     </div>
   )
@@ -85,9 +83,19 @@ const ParticipantItem = ({ participant }) => {
   const rightContent = (
     <div className="flex items-center gap-2 shrink-0">
       {isHandRaised && (
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50">
+        <motion.div
+          animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.5,
+            ease: "easeInOut",
+            repeatDelay: 1,
+          }}
+          style={{ originX: 0.7, originY: 0.7 }}
+          className="flex flex-shrink-0 items-center justify-center"
+        >
           <Hand size={18} className="text-amber-500" />
-        </span>
+        </motion.div>
       )}
       {isMicOn ? (
         <Mic size={20} className="text-cath-red-700" />
