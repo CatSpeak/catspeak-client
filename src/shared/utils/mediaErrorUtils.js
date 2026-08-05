@@ -24,7 +24,7 @@ export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
   if (webview.isWebView) {
     const wvMsg = t?.rooms?.waitingScreen?.webViewWarning ??
       "You are in an in-app browser. Please open in Safari for microphone and camera access."
-    toast.error(wvMsg, { duration: 8000 })
+    toast.error(wvMsg)
     return wvMsg
   }
 
@@ -96,11 +96,6 @@ export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
       }
   }
 
-  // Append error name if available so mobile QA/testers can easily report/screenshot the exact error
-  if (err?.name) {
-    message = `${message} (${err.name})`
-  }
-
-  toast.error(message, { duration: 6000 })
+  toast.error(message)
   return message
 }
