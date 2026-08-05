@@ -220,7 +220,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
           stack: err?.stack,
           raw: err,
         })
-        toast.error(`LiveKit connection error: ${err?.message || err?.name || "Unknown"}`, { duration: 8000 })
       }}
     >
       <GlobalCallContent

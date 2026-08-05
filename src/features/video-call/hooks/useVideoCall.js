@@ -5,7 +5,6 @@ import {
   useConnectionState,
 } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
-import toast from "react-hot-toast"
 import { useCombinedProcessor } from "@/features/video-call/processors/useCombinedProcessor"
 import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
 
