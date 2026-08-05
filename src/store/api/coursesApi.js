@@ -484,6 +484,44 @@ const buildCreateClassFormData = (data) => buildFormData({
   Status: data.status || null,
 })
 
+const buildAnalyticsQueryParams = (params = {}) => {
+  const mapping = {
+    groupBy: "GroupBy",
+    GroupBy: "GroupBy",
+    startDate: "StartDate",
+    StartDate: "StartDate",
+    endDate: "EndDate",
+    EndDate: "EndDate",
+    compareStartDate: "CompareStartDate",
+    CompareStartDate: "CompareStartDate",
+    compareEndDate: "CompareEndDate",
+    CompareEndDate: "CompareEndDate",
+    courseId: "CourseId",
+    CourseId: "CourseId",
+    classId: "ClassId",
+    ClassId: "ClassId",
+    includeStandaloneClasses: "IncludeStandaloneClasses",
+    IncludeStandaloneClasses: "IncludeStandaloneClasses",
+    page: "Page",
+    Page: "Page",
+    pageSize: "PageSize",
+    PageSize: "PageSize",
+    sortBy: "SortBy",
+    SortBy: "SortBy",
+    sortOrder: "SortOrder",
+    SortOrder: "SortOrder",
+  }
+
+  const queryParams = {}
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && val !== "") {
+      const targetKey = mapping[key] || key
+      queryParams[targetKey] = val
+    }
+  })
+  return queryParams
+}
+
 export const coursesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Student Endpoints
@@ -1956,6 +1994,192 @@ export const coursesApi = baseApi.injectEndpoints({
         return list
       },
     }),
+
+    // ─── Analytics Endpoints ──────────────────────────────────────────
+
+    // 1. AnalyticsCourseClass
+    getAnalyticsCourseClassOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsCourseClassEffectiveness: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/course-effectiveness",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsCourseClassStandaloneClasses: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/standalone-classes",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsCourseClassHotClasses: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/hot-classes",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsCourseClass: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // 2. AnalyticsQuality
+    getAnalyticsQualityOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsQualityRatingTrend: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/rating-trend",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsQualityRatingDistribution: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/rating-distribution",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsQualityByClass: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/by-class",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsQuality: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // 3. AnalyticsRevenue
+    getAnalyticsRevenueOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsRevenueTrend: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/trend",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsRevenueByClass: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/by-class",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsRevenueTopClasses: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/top-classes",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsRevenue: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // 4. AnalyticsStudents
+    getAnalyticsStudentsOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsStudentsGrowth: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/growth",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsStudentsByClass: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/by-class",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsStudentsByCourse: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/by-course",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsStudents: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/students/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
   }),
 })
 
@@ -2065,4 +2289,25 @@ export const {
   // Teaching Tasks Hooks
   useGetTeacherClassTeachingTasksCombinedQuery,
   useGetTeacherCourseTeachingTasksCombinedQuery,
+  // Analytics Hooks
+  useGetAnalyticsCourseClassOverviewQuery,
+  useGetAnalyticsCourseClassEffectivenessQuery,
+  useGetAnalyticsCourseClassStandaloneClassesQuery,
+  useGetAnalyticsCourseClassHotClassesQuery,
+  useExportAnalyticsCourseClassMutation,
+  useGetAnalyticsQualityOverviewQuery,
+  useGetAnalyticsQualityRatingTrendQuery,
+  useGetAnalyticsQualityRatingDistributionQuery,
+  useGetAnalyticsQualityByClassQuery,
+  useExportAnalyticsQualityMutation,
+  useGetAnalyticsRevenueOverviewQuery,
+  useGetAnalyticsRevenueTrendQuery,
+  useGetAnalyticsRevenueByClassQuery,
+  useGetAnalyticsRevenueTopClassesQuery,
+  useExportAnalyticsRevenueMutation,
+  useGetAnalyticsStudentsOverviewQuery,
+  useGetAnalyticsStudentsGrowthQuery,
+  useGetAnalyticsStudentsByClassQuery,
+  useGetAnalyticsStudentsByCourseQuery,
+  useExportAnalyticsStudentsMutation,
 } = coursesApi

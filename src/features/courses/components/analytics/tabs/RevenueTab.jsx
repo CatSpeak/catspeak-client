@@ -4,44 +4,97 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { trendData, labels, money, numberVi } from "../../../data/analyticsData"
+import { labels, money, numberVi } from "../../../data/analyticsData"
+import {
+  useGetAnalyticsRevenueOverviewQuery,
+  useGetAnalyticsRevenueTrendQuery,
+  useGetAnalyticsRevenueByClassQuery,
+  useGetAnalyticsRevenueTopClassesQuery,
+} from "@/store/api/coursesApi"
 
-const RevenueTab = ({ group, filteredClasses }) => {
+const RevenueTab = ({ group, queryParams = {} }) => {
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
   const colT = analyticsT.tableCols || {}
 
-  const trend = trendData[group] || trendData.month
+  const activeParams = {
+    groupBy: group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month",
+    ...queryParams,
+  }
 
+  // RTK Query API calls
+  const { data: overviewData } = useGetAnalyticsRevenueOverviewQuery(activeParams)
+  const { data: trendDataApi } = useGetAnalyticsRevenueTrendQuery(activeParams)
+  const { data: revenueByClassData } = useGetAnalyticsRevenueByClassQuery(activeParams)
+  const { data: topClassesData } = useGetAnalyticsRevenueTopClassesQuery(activeParams)
+
+  // 1. KPIs (strict API data)
+  const overview = overviewData || {}
   const kpis = [
-    { label: kpiT.totalRevenue || "Tổng doanh thu", value: "85.600.000 đ", delta: "↑ 18%", tone: "red", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.netEarnings || "Thực nhận", value: "81.320.000 đ", delta: "↑ 18%", tone: "green", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.platformFee || "Phí nền tảng", value: "4.280.000 đ", delta: "↑ 15%", tone: "blue", note: kpiT.vsPrevious || "so với kỳ trước" },
+    {
+      label: kpiT.totalRevenue || "Tổng doanh thu",
+      value: money(overview.totalRevenue ?? 0),
+      delta: "",
+      tone: "red",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.netEarnings || "Thực nhận",
+      value: money(overview.netReceipt ?? 0),
+      delta: "",
+      tone: "green",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.platformFee || "Phí nền tảng",
+      value: money(overview.platformFee ?? 0),
+      delta: "",
+      tone: "blue",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
     {
       label: kpiT.topRevenueClass || "Lớp doanh thu cao nhất",
-      value: "24.000.000 đ",
-      delta: "↑ 12%",
+      value: overview.topClassByRevenue || "-",
+      delta: "",
       tone: "orange",
-      note: "AC-T2-4-6 Buổi tối",
+      note: "Top lớp",
     },
-    { label: kpiT.avgRevenuePerClass || "Doanh thu TB/lớp", value: "7.704.000 đ", delta: "↑ 12,4%", tone: "purple", note: kpiT.vsPrevious || "so với kỳ trước" },
+    {
+      label: kpiT.avgRevenuePerClass || "Doanh thu TB/lớp",
+      value: money(overview.averageRevenuePerClass ?? 0),
+      delta: "",
+      tone: "purple",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
   ]
 
-  const topRows = [...filteredClasses].sort((a, b) => b.gross - a.gross).slice(0, 8)
-  const barData = topRows.map((r) => ({
+  // 2. Bar Chart Data (Top Classes)
+  const topItems = topClassesData?.data || (Array.isArray(topClassesData) ? topClassesData : [])
+  const barData = topItems.map((r) => ({
     label: r.className,
-    value: r.gross,
+    value: r.grossRevenue ?? r.revenue ?? 0,
   }))
 
-  const tableData = filteredClasses.map((r) => ({
+  // 3. Line Chart Data (Revenue Trend)
+  const trendPoints = trendDataApi?.trendData || []
+
+  const chartLabels = trendPoints.length > 0
+    ? trendPoints.map((p) => p.label || p.date)
+    : (labels[group] || labels.month)
+
+  const seriesRevenue = trendPoints.map((p) => (p.totalRevenue != null ? p.totalRevenue / 1000000 : 0))
+
+  // 4. Detail Table Data
+  const tableItems = revenueByClassData?.data || (Array.isArray(revenueByClassData) ? revenueByClassData : [])
+  const tableData = tableItems.map((r) => ({
     className: r.className,
-    course: r.course,
-    learners: r.learners,
-    gross: money(r.gross),
-    fee: money(r.fee),
-    net: money(r.net),
+    course: r.courseName || "Khóa học",
+    learners: r.studentCount,
+    gross: money(r.grossRevenue || 0),
+    fee: money(r.platformFee || 0),
+    net: money(r.netReceipt || 0),
   }))
 
   const millionLabel = secT.millionVnd || "Triệu đồng"
@@ -64,8 +117,8 @@ const RevenueTab = ({ group, filteredClasses }) => {
         <div className="lg:col-span-7 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
           <h2 className="text-base font-bold text-gray-900 mb-3">{secT.revenueTrend || "Xu hướng doanh thu"}</h2>
           <AnalyticsLineChart
-            chartLabels={labels[group] || labels.month}
-            series={[{ name: kpiT.totalRevenue || "Doanh thu", values: trend.revenue, color: "#e11d2e" }]}
+            chartLabels={chartLabels}
+            series={[{ name: kpiT.totalRevenue || "Doanh thu", values: seriesRevenue, color: "#e11d2e" }]}
             yAxisLabel={millionLabel}
             valueFormatter={(val) => `${numberVi(val)} ${millionShortLabel}`}
             axisFormatter={(val) => `${numberVi(val)}tr`}

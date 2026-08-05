@@ -34,8 +34,8 @@ export const groupMeta = {
   },
   month: {
     label: 'Theo tháng',
-    periods: ['Năm 2025', 'Năm 2024', 'Năm 2023'],
-    comparisons: ['Năm 2024', 'Năm 2023'],
+    periods: ['2025', '2024', '2023'],
+    comparisons: ['2024', '2023'],
   },
   year: {
     label: 'Theo năm',

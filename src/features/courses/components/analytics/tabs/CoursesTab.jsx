@@ -3,48 +3,103 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsDataTable from "../AnalyticsDataTable"
 import HotClassRanking from "../HotClassRanking"
-import { courseRows, money } from "../../../data/analyticsData"
+import { money } from "../../../data/analyticsData"
+import {
+  useGetAnalyticsCourseClassOverviewQuery,
+  useGetAnalyticsCourseClassEffectivenessQuery,
+  useGetAnalyticsCourseClassStandaloneClassesQuery,
+  useGetAnalyticsCourseClassHotClassesQuery,
+} from "@/store/api/coursesApi"
 
-const CoursesTab = ({ courseFilter, filteredClasses }) => {
+const CoursesTab = ({ queryParams = {} }) => {
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
   const colT = analyticsT.tableCols || {}
 
+  const activeParams = {
+    groupBy: "Month",
+    ...queryParams,
+  }
+
+  // RTK Query API calls
+  const { data: overviewData } = useGetAnalyticsCourseClassOverviewQuery(activeParams)
+  const { data: effectivenessData } = useGetAnalyticsCourseClassEffectivenessQuery(activeParams)
+  const { data: standaloneData } = useGetAnalyticsCourseClassStandaloneClassesQuery(activeParams)
+  const { data: hotClassesData } = useGetAnalyticsCourseClassHotClassesQuery(activeParams)
+
+  // 1. KPIs (strict API data)
+  const overview = overviewData || {}
   const kpis = [
-    { label: kpiT.totalCourses || "Tổng khóa học", value: "12", delta: "↑ 1", tone: "green", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.totalClasses || "Tổng lớp học", value: "36", delta: "↑ 5", tone: "orange", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.activeClasses || "Lớp đang mở", value: "14", delta: "↑ 2", tone: "blue", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.avgFillRate || "Tỷ lệ lấp đầy TB", value: "76%", delta: "↑ 6%", tone: "purple", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.avgCompletionRate || "Tỷ lệ hoàn thành TB", value: "82%", delta: "↑ 5%", tone: "green", note: kpiT.vsPrevious || "so với kỳ trước" },
+    {
+      label: kpiT.totalCourses || "Tổng khóa học",
+      value: String(overview.totalCourses ?? 0),
+      delta: "",
+      tone: "green",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.totalClasses || "Tổng lớp học",
+      value: String(overview.totalClasses ?? 0),
+      delta: "",
+      tone: "orange",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.activeClasses || "Lớp đang mở",
+      value: String(overview.openClasses ?? 0),
+      delta: "",
+      tone: "blue",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.avgFillRate || "Tỷ lệ lấp đầy TB",
+      value: `${overview.averageFillRate ?? 0}%`,
+      delta: "",
+      tone: "purple",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.avgCompletionRate || "Tỷ lệ hoàn thành TB",
+      value: `${overview.averageCompletionRate ?? 0}%`,
+      delta: "",
+      tone: "green",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
   ]
 
-  const allCoursesStr = analyticsT.filters?.allCourses || "Tất cả khóa học"
-  const visibleCourseRows =
-    courseFilter === allCoursesStr || courseFilter === "Tất cả khóa học"
-      ? courseRows
-      : courseRows.filter((r) => r.course === courseFilter)
-
-  const courseTableData = visibleCourseRows.map((r) => ({
-    course: r.course,
+  // 2. Course Performance Table Data
+  const effItems = effectivenessData?.data || (Array.isArray(effectivenessData) ? effectivenessData : [])
+  const courseTableData = effItems.map((r) => ({
+    course: r.courseName,
     classCount: r.classCount,
-    students: r.students,
-    average: money(r.average),
-    fill: `${r.fill}%`,
-    completion: `${r.completion}%`,
+    students: r.totalStudents,
+    average: money(r.averageRevenuePerClass || 0),
+    fill: `${r.averageFillRate}%`,
+    completion: `${r.averageCompletionRate}%`,
   }))
 
-  const unassignedStr = analyticsT.filters?.unassigned || "Không thuộc khóa"
-  const independentClasses = filteredClasses
-    .filter((r) => r.course === unassignedStr || r.course === "Không thuộc khóa")
-    .map((r) => ({
-      className: r.className,
-      students: r.learners,
-      gross: money(r.gross),
-      fill: `${r.fill}%`,
-      completion: `${r.completion}%`,
-    }))
+  // 3. Standalone Classes Table Data
+  const saItems = standaloneData?.data || (Array.isArray(standaloneData) ? standaloneData : [])
+  const independentClasses = saItems.map((r) => ({
+    className: r.className,
+    students: r.studentCount,
+    gross: money(r.revenue || 0),
+    fill: `${r.fillRate}%`,
+    completion: `${r.completionRate}%`,
+  }))
+
+  // 4. Hot Class Ranking Data
+  const hotItems = hotClassesData?.data || (Array.isArray(hotClassesData) ? hotClassesData : [])
+  const hotRankingRows = hotItems.map((r) => ({
+    className: r.className,
+    course: r.courseName || "Khóa học",
+    learners: r.students,
+    fill: r.fillRate,
+    gross: r.revenue,
+    newRegistrations: r.newEnrollments || 0,
+  }))
 
   return (
     <div className="flex flex-col gap-4">
@@ -87,7 +142,7 @@ const CoursesTab = ({ courseFilter, filteredClasses }) => {
       {/* Hot Class Popularity Ranking */}
       <div className="bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
         <h2 className="text-base font-bold text-gray-900 mb-3">{secT.hotClassRanking || "Mức độ hot của từng lớp"}</h2>
-        <HotClassRanking rows={filteredClasses} pageSize={6} />
+        <HotClassRanking rows={hotRankingRows} pageSize={6} />
       </div>
     </div>
   )

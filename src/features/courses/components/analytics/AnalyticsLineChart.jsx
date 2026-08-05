@@ -41,7 +41,6 @@ const CustomTooltip = ({ active, payload, label, valueFormatter }) => {
 const AnalyticsLineChart = ({
   chartLabels = [],
   series = [],
-  yAxisLabel,
   valueFormatter = (val) => numberVi(val),
   axisFormatter = (val) => numberVi(val),
   clickable = false,

@@ -1,7 +1,8 @@
 import React from "react"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { courses, standaloneClasses, groupMeta, exportCsv } from "../../data/analyticsData"
+import { groupMeta } from "../../data/analyticsData"
+import { useGetAllCoursesQuery, useGetAllClassesQuery } from "@/store/api/coursesApi"
 
 const AnalyticsFilterBar = ({
   group,
@@ -14,11 +15,21 @@ const AnalyticsFilterBar = ({
   setCourse,
   className,
   setClassName,
-  filteredClasses = [],
+  onExport,
+  isExporting = false,
 }) => {
   const { t } = useLanguage()
   const filterT = t.courses?.analytics?.filters || {}
   const meta = groupMeta[group] || groupMeta.month
+
+  // Fetch real courses & classes from RTK Query
+  const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 100 })
+  const { data: classesResponse } = useGetAllClassesQuery({ pageSize: 100 })
+
+  const realCourses = coursesResponse?.data || []
+  const realClasses = classesResponse?.data || []
+
+  const courseList = realCourses.map(c => c.name || c.title)
 
   const handleGroupChange = (e) => {
     const newGroup = e.target.value
@@ -40,13 +51,17 @@ const AnalyticsFilterBar = ({
 
   const getClassOptions = () => {
     if (course === allCoursesLabel || course === "Tất cả khóa học") {
-      return [allClassesLabel, ...courses.flatMap((item) => item.classes), ...standaloneClasses]
+      return [allClassesLabel, ...realClasses.map(c => c.name || c.title)]
     }
     if (course === unassignedLabel || course === "Không thuộc khóa") {
-      return [allClassesLabel, ...standaloneClasses]
+      const unassigned = realClasses.filter(c => !c.courseId)
+      return [allClassesLabel, ...unassigned.map(c => c.name || c.title)]
     }
-    const found = courses.find((item) => item.name === course)
-    return [allClassesLabel, ...(found?.classes || [])]
+    const selectedCourse = realCourses.find(c => (c.name || c.title) === course)
+    const courseClasses = selectedCourse
+      ? realClasses.filter(c => String(c.courseId) === String(selectedCourse.id))
+      : []
+    return [allClassesLabel, ...courseClasses.map(c => c.name || c.title)]
   }
 
   const groupLabels = {
@@ -54,6 +69,12 @@ const AnalyticsFilterBar = ({
     week: filterT.byWeek || "Theo tuần",
     month: filterT.byMonth || "Theo tháng",
     year: filterT.byYear || "Theo năm",
+  }
+
+  const handleExportClick = () => {
+    if (onExport) {
+      onExport()
+    }
   }
 
   return (
@@ -119,9 +140,9 @@ const AnalyticsFilterBar = ({
           className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
           <option value={allCoursesLabel}>{allCoursesLabel}</option>
-          {courses.map((item) => (
-            <option key={item.id} value={item.name}>
-              {item.name}
+          {courseList.map((cName) => (
+            <option key={cName} value={cName}>
+              {cName}
             </option>
           ))}
           <option value={unassignedLabel}>{unassignedLabel}</option>
@@ -148,11 +169,12 @@ const AnalyticsFilterBar = ({
       {/* Export button */}
       <button
         type="button"
-        onClick={() => exportCsv(filteredClasses)}
-        className="h-10 border border-[#990011] text-[#990011] hover:bg-[#990011]/5 bg-white font-bold rounded-xl flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer"
+        disabled={isExporting}
+        onClick={handleExportClick}
+        className="h-10 border border-[#990011] text-[#990011] hover:bg-[#990011]/5 bg-white font-bold rounded-xl flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
       >
         <Download size={18} />
-        {filterT.exportReport || "Xuất báo cáo"}
+        {isExporting ? "Đang xuất..." : (filterT.exportReport || "Xuất báo cáo")}
       </button>
     </section>
   )

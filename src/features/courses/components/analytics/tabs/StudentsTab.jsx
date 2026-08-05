@@ -4,48 +4,107 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { trendData, labels, studentCourseRows, numberVi } from "../../../data/analyticsData"
+import { labels, numberVi } from "../../../data/analyticsData"
+import {
+  useGetAnalyticsStudentsOverviewQuery,
+  useGetAnalyticsStudentsGrowthQuery,
+  useGetAnalyticsStudentsByClassQuery,
+  useGetAnalyticsStudentsByCourseQuery,
+} from "@/store/api/coursesApi"
 
-const StudentsTab = ({ group, courseFilter, filteredClasses, onDrillDown }) => {
+const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
   const colT = analyticsT.tableCols || {}
 
-  const trend = trendData[group] || trendData.month
+  const activeParams = {
+    groupBy: group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month",
+    ...queryParams,
+  }
 
+  // RTK Query API calls
+  const { data: overviewData } = useGetAnalyticsStudentsOverviewQuery(activeParams)
+  const { data: growthData } = useGetAnalyticsStudentsGrowthQuery(activeParams)
+  const { data: studentsByClassData } = useGetAnalyticsStudentsByClassQuery(activeParams)
+  const { data: studentsByCourseData } = useGetAnalyticsStudentsByCourseQuery(activeParams)
+
+  // 1. KPIs Mapping (strict API data)
+  const overview = overviewData || {}
   const kpis = [
-    { label: kpiT.totalStudents || "Tổng học viên", value: "1.256", delta: "↑ 12%", tone: "red", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.newStudents || "Học viên mới", value: "186", delta: "↑ 24%", tone: "green", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.returningStudents || "Học viên quay lại", value: "1.070", delta: "↑ 8%", tone: "orange", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.retentionRate || "Tỷ lệ duy trì học viên", value: "72,4%", delta: "↑ 4,1%", tone: "purple", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại", value: "61%", delta: "↑ 5%", tone: "orange", note: kpiT.vsPrevious || "so với kỳ trước" },
+    {
+      label: kpiT.totalStudents || "Tổng học viên",
+      value: numberVi(overview.totalStudents ?? 0, 0),
+      delta: "",
+      tone: "red",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.newStudents || "Học viên mới",
+      value: numberVi(overview.newStudents ?? 0, 0),
+      delta: "",
+      tone: "green",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.returningStudents || "Học viên quay lại",
+      value: numberVi(overview.returningStudents ?? 0, 0),
+      delta: "",
+      tone: "orange",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.retentionRate || "Tỷ lệ duy trì học viên",
+      value: `${numberVi(overview.retentionRate ?? 0, 1)}%`,
+      delta: "",
+      tone: "purple",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
+      value: `${numberVi(overview.reenrollmentRate ?? 0, 1)}%`,
+      delta: "",
+      tone: "orange",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
   ]
 
-  const allCoursesStr = analyticsT.filters?.allCourses || "Tất cả khóa học"
-  const visibleCourses =
-    courseFilter === allCoursesStr || courseFilter === "Tất cả khóa học"
-      ? studentCourseRows
-      : studentCourseRows.filter((r) => r.course === courseFilter)
+  // 2. Growth Line Chart
+  const growthPoints = growthData?.growthData || []
 
-  const courseTableData = visibleCourses.map((r) => ({
-    ...r,
-    retention: `${r.retention}%`,
+  const chartLabels = growthPoints.length > 0
+    ? growthPoints.map((p) => p.label || p.date)
+    : (labels[group] || labels.month)
+
+  const seriesTotalStudents = growthPoints.map((p) => p.totalStudents ?? 0)
+  const seriesNewStudents = growthPoints.map((p) => p.newStudents ?? 0)
+
+  // 3. Course Table Data
+  const courseItems = studentsByCourseData?.data || (Array.isArray(studentsByCourseData) ? studentsByCourseData : [])
+  const courseTableData = courseItems.map((r) => ({
+    course: r.courseName,
+    classCount: r.classCount,
+    total: r.totalStudents,
+    average: r.averageStudentsPerClass || (r.classCount ? Math.round(r.totalStudents / r.classCount) : r.totalStudents),
+    newStudents: r.newStudents,
+    retention: `${r.retentionRate}%`,
   }))
 
-  const classTableData = filteredClasses.map((r) => ({
+  // 4. Class Table Data & Bar Data
+  const classItems = studentsByClassData?.data || (Array.isArray(studentsByClassData) ? studentsByClassData : [])
+  const classTableData = classItems.map((r) => ({
     className: r.className,
-    course: r.course,
-    learners: r.learners,
-    newStudents: Math.max(1, r.newRegistrations),
-    returning: Math.max(0, r.learners - r.newRegistrations),
-    fill: `${r.fill}%`,
+    course: r.courseName || "Khóa học",
+    learners: r.totalStudents,
+    newStudents: r.newStudents,
+    returning: r.returningStudents,
+    fill: `${r.fillRate}%`,
   }))
 
-  const barData = filteredClasses.slice(0, 6).map((r) => ({
+  const barData = classItems.slice(0, 6).map((r) => ({
     label: r.className,
-    value: r.learners,
+    value: r.totalStudents,
   }))
 
   const hvSuffix = secT.studentsShort || "HV"
@@ -61,10 +120,10 @@ const StudentsTab = ({ group, courseFilter, filteredClasses, onDrillDown }) => {
         <div className="lg:col-span-7 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
           <h2 className="text-base font-bold text-gray-900 mb-3">{secT.studentGrowth || "Tăng trưởng học viên"}</h2>
           <AnalyticsLineChart
-            chartLabels={labels[group] || labels.month}
+            chartLabels={chartLabels}
             series={[
-              { name: kpiT.totalStudents || "Tổng học viên", values: trend.students, color: "#e11d2e" },
-              { name: kpiT.newStudents || "Học viên mới", values: trend.newStudents, color: "#f97316" },
+              { name: kpiT.totalStudents || "Tổng học viên", values: seriesTotalStudents, color: "#e11d2e" },
+              { name: kpiT.newStudents || "Học viên mới", values: seriesNewStudents, color: "#f97316" },
             ]}
             yAxisLabel={kpiT.totalStudents || "Số học viên"}
             valueFormatter={(val) => `${numberVi(val, 0)} ${hvSuffix}`}

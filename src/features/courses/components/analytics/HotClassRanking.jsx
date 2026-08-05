@@ -13,7 +13,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
   const [currentPage, setCurrentPage] = useState(1)
 
   const sorted = [...rows].sort(
-    (a, b) => b.fill - a.fill || b.newRegistrations - a.newRegistrations || b.gross - a.gross
+    (a, b) => (b.fill ?? 0) - (a.fill ?? 0) || (b.newRegistrations ?? 0) - (a.newRegistrations ?? 0) || (b.gross ?? 0) - (a.gross ?? 0)
   )
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
@@ -27,13 +27,16 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
         <div className="flex flex-col border-t border-b border-[#edf0f3] divide-y divide-[#edf0f3]">
           {visibleRows.map((row, idx) => {
             const globalRank = startIdx + idx + 1
-            const capacity = Math.max(
-              row.learners,
-              Math.ceil(row.learners / Math.max(row.fill / 100, 0.01))
+            const learners = row.learners ?? 0
+            const fill = row.fill ?? 0
+            const capacity = row.capacity || Math.max(
+              learners,
+              Math.ceil(learners / Math.max(fill / 100, 0.01))
             )
+            const newReg = row.newRegistrations ?? 0
             return (
               <div
-                key={row.className}
+                key={row.className || idx}
                 className="grid grid-cols-1 md:grid-cols-[36px_minmax(200px,1.25fr)_minmax(220px,1.6fr)] gap-3 items-center py-3 px-2 hover:bg-[#fffafb] transition-colors"
               >
                 {/* Rank number */}
@@ -47,7 +50,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
                     {row.className}
                   </strong>
                   <small className="text-[11px] text-gray-500 truncate">
-                    {row.course} · {row.learners}/{capacity} {learnersStr} · +{row.newRegistrations} {newRegStr}
+                    {row.course} · {learners}/{capacity} {learnersStr} · +{newReg} {newRegStr}
                   </small>
                 </div>
 
@@ -56,11 +59,11 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
                   <div className="h-2.5 rounded-full bg-[#eff1f4] overflow-hidden w-full">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-[#dc1630] to-[#f06b79] transition-all duration-500"
-                      style={{ width: `${Math.min(row.fill, 100)}%` }}
+                      style={{ width: `${Math.min(fill, 100)}%` }}
                     />
                   </div>
                   <strong className="text-right text-xs font-bold text-gray-900 tabular-nums">
-                    {row.fill}%
+                    {fill}%
                   </strong>
                 </div>
               </div>
@@ -94,8 +97,8 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
                 type="button"
                 onClick={() => setCurrentPage(pNum)}
                 className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${pNum === safePage
-                    ? "bg-[#990011] border-[#990011] text-white"
-                    : "bg-white border-gray-200 text-gray-700 hover:border-[#990011] hover:text-[#990011]"
+                  ? "bg-[#990011] border-[#990011] text-white"
+                  : "bg-white border-gray-200 text-gray-700 hover:border-[#990011] hover:text-[#990011]"
                   }`}
               >
                 {pNum}

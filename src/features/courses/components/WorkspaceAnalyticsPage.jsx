@@ -1,17 +1,25 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { BarChart3 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { classRows } from "../data/analyticsData"
 
 import AnalyticsFilterBar from "./analytics/AnalyticsFilterBar"
 import StudentsTab from "./analytics/tabs/StudentsTab"
 import RevenueTab from "./analytics/tabs/RevenueTab"
 import CoursesTab from "./analytics/tabs/CoursesTab"
 import QualityTab from "./analytics/tabs/QualityTab"
+import {
+  useExportAnalyticsStudentsMutation,
+  useExportAnalyticsRevenueMutation,
+  useExportAnalyticsCourseClassMutation,
+  useExportAnalyticsQualityMutation,
+  useGetAllCoursesQuery,
+  useGetAllClassesQuery,
+} from "@/store/api/coursesApi"
 
 const WorkspaceAnalyticsPage = () => {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
 
@@ -38,19 +46,42 @@ const WorkspaceAnalyticsPage = () => {
     },
   ]
 
-  const [activeTab, setActiveTab] = useState("students")
+  const urlTab = searchParams.get("tab") || searchParams.get("tabs")
+  const VALID_TABS = ["students", "revenue", "courses", "quality"]
+  const activeTab = urlTab && VALID_TABS.includes(urlTab) ? urlTab : "students"
+
+  const handleTabChange = (newTab) => {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set("tab", newTab)
+    nextParams.delete("tabs")
+    setSearchParams(nextParams, { replace: true })
+  }
+
   const [group, setGroup] = useState("month")
-  const [period, setPeriod] = useState("Năm 2025")
-  const [compare, setCompare] = useState("Năm 2024")
+  const [period, setPeriod] = useState("2025")
+  const [compare, setCompare] = useState("2024")
   const [courseFilter, setCourseFilter] = useState("Tất cả khóa học")
   const [classFilter, setClassFilter] = useState("Tất cả lớp học")
 
-  // Filter class rows according to global filter state
-  const filteredClasses = classRows.filter((r) => {
-    if (courseFilter !== "Tất cả khóa học" && courseFilter !== "All Courses" && courseFilter !== "所有课程" && r.course !== courseFilter) return false
-    if (classFilter !== "Tất cả lớp học" && classFilter !== "All Classes" && classFilter !== "所有班级" && r.className !== classFilter) return false
-    return true
-  })
+  // RTK Query hooks for course/class mapping and exports
+  const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 100 })
+  const { data: classesResponse } = useGetAllClassesQuery({ pageSize: 100 })
+
+  const [exportStudents, { isLoading: isExpStudents }] = useExportAnalyticsStudentsMutation()
+  const [exportRevenue, { isLoading: isExpRevenue }] = useExportAnalyticsRevenueMutation()
+  const [exportCourses, { isLoading: isExpCourses }] = useExportAnalyticsCourseClassMutation()
+  const [exportQuality, { isLoading: isExpQuality }] = useExportAnalyticsQualityMutation()
+
+  const isExporting = isExpStudents || isExpRevenue || isExpCourses || isExpQuality
+
+  const selectedCourseObj = (coursesResponse?.data || []).find(c => (c.name || c.title) === courseFilter)
+  const selectedClassObj = (classesResponse?.data || []).find(c => (c.name || c.title) === classFilter)
+
+  const activeQueryParams = {
+    groupBy: group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month",
+    courseId: selectedCourseObj ? parseInt(selectedCourseObj.id, 10) : undefined,
+    classId: selectedClassObj ? parseInt(selectedClassObj.id, 10) : undefined,
+  }
 
   // Drill-down from month trend to day trend
   const handleDrillDown = (monthIndex) => {
@@ -60,6 +91,32 @@ const WorkspaceAnalyticsPage = () => {
     const prevMonthNum = monthIndex === 0 ? "12" : String(monthIndex).padStart(2, "0")
     const prevYear = monthIndex === 0 ? "2024" : "2025"
     setCompare(`Tháng ${prevMonthNum}/${prevYear}`)
+  }
+
+  const handleExport = async () => {
+    try {
+      let exportFn
+      if (activeTab === "students") exportFn = exportStudents
+      else if (activeTab === "revenue") exportFn = exportRevenue
+      else if (activeTab === "courses") exportFn = exportCourses
+      else if (activeTab === "quality") exportFn = exportQuality
+
+      if (exportFn) {
+        const blob = await exportFn(activeQueryParams).unwrap()
+        if (blob) {
+          const url = window.URL.createObjectURL(new Blob([blob]))
+          const link = document.createElement("a")
+          link.href = url
+          link.setAttribute("download", `catspeak-${activeTab}-report.xlsx`)
+          document.body.appendChild(link)
+          link.click()
+          link.parentNode.removeChild(link)
+          window.URL.revokeObjectURL(url)
+        }
+      }
+    } catch (err) {
+      console.warn("API export failed:", err)
+    }
   }
 
   const currentTabObj = tabsList.find((tItem) => tItem.key === activeTab) || tabsList[0]
@@ -103,17 +160,17 @@ const WorkspaceAnalyticsPage = () => {
       {/* Main Analytics Container */}
       <div className="w-full flex flex-col">
         {/* Navigation Tabs Bar */}
-        <div className="flex gap-2 border-b border-gray-200 bg-white rounded-t-2xl px-3 pt-2 overflow-x-auto">
+        <div className="flex gap-2 border-b border-gray-200 bg-white rounded-t-2xl px-3 pt-2 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {tabsList.map((tab) => {
             const isActive = activeTab === tab.key
             return (
               <button
                 key={tab.key}
                 type="button"
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => handleTabChange(tab.key)}
                 className={`px-4 py-3.5 text-sm font-medium transition-all relative whitespace-nowrap cursor-pointer ${isActive
-                    ? "text-[#990011] font-bold"
-                    : "text-gray-500 hover:text-gray-800 font-medium"
+                  ? "text-[#990011] font-bold"
+                  : "text-gray-500 hover:text-gray-800 font-medium"
                   }`}
               >
                 {tab.label}
@@ -137,7 +194,8 @@ const WorkspaceAnalyticsPage = () => {
           setCourse={setCourseFilter}
           className={classFilter}
           setClassName={setClassFilter}
-          filteredClasses={filteredClasses}
+          onExport={handleExport}
+          isExporting={isExporting}
         />
 
         {/* Tab Content Views */}
@@ -146,21 +204,30 @@ const WorkspaceAnalyticsPage = () => {
             <StudentsTab
               group={group}
               courseFilter={courseFilter}
-              filteredClasses={filteredClasses}
               onDrillDown={handleDrillDown}
+              queryParams={activeQueryParams}
             />
           )}
 
           {activeTab === "revenue" && (
-            <RevenueTab group={group} filteredClasses={filteredClasses} />
+            <RevenueTab
+              group={group}
+              queryParams={activeQueryParams}
+            />
           )}
 
           {activeTab === "courses" && (
-            <CoursesTab courseFilter={courseFilter} filteredClasses={filteredClasses} />
+            <CoursesTab
+              courseFilter={courseFilter}
+              queryParams={activeQueryParams}
+            />
           )}
 
           {activeTab === "quality" && (
-            <QualityTab group={group} filteredClasses={filteredClasses} />
+            <QualityTab
+              group={group}
+              queryParams={activeQueryParams}
+            />
           )}
         </div>
       </div>

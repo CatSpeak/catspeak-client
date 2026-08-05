@@ -4,43 +4,98 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { trendData, labels, numberVi } from "../../../data/analyticsData"
+import { labels, numberVi } from "../../../data/analyticsData"
+import {
+  useGetAnalyticsQualityOverviewQuery,
+  useGetAnalyticsQualityRatingTrendQuery,
+  useGetAnalyticsQualityRatingDistributionQuery,
+  useGetAnalyticsQualityByClassQuery,
+} from "@/store/api/coursesApi"
 
-const QualityTab = ({ group, filteredClasses }) => {
+const QualityTab = ({ group, queryParams = {} }) => {
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
   const colT = analyticsT.tableCols || {}
 
-  const trend = trendData[group] || trendData.month
+  const activeParams = {
+    groupBy: group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month",
+    ...queryParams,
+  }
 
+  // RTK Query API calls
+  const { data: overviewData } = useGetAnalyticsQualityOverviewQuery(activeParams)
+  const { data: ratingTrendApi } = useGetAnalyticsQualityRatingTrendQuery(activeParams)
+  const { data: starDistApi } = useGetAnalyticsQualityRatingDistributionQuery(activeParams)
+  const { data: qualityByClassData } = useGetAnalyticsQualityByClassQuery(activeParams)
+
+  // 1. KPIs (strict API data)
+  const overview = overviewData || {}
   const kpis = [
-    { label: kpiT.avgRating || "Đánh giá trung bình", value: "4,8/5", delta: "↑ 0,2", tone: "orange", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại", value: "61%", delta: "↑ 5%", tone: "green", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.avgFillRate || "Tỷ lệ lấp đầy", value: "84%", delta: "↑ 7%", tone: "purple", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.conversionRate || "Tỷ lệ chuyển đổi đăng ký", value: "42%", delta: "↑ 4%", tone: "orange", note: kpiT.vsPrevious || "so với kỳ trước" },
-    { label: kpiT.cancellationRate || "Tỷ lệ hủy lớp", value: "6%", delta: "↓ 1%", tone: "red", note: kpiT.vsPrevious || "so với kỳ trước" },
+    {
+      label: kpiT.avgRating || "Đánh giá trung bình",
+      value: `${numberVi(overview.averageRating ?? 0, 1)}/5`,
+      delta: "",
+      tone: "orange",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
+      value: `${numberVi(overview.reenrollmentRate ?? 0, 1)}%`,
+      delta: "",
+      tone: "green",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.avgFillRate || "Tỷ lệ lấp đầy",
+      value: `${numberVi(overview.fillRate ?? 0, 1)}%`,
+      delta: "",
+      tone: "purple",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.conversionRate || "Tỷ lệ chuyển đổi đăng ký",
+      value: `${numberVi(overview.conversionRate ?? 0, 1)}%`,
+      delta: "",
+      tone: "orange",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.cancellationRate || "Tỷ lệ hủy lớp",
+      value: `${numberVi(overview.cancellationRate ?? 0, 1)}%`,
+      delta: "",
+      tone: "red",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
   ]
 
-  const ratingTrend = trend.ratings || labels[group].map((_, i) => 4.5 + (i % 4) * 0.08)
+  // 2. Rating Trend Line Chart
+  const trendPoints = ratingTrendApi?.trendData || []
 
-  const starDistribution = [
-    { label: "5 sao", value: 62 },
-    { label: "4 sao", value: 28 },
-    { label: "3 sao", value: 7 },
-    { label: "2 sao", value: 2 },
-    { label: "1 sao", value: 1 },
-  ]
+  const chartLabels = trendPoints.length > 0
+    ? trendPoints.map((p) => p.label || p.date)
+    : (labels[group] || labels.month)
 
-  const qualityTableData = filteredClasses.map((r) => ({
+  const seriesRating = trendPoints.map((p) => p.averageRating ?? 0)
+
+  // 3. Star Distribution Bar Chart
+  const distItems = starDistApi?.data || (Array.isArray(starDistApi) ? starDistApi : [])
+  const starDistribution = distItems.map((item) => ({
+    label: `${item.stars} sao`,
+    value: item.percentage,
+  }))
+
+  // 4. Quality Detail Table
+  const qualityItems = qualityByClassData?.data || (Array.isArray(qualityByClassData) ? qualityByClassData : [])
+  const qualityTableData = qualityItems.map((r) => ({
     className: r.className,
-    course: r.course,
-    rating: r.rating.toFixed(1),
-    fill: `${r.fill}%`,
-    conversion: `${r.conversion}%`,
-    repeat: `${r.repeat}%`,
-    cancellation: `${r.cancellation}%`,
+    course: r.courseName || "Khóa học",
+    rating: (r.averageRating || 0).toFixed(1),
+    fill: `${r.fillRate}%`,
+    conversion: `${r.conversionRate}%`,
+    repeat: `${r.reenrollmentRate}%`,
+    cancellation: `${r.cancellationRate}%`,
   }))
 
   return (
@@ -54,8 +109,8 @@ const QualityTab = ({ group, filteredClasses }) => {
         <div className="lg:col-span-7 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
           <h2 className="text-base font-bold text-gray-900 mb-3">{secT.ratingTrend || "Xu hướng đánh giá theo thời gian"}</h2>
           <AnalyticsLineChart
-            chartLabels={labels[group] || labels.month}
-            series={[{ name: kpiT.avgRating || "Đánh giá trung bình", values: ratingTrend, color: "#e11d2e" }]}
+            chartLabels={chartLabels}
+            series={[{ name: kpiT.avgRating || "Đánh giá trung bình", values: seriesRating, color: "#e11d2e" }]}
             yAxisLabel={kpiT.avgRating || "Điểm đánh giá"}
             valueFormatter={(val) => `${numberVi(val, 2)}/5`}
             axisFormatter={(val) => numberVi(val, 1)}
