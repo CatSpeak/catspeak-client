@@ -60,16 +60,15 @@ const Avatar = ({
     height: `${size}px`,
     minWidth: `${size}px`,
     minHeight: `${size}px`,
-    borderWidth: "1px",
-    borderColor: speaking ? "#16a34a" : "#C6C6C6",
-    borderStyle: "solid",
     fontSize: `${fontSize}px`,
+    boxShadow: speaking
+      ? "0 0 0 2px #3D9E60, 0 0 10px rgba(61, 158, 96, 0.5)"
+      : "0 0 0 2px transparent",
+    transition: "box-shadow 0.2s ease",
     ...style,
   }
 
-  const speakingClass = speaking
-    ? "shadow-[0_0_15px_rgba(46,125,50,0.4)]"
-    : ""
+  const speakingClass = ""
 
   const cursorClass = isClickable
     ? "cursor-pointer hover:opacity-85 hover:scale-[1.03] transition-all"
