@@ -38,6 +38,7 @@ import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -583,6 +584,7 @@ const GlobalCallContent = ({
     showCC,
     setShowCC,
     isAISession,
+    isHost: isRoomHost(roomData, user),
 
     // Room subtitles
     showRoomSubtitles,

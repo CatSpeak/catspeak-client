@@ -25,6 +25,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 import { useSessionTimer } from "../hooks/useSessionTimer"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
+import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
 import MenuItem from "@/shared/components/ui/MenuItem"
 
 const MoreMenuMobileView = ({
@@ -288,20 +289,22 @@ const MoreMenuMobileView = ({
               hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
             />
 
-            {!isAISession && (
-              <MenuItem
-                onClick={() => {
-                  setShowBreakout(!showBreakout)
-                  setShowMoreMenu(false)
-                }}
-                icon={<Split size={20} />}
-                label={
-                  t?.rooms?.breakoutRooms?.breakoutRoomOption ||
-                  "Breakout Rooms"
-                }
-                hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
-              />
-            )}
+            {!isAISession &&
+              isBreakoutSupported(room?.roomType) &&
+              (isHost || isBreakoutActive) && (
+                <MenuItem
+                  onClick={() => {
+                    setShowBreakout(!showBreakout)
+                    setShowMoreMenu(false)
+                  }}
+                  icon={<Split size={20} />}
+                  label={
+                    t?.rooms?.breakoutRooms?.breakoutRoomOption ||
+                    "Breakout Rooms"
+                  }
+                  hoverBg="active:bg-[#F2F2F2] md:hover:bg-[#F2F2F2] md:group-hover:bg-[#F2F2F2]"
+                />
+              )}
 
             <MenuItem
               onClick={() => {

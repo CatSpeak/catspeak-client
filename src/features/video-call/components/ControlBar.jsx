@@ -18,10 +18,7 @@ import {
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
-import {
-  isBreakoutSupported,
-  isCustomRoom,
-} from "@/features/video-call/utils/roomTypeHelpers"
+import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -73,11 +70,11 @@ const VideoCallControlBar = () => {
     user,
     participants,
     isAISession,
+    isHost: isHostFromContext,
   } = useVideoCallContext()
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall)
-  const isHost =
-    isCustomRoom(room?.roomType) && room?.creatorId === user?.accountId
+  const isHost = isHostFromContext
 
   const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
     skip: !parentSessionId,

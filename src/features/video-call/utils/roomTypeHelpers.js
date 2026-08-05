@@ -36,3 +36,23 @@ export const isCustomRoom = (roomType) => {
   return str === "custom" || str === "4";
 };
 
+/**
+ * Check if a given user/accountId is the host/creator of a room.
+ * @param {object} room - Room object containing creatorId and roomType
+ * @param {object|number|string} userOrAccountId - User object or account ID
+ * @returns {boolean}
+ */
+export const isRoomHost = (room, userOrAccountId) => {
+  if (!room?.creatorId || userOrAccountId == null) return false;
+  const targetId =
+    typeof userOrAccountId === "object"
+      ? userOrAccountId?.accountId
+      : userOrAccountId;
+  if (targetId == null) return false;
+  return (
+    isClassOrCustom(room?.roomType) &&
+    String(room.creatorId) === String(targetId)
+  );
+};
+
+
