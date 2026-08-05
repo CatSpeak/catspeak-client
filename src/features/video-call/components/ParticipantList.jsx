@@ -14,7 +14,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import toast from "react-hot-toast"
@@ -59,11 +59,7 @@ const ParticipantItem = ({ participant }) => {
   const isHandRaised = meta.handRaised === true
   const avatarUrl = meta.avatarImageUrl
 
-  const isParticipantHost =
-    isCustomRoom(room?.roomType) &&
-    room?.creatorId != null &&
-    accountId != null &&
-    String(accountId) === String(room.creatorId)
+  const isParticipantHost = isRoomHost(room, accountId)
 
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)

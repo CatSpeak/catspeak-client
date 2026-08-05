@@ -5,7 +5,6 @@ import Popover from "@/shared/components/ui/Popover"
 import Slider from "@/shared/components/ui/Slider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import {
   useKickParticipantMutation,
   useMuteParticipantMutation,
@@ -109,18 +108,12 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
 
 export const ParticipantVolumePopover = ({ participant, children }) => {
   const { t } = useLanguage()
-  const { room, user, id: roomId, lkRoom } = useVideoCallContext()
+  const { room, user, id: roomId, lkRoom, isHost: isCurrentHost } = useVideoCallContext()
 
   const [kickParticipant, { isLoading: isKicking }] = useKickParticipantMutation()
   const [muteParticipant, { isLoading: isMuting }] = useMuteParticipantMutation()
 
   if (participant.isLocal) return <>{children}</>
-
-  const isCurrentHost =
-    isCustomRoom(room?.roomType) &&
-    room?.creatorId != null &&
-    user?.accountId != null &&
-    String(room.creatorId) === String(user.accountId)
 
   const parseMetadata = (metadata) => {
     if (!metadata) return {}
