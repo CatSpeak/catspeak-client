@@ -1,0 +1,181 @@
+import React, { useState } from "react"
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+
+const AnalyticsDataTable = ({
+  columns = [],
+  data = [],
+  pageSize = 5,
+  emptyMessage,
+}) => {
+  const { t } = useLanguage()
+  const secT = t.courses?.analytics?.sections || {}
+
+  const defaultEmptyMsg = secT.noData || "Không có dữ liệu phù hợp."
+  const showingStr = secT.showing || "Hiển thị"
+  const ofStr = secT.of || "trong"
+
+  const [sortKey, setSortKey] = useState(columns[0]?.key || "")
+  const [sortDirection, setSortDirection] = useState("asc")
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
+    } else {
+      setSortKey(key)
+      setSortDirection("asc")
+    }
+    setCurrentPage(1)
+  }
+
+  const sortedData = [...data].sort((a, b) => {
+    if (!sortKey) return 0
+    const left = a[sortKey]
+    const right = b[sortKey]
+    let comp = 0
+    if (typeof left === "number" && typeof right === "number") {
+      comp = left - right
+    } else {
+      comp = String(left || "").localeCompare(String(right || ""), "vi")
+    }
+    return sortDirection === "asc" ? comp : -comp
+  })
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize))
+  const safePage = Math.min(Math.max(1, currentPage), totalPages)
+  const startIdx = (safePage - 1) * pageSize
+  const visibleRows = sortedData.slice(startIdx, startIdx + pageSize)
+  const endIdx = Math.min(startIdx + pageSize, sortedData.length)
+
+  // Visible page button builder
+  const getVisiblePages = () => {
+    const pages = []
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === 1 || p === totalPages || Math.abs(p - safePage) <= 1) {
+        pages.push(p)
+      }
+    }
+    return pages
+  }
+
+  const visiblePages = getVisiblePages()
+
+  return (
+    <div className="w-full flex flex-col min-w-0">
+      {/* Scrollable Table Area */}
+      <div className="w-full overflow-x-auto border border-gray-100 rounded-xl">
+        <table className="w-full text-left text-xs border-collapse min-w-[600px]">
+          <thead>
+            <tr className="bg-[#fafbfc] border-b border-[#edf0f3]">
+              {columns.map((col) => {
+                const isSorted = sortKey === col.key
+                return (
+                  <th
+                    key={col.key}
+                    className={`p-2.5 font-bold text-[#5e687a] ${col.align === "right" ? "text-right" : "text-left"
+                      }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort(col.key)}
+                      className="inline-flex items-center gap-1 font-bold text-inherit hover:text-[#990011] transition-colors cursor-pointer"
+                    >
+                      {col.label}
+                      {isSorted ? (
+                        sortDirection === "asc" ? (
+                          <ChevronUp size={14} className="text-[#990011]" />
+                        ) : (
+                          <ChevronDown size={14} className="text-[#990011]" />
+                        )
+                      ) : null}
+                    </button>
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {visibleRows.length > 0 ? (
+              visibleRows.map((row, rIdx) => (
+                <tr
+                  key={rIdx}
+                  className="border-b border-[#edf0f3] hover:bg-[#fffafb] transition-colors"
+                >
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={`p-2.5 text-gray-800 ${col.align === "right" ? "text-right" : "text-left"
+                        }`}
+                    >
+                      {row[col.key]}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="p-8 text-center text-gray-400 font-medium"
+                >
+                  {emptyMessage || defaultEmptyMsg}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Controls */}
+      {sortedData.length > pageSize && (
+        <div className="flex items-center justify-between gap-4 pt-3 text-xs text-gray-500">
+          <span>
+            {showingStr} {sortedData.length === 0 ? 0 : startIdx + 1}–{endIdx} {ofStr} {sortedData.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+            >
+              <ChevronLeft size={14} />
+            </button>
+
+            {visiblePages.map((pNum, pIdx) => {
+              const prevP = visiblePages[pIdx - 1]
+              const showEllipsis = prevP && pNum - prevP > 1
+              return (
+                <React.Fragment key={pNum}>
+                  {showEllipsis && <span className="px-1 text-gray-400">…</span>}
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage(pNum)}
+                    className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${pNum === safePage
+                        ? "bg-[#990011] border-[#990011] text-white"
+                        : "bg-white border-gray-200 text-gray-700 hover:border-[#990011] hover:text-[#990011]"
+                      }`}
+                  >
+                    {pNum}
+                  </button>
+                </React.Fragment>
+              )
+            })}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default AnalyticsDataTable
