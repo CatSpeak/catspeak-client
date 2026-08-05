@@ -123,9 +123,8 @@ export const useCallActions = ({
     const url = callInfo?.callPath
       ? `${window.location.origin}${callInfo.callPath}`
       : window.location.href;
-    navigator.clipboard.writeText(getShareUrlWithVersion(url));
-    toast.success("Link copied to clipboard!");
-  }, [callInfo?.callPath]);
+    copyRoomLink({ baseUrl: url, room: callInfo?.roomData });
+  }, [callInfo?.callPath, callInfo?.roomData]);
 
   // ── PiP transitions ──
 

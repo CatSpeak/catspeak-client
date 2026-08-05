@@ -24,7 +24,7 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 import { useSessionTimer } from "../hooks/useSessionTimer"
-import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
+import { copyRoomLink } from "@/shared/utils/shareUtils"
 import MenuItem from "@/shared/components/ui/MenuItem"
 
 const MoreMenuMobileView = ({
@@ -80,8 +80,11 @@ const MoreMenuMobileView = ({
   const unreadMessages = (unreadRoomChat || 0) + (unreadAiChat || 0)
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(getShareUrlWithVersion(window.location.href))
-    toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!")
+    copyRoomLink({
+      baseUrl: window.location.href,
+      room,
+      successMessage: t?.rooms?.videoCall?.linkCopied,
+    })
     setShowMoreMenu(false)
   }
 

@@ -15,7 +15,7 @@ import FullscreenOverlayShell from "@/layouts/VideoCallLayout/FullscreenOverlayS
 import { getCommunityPath } from "@/shared/utils/navigation"
 import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal"
 import EditNicknameModal from "./EditNicknameModal"
-import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
+import { copyRoomLink } from "@/shared/utils/shareUtils"
 
 import DeviceSettingsModal from "./DeviceSettingsModal"
 
@@ -48,8 +48,11 @@ const WaitingScreen = ({
   const [isEditingName, setIsEditingName] = useState(false)
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(getShareUrlWithVersion(window.location.href))
-    toast.success(t?.rooms?.waitingScreen?.linkCopied || "Link copied!")
+    copyRoomLink({
+      baseUrl: window.location.href,
+      room,
+      successMessage: t?.rooms?.waitingScreen?.linkCopied,
+    })
   }
 
   return (
