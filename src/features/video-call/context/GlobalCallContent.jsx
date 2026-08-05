@@ -191,8 +191,28 @@ const GlobalCallContent = ({
     }
   }, [lkRoom, showRoomSettings, localParticipant])
 
+  const connectionState = useConnectionState()
+  const isConnected = connectionState === ConnectionState.Connected
+
+  // Automatically start WebAudio context if iOS Safari requires audio unlock upon connection
   useEffect(() => {
-    if (lkRoom && deviceSelection?.selectedMic) {
+    if (lkRoom && isConnected && lkRoom.canPlayAudio === false) {
+      lkRoom.startAudio().catch((err) => {
+        console.warn("[GlobalCallContent] startAudio warning on connect:", err)
+      })
+    }
+  }, [lkRoom, isConnected])
+
+  // Only perform explicit device switching when room is connected and settings modal is active
+  useEffect(() => {
+    if (
+      lkRoom &&
+      isConnected &&
+      showRoomSettings &&
+      deviceSelection?.selectedMic &&
+      deviceSelection.selectedMic !== "default" &&
+      deviceSelection.selectedMic !== ""
+    ) {
       lkRoom
         .switchActiveDevice("audioinput", deviceSelection.selectedMic)
         .catch((err) => {
@@ -202,10 +222,17 @@ const GlobalCallContent = ({
           )
         })
     }
-  }, [lkRoom, deviceSelection?.selectedMic])
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedMic])
 
   useEffect(() => {
-    if (lkRoom && deviceSelection?.selectedSpeaker) {
+    if (
+      lkRoom &&
+      isConnected &&
+      showRoomSettings &&
+      deviceSelection?.selectedSpeaker &&
+      deviceSelection.selectedSpeaker !== "default" &&
+      deviceSelection.selectedSpeaker !== ""
+    ) {
       lkRoom
         .switchActiveDevice("audiooutput", deviceSelection.selectedSpeaker)
         .catch((err) => {
@@ -215,10 +242,17 @@ const GlobalCallContent = ({
           )
         })
     }
-  }, [lkRoom, deviceSelection?.selectedSpeaker])
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedSpeaker])
 
   useEffect(() => {
-    if (lkRoom && deviceSelection?.selectedCamera) {
+    if (
+      lkRoom &&
+      isConnected &&
+      showRoomSettings &&
+      deviceSelection?.selectedCamera &&
+      deviceSelection.selectedCamera !== "default" &&
+      deviceSelection.selectedCamera !== ""
+    ) {
       lkRoom
         .switchActiveDevice("videoinput", deviceSelection.selectedCamera)
         .catch((err) => {
@@ -228,10 +262,7 @@ const GlobalCallContent = ({
           )
         })
     }
-  }, [lkRoom, deviceSelection?.selectedCamera])
-
-  const connectionState = useConnectionState()
-  const isConnected = connectionState === ConnectionState.Connected
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedCamera])
 
   // ── Synchronized Recording States ──
   const sessionId =

@@ -1,4 +1,5 @@
 import toast from "react-hot-toast"
+import { detectWebView, isIOS } from "@/shared/utils/isWebView"
 
 /**
  * Centrally handle media capture errors (camera/mic).
@@ -12,24 +13,49 @@ import toast from "react-hot-toast"
  * @returns {string} The localized error message
  */
 export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
-  console.error(`Media error (${device}):`, err)
+  console.error(`Media error (${device}):`, {
+    name: err?.name,
+    message: err?.message,
+    stack: err?.stack,
+    err,
+  })
+
+  const webview = detectWebView()
+  if (webview.isWebView) {
+    const wvMsg = t?.rooms?.waitingScreen?.webViewWarning ??
+      "You are in an in-app browser. Please open in Safari for microphone and camera access."
+    toast.error(wvMsg)
+    return wvMsg
+  }
 
   let type = "unknown"
-  switch (err.name) {
-    case "NotAllowedError":
-    case "PermissionDeniedError":
-      type = "permission"
-      break
-    case "NotReadableError":
-    case "TrackStartError":
-      type = "notReadable"
-      break
-    case "NotFoundError":
-    case "DevicesNotFoundError":
-      type = "notFound"
-      break
-    default:
-      type = "unknown"
+  const errName = err?.name || ""
+  const errMsg = (err?.message || "").toLowerCase()
+
+  if (
+    errName === "NotAllowedError" ||
+    errName === "PermissionDeniedError" ||
+    errMsg.includes("permission") ||
+    errMsg.includes("denied") ||
+    errMsg.includes("not allowed")
+  ) {
+    type = "permission"
+  } else if (
+    errName === "NotReadableError" ||
+    errName === "TrackStartError" ||
+    errName === "AbortError" ||
+    errName === "OperationError" ||
+    errName === "InvalidStateError" ||
+    errMsg.includes("readable") ||
+    errMsg.includes("in use")
+  ) {
+    type = "notReadable"
+  } else if (
+    errName === "NotFoundError" ||
+    errName === "DevicesNotFoundError" ||
+    errMsg.includes("not found")
+  ) {
+    type = "notFound"
   }
 
   const isMic = device === "mic"
@@ -37,9 +63,16 @@ export const handleMediaError = (err, device, t, { isToggle = false } = {}) => {
 
   switch (type) {
     case "permission":
-      message = isMic
-        ? t.rooms.waitingScreen.micPermissionDenied
-        : t.rooms.waitingScreen.cameraPermissionDenied
+      if (isIOS()) {
+        message = t?.rooms?.waitingScreen?.iosPermissionTip ??
+          (isMic
+            ? t.rooms.waitingScreen.micPermissionDenied
+            : t.rooms.waitingScreen.cameraPermissionDenied)
+      } else {
+        message = isMic
+          ? t.rooms.waitingScreen.micPermissionDenied
+          : t.rooms.waitingScreen.cameraPermissionDenied
+      }
       break
     case "notReadable":
       message = isMic

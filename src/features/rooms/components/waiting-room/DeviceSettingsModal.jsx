@@ -3,6 +3,10 @@ import { Mic, Video, Volume2, Info } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import Modal from "@/shared/components/ui/Modal"
 import MicTestVisualizer from "@/features/video-call/components/settings/MicTestVisualizer"
+import {
+  buildAudioConstraint,
+  mapDevicesToOptions,
+} from "@/shared/utils/mediaConstraintUtils"
 
 const DeviceSettingsModal = ({
   open,
@@ -56,7 +60,7 @@ const DeviceSettingsModal = ({
         } else {
           // Request temporary audio stream for testing
           const constraints = {
-            audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
+            audio: buildAudioConstraint(selectedMic),
           }
           const stream = await navigator.mediaDevices.getUserMedia(constraints)
           if (cancelled) {
@@ -103,24 +107,6 @@ const DeviceSettingsModal = ({
     }
   }, [selectedSpeaker, isSinkSupported])
 
-  const mapToOptions = (deviceList = [], icon, isAudio = false) => {
-    const options = deviceList.map((d) => ({
-      value: d.deviceId,
-      label: d.label || t?.rooms?.waitingScreen?.unknownDevice || "Unknown Device",
-      icon: icon,
-    }))
-
-    if (isAudio) {
-      options.unshift({
-        value: "default",
-        label: t?.rooms?.waitingScreen?.systemDefaultSpeaker || "System Default",
-        icon: icon,
-      })
-    }
-
-    return options
-  }
-
   const handleTestMicToggle = (checked) => {
     console.log("[DeviceSettings] Test Mic changed to:", checked)
     if (checked && !micOn && onToggleMic) {
@@ -145,7 +131,13 @@ const DeviceSettingsModal = ({
       bodyClassName="px-6 pb-6 flex-1 overflow-y-auto flex flex-col gap-3"
     >
       <Dropdown
-        options={mapToOptions(devices.audioinput, <Mic size={16} />, true)}
+        options={mapDevicesToOptions(
+          devices.audioinput,
+          <Mic size={16} />,
+          true,
+          t?.rooms?.waitingScreen?.systemDefaultSpeaker,
+          t?.rooms?.waitingScreen?.unknownDevice
+        )}
         value={selectedMic}
         onChange={(val) => setSelectedMic(val)}
         placeholder={
@@ -158,7 +150,13 @@ const DeviceSettingsModal = ({
 
       <div className="flex flex-col gap-1">
         <Dropdown
-          options={mapToOptions(devices.audiooutput, <Volume2 size={16} />, true)}
+          options={mapDevicesToOptions(
+            devices.audiooutput,
+            <Volume2 size={16} />,
+            true,
+            t?.rooms?.waitingScreen?.systemDefaultSpeaker,
+            t?.rooms?.waitingScreen?.unknownDevice
+          )}
           value={selectedSpeaker}
           onChange={(val) => setSelectedSpeaker(val)}
           placeholder={
@@ -182,7 +180,13 @@ const DeviceSettingsModal = ({
       </div>
 
       <Dropdown
-        options={mapToOptions(devices.videoinput, <Video size={16} />)}
+        options={mapDevicesToOptions(
+          devices.videoinput,
+          <Video size={16} />,
+          false,
+          t?.rooms?.waitingScreen?.systemDefaultSpeaker,
+          t?.rooms?.waitingScreen?.unknownDevice
+        )}
         value={selectedCamera}
         onChange={(val) => setSelectedCamera(val)}
         placeholder={t?.rooms?.waitingScreen?.selectCamera || "Select Camera"}

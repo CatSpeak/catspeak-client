@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
+import { buildAudioConstraint } from "@/shared/utils/mediaConstraintUtils"
 
 const MicTestVisualizer = ({
   testMic,
@@ -37,7 +38,7 @@ const MicTestVisualizer = ({
       try {
         if (!activeStream || activeStream.getAudioTracks().length === 0) {
           const constraints = {
-            audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
+            audio: buildAudioConstraint(selectedMic),
           }
           internalStream =
             await navigator.mediaDevices.getUserMedia(constraints)

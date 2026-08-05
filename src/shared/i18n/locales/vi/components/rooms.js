@@ -323,6 +323,10 @@ export default {
       "Quyền truy cập micro bị từ chối. Vui lòng cho phép trong cài đặt.",
     cameraPermissionDenied:
       "Quyền truy cập camera bị từ chối. Vui lòng cho phép trong cài đặt.",
+    webViewWarning:
+      "Bạn đang mở trong ứng dụng (Zalo/FB/Messenger). Vui lòng nhấn '...' chọn 'Mở bằng Safari' để dùng Micro và Camera.",
+    iosPermissionTip:
+      "Microphone đã bị trình duyệt chặn. Vui lòng nhấn vào Cài đặt trang web ở thanh địa chỉ để mở Micro.",
     deviceSettings: "Cài đặt thiết bị",
     selectMicrophone: "Chọn Micro",
     selectSpeaker: "Chọn Loa",
