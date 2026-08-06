@@ -3,19 +3,37 @@ import Modal from '@/shared/components/ui/Modal'
 import { Clock, MapPin, Calendar, Users, AlignLeft, ArrowRight } from 'lucide-react'
 import dayjs from 'dayjs'
 import { IconButton } from '@/shared/components/ui/buttons';
+import { useNavigate } from 'react-router-dom';
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", label: "Lịch dạy", color: "#34ce56" },
-  "class-schedule": { background: "#f0f5ff", label: "Lịch học", color: "#0e6eec" },
+  "student-schedule": { background: "#f0f5ff", label: "Lịch học", color: "#0e6eec" },
   "my-event": { background: "#ffeef0", label: "Sự kiện của tôi", color: "#f83b4f" },
   "registered-event": { background: "#fffceb", label: "Đã đăng ký", color: "#e2b60a" },
   "other": { background: "#ffffff", label: "Khác", color: "#888888" },
 };
 
 const EventBlockDetail = ({ event, open, onClose }) => {
+  const navigate = useNavigate()
+
   if (!event) return null;
 
   const style = EVENT_STYLES[event.eventType] || EVENT_STYLES["other"];
+
+  const handleNavigate = (event) => {
+    switch (event.eventType) {
+      case 'teaching-schedule':
+        return navigate(`/workspace/courses/class/${event?.classId}`)
+      case 'student-schedule':
+        return navigate(`/workspace/learning/class/${event?.classId}`)
+      case 'my-event':
+        return navigate(`/workspace/events`)
+      case 'registered-event':
+        return navigate(`/workspace/events`)
+      case 'other':
+        return
+    }
+  }
 
   return (
     <Modal
@@ -63,7 +81,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
                 </div>
               </div>
             )}
-            <IconButton variant='outline' innerClassName='!w-8 !h-8'>
+            <IconButton variant='outline' innerClassName='!w-8 !h-8' onClick={() => handleNavigate(event)}>
               <ArrowRight size={8} />
             </IconButton>
           </div>

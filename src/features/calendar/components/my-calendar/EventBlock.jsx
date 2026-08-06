@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
-  "class-schedule": { background: "#f0f5ff", border: "" },
+  "student-schedule": { background: "#f0f5ff", border: "" },
   "my-event": { background: "#ffeef0", border: "" },
   "registered-event": { background: "#fffceb", border: "" },
   "other": { background: "#ffffff", border: "#E2E2E2" },

@@ -2,17 +2,37 @@ import { IconButton } from '@/shared/components/ui/buttons'
 import { ArrowRight, Calendar, Clock } from 'lucide-react'
 import React from 'react'
 import dayjs from 'dayjs'
+import { useNavigate } from 'react-router-dom';
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
-  "class-schedule": { background: "#f0f5ff", border: "" },
+  "student-schedule": { background: "#f0f5ff", border: "" },
   "my-event": { background: "#ffeef0", border: "" },
   "registered-event": { background: "#fffceb", border: "" },
   "other": { background: "#ffffff", border: "#E2E2E2" },
 };
 
 const EventCard = ({ event }) => {
+  const navigate = useNavigate()
+
+  if (!event) return;
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
+
+  const handleNavigate = (event) => {
+    switch (event.eventType) {
+      case 'teaching-schedule':
+        return navigate(`/workspace/courses/class/${event?.classId}`)
+      case 'student-schedule':
+        return navigate(`/workspace/learning/class/${event?.classId}`)
+      case 'my-event':
+        return navigate(`/workspace/events`)
+      case 'registered-event':
+        return navigate(`/workspace/events`)
+      case 'other':
+        return
+    }
+  }
+
   return (
     <div
       className="max-w-[290px] w-full h-fit p-4 space-y-2 rounded-xl border"
@@ -33,7 +53,7 @@ const EventCard = ({ event }) => {
           </p>
           <p className='flex items-center gap-2'><Calendar size={14} /> {event.location}</p>
         </div>
-        <IconButton variant='outline' innerClassName='!w-8 !h-8'>
+        <IconButton variant='outline' innerClassName='!w-8 !h-8' onClick={() => handleNavigate(event)}>
           <ArrowRight size={8} />
         </IconButton>
       </div>

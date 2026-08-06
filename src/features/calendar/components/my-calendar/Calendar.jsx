@@ -13,7 +13,7 @@ import EventFilter from './EventFilter'
 
 const LEGEND = [
   { type: 'teaching-schedule', label: 'Lịch dạy', color: '#34ce56' },
-  { type: 'class-schedule', label: 'Lịch học', color: '#0e6eec' },
+  { type: 'student-schedule', label: 'Lịch học', color: '#0e6eec' },
   { type: 'my-event', label: 'Sự kiện của tôi', color: '#f83b4f' },
   { type: 'registered-event', label: 'Đã đăng ký', color: '#e2b60a' },
   { type: 'other', label: 'Khác', color: '#888888' },

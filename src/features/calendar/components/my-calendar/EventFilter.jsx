@@ -5,7 +5,7 @@ import { Checkbox } from '@/shared/components/ui/inputs'
 
 const FILTER_OPTIONS = [
   { key: 'teaching-schedule', label: 'Lịch dạy', color: '#34ce56' },
-  { key: 'class-schedule', label: 'Lịch học', color: '#0e6eec' },
+  { key: 'student-schedule', label: 'Lịch học', color: '#0e6eec' },
   { key: 'my-event', label: 'Sự kiện của tôi', color: '#f83b4f' },
   { key: 'registered-event', label: 'Đã đăng ký', color: '#e2b60a' },
   { key: 'other', label: 'Khác', color: '#7b7979' },
