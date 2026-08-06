@@ -262,11 +262,17 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       return
     }
 
-    // Private room — silent check for existing grant
+    // Private room — check for URL pwd param or existing grant
     verifyTriggered.current = true
     ;(async () => {
       try {
-        const result = await verifyJoinRoom({ roomId: Number(roomId) }).unwrap()
+        const searchParams = new URLSearchParams(location.search)
+        const pwdParam = searchParams.get("pwd")
+        const payload = {
+          roomId: Number(roomId),
+          ...(pwdParam ? { password: pwdParam } : {}),
+        }
+        const result = await verifyJoinRoom(payload).unwrap()
         if (result.authorized) {
           setPhase("waiting")
         }
@@ -275,7 +281,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         setPhase("password-required")
       }
     })()
-  }, [room, user, isLoadingRoomData, isLoadingUser, fromQueue, roomId])
+  }, [room, user, isLoadingRoomData, isLoadingUser, fromQueue, roomId, location.search])
 
   // ── Handle password submission from PasswordScreen ──
   const handlePasswordSubmit = async (password) => {

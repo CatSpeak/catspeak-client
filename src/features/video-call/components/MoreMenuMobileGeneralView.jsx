@@ -97,9 +97,7 @@ const MoreMenuMobileGeneralView = ({
             setShowMoreMenu(false)
           }}
           className={`relative h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors ${
-            showChat
-              ? "bg-red-100 text-red-600"
-              : "bg-[#F5F5F5] text-black"
+            showChat ? "bg-red-100 text-red-600" : "bg-[#F5F5F5] text-black"
           }`}
         >
           <MessageSquare size={20} />
@@ -120,9 +118,7 @@ const MoreMenuMobileGeneralView = ({
           }}
           disabled={isTogglingScreenShare}
           className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
-            isLocalScreenShare
-              ? "bg-red-100 text-red-600"
-              : "bg-[#F5F5F5]"
+            isLocalScreenShare ? "bg-red-100 text-red-600" : "bg-[#F5F5F5]"
           }`}
         >
           {isLocalScreenShare ? (

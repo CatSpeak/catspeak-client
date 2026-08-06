@@ -8,6 +8,7 @@ import { useParticipants, useLocalParticipant } from "@livekit/components-react"
 import { toast } from "react-hot-toast"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { Link2 } from "lucide-react"
+import { copyRoomLink } from "@/shared/utils/shareUtils"
 import RightSideControls from "./RightSideControls"
 
 const RoomHeader = () => {
@@ -30,8 +31,11 @@ const RoomHeader = () => {
   })[0]
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href)
-    toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!")
+    copyRoomLink({
+      baseUrl: window.location.href,
+      room,
+      successMessage: t?.rooms?.videoCall?.linkCopied,
+    })
   }
 
   const isHost =
