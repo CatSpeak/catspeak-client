@@ -58,6 +58,7 @@ export const navSections = [
     defaultLabel: "My Workspace",
     maxInitial: 5,
     items: [
+      { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
       { key: "schedule", path: "/workspace/schedule", icon: Calendar },
@@ -100,6 +101,7 @@ export const navLinks = [
     icon: Briefcase,
     requiresAuth: true,
     subItems: [
+      { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
       { key: "schedule", path: "/workspace/schedule", icon: Calendar },
@@ -130,7 +132,9 @@ export const navLinks = [
 
 export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
+  { key: "pricing", path: "/pricing", icon: CreditCard },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
+  { key: "billing", path: "/billing", icon: CreditCard },
   { key: "systemConfig", path: "/setting/system", icon: Settings },
 ]
 

@@ -38,7 +38,7 @@ const mainDockItems = [
   { key: "exploreCourses", icon: Compass, path: "/explore-courses", hasSublinks: false },
   {
     key: "catSpeak",
-    icon: LayoutDashboard,
+    icon: Globe,
     path: "/cat-speak/global-news",
     hasSublinks: true,
   },
@@ -59,7 +59,7 @@ const mainDockItems = [
 const secondaryDockItems = [
   {
     key: "learningResources",
-    icon: Globe,
+    icon: LayoutDashboard,
     path: "/resources",
     hasSublinks: false,
   },
@@ -71,7 +71,7 @@ const normalizePath = (path) => {
 }
 
 const getActiveDockSection = (pathname) => {
-  if (pathname.includes("/setting")) return "settings"
+  if (pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")) return "settings"
   if (pathname.includes("/cat-speak")) return "catSpeak"
   if (pathname.includes("/workspace")) return "workspace"
   if (pathname.includes("/profile")) return "profile"
@@ -79,7 +79,6 @@ const getActiveDockSection = (pathname) => {
   if (pathname.includes("/explore-courses")) return "exploreCourses"
   if (pathname.includes("/resources")) return "learningResources"
   if (pathname.includes("/community")) return "community"
-  if (pathname.includes("/pricing")) return "pricing"
   return "community"
 }
 
@@ -109,7 +108,7 @@ const itemVariants = {
 const DesktopSidebar = () => {
   const { pathname } = useLocation()
   const { t } = useLanguage()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { isStudent, isTeacher } = useRoleOverride()
   const { resolvePath, currentLang } = useActiveLink()
   const {
@@ -132,12 +131,12 @@ const DesktopSidebar = () => {
   )
   const unreadChatCount = totalUnreadCountServer || totalUnreadCountRedux || 0
 
-  const isSettingsPage = pathname.includes("/setting")
+  const isSettingsPage = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")
 
   // Record last selected sublink on route change
   useEffect(() => {
     const cleanPath = normalizePath(pathname)
-    if (pathname.includes("/setting")) {
+    if (pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")) {
       setLastSublink("settings", cleanPath)
     } else if (pathname.includes("/cat-speak")) {
       setLastSublink("catSpeak", cleanPath)
@@ -415,6 +414,10 @@ const DesktopSidebar = () => {
                         .map((item) => {
                           const label =
                             t.nav?.[item.key] || item.label || item.key
+                          let itemPath = item.path
+                          if (item.key === "profile" && user) {
+                            itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
+                          }
                           return (
                             <motion.div
                               layout
@@ -425,7 +428,7 @@ const DesktopSidebar = () => {
                               className="w-full"
                             >
                               <DesktopNavItem
-                                to={resolvePath(item.path)}
+                                to={resolvePath(itemPath)}
                                 icon={item.icon}
                                 label={label}
                                 color={item.color}

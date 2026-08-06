@@ -90,7 +90,7 @@ const ProfileDropdown = () => {
 
   const handleProfileClick = () => {
     handleCloseMenu();
-    navigate(`/profile/${user?.accountId || user?.id || ""}`);
+    navigate(`/workspace/profile/${user?.accountId || user?.id || ""}`);
   };
 
   const handlePricingClick = () => {
@@ -195,28 +195,9 @@ const ProfileDropdown = () => {
       <div className="border-t border-[#e5e5e5]" />
 
       <div className="flex flex-col gap-1 p-1">
-        <button onClick={handleProfileClick} className={menuItemClass}>
-          <User size={20} />
-          <span>{t.header?.personalPage || "Trang cá nhân"}</span>
-        </button>
-        <button onClick={handlePricingClick} className={menuItemClass}>
-          <CreditCard size={20} />
-          <span>{t.billing?.pricing.tabTitle || "Pricing"}</span>
-        </button>
-
-        <button onClick={handleInstructorClick} className={menuItemClass}>
-          <GraduationCap size={20} />
-          <span>{t.profile?.sidebar?.instructor || "Giảng viên"}</span>
-        </button>
-
-        <button onClick={handleBillingClick} className={menuItemClass}>
-          <CreditCard size={20} />
-          <span>{t.profile?.sidebar?.billing || "Thanh toán"}</span>
-        </button>
-
         <button onClick={handleSettingsClick} className={menuItemClass}>
           <Settings size={20} />
-          <span>{t.header.settings || "Settings"}</span>
+          <span>{t.header?.generalInfo || "Thông tin chung"}</span>
         </button>
 
         <button onClick={handleLogout} className={menuItemClass}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -26,6 +26,7 @@ const Profile = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
   const navigate = useNavigate()
+  const location = useLocation()
   const { accountId: urlAccountId } = useParams()
   // Since URL params are strings, ensure we convert accountId to number for comparison
   const targetAccountId = urlAccountId
@@ -36,9 +37,10 @@ const Profile = () => {
 
   useEffect(() => {
     if (!urlAccountId && user?.accountId) {
-      navigate(`/profile/${user.accountId}`, { replace: true })
+      const isWorkspace = location.pathname.startsWith("/workspace")
+      navigate(`${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}`, { replace: true })
     }
-  }, [urlAccountId, user, navigate])
+  }, [urlAccountId, user, navigate, location.pathname])
 
   // Fetch private profile if own profile, otherwise skip
   const { data: privateProfileData, isLoading: loadingPrivate } =
