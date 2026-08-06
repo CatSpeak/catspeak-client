@@ -7,18 +7,20 @@ import { formatFileSize } from "./fileUtils"
  * @param {string} locale  - BCP-47 locale string (kept for non-date use)
  * @param {function} formatDate - date formatter from useTimezone()
  */
-export const getDisplayData = (item, labels, locale, formatDate) => {
+export const getDisplayData = (item, labels, locale, formatDateTime) => {
+  const formatFn = typeof formatDateTime === "function" ? formatDateTime : (d) => d
+
   if (item.type) {
     let finalMeta = item.meta
     let finalMetaType = item.metaType
 
     if (item.type === "assignment" && item.dueDate) {
-      const date = formatDateTime(item.dueDate, locale)
+      const date = formatFn(item.dueDate)
       finalMeta = labels.dueDateMeta?.replace("{{date}}", date) || `Hạn nộp: ${date}`
       finalMetaType = "time" // Using time maps to Clock icon
     } else if (item.type === "quiz" && (item.openTime || item.closeTime)) {
-      const openStr = item.openTime ? `${labels.openTime || "Mở"}: ${formatDateTime(item.openTime, locale)}` : ""
-      const closeStr = item.closeTime ? `${labels.closeTime || "Đóng"}: ${formatDateTime(item.closeTime, locale)}` : ""
+      const openStr = item.openTime ? `${labels.openTime || "Mở"}: ${formatFn(item.openTime)}` : ""
+      const closeStr = item.closeTime ? `${labels.closeTime || "Đóng"}: ${formatFn(item.closeTime)}` : ""
       finalMeta = [openStr, closeStr].filter(Boolean).join(", ")
       finalMetaType = "time"
     }
@@ -49,16 +51,16 @@ export const getDisplayData = (item, labels, locale, formatDate) => {
     type = "assignment"
     title = item.assignment.name
     if (item.assignment.dueDate) {
-      const date = formatDate ? formatDate(item.assignment.dueDate) : item.assignment.dueDate
-      meta = labels.dueDateMeta.replace("{{date}}", date)
+      const date = formatFn(item.assignment.dueDate)
+      meta = labels.dueDateMeta?.replace("{{date}}", date) || `Hạn nộp: ${date}`
       metaType = "time"
     }
   } else if (item.itemType === "Quiz" && item.quiz) {
     type = "assignment" // Map to assignment icon
     title = item.quiz.name
     if (item.quiz.closeTime) {
-      const date = formatDate ? formatDate(item.quiz.closeTime) : item.quiz.closeTime
-      meta = labels.closesAtMeta.replace("{{date}}", date)
+      const date = formatFn(item.quiz.closeTime)
+      meta = labels.closesAtMeta?.replace("{{date}}", date) || `Đóng: ${date}`
       metaType = "time"
     }
   } else if (item.itemType === "Material" && item.material) {

@@ -23,7 +23,7 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 export default function BulletinBoardPage() {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { formatDate } = useTimezone()
   const dict = t.courses.lectureHall
 
