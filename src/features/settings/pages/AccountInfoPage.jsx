@@ -1,5 +1,4 @@
 import React from "react"
-import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useProfileState } from "@/features/settings/hooks/useProfileState"
@@ -9,9 +8,9 @@ import AccountHeader from "@/features/settings/components/AccountHeader"
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
 import AccountSettingsForm from "@/features/settings/components/AccountSettingsForm"
 import PageTitle from "@/shared/components/ui/PageTitle"
+import { BankAccountList } from "@/features/bank-accounts"
 
 const AccountInfoPage = () => {
-  const { user } = useAuth()
   const { t } = useLanguage()
 
   // Fetch private profile
@@ -74,6 +73,11 @@ const AccountInfoPage = () => {
           errors={errors}
           t={t}
         />
+      </div>
+
+      {/* Bank Accounts Section */}
+      <div className="w-full border-t border-neutral-200 dark:border-neutral-800 pt-6">
+        <BankAccountList />
       </div>
 
       <ProfileOtpModal

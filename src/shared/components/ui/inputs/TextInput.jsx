@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { colors } from "@/shared/utils/colors"
 import { Eye, EyeOff } from "lucide-react"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 const TextInput = ({
   id,
@@ -12,6 +13,7 @@ const TextInput = ({
   type = "text",
   variant = "round",
   icon: Icon,
+  rightIcon: RightIcon,
   color,
   className = "",
   containerClassName = "",
@@ -44,6 +46,7 @@ const TextInput = ({
           : "rounded-3xl"
 
   const iconPadding = Icon ? "!pl-10" : ""
+  const rightIconPadding = RightIcon ? "!pr-12" : ""
   const passwordPadding = isPassword ? "!pr-10" : ""
 
   const errorClass = error
@@ -52,7 +55,7 @@ const TextInput = ({
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
   const heightClass = multiline ? "min-h-[56px] px-4" : "h-[56px] px-4"
-  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-[#e5e5e5] disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-[#e5e5e5] disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {
@@ -82,8 +85,7 @@ const TextInput = ({
             style={{
               "--border-color": colors.border,
               "--placeholder-color": colors.subtext,
-              "--focus-color":
-                color || "var(--tw-colors-cath-red-700, #8e0000)",
+              "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
             className={`${finalClassName} resize-none overflow-hidden scrollbar-hide`}
@@ -101,8 +103,7 @@ const TextInput = ({
             style={{
               "--border-color": colors.border,
               "--placeholder-color": colors.subtext,
-              "--focus-color":
-                color || "var(--tw-colors-cath-red-700, #8e0000)",
+              "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
             className={finalClassName}
@@ -120,6 +121,20 @@ const TextInput = ({
           >
             {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
+        )}
+        {RightIcon && !rightContent && !isPassword && (
+          <IconButton
+            as="div"
+            variant="iconOnly"
+            size="sm"
+            className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 z-10"
+          >
+            {React.isValidElement(RightIcon) ? (
+              RightIcon
+            ) : (
+              <RightIcon />
+            )}
+          </IconButton>
         )}
         {rightContent && (
           <div className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex items-center">
