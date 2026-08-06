@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast"
 import { Check } from "lucide-react"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import {
   useGetExploreClassDetailQuery,
@@ -22,6 +23,10 @@ import PublicClassFAQ from "../components/public-class/PublicClassFAQ"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 
 const PublicClassDetailPage = () => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const pc = c.publicClass || {}
+
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -103,7 +108,7 @@ const PublicClassDetailPage = () => {
       <div className="min-h-[70vh] flex flex-col justify-center items-center gap-4 bg-slate-50">
         <LoadingSpinner className="w-10 h-10 text-[#b20a1c]" />
         <p className="text-sm font-semibold text-slate-500 animate-pulse">
-          Đang tải thông tin lớp học...
+          {pc.loading || "Đang tải thông tin lớp học..."}
         </p>
       </div>
     )
@@ -116,17 +121,17 @@ const PublicClassDetailPage = () => {
           !
         </div>
         <h2 className="text-2xl font-black text-slate-900">
-          Không tìm thấy thông tin lớp học
+          {pc.notFoundTitle || "Không tìm thấy thông tin lớp học"}
         </h2>
         <p className="text-slate-500 text-sm max-w-md">
-          Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm.
+          {pc.notFoundDesc || "Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm."}
         </p>
         <button
           type="button"
           onClick={() => navigate(isWorkspace ? "/workspace/explore-courses" : "/explore-courses")}
           className="mt-2 bg-[#b20a1c] hover:bg-[#960817] text-white font-extrabold px-6 py-3 rounded-2xl shadow-md transition-colors text-sm"
         >
-          Khám Phá Các Lớp Học Khác
+          {pc.exploreOtherBtn || "Khám Phá Các Lớp Học Khác"}
         </button>
       </div>
     )
@@ -155,7 +160,7 @@ const PublicClassDetailPage = () => {
             <section id="about" className="scroll-mt-24">
               <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
                 <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mb-4">
-                  Giới Thiệu Chi Tiết Về Lớp Học
+                  {pc.overviewTitle || "Giới Thiệu Chi Tiết Về Lớp Học"}
                 </h2>
                 {classData.description ? (
                   <RenderHTML
@@ -164,23 +169,14 @@ const PublicClassDetailPage = () => {
                   />
                 ) : (
                   <p className="text-slate-600 font-medium leading-relaxed text-sm sm:text-base">
-                    Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc.
+                    {pc.defaultDescription || "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc."}
                   </p>
                 )}
               </div>
             </section>
 
-            {/* Outcomes */}
-            <PublicClassOutcomes classData={classData} />
-
-            {/* Syllabus */}
-            <PublicClassSyllabus classData={classData} />
-
             {/* Instructor Profile */}
             <PublicClassInstructor classData={classData} />
-
-            {/* Student Reviews */}
-            <PublicClassReviews />
 
             {/* FAQ */}
             <PublicClassFAQ />
@@ -201,10 +197,10 @@ const PublicClassDetailPage = () => {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200 p-4 shadow-2xl flex items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
-            Học phí trọn gói
+            {c.tuition || pc.tuitionFeeFull || "Học phí trọn gói"}
           </span>
           <span className="text-lg font-black text-slate-950">
-            {classData?.tuitionFee != null ? `${classData.tuitionFee.toLocaleString()} VNĐ` : "Chưa xác định"}
+            {classData?.tuitionFee != null ? `${classData.tuitionFee.toLocaleString()} VNĐ` : (pc.tbaFee || "Chưa xác định")}
           </span>
         </div>
 
@@ -214,7 +210,7 @@ const PublicClassDetailPage = () => {
             onClick={handleEnrollAction}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
           >
-            <Check size={16} /> Vào Lớp Học
+            <Check size={16} /> {c.enterClass || pc.enterClass || "Vào Lớp Học"}
           </button>
         ) : (
           <button
@@ -223,7 +219,7 @@ const PublicClassDetailPage = () => {
             disabled={isEnrolling}
             className="bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
           >
-            {isEnrolling ? "Đang xử lý..." : "Đăng Ký Ngay"}
+            {isEnrolling ? (pc.processing || "Đang xử lý...") : (c.enrollNow || pc.enrollNow || "Đăng Ký Ngay")}
           </button>
         )}
       </div>

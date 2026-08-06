@@ -1,30 +1,35 @@
 import React, { useState } from "react"
 import { ChevronDown, ChevronUp, HelpCircle } from "lucide-react"
-
-const FAQS = [
-  {
-    q: "Tôi cần trình độ Tiếng Anh thế nào để tham gia lớp?",
-    a: "Lớp học được thiết kế phù hợp cho nhiều cấp độ từ Sơ cấp (Basic) đến Trung cấp (Intermediate). Trước khi bắt đầu, giảng viên sẽ có buổi định hướng giúp bạn nắm bắt lộ trình học hiệu quả nhất."
-  },
-  {
-    q: "Lớp học diễn ra dưới hình thức nào?",
-    a: "Lớp học được tổ chức trực tuyến 100% qua nền tảng CatSpeak Video Room với sự tương tác trực tiếp 2 chiều giữa giảng viên và học viên."
-  },
-  {
-    q: "Nếu tôi bận nghỉ 1 buổi học thì sao?",
-    a: "Tất cả các buổi học đều có bản ghi hình (Recording) và slide bài giảng lưu trữ trên hệ thống. Bạn có thể xem lại bài học bất kỳ lúc nào."
-  },
-  {
-    q: "Làm thế nào để nhận chứng chỉ hoàn thành?",
-    a: "Sau khi hoàn thành tối thiểu 80% số buổi học và nộp đủ các bài tập / bài kiểm tra giữa kỳ & cuối kỳ, bạn sẽ nhận được chứng chỉ số CatSpeak."
-  },
-  {
-    q: "Chính sách đăng ký & hoàn tiền như thế nào?",
-    a: "CatSpeak cam kết hỗ trợ đổi lớp hoặc hoàn tiền 100% trong vòng 7 ngày đầu tiên nếu bạn cảm thấy lớp học không phù hợp với nhu cầu."
-  }
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PublicClassFAQ = () => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const pc = c.publicClass || {}
+
+  const faqs = [
+    {
+      q: pc.faq1Q || "Tôi cần trình độ Tiếng Anh thế nào để tham gia lớp?",
+      a: pc.faq1A || "Lớp học được thiết kế phù hợp cho nhiều cấp độ từ Sơ cấp (Basic) đến Trung cấp (Intermediate). Trước khi bắt đầu, giảng viên sẽ có buổi định hướng giúp bạn nắm bắt lộ trình học hiệu quả nhất."
+    },
+    {
+      q: pc.faq2Q || "Lớp học diễn ra dưới hình thức nào?",
+      a: pc.faq2A || "Lớp học được tổ chức trực tuyến 100% qua nền tảng CatSpeak Video Room với sự tương tác trực tiếp 2 chiều giữa giảng viên và học viên."
+    },
+    {
+      q: pc.faq3Q || "Nếu tôi bận nghỉ 1 buổi học thì sao?",
+      a: pc.faq3A || "Tất cả các buổi học đều có bản ghi hình (Recording) và slide bài giảng lưu trữ trên hệ thống. Bạn có thể xem lại bài học bất kỳ lúc nào."
+    },
+    {
+      q: pc.faq4Q || "Làm thế nào để nhận chứng chỉ hoàn thành?",
+      a: pc.faq4A || "Sau khi hoàn thành tối thiểu 80% số buổi học và nộp đủ các bài tập / bài kiểm tra giữa kỳ & cuối kỳ, bạn sẽ nhận được chứng chỉ số CatSpeak."
+    },
+    {
+      q: pc.faq5Q || "Chính sách đăng ký & hoàn tiền như thế nào?",
+      a: pc.faq5A || "CatSpeak cam kết hỗ trợ đổi lớp hoặc hoàn tiền 100% trong vòng 7 ngày đầu tiên nếu bạn cảm thấy lớp học không phù hợp với nhu cầu."
+    }
+  ]
+
   const [openIdx, setOpenIdx] = useState(0)
 
   const toggle = (idx) => {
@@ -38,12 +43,12 @@ const PublicClassFAQ = () => {
           <HelpCircle size={20} />
         </span>
         <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-          Các Câu Hỏi Thường Gặp (FAQ)
+          {pc.faqTitle || "Các Câu Hỏi Thường Gặp (FAQ)"}
         </h2>
       </div>
 
       <div className="flex flex-col gap-3">
-        {FAQS.map((faq, idx) => {
+        {faqs.map((faq, idx) => {
           const isOpen = openIdx === idx
           return (
             <div

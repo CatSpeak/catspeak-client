@@ -1,19 +1,24 @@
 import React from "react"
 import { ShieldCheck, Star, Users, Award, BookOpen, CheckCircle } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { getSafeMediaUrl } from "../../utils/courseUtils"
 
 const PublicClassInstructor = ({ classData }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const pc = c.publicClass || {}
+
   const teacher = classData?.teacher || {}
-  const teacherName = teacher.fullName || teacher.name || teacher.title || "Chuyên Gia Ngôn Ngữ CatSpeak"
-  const teacherTitle = teacher.title || "Giảng Viên Ngôn Ngữ Cao Cấp"
+  const teacherName = teacher.fullName || teacher.name || teacher.title || c.defaultInstructor || "CatSpeak Instructor"
+  const teacherTitle = teacher.title || pc.defaultTeacherTitle || "Giảng Viên Ngôn Ngữ Cao Cấp"
   const teacherAvatar = getSafeMediaUrl(teacher.avatar)
-  const teacherBio = teacher.introduction || teacher.description ||
+  const teacherBio = teacher.introduction || teacher.description || pc.defaultTeacherBio ||
     "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc."
 
   return (
     <div id="instructor" className="scroll-mt-24">
       <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mb-6">
-        Thông Tin Giảng Viên Chuyên Trách
+        {pc.instructorTitle || "Thông Tin Giảng Viên Chuyên Trách"}
       </h2>
 
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
@@ -38,7 +43,7 @@ const PublicClassInstructor = ({ classData }) => {
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#b20a1c] uppercase tracking-wider mb-1">
                 <ShieldCheck size={15} />
-                Giảng Viên Xác Thực Bởi CatSpeak
+                {pc.verifiedTeacher || "Giảng Viên Xác Thực Bởi CatSpeak"}
               </div>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
                 {teacherName}
@@ -49,7 +54,7 @@ const PublicClassInstructor = ({ classData }) => {
             </div>
 
             {/* Quick Instructor Metrics */}
-            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-700 py-2 border-y border-slate-100">
+            {/* <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-700 py-2 border-y border-slate-100">
               <div className="flex items-center gap-1 text-amber-500">
                 <Star size={14} className="fill-amber-400" />
                 <span>4.9 Đánh giá giảng viên</span>
@@ -64,7 +69,7 @@ const PublicClassInstructor = ({ classData }) => {
                 <BookOpen size={14} />
                 <span>15+ Lớp đã giảng dạy</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Bio */}
             <p className="text-sm text-slate-600 leading-relaxed font-medium">
@@ -72,14 +77,14 @@ const PublicClassInstructor = ({ classData }) => {
             </p>
 
             {/* Teaching badges */}
-            <div className="flex flex-wrap gap-2 pt-2">
+            {/* <div className="flex flex-wrap gap-2 pt-2">
               <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-md">
                 <CheckCircle size={12} /> Chứng chỉ TESOL / CELTA
               </span>
               <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200/60 px-2.5 py-1 rounded-md">
                 <CheckCircle size={12} /> Tương tác 1:1 trực tiếp
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

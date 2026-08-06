@@ -205,6 +205,48 @@ const CreateClassPage = () => {
     showDeleteModal,
   } = state
 
+  const isLevelDisabled = useMemo(() => {
+    if (!isEditMode || !editingClassData) return false
+
+    // 1. Explicit backend lock flag
+    if (editingClassData.isLevelLocked === true || editingClassData.levelsLocked === true) {
+      return true
+    }
+
+    // 2. Someone already enrolled in the class
+    const enrolledCount = Number(editingClassData.enrolledCount) || Number(editingClassData.enrolledStudentsCount) || Number(editingClassData.enrolled) || 0
+    if (enrolledCount > 0) {
+      return true
+    }
+    if (
+      editingClassData.slots !== undefined &&
+      editingClassData.remainingSlots !== undefined &&
+      Number(editingClassData.remainingSlots) < Number(editingClassData.slots)
+    ) {
+      return true
+    }
+
+    const now = new Date()
+
+    // 3. Class has started enrollment date (in enrollment date)
+    if (editingClassData.enrollmentStart) {
+      const startEn = new Date(editingClassData.enrollmentStart)
+      if (!isNaN(startEn.getTime()) && startEn <= now) {
+        return true
+      }
+    }
+
+    // 4. Class has started start date
+    if (editingClassData.startDate) {
+      const startCls = new Date(editingClassData.startDate)
+      if (!isNaN(startCls.getTime()) && startCls <= now) {
+        return true
+      }
+    }
+
+    return false
+  }, [isEditMode, editingClassData])
+
   const setShowDeleteModal = useCallback((val) => {
     setField("showDeleteModal", val)
   }, [setField])
@@ -341,7 +383,7 @@ const CreateClassPage = () => {
       const initialHydratedLevel = editingClassData?.levels?.[0] || ""
       const isLevelUnchanged = isEditMode && level === initialHydratedLevel
 
-      const payloadLevels = (isEditMode && originalLevels && isLevelUnchanged)
+      const payloadLevels = (isEditMode && originalLevels && (isLevelUnchanged || isLevelDisabled))
         ? originalLevels
         : [level]
 
@@ -714,7 +756,7 @@ const CreateClassPage = () => {
                       setField("level", e.target.value)
                       clearError("level")
                     }}
-                    disabled={!selectedLanguage || isRecoverMode}
+                    disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
                     className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>

@@ -160,7 +160,7 @@ const ExploreCoursesPage = () => {
   return (
     <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
       {/* ─── Breadcrumbs ─── */}
-      <Breadcrumb
+      {/* <Breadcrumb
         items={[
           {
             label: dict.home || "Home",
@@ -168,7 +168,7 @@ const ExploreCoursesPage = () => {
           },
           { label: dict.exploreCourses || "Explore Courses" },
         ]}
-      />
+      /> */}
 
       {/* ─── Header & Subtitle ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

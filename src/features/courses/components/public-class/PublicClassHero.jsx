@@ -64,7 +64,7 @@ const PublicClassHero = ({
             )}
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium">
-                {c.instructorLabel || "Giảng viên"}
+                {c.instructorLabel || pc.instructorLabel || "Giảng viên"}
                 <ShieldCheck size={14} className="text-rose-400 inline" />
               </div>
               <span className="text-white font-bold text-base hover:text-rose-300 transition-colors">
@@ -81,7 +81,7 @@ const PublicClassHero = ({
                 onClick={onEnroll}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-900/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base"
               >
-                {c.enterClass || "Vào Lớp Học"}
+                {c.enterClass || pc.enterClass || "Vào Lớp Học"}
               </button>
             ) : (
               <button
@@ -90,7 +90,7 @@ const PublicClassHero = ({
                 disabled={isEnrolling}
                 className="bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-xl shadow-[#b20a1c]/40 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base cursor-pointer"
               >
-                {isEnrolling ? (pc.processing || "Đang xử lý...") : (c.enrollNow || "Đăng ký tham gia")}
+                {isEnrolling ? (pc.processing || "Đang xử lý...") : (c.enrollNow || pc.enrollNow || "Đăng ký tham gia")}
               </button>
             )}
 
@@ -111,12 +111,12 @@ const PublicClassHero = ({
           </div>
 
           {/* Enrollment statistics subtext */}
-          <div className="flex items-center gap-4 text-xs text-slate-300 pt-1">
+          {/* <div className="flex items-center gap-4 text-xs text-slate-300 pt-1">
             <span className="flex items-center gap-1 text-slate-200 font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               {classData?.enrolledCount ? `${classData.enrolledCount} ${pc.studentsEnrolled || "học viên đã đăng ký"}` : `3,750+ ${pc.studentsEnrolled || "học viên đã đăng ký"}`}
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

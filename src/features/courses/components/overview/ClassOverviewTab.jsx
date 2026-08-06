@@ -288,7 +288,7 @@ const ClassOverviewTab = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center">
                 <Calendar size={18} />
               </div>
@@ -305,7 +305,7 @@ const ClassOverviewTab = ({
                     : ui.tba || "TBA"}
                 </span>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center">

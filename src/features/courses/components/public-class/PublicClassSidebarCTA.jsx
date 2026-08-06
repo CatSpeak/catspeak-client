@@ -36,9 +36,9 @@ const PublicClassSidebarCTA = ({ classData }) => {
 
       {/* Pricing Header */}
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+        {/* <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">
           {c.tuition || "Học phí trọn gói"}
-        </span>
+        </span> */}
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-black text-slate-950">
             {tuitionLabel}
@@ -66,7 +66,7 @@ const PublicClassSidebarCTA = ({ classData }) => {
       </div>
 
       {/* Share / Guarantee Footer */}
-      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      {/* <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
         <span className="font-semibold">{pc.qualityGuarantee || "Đảm bảo chất lượng 100%"}</span>
         <button
           type="button"
@@ -81,7 +81,7 @@ const PublicClassSidebarCTA = ({ classData }) => {
         >
           <Share2 size={14} /> {pc.share || "Chia sẻ"}
         </button>
-      </div>
+      </div> */}
     </div>
   )
 }
