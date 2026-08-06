@@ -93,6 +93,9 @@ const CheckoutPage = lazy(
 const MyCoursesPage = lazy(
   () => import("@/features/courses/pages/MyCoursesPage"),
 );
+const ExploreCoursesPage = lazy(
+  () => import("@/features/courses/pages/ExploreCoursesPage"),
+);
 const CreateCoursePage = lazy(
   () => import("@/features/courses/pages/CreateCoursePage"),
 );
@@ -125,6 +128,9 @@ const StudentClassDetailPage = lazy(
 );
 const StudentCourseDetailPage = lazy(
   () => import("@/features/courses/pages/StudentCourseDetailPage"),
+);
+const PublicClassDetailPage = lazy(
+  () => import("@/features/courses/pages/PublicClassDetailPage"),
 );
 const SchedulePage = lazy(
   () => import("@/features/courses/pages/SchedulePage"),
@@ -182,6 +188,30 @@ const routesConfig = [
                   <CheckoutPage />
                 </LazyRoute>
               </AuthGuard>
+            ),
+          },
+          {
+            path: "explore-courses",
+            element: (
+              <LazyRoute>
+                <ExploreCoursesPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/details/:id",
+            element: (
+              <LazyRoute>
+                <StudentCourseDetailPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/class/:id",
+            element: (
+              <LazyRoute>
+                <PublicClassDetailPage />
+              </LazyRoute>
             ),
           },
           {
@@ -361,6 +391,30 @@ const routesConfig = [
               {
                 index: true,
                 element: <WorkspaceCourseRedirect />,
+              },
+              {
+                path: "explore-courses",
+                element: (
+                  <LazyRoute>
+                    <ExploreCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/details/:id",
+                element: (
+                  <LazyRoute>
+                    <StudentCourseDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/class/:id",
+                element: (
+                  <LazyRoute>
+                    <PublicClassDetailPage />
+                  </LazyRoute>
+                ),
               },
               {
                 path: "courses",

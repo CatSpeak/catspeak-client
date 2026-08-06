@@ -1,198 +1,219 @@
 import React from "react"
-import { Calendar, Tag, Clock } from "lucide-react"
+import { Clock, Users, ShieldCheck, Calendar, ArrowRight, Settings } from "lucide-react"
 import {
-  formatDateRange,
   formatCurrencyVND,
-  getCourseLocale,
   getSafeMediaUrl,
+  formatDateDayMonth,
+  getCourseLocale,
+  defaultCourseThumbnail,
 } from "../utils/courseUtils"
-import CourseStatusPill from "./CourseStatusPill"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { formatScheduleDays } from "../utils/scheduleUtils"
+import CourseStatusPill from "./CourseStatusPill"
 
 const ClassCard = ({
   cls,
-  isStudent,
+  isStudent = true,
   isClassEnrolled,
   isLocked,
   onClick,
   onEnroll,
   progressLabel,
-  courseTitle
 }) => {
   const { language, t } = useLanguage()
   const c = t.courses || {}
-  const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
-  const completedSessions = Number(cls.completedSessions)
-  const totalSessions = Number(cls.totalSessions)
-  const progress = (
-    Number.isFinite(completedSessions)
-    && completedSessions >= 0
-    && Number.isFinite(totalSessions)
-    && totalSessions > 0
-  )
-    ? Math.min(100, Math.round((completedSessions / totalSessions) * 100))
-    : null
-  const thumbnailUrl = getSafeMediaUrl(cls.thumbnailUrl)
-  const tuitionLabel = cls.tuitionFee == null
-    ? ui.tba || "TBA"
-    : formatCurrencyVND(cls.tuitionFee)
+
+  const thumbnailUrl = getSafeMediaUrl(cls.thumbnailUrl || cls.thumbnail)
+
+  // Teacher Info
+  const teacher = cls.teacher || {}
+  const teacherName = teacher.name || teacher.fullName || c.defaultInstructor || "Giảng viên CatSpeak"
+  const teacherAvatar = getSafeMediaUrl(teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl)
+
+  // Pricing
+  const tuitionValue = cls.price ?? cls.tuitionFee ?? cls.priceMin
+  const tuitionLabel = tuitionValue != null && Number.isFinite(Number(tuitionValue))
+    ? formatCurrencyVND(tuitionValue)
+    : ui.tba || "TBA"
+
+  // Counts & Slot Info
+  const studentCount = cls.studentCount ?? cls.enrolledStudents ?? null
+  const remainingSlots = cls.remainingSlots
+  const minEnrollmentEnd = cls.minEnrollmentEnd || cls.enrollmentEnd
+  const scheduleDays = Array.isArray(cls.schedule)
+    ? cls.schedule.map((s) => s.dayOfWeek).filter(Boolean)
+    : cls.schedule?.days
+  const firstSchedule = Array.isArray(cls.schedule) && cls.schedule.length > 0
+    ? cls.schedule[0]
+    : cls.schedule
+
+  const scheduleDaysText = formatScheduleDays(scheduleDays, language, ui.tba)
+  const scheduleTimeText = firstSchedule?.startTime && firstSchedule?.endTime
+    ? `${firstSchedule.startTime} - ${firstSchedule.endTime}`
+    : ""
+
+  // Extract progress value (number, string, or object { completedSessions, totalSessions, percentage })
+  let progressPercent = null
+  if (cls.progress != null) {
+    if (typeof cls.progress === "number" || (typeof cls.progress === "string" && !isNaN(Number(cls.progress)))) {
+      progressPercent = Number(cls.progress)
+    } else if (typeof cls.progress === "object") {
+      if (cls.progress.percentage != null && !isNaN(Number(cls.progress.percentage))) {
+        progressPercent = Number(cls.progress.percentage)
+      } else if (cls.progress.totalSessions && !isNaN(Number(cls.progress.completedSessions))) {
+        progressPercent = Math.round((Number(cls.progress.completedSessions || 0) / Number(cls.progress.totalSessions)) * 100)
+      }
+    }
+  }
 
   return (
     <div
       onClick={isLocked ? undefined : onClick}
       aria-disabled={isLocked || undefined}
-      className={`bg-white border rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between ${isClassEnrolled
-        ? "border-green-300 ring-2 ring-green-50/50"
+      className={`bg-white border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group ${isClassEnrolled
+        ? "border-emerald-400 ring-2 ring-emerald-50"
         : isLocked
-          ? "border-gray-100 opacity-60 cursor-not-allowed"
-          : "border-gray-100 cursor-pointer"
+          ? "border-slate-200 opacity-60 cursor-not-allowed"
+          : "border-slate-200 cursor-pointer hover:border-[#b20a1c]/30"
         }`}
     >
-      {/* Image Thumbnail Placeholder Area */}
-      <div className="relative h-60 bg-[#D9D9D9] flex items-center justify-center overflow-hidden shrink-0">
-        {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={cls.title || ""}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : null}
+      {/* Thumbnail Area */}
+      <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">
+        <img
+          src={thumbnailUrl || defaultCourseThumbnail}
+          alt={cls.name || cls.title || ""}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          decoding="async"
+        />
 
-        {/* Top-right status pill */}
-        <div className="absolute top-3 right-3">
-          {isStudent ? (
-            isClassEnrolled ? (
-              <span className="text-[10px] font-black px-3 py-1 rounded-full bg-green-100 text-green-700">
-                {c.student?.enrolled || "Enrolled"}
-              </span>
-            ) : isLocked ? (
-              <span className="text-[10px] font-black px-3 py-1 rounded-full bg-gray-200 text-gray-500">
-                {scd.locked || "Locked"}
-              </span>
-            ) : (
-              <span className="text-[10px] font-black px-3 py-1 rounded-full bg-blue-105 text-blue-700">
-                {scd.open || "Open"}
-              </span>
-            )
-          ) : (
-            <CourseStatusPill status={cls.status} />
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+          {cls.language && (
+            <span className="bg-slate-900/85 backdrop-blur-md text-white border border-slate-700/60 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
+              {cls.language}
+            </span>
           )}
+          {Array.isArray(cls.levels) && cls.levels.map((lvl) => (
+            <span key={lvl} className="bg-rose-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm">
+              {lvl}
+            </span>
+          ))}
         </div>
+
+        {/* Teacher / Admin status pill */}
+        {!isStudent && cls.status && (
+          <div className="absolute top-3 right-3 z-10">
+            <CourseStatusPill status={cls.status} t={t} />
+          </div>
+        )}
       </div>
 
-      {/* Class Details Area */}
-      <div className="p-6 flex flex-col flex-1 justify-between">
-        <div>
-          <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-1 hover:text-[#b20a1c] transition-colors" title={cls.title}>
-            <button
-              type="button"
-              disabled={isLocked}
-              className="text-left disabled:cursor-not-allowed"
-              onClick={(event) => {
-                event.stopPropagation()
-                onClick?.()
-              }}
-            >
-              {cls.title}
-            </button>
-          </h4>
-          <span className="text-xs text-gray-400 font-bold mt-1 block">
-            {c.course ? `${c.course} ${courseTitle}` : `Course ${courseTitle}`}
-          </span>
+      {/* Class Details Content */}
+      <div className="p-5 flex flex-col flex-1 justify-between gap-5">
+        <div className="flex flex-col gap-2.5">
+          <h3 className="font-black text-lg text-slate-950 leading-snug line-clamp-2 group-hover:text-[#b20a1c] transition-colors" title={cls.name || cls.title}>
+            {cls.name || cls.title}
+          </h3>
 
-          <div className="mt-4 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Tag size={13} className="text-gray-400" />
-              <span className="text-gray-900 font-extrabold">{tuitionLabel}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Calendar size={13} className="text-gray-400" />
-              <span>
-                {formatScheduleDays(
-                  cls.schedule?.days,
-                  language,
-                  ui.tba,
-                )}
+          {/* Instructor Profile */}
+          <div className="flex items-center gap-2.5 pt-1">
+            {teacherAvatar ? (
+              <img src={teacherAvatar} alt={teacherName} className="w-7 h-7 rounded-full object-cover ring-2 ring-indigo-100 shadow-2xs" />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
+                {teacherName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none">
+                {c.instructorLabel || "Giảng viên"}
               </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Clock size={13} className="text-gray-400" />
-              <span>
-                {formatDateRange(
-                  cls.startDate,
-                  cls.endDate,
-                  getCourseLocale(language),
-                  ui.tba,
-                )}
+              <span className="text-xs font-bold text-slate-800 line-clamp-1 flex items-center gap-1">
+                {teacherName}
+                <ShieldCheck size={12} className="text-indigo-500 inline shrink-0" />
               </span>
             </div>
           </div>
-        </div>
 
-        {/* Student / Teacher footer split */}
-        {isStudent ? (
-          <div className="mt-5 pt-4 border-t border-gray-100 flex flex-col gap-4">
-            {isClassEnrolled && (
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                  <span>{progressLabel}</span>
-                  <span>{progress == null ? "—" : `${progress}%`}</span>
-                </div>
-                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${progress ?? 0}%` }} />
-                </div>
+          {/* Schedule & Slot Info Grid */}
+          <div className="mt-2 flex flex-col gap-2 text-xs font-bold text-slate-600 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+            {scheduleDaysText && scheduleDaysText !== ui.tba && (
+              <div className="flex items-center gap-1.5 text-slate-800">
+                <Clock size={13} className="text-[#b20a1c] shrink-0" />
+                <span className="truncate">
+                  {scheduleDaysText} {scheduleTimeText ? `| ${scheduleTimeText}` : ""}
+                </span>
               </div>
             )}
 
-            <div className="flex justify-end items-center gap-4">
-              {isClassEnrolled ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onClick()
-                  }}
-                  className="h-8 px-4 bg-green-600 hover:bg-green-700 text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
-                >
-                  <span>{scd.goToClass || "Go to Class"}</span>
-                  <span>→</span>
-                </button>
-              ) : isLocked ? (
-                <span className="text-xs text-gray-400 font-bold italic">
-                  {scd.otherBatchSelected || "Other batch selected"}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onEnroll(e)
-                  }}
-                  className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
-                >
-                  <span>{c.student?.enroll || "Enroll"}</span>
-                </button>
+            <div className="grid grid-cols-2 gap-2 pt-0.5">
+              <div className="flex items-center gap-1.5">
+                <Users size={13} className="text-slate-400 shrink-0" />
+                <span>{studentCount != null ? `${studentCount} ${c.studentsUnit || "học viên"}` : `0 ${c.studentsUnit || "học viên"}`}</span>
+              </div>
+              {remainingSlots != null && (
+                <div className="flex items-center gap-1.5 text-emerald-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>{c.slotsRemaining ? c.slotsRemaining.replace("{{count}}", remainingSlots) : `Còn ${remainingSlots} chỗ`}</span>
+                </div>
               )}
             </div>
+
+            {minEnrollmentEnd && (
+              <div className="flex items-center gap-1.5 text-amber-800 border-t border-slate-100 pt-1.5 text-[11px]">
+                <Calendar size={12} className="text-amber-600 shrink-0" />
+                <span>{c.registrationDeadline || "Hạn ĐK"}: {formatDateDayMonth(minEnrollmentEnd, getCourseLocale(language), ui.tba)}</span>
+              </div>
+            )}
+
+            {progressLabel && progressPercent != null && !isNaN(progressPercent) && (
+              <div className="flex items-center justify-between border-t border-slate-100 pt-1.5 text-[11px] text-indigo-700 font-bold">
+                <span>{progressLabel}:</span>
+                <span>{progressPercent}%</span>
+              </div>
+            )}
           </div>
-        ) : (
-          <>
-            {/* Progress Section */}
-            <div className="mt-5">
-              <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                <span>{progressLabel}</span>
-                <span>{progress == null ? "—" : `${progress}%`}</span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
-                <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${progress ?? 0}%` }} />
-              </div>
-            </div>
-          </>
-        )}
+        </div>
+
+        {/* Pricing & Footer Action */}
+        <div className="pt-3.5 border-t border-slate-150 flex items-center justify-between gap-3">
+          <div className="flex flex-col">
+            <span className="text-slate-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-extrabold">{c.tuition || "Học phí"}</span>
+            <span className="text-[#b20a1c] font-black text-sm sm:text-base leading-none">{tuitionLabel}</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (onEnroll) {
+                onEnroll(e)
+              } else if (onClick) {
+                onClick(e)
+              }
+            }}
+            className="h-9 px-4 bg-[#b20a1c] hover:bg-[#960817] text-white text-xs font-extrabold rounded-full flex items-center justify-center gap-1 transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+          >
+            {!isStudent ? (
+              <>
+                <Settings size={13} />
+                <span>{c.manageClass || "Quản Lý Lớp"}</span>
+              </>
+            ) : isClassEnrolled ? (
+              <>
+                <span>{c.enterClass || "Vào Lớp"}</span>
+                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+              </>
+            ) : (
+              <>
+                <span>{c.viewClass || "Xem Lớp Học"}</span>
+                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   )

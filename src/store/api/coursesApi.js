@@ -179,7 +179,9 @@ const transformClass = (cls) => {
   if (!isRecord(cls)) return null
   const id = toText(cls.id)
   if (!id) return null
-  const resolvedCourseTitle = toText(cls.courseName) || toText(cls.courseTitle) || "Course"
+  const courseId = toText(cls.courseId) || null
+  const rawCourseTitle = toText(cls.courseName) || toText(cls.courseTitle)
+  const resolvedCourseTitle = courseId ? (rawCourseTitle || "Course") : (rawCourseTitle || null)
   const resolvedClassTitle = toText(cls.name) || toText(cls.title) || "Untitled Class"
   const resolvedStudentCount = toNullableNumber(
     cls.studentCount ?? cls.enrolledStudents,
@@ -217,7 +219,7 @@ const transformClass = (cls) => {
   return {
     ...cls,
     id,
-    courseId: toText(cls.courseId) || null,
+    courseId,
     courseName: resolvedCourseTitle,
     courseTitle: resolvedCourseTitle,
     name: resolvedClassTitle,
@@ -259,6 +261,41 @@ const transformClass = (cls) => {
       teacher?.accountId
       || toText(cls.teacherId)
       || toText(cls.accountId),
+  }
+}
+
+const transformExploreItem = (item) => {
+  if (!isRecord(item)) return null
+  const isClassItem = String(item?.type || "").toLowerCase() === "class"
+  const title = toText(item.name) || toText(item.title) || (isClassItem ? "Untitled Class" : "Untitled Course")
+  const teacher = transformPerson(item.teacher)
+
+  return {
+    ...item,
+    id: toText(item.id),
+    isClassItem,
+    type: item.type,
+    name: title,
+    title,
+    language: toText(item.language),
+    levels: toTextList(item.levels),
+    price: toNullableNumber(item.price, { nonNegative: true }),
+    tuitionFee: toNullableNumber(item.price, { nonNegative: true }),
+    priceMin: toNullableNumber(item.priceMin, { nonNegative: true }),
+    priceMax: toNullableNumber(item.priceMax, { nonNegative: true }),
+    priceRange: (item.priceMin != null || item.priceMax != null) ? {
+      min: toNullableNumber(item.priceMin, { nonNegative: true }),
+      max: toNullableNumber(item.priceMax, { nonNegative: true }),
+    } : null,
+    openClassCount: toNullableNumber(item.openClassCount, { nonNegative: true }),
+    studentCount: toNullableNumber(item.studentCount, { nonNegative: true }),
+    remainingSlots: toNullableNumber(item.remainingSlots, { nonNegative: true }),
+    thumbnailUrl: toText(item.thumbnailUrl),
+    createdAt: toText(item.createdAt),
+    teacher: teacher ? {
+      ...teacher,
+      avatar: teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl
+    } : null
   }
 }
 
@@ -486,8 +523,69 @@ const buildCreateClassFormData = (data) => buildFormData({
   Status: data.status || null,
 })
 
+const buildAnalyticsQueryParams = (params = {}) => {
+  const mapping = {
+    groupBy: "GroupBy",
+    GroupBy: "GroupBy",
+    startDate: "StartDate",
+    StartDate: "StartDate",
+    endDate: "EndDate",
+    EndDate: "EndDate",
+    compareStartDate: "CompareStartDate",
+    CompareStartDate: "CompareStartDate",
+    compareEndDate: "CompareEndDate",
+    CompareEndDate: "CompareEndDate",
+    courseId: "CourseId",
+    CourseId: "CourseId",
+    classId: "ClassId",
+    ClassId: "ClassId",
+    includeStandaloneClasses: "IncludeStandaloneClasses",
+    IncludeStandaloneClasses: "IncludeStandaloneClasses",
+    page: "Page",
+    Page: "Page",
+    pageSize: "PageSize",
+    PageSize: "PageSize",
+    sortBy: "SortBy",
+    SortBy: "SortBy",
+    sortOrder: "SortOrder",
+    SortOrder: "SortOrder",
+  }
+
+  const queryParams = {}
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && val !== "") {
+      const targetKey = mapping[key] || key
+      queryParams[targetKey] = val
+    }
+  })
+  return queryParams
+}
+
 export const coursesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Public Explore Endpoints
+    getExploreCourses: builder.query({
+      query: (params) => ({
+        url: "/explore/courses",
+        method: "GET",
+        params: {
+          page: params?.page || 1,
+          pageSize: params?.pageSize || 24,
+          search: params?.search ? params.search.trim() : undefined,
+          sort: params?.sort && params.sort !== "default" ? params.sort : undefined,
+          language: params?.language && params.language !== "all" ? params.language.toLowerCase() : undefined,
+          minPrice: params?.minPrice != null && !isNaN(Number(params.minPrice)) ? Number(params.minPrice) : undefined,
+          maxPrice: params?.maxPrice != null && !isNaN(Number(params.maxPrice)) ? Number(params.maxPrice) : undefined,
+          type: params?.type && params.type !== "all"
+            ? (params.type === "courses" ? "course" : params.type === "classes" ? "class" : String(params.type).toLowerCase())
+            : undefined,
+        },
+        extraOptions: { skipAuthHeader: true },
+      }),
+      transformResponse: (response) => transformPaginatedResponse(response, transformExploreItem),
+      providesTags: ["ExploreCatalog"],
+    }),
+
     // Student Endpoints
     getStudentAvailableCourses: builder.query({
       query: (params) => ({
@@ -496,7 +594,7 @@ export const coursesApi = baseApi.injectEndpoints({
         params: {
           page: params?.page || 1,
           pageSize: params?.pageSize || 100,
-          language: params?.language,
+          language: params?.language ? params.language.toUpperCase() : undefined,
           search: params?.search,
         },
       }),
@@ -504,6 +602,21 @@ export const coursesApi = baseApi.injectEndpoints({
         return transformPaginatedResponse(response, transformCourse)
       },
       providesTags: ["StudentCourses"]
+    }),
+
+    getStudentAvailableClasses: builder.query({
+      query: (params) => ({
+        url: "/student/classes",
+        method: "GET",
+        params: {
+          page: params?.page || 1,
+          pageSize: params?.pageSize || 100,
+          language: params?.language ? params.language.toUpperCase() : undefined,
+          search: params?.search,
+        },
+      }),
+      transformResponse: (response) => transformPaginatedResponse(response, transformClass),
+      providesTags: ["StudentClasses"],
     }),
 
     getStudentJoinedClasses: builder.query({
@@ -563,6 +676,62 @@ export const coursesApi = baseApi.injectEndpoints({
         }
       },
       providesTags: ["StudentClasses"]
+    }),
+
+    getExploreCourseDetail: builder.query({
+      query: (id) => ({
+        url: `/explore/courses/${encodePathSegment(id)}`,
+        method: "GET",
+        extraOptions: { skipAuthHeader: true },
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        const transformedCourse = transformCourse(data)
+        if (!transformedCourse) return null
+        const transformedClasses = Array.isArray(data.classes)
+          ? data.classes.map((cls) => {
+            const transformedClass = transformClass(cls)
+            return transformedClass
+              ? {
+                ...transformedClass,
+                isEnrolled: cls.isEnrolled === true,
+                enrolledCount: cls.enrolledCount ?? null,
+              }
+              : null
+          }).filter(Boolean)
+          : []
+        const enrolledClass = transformedClasses.find(cls => cls.isEnrolled)
+        return {
+          ...transformedCourse,
+          enrolledClassId: enrolledClass?.id || null,
+          enrolledClassName: enrolledClass?.name || enrolledClass?.title || null,
+          classes: transformedClasses
+        }
+      },
+      providesTags: (result, error, id) => [{ type: "CourseDetail", id: String(id) }]
+    }),
+
+    getExploreClassDetail: builder.query({
+      query: (id) => ({
+        url: `/explore/classes/${encodePathSegment(id)}`,
+        method: "GET",
+        extraOptions: { skipAuthHeader: true },
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        const transformedClass = transformClass(data)
+        if (!transformedClass) return null
+        return {
+          ...transformedClass,
+          isEnrolled: data.isEnrolled === true,
+          enrolledCount: data.enrolledCount ?? null,
+          nextSession: transformNextSession(data),
+          teachingProgress: transformTeachingProgress(data),
+        }
+      },
+      providesTags: (result, error, id) => [{ type: "ClassDetail", id: String(id) }]
     }),
 
     getStudentCourseDetail: builder.query({
@@ -1967,11 +2136,201 @@ export const coursesApi = baseApi.injectEndpoints({
         return list
       },
     }),
+
+    // ─── Analytics Endpoints ──────────────────────────────────────────
+
+    // 1. AnalyticsCourseClass
+    getAnalyticsCourseClassOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsCourseClassEffectiveness: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/course-effectiveness",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsCourseClassStandaloneClasses: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/standalone-classes",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsCourseClassHotClasses: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/hot-classes",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsCourseClass: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/course-class/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // 2. AnalyticsQuality
+    getAnalyticsQualityOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsQualityRatingTrend: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/rating-trend",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsQualityRatingDistribution: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/rating-distribution",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsQualityByClass: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/by-class",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsQuality: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/quality/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // 3. AnalyticsRevenue
+    getAnalyticsRevenueOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsRevenueTrend: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/trend",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsRevenueByClass: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/by-class",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsRevenueTopClasses: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/top-classes",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsRevenue: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/revenue/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    // 4. AnalyticsStudents
+    getAnalyticsStudentsOverview: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/overview",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsStudentsGrowth: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/growth",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsStudentsByClass: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/by-class",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    getAnalyticsStudentsByCourse: builder.query({
+      query: (params) => ({
+        url: "/teacher/analytics/students/by-course",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportAnalyticsStudents: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/analytics/students/export",
+        method: "GET",
+        params: buildAnalyticsQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
   }),
 })
 
 export const {
+  useGetExploreCoursesQuery,
+  useGetExploreCourseDetailQuery,
+  useGetExploreClassDetailQuery,
   useGetStudentAvailableCoursesQuery,
+  useGetStudentAvailableClassesQuery,
   useGetStudentJoinedClassesQuery,
   useGetStudentCourseDetailQuery,
   useGetStudentClassDetailQuery,
@@ -2071,4 +2430,25 @@ export const {
   // Teaching Tasks Hooks
   useGetTeacherClassTeachingTasksCombinedQuery,
   useGetTeacherCourseTeachingTasksCombinedQuery,
+  // Analytics Hooks
+  useGetAnalyticsCourseClassOverviewQuery,
+  useGetAnalyticsCourseClassEffectivenessQuery,
+  useGetAnalyticsCourseClassStandaloneClassesQuery,
+  useGetAnalyticsCourseClassHotClassesQuery,
+  useExportAnalyticsCourseClassMutation,
+  useGetAnalyticsQualityOverviewQuery,
+  useGetAnalyticsQualityRatingTrendQuery,
+  useGetAnalyticsQualityRatingDistributionQuery,
+  useGetAnalyticsQualityByClassQuery,
+  useExportAnalyticsQualityMutation,
+  useGetAnalyticsRevenueOverviewQuery,
+  useGetAnalyticsRevenueTrendQuery,
+  useGetAnalyticsRevenueByClassQuery,
+  useGetAnalyticsRevenueTopClassesQuery,
+  useExportAnalyticsRevenueMutation,
+  useGetAnalyticsStudentsOverviewQuery,
+  useGetAnalyticsStudentsGrowthQuery,
+  useGetAnalyticsStudentsByClassQuery,
+  useGetAnalyticsStudentsByCourseQuery,
+  useExportAnalyticsStudentsMutation,
 } = coursesApi

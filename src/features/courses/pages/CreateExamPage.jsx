@@ -10,6 +10,7 @@ import {
   usePublishTeacherQuizMutation,
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import {
@@ -24,7 +25,6 @@ import {
 import { Editor } from "@tinymce/tinymce-react"
 import TeacherQuizDetailView from "@/features/courses/components/grading/TeacherQuizDetailView"
 import {
-  ChevronRight,
   Trash2,
   Copy,
   Plus,
@@ -1355,38 +1355,26 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       )}
 
       {/* ─── Breadcrumbs ─── */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-            {t.nav?.home || "Trang chủ"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>
-            {c.title || "Khóa học của tôi"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses/all")}>
-            {c.allCourses?.title || "Toàn bộ khóa học"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button
-            type="button"
-            disabled={!classData.courseId}
-            className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)}
-          >
-            {t.courses?.student?.courseDetails || "Chi tiết khóa học"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}`)}>
-            {t.courses?.student?.classDetails || "Chi tiết lớp học"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <span className="text-[#990011] font-semibold">
-            {effectiveQuizId ? (ce.editTitle || "Edit Exam") : (ce.pageTitle || "Create Exam")}
-          </span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: c.allCourses?.title || "Toàn bộ khóa học", onClick: () => navigate("/workspace/courses/all") },
+          ...(classData.courseId
+            ? [
+                {
+                  label: t.courses?.student?.courseDetails || "Chi tiết khóa học",
+                  onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
+                },
+              ]
+            : []),
+          {
+            label: t.courses?.student?.classDetails || "Chi tiết lớp học",
+            onClick: () => navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}`),
+          },
+          { label: effectiveQuizId ? (ce.editTitle || "Edit Exam") : (ce.pageTitle || "Create Exam") },
+        ]}
+      />
 
       {/* ─── Page Title ─── */}
       <h1 className="text-3xl font-black text-gray-950 tracking-tight">

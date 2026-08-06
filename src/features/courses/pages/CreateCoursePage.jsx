@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
+import { Editor } from "@tinymce/tinymce-react"
 import {
   Upload,
   ChevronDown,
@@ -16,6 +17,7 @@ import {
   useDeleteCourseMutation
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { TextInput } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
@@ -237,8 +239,9 @@ const CreateCoursePage = () => {
       return
     }
 
-    const descriptionWordCount = description.trim()
-      ? description.trim().split(/\s+/).length
+    const plainTextDesc = description ? description.replace(/<[^>]*>/g, " ").trim() : ""
+    const descriptionWordCount = plainTextDesc
+      ? plainTextDesc.split(/\s+/).filter(Boolean).length
       : 0
     if (descriptionWordCount > 150) {
       newErrors.description = true
@@ -339,18 +342,16 @@ const CreateCoursePage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] flex-1">
 
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-        <span>/</span>
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">
-          {labelCourseAction}
-        </span>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: labelCourseAction },
+        ]}
+      />
 
       {/* ─── Header ─── */}
       <div className="flex items-center gap-3">
@@ -368,14 +369,14 @@ const CreateCoursePage = () => {
       </div>
 
       {/* ─── Form Container ─── */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm flex flex-col gap-6 flex-1">
 
         <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
           {labelCourseInfoTitle}
         </h2>
 
         {/* ─── 2-Column Split Layout ─── */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 items-start flex-1">
 
           {/* Left Column: Course Avatar / Thumbnail Card */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0 flex flex-col gap-2.5">
@@ -451,7 +452,7 @@ const CreateCoursePage = () => {
           </div>
 
           {/* Right Column: Form Inputs */}
-          <div className="flex-1 w-full flex flex-col gap-5">
+          <div className="flex-1 w-full flex flex-col gap-5 h-full">
 
             {/* Course Name */}
             <div className="flex flex-col gap-2">
@@ -520,11 +521,10 @@ const CreateCoursePage = () => {
                       type="button"
                       onClick={toggle}
                       disabled={!selectedLanguage}
-                      className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition text-sm font-medium border ${
-                        !selectedLanguage
-                          ? "bg-gray-50/50 border-gray-100 text-gray-400 cursor-not-allowed opacity-60"
-                          : "bg-gray-50/50 border-gray-100 text-gray-800 hover:bg-gray-100/50 cursor-pointer"
-                      }`}
+                      className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition text-sm font-medium border ${!selectedLanguage
+                        ? "bg-gray-50/50 border-gray-100 text-gray-400 cursor-not-allowed opacity-60"
+                        : "bg-gray-50/50 border-gray-100 text-gray-800 hover:bg-gray-100/50 cursor-pointer"
+                        }`}
                     >
                       <span className={level ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
                         {level || (cc.levelPlaceholder || c.levelPlaceholder || "Chọn trình độ")}
@@ -536,8 +536,8 @@ const CreateCoursePage = () => {
               </div>
             </div>
 
-            {/* Description Textarea */}
-            <div className="flex flex-col gap-2">
+            {/* Description TinyMCE Editor */}
+            <div className="flex flex-col gap-2 flex-1">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-gray-800">
                   {cc.descriptionLabel || c.descriptionLabel || "Mô tả khóa học (tùy chọn)"}
@@ -546,12 +546,24 @@ const CreateCoursePage = () => {
                   {cc.descriptionLimitNote || c.descriptionLimitNote || "Nội dung không quá 150 từ"}
                 </span>
               </div>
-              <textarea
-                rows={4}
-                placeholder={cc.descriptionPlaceholder || c.descriptionPlaceholder || "Nhập thông tin mô tả tổng quan về khóa học..."}
+              <Editor
+                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-3.5 bg-gray-50/50 hover:bg-gray-100/50 focus:bg-white border border-gray-100 focus:border-gray-200 outline-none rounded-xl text-sm font-medium text-gray-800 transition-all resize-y min-h-[110px] placeholder:text-gray-400 placeholder:font-normal"
+                onEditorChange={(newContent) => {
+                  setDescription(newContent)
+                  clearError("description")
+                }}
+                init={{
+                  height: 250,
+                  menubar: false,
+                  statusbar: false,
+                  plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                  toolbar:
+                    "bold italic underline strikethrough | emoticons link | bullist numlist | removeformat",
+                  placeholder: cc.descriptionPlaceholder || c.descriptionPlaceholder || "Nhập thông tin mô tả tổng quan về khóa học...",
+                  skin: "oxide",
+                  content_style: "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                }}
               />
             </div>
 
@@ -560,7 +572,7 @@ const CreateCoursePage = () => {
         </div>
 
         {/* ─── Action Buttons ─── */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-2 w-full">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-auto w-full">
           {isEditMode && (
             <PillButton
               type="button"
