@@ -222,8 +222,8 @@ const DesktopSidebar = () => {
                     to={targetPath}
                     onClick={() => handleDockClick(item)}
                     className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
-                        ? "bg-white text-cath-red-700 shadow-md"
-                        : "text-white/80 hover:text-white hover:bg-white/15"
+                      ? "bg-white text-cath-red-700 shadow-md"
+                      : "text-white/80 hover:text-white hover:bg-white/15"
                       }`}
                   >
                     <Icon />
@@ -257,8 +257,8 @@ const DesktopSidebar = () => {
                   to={targetPath}
                   onClick={() => handleDockClick(item)}
                   className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
-                      ? "bg-white text-cath-red-700 shadow-md"
-                      : "text-white/80 hover:text-white hover:bg-white/15"
+                    ? "bg-white text-cath-red-700 shadow-md"
+                    : "text-white/80 hover:text-white hover:bg-white/15"
                     }`}
                 >
                   <Icon />
@@ -295,8 +295,8 @@ const DesktopSidebar = () => {
                     }
                   }}
                   className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
-                      ? "bg-white text-cath-red-700 shadow-md scale-105"
-                      : "text-white/80 hover:text-white hover:bg-white/15"
+                    ? "bg-white text-cath-red-700 shadow-md scale-105"
+                    : "text-white/80 hover:text-white hover:bg-white/15"
                     }`}
                 >
                   <Icon />
@@ -332,8 +332,8 @@ const DesktopSidebar = () => {
                 <span className="truncate text-lg">
                   {isSettingsPage
                     ? t.nav?.settings || "Settings"
-                    : currentSectionData?.defaultLabel ||
-                    t.nav?.[activeDockSection] ||
+                    : t.nav?.[currentSectionData?.labelKey || activeDockSection] ||
+                    currentSectionData?.defaultLabel ||
                     "Navigation"}
                 </span>
               </ListItem>
@@ -397,9 +397,6 @@ const DesktopSidebar = () => {
                             "teachingTasks",
                           ]
                           if (teacherTabs.includes(item.key) && isStudent)
-                            return false
-
-                          if (item.key === "myLearning" && isTeacher)
                             return false
 
                           return true

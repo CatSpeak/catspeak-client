@@ -2,7 +2,9 @@ import React, { useState } from "react"
 import { Editor } from "@tinymce/tinymce-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { TextInput, Switch } from "@/shared/components/ui/inputs"
+import { TextInput } from "@/shared/components/ui/inputs"
+import ToggleOption from "../ui/ToggleOption"
+import { MessageSquare, Eye } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -14,11 +16,13 @@ const CreateBulletinBoardModal = ({
 }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.modals.createBoard || {}
+  const createPostDict = t.courses.lectureHall.createPost || {}
 
   const [title, setTitle] = useState(initialData?.title || "")
   const [content, setContent] = useState(initialData?.content || "")
   const [allowReply, setAllowReply] = useState(initialData?.allowReply ?? true)
   const [isVisible, setIsVisible] = useState(initialData?.isVisibleToStudents ?? true)
+  const [errors, setErrors] = useState({})
 
   const [prevOpen, setPrevOpen] = useState(open)
   const [prevInitialData, setPrevInitialData] = useState(initialData)
@@ -31,23 +35,26 @@ const CreateBulletinBoardModal = ({
       setContent(initialData?.content || "")
       setAllowReply(initialData?.allowReply ?? true)
       setIsVisible(initialData?.isVisibleToStudents ?? true)
+      setErrors({})
     }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (!title.trim()) {
-      toast.error(dict.toastTitleRequired)
+    const newErrors = {}
+    if (!title.trim()) newErrors.title = true
+    const cleanContent = content.replace(/<[^>]*>?/gm, '').trim()
+    if (!cleanContent) newErrors.content = true
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      if (newErrors.title) toast.error(dict.toastTitleRequired)
+      else if (newErrors.content) toast.error(dict.toastContentRequired)
       return
     }
 
-    // Check if content is empty or just <p><br></p>
-    const cleanContent = content.replace(/<[^>]*>?/gm, '').trim()
-    if (!cleanContent) {
-      toast.error(dict.toastContentRequired)
-      return
-    }
+    setErrors({})
 
     onSubmit({
       title,
@@ -60,6 +67,7 @@ const CreateBulletinBoardModal = ({
 
   const handleEditorChange = (newContent) => {
     setContent(newContent)
+    if (errors.content) setErrors((prev) => ({ ...prev, content: false }))
   }
 
   return (
@@ -98,65 +106,65 @@ const CreateBulletinBoardModal = ({
           <TextInput
             required
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value)
+              if (errors.title) setErrors((prev) => ({ ...prev, title: false }))
+            }}
+            error={errors.title}
             placeholder={dict.boardPlaceholder}
-            className="rounded-xl !h-[50px] px-4 text-sm"
+            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
         {/* Content Input + TinyMCE Rich Text Editor */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            {dict.content}
+            {dict.content}  <span className="text-[#EF4444]">*</span>
           </label>
-          <Editor
-            tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
-            value={content}
-            onEditorChange={handleEditorChange}
-            init={{
-              height: 180,
-              menubar: false,
-              statusbar: false,
-              plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
-              toolbar:
-                "bold italic underline strikethrough | emoticons link | bullist numlist",
-              placeholder: dict.contentPlaceholder,
-              skin: "oxide",
-              setup: (editor) => {
-                editor.on("focus", () => { })
-              },
-            }}
-          />
+          <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
+            <Editor
+              tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+              value={content}
+              onEditorChange={handleEditorChange}
+              init={{
+                height: 180,
+                menubar: false,
+                statusbar: false,
+                plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                toolbar:
+                  "bold italic underline strikethrough | emoticons link | bullist numlist",
+                placeholder: dict.contentPlaceholder,
+                skin: "oxide",
+                setup: (editor) => {
+                  editor.on("focus", () => { })
+                },
+              }}
+            />
+          </div>
         </div>
 
 
         {/* Toggles */}
         <div className="space-y-3 pt-2">
-          {/* Allow Reply Toggle */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-[#191C1D]">
-              {dict.allowReply}
-            </span>
-            <Switch
-              checked={allowReply}
-              onChange={(e) => setAllowReply(e.target.checked)}
-              colorClass="peer-checked:bg-[#A00000]"
-              className="min-h-6"
-            />
-          </div>
-
           {/* Visible to Students Toggle */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-[#191C1D]">
-              {dict.visibleToStudents}
-            </span>
-            <Switch
-              checked={isVisible}
-              onChange={(e) => setIsVisible(e.target.checked)}
-              colorClass="peer-checked:bg-[#A00000]"
-              className="min-h-6"
-            />
-          </div>
+          <ToggleOption
+            icon={<Eye size={20} className="text-[#F83B4F]" />}
+            iconBg="bg-[#FFEAED]"
+            title={dict.visibleToStudents}
+            description={createPostDict.visibleDesc || ""}
+            checked={isVisible}
+            onChange={(e) => setIsVisible(e.target.checked)}
+          />
+
+          {/* Allow Reply Toggle */}
+          <ToggleOption
+            icon={<MessageSquare size={20} className="text-[#0E6EEC]" />}
+            iconBg="bg-[#8ECAFF]"
+            title={dict.allowReply}
+            description={createPostDict.allowReplyDesc || ""}
+            checked={allowReply}
+            onChange={(e) => setAllowReply(e.target.checked)}
+          />
         </div>
       </form>
     </Modal>

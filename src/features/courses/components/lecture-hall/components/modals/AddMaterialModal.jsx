@@ -1,10 +1,13 @@
 import React, { useState, useRef } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { TextInput, Switch } from "@/shared/components/ui/inputs"
-import { UploadCloud } from "lucide-react"
+import { TextInput } from "@/shared/components/ui/inputs"
+import ToggleOption from "../ui/ToggleOption"
+import { UploadCloud, Eye } from "lucide-react"
 import FileAttachmentItem from "../ui/FileAttachmentItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import toast from "react-hot-toast"
+import { getMaterialValidationError, getFileFingerprint } from "../../utils/fileUtils"
 
 const AddMaterialModal = ({
   open = false,
@@ -18,6 +21,7 @@ const AddMaterialModal = ({
   const [selectedFiles, setSelectedFiles] = useState([])
   const [dragActive, setDragActive] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
+  const [errors, setErrors] = useState({})
   const fileInputRef = useRef(null)
 
   // Standardized Drag Event Handlers
@@ -48,10 +52,46 @@ const AddMaterialModal = ({
 
   // Append new files to the list
   const handleFilesSelection = (files) => {
-    setSelectedFiles(prev => [...prev, ...files])
-    if (!title && files.length > 0) {
-      const nameWithoutExt = files[0].name.replace(/\.[^/.]+$/, "")
-      setTitle(nameWithoutExt)
+    const validFiles = []
+    const existingFingerprints = new Set(selectedFiles.map(getFileFingerprint))
+    let hasDuplicate = false
+
+    for (const file of files) {
+      const fingerprint = getFileFingerprint(file)
+      const validationError = getMaterialValidationError(file)
+
+      if (existingFingerprints.has(fingerprint)) {
+        hasDuplicate = true
+      } else if (validationError === "size") {
+        toast.error(dict.maxSize || "Dung lượng dưới 50MB")
+      } else if (validationError === "type") {
+        toast.error(dict.toastInvalidFileType || "Định dạng không hợp lệ")
+      } else if (validationError) {
+        toast.error(dict.toastInvalidFile || "Tệp không hợp lệ")
+      } else {
+        validFiles.push(file)
+        existingFingerprints.add(fingerprint)
+      }
+    }
+
+    if (hasDuplicate) {
+      toast.error(dict.toastDuplicateFile || "Một số tệp đã tồn tại và bị bỏ qua")
+    }
+
+    if (validFiles.length > 0) {
+      const remaining = 5 - selectedFiles.length
+      if (validFiles.length > remaining) {
+        toast.error(dict.toastMaxFiles || "Chỉ được chọn tối đa 5 tệp")
+      }
+      const toAdd = validFiles.slice(0, remaining)
+
+      if (!title && toAdd.length > 0) {
+        const nameWithoutExt = toAdd[0].name.replace(/\.[^/.]+$/, "")
+        setTitle(nameWithoutExt)
+      }
+
+      setSelectedFiles(prev => [...prev, ...toAdd])
+      if (errors.files) setErrors((prev) => ({ ...prev, files: false }))
     }
   }
 
@@ -65,6 +105,15 @@ const AddMaterialModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    if (selectedFiles.length === 0) {
+      setErrors({ files: true })
+      toast.error(dict.toastFilesRequired || "Vui lòng chọn ít nhất 1 tệp!")
+      return
+    }
+
+    setErrors({})
+
     onSubmit({
       title,
       files: selectedFiles,
@@ -77,6 +126,7 @@ const AddMaterialModal = ({
     setTitle("")
     setSelectedFiles([])
     setIsVisible(true)
+    setErrors({})
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -111,7 +161,7 @@ const AddMaterialModal = ({
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title Input */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-semibold text-[#374151] mb-1.5">
             {dict.materialName}
           </label>
@@ -122,7 +172,7 @@ const AddMaterialModal = ({
             placeholder={dict.materialPlaceholder}
             className="rounded-xl !h-[50px] px-4 text-sm"
           />
-        </div>
+        </div> */}
 
         {/* Upload File Zone */}
         <div>
@@ -134,7 +184,7 @@ const AddMaterialModal = ({
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept=".pdf,.docx,.pptx,.jpg,.png"
+            accept=".pdf,.docx,.jpg,.png"
             multiple
             className="hidden"
           />
@@ -157,7 +207,9 @@ const AddMaterialModal = ({
               aria-label={dict.uploadDesc}
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all space-y-3 ${dragActive
                 ? "border-[#72000d] bg-red-50/40"
-                : "border-gray-300 hover:border-gray-400 bg-white"
+                : errors.files
+                  ? "border-red-500 bg-red-50 ring-2 ring-red-200"
+                  : "border-gray-300 hover:border-gray-400 bg-white"
                 }`}
             >
               <div className="w-12 h-12 bg-red-100/70 text-[#72000d] rounded-full flex items-center justify-center mx-auto">
@@ -186,20 +238,14 @@ const AddMaterialModal = ({
         </div>
 
         {/* Visible to Students Card Box Toggle */}
-        <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl px-4 py-3 flex items-center justify-between">
-          <div className="space-y-0.5">
-            <h5 className="text-sm font-semibold text-[#111827]">
-              {t.courses.lectureHall.createPost.visibleToStudents}
-            </h5>
-            <p className="text-xs text-[#6B7280] font-normal">
-              {dict.visibleToStudentsDesc}
-            </p>
-          </div>
-          <Switch
+        <div className="space-y-3 pt-2">
+          <ToggleOption
+            icon={<Eye size={20} className="text-[#F83B4F]" />}
+            iconBg="bg-[#FFEAED]"
+            title={t.courses.lectureHall.createPost.visibleToStudents}
+            description={dict.visibleToStudentsDesc || ""}
             checked={isVisible}
             onChange={(e) => setIsVisible(e.target.checked)}
-            colorClass="peer-checked:bg-[#A00000]"
-            className="min-h-6"
           />
         </div>
       </form>

@@ -212,7 +212,6 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
             .filter((sub) => {
               const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
               if (teacherTabs.includes(sub.key) && isStudent) return false
-              if (sub.key === "myLearning" && isTeacher) return false
               if (sub.lang && sub.lang !== currentLang) return false
               if (isHorizontal && sub.showOnHorizontalBar === false) return false
               if (sub.isPrivate && !isAuthenticated) return false

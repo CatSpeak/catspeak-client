@@ -2,12 +2,13 @@ import React, { useMemo, useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { Checkbox, TextInput } from "@/shared/components/ui/inputs"
-import { Search, ChevronDown, FileText, CheckSquare, MessageSquare } from "lucide-react"
+import { Search, FileText, CheckSquare, Inbox } from "lucide-react"
 import { useGetTeacherAssignmentsQuery, useGetTeacherQuizzesQuery } from "@/store/api/coursesApi"
 import { getAssignmentTitle, getAssignmentStatus } from "../../../../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
+import { formatDateTime } from "@/shared/utils/dateFormatter"
 
 const AddActivityModal = ({
   open = false,
@@ -16,8 +17,10 @@ const AddActivityModal = ({
   classId,
 }) => {
   const { t, language } = useLanguage()
+  const locale = language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US"
   const dict = t.courses.lectureHall.modals.addActivity || {}
   const [searchQuery, setSearchQuery] = useState("")
+  const [filterType, setFilterType] = useState("all")
   const [selectedIds, setSelectedIds] = useState([])
   const [prevOpen, setPrevOpen] = useState(open)
 
@@ -25,6 +28,7 @@ const AddActivityModal = ({
     setPrevOpen(open)
     if (open) {
       setSearchQuery("")
+      setFilterType("all")
       setSelectedIds([])
     }
   }
@@ -57,7 +61,11 @@ const AddActivityModal = ({
     return [...assignmentsList, ...quizzesList]
   }, [assignmentsResponse, quizzesResponse])
 
+  console.log(activities)
+
   const filteredActivities = activities.filter((act) => {
+    if (filterType !== "all" && act._activityType !== filterType) return false
+
     const title = act._activityType === "quiz"
       ? (act.title || act.name || dict.defaultQuizName)
       : getAssignmentTitle(act, dict.defaultAssignmentName)
@@ -81,7 +89,7 @@ const AddActivityModal = ({
           ? (act.title || act.name || dict.defaultQuizName)
           : getAssignmentTitle(act, dict.defaultAssignmentName),
         dueDate: act.dueDate
-          ? new Date(act.dueDate).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US")
+          ? formatDateTime(act.dueDate, locale)
           : dict.noDueDate,
       }))
     onSubmit(chosenActivities)
@@ -90,7 +98,7 @@ const AddActivityModal = ({
 
   const getTypeBadgeStyle = (type) => {
     switch (type) {
-      case "submission":
+      case "assignment":
         return "bg-[#FFDAD6] text-[#93000A]"
       case "quiz":
         return "bg-[#FFDCBD] text-[#2C1600]"
@@ -133,8 +141,24 @@ const AddActivityModal = ({
     >
       <div className="space-y-5">
         {/* Filter Tabs & Search Bar Row */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="relative w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-2">
+          {/* Tabs */}
+          <div className="flex items-center gap-2 w-full sm:w-auto bg-[#F3F4F5] p-1 rounded-xl">
+            {["all", "assignment", "quiz"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilterType(type)}
+                className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-colors border ${filterType === type
+                  ? "bg-white text-[#191C1D] border-[#E2E2E2] shadow-faq-card"
+                  : "border-transparent text-[#5B403C] hover:text-[#191C1D]"
+                  }`}
+              >
+                {type === "all" ? dict.filterAll || "Tất cả" : type === "assignment" ? dict.filterAssignment || "Bài nộp" : dict.filterQuiz || "Bài kiểm tra"}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full sm:w-[300px]">
             <TextInput
               icon={Search}
               value={searchQuery}
@@ -152,8 +176,9 @@ const AddActivityModal = ({
               <LoadingSpinner text={t.courses.lectureHall.loading} />
             </div>
           ) : filteredActivities.length === 0 ? (
-            <div className="text-center py-8 text-sm text-gray-500">
-              {dict.noActivitiesFound}
+            <div className="flex flex-col items-center justify-center py-12 text-[#9CA3AF]">
+              <Inbox size={48} className="mb-3 opacity-50" strokeWidth={1.5} />
+              <p className="text-sm font-medium">{dict.noActivitiesFound}</p>
             </div>
           ) : (
             filteredActivities.map((act) => {
@@ -162,18 +187,54 @@ const AddActivityModal = ({
               const title = act._activityType === "quiz"
                 ? (act.title || act.name || dict.defaultQuizName)
                 : getAssignmentTitle(act, dict.defaultAssignmentName)
-              const status = act._activityType === "quiz" ? (act.status || "published") : getAssignmentStatus(act)
-              const statusLabel = status === "published"
-                ? dict.statusPublished
-                : status === "draft"
-                  ? dict.statusDraft
-                  : dict.statusClosed
+              const rawStatus = act._activityType === "quiz" ? (act.status || "Published") : getAssignmentStatus(act)
+              const statusLower = String(rawStatus).toLowerCase()
+              const statusLabel = statusLower === "published"
+                ? (dict.statusPublished || "Đã xuất bản")
+                : statusLower === "draft"
+                  ? (dict.statusDraft || "Bản nháp")
+                  : statusLower === "upcoming"
+                    ? (dict.statusUpcoming || "Sắp tới")
+                    : (dict.statusClosed || "Đã đóng")
 
-              const type = act._activityType === "quiz" ? "quiz" : "submission"
+              const type = act._activityType
               const typeLabel = act._activityType === "quiz" ? dict.typeQuiz : dict.typeSubmission
-              const dueDateLabel = act.dueDate
-                ? new Date(act.dueDate).toLocaleString(language === "vi" ? "vi-VN" : (language === "zh" ? "zh-CN" : "en-US"))
-                : dict.noDueDate
+
+              let timeInfo = null;
+              if (act._activityType === "assignment") {
+                const dueDateLabel = act.dueDate
+                  ? formatDateTime(act.dueDate, locale)
+                  : dict.noDueDate
+                timeInfo = (
+                  <div className="text-right">
+                    <span className="text-xs text-[#5B403C] block font-medium">
+                      {dict.dueDate || "Hạn nộp"}
+                    </span>
+                    <span className="text-sm text-[#191C1D] font-normal">
+                      {dueDateLabel}
+                    </span>
+                  </div>
+                )
+              } else if (act._activityType === "quiz") {
+                const openTimeStr = act.openTime
+                  ? formatDateTime(act.openTime, locale)
+                  : "-"
+                const closeTimeStr = act.closeTime
+                  ? formatDateTime(act.closeTime, locale)
+                  : "-"
+                timeInfo = (
+                  <div className="text-right flex flex-col gap-0.5 justify-end">
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-xs text-[#5B403C] font-medium">{dict.openTime || "Mở:"}</span>
+                      <span className="text-sm text-[#191C1D] font-normal">{openTimeStr}</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-xs text-[#5B403C] font-medium">{dict.closeTime || "Đóng:"}</span>
+                      <span className="text-sm text-[#191C1D] font-normal">{closeTimeStr}</span>
+                    </div>
+                  </div>
+                )
+              }
 
               return (
                 <div
@@ -189,7 +250,7 @@ const AddActivityModal = ({
                     <Checkbox
                       checked={isChecked}
                       onChange={() => { }}
-                      aria-label={dict.selectActivityAriaLabel.replace("{{title}}", title)}
+                      aria-label={dict.selectActivityAriaLabel ? dict.selectActivityAriaLabel.replace("{{title}}", title) : ""}
                     />
 
                     <div className="space-y-1 min-w-0">
@@ -199,9 +260,8 @@ const AddActivityModal = ({
                             type
                           )}`}
                         >
-                          {type === "submission" && <FileText size={12} />}
+                          {type === "assignment" && <FileText size={12} />}
                           {type === "quiz" && <CheckSquare size={10} />}
-                          {type === "forum" && <MessageSquare size={10} />}
                           {typeLabel}
                         </span>
 
@@ -216,15 +276,8 @@ const AddActivityModal = ({
                     </div>
                   </div>
 
-                  {/* Right info (Due Date) */}
-                  <div className="text-right">
-                    <span className="text-xs text-[#5B403C] block font-medium">
-                      {dict.dueDate}
-                    </span>
-                    <span className="text-sm text-[#191C1D] font-normal">
-                      {dueDateLabel}
-                    </span>
-                  </div>
+                  {/* Right info (Times) */}
+                  {timeInfo}
                 </div>
               )
             })
