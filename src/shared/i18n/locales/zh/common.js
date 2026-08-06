@@ -66,7 +66,7 @@ export default {
     pricing: "价格",
     profile: "个人资料",
     personalInfo: "个人信息",
-    instructor: "讲师",
+    instructor: "教师档案",
     organization: "组织",
     billing: "支付历史",
     recordings: "录像",

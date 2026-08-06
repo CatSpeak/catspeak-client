@@ -66,7 +66,7 @@ export default {
     pricing: "Nâng cấp gói",
     profile: "Hồ sơ",
     personalInfo: "Thông tin cá nhân",
-    instructor: "Giảng viên",
+    instructor: "Hồ sơ giáo viên",
     organization: "Tổ chức",
     billing: "Lịch sử thanh toán",
     recordings: "Bản ghi hình",
