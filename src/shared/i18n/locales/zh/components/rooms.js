@@ -431,14 +431,14 @@ export default {
     webviewBlock: {
       title: "请在浏览器中打开",
       genericApp: "此应用",
-      description: "您正在使用 {app} 的内置浏览器，不支持正常的视频通话。",
-      instruction: "如何加入：",
+      description: "您正在使用 {app} 的内置浏览器，尚不支持完整功能。",
+      instruction: "如何打开：",
       copyLink: "复制链接",
       copied: "已复制！",
       openInChrome: "在 Chrome 中打开",
       step1: "复制上方链接",
       step2: "打开 Chrome 或 Safari",
-      step3: "粘贴链接并加入通话",
+      step3: "在浏览器中粘贴链接并打开",
     },
     errorBoundary: {
       title: "视频通话遇到错误",

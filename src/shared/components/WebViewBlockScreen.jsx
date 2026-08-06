@@ -7,10 +7,10 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 
 /**
- * Full-screen block shown when a WebView browser tries to access a video call.
+ * Full-screen block shown when an in-app WebView browser attempts to access the application.
  *
  * @param {{ appName: string | null }} props
- *   `appName` — friendly name of the detected in-app browser (e.g. "Zalo")
+ *   `appName` — friendly name of the detected in-app browser (e.g. "Zalo", "Facebook")
  */
 const WebViewBlockScreen = ({ appName }) => {
   const { t } = useLanguage()
@@ -54,9 +54,9 @@ const WebViewBlockScreen = ({ appName }) => {
         <LanguageSwitcher />
       </div>
 
-      {/* Main Content Area (matching VideoCallErrorBoundary layout and typography) */}
+      {/* Main Content Area */}
       <div className="w-full max-w-xl p-4 sm:p-6 flex flex-col items-center text-center my-auto">
-        {/* Icon (matching EmptyState style without background circle) */}
+        {/* Icon */}
         <AlertTriangle className="w-14 h-14 mb-4 text-amber-500 stroke-[1.5]" />
 
         {/* Title */}
@@ -68,7 +68,7 @@ const WebViewBlockScreen = ({ appName }) => {
         <p className="text-sm text-[#606060] mb-6 max-w-md">
           {(
             wb.description ||
-            "You're using {app}'s built-in browser, which doesn't support video calls properly."
+            "You're using {app}'s built-in browser, which isn't fully supported."
           ).replace("{app}", displayApp)}
         </p>
 
@@ -105,12 +105,12 @@ const WebViewBlockScreen = ({ appName }) => {
         {/* Steps */}
         <div className="w-full max-w-md pt-4 sm:pt-6 border-t border-[#e5e5e5] text-left">
           <p className="font-semibold mb-2">
-            {wb.instruction || "How to join:"}
+            {wb.instruction || "How to open:"}
           </p>
           <ol className="list-decimal list-inside text-sm text-[#606060] space-y-1">
             <li>{wb.step1 || "Copy the link above"}</li>
             <li>{wb.step2 || "Open Chrome or Safari"}</li>
-            <li>{wb.step3 || "Paste the link and join the call"}</li>
+            <li>{wb.step3 || "Paste the link in your browser"}</li>
           </ol>
         </div>
       </div>

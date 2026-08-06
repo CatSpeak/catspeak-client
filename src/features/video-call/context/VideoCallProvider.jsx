@@ -25,8 +25,8 @@ import {
   leaveCall,
   enterBreakout,
 } from "@/store/slices/videoCallSlice"
-import { detectWebView } from "@/shared/utils/isWebView"
 import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
+
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import {
   pingActiveCall,
@@ -34,7 +34,6 @@ import {
 } from "@/features/video-call/services/callBroadcastChannel"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
-import WebViewBlockScreen from "../components/WebViewBlockScreen"
 import PasswordScreen from "../components/PasswordScreen"
 import CallEndedScreen from "../components/CallEndedScreen"
 import VideoCallErrorBoundary from "@/shared/components/VideoCallErrorBoundary"
@@ -92,9 +91,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const { t, language } = useLanguage()
 
   const { isInCall, callInfo } = useSelector((s) => s.videoCall)
-
-  // ── WebView gate (must be before any conditional hooks) ──
-  const webview = useMemo(() => detectWebView(), [])
 
   // Detect if user arrived from queue match
   const fromQueue = location.state?.fromQueue === true
@@ -510,11 +506,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       onConfirm={handleConfirmSwitch}
     />
   )
-
-  // WebView block — must come first
-  if (webview.isWebView) {
-    return <WebViewBlockScreen appName={webview.appName} />
-  }
 
   // Loading user data
   if (isLoadingUser) {
