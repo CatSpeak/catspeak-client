@@ -19,12 +19,6 @@ const InstructorSubmitSection = ({
   const isDisabled = isSubmitting || disabled;
   const [selectedPolicy, setSelectedPolicy] = useState(null);
 
-  const policyLinks = [
-    { label: "Điều khoản dịch vụ", title: "Điều khoản dịch vụ" },
-    { label: "Chính sách bảo mật", title: "Chính sách bảo mật" },
-    { label: "Chính sách thanh toán", title: "Chính sách thanh toán" },
-    { label: "Bản quyền sở hữu trí tuệ", title: "Bản quyền sở hữu trí tuệ" }
-  ];
 
   return (
     <>
@@ -40,22 +34,18 @@ const InstructorSubmitSection = ({
           <span className={`text-[13px] leading-relaxed transition-colors ${errors.agreed ? "text-red-500" : "text-gray-500 group-hover:text-gray-800"}`}>
             Tôi xác nhận rằng thông tin cung cấp là chính xác.{" "}
             Tôi đồng ý tuân thủ{" "}
-            {policyLinks.map((p, i, arr) => (
-              <React.Fragment key={p.title}>
-                <button 
-                  type="button" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setSelectedPolicy(p.title);
-                  }} 
-                  className="text-[#8f0d15] hover:underline font-medium"
-                >
-                  {p.label}
-                </button>
-                {i < arr.length - 1 ? ", " : " của nền tảng."}
-              </React.Fragment>
-            ))}
+            <button 
+              type="button" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedPolicy("Quy định nền tảng");
+              }} 
+              className="text-[#8f0d15] hover:underline font-medium"
+            >
+              Quy định nền tảng
+            </button>
+            .
           </span>
         </label>
 

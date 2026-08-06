@@ -2,6 +2,7 @@ import PrivacyPolicy from "./PrivacyPolicy"
 import TermsOfService from "./TermsOfService"
 import PaymentPolicy from "./PaymentPolicy"
 import IntellectualPropertyPolicy from "./IntellectualPropertyPolicy"
+import PlatformRegulationsPolicy from "./PlatformRegulationsPolicy"
 
 // Policy mapping configuration
 // Add new policies here by mapping the title text to the component
@@ -41,6 +42,11 @@ export const policyComponents = {
   "Bản quyền sở hữu trí tuệ": IntellectualPropertyPolicy,
   "Intellectual Property Rights": IntellectualPropertyPolicy,
   知识产权政策: IntellectualPropertyPolicy,
+
+  // Platform Regulations (combined tabs)
+  "Quy định nền tảng": PlatformRegulationsPolicy,
+  "Platform Regulations": PlatformRegulationsPolicy,
+  "平台规定": PlatformRegulationsPolicy,
 }
 
 // Helper function to get policy component by title
@@ -65,4 +71,5 @@ export {
   TermsOfService,
   PaymentPolicy,
   IntellectualPropertyPolicy,
+  PlatformRegulationsPolicy,
 }

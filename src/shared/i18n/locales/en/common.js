@@ -65,7 +65,7 @@ export default {
     pricing: "Pricing",
     profile: "Profile",
     personalInfo: "Personal Info",
-    instructor: "Instructor",
+    instructor: "Teacher Profile",
     organization: "Organization",
     billing: "Payment History",
     recordings: "Recordings",
