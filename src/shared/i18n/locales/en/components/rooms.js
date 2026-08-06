@@ -466,14 +466,14 @@ export default {
       title: "Open in Browser",
       genericApp: "This app",
       description:
-        "You're using {app}'s built-in browser, which doesn't support video calls properly.",
-      instruction: "How to join:",
+        "You're using {app}'s built-in browser, which isn't fully supported.",
+      instruction: "How to open:",
       copyLink: "Copy Link",
       copied: "Copied!",
       openInChrome: "Open in Chrome",
       step1: "Copy the link above",
       step2: "Open Chrome or Safari",
-      step3: "Paste the link and join the call",
+      step3: "Paste the link in your browser",
     },
     errorBoundary: {
       title: "Video Call Encountered an Error",
