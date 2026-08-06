@@ -41,6 +41,7 @@ import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/
 import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage";
 import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage";
 import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage";
+import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage";
 
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
@@ -377,6 +378,14 @@ const routesConfig = [
                     <MyClassesPage />
                   </LazyRoute>
                 ),
+              },
+              {
+                path: "my-calendar",
+                element: (
+                  <LazyRoute>
+                    <MyCalendarPage />
+                  </LazyRoute>
+                )
               },
               {
                 path: "teaching-tasks",
