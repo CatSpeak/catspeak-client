@@ -13,7 +13,6 @@ import CalendarMonthPanel from "../components/CalendarMonthPanel.jsx";
 import EventDetailModal from "../components/EventDetailModal/index";
 import MapView from "../components/Mapview";
 import { WorkshopCarousel } from "@/features/workshops";
-import RoomsBannerContent from "@/features/rooms/components/RoomsBannerContent";
 import {
   CreateRoomModal,
   JoinRoomModal,
@@ -170,12 +169,6 @@ const CalendarPage = () => {
   const yearNum = currentDate.format("YYYY");
   const localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
 
-  const langMap = {
-    en: "English",
-    zh: "Chinese",
-    vi: "Vietnamese",
-  };
-
   const checkAndIntercept = async (action) => {
     const remoteActive = await pingActiveCall();
     if (isInCall || remoteActive) {
@@ -184,42 +177,6 @@ const CalendarPage = () => {
       return true;
     }
     return false;
-  };
-
-  const proceedCreateOneOnOne = async () => {
-    const action = () => {
-      actions.handleCreateOneOnOneSession(() => {
-        const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
-        const preferences = {
-          roomType: "OneToOne",
-          topics: [],
-          languageType: langMap[supportedLangCode],
-        };
-        navigate("/queue", { state: preferences });
-      });
-    };
-    if (await checkAndIntercept(action)) return;
-    action();
-  };
-
-  const proceedCreateStudyGroup = async () => {
-    const action = () => {
-      actions.handleCreateStudyGroupSession(() => {
-        actions.openJoinRoomModal();
-      });
-    };
-    if (await checkAndIntercept(action)) return;
-    action();
-  };
-
-  const handleCreateCustomRoom = async () => {
-    const action = () => {
-      actions.handleCreateCustomRoomSession(() => {
-        actions.openCreateRoomModal("group");
-      });
-    };
-    if (await checkAndIntercept(action)) return;
-    action();
   };
 
   const handleConfirmSwitch = async () => {
@@ -264,25 +221,8 @@ const CalendarPage = () => {
         <Breadcrumb items={breadcrumbItems} />
       </div>
       {/* banner */}
-      <div className="relative w-full overflow-hidden bg-white">
-        <WorkshopCarousel
-          hideTitle={true}
-          leftContent={
-            <RoomsBannerContent
-              sessionProps={{
-                handleCreateOneOnOneSession: proceedCreateOneOnOne,
-                handleCreateStudyGroupSession: proceedCreateStudyGroup,
-                handleCreateAISession: () => actions.openAISettingsModal(),
-                handleCreateCustomRoomSession: handleCreateCustomRoom,
-                isCreatingOneOnOne: false,
-                isCreatingStudyGroup: false,
-                isCreatingAI: state.isCreatingAI,
-                isCreatingCustom: false,
-                canUseAI: true,
-              }}
-            />
-          }
-        />
+      <div className="relative w-full p-5">
+        <WorkshopCarousel hideTitle={true} />
       </div>
       {/* <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
         <img
