@@ -145,7 +145,7 @@ const LessonItemRow = ({
                 onClick={() => {
                   const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
                   if (displayData.type === "bulletinBoard") {
-                    navigate(`${basePath}/bulletin-board/${displayData.itemId}`)
+                    navigate(`${basePath}/bulletin-board/${displayData.itemId}`, { state: { displayData } })
                   } else if (isYoutubeLink) {
                     navigate(`${basePath}/links/${displayData.itemId}`)
                   } else if (displayData.type === "link") {
@@ -180,13 +180,16 @@ const LessonItemRow = ({
             </div>
 
             {displayData.meta && (
-              <div className="flex items-center gap-1 text-xs text-[#5B403C] font-normal">
+              <div className="flex items-start gap-1 text-xs text-[#5B403C] font-normal">
                 {displayData.metaType === "file" ? (
-                  <FileText size={13} className="text-stone-500 shrink-0" />
+                  <FileText size={13} className="text-stone-500 shrink-0 mt-0.5" />
                 ) : displayData.metaType === "none" ? null : (
-                  <Clock size={13} className="text-stone-500 shrink-0" />
+                  <Clock size={13} className="text-stone-500 shrink-0 mt-0.5" />
                 )}
-                <span className="truncate">{displayData.meta}</span>
+                <div
+                  className="line-clamp-2"
+                  dangerouslySetInnerHTML={{ __html: displayData.meta }}
+                />
               </div>
             )}
           </div>

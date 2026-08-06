@@ -1227,8 +1227,8 @@ export const coursesApi = baseApi.injectEndpoints({
 
               if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
                 title = item.bulletinBoard.title || title
-                metaType = "clock"
-                content = item.bulletinBoard.content
+                // metaType = "clock"
+                meta = item.bulletinBoard.content
               } else if (item.itemType === "Link" && item.link) {
                 title = item.link.title || title
                 meta = item.link.url || meta
@@ -1328,8 +1328,8 @@ export const coursesApi = baseApi.injectEndpoints({
 
               if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
                 title = item.bulletinBoard.title || title
-                metaType = "clock"
-                content = item.bulletinBoard.content
+                // metaType = "clock"
+                meta = item.bulletinBoard.content
               } else if (item.itemType === "Link" && item.link) {
                 title = item.link.title || title
                 meta = item.link.url || meta
