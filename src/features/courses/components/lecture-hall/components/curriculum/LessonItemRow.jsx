@@ -14,6 +14,7 @@ import { IconButton } from "@/shared/components/ui/buttons"
 import LessonActionMenu from "./LessonActionMenu"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 // Helper function to resolve icon, background, and left accent border based on item type
 const getItemConfig = (type) => {
@@ -58,6 +59,7 @@ const LessonItemRow = ({
   className = "",
 }) => {
   const { t, language } = useLanguage()
+  const { formatDateTime } = useTimezone()
   const dict = t.courses.lectureHall.curriculum
 
   const navigate = useNavigate()
@@ -73,6 +75,7 @@ const LessonItemRow = ({
       noTitle: t.courses.lectureHall.postDetail.noTitle,
     },
     locale,
+    formatDateTime,
   )
   const isYoutubeLink = displayData.type === "link" && displayData.meta && (displayData.meta.includes("youtube.com") || displayData.meta.includes("youtu.be"))
   const config = getItemConfig(displayData.type || "assignment")

@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast"
 import { formatFileSize, getFileIconColorClass } from "../../utils/courseUtils"
 import { getFileMeta, getSafeFileUrl } from "../../utils/assignmentUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MAX_MATERIAL_SIZE_BYTES = 15 * 1024 * 1024
 const MATERIAL_DOCUMENT_EXTENSIONS = new Set(["pdf", "docx", "xlsx"])
@@ -71,14 +72,7 @@ const validateMaterialFile = (file) => {
   return isSupportedDocument || isSupportedImage ? null : "type"
 }
 
-const formatMaterialDate = (value, locale) => {
-  if (!value) return ""
 
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ""
-
-  return date.toLocaleDateString(locale, { timeZone: "UTC" })
-}
 
 const formatMaterialSize = (value) => {
   const size = Number(value)
@@ -89,6 +83,7 @@ const formatMaterialSize = (value) => {
 
 const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
   const { language, t } = useLanguage()
+  const { formatDate } = useTimezone()
   const cm = t.courses?.classMaterials || {}
   const dateLocale = language === "vi"
     ? "vi-VN"
@@ -353,7 +348,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                       : null
                     const safeFileUrl = getSafeFileUrl(fileUrl)
                     const fileDate = material.createdAt || material.uploadedAt
-                    const formattedFileDate = formatMaterialDate(fileDate, dateLocale)
+                    const formattedFileDate = formatDate(fileDate)
                     const itemKey = materialId ?? `${fileName}-${index}`
 
                     return (

@@ -50,10 +50,15 @@ export const formatScheduleDays = (
   return formattedDays.length > 0 ? formattedDays.join(separator) : fallback
 }
 
+import { convertTimeStrToTz } from "@/shared/utils/dateUtils"
+
+export { convertTimeStrToTz }
+
 export const formatWeeklyScheduleText = (
   classData,
   language = "en",
   fallback = "—",
+  userTimeZone = null,
 ) => {
   let scheduleItems = null
 
@@ -66,8 +71,10 @@ export const formatWeeklyScheduleText = (
   if (scheduleItems && scheduleItems.length > 0) {
     const groups = scheduleItems.reduce((acc, item) => {
       if (!item || typeof item !== "object" || Array.isArray(item)) return acc
-      const start = typeof item.startTime === "string" ? item.startTime : ""
-      const end = typeof item.endTime === "string" ? item.endTime : ""
+      const rawStart = typeof item.startTime === "string" ? item.startTime : ""
+      const rawEnd = typeof item.endTime === "string" ? item.endTime : ""
+      const start = convertTimeStrToTz(rawStart, userTimeZone)
+      const end = convertTimeStrToTz(rawEnd, userTimeZone)
       const timeKey = start && end ? `${start} - ${end}` : ""
       const dayLabel = getLocalizedDayName(item.dayOfWeek, language)
       if (!dayLabel) return acc
@@ -102,7 +109,9 @@ export const formatWeeklyScheduleText = (
   const formattedDays = days
     .map((day) => getLocalizedDayName(day, language))
     .join(", ")
-  const timeText = startTime && endTime ? `${startTime} - ${endTime}` : ""
+  const start = convertTimeStrToTz(startTime, userTimeZone)
+  const end = convertTimeStrToTz(endTime, userTimeZone)
+  const timeText = start && end ? `${start} - ${end}` : ""
 
   return timeText ? `${formattedDays} (${timeText})` : formattedDays
 }

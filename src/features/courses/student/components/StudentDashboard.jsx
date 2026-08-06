@@ -14,6 +14,7 @@ import CourseTabs from "../../components/CourseTabs"
 import ViewModeToggle from "../../components/shared/ViewModeToggle"
 import TablePagination from "../../components/shared/TablePagination"
 import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTransforms"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const UNKNOWN_VALUE = "—"
 const PAGE_SIZE = 24
@@ -98,21 +99,14 @@ const getProgressPercent = (progress) => {
   )
 }
 
-const formatDisplayDate = (value) => {
+const formatDisplayDate = (value, formatDate) => {
   const text = toText(value)
   if (!/^\d{4}-\d{2}-\d{2}(?:[T\s]|$)/.test(text)) {
     return UNKNOWN_VALUE
   }
 
-  const date = new Date(text)
-  if (Number.isNaN(date.getTime())) return UNKNOWN_VALUE
-
-  return new Intl.DateTimeFormat(undefined, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date)
+  const formatted = formatDate ? formatDate(text) : text
+  return formatted || UNKNOWN_VALUE
 }
 
 const getSessionTimestamp = (dateValue, timeValue) => {
@@ -314,6 +308,7 @@ const normalizeCollection = (value, normalizeItem) => {
 }
 
 const StudentDashboard = ({ t, language }) => {
+  const { formatDate } = useTimezone()
   const sc = useMemo(() => t?.courses?.student || {}, [t])
   const navigate = useNavigate()
   const normalizedLanguage = toText(language).toLowerCase()

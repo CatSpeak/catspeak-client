@@ -7,6 +7,7 @@ import { useGetTeacherAssignmentsQuery, useGetTeacherQuizzesQuery } from "@/stor
 import { getAssignmentTitle, getAssignmentStatus } from "../../../../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import toast from "react-hot-toast"
 
 const AddActivityModal = ({
@@ -15,7 +16,8 @@ const AddActivityModal = ({
   onSubmit = () => { },
   classId,
 }) => {
-  const { t, language } = useLanguage()
+  const { language, t } = useLanguage()
+  const { formatDateTime } = useTimezone()
   const dict = t.courses.lectureHall.modals.addActivity || {}
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedIds, setSelectedIds] = useState([])
@@ -81,7 +83,7 @@ const AddActivityModal = ({
           ? (act.title || act.name || dict.defaultQuizName)
           : getAssignmentTitle(act, dict.defaultAssignmentName),
         dueDate: act.dueDate
-          ? new Date(act.dueDate).toLocaleString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US")
+          ? formatDateTime(act.dueDate)
           : dict.noDueDate,
       }))
     onSubmit(chosenActivities)
@@ -172,7 +174,7 @@ const AddActivityModal = ({
               const type = act._activityType === "quiz" ? "quiz" : "submission"
               const typeLabel = act._activityType === "quiz" ? dict.typeQuiz : dict.typeSubmission
               const dueDateLabel = act.dueDate
-                ? new Date(act.dueDate).toLocaleString(language === "vi" ? "vi-VN" : (language === "zh" ? "zh-CN" : "en-US"))
+                ? formatDateTime(act.dueDate)
                 : dict.noDueDate
 
               return (

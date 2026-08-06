@@ -1,9 +1,10 @@
 import React from "react"
 import { Clock, Calendar, MapPin } from "lucide-react"
 import { parseTime } from "../utils/EventUtils"
-import { formatLocation, formatTime } from "../utils/eventFormatters"
+import { formatLocation } from "../utils/eventFormatters"
 import { IconLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const EventBlock = ({
   event,
@@ -13,6 +14,7 @@ const EventBlock = ({
   colWidth = 180,
 }) => {
   const { t } = useLanguage()
+  const { formatDateTime } = useTimezone()
   const start = parseTime(event.startTime)
   const end = parseTime(event.endTime)
   // Minimum height of 70px to fit contents neatly
@@ -41,8 +43,8 @@ const EventBlock = ({
 
     if (diffHours > 24) {
       displayTimeLines = [
-        formatTime(event.originalStartTime),
-        formatTime(event.originalEndTime),
+        formatDateTime(event.originalStartTime),
+        formatDateTime(event.originalEndTime),
       ]
       displayTimeText = null
     }

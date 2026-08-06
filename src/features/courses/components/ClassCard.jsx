@@ -1,13 +1,12 @@
 import React from "react"
 import { Calendar, Tag, Clock } from "lucide-react"
 import {
-  formatDateRange,
   formatCurrencyVND,
-  getCourseLocale,
   getSafeMediaUrl,
 } from "../utils/courseUtils"
 import CourseStatusPill from "./CourseStatusPill"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { formatScheduleDays } from "../utils/scheduleUtils"
 
 const ClassCard = ({
@@ -21,6 +20,7 @@ const ClassCard = ({
   courseTitle
 }) => {
   const { language, t } = useLanguage()
+  const { formatDateMonth } = useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
@@ -122,12 +122,9 @@ const ClassCard = ({
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Clock size={13} className="text-gray-400" />
               <span>
-                {formatDateRange(
-                  cls.startDate,
-                  cls.endDate,
-                  getCourseLocale(language),
-                  ui.tba,
-                )}
+                {cls.startDate && cls.endDate
+                  ? `${formatDateMonth(cls.startDate, ui.tba)} - ${formatDateMonth(cls.endDate, ui.tba)}`
+                  : ui.tba}
               </span>
             </div>
           </div>

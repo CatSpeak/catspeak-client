@@ -3,15 +3,12 @@ import { useNavigate } from "react-router-dom"
 import { Calendar, Trophy, ChevronDown, ChevronUp, Star } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleString()
-  }
+  const { formatDateTime } = useTimezone()
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200" >
@@ -22,7 +19,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-slate-800 font-semibold text-base">
             <Calendar className="w-4 h-4 text-slate-400" />
-            {formatDate(match.startedAt)}
+            {formatDateTime(match.startedAt)}
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold uppercase">

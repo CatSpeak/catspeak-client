@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { Plus } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import {
@@ -30,7 +31,8 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 const generateTempId = () => `sec-${Date.now()}`;
 
 const ClassLectureHallPage = ({ id, isStudent }) => {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const dict = t.courses.lectureHall
   const sectionDict = dict.modals.section
   // Use the appropriate API based on role
@@ -174,7 +176,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           id: `item-${Date.now()}`,
           type: "announcement",
           title: data.title,
-          meta: `${dict.latestPost}: ${new Date().toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US")}`,
+          meta: `${dict.latestPost}: ${formatDate(new Date())}`,
           metaType: "clock",
           isVisibleToStudents: data.isVisible,
           content: data.content,

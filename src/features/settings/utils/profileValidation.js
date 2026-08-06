@@ -20,6 +20,7 @@ export const buildProfilePayload = (editingField, formData, overrides = {}) => {
     username: null,
     nickname: null,
     country: null,
+    timeZone: null,
     dateOfBirth: null,
     address: null,
     phoneNumber: null,
@@ -29,6 +30,7 @@ export const buildProfilePayload = (editingField, formData, overrides = {}) => {
   if (editingField === "username") payload.username = formData.username;
   if (editingField === "nickname") payload.nickname = formData.nickname;
   if (editingField === "country") payload.country = formData.country;
+  if (editingField === "timeZone") payload.timeZone = formData.timeZone;
   if (editingField === "dateOfBirth")
     payload.dateOfBirth = formData.dateOfBirth;
   if (editingField === "address") payload.address = formData.address;
@@ -38,6 +40,7 @@ export const buildProfilePayload = (editingField, formData, overrides = {}) => {
     payload.username = formData.username;
     payload.nickname = formData.nickname;
     payload.country = formData.country;
+    payload.timeZone = formData.timeZone;
     payload.dateOfBirth = formData.dateOfBirth || null;
     payload.address = formData.address;
   }

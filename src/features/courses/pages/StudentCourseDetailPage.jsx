@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import {
   useGetStudentCourseDetailQuery,
@@ -10,8 +11,6 @@ import StudentJoinModal from "../student/components/StudentJoinModal"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import {
   formatCurrencyVND,
-  formatDateDayMonth,
-  getCourseLocale,
   getClassEnrollmentIssue,
   getClassEnrollmentIssueLabel,
   getClassEnrollmentIssueMessage,
@@ -25,6 +24,7 @@ const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
@@ -388,7 +388,7 @@ const StudentCourseDetailPage = () => {
                               ui.tba,
                             )}
                             {cls.schedule?.startTime && cls.schedule?.endTime
-                              ? ` | ${cls.schedule.startTime} - ${cls.schedule.endTime}`
+                              ? ` | ${formatScheduleTime(cls.schedule.startTime)} - ${formatScheduleTime(cls.schedule.endTime)}`
                               : ""}
                           </h3>
 
@@ -397,21 +397,9 @@ const StudentCourseDetailPage = () => {
                               <Calendar size={12} className="text-gray-400" />
                               <span>
                                 {cls.startDate && cls.endDate
-                                  ? `${formatDateDayMonth(
-                                    cls.startDate,
-                                    getCourseLocale(language),
-                                    ui.tba,
-                                  )} – ${formatDateDayMonth(
-                                    cls.endDate,
-                                    getCourseLocale(language),
-                                    ui.tba,
-                                  )}`
+                                  ? `${formatDateMonth(cls.startDate, ui.tba)} – ${formatDateMonth(cls.endDate, ui.tba)}`
                                   : cls.startDate
-                                    ? `${c.student?.startsOn || "Starts"} ${formatDateDayMonth(
-                                      cls.startDate,
-                                      getCourseLocale(language),
-                                      ui.tba,
-                                    )}`
+                                    ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba)}`
                                     : ui.tba || "TBA"}
                               </span>
                             </div>
@@ -502,7 +490,7 @@ const StudentCourseDetailPage = () => {
                                         ui.tba,
                                       )}:
                                     </strong>{" "}
-                                    {s.startTime} - {s.endTime}
+                                    {formatScheduleTime(s.startTime)} - {formatScheduleTime(s.endTime)}
                                   </span>
                                 ))}
                               </div>

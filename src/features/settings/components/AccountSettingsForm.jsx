@@ -6,8 +6,8 @@ import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { ChevronDown } from "lucide-react"
-import ChangePasswordSection from "./ChangePasswordSection"
 import { countryOptions, phonePrefixes } from "@/shared/constants/countriesOptions"
+import ChangePasswordSection from "./ChangePasswordSection"
 
 const AccountSettingsForm = ({
   formData,

@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   useGetTeacherQuizDetailQuery,
   useGetTeacherQuizStudentsQuery,
@@ -243,18 +244,10 @@ const StatusBadge = ({ status }) => {
 }
 
 // Date Range Formatter
-const formatDateRange = (openTime, closeTime, qg) => {
+const formatDateRange = (openTime, closeTime, qg, formatDate) => {
   if (!openTime && !closeTime) return qg.noTimeLimit
-  const format = (dStr) => {
-    if (!dStr) return ""
-    const d = new Date(dStr)
-    if (Number.isNaN(d.getTime())) return ""
-    const day = String(d.getDate()).padStart(2, "0")
-    const month = String(d.getMonth() + 1).padStart(2, "0")
-    return `${day}/${month}`
-  }
-  const start = format(openTime)
-  const end = format(closeTime)
+  const start = openTime ? formatDate(openTime) : ""
+  const end = closeTime ? formatDate(closeTime) : ""
   if (start && end) return `${start} - ${end}`
   if (start) return interpolate(qg.fromDate, { date: start })
   if (end) return interpolate(qg.dueDate, { date: end })
@@ -1221,6 +1214,7 @@ const QuestionDetailCard = ({ question, index }) => {
 // Main Teacher Quiz Detail View Component
 const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
   const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const c = t?.courses || {}
   const cg = c?.grading || {}
   const qg = cg.teacherQuiz || {}
@@ -1599,7 +1593,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             <div>
               <p className="text-xs text-gray-400 font-medium">{qg.deadlineLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
-                {formatDateRange(quizDetail.openTime, quizDetail.closeTime, qg)}
+                {formatDateRange(quizDetail.openTime, quizDetail.closeTime, qg, formatDate)}
               </p>
             </div>
           </div>

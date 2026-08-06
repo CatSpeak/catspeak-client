@@ -1,6 +1,13 @@
 import { formatFileSize } from "./fileUtils"
 
-export const getDisplayData = (item, labels, locale) => {
+/**
+ * getDisplayData — returns display info for a curriculum item.
+ * @param {object} item
+ * @param {object} labels - i18n labels
+ * @param {string} locale  - BCP-47 locale string (kept for non-date use)
+ * @param {function} formatDate - date formatter from useTimezone()
+ */
+export const getDisplayData = (item, labels, locale, formatDate) => {
   if (item.type) {
     return {
       type: item.type,
@@ -28,10 +35,7 @@ export const getDisplayData = (item, labels, locale) => {
     type = "assignment"
     title = item.assignment.name
     if (item.assignment.dueDate) {
-      const date = new Date(item.assignment.dueDate).toLocaleString(locale, {
-        dateStyle: "short",
-        timeStyle: "short",
-      })
+      const date = formatDate ? formatDate(item.assignment.dueDate) : item.assignment.dueDate
       meta = labels.dueDateMeta.replace("{{date}}", date)
       metaType = "time"
     }
@@ -39,10 +43,7 @@ export const getDisplayData = (item, labels, locale) => {
     type = "assignment" // Map to assignment icon
     title = item.quiz.name
     if (item.quiz.closeTime) {
-      const date = new Date(item.quiz.closeTime).toLocaleString(locale, {
-        dateStyle: "short",
-        timeStyle: "short",
-      })
+      const date = formatDate ? formatDate(item.quiz.closeTime) : item.quiz.closeTime
       meta = labels.closesAtMeta.replace("{{date}}", date)
       metaType = "time"
     }

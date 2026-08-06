@@ -13,11 +13,13 @@ import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Pagination from "@/shared/components/ui/navigation/Pagination"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 export default function BulletinBoardPage() {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const dict = t.courses.lectureHall
 
   const { data: profileResponse } = useGetUserProfileQuery()
@@ -73,7 +75,7 @@ export default function BulletinBoardPage() {
       id: post.id,
       title: post.title,
       author: post.accountName,
-      date: post.createdAt ? new Date(post.createdAt).toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US") : "",
+      date: post.createdAt ? formatDate(post.createdAt) : "",
       replies: post.replyCount,
       isPinned: post.isPinned,
       isVisibleToStudents: post.isVisibleToStudents,

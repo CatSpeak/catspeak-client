@@ -1,6 +1,7 @@
 import React, { memo, useCallback } from "react";
 import { Clock, MapPin, Pencil, Trash2, Users, Calendar as CalendarIcon } from "lucide-react";
 import dayjs from "dayjs";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatLocation } from "../../utils/eventFormatters";
 
 const WorkspaceEventCard = memo(function WorkspaceEventCard({
@@ -20,6 +21,7 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
 
   const editEventId = event.eventId ?? event.recurringEventId ?? event.id;
 
+  const { formatDateTime } = useTimezone();
   const location =
     (isRecurring
       ? event.subOccurrences?.[0]?.location
@@ -27,10 +29,10 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
 
   // times
   const startDateStr = event.startTime
-    ? dayjs(event.startTime).format("HH:mm (DD/MM/YYYY)")
+    ? formatDateTime(event.startTime)
     : null;
   const endDateStr = event.endTime
-    ? dayjs(event.endTime).format("HH:mm (DD/MM/YYYY)")
+    ? formatDateTime(event.endTime)
     : null;
 
   const titleChar = (event.title || "E")[0].toUpperCase();

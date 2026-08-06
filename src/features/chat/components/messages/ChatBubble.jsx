@@ -1,5 +1,5 @@
 import { memo, useState, useRef } from "react";
-import { formatTime } from "@/shared/utils/dateFormatter";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import Avatar from "@/shared/components/ui/Avatar";
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme";
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
@@ -33,6 +33,7 @@ const ChatBubble = ({
   isWidget = false,
 }) => {
   const { t } = useLanguage();
+  const { formatTime } = useTimezone();
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [targetRect, setTargetRect] = useState(null);
   const touchTimerRef = useRef(null);

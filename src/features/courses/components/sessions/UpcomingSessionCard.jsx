@@ -1,12 +1,9 @@
 import React from "react"
 import { Calendar, Clock, Users } from "lucide-react"
-import {
-  formatDateDayMonth,
-  formatTime12h,
-  getCourseLocale,
-} from "../../utils/courseUtils"
+
 import CourseStatusPill from "../CourseStatusPill"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const UpcomingSessionCard = ({
@@ -21,8 +18,8 @@ const UpcomingSessionCard = ({
   onViewAll,
 }) => {
   const { language, t } = useLanguage()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
   const ui = t.courses?.workspaceUi || {}
-  const locale = getCourseLocale(language)
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
@@ -55,13 +52,13 @@ const UpcomingSessionCard = ({
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Clock size={14} className="text-gray-400" />
               <span>
-                {formatTime12h(nextClass.schedule?.startTime, locale, ui.tba)}
+                {formatScheduleTime(nextClass.schedule?.startTime) || ui.tba}
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={14} className="text-gray-400" />
               <span>
-                {formatDateDayMonth(nextClass.startDate, locale, ui.tba)}
+                {formatDateMonth(nextClass.startDate, ui.tba)}
               </span>
             </div>
           </div>

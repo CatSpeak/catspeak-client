@@ -7,6 +7,7 @@ import SystemMessage from "../messages/SystemMessage"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useGroupedMessages } from "../../hooks/useGroupedMessages"
 
 const ConversationDetail = ({
@@ -33,12 +34,14 @@ const ConversationDetail = ({
 }) => {
   const scrollRef = useRef(null)
   const { t } = useLanguage()
+  const { userTimeZone } = useTimezone()
 
   const groupedItems = useGroupedMessages({
     messages,
     currentUser,
     conversation,
     isLoading,
+    userTimeZone,
   })
 
   // Auto-scroll to bottom on new messages, pending uploads, or typing indicator changes

@@ -54,16 +54,6 @@ export const getPreviewText = (html) => {
   return div.textContent?.replace(/\s+/g, " ").trim() || ""
 }
 
-
-
-export const formatExactDate = (dateStr, locale = "en-GB") => {
-  return new Date(dateStr).toLocaleDateString(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })
-}
-
 export const getCommunityName = (code) => {
   if (!code) return "English"
   const c = code.toLowerCase()
