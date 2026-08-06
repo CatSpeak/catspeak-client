@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
@@ -24,6 +24,8 @@ export default function BulletinBoardPage() {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
   const { t, language } = useLanguage()
+  const location = useLocation();
+  const title = location.state?.displayData?.title;
   const dict = t.courses.lectureHall
 
   const { data: profileResponse } = useGetUserProfileQuery()
@@ -173,7 +175,7 @@ export default function BulletinBoardPage() {
       />
 
       <CourseTablePageHeader
-        title={"Chi tiết bảng tin"}
+        title={title}
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder={dict.bulletinBoard.searchPlaceholder}

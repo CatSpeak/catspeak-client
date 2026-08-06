@@ -119,27 +119,27 @@ const CreateBulletinBoardModal = ({
         {/* Content Input + TinyMCE Rich Text Editor */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            {dict.content}
+            {dict.content}  <span className="text-[#EF4444]">*</span>
           </label>
           <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
             <Editor
-            tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
-            value={content}
-            onEditorChange={handleEditorChange}
-            init={{
-              height: 180,
-              menubar: false,
-              statusbar: false,
-              plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
-              toolbar:
-                "bold italic underline strikethrough | emoticons link | bullist numlist",
-              placeholder: dict.contentPlaceholder,
-              skin: "oxide",
-              setup: (editor) => {
-                editor.on("focus", () => { })
-              },
-            }}
-          />
+              tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+              value={content}
+              onEditorChange={handleEditorChange}
+              init={{
+                height: 180,
+                menubar: false,
+                statusbar: false,
+                plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                toolbar:
+                  "bold italic underline strikethrough | emoticons link | bullist numlist",
+                placeholder: dict.contentPlaceholder,
+                skin: "oxide",
+                setup: (editor) => {
+                  editor.on("focus", () => { })
+                },
+              }}
+            />
           </div>
         </div>
 

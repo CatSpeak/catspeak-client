@@ -668,7 +668,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           editItemData
             ? {
               title: editItemData.bulletinBoard?.title || editItemData.title,
-              content: editItemData.bulletinBoard?.content || editItemData.content,
+              content: editItemData.bulletinBoard?.meta || editItemData.meta,
               allowReply: editItemData.bulletinBoard?.allowStudentReply ?? editItemData.allowReply ?? true,
               isVisibleToStudents: editItemData.isVisibleToStudents,
             }
