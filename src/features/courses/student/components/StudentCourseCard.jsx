@@ -6,6 +6,7 @@ import {
   getSafeMediaUrl,
   formatDateDayMonth,
   getCourseLocale,
+  defaultCourseThumbnail,
 } from "../../utils/courseUtils"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -171,38 +172,13 @@ const StudentCourseCard = ({
     >
       {/* Thumbnail Area */}
       <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">
-        {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={course.name || course.title || ""}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center group-hover:scale-102 transition-transform duration-500`}>
-            <Icon size={44} className="stroke-[1.5] text-white" />
-          </div>
-        )}
-
-        {/* Top Badges */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
-          <span className="bg-[#b20a1c] text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider">
-            <BookOpen size={10} />
-            {sc.courseBadge || "Khóa học"}
-          </span>
-          <span className="bg-slate-900/85 backdrop-blur-md text-white border border-slate-700/60 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-            <Languages size={10} />
-            <span>{getLocalizedLanguageName(course.language, t)}</span>
-          </span>
-        </div>
-
-        {openClassCount != null && openClassCount > 0 && (
-          <div className="absolute top-3 right-3 bg-emerald-600 border border-emerald-500/20 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1 z-10">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            {openClassCount} {sc.classesOpen || "lớp mở"}
-          </div>
-        )}
+        <img
+          src={thumbnailUrl || defaultCourseThumbnail}
+          alt={course.name || course.title || ""}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          decoding="async"
+        />
       </div>
 
       {/* Content Details */}
@@ -233,31 +209,38 @@ const StudentCourseCard = ({
           </div>
 
           {/* Class Metrics */}
-          <div className="mt-2 flex flex-col gap-2 text-xs font-bold text-slate-600 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-1.5">
-                <Users size={13} className="text-slate-400 shrink-0" />
-                <span>{studentCount != null ? `${studentCount} ${sc.studentsUnit || "học viên"}` : `0 ${sc.studentsUnit || "học viên"}`}</span>
+          <div className="mt-2 text-xs font-bold text-slate-700 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
+              {/* 1. Language */}
+              <div className="flex items-center gap-1.5 min-w-0" title={getLocalizedLanguageName(course.language, t)}>
+                <Languages size={13} className="text-indigo-500 shrink-0" />
+                <span className="truncate text-slate-800">{getLocalizedLanguageName(course.language, t)}</span>
               </div>
-              {remainingSlots != null ? (
-                <div className="flex items-center gap-1.5 text-emerald-700">
-                  <Clock size={13} className="text-emerald-500 shrink-0" />
-                  <span>{sc.slotsRemaining ? sc.slotsRemaining.replace("{{count}}", remainingSlots) : `Còn ${remainingSlots} chỗ`}</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <BookOpen size={13} className="text-slate-400 shrink-0" />
-                  <span>{classCount != null && classCount !== "—" ? `${classCount} ${sc.classesUnit || "lớp"}` : sc.multipleClasses || "Nhiều lớp"}</span>
-                </div>
-              )}
-            </div>
 
-            {minEnrollmentEnd && (
-              <div className="flex items-center gap-1.5 text-amber-800 border-t border-slate-100 pt-1.5 text-[11px]">
-                <Calendar size={12} className="text-amber-600 shrink-0" />
-                <span>{sc.registrationDeadline || "Hạn ĐK"}: {formatDateDayMonth(minEnrollmentEnd, getCourseLocale(language), ui.tba || "TBA")}</span>
+              {/* 2. Students */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Users size={13} className="text-sky-500 shrink-0" />
+                <span className="truncate text-slate-800">{studentCount != null ? `${studentCount} ${sc.studentsUnit || "học viên"}` : `0 ${sc.studentsUnit || "học viên"}`}</span>
               </div>
-            )}
+
+              {/* 3. Open Classes */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <BookOpen size={13} className="text-purple-500 shrink-0" />
+                <span className="truncate text-slate-800">
+                  {openClassCount != null ? `${openClassCount} ${sc.classesOpen || "lớp mở"}` : `${classCount != null && classCount !== "—" ? classCount : 0} ${sc.classesUnit || "lớp"}`}
+                </span>
+              </div>
+
+              {/* 4. Registration Deadline */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Calendar size={13} className="text-amber-500 shrink-0" />
+                <span className="truncate text-slate-800">
+                  {minEnrollmentEnd
+                    ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateDayMonth(minEnrollmentEnd, getCourseLocale(language), ui.tba || "TBA")}`
+                    : (ui.tba || "TBA")}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

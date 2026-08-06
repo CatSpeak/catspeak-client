@@ -15,6 +15,7 @@ import {
   formatDateDayMonth,
   getCourseLocale,
   getSafeMediaUrl,
+  defaultCourseThumbnail,
 } from "../../utils/courseUtils"
 
 const ClassOverviewTab = ({
@@ -128,8 +129,7 @@ const ClassOverviewTab = ({
           <div
             className="absolute inset-0 rounded-3xl overflow-hidden z-0 bg-cover bg-center"
             style={{
-              backgroundImage: thumbnailUrl ? `url(${JSON.stringify(thumbnailUrl)})` : undefined,
-              backgroundColor: "#374151",
+              backgroundImage: `url(${thumbnailUrl || defaultCourseThumbnail})`,
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15" />
@@ -137,20 +137,6 @@ const ClassOverviewTab = ({
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
             <div className="flex flex-col gap-2 max-w-xl">
-              {classData.courseId && (classData.courseName || classData.courseTitle) ? (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)}
-                  className="w-fit inline-flex items-center gap-1.5 text-xs font-extrabold text-white/95 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full backdrop-blur-md transition-all border border-white/25 cursor-pointer shadow-2xs"
-                >
-                  <Layers size={13} className="text-white flex-shrink-0" />
-                  <span>{cd.partOfCourse ? cd.partOfCourse.replace("{{course}}", classData.courseName || classData.courseTitle) : `Course: ${classData.courseName || classData.courseTitle}`}</span>
-                </button>
-              ) : (
-                <span className="w-fit inline-flex items-center gap-1.5 text-xs font-extrabold text-white/90 bg-black/40 px-3 py-1 rounded-full backdrop-blur-md border border-white/15">
-                  {c.standaloneClass || "Lớp độc lập"}
-                </span>
-              )}
               <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight">
                 {classData.title || ui.untitledClass || "Untitled class"}
               </h2>

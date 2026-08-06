@@ -17,6 +17,7 @@ import {
   useDeleteCourseMutation
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { TextInput } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
@@ -344,15 +345,13 @@ const CreateCoursePage = () => {
     <div className="flex flex-col gap-6 text-[#2e2e2e] flex-1">
 
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-        <span>/</span>
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">
-          {labelCourseAction}
-        </span>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: labelCourseAction },
+        ]}
+      />
 
       {/* ─── Header ─── */}
       <div className="flex items-center gap-3">

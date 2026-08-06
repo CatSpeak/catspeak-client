@@ -647,7 +647,7 @@ export default {
     activeStatus: "进行中",
     aboutCourse: "关于这门课程",
     whatYouLearn: "你将学到什么",
-    availableClasses: "招收班级 / 现有班级",
+    availableClasses: "现有班级",
     instructor: "讲师",
     courseInstructor: "主讲教师",
     slotsAvailable: "剩余 {{slots}} 名额",

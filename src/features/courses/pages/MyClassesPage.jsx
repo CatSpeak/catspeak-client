@@ -175,24 +175,13 @@ const MyClassesPage = () => {
           {mc.refreshClassesFailed || "Some class data could not be refreshed. The displayed information may be out of date."}
         </div>
       )}
-      {/* <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            className="cursor-pointer hover:underline"
-            onClick={() => navigate("/workspace")}
-          >
-            {t.nav?.home || "Home"}
-          </button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{c.myClassesTab || "My Classes"}</span>
-        </div>
-      </div> */}
+      {/* ─── Breadcrumbs ─── */}
       <Breadcrumb
         items={[
-          { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
-          { label: c.myClassesTab || "My Classes" }
-        ]} />
+          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: c.myClassesTab || "My Classes" },
+        ]}
+      />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">

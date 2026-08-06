@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { BarChart3 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 import AnalyticsFilterBar from "./analytics/AnalyticsFilterBar"
 import StudentsTab from "./analytics/tabs/StudentsTab"
@@ -140,21 +141,12 @@ const WorkspaceAnalyticsPage = () => {
   return (
     <div className="flex flex-col gap-5 text-[#2e2e2e] min-h-full pb-10">
       {/* Breadcrumb Header */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            className="cursor-pointer hover:underline text-gray-500 hover:text-gray-700"
-            onClick={() => navigate("/workspace")}
-          >
-            {t.nav?.home || "Home"}
-          </button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">
-            {analyticsT.title || "Phân tích"}
-          </span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: analyticsT.title || "Phân tích" },
+        ]}
+      />
 
       {/* Page Title & Icon */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

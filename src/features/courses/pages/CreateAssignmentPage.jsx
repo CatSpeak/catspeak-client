@@ -18,6 +18,7 @@ import {
   getSafeFileUrl,
 } from "../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import { Editor } from "@tinymce/tinymce-react"
 import {
@@ -250,40 +251,30 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
 
       {/* ─── Breadcrumbs ─── */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-            {t.nav?.home || "Trang chủ"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>
-            {c.title || "Khóa học của tôi"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses/all")}>
-            {c.allCourses?.title || "Toàn bộ khóa học"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button
-            type="button"
-            disabled={!classData.courseId}
-            className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)}
-          >
-            {c.student?.courseDetails || "Chi tiết khóa học"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}`)}>
-            {classData.name || c.student?.classDetails || "Chi tiết lớp học"}
-          </button>
-          <ChevronRight size={12} className="text-gray-300" />
-          <span className="text-[#990011] font-semibold">
-            {assignmentId
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: c.allCourses?.title || "Toàn bộ khóa học", onClick: () => navigate("/workspace/courses/all") },
+          ...(classData.courseId
+            ? [
+                {
+                  label: c.student?.courseDetails || "Chi tiết khóa học",
+                  onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
+                },
+              ]
+            : []),
+          {
+            label: classData.name || c.student?.classDetails || "Chi tiết lớp học",
+            onClick: () => navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}`),
+          },
+          {
+            label: assignmentId
               ? ca.editTitle || "Edit Assignment"
-              : ca.pageTitle || "Create Assignment"}
-          </span>
-        </div>
-      </div>
+              : ca.pageTitle || "Create Assignment",
+          },
+        ]}
+      />
 
       {/* ─── Heading ─── */}
       <h1 className="text-3xl font-black text-gray-950 tracking-tight">

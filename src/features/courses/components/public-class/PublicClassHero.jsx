@@ -1,6 +1,6 @@
 import React from "react"
 import { ShieldCheck, Share2 } from "lucide-react"
-import { getSafeMediaUrl } from "../../utils/courseUtils"
+import { getSafeMediaUrl, defaultCourseThumbnail } from "../../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PublicClassHero = ({
@@ -16,17 +16,15 @@ const PublicClassHero = ({
   const teacher = classData?.teacher || {}
   const teacherName = teacher.fullName || teacher.name || teacher.title || c.defaultInstructor || "CatSpeak Instructor"
   const teacherAvatar = getSafeMediaUrl(teacher.avatar || teacher.avatarImageUrl)
-  const bgThumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl)
+  const bgThumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl) || defaultCourseThumbnail
 
   return (
     <section className="relative bg-slate-950 text-white overflow-hidden min-h-[480px] sm:min-h-[560px] lg:min-h-[620px] flex flex-col justify-end pt-16 pb-16 sm:pb-20 border-b border-slate-800">
       {/* Full-Vibrancy Thumbnail Background Image */}
-      {bgThumbnailUrl && (
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-85 transition-all duration-700"
-          style={{ backgroundImage: `url(${bgThumbnailUrl})` }}
-        />
-      )}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-85 transition-all duration-700"
+        style={{ backgroundImage: `url(${bgThumbnailUrl})` }}
+      />
 
       {/* Lightweight Scrim Overlays */}
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent" />

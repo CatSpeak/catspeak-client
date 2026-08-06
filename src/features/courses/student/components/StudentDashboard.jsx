@@ -7,6 +7,7 @@ import { useGetProfileQuery } from "@/features/auth"
 import CourseSearchInput from "../../components/CourseSearchInput"
 import CourseSelectFilter from "../../components/CourseSelectFilter"
 import TablePagination from "../../components/shared/TablePagination"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { filterStudentClasses } from "../../utils/courseTransforms"
 
 const UNKNOWN_VALUE = "—"
@@ -309,19 +310,12 @@ const StudentDashboard = ({ t, language }) => {
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       {/* ─── Breadcrumb ─── */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            className="cursor-pointer hover:underline"
-            onClick={() => navigate("/workspace")}
-          >
-            {t?.nav?.home || "Home"}
-          </button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{sc.myClasses || "Joined Classes"}</span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t?.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: sc.myClasses || "Joined Classes" },
+        ]}
+      />
 
       {/* ─── Coursera-Style Student Profile Welcome Banner ─── */}
       <div className="bg-white rounded-3xl p-6 border border-gray-150 shadow-xs relative flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 mt-2">

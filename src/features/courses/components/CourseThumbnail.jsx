@@ -1,26 +1,18 @@
 import React from "react"
-import { getSafeMediaUrl } from "../utils/courseUtils"
+import { getSafeMediaUrl, defaultCourseThumbnail } from "../utils/courseUtils"
 
 const CourseThumbnail = ({
   item,
   title,
   className = "",
-  iconSize = 24,
   imageClassName = "w-full h-full object-cover",
   children,
 }) => {
-  const Icon = item?.icon
-  const thumbnailUrl = getSafeMediaUrl(item?.thumbnailUrl)
-  const hasThumbnail = Boolean(thumbnailUrl)
-  const gradient = item?.gradient || "from-gray-100 to-gray-200 text-gray-400"
+  const thumbnailUrl = getSafeMediaUrl(item?.thumbnailUrl) || defaultCourseThumbnail
 
   return (
-    <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${hasThumbnail ? "" : `bg-gradient-to-br ${gradient}`} ${className}`}>
-      {hasThumbnail ? (
-        <img src={thumbnailUrl} alt={title || item.title || ""} className={imageClassName} loading="lazy" decoding="async" />
-      ) : (
-        Icon && <Icon size={iconSize} className="stroke-[1.5]" />
-      )}
+    <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${className}`}>
+      <img src={thumbnailUrl} alt={title || item?.title || ""} className={imageClassName} loading="lazy" decoding="async" />
       {children}
     </div>
   )

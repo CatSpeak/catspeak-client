@@ -266,7 +266,7 @@ const transformClass = (cls) => {
 
 const transformExploreItem = (item) => {
   if (!isRecord(item)) return null
-  const isClassItem = item.type === "Class"
+  const isClassItem = String(item?.type || "").toLowerCase() === "class"
   const title = toText(item.name) || toText(item.title) || (isClassItem ? "Untitled Class" : "Untitled Course")
   const teacher = transformPerson(item.teacher)
 
@@ -567,9 +567,14 @@ export const coursesApi = baseApi.injectEndpoints({
         params: {
           page: params?.page || 1,
           pageSize: params?.pageSize || 24,
-          language: params?.language && params.language !== "all" ? params.language.toUpperCase() : undefined,
           search: params?.search ? params.search.trim() : undefined,
-          type: params?.type && params.type !== "all" ? (params.type === "courses" ? "Course" : "Class") : undefined,
+          sort: params?.sort && params.sort !== "default" ? params.sort : undefined,
+          language: params?.language && params.language !== "all" ? params.language.toLowerCase() : undefined,
+          minPrice: params?.minPrice != null && !isNaN(Number(params.minPrice)) ? Number(params.minPrice) : undefined,
+          maxPrice: params?.maxPrice != null && !isNaN(Number(params.maxPrice)) ? Number(params.maxPrice) : undefined,
+          type: params?.type && params.type !== "all"
+            ? (params.type === "courses" ? "course" : params.type === "classes" ? "class" : String(params.type).toLowerCase())
+            : undefined,
         },
         extraOptions: { skipAuthHeader: true },
       }),

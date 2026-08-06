@@ -1,10 +1,11 @@
 import React from "react"
-import { Clock, GraduationCap, Users, ShieldCheck, Layers, Calendar, ArrowRight, Settings } from "lucide-react"
+import { Clock, Users, ShieldCheck, Calendar, ArrowRight, Settings } from "lucide-react"
 import {
   formatCurrencyVND,
   getSafeMediaUrl,
   formatDateDayMonth,
   getCourseLocale,
+  defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { formatScheduleDays } from "../utils/scheduleUtils"
@@ -18,7 +19,6 @@ const ClassCard = ({
   onClick,
   onEnroll,
   progressLabel,
-  courseTitle
 }) => {
   const { language, t } = useLanguage()
   const c = t.courses || {}
@@ -53,6 +53,20 @@ const ClassCard = ({
     ? `${firstSchedule.startTime} - ${firstSchedule.endTime}`
     : ""
 
+  // Extract progress value (number, string, or object { completedSessions, totalSessions, percentage })
+  let progressPercent = null
+  if (cls.progress != null) {
+    if (typeof cls.progress === "number" || (typeof cls.progress === "string" && !isNaN(Number(cls.progress)))) {
+      progressPercent = Number(cls.progress)
+    } else if (typeof cls.progress === "object") {
+      if (cls.progress.percentage != null && !isNaN(Number(cls.progress.percentage))) {
+        progressPercent = Number(cls.progress.percentage)
+      } else if (cls.progress.totalSessions && !isNaN(Number(cls.progress.completedSessions))) {
+        progressPercent = Math.round((Number(cls.progress.completedSessions || 0) / Number(cls.progress.totalSessions)) * 100)
+      }
+    }
+  }
+
   return (
     <div
       onClick={isLocked ? undefined : onClick}
@@ -66,26 +80,16 @@ const ClassCard = ({
     >
       {/* Thumbnail Area */}
       <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">
-        {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={cls.name || cls.title || ""}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-400 font-bold text-sm">
-            <GraduationCap size={44} className="text-slate-500" />
-          </div>
-        )}
+        <img
+          src={thumbnailUrl || defaultCourseThumbnail}
+          alt={cls.name || cls.title || ""}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          decoding="async"
+        />
 
         {/* Top Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
-          <span className="bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider">
-            <GraduationCap size={10} />
-            {c.classBadge || "Lớp học"}
-          </span>
           {cls.language && (
             <span className="bg-slate-900/85 backdrop-blur-md text-white border border-slate-700/60 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
               {cls.language}
@@ -102,15 +106,6 @@ const ClassCard = ({
         {!isStudent && cls.status && (
           <div className="absolute top-3 right-3 z-10">
             <CourseStatusPill status={cls.status} t={t} />
-          </div>
-        )}
-
-        {courseTitle && (
-          <div className="absolute bottom-3 left-3 right-3 z-10">
-            <span className="bg-slate-950/80 backdrop-blur-md text-rose-300 border border-rose-900/60 text-[10px] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm truncate">
-              <Layers size={10} />
-              <span>{c.courseLabel || "Khóa học"}: {courseTitle}</span>
-            </span>
           </div>
         )}
       </div>
@@ -173,10 +168,10 @@ const ClassCard = ({
               </div>
             )}
 
-            {progressLabel && cls.progress != null && (
+            {progressLabel && progressPercent != null && !isNaN(progressPercent) && (
               <div className="flex items-center justify-between border-t border-slate-100 pt-1.5 text-[11px] text-indigo-700 font-bold">
                 <span>{progressLabel}:</span>
-                <span>{cls.progress}%</span>
+                <span>{progressPercent}%</span>
               </div>
             )}
           </div>

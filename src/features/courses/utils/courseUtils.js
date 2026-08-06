@@ -1,5 +1,8 @@
 import { MessageSquare, FileText, Users, GraduationCap, PenSquare, BookOpen } from "lucide-react"
 import { DEFAULT_CLASS_FEE_TIERS } from "../data/courseFormOptions.js"
+import defaultCourseThumbnail from "@/shared/assets/backgrounds/background-account.png"
+
+export { defaultCourseThumbnail, defaultCourseThumbnail as DEFAULT_COURSE_THUMBNAIL }
 
 const CARD_GRADIENTS = [
   "from-[#8B5CF6]/20 to-[#C084FC]/20 text-[#8B5CF6]",

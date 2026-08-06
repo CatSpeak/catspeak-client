@@ -12,6 +12,7 @@ import {
   formatDateDayMonth,
   getCourseLocale,
   getSafeMediaUrl,
+  defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { Calendar, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
@@ -101,7 +102,7 @@ const StudentCourseDetailPage = () => {
   const teacherAvatarUrl = getSafeMediaUrl(teacher.avatarImageUrl)
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e] p-4 sm:p-6">
+    <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
       {isFetching && (
         <span className="sr-only" role="status">
           {scd.refreshing || "Refreshing course details"}
@@ -143,20 +144,13 @@ const StudentCourseDetailPage = () => {
               )}
 
               <div className="w-full">
-                {thumbnailUrl ? (
-                  <img
-                    src={thumbnailUrl}
-                    alt={rawCourse.title || ""}
-                    className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-gray-150 shadow-2xs block"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <div
-                    aria-hidden="true"
-                    className="w-full h-52 sm:h-60 rounded-2xl border border-gray-150 bg-gray-100"
-                  />
-                )}
+                <img
+                  src={thumbnailUrl || defaultCourseThumbnail}
+                  alt={rawCourse.title || ""}
+                  className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-gray-150 shadow-2xs block"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             </div>
           </div>
@@ -243,25 +237,19 @@ const StudentCourseDetailPage = () => {
                             onClick={(e) => {
                               e.stopPropagation()
                               const isWorkspace = window.location.pathname.startsWith("/workspace")
-                              const classPath = isWorkspace
-                                ? `/workspace/explore-courses/class/${encodeURIComponent(String(cls.id))}`
+                              const classPath = isClassEnrolled
+                                ? (isWorkspace ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}` : `/learning/class/${encodeURIComponent(String(cls.id))}`)
                                 : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                               navigate(classPath)
                             }}
                             className="w-28 h-16 sm:w-36 sm:h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 cursor-pointer group/thumb relative shadow-2xs"
                             title="Xem chi tiết lớp học"
                           >
-                            {classThumbnailUrl ? (
-                              <img
-                                src={classThumbnailUrl}
-                                alt={cls.title || "Class thumbnail"}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-slate-100 text-[#b20a1c] flex items-center justify-center font-black text-lg">
-                                <BookOpen size={24} />
-                              </div>
-                            )}
+                            <img
+                              src={classThumbnailUrl || defaultCourseThumbnail}
+                              alt={cls.title || "Class thumbnail"}
+                              className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
+                            />
                           </div>
 
                           {/* Class Main Information */}
@@ -272,8 +260,8 @@ const StudentCourseDetailPage = () => {
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   const isWorkspace = window.location.pathname.startsWith("/workspace")
-                                  const classPath = isWorkspace
-                                    ? `/workspace/explore-courses/class/${encodeURIComponent(String(cls.id))}`
+                                  const classPath = isClassEnrolled
+                                    ? (isWorkspace ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}` : `/learning/class/${encodeURIComponent(String(cls.id))}`)
                                     : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                                   navigate(classPath)
                                 }}

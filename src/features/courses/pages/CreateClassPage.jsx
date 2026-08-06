@@ -23,6 +23,7 @@ import {
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   getInstructorFormLanguages,
   getLocalizedLanguageName,
@@ -595,15 +596,14 @@ const CreateClassPage = () => {
     <div className="flex flex-col gap-6 text-[#2e2e2e] flex-1">
 
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-        <span>/</span>
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
-        <span>/</span>
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/classes/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">{pageTitle}</span>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: isFormBusy ? undefined : () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: isFormBusy ? undefined : () => navigate("/workspace/courses") },
+          { label: c.allClasses?.title || "Toàn bộ lớp học", onClick: isFormBusy ? undefined : () => navigate("/workspace/classes/all-classes") },
+          { label: pageTitle },
+        ]}
+      />
 
       {/* ─── Header ─── */}
       <div className="flex items-center gap-3">

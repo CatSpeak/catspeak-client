@@ -88,13 +88,10 @@ const CourseManagementCard = ({
       <CourseThumbnail
         item={item}
         title={item.title}
-        iconSize={isGrid ? 48 : 24}
         className={isGrid ? "h-48 w-full bg-[#D9D9D9]" : "h-20 w-28 bg-[#D9D9D9] rounded-2xl"}
       >
         {isGrid && (
           <>
-
-
             {item.status && (
               <div className="absolute top-3 right-3">
                 <CourseStatusPill status={item.status} />
@@ -173,17 +170,31 @@ const CourseManagementCard = ({
                 <MetaRow icon={Clock}>{item.startDate} - {item.endDate}</MetaRow>
               </div>
 
-              {item.status !== "OPEN" && item.progress != null && (
-                <div className="mt-5">
-                  <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                    <span>{labels.progress}</span>
-                    <span>{item.progress}%</span>
+              {(() => {
+                let progressPercent = null
+                if (item.progress != null) {
+                  if (typeof item.progress === "number" || (typeof item.progress === "string" && !isNaN(Number(item.progress)))) {
+                    progressPercent = Number(item.progress)
+                  } else if (typeof item.progress === "object") {
+                    if (item.progress.percentage != null && !isNaN(Number(item.progress.percentage))) {
+                      progressPercent = Number(item.progress.percentage)
+                    } else if (item.progress.totalSessions && !isNaN(Number(item.progress.completedSessions))) {
+                      progressPercent = Math.round((Number(item.progress.completedSessions || 0) / Number(item.progress.totalSessions)) * 100)
+                    }
+                  }
+                }
+                return item.status !== "OPEN" && progressPercent != null && !isNaN(progressPercent) ? (
+                  <div className="mt-5">
+                    <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                      <span>{labels.progress}</span>
+                      <span>{progressPercent}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
+                      <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                    </div>
                   </div>
-                  <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
-                    <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${item.progress}%` }} />
-                  </div>
-                </div>
-              )}
+                ) : null
+              })()}
             </>
           )}
         </div>

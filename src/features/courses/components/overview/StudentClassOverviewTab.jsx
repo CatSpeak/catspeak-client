@@ -5,6 +5,7 @@ import {
   formatDateDayMonth,
   getCourseLocale,
   getSafeMediaUrl,
+  defaultCourseThumbnail,
 } from "../../utils/courseUtils"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
@@ -82,8 +83,7 @@ const StudentClassOverviewTab = ({
         <div
           className="relative rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm text-white overflow-hidden"
           style={{
-            backgroundImage: thumbnailUrl ? `url(${JSON.stringify(thumbnailUrl)})` : undefined,
-            backgroundColor: "#374151",
+            backgroundImage: `url(${thumbnailUrl || defaultCourseThumbnail})`,
             backgroundSize: "cover",
             backgroundPosition: "center"
           }}

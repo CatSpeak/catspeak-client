@@ -13,6 +13,7 @@ import {
 import { formatCurrency } from "../utils/courseUtils"
 import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 import ClassDetailTabs from "../components/ClassDetailTabs"
 import ClassOverviewTab from "../components/overview/ClassOverviewTab"
@@ -176,29 +177,21 @@ const ClassDetailPage = () => {
       {!hasGradingDeepLink && (
         <>
           {/* ─── Breadcrumb ─── */}
-          <div className="flex justify-between items-center flex-wrap gap-2">
-            <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-              <span>/</span>
-              <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/classes/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
-              {classData.courseId && (
-                <>
-                  <span>/</span>
-                  <button
-                    type="button"
-                    className="cursor-pointer hover:underline"
-                    onClick={() => {
-                      navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`)
-                    }}
-                  >
-                    {classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details"}
-                  </button>
-                </>
-              )}
-              <span>/</span>
-              <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
-            </div>
-          </div>
+          <Breadcrumb
+            items={[
+              { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+              { label: c.allClasses?.title || "Toàn bộ lớp học", onClick: () => navigate("/workspace/classes/all-classes") },
+              ...(classData.courseId
+                ? [
+                    {
+                      label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
+                      onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
+                    },
+                  ]
+                : []),
+              { label: c.student?.classDetails || "Class Details" },
+            ]}
+          />
 
           {/* ─── Page Heading & Header Actions ─── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

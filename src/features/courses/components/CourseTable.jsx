@@ -49,7 +49,6 @@ const CourseTable = ({ courses, t, onDelete }) => {
                 <CourseThumbnail
                   item={item}
                   title={item.title}
-                  iconSize={28}
                   className="w-32 h-20 rounded-xl border border-gray-100"
                 />
               </td>

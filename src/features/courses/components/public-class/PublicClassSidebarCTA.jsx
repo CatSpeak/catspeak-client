@@ -1,6 +1,6 @@
 import React from "react"
 import { Check, Shield, BookOpen, Video, Award, MessageSquare, Share2 } from "lucide-react"
-import { formatCurrencyVND, getSafeMediaUrl } from "../../utils/courseUtils"
+import { formatCurrencyVND, getSafeMediaUrl, defaultCourseThumbnail } from "../../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PublicClassSidebarCTA = ({ classData }) => {
@@ -13,7 +13,7 @@ const PublicClassSidebarCTA = ({ classData }) => {
     ? (ui.tba || "TBA")
     : formatCurrencyVND(classData.tuitionFee)
 
-  const thumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl)
+  const thumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl) || defaultCourseThumbnail
 
   const highlights = [
     { icon: Video, text: pc.featLive || "Học trực tuyến tương tác trực tiếp" },
@@ -26,15 +26,13 @@ const PublicClassSidebarCTA = ({ classData }) => {
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 sticky top-20 flex flex-col gap-5">
       {/* Thumbnail */}
-      {thumbnailUrl && (
-        <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-100 border border-slate-100">
-          <img
-            src={thumbnailUrl}
-            alt={classData?.title || ""}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
+      <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-100 border border-slate-100">
+        <img
+          src={thumbnailUrl}
+          alt={classData?.title || ""}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
       {/* Pricing Header */}
       <div className="flex flex-col gap-1">

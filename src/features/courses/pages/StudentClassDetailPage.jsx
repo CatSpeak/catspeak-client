@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { MessageSquare, Video } from "lucide-react"
 
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   useGetStudentClassDetailQuery,
   useEnrollInCourseMutation
@@ -246,29 +247,21 @@ const StudentClassDetailPage = () => {
       )}
 
       {/* ─── Breadcrumb ─── */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle || "Lớp học của tôi"}</button>
-          {classData.courseId && (
-            <>
-              <span>/</span>
-              <button
-                type="button"
-                className="cursor-pointer hover:underline"
-                onClick={() => {
-                  navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`)
-                }}
-              >
-                {classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details"}
-              </button>
-            </>
-          )}
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.student?.dashboardTitle || "Lớp học của tôi", onClick: () => navigate("/workspace/learning") },
+          ...(classData.courseId
+            ? [
+                {
+                  label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
+                  onClick: () => navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`),
+                },
+              ]
+            : []),
+          { label: c.student?.classDetails || "Class Details" },
+        ]}
+      />
 
       {/* ─── Page Heading & Header Actions ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

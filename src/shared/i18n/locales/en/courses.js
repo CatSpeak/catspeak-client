@@ -647,7 +647,7 @@ export default {
     activeStatus: "Active",
     aboutCourse: "About this Course",
     whatYouLearn: "What you'll learn",
-    availableClasses: "Available Batches / Classes",
+    availableClasses: "Available Classes",
     instructor: "Instructor",
     courseInstructor: "Course Instructor",
     slotsAvailable: "{{slots}} slots available",
