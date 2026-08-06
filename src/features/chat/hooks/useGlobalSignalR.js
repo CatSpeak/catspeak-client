@@ -273,7 +273,7 @@ export const useGlobalSignalR = () => {
     handlers.ConversationCreated = handleNewConversationEvent
   }, [handlers, handleNewConversationEvent])
 
-  const { invoke, reconnect } = useConversationSignalR(handlers)
+  const { isConnected, invoke, reconnect } = useConversationSignalR(handlers)
 
   // Keep invokeRef and reconnectRef in sync
   const reconnectRef = useRef(null)
@@ -284,7 +284,7 @@ export const useGlobalSignalR = () => {
 
   // Automatically join SignalR groups for ALL of the user's conversations as soon as SignalR connects
   useEffect(() => {
-    if (invoke && conversations.length > 0) {
+    if (isConnected && invoke && conversations.length > 0) {
       conversations.forEach((c) => {
         const convId = c.conversationId || c.id
         if (convId) {
@@ -297,7 +297,7 @@ export const useGlobalSignalR = () => {
         }
       })
     }
-  }, [invoke, conversations])
+  }, [isConnected, invoke, conversations])
 }
 
 export default useGlobalSignalR
