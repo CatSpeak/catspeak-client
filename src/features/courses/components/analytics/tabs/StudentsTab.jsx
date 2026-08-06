@@ -4,7 +4,7 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { labels, numberVi } from "../../../data/analyticsData"
+import { numberVi } from "../../../data/analyticsData"
 import {
   useGetAnalyticsStudentsOverviewQuery,
   useGetAnalyticsStudentsGrowthQuery,
@@ -71,11 +71,10 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
   ]
 
   // 2. Growth Line Chart
-  const growthPoints = growthData?.growthData || []
+  const growthPoints = (growthData?.growthData || [])
+    .filter((point) => point?.label || point?.date)
 
-  const chartLabels = growthPoints.length > 0
-    ? growthPoints.map((p) => p.label || p.date)
-    : (labels[group] || labels.month)
+  const chartLabels = growthPoints.map((p) => p.label || p.date)
 
   const seriesTotalStudents = growthPoints.map((p) => p.totalStudents ?? 0)
   const seriesNewStudents = growthPoints.map((p) => p.newStudents ?? 0)
@@ -89,6 +88,7 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
     average: r.averageStudentsPerClass || (r.classCount ? Math.round(r.totalStudents / r.classCount) : r.totalStudents),
     newStudents: r.newStudents,
     retention: `${r.retentionRate}%`,
+    retentionRaw: r.retentionRate || 0,
   }))
 
   // 4. Class Table Data & Bar Data
@@ -100,6 +100,7 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
     newStudents: r.newStudents,
     returning: r.returningStudents,
     fill: `${r.fillRate}%`,
+    fillRaw: r.fillRate || 0,
   }))
 
   const barData = classItems.slice(0, 6).map((r) => ({

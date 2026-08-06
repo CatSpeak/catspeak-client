@@ -4,7 +4,7 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { labels, money, numberVi } from "../../../data/analyticsData"
+import { money, numberVi } from "../../../data/analyticsData"
 import {
   useGetAnalyticsRevenueOverviewQuery,
   useGetAnalyticsRevenueTrendQuery,
@@ -78,11 +78,10 @@ const RevenueTab = ({ group, queryParams = {} }) => {
   }))
 
   // 3. Line Chart Data (Revenue Trend)
-  const trendPoints = trendDataApi?.trendData || []
+  const trendPoints = (trendDataApi?.trendData || [])
+    .filter((point) => point?.label || point?.date)
 
-  const chartLabels = trendPoints.length > 0
-    ? trendPoints.map((p) => p.label || p.date)
-    : (labels[group] || labels.month)
+  const chartLabels = trendPoints.map((p) => p.label || p.date)
 
   const seriesRevenue = trendPoints.map((p) => (p.totalRevenue != null ? p.totalRevenue / 1000000 : 0))
 
@@ -93,8 +92,11 @@ const RevenueTab = ({ group, queryParams = {} }) => {
     course: r.courseName || "Khóa học",
     learners: r.studentCount,
     gross: money(r.grossRevenue || 0),
+    grossRaw: r.grossRevenue || 0,
     fee: money(r.platformFee || 0),
+    feeRaw: r.platformFee || 0,
     net: money(r.netReceipt || 0),
+    netRaw: r.netReceipt || 0,
   }))
 
   const millionLabel = secT.millionVnd || "Triệu đồng"

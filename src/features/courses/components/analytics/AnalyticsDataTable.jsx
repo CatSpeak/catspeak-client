@@ -8,7 +8,7 @@ const AnalyticsDataTable = ({
   pageSize = 5,
   emptyMessage,
 }) => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const secT = t.courses?.analytics?.sections || {}
 
   const defaultEmptyMsg = secT.noData || "Không có dữ liệu phù hợp."
@@ -31,13 +31,30 @@ const AnalyticsDataTable = ({
 
   const sortedData = [...data].sort((a, b) => {
     if (!sortKey) return 0
-    const left = a[sortKey]
-    const right = b[sortKey]
+    const col = columns.find((c) => c.key === sortKey)
+
+    let left = col?.sortValue
+      ? col.sortValue(a)
+      : (a[`${sortKey}Raw`] !== undefined ? a[`${sortKey}Raw`] : a[sortKey])
+    let right = col?.sortValue
+      ? col.sortValue(b)
+      : (b[`${sortKey}Raw`] !== undefined ? b[`${sortKey}Raw`] : b[sortKey])
+
+    if (typeof left === "string" && typeof right === "string") {
+      // Strip currency symbols, spaces, percent signs to attempt numeric comparison
+      const cleanL = left.replace(/[^\d.-]/g, "")
+      const cleanR = right.replace(/[^\d.-]/g, "")
+      if (cleanL.length > 0 && cleanR.length > 0 && !isNaN(Number(cleanL)) && !isNaN(Number(cleanR)) && !/[a-zA-Z]{3,}/.test(left)) {
+        left = Number(cleanL)
+        right = Number(cleanR)
+      }
+    }
+
     let comp = 0
-    if (typeof left === "number" && typeof right === "number") {
+    if (typeof left === "number" && typeof right === "number" && !isNaN(left) && !isNaN(right)) {
       comp = left - right
     } else {
-      comp = String(left || "").localeCompare(String(right || ""), "vi")
+      comp = String(left ?? "").localeCompare(String(right ?? ""), language === "en" ? "en" : "vi", { numeric: true })
     }
     return sortDirection === "asc" ? comp : -comp
   })

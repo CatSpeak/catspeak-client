@@ -1,11 +1,14 @@
 import React from "react"
-import { BookOpen, Clock, Languages, ArrowRight, User } from "lucide-react"
+import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar } from "lucide-react"
 import {
   getCourseGradientAndIcon,
   formatCurrencyVND,
   getSafeMediaUrl,
+  formatDateDayMonth,
+  getCourseLocale,
 } from "../../utils/courseUtils"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const StudentCourseCard = ({
   course,
@@ -13,125 +16,146 @@ const StudentCourseCard = ({
   viewMode = "grid",
   onViewDetails,
   onJoin,
-  t,
+  t: propsT,
   index
 }) => {
-  const { gradient, icon: Icon } = getCourseGradientAndIcon(index)
+  const { language, t: contextT } = useLanguage()
+  const t = propsT || contextT
   const sc = t?.courses?.student || {}
+  const ui = t?.courses?.workspaceUi || {}
+  const { gradient, icon: Icon } = getCourseGradientAndIcon(index)
   const thumbnailUrl = getSafeMediaUrl(course.thumbnailUrl)
-  const minimumPrice = Number(course.priceRange?.min)
-  const maximumPrice = Number(course.priceRange?.max)
-  const hasMinimumPrice = Number.isFinite(minimumPrice) && minimumPrice >= 0
-  const hasMaximumPrice = Number.isFinite(maximumPrice) && maximumPrice >= minimumPrice
-  const priceText = hasMinimumPrice && hasMaximumPrice
-    ? minimumPrice === 0 && maximumPrice === 0
-      ? sc.priceFree
-      : `${formatCurrencyVND(minimumPrice)} - ${formatCurrencyVND(maximumPrice)}`
-    : sc.toBeAnnounced
-  const classCount = course.classCount != null && course.classCount !== "" && Number.isFinite(Number(course.classCount))
-    ? Number(course.classCount)
-    : "—"
-  const totalSessions = course.totalSessions != null && course.totalSessions !== "" && Number.isFinite(Number(course.totalSessions))
-    ? Number(course.totalSessions)
-    : "—"
-  const instructorName = course.instructorName || course.teacher?.name || "—"
-  const completedSessions = Number(course.progress?.completedSessions)
-  const progressTotal = Number(course.progress?.totalSessions)
-  const progressPercent = (
-    Number.isFinite(completedSessions)
-    && completedSessions >= 0
-    && Number.isFinite(progressTotal)
-    && progressTotal > 0
-  )
-    ? Math.min(100, Math.round((completedSessions / progressTotal) * 100))
-    : null
-  const formatCountLabel = (template, count) => (
-    template.replace("{{count}}", String(count))
-  )
+
+  // Teacher Info
+  const teacher = course.teacher || {}
+  const teacherName = teacher.name || teacher.fullName || course.instructorName || sc.defaultInstructor || "Giảng viên CatSpeak"
+  const teacherAvatar = getSafeMediaUrl(teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl)
+
+  // Pricing Logic
+  const minPrice = course.priceMin ?? course.priceRange?.min ?? course.price
+  const maxPrice = course.priceMax ?? course.priceRange?.max ?? course.price
+  const hasMinPrice = minPrice != null && Number.isFinite(Number(minPrice)) && Number(minPrice) >= 0
+  const hasMaxPrice = maxPrice != null && Number.isFinite(Number(maxPrice)) && Number(maxPrice) >= Number(minPrice)
+
+  let priceText = sc.toBeAnnounced || "TBA"
+  if (hasMinPrice && hasMaxPrice) {
+    if (Number(minPrice) === 0 && Number(maxPrice) === 0) {
+      priceText = sc.priceFree || "Miễn phí"
+    } else if (Number(minPrice) === Number(maxPrice)) {
+      priceText = formatCurrencyVND(minPrice)
+    } else {
+      priceText = `${formatCurrencyVND(minPrice)} - ${formatCurrencyVND(maxPrice)}`
+    }
+  } else if (hasMinPrice) {
+    priceText = formatCurrencyVND(minPrice)
+  }
+
+  // Counts & Stats
+  const openClassCount = course.openClassCount != null ? Number(course.openClassCount) : null
+  const classCount = course.classCount != null ? Number(course.classCount) : openClassCount
+  const studentCount = course.studentCount != null ? Number(course.studentCount) : null
+  const remainingSlots = course.remainingSlots != null ? Number(course.remainingSlots) : null
+  const minEnrollmentEnd = course.minEnrollmentEnd || course.enrollmentEnd
+
+  const handleCardAction = (e) => {
+    e.stopPropagation()
+    if (isEnrolled) {
+      onViewDetails()
+    } else if (onJoin) {
+      onJoin()
+    } else {
+      onViewDetails()
+    }
+  }
+
+  // --- List View Mode ---
   if (viewMode === "list") {
     return (
       <div
         onClick={onViewDetails}
-        className="bg-white rounded-3xl border border-gray-150 hover:border-[#990011]/20 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-md transition-all duration-300 cursor-pointer group"
+        className="bg-white rounded-3xl border border-slate-200 hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
       >
         <div className="flex items-center gap-5 flex-1 min-w-0">
-          {/* Icon/Thumbnail area */}
-          <div className="h-16 w-24 shrink-0 rounded-2xl overflow-hidden bg-[#D9D9D9] flex items-center justify-center relative shadow-sm border border-gray-100 group-hover:scale-102 transition-transform duration-300">
+          {/* Thumbnail */}
+          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-sm border border-slate-200 group-hover:scale-[1.02] transition-transform duration-300">
             {thumbnailUrl ? (
               <img
                 src={thumbnailUrl}
-                alt={course.title || ""}
+                alt={course.name || course.title || ""}
                 className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
               />
             ) : (
               <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-                <Icon size={24} className="stroke-[1.5] text-white" />
+                <Icon size={28} className="stroke-[1.5] text-white" />
               </div>
             )}
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="bg-[#fcf8e3] border border-amber-200/50 text-[#b28730] font-black text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            {/* Top Badges */}
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="bg-[#b20a1c]/10 text-[#b20a1c] border border-rose-200/60 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                <BookOpen size={10} />
+                {sc.courseBadge || "Khóa học"}
+              </span>
+              <span className="bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-slate-200">
                 {getLocalizedLanguageName(course.language, t)}
               </span>
-              {Array.isArray(course.levels) && course.levels.map((lvl) => (
-                <span key={lvl} className="bg-red-50 text-[#990011] font-black text-[9px] px-2.5 py-0.5 rounded-full uppercase border border-red-100/50">
-                  {lvl}
+              {openClassCount != null && openClassCount > 0 && (
+                <span className="bg-emerald-50 text-emerald-700 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-emerald-200/60 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {openClassCount} {sc.classesOpen || "lớp mở"}
                 </span>
-              ))}
+              )}
             </div>
-            <h3 className="font-black text-base text-gray-950 truncate leading-snug group-hover:text-[#990011] transition-colors">
-              {course.title}
+
+            <h3 className="font-black text-lg text-slate-950 truncate leading-snug group-hover:text-[#b20a1c] transition-colors">
+              {course.name || course.title}
             </h3>
-            <p className="text-xs text-gray-500 font-semibold line-clamp-1 mt-1 flex items-center gap-1.5">
-              <User size={12} className="text-gray-400" />
-              <span>{instructorName}</span>
-            </p>
+
+            {/* Teacher info */}
+            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-500 font-semibold">
+              {teacherAvatar ? (
+                <img src={teacherAvatar} alt={teacherName} className="w-5 h-5 rounded-full object-cover ring-1 ring-slate-200" />
+              ) : (
+                <User size={14} className="text-slate-400" />
+              )}
+              <span className="text-slate-700 font-bold">{teacherName}</span>
+            </div>
           </div>
         </div>
 
-        {/* Stats and actions */}
-        <div className="flex flex-wrap md:flex-nowrap items-center gap-6 justify-between w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 border-gray-150 shrink-0">
-          <div className="flex items-center gap-4 text-xs font-bold text-gray-500">
-            <div className="flex items-center gap-1">
-              <BookOpen size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.batchesCount, classCount)}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.sessionsCount, totalSessions)}</span>
-            </div>
+        {/* Right Stats & Actions */}
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-6 justify-between w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 border-slate-150 shrink-0">
+          <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
+            {studentCount != null && (
+              <div className="flex items-center gap-1">
+                <Users size={14} className="text-slate-400" />
+                <span>{studentCount} {sc.studentsUnit || "học viên"}</span>
+              </div>
+            )}
+            {remainingSlots != null && (
+              <div className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60">
+                <Clock size={12} />
+                <span>{sc.slotsRemaining ? sc.slotsRemaining.replace("{{count}}", remainingSlots) : `Còn ${remainingSlots} chỗ`}</span>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-            <div className="text-sm font-black text-gray-950 pr-2">
-              {isEnrolled ? (
-                <span className="text-green-700 font-black text-xs bg-green-50 px-3 py-1 rounded-full border border-green-100 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> {sc.enrolledStatus}
-                </span>
-              ) : (
-                <div className="flex flex-col text-right">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">{sc.tuition}</span>
-                  <span className="text-sm font-black text-[#990011] leading-none">{priceText}</span>
-                </div>
-              )}
+          <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+            <div className="flex flex-col text-right">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{sc.tuition || "Học phí"}</span>
+              <span className="text-base font-black text-[#b20a1c] leading-none">{priceText}</span>
             </div>
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                isEnrolled ? onViewDetails() : onJoin()
-              }}
-              className={`h-9 px-5 text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap ${isEnrolled
-                ? "bg-white border border-gray-250 text-gray-700 hover:bg-gray-50"
-                : "bg-[#990011] hover:bg-[#b20a1c] text-white"
-                }`}
+              onClick={handleCardAction}
+              className="h-10 px-5 text-xs font-extrabold rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 whitespace-nowrap cursor-pointer"
             >
-              <span>{isEnrolled ? sc.details : sc.joinCourse}</span>
-              <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+              <span>{isEnrolled ? (sc.details || "Chi tiết") : (sc.viewCourse || "Xem Khóa Học")}</span>
+              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
@@ -139,19 +163,19 @@ const StudentCourseCard = ({
     )
   }
 
-  // Grid Layout
+  // --- Grid View Mode ---
   return (
     <div
       onClick={onViewDetails}
-      className="bg-white rounded-3xl border border-gray-150 hover:border-[#990011]/20 overflow-hidden shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.06)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[450px] group"
+      className="bg-white rounded-3xl border border-slate-200 hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
     >
-      {/* Thumbnail / Icon area */}
-      <div className="relative h-60 w-full bg-[#D9D9D9] flex items-center justify-center shrink-0 overflow-hidden border-b border-gray-100">
+      {/* Thumbnail Area */}
+      <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
-            alt={course.title || ""}
-            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+            alt={course.name || course.title || ""}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
             decoding="async"
           />
@@ -161,100 +185,97 @@ const StudentCourseCard = ({
           </div>
         )}
 
-        {/* Badges on card top */}
-        <div className="absolute top-3 left-3 flex gap-1.5">
-          <span className="bg-white/95 backdrop-blur-xs border border-gray-100 text-gray-800 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider">
-            <Languages size={10} className="text-gray-500" />
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+          <span className="bg-[#b20a1c] text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider">
+            <BookOpen size={10} />
+            {sc.courseBadge || "Khóa học"}
+          </span>
+          <span className="bg-slate-900/85 backdrop-blur-md text-white border border-slate-700/60 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+            <Languages size={10} />
             <span>{getLocalizedLanguageName(course.language, t)}</span>
           </span>
-          {Array.isArray(course.levels) && course.levels.slice(0, 2).map((lvl) => (
-            <span key={lvl} className="bg-[#990011]/90 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm">
-              {lvl}
-            </span>
-          ))}
         </div>
 
-        {isEnrolled && (
-          <div className="absolute top-3 right-3 bg-green-600 border border-green-500/20 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
-            {sc.enrolledStatus}
+        {openClassCount != null && openClassCount > 0 && (
+          <div className="absolute top-3 right-3 bg-emerald-600 border border-emerald-500/20 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1 z-10">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            {openClassCount} {sc.classesOpen || "lớp mở"}
           </div>
         )}
       </div>
 
       {/* Content Details */}
-      <div className="p-5 flex flex-col flex-1 justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h4 className="font-black text-base text-gray-950 leading-snug line-clamp-1 group-hover:text-[#990011] transition-colors" title={course.title}>
-            {course.title}
-          </h4>
+      <div className="p-5 flex flex-col flex-1 justify-between gap-5">
+        <div className="flex flex-col gap-2.5">
+          <h3 className="font-black text-lg text-slate-950 leading-snug line-clamp-2 group-hover:text-[#b20a1c] transition-colors" title={course.name || course.title}>
+            {course.name || course.title}
+          </h3>
 
-          <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-extrabold uppercase tracking-wide">
-            <User size={12} className="text-gray-400" />
-            <span>{sc.instructor}: {instructorName}</span>
+          {/* Instructor Profile */}
+          <div className="flex items-center gap-2.5 pt-1">
+            {teacherAvatar ? (
+              <img src={teacherAvatar} alt={teacherName} className="w-7 h-7 rounded-full object-cover ring-2 ring-rose-100 shadow-2xs" />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
+                {teacherName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none">
+                {sc.instructor || "Giảng viên"}
+              </span>
+              <span className="text-xs font-bold text-slate-800 line-clamp-1 flex items-center gap-1">
+                {teacherName}
+                <ShieldCheck size={12} className="text-rose-500 inline shrink-0" />
+              </span>
+            </div>
           </div>
 
-          <p className="text-xs text-gray-500 font-semibold line-clamp-3 leading-relaxed mt-2" title={course.description ? course.description.replace(/<[^>]*>/g, " ").trim() : ""}>
-            {course.description ? course.description.replace(/<[^>]*>/g, " ").trim() : ""}
-          </p>
+          {/* Class Metrics */}
+          <div className="mt-2 flex flex-col gap-2 text-xs font-bold text-slate-600 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-1.5">
+                <Users size={13} className="text-slate-400 shrink-0" />
+                <span>{studentCount != null ? `${studentCount} ${sc.studentsUnit || "học viên"}` : `0 ${sc.studentsUnit || "học viên"}`}</span>
+              </div>
+              {remainingSlots != null ? (
+                <div className="flex items-center gap-1.5 text-emerald-700">
+                  <Clock size={13} className="text-emerald-500 shrink-0" />
+                  <span>{sc.slotsRemaining ? sc.slotsRemaining.replace("{{count}}", remainingSlots) : `Còn ${remainingSlots} chỗ`}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <BookOpen size={13} className="text-slate-400 shrink-0" />
+                  <span>{classCount != null && classCount !== "—" ? `${classCount} ${sc.classesUnit || "lớp"}` : sc.multipleClasses || "Nhiều lớp"}</span>
+                </div>
+              )}
+            </div>
 
-          {/* Key details */}
-          <div className="mt-4 flex flex-col gap-2 text-xs font-bold text-gray-500 bg-slate-50 p-3 rounded-2xl border border-gray-100">
-            <div className="flex items-center gap-2">
-              <BookOpen size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.batchesAvailable, classCount)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock size={13} className="text-gray-400" />
-              <span>{formatCountLabel(sc.sessionsCount, totalSessions)}</span>
-            </div>
+            {minEnrollmentEnd && (
+              <div className="flex items-center gap-1.5 text-amber-800 border-t border-slate-100 pt-1.5 text-[11px]">
+                <Calendar size={12} className="text-amber-600 shrink-0" />
+                <span>{sc.registrationDeadline || "Hạn ĐK"}: {formatDateDayMonth(minEnrollmentEnd, getCourseLocale(language), ui.tba || "TBA")}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Progress or Pricing Footer */}
-        <div className="pt-4 border-t border-gray-150 flex flex-col gap-3">
-          {isEnrolled ? (
-            <div className="w-full">
-              <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-                <span>{sc.progress}</span>
-                <span>{progressPercent == null ? "—" : `${progressPercent}%`}</span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-100 rounded-full mt-1.5 overflow-hidden">
-                <div
-                  className="h-full bg-green-500 rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercent ?? 0}%` }}
-                  role="progressbar"
-                  aria-label={sc.progress}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={progressPercent ?? 0}
-                />
-              </div>
-              <div className="text-[10px] font-bold text-gray-500 mt-1 truncate">
-                {sc.classLabel}{course.enrolledClassName || "—"}
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-between items-center w-full">
-              <div className="flex flex-col">
-                <span className="text-gray-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-black">{sc.tuition}</span>
-                <span className="text-gray-950 font-black text-sm">{priceText}</span>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  isEnrolled ? onViewDetails() : onJoin()
-                }}
-                className={`h-9 px-5 text-xs font-black rounded-full flex items-center justify-center gap-1 transition-all shadow-xs active:scale-95 whitespace-nowrap group-hover:translate-x-0.5 duration-300 ${isEnrolled
-                  ? "bg-white border border-gray-250 text-gray-700 hover:bg-gray-50"
-                  : "bg-[#990011] hover:bg-[#b20a1c] text-white shadow-md hover:shadow-lg"
-                  }`}
-              >
-                <span>{isEnrolled ? sc.details : sc.joinCourse}</span>
-                <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-              </button>
-            </div>
-          )}
+        {/* Footer Pricing & CTA */}
+        <div className="pt-3.5 border-t border-slate-150 flex items-center justify-between gap-3">
+          <div className="flex flex-col">
+            <span className="text-slate-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-extrabold">{sc.tuition || "Học phí"}</span>
+            <span className="text-[#b20a1c] font-black text-sm sm:text-base leading-none">{priceText}</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCardAction}
+            className="h-9 px-4 bg-[#b20a1c] hover:bg-[#960817] text-white text-xs font-extrabold rounded-full flex items-center justify-center gap-1 transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+          >
+            <span>{sc.explore || "Khám Phá"}</span>
+            <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+          </button>
         </div>
       </div>
     </div>

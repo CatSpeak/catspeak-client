@@ -1,10 +1,15 @@
 import React from "react"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { groupMeta } from "../../data/analyticsData"
-import { useGetAllCoursesQuery, useGetAllClassesQuery } from "@/store/api/coursesApi"
+
+const ALL_COURSES_VALUE = "__all_courses__"
+const ALL_CLASSES_VALUE = "__all_classes__"
+const UNASSIGNED_VALUE = "__unassigned__"
 
 const AnalyticsFilterBar = ({
+  filterMeta,
+  courses = [],
+  classes = [],
   group,
   setGroup,
   period,
@@ -20,29 +25,27 @@ const AnalyticsFilterBar = ({
 }) => {
   const { t } = useLanguage()
   const filterT = t.courses?.analytics?.filters || {}
-  const meta = groupMeta[group] || groupMeta.month
+  const meta = filterMeta?.[group] || filterMeta?.month
 
-  // Fetch real courses & classes from RTK Query
-  const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 100 })
-  const { data: classesResponse } = useGetAllClassesQuery({ pageSize: 100 })
-
-  const realCourses = coursesResponse?.data || []
-  const realClasses = classesResponse?.data || []
-
-  const courseList = realCourses.map(c => c.name || c.title)
+  const courseList = courses
+    .map((item) => ({
+      value: String(item.id),
+      label: item.name || item.title,
+    }))
+    .filter((item) => item.label)
 
   const handleGroupChange = (e) => {
     const newGroup = e.target.value
     setGroup(newGroup)
-    const newMeta = groupMeta[newGroup] || groupMeta.month
-    setPeriod(newMeta.periods[0])
-    setCompare(newMeta.comparisons[0])
+    const newMeta = filterMeta?.[newGroup] || filterMeta?.month
+    setPeriod(newMeta.periods[0].value)
+    setCompare(newMeta.comparisons[0].value)
   }
 
   const handleCourseChange = (e) => {
     const newCourse = e.target.value
     setCourse(newCourse)
-    setClassName(filterT.allClasses || "Tất cả lớp học")
+    setClassName(ALL_CLASSES_VALUE)
   }
 
   const allCoursesLabel = filterT.allCourses || "Tất cả khóa học"
@@ -50,18 +53,33 @@ const AnalyticsFilterBar = ({
   const unassignedLabel = filterT.unassigned || "Không thuộc khóa"
 
   const getClassOptions = () => {
-    if (course === allCoursesLabel || course === "Tất cả khóa học") {
-      return [allClassesLabel, ...realClasses.map(c => c.name || c.title)]
+    if (course === ALL_COURSES_VALUE) {
+      return [
+        { value: ALL_CLASSES_VALUE, label: allClassesLabel },
+        ...classes
+          .map((item) => ({ value: String(item.id), label: item.name || item.title }))
+          .filter((item) => item.label),
+      ]
     }
-    if (course === unassignedLabel || course === "Không thuộc khóa") {
-      const unassigned = realClasses.filter(c => !c.courseId)
-      return [allClassesLabel, ...unassigned.map(c => c.name || c.title)]
+    if (course === UNASSIGNED_VALUE) {
+      const unassigned = classes.filter((item) => !item.courseId)
+      return [
+        { value: ALL_CLASSES_VALUE, label: allClassesLabel },
+        ...unassigned
+          .map((item) => ({ value: String(item.id), label: item.name || item.title }))
+          .filter((item) => item.label),
+      ]
     }
-    const selectedCourse = realCourses.find(c => (c.name || c.title) === course)
+    const selectedCourse = courses.find((item) => String(item.id) === String(course))
     const courseClasses = selectedCourse
-      ? realClasses.filter(c => String(c.courseId) === String(selectedCourse.id))
+      ? classes.filter((item) => String(item.courseId) === String(selectedCourse.id))
       : []
-    return [allClassesLabel, ...courseClasses.map(c => c.name || c.title)]
+    return [
+      { value: ALL_CLASSES_VALUE, label: allClassesLabel },
+      ...courseClasses
+        .map((item) => ({ value: String(item.id), label: item.name || item.title }))
+        .filter((item) => item.label),
+    ]
   }
 
   const groupLabels = {
@@ -88,9 +106,9 @@ const AnalyticsFilterBar = ({
           onChange={handleGroupChange}
           className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
-          {Object.keys(groupMeta).map((key) => (
+          {Object.keys(filterMeta || {}).map((key) => (
             <option key={key} value={key}>
-              {groupLabels[key] || groupMeta[key].label}
+              {groupLabels[key] || filterMeta[key].label}
             </option>
           ))}
         </select>
@@ -105,9 +123,9 @@ const AnalyticsFilterBar = ({
           onChange={(e) => setPeriod(e.target.value)}
           className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
-          {meta.periods.map((p) => (
-            <option key={p} value={p}>
-              {p}
+          {meta.periods.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
             </option>
           ))}
         </select>
@@ -122,9 +140,9 @@ const AnalyticsFilterBar = ({
           onChange={(e) => setCompare(e.target.value)}
           className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
-          {meta.comparisons.map((c) => (
-            <option key={c} value={c}>
-              {c}
+          {meta.comparisons.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
             </option>
           ))}
         </select>
@@ -139,13 +157,13 @@ const AnalyticsFilterBar = ({
           onChange={handleCourseChange}
           className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
-          <option value={allCoursesLabel}>{allCoursesLabel}</option>
-          {courseList.map((cName) => (
-            <option key={cName} value={cName}>
-              {cName}
+          <option value={ALL_COURSES_VALUE}>{allCoursesLabel}</option>
+          {courseList.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
             </option>
           ))}
-          <option value={unassignedLabel}>{unassignedLabel}</option>
+          <option value={UNASSIGNED_VALUE}>{unassignedLabel}</option>
         </select>
       </div>
 
@@ -158,9 +176,9 @@ const AnalyticsFilterBar = ({
           onChange={(e) => setClassName(e.target.value)}
           className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
-          {getClassOptions().map((cls) => (
-            <option key={cls} value={cls}>
-              {cls}
+          {getClassOptions().map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
             </option>
           ))}
         </select>

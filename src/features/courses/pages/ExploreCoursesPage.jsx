@@ -1,15 +1,11 @@
-import React, { useState, useMemo, useContext } from "react"
+import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { Compass, RefreshCw, BookOpen, GraduationCap, LogIn } from "lucide-react"
-import { toast } from "react-hot-toast"
+import { Compass, RefreshCw, BookOpen, GraduationCap } from "lucide-react"
 
 import {
-  useGetStudentAvailableCoursesQuery,
-  useGetStudentAvailableClassesQuery
+  useGetExploreCoursesQuery
 } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useAuth } from "@/features/auth"
-import AuthModalContext from "@/shared/context/AuthModalContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
@@ -27,8 +23,6 @@ const PAGE_SIZE = 24
 const ExploreCoursesPage = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
-  const authModalCtx = useContext(AuthModalContext)
   const c = t.courses || {}
   const sc = c.student || {}
   const dict = t.nav || {}
@@ -58,55 +52,23 @@ const ExploreCoursesPage = () => {
     { value: "classes", label: sc.tabClasses || "Lớp học", icon: GraduationCap },
   ]
 
-  const availableCoursesQuery = useGetStudentAvailableCoursesQuery(
-    {
-      page: currentPage,
-      pageSize: PAGE_SIZE,
-      language: langFilter !== "all" ? langFilter : undefined,
-      search: debouncedSearchQuery.trim() || undefined,
-    },
-    { skip: !isAuthenticated || contentType === "classes" }
-  )
-
-  const availableClassesQuery = useGetStudentAvailableClassesQuery(
-    {
-      page: currentPage,
-      pageSize: PAGE_SIZE,
-      language: langFilter !== "all" ? langFilter : undefined,
-      search: debouncedSearchQuery.trim() || undefined,
-    },
-    { skip: !isAuthenticated || contentType === "courses" }
-  )
-
-  const coursesList = useMemo(() => {
-    const raw = availableCoursesQuery.currentData?.data
-    return (Array.isArray(raw) ? raw : []).map(item => ({ ...item, isClassItem: false }))
-  }, [availableCoursesQuery.currentData])
-
-  const classesList = useMemo(() => {
-    const raw = availableClassesQuery.currentData?.data
-    return (Array.isArray(raw) ? raw : []).map(item => ({ ...item, isClassItem: true }))
-  }, [availableClassesQuery.currentData])
+  const exploreCatalogQuery = useGetExploreCoursesQuery({
+    page: currentPage,
+    pageSize: PAGE_SIZE,
+    language: langFilter !== "all" ? langFilter : undefined,
+    search: debouncedSearchQuery.trim() || undefined,
+    type: contentType !== "all" ? contentType : undefined,
+  })
 
   const combinedCatalog = useMemo(() => {
-    if (contentType === "courses") return coursesList
-    if (contentType === "classes") return classesList
-    // "all": Merge courses and all available classes
-    return [...coursesList, ...classesList]
-  }, [contentType, coursesList, classesList])
+    const raw = exploreCatalogQuery.currentData?.data
+    return Array.isArray(raw) ? raw : []
+  }, [exploreCatalogQuery.currentData])
 
-  const isLoading = contentType === "courses"
-    ? availableCoursesQuery.isLoading
-    : contentType === "classes"
-      ? availableClassesQuery.isLoading
-      : (availableCoursesQuery.isLoading && availableClassesQuery.isLoading)
-
-  const isFetching = availableCoursesQuery.isFetching || availableClassesQuery.isFetching
-  const error = availableCoursesQuery.error || availableClassesQuery.error
-
-  const pagination = contentType === "classes"
-    ? availableClassesQuery.currentData?.pagination
-    : availableCoursesQuery.currentData?.pagination
+  const isLoading = exploreCatalogQuery.isLoading
+  const isFetching = exploreCatalogQuery.isFetching
+  const error = exploreCatalogQuery.error
+  const pagination = exploreCatalogQuery.currentData?.pagination
 
   const totalPages = Number(pagination?.totalPages) || 1
   const totalItems = Number(pagination?.totalItems) || combinedCatalog.length
@@ -122,8 +84,15 @@ const ExploreCoursesPage = () => {
     }
   }
 
-  const handleOpenClassDetail = () => {
-    toast.info("Chi tiết lớp học sẽ sớm được cập nhật!")
+  const handleOpenClassDetail = (cls) => {
+    if (!cls?.id) return
+    const classId = encodeURIComponent(String(cls.id))
+    const isWorkspace = window.location.pathname.startsWith("/workspace")
+    if (isWorkspace) {
+      navigate(`/workspace/explore-courses/class/${classId}`)
+    } else {
+      navigate(`/explore-courses/class/${classId}`)
+    }
   }
 
   const handleClearFilters = () => {
@@ -204,29 +173,7 @@ const ExploreCoursesPage = () => {
 
       {/* ─── Catalog Grid / List Section ─── */}
       <div aria-busy={isFetching}>
-        {!isAuthenticated || error?.status === 401 ? (
-          <div
-            role="status"
-            className="flex min-h-[340px] flex-col items-center justify-center gap-4 rounded-3xl border border-gray-150 bg-white p-8 text-center shadow-xs"
-          >
-            <h3 className="text-xl font-extrabold text-gray-900">
-              {sc.loginRequiredTitle || "Vui lòng đăng nhập để xem danh sách khóa học & lớp học"}
-            </h3>
-            <p className="max-w-md text-sm font-semibold text-gray-600 leading-relaxed">
-              {sc.loginRequiredDesc || "Bạn cần đăng nhập tài khoản CatSpeak để khám phá và đăng ký các khóa học & lớp học."}
-            </p>
-            {authModalCtx?.openAuthModal && (
-              <button
-                type="button"
-                onClick={() => authModalCtx.openAuthModal("login", "/explore-courses")}
-                className="mt-2 h-10 px-6 rounded-full bg-[#990011] hover:bg-[#b20a1c] text-white text-xs font-black transition-all shadow-md hover:shadow-lg cursor-pointer active:scale-95 flex items-center gap-2"
-              >
-                <LogIn size={15} />
-                <span>{sc.loginNow || "Đăng nhập ngay"}</span>
-              </button>
-            )}
-          </div>
-        ) : isLoading ? (
+        {isLoading ? (
           <div
             role="status"
             aria-live="polite"
@@ -251,8 +198,7 @@ const ExploreCoursesPage = () => {
             <button
               type="button"
               onClick={() => {
-                availableCoursesQuery.refetch?.()
-                availableClassesQuery.refetch?.()
+                exploreCatalogQuery.refetch?.()
               }}
               disabled={isFetching}
               className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 bg-white px-5 text-xs font-extrabold text-red-700 hover:bg-red-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"

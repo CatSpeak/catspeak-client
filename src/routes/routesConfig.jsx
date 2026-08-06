@@ -129,6 +129,9 @@ const StudentClassDetailPage = lazy(
 const StudentCourseDetailPage = lazy(
   () => import("@/features/courses/pages/StudentCourseDetailPage"),
 );
+const PublicClassDetailPage = lazy(
+  () => import("@/features/courses/pages/PublicClassDetailPage"),
+);
 const SchedulePage = lazy(
   () => import("@/features/courses/pages/SchedulePage"),
 );
@@ -200,6 +203,14 @@ const routesConfig = [
             element: (
               <LazyRoute>
                 <StudentCourseDetailPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/class/:id",
+            element: (
+              <LazyRoute>
+                <PublicClassDetailPage />
               </LazyRoute>
             ),
           },
@@ -394,6 +405,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <StudentCourseDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/class/:id",
+                element: (
+                  <LazyRoute>
+                    <PublicClassDetailPage />
                   </LazyRoute>
                 ),
               },

@@ -4,7 +4,7 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { labels, numberVi } from "../../../data/analyticsData"
+import { numberVi } from "../../../data/analyticsData"
 import {
   useGetAnalyticsQualityOverviewQuery,
   useGetAnalyticsQualityRatingTrendQuery,
@@ -71,11 +71,10 @@ const QualityTab = ({ group, queryParams = {} }) => {
   ]
 
   // 2. Rating Trend Line Chart
-  const trendPoints = ratingTrendApi?.trendData || []
+  const trendPoints = (ratingTrendApi?.trendData || [])
+    .filter((point) => point?.label || point?.date)
 
-  const chartLabels = trendPoints.length > 0
-    ? trendPoints.map((p) => p.label || p.date)
-    : (labels[group] || labels.month)
+  const chartLabels = trendPoints.map((p) => p.label || p.date)
 
   const seriesRating = trendPoints.map((p) => p.averageRating ?? 0)
 
@@ -92,10 +91,15 @@ const QualityTab = ({ group, queryParams = {} }) => {
     className: r.className,
     course: r.courseName || "Khóa học",
     rating: (r.averageRating || 0).toFixed(1),
+    ratingRaw: r.averageRating || 0,
     fill: `${r.fillRate}%`,
+    fillRaw: r.fillRate || 0,
     conversion: `${r.conversionRate}%`,
+    conversionRaw: r.conversionRate || 0,
     repeat: `${r.reenrollmentRate}%`,
+    repeatRaw: r.reenrollmentRate || 0,
     cancellation: `${r.cancellationRate}%`,
+    cancellationRaw: r.cancellationRate || 0,
   }))
 
   return (

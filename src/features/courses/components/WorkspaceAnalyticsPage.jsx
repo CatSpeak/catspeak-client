@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { BarChart3 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -16,12 +16,22 @@ import {
   useGetAllCoursesQuery,
   useGetAllClassesQuery,
 } from "@/store/api/coursesApi"
+import {
+  buildAnalyticsQueryParams,
+  getAnalyticsFilterMeta,
+  getDrillDownSelection,
+} from "../data/analyticsData"
 
 const WorkspaceAnalyticsPage = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
+
+  const filterMeta = useMemo(
+    () => getAnalyticsFilterMeta(language),
+    [language],
+  )
 
   const tabsList = [
     {
@@ -58,14 +68,14 @@ const WorkspaceAnalyticsPage = () => {
   }
 
   const [group, setGroup] = useState("month")
-  const [period, setPeriod] = useState("2025")
-  const [compare, setCompare] = useState("2024")
-  const [courseFilter, setCourseFilter] = useState("Tất cả khóa học")
-  const [classFilter, setClassFilter] = useState("Tất cả lớp học")
+  const [period, setPeriod] = useState(() => filterMeta.month.periods[0].value)
+  const [compare, setCompare] = useState(() => filterMeta.month.comparisons[0].value)
+  const [courseFilter, setCourseFilter] = useState("__all_courses__")
+  const [classFilter, setClassFilter] = useState("__all_classes__")
 
   // RTK Query hooks for course/class mapping and exports
-  const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 100 })
-  const { data: classesResponse } = useGetAllClassesQuery({ pageSize: 100 })
+  const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 500 })
+  const { data: classesResponse } = useGetAllClassesQuery({ pageSize: 500 })
 
   const [exportStudents, { isLoading: isExpStudents }] = useExportAnalyticsStudentsMutation()
   const [exportRevenue, { isLoading: isExpRevenue }] = useExportAnalyticsRevenueMutation()
@@ -74,23 +84,29 @@ const WorkspaceAnalyticsPage = () => {
 
   const isExporting = isExpStudents || isExpRevenue || isExpCourses || isExpQuality
 
-  const selectedCourseObj = (coursesResponse?.data || []).find(c => (c.name || c.title) === courseFilter)
-  const selectedClassObj = (classesResponse?.data || []).find(c => (c.name || c.title) === classFilter)
+  const selectedCourseObj = (coursesResponse?.data || []).find(
+    (course) => String(course.id) === String(courseFilter),
+  )
+  const selectedClassObj = (classesResponse?.data || []).find(
+    (item) => String(item.id) === String(classFilter),
+  )
 
-  const activeQueryParams = {
-    groupBy: group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month",
+  const activeQueryParams = buildAnalyticsQueryParams({
+    group,
+    period,
+    compare,
     courseId: selectedCourseObj ? parseInt(selectedCourseObj.id, 10) : undefined,
     classId: selectedClassObj ? parseInt(selectedClassObj.id, 10) : undefined,
-  }
+  })
 
   // Drill-down from month trend to day trend
   const handleDrillDown = (monthIndex) => {
-    const monthNum = String(monthIndex + 1).padStart(2, "0")
-    setGroup("day")
-    setPeriod(`Tháng ${monthNum}/2025`)
-    const prevMonthNum = monthIndex === 0 ? "12" : String(monthIndex).padStart(2, "0")
-    const prevYear = monthIndex === 0 ? "2024" : "2025"
-    setCompare(`Tháng ${prevMonthNum}/${prevYear}`)
+    const selection = getDrillDownSelection({ group, period, index: monthIndex })
+    if (!selection) return
+
+    setGroup(selection.group)
+    setPeriod(selection.period)
+    setCompare(selection.compare)
   }
 
   const handleExport = async () => {
@@ -184,6 +200,9 @@ const WorkspaceAnalyticsPage = () => {
 
         {/* Global Filter Bar */}
         <AnalyticsFilterBar
+          filterMeta={filterMeta}
+          courses={coursesResponse?.data || []}
+          classes={classesResponse?.data || []}
           group={group}
           setGroup={setGroup}
           period={period}

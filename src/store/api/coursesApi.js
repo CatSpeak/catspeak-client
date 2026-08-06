@@ -264,6 +264,41 @@ const transformClass = (cls) => {
   }
 }
 
+const transformExploreItem = (item) => {
+  if (!isRecord(item)) return null
+  const isClassItem = item.type === "Class"
+  const title = toText(item.name) || toText(item.title) || (isClassItem ? "Untitled Class" : "Untitled Course")
+  const teacher = transformPerson(item.teacher)
+
+  return {
+    ...item,
+    id: toText(item.id),
+    isClassItem,
+    type: item.type,
+    name: title,
+    title,
+    language: toText(item.language),
+    levels: toTextList(item.levels),
+    price: toNullableNumber(item.price, { nonNegative: true }),
+    tuitionFee: toNullableNumber(item.price, { nonNegative: true }),
+    priceMin: toNullableNumber(item.priceMin, { nonNegative: true }),
+    priceMax: toNullableNumber(item.priceMax, { nonNegative: true }),
+    priceRange: (item.priceMin != null || item.priceMax != null) ? {
+      min: toNullableNumber(item.priceMin, { nonNegative: true }),
+      max: toNullableNumber(item.priceMax, { nonNegative: true }),
+    } : null,
+    openClassCount: toNullableNumber(item.openClassCount, { nonNegative: true }),
+    studentCount: toNullableNumber(item.studentCount, { nonNegative: true }),
+    remainingSlots: toNullableNumber(item.remainingSlots, { nonNegative: true }),
+    thumbnailUrl: toText(item.thumbnailUrl),
+    createdAt: toText(item.createdAt),
+    teacher: teacher ? {
+      ...teacher,
+      avatar: teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl
+    } : null
+  }
+}
+
 const transformPaginatedResponse = (response, itemTransformer) => {
   if (!response) {
     return { data: [], pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 } }
@@ -524,6 +559,24 @@ const buildAnalyticsQueryParams = (params = {}) => {
 
 export const coursesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Public Explore Endpoints
+    getExploreCourses: builder.query({
+      query: (params) => ({
+        url: "/explore/courses",
+        method: "GET",
+        params: {
+          page: params?.page || 1,
+          pageSize: params?.pageSize || 24,
+          language: params?.language && params.language !== "all" ? params.language.toUpperCase() : undefined,
+          search: params?.search ? params.search.trim() : undefined,
+          type: params?.type && params.type !== "all" ? (params.type === "courses" ? "Course" : "Class") : undefined,
+        },
+        extraOptions: { skipAuthHeader: true },
+      }),
+      transformResponse: (response) => transformPaginatedResponse(response, transformExploreItem),
+      providesTags: ["ExploreCatalog"],
+    }),
+
     // Student Endpoints
     getStudentAvailableCourses: builder.query({
       query: (params) => ({
@@ -614,6 +667,62 @@ export const coursesApi = baseApi.injectEndpoints({
         }
       },
       providesTags: ["StudentClasses"]
+    }),
+
+    getExploreCourseDetail: builder.query({
+      query: (id) => ({
+        url: `/explore/courses/${encodePathSegment(id)}`,
+        method: "GET",
+        extraOptions: { skipAuthHeader: true },
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        const transformedCourse = transformCourse(data)
+        if (!transformedCourse) return null
+        const transformedClasses = Array.isArray(data.classes)
+          ? data.classes.map((cls) => {
+            const transformedClass = transformClass(cls)
+            return transformedClass
+              ? {
+                ...transformedClass,
+                isEnrolled: cls.isEnrolled === true,
+                enrolledCount: cls.enrolledCount ?? null,
+              }
+              : null
+          }).filter(Boolean)
+          : []
+        const enrolledClass = transformedClasses.find(cls => cls.isEnrolled)
+        return {
+          ...transformedCourse,
+          enrolledClassId: enrolledClass?.id || null,
+          enrolledClassName: enrolledClass?.name || enrolledClass?.title || null,
+          classes: transformedClasses
+        }
+      },
+      providesTags: (result, error, id) => [{ type: "CourseDetail", id: String(id) }]
+    }),
+
+    getExploreClassDetail: builder.query({
+      query: (id) => ({
+        url: `/explore/classes/${encodePathSegment(id)}`,
+        method: "GET",
+        extraOptions: { skipAuthHeader: true },
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        const transformedClass = transformClass(data)
+        if (!transformedClass) return null
+        return {
+          ...transformedClass,
+          isEnrolled: data.isEnrolled === true,
+          enrolledCount: data.enrolledCount ?? null,
+          nextSession: transformNextSession(data),
+          teachingProgress: transformTeachingProgress(data),
+        }
+      },
+      providesTags: (result, error, id) => [{ type: "ClassDetail", id: String(id) }]
     }),
 
     getStudentCourseDetail: builder.query({
@@ -2184,6 +2293,9 @@ export const coursesApi = baseApi.injectEndpoints({
 })
 
 export const {
+  useGetExploreCoursesQuery,
+  useGetExploreCourseDetailQuery,
+  useGetExploreClassDetailQuery,
   useGetStudentAvailableCoursesQuery,
   useGetStudentAvailableClassesQuery,
   useGetStudentJoinedClassesQuery,

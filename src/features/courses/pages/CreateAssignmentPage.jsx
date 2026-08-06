@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useRef, useEffect } from "react"
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
@@ -30,16 +30,7 @@ import {
   ChevronRight
 } from "lucide-react"
 
-const MAX_ASSIGNMENT_ATTACHMENTS = 5
-const MAX_ASSIGNMENT_ATTACHMENT_SIZE = 50 * 1024 * 1024
-const ASSIGNMENT_ATTACHMENT_EXTENSIONS = new Set([
-  "docx",
-  "jpg",
-  "pdf",
-  "png",
-  "pptx",
-  "xlsx",
-])
+import { useAssignmentFormReducer } from "../hooks/useAssignmentFormReducer"
 
 const isRecord = (value) => (
   value !== null && typeof value === "object" && !Array.isArray(value)
@@ -55,29 +46,6 @@ const getObjectPayload = (response) => {
 
   return isRecord(payload) ? payload : null
 }
-
-const getAttachmentExtension = (fileName) => {
-  if (typeof fileName !== "string") return ""
-  const dotIndex = fileName.lastIndexOf(".")
-  return dotIndex >= 0 ? fileName.slice(dotIndex + 1).toLowerCase() : ""
-}
-
-const getAttachmentValidationError = (file) => {
-  if (!file || typeof file.name !== "string") return "invalid"
-
-  const size = Number(file.size)
-  if (!Number.isFinite(size) || size <= 0) return "empty"
-  if (size > MAX_ASSIGNMENT_ATTACHMENT_SIZE) return "size"
-  if (!ASSIGNMENT_ATTACHMENT_EXTENSIONS.has(getAttachmentExtension(file.name))) {
-    return "type"
-  }
-
-  return null
-}
-
-const getAttachmentFingerprint = (file) => (
-  `${String(file?.name || "").toLowerCase()}-${Number(file?.size) || 0}-${Number(file?.lastModified) || 0}`
-)
 
 const getExistingAttachmentReference = (file) => {
   const metadataUrl = getFileMeta(file, "").url
@@ -112,13 +80,49 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
   const isSaving = isCreating || isUpdating
   const saveInFlightRef = useRef(false)
 
-  const [editorText, setEditorText] = useState(() => defaults.editorText)
+  const {
+    state,
+    fileInputRef,
+    setField,
+    toggleField,
+    removeFile,
+    removeExistingAttachment,
+    removeFileType,
+    addFileType,
+    handleDragOver,
+    handleDrop: handleDropHook,
+    handleFileSelect: handleFileSelectHook,
+  } = useAssignmentFormReducer(
+    {
+      ...defaults,
+      existingAttachments: defaults.existingAttachments.filter((file) =>
+        getExistingAttachmentReference(file)
+      ),
+    },
+    { toast }
+  )
 
-  // Form States
-  const [title, setTitle] = useState(() => defaults.title)
-  const [dueDate, setDueDate] = useState(() => defaults.dueDate)
-  const [dueTime, setDueTime] = useState(() => defaults.dueTime)
-  const [allowLateSubmission, setAllowLateSubmission] = useState(() => defaults.allowLateSubmission)
+  const {
+    editorText,
+    title,
+    dueDate,
+    dueTime,
+    allowLateSubmission,
+    attachedFiles,
+    existingAttachments,
+    submissionTypeFile,
+    submissionTypeText,
+    allowedFileTypes,
+    maxFiles,
+    enableGrading,
+    gradeScale,
+    resultRelease,
+    publishStatus,
+    postToFeed,
+  } = state
+
+  const handleDrop = (e) => handleDropHook(e, ca)
+  const handleFileSelect = (e) => handleFileSelectHook(e, ca)
 
   const buildAssignmentFormData = (status) => {
     const formData = new FormData()
@@ -156,115 +160,6 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
     })
 
     return formData
-  }
-
-  // File Upload State (Empty by default)
-  const [attachedFiles, setAttachedFiles] = useState([])
-  const fileInputRef = useRef(null)
-
-  // Sidebar Config States
-  const [submissionTypeFile, setSubmissionTypeFile] = useState(() => defaults.submissionTypeFile)
-  const [submissionTypeText, setSubmissionTypeText] = useState(() => defaults.submissionTypeText)
-  const [allowedFileTypes, setAllowedFileTypes] = useState(() => defaults.allowedFileTypes)
-  const [maxFiles, setMaxFiles] = useState(() => defaults.maxFiles)
-  const [enableGrading, setEnableGrading] = useState(() => defaults.enableGrading)
-  const [gradeScale, setGradeScale] = useState(() => defaults.gradeScale) // scale10, scale100
-  const [resultRelease, setResultRelease] = useState(() => defaults.resultRelease) // manual, automatic
-  const [publishStatus, setPublishStatus] = useState(() => defaults.publishStatus) // now, draft
-  const [postToFeed, setPostToFeed] = useState(() => defaults.postToFeed)
-
-  // State for existing attachments to keep
-  const [existingAttachments, setExistingAttachments] = useState(() => (
-    defaults.existingAttachments.filter((file) => getExistingAttachmentReference(file))
-  ))
-
-  const handleDragOver = (e) => {
-    e.preventDefault()
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      addFiles(e.dataTransfer.files)
-    }
-  }
-
-  const handleFileSelect = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      addFiles(e.target.files)
-    }
-    e.target.value = ""
-  }
-
-  const addFiles = (filesList) => {
-    const files = Array.from(filesList || [])
-    if (files.length === 0) return
-
-    const availableSlots = (
-      MAX_ASSIGNMENT_ATTACHMENTS
-      - existingAttachments.length
-      - attachedFiles.length
-    )
-    if (files.length > availableSlots) {
-      toast.error(ca.toastMaxFiles || "Tối đa 5 tài liệu đính kèm")
-      return
-    }
-
-    const validationError = files
-      .map(getAttachmentValidationError)
-      .find(Boolean)
-    if (validationError === "size") {
-      toast.error(ca.toastFileTooLarge || "Each file must be 50 MB or smaller")
-      return
-    }
-    if (validationError === "type") {
-      toast.error(ca.toastInvalidFileType || "This file type is not supported")
-      return
-    }
-    if (validationError) {
-      toast.error(ca.toastInvalidFile || "Please select a non-empty file")
-      return
-    }
-
-    const fingerprints = new Set(attachedFiles.map(getAttachmentFingerprint))
-    if (files.some((file) => fingerprints.has(getAttachmentFingerprint(file)))) {
-      toast.error(ca.toastDuplicateFile || "This file is already attached")
-      return
-    }
-
-    const selectionFingerprints = new Set()
-    if (files.some((file) => {
-      const fingerprint = getAttachmentFingerprint(file)
-      if (selectionFingerprints.has(fingerprint)) return true
-      selectionFingerprints.add(fingerprint)
-      return false
-    })) {
-      toast.error(ca.toastDuplicateFile || "This file is already attached")
-      return
-    }
-
-    const newFiles = files.map((file, idx) => {
-      const sizeInMB = (file.size / (1024 * 1024)).toFixed(1)
-      return {
-        id: `uploaded-file-${Date.now()}-${idx}`,
-        name: file.name,
-        size: `${sizeInMB} MB`,
-        file
-      }
-    })
-
-    setAttachedFiles((prev) => [...prev, ...newFiles])
-    toast.success(ca.toastUploadSuccess || "Đã đính kèm tài liệu thành công")
-  }
-
-  const removeFile = (fileId) => {
-    setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId))
-    toast.success(ca.toastDeleteSuccess || "Đã xóa tài liệu đính kèm")
-  }
-
-  // Remove individual file type tag
-  const removeFileType = (type) => {
-    setAllowedFileTypes((prev) => prev.filter((t) => t !== type))
   }
 
   // Handle Action Buttons
@@ -413,7 +308,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => setField("title", e.target.value)}
                 placeholder={ca.assignmentNamePlaceholder || "Nhập tên bài nộp (VD: Bài kiểm tra giữa kỳ)"}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm"
               />
@@ -426,7 +321,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 <Editor
                   tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
                   value={editorText}
-                  onEditorChange={(newVal) => setEditorText(newVal)}
+                  onEditorChange={(newVal) => setField("editorText", newVal)}
                   init={{
                     height: 250,
                     menubar: false,
@@ -520,7 +415,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                         </div>
                         <button
                           type="button"
-                          onClick={() => setExistingAttachments(prev => prev.filter((_, i) => i !== idx))}
+                          onClick={() => removeExistingAttachment(idx)}
                           className="p-1.5 text-gray-400 hover:text-red-655 hover:bg-red-50 rounded-lg transition-all"
                           title={ca.deleteFile || "Delete file"}
                         >
@@ -572,7 +467,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 </label>
                 <DatePicker
                   value={dueDate}
-                  onChange={(date) => setDueDate(date ? toLocalDateString(date) : "")}
+                  onChange={(date) => setField("dueDate", date ? toLocalDateString(date) : "")}
                   mode="date"
                   color="#990011"
                   placeholder="dd/MM/yyyy"
@@ -587,7 +482,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 </label>
                 <DatePicker
                   value={dueTime}
-                  onChange={(val) => setDueTime(val || "")}
+                  onChange={(val) => setField("dueTime", val || "")}
                   mode="time"
                   color="#990011"
                   placeholder="--:--"
@@ -611,7 +506,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 role="switch"
                 aria-checked={allowLateSubmission}
                 aria-label={ca.allowLateSubmission || "Allow late submission"}
-                onClick={() => setAllowLateSubmission(!allowLateSubmission)}
+                onClick={() => toggleField("allowLateSubmission")}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowLateSubmission ? "bg-[#990011]" : "bg-gray-200"
                   }`}
               >
@@ -644,7 +539,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   role="checkbox"
                   aria-checked={submissionTypeFile}
                   aria-label={ca.uploadFile || "Allow file uploads"}
-                  onClick={() => setSubmissionTypeFile(!submissionTypeFile)}
+                  onClick={() => toggleField("submissionTypeFile")}
                   className={`w-5 h-5 border rounded-lg flex items-center justify-center transition-all ${submissionTypeFile
                     ? "bg-[#990011] border-[#990011] text-white"
                     : "border-gray-300 hover:border-[#990011]"
@@ -653,7 +548,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   {submissionTypeFile && <Check size={12} strokeWidth={3} />}
                 </button>
                 <span
-                  onClick={() => setSubmissionTypeFile(!submissionTypeFile)}
+                  onClick={() => toggleField("submissionTypeFile")}
                   className="text-xs font-semibold text-gray-700 cursor-pointer select-none"
                 >
                   {ca.uploadFile || "Tải lên file"}
@@ -667,7 +562,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   role="checkbox"
                   aria-checked={submissionTypeText}
                   aria-label={ca.directInput || "Allow direct text input"}
-                  onClick={() => setSubmissionTypeText(!submissionTypeText)}
+                  onClick={() => toggleField("submissionTypeText")}
                   className={`w-5 h-5 border rounded-lg flex items-center justify-center transition-all ${submissionTypeText
                     ? "bg-[#990011] border-[#990011] text-white"
                     : "border-gray-300 hover:border-[#990011]"
@@ -676,7 +571,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   {submissionTypeText && <Check size={12} strokeWidth={3} />}
                 </button>
                 <span
-                  onClick={() => setSubmissionTypeText(!submissionTypeText)}
+                  onClick={() => toggleField("submissionTypeText")}
                   className="text-xs font-semibold text-gray-700 cursor-pointer select-none"
                 >
                   {ca.directInput || "Nhập nội dung trực tiếp"}
@@ -693,8 +588,8 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   value="all"
                   onChange={(e) => {
                     const val = e.target.value
-                    if (val && !allowedFileTypes.includes(val) && val !== "all") {
-                      setAllowedFileTypes((prev) => [...prev, val])
+                    if (val && val !== "all") {
+                      addFileType(val)
                     }
                   }}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
@@ -741,7 +636,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 min={1}
                 max={5}
                 value={maxFiles}
-                onChange={(e) => setMaxFiles(clampMaxFiles(e.target.value))}
+                onChange={(e) => setField("maxFiles", clampMaxFiles(e.target.value))}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 shadow-xs"
               />
             </div>
@@ -756,7 +651,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 role="switch"
                 aria-checked={enableGrading}
                 aria-label={ca.gradingLabel || "Enable grading"}
-                onClick={() => setEnableGrading(!enableGrading)}
+                onClick={() => toggleField("enableGrading")}
                 className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${enableGrading ? "bg-[#990011]" : "bg-gray-200"
                   }`}
               >
@@ -773,7 +668,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <div className="relative">
                 <select
                   value={gradeScale}
-                  onChange={(e) => setGradeScale(e.target.value)}
+                  onChange={(e) => setField("gradeScale", e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
                 >
                   <option value="scale10">{ca.scale10 || "Thang điểm 10"}</option>
@@ -789,7 +684,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               <div className="relative">
                 <select
                   value={resultRelease}
-                  onChange={(e) => setResultRelease(e.target.value)}
+                  onChange={(e) => setField("resultRelease", e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
                 >
                   <option value="manual">{ca.releaseManual || "Công bố thủ công"}</option>
@@ -812,7 +707,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               >
                 {/* Radio: Đăng ngay */}
                 <div
-                  onClick={() => setPublishStatus("now")}
+                  onClick={() => setField("publishStatus", "now")}
                   className="flex items-center gap-3 cursor-pointer select-none"
                 >
                   <button
@@ -821,7 +716,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                     aria-checked={publishStatus === "now"}
                     onClick={(e) => {
                       e.stopPropagation()
-                      setPublishStatus("now")
+                      setField("publishStatus", "now")
                     }}
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "now"
                       ? "border-[#990011]"
@@ -839,7 +734,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
                 {/* Radio: Lưu nháp */}
                 <div
-                  onClick={() => setPublishStatus("draft")}
+                  onClick={() => setField("publishStatus", "draft")}
                   className="flex items-center gap-3 cursor-pointer select-none"
                 >
                   <button
@@ -848,7 +743,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                     aria-checked={publishStatus === "draft"}
                     onClick={(e) => {
                       e.stopPropagation()
-                      setPublishStatus("draft")
+                      setField("publishStatus", "draft")
                     }}
                     className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "draft"
                       ? "border-[#990011]"
@@ -874,7 +769,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 role="switch"
                 aria-checked={postToFeed}
                 aria-label={ca.postToFeed || "Post to class feed"}
-                onClick={() => setPostToFeed(!postToFeed)}
+                onClick={() => toggleField("postToFeed")}
                 className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${postToFeed ? "bg-[#990011]" : "bg-gray-200"
                   }`}
               >

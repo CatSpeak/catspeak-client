@@ -76,8 +76,11 @@ const CoursesTab = ({ queryParams = {} }) => {
     classCount: r.classCount,
     students: r.totalStudents,
     average: money(r.averageRevenuePerClass || 0),
+    averageRaw: r.averageRevenuePerClass || 0,
     fill: `${r.averageFillRate}%`,
+    fillRaw: r.averageFillRate || 0,
     completion: `${r.averageCompletionRate}%`,
+    completionRaw: r.averageCompletionRate || 0,
   }))
 
   // 3. Standalone Classes Table Data
@@ -86,8 +89,11 @@ const CoursesTab = ({ queryParams = {} }) => {
     className: r.className,
     students: r.studentCount,
     gross: money(r.revenue || 0),
+    grossRaw: r.revenue || 0,
     fill: `${r.fillRate}%`,
+    fillRaw: r.fillRate || 0,
     completion: `${r.completionRate}%`,
+    completionRaw: r.completionRate || 0,
   }))
 
   // 4. Hot Class Ranking Data
@@ -96,8 +102,10 @@ const CoursesTab = ({ queryParams = {} }) => {
     className: r.className,
     course: r.courseName || "Khóa học",
     learners: r.students,
-    fill: r.fillRate,
-    gross: r.revenue,
+    fill: `${r.fillRate}%`,
+    fillRaw: r.fillRate || 0,
+    gross: money(r.revenue || 0),
+    grossRaw: r.revenue || 0,
     newRegistrations: r.newEnrollments || 0,
   }))
 
