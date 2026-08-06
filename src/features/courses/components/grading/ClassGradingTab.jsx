@@ -90,6 +90,7 @@ const getTimestamp = (value) => {
 
 // ─── Student Assignment Row (Table View) ──────────────────────────────
 const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect }) => {
+  const { formatDateTime } = useTimezone()
   const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
     || Object.prototype.hasOwnProperty.call(assignment, "submission")
   const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
@@ -208,6 +209,7 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
 
 // ─── Student Quiz Row (Table View) ───────────────────────────────────
 const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
+  const { formatDateTime } = useTimezone()
   const closeTimeFormatted = formatLabelDateTime(quiz.closeTime, formatDateTime)
 
   const recordStatus = typeof quiz.recordStatus === "string"
@@ -332,6 +334,7 @@ const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
 
 // ─── Student Assignment Card (Grid View) ─────────────────────────────
 const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect, nowMs }) => {
+  const { formatDateTime } = useTimezone()
   const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
     || Object.prototype.hasOwnProperty.call(assignment, "submission")
   const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
@@ -496,6 +499,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
 
 // ─── Student Quiz Card (Grid View) ──────────────────────────────────
 const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
+  const { formatDateTime } = useTimezone()
   const closeTimeFormatted = formatLabelDateTime(quiz.closeTime, formatDateTime)
 
   const recordStatus = typeof quiz.recordStatus === "string"
@@ -647,6 +651,7 @@ const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
 
 // ─── Teacher Quiz Card ───────────────────────────────────────────────
 const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
+  const { formatDateTime } = useTimezone()
   const [publishTeacherQuiz, { isLoading: isPublishing }] = usePublishTeacherQuizMutation()
   const publishGuardRef = useRef(false)
 
@@ -837,6 +842,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
 
 const ClassGradingTab = ({ id: classId, isStudent }) => {
   const { language, t } = useLanguage()
+  const { formatDateTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const cg = c.grading || {}
