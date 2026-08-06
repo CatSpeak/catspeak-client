@@ -2,8 +2,8 @@ import dayjs from "dayjs";
 import DatePicker from "@/shared/components/ui/inputs/DatePicker";
 import TimeDropdown from "../ui/TimeDropdown";
 import TimezoneDropdown from "../ui/TimezoneDropdown";
-import { formatTime } from "@/shared/utils/dateFormatter";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { formatTimeInZone } from "../../utils/timeFormatters";
 
 /** Safely converts a Firestore Timestamp or plain Date to a JS Date */
 const toDate = (value) =>
@@ -54,7 +54,9 @@ const EventDateTimeSection = ({
                 }
               />
               <TimeDropdown
-                value={startTime ? formatTime(toDate(startTime)) : ""}
+                value={
+                  startTime ? formatTimeInZone(startTime, selectedTimezone) : ""
+                }
                 color={eventColor}
                 onChange={(hhmm) => {
                   const [h, m] = hhmm.split(":");
@@ -103,7 +105,9 @@ const EventDateTimeSection = ({
                 className={errors?.endTime ? "border-red-500 rounded-2xl" : ""}
               />
               <TimeDropdown
-                value={endTime ? formatTime(toDate(endTime)) : ""}
+                value={
+                  endTime ? formatTimeInZone(endTime, selectedTimezone) : ""
+                }
                 color={eventColor}
                 onChange={(hhmm) => {
                   const [h, m] = hhmm.split(":");

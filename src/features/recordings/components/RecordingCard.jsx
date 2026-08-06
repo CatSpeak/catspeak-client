@@ -12,8 +12,8 @@ import {
 import {
   formatDuration,
   formatFileSize,
-  formatDate,
 } from "../utils/formatUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { FaGoogleDrive } from "react-icons/fa"
 import { useGoogleLogin } from "@react-oauth/google"
 import { useUploadRecordingToDriveMutation } from "@/store/api/recordingsApi"
@@ -25,6 +25,7 @@ import IconButton from "@/shared/components/ui/buttons/IconButton"
  * RecordingCard — displays a single recording with metadata and action buttons.
  */
 const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
+  const { formatDateTime } = useTimezone()
   const {
     recordingId,
     meetingId,
@@ -175,7 +176,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
         <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap mt-1">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
-            {formatDate(createdAt)}
+            {formatDateTime(createdAt)}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />

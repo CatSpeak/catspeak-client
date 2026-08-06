@@ -1,6 +1,7 @@
 import React from "react";
 import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 
 const STATUS_CONFIG = {
   Pending: {
@@ -47,6 +48,7 @@ const InstructorStatusBanner = ({
   isReapplying,
 }) => {
   const { language } = useLanguage();
+  const { formatDate } = useTimezone();
   const ins = t.profile?.instructor || {};
   const config = STATUS_CONFIG[status];
   if (!config) return null;
@@ -65,20 +67,6 @@ const InstructorStatusBanner = ({
     Approved: ins.statusApprovedDesc,
     Rejected: ins.statusRejectedDesc,
     RequestEdit: ins.statusRequestEditDesc,
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    try {
-      const locale = language === "zh" ? "zh-CN" : language === "vi" ? "vi-VN" : "en-US";
-      return new Date(dateStr).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
   };
 
   return (

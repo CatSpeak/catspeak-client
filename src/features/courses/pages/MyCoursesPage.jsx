@@ -17,9 +17,11 @@ import {
   mapTeacherCourseSummary,
 } from "../utils/courseTransforms"
 import { getCourseLocale } from "../utils/courseUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyCoursesPage = () => {
   const { language, t } = useLanguage()
+  const { formatDate } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}
   const mc = c.myCourses || {}
@@ -82,9 +84,9 @@ const MyCoursesPage = () => {
         studentsCount: c.studentsCount,
         tba: c.workspaceUi?.tba,
       },
-      getCourseLocale(language),
+      formatDate,
     )),
-    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, language],
+    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, formatDate],
   )
   const filteredDisplayList = useMemo(() => filterByStatus(courseList, statusFilter), [courseList, statusFilter])
 

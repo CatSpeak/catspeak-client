@@ -19,11 +19,13 @@ import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
+import TimezoneBackfill from "@/shared/components/TimezoneBackfill"
 
 function App() {
   return (
     <Provider store={store}>
       <AuthVisibilitySync />
+      <TimezoneBackfill />
       <LanguageProvider>
         <GlobalVideoCallProvider>
           <NavigationProgress />

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { getLocalizedLanguageName } from "../data/courseFormOptions"
 import {
   useGetAllClassesQuery,
@@ -18,20 +19,16 @@ import {
   Users,
 } from "lucide-react"
 
-import { formatUTCDate } from "../utils/courseUtils"
+
 import { toLocalDateString } from "../utils/dateUtils"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const SchedulePage = () => {
   const { language, t } = useLanguage()
+  const { formatDate, formatDateMonth } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const navigate = useNavigate()
-  const dateLocale = language === "vi"
-    ? "vi-VN"
-    : language === "zh"
-      ? "zh-CN"
-      : "en-GB"
 
   // Local State
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -328,7 +325,7 @@ const SchedulePage = () => {
                   return (
                     <button
                       type="button"
-                    aria-label={date.toLocaleDateString(dateLocale)}
+                      aria-label={formatDate(date)}
                       aria-pressed={active}
                       key={idx}
                       onClick={() => setSelectedDate(date)}
@@ -396,7 +393,7 @@ const SchedulePage = () => {
                 <span className="text-[11px] font-black text-gray-400 uppercase tracking-wider">
                   {viewMode === "grid"
                     ? `${MONTHS[month]} ${year}`
-                    : `${c.date || "Date"} ${selectedDate.toLocaleDateString(dateLocale, { day: "numeric", month: "numeric" })}`}
+                    : `${c.date || "Date"} ${formatDateMonth(selectedDate)}`}
                 </span>
 
                 {selectedDateClasses.map((cls) => {
@@ -463,11 +460,8 @@ const SchedulePage = () => {
                               ? (c.sessionOf
                                 ? c.sessionOf.replace("{{session}}", cls.sessionNumber).replace("{{total}}", cls.totalSessions)
                                 : `Session ${cls.sessionNumber} of ${cls.totalSessions}`)
-                              : formatUTCDate(
+                              : formatDate(
                                 cls.date || cls.startDate,
-                                dateLocale,
-                                { day: "2-digit", month: "short", year: "numeric" },
-                                ui.tba,
                               )
                             }
                           </span>

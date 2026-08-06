@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { formatRelativeTime } from "../../utils/formatters"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 /**
  * Individual comment node inside the hierarchical comments tree.
@@ -15,7 +15,8 @@ const CommentItemNode = React.memo(function CommentItemNode({
   onReply,
   onDelete,
 }) {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
+  const { formatRelative } = useTimezone()
   const navigate = useNavigate()
   const [expanded, setExpanded] = useState(false)
   const hasReplies = comment.replies && comment.replies.length > 0
@@ -60,7 +61,7 @@ const CommentItemNode = React.memo(function CommentItemNode({
               {comment.nickname || comment.username || "Anonymous"}
             </span>
             <span className="text-xs text-lighttextGray">
-              {formatRelativeTime(comment.createdAt, language)}
+              {formatRelative(comment.createdAt)}
             </span>
           </div>
           <p className="text-[14px] text-headingColor leading-[1.4] break-words whitespace-pre-wrap mt-0.5">{comment.content}</p>

@@ -21,9 +21,11 @@ import {
 } from "../utils/courseTransforms"
 import { getCourseLocale } from "../utils/courseUtils"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyClassesPage = () => {
   const { language, t } = useLanguage()
+  const { formatDate } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}
   const mc = c.myCourses || {}
@@ -89,14 +91,14 @@ const MyClassesPage = () => {
         studentsRatio: c.allClasses?.studentsRatio,
         tba: c.workspaceUi?.tba,
       },
-      getCourseLocale(language),
+      formatDate,
     )),
     [
       classesRaw,
       c.allClasses?.studentsRatio,
       c.workspaceUi?.notAvailable,
       c.workspaceUi?.tba,
-      language,
+      formatDate,
     ],
   )
   const filteredDisplayList = useMemo(() => filterByStatus(classList, statusFilter), [classList, statusFilter])

@@ -1,6 +1,6 @@
 import React from "react"
 import DataTable from "@/shared/components/ui/DataTable"
-import { formatDateTime12Hour } from "@/shared/utils/dateFormatter"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import BillingMobileCard from "./BillingMobileCard"
 import { RotateCcw, AlertCircle, Loader2 } from "lucide-react"
 
@@ -12,6 +12,7 @@ const BillingTable = ({
   repayingId,
   t,
 }) => {
+  const { formatDateTime } = useTimezone()
   const hist = t.billing?.history || {}
   const cols = hist.columns || {}
   const actionsText = hist.actions || {}
@@ -25,7 +26,7 @@ const BillingTable = ({
       label: cols.date || "Date",
       headerClassName: "w-[22%]",
       className: "w-[22%]",
-      render: (row) => formatDateTime12Hour(row.createDate),
+      render: (row) => formatDateTime(row.createDate),
     },
     {
       key: "orderCode",
@@ -126,7 +127,7 @@ const BillingTable = ({
             statusInfo={statusInfo}
             cols={cols}
             actionsText={actionsText}
-            formatDate={formatDateTime12Hour}
+            formatDate={formatDateTime}
             formatAmount={formatAmount}
             onReport={onReport}
             onRepay={onRepay}

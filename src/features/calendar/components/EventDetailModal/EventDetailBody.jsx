@@ -1,15 +1,15 @@
 import React, { useState } from "react"
 import {
-  formatTime,
   formatLocation,
   FREQUENCY_LABEL,
 } from "../../utils/eventFormatters"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useCancelEventOccurrenceMutation } from "@/store/api/eventsApi"
 import { Trash2, ChevronRight } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import Modal from "@/shared/components/ui/Modal"
-import { TIMEZONES } from "../ui/TimezoneDropdown"
+import { TIMEZONE_IDS, getTimezoneOffset } from "@/shared/constants/timezones"
 
 const EventDetailBody = ({
   ev,
@@ -19,6 +19,7 @@ const EventDetailBody = ({
   onSelectOccurrence,
 }) => {
   const { t, language } = useLanguage()
+  const { formatDate, formatDateTime } = useTimezone()
   const { user, isAdmin } = useAuth()
   const localeStr = language === "vi" ? "vi-VN" : "en-US"
   const [cancelOccurrence, { isLoading: isCancelling }] =
@@ -47,8 +48,8 @@ const EventDetailBody = ({
   }
 
   const eventTzId = ev.timezone || "Asia/Ho_Chi_Minh"
-  const eventTzObj = TIMEZONES.find((tz) => tz.id === eventTzId)
-  const tzOffsetLabel = eventTzObj ? `(${eventTzObj.offset})` : `(${eventTzId})`
+  const isKnownTz = TIMEZONE_IDS.includes(eventTzId)
+  const tzOffsetLabel = isKnownTz ? `(${getTimezoneOffset(eventTzId)})` : `(${eventTzId})`
 
   return (
     <div className="relative bg-white text-base  max-h-[60vh] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
@@ -93,13 +94,13 @@ const EventDetailBody = ({
               {t.calendar?.timeLabel || "Time"}:
             </span>
             <span className="text-[#60060]">
-              {formatTime(ev.startTime, eventTzId)} –{" "}
-              {formatTime(ev.endTime, eventTzId)} {tzOffsetLabel}
+              {formatDateTime(ev.startTime)} –{" "}
+              {formatDateTime(ev.endTime)} {tzOffsetLabel}
             </span>
           </div>
         )}
 
-        {/* Location / City / Country */}
+        {/* Location / City / Country */} 
         {!ev.isRecurringGroup && (
           <div className="flex flex-col gap-3">
             {(() => {
@@ -239,13 +240,9 @@ const EventDetailBody = ({
               {ev.recurrenceRule.recurrenceStartDate &&
                 ev.recurrenceRule.recurrenceEndDate && (
                   <span className="text-[#60060]">
-                    {new Date(
-                      ev.recurrenceRule.recurrenceStartDate,
-                    ).toLocaleDateString(localeStr)}{" "}
+                    {formatDate(ev.recurrenceRule.recurrenceStartDate)}{" "}
                     –{" "}
-                    {new Date(
-                      ev.recurrenceRule.recurrenceEndDate,
-                    ).toLocaleDateString(localeStr)}
+                    {formatDate(ev.recurrenceRule.recurrenceEndDate)}
                   </span>
                 )}
             </div>
@@ -275,9 +272,9 @@ const EventDetailBody = ({
                         {sub.title || ev.title}
                       </span>
                       <span className="text-[#606060]">
-                        {formatTime(sub.startTime, eventTzId)} –{" "}
-                        {formatTime(sub.endTime, eventTzId)}{" "}
-                        {new Date(sub.startTime).toLocaleDateString(localeStr)}
+                        {formatDateTime(sub.startTime)} –{" "}
+                        {formatDateTime(sub.endTime)}{" "}
+                        ({formatDate(sub.startTime)})
                       </span>
                     </div>
                     <ChevronRight className="text-gray-400" size={20} />
