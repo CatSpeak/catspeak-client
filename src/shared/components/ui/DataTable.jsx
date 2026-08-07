@@ -28,6 +28,7 @@ const DataTable = ({
   emptyIcon,
   renderMobileCard,
   className = "",
+  striped = false,
 }) => {
   // Empty state
   if (data.length === 0) {
@@ -52,9 +53,14 @@ const DataTable = ({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`py-4 px-6 font-semibold text-[13px] ${col.headerClassName || ""}`}
+                  className={`py-4 px-6 font-bold text-[13px] ${col.headerClassName || ""}`}
                 >
-                  {col.label}
+                  <span
+                    className="block whitespace-normal break-words line-clamp-2 text-ellipsis overflow-hidden"
+                    title={typeof col.label === "string" ? col.label : undefined}
+                  >
+                    {col.label}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -63,7 +69,11 @@ const DataTable = ({
             {data.map((row, index) => (
               <tr
                 key={rowKey ? rowKey(row, index) : index}
-                className="border-b border-gray-100 last:border-0 hover:bg-gray-50/80 transition-colors"
+                className={`border-b border-gray-100 last:border-0 transition-colors ${
+                  striped
+                    ? "odd:bg-white even:bg-gray-50/60 hover:bg-gray-100/70"
+                    : "hover:bg-gray-50/80"
+                }`}
               >
                 {columns.map((col) => (
                   <td
