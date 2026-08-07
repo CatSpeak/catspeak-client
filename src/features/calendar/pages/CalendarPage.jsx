@@ -204,6 +204,8 @@ const CalendarPage = () => {
                 onEventSelect={setSelectedEvent}
                 onEventsUpdate={setDayEvents}
                 eventCountsByDay={eventCountsByDay}
+                totalUniqueEvents={eventCountsData?.totalUniqueEvents || 0}
+                totalUniqueRegisteredEvents={eventCountsData?.totalUniqueRegisteredEvents || 0}
                 onSelectDate={(d) => {
                   setSelectedDate(d);
                   setSelectedEvent(null);

@@ -49,6 +49,8 @@ const DaySchedule = ({
   onEventSelect,
   onEventsUpdate,
   eventCountsByDay,
+  totalUniqueEvents,
+  totalUniqueRegisteredEvents,
   onSelectDate,
 }) => {
   const { t } = useLanguage();
@@ -333,6 +335,7 @@ const DaySchedule = ({
           <DayScheduleMonthView
             currentDate={currentDate}
             eventCountsByDay={eventCountsByDay}
+            totalUniqueEvents={totalUniqueEvents}
             registeredMonthEvents={registeredMonthEvents}
             registeredByDay={registeredByDay}
             daysWithRegistered={daysWithRegistered}
