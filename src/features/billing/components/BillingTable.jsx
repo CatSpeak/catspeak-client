@@ -23,35 +23,35 @@ const BillingTable = ({
     {
       key: "createDate",
       label: cols.date || "Date",
-      headerClassName: "w-[22%]",
-      className: "w-[22%]",
+      headerClassName: "!py-2.5 !px-4 w-[22%]",
+      className: "!py-2.5 !px-4 w-[22%]",
       render: (row) => formatDateTime12Hour(row.createDate),
     },
     {
       key: "orderCode",
       label: cols.orderCode || "Order Code",
-      headerClassName: "w-[16%]",
-      className: "w-[16%] font-medium text-gray-800",
+      headerClassName: "!py-2.5 !px-4 w-[16%]",
+      className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800",
       render: (row) => `#${row.orderCode}`,
     },
     {
       key: "method",
       label: cols.method || "Method",
-      headerClassName: "w-[15%]",
-      className: "w-[15%]",
+      headerClassName: "!py-2.5 !px-4 w-[15%]",
+      className: "!py-2.5 !px-4 w-[15%]",
     },
     {
       key: "amount",
       label: cols.amount || "Amount",
-      headerClassName: "w-[17%]",
-      className: "w-[17%] font-medium text-gray-800",
+      headerClassName: "!py-2.5 !px-4 w-[17%]",
+      className: "!py-2.5 !px-4 w-[17%] font-medium text-gray-800",
       render: (row) => formatAmount(row.amount),
     },
     {
       key: "status",
       label: cols.status || "Status",
-      headerClassName: "w-[15%]",
-      className: "w-[15%]",
+      headerClassName: "!py-2.5 !px-4 w-[15%]",
+      className: "!py-2.5 !px-4 w-[15%]",
       render: (row) => {
         const statusInfo = statusMap[row.status] || {
           label: "Unknown",
@@ -69,8 +69,8 @@ const BillingTable = ({
     {
       key: "actions",
       label: cols.actions || "Actions",
-      headerClassName: "w-[15%] text-right pr-6 whitespace-nowrap",
-      className: "w-[15%] text-right pr-6 whitespace-nowrap",
+      headerClassName: "!py-2.5 !px-4 w-[15%] text-right",
+      className: "!py-2.5 !px-4 w-[15%] text-right whitespace-nowrap",
       render: (row) => {
         const isPending = row.status === 3 || row.status === "3" || String(row.status).toLowerCase() === "pending"
         const isRepayingThis = repayingId === row.paymentId
@@ -115,6 +115,7 @@ const BillingTable = ({
       rowKey={(row) => row.paymentId || row.orderCode}
       emptyTitle={hist.noResults || "No results found"}
       emptyDescription={hist.noResultsHint || "Try changing the filters or search keyword."}
+      striped={true}
       renderMobileCard={(invoice) => {
         const statusInfo = statusMap[invoice.status] || {
           label: "Unknown",
