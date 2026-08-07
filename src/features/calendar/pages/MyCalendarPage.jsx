@@ -12,9 +12,11 @@ import { useGetMyEventsQuery, useGetRegisteredEventsQuery, useGetStudentRegister
 import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from 'react-hot-toast'
 
 const MyCalendarPage = () => {
+  const { t } = useLanguage()
   const { isTeacher } = useRoleOverride()
   const [activeTab, setActiveTab] = useState('calendar')
   const [currentDate, setCurrentDate] = useState(dayjs())
@@ -47,53 +49,53 @@ const MyCalendarPage = () => {
 
   const isLoading = isLoadingTeacher || isLoadingStudent || isLoadingMyEvent || isLoadingRegis || isLoadingStuRegis
 
-  const processEventsList = (events, list, eventType, seenIds) => {
-    list.forEach(ev => {
-      if (ev.isRecurringGroup && ev.subOccurrences && Array.isArray(ev.subOccurrences) && ev.subOccurrences.length > 0) {
-        ev.subOccurrences.forEach(sub => {
-          const newId = `${eventType}-${sub.id}`;
+  const allEvents = useMemo(() => {
+    const processEventsList = (events, list, eventType, seenIds) => {
+      list.forEach(ev => {
+        if (ev.isRecurringGroup && ev.subOccurrences && Array.isArray(ev.subOccurrences) && ev.subOccurrences.length > 0) {
+          ev.subOccurrences.forEach(sub => {
+            const newId = `${eventType}-${sub.id}`;
+            if (!seenIds.has(newId)) {
+              seenIds.add(newId);
+              events.push({
+                id: newId,
+                eventId: ev.eventId || ev.id,
+                occurrenceId: sub.id,
+                title: sub.title || ev.title,
+                subtitle: ev.description || "",
+                startTime: sub.startTime,
+                endTime: sub.endTime,
+                location: sub.location || ev.location || (ev.isOnline ? (t.calendar?.online || 'Trực tuyến') : (t.calendar?.notAssigned || 'Chưa xác định')),
+                thumbnailUrl: ev.thumbnailUrl || null,
+                isOnline: ev.isOnline || false,
+                ticketPrice: ev.ticketPrice || "",
+                eventType: eventType,
+              });
+            }
+          });
+        } else {
+          const newId = `${eventType}-${ev.occurrenceId || ev.id}`;
           if (!seenIds.has(newId)) {
             seenIds.add(newId);
             events.push({
               id: newId,
               eventId: ev.eventId || ev.id,
-              occurrenceId: sub.id,
-              title: sub.title || ev.title,
+              occurrenceId: ev.occurrenceId || ev.id,
+              title: ev.title,
               subtitle: ev.description || "",
-              startTime: sub.startTime,
-              endTime: sub.endTime,
-              location: sub.location || ev.location || (ev.isOnline ? 'Trực tuyến' : 'Chưa xác định'),
+              startTime: ev.startTime,
+              endTime: ev.endTime,
+              location: ev.location || (ev.isOnline ? (t.calendar?.online || 'Trực tuyến') : (t.calendar?.notAssigned || 'Chưa xác định')),
               thumbnailUrl: ev.thumbnailUrl || null,
               isOnline: ev.isOnline || false,
               ticketPrice: ev.ticketPrice || "",
               eventType: eventType,
             });
           }
-        });
-      } else {
-        const newId = `${eventType}-${ev.occurrenceId || ev.id}`;
-        if (!seenIds.has(newId)) {
-          seenIds.add(newId);
-          events.push({
-            id: newId,
-            eventId: ev.eventId || ev.id,
-            occurrenceId: ev.occurrenceId || ev.id,
-            title: ev.title,
-            subtitle: ev.description || "",
-            startTime: ev.startTime,
-            endTime: ev.endTime,
-            location: ev.location || (ev.isOnline ? 'Trực tuyến' : 'Chưa xác định'),
-            thumbnailUrl: ev.thumbnailUrl || null,
-            isOnline: ev.isOnline || false,
-            ticketPrice: ev.ticketPrice || "",
-            eventType: eventType,
-          });
         }
-      }
-    });
-  };
+      });
+    };
 
-  const allEvents = useMemo(() => {
     const events = [];
     const seenIds = new Set();
 
@@ -114,11 +116,11 @@ const MyCalendarPage = () => {
           events.push({
             id: newId,
             classId: session.class?.id,
-            title: session.class?.name || 'Lịch dạy',
-            subtitle: session.sessionNumber ? `Buổi ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
+            title: session.class?.name || (t.calendar?.teachingSchedule || 'Lịch dạy'),
+            subtitle: session.sessionNumber ? `${t.calendar?.session || 'Buổi'} ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
             startTime: startDateTime,
             endTime: endDateTime,
-            location: session.location || 'Trực tuyến',
+            location: session.location || (t.calendar?.online || 'Trực tuyến'),
             thumbnailUrl: session.thumbnailUrl || null,
             isOnline: session.isOnline || false,
             status: session.class?.status,
@@ -145,11 +147,11 @@ const MyCalendarPage = () => {
           events.push({
             id: newId,
             classId: session.class?.id,
-            title: session.class?.name || 'Lịch học',
-            subtitle: session.sessionNumber ? `Buổi ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
+            title: session.class?.name || (t.calendar?.studentSchedule || 'Lịch học'),
+            subtitle: session.sessionNumber ? `${t.calendar?.session || 'Buổi'} ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
             startTime: startDateTime,
             endTime: endDateTime,
-            location: session.location || 'Trực tuyến',
+            location: session.location || (t.calendar?.online || 'Trực tuyến'),
             thumbnailUrl: session.thumbnailUrl || null,
             isOnline: session.isOnline || false,
             status: session.class?.status,
@@ -172,7 +174,7 @@ const MyCalendarPage = () => {
     processEventsList(events, studentRegEventsList, 'registered-event', seenIds);
 
     return events;
-  }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents])
+  }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents, t])
 
   console.log(allEvents)
 
@@ -221,10 +223,10 @@ const MyCalendarPage = () => {
   }
 
   const tabOptions = [
-    { id: 'calendar', label: 'Lịch tổng hợp', icon: CalendarDays },
+    { id: 'calendar', label: t.calendar?.generalCalendar || 'Lịch tổng hợp', icon: CalendarDays },
     ...(isTeacher ? [
-      { id: 'event', label: 'Sự kiện', icon: Ticket },
-      { id: 'teaching-schedule', label: 'Lịch giảng dạy', icon: BookOpen },
+      { id: 'event', label: t.nav?.events || 'Sự kiện', icon: Ticket },
+      { id: 'teaching-schedule', label: t.nav?.schedule || 'Lịch giảng dạy', icon: BookOpen },
     ] : []),
   ]
 
@@ -238,26 +240,26 @@ const MyCalendarPage = () => {
     <div className='w-full space-y-6'>
       <Breadcrumb
         items={[
-          { label: 'Trang chủ', onClick: () => navigate('/workspace') },
-          { label: 'Lịch cá nhân' },
+          { label: t.nav?.home || 'Trang chủ', onClick: () => navigate('/') },
+          { label: t.calendar?.personalCalendar || 'Lịch cá nhân' },
         ]}
       />
 
       <div className='flex items-center justify-between'>
-        <p className='text-[40px] font-semibold text-[#1A1A1A]'>Lịch của tôi</p>
+        <p className='text-[40px] font-semibold text-[#1A1A1A]'>{t.nav?.myCalendar || 'Lịch của tôi'}</p>
         {isTeacher && (
           <div className='flex gap-4'>
             <PillButton
               variant='primary'
               startIcon={<CalendarClock className='w-4 h-4' />}
-              onClick={() => toast.success("Tính năng đang được phát triển.")}>
-              Thay đổi lịch dạy
+              onClick={() => toast.success(t.comingSoon?.title || "Tính năng đang phát triển")}>
+              {t.calendar?.changeTeachingSchedule || 'Thay đổi lịch dạy'}
             </PillButton>
             <PillButton
               variant='outline'
               endIcon={<Plus className='w-4 h-4' />}
               onClick={() => navigate("/workspace/events/create")}>
-              Tạo sự kiện
+              {t.calendar?.createEvent || 'Tạo sự kiện'}
             </PillButton>
           </div>
         )}

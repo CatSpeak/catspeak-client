@@ -2,16 +2,18 @@ import React, { useState } from 'react'
 import Modal from '@/shared/components/ui/Modal'
 import { PillButton } from '@/shared/components/ui/buttons'
 import { Checkbox } from '@/shared/components/ui/inputs'
-
-const FILTER_OPTIONS = [
-  { key: 'teaching-schedule', label: 'Lịch dạy', color: '#34ce56' },
-  { key: 'student-schedule', label: 'Lịch học', color: '#0e6eec' },
-  { key: 'my-event', label: 'Sự kiện của tôi', color: '#f83b4f' },
-  { key: 'registered-event', label: 'Đã đăng ký', color: '#e2b60a' },
-  { key: 'other', label: 'Khác', color: '#7b7979' },
-]
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const EventFilter = ({ open, onClose, onApply, activeFilters = [] }) => {
+  const { t } = useLanguage()
+
+  const FILTER_OPTIONS = [
+    { key: 'teaching-schedule', label: t.calendar?.teachingSchedule || 'Lịch dạy', color: '#34ce56' },
+    { key: 'student-schedule', label: t.calendar?.studentSchedule || 'Lịch học', color: '#0e6eec' },
+    { key: 'my-event', label: t.calendar?.myEvents || 'Sự kiện của tôi', color: '#f83b4f' },
+    { key: 'registered-event', label: t.calendar?.registered || 'Đã đăng ký', color: '#e2b60a' },
+    { key: 'other', label: t.calendar?.other || 'Khác', color: '#7b7979' },
+  ]
   const [selected, setSelected] = useState(activeFilters)
 
   const toggleFilter = (key) => {
@@ -32,23 +34,23 @@ const EventFilter = ({ open, onClose, onApply, activeFilters = [] }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title="Bộ lọc sự kiện"
+      title={t.calendar?.eventFilter || "Bộ lọc sự kiện"}
       className="md:max-w-sm"
       bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       footer={
         <div className="flex items-center gap-2">
           <PillButton variant="secondary" onClick={handleReset} className="flex-1">
-            Đặt lại
+            {t.calendar?.filterReset || "Đặt lại"}
           </PillButton>
           <PillButton variant="primary" onClick={handleApply} className="flex-1">
-            Áp dụng
+            {t.calendar?.filterApply || "Áp dụng"}
           </PillButton>
         </div>
       }
     >
       <div className="space-y-2">
         <p className="text-sm text-[#7B7979]">
-          Lọc theo loại sự kiện
+          {t.calendar?.filterByEventType || "Lọc theo loại sự kiện"}
         </p>
         {FILTER_OPTIONS.map((option) => {
           const isActive = selected.includes(option.key)

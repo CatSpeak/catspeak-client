@@ -44,11 +44,11 @@ const EventCardDetail = ({ event, onBack }) => {
 
         let statusLabel = "";
         if (isPast) {
-          statusLabel = "Đã kết thúc";
+          statusLabel = t.calendar?.ended || "Đã kết thúc";
         } else if (event.eventType === "my-event") {
-          statusLabel = isUpcoming ? "Sắp diễn ra" : "Đang diễn ra";
+          statusLabel = isUpcoming ? (t.calendar?.upcoming || "Sắp diễn ra") : (t.calendar?.ongoing || "Đang diễn ra");
         } else {
-          statusLabel = "Đã đăng ký";
+          statusLabel = t.calendar?.registered || "Đã đăng ký";
         }
 
         return (
@@ -69,12 +69,12 @@ const EventCardDetail = ({ event, onBack }) => {
               variant='outline'
               onClick={() => navigate(`/${language || 'vi'}/meet/class-${event?.classId}`)}
             >
-              {"Vào phòng"}
+              {t.calendar?.enterRoom || "Vào phòng"}
             </PillButton>
             <PillButton
               onClick={() => navigate(`//workspace/courses/class/${event?.classId}`)}
             >
-              {"Xem lớp học"}
+              {t.calendar?.viewClass || "Xem lớp học"}
             </PillButton>
           </div>
         )
@@ -89,7 +89,7 @@ const EventCardDetail = ({ event, onBack }) => {
         <IconButton variant="ghost" onClick={onBack} innerClassName="!text-[#990011] !w-8 !h-8 shrink-0">
           <ChevronLeft size={20} />
         </IconButton>
-        <h3 className="font-bold text-[15px] text-[#1A1A1A] line-clamp-1">{event.title || 'Không có tiêu đề'}</h3>
+        <h3 className="font-bold text-[15px] text-[#1A1A1A] line-clamp-1">{event.title || t.calendar?.noTitle || 'Không có tiêu đề'}</h3>
       </div>
 
       {/* Scrollable Body */}
@@ -121,7 +121,7 @@ const EventCardDetail = ({ event, onBack }) => {
           {event.location && (
             <div className="flex items-start gap-3 text-[#7B7979] text-[15px]">
               <MapPin size={18} className="shrink-0 mt-0.5" />
-              <span className="leading-tight">{event.location || 'Chưa cập nhật'}</span>
+              <span className="leading-tight">{event.location || t.calendar?.notAssigned || 'Chưa cập nhật'}</span>
             </div>
           )}
 
@@ -130,9 +130,9 @@ const EventCardDetail = ({ event, onBack }) => {
             <div className="flex items-center justify-between text-[15px] w-full">
               <div className="flex items-center gap-3 text-[#7B7979]">
                 <Tag size={18} className="shrink-0" />
-                <span>Giá vé</span>
+                <span>{t.calendar?.ticketPrice || 'Giá vé'}</span>
               </div>
-              <span className="font-bold text-[#990011]">{event.ticketPrice + "K" || 'Miễn phí'}</span>
+              <span className="font-bold text-[#990011]">{event.ticketPrice ? event.ticketPrice + "K" : (t.calendar?.free || 'Miễn phí')}</span>
             </div>
           )}
         </div>

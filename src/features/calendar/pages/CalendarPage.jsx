@@ -16,7 +16,7 @@ import { HeaderImage } from "../assets";
 const CalendarPage = () => {
   const { lang } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const cal = t.calendar || {};
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -147,7 +147,13 @@ const CalendarPage = () => {
 
   const monthNum = currentDate.format("M");
   const yearNum = currentDate.format("YYYY");
-  const localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
+  
+  let localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
+  if (language === 'en') {
+    localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
+  } else if (language === 'zh') {
+    localizedMonth = `${yearNum}年 ${monthNum}月`
+  }
 
   return (
     <div className="w-full flex flex-col gap-4 overflow-hidden bg-[#F3F3F3] min-h-screen">

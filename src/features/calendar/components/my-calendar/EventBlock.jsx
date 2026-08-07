@@ -14,7 +14,7 @@ const EVENT_STYLES = {
 
 const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick }) => {
   const navigate = useNavigate()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
 
   return (
@@ -59,7 +59,7 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
           }}
           className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-[90%] py-1 bg-white border border-[#990011] text-[#990011] rounded-md text-xs font-bold hover:bg-red-50 z-20 shadow-sm"
         >
-          Vào phòng
+          {t?.calendar?.enterRoom || 'Vào phòng'}
         </button>
       )}
     </div>

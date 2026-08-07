@@ -6,17 +6,17 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext'
 
-const EVENT_STYLES = {
-  "teaching-schedule": { background: "#f1fff8", label: "Lịch dạy", color: "#34ce56" },
-  "student-schedule": { background: "#f0f5ff", label: "Lịch học", color: "#0e6eec" },
-  "my-event": { background: "#ffeef0", label: "Sự kiện của tôi", color: "#f83b4f" },
-  "registered-event": { background: "#fffceb", label: "Đã đăng ký", color: "#e2b60a" },
-  "other": { background: "#ffffff", label: "Khác", color: "#888888" },
-};
-
 const EventBlockDetail = ({ event, open, onClose }) => {
   const navigate = useNavigate()
   const { t, language } = useLanguage()
+
+  const EVENT_STYLES = {
+    "teaching-schedule": { background: "#f1fff8", label: t.calendar?.teachingSchedule || "Lịch dạy", color: "#34ce56" },
+    "student-schedule": { background: "#f0f5ff", label: t.calendar?.studentSchedule || "Lịch học", color: "#0e6eec" },
+    "my-event": { background: "#ffeef0", label: t.calendar?.myEvent || "Sự kiện của tôi", color: "#f83b4f" },
+    "registered-event": { background: "#fffceb", label: t.calendar?.registeredEvent || "Đã đăng ký", color: "#e2b60a" },
+    "other": { background: "#ffffff", label: t.calendar?.other || "Khác", color: "#888888" },
+  };
 
   if (!event) return null;
 
@@ -69,12 +69,12 @@ const EventBlockDetail = ({ event, open, onClose }) => {
             variant='outline'
             onClick={() => navigate(`/${language || 'vi'}/meet/class-${event?.classId}`)}
           >
-            {"Vào phòng"}
+            {t.calendar?.enterRoom || "Vào phòng"}
           </PillButton>
           <PillButton
             onClick={() => handleNavigate(event)}
           >
-            {"Xem lớp học"}
+            {t.calendar?.viewClass || "Xem lớp học"}
           </PillButton>
         </div>
       )
@@ -90,11 +90,11 @@ const EventBlockDetail = ({ event, open, onClose }) => {
 
       let statusLabel = "";
       if (isPast) {
-        statusLabel = "Đã kết thúc";
+        statusLabel = t.calendar?.ended || "Đã kết thúc";
       } else if (event.eventType === "my-event") {
-        statusLabel = isUpcoming ? "Sắp diễn ra" : "Đang diễn ra";
+        statusLabel = isUpcoming ? (t.calendar?.upcoming || "Sắp diễn ra") : (t.calendar?.ongoing || "Đang diễn ra");
       } else {
-        statusLabel = "Đã đăng ký";
+        statusLabel = t.calendar?.registered || "Đã đăng ký";
       }
 
       return (
@@ -114,7 +114,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title="Chi tiết sự kiện"
+      title={t.calendar?.eventDetail || "Chi tiết sự kiện"}
       className="max-w-md w-full "
       bodyClassName="p-0"
     >
@@ -140,7 +140,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
               <Info className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[#1A1A1A] font-medium">{t.courses?.student?.classStatuses?.[event.status] || event.status}</p>
-                <p className="text-sm text-gray-500">Trạng thái</p>
+                <p className="text-sm text-gray-500">{t.calendar?.statusLabel || 'Trạng thái'}</p>
               </div>
             </div>
           )}
@@ -154,7 +154,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
                 {event.endTime ? ` - ${dayjs(event.endTime).format('HH:mm')}` : ''}
                 {event.startTime ? `, (${dayjs(event.startTime).format('DD/MM/YYYY')})` : ''}
               </p>
-              <p className="text-sm text-gray-500">Thời gian</p>
+              <p className="text-sm text-gray-500">{t.calendar?.timeLabel || 'Thời gian'}</p>
             </div>
           </div>
 
@@ -164,7 +164,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
               <MapPin className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[#1A1A1A] font-medium">{event.location}</p>
-                <p className="text-sm text-gray-500">Địa điểm</p>
+                <p className="text-sm text-gray-500">{t.calendar?.location || 'Địa điểm'}</p>
               </div>
             </div>
           )}
@@ -174,8 +174,8 @@ const EventBlockDetail = ({ event, open, onClose }) => {
             <div className="flex items-start gap-3">
               <Tag className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
               <div>
-                <p className="text-[#1A1A1A] font-medium">{event.ticketPrice + "K" || 'Miễn phí'}</p>
-                <p className="text-sm text-gray-500">Giá vé</p>
+                <p className="text-[#1A1A1A] font-medium">{event.ticketPrice ? event.ticketPrice + "K" : (t.calendar?.free || 'Miễn phí')}</p>
+                <p className="text-sm text-gray-500">{t.calendar?.ticketPrice || 'Giá vé'}</p>
               </div>
             </div>
           )}

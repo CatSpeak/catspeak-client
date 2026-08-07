@@ -15,7 +15,7 @@ const EVENT_STYLES = {
 
 const EventCard = ({ event, onClick }) => {
   const navigate = useNavigate()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
 
   if (!event) return;
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
@@ -67,7 +67,7 @@ const EventCard = ({ event, onClick }) => {
             className='!h-8'
             roundedClass='h-8 rounded-full'
           >
-            Vào phòng
+            {t.calendar?.enterRoom || 'Vào phòng'}
           </PillButton>
         ) : (
           <IconButton variant='outline' innerClassName='!w-8 !h-8' onClick={(e) => {

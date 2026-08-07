@@ -11,12 +11,14 @@ import CalendarMonthView from './CalendarMonthView'
 import CalendarWeekView from './CalendarWeekView'
 import EventFilter from './EventFilter'
 
-const LEGEND = [
-  { type: 'teaching-schedule', label: 'Lịch dạy', color: '#34ce56' },
-  { type: 'student-schedule', label: 'Lịch học', color: '#0e6eec' },
-  { type: 'my-event', label: 'Sự kiện của tôi', color: '#f83b4f' },
-  { type: 'registered-event', label: 'Đã đăng ký', color: '#e2b60a' },
-  { type: 'other', label: 'Khác', color: '#888888' },
+import { useLanguage } from '@/shared/context/LanguageContext'
+
+const getLegend = (t) => [
+  { type: 'teaching-schedule', label: t.calendar?.teachingSchedule || 'Lịch dạy', color: '#34ce56' },
+  { type: 'student-schedule', label: t.calendar?.studentSchedule || 'Lịch học', color: '#0e6eec' },
+  { type: 'my-event', label: t.calendar?.myEvents || 'Sự kiện của tôi', color: '#f83b4f' },
+  { type: 'registered-event', label: t.calendar?.registered || 'Đã đăng ký', color: '#e2b60a' },
+  { type: 'other', label: t.calendar?.other || 'Khác', color: '#888888' },
 ]
 
 const CalendarTab = ({
@@ -31,6 +33,7 @@ const CalendarTab = ({
   activeFilters = [],
   onApplyFilter,
 }) => {
+  const { t, language } = useLanguage()
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterOpenCount, setFilterOpenCount] = useState(0)
 
@@ -41,7 +44,14 @@ const CalendarTab = ({
 
   const monthNum = currentDate.format('M')
   const yearNum = currentDate.format('YYYY')
-  const localizedMonth = `Tháng ${monthNum} ${yearNum}`
+  let localizedMonth = `Tháng ${monthNum} ${yearNum}`
+  if (language === 'en') {
+    localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
+  } else if (language === 'zh') {
+    localizedMonth = `${yearNum}年 ${monthNum}月`
+  }
+
+  const LEGEND = getLegend(t)
 
   return (
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">

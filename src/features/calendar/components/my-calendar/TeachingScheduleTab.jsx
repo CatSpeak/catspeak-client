@@ -50,33 +50,33 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const columns = [
     {
       key: 'class',
-      label: 'Lớp học',
-      render: (row) => <span className="font-medium text-gray-900">{row.class?.name || 'Không có tên lớp'}</span>
+      label: t.courses?.class || 'Lớp học',
+      render: (row) => <span className="font-medium text-gray-900">{row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}</span>
     },
     {
       key: 'sessionNumber',
-      label: 'Buổi học',
+      label: t.calendar?.sessionNumber || 'Buổi học',
       render: (row) => row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'
     },
     {
       key: 'date',
-      label: 'Ngày',
+      label: t.calendar?.day || 'Ngày',
       render: (row) => row.date ? dayjs(row.date).format('DD/MM/YYYY') : '-'
     },
     {
       key: 'time',
-      label: 'Thời gian',
+      label: t.calendar?.timeLabel || 'Thời gian',
       render: (row) => `${row.startTime || ''} - ${row.endTime || ''}`
     },
     {
       key: 'roomName',
-      label: 'Phòng',
+      label: t.calendar?.room || 'Phòng',
       render: (row) => row.class?.id ? (
         <Link to={`/${language || 'vi'}/meet/class-${row.class.id}`} className="text-[#990011] hover:underline font-medium hover:text-[#80000e]">
-          {row.roomName || 'Phòng học'}
+          {row.roomName || t.calendar?.classRoom || 'Phòng học'}
         </Link>
       ) : (
-        <span>{row.roomName || 'Chưa xác định'}</span>
+        <span>{row.roomName || t.calendar?.notAssigned || 'Chưa xác định'}</span>
       )
     },
     {
@@ -99,7 +99,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
                   }}
                   icon={<DoorOpen className="w-4 h-4 text-gray-400" />}
                 >
-                  Vào lớp học
+                  {t.calendar?.enterClassroom || 'Vào lớp học'}
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -108,7 +108,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
                   }}
                   icon={<Edit className="w-4 h-4 text-gray-400" />}
                 >
-                  Chỉnh sửa lịch học
+                  {t.calendar?.editSchedule || 'Chỉnh sửa lịch học'}
                 </MenuItem>
               </div>
             )}
@@ -121,7 +121,13 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
 
   const monthNum = currentDate.format('M')
   const yearNum = currentDate.format('YYYY')
-  const localizedMonth = `Tháng ${monthNum} ${yearNum}`
+
+  let localizedMonth = `Tháng ${monthNum} ${yearNum}`
+  if (language === 'en') {
+    localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
+  } else if (language === 'zh') {
+    localizedMonth = `${yearNum}年 ${monthNum}月`
+  }
 
   if (isLoading) return <LoadingSpinner className="py-20 flex justify-center w-full" />
 
@@ -129,10 +135,10 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
     <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl flex flex-col gap-2">
       <div className="flex justify-between items-start gap-4">
         <span className="font-semibold text-gray-900 line-clamp-2">
-          {row.class?.name || 'Không có tên lớp'}
+          {row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}
         </span>
         <span className="text-xs font-medium bg-[#990011]/10 text-[#990011] px-2 py-1 rounded-full whitespace-nowrap">
-          Buổi {row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'}
+          {t.calendar?.session || 'Buổi'} {row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'}
         </span>
       </div>
       <div className="text-sm text-gray-600 space-y-2 mt-2">
@@ -144,10 +150,10 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           <Clock className="w-4 h-4 text-gray-400 shrink-0" />
           <span>{`${row.startTime || ''} - ${row.endTime || ''}`}</span>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-          <span className="truncate">{row.isOnline ? 'Trực tuyến' : (row.location || 'Chưa xác định')}</span>
-        </div>
+          <span className="truncate">{row.class?.location}</span>
+        </div> */}
       </div>
     </div>
   )
@@ -179,14 +185,14 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           <DatePicker
             value={filterDate}
             onChange={(d) => { setFilterDate(d); setCurrentPage(1); }}
-            placeholder="Lọc theo ngày"
+            placeholder={t.calendar?.filterByDate || "Lọc theo ngày"}
             className="w-40 sm:w-48"
           />
           {filterDate && (
             <IconButton
               variant="ghost"
               onClick={() => setFilterDate(null)}
-              title="Bỏ lọc"
+              title={t.calendar?.clearFilter || "Bỏ lọc"}
             >
               <X className="w-4 h-4" />
             </IconButton>
@@ -199,8 +205,8 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           columns={columns}
           data={paginatedSessions}
           rowKey={(row) => row.id || `${row.date}-${row.startTime}`}
-          emptyTitle="Không có lịch giảng dạy"
-          emptyDescription={`Bạn chưa có lịch dạy nào trong ${localizedMonth.toLowerCase()}.`}
+          emptyTitle={t.calendar?.noTeachingSchedule || "Không có lịch giảng dạy"}
+          emptyDescription={`${t.calendar?.noTeachingScheduleDesc || "Bạn chưa có lịch dạy nào trong"} ${localizedMonth.toLowerCase()}.`}
           renderMobileCard={renderMobileCard}
         />
         {totalPages > 1 && (

@@ -4,8 +4,10 @@ import { IconButton } from '@/shared/components/ui/buttons'
 import EventCard from './EventCard'
 import EventCardDetail from './EventCardDetail'
 import EventFilter from './EventFilter'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onApplyFilter }) => {
+  const { t } = useLanguage()
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterOpenCount, setFilterOpenCount] = useState(0)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -35,7 +37,7 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
       {/* Panel Header */}
       <div className="flex items-center justify-between">
         <p className="text-lg font-semibold text-[#1A1A1A]">
-          Lịch trình sự kiện ngày {date}
+          {t.calendar?.daySchedule || 'Lịch trình sự kiện ngày'} {date}
         </p>
         <IconButton
           variant="outline"
@@ -56,7 +58,7 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
           ))
         ) : (
           <p className="text-center text-[#7B7979] py-8">
-            Không có sự kiện nào
+            {t.calendar?.noEvents || 'Không có sự kiện nào'}
           </p>
         )}
       </div>
