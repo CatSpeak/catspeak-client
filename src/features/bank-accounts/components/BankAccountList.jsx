@@ -11,23 +11,16 @@ export default function BankAccountList() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const {
-    data: responseData,
+    data: accounts = [],
     isLoading,
     isError,
     error,
     refetch,
   } = useGetInstructorBankAccountsQuery()
 
-  // Log exact error payload for diagnosis
   if (isError) {
     console.log("[BankAccounts API Error Object]:", error)
   }
-
-  const accounts = Array.isArray(responseData)
-    ? responseData
-    : Array.isArray(responseData?.data)
-      ? responseData.data
-      : []
 
   return (
     <div className="space-y-6">

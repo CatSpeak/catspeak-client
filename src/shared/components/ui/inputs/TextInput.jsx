@@ -20,6 +20,8 @@ const TextInput = ({
   labelClassName = "",
   showCount = false,
   error,
+  helperText,
+  helperTextClassName = "",
   leftContent,
   leftContentWidthClass = "pl-14",
   rightContent,
@@ -162,12 +164,21 @@ const TextInput = ({
           </label>
         )}
       </div>
-      {(showCount && props.maxLength) || error ? (
+      {(showCount && props.maxLength) || error || helperText ? (
         <div className="flex justify-between items-start px-4 pt-1 w-full">
           <div className="flex-1">
-            {error && (
+            {error ? (
               <span className="text-xs text-red-500 block">{error}</span>
-            )}
+            ) : helperText ? (
+              <span
+                className={`text-xs block ${
+                  helperTextClassName ||
+                  "text-[#7A7574] dark:text-neutral-400"
+                }`}
+              >
+                {helperText}
+              </span>
+            ) : null}
           </div>
           {showCount && props.maxLength && (
             <span className="text-xs text-[#7A7574] ml-2 whitespace-nowrap">
