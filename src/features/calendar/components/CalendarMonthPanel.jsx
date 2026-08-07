@@ -155,8 +155,12 @@ const CalendarMonthPanel = ({
               >
                 {day}
               </button>
-              {eventCount > 0 && !isSelected && (
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#990011]"></span>
+              {eventCount > 0 && (
+                <span
+                  className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] ${
+                    isSelected ? "bg-white" : "bg-[#990011]"
+                  }`}
+                ></span>
               )}
             </div>
           );

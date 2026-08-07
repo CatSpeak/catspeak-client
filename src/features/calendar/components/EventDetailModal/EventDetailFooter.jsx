@@ -54,7 +54,11 @@ const EventDetailFooter = ({
         );
 
   const isRegistered = event?.isRegistered ?? false;
-  const isPast = event?.startTime && dayjs(event.startTime).isBefore(dayjs());
+  const isPast = event?.endTime
+    ? dayjs(event.endTime).isBefore(dayjs())
+    : event?.startTime
+      ? dayjs(event.startTime).isBefore(dayjs())
+      : false;
 
   const { confirmDelete, setConfirmDelete, isDeleting, handleDelete } =
     useEventDelete(eventId, event?.occurrenceId, onClose, onActionComplete);

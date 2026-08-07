@@ -4,6 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import {
   useGetEventsByDateQuery,
   useGetRegisteredEventsQuery,
+  useGetStudentRegisteredEventsQuery,
   useGetEventByIdQuery,
   useGetEventOccurrenceByIdQuery,
 } from "@/store/api/eventsApi";
@@ -97,19 +98,51 @@ const DaySchedule = ({
   const { data: registeredMonthData } = useGetRegisteredEventsQuery(undefined, {
     skip: !isMonthView,
   });
-  const registeredMonthEvents = (() => {
-    const registeredEvents =
-      registeredMonthData?.occurrences ||
-      registeredMonthData?.events ||
+  const { data: studentRegisteredMonthData } = useGetStudentRegisteredEventsQuery(undefined, {
+    skip: !isMonthView,
+  });
+  const mergedRegisteredMonthData = (() => {
+    const teacherOccs =
+      registeredMonthData?.occurrences ??
+      registeredMonthData?.events ??
       (Array.isArray(registeredMonthData) ? registeredMonthData : []);
-
+    const studentOccs =
+      studentRegisteredMonthData?.occurrences ??
+      studentRegisteredMonthData?.events ??
+      (Array.isArray(studentRegisteredMonthData) ? studentRegisteredMonthData : []);
+    const all = [...teacherOccs, ...studentOccs];
+    // Deduplicate by occurrence id
+    const seen = new Set();
+    return all.filter((ev) => {
+      const id = ev.occurrenceId ?? ev.id;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  })();
+  const registeredMonthEvents = (() => {
     const month = currentDate.month();
     const year = currentDate.year();
+    const result = [];
 
-    return registeredEvents.filter((ev) => {
-      const start = getRegisteredEventDate(ev);
-      return start && start.month() === month && start.year() === year;
+    mergedRegisteredMonthData.forEach((ev) => {
+      if (ev.isRecurringGroup && ev.subOccurrences?.length > 0) {
+        // For recurring series: check each sub-occurrence
+        ev.subOccurrences.forEach((sub) => {
+          const start = sub.startTime ? dayjs(sub.startTime) : null;
+          if (start && start.isValid() && start.month() === month && start.year() === year) {
+            result.push({ ...ev, startTime: sub.startTime, endTime: sub.endTime, occurrenceId: sub.id, id: sub.id });
+          }
+        });
+      } else {
+        const start = getRegisteredEventDate(ev);
+        if (start && start.month() === month && start.year() === year) {
+          result.push(ev);
+        }
+      }
     });
+
+    return result;
   })();
   const registeredByDay = registeredMonthEvents.reduce((acc, ev) => {
     const day = dayjs(ev.startTime).date();
@@ -125,12 +158,22 @@ const DaySchedule = ({
     { startDate: localStart.toISOString(), endDate: localEnd.toISOString() },
     { skip: selectedDate == null },
   );
-  const registeredDayOccurrences =
-    registeredDayData?.occurrences ||
-    (Array.isArray(registeredDayData) ? registeredDayData : []);
+  const { data: studentRegisteredDayData } = useGetStudentRegisteredEventsQuery(
+    { startDate: localStart.toISOString(), endDate: localEnd.toISOString() },
+    { skip: selectedDate == null },
+  );
+  const allRegisteredDayOccurrences = (() => {
+    const teacherOccs =
+      registeredDayData?.occurrences ??
+      (Array.isArray(registeredDayData) ? registeredDayData : []);
+    const studentOccs =
+      studentRegisteredDayData?.occurrences ??
+      (Array.isArray(studentRegisteredDayData) ? studentRegisteredDayData : []);
+    return [...teacherOccs, ...studentOccs];
+  })();
   // Build a Set of occurrence IDs that the user registered for
   const registeredOccurrenceIds = new Set(
-    registeredDayOccurrences.map((ev) => ev.occurrenceId ?? ev.id),
+    allRegisteredDayOccurrences.map((ev) => ev.occurrenceId ?? ev.id),
   );
 
   const selectedDay = dayjs(displayDateKey).startOf("day");
