@@ -172,10 +172,20 @@ export const eventsApi = baseApi.injectEndpoints({
       providesTags: ["Events"],
     }),
 
-    // GET /api/v1/Events/registered
+    // GET /api/v1/Events/registered (teacher)
     getRegisteredEvents: builder.query({
       query: (params) => ({
         url: "/teacher/Events/registered",
+        params,
+      }),
+      transformResponse: fixOvernightEvents,
+      providesTags: getOccurrenceTags,
+    }),
+
+    // GET /api/student/EventRegistration/registered (student)
+    getStudentRegisteredEvents: builder.query({
+      query: (params) => ({
+        url: "/student/EventRegistration/registered",
         params,
       }),
       transformResponse: fixOvernightEvents,
@@ -270,6 +280,7 @@ export const {
   useGetEventCountsQuery,
   useGetEventsByDateQuery,
   useGetRegisteredEventsQuery,
+  useGetStudentRegisteredEventsQuery,
   useGetMyEventsQuery,
   useCreateSharedLinkMutation,
   useGetSharedEventQuery,
