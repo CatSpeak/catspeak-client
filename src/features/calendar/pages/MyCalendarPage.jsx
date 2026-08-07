@@ -9,7 +9,7 @@ import { Breadcrumb, Tabs } from '@/shared/components/ui/navigation'
 import { CalendarClock, Plus, Loader2, CalendarDays, Ticket, BookOpen } from 'lucide-react'
 import { useGetScheduleSessionsQuery, useGetStudentScheduleSessionsQuery } from '@/store/api/coursesApi'
 import { useGetMyEventsQuery, useGetRegisteredEventsQuery, useGetStudentRegisteredEventsQuery } from '@/store/api/eventsApi'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -18,12 +18,23 @@ import toast from 'react-hot-toast'
 const MyCalendarPage = () => {
   const { t } = useLanguage()
   const { isTeacher } = useRoleOverride()
-  const [activeTab, setActiveTab] = useState('calendar')
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'calendar')
+  const [prevLocationKey, setPrevLocationKey] = useState(location.key)
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState(dayjs().date())
   const [viewType, setViewType] = useState('month')
   const [activeFilters, setActiveFilters] = useState([])
-  const navigate = useNavigate()
+
+  // Adjust state during render to avoid cascading renders from useEffect
+  if (location.key !== prevLocationKey) {
+    setPrevLocationKey(location.key)
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab)
+    }
+  }
 
   const fromDate = currentDate.startOf('month').format('YYYY-MM-DD')
   const toDate = currentDate.endOf('month').format('YYYY-MM-DD')

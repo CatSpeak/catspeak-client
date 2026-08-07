@@ -11,6 +11,7 @@ import TablePagination from "@/features/courses/components/shared/TablePaginatio
 import DatePicker from '@/shared/components/ui/inputs/DatePicker'
 import Popover from '@/shared/components/ui/Popover'
 import MenuItem from '@/shared/components/ui/MenuItem'
+import toast from 'react-hot-toast'
 
 const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const { t, language } = useLanguage()
@@ -103,7 +104,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    // edit logic...
+                    toast.success(t.comingSoon?.title || "Tính năng đang phát triển")
                     close && close()
                   }}
                   icon={<Edit className="w-4 h-4 text-gray-400" />}
