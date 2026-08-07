@@ -63,7 +63,7 @@ export const navSections = [
     items: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
-      { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
@@ -71,7 +71,7 @@ export const navSections = [
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "workspaceReels", path: "/workspace/reels", icon: Film },
-      { key: "events", path: "/workspace/events", icon: Calendar },
+      // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
 ]
@@ -106,7 +106,7 @@ export const navLinks = [
     subItems: [
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
-      { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
@@ -114,7 +114,7 @@ export const navLinks = [
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
-      { key: "events", path: "/workspace/events", icon: Calendar },
+      // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
   {

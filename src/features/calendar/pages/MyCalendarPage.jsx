@@ -1,16 +1,21 @@
 import React, { useState, useMemo } from 'react'
 import dayjs from 'dayjs'
 import DailyEventPanel from '../components/my-calendar/DailyEventPanel'
-import Calendar from '../components/my-calendar/Calendar'
+import CalendarTab from '../components/my-calendar/CalendarTab'
+import EventTab from '../components/my-calendar/EventTab'
+import TeachingScheduleTab from '../components/my-calendar/TeachingScheduleTab'
 import { PillButton } from '@/shared/components/ui/buttons'
-import { Breadcrumb } from '@/shared/components/ui/navigation'
-import { CalendarClock, Plus, Loader2 } from 'lucide-react'
+import { Breadcrumb, Tabs } from '@/shared/components/ui/navigation'
+import { CalendarClock, Plus, Loader2, CalendarDays, Ticket, BookOpen } from 'lucide-react'
 import { useGetScheduleSessionsQuery, useGetStudentScheduleSessionsQuery } from '@/store/api/coursesApi'
 import { useGetMyEventsQuery, useGetRegisteredEventsQuery } from '@/store/api/eventsApi'
 import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
 const MyCalendarPage = () => {
+  const { isTeacher } = useRoleOverride()
+  const [activeTab, setActiveTab] = useState('calendar')
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState(dayjs().date())
   const [viewType, setViewType] = useState('month')
@@ -164,6 +169,14 @@ const MyCalendarPage = () => {
     }
   }
 
+  const tabOptions = [
+    { id: 'calendar', label: 'Lịch cá nhân', icon: CalendarDays },
+    ...(isTeacher ? [
+      { id: 'event', label: 'Sự kiện', icon: Ticket },
+      { id: 'teaching-schedule', label: 'Lịch giảng dạy', icon: BookOpen },
+    ] : []),
+  ]
+
   if (isLoading) {
     return (
       <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
@@ -186,34 +199,50 @@ const MyCalendarPage = () => {
           <PillButton variant='outline' endIcon={<Plus className='w-4 h-4' />} onClick={() => navigate("/workspace/events/create")}>Tạo sự kiện</PillButton>
         </div>
       </div>
-      <div className='flex flex-col lg:flex-row items-stretch gap-4 h-auto xl:h-[calc(100vh-200px)]'>
-        <div className='flex-1 w-full min-h-0 flex flex-col'>
-          <Calendar
-            currentDate={currentDate}
-            selectedDate={selectedDate}
-            viewType={viewType}
-            events={filteredEvents}
-            onChangeView={setViewType}
-            onPrev={handlePrev}
-            onNext={handleNext}
-            onSelectDate={setSelectedDate}
-            activeFilters={activeFilters}
-            onApplyFilter={setActiveFilters}
-          />
-        </div>
-        {viewType === 'month' && (
-          <div className='w-full lg:w-[340px] flex flex-col relative shrink-0'>
-            <div className='w-full h-[500px] lg:h-auto lg:absolute lg:inset-0'>
-              <DailyEventPanel
-                date={currentDate.date(selectedDate).format('DD/MM')}
-                events={eventsForSelectedDate}
-                activeFilters={activeFilters}
-                onApplyFilter={setActiveFilters}
-              />
-            </div>
+
+      <Tabs tabs={tabOptions} activeTab={activeTab} onChange={setActiveTab} fullWidth={false} />
+
+      {/* Content with 3 tab: Calendar, Event, Teaching Schedule */}
+      {activeTab === 'calendar' && (
+        <div className='flex flex-col lg:flex-row items-stretch gap-4 h-auto xl:h-[calc(100vh-200px)]'>
+          <div className='flex-1 w-full min-h-0 flex flex-col'>
+            <CalendarTab
+              currentDate={currentDate}
+              selectedDate={selectedDate}
+              viewType={viewType}
+              events={filteredEvents}
+              onChangeView={setViewType}
+              onPrev={handlePrev}
+              onNext={handleNext}
+              onSelectDate={setSelectedDate}
+              activeFilters={activeFilters}
+              onApplyFilter={setActiveFilters}
+            />
           </div>
-        )}
-      </div>
+          {viewType === 'month' && (
+            <div className='w-full lg:w-[340px] flex flex-col relative shrink-0'>
+              <div className='w-full h-[500px] lg:h-auto lg:absolute lg:inset-0'>
+                <DailyEventPanel
+                  date={currentDate.date(selectedDate).format('DD/MM')}
+                  events={eventsForSelectedDate}
+                  activeFilters={activeFilters}
+                  onApplyFilter={setActiveFilters}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {isTeacher && activeTab === 'event' && <EventTab />}
+
+      {isTeacher && activeTab === 'teaching-schedule' && (
+        <TeachingScheduleTab
+          currentDate={currentDate}
+          onPrev={handlePrev}
+          onNext={handleNext}
+        />
+      )}
     </div>
   )
 }

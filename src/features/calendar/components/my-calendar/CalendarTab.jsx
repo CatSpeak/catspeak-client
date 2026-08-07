@@ -19,7 +19,7 @@ const LEGEND = [
   { type: 'other', label: 'Khác', color: '#888888' },
 ]
 
-const Calendar = ({
+const CalendarTab = ({
   currentDate,
   selectedDate,
   events = [],
@@ -139,4 +139,4 @@ const Calendar = ({
   )
 }
 
-export default Calendar
+export default CalendarTab
