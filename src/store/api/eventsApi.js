@@ -238,9 +238,9 @@ export const eventsApi = baseApi.injectEndpoints({
       },
     }),
 
-    // GET /api/v1/Events/occurrence/{occurrenceId}/register
+    // GET api/teacher/Events/occurrences/{occurrenceId}/registers
     getOccurrenceRegistrations: builder.query({
-      query: (occurrenceId) => `/v1/Events/occurrence/${occurrenceId}/register`,
+      query: (occurrenceId) => `/teacher/Events/occurrences/${occurrenceId}/registers`,
       providesTags: (result, error, occurrenceId) => [
         { type: "Events", id: `registrations-${occurrenceId}` },
         "Events",

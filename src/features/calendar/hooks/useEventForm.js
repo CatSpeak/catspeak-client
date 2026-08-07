@@ -232,7 +232,7 @@ export const useEventForm = (
       if (!endTime) newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
     }
 
-    if (startTime) {
+    if (startTime && !editEvent) {
       if (dayjs(startTime).isBefore(dayjs())) {
         newErrors.startTime = t.validation?.calendar?.startTimeInPast || "Thời gian bắt đầu phải sau hiện tại";
       }

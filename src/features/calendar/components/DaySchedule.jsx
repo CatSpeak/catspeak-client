@@ -12,16 +12,33 @@ import DayScheduleMonthView from "./day-schedule/DayScheduleMonthView";
 import DayScheduleDayView from "./day-schedule/DayScheduleDayView";
 import DayScheduleEventDetail from "./day-schedule/DayScheduleEventDetail";
 
-
 const getTimeOfDay = (timeStr) => {
   if (!timeStr) return "morning";
   const hour = parseInt(timeStr.split(":")[0], 10);
-  if (hour < 12) return "morning";   // 00:00 - 11:59
-  if (hour < 14) return "noon";      // 12:00 - 13:59
+  if (hour < 12) return "morning"; // 00:00 - 11:59
+  if (hour < 14) return "noon"; // 12:00 - 13:59
   if (hour < 18) return "afternoon"; // 14:00 - 17:59
-  return "evening";                  // 18:00 - 23:59
+  return "evening"; // 18:00 - 23:59
 };
 
+const getRegisteredEventDate = (event) => {
+  const candidate =
+    event?.startTime ||
+    event?.startDateTime ||
+    event?.occurrence?.startTime ||
+    event?.occurrence?.startDateTime ||
+    event?.event?.startTime ||
+    event?.event?.startDateTime ||
+    event?.originalStartTime ||
+    event?.date ||
+    event?.startDate ||
+    event?.registrationDate ||
+    event?.registeredAt ||
+    event?.createdAt;
+
+  const parsed = candidate ? dayjs(candidate) : null;
+  return parsed && parsed.isValid() ? parsed : null;
+};
 
 const DaySchedule = ({
   selectedDate,
@@ -36,7 +53,7 @@ const DaySchedule = ({
   const { t } = useLanguage();
   const cal = t.calendar || {};
 
-  const [tab, setTab] = useState("unregistered");   // day view tab
+  const [tab, setTab] = useState("unregistered"); // day view tab
   const [monthTab, setMonthTab] = useState("upcoming"); // month view tab
   const [actionStatus, setActionStatus] = useState(null);
 
@@ -75,15 +92,25 @@ const DaySchedule = ({
     : null;
 
   // Registered events for the month (month view only)
-  const monthStart = currentDate.startOf("month").toISOString();
-  const monthEnd = currentDate.endOf("month").toISOString();
-  const { data: registeredMonthData } = useGetRegisteredEventsQuery(
-    { startDate: monthStart, endDate: monthEnd },
-    { skip: !isMonthView },
-  );
-  const registeredMonthEvents =
-    registeredMonthData?.events ||
-    (Array.isArray(registeredMonthData) ? registeredMonthData : []);
+  // Pull the full registered list and filter locally so month view stays
+  // consistent with the day/week registered state.
+  const { data: registeredMonthData } = useGetRegisteredEventsQuery(undefined, {
+    skip: !isMonthView,
+  });
+  const registeredMonthEvents = (() => {
+    const registeredEvents =
+      registeredMonthData?.occurrences ||
+      registeredMonthData?.events ||
+      (Array.isArray(registeredMonthData) ? registeredMonthData : []);
+
+    const month = currentDate.month();
+    const year = currentDate.year();
+
+    return registeredEvents.filter((ev) => {
+      const start = getRegisteredEventDate(ev);
+      return start && start.month() === month && start.year() === year;
+    });
+  })();
   const registeredByDay = registeredMonthEvents.reduce((acc, ev) => {
     const day = dayjs(ev.startTime).date();
     acc[day] = (acc[day] || 0) + 1;
@@ -92,6 +119,19 @@ const DaySchedule = ({
   const daysWithRegistered = Object.keys(registeredByDay)
     .map(Number)
     .sort((a, b) => a - b);
+
+  // Registered events for selected day (day view tab)
+  const { data: registeredDayData } = useGetRegisteredEventsQuery(
+    { startDate: localStart.toISOString(), endDate: localEnd.toISOString() },
+    { skip: selectedDate == null },
+  );
+  const registeredDayOccurrences =
+    registeredDayData?.occurrences ||
+    (Array.isArray(registeredDayData) ? registeredDayData : []);
+  // Build a Set of occurrence IDs that the user registered for
+  const registeredOccurrenceIds = new Set(
+    registeredDayOccurrences.map((ev) => ev.occurrenceId ?? ev.id),
+  );
 
   const selectedDay = dayjs(displayDateKey).startOf("day");
   const seen = new Set();
@@ -122,7 +162,12 @@ const DaySchedule = ({
       }
 
       seen.add(id);
-      allEvents.push({ ...ev, id, eventId: ev.eventId, occurrenceId: ev.occurrenceId });
+      allEvents.push({
+        ...ev,
+        id,
+        eventId: ev.eventId,
+        occurrenceId: ev.occurrenceId,
+      });
     });
   };
 
@@ -144,8 +189,15 @@ const DaySchedule = ({
     });
   })();
 
-  const unregistered = visibleEvents.filter((ev) => !ev.isRegistered);
-  const registered = visibleEvents.filter((ev) => ev.isRegistered);
+  const unregistered = visibleEvents.filter(
+    (ev) =>
+      !registeredOccurrenceIds.has(ev.occurrenceId ?? ev.id) &&
+      !ev.isRegistered,
+  );
+  const registered = visibleEvents.filter(
+    (ev) =>
+      registeredOccurrenceIds.has(ev.occurrenceId ?? ev.id) || ev.isRegistered,
+  );
 
   // Apply active filters
   const filteredEvents = (
@@ -182,7 +234,9 @@ const DaySchedule = ({
   const grouped = (() => {
     const groups = { morning: [], noon: [], afternoon: [], evening: [] };
     displayEvents.forEach((ev) => {
-      const startTime = ev.startTime ? dayjs(ev.startTime).format("HH:mm") : null;
+      const startTime = ev.startTime
+        ? dayjs(ev.startTime).format("HH:mm")
+        : null;
       const section = getTimeOfDay(startTime);
       groups[section].push(ev);
     });
@@ -229,7 +283,9 @@ const DaySchedule = ({
 
   return (
     <div className="relative flex flex-col h-full">
-      <div className={`flex-col h-full ${selectedEvent ? "flex lg:hidden" : "flex"}`}>
+      <div
+        className={`flex-col h-full ${selectedEvent ? "flex lg:hidden" : "flex"}`}
+      >
         {isMonthView ? (
           <DayScheduleMonthView
             currentDate={currentDate}
