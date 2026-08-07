@@ -92,26 +92,19 @@ const EventDetailFooter = ({
     if (isRegistered) {
       // Cancel registration for this occurrence (or the single event)
       try {
-        if (event?.registrationId) {
-          await deleteRegistration({
-            registrationId: event.registrationId,
-            cancellationReason: "User cancelled",
-          }).unwrap();
-        } else {
-          const body = {
-            eventId,
-            cancellationReason: "User cancelled",
-            ...(event?.occurrenceId
-              ? { occurrenceId: event.occurrenceId }
-              : {}),
-            ...(event?.isRecurring &&
-            event?.originalStartTime &&
-            !event?.occurrenceId
-              ? { registrationDate: event.originalStartTime }
-              : {}),
-          };
-          await cancelRegistration(body).unwrap();
-        }
+        const body = {
+          eventId,
+          cancellationReason: "User cancelled",
+          ...(event?.occurrenceId
+            ? { occurrenceId: event.occurrenceId }
+            : {}),
+          ...(event?.isRecurring &&
+          event?.originalStartTime &&
+          !event?.occurrenceId
+            ? { registrationDate: event.originalStartTime }
+            : {}),
+        };
+        await cancelRegistration(body).unwrap();
         if (onActionComplete) onActionComplete('cancel', 'success')
       } catch (err) {
         console.error("Cancel registration failed:", err);
