@@ -19,6 +19,7 @@ import {
   Globe,
   Users,
   BarChart,
+  CalendarDays,
 } from "lucide-react"
 
 export const navSections = [
@@ -63,14 +64,15 @@ export const navSections = [
       { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
-      { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "workspaceReels", path: "/workspace/reels", icon: Film },
-      { key: "events", path: "/workspace/events", icon: Calendar },
+      // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
 ]
@@ -106,14 +108,15 @@ export const navLinks = [
       { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
       { key: "myClass", path: "/workspace/classes", icon: Users },
-      { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
-      { key: "events", path: "/workspace/events", icon: Calendar },
+      // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
   {

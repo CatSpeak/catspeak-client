@@ -638,6 +638,7 @@ export default {
       OPEN: "Open",
       OPEN_FOR_ENROLLMENT: "Open for enrollment",
       UPCOMING: "Upcoming",
+      NOT_STARTED: "Not started",
       ARCHIVED: "Archived",
       COMPLETED: "Completed",
       CANCELLED: "Cancelled"

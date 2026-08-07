@@ -1164,6 +1164,37 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: ["Schedule"],
     }),
 
+    getStudentScheduleSessions: builder.query({
+      query: ({ from, to, classId, language, status } = {}) => ({
+        url: "/student/schedule/sessions",
+        method: "GET",
+        params: { from, to, classId, language, status },
+      }),
+      transformResponse: (response) => {
+        const responseRecord = isRecord(response) ? response : {}
+        const rawSessions = Array.isArray(responseRecord.data)
+          ? responseRecord.data
+          : Array.isArray(responseRecord.items)
+            ? responseRecord.items
+            : (Array.isArray(response) ? response : [])
+        const converted = rawSessions.filter(isRecord).map(session => ({
+          ...session,
+          startTime: parseToLocalTimeStr(session.startTime),
+          endTime: parseToLocalTimeStr(session.endTime),
+          date: parseToLocalDateStr(session.startTime),
+          class: session.class ? {
+            ...session.class,
+            id: session.class.id?.toString() || ""
+          } : null
+        }))
+        return {
+          ...responseRecord,
+          data: converted
+        }
+      },
+      providesTags: ["Schedule"],
+    }),
+
     // ─── Commission ───────────────────────────────────────────────────
 
     getCommission: builder.query({
@@ -2008,6 +2039,7 @@ export const {
   useDeleteClassMaterialMutation,
   useGetScheduleDatesQuery,
   useGetScheduleSessionsQuery,
+  useGetStudentScheduleSessionsQuery,
   useGetCommissionQuery,
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,

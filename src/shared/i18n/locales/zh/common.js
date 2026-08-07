@@ -54,6 +54,7 @@ export default {
     allCourses: "所有课程",
     myCourses: "我的课程",
     myClass: "我的班级",
+    myCalendar: "我的日历",
     schedule: "日程安排",
     teachingTasks: "教学任务",
     myLearning: "我的学习",

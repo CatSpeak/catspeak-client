@@ -638,6 +638,7 @@ export default {
       OPEN: "Đang mở",
       OPEN_FOR_ENROLLMENT: "Đang mở đăng ký",
       UPCOMING: "Sắp diễn ra",
+      NOT_STARTED: "Chưa bắt đầu",
       ARCHIVED: "Đã lưu trữ",
       COMPLETED: "Đã hoàn thành",
       CANCELLED: "Đã hủy"

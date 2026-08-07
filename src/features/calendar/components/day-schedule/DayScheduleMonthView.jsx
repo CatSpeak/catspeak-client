@@ -18,6 +18,7 @@ import { ChevronDown } from "lucide-react";
 const DayScheduleMonthView = ({
   currentDate,
   eventCountsByDay,
+  totalUniqueEvents,
   registeredMonthEvents,
   registeredByDay,
   daysWithRegistered,
@@ -32,10 +33,7 @@ const DayScheduleMonthView = ({
     .sort((a, b) => a - b)
     .filter((day) => eventCounts[day] > 0);
 
-  const totalUpcoming = daysWithEvents.reduce(
-    (acc, day) => acc + eventCounts[day],
-    0,
-  );
+  const totalUpcoming = totalUniqueEvents || 0;
 
   return (
     <div className="flex flex-col h-full bg-white p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">

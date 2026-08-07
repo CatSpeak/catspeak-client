@@ -227,14 +227,14 @@ const SchedulePage = () => {
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
           {c.teachingSchedule || "Teaching Schedule"}
         </h1>
-        <button
+        {/* <button
           type="button"
           onClick={() => navigate("/workspace/classes/create-class")}
           className="flex items-center justify-center gap-2 bg-[#990011] hover:bg-[#80000e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 shadow-sm hover:scale-[1.01] active:scale-95"
         >
           <Plus size={16} />
           <span>{c.createEvent || "Create Event"}</span>
-        </button>
+        </button> */}
       </div>
 
       {/* ─── Upcoming Section bar ─── */}
@@ -367,7 +367,7 @@ const SchedulePage = () => {
           {/* Right Column: Classes Scheduled (Span 7 of 12) */}
           <div className="lg:col-span-7 flex flex-col gap-5">
             <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2 pb-1 border-b border-gray-100">
-              <span>{c.mySchedule || "My Schedule"}</span>
+              <span>{c.teachingSchedule || "My Schedule"}</span>
             </h3>
 
             {isLoading ? (

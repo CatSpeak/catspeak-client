@@ -88,10 +88,13 @@ export const mapFormToPayload = ({
     payload.recurrenceRule = {
       frequency,
       interval: Number(recurrenceInterval) || 1,
-      byWeekDay:
-        frequency === "WEEKLY"
-          ? JSON.stringify(selectedDays.map((d) => WEEKDAY_CODES[d] ?? d))
-          : undefined,
+      ...(frequency === "WEEKLY"
+        ? {
+            byWeekDay: JSON.stringify(
+              selectedDays.map((d) => WEEKDAY_CODES[d] ?? d),
+            ),
+          }
+        : {}),
       ...(frequency === "MONTHLY" && {
         byMonthDay: dayjs(startTime).date(),
       }),
@@ -106,7 +109,7 @@ export const mapFormToPayload = ({
       endCondition:
         recurrenceEndType === "COUNT"
           ? "OCCURRENCE_COUNT"
-          : recurrenceEndDate
+          : recurrenceEndType === "DATE"
             ? "UNTIL_DATE"
             : "NEVER",
       occurrenceCount:

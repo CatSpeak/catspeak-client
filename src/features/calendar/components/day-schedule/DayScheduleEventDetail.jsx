@@ -45,7 +45,7 @@ const DayScheduleEventDetail = ({
         onClick={onClose}
       />
 
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[92vw] max-w-[420px] max-h-[85vh] lg:static lg:transform-none lg:w-full lg:max-w-none lg:max-h-none flex flex-col bg-white rounded-[32px] lg:rounded-2xl lg:shadow-sm overflow-hidden shadow-2xl lg:h-max">
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  w-[92vw] max-w-[420px] max-h-[85vh] lg:static lg:transform-none lg:w-full lg:max-w-none lg:max-h-none flex flex-col bg-white rounded-[32px] lg:rounded-2xl lg:shadow-sm overflow-hidden shadow-2xl lg:h-max">
         <div className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-6 [&::-webkit-scrollbar]:hidden flex flex-col">
           {/* Header */}
           <div className="flex items-start gap-4 mb-6 shrink-0">
