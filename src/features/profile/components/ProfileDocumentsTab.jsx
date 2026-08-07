@@ -13,7 +13,7 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
     pageSize: 50,
   })
 
-  const documents = data?.data || []
+  const documents = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
 
   // Helper to format file size
   const formatFileSize = (bytes) => {

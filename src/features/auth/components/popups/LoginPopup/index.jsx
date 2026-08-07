@@ -10,6 +10,7 @@ import { useAuthModal } from "@/shared/context/AuthModalContext";
 import Modal from "@/shared/components/ui/Modal";
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import Checkbox from "@/shared/components/ui/inputs/Checkbox";
+import { parseApiError } from "@/shared/utils/apiError";
 
 const LoginPopup = ({ open, onClose, onSwitchMode }) => {
   const { t } = useLanguage();
@@ -63,47 +64,40 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
     if (emailErr || passwordErr) return;
 
     try {
-      const result = await login({ email, password });
+      await login({ email, password }).unwrap()
 
-      const err = result?.error;
-      if (err) {
-        const errData = err?.data;
-        const errMessage = errData?.message;
+      handleClose()
+      if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
+    } catch (err) {
+      console.error("Login error:", err)
+      const { statusCode, errorCode, message } = parseApiError(err)
 
-        const isNotActivated =
-          err?.status === 401 &&
-          errMessage === "Account is not activated. Please verify your email.";
+      const isNotActivated =
+        statusCode === 401 && errorCode === "AUTH_ACCOUNT_NOT_ACTIVATED"
 
-        if (isNotActivated) {
-          setIsNotActivatedError(true);
-          setApiError(errMessage);
-          return;
-        }
-
-        const isInvalidCredentials = errMessage === "Invalid email or password";
-
-        setApiError(
-          isInvalidCredentials
-            ? authText.invalidCredentials
-            : errMessage ||
-                t.common?.errorGeneric ||
-                authText.loginFailed ||
-                "Login failed",
-        );
-        return;
+      if (isNotActivated) {
+        setIsNotActivatedError(true)
+        setApiError(authText.accountNotActivated)
+        return
       }
 
-      handleClose();
-      if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true });
-    } catch (err) {
-      console.error("Login unexpected error:", err);
+      if (errorCode === "AUTH_ACCOUNT_LOCKED_ATTEMPTS") {
+        setApiError(authText.accountLocked || message)
+        return
+      }
+
+      if (statusCode === 429 || errorCode === "AUTH_TOO_MANY_REQUESTS") {
+        setApiError(authText.tooManyOtpRequests || "Too many requests. Please try again later.")
+        return
+      }
+
+      const isInvalidCredentials = errorCode === "AUTH_INVALID_CREDENTIALS"
+
       setApiError(
-        err?.data?.message ||
-          err?.message ||
-          t.common?.errorGeneric ||
-          authText.loginFailed ||
-          "Login failed",
-      );
+        isInvalidCredentials
+          ? authText.invalidCredentials
+          : message || authText.loginFailed,
+      )
     }
   };
 
@@ -194,16 +188,13 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
                     try {
                       await resendEmailOtp({ email }).unwrap();
                     } catch (err) {
-                      const apiMsg = err?.data?.message;
-                      if (
-                        apiMsg ===
-                        "Too many OTP requests. Please try again later."
-                      ) {
-                        setApiError(authText.tooManyOtpRequests);
+                      const { errorCode, message } = parseApiError(err)
+                      if (errorCode === "AUTH_TOO_MANY_REQUESTS") {
+                        setApiError(authText.tooManyOtpRequests)
                       } else {
-                        setApiError(apiMsg || "Failed to resend OTP.");
+                        setApiError(message || authText.sendOtpFailed)
                       }
-                      return;
+                      return
                     }
                     onSwitchMode("verify-email", email);
                   }}

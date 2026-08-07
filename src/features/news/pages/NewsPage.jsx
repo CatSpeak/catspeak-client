@@ -34,16 +34,16 @@ const NewsPage = ({ postType = "1" }) => {
 
   // Public posts filtered by current language community or "All"
   const publicPosts = useMemo(() => {
-    if (!data?.data) return [];
+    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
     const targetCommunity = currentCommunity.toLowerCase();
 
-    return data.data.filter((post) => {
+    return rawList.filter((post) => {
       if (post.privacy !== "Public") return false;
 
       const postCommunity = (post.languageCommunity || "All").toLowerCase();
       return postCommunity === "all" || postCommunity === targetCommunity;
     });
-  }, [data?.data, currentCommunity]);
+  }, [data, currentCommunity]);
 
   const columnsCount = useColumnCount();
 

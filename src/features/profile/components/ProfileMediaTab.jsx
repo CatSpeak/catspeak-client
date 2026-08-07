@@ -17,7 +17,7 @@ const ProfileMediaTab = ({ targetAccountId }) => {
     pageSize: 50,
   });
 
-  const medias = data?.data || [];
+  const medias = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
   const columnsCount = useColumnCount();
 
   // Distribute items sequentially across columns to fill column height evenly

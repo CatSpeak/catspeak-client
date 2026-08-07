@@ -15,7 +15,7 @@ const WelcomeSection = () => {
 
   const { isAuthenticated } = useAuth()
   const { data: userData } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
-  const user = userData?.data
+  const user = userData?.data ?? userData ?? null
 
   return (
     <>

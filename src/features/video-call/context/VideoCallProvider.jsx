@@ -130,7 +130,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     undefined,
     { skip: !isAuthenticated },
   )
-  const user = userData?.data ?? null
+  const user = userData?.data ?? userData ?? null
 
   const isClassRoom = roomId && roomId.startsWith("class-")
   const classId = isClassRoom ? roomId.replace("class-", "") : null
