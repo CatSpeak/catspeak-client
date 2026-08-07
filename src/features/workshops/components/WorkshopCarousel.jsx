@@ -135,8 +135,8 @@ const WorkshopCarousel = ({
               }}
               aria-label={`Go to slide ${idx + 1}`}
               className={`rounded-full transition-all duration-300 ${idx === safeIndex
-                  ? "w-8 h-2.5 bg-[#990011]"
-                  : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400"
+                ? "w-8 h-2.5 bg-[#990011]"
+                : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400"
                 }`}
             />
           ))}
@@ -175,10 +175,8 @@ const WorkshopCarousel = ({
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden py-10 -my-10 px-4 -mx-4">
-          <div className="w-full relative rounded-2xl overflow-hidden shadow-lg border border-[#e5e5e5]">
-            {carouselContent}
-          </div>
+        <div className="w-full">
+          {carouselContent}
         </div>
       )}
 

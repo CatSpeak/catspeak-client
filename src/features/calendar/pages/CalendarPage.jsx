@@ -12,6 +12,7 @@ import CalendarMonthPanel from "../components/CalendarMonthPanel.jsx";
 import EventDetailModal from "../components/EventDetailModal/index";
 import MapView from "../components/Mapview";
 import { HeaderImage } from "../assets";
+import { WorkshopCarousel } from "@/features/workshops";
 
 const CalendarPage = () => {
   const { lang } = useParams();
@@ -147,7 +148,7 @@ const CalendarPage = () => {
 
   const monthNum = currentDate.format("M");
   const yearNum = currentDate.format("YYYY");
-  
+
   let localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
   if (language === 'en') {
     localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
@@ -160,13 +161,18 @@ const CalendarPage = () => {
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
-      <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
+      <div className="w-full px-6 md:px-0 flex justify-center">
+        <div className="w-full md:w-3/4 lg:w-2/3">
+          <WorkshopCarousel hideTitle={true} />
+        </div>
+      </div>
+      {/* <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
         <img
           src={HeaderImage}
           alt="Calendar Banner"
           className="w-full h-full object-cover object-center"
         />
-      </div>
+      </div> */}
 
       <div className="px-6 pt-5 pb-8">
         <CalendarPageHeader
