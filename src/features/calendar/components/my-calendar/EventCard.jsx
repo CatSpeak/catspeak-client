@@ -27,9 +27,9 @@ const EventCard = ({ event, onClick }) => {
       case 'student-schedule':
         return navigate(`/workspace/learning/class/${event?.classId}`)
       case 'my-event':
-        return navigate(`/workspace/events`)
+        return navigate(`/workspace/my-calendar`, { state: { activeTab: 'event' } })
       case 'registered-event':
-        return navigate(`/workspace/events`)
+        return navigate(`/${language || 'vi'}/cat-speak/calendar`)
       case 'other':
         return
     }

@@ -72,7 +72,7 @@ const EventCardDetail = ({ event, onBack }) => {
               {t.calendar?.enterRoom || "Vào phòng"}
             </PillButton>
             <PillButton
-              onClick={() => navigate(`//workspace/courses/class/${event?.classId}`)}
+              onClick={() => navigate(`/workspace/courses/class/${event?.classId}`)}
             >
               {t.calendar?.viewClass || "Xem lớp học"}
             </PillButton>
