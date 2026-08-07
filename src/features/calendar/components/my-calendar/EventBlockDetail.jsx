@@ -81,8 +81,21 @@ const EventBlockDetail = ({ event, open, onClose }) => {
     }
 
     if (isEvent) {
-      const isPast = event.endTime ? dayjs().isAfter(dayjs(event.endTime)) : dayjs().isAfter(dayjs(event.startTime));
-      const statusLabel = isPast ? "Đã kết thúc" : (event.eventType === "my-event" ? "Đang diễn ra" : "Đã đăng ký");
+      const now = dayjs();
+      const start = dayjs(event.startTime);
+      const end = event.endTime ? dayjs(event.endTime) : start;
+
+      const isPast = now.isAfter(end);
+      const isUpcoming = now.isBefore(start);
+
+      let statusLabel = "";
+      if (isPast) {
+        statusLabel = "Đã kết thúc";
+      } else if (event.eventType === "my-event") {
+        statusLabel = isUpcoming ? "Sắp diễn ra" : "Đang diễn ra";
+      } else {
+        statusLabel = "Đã đăng ký";
+      }
 
       return (
         <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
