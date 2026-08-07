@@ -20,7 +20,7 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
   const { data: userData } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
   })
-  const user = userData?.data ?? authUser ?? {}
+  const user = userData?.data ?? userData ?? authUser ?? {}
 
   const { data: comments, isLoading } = useGetPostCommentsQuery({ postId })
   const [createComment] = useCreatePostCommentMutation()

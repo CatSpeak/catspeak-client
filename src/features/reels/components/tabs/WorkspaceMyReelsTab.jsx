@@ -25,7 +25,7 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
   )
   const [deleteReel, { isLoading: isDeleting }] = useDeleteReelMutation()
 
-  const reels = data?.data || EMPTY_REELS
+  const reels = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : EMPTY_REELS)
   const hasMore = (data?.lastPageCount || 0) >= PAGE_SIZE
 
   const stats = useMemo(

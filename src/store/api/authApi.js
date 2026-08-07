@@ -15,7 +15,7 @@ export const authApi = baseApi.injectEndpoints({
           const { data } = await queryFulfilled
           dispatch(setCredentials(data))
         } catch (err) {
-          console.error(err)
+          // Handled by UI component
         }
       },
     }),
@@ -52,7 +52,7 @@ export const authApi = baseApi.injectEndpoints({
             }),
           )
         } catch (err) {
-          console.error(err)
+          // Handled by refresh handler / component
         }
       },
     }),
