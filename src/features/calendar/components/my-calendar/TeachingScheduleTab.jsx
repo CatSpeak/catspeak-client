@@ -1,14 +1,20 @@
 import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X, MoreVertical, Edit, DoorOpen } from 'lucide-react'
 import { useGetScheduleSessionsQuery } from '@/store/api/coursesApi'
 import DataTable from '@/shared/components/ui/DataTable'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import { IconButton } from '@/shared/components/ui/buttons'
-import Pagination from '@/shared/components/ui/navigation/Pagination'
+import { useLanguage } from '@/shared/context/LanguageContext'
+import TablePagination from "@/features/courses/components/shared/TablePagination"
 import DatePicker from '@/shared/components/ui/inputs/DatePicker'
+import Popover from '@/shared/components/ui/Popover'
+import MenuItem from '@/shared/components/ui/MenuItem'
 
 const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
+  const { t, language } = useLanguage()
+  const navigate = useNavigate()
   const fromDate = currentDate.startOf('month').format('YYYY-MM-DD')
   const toDate = currentDate.endOf('month').format('YYYY-MM-DD')
 
@@ -22,7 +28,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const rawSessions = Array.isArray(sessionsResponse?.data)
     ? sessionsResponse.data
     : (Array.isArray(sessionsResponse) ? sessionsResponse : [])
-    
+
   const [prevMonth, setPrevMonth] = useState(currentDate.format('YYYY-MM'))
 
   const currentMonth = currentDate.format('YYYY-MM')
@@ -63,9 +69,53 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       render: (row) => `${row.startTime || ''} - ${row.endTime || ''}`
     },
     {
-      key: 'location',
-      label: 'Hình thức / Địa điểm',
-      render: (row) => row.isOnline ? 'Trực tuyến' : (row.location || 'Chưa xác định')
+      key: 'roomName',
+      label: 'Phòng',
+      render: (row) => row.class?.id ? (
+        <Link to={`/${language || 'vi'}/meet/class-${row.class.id}`} className="text-[#990011] hover:underline font-medium hover:text-[#80000e]">
+          {row.roomName || 'Phòng học'}
+        </Link>
+      ) : (
+        <span>{row.roomName || 'Chưa xác định'}</span>
+      )
+    },
+    {
+      key: 'actions',
+      label: '',
+      render: (row) => (
+        <div onClick={(e) => e.stopPropagation()} className="flex justify-end">
+          <Popover
+            trigger={
+              <IconButton variant="ghost" size="sm">
+                <MoreVertical className="w-4 h-4 text-gray-500" />
+              </IconButton>
+            }
+            content={(close) => (
+              <div className="flex flex-col min-w-[200px] p-1 bg-white rounded-xl shadow-lg border border-gray-100">
+                <MenuItem
+                  onClick={() => {
+                    navigate(`/workspace/courses/class/${row.class?.id}`)
+                    close && close()
+                  }}
+                  icon={<DoorOpen className="w-4 h-4 text-gray-400" />}
+                >
+                  Vào lớp học
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    // edit logic...
+                    close && close()
+                  }}
+                  icon={<Edit className="w-4 h-4 text-gray-400" />}
+                >
+                  Chỉnh sửa lịch học
+                </MenuItem>
+              </div>
+            )}
+            placement="bottom-right"
+          />
+        </div>
+      )
     }
   ]
 
@@ -124,7 +174,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
             <ChevronRight />
           </IconButton>
         </div>
-        
+
         <div className="flex items-center gap-2 relative z-10">
           <DatePicker
             value={filterDate}
@@ -133,8 +183,8 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
             className="w-40 sm:w-48"
           />
           {filterDate && (
-            <IconButton 
-              variant="ghost" 
+            <IconButton
+              variant="ghost"
               onClick={() => setFilterDate(null)}
               title="Bỏ lọc"
             >
@@ -154,10 +204,13 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           renderMobileCard={renderMobileCard}
         />
         {totalPages > 1 && (
-          <Pagination
-            page={currentPage}
+          <TablePagination
+            currentPage={currentPage}
             totalPages={totalPages}
-            onChangePage={setCurrentPage}
+            totalCount={filteredSessions.length}
+            limit={pageSize}
+            onPageChange={setCurrentPage}
+            t={t}
           />
         )}
       </div>

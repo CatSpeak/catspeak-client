@@ -2,15 +2,32 @@ import React, { useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
 import { IconButton } from '@/shared/components/ui/buttons'
 import EventCard from './EventCard'
+import EventCardDetail from './EventCardDetail'
 import EventFilter from './EventFilter'
 
 const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onApplyFilter }) => {
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterOpenCount, setFilterOpenCount] = useState(0)
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [prevDate, setPrevDate] = useState(date)
+
+  // Reset selected event when date changes
+  if (date !== prevDate) {
+    setPrevDate(date)
+    setSelectedEvent(null)
+  }
 
   const handleApplyFilter = (selectedTypes) => {
     if (onApplyFilter) onApplyFilter(selectedTypes)
     setFilterOpen(false)
+  }
+
+  if (selectedEvent) {
+    return (
+      <div className="flex flex-col min-h-0 w-full border bg-white rounded-xl h-full flex-1">
+        <EventCardDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} />
+      </div>
+    )
   }
 
   return (
@@ -35,7 +52,7 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
       <div className="space-y-3 overflow-y-auto flex-1 min-h-0 scrollbar-app pr-1">
         {events.length > 0 ? (
           events.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id} event={event} onClick={setSelectedEvent} />
           ))
         ) : (
           <p className="text-center text-[#7B7979] py-8">

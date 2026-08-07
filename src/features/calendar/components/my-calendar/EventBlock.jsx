@@ -1,6 +1,8 @@
 import React from 'react'
 import { Clock, Calendar } from 'lucide-react'
 import dayjs from 'dayjs'
+import { useNavigate } from 'react-router-dom'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
@@ -11,12 +13,14 @@ const EVENT_STYLES = {
 };
 
 const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick }) => {
+  const navigate = useNavigate()
+  const { language } = useLanguage()
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
 
   return (
     <div
       onClick={onClick}
-      className="absolute rounded-xl p-3 overflow-hidden flex flex-col gap-2 min-h-fit z-10 border cursor-pointer hover:opacity-90 transition-opacity"
+      className="absolute rounded-xl p-3 flex flex-col gap-2 min-h-fit z-10 border cursor-pointer hover:opacity-90 transition-opacity"
       style={{
         top: `${top}px`,
         height: `${height}px`,
@@ -45,6 +49,19 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
           </div>
         )}
       </div>
+
+      {(event.eventType === 'teaching-schedule' || event.eventType === 'student-schedule') &&
+        dayjs().isAfter(dayjs(event.startTime)) && dayjs().isBefore(dayjs(event.endTime)) && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/${language || 'vi'}/meet/class-${event?.classId}`);
+          }}
+          className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-[90%] py-1 bg-white border border-[#990011] text-[#990011] rounded-md text-xs font-bold hover:bg-red-50 z-20 shadow-sm"
+        >
+          Vào phòng
+        </button>
+      )}
     </div>
   )
 }

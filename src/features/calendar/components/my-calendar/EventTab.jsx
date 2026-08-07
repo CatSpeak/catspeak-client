@@ -12,7 +12,7 @@ import {
   useDeleteEventMutation,
 } from "@/store/api/eventsApi"
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"
-import Pagination from '@/shared/components/ui/navigation/Pagination'
+import TablePagination from "@/features/courses/components/shared/TablePagination"
 
 import RegistrationsModal from "../workspace-events/RegistrationsModal"
 import EventFetcher from "../workspace-events/EventFetcher"
@@ -169,13 +169,14 @@ const EventTab = () => {
               ))}
             </div>
             {totalPages > 1 && (
-              <div className="mt-4">
-                <Pagination
-                  page={currentPage}
-                  totalPages={totalPages}
-                  onChangePage={setCurrentPage}
-                />
-              </div>
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={events.length}
+                limit={pageSize}
+                onPageChange={setCurrentPage}
+                t={t}
+              />
             )}
           </div>
         )}

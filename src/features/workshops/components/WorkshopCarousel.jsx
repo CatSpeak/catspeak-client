@@ -134,11 +134,10 @@ const WorkshopCarousel = ({
                 goToSlide(idx);
               }}
               aria-label={`Go to slide ${idx + 1}`}
-              className={`rounded-full transition-all duration-300 ${
-                idx === safeIndex
+              className={`rounded-full transition-all duration-300 ${idx === safeIndex
                   ? "w-8 h-2.5 bg-[#990011]"
                   : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400"
-              }`}
+                }`}
             />
           ))}
         </div>

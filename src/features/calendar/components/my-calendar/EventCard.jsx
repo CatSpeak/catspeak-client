@@ -1,8 +1,9 @@
-import { IconButton } from '@/shared/components/ui/buttons'
-import { ArrowRight, Calendar, Clock } from 'lucide-react'
+import { IconButton, PillButton } from '@/shared/components/ui/buttons'
+import { ArrowRight, Calendar, Clock, MapPin } from 'lucide-react'
 import React from 'react'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
@@ -12,8 +13,9 @@ const EVENT_STYLES = {
   "other": { background: "#ffffff", border: "#E2E2E2" },
 };
 
-const EventCard = ({ event }) => {
+const EventCard = ({ event, onClick }) => {
   const navigate = useNavigate()
+  const { language } = useLanguage()
 
   if (!event) return;
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
@@ -35,7 +37,8 @@ const EventCard = ({ event }) => {
 
   return (
     <div
-      className="max-w-[290px] w-full h-fit p-4 space-y-2 rounded-xl border"
+      onClick={() => onClick && onClick(event)}
+      className={`max-w-[290px] w-full h-fit p-4 space-y-2 rounded-xl border relative transition-shadow ${onClick ? 'cursor-pointer hover:shadow-md' : ''}`}
       style={{ backgroundColor: background, borderColor: border || 'transparent' }}
     >
       {/* Heading */}
@@ -51,11 +54,29 @@ const EventCard = ({ event }) => {
             {event.startTime ? dayjs(event.startTime).format('HH:mm') : ''}
             {event.endTime ? ` - ${dayjs(event.endTime).format('HH:mm')}` : ''}
           </p>
-          <p className='flex items-center gap-2'><Calendar size={14} /> {event.location}</p>
+          <p className='flex items-center gap-2'><MapPin size={14} /> {event.location}</p>
         </div>
-        <IconButton variant='outline' innerClassName='!w-8 !h-8' onClick={() => handleNavigate(event)}>
-          <ArrowRight size={8} />
-        </IconButton>
+        {(event.eventType === 'teaching-schedule' || event.eventType === 'student-schedule') &&
+          dayjs().isAfter(dayjs(event.startTime)) && dayjs().isBefore(dayjs(event.endTime)) ? (
+          <PillButton
+            variant='outline'
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/${language || 'vi'}/meet/class-${event?.classId}`);
+            }}
+            className='!h-8'
+            roundedClass='h-8 rounded-full'
+          >
+            Vào phòng
+          </PillButton>
+        ) : (
+          <IconButton variant='outline' innerClassName='!w-8 !h-8' onClick={(e) => {
+            e.stopPropagation();
+            handleNavigate(event)
+          }}>
+            <ArrowRight size={8} />
+          </IconButton>
+        )}
       </div>
     </div>
   )

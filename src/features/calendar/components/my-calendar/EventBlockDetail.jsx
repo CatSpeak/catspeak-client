@@ -1,9 +1,10 @@
 import React from 'react'
 import Modal from '@/shared/components/ui/Modal'
-import { Clock, MapPin, Calendar, Users, AlignLeft, ArrowRight } from 'lucide-react'
+import { Clock, MapPin, Tag, Info, ArrowRight, Share2 } from 'lucide-react'
 import dayjs from 'dayjs'
-import { IconButton } from '@/shared/components/ui/buttons';
+import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", label: "Lịch dạy", color: "#34ce56" },
@@ -15,6 +16,7 @@ const EVENT_STYLES = {
 
 const EventBlockDetail = ({ event, open, onClose }) => {
   const navigate = useNavigate()
+  const { t, language } = useLanguage()
 
   if (!event) return null;
 
@@ -35,12 +37,72 @@ const EventBlockDetail = ({ event, open, onClose }) => {
     }
   }
 
+  const renderImage = (event) => {
+    if (['teaching-schedule', 'student-schedule'].includes(event.eventType)) return null;
+
+    return (
+      <div>
+        {['registered-event', 'my-event'].includes(event.eventType) && event.thumbnailUrl ? (
+          <div className="w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center overflow-hidden border border-gray-100 mt-2 shrink-0">
+            <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="w-full h-44 bg-[#F8F9FA] text-[#7B7979] rounded-2xl flex items-center justify-center overflow-hidden border border-gray-100 mt-2 shrink-0">
+            No Image
+          </div>
+        )}
+      </div>
+    )
+  }
+
+
+  const renderFooter = () => {
+    const isSchedule = ["teaching-schedule", "student-schedule"].includes(event.eventType);
+    const isEvent = ["registered-event", "my-event"].includes(event.eventType);
+
+    if (!isSchedule && !isEvent) return null;
+
+    if (isSchedule) {
+      return (
+        <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
+          <PillButton
+            variant='outline'
+            onClick={() => navigate(`/${language || 'vi'}/meet/class-${event?.classId}`)}
+          >
+            {"Vào phòng"}
+          </PillButton>
+          <PillButton
+            onClick={() => handleNavigate(event)}
+          >
+            {"Xem lớp học"}
+          </PillButton>
+        </div>
+      )
+    }
+
+    if (isEvent) {
+      const isPast = event.endTime ? dayjs().isAfter(dayjs(event.endTime)) : dayjs().isAfter(dayjs(event.startTime));
+      const statusLabel = isPast ? "Đã kết thúc" : (event.eventType === "my-event" ? "Đang diễn ra" : "Đã đăng ký");
+
+      return (
+        <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
+          <PillButton bgColor={isPast ? "#d1d5db" : undefined}>
+            {statusLabel}
+          </PillButton>
+          <IconButton variant="outline" innerClassName="!w-11 !h-11 rounded-full border-gray-200 text-[#1A1A1A]">
+            <Share2 size={18} />
+          </IconButton>
+        </div>
+      )
+    }
+  }
+
   return (
     <Modal
       open={open}
       onClose={onClose}
       title="Chi tiết sự kiện"
-      className="max-w-md w-full"
+      className="max-w-md w-full "
       bodyClassName="p-0"
     >
       <div className="flex flex-col">
@@ -58,34 +120,59 @@ const EventBlockDetail = ({ event, open, onClose }) => {
         </div>
 
         {/* Content section */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-3">
+          {/* Status */}
+          {event.status && (
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[#1A1A1A] font-medium">{t.courses?.student?.classStatuses?.[event.status] || event.status}</p>
+                <p className="text-sm text-gray-500">Trạng thái</p>
+              </div>
+            </div>
+          )}
+
+          {/* Time */}
           <div className="flex items-start gap-3">
             <Clock className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
             <div>
               <p className="text-[#1A1A1A] font-medium">
                 {event.startTime ? dayjs(event.startTime).format('HH:mm') : ''}
                 {event.endTime ? ` - ${dayjs(event.endTime).format('HH:mm')}` : ''}
-                {`, (${dayjs(event.startTime).format('DD/MM/YYYY')})`}
+                {event.startTime ? `, (${dayjs(event.startTime).format('DD/MM/YYYY')})` : ''}
               </p>
               <p className="text-sm text-gray-500">Thời gian</p>
             </div>
           </div>
 
-          <div className='flex justify-between items-center w-full'>
-            {event.location && (
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-[#1A1A1A] font-medium">{event.location}</p>
-                  <p className="text-sm text-gray-500">Địa điểm</p>
-                </div>
+          {/* Location */}
+          {event.location && (
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[#1A1A1A] font-medium">{event.location}</p>
+                <p className="text-sm text-gray-500">Địa điểm</p>
               </div>
-            )}
-            <IconButton variant='outline' innerClassName='!w-8 !h-8' onClick={() => handleNavigate(event)}>
-              <ArrowRight size={8} />
-            </IconButton>
-          </div>
+            </div>
+          )}
+
+          {/* Price */}
+          {event.ticketPrice && (
+            <div className="flex items-start gap-3">
+              <Tag className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[#1A1A1A] font-medium">{event.ticketPrice + "K" || 'Miễn phí'}</p>
+                <p className="text-sm text-gray-500">Giá vé</p>
+              </div>
+            </div>
+          )}
+
+          {/* Thumbnail */}
+          {renderImage(event)}
         </div>
+
+        {/* Footer */}
+        {renderFooter()}
       </div>
     </Modal>
   )
