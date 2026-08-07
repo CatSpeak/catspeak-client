@@ -26,6 +26,7 @@ import {
   pingActiveCall,
   requestLeaveActiveCall,
 } from "@/features/video-call/services/callBroadcastChannel";
+import { HeaderImage } from "../assets";
 
 const CalendarPage = () => {
   const { lang } = useParams();
@@ -167,7 +168,7 @@ const CalendarPage = () => {
 
   const monthNum = currentDate.format("M");
   const yearNum = currentDate.format("YYYY");
-  
+
   let localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
   if (language === 'en') {
     localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
@@ -226,9 +227,10 @@ const CalendarPage = () => {
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
-      {/* banner */}
-      <div className="relative w-full p-5">
-        <WorkshopCarousel hideTitle={true} />
+      <div className="w-full px-6 md:px-0 flex justify-center">
+        <div className="w-full md:w-3/4 lg:w-2/3">
+          <WorkshopCarousel hideTitle={true} />
+        </div>
       </div>
       {/* <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
         <img
