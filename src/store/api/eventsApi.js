@@ -202,18 +202,18 @@ export const eventsApi = baseApi.injectEndpoints({
       providesTags: getOccurrenceTags,
     }),
 
-    // POST /api/v1/events/{occurrenceId}/shared-links
+    // POST /api/teacher/Events/occurrences/{occurrenceId}/shared-links
     createSharedLink: builder.mutation({
       query: ({ occurrenceId, ...body }) => ({
-        url: `/v1/events/${occurrenceId}/shared-links`,
+        url: `/teacher/Events/occurrences/${occurrenceId}/shared-links`,
         method: "POST",
         body,
       }),
     }),
 
-    // GET /api/v1/events/shared/{token}
+    // GET /api/teacher/EventsPublic/shared/{token}
     getSharedEvent: builder.query({
-      query: (token) => `/v1/events/shared/${token}`,
+      query: (token) => `/teacher/EventsPublic/shared/${token}`,
     }),
 
     // POST /api/v1/event/registration

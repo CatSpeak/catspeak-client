@@ -154,12 +154,18 @@ const EventDetailFooter = ({
               disabled={isPast}
               loading={isProcessing}
               loadingText={cal.processing || "Đang xử lý..."}
-              bgColor={isPast ? "#d1d5db" : (isRegistered ? undefined : "#06AA3B")}
+              bgColor={
+                isPast ? "#d1d5db" : isRegistered ? undefined : "#06AA3B"
+              }
               className={`w-full min-[426px]:flex-1 ${!isPast && isRegistered ? "bg-cath-red-700 rounded-full " : ""} ${isPast ? "cursor-not-allowed opacity-80" : ""}`}
             >
-              {isPast 
-                ? (isRegistered ? "Đã tham gia" : "Đã kết thúc") 
-                : (isRegistered ? (cal.cancelRegistration || "Hủy đăng kí") : (cal.register || "Đăng kí"))}
+              {isPast
+                ? isRegistered
+                  ? "Đã tham gia"
+                  : "Đã kết thúc"
+                : isRegistered
+                  ? cal.cancelRegistration || "Hủy đăng kí"
+                  : cal.register || "Đăng kí"}
             </PillButton>
           ))}
 
@@ -208,29 +214,37 @@ const EventDetailFooter = ({
             </PillButton>
           </div>
         ) : (
-          <div className="relative flex items-center justify-center min-[426px]:justify-end gap-2 w-full min-[426px]:w-auto">
-            {isCreator && !hideAdminControls && (
-              <>
-                <button
-                  onClick={onEdit}
-                  disabled={isPast}
-                  title={isPast ? "Không thể sửa sự kiện đã qua" : undefined}
-                  className={`transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 ${isPast ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#F2F2F2] hover:bg-[#D9D9D9] text-[#111111]'}`}
-                >
-                  <Pencil />
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(true)}
-                  className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
-                >
-                  <Trash2 />
-                </button>
-              </>
-            )}
-            <SharePopover
-              eventId={eventId}
-              occurrenceId={event?.occurrenceId}
-            />
+          <div className="relative flex items-center w-full">
+            <div className="ml-auto flex items-center gap-2">
+              {isCreator && !hideAdminControls && (
+                <>
+                  <button
+                    onClick={onEdit}
+                    disabled={isPast}
+                    title={isPast ? "Không thể sửa sự kiện đã qua" : undefined}
+                    className={`transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 ${
+                      isPast
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-[#F2F2F2] hover:bg-[#D9D9D9] text-[#111111]"
+                    }`}
+                  >
+                    <Pencil />
+                  </button>
+
+                  <button
+                    onClick={() => setConfirmDelete(true)}
+                    className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
+                  >
+                    <Trash2 />
+                  </button>
+                </>
+              )}
+
+              <SharePopover
+                eventId={eventId}
+                occurrenceId={event?.occurrenceId}
+              />
+            </div>
           </div>
         )}
       </div>
