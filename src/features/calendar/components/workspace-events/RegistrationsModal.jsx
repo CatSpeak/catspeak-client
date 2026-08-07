@@ -64,9 +64,9 @@ const RegistrationsModal = memo(function RegistrationsModal({
               className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="w-9 h-9 rounded-full bg-[#990011]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                {r.avatarUrl ? (
+                {r.avatarImageUrl || r.avatarUrl ? (
                   <img
-                    src={r.avatarUrl}
+                    src={r.avatarImageUrl || r.avatarUrl}
                     alt={r.username}
                     className="w-full h-full object-cover"
                   />
