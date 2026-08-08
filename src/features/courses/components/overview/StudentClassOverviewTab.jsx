@@ -1,7 +1,7 @@
 import React from "react"
 import { Calendar, Clock } from "lucide-react"
 import CountdownTicker from "../CountdownTicker"
-import { getSafeMediaUrl } from "../../utils/courseUtils"
+import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
@@ -17,7 +17,7 @@ const StudentClassOverviewTab = ({
   noUpcomingLabel,
   onJoinRoom
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}

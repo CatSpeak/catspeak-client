@@ -16,7 +16,7 @@ const AddActivityModal = ({
   onSubmit = () => { },
   classId,
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateTime } = useTimezone()
   const dict = t.courses.lectureHall.modals.addActivity || {}
   const [searchQuery, setSearchQuery] = useState("")

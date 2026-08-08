@@ -8,7 +8,6 @@ const WorkspaceCourseRedirect = () => {
   const { t } = useLanguage()
   const redirect = t.courses?.workspaceRedirect || {}
   const {
-    isStudent,
     isRoleResolved,
     isLoading,
     isFetching,

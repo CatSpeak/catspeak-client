@@ -16,7 +16,6 @@ import {
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { mapTeachingTask } from "../utils/courseTransforms"
-import { toLocalDateString } from "../utils/dateUtils"
 
 import ClassCard from "../components/ClassCard"
 import CourseInfoCard from "../components/CourseInfoCard"
@@ -26,7 +25,7 @@ import UpcomingSessionCard from "../components/sessions/UpcomingSessionCard"
 const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}

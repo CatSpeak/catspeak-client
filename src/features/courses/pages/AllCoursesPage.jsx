@@ -14,11 +14,10 @@ import TablePagination from "../components/shared/TablePagination"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapCourseTableRow } from "../utils/courseTransforms"
-import { getCourseLocale } from "../utils/courseUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const AllCoursesPage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ac = c.allCourses || {}

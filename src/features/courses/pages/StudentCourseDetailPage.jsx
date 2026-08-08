@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
-import { toast } from "react-hot-toast"
 import {
   useGetStudentCourseDetailQuery,
   useGetExploreCourseDetailQuery
@@ -11,9 +10,6 @@ import RenderHTML from "@/shared/components/ui/RenderHTML"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   formatCurrencyVND,
-  getClassEnrollmentIssue,
-  getClassEnrollmentIssueLabel,
-  getClassEnrollmentIssueMessage,
   getSafeMediaUrl,
   defaultCourseThumbnail,
 } from "../utils/courseUtils"

@@ -19,7 +19,7 @@ const StudentCourseCard = ({
   t: propsT,
   index
 }) => {
-  const { language, t: contextT } = useLanguage()
+  const { t: contextT } = useLanguage()
   const { formatDateMonth } = useTimezone()
   const t = propsT || contextT
   const sc = t?.courses?.student || {}
