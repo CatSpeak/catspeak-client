@@ -431,6 +431,11 @@ const SchedulePage = () => {
                               {c.teachingStatus || "Teaching"}
                             </span>
                           )}
+                          {cls.status === "NOT_STARTED" && (
+                            <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[9px] px-2 py-0.5 rounded-md">
+                              {c.notStartedStatus || "Not started"}
+                            </span>
+                          )}
                         </div>
                       </div>
 

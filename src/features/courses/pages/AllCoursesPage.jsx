@@ -71,6 +71,7 @@ const AllCoursesPage = () => {
     { value: "all", label: ac.tabAll || "All" },
     { value: "teaching", label: ac.tabTeaching || "Teaching" },
     { value: "open", label: ac.tabOpen || "Open Enrollment" },
+    { value: "not_started", label: ac.tabNotStarted || "Not Started" },
     { value: "archived", label: ac.tabArchived || "Archived" },
   ]
 

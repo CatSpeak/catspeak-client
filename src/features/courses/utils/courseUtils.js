@@ -143,6 +143,7 @@ export const CLASS_STATUS_CONFIG = {
   OPEN: { bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
   OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
   UPCOMING: { bgClass: "bg-[#EEF2FF]", textClass: "text-[#4F46E5]", dotClass: null, hasPing: false },
+  NOT_STARTED: { bgClass: "bg-[#FEF3C7]", textClass: "text-[#D97706]", dotClass: null, hasPing: false },
   ARCHIVED: { bgClass: "bg-[#F3F4F6]", textClass: "text-[#6B7280]", dotClass: null, hasPing: false },
 }
 
