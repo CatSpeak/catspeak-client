@@ -1,23 +1,24 @@
-import React, { useRef, useState } from "react"
+import React, { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import {
   useGetStudentCourseDetailQuery,
-  useEnrollInCourseMutation
+  useGetExploreCourseDetailQuery
 } from "@/store/api/coursesApi"
-import StudentJoinModal from "../student/components/StudentJoinModal"
-import { useGetUserProfileQuery } from "@/store/api/userApi"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   formatCurrencyVND,
   getClassEnrollmentIssue,
   getClassEnrollmentIssueLabel,
   getClassEnrollmentIssueMessage,
   getSafeMediaUrl,
+  defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { Calendar, Mail, CheckCircle2, BookOpen, FileText, Award, Globe, User, Radio, Users, Clock, Video } from "lucide-react"
+import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
 import { formatScheduleDays } from "../utils/scheduleUtils"
 
 const StudentCourseDetailPage = () => {
@@ -29,29 +30,25 @@ const StudentCourseDetailPage = () => {
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
 
-  // Fetch course details
-  const {
-    currentData: courseDetail,
-    isLoading,
-    isFetching,
-    error,
-    refetch,
-  } = useGetStudentCourseDetailQuery(id, { skip: !id })
-  const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
-  const { data: profileResponse } = useGetUserProfileQuery()
-  const profile = profileResponse?.data || profileResponse || {}
-  const currentUserId = (
-    profile.accountId
-    ?? profile.id
-    ?? ""
-  ).toString()
+  const isExploreRoute = window.location.pathname.includes("/explore-courses")
+  const isWorkspace = window.location.pathname.startsWith("/workspace")
+  const exploreHomePath = isWorkspace ? "/workspace/explore-courses" : "/explore-courses"
+
+  // Fetch course details (Use public explore endpoint on explore route)
+  const exploreQuery = useGetExploreCourseDetailQuery(id, { skip: !id || !isExploreRoute })
+  const studentQuery = useGetStudentCourseDetailQuery(id, { skip: !id || isExploreRoute })
+
+  const courseDetail = isExploreRoute
+    ? exploreQuery.currentData
+    : (studentQuery.currentData || exploreQuery.currentData)
+
+  const isLoading = isExploreRoute ? exploreQuery.isLoading : studentQuery.isLoading
+  const isFetching = isExploreRoute ? exploreQuery.isFetching : studentQuery.isFetching
+  const error = isExploreRoute ? exploreQuery.error : studentQuery.error
+  const refetch = isExploreRoute ? exploreQuery.refetch : studentQuery.refetch
 
   // State
-  const [enrollTarget, setEnrollTarget] = useState(null)
-  const [isJoinOpen, setIsJoinOpen] = useState(false)
-  const [enrollSuccess, setEnrollSuccess] = useState(false)
   const [expandedClassIds, setExpandedClassIds] = useState({})
-  const enrollmentGuardRef = useRef(false)
 
   const isRecord = (value) => (
     value !== null
@@ -65,100 +62,12 @@ const StudentCourseDetailPage = () => {
     ? rawCourse.classes.filter((cls) => isRecord(cls) && cls.id)
     : []
   const teacher = isRecord(rawCourse?.teacher) ? rawCourse.teacher : {}
-  const isOwner = Boolean(
-    currentUserId
-    && (
-      rawCourse?.accountId?.toString() === currentUserId
-      || teacher.accountId?.toString() === currentUserId
-    )
-  )
 
   const toggleClassExpand = (classId) => {
     setExpandedClassIds((prev) => ({
       ...prev,
       [classId]: !prev[classId]
     }))
-  }
-
-  const handleOpenEnroll = (course, cls) => {
-    if (isOwner) {
-      toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
-      return
-    }
-    if (!isRecord(cls) || !cls.id) {
-      toast.error(scd.classUnavailable || "This class is not available for enrollment.")
-      return
-    }
-    const enrollmentIssue = getClassEnrollmentIssue({
-      classData: cls,
-      enrolledClassId: course?.enrolledClassId,
-    })
-    if (enrollmentIssue) {
-      toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
-      return
-    }
-    setEnrollTarget({ course, class: cls })
-    setEnrollSuccess(false)
-    setIsJoinOpen(true)
-  }
-
-  const handleConfirmEnroll = async () => {
-    if (!enrollTarget || enrollmentGuardRef.current || isEnrolling) return
-    const enrollmentIssue = getClassEnrollmentIssue({
-      classData: enrollTarget.class,
-      enrolledClassId: enrollTarget.course?.enrolledClassId,
-    })
-    if (enrollmentIssue) {
-      toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
-      setIsJoinOpen(false)
-      return
-    }
-    enrollmentGuardRef.current = true
-    try {
-      const result = await enrollInCourse({
-        classId: enrollTarget.class.id,
-        courseId: enrollTarget.course.id,
-      }).unwrap()
-      const resultPayload = isRecord(result) && Object.prototype.hasOwnProperty.call(result, "data")
-        ? result.data
-        : result
-      if (!isRecord(resultPayload)) {
-        throw new Error("Unexpected enrollment response")
-      }
-
-      if (resultPayload.checkoutUrl) {
-        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
-        if (!checkoutUrl) {
-          throw new Error("Invalid checkout URL")
-        }
-        toast.success(
-          c.createClass?.toastRedirectPayment || "Redirecting to payment..."
-        )
-        window.location.assign(checkoutUrl)
-      } else if (resultPayload.classId || resultPayload.enrollmentId) {
-        setEnrollSuccess(true)
-        toast.success(
-          c.student?.enrolledSuccess
-            ? c.student.enrolledSuccess.replace("{{className}}", enrollTarget.class.title)
-            : `Successfully enrolled in ${enrollTarget.class.title}!`
-        )
-      } else {
-        throw new Error("Missing enrollment confirmation")
-      }
-    } catch {
-      toast.error(scd.enrollFailed || "Enrollment could not be completed. Please try again.")
-    } finally {
-      enrollmentGuardRef.current = false
-    }
-  }
-
-  const handleSuccessClose = () => {
-    setIsJoinOpen(false)
-    const targetClassId = enrollTarget?.class?.id
-    setEnrollTarget(null)
-    if (targetClassId) {
-      navigate(`/workspace/learning/class/${encodeURIComponent(String(targetClassId))}`)
-    }
   }
 
   if (isLoading || (isFetching && courseDetail === undefined)) {
@@ -193,14 +102,11 @@ const StudentCourseDetailPage = () => {
 
   // Data helpers
   const languageLabel = rawCourse.language || "—"
-  const levelLabel = Array.isArray(rawCourse.levels) && rawCourse.levels.length > 0
-    ? rawCourse.levels.join(", ")
-    : "—"
   const thumbnailUrl = getSafeMediaUrl(rawCourse.thumbnailUrl)
   const teacherAvatarUrl = getSafeMediaUrl(teacher.avatarImageUrl)
 
   return (
-    <div className="flex flex-col gap-8 text-[#2e2e2e] bg-gray-50/30 -mx-4 sm:-mx-6 px-4 sm:px-6">
+    <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
       {isFetching && (
         <span className="sr-only" role="status">
           {scd.refreshing || "Refreshing course details"}
@@ -208,27 +114,26 @@ const StudentCourseDetailPage = () => {
       )}
 
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-semibold flex flex-wrap items-center gap-1.5">
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Home"}</button>
-        <span>/</span>
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle || "My Learning"}</button>
-        <span>/</span>
-        <span className="text-[#990011] font-bold">{rawCourse.title}</span>
-      </div>
+      <Breadcrumb
+        items={[
+          {
+            label: t.nav?.home || "Home",
+            onClick: () => navigate(isExploreRoute ? exploreHomePath : "/workspace"),
+          },
+          {
+            label: isExploreRoute ? (t.nav?.exploreCourses || "Explore Courses") : (c.student?.dashboardTitle || "My Learning"),
+            onClick: () => navigate(isExploreRoute ? exploreHomePath : "/workspace/learning"),
+          },
+          {
+            label: rawCourse.title,
+          },
+        ]}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* ─── 1. Course Header Block inside Left Column ─── */}
           <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider">
-                {languageLabel}
-              </span>
-              <span className="bg-red-50 text-[#990011] border border-red-100 font-bold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider">
-                {levelLabel}
-              </span>
-            </div>
-
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-950 tracking-tight leading-tight">
               {rawCourse.title}
             </h1>
@@ -236,26 +141,20 @@ const StudentCourseDetailPage = () => {
             {/* Side-by-side 50/50: Description (Left) + Thumbnail (Right) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start pt-1">
               {rawCourse.description && (
-                <div className="text-sm sm:text-sm md:text-base text-gray-600 font-medium leading-relaxed whitespace-pre-line">
-                  {rawCourse.description}
-                </div>
+                <RenderHTML
+                  html={rawCourse.description}
+                  className="text-sm sm:text-sm md:text-base text-gray-600 font-medium leading-relaxed"
+                />
               )}
 
               <div className="w-full">
-                {thumbnailUrl ? (
-                  <img
-                    src={thumbnailUrl}
-                    alt={rawCourse.title || ""}
-                    className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-gray-150 shadow-2xs block"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <div
-                    aria-hidden="true"
-                    className="w-full h-52 sm:h-60 rounded-2xl border border-gray-150 bg-gray-100"
-                  />
-                )}
+                <img
+                  src={thumbnailUrl || defaultCourseThumbnail}
+                  alt={rawCourse.title || ""}
+                  className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-gray-150 shadow-2xs block"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             </div>
           </div>
@@ -281,14 +180,6 @@ const StudentCourseDetailPage = () => {
                 <div className="flex flex-col">
                   <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.totalClasses || "Total Classes"}</span>
                   <span className="text-sm font-black text-gray-950">{classes.length} {c.student?.classesText || "classes"}</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
-                <Award size={18} className="text-purple-600 shrink-0 mt-0.5" />
-                <div className="flex flex-col">
-                  <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.targetLevel || "Target Level"}</span>
-                  <span className="text-sm font-black text-gray-950">{levelLabel}</span>
                 </div>
               </div>
 
@@ -322,23 +213,15 @@ const StudentCourseDetailPage = () => {
             ) : (
               <div className="flex flex-col gap-4">
                 {classes.map((cls) => {
-                  const isClassEnrolled = cls.isEnrolled || rawCourse.enrolledClassId === cls.id
+                  const isClassEnrolled = Boolean(cls.isEnrolled)
                   const isExpanded = !!expandedClassIds[cls.id]
                   const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
                   const tuitionLabel = cls.tuitionFee == null
                     ? ui.tba || "TBA"
                     : formatCurrencyVND(cls.tuitionFee)
-                  const sessionCount = cls.progress?.totalSessions ?? cls.totalSessions ?? null
-                  const enrollmentIssue = isClassEnrolled
-                    ? null
-                    : getClassEnrollmentIssue({
-                        classData: cls,
-                        enrolledClassId: rawCourse.enrolledClassId,
-                      })
-                  const enrollmentIssueMessage = enrollmentIssue
-                    ? getClassEnrollmentIssueMessage(enrollmentIssue, c.student)
-                    : ""
+                  const levelsText = Array.isArray(cls.levels) && cls.levels.length > 0 ? cls.levels.join(", ") : (cls.level || rawCourse?.level || "—")
+                  const classThumbnailUrl = getSafeMediaUrl(cls?.thumbnailUrl || cls?.thumbnail || rawCourse?.thumbnailUrl)
 
                   return (
                     <div
@@ -350,58 +233,84 @@ const StudentCourseDetailPage = () => {
                           : "border-gray-200 hover:border-gray-300 hover:shadow-2xs"
                         }`}
                     >
-                      {/* Accordion Trigger */}
-                      <div
-                        onClick={() => toggleClassExpand(cls.id)}
-                        onKeyDown={(event) => {
-                          if (
-                            event.currentTarget === event.target
-                            && (event.key === "Enter" || event.key === " ")
-                          ) {
-                            event.preventDefault()
-                            toggleClassExpand(cls.id)
-                          }
-                        }}
-                        role="button"
-                        tabIndex={0}
-                        aria-expanded={isExpanded}
-                        aria-controls={`class-details-${cls.id}`}
-                        className="p-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 cursor-pointer select-none group bg-white"
-                      >
-                        <div className="flex-1 flex flex-col gap-1.5 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="bg-red-50 text-[#990011] font-black text-[12px] px-2.5 py-0.5 rounded-full tracking-wider border border-red-100/60">
-                              {cls.title}
-                            </span>
-                            {isClassEnrolled && (
-                              <span className="bg-green-100 text-green-700 font-bold text-[12px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                                <CheckCircle2 size={10} />
-                                <span>{c.student?.enrolled || "Enrolled"}</span>
-                              </span>
-                            )}
+                      {/* Accordion Header */}
+                      <div className="p-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 select-none bg-white">
+                        <div className="flex-1 flex items-start sm:items-center gap-4 min-w-0">
+                          {/* Class Thumbnail Image on Left */}
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const isWorkspace = window.location.pathname.startsWith("/workspace")
+                              const classPath = isClassEnrolled
+                                ? (isWorkspace ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}` : `/learning/class/${encodeURIComponent(String(cls.id))}`)
+                                : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
+                              navigate(classPath)
+                            }}
+                            className="w-28 h-16 sm:w-36 sm:h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 cursor-pointer group/thumb relative shadow-2xs"
+                            title="Xem chi tiết lớp học"
+                          >
+                            <img
+                              src={classThumbnailUrl || defaultCourseThumbnail}
+                              alt={cls.title || "Class thumbnail"}
+                              className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
+                            />
                           </div>
 
-                          <h3 className="font-black text-base text-gray-950 group-hover:text-[#990011] transition-colors leading-snug">
-                            {formatScheduleDays(
-                              cls.schedule?.days,
-                              language,
-                              ui.tba,
-                            )}
-                            {cls.schedule?.startTime && cls.schedule?.endTime
-                              ? ` | ${formatScheduleTime(cls.schedule.startTime)} - ${formatScheduleTime(cls.schedule.endTime)}`
-                              : ""}
-                          </h3>
+                          {/* Class Main Information */}
+                          <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+                            {/* Prominent Primary Class Title */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const isWorkspace = window.location.pathname.startsWith("/workspace")
+                                  const classPath = isClassEnrolled
+                                    ? (isWorkspace ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}` : `/learning/class/${encodeURIComponent(String(cls.id))}`)
+                                    : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
+                                  navigate(classPath)
+                                }}
+                                className="font-black text-lg sm:text-xl text-gray-950 hover:text-[#b20a1c] transition-colors leading-snug cursor-pointer flex items-center gap-1.5 group/title"
+                                title="Xem chi tiết lớp học"
+                              >
+                                <span className="group-hover/title:underline">{cls.title}</span>
+                              </h3>
 
-                          <div className="flex items-center gap-3 text-sm font-semibold text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <Calendar size={12} className="text-gray-400" />
-                              <span>
-                                {cls.startDate && cls.endDate
-                                  ? `${formatDateMonth(cls.startDate, ui.tba)} – ${formatDateMonth(cls.endDate, ui.tba)}`
-                                  : cls.startDate
-                                    ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba)}`
-                                    : ui.tba || "TBA"}
-                              </span>
+                              {isClassEnrolled && (
+                                <span className="bg-green-100 text-green-700 font-bold text-[12px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <CheckCircle2 size={10} />
+                                  <span>{c.student?.enrolled || "Enrolled"}</span>
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Subtitle / Schedule Badge & Dates */}
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm font-semibold text-gray-500">
+                              {(cls.schedule?.days || (cls.schedule?.startTime && cls.schedule?.endTime)) && (
+                                <div className="flex items-center gap-1.5 bg-red-50 text-[#b20a1c] px-2.5 py-0.5 rounded-md border border-red-100/70 font-black text-xs">
+                                  <Clock size={12} className="shrink-0" />
+                                  <span>
+                                    {formatScheduleDays(
+                                      cls.schedule?.days,
+                                      language,
+                                      ui.tba,
+                                    )}
+                                    {cls.schedule?.startTime && cls.schedule?.endTime
+                                      ? ` | ${formatScheduleTime(cls.schedule.startTime)} - ${formatScheduleTime(cls.schedule.endTime)}`
+                                      : ""}
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className="flex items-center gap-1">
+                                <Calendar size={12} className="text-gray-400 shrink-0" />
+                                <span>
+                                  {cls.startDate && cls.endDate
+                                    ? `${formatDateMonth(cls.startDate, ui.tba)} – ${formatDateMonth(cls.endDate, ui.tba)}`
+                                    : cls.startDate
+                                      ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba)}`
+                                      : ui.tba || "TBA"}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -413,7 +322,7 @@ const StudentCourseDetailPage = () => {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            {isClassEnrolled ? (
+                            {isClassEnrolled && (
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -424,22 +333,21 @@ const StudentCourseDetailPage = () => {
                               >
                                 {c.student?.goToWorkspace || "Go to Workspace →"}
                               </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleOpenEnroll(rawCourse, cls)
-                                }}
-                                disabled={Boolean(enrollmentIssue)}
-                                title={enrollmentIssueMessage || undefined}
-                                className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-sm font-black rounded-full transition-all active:scale-95 shadow-2xs disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600"
-                              >
-                                {enrollmentIssue
-                                  ? getClassEnrollmentIssueLabel(enrollmentIssue, c.student)
-                                  : (c.student?.enroll || "Enroll")}
-                              </button>
                             )}
+
+                            {/* Expand/Collapse Accordion Button with Primary Text Styling */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toggleClassExpand(cls.id)
+                              }}
+                              aria-expanded={isExpanded}
+                              className="h-8 px-2 flex items-center gap-1 text-sm font-black text-[#b20a1c] hover:text-[#990011] transition-colors cursor-pointer shrink-0"
+                            >
+                              <span>{isExpanded ? "Thu gọn" : "Chi tiết"}</span>
+                              {isExpanded ? <ChevronUp size={15} className="text-[#b20a1c]" /> : <ChevronDown size={15} className="text-[#b20a1c]" />}
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -447,23 +355,41 @@ const StudentCourseDetailPage = () => {
                       {/* Collapsible Panel */}
                       {isExpanded && (
                         <div id={`class-details-${cls.id}`} className="bg-gray-50/70 border-t border-gray-150 p-5 flex flex-col gap-4 text-sm animate-fadeIn">
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
                               <Users size={18} className="text-[#990011] shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.enrolledSlots || "Enrolled Slots"}</span>
                                 <span className="text-gray-950 font-black text-sm">
-                                  {enrolledSeats ?? "—"} / {totalSlots ?? "—"}
+                                  {enrolledSeats ?? "0"} / {totalSlots ?? "N/A"}
                                 </span>
                               </div>
                             </div>
 
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
-                              <Clock size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                              <GraduationCap size={18} className="text-amber-600 shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.sessionCount || "Session Count"}</span>
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.levelLabel || "Trình độ"}</span>
                                 <span className="text-gray-950 font-black text-sm">
-                                  {sessionCount ?? "—"} {c.student?.sessionsText || "Sessions"}
+                                  {levelsText}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
+                              <Calendar size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                              <div className="flex flex-col gap-0.5 min-w-0">
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">
+                                  {c.student?.enrollmentPeriod || "Registration Period"}
+                                </span>
+                                <span className="text-gray-950 font-black text-sm truncate">
+                                  {cls.enrollmentStart && cls.enrollmentEnd
+                                    ? `${formatDateMonth(cls.enrollmentStart, ui.tba)} – ${formatDateMonth(cls.enrollmentEnd, ui.tba)}`
+                                    : cls.enrollmentStart
+                                      ? `${c.student?.startsOn || "From"} ${formatDateMonth(cls.enrollmentStart, ui.tba)}`
+                                      : cls.enrollmentEnd
+                                        ? `${c.student?.endsUntil || "Until"} ${formatDateMonth(cls.enrollmentEnd, ui.tba)}`
+                                        : ui.tba || "TBA"}
                                 </span>
                               </div>
                             </div>
@@ -503,9 +429,11 @@ const StudentCourseDetailPage = () => {
                               <FileText size={13} className="text-[#990011]" />
                               <span>{c.student?.description || "Description"}</span>
                             </span>
-                            <p className="text-gray-600 font-medium text-sm leading-relaxed">
-                              {cls.description || scd.noClassDescription || "No description provided."}
-                            </p>
+                            <RenderHTML
+                              html={cls.description}
+                              className="text-gray-600 font-medium text-sm leading-relaxed"
+                              fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed">{scd.noClassDescription || "No description provided."}</span>}
+                            />
                           </div>
                         </div>
                       )}
@@ -589,20 +517,6 @@ const StudentCourseDetailPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Student Enrollment Checkout Modal */}
-      <StudentJoinModal
-        open={isJoinOpen}
-        onClose={() => setIsJoinOpen(false)}
-        onConfirm={handleConfirmEnroll}
-        course={enrollTarget?.course}
-        selectedClass={enrollTarget?.class}
-        isSubmitting={isEnrolling}
-        success={enrollSuccess}
-        onSuccessClose={handleSuccessClose}
-        t={t}
-        language={language}
-      />
     </div>
   )
 }

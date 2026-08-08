@@ -282,7 +282,7 @@ const DaySchedule = ({
     const groups = { morning: [], noon: [], afternoon: [], evening: [] };
     displayEvents.forEach((ev) => {
       const startTime = ev.startTime
-        ? dayjs(ev.startTime).format("HH:mm")
+        ? formatCustom(ev.startTime, { hour: "2-digit", minute: "2-digit", hour12: false })
         : null;
       const section = getTimeOfDay(startTime);
       groups[section].push(ev);

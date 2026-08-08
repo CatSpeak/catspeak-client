@@ -15,6 +15,7 @@ import {
   useGetTeacherStudentAttemptQuery,
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { getQuizObjectFromResponse } from "@/features/courses/utils/quizUtils"
 import {
@@ -1432,47 +1433,29 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
   return (
     <div className="w-full mx-auto">
       {/* Breadcrumb Navigation */}
-      <div className="mb-4">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-            {qg.home}
-          </button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>
-            {qg.myCourses}
-          </button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses/all")}>
-            {qg.allCourses}
-          </button>
-          <span>/</span>
-          <button
-            type="button"
-            className="cursor-pointer hover:underline"
-            onClick={() => {
+      <Breadcrumb
+        className="mb-4"
+        items={[
+          { label: qg.home, onClick: () => navigate("/workspace") },
+          { label: qg.myCourses, onClick: () => navigate("/workspace/courses") },
+          { label: qg.allCourses, onClick: () => navigate("/workspace/courses/all") },
+          {
+            label: qg.courseDetails,
+            onClick: () => {
               if (quizDetail?.courseId) {
                 navigate(`/workspace/courses/details/${encodeURIComponent(String(quizDetail.courseId))}`)
               } else {
                 navigate("/workspace/courses")
               }
-            }}
-          >
-            {qg.courseDetails}
-          </button>
-          <span>/</span>
-          <button
-            type="button"
-            className="cursor-pointer hover:underline"
-            onClick={onBack || (() => navigate(`/workspace/courses/class/${classId}`))}
-          >
-            {qg.classDetails}
-          </button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold truncate max-w-xs sm:max-w-md">
-            {quizDetail.name || quizDetail.title || qg.quizDetails}
-          </span>
-        </div>
-      </div>
+            },
+          },
+          {
+            label: qg.classDetails,
+            onClick: onBack || (() => navigate(`/workspace/courses/class/${classId}`)),
+          },
+          { label: quizDetail.name || quizDetail.title || qg.quizDetails },
+        ]}
+      />
 
       {/* Main Header Card */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">

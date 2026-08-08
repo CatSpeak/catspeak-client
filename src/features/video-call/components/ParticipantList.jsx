@@ -21,6 +21,8 @@ import { IconButton } from "@/shared/components/ui/buttons"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import InviteParticipantModal from "./InviteParticipantModal"
+import { useNavigate } from "react-router-dom"
+import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 /**
  * A single row in the participant list.
@@ -28,6 +30,13 @@ import InviteParticipantModal from "./InviteParticipantModal"
  */
 const ParticipantItem = ({ participant }) => {
   const { t } = useLanguage()
+  let navigate
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    navigate = useNavigate()
+  } catch {
+    navigate = getNavigate()
+  }
   const {
     micOn: localMicOn,
     cameraOn: localCameraOn,

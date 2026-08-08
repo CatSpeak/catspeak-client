@@ -380,6 +380,7 @@ export const baseApi = createApi({
     "QuizStudents",
     "StudentQuizzes",
     "StudentQuizResult",
+    "Analytics",
   ],
   endpoints: () => ({}),
 })

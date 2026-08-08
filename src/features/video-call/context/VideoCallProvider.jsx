@@ -26,7 +26,6 @@ import {
   enterBreakout,
 } from "@/store/slices/videoCallSlice"
 import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
-
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import {
   pingActiveCall,

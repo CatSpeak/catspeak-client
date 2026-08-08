@@ -199,7 +199,7 @@ const AddActivityModal = ({
 
               const type = act._activityType
               const typeLabel = act._activityType === "quiz" ? dict.typeQuiz : dict.typeSubmission
-              let timeInfo = null;
+              let timeInfo = null
               if (act._activityType === "assignment") {
                 const dueDateLabel = act.dueDate
                   ? formatDateTime(act.dueDate)

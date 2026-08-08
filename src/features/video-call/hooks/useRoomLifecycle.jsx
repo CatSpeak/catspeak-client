@@ -234,12 +234,11 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   useEffect(() => {
     if (!lkRoom) return
 
-    const handleDisconnected = (reason) => {
-      console.error('[useRoomLifecycle] LiveKit room disconnected with reason:', reason)
+    const handleDisconnected = () => {
       dispatch(leaveCall())
       const navigateFn = getNavigate()
       const locationObj = getLocation()
-      if (locationObj && locationObj.pathname.includes('/meet/')) {
+      if (locationObj && locationObj.pathname.includes("/meet/")) {
         navigateFn(getCommunityPath(language), { replace: true })
         if (closingRemainingSeconds !== null) {
           toast.error(

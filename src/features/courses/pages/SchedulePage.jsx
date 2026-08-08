@@ -207,20 +207,12 @@ const SchedulePage = () => {
       )}
 
       {/* ─── Breadcrumbs ─── */}
-      {/* <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-          {c.home || "Home"}
-        </button>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">
-          {c.teachingSchedule || "Teaching Schedule"}
-        </span>
-      </div> */}
       <Breadcrumb
         items={[
-          { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
-          { label: c.teachingSchedule || "Teaching Schedule" }
-        ]} />
+          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: c.teachingSchedule || "Teaching Schedule" },
+        ]}
+      />
 
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">

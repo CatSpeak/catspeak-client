@@ -27,6 +27,7 @@ import {
   Users,
   Calendar,
   BarChart,
+  Compass,
 } from "lucide-react"
 import DesktopNavItem from "./DesktopNavItem"
 import ListItem from "@/shared/components/ui/ListItem"
@@ -34,6 +35,7 @@ import ListItem from "@/shared/components/ui/ListItem"
 // Primary Dock Navigation Items
 const mainDockItems = [
   { key: "community", icon: Home, path: "/community", hasSublinks: false },
+  { key: "exploreCourses", icon: Compass, path: "/explore-courses", hasSublinks: false },
   {
     key: "catSpeak",
     icon: Globe,
@@ -74,6 +76,7 @@ const getActiveDockSection = (pathname) => {
   if (pathname.includes("/workspace")) return "workspace"
   if (pathname.includes("/profile")) return "profile"
   if (pathname.includes("/chat")) return "messages"
+  if (pathname.includes("/explore-courses")) return "exploreCourses"
   if (pathname.includes("/resources")) return "learningResources"
   if (pathname.includes("/community")) return "community"
   return "community"
@@ -150,19 +153,26 @@ const DesktopSidebar = () => {
     activeDockSection === "settings" ||
     Boolean(currentSectionData?.items?.length)
 
-  const handleDockClick = (item) => {
-    if (item.hasSublinks) {
-      if (activeDockSection === item.key && isDesktopExpanded) {
-        setIsDesktopExpanded(false)
-      } else {
-        setIsDesktopExpanded(true)
+  const handleDockClick = (item, e) => {
+    if (activeDockSection === item.key) {
+      if (item.hasSublinks) {
+        e?.preventDefault();
+        setIsDesktopExpanded((prev) => !prev);
       }
     } else {
-      setIsDesktopExpanded(false)
+      if (item.hasSublinks) {
+        setIsDesktopExpanded(true);
+      } else {
+        setIsDesktopExpanded(false);
+      }
     }
   }
 
   const getDockItemPath = (item) => {
+    if (lastSublinks?.[item.key]) {
+      return resolvePath(lastSublinks[item.key])
+    }
+
     return resolvePath(item.path)
   }
 
@@ -219,7 +229,7 @@ const DesktopSidebar = () => {
                 <div key={item.key} className="relative group/dock">
                   <Link
                     to={targetPath}
-                    onClick={() => handleDockClick(item)}
+                    onClick={(e) => handleDockClick(item, e)}
                     className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
                       ? "bg-white text-cath-red-700 shadow-md"
                       : "text-white/80 hover:text-white hover:bg-white/15"
@@ -254,7 +264,7 @@ const DesktopSidebar = () => {
               <div key={item.key} className="relative group/dock">
                 <Link
                   to={targetPath}
-                  onClick={() => handleDockClick(item)}
+                  onClick={(e) => handleDockClick(item, e)}
                   className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${isActive
                     ? "bg-white text-cath-red-700 shadow-md"
                     : "text-white/80 hover:text-white hover:bg-white/15"
@@ -286,9 +296,10 @@ const DesktopSidebar = () => {
               <div key={item.key} className="relative group/dock">
                 <Link
                   to={targetPath}
-                  onClick={() => {
-                    if (activeDockSection === item.key && isDesktopExpanded) {
-                      setIsDesktopExpanded(false)
+                  onClick={(e) => {
+                    if (activeDockSection === item.key || (item.key === "settings" && isSettingsPage)) {
+                      e.preventDefault()
+                      setIsDesktopExpanded((prev) => !prev)
                     } else {
                       setIsDesktopExpanded(true)
                     }

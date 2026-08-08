@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users } from "lucide-react"
+import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users, Layers } from "lucide-react"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
@@ -7,9 +7,10 @@ import TeachingTasksSection from "../assignments/TeachingTasksSection"
 import { useGetTeacherClassTeachingTasksCombinedQuery } from "@/store/api/coursesApi"
 import { mapTeachingTask } from "../../utils/courseTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
 import CourseStatusPill from "../CourseStatusPill"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
-import { getSafeMediaUrl } from "../../utils/courseUtils"
+import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const ClassOverviewTab = ({
@@ -37,7 +38,7 @@ const ClassOverviewTab = ({
   cd = {}
 }) => {
   const { language, t } = useLanguage()
-  const { formatDateMonth, formatDate } = useTimezone()
+  const { formatDateMonth, formatDate, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const taskText = c.grading || {}
@@ -65,6 +66,7 @@ const ClassOverviewTab = ({
     ? classData.nextSession
     : null
   const sessionStartTime = nextSession?.startTime
+  const sessionEndTime = nextSession?.endTime
   const sessionDate = nextSession?.date
   const studentCountValue = Number(classData.studentCount ?? classData.enrolledStudents)
   const studentCount = Number.isFinite(studentCountValue)
@@ -124,17 +126,18 @@ const ClassOverviewTab = ({
           <div
             className="absolute inset-0 rounded-3xl overflow-hidden z-0 bg-cover bg-center"
             style={{
-              backgroundImage: thumbnailUrl ? `url(${JSON.stringify(thumbnailUrl)})` : undefined,
-              backgroundColor: "#374151",
+              backgroundImage: `url(${thumbnailUrl || defaultCourseThumbnail})`,
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15" />
           </div>
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
-            <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight max-w-xl">
-              {classData.title || ui.untitledClass || "Untitled class"}
-            </h2>
+            <div className="flex flex-col gap-2 max-w-xl">
+              <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight">
+                {classData.title || ui.untitledClass || "Untitled class"}
+              </h2>
+            </div>
 
             {!isStudent && (
               isCompletedClass ? (
@@ -277,7 +280,7 @@ const ClassOverviewTab = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center">
                 <Calendar size={18} />
               </div>
@@ -289,7 +292,7 @@ const ClassOverviewTab = ({
                     : ui.tba || "TBA"}
                 </span>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center">
@@ -320,11 +323,13 @@ const ClassOverviewTab = ({
             <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
               <AlignLeft size={18} />
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 w-full min-w-0">
               <span className="text-sm text-gray-400 font-bold">{cd.description || "Description"}</span>
-              <p className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5">
-                {classData.description || cd.noDescription || "No description provided."}
-              </p>
+              <RenderHTML
+                html={classData.description}
+                className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5"
+                fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed mt-0.5">{cd.noDescription || "No description provided."}</span>}
+              />
             </div>
           </div>
         </div>
@@ -408,7 +413,13 @@ const ClassOverviewTab = ({
                   <div className="flex flex-col gap-2 border-b border-gray-55 pb-4 text-xs font-semibold text-gray-500">
                     <div className="flex items-center gap-2">
                       <Clock size={14} className="text-gray-400" />
-                      <span>{sessionStartTime || ui.tba || "TBA"}</span>
+                      <span>
+                        {sessionStartTime
+                          ? sessionEndTime
+                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
+                            : formatScheduleTime(sessionStartTime)
+                          : ui.tba || "TBA"}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-gray-400" />

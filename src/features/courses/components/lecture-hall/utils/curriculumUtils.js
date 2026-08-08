@@ -5,7 +5,7 @@ import { formatFileSize } from "./fileUtils"
  * @param {object} item
  * @param {object} labels - i18n labels
  * @param {string} locale  - BCP-47 locale string (kept for non-date use)
- * @param {function} formatDate - date formatter from useTimezone()
+ * @param {function} formatDateTime - date formatter from useTimezone()
  */
 export const getDisplayData = (item, labels, locale, formatDateTime) => {
   const formatFn = typeof formatDateTime === "function" ? formatDateTime : (d) => d

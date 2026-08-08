@@ -13,7 +13,6 @@ const MoreMenuMobileView = ({
   setShowSubtitlePicker,
   setShowChooseLayout,
 }) => {
-
   return (
     <div className="flex md:hidden flex-col pt-2 w-full">
       <div
@@ -65,3 +64,4 @@ const MoreMenuMobileView = ({
 }
 
 export default MoreMenuMobileView
+

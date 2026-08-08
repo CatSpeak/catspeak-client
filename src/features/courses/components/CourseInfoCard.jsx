@@ -1,6 +1,7 @@
 import React from "react"
 import { Globe, AlignLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { getLocalizedLanguageName } from "../data/courseFormOptions"
 
 const CourseInfoCard = ({
@@ -37,11 +38,13 @@ const CourseInfoCard = ({
         <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
           <AlignLeft size={18} />
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 w-full min-w-0">
           <span className="text-sm text-gray-400 font-bold">{descriptionLabel}</span>
-          <p className="text-gray-600 font-medium text-sm leading-relaxed">
-            {courseData.description || resolvedNoDescription}
-          </p>
+          <RenderHTML
+            html={courseData.description}
+            className="text-gray-600 font-medium text-sm leading-relaxed"
+            fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed">{resolvedNoDescription}</span>}
+          />
         </div>
       </div>
     </div>

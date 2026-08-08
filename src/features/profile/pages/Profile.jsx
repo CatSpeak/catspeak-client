@@ -118,7 +118,7 @@ const Profile = () => {
     },
     { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
     { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },
-    { id: "registeredCourse", label: "Khóa đã đăng ký" }
+    // { id: "registeredCourse", label: "Khóa đã đăng ký" }
   ]
 
   return (
@@ -173,14 +173,14 @@ const Profile = () => {
               isOwnProfile={isOwnProfile}
             />
           )}
-          {
+          {/* {
             activeTab === "registeredCourse" && (
               <RegisteredCourse
                 targetAccountId={targetAccountId}
                 isOwnProfile={isOwnProfile}
               />
             )
-          }
+          } */}
         </div>
 
         <ProfileOtpModal
