@@ -116,6 +116,7 @@ export default {
   otpResentSuccess: "Mã OTP đã được gửi lại thành công",
   sendingOtp: "Đang gửi OTP...",
   tooManyOtpRequests: "Yêu cầu mã OTP quá nhiều lần. Vui lòng thử lại sau.",
+  accountLocked: "Tài khoản của bạn đã bị khóa tạm thời do nhập sai nhiều lần. Vui lòng thử lại sau.",
   loginFailed: "Đăng nhập thất bại. Vui lòng thử lại.",
   serverConnectionRestored: "Đã khôi phục kết nối máy chủ!",
   emailOptIn: "Tôi muốn nhận email thông báo & tin tức cập nhật từ CatSpeak",

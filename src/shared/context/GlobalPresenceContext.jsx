@@ -12,7 +12,7 @@ export const GlobalPresenceProvider = ({ children }) => {
   const { language: contextLanguage } = useLanguage()
   const { isAuthenticated } = useAuth()
   const { data: userData } = useGetProfileQuery(undefined, { skip: !isAuthenticated })
-  const user = userData?.data
+  const user = userData?.data ?? userData ?? null
 
   const { data: config } = useGetPresenceConfigQuery()
   const [sendHeartbeat] = useSendHeartbeatMutation()
