@@ -67,6 +67,11 @@ const resources = [
     lang: "en",
     url: "https://fluentez.com/",
   },
+  {
+    id: "questsme",
+    lang: "en",
+    url: "https://play.questsme.com/",
+  },
   // 3. Luyện nghe
   {
     id: "elllo",
