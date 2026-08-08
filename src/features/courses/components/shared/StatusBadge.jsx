@@ -18,6 +18,7 @@ const StatusBadge = ({ status, label, className = "" }) => {
     OPEN_ENROLLMENT: courses.openEnrollmentStatus,
     OPEN_FOR_ENROLLMENT: courses.openEnrollmentStatus,
     UPCOMING: courses.upcomingStatus,
+    NOT_STARTED: courses.notStartedStatus,
     ARCHIVED: courses.archivedStatus || courses.archive,
     COMPLETED: courses.completedStatus || courses.student?.completed,
   }[status]
