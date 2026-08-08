@@ -24,7 +24,7 @@ import { toLocalDateString } from "../utils/dateUtils"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const SchedulePage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate, formatDateMonth } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}

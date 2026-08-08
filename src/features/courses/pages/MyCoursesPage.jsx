@@ -17,11 +17,10 @@ import {
   filterByStatus,
   mapTeacherCourseSummary,
 } from "../utils/courseTransforms"
-import { getCourseLocale } from "../utils/courseUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyCoursesPage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}

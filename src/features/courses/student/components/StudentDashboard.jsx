@@ -7,7 +7,7 @@ import { useGetProfileQuery } from "@/features/auth"
 import CourseSearchInput from "../../components/CourseSearchInput"
 import CourseSelectFilter from "../../components/CourseSelectFilter"
 import TablePagination from "../../components/shared/TablePagination"
-import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTransforms"
+import { filterStudentClasses } from "../../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 

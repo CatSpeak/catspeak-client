@@ -19,12 +19,11 @@ import {
   filterByStatus,
   mapTeacherClassSummary,
 } from "../utils/courseTransforms"
-import { getCourseLocale } from "../utils/courseUtils"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyClassesPage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}

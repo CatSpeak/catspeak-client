@@ -37,7 +37,7 @@ const ClassOverviewTab = ({
   onViewTasks,
   cd = {}
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatDate, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}

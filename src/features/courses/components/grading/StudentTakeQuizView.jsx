@@ -41,7 +41,6 @@ import {
   getStudentQuizAttemptFromResponse,
   mergeQuizResultQuestions,
 } from "../../utils/quizUtils"
-import { getCourseLocale } from "../../utils/courseUtils"
 
 const AUTOSAVE_DELAY_MS = 1000
 
@@ -456,7 +455,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
       return saveQueueRef.current
     },
-    [classId, language, quizId, quizKey, saveAnswers, sq.autosaveError],
+    [classId, formatTime, language, quizId, quizKey, saveAnswers, sq.autosaveError],
   )
 
   const scheduleAnswerSave = useCallback(

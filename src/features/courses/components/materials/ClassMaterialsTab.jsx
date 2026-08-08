@@ -82,14 +82,9 @@ const formatMaterialSize = (value) => {
 }
 
 const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const cm = t.courses?.classMaterials || {}
-  const dateLocale = language === "vi"
-    ? "vi-VN"
-    : language === "zh"
-      ? "zh-CN"
-      : "en-GB"
   const fileInputRef = useRef(null)
   const deleteInFlightRef = useRef(false)
   const uploadInFlightRef = useRef(false)

@@ -17,7 +17,7 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatScheduleTime } = useTimezone()
   const ui = t.courses?.workspaceUi || {}
 
