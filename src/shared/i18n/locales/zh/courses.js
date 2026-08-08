@@ -744,6 +744,7 @@ export default {
       OPEN: "开放中",
       OPEN_FOR_ENROLLMENT: "开放报名",
       UPCOMING: "即将开始",
+      NOT_STARTED: "未开始",
       ARCHIVED: "已归档",
       COMPLETED: "已完成",
       CANCELLED: "已取消"

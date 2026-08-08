@@ -21,6 +21,7 @@ import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileDocumentsTab from "../components/ProfileDocumentsTab"
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
+import RegisteredCourse from "../components/RegisteredCourse"
 
 const Profile = () => {
   const { user } = useAuth()
@@ -117,6 +118,7 @@ const Profile = () => {
     },
     { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
     { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },
+    // { id: "registeredCourse", label: "Khóa đã đăng ký" }
   ]
 
   return (
@@ -171,6 +173,14 @@ const Profile = () => {
               isOwnProfile={isOwnProfile}
             />
           )}
+          {/* {
+            activeTab === "registeredCourse" && (
+              <RegisteredCourse
+                targetAccountId={targetAccountId}
+                isOwnProfile={isOwnProfile}
+              />
+            )
+          } */}
         </div>
 
         <ProfileOtpModal
@@ -180,12 +190,12 @@ const Profile = () => {
           title={
             editingField === "phoneNumber"
               ? t.profile?.personalInfo?.verifyPhoneTitle ||
-                "Xác nhận thay đổi số điện thoại"
+              "Xác nhận thay đổi số điện thoại"
               : editingField === "email"
                 ? t.profile?.personalInfo?.verifyEmailTitle ||
-                  "Xác nhận thay đổi Email"
+                "Xác nhận thay đổi Email"
                 : t.profile?.personalInfo?.verifyChangesTitle ||
-                  "Xác minh thay đổi"
+                "Xác minh thay đổi"
           }
           onVerify={handleOtpVerify}
           isVerifying={isUpdating || isUpdatingPhone}

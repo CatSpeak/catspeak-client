@@ -10,7 +10,11 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
   onDeleteClick,
   onViewRegistrations,
 }) {
-  const isPast = event.startTime && dayjs(event.startTime).isBefore(dayjs());
+  const isPast = event.endTime
+    ? dayjs(event.endTime).isBefore(dayjs())
+    : event.startTime
+      ? dayjs(event.startTime).isBefore(dayjs())
+      : false;
   const isRecurring = event.isRecurringGroup === true;
 
   // Which occurrence ID to use for registrations modal

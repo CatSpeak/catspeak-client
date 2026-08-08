@@ -30,7 +30,7 @@ import {
 const CalendarPage = () => {
   const { lang } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const cal = t.calendar || {};
   const dispatch = useDispatch();
   const { isInCall } = useSelector((s) => s.videoCall);
@@ -87,11 +87,11 @@ const CalendarPage = () => {
 
   // Fetch event counts for current month
   // Send browser UTC offset so backend groups events by local day, not UTC day.
-  // const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
+  const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
-    // timezoneOffsetMinutes,
+    timezoneOffsetMinutes,
   });
 
   const eventCountsByDay = useMemo(() => {
@@ -167,7 +167,13 @@ const CalendarPage = () => {
 
   const monthNum = currentDate.format("M");
   const yearNum = currentDate.format("YYYY");
-  const localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
+
+  let localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
+  if (language === 'en') {
+    localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
+  } else if (language === 'zh') {
+    localizedMonth = `${yearNum}年 ${monthNum}月`
+  }
 
   const checkAndIntercept = async (action) => {
     const remoteActive = await pingActiveCall();
@@ -220,9 +226,10 @@ const CalendarPage = () => {
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
-      {/* banner */}
-      <div className="relative w-full p-5">
-        <WorkshopCarousel hideTitle={true} />
+      <div className="w-full px-6 md:px-0 flex justify-center">
+        <div className="w-full md:w-3/4 lg:w-2/3">
+          <WorkshopCarousel hideTitle={true} />
+        </div>
       </div>
       {/* <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
         <img
@@ -274,6 +281,8 @@ const CalendarPage = () => {
                 onEventSelect={setSelectedEvent}
                 onEventsUpdate={setDayEvents}
                 eventCountsByDay={eventCountsByDay}
+                totalUniqueEvents={eventCountsData?.totalUniqueEvents || 0}
+                totalUniqueRegisteredEvents={eventCountsData?.totalUniqueRegisteredEvents || 0}
                 onSelectDate={(d) => {
                   setSelectedDate(d);
                   setSelectedEvent(null);
