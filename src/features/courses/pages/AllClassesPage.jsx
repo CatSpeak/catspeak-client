@@ -45,7 +45,7 @@ const AllClassesPage = () => {
     pageSize: 5,
   })
 
-  const classes = (Array.isArray(data?.data) ? data.data : [])
+  const classes = (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []))
     .map((cls, index) => mapClassTableRow(
       cls,
       index,

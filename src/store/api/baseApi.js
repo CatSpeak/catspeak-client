@@ -194,14 +194,9 @@ export async function ensureRefresh(
         return false
       }
 
-      if (refreshResult.data) {
-        const { user } = api.getState().auth
-        api.dispatch(
-          setCredentials({
-            ...refreshResult.data,
-            user: refreshResult.data.user || user,
-          }),
-        )
+      if (refreshResult.data?.data) {
+        const payload = refreshResult.data.data
+        api.dispatch(setCredentials(payload))
         console.info(
           AUTH_LOG,
           "Token refresh successful — new credentials stored",
@@ -314,6 +309,19 @@ export function createReauthBaseQuery(queryResolver) {
         "Server is reachable again — clearing server-down flag",
       )
       api.dispatch(setServerUp())
+    }
+
+    // ── Global Data Unwrapping ───────────────────────────────────────
+    // Skip unwrapping when the response contains pagination metadata
+    if (
+      result.data &&
+      typeof result.data === "object" &&
+      "data" in result.data &&
+      !("pagination" in result.data) &&
+      result.data.data !== null &&
+      result.data.data !== undefined
+    ) {
+      result.data = result.data.data
     }
 
     return result

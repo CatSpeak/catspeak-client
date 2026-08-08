@@ -16,9 +16,10 @@ const AccountInfoPage = () => {
 
   // Fetch private profile
   const { data: privateProfileData, isLoading } = useGetUserProfileQuery()
+  const profile = privateProfileData?.data ?? privateProfileData ?? null
 
-  const stateHooks = useProfileState(privateProfileData?.data)
-  const mutationHooks = useProfileMutations(t, privateProfileData?.data, stateHooks)
+  const stateHooks = useProfileState(profile)
+  const mutationHooks = useProfileMutations(t, profile, stateHooks)
 
   const {
     formData,
@@ -56,7 +57,7 @@ const AccountInfoPage = () => {
               {t.nav?.accountInfo || "Thông tin tài khoản"}
             </PageTitle>
       <AccountHeader
-        user={privateProfileData?.data}
+        user={profile}
         formData={formData}
         t={t}
       />
@@ -79,7 +80,7 @@ const AccountInfoPage = () => {
       <ProfileOtpModal
         open={isOtpModalOpen}
         onClose={() => setIsOtpModalOpen(false)}
-        email={privateProfileData?.data?.email}
+        email={profile?.email}
         title={
           editingField === "phoneNumber"
             ? t.profile?.personalInfo?.verifyPhoneTitle ||

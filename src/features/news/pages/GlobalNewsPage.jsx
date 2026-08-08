@@ -18,12 +18,12 @@ const GlobalNewsPage = () => {
 
   // Filter public posts
   const posts = useMemo(() => {
-    if (!Array.isArray(data?.data)) return []
-    return data.data.filter(
+    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
+    return rawList.filter(
       (post) =>
         !post.privacy || String(post.privacy).toLowerCase() === "public",
     )
-  }, [data?.data])
+  }, [data])
 
   // Infinite scroll observer for vertical social feed
   const lastPostRef = useRef(null)
