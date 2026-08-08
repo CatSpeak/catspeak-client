@@ -1,27 +1,48 @@
 import { useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useUpdateUserProfileMutation } from "@/store/api/userApi"
+import { useGetUserProfileQuery, useUpdateUserProfileMutation } from "@/store/api/userApi"
 import { setCredentials } from "@/store/slices/authSlice"
 import { getBrowserTimeZone } from "@/shared/constants/timezones"
 
 /**
- * On every render where the user has no TimeZone set in DB (null or empty),
+ * Syncs user profile with Redux state on load.
+ * Only if the user has no TimeZone set in DB (null or empty),
  * fire a single updateUserProfile call to auto-backfill their browser TimeZone.
- * After the mutation succeeds, synchronise Redux so the rest of the app
- * and Settings dropdown immediately reflects the auto-detected value.
  */
 export const useTimezoneBackfill = () => {
-  const user = useSelector((state) => state.auth?.user)
+  const authUser = useSelector((state) => state.auth?.user)
   const token = useSelector((state) => state.auth?.token)
   const dispatch = useDispatch()
+
+  const { data: profileResponse, isSuccess } = useGetUserProfileQuery(undefined, {
+    skip: !token,
+  })
   const [updateUserProfile] = useUpdateUserProfileMutation()
   const firedRef = useRef(false)
 
-  useEffect(() => {
-    if (firedRef.current) return
-    if (!user) return
-    if (typeof user.timeZone === "string" && user.timeZone.length > 0) return
+  const profileData = profileResponse?.data ?? profileResponse
 
+  useEffect(() => {
+    if (!token || !isSuccess || !profileData) return
+
+    // Synchronize Redux auth.user with profileData from DB whenever it arrives
+    if (authUser && profileData.timeZone && authUser.timeZone !== profileData.timeZone) {
+      dispatch(
+        setCredentials({
+          user: { ...authUser, ...profileData },
+          token,
+        }),
+      )
+    }
+
+    if (firedRef.current) return
+
+    // If profile in DB already has a valid timezone set, DO NOT overwrite!
+    if (typeof profileData.timeZone === "string" && profileData.timeZone.trim().length > 0) {
+      return
+    }
+
+    // Only backfill browser timezone if user's timezone in DB is explicitly null or empty
     const targetTz = getBrowserTimeZone()
     firedRef.current = true
 
@@ -29,10 +50,10 @@ export const useTimezoneBackfill = () => {
       .unwrap()
       .then((response) => {
         const payload = response?.data ?? response
-        if (payload && user) {
+        if (payload && authUser) {
           dispatch(
             setCredentials({
-              user: { ...user, ...payload, timeZone: targetTz },
+              user: { ...authUser, ...payload, timeZone: targetTz },
               token,
             }),
           )
@@ -42,7 +63,7 @@ export const useTimezoneBackfill = () => {
         // allow retry on next mount if the request failed
         firedRef.current = false
       })
-  }, [user, token, dispatch, updateUserProfile])
+  }, [authUser, token, isSuccess, profileData, dispatch, updateUserProfile])
 }
 
 export default useTimezoneBackfill
