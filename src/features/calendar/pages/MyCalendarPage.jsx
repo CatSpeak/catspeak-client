@@ -252,7 +252,7 @@ const MyCalendarPage = () => {
       <Breadcrumb
         items={[
           { label: t.nav?.home || 'Trang chủ', onClick: () => navigate('/') },
-          { label: t.calendar?.personalCalendar || 'Lịch cá nhân' },
+          { label: t.nav?.myCalendar || 'Lịch của tôi' },
         ]}
       />
 
