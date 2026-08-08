@@ -105,11 +105,22 @@ export const formatRelativeTime = (timestamp, userTimeZone = null, language = "e
  * Convert HH:mm time string to target TimeZone (e.g. "14:30" -> formatted HH:mm in target TZ)
  */
 export const convertTimeStrToTz = (timeStr, userTimeZone = null) => {
-  if (!timeStr || typeof timeStr !== "string") return timeStr
-  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})/)
-  if (!match) return timeStr
+  if (!timeStr) return ""
+  const str = String(timeStr).trim()
+  if (!str) return ""
 
-  if (!userTimeZone) return timeStr.slice(0, 5)
+  // If it's a full ISO timestamp string (e.g. "2026-08-10T11:00:00Z")
+  if (str.includes("T") || (str.length >= 19 && str.includes("-"))) {
+    const d = ensureDate(str)
+    if (d) {
+      return formatInTimeZone(d, userTimeZone, { hour: "2-digit", minute: "2-digit", hour12: false })
+    }
+  }
+
+  const match = str.match(/^(\d{1,2}):(\d{2})/)
+  if (!match) return str
+
+  if (!userTimeZone) return str.slice(0, 5)
 
   const hours = Number(match[1])
   const minutes = Number(match[2])
