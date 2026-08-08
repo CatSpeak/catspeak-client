@@ -109,7 +109,7 @@ const DesktopSidebar = () => {
   const { pathname } = useLocation()
   const { t } = useLanguage()
   const { isAuthenticated, user } = useAuth()
-  const { isStudent, isTeacher } = useRoleOverride()
+  const { isStudent } = useRoleOverride()
   const { resolvePath, currentLang } = useActiveLink()
   const {
     isDesktopExpanded,
@@ -427,6 +427,9 @@ const DesktopSidebar = () => {
                               animate="visible"
                               className="w-full"
                             >
+                              {item.key === "myCourses" && (
+                                <div className="my-1.5 mx-3 border-t border-black" />
+                              )}
                               <DesktopNavItem
                                 to={resolvePath(itemPath)}
                                 icon={item.icon}
@@ -436,9 +439,6 @@ const DesktopSidebar = () => {
                                 isDocked={false}
                                 sectionId={currentSectionKey}
                               />
-                              {item.key === "analytics" && (
-                                <div className="my-1.5 mx-3 border-b border-black" />
-                              )}
                             </motion.div>
                           )
                         })}
