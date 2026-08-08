@@ -9,6 +9,13 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["UserProfile"],
     }),
+    getUserProfileHaveAccountType: builder.query({
+      query: () => ({
+        url: "/Account/profile",
+        method: "GET",
+      }),
+      providesTags: ["UserProfile"],
+    }),
     getPublicProfile: builder.query({
       query: (accountId) => ({
         url: `/Account/${accountId}`,
@@ -106,6 +113,7 @@ export const userApi = baseApi.injectEndpoints({
 
 export const {
   useGetUserProfileQuery,
+  useGetUserProfileHaveAccountTypeQuery,
   useLazyGetUserProfileQuery,
   useGetPublicProfileQuery,
   useUpdateUserProfileMutation,
