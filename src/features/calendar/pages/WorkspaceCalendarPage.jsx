@@ -1,6 +1,7 @@
 import React, { useMemo } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 import {
@@ -18,6 +19,7 @@ import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const WorkspaceCalendarPage = () => {
   const { language, t } = useLanguage()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}
   const mc = c.myCourses || {}
@@ -58,7 +60,7 @@ const WorkspaceCalendarPage = () => {
   const isLoading = isClassesLoading || (isClassesFetching && classesData === undefined) || isScheduleLoading
   const error = classesError || scheduleError
 
-  const upcomingClasses = useMemo(() => mapUpcomingSessions(rawSessions, classesRaw, 10), [rawSessions, classesRaw])
+  const upcomingClasses = useMemo(() => mapUpcomingSessions(rawSessions, classesRaw, 10, formatDateMonth, formatScheduleTime), [rawSessions, classesRaw, formatDateMonth, formatScheduleTime])
 
   if (isLoading) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />

@@ -3,6 +3,7 @@ import { Clock, Calendar } from 'lucide-react'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
@@ -15,6 +16,7 @@ const EVENT_STYLES = {
 const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick }) => {
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { formatTime } = useTimezone()
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
 
   return (
@@ -38,8 +40,8 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
         <div className="flex items-center gap-1.5 text-xs text-[#1A1A1A]">
           <Clock className="w-3.5 h-3.5 shrink-0" />
           <span className="truncate">
-            {event.startTime ? dayjs(event.startTime).format('HH:mm') : ''}
-            {event.endTime ? ` - ${dayjs(event.endTime).format('HH:mm')}` : ''}
+            {event.startTime ? formatTime(event.startTime) : ''}
+            {event.endTime ? ` - ${formatTime(event.endTime)}` : ''}
           </span>
         </div>
         {event.location && (

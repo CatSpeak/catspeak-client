@@ -3,11 +3,10 @@ import { Clock, Users, ShieldCheck, Calendar, ArrowRight, Settings } from "lucid
 import {
   formatCurrencyVND,
   getSafeMediaUrl,
-  formatDateDayMonth,
-  getCourseLocale,
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { formatScheduleDays } from "../utils/scheduleUtils"
 import CourseStatusPill from "./CourseStatusPill"
 
@@ -21,6 +20,7 @@ const ClassCard = ({
   progressLabel,
 }) => {
   const { language, t } = useLanguage()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
 
@@ -50,7 +50,7 @@ const ClassCard = ({
 
   const scheduleDaysText = formatScheduleDays(scheduleDays, language, ui.tba)
   const scheduleTimeText = firstSchedule?.startTime && firstSchedule?.endTime
-    ? `${firstSchedule.startTime} - ${firstSchedule.endTime}`
+    ? `${formatScheduleTime(firstSchedule.startTime)} - ${formatScheduleTime(firstSchedule.endTime)}`
     : ""
 
   // Extract progress value (number, string, or object { completedSessions, totalSessions, percentage })
@@ -130,9 +130,13 @@ const ClassCard = ({
               <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none">
                 {c.instructorLabel || "Giảng viên"}
               </span>
-              <span className="text-xs font-bold text-slate-800 line-clamp-1 flex items-center gap-1">
-                {teacherName}
-                <ShieldCheck size={12} className="text-indigo-500 inline shrink-0" />
+            </div>
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+              <Clock size={13} className="text-gray-400" />
+              <span>
+                {cls.startDate && cls.endDate
+                  ? `${formatDateMonth(cls.startDate, ui.tba)} - ${formatDateMonth(cls.endDate, ui.tba)}`
+                  : ui.tba}
               </span>
             </div>
           </div>
@@ -164,7 +168,7 @@ const ClassCard = ({
             {minEnrollmentEnd && (
               <div className="flex items-center gap-1.5 text-amber-800 border-t border-slate-100 pt-1.5 text-[11px]">
                 <Calendar size={12} className="text-amber-600 shrink-0" />
-                <span>{c.registrationDeadline || "Hạn ĐK"}: {formatDateDayMonth(minEnrollmentEnd, getCourseLocale(language), ui.tba)}</span>
+                <span>{c.registrationDeadline || "Hạn ĐK"}: {formatDateMonth(minEnrollmentEnd, ui.tba)}</span>
               </div>
             )}
 

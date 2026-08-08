@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef, useEffect } from "react"
 import { Calendar, ChevronDown, ChevronUp, ListPlus, Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useGetPlaylistsQuery, useCreatePlaylistMutation, useUpdatePlaylistMutation, useDeletePlaylistMutation, useGetBookmarkedReelsQuery } from "@/store/api/reelsApi"
 
 import PlaylistReelList from "./PlaylistReelList"
@@ -151,7 +152,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
             <span>•</span>
             <span className="flex items-center gap-1">
               <Calendar size={12} />
-              {ws?.createdOn || "Created on"} {dateFormatter.format(new Date(playlist.createdAt))}
+              {ws?.createdOn || "Created on"} {dateFormatter(playlist.createdAt)}
             </span>
           </div>
         </div>
@@ -231,7 +232,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   )
 }
 
-const WorkspacePlaylistsTab = ({ formatNumber, formatDate, navigate }) => {
+const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navigate }) => {
   const { t } = useLanguage()
   const ws = t?.catSpeak?.reels?.workspace || {}
   const currentLang = localStorage.getItem("communityLanguage") || "en"
@@ -250,10 +251,8 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate, navigate }) => {
     }
   }, [showCreateInput])
 
-  const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(locale, { year: "numeric", month: "2-digit", day: "2-digit" }),
-    [locale]
-  )
+  const { formatDate } = useTimezone()
+  const dateFormatter = formatDate
 
   const handleCreate = async () => {
     if (!newPlaylistName.trim()) return

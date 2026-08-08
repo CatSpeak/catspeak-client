@@ -4,10 +4,12 @@ import dayjs from 'dayjs'
 import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
 const EventCardDetail = ({ event, onBack }) => {
   const navigate = useNavigate()
   const { t, language } = useLanguage()
+  const { formatDate, formatTime } = useTimezone()
 
   if (!event) return null;
 
@@ -112,8 +114,8 @@ const EventCardDetail = ({ event, onBack }) => {
           <div className="flex items-start gap-3 text-[#7B7979] text-[15px]">
             <Clock size={18} className="shrink-0 mt-0.5" />
             <span className="leading-tight">
-              {event.startTime ? dayjs(event.startTime).format('HH:mm (DD/MM/YYYY)') : ''}
-              {event.endTime ? ` - ${dayjs(event.endTime).format('HH:mm (DD/MM/YYYY)')}` : ''}
+              {event.startTime ? `${formatTime(event.startTime)} (${formatDate(event.startTime)})` : ''}
+              {event.endTime ? ` - ${formatTime(event.endTime)} (${formatDate(event.endTime)})` : ''}
             </span>
           </div>
 
@@ -126,7 +128,7 @@ const EventCardDetail = ({ event, onBack }) => {
           )}
 
           {/* Price */}
-          {event.ticketPrice && (
+          {['registered-event', 'my-event'].includes(event.eventType) && (
             <div className="flex items-center justify-between text-[15px] w-full">
               <div className="flex items-center gap-3 text-[#7B7979]">
                 <Tag size={18} className="shrink-0" />

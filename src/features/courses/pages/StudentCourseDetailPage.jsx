@@ -1,6 +1,8 @@
 import React, { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { toast } from "react-hot-toast"
 import {
   useGetStudentCourseDetailQuery,
   useGetExploreCourseDetailQuery
@@ -9,19 +11,21 @@ import RenderHTML from "@/shared/components/ui/RenderHTML"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   formatCurrencyVND,
-  formatDateDayMonth,
-  getCourseLocale,
+  getClassEnrollmentIssue,
+  getClassEnrollmentIssueLabel,
+  getClassEnrollmentIssueMessage,
   getSafeMediaUrl,
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { Calendar, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
+import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
 import { formatScheduleDays } from "../utils/scheduleUtils"
 
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
@@ -281,71 +285,32 @@ const StudentCourseDetailPage = () => {
 
                             {/* Subtitle / Schedule Badge & Dates */}
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm font-semibold text-gray-500">
-                              {/* <div className="flex items-center gap-1.5 bg-red-50 text-[#b20a1c] px-2.5 py-0.5 rounded-md border border-red-100/70 font-black text-xs">
-                                <Clock size={12} className="shrink-0" />
-                                <span>
-                                  {formatScheduleDays(
-                                    cls.schedule?.days,
-                                    language,
-                                    ui.tba,
-                                  )}
-                                  {cls.schedule?.startTime && cls.schedule?.endTime
-                                    ? ` | ${cls.schedule.startTime} - ${cls.schedule.endTime}`
-                                    : ""}
-                                </span>
-                              </div> */}
+                              {(cls.schedule?.days || (cls.schedule?.startTime && cls.schedule?.endTime)) && (
+                                <div className="flex items-center gap-1.5 bg-red-50 text-[#b20a1c] px-2.5 py-0.5 rounded-md border border-red-100/70 font-black text-xs">
+                                  <Clock size={12} className="shrink-0" />
+                                  <span>
+                                    {formatScheduleDays(
+                                      cls.schedule?.days,
+                                      language,
+                                      ui.tba,
+                                    )}
+                                    {cls.schedule?.startTime && cls.schedule?.endTime
+                                      ? ` | ${formatScheduleTime(cls.schedule.startTime)} - ${formatScheduleTime(cls.schedule.endTime)}`
+                                      : ""}
+                                  </span>
+                                </div>
+                              )}
 
                               <div className="flex items-center gap-1">
                                 <Calendar size={12} className="text-gray-400 shrink-0" />
                                 <span>
                                   {cls.startDate && cls.endDate
-                                    ? `${formatDateDayMonth(
-                                      cls.startDate,
-                                      getCourseLocale(language),
-                                      ui.tba,
-                                    )} – ${formatDateDayMonth(
-                                      cls.endDate,
-                                      getCourseLocale(language),
-                                      ui.tba,
-                                    )}`
+                                    ? `${formatDateMonth(cls.startDate, ui.tba)} – ${formatDateMonth(cls.endDate, ui.tba)}`
                                     : cls.startDate
-                                      ? `${c.student?.startsOn || "Starts"} ${formatDateDayMonth(
-                                        cls.startDate,
-                                        getCourseLocale(language),
-                                        ui.tba,
-                                      )}`
+                                      ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba)}`
                                       : ui.tba || "TBA"}
                                 </span>
                               </div>
-
-                              {/* {(cls.enrollmentStart || cls.enrollmentEnd) && (
-                                <div className="flex items-center gap-1 text-xs text-amber-800 font-bold bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80">
-                                  <Clock size={11} className="text-amber-600 shrink-0" />
-                                  <span>
-                                    {c.student?.registration || "Registration"}: {cls.enrollmentStart && cls.enrollmentEnd
-                                      ? `${formatDateDayMonth(
-                                        cls.enrollmentStart,
-                                        getCourseLocale(language),
-                                        ui.tba,
-                                      )} – ${formatDateDayMonth(
-                                        cls.enrollmentEnd,
-                                        getCourseLocale(language),
-                                        ui.tba,
-                                      )}`
-                                      : cls.enrollmentStart
-                                        ? `${c.student?.startsOn || "Starts"} ${formatDateDayMonth(
-                                          cls.enrollmentStart,
-                                          getCourseLocale(language),
-                                          ui.tba,
-                                        )}`
-                                        : `${c.student?.endsOn || "Ends"} ${formatDateDayMonth(
-                                          cls.enrollmentEnd,
-                                          getCourseLocale(language),
-                                          ui.tba,
-                                        )}`}
-                                  </span>
-                                </div>
-                              )} */}
                             </div>
                           </div>
                         </div>
@@ -419,27 +384,11 @@ const StudentCourseDetailPage = () => {
                                 </span>
                                 <span className="text-gray-950 font-black text-sm truncate">
                                   {cls.enrollmentStart && cls.enrollmentEnd
-                                    ? `${formatDateDayMonth(
-                                      cls.enrollmentStart,
-                                      getCourseLocale(language),
-                                      ui.tba,
-                                    )} – ${formatDateDayMonth(
-                                      cls.enrollmentEnd,
-                                      getCourseLocale(language),
-                                      ui.tba,
-                                    )}`
+                                    ? `${formatDateMonth(cls.enrollmentStart, ui.tba)} – ${formatDateMonth(cls.enrollmentEnd, ui.tba)}`
                                     : cls.enrollmentStart
-                                      ? `${c.student?.startsOn || "From"} ${formatDateDayMonth(
-                                        cls.enrollmentStart,
-                                        getCourseLocale(language),
-                                        ui.tba,
-                                      )}`
+                                      ? `${c.student?.startsOn || "From"} ${formatDateMonth(cls.enrollmentStart, ui.tba)}`
                                       : cls.enrollmentEnd
-                                        ? `${c.student?.endsUntil || "Until"} ${formatDateDayMonth(
-                                          cls.enrollmentEnd,
-                                          getCourseLocale(language),
-                                          ui.tba,
-                                        )}`
+                                        ? `${c.student?.endsUntil || "Until"} ${formatDateMonth(cls.enrollmentEnd, ui.tba)}`
                                         : ui.tba || "TBA"}
                                 </span>
                               </div>
@@ -467,7 +416,7 @@ const StudentCourseDetailPage = () => {
                                         ui.tba,
                                       )}:
                                     </strong>{" "}
-                                    {s.startTime} - {s.endTime}
+                                    {formatScheduleTime(s.startTime)} - {formatScheduleTime(s.endTime)}
                                   </span>
                                 ))}
                               </div>

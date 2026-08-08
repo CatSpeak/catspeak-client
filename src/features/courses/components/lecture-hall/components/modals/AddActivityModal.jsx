@@ -7,8 +7,8 @@ import { useGetTeacherAssignmentsQuery, useGetTeacherQuizzesQuery } from "@/stor
 import { getAssignmentTitle, getAssignmentStatus } from "../../../../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import toast from "react-hot-toast"
-import { formatDateTime } from "@/shared/utils/dateFormatter"
 
 const AddActivityModal = ({
   open = false,
@@ -16,8 +16,8 @@ const AddActivityModal = ({
   onSubmit = () => { },
   classId,
 }) => {
-  const { t, language } = useLanguage()
-  const locale = language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US"
+  const { language, t } = useLanguage()
+  const { formatDateTime } = useTimezone()
   const dict = t.courses.lectureHall.modals.addActivity || {}
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState("all")
@@ -89,7 +89,7 @@ const AddActivityModal = ({
           ? (act.title || act.name || dict.defaultQuizName)
           : getAssignmentTitle(act, dict.defaultAssignmentName),
         dueDate: act.dueDate
-          ? formatDateTime(act.dueDate, locale)
+          ? formatDateTime(act.dueDate)
           : dict.noDueDate,
       }))
     onSubmit(chosenActivities)
@@ -199,11 +199,10 @@ const AddActivityModal = ({
 
               const type = act._activityType
               const typeLabel = act._activityType === "quiz" ? dict.typeQuiz : dict.typeSubmission
-
-              let timeInfo = null;
+              let timeInfo = null
               if (act._activityType === "assignment") {
                 const dueDateLabel = act.dueDate
-                  ? formatDateTime(act.dueDate, locale)
+                  ? formatDateTime(act.dueDate)
                   : dict.noDueDate
                 timeInfo = (
                   <div className="text-right">
@@ -217,10 +216,10 @@ const AddActivityModal = ({
                 )
               } else if (act._activityType === "quiz") {
                 const openTimeStr = act.openTime
-                  ? formatDateTime(act.openTime, locale)
+                  ? formatDateTime(act.openTime)
                   : "-"
                 const closeTimeStr = act.closeTime
-                  ? formatDateTime(act.closeTime, locale)
+                  ? formatDateTime(act.closeTime)
                   : "-"
                 timeInfo = (
                   <div className="text-right flex flex-col gap-0.5 justify-end">

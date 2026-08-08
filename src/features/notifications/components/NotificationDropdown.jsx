@@ -1,10 +1,12 @@
 import React from "react"
 import { ArrowLeft, Bell } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { getNotificationType } from "../config/notificationTypeConfig"
 
 const NotificationDropdown = ({ onClose, isMobile, notifications, unreadCount, markAsRead, markAllAsRead }) => {
   const { t } = useLanguage()
+  const { formatRelative } = useTimezone()
 
   const handleClickItem = async (n) => {
     if (!n.isRead) await markAsRead(n.id)
@@ -76,7 +78,7 @@ const NotificationDropdown = ({ onClose, isMobile, notifications, unreadCount, m
                     </p>
                     <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">{n?.resolvedBody}</p>
                     <p className="mt-1 text-[10px] text-gray-400">
-                      {n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
+                      {n.createdAt ? formatRelative(n.createdAt) : ""}
                     </p>
                   </div>
                 </div>

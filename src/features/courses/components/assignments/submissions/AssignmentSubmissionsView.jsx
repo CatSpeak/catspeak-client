@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast"
 
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   useBulkReturnSubmissionsMutation,
   useCloseAssignmentMutation,
@@ -23,7 +24,6 @@ import {
 } from "../../../utils/assignmentUtils"
 import {
   buildSubmissionStudentList,
-  formatSubmissionDate,
   getSafeSubmissionErrorMessage,
   getValidAttachmentList,
   getValidDateMs,
@@ -147,8 +147,9 @@ const sanitizeDownloadName = (value, fallback) => {
 }
 
 const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdProp, onBack, classId }) => {
-  const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { formatDateTime } = useTimezone()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [studentSearch, setStudentSearch] = useState("")
@@ -244,12 +245,7 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     && getValidDateMs(currentAssignment.dueDate) === null
   )
   const assignmentExpired = isAssignmentExpired(currentAssignment, nowMs)
-  const assignmentDueLabel = formatSubmissionDate(
-    currentAssignment?.dueDate,
-    language === "vi"
-      ? "vi-VN"
-      : (language === "zh" ? "zh-CN" : "en-US")
-  )
+  const assignmentDueLabel = formatDateTime(currentAssignment?.dueDate)
   const assignmentMembers = useMemo(
     () => (
       Array.isArray(currentAssignment?.members)
@@ -262,9 +258,11 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
     members: assignmentMembers,
     submissions,
     language,
+    formatDateTime,
     fallbackName: gradingTranslations.studentLabel,
   }), [
     assignmentMembers,
+    formatDateTime,
     gradingTranslations.studentLabel,
     language,
     submissions,

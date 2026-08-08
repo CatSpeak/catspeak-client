@@ -10,9 +10,8 @@ import {
 import { Pencil, Trash2 } from "lucide-react"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
-  formatDateRange,
-  getCourseLocale,
   getSafeMediaUrl,
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
@@ -28,6 +27,7 @@ const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const taskText = c.grading || {}
@@ -179,12 +179,7 @@ const CourseDetailPage = () => {
       ? rawCourse.levels.join(", ")
       : ui.notAvailable || "N/A",
     admissionPeriod: rawCourse.enrollmentStart && rawCourse.enrollmentEnd
-      ? formatDateRange(
-        rawCourse.enrollmentStart,
-        rawCourse.enrollmentEnd,
-        getCourseLocale(language),
-        ui.tba,
-      )
+      ? `${formatDate(rawCourse.enrollmentStart)} - ${formatDate(rawCourse.enrollmentEnd)}`
       : ui.tba || "TBA",
     duration: durationText,
     description: rawCourse.description || "",

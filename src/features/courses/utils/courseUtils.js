@@ -1,6 +1,7 @@
 import { MessageSquare, FileText, Users, GraduationCap, PenSquare, BookOpen } from "lucide-react"
 import { DEFAULT_CLASS_FEE_TIERS } from "../data/courseFormOptions.js"
 import defaultCourseThumbnail from "@/shared/assets/backgrounds/background-account.png"
+import { ensureDate } from "@/shared/utils/dateUtils"
 
 export { defaultCourseThumbnail, defaultCourseThumbnail as DEFAULT_COURSE_THUMBNAIL }
 
@@ -27,69 +28,14 @@ export const getCourseLocale = (language) => (
 export function formatToYYYYMMDD(isoStr) {
   if (!isoStr) return ""
   try {
-    // If the string contains timezone info (T, Z, +), parse as Date for local conversion
-    if (isoStr.includes("T") || isoStr.includes("Z") || /[+-]\d{2}:?\d{2}$/.test(isoStr)) {
-      return utcToLocalDateStr(isoStr)
-    }
-    // Plain date string (e.g. "2026-10-15") — return as-is
-    return isoStr.split("T")[0]
+    const d = ensureDate(isoStr)
+    return d ? d.toISOString().split("T")[0] : ""
   } catch {
     return ""
   }
 }
 
-/**
- * Convert a UTC ISO string from the backend into a YYYY-MM-DD string
- * in the user's local timezone. Used when populating date inputs from API data.
- *
- * Example (UTC+7): "2026-10-14T17:00:00Z" → "2026-10-15"
- *   (because 17:00 UTC = 00:00 next day in UTC+7)
- *
- * @param {string} isoStr - UTC ISO date string from the API
- * @returns {string} "YYYY-MM-DD" in local timezone, or "" if invalid
- */
-export function utcToLocalDateStr(isoStr) {
-  if (!isoStr) return ""
-  try {
-    const d = new Date(isoStr)
-    if (isNaN(d.getTime())) return ""
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, "0")
-    const day = String(d.getDate()).padStart(2, "0")
-    return `${y}-${m}-${day}`
-  } catch {
-    return ""
-  }
-}
 
-/**
- * Format a UTC ISO date string into a localized string without timezone shift.
- * Uses `timeZone: "UTC"` to avoid local timezone offset shifting.
- *
- * @param {string} isoStr - UTC ISO string (e.g. "2026-10-15T00:00:00Z")
- * @param {string} [locales] - Locale parameter, defaults to "en-GB"
- * @param {object} [options] - Additional Intl options
- * @param {string} [fallback] - Text returned when the date is missing or invalid
- * @returns {string} Formatted date or the provided fallback
- */
-export function formatUTCDate(
-  isoStr,
-  locales = "en-GB",
-  options = {},
-  fallback = "—",
-) {
-  if (!isoStr) return fallback
-  try {
-    const d = new Date(isoStr)
-    if (isNaN(d.getTime())) return fallback
-    return d.toLocaleDateString(locales, {
-      timeZone: "UTC",
-      ...options
-    })
-  } catch {
-    return fallback
-  }
-}
 
 /**
  * ═══════════════════════════════════════════════════════════════════
@@ -209,99 +155,11 @@ export const ATTENDANCE_STATUS = {
   ABSENT_UNEXCUSED: { color: "#EF4444" },
 }
 
-const SHORT_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-const getOrdinalSuffix = (day) => {
-  if (day > 3 && day < 21) return "th"
-  if (day % 10 === 1) return "st"
-  if (day % 10 === 2) return "nd"
-  if (day % 10 === 3) return "rd"
-  return "th"
-}
 
-const formatLocalizedDay = (date, locale, dayFirst = false) => {
-  if (String(locale).toLowerCase().startsWith("en")) {
-    const day = date.getUTCDate()
-    const month = SHORT_MONTH_NAMES[date.getUTCMonth()]
-    return dayFirst
-      ? `${day}${getOrdinalSuffix(day)} ${month}`
-      : `${month} ${day}${getOrdinalSuffix(day)}`
-  }
 
-  return date.toLocaleDateString(locale, {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  })
-}
 
-// Date range formatter helper (e.g. Jan 15th - Feb 16th)
-export const formatDateRange = (
-  start,
-  end,
-  locale = "en-US",
-  fallback = "—",
-) => {
-  if (!start || !end) return fallback
 
-  const parseDate = (dStr) => {
-    const d = new Date(dStr)
-    if (isNaN(d.getTime())) return null
-    return formatLocalizedDay(d, locale)
-  }
-  const startLabel = parseDate(start)
-  const endLabel = parseDate(end)
-  return startLabel && endLabel ? `${startLabel} - ${endLabel}` : fallback
-}
-
-export const formatDateDayMonth = (
-  dateStr,
-  locale = "en-US",
-  fallback = "—",
-) => {
-  if (!dateStr) return fallback
-  const d = new Date(dateStr)
-  if (isNaN(d.getTime())) return fallback
-  return formatLocalizedDay(d, locale, true)
-}
-
-export const formatTime12h = (
-  timeStr,
-  locale = "en-US",
-  fallback = "—",
-) => {
-  if (!timeStr) return fallback
-  const value = String(timeStr).trim()
-  const twelveHourMatch = value.match(/^(0?[1-9]|1[0-2]):([0-5]\d)\s?(AM|PM)$/i)
-  const twentyFourHourMatch = value.match(/^(\d{1,2}):(\d{2})$/)
-  if (!twelveHourMatch && !twentyFourHourMatch) return fallback
-
-  let hours
-  let minutes
-  if (twelveHourMatch) {
-    hours = Number(twelveHourMatch[1]) % 12
-    if (twelveHourMatch[3].toUpperCase() === "PM") hours += 12
-    minutes = Number(twelveHourMatch[2])
-  } else {
-    hours = Number(twentyFourHourMatch[1])
-    minutes = Number(twentyFourHourMatch[2])
-  }
-
-  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return fallback
-  if (!String(locale).toLowerCase().startsWith("en")) {
-    const time = new Date(Date.UTC(2000, 0, 1, hours, minutes))
-    return time.toLocaleTimeString(locale, {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: "UTC",
-    })
-  }
-
-  const ampm = hours >= 12 ? "PM" : "AM"
-  const displayHours = hours % 12 || 12
-  return `${displayHours}:${String(minutes).padStart(2, "0")} ${ampm}`
-}
 
 export const getSafeMediaUrl = (value) => {
   if (typeof value !== "string" || !value.trim()) return null

@@ -7,7 +7,6 @@ import {
   buildSubmissionStudentList,
   filterSubmissionStudents,
   formatPaginationShowingText,
-  formatSubmissionDate,
   getSafeSubmissionErrorMessage,
   getSubmissionStats,
   getValidAttachmentList,
@@ -97,15 +96,10 @@ test("duplicate roster entries do not create duplicate students", () => {
   assert.equal(students[0].status, "not_submitted")
 })
 
-test("date helpers reject invalid input and support the Chinese locale", () => {
+test("date helpers reject invalid input", () => {
   assert.equal(getValidDateMs("not-a-date"), null)
   assert.equal(getValidDateMs(false), null)
   assert.equal(getValidDateMs([]), null)
-  assert.equal(formatSubmissionDate("not-a-date", "en-US"), "—")
-  assert.notEqual(
-    formatSubmissionDate("2026-07-25T10:00:00.000Z", "zh-CN"),
-    "—"
-  )
 })
 
 test("attachment parsing rejects malformed API fields", () => {

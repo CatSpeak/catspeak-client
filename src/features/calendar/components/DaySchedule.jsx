@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import {
   useGetEventsByDateQuery,
   useGetRegisteredEventsQuery,
@@ -54,6 +55,7 @@ const DaySchedule = ({
   onSelectDate,
 }) => {
   const { t } = useLanguage();
+  const { formatCustom } = useTimezone();
   const cal = t.calendar || {};
 
   const [tab, setTab] = useState("unregistered"); // day view tab
@@ -253,7 +255,7 @@ const DaySchedule = ({
 
     if (activeFilters?.startTime || activeFilters?.endTime) {
       const evStartHs = ev.startTime
-        ? dayjs(ev.startTime).format("HH:mm")
+        ? formatCustom(ev.startTime, { hour: "2-digit", minute: "2-digit", hour12: false })
         : null;
       if (!evStartHs) return false;
       if (activeFilters?.startTime && evStartHs < activeFilters.startTime)
@@ -280,7 +282,7 @@ const DaySchedule = ({
     const groups = { morning: [], noon: [], afternoon: [], evening: [] };
     displayEvents.forEach((ev) => {
       const startTime = ev.startTime
-        ? dayjs(ev.startTime).format("HH:mm")
+        ? formatCustom(ev.startTime, { hour: "2-digit", minute: "2-digit", hour12: false })
         : null;
       const section = getTimeOfDay(startTime);
       groups[section].push(ev);

@@ -18,13 +18,14 @@ import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useSelector } from "react-redux"
 import { formatFileSize } from "../utils/fileUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { formatDateTime } from "@/shared/utils/dateFormatter"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const PostDetailPage = () => {
   const navigate = useNavigate()
   const { id: classId, postId } = useParams()
   const location = useLocation()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const dict = t.courses.lectureHall.postDetail
 
   // Robust role check
@@ -70,7 +71,7 @@ const PostDetailPage = () => {
     title: postDetail?.title || dict.noTitle,
     authorName: postDetail?.accountName || dict.teacher,
     authorAvatar: postDetail?.avatarImageUrl || "",
-    date: formatDateTime(postDetail?.createdAt, language),
+    date: postDetail?.createdAt ? formatDate(postDetail.createdAt) : "",
     thumbnailUrl: postDetail?.thumbnailUrl || "",
     content: postDetail?.content || "",
     attachments: postDetail?.attachmentsJson
@@ -87,7 +88,7 @@ const PostDetailPage = () => {
     authorName: comment.accountName || dict.anonymous,
     authorAvatar: comment.avatarImageUrl || "",
     isTeacher: comment.isTeacher || false,
-    time: formatDateTime(comment.createdAt, language),
+    time: comment.createdAt ? formatDate(comment.createdAt) : "",
     content: comment.content,
     replyCount: comment.replyCount || 0,
   })) || []

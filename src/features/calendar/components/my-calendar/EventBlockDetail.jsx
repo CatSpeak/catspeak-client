@@ -5,10 +5,12 @@ import dayjs from 'dayjs'
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
 const EventBlockDetail = ({ event, open, onClose }) => {
   const navigate = useNavigate()
   const { t, language } = useLanguage()
+  const { formatDate, formatTime } = useTimezone()
 
   const EVENT_STYLES = {
     "teaching-schedule": { background: "#f1fff8", label: t.calendar?.teachingSchedule || "Lịch dạy", color: "#34ce56" },
@@ -150,9 +152,9 @@ const EventBlockDetail = ({ event, open, onClose }) => {
             <Clock className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
             <div>
               <p className="text-[#1A1A1A] font-medium">
-                {event.startTime ? dayjs(event.startTime).format('HH:mm') : ''}
-                {event.endTime ? ` - ${dayjs(event.endTime).format('HH:mm')}` : ''}
-                {event.startTime ? `, (${dayjs(event.startTime).format('DD/MM/YYYY')})` : ''}
+                {event.startTime ? formatTime(event.startTime) : ''}
+                {event.endTime ? ` - ${formatTime(event.endTime)}` : ''}
+                {event.startTime ? `, (${formatDate(event.startTime)})` : ''}
               </p>
               <p className="text-sm text-gray-500">{t.calendar?.timeLabel || 'Thời gian'}</p>
             </div>
@@ -170,7 +172,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
           )}
 
           {/* Price */}
-          {event.ticketPrice && (
+          {['registered-event', 'my-event'].includes(event.eventType) && (
             <div className="flex items-start gap-3">
               <Tag className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
               <div>

@@ -7,33 +7,34 @@ import { Clock, Users, Link as LinkIcon, Bookmark, Lock } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useAuth } from "@/features/auth";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
-import {
-  formatDate,
-  formatTimeRange,
-  calculateEndDate,
-} from "@/shared/utils/dateFormatter";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import { calculateEndDate } from "@/shared/utils/dateUtils";
 import toast from "react-hot-toast";
 import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
-import Modal from "@/shared/components/ui/Modal";
 import RoomFullModal from "./RoomFullModal";
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png";
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png";
 import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon";
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
 
 const RoomCard = ({ room }) => {
-  const [searchParams] = useSearchParams();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
+  const { formatTime } = useTimezone();
   const { isAuthenticated } = useAuth();
   const { openAuthModal } = useAuthModal();
   const navigate = useNavigate();
   const { lang } = useParams();
 
-  const currentLang = lang || (typeof window !== 'undefined' ? localStorage.getItem("communityLanguage") : null) || "en";
+  const currentLang =
+    lang ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("communityLanguage")
+      : null) ||
+    "en";
   const fallbackThumbnail = currentLang === "zh" ? ZHThumbnail : ENThumbnail;
   const [imageError, setImageError] = useState(false);
-  const displayThumbnail = imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl;
+  const displayThumbnail =
+    imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl;
 
   const translatedName = room.name;
   const isRoomFull =
@@ -41,7 +42,8 @@ const RoomCard = ({ room }) => {
     (room.currentParticipantCount || 0) >= room.maxParticipants;
 
   const isPrivate = room.privacy === "Private" || room.isPrivate;
-  const hasPassword = room.hasPassword || room.isPasswordProtected || !!room.password;
+  const hasPassword =
+    room.hasPassword || room.isPasswordProtected || !!room.password;
 
   const handleJoinRoom = (e) => {
     e.stopPropagation();
@@ -59,14 +61,13 @@ const RoomCard = ({ room }) => {
 
   // Date and time formatting using locale-aware utilities
   const createDate = new Date(room.createDate);
-  const dateStr = formatDate(createDate);
 
   const isInfiniteDuration = room.duration === null;
   const durationMinutes = room.duration || 20; // fallback to 20 if not null
   const endDate = calculateEndDate(createDate, durationMinutes);
   const timeStr = isInfiniteDuration
     ? t.rooms.noLimit
-    : formatTimeRange(createDate, endDate);
+    : `${formatTime(createDate)} - ${formatTime(endDate)}`;
 
   // Placeholder code simulation
   const roomCode = `room-${room.roomId}`.toLowerCase();
@@ -128,7 +129,7 @@ const RoomCard = ({ room }) => {
             src={displayThumbnail}
             onError={() => setImageError(true)}
             alt="Room Cover"
-            className={`relative z-10 h-full w-full ${(!imageError && room.thumbnailUrl) ? "object-contain" : "object-cover"}`}
+            className={`relative z-10 h-full w-full ${!imageError && room.thumbnailUrl ? "object-contain" : "object-cover"}`}
           />
 
           {/* Top Left: Badges */}
@@ -137,7 +138,9 @@ const RoomCard = ({ room }) => {
               <div
                 className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate cursor-default"
                 title={
-                  t?.rooms?.filters?.levels?.[room.requiredLevel?.toLowerCase()] ||
+                  t?.rooms?.filters?.levels?.[
+                    room.requiredLevel?.toLowerCase()
+                  ] ||
                   `${t?.rooms?.filters?.levelLabel || "Trình độ"}: ${room.requiredLevel}`
                 }
               >
@@ -147,12 +150,12 @@ const RoomCard = ({ room }) => {
             {(() => {
               // Tooltip hiện theo locale hiện tại của user.
               // i18n key path: t.rooms.filters.topics.<topicKey>  (e.g. rooms.filters.topics.history)
-              const { topicKey } = getTopicMeta(room.topic)
+              const { topicKey } = getTopicMeta(room.topic);
               const topicLabel =
                 t?.rooms?.filters?.topics?.[topicKey] ||
                 room.topic ||
                 t?.rooms?.filters?.topics?.other ||
-                "Khác"
+                "Khác";
               return (
                 <div
                   className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10 cursor-default"
@@ -160,7 +163,7 @@ const RoomCard = ({ room }) => {
                 >
                   {getTopicIcon(room.topic)}
                 </div>
-              )
+              );
             })()}
           </div>
 

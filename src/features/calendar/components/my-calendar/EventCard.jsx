@@ -4,6 +4,7 @@ import React from 'react'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
@@ -16,6 +17,7 @@ const EVENT_STYLES = {
 const EventCard = ({ event, onClick }) => {
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { formatTime } = useTimezone()
 
   if (!event) return;
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
@@ -51,8 +53,8 @@ const EventCard = ({ event, onClick }) => {
         <div className='space-y-1 text-sm text-[#1A1A1A]'>
           <p className='flex items-center gap-2'>
             <Clock size={14} />
-            {event.startTime ? dayjs(event.startTime).format('HH:mm') : ''}
-            {event.endTime ? ` - ${dayjs(event.endTime).format('HH:mm')}` : ''}
+            {event.startTime ? formatTime(event.startTime) : ''}
+            {event.endTime ? ` - ${formatTime(event.endTime)}` : ''}
           </p>
           <p className='flex items-center gap-2'><MapPin size={14} /> {event.location}</p>
         </div>

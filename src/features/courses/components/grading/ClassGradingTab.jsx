@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   useGetTeacherAssignmentsQuery,
   useGetStudentAssignmentsQuery,
@@ -77,16 +78,9 @@ const getDisplayableItems = (items) => {
   })
 }
 
-const formatDateTime = (value, language, options) => {
+const formatLabelDateTime = (value, formatDateTime) => {
   if (!value) return "—"
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "—"
-
-  const locale = language === "vi"
-    ? "vi-VN"
-    : (language === "zh" ? "zh-CN" : "en-US")
-  return date.toLocaleString(locale, options)
+  return formatDateTime ? formatDateTime(value) : String(value)
 }
 
 const getTimestamp = (value) => {
@@ -96,6 +90,7 @@ const getTimestamp = (value) => {
 
 // ─── Student Assignment Row (Table View) ──────────────────────────────
 const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect }) => {
+  const { formatDateTime } = useTimezone()
   const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
     || Object.prototype.hasOwnProperty.call(assignment, "submission")
   const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
@@ -135,7 +130,7 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
     ? (maxScore === null ? String(grade) : `${grade} / ${maxScore}`)
     : "—"
 
-  const dueLabel = formatDateTime(assignment.dueDate, language)
+  const dueLabel = formatLabelDateTime(assignment.dueDate, formatDateTime)
 
   const submittedAtMs = getTimestamp(submission?.submittedAt)
   const dueAtMs = getTimestamp(assignment?.dueDate)
@@ -214,13 +209,8 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
 
 // ─── Student Quiz Row (Table View) ───────────────────────────────────
 const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
-  const closeTimeFormatted = formatDateTime(quiz.closeTime, language, {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  const { formatDateTime } = useTimezone()
+  const closeTimeFormatted = formatLabelDateTime(quiz.closeTime, formatDateTime)
 
   const recordStatus = typeof quiz.recordStatus === "string"
     ? quiz.recordStatus.trim().toLowerCase()
@@ -344,6 +334,7 @@ const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
 
 // ─── Student Assignment Card (Grid View) ─────────────────────────────
 const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect, nowMs }) => {
+  const { formatDateTime } = useTimezone()
   const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
     || Object.prototype.hasOwnProperty.call(assignment, "submission")
   const embeddedSubmission = assignment.mySubmission ?? assignment.submission ?? null
@@ -383,12 +374,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
     ? (maxScore === null ? String(grade) : `${grade} / ${maxScore}`)
     : null
 
-  const dueLabel = formatDateTime(assignment.dueDate, language, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  const dueLabel = formatLabelDateTime(assignment.dueDate, formatDateTime)
 
   const submittedAtMs = getTimestamp(submission?.submittedAt)
   const dueAtMs = getTimestamp(assignment?.dueDate)
@@ -513,12 +499,8 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
 
 // ─── Student Quiz Card (Grid View) ──────────────────────────────────
 const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
-  const closeTimeFormatted = formatDateTime(quiz.closeTime, language, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  const { formatDateTime } = useTimezone()
+  const closeTimeFormatted = formatLabelDateTime(quiz.closeTime, formatDateTime)
 
   const recordStatus = typeof quiz.recordStatus === "string"
     ? quiz.recordStatus.trim().toLowerCase()
@@ -669,6 +651,7 @@ const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
 
 // ─── Teacher Quiz Card ───────────────────────────────────────────────
 const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
+  const { formatDateTime } = useTimezone()
   const [publishTeacherQuiz, { isLoading: isPublishing }] = usePublishTeacherQuizMutation()
   const publishGuardRef = useRef(false)
 
@@ -678,13 +661,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
   const isUpcoming = statusStr === "upcoming"
   const isClosed = statusStr === "closed"
 
-  const closeTimeFormatted = formatDateTime(quiz.closeTime, language, {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  const closeTimeFormatted = formatLabelDateTime(quiz.closeTime, formatDateTime)
 
   const embeddedQuestionCount = Array.isArray(quiz.questions)
     ? quiz.questions.length
@@ -865,6 +842,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
 
 const ClassGradingTab = ({ id: classId, isStudent }) => {
   const { language, t } = useLanguage()
+  const { formatDateTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const cg = c.grading || {}
@@ -1698,7 +1676,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               : null
             const { isExpired, isUpcoming } = getAssignmentTimeline(assignment, nowMs)
             const title = getAssignmentTitle(assignment, cg.untitledAssignment)
-            const dueDate = formatDateTime(assignment.dueDate, language)
+            const dueDate = formatLabelDateTime(assignment.dueDate, formatDateTime)
 
             return (
               <div

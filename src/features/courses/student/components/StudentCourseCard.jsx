@@ -4,12 +4,11 @@ import {
   getCourseGradientAndIcon,
   formatCurrencyVND,
   getSafeMediaUrl,
-  formatDateDayMonth,
-  getCourseLocale,
   defaultCourseThumbnail,
 } from "../../utils/courseUtils"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const StudentCourseCard = ({
   course,
@@ -21,6 +20,7 @@ const StudentCourseCard = ({
   index
 }) => {
   const { language, t: contextT } = useLanguage()
+  const { formatDateMonth } = useTimezone()
   const t = propsT || contextT
   const sc = t?.courses?.student || {}
   const ui = t?.courses?.workspaceUi || {}
@@ -236,7 +236,7 @@ const StudentCourseCard = ({
                 <Calendar size={13} className="text-amber-500 shrink-0" />
                 <span className="truncate text-slate-800">
                   {minEnrollmentEnd
-                    ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateDayMonth(minEnrollmentEnd, getCourseLocale(language), ui.tba || "TBA")}`
+                    ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateMonth(minEnrollmentEnd, ui.tba || "TBA")}`
                     : (ui.tba || "TBA")}
                 </span>
               </div>

@@ -4,8 +4,8 @@ import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import GroupAvatar from "../GroupAvatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
-import { formatRelativeTime } from "@/shared/utils/dateFormatter"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { selectUnreadForConversation } from "@/store/slices/notificationSlice"
 import { useAuth } from "@/features/auth"
 
@@ -18,6 +18,7 @@ const ConversationItem = ({
 }) => {
   const { t } = useLanguage()
   const { user } = useAuth()
+  const { formatRelative } = useTimezone()
 
   const currentUserId = currentUser?.id || user?.accountId
 
@@ -157,7 +158,7 @@ const ConversationItem = ({
   const rightContent = (
     <div className="flex flex-col items-end gap-1 justify-center shrink-0">
       <span className="text-xs text-[#606060]">
-        {formatRelativeTime(timestamp)}
+        {formatRelative(timestamp)}
       </span>
       {unreadCount > 0 ? (
         <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#990011] px-1.5 text-xs text-white">

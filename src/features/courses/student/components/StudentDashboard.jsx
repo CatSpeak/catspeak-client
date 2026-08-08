@@ -7,8 +7,9 @@ import { useGetProfileQuery } from "@/features/auth"
 import CourseSearchInput from "../../components/CourseSearchInput"
 import CourseSelectFilter from "../../components/CourseSelectFilter"
 import TablePagination from "../../components/shared/TablePagination"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
-import { filterStudentClasses } from "../../utils/courseTransforms"
+import { filterStudentClasses, filterStudentCourses } from "../../utils/courseTransforms"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const UNKNOWN_VALUE = "—"
 const PAGE_SIZE = 24
@@ -51,16 +52,14 @@ const getProgressPercent = (progress) => {
   )
 }
 
-const formatDisplayDate = (value) => {
-  const dateText = toText(value)
-  if (!dateText) return UNKNOWN_VALUE
-  const date = new Date(dateText)
-  if (Number.isNaN(date.getTime())) return dateText
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
+const formatDisplayDate = (value, formatDate) => {
+  const text = toText(value)
+  if (!/^\d{4}-\d{2}-\d{2}(?:[T\s]|$)/.test(text)) {
+    return UNKNOWN_VALUE
+  }
+
+  const formatted = formatDate ? formatDate(text) : text
+  return formatted || UNKNOWN_VALUE
 }
 
 const normalizeClass = (item) => {
@@ -138,6 +137,7 @@ const normalizeCollection = (rawData, normalizer) => {
 }
 
 const StudentDashboard = ({ t, language }) => {
+  const { formatDate } = useTimezone()
   const sc = useMemo(() => t?.courses?.student || {}, [t])
   const navigate = useNavigate()
   const normalizedLanguage = toText(language).toLowerCase()
@@ -621,9 +621,9 @@ const StudentDashboard = ({ t, language }) => {
                             <div className="flex items-center gap-1.5">
                               <Calendar size={13} aria-hidden="true" className="text-gray-400" />
                               <span>
-                                {formatDisplayDate(cls.startDate)}
+                                {formatDisplayDate(cls.startDate, formatDate)}
                                 {" - "}
-                                {formatDisplayDate(cls.endDate)}
+                                {formatDisplayDate(cls.endDate, formatDate)}
                               </span>
                             </div>
                           </div>

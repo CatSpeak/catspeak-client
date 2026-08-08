@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { setCredentials, logout } from "../slices/authSlice"
 import { setServerDown, setServerUp } from "../slices/serverStatusSlice"
 import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
+import { getBrowserTimeZone } from "@/shared/constants/timezones"
 
 // ─── Helpers ────────────────────────────────────────────────────────
 const AUTH_LOG = "[Auth]"
@@ -44,8 +45,11 @@ const baseQuery = fetchBaseQuery({
       headers.set("X-Community-Lang", match[1])
     }
 
+    // Attach user timezone (e.g. "Asia/Ho_Chi_Minh")
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
+    headers.set("X-Time-Zone", userTz)
+
     // Attach local timezone offset in minutes (JS returns negative for UTC+X, e.g. -420 for UTC+7)
-    // We send the negative value to match C# logic (e.g. UTC + 420 minutes = Local)
     headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
 
     return headers
@@ -65,8 +69,9 @@ const instructorBaseQuery = fetchBaseQuery({
       headers.set("X-Community-Lang", match[1])
     }
 
-    // Attach local timezone offset in minutes (JS returns negative for UTC+X, e.g. -420 for UTC+7)
-    // We send the negative value to match C# logic (e.g. UTC + 420 minutes = Local)
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
+    headers.set("X-Time-Zone", userTz)
+
     headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
 
     return headers

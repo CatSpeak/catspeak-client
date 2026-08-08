@@ -2,6 +2,7 @@ import React from "react";
 import { Clock, MapPin, Globe, ChevronLeft, Tag } from "lucide-react";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatLocation } from "../../utils/eventFormatters";
 import EventDetailFooter from "../EventDetailModal/EventDetailFooter";
 
@@ -14,13 +15,14 @@ const DayScheduleEventDetail = ({
 }) => {
   const navigate = useNavigate();
   const { lang } = useParams();
+  const { formatDateTime } = useTimezone();
   const ev = fullEvent || selectedEvent;
 
   const startTime = ev.startTime
-    ? dayjs(ev.startTime).format("HH:mm (DD/MM/YYYY)")
+    ? formatDateTime(ev.startTime)
     : "";
   const endTime = ev.endTime
-    ? dayjs(ev.endTime).format("HH:mm (DD/MM/YYYY)")
+    ? formatDateTime(ev.endTime)
     : "";
   const timeStr =
     startTime && endTime ? `${startTime} - ${endTime}` : startTime;

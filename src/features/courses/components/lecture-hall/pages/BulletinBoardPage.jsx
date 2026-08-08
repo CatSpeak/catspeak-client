@@ -7,25 +7,13 @@ import TablePagination from "@/features/courses/components/shared/TablePaginatio
 import CourseTablePageHeader from "@/features/courses/components/CourseTablePageHeader"
 import { usePaginatedSearch } from "@/features/courses/hooks/usePaginatedSearch"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import BulletinBoardTable from "../components/ui/BulletinBoardTable"
-import { FileText } from "lucide-react"
-import { formatDateTime } from "@/shared/utils/dateFormatter"
-import { useGetStudentClassDetailQuery } from "@/store/api/coursesApi"
-import { useGetUserProfileQuery } from "@/store/api/userApi"
-import {
-  useDeletePostInBulletinBoardMutation,
-  useGetListPostsInBulletinBoardQuery,
-  useGetStudentListPostsInBulletinBoardQuery,
-  useUpdatePostInBulletinBoardMutation
-} from "@/store/api/coursesApi"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 export default function BulletinBoardPage() {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
-  const { t, language } = useLanguage()
-  const location = useLocation();
-  const title = location.state?.displayData?.title;
+  const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const dict = t.courses.lectureHall
 
   const { data: profileResponse } = useGetUserProfileQuery()
@@ -86,7 +74,7 @@ export default function BulletinBoardPage() {
       id: post.id,
       title: post.title,
       author: post.accountName,
-      date: formatDateTime(post.createdAt, language),
+      date: post.createdAt ? formatDate(post.createdAt) : "",
       replies: post.replyCount,
       isPinned: post.isPinned,
       isVisibleToStudents: post.isVisibleToStudents,

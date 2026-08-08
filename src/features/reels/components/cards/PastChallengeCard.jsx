@@ -3,11 +3,13 @@ import { useGetChallengeLeaderboardQuery } from "@/store/api/reelsApi"
 import { ArrowRight, Calendar, Trophy } from "lucide-react"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { formatScore, formatChallengeDate } from "../../utils/formatters"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { formatScore } from "../../utils/formatters"
 import fallbackChallengeCard from "@/shared/assets/images/reels/ChallengeCard.png"
 
 export default function PastChallengeCard({ challenge, isSelected, onSelectChallenge }) {
   const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const { data: leaderboardResponse } = useGetChallengeLeaderboardQuery(
     { challengeId: challenge.challengeId, take: 1 },
     { skip: !challenge.challengeId }
@@ -25,8 +27,8 @@ export default function PastChallengeCard({ challenge, isSelected, onSelectChall
   const winnerEntry = getWinnerEntry(leaderboardResponse)
   const winnerNickname = winnerEntry?.reel?.nickname || winnerEntry?.reel?.username || "User"
 
-  const startDateFormatted = formatChallengeDate(challenge.startDate)
-  const endDateFormatted = formatChallengeDate(challenge.endDate)
+  const startDateFormatted = formatDate(challenge.startDate)
+  const endDateFormatted = formatDate(challenge.endDate)
 
   return (
     <div 

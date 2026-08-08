@@ -10,13 +10,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import CourseStatusPill from "../CourseStatusPill"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
-import {
-  formatDateRange,
-  formatDateDayMonth,
-  getCourseLocale,
-  getSafeMediaUrl,
-  defaultCourseThumbnail,
-} from "../../utils/courseUtils"
+import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const ClassOverviewTab = ({
   classData,
@@ -43,6 +38,7 @@ const ClassOverviewTab = ({
   cd = {}
 }) => {
   const { language, t } = useLanguage()
+  const { formatDateMonth, formatDate } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const taskText = c.grading || {}
@@ -276,13 +272,8 @@ const ClassOverviewTab = ({
               <div className="flex flex-col">
                 <span className="text-sm text-gray-400 font-bold">{cd.enrollmentPeriod || "Admission Period"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
-                  {classData.enrollmentStart && classData.enrollmentEnd
-                    ? formatDateRange(
-                      classData.enrollmentStart,
-                      classData.enrollmentEnd,
-                      getCourseLocale(language),
-                      ui.tba,
-                    )
+                   {classData.enrollmentStart && classData.enrollmentEnd
+                    ? `${formatDate(classData.enrollmentStart)} - ${formatDate(classData.enrollmentEnd)}`
                     : ui.tba || "TBA"}
                 </span>
               </div>
@@ -296,12 +287,7 @@ const ClassOverviewTab = ({
                 <span className="text-sm text-gray-400 font-bold">{cd.schedulePeriod || "Period"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
                   {classData.startDate && classData.endDate
-                    ? formatDateRange(
-                      classData.startDate,
-                      classData.endDate,
-                      getCourseLocale(language),
-                      ui.tba,
-                    )
+                    ? `${formatDate(classData.startDate)} - ${formatDate(classData.endDate)}`
                     : ui.tba || "TBA"}
                 </span>
               </div>
@@ -431,11 +417,7 @@ const ClassOverviewTab = ({
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-gray-400" />
                       <span>
-                        {formatDateDayMonth(
-                          sessionDate,
-                          getCourseLocale(language),
-                          ui.tba,
-                        )}
+                        {formatDateMonth(sessionDate, ui.tba)}
                       </span>
                     </div>
                   </div>
