@@ -229,6 +229,9 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
 
               return (
                 <div key={sub.key} className="w-full">
+                  {sub.key === "myCourses" && (
+                    <div className="my-1.5 mx-3 border-t border-black" />
+                  )}
                   <DesktopNavItem
                     to={resolvePath(subPath)}
                     icon={SubIconComponent}
@@ -237,9 +240,6 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                     img={sub.img}
                     onClick={() => setIsMobileOpen?.(false)}
                   />
-                  {sub.key === "analytics" && (
-                    <div className="my-1.5 mx-3 border-b border-black" />
-                  )}
                 </div>
               )
             })}

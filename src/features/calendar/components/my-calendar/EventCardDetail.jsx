@@ -13,6 +13,21 @@ const EventCardDetail = ({ event, onBack }) => {
 
   if (!event) return null;
 
+  const handleNavigate = (event) => {
+    switch (event.eventType) {
+      case 'teaching-schedule':
+        return navigate(`/workspace/courses/class/${event?.classId}`)
+      case 'student-schedule':
+        return navigate(`/workspace/learning/class/${event?.classId}`)
+      case 'my-event':
+        return navigate(`/workspace/my-calendar`, { state: { activeTab: 'event' } })
+      case 'registered-event':
+        return navigate(`/${language || 'vi'}/cat-speak/calendar`)
+      case 'other':
+        return
+    }
+  }
+
   const renderImage = (event) => {
     if (['teaching-schedule', 'student-schedule'].includes(event.eventType)) return null;
 
@@ -74,7 +89,7 @@ const EventCardDetail = ({ event, onBack }) => {
               {t.calendar?.enterRoom || "Vào phòng"}
             </PillButton>
             <PillButton
-              onClick={() => navigate(`/workspace/courses/class/${event?.classId}`)}
+              onClick={() => handleNavigate(event)}
             >
               {t.calendar?.viewClass || "Xem lớp học"}
             </PillButton>
