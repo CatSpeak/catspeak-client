@@ -579,7 +579,8 @@ const StudentDashboard = ({ t, language }) => {
                       ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
                       : UNKNOWN_VALUE
                     const statusLabel = cls.status
-                      ? cls.status.replace(/_/g, " ")
+                      ? (sc.classStatuses?.[cls.status]
+                        || cls.status.replace(/_/g, " "))
                       : UNKNOWN_VALUE
 
                     return (

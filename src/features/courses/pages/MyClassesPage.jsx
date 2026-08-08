@@ -33,6 +33,7 @@ const MyClassesPage = () => {
     { value: "all", label: mc.statusAll || "All Status" },
     { value: "teaching", label: c.teachingStatus || "Teaching" },
     { value: "open", label: c.openEnrollmentStatus || "Open" },
+    { value: "not_started", label: c.notStartedStatus || "Not Started" },
     { value: "archived", label: c.archive || "Archived" },
   ]
 

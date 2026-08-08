@@ -17,6 +17,7 @@ const CourseStatusPill = ({ status, label, labels, className = "" }) => {
     OPEN_ENROLLMENT: c.openEnrollmentStatus,
     OPEN_FOR_ENROLLMENT: c.openEnrollmentStatus,
     UPCOMING: c.upcomingStatus,
+    NOT_STARTED: c.notStartedStatus,
     ARCHIVED: c.archivedStatus || c.archive,
     COMPLETED: c.completedStatus || c.student?.completed,
     default: c.statusUnknown,
