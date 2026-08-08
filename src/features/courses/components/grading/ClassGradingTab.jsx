@@ -89,7 +89,7 @@ const getTimestamp = (value) => {
 }
 
 // ─── Student Assignment Row (Table View) ──────────────────────────────
-const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect }) => {
+const StudentAssignmentRow = ({ assignment, classId, cd, cg, onSelect }) => {
   const { formatDateTime } = useTimezone()
   const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
     || Object.prototype.hasOwnProperty.call(assignment, "submission")
@@ -208,7 +208,7 @@ const StudentAssignmentRow = ({ assignment, classId, cd, cg, language, onSelect 
 }
 
 // ─── Student Quiz Row (Table View) ───────────────────────────────────
-const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
+const StudentQuizRow = ({ quiz, cg, onSelect }) => {
   const { formatDateTime } = useTimezone()
   const closeTimeFormatted = formatLabelDateTime(quiz.closeTime, formatDateTime)
 
@@ -333,7 +333,7 @@ const StudentQuizRow = ({ quiz, cg, language, onSelect }) => {
 }
 
 // ─── Student Assignment Card (Grid View) ─────────────────────────────
-const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect, nowMs }) => {
+const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs }) => {
   const { formatDateTime } = useTimezone()
   const hasEmbeddedSubmission = Object.prototype.hasOwnProperty.call(assignment, "mySubmission")
     || Object.prototype.hasOwnProperty.call(assignment, "submission")
@@ -498,7 +498,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, language, onSelect
 }
 
 // ─── Student Quiz Card (Grid View) ──────────────────────────────────
-const StudentQuizCard = ({ quiz, cg, language, onSelect }) => {
+const StudentQuizCard = ({ quiz, cg, onSelect }) => {
   const { formatDateTime } = useTimezone()
   const closeTimeFormatted = formatLabelDateTime(quiz.closeTime, formatDateTime)
 
