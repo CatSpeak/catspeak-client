@@ -61,8 +61,8 @@ const ProfileDropdown = () => {
   const { isInCall } = useSelector((state) => state.videoCall);
 
   const user = {
-    ...(userData?.data ?? authUser ?? {}),
-    ...(detailedProfile?.data ?? {}),
+    ...(userData?.data ?? userData ?? authUser ?? {}),
+    ...(detailedProfile?.data ?? detailedProfile ?? {}),
   };
 
   const handleToggleMenu = () => {

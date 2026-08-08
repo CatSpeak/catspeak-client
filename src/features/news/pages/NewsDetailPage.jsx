@@ -168,7 +168,7 @@ const NewsDetailPage = () => {
       ? normalError
       : slugError;
   const [reactToPost] = useReactToPostMutation();
-  const newsItem = data?.data;
+  const newsItem = data?.data ?? data ?? null;
   const handleReact = (type) => {
     if (!newsItem?.postId) return;
     reactToPost({ postId: newsItem.postId, type });

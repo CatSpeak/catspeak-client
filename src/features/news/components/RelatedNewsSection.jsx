@@ -35,17 +35,17 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
 
   // Filter out current post, non-public posts, and filter by current language community or "All"
   const relatedPosts = useMemo(() => {
-    if (!data?.data) return [];
+    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
     const targetCommunity = currentCommunity.toLowerCase();
 
-    return data.data.filter((post) => {
+    return rawList.filter((post) => {
       if (post.postId === currentPostId) return false;
       if (post.privacy !== "Public") return false;
 
       const postCommunity = (post.languageCommunity || "All").toLowerCase();
       return postCommunity === "all" || postCommunity === targetCommunity;
     });
-  }, [data?.data, currentPostId, currentCommunity]);
+  }, [data, currentPostId, currentCommunity]);
 
   const columnsCount = useColumnCount();
 
