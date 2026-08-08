@@ -18,7 +18,7 @@ const StudentClassOverviewTab = ({
   onJoinRoom
 }) => {
   const { language, t } = useLanguage()
-  const { formatDateMonth } = useTimezone()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const scd = c.studentCourseDetail || {}
@@ -183,9 +183,11 @@ const StudentClassOverviewTab = ({
                       <Clock size={14} className="text-gray-400" />
                       <span>
                         {scd.timeLabel || "Time"}:{" "}
-                        {[sessionStartTime, sessionEndTime].filter(Boolean).join(" - ")
-                          || ui.tba
-                          || "TBA"}
+                        {sessionStartTime
+                          ? sessionEndTime
+                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
+                            : formatScheduleTime(sessionStartTime)
+                          : ui.tba || "TBA"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">

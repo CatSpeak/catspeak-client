@@ -195,22 +195,15 @@ const CourseDetailPage = () => {
     .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
     .sort((left, right) => left.startTimeMs - right.startTimeMs)[0]
   const nextSessionClass = nextSessionCandidate?.cls || null
-  const nextSessionStart = nextSessionCandidate
-    ? new Date(nextSessionCandidate.startTimeMs)
-    : null
-  const nextSessionEnd = nextSessionClass?.nextSession?.endTime
-    ? new Date(nextSessionClass.nextSession.endTime)
-    : null
-  const nextClass = nextSessionStart
+
+  const nextClass = nextSessionClass
     ? {
       ...nextSessionClass,
-      startDate: toLocalDateString(nextSessionStart),
+      startDate: nextSessionClass.nextSession?.date || nextSessionClass.nextSession?.startTime || nextSessionClass.startDate,
       schedule: {
         ...nextSessionClass.schedule,
-        startTime: nextSessionStart.toTimeString().slice(0, 5),
-        endTime: nextSessionEnd && !Number.isNaN(nextSessionEnd.getTime())
-          ? nextSessionEnd.toTimeString().slice(0, 5)
-          : "",
+        startTime: nextSessionClass.nextSession?.startTime || nextSessionClass.schedule?.startTime,
+        endTime: nextSessionClass.nextSession?.endTime || nextSessionClass.schedule?.endTime,
       },
     }
     : null

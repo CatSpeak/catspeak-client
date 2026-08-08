@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useRef, useState } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { MessageSquare, Video } from "lucide-react"
@@ -38,6 +39,7 @@ const ClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { userTimeZone } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const ui = c.workspaceUi || {}
@@ -144,6 +146,7 @@ const ClassDetailPage = () => {
     classData || {},
     language || "en",
     ui.tba,
+    userTimeZone,
   )
 
   if (

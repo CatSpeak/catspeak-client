@@ -52,13 +52,20 @@ const UpcomingSessionCard = ({
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Clock size={14} className="text-gray-400" />
               <span>
-                {formatScheduleTime(nextClass.schedule?.startTime) || ui.tba}
+                {(() => {
+                  const startTimeStr = nextClass.schedule?.startTime || nextClass.startTime
+                  const endTimeStr = nextClass.schedule?.endTime || nextClass.endTime
+                  if (!startTimeStr) return ui.tba || "TBA"
+                  const startFormatted = formatScheduleTime(startTimeStr)
+                  const endFormatted = endTimeStr ? formatScheduleTime(endTimeStr) : ""
+                  return endFormatted ? `${startFormatted} - ${endFormatted}` : startFormatted
+                })()}
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={14} className="text-gray-400" />
               <span>
-                {formatDateMonth(nextClass.startDate, ui.tba)}
+                {formatDateMonth(nextClass.startDate || nextClass.date, ui.tba)}
               </span>
             </div>
           </div>

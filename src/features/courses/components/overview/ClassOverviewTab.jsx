@@ -38,7 +38,7 @@ const ClassOverviewTab = ({
   cd = {}
 }) => {
   const { language, t } = useLanguage()
-  const { formatDateMonth, formatDate } = useTimezone()
+  const { formatDateMonth, formatDate, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const taskText = c.grading || {}
@@ -66,6 +66,7 @@ const ClassOverviewTab = ({
     ? classData.nextSession
     : null
   const sessionStartTime = nextSession?.startTime
+  const sessionEndTime = nextSession?.endTime
   const sessionDate = nextSession?.date
   const studentCountValue = Number(classData.studentCount ?? classData.enrolledStudents)
   const studentCount = Number.isFinite(studentCountValue)
@@ -412,7 +413,13 @@ const ClassOverviewTab = ({
                   <div className="flex flex-col gap-2 border-b border-gray-55 pb-4 text-xs font-semibold text-gray-500">
                     <div className="flex items-center gap-2">
                       <Clock size={14} className="text-gray-400" />
-                      <span>{sessionStartTime || ui.tba || "TBA"}</span>
+                      <span>
+                        {sessionStartTime
+                          ? sessionEndTime
+                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
+                            : formatScheduleTime(sessionStartTime)
+                          : ui.tba || "TBA"}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-gray-400" />
