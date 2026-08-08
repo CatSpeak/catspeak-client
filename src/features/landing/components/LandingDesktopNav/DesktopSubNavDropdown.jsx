@@ -23,7 +23,7 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
   const navigate = useNavigate()
   const { checkIsActive, resolvePath, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
-  const { isStudent, isTeacher } = useRoleOverride()
+  const { isStudent } = useRoleOverride()
   const isActive = checkIsActive(item)
 
   // Gate: show dropdown & allow navigation only when authenticated (if requiresAuth)
@@ -119,6 +119,9 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
                     const href = resolvePath(sub.path) || sub.path
                     return (
                       <React.Fragment key={sub.key}>
+                        {sub.key === "myCourses" && (
+                          <div className="my-1 mx-2 border-t border-black" />
+                        )}
                         <NavLink
                           to={href}
                           onClick={() => setIsOpen(false)}
@@ -134,9 +137,6 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
                           )}
                           <span>{t.nav?.[sub.key] || sub.key}</span>
                         </NavLink>
-                        {sub.key === "analytics" && (
-                          <div className="my-1 mx-2 border-b border-black" />
-                        )}
                       </React.Fragment>
                     )
                   })}
