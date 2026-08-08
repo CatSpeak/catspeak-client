@@ -167,7 +167,7 @@ const RoomsPage = () => {
     { skip: !shouldFetch },
   );
 
-  let rooms = responseData?.data ?? [];
+  let rooms = responseData?.data ?? (Array.isArray(responseData) ? responseData : []);
 
   if (hasOtherCategory) {
     const known = ["Knowledge", "Culture", "Lifestyle", "Growth"];
