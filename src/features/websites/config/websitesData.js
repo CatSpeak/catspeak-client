@@ -100,6 +100,15 @@ export const websites = [
         description:
           "Comprehensive video-based platform to learn English online for free.",
       },
+      {
+        key: "questsme",
+        label: "Questsme",
+        path: "/resources/questsme",
+        img: "https://play.questsme.com/favicon.png",
+        color: "#f7ca14",
+        description:
+          "A journey to enhance knowledge about your favorite brands.",
+      },
     ],
   },
   {
