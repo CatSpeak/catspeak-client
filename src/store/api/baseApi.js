@@ -306,15 +306,21 @@ export function createReauthBaseQuery(queryResolver) {
       api.dispatch(setServerUp())
     }
 
-    // ── Global Data Unwrapping ───────────────────────────────────────
-    if (
-      result.data &&
-      typeof result.data === "object" &&
-      "data" in result.data &&
-      result.data.data !== null &&
-      result.data.data !== undefined
-    ) {
-      result.data = result.data.data
+    // ── Global Data Normalization & Unwrapping ───────────────────────
+    // Supports both Old API ({ data, additionalData }) and New API ({ success, data: { data, additionalData } })
+    if (result.data && typeof result.data === "object") {
+      const res = result.data
+
+      // New API (Double-nested: { success: true, data: { data: [...], additionalData: {...} } })
+      if (res.success && res.data && typeof res.data === "object" && "data" in res.data) {
+        result.data = res.data
+      }
+      // Standard New API envelope ({ success: true, data: { ... } })
+      else if (res.success && res.data !== undefined) {
+        result.data = res.data
+      }
+      // Old API ({ data: [...], additionalData: {...} })
+      // Keep result.data as-is without unwrapping so top-level additionalData is preserved!
     }
 
     return result
