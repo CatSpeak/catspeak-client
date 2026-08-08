@@ -3,7 +3,7 @@ import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line no-unused-vars
 import { Check, X, Calendar, Clock, Loader2 } from "lucide-react"
 import { formatCurrencyVND } from "../../utils/courseUtils"
-import { formatScheduleDays } from "../../utils/scheduleUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const FOCUSABLE_SELECTOR = [
   "button:not([disabled])",
@@ -26,6 +26,7 @@ const StudentJoinModal = ({
   t,
   language,
 }) => {
+  const { formatScheduleDays } = useTimezone()
   const dialogRef = useRef(null)
   const previousFocusRef = useRef(null)
 
@@ -181,8 +182,9 @@ const StudentJoinModal = ({
                   <span>
                     {formatScheduleDays(
                       selectedClass.schedule?.days,
-                      language,
                       sc.toBeAnnounced,
+                      " - ",
+                      selectedClass.schedule?.startTime,
                     )}
                   </span>
                 </div>

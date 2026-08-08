@@ -62,12 +62,12 @@ const ClassOverviewTab = ({
     : null
   const progressText = `${completed ?? "—"} / ${total || "—"}`
   const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl)
-  const nextSession = classData.nextSession?.date && classData.nextSession?.startTime
+  const nextSession = classData.nextSession?.date && (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
     ? classData.nextSession
     : null
-  const sessionStartTime = nextSession?.startTime
-  const sessionEndTime = nextSession?.endTime
-  const sessionDate = nextSession?.date
+  const sessionStartTime = nextSession?.rawStartTime || nextSession?.startTime
+  const sessionEndTime = nextSession?.rawEndTime || nextSession?.endTime
+  const sessionDate = nextSession?.rawStartTime || (nextSession?.startTime && (nextSession.startTime.includes('T') || nextSession.startTime.includes('-')) ? nextSession.startTime : null) || nextSession?.date
   const studentCountValue = Number(classData.studentCount ?? classData.enrolledStudents)
   const studentCount = Number.isFinite(studentCountValue)
     ? Math.max(0, Math.floor(studentCountValue))

@@ -16,7 +16,7 @@ import {
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { mapTeachingTask } from "../utils/courseTransforms"
-import { toLocalDateString } from "../utils/dateUtils"
+import { ensureDate } from "@/shared/utils/dateUtils"
 
 import ClassCard from "../components/ClassCard"
 import CourseInfoCard from "../components/CourseInfoCard"
@@ -189,7 +189,10 @@ const CourseDetailPage = () => {
   // Only show an upcoming session when the API provides one.
   const nextSessionCandidate = classes
     .map((cls) => {
-      const startTimeMs = new Date(cls.nextSession?.startTime || "").getTime()
+      const ns = cls.nextSession
+      const rawTs = ns?.rawStartTime || (ns?.date && ns?.startTime ? `${ns.date}T${ns.startTime}` : ns?.startTime || "")
+      const d = ensureDate(rawTs)
+      const startTimeMs = d ? d.getTime() : NaN
       return { cls, startTimeMs }
     })
     .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
@@ -199,11 +202,12 @@ const CourseDetailPage = () => {
   const nextClass = nextSessionClass
     ? {
       ...nextSessionClass,
-      startDate: nextSessionClass.nextSession?.date || nextSessionClass.nextSession?.startTime || nextSessionClass.startDate,
+      nextSession: nextSessionClass.nextSession,
+      startDate: nextSessionClass.nextSession?.date || nextSessionClass.startDate,
       schedule: {
         ...nextSessionClass.schedule,
-        startTime: nextSessionClass.nextSession?.startTime || nextSessionClass.schedule?.startTime,
-        endTime: nextSessionClass.nextSession?.endTime || nextSessionClass.schedule?.endTime,
+        startTime: nextSessionClass.schedule?.startTime || nextSessionClass.nextSession?.startTime,
+        endTime: nextSessionClass.schedule?.endTime || nextSessionClass.nextSession?.endTime,
       },
     }
     : null

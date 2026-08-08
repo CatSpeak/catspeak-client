@@ -19,13 +19,12 @@ import {
 } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
-import { formatScheduleDays } from "../utils/scheduleUtils"
 
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
-  const { formatDateMonth, formatScheduleTime } = useTimezone()
+  const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
@@ -291,8 +290,9 @@ const StudentCourseDetailPage = () => {
                                   <span>
                                     {formatScheduleDays(
                                       cls.schedule?.days,
-                                      language,
                                       ui.tba,
+                                      " - ",
+                                      cls.schedule?.startTime,
                                     )}
                                     {cls.schedule?.startTime && cls.schedule?.endTime
                                       ? ` | ${formatScheduleTime(cls.schedule.startTime)} - ${formatScheduleTime(cls.schedule.endTime)}`
@@ -412,8 +412,9 @@ const StudentCourseDetailPage = () => {
                                     <strong className="text-gray-950">
                                       {formatScheduleDays(
                                         [s.dayOfWeek],
-                                        language,
                                         ui.tba,
+                                        " - ",
+                                        s.startTime,
                                       )}:
                                     </strong>{" "}
                                     {formatScheduleTime(s.startTime)} - {formatScheduleTime(s.endTime)}

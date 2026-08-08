@@ -3,10 +3,7 @@ import {
   getCourseGradientAndIcon,
 } from "./courseUtils"
 import { toLocalDateString } from "./dateUtils"
-import { formatScheduleDays } from "./scheduleUtils"
-
-const SHORT_DATE_OPTIONS = { day: "2-digit", month: "short", year: "numeric" }
-const NUMERIC_DATE_OPTIONS = { day: "2-digit", month: "2-digit", year: "numeric" }
+import { formatScheduleDays } from "@/shared/utils/dateUtils"
 
 const toNonNegativeNumber = (value) => {
   if (value === null || value === undefined || value === "") return null
