@@ -26,6 +26,7 @@ export default {
       friends: "Bạn bè",
       media: "Video/Ảnh",
       documents: "Tài liệu",
+      completedClass: "Lớp học đã hoàn thành",
     },
     avatar: {
       updating: "Đang cập nhật...",
@@ -72,6 +73,18 @@ export default {
     },
     media: {
       noMedia: "Chưa có phương tiện nào",
+    },
+    completedClass: {
+      title: "Lớp học đã hoàn thành",
+      cannotViewOther: "Bạn chỉ có thể xem danh sách lớp học đã hoàn thành của chính mình.",
+      errorLoading: "Đã xảy ra lỗi khi tải danh sách lớp học đã hoàn thành.",
+      noClassesFound: "Không tìm thấy lớp học đã hoàn thành",
+      noClassesFoundDesc: "Thử điều chỉnh từ khoá tìm kiếm của bạn.",
+      noClassesTitle: "Chưa có lớp học đã hoàn thành",
+      noClassesDesc: "Bạn chưa hoàn thành bất kỳ lớp học nào.",
+      searchPlaceholder: "Tìm kiếm lớp học...",
+      courseLabel: "Khóa học: ",
+      exploreMore: "Khám phá khoá học",
     },
     documents: {
       title: "Tài liệu chia sẻ",

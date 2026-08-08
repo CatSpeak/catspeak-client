@@ -26,6 +26,7 @@ export default {
       friends: "Friends",
       media: "Photos & Videos",
       documents: "Documents",
+      completedClass: "Completed Classes",
     },
     avatar: {
       updating: "Updating...",
@@ -72,6 +73,18 @@ export default {
     },
     media: {
       noMedia: "No media yet",
+    },
+    completedClass: {
+      title: "Completed Classes",
+      cannotViewOther: "You can only view your own completed classes.",
+      errorLoading: "An error occurred while loading completed classes.",
+      noClassesFound: "No completed classes found",
+      noClassesFoundDesc: "Try adjusting your search keywords.",
+      noClassesTitle: "No completed classes yet",
+      noClassesDesc: "You haven't completed any classes yet.",
+      searchPlaceholder: "Search classes...",
+      courseLabel: "Course: ",
+      exploreMore: "Explore Courses",
     },
     documents: {
       title: "Shared Documents",

@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
@@ -8,13 +8,32 @@ import CourseTablePageHeader from "@/features/courses/components/CourseTablePage
 import { usePaginatedSearch } from "@/features/courses/hooks/usePaginatedSearch"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { 
+  useDeletePostInBulletinBoardMutation, 
+  useGetListPostsInBulletinBoardQuery, 
+  useGetStudentClassDetailQuery, 
+  useGetStudentListPostsInBulletinBoardQuery, 
+  useUpdatePostInBulletinBoardMutation,
+  useGetBulletinBoardDetailQuery
+} from "@/store/api/coursesApi"
+import BulletinBoardTable from "../components/ui/BulletinBoardTable"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { FileText } from "lucide-react"
 
 export default function BulletinBoardPage() {
   const navigate = useNavigate()
   const { id: classId, boardId } = useParams()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { formatDate } = useTimezone()
   const dict = t.courses.lectureHall
+
+  const { data: boardDetailResponse } = useGetBulletinBoardDetailQuery(
+    { classId, boardId },
+    { skip: !classId || !boardId }
+  )
+  const boardDetail = boardDetailResponse?.data || boardDetailResponse || {}
+  const title = boardDetail?.title || dict?.board || "Bảng tin"
 
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}

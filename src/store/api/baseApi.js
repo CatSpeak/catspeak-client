@@ -312,10 +312,12 @@ export function createReauthBaseQuery(queryResolver) {
     }
 
     // ── Global Data Unwrapping ───────────────────────────────────────
+    // Skip unwrapping when the response contains pagination metadata
     if (
       result.data &&
       typeof result.data === "object" &&
       "data" in result.data &&
+      !("pagination" in result.data) &&
       result.data.data !== null &&
       result.data.data !== undefined
     ) {
