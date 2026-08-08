@@ -327,7 +327,8 @@ const baseQueryWithReauth = createReauthBaseQuery(
     const isCoursesRoute =
       url &&
       (url.toLowerCase().startsWith("/teacher/") ||
-        url.toLowerCase().startsWith("/student/"))
+        url.toLowerCase().startsWith("/student/") ||
+        url.toLowerCase().startsWith("/explore/"))
     const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
     return activeQuery(args, api, extraOptions)
   },
