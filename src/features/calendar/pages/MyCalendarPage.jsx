@@ -187,8 +187,6 @@ const MyCalendarPage = () => {
     return events;
   }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents, t])
 
-  console.log(allEvents)
-
   const filteredEvents = useMemo(() => {
     if (activeFilters.length === 0) return allEvents
     return allEvents.filter(e => activeFilters.includes(e.eventType))

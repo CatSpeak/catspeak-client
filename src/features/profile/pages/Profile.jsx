@@ -21,7 +21,7 @@ import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileDocumentsTab from "../components/ProfileDocumentsTab"
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
-import RegisteredCourse from "../components/RegisteredCourse"
+import CompletedClass from "../components/CompletedClass"
 
 const Profile = () => {
   const { user } = useAuth()
@@ -118,7 +118,7 @@ const Profile = () => {
     },
     { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
     { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },
-    // { id: "registeredCourse", label: "Khóa đã đăng ký" }
+    { id: "completedClass", label: t.profile?.tabs?.completedClass || "Lớp học đã hoàn thành" }
   ]
 
   return (
@@ -173,14 +173,14 @@ const Profile = () => {
               isOwnProfile={isOwnProfile}
             />
           )}
-          {/* {
-            activeTab === "registeredCourse" && (
-              <RegisteredCourse
+          {
+            activeTab === "completedClass" && (
+              <CompletedClass
                 targetAccountId={targetAccountId}
                 isOwnProfile={isOwnProfile}
               />
             )
-          } */}
+          }
         </div>
 
         <ProfileOtpModal

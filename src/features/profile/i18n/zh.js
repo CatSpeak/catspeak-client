@@ -26,6 +26,7 @@ export default {
       friends: "好友",
       media: "照片/视频",
       documents: "文件",
+      completedClass: "已完成的班级",
     },
     avatar: {
       updating: "正在更新...",
@@ -72,6 +73,18 @@ export default {
     },
     media: {
       noMedia: "暂无媒体",
+    },
+    completedClass: {
+      title: "已完成的班级",
+      cannotViewOther: "您只能查看自己已完成的班级。",
+      errorLoading: "加载已完成班级时发生错误。",
+      noClassesFound: "未找到已完成的班级",
+      noClassesFoundDesc: "请尝试调整搜索关键词。",
+      noClassesTitle: "暂无已完成的班级",
+      noClassesDesc: "您还没有完成任何班级。",
+      searchPlaceholder: "搜索班级...",
+      courseLabel: "课程：",
+      exploreMore: "探索课程",
     },
     documents: {
       title: "共享文件",
