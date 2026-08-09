@@ -13,10 +13,12 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import toast from 'react-hot-toast'
 
 const MyCalendarPage = () => {
   const { t } = useLanguage()
+  const { userTimeZone } = useTimezone()
   const { isTeacher } = useRoleOverride()
   const navigate = useNavigate()
   const location = useLocation()
@@ -113,13 +115,25 @@ const MyCalendarPage = () => {
     // 1. (Teacher Schedule)
     if (teacherScheduleSessions?.data && Array.isArray(teacherScheduleSessions.data)) {
       teacherScheduleSessions.data.forEach((session, index) => {
-        // Construct full startTime and endTime from date and time
-        const startDateTime = session.date && session.startTime
-          ? dayjs(`${session.date}T${session.startTime}`).toISOString()
-          : dayjs().toISOString();
-        const endDateTime = session.date && session.endTime
-          ? dayjs(`${session.date}T${session.endTime}`).toISOString()
-          : dayjs().toISOString();
+        const timePart = typeof session.startTime === "string" ? session.startTime.split("T")[1] || session.startTime : "00:00";
+        const datePart = session.date || (typeof session.startTime === "string" && session.startTime.includes("T") ? session.startTime.split("T")[0] : null);
+        const timeMatch = timePart.match(/(\d{1,2}:\d{2})/);
+        const cleanTime = timeMatch ? timeMatch[1].padStart(5, "0") : "00:00";
+
+        const timeEndPart = typeof session.endTime === "string" ? session.endTime.split("T")[1] || session.endTime : "00:00";
+        const timeEndMatch = timeEndPart.match(/(\d{1,2}:\d{2})/);
+        const cleanEndTime = timeEndMatch ? timeEndMatch[1].padStart(5, "0") : "00:00";
+
+        const rawIsoStart = datePart && cleanTime
+          ? `${datePart.trim()}T${cleanTime}:00Z`
+          : session.rawStartTime || session.startTime;
+
+        const rawIsoEnd = datePart && cleanEndTime
+          ? `${datePart.trim()}T${cleanEndTime}:00Z`
+          : session.rawEndTime || session.endTime;
+
+        const startDateTime = rawIsoStart ? new Date(rawIsoStart).toISOString() : dayjs().toISOString();
+        const endDateTime = rawIsoEnd ? new Date(rawIsoEnd).toISOString() : dayjs().toISOString();
 
         const newId = `teaching-${session.id || session.class?.id || `idx-${index}`}-${session.sessionNumber}`;
         if (!seenIds.has(newId)) {
@@ -144,13 +158,25 @@ const MyCalendarPage = () => {
     // 2. (Student Schedule)
     if (studentScheduleSessions?.data && Array.isArray(studentScheduleSessions.data)) {
       studentScheduleSessions.data.forEach((session, index) => {
-        // Construct full startTime and endTime from date and time
-        const startDateTime = session.date && session.startTime
-          ? dayjs(`${session.date}T${session.startTime}`).toISOString()
-          : dayjs().toISOString();
-        const endDateTime = session.date && session.endTime
-          ? dayjs(`${session.date}T${session.endTime}`).toISOString()
-          : dayjs().toISOString();
+        const timePart = typeof session.startTime === "string" ? session.startTime.split("T")[1] || session.startTime : "00:00";
+        const datePart = session.date || (typeof session.startTime === "string" && session.startTime.includes("T") ? session.startTime.split("T")[0] : null);
+        const timeMatch = timePart.match(/(\d{1,2}:\d{2})/);
+        const cleanTime = timeMatch ? timeMatch[1].padStart(5, "0") : "00:00";
+
+        const timeEndPart = typeof session.endTime === "string" ? session.endTime.split("T")[1] || session.endTime : "00:00";
+        const timeEndMatch = timeEndPart.match(/(\d{1,2}:\d{2})/);
+        const cleanEndTime = timeEndMatch ? timeEndMatch[1].padStart(5, "0") : "00:00";
+
+        const rawIsoStart = datePart && cleanTime
+          ? `${datePart.trim()}T${cleanTime}:00Z`
+          : session.rawStartTime || session.startTime;
+
+        const rawIsoEnd = datePart && cleanEndTime
+          ? `${datePart.trim()}T${cleanEndTime}:00Z`
+          : session.rawEndTime || session.endTime;
+
+        const startDateTime = rawIsoStart ? new Date(rawIsoStart).toISOString() : dayjs().toISOString();
+        const endDateTime = rawIsoEnd ? new Date(rawIsoEnd).toISOString() : dayjs().toISOString();
 
         const newId = `student-${session.id || session.class?.id || `idx-${index}`}-${session.sessionNumber}`;
         if (!seenIds.has(newId)) {
@@ -185,9 +211,7 @@ const MyCalendarPage = () => {
     processEventsList(events, studentRegEventsList, 'registered-event', seenIds);
 
     return events;
-  }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents, t])
-
-  console.log(allEvents)
+  }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents, t, userTimeZone])
 
   const filteredEvents = useMemo(() => {
     if (activeFilters.length === 0) return allEvents
@@ -197,17 +221,14 @@ const MyCalendarPage = () => {
   // Filter events for the selected date
   const eventsForSelectedDate = useMemo(() => {
     const targetDateStr = currentDate.date(selectedDate).format('YYYY-MM-DD')
-    const targetStart = dayjs(targetDateStr)
-    const targetEnd = targetStart.add(1, 'day')
 
     return filteredEvents.filter(ev => {
       if (!ev.startTime) return false
-      const evStart = dayjs(ev.startTime)
-      const evEnd = ev.endTime ? dayjs(ev.endTime) : evStart.add(1, 'hour')
-      // Check if event timeline overlaps with the target day
-      return evStart.isBefore(targetEnd) && evEnd.isAfter(targetStart)
+      const evStart = dayjs(ev.startTime).tz(userTimeZone)
+      const evDateStr = evStart.format('YYYY-MM-DD')
+      return evDateStr === targetDateStr
     })
-  }, [selectedDate, currentDate, filteredEvents])
+  }, [selectedDate, currentDate, filteredEvents, userTimeZone])
 
   const handleNext = () => {
     if (viewType === 'week') {
