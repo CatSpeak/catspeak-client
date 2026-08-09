@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { getLocalizedLanguageName } from "../data/courseFormOptions"
 import {
   useGetAllClassesQuery,
-  useGetScheduleDatesQuery,
   useGetScheduleSessionsQuery
 } from "@/store/api/coursesApi"
 import {
@@ -14,29 +15,25 @@ import {
   Grid,
   CalendarDays,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Users,
 } from "lucide-react"
 
-import { formatUTCDate } from "../utils/courseUtils"
+
+import { toLocalDateString } from "../utils/dateUtils"
+import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const SchedulePage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
+  const { formatDate, formatDateMonth } = useTimezone()
   const c = t.courses || {}
+  const ui = c.workspaceUi || {}
   const navigate = useNavigate()
 
   // Local State
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [viewMode, setViewMode] = useState("calendar") // "calendar" or "grid"
-
-  // Date Formatting Helper (yyyy-MM-dd)
-  const formatDateToYYYYMMDD = (date) => {
-    if (!date) return ""
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    return `${y}-${m}-${d}`
-  }
 
   // Helper arrays for calendar from localization
   const MONTHS = c.months || [
@@ -71,10 +68,14 @@ const SchedulePage = () => {
 
   // Navigate Months
   const handlePrevMonth = () => {
-    setCurrentMonth(new Date(year, month - 1, 1))
+    const previousMonth = new Date(year, month - 1, 1)
+    setCurrentMonth(previousMonth)
+    setSelectedDate(previousMonth)
   }
   const handleNextMonth = () => {
-    setCurrentMonth(new Date(year, month + 1, 1))
+    const nextMonth = new Date(year, month + 1, 1)
+    setCurrentMonth(nextMonth)
+    setSelectedDate(nextMonth)
   }
 
   // Check state helpers
@@ -96,84 +97,136 @@ const SchedulePage = () => {
   // YYYY-MM-DD Date Queries computed values
   const startOfMonthStr = useMemo(() => {
     const d = new Date(year, month, 1)
-    return formatDateToYYYYMMDD(d)
+    return toLocalDateString(d)
   }, [year, month])
 
   const endOfMonthStr = useMemo(() => {
     const d = new Date(year, month + 1, 0)
-    return formatDateToYYYYMMDD(d)
+    return toLocalDateString(d)
   }, [year, month])
 
   const selectedDateStr = useMemo(() => {
-    return formatDateToYYYYMMDD(selectedDate)
+    return toLocalDateString(selectedDate)
   }, [selectedDate])
 
   // RTK Query endpoints integration
-  const { data: classesData, isLoading: isClassesLoading } = useGetAllClassesQuery({ page: 1, pageSize: 100 })
-  const { data: scheduleDatesData, isLoading: isDatesLoading } = useGetScheduleDatesQuery({
+  const {
+    currentData: classesData,
+    isLoading: isClassesLoading,
+    isFetching: isClassesFetching,
+    error: classesError,
+    refetch: refetchClasses,
+  } = useGetAllClassesQuery({ page: 1, pageSize: 100 })
+  const {
+    currentData: scheduleSessionsData,
+    isLoading: isSessionsLoading,
+    isFetching: isSessionsFetching,
+    error: sessionsError,
+    refetch: refetchSessions,
+  } = useGetScheduleSessionsQuery({
     from: startOfMonthStr,
     to: endOfMonthStr
   })
-  const { data: scheduleSessionsData, isLoading: isSessionsLoading } = useGetScheduleSessionsQuery({
-    from: selectedDateStr,
-    to: selectedDateStr
-  })
 
-  const classesList = useMemo(() => classesData?.data || [], [classesData])
-  const sessionDates = useMemo(() => scheduleDatesData?.dates || [], [scheduleDatesData])
-  const isLoading = isClassesLoading || isDatesLoading || isSessionsLoading
+  const classesList = useMemo(
+    () => (
+      Array.isArray(classesData?.data)
+        ? classesData.data.filter((item) => (
+          item !== null
+          && typeof item === "object"
+          && !Array.isArray(item)
+          && item.id
+        ))
+        : []
+    ),
+    [classesData],
+  )
+  const monthSessions = useMemo(
+    () => (
+      Array.isArray(scheduleSessionsData?.data)
+        ? scheduleSessionsData.data.filter((session) => (
+          session !== null
+          && typeof session === "object"
+          && !Array.isArray(session)
+        ))
+        : []
+    ),
+    [scheduleSessionsData],
+  )
+  const classesById = useMemo(
+    () => new Map(classesList.map((item) => [String(item.id), item])),
+    [classesList]
+  )
+  const sessionDateSet = useMemo(
+    () => new Set(monthSessions.map(session => session.date).filter(Boolean)),
+    [monthSessions]
+  )
+  const isLoading = (
+    isClassesLoading
+    || isSessionsLoading
+    || (isClassesFetching && classesData === undefined)
+    || (isSessionsFetching && scheduleSessionsData === undefined)
+  )
 
   // Map schedule sessions and enrich with metadata from classesList (levels, slots, studentCount)
   const selectedDateClasses = useMemo(() => {
-    const rawSessions = scheduleSessionsData?.data || []
-    return rawSessions.map(session => {
-      const matchedClass = classesList.find(c => c.id === session.class?.id)
-      return {
-        id: session.class?.id,
-        name: session.class?.name || matchedClass?.name || "",
-        language: session.class?.language || matchedClass?.language || "English",
-        levels: matchedClass?.levels || [],
-        status: session.class?.status || matchedClass?.status || "OPEN",
-        startTime: session.startTime,
-        endTime: session.endTime,
-        sessionNumber: session.sessionNumber,
-        totalSessions: session.totalSessions,
-        studentCount: matchedClass?.studentCount || 0,
-        slots: matchedClass?.slots || 10,
-        startDate: matchedClass?.startDate
-      }
-    })
-  }, [scheduleSessionsData, classesList])
+    return monthSessions
+      .filter((session) => (
+        viewMode === "grid" || session.date === selectedDateStr
+      ))
+      .map(session => {
+        const matchedClass = classesById.get(String(session.class?.id))
+        return {
+          id: session.class?.id,
+          name: session.class?.name || matchedClass?.name || "",
+          language: session.class?.language || matchedClass?.language || "",
+          levels: Array.isArray(matchedClass?.levels) ? matchedClass.levels : [],
+          status: session.class?.status || matchedClass?.status || "",
+          startTime: session.startTime,
+          endTime: session.endTime,
+          sessionNumber: session.sessionNumber,
+          totalSessions: session.totalSessions,
+          date: session.date,
+          studentCount: matchedClass?.studentCount ?? null,
+          slots: matchedClass?.slots ?? null,
+          startDate: matchedClass?.startDate
+        }
+      })
+  }, [classesById, monthSessions, selectedDateStr, viewMode])
 
   // Count active dates with sessions in current month
-  const monthClassesCount = sessionDates.length
+  const monthClassesCount = sessionDateSet.size
+  const isRefreshing = isClassesFetching || isSessionsFetching
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
+      {isRefreshing && !isLoading && (
+        <span role="status" className="sr-only">
+          {c.refreshingSchedule || "Refreshing teaching schedule"}
+        </span>
+      )}
 
       {/* ─── Breadcrumbs ─── */}
-      <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
-        <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-          {c.home || "Home"}
-        </span>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">
-          {c.teachingSchedule || "Teaching Schedule"}
-        </span>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: c.teachingSchedule || "Teaching Schedule" },
+        ]}
+      />
 
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+        <h1 className="text-3xl font-black text-gray-950 tracking-tight">
           {c.teachingSchedule || "Teaching Schedule"}
         </h1>
-        <button
-          onClick={() => navigate("/workspace/courses/create-class")}
+        {/* <button
+          type="button"
+          onClick={() => navigate("/workspace/classes/create-class")}
           className="flex items-center justify-center gap-2 bg-[#990011] hover:bg-[#80000e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 shadow-sm hover:scale-[1.01] active:scale-95"
         >
           <Plus size={16} />
           <span>{c.createEvent || "Create Event"}</span>
-        </button>
+        </button> */}
       </div>
 
       {/* ─── Upcoming Section bar ─── */}
@@ -201,6 +254,8 @@ const SchedulePage = () => {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <button
+                    type="button"
+                    aria-label={c.previousMonth || "Previous month"}
                     onClick={handlePrevMonth}
                     className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-800 transition-colors"
                   >
@@ -210,6 +265,8 @@ const SchedulePage = () => {
                     {`${MONTHS[month]} ${year}`}
                   </span>
                   <button
+                    type="button"
+                    aria-label={c.nextMonth || "Next month"}
                     onClick={handleNextMonth}
                     className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-800 transition-colors"
                   >
@@ -220,12 +277,18 @@ const SchedulePage = () => {
                 {/* View Mode controls */}
                 <div className="flex bg-gray-100 p-0.5 rounded-lg">
                   <button
+                    type="button"
+                    aria-label={c.calendarView || "Selected-date view"}
+                    aria-pressed={viewMode === "calendar"}
                     onClick={() => setViewMode("calendar")}
                     className={`p-1.5 rounded-md transition-all ${viewMode === "calendar" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400"}`}
                   >
                     <CalendarDays size={14} />
                   </button>
                   <button
+                    type="button"
+                    aria-label={c.monthGridView || "Whole-month view"}
+                    aria-pressed={viewMode === "grid"}
                     onClick={() => setViewMode("grid")}
                     className={`p-1.5 rounded-md transition-all ${viewMode === "grid" ? "bg-white text-[#990011] shadow-xs" : "text-gray-400"}`}
                   >
@@ -247,15 +310,18 @@ const SchedulePage = () => {
                 {calendarDays.map((date, idx) => {
                   if (!date) return <div key={idx} className="aspect-square" />
 
-                  const hasClasses = sessionDates.includes(formatDateToYYYYMMDD(date))
+                  const hasClasses = sessionDateSet.has(toLocalDateString(date))
                   const active = isSelected(date)
                   const today = isToday(date)
 
                   return (
                     <button
+                      type="button"
+                      aria-label={formatDate(date)}
+                      aria-pressed={active}
                       key={idx}
                       onClick={() => setSelectedDate(date)}
-                      className={`relative aspect-square flex items-center justify-center text-xs font-bold rounded-full transition-all duration-200 select-none
+                      className={`relative aspect-square flex items-center justify-center font-bold rounded-full transition-all duration-200 select-none
                         ${active
                           ? "bg-[#990011] text-white shadow-sm hover:bg-[#80000e]"
                           : today
@@ -293,28 +359,48 @@ const SchedulePage = () => {
           {/* Right Column: Classes Scheduled (Span 7 of 12) */}
           <div className="lg:col-span-7 flex flex-col gap-5">
             <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2 pb-1 border-b border-gray-100">
-              <span>{c.mySchedule || "My Schedule"}</span>
+              <span>{c.teachingSchedule || "My Schedule"}</span>
             </h3>
 
             {isLoading ? (
               <div className="flex justify-center items-center py-10">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#990011]"></div>
               </div>
+            ) : classesError || sessionsError ? (
+              <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+                <span>{c.scheduleLoadError || "Failed to load the teaching schedule."}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    refetchClasses()
+                    refetchSessions()
+                  }}
+                  className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+                >
+                  {c.retry || "Try again"}
+                </button>
+              </div>
             ) : selectedDateClasses.length > 0 ? (
               <div className="flex flex-col gap-4">
                 <span className="text-[11px] font-black text-gray-400 uppercase tracking-wider">
-                  {c.date || "Date"} {selectedDate.toLocaleDateString(language || "en-US", { day: "numeric", month: "numeric" })}
+                  {viewMode === "grid"
+                    ? `${MONTHS[month]} ${year}`
+                    : `${c.date || "Date"} ${formatDateMonth(selectedDate)}`}
                 </span>
 
                 {selectedDateClasses.map((cls) => {
                   const scheduleTime = cls.startTime && cls.endTime
                     ? `${cls.startTime} - ${cls.endTime}`
-                    : "TBA"
+                    : ui.tba || "TBA"
 
                   return (
                     <div
-                      key={cls.id}
-                      onClick={() => navigate(`/workspace/courses/class/${cls.id}`)}
+                      key={`${cls.id || "class"}-${cls.date || selectedDateStr}-${cls.sessionNumber || cls.startTime || "session"}`}
+                      onClick={() => {
+                        if (cls.id) {
+                          navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)
+                        }
+                      }}
                       className="bg-[#FDFDFD] border border-gray-100 hover:border-gray-250 rounded-2xl p-5 flex flex-col gap-3 shadow-xs hover:shadow-sm transition-all duration-300 cursor-pointer"
                     >
                       <div className="flex justify-between items-start">
@@ -322,7 +408,7 @@ const SchedulePage = () => {
                         <div className="flex flex-wrap gap-1.5">
                           {cls.language && (
                             <span className="bg-[#F59E0B] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
-                              {cls.language}
+                              {getLocalizedLanguageName(cls.language, t)}
                             </span>
                           )}
                           {cls.levels && cls.levels.map((lvl, index) => (
@@ -337,12 +423,17 @@ const SchedulePage = () => {
                           {cls.status === "LIVE" && (
                             <span className="bg-[#FFE4E6] text-[#E11D48] font-bold text-[9px] px-2 py-0.5 rounded-md flex items-center gap-1">
                               <span className="w-1 h-1 rounded-full bg-[#E11D48] animate-ping" />
-                              LIVE
+                              {c.liveStatus || "Live"}
                             </span>
                           )}
-                          {(cls.status === "TEACHING" || !cls.status) && (
+                          {cls.status === "TEACHING" && (
                             <span className="bg-[#E8F8F0] text-[#15803D] font-bold text-[9px] px-2 py-0.5 rounded-md">
-                              LIVE ROOM
+                              {c.teachingStatus || "Teaching"}
+                            </span>
+                          )}
+                          {cls.status === "NOT_STARTED" && (
+                            <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[9px] px-2 py-0.5 rounded-md">
+                              {c.notStartedStatus || "Not started"}
                             </span>
                           )}
                         </div>
@@ -362,11 +453,13 @@ const SchedulePage = () => {
                         <div className="flex items-center gap-1.5">
                           <Calendar size={13} className="text-gray-400" />
                           <span>
-                            {cls.sessionNumber
+                            {cls.sessionNumber && cls.totalSessions
                               ? (c.sessionOf
                                 ? c.sessionOf.replace("{{session}}", cls.sessionNumber).replace("{{total}}", cls.totalSessions)
                                 : `Session ${cls.sessionNumber} of ${cls.totalSessions}`)
-                              : formatUTCDate(cls.startDate, "en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                              : formatDate(
+                                cls.date || cls.startDate,
+                              )
                             }
                           </span>
                         </div>
@@ -375,20 +468,23 @@ const SchedulePage = () => {
                       {/* Bottom Info: Avatars and action */}
                       <div className="flex justify-between items-center pt-3 border-t border-gray-50 mt-1">
                         <div className="flex items-center gap-2">
-                          <div className="flex -space-x-1.5">
-                            {/* Stub student avatar styles */}
-                            <div className="w-7 h-7 rounded-full bg-gray-200 border border-white flex items-center justify-center text-[10px] font-extrabold">S1</div>
-                            <div className="w-7 h-7 rounded-full bg-gray-300 border border-white flex items-center justify-center text-[10px] font-extrabold">S2</div>
-                          </div>
+                          <Users size={15} className="text-gray-400" aria-hidden="true" />
                           <span className="text-[10px] text-gray-400 font-bold">
-                            {cls.studentCount || 0} student{(cls.studentCount || 0) !== 1 ? "s" : ""}
+                            {cls.studentCount == null
+                              ? "—"
+                              : (c.studentsCount || "{{count}} students")
+                                .replace("{{count}}", String(cls.studentCount))}
                           </span>
                         </div>
 
                         <button
+                          type="button"
+                          disabled={!cls.id}
                           onClick={(e) => {
                             e.stopPropagation()
-                            navigate(`/workspace/courses/class/${cls.id}`)
+                            if (cls.id) {
+                              navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)
+                            }
                           }}
                           className="bg-[#990011] hover:bg-[#80000e] text-white text-[11px] font-bold px-4 py-1.5 rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
                         >

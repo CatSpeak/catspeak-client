@@ -1,4 +1,12 @@
 import { useMemo, useState } from "react"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+
+const getDateKeyInTz = (dateStr, tz) => {
+  if (!dateStr) return ""
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return ""
+  return d.toLocaleDateString("en-CA", { timeZone: tz || "UTC" })
+}
 
 /**
  * useGroupedMessages — processes messages and groups them with date separators
@@ -11,7 +19,10 @@ export const useGroupedMessages = ({
   currentUser,
   conversation,
   isLoading,
+  userTimeZone: propTz = null,
 }) => {
+  const { userTimeZone: hookTz } = useTimezone()
+  const userTimeZone = propTz || hookTz
   const [initialMessageIds, setInitialMessageIds] = useState(() => new Set())
   const [prevConversationId, setPrevConversationId] = useState(null)
 
@@ -48,7 +59,7 @@ export const useGroupedMessages = ({
       const msgTimestamp = msg.timestamp || msg.createDate
       const msgSenderId = msg.senderId ?? msg.sender?.accountId
       const msgId = msg.id || msg.messageId
-      const msgDate = new Date(msgTimestamp).toDateString()
+      const msgDate = getDateKeyInTz(msgTimestamp, userTimeZone)
 
       const prevMsg = i > 0 ? messages[i - 1] : null
       const nextMsg = i < messages.length - 1 ? messages[i + 1] : null
@@ -79,22 +90,79 @@ export const useGroupedMessages = ({
         continue
       }
 
-      // Grouping: same sender within 5 minutes
+      // StoryInterest messages handling (messageType 6 or "storyinterest")
+      const msgTypeRaw = msg?.messageType
+      const isStoryInterest =
+        msgTypeRaw === 6 ||
+        msgTypeRaw === "6" ||
+        String(msgTypeRaw).toLowerCase() === "storyinterest"
+
+      if (isStoryInterest) {
+        // Resolve sender so the card can show avatar + name
+        const siSenderId = msg.senderId ?? msg.sender?.accountId
+        const siIsOwn =
+          Number(siSenderId) === Number(currentUser?.id || currentUser?.accountId)
+        const siSender = siIsOwn
+          ? {
+              id: currentUser?.id || currentUser?.accountId,
+              name: currentUser?.name || currentUser?.username,
+              avatar: currentUser?.avatar || currentUser?.avatarImageUrl,
+              ...msg.sender,
+            }
+          : !isGroup && otherUser && otherUser.accountId === siSenderId
+            ? {
+                id: otherUser.accountId,
+                name: otherUser.username,
+                avatar: otherUser.avatarImageUrl,
+                ...msg.sender,
+              }
+            : (() => {
+                const p = conversation.participants?.find(
+                  (part) =>
+                    Number(part.accountId || part.id) === Number(siSenderId),
+                )
+                return p
+                  ? {
+                      id: p.accountId || p.id,
+                      name: p.username || p.name,
+                      avatar: p.avatarImageUrl || p.avatar,
+                      ...msg.sender,
+                    }
+                  : {
+                      id: msg.sender?.accountId || siSenderId,
+                      name: msg.sender?.username || msg.sender?.name || "User",
+                      avatar: msg.sender?.avatarImageUrl || msg.sender?.avatar,
+                      ...msg.sender,
+                    }
+              })()
+
+        groupedItems.push({
+          type: "storyinterest",
+          id: msgId,
+          message: msg,
+          sender: siSender,
+          timestamp: msgTimestamp,
+        })
+        continue
+      }
+
+
+      // Grouping: same sender within 5 minutes on the same date in user's timezone
       const isSameSenderAsPrev =
         prevMsg &&
         getMessageTypeStr(prevMsg) !== "system" &&
         prevSenderId === msgSenderId &&
         new Date(msgTimestamp) - new Date(prevTimestamp) < FIVE_MIN &&
-        new Date(msgTimestamp).toDateString() ===
-          new Date(prevTimestamp).toDateString()
+        getDateKeyInTz(msgTimestamp, userTimeZone) ===
+          getDateKeyInTz(prevTimestamp, userTimeZone)
 
       const isSameSenderAsNext =
         nextMsg &&
         getMessageTypeStr(nextMsg) !== "system" &&
         nextSenderId === msgSenderId &&
         new Date(nextTimestamp) - new Date(msgTimestamp) < FIVE_MIN &&
-        new Date(msgTimestamp).toDateString() ===
-          new Date(nextTimestamp).toDateString()
+        getDateKeyInTz(msgTimestamp, userTimeZone) ===
+          getDateKeyInTz(nextTimestamp, userTimeZone)
 
       const isFirstInGroup = !isSameSenderAsPrev
       const isLastInGroup = !isSameSenderAsNext
@@ -196,5 +264,6 @@ export const useGroupedMessages = ({
     }
 
     return groupedItems
-  }, [messages, currentUser, conversation, initialMessageIds])
+  }, [messages, currentUser, conversation, initialMessageIds, userTimeZone])
 }
+

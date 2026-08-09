@@ -85,6 +85,7 @@ export default {
       intermediate: "Intermediate",
       advanced: "Advanced",
     },
+    levelLabel: "Level",
     categories: {
       random: "Random Connection",
       exam: "Exam Prep",
@@ -122,7 +123,7 @@ export default {
     title: "Join Room",
   },
   createRoom: {
-    title: "What's your room name?",
+    title: "Create Room",
     namePlaceholder: "e.g. Chill Practice",
     // This tool call only supports file replacement. I will do i18n updates in separate calls or use multiple `replace_file_content` calls serially in my list?
     // I can only do one replacement per tool call for `replace_file_content`.
@@ -152,6 +153,7 @@ export default {
     // First En.
     topicsLabel: "Topics",
     nameLabel: "Room name",
+    nameRequired: "Room name is required",
     thumbnailLabel: "Room Thumbnail",
     uploadImage: "Upload Image",
     noFileChosen: "No file chosen",
@@ -159,6 +161,7 @@ export default {
     privateRoom: "Private Room",
     passwordLabel: "Password",
     passwordPlaceholder: "Enter room password",
+    passwordRequiredMessage: "Private room requires a password.",
     cancel: "Cancel",
     join: "Join Room",
     joining: "Joining...",
@@ -217,6 +220,58 @@ export default {
     connect11: "Connect 1:1",
     connect25: "Connect 2:5",
     yourAI: "With AI 1:1",
+    customRoom: "Create Room",
+  },
+  customRooms: {
+    title: "Pro Custom Room",
+    myRoomsTitle: "My Custom Rooms",
+    createTitle: "Create Custom Room",
+    editTitle: "Edit Custom Room",
+    quota: "{{used}}/{{max}} rooms used",
+    quotaFull: "You've reached the maximum of {{max}} custom rooms",
+    capacity: "Capacity: 100 participants",
+    persistent: "Persistent Room",
+    roomName: "Room Name",
+    roomNamePlaceholder: "e.g. My Study Group",
+    description: "Description",
+    descriptionPlaceholder: "What's this room about?",
+    create: "Create Room",
+    creating: "Creating...",
+    save: "Save Changes",
+    saving: "Saving...",
+    delete: "Delete",
+    deleteConfirmTitle: "Delete room?",
+    deleteConfirmMessage: 'Are you sure you want to delete "{{name}}"? This action cannot be undone.',
+    deleteConfirm: "Are you sure you want to delete this room?",
+    deleteSuccess: "Room deleted successfully",
+    createSuccess: "Custom room created successfully",
+    updateSuccess: "Room updated successfully",
+    noRooms: "You haven't created any custom rooms yet",
+    noRoomsSubtext:
+      "Create your first persistent room with up to 100 participants!",
+    join: "Join",
+    copyLink: "Copy link",
+    linkCopied: "Link copied!",
+    tabCreate: "Create",
+    tabMyRooms: "My rooms",
+    proBadge: "PRO",
+    maxRoomsReached: "Maximum rooms reached",
+    manageRooms: "Manage rooms",
+    nameRequired: "Room name is required",
+    privateHint: "Require a password to join this room.",
+    publicHint: "No password required. Anyone can join.",
+    private: "Private",
+    passwordRequired: "Password required",
+    passwordLabel: "Password (Optional)",
+    passwordPlaceholder: "Enter room password",
+    roomThumbnail: "Room Thumbnail",
+    uploadThumbnail: "Upload Image",
+    dragDropHint: "Drag & drop thumbnail image here",
+    imageHint: "PNG, JPG, WEBP up to 5MB",
+    change: "Change",
+    remove: "Remove",
+    people: "people",
+    unlimited: "Unlimited",
   },
   aiSettings: {
     title: "AI Session Settings",
@@ -295,16 +350,24 @@ export default {
       "Microphone access denied. Please allow it in settings.",
     cameraPermissionDenied:
       "Camera access denied. Please allow it in settings.",
+    webViewWarning:
+      "You are in an in-app browser (Zalo/Facebook/Messenger). Tap '...' and select 'Open in Safari' to use your microphone and camera.",
+    iosPermissionTip:
+      "Microphone access is blocked. Please open Site Settings in your address bar to allow Microphone access.",
     deviceSettings: "Device Settings",
     selectMicrophone: "Select Microphone",
     selectSpeaker: "Select Speaker",
     systemDefaultSpeaker: "System Default Speaker",
     speakerNotSupported: "Speaker selection is not supported in your browser.",
     selectCamera: "Select Camera",
-    testMic: "Test Microphone (Playback)",
+    testMic: "Test mic",
+    stopTest: "Stop testing",
     unknownDevice: "Unknown Device",
   },
   videoCall: {
+    inviteParticipant: "Invite participant",
+    sendInvite: "Send invite",
+    inviteDescription: "Enter the email address of the person you want to invite to this room. They will receive a notification with a link to join.",
     changeLayout: {
       title: "Change layout",
       auto: "Auto",
@@ -332,6 +395,11 @@ export default {
       description:
         "If you're experiencing lag, frozen video, or audio dropouts, try forcing a full reconnection. Your call will pause briefly while we re-establish the connection.",
       forceReconnect: "Force Reconnect",
+    },
+    general: {
+      receiveSystemMsgs: "Receive system notifications",
+      receiveSystemMsgsDesc:
+        "Display automatic system notifications during the meeting.",
     },
     copyLink: "Copy meeting link",
     linkCopied: "Link copied!",
@@ -407,15 +475,34 @@ export default {
       title: "Open in Browser",
       genericApp: "This app",
       description:
-        "You're using {app}'s built-in browser, which doesn't support video calls properly.",
-      instruction: "How to join:",
+        "You're using {app}'s built-in browser, which isn't fully supported.",
+      instruction: "How to open:",
       copyLink: "Copy Link",
       copied: "Copied!",
       openInChrome: "Open in Chrome",
       step1: "Copy the link above",
       step2: "Open Chrome or Safari",
-      step3: "Paste the link and join the call",
+      step3: "Paste the link in your browser",
     },
+    errorBoundary: {
+      title: "Video Call Encountered an Error",
+      defaultDescription:
+        "An unexpected error occurred during the video call session.",
+      reloadPage: "Reload Page",
+      copyLog: "Copy Log",
+      copied: "Copied!",
+      goHome: "Go to Home",
+      technicalDetails: "Technical Details",
+      stackTrace: "Stack Trace:",
+      componentStack: "Component Stack:",
+    },
+    inviteParticipant: "Invite participant",
+    sendInvite: "Send invite",
+    inviteDescription:
+      "Enter the email address of the person you want to invite to this room. They will receive a notification with a link to join.",
+  },
+  notifications: {
+    inviteSent: "Invite sent",
   },
   roomFullModal: {
     title: "Room is full",
@@ -725,7 +812,8 @@ export default {
       cancel: "Cancel",
       confirmExit: "Yes, Exit",
       roundLeaderboard: "Round Leaderboard",
-      forceStopNotEnoughPlayers: "Not enough players to continue. Game cancelled.",
+      forceStopNotEnoughPlayers:
+        "Not enough players to continue. Game cancelled.",
       forceStopGeneric: "Game stopped unexpectedly.",
       tallyingFinalResults: "Tallying final results...",
       gameHistory: "Game History",
@@ -733,23 +821,30 @@ export default {
       noHistoryFound: "No game history found for this room.",
       score: "Score",
       matchDate: "Date Played",
-      winner: "Winner"
+      winner: "Winner",
+      startDateLabel: "From date",
+      endDateLabel: "To date",
     },
     setup: {
       title: "Game Setup",
-      pictureItDesc: "Describe an image using the room language. Other players will rate your description.",
+      pictureItDesc:
+        "Describe an image using the room language. Other players will rate your description.",
       crackItDesc: "Guess hidden words from hints before everyone else.",
       difficultyDesc: "Adjust the challenge level for your room.",
       languageDesc: "Choose the language for this session.",
       selectLanguage: "Language",
       langEn: "English",
       langZh: "Chinese",
+      langVi: "Vietnamese",
+      languageLockedByCommunity:
+        "Game language follows the community's language.",
+      lockedHint: "Locked",
       selectLevel: "Difficulty",
       levelEasy: "Easy",
       levelMedium: "Medium",
       levelHard: "Hard",
       cancel: "Cancel",
-      startNow: "Start Now"
+      startNow: "Start Now",
     },
     pictureIt: {
       topBar: {
@@ -757,7 +852,7 @@ export default {
         describer: "Describer",
         spectator: "Spectator",
         roleDescriber: "Describer",
-        roleRater: "Rater"
+        roleRater: "Rater",
       },
       actionPanel: {
         watchingAsSpectator: "You are watching as a spectator.",
@@ -768,7 +863,7 @@ export default {
         timeLeft: "({0}s left)",
         submitRating: "Submit rating",
         ratingSubmitted: "Rating submitted! Waiting for others...",
-        waiting: "Waiting..."
+        waiting: "Waiting...",
       },
       imageCard: {
         describeToTeam: "Describe this image to your team",
@@ -779,13 +874,13 @@ export default {
         preparing: "Preparing...",
         forbiddenWordsTitle: "Forbidden words",
         forbiddenWordsDesc: "Do NOT use these words",
-        flaggedCount: "{0} / {1} flagged"
+        flaggedCount: "{0} / {1} flagged",
       },
       modals: {
         gameEnded: "Game Ended",
         notEnoughPlayers: "Not enough players to continue.",
         close: "Close",
-        waitingStart: "Preparing game..."
+        waitingStart: "Preparing game...",
       },
       badges: {
         "Master Describer": "Master Describer",
@@ -794,7 +889,7 @@ export default {
         "Most Fluent": "Most Fluent",
         "Team Player": "Team Player",
         "Keep Practicing": "Keep Practicing",
-        champion: "Champion"
+        champion: "Champion",
       },
       gameOver: {
         title: "Game Finished",
@@ -807,16 +902,24 @@ export default {
         highestRoundScore: "Highest Round Score",
         playAgain: "Play Again",
         backToRoom: "Back to Room",
-        playersCount: "{0} players"
+        playersCount: "{0} players",
       },
       leaderboard: {
         title: "Leaderboard",
-        playersCount: "{0} players"
+        playersCount: "{0} players",
       },
       roundResult: {
         nextRoundStartsIn: "Next round starts in...",
-        averageRating: "Average Rating"
-      }
-    }
+        averageRating: "Average Rating",
+      },
+    },
   },
-}
+
+  notifications: {
+    inviteSent: "Invite sent",
+    room_invite: {
+      title: "Room Invitation",
+      body: "{inviterName} invited you to join a room",
+    }
+  }
+};

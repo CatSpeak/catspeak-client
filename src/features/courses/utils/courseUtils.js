@@ -1,4 +1,9 @@
 import { MessageSquare, FileText, Users, GraduationCap, PenSquare, BookOpen } from "lucide-react"
+import { DEFAULT_CLASS_FEE_TIERS } from "../data/courseFormOptions.js"
+import defaultCourseThumbnail from "@/shared/assets/backgrounds/background-account.png"
+import { ensureDate } from "@/shared/utils/dateUtils"
+
+export { defaultCourseThumbnail, defaultCourseThumbnail as DEFAULT_COURSE_THUMBNAIL }
 
 const CARD_GRADIENTS = [
   "from-[#8B5CF6]/20 to-[#C084FC]/20 text-[#8B5CF6]",
@@ -16,66 +21,21 @@ export function getCourseGradientAndIcon(index) {
   }
 }
 
+export const getCourseLocale = (language) => (
+  language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US"
+)
+
 export function formatToYYYYMMDD(isoStr) {
   if (!isoStr) return ""
   try {
-    // If the string contains timezone info (T, Z, +), parse as Date for local conversion
-    if (isoStr.includes("T") || isoStr.includes("Z") || /[+-]\d{2}:?\d{2}$/.test(isoStr)) {
-      return utcToLocalDateStr(isoStr)
-    }
-    // Plain date string (e.g. "2026-10-15") — return as-is
-    return isoStr.split("T")[0]
+    const d = ensureDate(isoStr)
+    return d ? d.toISOString().split("T")[0] : ""
   } catch {
     return ""
   }
 }
 
-/**
- * Convert a UTC ISO string from the backend into a YYYY-MM-DD string
- * in the user's local timezone. Used when populating date inputs from API data.
- *
- * Example (UTC+7): "2026-10-14T17:00:00Z" → "2026-10-15"
- *   (because 17:00 UTC = 00:00 next day in UTC+7)
- *
- * @param {string} isoStr - UTC ISO date string from the API
- * @returns {string} "YYYY-MM-DD" in local timezone, or "" if invalid
- */
-export function utcToLocalDateStr(isoStr) {
-  if (!isoStr) return ""
-  try {
-    const d = new Date(isoStr)
-    if (isNaN(d.getTime())) return ""
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, "0")
-    const day = String(d.getDate()).padStart(2, "0")
-    return `${y}-${m}-${day}`
-  } catch {
-    return ""
-  }
-}
 
-/**
- * Format a UTC ISO date string into a localized string without timezone shift.
- * Uses `timeZone: "UTC"` to avoid local timezone offset shifting.
- *
- * @param {string} isoStr - UTC ISO string (e.g. "2026-10-15T00:00:00Z")
- * @param {string} [locales] - Locale parameter, defaults to "en-GB"
- * @param {object} [options] - Additional Intl options
- * @returns {string} Formatted date or "TBA"
- */
-export function formatUTCDate(isoStr, locales = "en-GB", options = {}) {
-  if (!isoStr) return "TBA"
-  try {
-    const d = new Date(isoStr)
-    if (isNaN(d.getTime())) return isoStr
-    return d.toLocaleDateString(locales, {
-      timeZone: "UTC",
-      ...options
-    })
-  } catch {
-    return "TBA"
-  }
-}
 
 /**
  * ═══════════════════════════════════════════════════════════════════
@@ -88,20 +48,13 @@ export function formatUTCDate(isoStr, locales = "en-GB", options = {}) {
  */
 
 // ─── BR19 Fee Tiers (default, can be overridden by server data) ─
-const DEFAULT_FEE_TIERS = [
-  { minSlots: 1, maxSlots: 6, openingFee: 0, commissionRate: 10 },
-  { minSlots: 7, maxSlots: 20, openingFee: 200000, commissionRate: 12 },
-  { minSlots: 21, maxSlots: 50, openingFee: 500000, commissionRate: 15 },
-  { minSlots: 51, maxSlots: Infinity, openingFee: 0, commissionRate: 20 },
-]
-
 /**
  * Get the fee tier for a given number of slots.
  * @param {number} slots - Number of student slots
  * @param {Array} [tiers] - Optional custom fee tiers from server
  * @returns {{ openingFee: number, commissionRate: number, minSlots: number, maxSlots: number }}
  */
-export function getFeeTier(slots, tiers = DEFAULT_FEE_TIERS) {
+export function getFeeTier(slots, tiers = DEFAULT_CLASS_FEE_TIERS) {
   const tier = tiers.find((t) => slots >= t.minSlots && slots <= t.maxSlots)
   return tier || tiers[tiers.length - 1]
 }
@@ -185,84 +138,180 @@ export function formatCurrencyVND(amount) {
  * Status display config
  */
 export const CLASS_STATUS_CONFIG = {
-  LIVE: { label: "LIVE", bgClass: "bg-[#FFE4E6]", textClass: "text-[#E11D48]", dotClass: "bg-[#E11D48]", hasPing: true },
-  TEACHING: { label: "TEACHING", bgClass: "bg-[#E8F8F0]", textClass: "text-[#15803D]", dotClass: null, hasPing: false },
-  OPEN: { label: "ENROLLING", bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
-  OPEN_FOR_ENROLLMENT: { label: "ENROLLING", bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
-  UPCOMING: { label: "UPCOMING", bgClass: "bg-[#EEF2FF]", textClass: "text-[#4F46E5]", dotClass: null, hasPing: false },
-  ARCHIVED: { label: "ARCHIVED", bgClass: "bg-[#F3F4F6]", textClass: "text-[#6B7280]", dotClass: null, hasPing: false },
+  LIVE: { bgClass: "bg-[#FFE4E6]", textClass: "text-[#E11D48]", dotClass: "bg-[#E11D48]", hasPing: true },
+  TEACHING: { bgClass: "bg-[#E8F8F0]", textClass: "text-[#15803D]", dotClass: null, hasPing: false },
+  OPEN: { bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
+  OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#EFF6FF]", textClass: "text-[#1D4ED8]", dotClass: null, hasPing: false },
+  UPCOMING: { bgClass: "bg-[#EEF2FF]", textClass: "text-[#4F46E5]", dotClass: null, hasPing: false },
+  NOT_STARTED: { bgClass: "bg-[#FEF3C7]", textClass: "text-[#D97706]", dotClass: null, hasPing: false },
+  ARCHIVED: { bgClass: "bg-[#F3F4F6]", textClass: "text-[#6B7280]", dotClass: null, hasPing: false },
 }
 
 /**
  * Attendance status config (BR14)
  */
 export const ATTENDANCE_STATUS = {
-  PRESENT: { label: "Có mặt", color: "#22C55E" },
-  ABSENT_EXCUSED: { label: "Vắng có phép", color: "#3B82F6" },
-  ABSENT_UNEXCUSED: { label: "Vắng không phép", color: "#EF4444" },
+  PRESENT: { color: "#22C55E" },
+  ABSENT_EXCUSED: { color: "#3B82F6" },
+  ABSENT_UNEXCUSED: { color: "#EF4444" },
 }
 
-// Date range formatter helper (e.g. Jan 15th - Feb 16th)
-export const formatDateRange = (start, end) => {
-  if (!start || !end) return "TBA"
 
-  const parseDate = (dStr) => {
-    const d = new Date(dStr)
-    if (isNaN(d.getTime())) return dStr
-    const day = d.getUTCDate()
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    const month = months[d.getUTCMonth()]
 
-    const suffix = (dayNum) => {
-      if (dayNum > 3 && dayNum < 21) return "th"
-      switch (dayNum % 10) {
-        case 1: return "st"
-        case 2: return "nd"
-        case 3: return "rd"
-        default: return "th"
-      }
+
+
+
+
+export const getSafeMediaUrl = (value) => {
+  if (typeof value !== "string" || !value.trim()) return null
+
+  try {
+    const trimmedValue = value.trim()
+    const hasControlCharacter = [...trimmedValue].some((character) => {
+      const codePoint = character.codePointAt(0)
+      return codePoint <= 31 || codePoint === 127
+    })
+    if (hasControlCharacter || trimmedValue.startsWith("#")) return null
+
+    const baseUrl = typeof window !== "undefined"
+      ? window.location.origin
+      : "https://localhost"
+    const parsedUrl = new URL(trimmedValue, baseUrl)
+    if (
+      !["http:", "https:"].includes(parsedUrl.protocol)
+      || parsedUrl.username
+      || parsedUrl.password
+    ) {
+      return null
     }
-    return `${month} ${day}${suffix(day)}`
+
+    return parsedUrl.href
+  } catch {
+    return null
   }
-  return `${parseDate(start)} - ${parseDate(end)}`
 }
 
-export const formatDateDayMonth = (dateStr) => {
-  if (!dateStr) return "31st Jul"
-  const d = new Date(dateStr)
-  if (isNaN(d.getTime())) return dateStr
-  const day = d.getUTCDate()
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  const month = months[d.getUTCMonth()]
-  const suffix = (dayNum) => {
-    if (dayNum > 3 && dayNum < 21) return "th"
-    switch (dayNum % 10) {
-      case 1: return "st"
-      case 2: return "nd"
-      case 3: return "rd"
-      default: return "th"
-    }
+export const getClassEnrollmentIssue = ({
+  classData,
+  nowMs = Date.now(),
+}) => {
+  if (!classData || typeof classData !== "object" || Array.isArray(classData)) {
+    return "unavailable"
   }
-  return `${day}${suffix(day)} ${month}`
+
+  const classId = classData.id == null ? "" : String(classData.id)
+  if (!classId) return "unavailable"
+
+  const status = typeof classData.status === "string"
+    ? classData.status.trim().toUpperCase()
+    : ""
+  const closedStatuses = ["CLOSED", "ARCHIVED", "COMPLETED", "CANCELLED"]
+  if (status && closedStatuses.includes(status)) {
+    return "closed"
+  }
+
+  const enrolledCountValue = (
+    classData.enrolledCount
+    ?? classData.studentCount
+    ?? classData.enrolledStudents
+  )
+  const capacityValue = classData.capacity ?? classData.slots
+  const enrolledCount = Number(enrolledCountValue)
+  const capacity = Number(capacityValue)
+  const hasEnrolledCount = (
+    enrolledCountValue !== null
+    && enrolledCountValue !== undefined
+    && enrolledCountValue !== ""
+  )
+  const hasCapacity = (
+    capacityValue !== null
+    && capacityValue !== undefined
+    && capacityValue !== ""
+  )
+  if (
+    (hasEnrolledCount && (!Number.isFinite(enrolledCount) || enrolledCount < 0))
+    || (hasCapacity && (!Number.isFinite(capacity) || capacity < 0))
+  ) {
+    return "unavailable"
+  }
+  if (
+    hasEnrolledCount
+    && hasCapacity
+    && Number.isFinite(enrolledCount)
+    && Number.isFinite(capacity)
+    && capacity > 0
+    && enrolledCount >= capacity
+  ) {
+    return "full"
+  }
+
+  const hasEnrollmentStart = Boolean(classData.enrollmentStart)
+  const enrollmentStartMs = new Date(classData.enrollmentStart || "").getTime()
+  if (hasEnrollmentStart && !Number.isFinite(enrollmentStartMs)) {
+    return "unavailable"
+  }
+  if (Number.isFinite(enrollmentStartMs) && nowMs < enrollmentStartMs) {
+    return "closed"
+  }
+
+  const hasEnrollmentEnd = Boolean(classData.enrollmentEnd)
+  const enrollmentEndMs = new Date(classData.enrollmentEnd || "").getTime()
+  if (hasEnrollmentEnd && !Number.isFinite(enrollmentEndMs)) {
+    return "unavailable"
+  }
+  if (Number.isFinite(enrollmentEndMs) && nowMs > enrollmentEndMs) {
+    return "closed"
+  }
+
+  return null
 }
 
-export const formatTime12h = (timeStr) => {
-  if (!timeStr) return "11:45 AM"
-  if (timeStr.includes("AM") || timeStr.includes("PM")) return timeStr
-  const parts = timeStr.split(":")
-  const hours = parseInt(parts[0])
-  if (isNaN(hours)) return timeStr
-  const ampm = hours >= 12 ? "PM" : "AM"
-  const displayHours = hours % 12 || 12
-  return `${displayHours}:${parts[1] || "00"} ${ampm}`
+export const getClassEnrollmentIssueMessage = (issue, studentText = {}) => {
+  const messages = {
+    already_enrolled_in_course:
+      studentText.alreadyEnrolledInCourse || "You are already enrolled in a class for this course.",
+    not_open:
+      studentText.enrollmentNotOpen || "Class enrollment is not open.",
+    full:
+      studentText.classFull || "This class is full.",
+    not_started:
+      studentText.enrollmentClosed || studentText.closed || "Enrollment for this class has closed.",
+    closed:
+      studentText.enrollmentClosed || studentText.closed || "Enrollment for this class has closed.",
+    unavailable:
+      studentText.enrollmentUnavailable || "Class is not available for enrollment.",
+  }
+  return messages[issue] || messages.unavailable || "Class is not available for enrollment."
+}
+
+export const getClassEnrollmentIssueLabel = (issue, studentText = {}) => {
+  const labels = {
+    already_enrolled_in_course:
+      studentText.alreadyEnrolled || "Already enrolled",
+    not_open:
+      studentText.notOpen || "Not open",
+    full:
+      studentText.full || "Full",
+    not_started:
+      studentText.closed || "Closed",
+    closed:
+      studentText.closed || "Closed",
+    unavailable:
+      studentText.unavailable || "Unavailable",
+  }
+  return labels[issue] || labels.unavailable || "Unavailable"
 }
 
 export const formatFileSize = (bytes) => {
-  if (!bytes) return "0 Bytes"
+  const value = Number(bytes)
+  if (!Number.isFinite(value) || value <= 0) return "0 Bytes"
   const k = 1024
   const sizes = ["Bytes", "KB", "MB", "GB"]
-  const i = Math.log(bytes) / Math.log(k)
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  const i = Math.min(
+    sizes.length - 1,
+    Math.floor(Math.log(value) / Math.log(k)),
+  )
+  return `${parseFloat((value / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
 }
 
 export const getFileIconColorClass = (fileName) => {

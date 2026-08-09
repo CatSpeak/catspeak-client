@@ -7,6 +7,7 @@ import { useDeleteReelMutation, useGetUserReelsQuery } from "@/store/api/reelsAp
 import StatCard from "../cards/StatCard"
 import WorkspaceReelListItem from "../grid/WorkspaceReelListItem"
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 
 const PAGE_SIZE = 10
 const EMPTY_REELS = []
@@ -24,7 +25,7 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
   )
   const [deleteReel, { isLoading: isDeleting }] = useDeleteReelMutation()
 
-  const reels = data?.data || EMPTY_REELS
+  const reels = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : EMPTY_REELS)
   const hasMore = (data?.lastPageCount || 0) >= PAGE_SIZE
 
   const stats = useMemo(
@@ -140,31 +141,22 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-opacity">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-gray-100 flex flex-col text-left">
-            <h3 className="text-lg font-bold text-gray-800 mb-2">{ws?.deleteTitle || "Delete Reel?"}</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              {ws?.deleteConfirm || "Are you sure you want to delete"} <strong className="text-gray-700">"{deleteTarget.title}"</strong>? {ws?.deleteWarning || "This action is permanent and cannot be undone."}
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                disabled={isDeleting}
-                className="px-4 py-2 text-sm font-semibold rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
-              >
-                {ws?.cancelBtn || "Cancel"}
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-                className="px-4 py-2 text-sm font-semibold rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors flex items-center space-x-1"
-              >
-                {isDeleting && <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />}
-                <span>{ws?.deleteBtn || "Delete"}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmationModal
+          open={!!deleteTarget}
+          onClose={() => !isDeleting && setDeleteTarget(null)}
+          onConfirm={handleDeleteConfirm}
+          title={ws?.deleteTitle || "Delete Reel?"}
+          confirmText={ws?.deleteBtn || "Delete"}
+          cancelText={ws?.cancelBtn || "Cancel"}
+          confirmVariant="destructive"
+          isPending={isDeleting}
+        >
+          <p>
+            {ws?.deleteConfirm || "Are you sure you want to delete"}{" "}
+            <strong className="text-gray-700">"{deleteTarget.title}"</strong>?{" "}
+            {ws?.deleteWarning || "This action is permanent and cannot be undone."}
+          </p>
+        </ConfirmationModal>
       )}
     </>
   )

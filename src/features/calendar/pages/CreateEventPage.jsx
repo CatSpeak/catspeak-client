@@ -152,7 +152,7 @@ const CreateEventPage = () => {
     }
   };
 
-  const workspaceEventsPath = "/workspace/events";
+  const workspaceEventsPath = "/workspace/my-calendar";
   // the return path should go back to workspace events or wherever it came from
   const returnPath = location.state?.from || workspaceEventsPath;
 
@@ -167,7 +167,7 @@ const CreateEventPage = () => {
     },
     {
       label: cal.workspaceEventsTitle || "Sự kiện",
-      onClick: () => navigate(workspaceEventsPath),
+      onClick: () => navigate("/workspace/my-calendar", { state: { activeTab: 'event' } }),
     },
     {
       label: isEditing
@@ -177,7 +177,11 @@ const CreateEventPage = () => {
   ];
 
   const handleClose = () => {
-    navigate(returnPath);
+    if (returnPath === workspaceEventsPath) {
+      navigate("/workspace/my-calendar", { state: { activeTab: 'event' } });
+    } else {
+      navigate(returnPath);
+    }
   };
 
   const handleSuccess = () => {
@@ -203,7 +207,7 @@ const CreateEventPage = () => {
     try {
       const eventId = editEvent?.eventId || editEvent?.id;
       await deleteEvent(eventId).unwrap();
-      navigate(returnPath);
+      handleClose();
     } catch (err) {
       console.error("Delete failed:", err);
       setShowDeleteConfirm(false);
@@ -510,7 +514,24 @@ const CreateEventPage = () => {
               selectedTimezone={form.selectedTimezone}
               onTimezoneChange={form.setSelectedTimezone}
               errors={form.errors}
-            />
+            >
+              <EventRecurrenceSection
+                eventColor={form.eventColor || "#990011"}
+                startTime={form.startTime}
+                recurrenceOption={form.recurrenceOption}
+                onRecurrenceChange={form.setRecurrenceOption}
+                recurrenceInterval={form.recurrenceInterval}
+                onRecurrenceIntervalChange={form.setRecurrenceInterval}
+                selectedDays={form.selectedDays}
+                onSelectedDaysChange={form.setSelectedDays}
+                recurrenceEndDate={form.recurrenceEndDate}
+                onRecurrenceEndDateChange={form.setRecurrenceEndDate}
+                recurrenceEndType={form.recurrenceEndType}
+                onRecurrenceEndTypeChange={form.setRecurrenceEndType}
+                occurrenceCount={form.occurrenceCount}
+                onOccurrenceCountChange={form.setOccurrenceCount}
+              />
+            </EventDateTimeSection>
 
             <EventDetailsSection
               title={form.title}
@@ -559,23 +580,6 @@ const CreateEventPage = () => {
               onTicketPriceChange={form.setTicketPrice}
               isOnline={form.isOnline}
               errors={form.errors}
-            />
-
-            <EventRecurrenceSection
-              eventColor={form.eventColor || "#990011"}
-              startTime={form.startTime}
-              recurrenceOption={form.recurrenceOption}
-              onRecurrenceChange={form.setRecurrenceOption}
-              recurrenceInterval={form.recurrenceInterval}
-              onRecurrenceIntervalChange={form.setRecurrenceInterval}
-              selectedDays={form.selectedDays}
-              onSelectedDaysChange={form.setSelectedDays}
-              recurrenceEndDate={form.recurrenceEndDate}
-              onRecurrenceEndDateChange={form.setRecurrenceEndDate}
-              recurrenceEndType={form.recurrenceEndType}
-              onRecurrenceEndTypeChange={form.setRecurrenceEndType}
-              occurrenceCount={form.occurrenceCount}
-              onOccurrenceCountChange={form.setOccurrenceCount}
             />
 
             {/* Event type (online/offline) dropdown note */}

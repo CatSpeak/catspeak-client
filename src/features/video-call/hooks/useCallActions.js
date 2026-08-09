@@ -1,14 +1,15 @@
-import { useCallback } from "react"
-import { useDispatch } from "react-redux"
-import { toast } from "react-hot-toast"
+import { useCallback } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-hot-toast";
 
-import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
-import { getCommunityPath } from "@/shared/utils/navigation"
+import { handleMediaError } from "@/shared/utils/mediaErrorUtils";
+import { getCommunityPath } from "@/shared/utils/navigation";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import {
   setPiP as setPiPAction,
   leaveCall as leaveCallAction,
-} from "@/store/slices/videoCallSlice"
-import { getNavigate, getLocation } from "./useNavigateRef"
+} from "@/store/slices/videoCallSlice";
+import { getNavigate, getLocation } from "./useNavigateRef";
 
 /**
  * All user-facing action handlers for a video call.
@@ -41,36 +42,48 @@ export const useCallActions = ({
   chatSend,
   setActiveSidePanel,
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   // ── Media toggles ──
 
   const handleToggleMic = useCallback(async () => {
     try {
-      await toggleAudioFn()
+      await toggleAudioFn();
     } catch (err) {
-      handleMediaError(err, "mic", t, { isToggle: true })
+      console.error("[useCallActions] Mic toggle failed with error:", {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        raw: err,
+      });
+      handleMediaError(err, "mic", t, { isToggle: true });
     }
-  }, [toggleAudioFn, t])
+  }, [toggleAudioFn, t]);
 
   const handleToggleCam = useCallback(async () => {
     try {
-      await toggleVideoFn()
+      await toggleVideoFn();
     } catch (err) {
-      handleMediaError(err, "camera", t, { isToggle: true })
+      console.error("[useCallActions] Camera toggle failed with error:", {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        raw: err,
+      });
+      handleMediaError(err, "camera", t, { isToggle: true });
     }
-  }, [toggleVideoFn, t])
+  }, [toggleVideoFn, t]);
 
   const handleToggleScreenShare = useCallback(() => {
     try {
-      screenShareState.toggleScreenShare()
+      screenShareState.toggleScreenShare();
     } catch (err) {
-      console.error("[useCallActions] Screen share error:", err)
+      console.error("[useCallActions] Screen share error:", err);
       toast.error(
         t?.rooms?.videoCall?.screenShare?.error ?? "Failed to share screen.",
-      )
+      );
     }
-  }, [screenShareState.toggleScreenShare, t])
+  }, [screenShareState.toggleScreenShare, t]);
 
   // ── Chat ──
 
@@ -86,78 +99,154 @@ export const useCallActions = ({
               name: replyTarget.from?.name || "User",
             },
           }),
-        )
+        );
       } else {
-        chatSend(text)
+        chatSend(text);
       }
     },
     [chatSend],
-  )
+  );
 
   // ── Leave session ──
 
   const handleLeaveSession = useCallback(async () => {
+    // Thông báo cho game (nếu đang chơi) để gọi exitGame → gửi PlayerLeaveGame lên BE.
+    // GameProvider sẽ lắng nghe event này và tự xử lý (player thì gọi BE, spectator thì chỉ reset FE).
+    // Dùng CustomEvent trên window để tránh phải truyền signalR connection xuống đây.
+    try {
+      window.dispatchEvent(new CustomEvent("hostLeaveGame"))
+    } catch (e) {
+      // ignore
+    }
+
     await leaveMeetingFn()
     dispatch(leaveCallAction())
 
     // Navigate away if on the call page (not in PiP)
-    const navigate = getNavigate()
+    const navigate = getNavigate();
     if (!isPiP && navigate) {
-      navigate(getCommunityPath(language), { replace: true })
+      navigate(getCommunityPath(language), { replace: true });
     }
-  }, [isPiP, language, leaveMeetingFn, dispatch])
+  }, [isPiP, language, leaveMeetingFn, dispatch]);
 
   // ── Copy link ──
 
   const handleCopyLink = useCallback(() => {
     const url = callInfo?.callPath
       ? `${window.location.origin}${callInfo.callPath}`
-      : window.location.href
-    navigator.clipboard.writeText(url)
-    toast.success("Link copied to clipboard!")
-  }, [callInfo?.callPath])
+      : window.location.href;
+    copyRoomLink({ baseUrl: url, room: callInfo?.roomData });
+  }, [callInfo?.callPath, callInfo?.roomData]);
 
   // ── PiP transitions ──
 
+  const checkIsPiPSupported = useCallback(() => {
+    if (typeof window === "undefined") return false
+    if ("documentPictureInPicture" in window) return true
+    if ("pictureInPictureEnabled" in document && document.pictureInPictureEnabled)
+      return true
+
+    const videos = Array.from(document.querySelectorAll("video"))
+    for (const v of videos) {
+      if (
+        v.webkitSupportsPresentationMode &&
+        typeof v.webkitSetPresentationMode === "function" &&
+        v.webkitSupportsPresentationMode("picture-in-picture")
+      ) {
+        return true
+      }
+    }
+    if (
+      typeof HTMLVideoElement !== "undefined" &&
+      "webkitSetPresentationMode" in HTMLVideoElement.prototype
+    ) {
+      return true
+    }
+    return false
+  }, [])
+
   const enterPiP = useCallback(
     (navigateTo) => {
-      // Create the PiP window immediately in the click handler to preserve user activation
-      if (
-        "documentPictureInPicture" in window &&
-        !window.documentPictureInPicture.window
-      ) {
-        window.__pipWindowPromise = window.documentPictureInPicture
-          .requestWindow({
-            width: 400,
-            height: 300,
-          })
-          .catch((err) => {
-            console.error("Failed to request PiP window in click handler", err)
-            return null
-          })
+      // 1. Document Picture-in-Picture (Desktop Chrome / Edge / Chrome Android)
+      if ("documentPictureInPicture" in window) {
+        if (!window.documentPictureInPicture?.window) {
+          window.__pipWindowPromise = window.documentPictureInPicture
+            .requestWindow({
+              width: 400,
+              height: 300,
+            })
+            .catch((err) => {
+              console.error("Failed to request PiP window in click handler", err);
+              return null;
+            });
+        }
+
+        dispatch(setPiPAction(true));
+        setActiveSidePanel(null);
+        const navigate = getNavigate();
+        if (navigateTo && navigate) {
+          navigate(navigateTo);
+        }
+        return;
       }
 
-      dispatch(setPiPAction(true))
-      setActiveSidePanel(null)
-      const navigate = getNavigate()
+      // 2. Native Video Picture-in-Picture Fallback (iOS Safari / Standard Video PiP)
+      const videos = Array.from(document.querySelectorAll("video"));
+      const targetVideo =
+        videos.find((v) => !v.paused && v.readyState >= 2) || videos[0];
+
+      if (targetVideo) {
+        // iOS Safari WebKit Presentation Mode
+        if (
+          targetVideo.webkitSupportsPresentationMode &&
+          typeof targetVideo.webkitSetPresentationMode === "function"
+        ) {
+          try {
+            targetVideo.webkitSetPresentationMode("picture-in-picture");
+            toast.success(
+              t?.rooms?.videoCall?.pipActivated ||
+                "Picture-in-Picture activated",
+            );
+            return;
+          } catch (err) {
+            console.error("Failed iOS Safari webkitSetPresentationMode:", err);
+          }
+        }
+
+        // Standard W3C HTML5 Video requestPictureInPicture
+        if (
+          document.pictureInPictureEnabled &&
+          typeof targetVideo.requestPictureInPicture === "function"
+        ) {
+          targetVideo.requestPictureInPicture().catch((err) => {
+            console.error("Failed requestPictureInPicture:", err);
+          });
+          return;
+        }
+      }
+
+      // 3. Fallback inside Single Page App (Redux state PiP widget)
+      dispatch(setPiPAction(true));
+      setActiveSidePanel(null);
+      const navigate = getNavigate();
       if (navigateTo && navigate) {
-        navigate(navigateTo)
+        navigate(navigateTo);
       }
     },
-    [dispatch, setActiveSidePanel],
-  )
+    [dispatch, setActiveSidePanel, t],
+  );
 
   const exitPiP = useCallback(() => {
-    dispatch(setPiPAction(false))
-  }, [dispatch])
+    dispatch(setPiPAction(false));
+  }, [dispatch]);
 
   const returnToCall = useCallback(() => {
-    const navigate = getNavigate()
+    const navigate = getNavigate();
     if (callInfo?.callPath && navigate) {
-      dispatch(setPiPAction(false))
-      navigate(callInfo.callPath)
+      dispatch(setPiPAction(false));
+      navigate(callInfo.callPath);
     }
-  }, [dispatch, callInfo?.callPath])
+  }, [dispatch, callInfo?.callPath]);
 
   return {
     handleToggleMic,
@@ -169,5 +258,6 @@ export const useCallActions = ({
     enterPiP,
     exitPiP,
     returnToCall,
-  }
-}
+    isPiPSupported: checkIsPiPSupported(),
+  };
+};

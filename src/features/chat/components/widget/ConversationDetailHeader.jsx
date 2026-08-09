@@ -1,17 +1,21 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import GroupAvatar from "../GroupAvatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getProfilePath } from "@/shared/utils/navigation"
 
 const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
 
   if (!conversation) return null
 
   const isGroup = conversation.isGroup
   const otherUser = conversation.friend
+  const friendId = otherUser?.accountId || otherUser?.id
   const name = isGroup
     ? conversation.groupName || conversation.name
     : otherUser?.username || t?.messages?.unknownUser || "Unknown User"
@@ -22,6 +26,12 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
   const friendTheme = getParticipantTheme(
     otherUser?.accountId || otherUser?.username || "",
   )
+
+  const handleProfileClick = () => {
+    if (friendId) {
+      navigate(getProfilePath(friendId))
+    }
+  }
 
   return (
     <div className="flex items-center justify-between border-b border-[#e5e5e5] px-3 py-2 shrink-0">
@@ -42,13 +52,23 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
               src={otherUser?.avatarImageUrl || otherUser?.avatar}
               name={name}
               alt={name}
+              accountId={friendId}
               className={friendTheme.avatarClass}
             />
           )}
           <div className="flex flex-col min-w-0">
-            <span className="font-semibold text-sm text-gray-900 truncate">
-              {name}
-            </span>
+            {!isGroup && friendId ? (
+              <span
+                onClick={handleProfileClick}
+                className="font-semibold text-sm text-gray-900 truncate hover:underline hover:text-primary transition-colors cursor-pointer"
+              >
+                {name}
+              </span>
+            ) : (
+              <span className="font-semibold text-sm text-gray-900 truncate">
+                {name}
+              </span>
+            )}
             {statusText && (
               <span className="text-[11px] text-[#606060] truncate">
                 {statusText}
@@ -58,7 +78,7 @@ const ConversationDetailHeader = ({ conversation, onBack, onClose }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ConversationDetailHeader
+export default ConversationDetailHeader;

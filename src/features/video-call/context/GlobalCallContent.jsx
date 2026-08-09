@@ -45,6 +45,10 @@ import {
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
+import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
+import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -140,7 +144,7 @@ const GlobalCallContent = ({
     }
   }, [layoutMode, maxTiles, hideEmptyTiles])
 
-  // ── LiveKit hooks ──
+  // ── LiveKit hooks & Device Selection ──
   let lkRoom = null
   try {
     lkRoom = useRoomContext()
@@ -148,12 +152,130 @@ const GlobalCallContent = ({
     lkRoom = null
   }
 
+  const deviceSelection = useDeviceSelection()
+  const [showRoomSettings, setShowRoomSettings] = useState(false)
+  const [activeSettingsTab, setActiveSettingsTab] = useState("audio-video")
+
   const allParticipants = useParticipants()
   const localPart = useLocalParticipant()
   const localParticipant = localPart?.localParticipant ?? null
 
+  // Refresh hardware device list & sync active devices with LiveKit when settings modal opens
+  useEffect(() => {
+    if (!lkRoom) return
+
+    const syncActiveDevices = async () => {
+      try {
+        deviceSelection.refreshDevices?.()
+
+        const activeMic =
+          (await lkRoom.getActiveDevice?.("audioinput")) ||
+          localParticipant
+            ?.getTrackPublication?.("microphone")
+            ?.track?.mediaStreamTrack?.getSettings()?.deviceId
+
+        const activeSpeaker = await lkRoom.getActiveDevice?.("audiooutput")
+
+        const activeCam =
+          (await lkRoom.getActiveDevice?.("videoinput")) ||
+          localParticipant
+            ?.getTrackPublication?.("camera")
+            ?.track?.mediaStreamTrack?.getSettings()?.deviceId
+
+        if (activeMic && activeMic !== deviceSelection.selectedMic) {
+          deviceSelection.setSelectedMic(activeMic)
+        }
+        if (
+          activeSpeaker &&
+          activeSpeaker !== deviceSelection.selectedSpeaker
+        ) {
+          deviceSelection.setSelectedSpeaker(activeSpeaker)
+        }
+        if (activeCam && activeCam !== deviceSelection.selectedCamera) {
+          deviceSelection.setSelectedCamera(activeCam)
+        }
+      } catch (err) {
+        console.warn("[GlobalCallContent] Sync active devices warning:", err)
+      }
+    }
+
+    if (showRoomSettings) {
+      syncActiveDevices()
+    }
+  }, [lkRoom, showRoomSettings, localParticipant])
+
   const connectionState = useConnectionState()
   const isConnected = connectionState === ConnectionState.Connected
+
+  // Automatically start WebAudio context if iOS Safari requires audio unlock upon connection
+  useEffect(() => {
+    if (lkRoom && isConnected && lkRoom.canPlayAudio === false) {
+      lkRoom.startAudio().catch((err) => {
+        console.warn("[GlobalCallContent] startAudio warning on connect:", err)
+      })
+    }
+  }, [lkRoom, isConnected])
+
+  // Only perform explicit device switching when room is connected and settings modal is active
+  useEffect(() => {
+    if (
+      lkRoom &&
+      isConnected &&
+      showRoomSettings &&
+      deviceSelection?.selectedMic &&
+      deviceSelection.selectedMic !== "default" &&
+      deviceSelection.selectedMic !== ""
+    ) {
+      lkRoom
+        .switchActiveDevice("audioinput", deviceSelection.selectedMic)
+        .catch((err) => {
+          console.error(
+            "[GlobalCallContent] Failed to switch audio input:",
+            err,
+          )
+        })
+    }
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedMic])
+
+  useEffect(() => {
+    if (
+      lkRoom &&
+      isConnected &&
+      showRoomSettings &&
+      deviceSelection?.selectedSpeaker &&
+      deviceSelection.selectedSpeaker !== "default" &&
+      deviceSelection.selectedSpeaker !== ""
+    ) {
+      lkRoom
+        .switchActiveDevice("audiooutput", deviceSelection.selectedSpeaker)
+        .catch((err) => {
+          console.error(
+            "[GlobalCallContent] Failed to switch audio output:",
+            err,
+          )
+        })
+    }
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedSpeaker])
+
+  useEffect(() => {
+    if (
+      lkRoom &&
+      isConnected &&
+      showRoomSettings &&
+      deviceSelection?.selectedCamera &&
+      deviceSelection.selectedCamera !== "default" &&
+      deviceSelection.selectedCamera !== ""
+    ) {
+      lkRoom
+        .switchActiveDevice("videoinput", deviceSelection.selectedCamera)
+        .catch((err) => {
+          console.error(
+            "[GlobalCallContent] Failed to switch video input:",
+            err,
+          )
+        })
+    }
+  }, [lkRoom, isConnected, showRoomSettings, deviceSelection?.selectedCamera])
 
   // ── Synchronized Recording States ──
   const sessionId =
@@ -353,6 +475,13 @@ const GlobalCallContent = ({
     sessionId,
   })
 
+  const subtitleControls = useSubtitleControls({
+    sessionId,
+    room: roomData,
+    setShowRoomSubtitles,
+    setSubtitleSelectedLanguage,
+  })
+
   // Audio is handled by <RoomAudioRenderer /> in the JSX below.
 
   // ── Participants ──
@@ -427,6 +556,53 @@ const GlobalCallContent = ({
     setShowLeaveModal(false)
   }
 
+  // ── Moderation Listener (Real-Time Kick & Mute) ──
+  useEffect(() => {
+    if (!lkRoom) return
+
+    const handleModerationData = (payload, participant, kind, topic) => {
+      if (topic !== "moderation") return
+
+      try {
+        const decoded = new TextDecoder().decode(payload)
+        const data = JSON.parse(decoded)
+        const currentAccId =
+          user?.accountId != null ? String(user.accountId) : null
+        const localIdent =
+          localParticipant?.identity != null
+            ? String(localParticipant.identity)
+            : null
+
+        const isTarget =
+          (data.targetId != null && String(data.targetId) === currentAccId) ||
+          (data.targetIdentity != null &&
+            String(data.targetIdentity) === localIdent)
+
+        if (!isTarget) return
+
+        if (data.action === "KICK_PARTICIPANT") {
+          toast.error("Bạn đã bị Host mời ra khỏi phòng.", { duration: 5000 })
+          actions.handleLeaveSession()
+        } else if (data.action === "MUTE_PARTICIPANT") {
+          if (data.trackKind === "audio" && localParticipant) {
+            localParticipant.setMicrophoneEnabled(false)
+            toast.error("Host đã tắt mic của bạn.")
+          } else if (data.trackKind === "video" && localParticipant) {
+            localParticipant.setCameraEnabled(false)
+            toast.error("Host đã tắt camera của bạn.")
+          }
+        }
+      } catch (err) {
+        console.error("[Moderation] Error parsing moderation payload:", err)
+      }
+    }
+
+    lkRoom.on(RoomEvent.DataReceived, handleModerationData)
+    return () => {
+      lkRoom.off(RoomEvent.DataReceived, handleModerationData)
+    }
+  }, [lkRoom, localParticipant, user?.accountId, actions])
+
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
   const { closingRemainingSeconds } = useRoomLifecycle({
@@ -444,6 +620,7 @@ const GlobalCallContent = ({
     enterPiP: actions.enterPiP,
     exitPiP: actions.exitPiP,
     returnToCall: actions.returnToCall,
+    isPiPSupported: actions.isPiPSupported,
     showLeaveModal,
     promptLeaveCall,
     cancelLeaveCall,
@@ -492,12 +669,19 @@ const GlobalCallContent = ({
     showCC,
     setShowCC,
     isAISession,
+    isHost: isRoomHost(roomData, user),
 
     // Room subtitles
     showRoomSubtitles,
     setShowRoomSubtitles,
     subtitleSelectedLanguage,
     setSubtitleSelectedLanguage,
+    isSubtitleActive: subtitleControls.isSubtitleActive,
+    isStartingSubtitles: subtitleControls.isStarting,
+    isStoppingSubtitles: subtitleControls.isStopping,
+    subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,
+    startSubtitles: subtitleControls.startSubtitles,
+    stopSubtitles: subtitleControls.stopSubtitles,
 
     // Chat
     messages: chatMessages,
@@ -546,6 +730,12 @@ const GlobalCallContent = ({
     setMaxTiles,
     hideEmptyTiles,
     setHideEmptyTiles,
+
+    deviceSelection,
+    showRoomSettings,
+    setShowRoomSettings,
+    activeSettingsTab,
+    setActiveSettingsTab,
   }
 
   return (
@@ -555,6 +745,11 @@ const GlobalCallContent = ({
       <RoomClosingWarningModal
         remainingSeconds={closingRemainingSeconds}
         t={t}
+      />
+      <RoomSettingsModal
+        open={showRoomSettings}
+        onClose={() => setShowRoomSettings(false)}
+        initialTab={activeSettingsTab}
       />
     </ContextProvider>
   )

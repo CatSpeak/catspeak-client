@@ -1,8 +1,8 @@
 import React from "react"
-import { motion } from "framer-motion"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import CategoryBadge from "./CategoryBadge"
 import { fluentEaseOut } from "@/shared/utils/animations"
+import { motion } from "framer-motion"
 
 /**
  * RoundImageCard

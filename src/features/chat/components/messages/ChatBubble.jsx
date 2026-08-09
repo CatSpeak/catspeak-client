@@ -1,14 +1,14 @@
-import { memo, useState, useRef } from "react"
-import { formatTime } from "@/shared/utils/dateFormatter"
-import Avatar from "@/shared/components/ui/Avatar"
-import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import ChatContextMenu from "./ChatContextMenu"
-import ChatBubbleActions from "./ChatBubbleActions"
-import ChatBubbleTyping from "./ChatBubbleTyping"
-import ChatBubbleContent from "./ChatBubbleContent"
-import ChatBubbleReadStatus from "./ChatBubbleReadStatus"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import { memo, useState, useRef } from "react";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import Avatar from "@/shared/components/ui/Avatar";
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme";
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
+import ChatContextMenu from "./ChatContextMenu";
+import ChatBubbleActions from "./ChatBubbleActions";
+import ChatBubbleTyping from "./ChatBubbleTyping";
+import ChatBubbleContent from "./ChatBubbleContent";
+import ChatBubbleReadStatus from "./ChatBubbleReadStatus";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 /**
  * ChatBubble — individual message bubble.
@@ -32,46 +32,47 @@ const ChatBubble = ({
   onRecall,
   isWidget = false,
 }) => {
-  const { t } = useLanguage()
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
-  const [targetRect, setTargetRect] = useState(null)
-  const touchTimerRef = useRef(null)
-  const rowRef = useRef(null)
+  const { t } = useLanguage();
+  const { formatTime } = useTimezone();
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [targetRect, setTargetRect] = useState(null);
+  const touchTimerRef = useRef(null);
+  const rowRef = useRef(null);
 
-  const maxWidthClass = isWidget ? "max-w-[65%]" : "max-w-[75%]"
+  const maxWidthClass = isWidget ? "max-w-[65%]" : "max-w-[75%]";
 
   const isRecalled =
     message?.isRecalled ||
     message?.messageType === "Recalled" ||
-    message?.content === "[Message Recalled]"
+    message?.content === "[Message Recalled]";
 
   const handleContextMenu = (e) => {
-    if (isRecalled) return
-    e.preventDefault()
+    if (isRecalled) return;
+    e.preventDefault();
     if (rowRef.current) {
-      setTargetRect(rowRef.current.getBoundingClientRect())
+      setTargetRect(rowRef.current.getBoundingClientRect());
     }
-    setIsContextMenuOpen(true)
-  }
+    setIsContextMenuOpen(true);
+  };
 
   const handleTouchStart = () => {
-    if (isRecalled) return
+    if (isRecalled) return;
     touchTimerRef.current = setTimeout(() => {
       if (rowRef.current) {
-        setTargetRect(rowRef.current.getBoundingClientRect())
+        setTargetRect(rowRef.current.getBoundingClientRect());
       }
-      setIsContextMenuOpen(true)
-    }, 400)
-  }
+      setIsContextMenuOpen(true);
+    }, 400);
+  };
 
   const handleTouchEnd = () => {
     if (touchTimerRef.current) {
-      clearTimeout(touchTimerRef.current)
+      clearTimeout(touchTimerRef.current);
     }
-  }
+  };
 
   if (isTyping) {
-    return <ChatBubbleTyping sender={sender} />
+    return <ChatBubbleTyping sender={sender} />;
   }
 
   // Fallback for System messages if passed directly
@@ -85,22 +86,22 @@ const ChatBubble = ({
           {message.content}
         </span>
       </div>
-    )
+    );
   }
 
   // Spacing between groups
-  const marginTop = isFirstInGroup ? "mt-3" : "mt-0.5"
-  const avatarSrc = sender?.avatar || sender?.avatarImageUrl
+  const marginTop = isFirstInGroup ? "mt-3" : "mt-0.5";
+  const avatarSrc = sender?.avatar || sender?.avatarImageUrl;
 
-  const readers = Array.isArray(readByUsers) ? readByUsers : []
+  const readers = Array.isArray(readByUsers) ? readByUsers : [];
   const hasBeenSeen =
     readers.length > 0 ||
     message?.isRead ||
     (Array.isArray(message?.readByAccountIds) &&
       message.readByAccountIds.length > 0) ||
-    message?.status === "read"
+    message?.status === "read";
 
-  const bubbleNode = <ChatBubbleContent message={message} isOwn={isOwn} />
+  const bubbleNode = <ChatBubbleContent message={message} isOwn={isOwn} />;
 
   const avatarNode =
     !isOwn && isLastInGroup ? (
@@ -114,7 +115,7 @@ const ChatBubble = ({
           ).avatarClass
         }
       />
-    ) : null
+    ) : null;
 
   const rowNode = (
     <div
@@ -125,7 +126,7 @@ const ChatBubble = ({
       {!isOwn && <div className="w-10 shrink-0">{avatarNode}</div>}
       <div className={`relative ${maxWidthClass} w-fit`}>{bubbleNode}</div>
     </div>
-  )
+  );
 
   return (
     <div
@@ -141,7 +142,7 @@ const ChatBubble = ({
           }`}
         >
           <span className="font-semibold">
-            {isOwn ? (t?.chat?.you || "You") : sender?.name || sender?.username}
+            {isOwn ? t?.chat?.you || "You" : sender?.name || sender?.username}
           </span>
 
           <span className="text-xs text-[#606060]">
@@ -214,7 +215,7 @@ const ChatBubble = ({
         isOwn={isOwn}
       />
     </div>
-  )
-}
+  );
+};
 
-export default memo(ChatBubble)
+export default memo(ChatBubble);

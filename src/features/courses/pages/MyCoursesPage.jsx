@@ -1,70 +1,95 @@
-import React, { useMemo, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Plus } from "lucide-react"
+import React, { useMemo } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { BookOpen, FilterX, Plus, Sparkles, Users } from "lucide-react"
 
-import { useGetAllClassesQuery, useGetAllCoursesQuery, useGetScheduleSessionsQuery } from "@/store/api/coursesApi"
+import { useGetAllCoursesQuery } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 import CourseManagementCard from "../components/CourseManagementCard"
 import CourseSelectFilter from "../components/CourseSelectFilter"
-import CourseTabs from "../components/CourseTabs"
 import EmptyCoursesState from "../components/EmptyCoursesState"
-import TeachingTasksSection from "../components/TeachingTasksSection"
-import UpcomingSessionsPanel from "../components/UpcomingSessionsPanel"
-import ViewModeToggle from "../components/ViewModeToggle"
+import ViewModeToggle from "../components/shared/ViewModeToggle"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import {
   filterByStatus,
-  getScheduleRange,
-  mapTeacherClassSummary,
   mapTeacherCourseSummary,
-  mapUpcomingSessions,
 } from "../utils/courseTransforms"
-
-const STATUS_OPTIONS = [
-  { value: "all", label: "All Status" },
-  { value: "teaching", label: "Teaching" },
-  { value: "open", label: "Open" },
-  { value: "archived", label: "Archived" },
-]
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyCoursesPage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}
   const mc = c.myCourses || {}
+  const statusOptions = [
+    { value: "all", label: mc.statusAll || "All Status" },
+    { value: "teaching", label: c.teachingStatus || "Teaching" },
+    { value: "open", label: c.openEnrollmentStatus || "Open" },
+    { value: "not_started", label: c.notStartedStatus || "Not Started" },
+    { value: "archived", label: c.archive || "Archived" },
+  ]
 
-  const [activeTab, setActiveTab] = useState("courses")
-  const [viewMode, setViewMode] = useState("grid")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const viewMode = searchParams.get("view") || "grid"
+  const statusFilter = searchParams.get("status") || "all"
+
+  const setViewMode = (mode) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("view", mode)
+      return next
+    })
+  }
+
+  const setStatusFilter = (status) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("status", status)
+      return next
+    })
+  }
 
   const deleteHelper = useDeleteCourse(t)
-  const scheduleParams = useMemo(() => getScheduleRange(180), [])
 
-  const { data: scheduleData, isLoading: isScheduleLoading } = useGetScheduleSessionsQuery(scheduleParams)
-  const { data: coursesData, isLoading: isCoursesLoading, error: coursesError } = useGetAllCoursesQuery({ page: 1, pageSize: 6 })
-  const { data: classesData, isLoading: isClassesLoading, error: classesError } = useGetAllClassesQuery({ page: 1, pageSize: 6 })
+  const {
+    currentData: coursesData,
+    isLoading: isCoursesLoading,
+    isFetching: isCoursesFetching,
+    error: coursesError,
+    refetch: refetchCourses,
+  } = useGetAllCoursesQuery({
+    page: 1,
+    pageSize: 6,
+    status: statusFilter === "all" ? undefined : statusFilter.toUpperCase(),
+  })
 
-  const rawSessions = useMemo(() => scheduleData?.data || [], [scheduleData])
-  const coursesRaw = useMemo(() => coursesData?.data || [], [coursesData])
-  const classesRaw = useMemo(() => classesData?.data || [], [classesData])
+  const coursesRaw = useMemo(
+    () => (Array.isArray(coursesData?.data) ? coursesData.data : []),
+    [coursesData],
+  )
 
-  const isLoading = isCoursesLoading || isClassesLoading || isScheduleLoading
-  const error = coursesError || classesError
+  const isLoading = isCoursesLoading || (isCoursesFetching && coursesData === undefined)
+  const isRefreshing = isCoursesFetching
+  const error = coursesData === undefined && coursesError
+  const refreshError = coursesError
 
-  const upcomingClasses = useMemo(() => mapUpcomingSessions(rawSessions, classesRaw, 3), [rawSessions, classesRaw])
-  const courseList = useMemo(() => coursesRaw.map(mapTeacherCourseSummary), [coursesRaw])
-  const classList = useMemo(() => classesRaw.map(mapTeacherClassSummary), [classesRaw])
-  const isCoursesTab = activeTab === "courses"
-  const displayList = isCoursesTab ? courseList : classList
-  const filteredDisplayList = useMemo(() => filterByStatus(displayList, statusFilter), [displayList, statusFilter])
-
-  const tabs = useMemo(() => [
-    { value: "courses", label: c.myCoursesTab || "My Courses" },
-    { value: "classes", label: c.myClassesTab || "My Classes" },
-  ], [c.myClassesTab, c.myCoursesTab])
+  const courseList = useMemo(
+    () => coursesRaw.map((course, index) => mapTeacherCourseSummary(
+      course,
+      index,
+      {
+        studentsCount: c.studentsCount,
+        tba: c.workspaceUi?.tba,
+      },
+      formatDate,
+    )),
+    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, formatDate],
+  )
+  const filteredDisplayList = useMemo(() => filterByStatus(courseList, statusFilter), [courseList, statusFilter])
 
   const cardLabels = {
     editCourse: c.editCourse || "Edit Course",
@@ -74,9 +99,9 @@ const MyCoursesPage = () => {
     progress: c.progress || "Progress",
     courseLabel: c.course || "Course",
     classLabel: c.class || "Class",
+    classCount: c.classCount || "{{count}} classes",
+    actionsFor: c.actionsForCourse || "Actions for {{title}}",
   }
-
-
 
   if (isLoading) {
     return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
@@ -84,21 +109,43 @@ const MyCoursesPage = () => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Error loading course overview: {error.message || "Unknown error"}
+      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
+        <span>{mc.loadCoursesFailed || "The course overview could not be loaded. Please try again."}</span>
+        <button
+          type="button"
+          onClick={() => refetchCourses()}
+          className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+        >
+          {mc.retry || "Try again"}
+        </button>
       </div>
     )
   }
 
+  const handleCloseDeleteModal = () => {
+    if (deleteHelper.isDeleting) return
+    deleteHelper.handleCancel()
+  }
+
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Home"}</span>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{c.title || "My Courses"}</span>
+    <div className="flex flex-col gap-4 text-[#2e2e2e]">
+      {isRefreshing && (
+        <span role="status" className="sr-only">
+          {mc.refreshingCourses || "Refreshing course overview"}
+        </span>
+      )}
+      {refreshError && !error && (
+        <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
+          {mc.refreshCoursesFailed || "Some course data could not be refreshed. The displayed information may be out of date."}
         </div>
-      </div>
+      )}
+      {/* ─── Breadcrumb ─── */}
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: c.title || "My Courses" },
+        ]}
+      />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
@@ -114,70 +161,61 @@ const MyCoursesPage = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 flex flex-col gap-5">
-          <UpcomingSessionsPanel
-            title={mc.upcomingClasses || "Upcoming Classes"}
-            count={rawSessions.length || upcomingClasses.length}
-            sessions={upcomingClasses}
-            viewScheduleLabel={c.viewSchedule || "View schedule"}
-            emptyLabel={c.noUpcomingClasses || "No upcoming classes yet"}
-            viewClassLabel={c.viewClass || "View class"}
-            joinRoomLabel={c.joinRoom || "Join room"}
-            onViewSchedule={() => navigate("/workspace/courses/schedule")}
-            onOpenSession={(item) => navigate(`/workspace/courses/class/${item.classId || item.id}`)}
-          />
-        </div>
-
-        <TeachingTasksSection
-          teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
-          viewAllLabel={c.viewAll || "View all"}
-          language={language}
-          gradeAssignmentLabel={c.gradeAssignment || "Grade homework"}
-          giveFeedbackLabel={c.giveFeedback || "Give feedback"}
-          prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
-          actionIcon="plus"
-          devMessage={c.devMessage || "Feature in development"}
-        />
-      </div>
-
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-px gap-4 mt-6">
-        <CourseTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          onChange={setActiveTab}
-          className="gap-8"
-        />
-
+      <div className="flex flex-col sm:flex-row sm:items-center justify-end pb-px gap-4 mt-6">
         <div className="flex items-center gap-3 self-end sm:self-auto">
           <CourseSelectFilter
             value={statusFilter}
             onChange={setStatusFilter}
-            options={STATUS_OPTIONS}
+            options={statusOptions}
           />
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </div>
       </div>
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         {filteredDisplayList.length === 0 ? (
           <EmptyCoursesState
-            message={isCoursesTab
-              ? (c.myCourses?.noCourses || "No courses yet")
-              : (c.myCourses?.noClasses || "No classes yet")}
+            icon={statusFilter !== "all" ? FilterX : BookOpen}
+            title={
+              statusFilter !== "all"
+                ? (mc.noFilteredCoursesTitle || "No matching courses found")
+                : (mc.noCoursesTitle || "Start Your Teaching Journey")
+            }
+            message={
+              statusFilter !== "all"
+                ? (mc.noFilteredCoursesDesc || "No courses match the selected status filter. Try changing or clearing your filter to view other courses.")
+                : (mc.noCoursesDesc || "You haven't created any courses yet. Create your first course to structure modules, upload materials, and manage classes.")
+            }
+            isFiltered={statusFilter !== "all"}
+            onResetFilter={statusFilter !== "all" ? () => setStatusFilter("all") : undefined}
+            resetFilterLabel={mc.resetFilter || "Reset Filter"}
+            action={
+              statusFilter === "all" ? (
+                <button
+                  type="button"
+                  onClick={() => navigate("/workspace/courses/create")}
+                  className="h-9 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
+                >
+                  <Plus size={15} />
+                  <span>{c.createCourse?.title || "Create Course"}</span>
+                </button>
+              ) : null
+            }
           />
         ) : (
-          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>
             {filteredDisplayList.map((item) => (
               <CourseManagementCard
                 key={item.id}
                 item={item}
-                type={isCoursesTab ? "course" : "class"}
+                type="course"
                 viewMode={viewMode}
                 labels={cardLabels}
-                onOpen={() => navigate(isCoursesTab ? `/workspace/courses/details/${item.id}` : `/workspace/courses/class/${item.id}`)}
-                onEdit={() => navigate(`/workspace/courses/edit/${item.id}`)}
-                onDelete={() => deleteHelper.setTargetId(item.id)}
+                onOpen={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(item.id))}`)}
+                onEdit={() => navigate(`/workspace/courses/edit/${encodeURIComponent(String(item.id))}`)}
+                onDelete={() => {
+                  deleteHelper.setTargetId(item.id)
+                }}
               />
             ))}
           </div>
@@ -186,7 +224,7 @@ const MyCoursesPage = () => {
         {filteredDisplayList.length > 0 && (
           <button
             type="button"
-            onClick={() => navigate(isCoursesTab ? "/workspace/courses/all" : "/workspace/courses/all-classes")}
+            onClick={() => navigate("/workspace/courses/all")}
             className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2"
           >
             {c.myCourses?.viewAll || "View all"}
@@ -196,8 +234,9 @@ const MyCoursesPage = () => {
 
       <ConfirmationModal
         open={deleteHelper.isOpen}
-        onClose={deleteHelper.handleCancel}
+        onClose={handleCloseDeleteModal}
         onConfirm={deleteHelper.handleConfirm}
+        isPending={deleteHelper.isDeleting}
         title={c.courseDetail?.deleteCourse || "Delete Course"}
         message={c.courseDetail?.confirmDeleteCourse || "Are you sure you want to delete this course? All associated classes will also be affected."}
         confirmText={c.courseDetail?.deleteCourse || "Delete"}

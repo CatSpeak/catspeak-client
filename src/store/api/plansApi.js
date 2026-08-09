@@ -6,8 +6,12 @@ export const plansApi = baseApi.injectEndpoints({
       query: () => "v1/Plans",
       providesTags: ["Plans"],
     }),
+    getMyUsage: builder.query({
+      query: () => "v1/Plans/my-usage",
+      providesTags: ["PlanUsage"],
+    }),
   }),
   overrideExisting: false,
 })
 
-export const { useGetPlansQuery } = plansApi
+export const { useGetPlansQuery, useGetMyUsageQuery } = plansApi

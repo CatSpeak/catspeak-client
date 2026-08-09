@@ -16,14 +16,12 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
  * `subtitleSupportedLangs` is derived from room.languageType so no extra API call
  * is required before presenting the language picker to the user.
  */
-export const useSubtitleControls = () => {
-  const {
-    sessionId,
-    room,
-    setShowRoomSubtitles,
-    setSubtitleSelectedLanguage,
-  } = useGlobalVideoCall()
-
+export const useSubtitleControls = ({
+  sessionId,
+  room,
+  setShowRoomSubtitles,
+  setSubtitleSelectedLanguage,
+} = {}) => {
   const [isSubtitleActive, setIsSubtitleActive] = useState(false)
   const [dispatchId, setDispatchId] = useState(null)
 
@@ -54,17 +52,17 @@ export const useSubtitleControls = () => {
     if (statusData.active && statusData.dispatchId && !isSubtitleActive) {
       setDispatchId(statusData.dispatchId)
       setIsSubtitleActive(true)
-      setShowRoomSubtitles(true)
+      setShowRoomSubtitles?.(true)
       // Default display language to community language from URL
-      setSubtitleSelectedLanguage((prev) =>
+      setSubtitleSelectedLanguage?.((prev) =>
         prev ?? defaultDisplayLang
       )
     } else if (!statusData.active && isSubtitleActive) {
       // Agent stopped externally (e.g. another user stopped it)
       setDispatchId(null)
       setIsSubtitleActive(false)
-      setShowRoomSubtitles(false)
-      setSubtitleSelectedLanguage(null)
+      setShowRoomSubtitles?.(false)
+      setSubtitleSelectedLanguage?.(null)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusData])
@@ -75,8 +73,8 @@ export const useSubtitleControls = () => {
       const result = await startMutation({ sessionId, language: chosenLang }).unwrap()
       setDispatchId(result.dispatchId)
       setIsSubtitleActive(true)
-      setSubtitleSelectedLanguage(chosenLang)
-      setShowRoomSubtitles(true)
+      setSubtitleSelectedLanguage?.(chosenLang)
+      setShowRoomSubtitles?.(true)
     } catch (err) {
       console.error("[useSubtitleControls] Failed to start subtitles:", err)
     }
@@ -88,23 +86,25 @@ export const useSubtitleControls = () => {
   }
 
   const stopSubtitles = async () => {
-    if (!dispatchId) return
-    try {
-      await stopMutation({ sessionId, dispatchId }).unwrap()
-    } catch (err) {
-      console.error("[useSubtitleControls] Failed to stop subtitles:", err)
-    } finally {
-      setDispatchId(null)
-      setIsSubtitleActive(false)
-      setShowRoomSubtitles(false)
-      setSubtitleSelectedLanguage(null)
+    const targetDispatchId = dispatchId || statusData?.dispatchId
+    if (targetDispatchId) {
+      try {
+        await stopMutation({ sessionId, dispatchId: targetDispatchId }).unwrap()
+      } catch (err) {
+        console.error("[useSubtitleControls] Failed to stop subtitles:", err)
+      }
     }
+    setDispatchId(null)
+    setIsSubtitleActive(false)
+    setShowRoomSubtitles?.(false)
+    setSubtitleSelectedLanguage?.(null)
   }
 
   return {
     isSubtitleActive,
     isStarting,
     isStopping,
+    dispatchId,
     subtitleSupportedLangs,
     startSubtitles,
     changeSubtitleLanguage,

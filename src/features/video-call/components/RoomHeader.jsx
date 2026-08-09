@@ -7,40 +7,52 @@ import { useSessionTimer } from "@/features/video-call"
 import { useParticipants, useLocalParticipant } from "@livekit/components-react"
 import { toast } from "react-hot-toast"
 import { IconButton } from "@/shared/components/ui/buttons"
-import { Link2 } from 'lucide-react';
+import { Link2 } from "lucide-react"
+import { copyRoomLink } from "@/shared/utils/shareUtils"
 import RightSideControls from "./RightSideControls"
 
 const RoomHeader = () => {
   const { t, language } = useLanguage()
   const { lang } = useParams()
   const { room, closingRemainingSeconds } = useVideoCallContext()
-  const { formattedRemaining, formattedMax, hasDuration, formattedElapsed } = useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
+  const { formattedRemaining, formattedMax, hasDuration, formattedElapsed } =
+    useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
 
   const rawRoomName = room?.name || "General"
 
-  const allParticipants = useParticipants();
-  const { localParticipant } = useLocalParticipant();
+  const allParticipants = useParticipants()
+  const { localParticipant } = useLocalParticipant()
 
   // Whoever joined first is the host
   const hostParticipant = [...allParticipants].sort((a, b) => {
-    const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
-    const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER;
-    return timeA - timeB;
-  })[0];
+    const timeA = a.joinedAt ? a.joinedAt.getTime() : Number.MAX_SAFE_INTEGER
+    const timeB = b.joinedAt ? b.joinedAt.getTime() : Number.MAX_SAFE_INTEGER
+    return timeA - timeB
+  })[0]
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success(t?.rooms?.videoCall?.linkCopied || "Link copied!");
-  };
+    copyRoomLink({
+      baseUrl: window.location.href,
+      room,
+      successMessage: t?.rooms?.videoCall?.linkCopied,
+    })
+  }
 
-  const isHost = hostParticipant && localParticipant && hostParticipant.identity === localParticipant.identity;
+  const isHost =
+    hostParticipant &&
+    localParticipant &&
+    hostParticipant.identity === localParticipant.identity
 
   return (
-    <div className="flex items-center justify-between bg-white px-5 h-[56px] shrink-0">
+    <div className="flex items-center justify-between bg-white px-4 h-[56px] shrink-0 border-b border-[#e5e5e5]">
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
-            <Link to={`/${lang || 'en'}/community`} target="_blank" rel="noopener noreferrer">
+            <Link
+              to={`/${lang || "en"}/community`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img
                 src={MainLogo}
                 alt="Cat Speak logo"
@@ -52,6 +64,14 @@ const RoomHeader = () => {
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="text-base font-semibold">{rawRoomName}</div>
+            <IconButton
+              variant="ghost"
+              innerClassName="!bg-transparent group-hover/icon:!bg-[#D9D9D9]"
+              title={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
+              onClick={handleCopyLink}
+            >
+              <Link2 color="#F3B403" className="transform rotate-[135deg]" />
+            </IconButton>
             {room?.requiredLevel && (
               <span className="rounded-full bg-cath-red-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                 {room.requiredLevel}
@@ -80,17 +100,7 @@ const RoomHeader = () => {
             {formattedRemaining} / {formattedMax}
           </div>
         )}
-        <IconButton
-          title={t?.rooms?.videoCall?.copyLink || "Copy meeting link"}
-          onClick={handleCopyLink}
-          className="lg:flex hidden"
-        >
-          <Link2 color="#F3B403" className="transform rotate-[135deg]" />
-        </IconButton>
-        <RightSideControls className="lg:hidden" />
       </div>
-
-
     </div>
   )
 }

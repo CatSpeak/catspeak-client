@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { MoreVertical, Layers, Users, Trash2, PenSquare } from "lucide-react"
-import StatusBadge from "./StatusBadge"
-import ProgressBar from "./ProgressBar"
+import ProgressBar from "./overview/ProgressBar"
+import StatusBadge from "./shared/StatusBadge"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import CourseThumbnail from "./CourseThumbnail"
 
@@ -31,14 +31,24 @@ const CourseTable = ({ courses, t, onDelete }) => {
         </thead>
         <tbody className="divide-y divide-gray-200 text-gray-700">
           {courses.map((item) => (
-            <tr key={item.id} onClick={() => navigate(`/workspace/courses/details/${item.id}`)} className="hover:bg-gray-50/60 cursor-pointer transition-colors">
+            <tr
+              key={item.id}
+              onClick={() => navigate(`/workspace/courses/details/${encodeURIComponent(String(item.id))}`)}
+              onKeyDown={(event) => {
+                if (event.currentTarget === event.target && (event.key === "Enter" || event.key === " ")) {
+                  event.preventDefault()
+                  navigate(`/workspace/courses/details/${encodeURIComponent(String(item.id))}`)
+                }
+              }}
+              tabIndex={0}
+              className="hover:bg-gray-50/60 cursor-pointer transition-colors"
+            >
 
               {/* Cover Image cell */}
               <td className="p-4 border-r border-gray-200">
                 <CourseThumbnail
                   item={item}
                   title={item.title}
-                  iconSize={28}
                   className="w-32 h-20 rounded-xl border border-gray-100"
                 />
               </td>
@@ -68,7 +78,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                   <div className="flex items-center gap-3 text-[10px] text-gray-400 font-bold">
                     <span className="flex items-center gap-1">
                       <Layers size={11} />
-                      {item.classCount || "5 classes"}
+                      {item.classCount}
                     </span>
                     <span>|</span>
                     <span className="flex items-center gap-1">
@@ -101,6 +111,11 @@ const CourseTable = ({ courses, t, onDelete }) => {
               <td className="p-4 text-center relative" onClick={(e) => e.stopPropagation()}>
                 <div className="inline-block" ref={activeDropdown === item.id ? dropdownRef : null}>
                   <button
+                    type="button"
+                    aria-label={(c.actionsForCourse || "Actions for {{title}}")
+                      .replace("{{title}}", item.title || c.course || "course")}
+                    aria-expanded={activeDropdown === item.id}
+                    aria-haspopup="menu"
                     onClick={(e) => {
                       e.stopPropagation();
                       setActiveDropdown(activeDropdown === item.id ? null : item.id);
@@ -110,12 +125,14 @@ const CourseTable = ({ courses, t, onDelete }) => {
                     <MoreVertical size={16} />
                   </button>
                   {activeDropdown === item.id && (
-                    <div className="absolute right-4 mt-1 w-36 bg-white border border-gray-250 rounded-xl shadow-lg py-1 z-30 text-left">
+                    <div role="menu" className="absolute right-4 mt-1 w-36 bg-white border border-gray-250 rounded-xl shadow-lg py-1 z-30 text-left">
                       <button
+                        type="button"
+                        role="menuitem"
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveDropdown(null);
-                          navigate(`/workspace/courses/edit/${item.id}`);
+                          navigate(`/workspace/courses/edit/${encodeURIComponent(String(item.id))}`);
                         }}
                         className="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                       >
@@ -123,6 +140,8 @@ const CourseTable = ({ courses, t, onDelete }) => {
                         <span>{c.editCourse || "Edit Course"}</span>
                       </button>
                       <button
+                        type="button"
+                        role="menuitem"
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveDropdown(null);

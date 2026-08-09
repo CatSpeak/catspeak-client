@@ -25,28 +25,28 @@ export const useSystemMessages = (lkRoom, receiveSystemMessages = true) => {
       return
     }
 
-    console.log(
-      `[LiveKit Debug] DataReceived listener actively attached to room: ${lkRoom.name || "Unknown"}`,
-    )
+    // console.log(
+    //   `[LiveKit Debug] DataReceived listener actively attached to room: ${lkRoom.name || "Unknown"}`,
+    // )
 
     const handleData = (payload, participant, kind, topic) => {
       const decoded = new TextDecoder().decode(payload)
-      console.log(
-        `[LiveKit Debug] Packet Received! Topic:`,
-        topic,
-        `| Participant:`,
-        participant?.identity,
-        `| Content:`,
-        decoded,
-      )
+      // console.log(
+      //   `[LiveKit Debug] Packet Received! Topic:`,
+      //   topic,
+      //   `| Participant:`,
+      //   participant?.identity,
+      //   `| Content:`,
+      //   decoded,
+      // )
 
       if (!participant) {
-        console.log("🚀 [BACKEND PAYLOAD RECEIVED] Topic:", topic)
-        console.log("Raw decoded:", decoded)
+        // console.log("🚀 [BACKEND PAYLOAD RECEIVED] Topic:", topic)
+        // console.log("Raw decoded:", decoded)
         try {
           const parsed = JSON.parse(decoded)
-          console.log("Parsed JSON:", parsed)
-        } catch {
+          // console.log("Parsed JSON:", parsed)
+        } catch (e) {
           // Not a JSON payload, ignore
         }
       }

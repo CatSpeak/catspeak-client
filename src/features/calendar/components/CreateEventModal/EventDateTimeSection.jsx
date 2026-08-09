@@ -2,8 +2,8 @@ import dayjs from "dayjs";
 import DatePicker from "@/shared/components/ui/inputs/DatePicker";
 import TimeDropdown from "../ui/TimeDropdown";
 import TimezoneDropdown from "../ui/TimezoneDropdown";
-import { formatTime } from "@/shared/utils/dateFormatter";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { formatTimeInZone } from "../../utils/timeFormatters";
 
 /** Safely converts a Firestore Timestamp or plain Date to a JS Date */
 const toDate = (value) =>
@@ -18,6 +18,7 @@ const EventDateTimeSection = ({
   selectedTimezone,
   onTimezoneChange,
   errors,
+  children,
 }) => {
   const { t } = useLanguage();
   const cal = t.calendar;
@@ -30,8 +31,8 @@ const EventDateTimeSection = ({
           <span className="text-base w-[150px] shrink-0 font-medium">
             {cal.startTime}
           </span>
-          <div className="flex flex-col gap-1 flex-1">
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-6">
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
               <DatePicker
                 value={toDate(startTime)}
                 onChange={(d) => {
@@ -53,7 +54,9 @@ const EventDateTimeSection = ({
                 }
               />
               <TimeDropdown
-                value={startTime ? formatTime(toDate(startTime)) : ""}
+                value={
+                  startTime ? formatTimeInZone(startTime, selectedTimezone) : ""
+                }
                 color={eventColor}
                 onChange={(hhmm) => {
                   const [h, m] = hhmm.split(":");
@@ -81,8 +84,8 @@ const EventDateTimeSection = ({
           <span className="text-base w-[150px] shrink-0 mt-3 font-medium">
             {cal.endTime}
           </span>
-          <div className="flex flex-col gap-1 flex-1">
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-6">
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
               <DatePicker
                 value={toDate(endTime)}
                 onChange={(d) => {
@@ -102,7 +105,9 @@ const EventDateTimeSection = ({
                 className={errors?.endTime ? "border-red-500 rounded-2xl" : ""}
               />
               <TimeDropdown
-                value={endTime ? formatTime(toDate(endTime)) : ""}
+                value={
+                  endTime ? formatTimeInZone(endTime, selectedTimezone) : ""
+                }
                 color={eventColor}
                 onChange={(hhmm) => {
                   const [h, m] = hhmm.split(":");
@@ -124,11 +129,13 @@ const EventDateTimeSection = ({
           </div>
         </div>
 
+        {children}
+
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
           <span className="text-base w-[150px] shrink-0">
             {cal.timezone || "Timezone"}
           </span>
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-6 w-full sm:w-auto">
+          <div className="flex-1 min-w-0">
             <TimezoneDropdown
               value={selectedTimezone}
               onChange={onTimezoneChange}

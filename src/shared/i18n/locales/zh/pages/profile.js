@@ -50,6 +50,17 @@ export default {
     otpInvalid: "OTP 无效或已过期",
     currentIncorrect: "当前密码不正确",
     allFieldsRequired: "所有密码字段都是必填的",
+    updatingAvatar: "正在更新头像...",
+    updateAvatarSuccess: "头像更新成功",
+    updateAvatarError: "无法更新头像",
+    updatingMeetingAvatar: "正在更新会议头像...",
+    updateMeetingAvatarSuccess: "会议头像更新成功",
+    updateMeetingAvatarError: "无法更新会议头像",
+    meetingAvatarLabel: "会议头像",
+    meetingAvatarHint: "当您加入会议室时，此头像会展示给其他参与者。",
+    mainAvatarLabel: "主账号头像",
+    changeMeetingAvatar: "更换会议头像",
+    clickToChangeMeetingAvatar: "点击更换会议头像",
   },
   instructor: {
     title: "讲师",
@@ -119,5 +130,13 @@ export default {
     selectLevelError: "请选择每种语言的熟练程度",
     certifyError: "请选中复选框以同意我们的条款。",
     formInvalid: "提交前请填写所有必填字段。",
+    credentialSizeLimit: "每份证书必须小于 {max}MB（当前 {actual}MB）。",
+    videoSizeLimit: "视频必须小于 {max}MB（当前 {actual}MB）。",
   },
+  notifications: {
+    friend_request: {
+      title: "新好友请求",
+      body: "{requesterName} 向您发送了好友请求。",
+    }
+  }
 }

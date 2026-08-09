@@ -86,6 +86,7 @@ export default {
       intermediate: "Trung cấp",
       advanced: "Nâng cao",
     },
+    levelLabel: "Trình độ",
     categories: {
       random: "Kết nối ngẫu hứng",
       exam: "Luyện thi",
@@ -123,8 +124,9 @@ export default {
     title: "Tham gia phòng",
   },
   createRoom: {
-    title: "Tên phòng của bạn là gì?",
+    title: "Tạo phòng",
     namePlaceholder: "ví dụ: Luyện tập vui vẻ",
+    nameRequired: "Vui lòng nhập tên phòng",
     topicsLabel: "Chủ đề",
     nameLabel: "Tên phòng",
     thumbnailLabel: "Ảnh bìa phòng",
@@ -134,6 +136,7 @@ export default {
     privateRoom: "Phòng riêng tư",
     passwordLabel: "Mật khẩu",
     passwordPlaceholder: "Nhập mật khẩu phòng",
+    passwordRequiredMessage: "Phòng riêng tư yêu cầu phải có mật khẩu.",
     cancel: "Hủy",
     join: "Tham gia phòng",
     joining: "Đang tham gia...",
@@ -192,6 +195,58 @@ export default {
     connect11: "Kết nối 1:1",
     connect25: "Kết nối 2:5",
     yourAI: "1:1 với AI",
+    customRoom: "Tạo phòng",
+  },
+  customRooms: {
+    title: "Phòng Tùy Chỉnh Pro",
+    myRoomsTitle: "Phòng Của Tôi",
+    createTitle: "Tạo Phòng Tùy Chỉnh",
+    editTitle: "Chỉnh Sửa Phòng",
+    quota: "{{used}}/{{max}} phòng đã dùng",
+    quotaFull: "Bạn đã đạt giới hạn tối đa {{max}} phòng",
+    capacity: "Sức chứa: 100 người",
+    persistent: "Phòng Vĩnh Viễn",
+    roomName: "Tên Phòng",
+    roomNamePlaceholder: "VD: Nhóm Học Tập",
+    description: "Mô tả",
+    descriptionPlaceholder: "Phòng này về chủ đề gì?",
+    create: "Tạo Phòng",
+    creating: "Đang tạo...",
+    save: "Lưu Thay Đổi",
+    saving: "Đang lưu...",
+    delete: "Xóa",
+    deleteConfirmTitle: "Xóa phòng?",
+    deleteConfirmMessage: 'Bạn có chắc chắn muốn xóa "{{name}}"? Hành động này không thể hoàn tác.',
+    deleteConfirm: "Bạn có chắc chắn muốn xóa phòng này?",
+    deleteSuccess: "Đã xóa phòng thành công",
+    createSuccess: "Đã tạo phòng tùy chỉnh thành công",
+    updateSuccess: "Đã cập nhật phòng thành công",
+    noRooms: "Bạn chưa tạo phòng tùy chỉnh nào",
+    noRoomsSubtext:
+      "Tạo phòng vĩnh viễn đầu tiên với tối đa 100 người tham gia!",
+    join: "Tham gia",
+    copyLink: "Sao chép liên kết",
+    linkCopied: "Đã sao chép!",
+    tabCreate: "Tạo mới",
+    tabMyRooms: "Phòng của tôi",
+    proBadge: "PRO",
+    maxRoomsReached: "Đã đạt giới hạn phòng",
+    manageRooms: "Quản lý phòng",
+    nameRequired: "Vui lòng nhập tên phòng",
+    privateHint: "Yêu cầu mật khẩu để tham gia phòng này.",
+    publicHint: "Không yêu cầu mật khẩu. Mọi người đều có thể tham gia.",
+    private: "Riêng tư",
+    passwordRequired: "Yêu cầu mật khẩu",
+    passwordLabel: "Mật khẩu (Tùy chọn)",
+    passwordPlaceholder: "Nhập mật khẩu phòng",
+    roomThumbnail: "Ảnh bìa phòng",
+    uploadThumbnail: "Tải ảnh lên",
+    dragDropHint: "Kéo & thả ảnh bìa vào đây",
+    imageHint: "PNG, JPG, WEBP tối đa 5MB",
+    change: "Thay đổi",
+    remove: "Xóa",
+    people: "người",
+    unlimited: "Vĩnh viễn",
   },
   aiSettings: {
     title: "Cài đặt phiên AI",
@@ -273,16 +328,24 @@ export default {
       "Quyền truy cập micro bị từ chối. Vui lòng cho phép trong cài đặt.",
     cameraPermissionDenied:
       "Quyền truy cập camera bị từ chối. Vui lòng cho phép trong cài đặt.",
+    webViewWarning:
+      "Bạn đang mở trong ứng dụng (Zalo/FB/Messenger). Vui lòng nhấn '...' chọn 'Mở bằng Safari' để dùng Micro và Camera.",
+    iosPermissionTip:
+      "Microphone đã bị trình duyệt chặn. Vui lòng nhấn vào Cài đặt trang web ở thanh địa chỉ để mở Micro.",
     deviceSettings: "Cài đặt thiết bị",
     selectMicrophone: "Chọn Micro",
     selectSpeaker: "Chọn Loa",
     systemDefaultSpeaker: "Loa Mặc Định Hệ Thống",
     speakerNotSupported: "Trình duyệt của bạn không hỗ trợ chọn loa.",
     selectCamera: "Chọn Camera",
-    testMic: "Kiểm tra Micro (Phát lại)",
+    testMic: "Kiểm tra mic",
+    stopTest: "Dừng kiểm tra",
     unknownDevice: "Thiết bị không xác định",
   },
   videoCall: {
+    inviteParticipant: "Mời tham gia phòng",
+    sendInvite: "Gửi lời mời",
+    inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
     changeLayout: {
       title: "Điều chỉnh chế độ xem",
       auto: "Tự động (linh động)",
@@ -310,6 +373,11 @@ export default {
       description:
         "Nếu bạn gặp tình trạng giật lag, video bị đóng băng hoặc mất âm thanh, hãy thử buộc kết nối lại. Cuộc gọi của bạn sẽ tạm dừng một chút trong khi chúng tôi thiết lập lại kết nối.",
       forceReconnect: "Buộc kết nối lại",
+    },
+    general: {
+      receiveSystemMsgs: "Nhận thông báo tin nhắn hệ thống",
+      receiveSystemMsgsDesc:
+        "Hiển thị các thông báo tự động từ hệ thống trong khi cuộc họp đang diễn ra.",
     },
     copyLink: "Sao chép liên kết phòng",
     linkCopied: "Đã sao chép!",
@@ -385,15 +453,33 @@ export default {
       title: "Mở trong trình duyệt",
       genericApp: "Ứng dụng này",
       description:
-        "Bạn đang dùng trình duyệt tích hợp của {app}, không hỗ trợ gọi video ổn định.",
-      instruction: "Cách tham gia:",
+        "Bạn đang dùng trình duyệt tích hợp của {app}, chưa được hỗ trợ đầy đủ.",
+      instruction: "Cách mở:",
       copyLink: "Sao chép liên kết",
       copied: "Đã sao chép!",
       openInChrome: "Mở bằng Chrome",
       step1: "Sao chép liên kết ở trên",
       step2: "Mở Chrome hoặc Safari",
-      step3: "Dán liên kết và tham gia cuộc gọi",
+      step3: "Dán liên kết vào trình duyệt của bạn",
     },
+    errorBoundary: {
+      title: "Cuộc gọi video gặp lỗi",
+      defaultDescription:
+        "Đã xảy ra lỗi không mong muốn trong phiên gọi video.",
+      reloadPage: "Tải lại trang",
+      copyLog: "Sao chép nhật ký",
+      copied: "Đã sao chép!",
+      goHome: "Về trang chủ",
+      technicalDetails: "Chi tiết kỹ thuật",
+      stackTrace: "Dấu vết ngăn xếp:",
+      componentStack: "Ngăn xếp thành phần:",
+    },
+    inviteParticipant: "Mời tham gia phòng",
+    sendInvite: "Gửi lời mời",
+    inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
+  },
+  notifications: {
+    inviteSent: "Đã gửi lời mời",
   },
   roomFullModal: {
     title: "Phòng đã đầy",
@@ -705,7 +791,8 @@ export default {
       cancel: "Hủy",
       confirmExit: "Đồng ý thoát",
       roundLeaderboard: "Thành tích ván này",
-      forceStopNotEnoughPlayers: "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
+      forceStopNotEnoughPlayers:
+        "Không đủ người chơi tiếp tục. Trò chơi đã bị hủy.",
       forceStopGeneric: "Trò chơi bị dừng đột ngột.",
       out: "Thoát",
       tallyingFinalResults: "Đang tổng hợp kết quả chung cuộc...",
@@ -715,23 +802,30 @@ export default {
       noHistoryFound: "Chưa có dữ liệu lịch sử cho phòng này.",
       score: "Điểm",
       matchDate: "Ngày chơi",
-      winner: "Người chiến thắng"
+      winner: "Người chiến thắng",
+      startDateLabel: "Từ ngày",
+      endDateLabel: "Đến ngày",
     },
     setup: {
       title: "Thiết lập Trò chơi",
-      pictureItDesc: "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
+      pictureItDesc:
+        "Miêu tả hình ảnh bằng ngôn ngữ của phòng. Những người chơi khác sẽ đánh giá mô tả của bạn.",
       crackItDesc: "Đoán từ khóa ẩn qua các gợi ý trước những người chơi khác.",
       difficultyDesc: "Điều chỉnh độ khó phù hợp cho phòng của bạn.",
       languageDesc: "Chọn ngôn ngữ trò chơi cho phiên này.",
       selectLanguage: "Ngôn ngữ",
       langEn: "Tiếng Anh",
       langZh: "Tiếng Trung",
+      langVi: "Tiếng Việt",
+      languageLockedByCommunity:
+        "Ngôn ngữ trò chơi ăn theo ngôn ngữ của cộng đồng.",
+      lockedHint: "Đã khóa",
       selectLevel: "Mức độ",
       levelEasy: "Dễ",
       levelMedium: "Trung bình",
       levelHard: "Khó",
       cancel: "Hủy",
-      startNow: "Bắt đầu ngay"
+      startNow: "Bắt đầu ngay",
     },
     pictureIt: {
       topBar: {
@@ -739,7 +833,7 @@ export default {
         describer: "Người mô tả",
         spectator: "Khán giả",
         roleDescriber: "Người mô tả",
-        roleRater: "Người đoán"
+        roleRater: "Người đoán",
       },
       actionPanel: {
         watchingAsSpectator: "Bạn đang xem với tư cách khán giả.",
@@ -750,7 +844,7 @@ export default {
         timeLeft: "(Còn {0}s)",
         submitRating: "Gửi điểm",
         ratingSubmitted: "Đã gửi! Đang chờ người khác...",
-        waiting: "Đang chờ..."
+        waiting: "Đang chờ...",
       },
       imageCard: {
         describeToTeam: "Hãy mô tả bức ảnh này cho đội của bạn",
@@ -761,13 +855,13 @@ export default {
         preparing: "Đang chuẩn bị...",
         forbiddenWordsTitle: "Từ cấm",
         forbiddenWordsDesc: "KHÔNG được sử dụng các từ này",
-        flaggedCount: "{0} / {1} người đã báo vi phạm"
+        flaggedCount: "{0} / {1} người đã báo vi phạm",
       },
       modals: {
         gameEnded: "Kết thúc trò chơi",
         notEnoughPlayers: "Không đủ người chơi để tiếp tục.",
         close: "Đóng",
-        waitingStart: "Đang chuẩn bị ván đấu..."
+        waitingStart: "Đang chuẩn bị ván đấu...",
       },
       badges: {
         "Master Describer": "Bậc thầy mô tả",
@@ -776,7 +870,7 @@ export default {
         "Most Fluent": "Trôi chảy nhất",
         "Team Player": "Tinh thần đồng đội",
         "Keep Practicing": "Cố gắng hơn nhé",
-        champion: "Nhà vô địch"
+        champion: "Nhà vô địch",
       },
       gameOver: {
         title: "Trò chơi kết thúc",
@@ -789,16 +883,24 @@ export default {
         highestRoundScore: "Điểm 1 vòng cao nhất",
         playAgain: "Chơi lại",
         backToRoom: "Về phòng",
-        playersCount: "{0} người chơi"
+        playersCount: "{0} người chơi",
       },
       leaderboard: {
         title: "Bảng xếp hạng",
-        playersCount: "{0} người chơi"
+        playersCount: "{0} người chơi",
       },
       roundResult: {
         nextRoundStartsIn: "Vòng tiếp theo bắt đầu sau...",
-        averageRating: "Điểm trung bình"
-      }
-    }
+        averageRating: "Điểm trung bình",
+      },
+    },
   },
+
+  notifications: {
+    inviteSent: "Đã gửi lời mời",
+    room_invite: {
+      title: "Lời mời tham gia phòng",
+      body: "{inviterName} đã mời bạn tham gia phòng họp",
+    }
+  }
 }

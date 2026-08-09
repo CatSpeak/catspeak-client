@@ -8,7 +8,6 @@ import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useAuth } from "@/features/auth"
 import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
 import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
-import { getNavItemClasses, getNavTextClasses } from "../../utils/navStyles"
 
 const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
   const [imgError, setImgError] = useState(false)
@@ -41,15 +40,19 @@ const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
 
 const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false }) => {
   const { t } = useLanguage()
-  const { isStudent } = useRoleOverride()
+  const { isStudent, isTeacher } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
+  const { user } = useAuth()
+  const userId = user?.accountId || user?.id || ""
 
   // Sync drilldown state when drawer opens or when navigating
+  const isSettings = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")
+
   useEffect(() => {
     if (isMobileOpen) {
-      const activeLinks = pathname.startsWith("/setting") ? settingNavLinks : navLinks
+      const activeLinks = isSettings ? settingNavLinks : navLinks
       const activeItem = activeLinks.find(
         (item) =>
           item.hasDropdown && item.subItems?.length > 0 && checkIsActive(item),
@@ -57,7 +60,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
       setActiveDrilldownItem(activeItem || null)
     } else {
       const timer = setTimeout(() => {
-        const activeLinks = pathname.startsWith("/setting") ? settingNavLinks : navLinks
+        const activeLinks = isSettings ? settingNavLinks : navLinks
         const activeItem = activeLinks.find(
           (item) =>
             item.hasDropdown &&
@@ -81,12 +84,14 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-1 scrollbar-none">
-          {(pathname.startsWith("/setting") ? settingNavLinks : navLinks)
+          {(isSettings ? settingNavLinks : navLinks)
             .filter((item) => {
               if (item.hideInSidebar) return false
               if (item.lang && item.lang !== currentLang) return false
               if (isHorizontal && item.showOnHorizontalBar === false) return false
               if (item.isPrivate && !isAuthenticated) return false
+              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+              if (teacherTabs.includes(item.key) && isStudent) return false
               return true
             })
             .map((item) => {
@@ -110,7 +115,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                   <button
                     key={item.key}
                     onClick={() => setActiveDrilldownItem(item)}
-                    className={getNavItemClasses(false, false)}
+                    className="relative flex items-center shrink-0 h-11 px-4 gap-3 rounded-lg transition-all duration-300 group overflow-hidden w-full hover:bg-gray-100"
                     title={label}
                   >
                     <NavIcon
@@ -119,7 +124,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                       color={item.color}
                     />
                     <span
-                      className={getNavTextClasses(true)}
+                      className="text-sm font-medium text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
                       style={item.color ? { color: item.color } : undefined}
                     >
                       {label}
@@ -180,8 +185,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
             title={
               activeDrilldownItem
                 ? t.nav?.[activeDrilldownItem.key] ||
-                  activeDrilldownItem.label ||
-                  activeDrilldownItem.key
+                activeDrilldownItem.label ||
+                activeDrilldownItem.key
                 : undefined
             }
           >
@@ -207,25 +212,35 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 flex flex-col gap-1 scrollbar-none">
           {(activeDrilldownItem?.subItems || [])
             .filter((sub) => {
-              if (sub.key === "myCourses" && isStudent) return false
+              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+              if (teacherTabs.includes(sub.key) && isStudent) return false
               if (sub.lang && sub.lang !== currentLang) return false
               if (isHorizontal && sub.showOnHorizontalBar === false) return false
               if (sub.isPrivate && !isAuthenticated) return false
               return true
             })
             .map((sub) => {
-              const subLabel = t.nav?.[sub.key] || sub.label || sub.key
+              const subLabel = t.nav?.[sub.key] || sub.key || sub.label
               const SubIconComponent = sub.icon || Globe
+              let subPath = sub.path
+              if (sub.key === "profile" && userId) {
+                subPath = `/workspace/profile/${userId}`
+              }
+
               return (
-                <DesktopNavItem
-                  key={sub.key}
-                  to={resolvePath(sub.path)}
-                  icon={SubIconComponent}
-                  label={subLabel}
-                  color={sub.color}
-                  img={sub.img}
-                  onClick={() => setIsMobileOpen?.(false)}
-                />
+                <div key={sub.key} className="w-full">
+                  {sub.key === "myCourses" && (
+                    <div className="my-1.5 mx-3 border-t border-black" />
+                  )}
+                  <DesktopNavItem
+                    to={resolvePath(subPath)}
+                    icon={SubIconComponent}
+                    label={subLabel}
+                    color={sub.color}
+                    img={sub.img}
+                    onClick={() => setIsMobileOpen?.(false)}
+                  />
+                </div>
               )
             })}
         </div>

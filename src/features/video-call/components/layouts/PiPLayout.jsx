@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback } from "react"
 import ScreenShareTile from "../ScreenShareTile"
 import VideoTile from "../VideoTile"
 
@@ -10,10 +10,22 @@ const CORNER_CLASSES = {
   "top-left": "top-3 left-3 md:top-4 md:left-4",
 }
 
-const PiPLayout = ({ spotlightItem, screenShareTracks, participants, handleTileClick }) => {
+const PiPLayout = ({
+  spotlightItem,
+  screenShareTracks,
+  participants,
+  handleTileClick,
+}) => {
   const containerRef = useRef(null)
   const pipRef = useRef(null)
-  const dragState = useRef({ isDragging: false, startX: 0, startY: 0, offsetX: 0, offsetY: 0, hasMoved: false })
+  const dragState = useRef({
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    offsetX: 0,
+    offsetY: 0,
+    hasMoved: false,
+  })
   const [corner, setCorner] = useState("bottom-right")
   const [dragging, setDragging] = useState(false)
   const [isSwapped, setIsSwapped] = useState(false)
@@ -129,16 +141,24 @@ const PiPLayout = ({ spotlightItem, screenShareTracks, participants, handleTileC
       return (
         <ScreenShareTile
           trackRef={item.data}
-          presenterDisplayName={item.data.participant?.name || item.data.participant?.identity || "Unknown"}
+          presenterDisplayName={
+            item.data.participant?.name ||
+            item.data.participant?.identity ||
+            "Unknown"
+          }
           isLocal={item.data.participant?.isLocal}
-          onClick={() => handleTileClick({ type: "screen", trackRef: item.data })}
+          onClick={() =>
+            handleTileClick({ type: "screen", trackRef: item.data })
+          }
         />
       )
     } else {
       return (
         <VideoTile
           participant={item.data}
-          onClick={() => handleTileClick({ type: "video", participant: item.data })}
+          onClick={() =>
+            handleTileClick({ type: "video", participant: item.data })
+          }
         />
       )
     }
@@ -160,11 +180,14 @@ const PiPLayout = ({ spotlightItem, screenShareTracks, participants, handleTileC
   ]
 
   // Fallback just in case
-  if (allItems.length === 0) return null;
+  if (allItems.length === 0) return null
 
   if (allItems.length === 1) {
     return (
-      <div ref={containerRef} className="relative h-full w-full overflow-hidden">
+      <div
+        ref={containerRef}
+        className="relative h-full w-full overflow-hidden"
+      >
         {/* Main Background Video */}
         <div className="absolute inset-0 w-full h-full p-2">
           {renderItem(allItems[0])}
@@ -174,55 +197,65 @@ const PiPLayout = ({ spotlightItem, screenShareTracks, participants, handleTileC
   }
 
   // Determine which item goes to the background (main) and which is floating (PiP)
-  let mainItem;
-  let pipItem;
+  let mainItem
+  let pipItem
 
-  const localIndex = allItems.findIndex(i => i.type === "video" && (i.data.isLocal || i.data.participant?.isLocal));
+  const localIndex = allItems.findIndex(
+    (i) =>
+      i.type === "video" && (i.data.isLocal || i.data.participant?.isLocal),
+  )
 
   if (localIndex !== -1) {
     // Floating PiP is always the local participant
-    pipItem = allItems[localIndex];
+    pipItem = allItems[localIndex]
 
     // Main background is the spotlight item if it's not the local participant
     if (spotlightItem) {
-      const isSpotlightVideo = spotlightItem.type === "video";
-      const spotIndex = allItems.findIndex(i =>
+      const isSpotlightVideo = spotlightItem.type === "video"
+      const spotIndex = allItems.findIndex((i) =>
         isSpotlightVideo
-          ? i.type === "video" && i.data.identity === spotlightItem.participant?.identity
-          : i.type === "screen" && i.data.publication?.trackSid === spotlightItem.trackRef?.publication?.trackSid
-      );
+          ? i.type === "video" &&
+            i.data.identity === spotlightItem.participant?.identity
+          : i.type === "screen" &&
+            i.data.publication?.trackSid ===
+              spotlightItem.trackRef?.publication?.trackSid,
+      )
 
       if (spotIndex !== -1 && spotIndex !== localIndex) {
-        mainItem = allItems[spotIndex];
+        mainItem = allItems[spotIndex]
       }
     }
 
     // Fallback for main if spotlight is local, not found, or not active
     if (!mainItem) {
-      const firstNonLocalIndex = allItems.findIndex(i => i.type !== "video" || !(i.data.isLocal || i.data.participant?.isLocal));
+      const firstNonLocalIndex = allItems.findIndex(
+        (i) =>
+          i.type !== "video" ||
+          !(i.data.isLocal || i.data.participant?.isLocal),
+      )
       if (firstNonLocalIndex !== -1) {
-        mainItem = allItems[firstNonLocalIndex];
+        mainItem = allItems[firstNonLocalIndex]
       } else {
-        mainItem = allItems[localIndex === 0 ? 1 : 0];
+        mainItem = allItems[localIndex === 0 ? 1 : 0]
       }
     }
   } else {
     // Fallback if local participant is not found
-    mainItem = allItems[0];
-    pipItem = allItems[1];
+    mainItem = allItems[0]
+    pipItem = allItems[1]
   }
 
   // Swap layout roles if clicked/swapped
   if (isSwapped && mainItem && pipItem) {
-    const temp = mainItem;
-    mainItem = pipItem;
-    pipItem = temp;
+    const temp = mainItem
+    mainItem = pipItem
+    pipItem = temp
   }
 
   return (
     <div ref={containerRef} className="relative h-full w-full overflow-hidden">
       {/* Main Background Video */}
-      <div className="absolute inset-0 w-full h-full p-2">
+      <div className="absolute inset-0 w-full h-full">
         {renderItem(mainItem)}
       </div>
 

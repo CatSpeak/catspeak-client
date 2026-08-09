@@ -48,26 +48,26 @@ const ListItem = ({
       >
         <div className="flex items-center gap-4 overflow-hidden flex-1">
           {leftContent && (
-            <div className="shrink-0 flex items-center justify-center">
+            <div className="shrink-0 flex items-center justify-center [&_svg]:w-6 [&_svg]:h-6">
               {leftContent}
             </div>
           )}
 
           {children && (
-            <div className="flex flex-col justify-center min-w-0 flex-1">
+            <div className="flex flex-col justify-center min-w-0 flex-1 text-base">
               {children}
             </div>
           )}
-        </div>
 
-        {(rightText !== undefined || rightContent) && (
-          <div className="flex items-center shrink-0 ml-2">
-            {rightText !== undefined && (
-              <span className="text-xs mr-2">{rightText}</span>
-            )}
-            {rightContent}
-          </div>
-        )}
+          {(rightText !== undefined || rightContent) && (
+            <div className="flex items-center shrink-0">
+              {rightText !== undefined && (
+                <span className="text-xs mr-2">{rightText}</span>
+              )}
+              {rightContent}
+            </div>
+          )}
+        </div>
       </div>
     </Wrapper>
   )

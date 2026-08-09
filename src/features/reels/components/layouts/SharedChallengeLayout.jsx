@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Flame, Trophy, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
@@ -18,11 +19,14 @@ export default function SharedChallengeLayout({
   renderContent,
 }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const { lang } = useParams();
 
   // Responsive Pagination Logic
-  const isXl = useMediaQuery("(min-width: 1280px)");
+  const isUltraWide = useMediaQuery("(min-width: 1800px)");
   const isLg = useMediaQuery("(min-width: 1024px)");
-  const itemsPerPage = isXl ? 5 : isLg ? 4 : 2;
+  const isMd = useMediaQuery("(min-width: 768px)");
+  const itemsPerPage = isUltraWide ? 5 : isLg ? 4 : isMd ? 3 : 2;
 
   const [page, setPage] = useState(0);
 
@@ -78,12 +82,37 @@ export default function SharedChallengeLayout({
     );
   }, [effectiveChallengeId, challengesList]);
 
-  // Auto-select first challenge if none is selected
+  // Redirect to the correct language community based on the challenge's LanguageCommunity
   useEffect(() => {
-    if (!challengeId && challengesList.length > 0) {
+    if (selectedChallenge) {
+      const community = selectedChallenge.languageCommunity?.toLowerCase();
+      let targetLang = lang;
+      
+      if (community === "english") targetLang = "en";
+      else if (community === "chinese") targetLang = "zh";
+      else if (community === "vietnamese") targetLang = "vi";
+
+      if (targetLang && lang !== targetLang) {
+        navigate(`/${targetLang}/cat-speak/reels?challenge=${selectedChallenge.challengeId}`, { replace: true });
+      }
+    }
+  }, [selectedChallenge, lang, navigate]);
+
+  // Auto-select first challenge if none is selected, or switch tab if challenge is in another list
+  useEffect(() => {
+    if (challengeId) {
+      const inActive = activeChallenges.find((c) => String(c.challengeId) === String(challengeId));
+      const inPast = pastChallenges.find((c) => String(c.challengeId) === String(challengeId));
+      
+      if (!inActive && inPast && challengeStatus !== "past") {
+        setChallengeStatus("past");
+      } else if (inActive && !inPast && challengeStatus !== "active") {
+        setChallengeStatus("active");
+      }
+    } else if (!challengeId && challengesList.length > 0) {
       onSelectChallenge(challengesList[0].challengeId);
     }
-  }, [challengeId, challengesList, onSelectChallenge]);
+  }, [challengeId, activeChallenges, pastChallenges, challengeStatus, setChallengeStatus, challengesList, onSelectChallenge]);
 
   return (
     <div className="flex flex-col w-full">

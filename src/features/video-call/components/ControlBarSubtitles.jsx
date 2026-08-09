@@ -1,18 +1,19 @@
 import React, { useState } from "react"
 import { Captions } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import ControlButton from "./ControlButton"
 
 const ControlBarSubtitles = ({ className = "" }) => {
-  const { showCC, setShowCC, isAISession } = useGlobalVideoCall()
   const {
+    showCC,
+    setShowCC,
+    isAISession,
     isSubtitleActive,
-    isStarting,
+    isStartingSubtitles,
     subtitleSupportedLangs,
     startSubtitles,
     stopSubtitles,
-  } = useSubtitleControls()
+  } = useGlobalVideoCall()
 
   const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
 
@@ -33,7 +34,7 @@ const ControlBarSubtitles = ({ className = "" }) => {
     <div className={`relative ${className}`}>
       <ControlButton
         isActive={isSubtitleActive}
-        isLoading={isStarting}
+        isLoading={isStartingSubtitles}
         onClick={() => {
           if (isSubtitleActive) {
             stopSubtitles()

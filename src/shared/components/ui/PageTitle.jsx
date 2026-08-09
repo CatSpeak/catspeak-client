@@ -1,12 +1,18 @@
 import React from "react"
 
-const PageTitle = ({ children, className = "" }) => {
+const PageTitle = ({
+  children,
+  as: Component = "h1",
+  className = "",
+  ...props
+}) => {
   return (
-    <h2
-      className={`text-[28px] leading-[36px] font-bold text-cath-red-700 mb-6 ${className}`}
+    <Component
+      className={`text-3xl font-bold text-black text-center sm:text-left ${className}`}
+      {...props}
     >
       {children}
-    </h2>
+    </Component>
   )
 }
 

@@ -84,6 +84,7 @@ export default {
       intermediate: "中级",
       advanced: "高级",
     },
+    levelLabel: "等级",
     categories: {
       random: "随机连接",
       exam: "备考",
@@ -124,6 +125,7 @@ export default {
     namePlaceholder: "例如：轻松练习",
     topicsLabel: "话题",
     nameLabel: "房间名称",
+    nameRequired: "请输入房间名称",
     thumbnailLabel: "房间封面",
     uploadImage: "上传图片",
     noFileChosen: "未选择文件",
@@ -131,6 +133,7 @@ export default {
     privateRoom: "私密房间",
     passwordLabel: "密码",
     passwordPlaceholder: "输入房间密码",
+    passwordRequiredMessage: "私密房间必须设置密码。",
     cancel: "取消",
     join: "加入房间",
     joining: "正在加入...",
@@ -189,6 +192,57 @@ export default {
     connect11: "连接 1:1",
     connect25: "连接 2:5",
     yourAI: "1:1 AI 对话",
+    customRoom: "创建房间",
+  },
+  customRooms: {
+    title: "Pro 自定义房间",
+    myRoomsTitle: "我的房间",
+    createTitle: "创建自定义房间",
+    editTitle: "编辑房间",
+    quota: "已使用 {{used}}/{{max}} 个房间",
+    quotaFull: "您已达到最大 {{max}} 个自定义房间的限制",
+    capacity: "容量：100 人",
+    persistent: "持久房间",
+    roomName: "房间名称",
+    roomNamePlaceholder: "例如：我的学习小组",
+    description: "描述",
+    descriptionPlaceholder: "这个房间是关于什么的？",
+    create: "创建房间",
+    creating: "创建中...",
+    save: "保存更改",
+    saving: "保存中...",
+    delete: "删除",
+    deleteConfirmTitle: "删除房间？",
+    deleteConfirmMessage: '您确定要删除“{{name}}”吗？此操作无法撤销。',
+    deleteConfirm: "确定要删除此房间吗？",
+    deleteSuccess: "房间删除成功",
+    createSuccess: "自定义房间创建成功",
+    updateSuccess: "房间更新成功",
+    noRooms: "您还没有创建任何自定义房间",
+    noRoomsSubtext: "创建您的第一个最多可容纳 100 人的持久房间！",
+    join: "加入",
+    copyLink: "复制链接",
+    linkCopied: "已复制！",
+    tabCreate: "创建",
+    tabMyRooms: "我的房间",
+    proBadge: "PRO",
+    maxRoomsReached: "已达到房间上限",
+    manageRooms: "管理房间",
+    nameRequired: "请输入房间名称",
+    privateHint: "加入此房间需要密码。",
+    publicHint: "无需密码。所有人均可加入。",
+    private: "私密",
+    passwordRequired: "需要密码",
+    passwordLabel: "密码（可选）",
+    passwordPlaceholder: "输入房间密码",
+    roomThumbnail: "房间封面",
+    uploadThumbnail: "上传图片",
+    dragDropHint: "拖放封面图片至此处",
+    imageHint: "PNG, JPG, WEBP 最大 5MB",
+    change: "更换",
+    remove: "移除",
+    people: "人",
+    unlimited: "无限制",
   },
   aiSettings: {
     title: "AI 会话设置",
@@ -263,16 +317,22 @@ export default {
     cameraInUse: "摄像头正被其他应用使用中或无法启动。",
     micPermissionDenied: "麦克风访问被拒绝，请在设置中允许。",
     cameraPermissionDenied: "摄像头访问被拒绝，请在设置中允许。",
+    webViewWarning: "您正在应用内浏览器（微信/Zalo/FB）中打开。请点击右上角在 Safari 中打开以使用麦克风和摄像头。",
+    iosPermissionTip: "麦克风已被浏览器阻止。请在地址栏的网站设置中允许使用麦克风。",
     deviceSettings: "设备设置",
     selectMicrophone: "选择麦克风",
     selectSpeaker: "选择扬声器",
     systemDefaultSpeaker: "系统默认扬声器",
     speakerNotSupported: "您的浏览器不支持选择扬声器。",
     selectCamera: "选择摄像头",
-    testMic: "测试麦克风 (回放)",
+    testMic: "测试麦克风",
+    stopTest: "停止测试",
     unknownDevice: "未知设备",
   },
   videoCall: {
+    inviteParticipant: "邀请参加房间",
+    sendInvite: "发送邀请",
+    inviteDescription: "输入您想邀请参加此房间的人的电子邮件地址。他们将收到带有链接的通知以加入。",
     changeLayout: {
       title: "更改布局",
       auto: "自动",
@@ -298,6 +358,11 @@ export default {
       description:
         "如果您遇到延迟、视频卡顿或音频中断的情况，请尝试强制重新连接。在重新建立连接期间，您的通话将短暂暂停。",
       forceReconnect: "强制重新连接",
+    },
+    general: {
+      receiveSystemMsgs: "接收系统消息通知",
+      receiveSystemMsgsDesc:
+        "在会议期间显示系统自动发出的通知消息。",
     },
     copyLink: "复制会议链接",
     linkCopied: "已复制！",
@@ -371,15 +436,32 @@ export default {
     webviewBlock: {
       title: "请在浏览器中打开",
       genericApp: "此应用",
-      description: "您正在使用 {app} 的内置浏览器，不支持正常的视频通话。",
-      instruction: "如何加入：",
+      description: "您正在使用 {app} 的内置浏览器，尚不支持完整功能。",
+      instruction: "如何打开：",
       copyLink: "复制链接",
       copied: "已复制！",
       openInChrome: "在 Chrome 中打开",
       step1: "复制上方链接",
       step2: "打开 Chrome 或 Safari",
-      step3: "粘贴链接并加入通话",
+      step3: "在浏览器中粘贴链接并打开",
     },
+    errorBoundary: {
+      title: "视频通话遇到错误",
+      defaultDescription: "视频通话过程中发生意外错误。",
+      reloadPage: "重新加载页面",
+      copyLog: "复制日志",
+      copied: "已复制！",
+      goHome: "返回首页",
+      technicalDetails: "技术细节",
+      stackTrace: "堆栈追踪：",
+      componentStack: "组件堆栈：",
+    },
+    inviteParticipant: "邀请参加房间",
+    sendInvite: "发送邀请",
+    inviteDescription: "输入您想邀请参加此房间的人的电子邮件地址。他们将收到带有链接的通知以加入。",
+  },
+  notifications: {
+    inviteSent: "已发送邀请",
   },
   roomFullModal: {
     title: "房间已满",
@@ -564,7 +646,9 @@ export default {
       noHistoryFound: "该房间没有游戏历史记录。",
       score: "分数",
       matchDate: "比赛日期",
-      winner: "获胜者"
+      winner: "获胜者",
+      startDateLabel: "起始日期",
+      endDateLabel: "结束日期",
     },
     setup: {
       title: "游戏设置",
@@ -575,12 +659,15 @@ export default {
       selectLanguage: "语言",
       langEn: "英语",
       langZh: "中文",
+      langVi: "越南语",
+      languageLockedByCommunity: "游戏语言跟随社区语言。",
+      lockedHint: "已锁定",
       selectLevel: "难度",
       levelEasy: "简单",
       levelMedium: "中等",
       levelHard: "困难",
       cancel: "取消",
-      startNow: "立即开始"
+      startNow: "立即开始",
     },
     pictureIt: {
       topBar: {
@@ -588,7 +675,7 @@ export default {
         describer: "描述者",
         spectator: "观众",
         roleDescriber: "描述者",
-        roleRater: "评分者"
+        roleRater: "评分者",
       },
       actionPanel: {
         watchingAsSpectator: "您正在以观众身份观看。",
@@ -599,7 +686,7 @@ export default {
         timeLeft: "(剩余 {0}秒)",
         submitRating: "提交评分",
         ratingSubmitted: "已提交！等待其他玩家...",
-        waiting: "等待中..."
+        waiting: "等待中...",
       },
       imageCard: {
         describeToTeam: "向您的团队描述这张图片",
@@ -610,13 +697,13 @@ export default {
         preparing: "准备中...",
         forbiddenWordsTitle: "禁用词",
         forbiddenWordsDesc: "请勿使用这些词",
-        flaggedCount: "{0} / {1} 人已标记违规"
+        flaggedCount: "{0} / {1} 人已标记违规",
       },
       modals: {
         gameEnded: "游戏结束",
         notEnoughPlayers: "玩家人数不足以继续。",
         close: "关闭",
-        waitingStart: "正在准备游戏..."
+        waitingStart: "正在准备游戏...",
       },
       badges: {
         "Master Describer": "描述大师",
@@ -625,7 +712,7 @@ export default {
         "Most Fluent": "最流利",
         "Team Player": "团队合作",
         "Keep Practicing": "继续努力",
-        champion: "冠军"
+        champion: "冠军",
       },
       gameOver: {
         title: "游戏结束",
@@ -638,16 +725,24 @@ export default {
         highestRoundScore: "最高单回合分数",
         playAgain: "再玩一次",
         backToRoom: "返回房间",
-        playersCount: "{0} 名玩家"
+        playersCount: "{0} 名玩家",
       },
       leaderboard: {
         title: "排行榜",
-        playersCount: "{0} 名玩家"
+        playersCount: "{0} 名玩家",
       },
       roundResult: {
         nextRoundStartsIn: "下一回合开始于...",
-        averageRating: "平均评分"
-      }
+        averageRating: "平均评分",
+      },
+    },
+  },
+
+  notifications: {
+    inviteSent: "已发送邀请",
+    room_invite: {
+      title: "房间邀请",
+      body: "{inviterName} 邀请您加入会议室",
     }
   }
 }

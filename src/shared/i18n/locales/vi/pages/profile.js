@@ -50,6 +50,17 @@ export default {
     otpInvalid: "Mã OTP không hợp lệ hoặc đã hết hạn",
     currentIncorrect: "Mật khẩu hiện tại không đúng",
     allFieldsRequired: "Vui lòng nhập đầy đủ các trường mật khẩu",
+    updatingAvatar: "Đang cập nhật ảnh đại diện...",
+    updateAvatarSuccess: "Cập nhật ảnh đại diện thành công",
+    updateAvatarError: "Không thể cập nhật ảnh đại diện",
+    updatingMeetingAvatar: "Đang cập nhật ảnh đại diện phòng họp...",
+    updateMeetingAvatarSuccess: "Cập nhật ảnh đại diện phòng họp thành công",
+    updateMeetingAvatarError: "Không thể cập nhật ảnh đại diện phòng họp",
+    meetingAvatarLabel: "Ảnh đại diện trong phòng họp",
+    meetingAvatarHint: "Ảnh này sẽ hiển thị cho người khác khi bạn tham gia phòng họp.",
+    mainAvatarLabel: "Ảnh đại diện chính tài khoản",
+    changeMeetingAvatar: "Đổi ảnh phòng họp",
+    clickToChangeMeetingAvatar: "Bấm để đổi ảnh phòng họp",
   },
   instructor: {
     title: "Giảng viên",
@@ -123,7 +134,18 @@ export default {
     requiredField: "Trường này là bắt buộc",
     selectLanguagesError: "Vui lòng chọn ngôn ngữ giảng dạy",
     selectLevelError: "Vui lòng chọn trình độ cho từng ngôn ngữ",
+    selectAtLeastOneTag: "Vui lòng chọn ít nhất 1 thẻ",
+    tagsUpdatedSuccess: "Cập nhật thẻ thành công",
+    tagsUpdatedError: "Lỗi khi cập nhật thẻ",
     certifyError: "Vui lòng xác nhận và đồng ý với các quy định của nền tảng.",
     formInvalid: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi gửi.",
+    credentialSizeLimit: "Mỗi chứng chỉ phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
+    videoSizeLimit: "Video phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
   },
+  notifications: {
+    friend_request: {
+      title: "Yêu cầu kết bạn mới",
+      body: "{requesterName} đã gửi cho bạn yêu cầu kết bạn.",
+    }
+  }
 }

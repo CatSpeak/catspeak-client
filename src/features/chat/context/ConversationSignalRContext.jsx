@@ -17,6 +17,7 @@ const RETRY_DELAY_MS = 3000
 const HUB_EVENTS = [
   "NewMessage",
   "MessageRead",
+  "MessageRecalled",
   "ConversationRead",
   "ReadReceipt",
   "UserTyping",
@@ -100,16 +101,19 @@ export const ConversationSignalRProvider = ({ children }) => {
     const abortController = new AbortController()
     const { signal } = abortController
 
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || "/api"
-    const baseUrl = apiUrl.replace(/\/api\/?$/, "")
+    const apiUrl = import.meta.env.VITE_SOCIAL_API_BASE_URL || "/api/social"
+    const baseUrl = apiUrl.replace(/\/api(\/social)?\/?$/, "")
     const hubUrl = `${baseUrl}/hubs/social`
 
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => store.getState().auth.token,
+        transport:
+          signalR.HttpTransportType.ServerSentEvents |
+          signalR.HttpTransportType.LongPolling,
       })
       .withAutomaticReconnect()
-      .configureLogging(signalR.LogLevel.Critical)
+      .configureLogging(signalR.LogLevel.None)
       .build()
 
     connectionRef.current = connection

@@ -38,7 +38,10 @@ export const useSidePanelState = () => {
 
   // Chat sub-panel collapse state (tightly coupled to panel visibility)
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
-  const [isAiCollapsed, setIsAiCollapsed] = useState(false)
+  const [isAiCollapsed, setIsAiCollapsed] = useState(true)
+
+  // Persisted chat tab selection so it survives open/close cycles
+  const [activeChatTab, setActiveChatTab] = useState("room") // "room" | "ai"
 
   return {
     activeSidePanel,
@@ -59,5 +62,7 @@ export const useSidePanelState = () => {
     setIsChatCollapsed,
     isAiCollapsed,
     setIsAiCollapsed,
+    activeChatTab,
+    setActiveChatTab,
   }
 }

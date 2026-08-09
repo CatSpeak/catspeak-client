@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from "react"
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion"
 import { fluentEaseOut } from "@/shared/utils/animations"
-import { useLanguage } from "@/shared/context/LanguageContext"
 
 const RADIUS = 28
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const SIZE = 80 // SVG viewport size
 
 const CountdownCircle = ({ duration = 3, onComplete, label }) => {
-  const { t } = useLanguage();
   const [remaining, setRemaining] = useState(duration)
   const intervalRef = useRef(null)
   const startTimeRef = useRef(Date.now())

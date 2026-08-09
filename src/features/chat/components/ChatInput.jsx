@@ -23,6 +23,7 @@ const ChatInput = ({
   disabled = false,
   showLeftIcon = true,
   showRightIcons = true,
+  maxLength = 500,
 }) => {
   const { t } = useLanguage()
   const textareaRef = useRef(null)
@@ -189,49 +190,67 @@ const ChatInput = ({
             onKeyDown={handleKeyDown}
             disabled={disabled}
             rows={isMultiline ? 5 : 1}
+            maxLength={maxLength}
           />
         </div>
 
-        {/* Right buttons */}
-        {showRightIcons && (
-          <div
-            className={`flex items-center h-12 ${
-              isMultiline
-                ? "col-start-3 row-start-2"
-                : "col-start-3 row-start-1"
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Emoji button */}
-            <Popover
-              placement="top-right"
-              trigger={
-                <IconButton variant="ghost" aria-label="Emoji" type="button">
-                  <Smile />
-                </IconButton>
-              }
-              content={(close) => (
-                <EmojiPickerWrapper
-                  onSelect={(emoji) => {
-                    insertEmoji(emoji, textareaRef, value, onChange)
-                    addRecent(emoji)
-                    close()
-                  }}
-                />
-              )}
-            />
-
-            {/* Send button */}
-            <IconButton
-              onClick={handleSend}
-              disabled={disabled || !hasContent}
-              variant={hasContent ? "primary" : "ghost"}
-              aria-label="Send message"
+        {/* Right controls (counter when multiline + action buttons) */}
+        <div
+          className={`flex items-center h-12 gap-1 ${
+            isMultiline
+              ? "col-start-3 row-start-2"
+              : "col-start-3 row-start-1"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {isMultiline && (
+            <span
+              className={`text-[11px] font-mono select-none px-1 ${
+                value.length >= maxLength
+                  ? "text-red-500 font-bold"
+                  : value.length >= maxLength * 0.8
+                  ? "text-amber-600 font-medium"
+                  : "text-gray-400 opacity-75"
+              }`}
+              title={`${value.length} / ${maxLength} characters`}
             >
-              <Send className="-translate-x-[1px] translate-y-[1px]" />
-            </IconButton>
-          </div>
-        )}
+              {value.length}/{maxLength}
+            </span>
+          )}
+
+          {showRightIcons && (
+            <>
+              {/* Emoji button */}
+              <Popover
+                placement="top-right"
+                trigger={
+                  <IconButton variant="ghost" aria-label="Emoji" type="button">
+                    <Smile />
+                  </IconButton>
+                }
+                content={(close) => (
+                  <EmojiPickerWrapper
+                    onSelect={(emoji) => {
+                      insertEmoji(emoji, textareaRef, value, onChange)
+                      addRecent(emoji)
+                      if (typeof close === "function") close()
+                    }}
+                  />
+                )}
+              />
+
+              {/* Send button */}
+              <IconButton
+                onClick={handleSend}
+                disabled={disabled || !hasContent}
+                variant={hasContent ? "primary" : "ghost"}
+                aria-label="Send message"
+              >
+                <Send className="-translate-x-[1px] translate-y-[1px]" />
+              </IconButton>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

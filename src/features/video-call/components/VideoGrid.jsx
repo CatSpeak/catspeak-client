@@ -1,5 +1,6 @@
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useSpotlight } from "@/features/video-call/hooks/useSpotlight"
+import { useGame } from "@/features/games/context/GameContext"
 import SpotlightLayout from "./layouts/SpotlightLayout"
 import NormalVideoLayout from "./layouts/NormalVideoLayout"
 import PiPLayout from "./layouts/PiPLayout"
@@ -17,6 +18,8 @@ import PiPLayout from "./layouts/PiPLayout"
  */
 const VideoGrid = () => {
   const { participants, screenShareTracks, layoutMode, setLayoutMode, maxTiles, hideEmptyTiles } = useVideoCallContext()
+  const { gameState, gameType } = useGame()
+  const isGameActive = gameState !== "idle" && !!gameType
 
   const { spotlightItem, handleTileClick } = useSpotlight(
     screenShareTracks,
@@ -55,6 +58,20 @@ const VideoGrid = () => {
     if (isCurrentSpotlight) {
       setLayoutMode("grid")
     }
+  }
+
+  // ── Khi Game đang chạy: Tự động dùng   để nhúng Game vào ô chính (trái) ──
+  if (isGameActive) {
+    const forcedSpotlight = spotlightItem || getDefaultSpotlightItem()
+    return (
+      <SpotlightLayout
+        spotlightItem={forcedSpotlight}
+        screenShareTracks={screenShareTracks}
+        participants={filteredParticipants}
+        handleTileClick={handleSpotlightTileClick}
+        totalItems={totalItems}
+      />
+    )
   }
 
   // ── "grid" mode: always NormalVideoLayout ──

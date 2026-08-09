@@ -12,18 +12,20 @@ import {
 import {
   formatDuration,
   formatFileSize,
-  formatDate,
 } from "../utils/formatUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { FaGoogleDrive } from "react-icons/fa"
 import { useGoogleLogin } from "@react-oauth/google"
 import { useUploadRecordingToDriveMutation } from "@/store/api/recordingsApi"
 import toast from "react-hot-toast"
 import { RECORDING_STATUS } from "../constants/recordingStatus"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 /**
  * RecordingCard — displays a single recording with metadata and action buttons.
  */
 const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
+  const { formatDateTime } = useTimezone()
   const {
     recordingId,
     meetingId,
@@ -160,7 +162,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
   }
 
   return (
-    <div className="group flex flex-col gap-3 rounded-lg border border-[#e5e5e5] bg-white min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="group flex flex-col gap-3 rounded-xl border border-[#e5e5e5] bg-white min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Left: metadata */}
       <div className="flex flex-col">
         {/* Top row: meeting ID & potential status badge */}
@@ -174,7 +176,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
         <div className="flex items-center gap-4 text-sm text-[#606060] flex-wrap mt-1">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
-            {formatDate(createdAt)}
+            {formatDateTime(createdAt)}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
@@ -223,7 +225,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
         ) : (
           <>
             {/* Play */}
-            <button
+            <IconButton
               onClick={() => hasFile && onPlay?.(recording)}
               disabled={!hasFile}
               title={
@@ -232,17 +234,12 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
                   : t?.recordings?.actions?.playUnavailable ||
                     "File not available"
               }
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-                hasFile
-                  ? "bg-[#F2F2F2] hover:bg-[#D9D9D9]"
-                  : "bg-gray-50 text-gray-300 cursor-not-allowed"
-              }`}
             >
-              <Play className="h-5 w-5" />
-            </button>
+              <Play />
+            </IconButton>
 
             {/* Download */}
-            <button
+            <IconButton
               onClick={handleDownload}
               disabled={!hasFile}
               title={
@@ -251,17 +248,12 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
                   : t?.recordings?.actions?.downloadUnavailable ||
                     "File not available"
               }
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-                hasFile
-                  ? "bg-[#F2F2F2] hover:bg-[#D9D9D9]"
-                  : "bg-gray-50 text-gray-300 cursor-not-allowed"
-              }`}
             >
-              <Download className="h-5 w-5" />
-            </button>
+              <Download />
+            </IconButton>
 
             {/* Upload to Google Drive */}
-            <button
+            <IconButton
               onClick={() => loginWithGoogle()}
               disabled={!hasFile || isUploading}
               title={
@@ -271,29 +263,23 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
                   : t?.recordings?.actions?.uploadUnavailable ||
                     "File không có sẵn"
               }
-              className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-                hasFile
-                  ? "bg-[#F2F2F2] hover:bg-[#D9D9D9] text-gray-700"
-                  : "bg-gray-50 text-gray-300 cursor-not-allowed"
-              }`}
             >
               {isUploading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                <Loader2 className="animate-spin text-blue-600" />
               ) : (
-                <FaGoogleDrive className="h-5 w-5" />
+                <FaGoogleDrive />
               )}
-            </button>
+            </IconButton>
           </>
         )}
 
         {/* Delete */}
-        <button
+        <IconButton
           onClick={() => onDelete?.(recording)}
           title={t?.recordings?.actions?.delete || "Delete recording"}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors"
         >
-          <Trash2 className="h-5 w-5" />
-        </button>
+          <Trash2 />
+        </IconButton>
       </div>
     </div>
   )

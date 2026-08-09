@@ -8,6 +8,9 @@ export default {
   community: "Community",
   notifications: "Notifications",
   noNewNotifications: "No new notifications",
+  markAllRead: "Mark all as read",
+  newNotificationTitle: "New Notification",
+  newNotificationBody: "You have a new notification to view.",
   searchPlaceholder: "Search rooms",
   languages: {
     vi: "Vietnamese",
@@ -20,6 +23,12 @@ export default {
     china: "China",
     english: "English",
   },
+  switchRole: "Switch Role",
+  studentRole: "Student",
+  teacherRole: "Teacher",
+  noPermissionTeacher: "You do not have permission to switch to the Teacher role!",
+  switchRoleSuccess: "Switched role successfully!",
+  switchRoleFail: "Failed to switch role!",
   logoutWarning: {
     title: "End Call & Log Out",
     message: "You are currently in a call. Logging out will disconnect you. Are you sure you want to log out?",

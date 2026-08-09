@@ -1,11 +1,13 @@
 import { useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import { ArrowLeft, PanelRight } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import GroupAvatar from "./GroupAvatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
-import { formatLastSeen } from "@/shared/utils/dateFormatter"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { getProfilePath } from "@/shared/utils/navigation"
 
 /**
  * ChatHeader — top bar displaying active conversation name, avatar, online status, and panel actions.
@@ -17,32 +19,42 @@ const ChatHeader = ({
   friendOnlineStatus,
 }) => {
   const { t } = useLanguage()
+  const { formatRelative } = useTimezone()
+  const navigate = useNavigate()
   const isGroup = conversation?.isGroup
   const otherUser = conversation?.friend
   const name = conversation?.name
   const memberCount = conversation?.participants?.length || 0
 
   const friendId = otherUser?.accountId || otherUser?.id
+
+  const handleProfileClick = () => {
+    if (friendId) {
+      navigate(getProfilePath(friendId))
+    }
+  }
   const reduxFriendOnlineStatus = useSelector(
     (state) => state.notification?.friendOnlineStatus || {},
-  )
+  );
   const reduxFriendLastSeen = useSelector(
     (state) => state.notification?.friendLastSeen || {},
-  )
-  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus
+  );
+  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus;
   const isOnline =
     !isGroup &&
     friendId &&
-    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false)
+    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false);
 
   const lastSeenTime =
-    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen
+    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen;
 
   const statusText = isGroup
-    ? (t?.chat?.memberCount ? t.chat.memberCount.replace("{{count}}", memberCount) : `${memberCount} members`)
+    ? t?.chat?.memberCount
+      ? t.chat.memberCount.replace("{{count}}", memberCount)
+      : `${memberCount} members`
     : isOnline
-      ? (t?.chat?.online || "Online")
-      : formatLastSeen(lastSeenTime)
+      ? t?.chat?.online || "Online"
+      : formatRelative(lastSeenTime);
 
   return (
     <div className="flex items-center justify-between px-4 h-[72px] border-b border-[#E5E5E5] shrink-0">
@@ -67,6 +79,7 @@ const ChatHeader = ({
               size={40}
               name={otherUser?.username}
               src={otherUser?.avatarImageUrl}
+              accountId={friendId}
               className={
                 getParticipantTheme(
                   otherUser?.accountId || otherUser?.username || "",
@@ -81,7 +94,16 @@ const ChatHeader = ({
 
         {/* Name + status */}
         <div className="min-w-0">
-          <h2 className="font-semibold truncate">{name}</h2>
+          {!isGroup && friendId ? (
+            <h2
+              onClick={handleProfileClick}
+              className="font-semibold truncate hover:underline hover:text-primary transition-colors cursor-pointer"
+            >
+              {name}
+            </h2>
+          ) : (
+            <h2 className="font-semibold truncate">{name}</h2>
+          )}
           {statusText && <p className="text-sm text-[#606060]">{statusText}</p>}
         </div>
       </div>
@@ -98,7 +120,7 @@ const ChatHeader = ({
         </IconButton>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ChatHeader
+export default ChatHeader;

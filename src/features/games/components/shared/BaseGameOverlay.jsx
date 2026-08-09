@@ -1,4 +1,5 @@
 import React from "react"
+// eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from "framer-motion"
 import { useGame } from "@/features/games/context/GameContext"
 import GameLayoutOverlay from "./GameLayoutOverlay"
@@ -11,27 +12,37 @@ const BaseGameOverlay = ({
   gameContent,
   overlays,
   useFluentAnimation = false,
-  animationKey = "game-overlay"
+  animationKey = "game-overlay",
+  /**
+   * "fullscreen" (mặc định): chiếm full viewport, dùng khi render độc lập ngoài VideoCallRoom.
+   * "embedded": render gọn trong 1 container, dùng khi nhúng vào spotlight tile hoặc tile khác.
+   */
+  mode = "fullscreen",
 }) => {
-  const { gameState, gameType, countdown, currentUserId, leftPlayers, isSpectator } = useGame();
-  
-  const hasLeft = leftPlayers?.has(currentUserId?.toString())
+  const { gameState, gameType, countdown } = useGame();
 
-  const matchesGameType = Array.isArray(expectedGameType) 
-    ? expectedGameType.includes(gameType) 
-    : gameType === expectedGameType;
+  const normalizeType = (t) => t?.toLowerCase()?.replace(/-/g, "_")
+  const normCurrent = normalizeType(gameType)
 
-  if (!matchesGameType || (hasLeft && !isSpectator)) {
+  const matchesGameType = Array.isArray(expectedGameType)
+    ? expectedGameType.map(normalizeType).includes(normCurrent)
+    : normalizeType(expectedGameType) === normCurrent;
+
+  if (!matchesGameType) {
     return null
   }
 
-  // Allow passing force_stopped if needed, but typically handle it inside overlays or wrapper
-  if (gameState === "idle") {
+  // Khi user đã từng out (`leftPlayers` chứa họ) nhưng game vẫn đang chơi,
+  // nghĩa là user vừa reconnect vào phòng có ván đang diễn ra → vẫn cho xem overlay
+  // (với tư cách spectator) thay vì màn hình đen.
+  // Chỉ ẩn khi game thực sự kết thúc (idle / force_stopped).
+  if (gameState === "idle" || gameState === "force_stopped") {
     return null;
   }
 
   const content = (
     <GameLayoutOverlay
+      embedded={mode === "embedded"}
       gameContentComponent={gameContent}
       overlays={
         <>
@@ -72,6 +83,11 @@ const BaseGameOverlay = ({
       }
     />
   );
+
+  // Embedded mode: render gọn trong container của caller, không fixed, không fullscreen.
+  if (mode === "embedded") {
+    return <div className="relative w-full h-full overflow-hidden rounded-2xl bg-gray-50">{content}</div>;
+  }
 
   return (
     <AnimatePresence>

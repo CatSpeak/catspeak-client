@@ -1,68 +1,87 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react"
+import React, { useEffect, useMemo, useState } from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const CountdownTicker = ({ targetDate }) => {
-  const countdownTarget = useMemo(() => {
-    if (targetDate) {
-      const parsed = new Date(targetDate)
-      if (!isNaN(parsed.getTime())) return parsed
-    }
-    const target = new Date()
-    target.setDate(target.getDate() + 12)
-    target.setHours(target.getHours() + 9)
-    target.setMinutes(target.getMinutes() + 9)
-    target.setSeconds(target.getSeconds() + 9)
-    return target
+  const { t } = useLanguage()
+  const ui = t.courses?.workspaceUi || {}
+  const countdownTargetMs = useMemo(() => {
+    if (!targetDate) return null
+    const parsed = new Date(targetDate)
+    const timestamp = parsed.getTime()
+    return Number.isFinite(timestamp) ? timestamp : null
   }, [targetDate])
-
-  const calculateTimeLeft = useCallback(() => {
-    const diff = countdownTarget.getTime() - new Date().getTime()
-    return diff > 0 ? Math.floor(diff / 1000) : 0
-  }, [countdownTarget])
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft)
-  const [prevTarget, setPrevTarget] = useState(countdownTarget)
-
-  if (countdownTarget !== prevTarget) {
-    setPrevTarget(countdownTarget)
-    setTimeLeft(calculateTimeLeft())
-  }
+  const [nowMs, setNowMs] = useState(() => Date.now())
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft())
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [calculateTimeLeft])
+    if (countdownTargetMs === null) return undefined
+
+    let timer
+
+    const updateCountdown = () => {
+      const currentTime = Date.now()
+      setNowMs(currentTime)
+      const remainingMs = countdownTargetMs - currentTime
+      if (remainingMs <= 0) return
+
+      const millisecondsUntilMinuteChanges = remainingMs % 60000
+      timer = setTimeout(
+        updateCountdown,
+        millisecondsUntilMinuteChanges > 0 ? millisecondsUntilMinuteChanges + 10 : 10
+      )
+    }
+
+    timer = setTimeout(updateCountdown, 0)
+    return () => clearTimeout(timer)
+  }, [countdownTargetMs])
+
+  const minutesLeft = countdownTargetMs === null
+    ? null
+    : Math.max(0, Math.floor((countdownTargetMs - nowMs) / 60000))
 
   const countdownTime = useMemo(() => {
-    if (timeLeft <= 0) {
+    if (minutesLeft === null) return null
+    if (minutesLeft <= 0) {
       return { days: "00", hours: "00", mins: "00" }
     }
-    const days = Math.floor(timeLeft / (24 * 3600))
-    const hours = Math.floor((timeLeft % (24 * 3600)) / 3600)
-    const mins = Math.floor((timeLeft % 3600) / 60)
+    const days = Math.floor(minutesLeft / (24 * 60))
+    const hours = Math.floor((minutesLeft % (24 * 60)) / 60)
+    const mins = minutesLeft % 60
     return {
       days: days.toString().padStart(2, "0"),
       hours: hours.toString().padStart(2, "0"),
       mins: mins.toString().padStart(2, "0")
     }
-  }, [timeLeft])
+  }, [minutesLeft])
+
+  if (countdownTargetMs === null || !countdownTime) {
+    return (
+      <div role="status" className="py-6 text-center text-xs font-semibold text-gray-500">
+        {ui.tba || "TBA"}
+      </div>
+    )
+  }
 
   return (
     <div className="flex justify-around items-center text-center py-3 border-b border-gray-100 select-none">
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.days}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">Days</span>
+        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+          {ui.days || "Days"}
+        </span>
       </div>
       <span className="text-2xl font-bold text-gray-300 -mt-5">:</span>
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.hours}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">Hours</span>
+        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+          {ui.hours || "Hours"}
+        </span>
       </div>
       <span className="text-2xl font-bold text-gray-300 -mt-5">:</span>
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.mins}</span>
-        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">Mins</span>
+        <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">
+          {ui.minutesShort || "Mins"}
+        </span>
       </div>
     </div>
   )

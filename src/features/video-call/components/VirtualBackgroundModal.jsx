@@ -4,6 +4,8 @@ import VirtualBackgroundPicker from "./VirtualBackgroundPicker";
 import BeautyPicker from "./BeautyPicker";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
+import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHelpers";
+
 const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions";
 
 const readStoredBeautyOptions = () => {
@@ -24,8 +26,6 @@ const persistBeautyOptions = (opts) => {
   }
 };
 
-const TABS = ["backgrounds", "beauty"];
-
 const VirtualBackgroundModal = ({
   open,
   onClose,
@@ -33,6 +33,7 @@ const VirtualBackgroundModal = ({
   cameraOn,
   onToggleCam,
   lkVideoTrack,
+  room,
 }) => {
   const { t } = useLanguage();
   const videoRef = useRef(null);
@@ -130,21 +131,29 @@ const VirtualBackgroundModal = ({
         {/* Right Column: Tabbed Picker */}
         <div className="w-full md:w-80 flex-shrink-0 flex flex-col flex-1 md:h-auto">
           {/* Tab strip */}
-          <div className="flex border-b border-[#E5E5E5] mb-3">
-            {TABS.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                  activeTab === tab
-                    ? "border-cath-red-600 text-cath-red-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {tabLabel(tab)}
-              </button>
-            ))}
-          </div>
+          {(() => {
+            const availableTabs = isBeautyFilterSupported(room?.roomType)
+              ? ["backgrounds", "beauty"]
+              : ["backgrounds"];
+            if (availableTabs.length <= 1) return null;
+            return (
+              <div className="flex border-b border-[#E5E5E5] mb-3">
+                {availableTabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                      activeTab === tab
+                        ? "border-cath-red-600 text-cath-red-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    {tabLabel(tab)}
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
 
           {activeTab === "backgrounds" ? (
             <VirtualBackgroundPicker onApply={handleApply} className="p-0" />

@@ -1,4 +1,4 @@
-import { baseApi } from "./baseApi"
+import { baseApi } from "./baseApi";
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,12 +9,21 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["UserProfile"],
     }),
+    getUserProfileHaveAccountType: builder.query({
+      query: () => ({
+        url: "/Account/profile",
+        method: "GET",
+      }),
+      providesTags: ["UserProfile"],
+    }),
     getPublicProfile: builder.query({
       query: (accountId) => ({
         url: `/Account/${accountId}`,
         method: "GET",
       }),
-      providesTags: (result, error, accountId) => [{ type: "PublicProfile", id: accountId }],
+      providesTags: (result, error, accountId) => [
+        { type: "PublicProfile", id: accountId },
+      ],
     }),
     updateUserProfile: builder.mutation({
       query: (data) => ({
@@ -32,9 +41,10 @@ export const userApi = baseApi.injectEndpoints({
       }),
     }),
     requestUserProfileOtp: builder.mutation({
-      query: () => ({
+      query: (body) => ({
         url: "/user-profile/request-otp",
         method: "POST",
+        body,
       }),
     }),
     requestPhoneUpdateOtp: builder.mutation({
@@ -99,10 +109,11 @@ export const userApi = baseApi.injectEndpoints({
       invalidatesTags: ["UserProfile", "User"],
     }),
   }),
-})
+});
 
 export const {
   useGetUserProfileQuery,
+  useGetUserProfileHaveAccountTypeQuery,
   useLazyGetUserProfileQuery,
   useGetPublicProfileQuery,
   useUpdateUserProfileMutation,
@@ -122,4 +133,4 @@ export const {
   useGetSampleBackgroundsQuery,
   useUploadCustomBackgroundMutation,
   useSetActiveBackgroundMutation,
-} = userApi
+} = userApi;

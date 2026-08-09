@@ -1,13 +1,16 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Navigate, useParams } from "react-router-dom";
-import { ChevronRight, Loader2, Clock } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useConnectionState } from "@livekit/components-react";
-import { ConnectionState } from "livekit-client";
-import { useSelector, useDispatch } from "react-redux";
-import { useGetBreakoutStatusQuery, useStopBreakoutRoomsMutation } from "@/store/api/roomsApi";
-import { exitBreakout } from "@/store/slices/videoCallSlice";
-import { toast } from "react-hot-toast";
+import React, { useState, useRef, useEffect, useCallback } from "react"
+import { Navigate, useParams } from "react-router-dom"
+import { ChevronRight, Loader2, Clock } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useConnectionState } from "@livekit/components-react"
+import { ConnectionState } from "livekit-client"
+import { useSelector, useDispatch } from "react-redux"
+import {
+  useGetBreakoutStatusQuery,
+  useStopBreakoutRoomsMutation,
+} from "@/store/api/roomsApi"
+import { exitBreakout } from "@/store/slices/videoCallSlice"
+import { toast } from "react-hot-toast"
 
 import {
   VideoGrid,
@@ -25,14 +28,15 @@ import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverl
 import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
 
-import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider";
-import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider";
-import { GameProvider } from "@/features/games/context/GameContext";
-import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import VideoCallLoading from "@/features/video-call/components/VideoCallLoading";
-import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay";
-import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer";
+import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
+import { GameProvider } from "@/features/games/context/GameContext"
+import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay"
+import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
+import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage()
@@ -70,12 +74,13 @@ const VideoCallRoomContent = () => {
     isRecording,
     confirmStopRecording,
     participants,
+    isHost: isHostFromContext,
   } = useVideoCallContext()
 
   const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
     (s) => s.videoCall,
   )
-  const isHost = room?.creatorId === user?.accountId
+  const isHost = isHostFromContext
 
   const dispatch = useDispatch()
   const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
@@ -133,6 +138,10 @@ const VideoCallRoomContent = () => {
   const [hasConnected, setHasConnected] = useState(false)
 
   useEffect(() => {
+    console.log(
+      "[VideoCallRoom] LiveKit connectionState changed:",
+      connectionState,
+    )
     if (connectionState === ConnectionState.Connected) {
       setHasConnected(true)
     }
@@ -208,13 +217,8 @@ const VideoCallRoomContent = () => {
       {/* Top Bar */}
       <RoomHeader />
 
-      {/* Game Overlay */}
-      <CrackItOverlay />
-
-      <PictureITOverlay />
-
       {/* Main Content Area */}
-      <div className="relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-[#F3F3F3] bg-white">
+      <div className="p-4 md:p-6 relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-[#F3F3F3] bg-white gap-4 sm:gap-6">
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
@@ -226,7 +230,7 @@ const VideoCallRoomContent = () => {
               formattedTime={formattedTime}
             />
           )}
-          <div className="flex-1 relative min-h-0">
+          <div className="flex flex-1 min-h-0 relative">
             <VideoGrid />
           </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
@@ -237,23 +241,23 @@ const VideoCallRoomContent = () => {
           )}
         </div>
 
-        {/* Desktop Side Panel */}
+        {/* Desktop Side Panel (lg+) */}
         <AnimatePresence initial={false}>
           {isSidePanelOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 376, opacity: 1 }}
+              animate={{ width: 360, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="hidden md:flex flex-col overflow-hidden relative py-2 ml-1"
-              style={{ width: 376 }}
+              className="hidden lg:flex flex-col overflow-hidden relative"
+              style={{ width: 360 }}
             >
-              <div className="w-[360px] h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+              <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
                 {showTroubleshoot && <TroubleshootPanel />}
-                {showBreakout && (
+                {showBreakout && isBreakoutSupported(room?.roomType) && (
                   <BreakoutSidebarPanel
                     sessionId={parentSessionId}
                     onClose={() => setActiveSidePanel(null)}
@@ -272,74 +276,121 @@ const VideoCallRoomContent = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Mobile Overlay Side Panel */}
-        <AnimatePresence initial={false}>
-          {isSidePanelOpen && (
-            <div className="md:hidden">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-[30] flex flex-col justify-end bg-black/50"
-                onClick={() => setActiveSidePanel(null)}
-              >
-                <motion.div
-                  initial={{ y: "100%" }}
-                  animate={{ y: 0 }}
-                  exit={{ y: "100%" }}
-                  transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-                  className="flex h-[70vh] w-full flex-col bg-white shadow-xl rounded-t-[24px] overflow-hidden"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="w-full flex justify-center pt-3 pb-1 shrink-0 cursor-pointer" onClick={() => setActiveSidePanel(null)}>
-                    <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
-                  </div>
-
-                  {!showChat && (
-                    <button
-                      type="button"
-                      className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50 shrink-0"
-                      onClick={() => setActiveSidePanel(null)}
-                    >
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
-                        <ChevronRight className="rotate-180" />
-                      </span>
-                      <div className="text-base font-semibold">
-                        {sidePanelTitle}
-                      </div>
-                    </button>
-                  )}
-
-                  <div className="flex-1 overflow-y-auto bg-white min-h-0">
-                    {showParticipants && <ParticipantList hideTitle />}
-                    {showVirtualBackground && <BackgroundsAndEffectsPanel />}
-                    {showAvatarPicker && <AvatarUrlPicker />}
-                    {showTroubleshoot && <TroubleshootPanel hideTitle />}
-                    {showBreakout && (
-                      <BreakoutSidebarPanel
-                        sessionId={parentSessionId}
-                        onClose={() => setActiveSidePanel(null)}
-                      />
-                    )}
-                    {showChat && (
-                      <ChatBox
-                        messages={messages}
-                        currentUser={user}
-                        onSendMessage={handleSendMessage}
-                        isConnected={isConnected}
-                        className="h-full w-full rounded-t-[24px]"
-                        hideTitle
-                      />
-                    )}
-                  </div>
-                </motion.div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
       </div>
+
+      {/* Tablet Right Slide-Over Drawer (md to lg) — Rendered outside flex flow */}
+      <AnimatePresence initial={false}>
+        {isSidePanelOpen && (
+          <div className="hidden md:block lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/40"
+              onClick={() => setActiveSidePanel(null)}
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white shadow-2xl flex flex-col border-l border-[#E5E5E5] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {showParticipants && <ParticipantList />}
+              {showVirtualBackground && <BackgroundsAndEffectsPanel />}
+              {showAvatarPicker && <AvatarUrlPicker />}
+              {showTroubleshoot && <TroubleshootPanel />}
+              {showBreakout && isBreakoutSupported(room?.roomType) && (
+                <BreakoutSidebarPanel
+                  sessionId={parentSessionId}
+                  onClose={() => setActiveSidePanel(null)}
+                />
+              )}
+              {showChat && (
+                <ChatBox
+                  messages={messages}
+                  currentUser={user}
+                  onSendMessage={handleSendMessage}
+                  isConnected={isConnected}
+                  className="h-full w-full"
+                />
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Overlay Side Panel */}
+      <AnimatePresence initial={false}>
+        {isSidePanelOpen && (
+          <div className="md:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[30] flex flex-col justify-end bg-black/50"
+              onClick={() => setActiveSidePanel(null)}
+            >
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
+                className="flex h-[70vh] w-full flex-col bg-white shadow-xl rounded-t-[24px] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div
+                  className="w-full flex justify-center pt-3 pb-1 shrink-0 cursor-pointer"
+                  onClick={() => setActiveSidePanel(null)}
+                >
+                  <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
+                </div>
+
+                {!showChat && (
+                  <button
+                    type="button"
+                    className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50 shrink-0"
+                    onClick={() => setActiveSidePanel(null)}
+                  >
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
+                      <ChevronRight className="rotate-180" />
+                    </span>
+                    <div className="text-base font-semibold">
+                      {sidePanelTitle}
+                    </div>
+                  </button>
+                )}
+
+                <div className="flex-1 overflow-y-auto bg-white min-h-0">
+                  {showParticipants && <ParticipantList hideTitle />}
+                  {showVirtualBackground && <BackgroundsAndEffectsPanel />}
+                  {showAvatarPicker && <AvatarUrlPicker />}
+                  {showTroubleshoot && <TroubleshootPanel hideTitle />}
+                  {showBreakout && isBreakoutSupported(room?.roomType) && (
+                    <BreakoutSidebarPanel
+                      sessionId={parentSessionId}
+                      onClose={() => setActiveSidePanel(null)}
+                    />
+                  )}
+                  {showChat && (
+                    <ChatBox
+                      messages={messages}
+                      currentUser={user}
+                      onSendMessage={handleSendMessage}
+                      isConnected={isConnected}
+                      className="h-full w-full rounded-t-[24px]"
+                      hideTitle
+                    />
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <VideoCallControlBar />
     </div>
@@ -347,14 +398,14 @@ const VideoCallRoomContent = () => {
 }
 
 const VideoCallRoomWrapper = () => {
-  const { lang } = useParams();
+  const { lang } = useParams()
   return (
     <VideoCallProvider>
       <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>
-  );
-};
+  )
+}
 
-export default VideoCallRoomWrapper;
+export default VideoCallRoomWrapper

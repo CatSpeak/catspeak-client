@@ -3,7 +3,7 @@ import React from "react";
 const Breadcrumb = ({ items, className = "" }) => {
   return (
     <div
-      className={`flex min-w-0 max-w-full items-center gap-3 overflow-hidden font-nunito text-sm leading-[1.4] ${className}`}
+      className={`flex min-w-0 max-w-full items-center gap-3 overflow-hidden text-sm leading-[1.4] ${className}`}
     >
       {items.map((item, index) => {
         const isLast = index === items.length - 1;

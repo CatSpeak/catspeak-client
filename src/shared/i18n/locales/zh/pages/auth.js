@@ -52,7 +52,7 @@ export default {
   usernameLabel: "用户名",
   usernamePlaceholder: "输入用户名",
   dateOfBirthLabel: "出生日期",
-  dateOfBirthPlaceholder: "选择日期",
+  dateOfBirthPlaceholder: "输入您的出生日期",
   levelLabel: "等级",
   levelBeginner: "初学者",
   levelIntermediate: "中级",
@@ -114,4 +114,5 @@ export default {
   tooManyOtpRequests: "OTP 请求过多。请稍后再试。",
   loginFailed: "登录失败，请重试。",
   serverConnectionRestored: "服务器连接已恢复！",
+  emailOptIn: "我想接收来自 CatSpeak 的电子邮件通知和最新消息",
 }

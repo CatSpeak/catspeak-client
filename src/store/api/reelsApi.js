@@ -83,6 +83,10 @@ const updateLikeFields = (reel) => {
 // Reels API slice
 export const reelsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    checkUploadEligibility: builder.query({
+      query: () => "/Reels/check-eligibility",
+    }),
+
     getCreatorCount: builder.query({
       query: ({ from, to } = {}) => {
         const params = new URLSearchParams()
@@ -619,4 +623,5 @@ export const {
   useReportReelMutation,
   useNotInterestedReelMutation,
   useGetCreatorCountQuery,
+  useLazyCheckUploadEligibilityQuery,
 } = reelsApi

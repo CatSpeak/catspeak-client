@@ -1,10 +1,8 @@
-import { websites } from "@/features/navigation/config/websites";
 import {
   Home,
   LayoutDashboard,
   GraduationCap,
   Settings,
-  HelpCircle,
   Briefcase,
   User,
   CreditCard,
@@ -14,9 +12,68 @@ import {
   Film,
   Mail,
   BookOpen,
-  Video,
   MessageCircle,
-} from "lucide-react";
+  DoorOpen,
+  Globe,
+  Users,
+  BarChart,
+  CalendarDays,
+} from "lucide-react"
+
+export const navSections = [
+  {
+    key: "main",
+    labelKey: null,
+    items: [
+      { key: "community", path: "/community", icon: Home },
+      {
+        key: "messages",
+        label: "Chat",
+        path: "/chat",
+        icon: MessageCircle,
+      },
+      {
+        key: "learningResources",
+        label: "Resource Hub",
+        path: "/resources",
+        icon: Globe,
+      },
+    ],
+  },
+  {
+    key: "catSpeak",
+    labelKey: "catSpeak",
+    defaultLabel: "Cat Speak",
+    maxInitial: 5,
+    items: [
+      { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
+      { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
+      { key: "reels", path: "/cat-speak/reels", icon: Film },
+      { key: "letters", path: "/cat-speak/letters", icon: Mail },
+      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
+    ],
+  },
+  {
+    key: "workspace",
+    labelKey: "workspace",
+    defaultLabel: "My Workspace",
+    maxInitial: 5,
+    items: [
+      { key: "profile", path: "/workspace/profile", icon: User },
+      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
+      { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
+      { key: "recordings", path: "/workspace/recordings", icon: Mic },
+      { key: "workspaceReels", path: "/workspace/reels", icon: Film },
+      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myClass", path: "/workspace/classes", icon: Users },
+      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+      // { key: "events", path: "/workspace/events", icon: Calendar },
+    ],
+  },
+]
 
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
@@ -25,27 +82,39 @@ export const navLinks = [
     hasDropdown: true,
     icon: LayoutDashboard,
     subItems: [
+      { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
-      // { key: "worldNews", path: "/cat-speak/discover" },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
-      // { key: "video", path: "/cat-speak/video" },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
-
+  {
+    key: "messages",
+    label: "Chat",
+    path: "/chat",
+    icon: MessageCircle,
+    isPrivate: true,
+    showOnHorizontalBar: false,
+  },
   {
     key: "workspace",
     hasDropdown: true,
     icon: Briefcase,
+    requiresAuth: true,
     subItems: [
-      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
+      { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
-      { key: "events", path: "/workspace/events", icon: Calendar },
-      { key: "profile", path: "/profile", icon: User },
-      { key: "messages", path: "/chat", icon: MessageCircle },
+      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "myClass", path: "/workspace/classes", icon: Users },
+      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
+      { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+      // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
   {
@@ -54,33 +123,25 @@ export const navLinks = [
     isHorizontalBar: true,
     showOnHorizontalBar: false,
   },
-  ...websites,
-  // {
-  //   key: "pricing",
-  //   path: "/pricing",
-  //   hasDropdown: false,
-  //   icon: CreditCard,
-  // },
-  // { key: "cart", path: "/cart", icon: ShoppingCart },
-  // {
-  //   key: "courses",
-  //   hasDropdown: true,
-  //   icon: GraduationCap,
-  //   subItems: [
-  //     { key: "allCourses", path: "/courses" },
-  //     { key: "myCourses", path: "/my-courses" }
-  //   ]
-  // },
-];
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: Globe,
+    isPrivate: true,
+    showOnHorizontalBar: false,
+  },
+]
 
 export const settingNavLinks = [
   { key: "accountInfo", path: "/setting/account", icon: User },
+  { key: "pricing", path: "/pricing", icon: CreditCard },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
+  { key: "billing", path: "/billing", icon: CreditCard },
   { key: "systemConfig", path: "/setting/system", icon: Settings },
-];
+]
 
 export const footerLinks = [
-  { key: "pricing", path: "/pricing", icon: CreditCard }, // Trỏ tới bảng giá
-  { key: "settings", path: "/setting", icon: Settings }, // Trỏ tới trang Cài đặt tài khoản
-  // { key: "help", path: "/help", icon: HelpCircle }
-];
+  { key: "pricing", path: "/pricing", icon: CreditCard },
+  { key: "settings", path: "/setting", icon: Settings },
+]

@@ -1,17 +1,14 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { Calendar, Trophy, ChevronDown, ChevronUp, Star } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
   const { t } = useLanguage()
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleString()
-  }
-
-  const hasWinners = match.winners && match.winners.length > 0
+  const navigate = useNavigate()
+  const { formatDateTime } = useTimezone()
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200" >
@@ -22,7 +19,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-slate-800 font-semibold text-base">
             <Calendar className="w-4 h-4 text-slate-400" />
-            {formatDate(match.startedAt)}
+            {formatDateTime(match.startedAt)}
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold uppercase">
@@ -61,6 +58,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                   alt={match.leaderboard[0].player.username}
                   name={match.leaderboard[0].player.username}
                   size={32}
+                  accountId={match.leaderboard[0].player.accountId || match.leaderboard[0].player.userId}
                   className="border-2 border-white"
                 />
               </div>
@@ -99,9 +97,21 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                         alt={item.player.username}
                         name={item.player.username}
                         size={36}
+                        accountId={item.player.accountId || item.player.userId}
                       />
                       <div className="font-semibold text-slate-800 flex flex-col sm:flex-row sm:items-center">
-                        <span className="truncate max-w-[150px] sm:max-w-[200px]">{item.player.username}</span>
+                        <span
+                          onClick={(e) => {
+                            const id = item.player.accountId || item.player.userId
+                            if (id) {
+                              e.stopPropagation()
+                              navigate(`/profile/${id}`)
+                            }
+                          }}
+                          className="truncate max-w-[150px] sm:max-w-[200px] cursor-pointer hover:underline hover:text-cath-red-700 transition-colors"
+                        >
+                          {item.player.username}
+                        </span>
                         {isWinner && (
                           <div
                             className="mt-1 sm:mt-0 sm:ml-2 inline-flex items-center justify-center w-max px-2 py-0.5 bg-yellow-100 text-yellow-600 rounded-full shrink-0"

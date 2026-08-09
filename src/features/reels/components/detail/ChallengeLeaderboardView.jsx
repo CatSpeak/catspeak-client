@@ -147,6 +147,8 @@ export default function ChallengeLeaderboardView({
                     const score = entry.score || 0;
                     const coverUrl =
                       entry.reel?.coverUrl || entry.reel?.thumbnailUrl;
+                    const avatarUrl = entry.reel?.avatarUrl || entry.avatarUrl;
+                    const accountId = entry.reel?.accountId || entry.accountId;
 
                     return (
                       <RankRow
@@ -156,6 +158,8 @@ export default function ChallengeLeaderboardView({
                         handle={handle}
                         score={score}
                         coverUrl={coverUrl}
+                        avatarUrl={avatarUrl}
+                        accountId={accountId}
                         onClick={() => {
                           if (onReelClick) {
                             const reelData = entry.reel || entry;

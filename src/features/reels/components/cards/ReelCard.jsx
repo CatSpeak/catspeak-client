@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from "react"
 import { Play, Heart, Eye, Volume2, VolumeX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { formatCompactNumber, formatRelativeTime } from "../../utils/formatters"
+import { formatCompactNumber } from "../../utils/formatters"
 import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 /**
  * Single reel card in the Pinterest masonry grid - V2 Design
@@ -14,6 +15,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  */
 const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
   const { language } = useLanguage()
+  const { formatRelative } = useTimezone()
   const videoRef = useRef(null)
   const hoverIntentRef = useRef(null)
 
@@ -194,6 +196,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
               src={reel.author.avatarUrl}
               name={reel.author.name}
               alt={reel.author.name}
+              accountId={reel.author.id || reel.author.accountId}
             />
             <div className="flex flex-col">
               <span className="text-[11px] sm:text-[13px] font-medium text-gray-500 leading-none mb-1 flex items-center gap-1">
@@ -205,7 +208,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
                 )}
               </span>
               <span className="text-[9px] sm:text-[11px] text-gray-400 leading-none">
-                {formatRelativeTime(reel.createdAt, language)}
+                {formatRelative(reel.createdAt)}
               </span>
             </div>
           </div>

@@ -26,7 +26,7 @@ export const useDeviceSelection = () => {
       }
 
       allDevices.forEach((device) => {
-        // Filter out virtual/default devices to only show actual hardware options
+        // Filter out virtual/default devices to keep clean hardware options list
         if (device.deviceId === "default" || device.deviceId === "communications") {
           return
         }
@@ -39,19 +39,17 @@ export const useDeviceSelection = () => {
       setDevices(grouped)
 
       setSelectedMic((prev) => {
-        if (prev && grouped.audioinput.some((d) => d.deviceId === prev)) return prev
-        const defaultDevice = grouped.audioinput.find(d => d.deviceId === "default") || grouped.audioinput[0]
-        return defaultDevice?.deviceId || ""
+        if (prev && prev !== "default" && grouped.audioinput.some((d) => d.deviceId === prev)) return prev
+        return ""
       })
 
       setSelectedSpeaker((prev) => {
-        if (prev && grouped.audiooutput.some((d) => d.deviceId === prev)) return prev
-        const defaultDevice = grouped.audiooutput.find(d => d.deviceId === "default") || grouped.audiooutput[0]
-        return defaultDevice?.deviceId || ""
+        if (prev && prev !== "default" && grouped.audiooutput.some((d) => d.deviceId === prev)) return prev
+        return ""
       })
 
       setSelectedCamera((prev) => {
-        if (prev && grouped.videoinput.some((d) => d.deviceId === prev)) return prev
+        if (prev && prev !== "default" && grouped.videoinput.some((d) => d.deviceId === prev)) return prev
         return grouped.videoinput[0]?.deviceId || ""
       })
     } catch (err) {

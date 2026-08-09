@@ -1,12 +1,25 @@
 import React from "react"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Pencil } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { countryOptions, phonePrefixes } from "@/shared/constants/countriesOptions"
 
-const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors = {}, t }) => {
+const InstructorPersonalInfo = ({
+  formData,
+  onChange,
+  readOnly = false,
+  errors = {},
+  t,
+  canSectionEdit = false,
+  isSectionEditing = false,
+  onStartSectionEdit,
+  onCancelSectionEdit,
+  onSaveSectionEdit,
+  isSavingSection = false,
+}) => {
   const ins = t.profile?.instructor || {}
+  const effectiveReadOnly = isSectionEditing ? false : readOnly
 
   const prefixLength = formData.phonePrefix?.length || 3
   const plClass =
@@ -22,9 +35,44 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
 
   return (
     <FluentCard className="gap-6 !justify-start h-full min-h-[365px]">
-      <h2 className="text-xl font-bold text-gray-900">
-        {ins.yourInfo || "Thông tin của bạn"}
-      </h2>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-xl font-bold text-gray-900">
+          {ins.yourInfo || "Thông tin của bạn"}
+        </h2>
+        {canSectionEdit && !isSectionEditing && (
+          <button
+            type="button"
+            onClick={onStartSectionEdit}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#990011] hover:text-white bg-[#990011]/10 hover:bg-[#990011] border border-[#990011]/20 rounded-lg transition-all cursor-pointer"
+          >
+            <Pencil size={13} />
+            <span>{ins.editInfo || "Chỉnh sửa"}</span>
+          </button>
+        )}
+        {canSectionEdit && isSectionEditing && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={isSavingSection}
+              onClick={onCancelSectionEdit}
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 border border-gray-200 rounded-lg transition cursor-pointer disabled:opacity-50"
+            >
+              {ins.cancel || "Hủy"}
+            </button>
+            <button
+              type="button"
+              disabled={isSavingSection}
+              onClick={onSaveSectionEdit}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition cursor-pointer shadow-sm disabled:opacity-50"
+            >
+              {isSavingSection && (
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              <span>{isSavingSection ? (ins.saving || "Đang lưu...") : (ins.save || "Lưu")}</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -37,7 +85,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
               value={formData.fullName}
               onChange={onChange}
               placeholder={ins.inputFieldPlaceholder || "Input field"}
-              disabled={readOnly}
+              disabled={effectiveReadOnly}
               className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.fullName ? "border-red-500" : "border-gray-100"}`}
               containerClassName="!gap-0"
             />
@@ -54,7 +102,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
               value={formData.email}
               onChange={onChange}
               placeholder={ins.inputFieldPlaceholder || "Input field"}
-              disabled={readOnly}
+              disabled={effectiveReadOnly}
               className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.email ? "border-red-500" : "border-gray-100"}`}
               containerClassName="!gap-0"
             />
@@ -71,7 +119,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
               options={phonePrefixes}
               value={formData.phonePrefix}
               onChange={(val) => onChange({ target: { name: "phonePrefix", value: val } })}
-              disabled={readOnly}
+              disabled={effectiveReadOnly}
               enableSearch={true}
               searchPlaceholder={ins.searchPhoneCode || "Tìm kiếm mã vùng..."}
               dropdownClassName="w-full min-w-[260px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
@@ -82,7 +130,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
                   value={formData.phoneNumber}
                   onChange={onChange}
                   placeholder={ins.inputFieldPlaceholder || "Input field"}
-                  disabled={readOnly}
+                  disabled={effectiveReadOnly}
                   className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.phoneNumber ? "border-red-500" : "border-gray-100"}`}
                   containerClassName="!gap-0"
                   leftContentWidthClass={plClass}
@@ -90,7 +138,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
                     <div className="flex items-center h-full">
                       <button
                         type="button"
-                        disabled={readOnly}
+                        disabled={effectiveReadOnly}
                         onClick={(e) => {
                           e.stopPropagation()
                           toggleDropdown()
@@ -128,7 +176,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
               options={countryOptions}
               value={formData.nationality}
               onChange={(val) => onChange({ target: { name: "nationality", value: val } })}
-              disabled={readOnly}
+              disabled={effectiveReadOnly}
               enableSearch={true}
               searchPlaceholder={ins.searchCountry || "Tìm kiếm quốc gia..."}
               placeholder={ins.selectNationality || "Chọn quốc tịch"}
@@ -136,7 +184,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
                 <button
                   type="button"
                   onClick={toggle}
-                  disabled={readOnly}
+                  disabled={effectiveReadOnly}
                   className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.nationality ? "border-red-500" : "border-gray-100"}`}
                 >
                   <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400" : ""}`}>
@@ -162,7 +210,7 @@ const InstructorPersonalInfo = ({ formData, onChange, readOnly = false, errors =
             value={formData.address}
             onChange={onChange}
             placeholder={ins.inputFieldPlaceholder || "Input field"}
-            disabled={readOnly}
+            disabled={effectiveReadOnly}
             className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.address ? "border-red-500" : "border-gray-100"}`}
             containerClassName="!gap-0"
           />

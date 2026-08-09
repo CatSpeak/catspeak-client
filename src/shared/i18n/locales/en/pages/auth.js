@@ -54,7 +54,7 @@ export default {
   usernameLabel: "Username",
   usernamePlaceholder: "Enter your username",
   dateOfBirthLabel: "Date of Birth",
-  dateOfBirthPlaceholder: "Select date",
+  dateOfBirthPlaceholder: "Enter your date of birth",
   levelLabel: "Level",
   levelBeginner: "Beginner",
   levelIntermediate: "Intermediate",
@@ -114,6 +114,8 @@ export default {
   otpResentSuccess: "OTP has been resent successfully",
   sendingOtp: "Sending OTP...",
   tooManyOtpRequests: "Too many OTP requests. Please try again later.",
+  accountLocked: "Your account is temporarily locked due to multiple failed login attempts. Please try again later.",
   loginFailed: "Login failed. Please try again.",
   serverConnectionRestored: "Server connection restored!",
+  emailOptIn: "I want to receive email notifications & news updates from CatSpeak",
 }

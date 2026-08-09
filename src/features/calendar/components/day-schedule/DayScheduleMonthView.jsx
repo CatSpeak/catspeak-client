@@ -18,6 +18,7 @@ import { ChevronDown } from "lucide-react";
 const DayScheduleMonthView = ({
   currentDate,
   eventCountsByDay,
+  totalUniqueEvents,
   registeredMonthEvents,
   registeredByDay,
   daysWithRegistered,
@@ -32,10 +33,7 @@ const DayScheduleMonthView = ({
     .sort((a, b) => a - b)
     .filter((day) => eventCounts[day] > 0);
 
-  const totalUpcoming = daysWithEvents.reduce(
-    (acc, day) => acc + eventCounts[day],
-    0,
-  );
+  const totalUpcoming = totalUniqueEvents || 0;
 
   return (
     <div className="flex flex-col h-full bg-white p-5 md:p-6 lg:p-6 rounded-3xl shadow-sm">
@@ -79,7 +77,7 @@ const DayScheduleMonthView = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto space-y-3 [&::-webkit-scrollbar]:hidden pr-1">
+      <div className="flex-1 overflow-y-auto space-y-3 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] pr-1">
         {monthTab === "upcoming" ? (
           daysWithEvents.length === 0 ? (
             <div className="text-sm text-gray-400 py-8 text-center mt-10">

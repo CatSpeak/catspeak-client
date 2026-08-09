@@ -16,6 +16,7 @@ const MemberProfileView = ({ member }) => {
         size={80}
         name={member.username}
         src={member.avatarImageUrl}
+        accountId={member.accountId}
         className={
           getParticipantTheme(
             member.accountId || member.username || "",

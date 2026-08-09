@@ -7,6 +7,20 @@ import { usePiPDrag } from "@/features/video-call/hooks/usePiPDrag"
 import PiPWidgetContent from "./PiPWidgetContent"
 import DocumentPiPWindow from "./DocumentPiPWindow"
 
+class PiPErrorBoundary extends React.Component {
+  state = { hasError: false }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("PiP Error:", error, errorInfo)
+  }
+  render() {
+    if (this.state.hasError) return null
+    return this.props.children
+  }
+}
+
 /**
  * Main PiP routing component.
  * Decides whether to render the new Document Picture-in-Picture window
@@ -23,17 +37,17 @@ const PiPWidget = () => {
 
   if (!shouldRender) return null
 
-  // Modern Document PiP API (Chrome/Edge Desktop)
-  if (isDocumentPiPSupported) {
-    return (
-      <DocumentPiPWindow>
-        <PiPWidgetContent isNativeWindow={true} />
-      </DocumentPiPWindow>
-    )
-  }
-
-  // Fallback Floating Widget (Firefox, Safari, Mobile)
-  return <FallbackPiPWidget />
+  return (
+    <PiPErrorBoundary>
+      {isDocumentPiPSupported ? (
+        <DocumentPiPWindow>
+          <PiPWidgetContent isNativeWindow={true} />
+        </DocumentPiPWindow>
+      ) : (
+        <FallbackPiPWidget />
+      )}
+    </PiPErrorBoundary>
+  )
 }
 
 /**

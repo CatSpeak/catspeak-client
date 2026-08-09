@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react"
-
+import { useNavigate } from "react-router-dom"
+import { getProfilePath } from "@/shared/utils/navigation"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 /**
  * Reusable Avatar component — displays a user image or initial fallback.
+ * Clicking on an Avatar with an `accountId` automatically navigates to that user's profile.
  *
- * Consistent look across the app. Only `size` and data props should vary.
- *
- * @param {number}  [size=24]    - Width & height in pixels (like lucide-react icons)
- * @param {string}  [src]        - Image URL (shows image when provided)
- * @param {string}  [alt]        - Alt text for the image
- * @param {string}  [name]       - Used to derive the fallback initial
- * @param {string}  [fallback]   - Explicit fallback character (overrides name)
- * @param {boolean} [speaking]   - Show green speaking-indicator border
- * @param {string}  [className]  - Extra classes merged onto the outer wrapper
+ * @param {number}  [size=24]        - Width & height in pixels
+ * @param {string}  [src]            - Image URL
+ * @param {string}  [alt]            - Alt text for the image
+ * @param {string}  [name]           - Used to derive the fallback initial
+ * @param {string}  [fallback]       - Explicit fallback character (overrides name)
+ * @param {boolean} [speaking]       - Show green speaking-indicator border
+ * @param {number|string} [accountId]- If provided, clicking navigates to /profile/:accountId
+ * @param {function} [onClick]       - Custom click handler
+ * @param {boolean} [clickable=true] - Enable click-to-profile behavior when accountId or onClick is provided
+ * @param {string}  [className]      - Extra classes merged onto outer wrapper
+ * @param {object}  [style]          - Custom inline styles
  */
 const Avatar = ({
   size = 24,
@@ -21,40 +27,66 @@ const Avatar = ({
   name,
   fallback,
   speaking = false,
+  accountId,
+  onClick,
+  clickable = true,
   className = "",
+  style = {},
 }) => {
   const [imgError, setImgError] = useState(false)
+  let navigate
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    navigate = useNavigate()
+  } catch {
+    navigate = getNavigate()
+  }
+  const { currentLang } = useLanguage()
 
-  // Reset imgError if src changes
   useEffect(() => {
     setImgError(false)
   }, [src])
 
   const initial = fallback || (name ? name.charAt(0).toUpperCase() : "U")
-
-  // Scale font size relative to the avatar size
   const fontSize = Math.max(10, Math.round(size * 0.4))
+
+  const isClickable = clickable && (Boolean(accountId) || Boolean(onClick))
+
+  const handleClick = (e) => {
+    if (onClick) {
+      onClick(e)
+    }
+    if (accountId && !e.defaultPrevented) {
+      e.stopPropagation()
+      navigate(getProfilePath(accountId))
+    }
+  }
 
   const baseStyle = {
     width: `${size}px`,
     height: `${size}px`,
     minWidth: `${size}px`,
     minHeight: `${size}px`,
-    borderWidth: "1px",
-    borderColor: speaking ? "#16a34a" : "#C6C6C6",
-    borderStyle: "solid",
     fontSize: `${fontSize}px`,
+    boxShadow: speaking
+      ? "0 0 0 2px #3D9E60, 0 0 10px rgba(61, 158, 96, 0.5)"
+      : "0 0 0 2px transparent",
+    transition: "box-shadow 0.2s ease",
+    ...style,
   }
 
-  const speakingClass = speaking
-    ? "shadow-[0_0_15px_rgba(46,125,50,0.4)]"
+  const speakingClass = ""
+
+  const cursorClass = isClickable
+    ? "cursor-pointer hover:opacity-85 hover:scale-[1.03] transition-all"
     : ""
 
   if (src && !imgError) {
     return (
       <div
-        className={`overflow-hidden rounded-full ${speakingClass} ${className}`}
+        className={`overflow-hidden rounded-full shrink-0 ${speakingClass} ${cursorClass} ${className}`}
         style={baseStyle}
+        onClick={isClickable ? handleClick : onClick}
       >
         <img
           src={src}
@@ -68,8 +100,9 @@ const Avatar = ({
 
   return (
     <div
-      className={`flex items-center justify-center rounded-full font-semibold bg-cath-red-700 text-white ${speakingClass} ${className}`}
+      className={`flex items-center justify-center rounded-full font-semibold bg-cath-red-700 text-white shrink-0 ${speakingClass} ${cursorClass} ${className}`}
       style={baseStyle}
+      onClick={isClickable ? handleClick : onClick}
     >
       {initial}
     </div>

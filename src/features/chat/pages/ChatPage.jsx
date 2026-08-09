@@ -1,10 +1,12 @@
 import { useState, useCallback, useMemo, useEffect } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { MessageCircle } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
 import ChatSidebar from "../components/ChatSidebar"
 import ChatArea from "../components/ChatArea"
 import ChatUserPanel from "../components/ChatUserPanel"
 import NewChatModal from "../components/modals/NewChatModal"
+import FileSizeLimitModal from "../components/modals/FileSizeLimitModal"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { conversationsApi } from "@/store/api/social/conversationsApi"
@@ -16,6 +18,7 @@ import useChatConversations from "@/features/chat/hooks/useChatConversations"
 import { EmptyState } from "@/shared/components/ui/indicators"
 import useMediaQuery from "@/shared/hooks/useMediaQuery"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { FluentAnimation } from "@/shared/components/ui/animations"
 
 /**
  * ChatPage — fullscreen chat page.
@@ -26,14 +29,18 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 const ChatPage = () => {
   const { t } = useLanguage()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { id: routeId } = useParams()
   const isDesktop = useMediaQuery("(min-width: 1280px)")
 
   // ── Auth & Profile ─────────────────────────────────────
   const { user: authUser } = useAuth()
   const { data: userProfile } = useGetUserProfileQuery()
 
+  // ── Route & Selection State ─────────────────────────────
+  const selectedId = routeId || null
+
   // ── UI State ───────────────────────────────────────────
-  const [selectedId, setSelectedId] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [showInfoPanel, setShowInfoPanel] = useState(false)
   const [inputValue, setInputValue] = useState("")
@@ -55,9 +62,14 @@ const ChatPage = () => {
 
   const {
     replyingTo,
+    pendingUpload,
+    isFileSizeModalOpen,
+    closeFileSizeModal,
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
+    handleRetryUpload,
+    handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
   } = useChatMessageActions(selectedId)
@@ -93,29 +105,29 @@ const ChatPage = () => {
   // ── Handlers ───────────────────────────────────────────
   const handleSelectConversation = useCallback(
     (convId) => {
-      setSelectedId(convId)
+      navigate(`/chat/${convId}`)
       setInputValue("")
       handleCancelReply()
     },
-    [handleCancelReply],
+    [navigate, handleCancelReply],
   )
 
   const handleBack = useCallback(() => {
-    setSelectedId(null)
+    navigate("/chat")
     setShowInfoPanel(false)
     handleCancelReply()
-  }, [handleCancelReply])
+  }, [navigate, handleCancelReply])
 
   const handleToggleInfo = useCallback(() => {
     setShowInfoPanel((prev) => !prev)
   }, [])
 
   const handleLeaveGroup = useCallback(() => {
-    setSelectedId(null)
+    navigate("/chat")
     setShowInfoPanel(false)
     handleCancelReply()
     dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-  }, [dispatch, handleCancelReply])
+  }, [navigate, dispatch, handleCancelReply])
 
   const handleSend = useCallback(
     async (text, file) => {
@@ -126,7 +138,7 @@ const ChatPage = () => {
   )
 
   return (
-    <div className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
+    <FluentAnimation className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
       {/* ── Sidebar ──────────────────────────────────── */}
       <div
         className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-fit shrink-0`}
@@ -169,6 +181,9 @@ const ChatPage = () => {
           onCancelReply={handleCancelReply}
           onDeleteForMe={handleDeleteForMe}
           onRecall={handleRecall}
+          pendingUpload={pendingUpload}
+          onRetryUpload={handleRetryUpload}
+          onCancelUpload={handleCancelUpload}
         />
       ) : (
         <EmptyState
@@ -231,7 +246,13 @@ const ChatPage = () => {
         onClose={() => setIsNewChatOpen(false)}
         onConversationCreated={handleSelectConversation}
       />
-    </div>
+
+      {/* ── File Size Limit Modal ────────────────────── */}
+      <FileSizeLimitModal
+        open={isFileSizeModalOpen}
+        onClose={closeFileSizeModal}
+      />
+    </FluentAnimation>
   )
 }
 

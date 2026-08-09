@@ -1,7 +1,7 @@
-import { getApps, getApp, initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+import { getApps, getApp, initializeApp } from "firebase/app"
+import { getAuth } from "firebase/auth"
+import { getFirestore } from "firebase/firestore"
+import { getStorage } from "firebase/storage"
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -12,13 +12,25 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_APPID,
 }
 
-// Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
+let app = null
+let auth = null
+let db = null
+let storage = null
 
-// Initialize Firebase services
-const auth = getAuth(app)
-const db = getFirestore(app)
-const storage = getStorage(app)
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "undefined") {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
+    auth = getAuth(app)
+    db = getFirestore(app)
+    storage = getStorage(app)
+  } else {
+    console.warn(
+      "[Firebase] VITE_API_KEY missing or not set. Firebase services disabled gracefully.",
+    )
+  }
+} catch (err) {
+  console.warn("[Firebase] Failed to initialize Firebase:", err)
+}
 
 export { app, auth, db, storage }
 

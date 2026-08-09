@@ -1,5 +1,4 @@
 import React from "react"
-import { motion } from "framer-motion"
 import { Star } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -7,6 +6,7 @@ import RoleBadge from "./RoleBadge"
 import useCountUp from "./useCountUp"
 import { fluentEaseOut } from "@/shared/utils/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { motion } from "framer-motion"
 
 /**
  * RoundScoreCard
@@ -14,6 +14,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * @param {object} describer     - { id, name, avatar }
  * @param {number} roundScore    - Score earned this round
  */
+import { getImageUrl } from "@/shared/utils/imageUtils"
+
 const RoundScoreCard = ({ describer, roundScore }) => {
   const { t } = useLanguage();
   const tb = t.rooms?.game?.pictureIt?.topBar || {};
@@ -48,7 +50,7 @@ const RoundScoreCard = ({ describer, roundScore }) => {
         <div className="flex flex-col items-center gap-2 pb-3 border-b border-[#E5E5E5]">
           <Avatar
             size={56}
-            src={describer?.avatar}
+            src={describer?.avatar ? getImageUrl(describer.avatar) : null}
             name={describer?.name}
             alt={describer?.name}
           />

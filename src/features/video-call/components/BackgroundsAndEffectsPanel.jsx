@@ -6,20 +6,26 @@ import { Tabs } from "@/shared/components/ui/navigation"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHelpers"
+
 /**
  * Tab strip + content panel for Backgrounds / Beauty effects.
  * Used inside the room side panel (no modal wrapper or video preview).
  */
 const BackgroundsAndEffectsPanel = () => {
   const { t } = useLanguage()
+  const { room } = useGlobalVideoCall()
   const [activeTab, setActiveTab] = useState("backgrounds")
   const { hasFeature } = usePlanFeatures()
 
-  const hasBeautyFilter = hasFeature(PLAN_FEATURES.BEAUTY_FILTER)
+  const isBeautyAllowed =
+    hasFeature(PLAN_FEATURES.BEAUTY_FILTER) &&
+    isBeautyFilterSupported(room?.roomType)
 
   const tabs = [
     { id: "backgrounds", label: t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds" },
-    ...(hasBeautyFilter ? [{ id: "beauty", label: t?.rooms?.beauty?.tabLabel || "Beauty" }] : [])
+    ...(isBeautyAllowed ? [{ id: "beauty", label: t?.rooms?.beauty?.tabLabel || "Beauty" }] : [])
   ]
 
   const scrollbarClasses =
@@ -39,7 +45,7 @@ const BackgroundsAndEffectsPanel = () => {
         {activeTab === "backgrounds" ? (
           <VirtualBackgroundPicker />
         ) : (
-          hasBeautyFilter && <BeautyPicker />
+          isBeautyAllowed && <BeautyPicker />
         )}
       </div>
     </div>

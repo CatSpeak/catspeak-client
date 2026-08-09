@@ -6,6 +6,8 @@ import MobileLanguageItem from "./MobileLanguageItem";
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink";
 import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages";
 
+import { getSwitchCommunityPath } from "@/shared/utils/navigation";
+
 const DEFAULT_COMMUNITY = "zh";
 
 const MobileCommunityDropdown = ({ navKey, onClose }) => {
@@ -58,15 +60,11 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
     setCommunityOpen(false);
 
     const isInsideEcosystem =
-      location.pathname.startsWith(`/${currentCommunity}/community`) ||
-      location.pathname.startsWith(`/${currentCommunity}/cat-speak`);
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`);
 
     if (isInsideEcosystem) {
-      const newPath = location.pathname.replace(
-        `/${currentCommunity}`,
-        `/${newCode}`,
-      );
-      window.location.href = newPath;
+      window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode);
     } else {
       window.location.href = `/${newCode}/community`;
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React from "react"
 import ScreenShareTile from "../ScreenShareTile"
 import VideoTile from "../VideoTile"
 
@@ -10,19 +10,7 @@ const NormalVideoLayout = ({
   participants,
   handleTileClick,
   totalItems,
-  maxTiles = 16,
 }) => {
-  const [currentPage, setCurrentPage] = useState(0)
-
-  // Reset page if total items change and current page is now invalid
-  useEffect(() => {
-    const itemsPerPage = maxTiles
-    const maxPages = Math.ceil(totalItems / itemsPerPage)
-    if (currentPage >= maxPages && maxPages > 0) {
-      setCurrentPage(maxPages - 1)
-    }
-  }, [totalItems, currentPage, maxTiles])
-
   const allItems = [
     ...(screenShareTracks || []).map((t) => ({
       type: "screen",
@@ -37,126 +25,124 @@ const NormalVideoLayout = ({
     })),
   ]
 
-  const itemsPerPage = maxTiles
-  const shouldPaginate = totalItems > itemsPerPage
-  const maxPages = Math.ceil(totalItems / itemsPerPage)
-
-  const displayedItems = shouldPaginate
-    ? allItems.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
-    : allItems
-
-  const currentDisplayCount = displayedItems.length
-
-  const getContainerLayout = (count) => {
-    if (count === 1) return "flex flex-col items-center justify-center"
-    return "flex flex-wrap items-center justify-center content-center"
-  }
-
-  const getItemClass = (count) => {
-    if (count === 1) return "h-full w-full"
-
-    // 2 items: Mobile -> 1 col 2 rows, Desktop -> 2 cols 1 row
-    if (count === 2)
-      return "w-full h-[calc(50%-2px)] md:w-[calc(50%-2px)] md:h-full flex-shrink-0"
-
-    // 3 items: Mobile -> 1 col 3 rows, Desktop -> 2 cols 2 rows (like 4 items)
-    if (count === 3)
-      return "w-full h-[calc(33.333%-2.66px)] md:w-[calc(50%-2px)] md:h-[calc(50%-2px)] md:min-h-[250px] flex-shrink-0"
-
-    // 4 items: 50% width, 50% height to perfectly fill the screen without scrolling (2 cols 2 rows)
-    if (count === 4)
-      return "w-[calc(50%-2px)] h-[calc(50%-2px)] min-h-[250px] flex-shrink-0"
-
-    // 5, 6 items: Mobile -> 2 cols 3 rows, Desktop -> 3 cols 2 rows
-    if (count === 5 || count === 6)
-      return "w-[calc(50%-2px)] md:w-[calc(33.333%-2.66px)] h-[calc(33.333%-2.66px)] md:h-[calc(50%-2px)] min-h-[150px] md:min-h-[200px] flex-shrink-0"
-
-    // 7, 8 items: 4 columns, 2 rows
-    if (count === 7 || count === 8)
-      return "w-[calc(25%-3px)] h-[calc(50%-2px)] min-h-[150px] flex-shrink-0"
-
-    // 9 items: 3 columns, 3 rows
-    if (count === 9)
-      return "w-[calc(33.333%-2.66px)] h-[calc(33.333%-2.66px)] min-h-[150px] flex-shrink-0"
-
-    // 10, 11, 12 items: 4 columns, 3 rows
-    if (count >= 10 && count <= 12)
-      return "w-[calc(25%-3px)] h-[calc(33.333%-2.66px)] min-h-[150px] flex-shrink-0"
-
-    // > 12 items: fallback to responsive wrapped flex
-    return "w-[calc(25%-3px)] aspect-video min-w-[200px] min-h-[150px] flex-shrink-0"
-  }
-
-  return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden">
-      <div
-        className={`
-          flex-1 w-full
-          gap-1
-          md:p-2 px-2
-          ${!shouldPaginate ? "overflow-y-auto" : "overflow-hidden"}
-          [align-content:safe_center]
-          [justify-content:safe_center]
-          ${getContainerLayout(currentDisplayCount)}
-          ${scrollbarClasses}
-        `}
-      >
-        {displayedItems.map((item) => {
-          if (item.type === "screen") {
-            return (
-              <div
-                key={item.key}
-                className={`relative ${getItemClass(currentDisplayCount)}`}
-              >
-                <ScreenShareTile
-                  trackRef={item.data}
-                  presenterDisplayName={
-                    item.data.participant?.name ||
-                    item.data.participant?.identity ||
-                    "Unknown"
-                  }
-                  isLocal={item.data.participant?.isLocal}
-                  onClick={
-                    totalItems >= 2
-                      ? () => handleTileClick({ type: "screen", trackRef: item.data })
-                      : undefined
-                  }
-                />
-              </div>
-            )
-          } else {
-            return (
-              <div
-                key={item.key}
-                className={`relative ${getItemClass(currentDisplayCount)}`}
-              >
-                <VideoTile
-                  participant={item.data}
-                  onClick={
-                    totalItems >= 2
-                      ? () => handleTileClick({ type: "video", participant: item.data })
-                      : undefined
-                  }
-                />
-              </div>
-            )
-          }
-        })}
-      </div>
-
-      {shouldPaginate && maxPages > 1 && (
-        <div className="flex w-full shrink-0 items-center justify-center gap-2 mt-2 md:mb-1.5 md:mt-0">
-          {Array.from({ length: maxPages }).map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentPage(idx)}
-              className={`h-2 w-2 rounded-full transition-colors ${currentPage === idx ? "bg-cath-red-700" : "bg-[#D9D9D9]"
-                }`}
-              aria-label={`Page ${idx + 1}`}
-            />
-          ))}
+  const renderTile = (item, extraClass = "") => {
+    const isClickable = totalItems >= 2
+    if (item.type === "screen") {
+      return (
+        <div
+          key={item.key}
+          className={`relative overflow-hidden rounded-xl ${extraClass}`}
+        >
+          <ScreenShareTile
+            trackRef={item.data}
+            presenterDisplayName={
+              item.data.participant?.name ||
+              item.data.participant?.identity ||
+              "Unknown"
+            }
+            isLocal={item.data.participant?.isLocal}
+            onClick={
+              isClickable
+                ? () =>
+                    handleTileClick({
+                      type: "screen",
+                      trackRef: item.data,
+                    })
+                : undefined
+            }
+          />
         </div>
-      )}
+      )
+    }
+
+    return (
+      <div
+        key={item.key}
+        className={`relative overflow-hidden rounded-xl ${extraClass}`}
+      >
+        <VideoTile
+          participant={item.data}
+          onClick={
+            isClickable
+              ? () =>
+                  handleTileClick({
+                    type: "video",
+                    participant: item.data,
+                  })
+              : undefined
+          }
+        />
+      </div>
+    )
+  }
+
+  // 1 Participant: Full Container
+  if (totalItems === 1 && allItems.length === 1) {
+    return (
+      <div className="relative h-full w-full overflow-hidden">
+        {renderTile(allItems[0], "w-full h-full")}
+      </div>
+    )
+  }
+
+  // 2 Participants: Side by side (Desktop) / Stacked (Mobile)
+  if (totalItems === 2 && allItems.length === 2) {
+    return (
+      <div className="relative h-full w-full overflow-hidden grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {allItems.map((item) => renderTile(item, "w-full h-full"))}
+      </div>
+    )
+  }
+
+  // 3 Participants: 3 Equal Columns (Desktop) / Stacked (Mobile)
+  if (totalItems === 3 && allItems.length === 3) {
+    return (
+      <div className="relative h-full w-full overflow-hidden grid grid-cols-1 sm:grid-cols-3 gap-2">
+        {allItems.map((item) => renderTile(item, "w-full h-full"))}
+      </div>
+    )
+  }
+
+  // 4 Participants: 2x2 Grid
+  if (totalItems === 4 && allItems.length === 4) {
+    return (
+      <div className="relative h-full w-full overflow-hidden grid grid-cols-2 grid-rows-2 gap-2">
+        {allItems.map((item) => renderTile(item, "w-full h-full"))}
+      </div>
+    )
+  }
+
+  // 5 Participants: Top 3, Bottom 2 centered
+  if (totalItems === 5 && allItems.length === 5) {
+    return (
+      <div className="relative h-full w-full overflow-hidden flex flex-col gap-2">
+        <div className="grid grid-cols-3 gap-2 h-1/2 w-full">
+          {allItems
+            .slice(0, 3)
+            .map((item) => renderTile(item, "w-full h-full"))}
+        </div>
+        <div className="flex gap-2 h-1/2 w-full justify-center">
+          {allItems
+            .slice(3, 5)
+            .map((item) =>
+              renderTile(
+                item,
+                "w-full sm:w-[calc(33.333%-0.5rem)] h-full flex-1 sm:flex-initial",
+              ),
+            )}
+        </div>
+      </div>
+    )
+  }
+
+  // > 5 Participants: Scrollable Grid
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <div
+        className={`h-full w-full overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-max ${scrollbarClasses}`}
+      >
+        {allItems.map((item) => renderTile(item, "w-full aspect-video"))}
+      </div>
     </div>
   )
 }

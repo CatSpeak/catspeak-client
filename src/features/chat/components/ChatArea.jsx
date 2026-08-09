@@ -1,12 +1,15 @@
 import { memo, useEffect, useRef } from "react"
 import ChatBubble from "./messages/ChatBubble"
+import MediaUploadBubble from "./messages/MediaUploadBubble"
 import ChatInput from "./ChatInput"
 import ChatHeader from "./ChatHeader"
 import ChatMessagesSkeleton from "./ChatMessagesSkeleton"
 import DateSeparator from "./messages/DateSeparator"
 import SystemMessage from "./messages/SystemMessage"
+import StoryInterestMessage from "./messages/StoryInterestMessage"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useGroupedMessages } from "../hooks/useGroupedMessages"
 
 /**
@@ -34,7 +37,11 @@ const ChatArea = ({
   onCancelReply,
   onDeleteForMe,
   onRecall,
+  pendingUpload = null,
+  onRetryUpload,
+  onCancelUpload,
 }) => {
+  const { userTimeZone } = useTimezone()
   const scrollRef = useRef(null)
   const isPrependingRef = useRef(false)
   const prevScrollHeightRef = useRef(0)
@@ -45,6 +52,7 @@ const ChatArea = ({
     currentUser,
     conversation,
     isLoading,
+    userTimeZone,
   })
 
   // Trigger top scroll load more
@@ -67,7 +75,7 @@ const ChatArea = ({
     }
   }
 
-  // Auto-scroll to bottom on initial load / new bottom messages, preserve offset on prepending
+  // Auto-scroll to bottom on initial load / new bottom messages / pending uploads, preserve offset on prepending
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
@@ -81,12 +89,12 @@ const ChatArea = ({
       const isInitial = prevMessagesLengthRef.current === 0
       const isNearBottom =
         el.scrollHeight - el.scrollTop - el.clientHeight < 150
-      if (isInitial || isNearBottom) {
+      if (isInitial || isNearBottom || pendingUpload) {
         el.scrollTop = el.scrollHeight
       }
     }
     prevMessagesLengthRef.current = messages.length
-  }, [messages, typingUsers])
+  }, [messages, typingUsers, pendingUpload])
 
   if (!conversation) return null
 
@@ -98,6 +106,15 @@ const ChatArea = ({
       }
       if (item.type === "system") {
         return <SystemMessage key={item.id} content={item.message.content} />
+      }
+      if (item.type === "storyinterest") {
+        return (
+          <StoryInterestMessage
+            key={item.id}
+            message={item.message}
+            sender={item.sender}
+          />
+        )
       }
       return (
         <ChatBubble
@@ -143,12 +160,23 @@ const ChatArea = ({
         ) : (
           <>
             <div className="flex-1" />
+
             {isLoadingMore && (
               <div className="flex items-center justify-center py-2 shrink-0">
                 <Skeleton className="h-6 w-32 rounded-full" />
               </div>
             )}
+
             {renderMessages()}
+
+            {pendingUpload && (
+              <MediaUploadBubble
+                pendingUpload={pendingUpload}
+                onRetry={onRetryUpload}
+                onCancel={onCancelUpload}
+              />
+            )}
+
             {typingUsers &&
               typingUsers.map((u) => {
                 const participant = conversation?.participants?.find(

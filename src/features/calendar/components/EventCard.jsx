@@ -1,5 +1,5 @@
 import { useLanguage } from "@/shared/context/LanguageContext";
-import dayjs from "dayjs";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatLocation } from "../utils/eventFormatters";
 import {
   Clock,
@@ -16,11 +16,10 @@ const DEFAULT_COLOR = "#990011";
 
 const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
   const { t } = useLanguage();
+  const { formatDateTime } = useTimezone();
 
-  const startTime = event.startTime
-    ? dayjs(event.startTime).format("HH:mm (DD/MM/YYYY)")
-    : "";
-  const endTime = event.endTime ? dayjs(event.endTime).format("HH:mm (DD/MM/YYYY)") : "";
+  const startTime = event.startTime ? formatDateTime(event.startTime) : "";
+  const endTime = event.endTime ? formatDateTime(event.endTime) : "";
   const timeStr =
     startTime && endTime ? `${startTime} - ${endTime}` : startTime;
 
@@ -97,7 +96,8 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
             <span className="text-sm font-bold text-[#990011]">
               {new Intl.NumberFormat("vi-VN", {
                 maximumFractionDigits: 0,
-              }).format(event.ticketPrice)}k
+              }).format(event.ticketPrice)}
+              k
             </span>
           ) : (
             <span className="text-sm font-bold text-[#990011]">
@@ -118,7 +118,11 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
       {/* Expanded Details section */}
       {isSelected && (
         <FluentAnimation direction="up" distance={10} duration={0.3}>
-          <EventCardDetails event={event} onClose={() => onClick(event)} onActionComplete={onActionComplete} />
+          <EventCardDetails
+            event={event}
+            onClose={() => onClick(event)}
+            onActionComplete={onActionComplete}
+          />
         </FluentAnimation>
       )}
     </div>

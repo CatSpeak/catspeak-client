@@ -1,157 +1,157 @@
-import React, { useState, useRef, useCallback, useMemo, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPostsQuery } from "@/store/api/social/postsApi"
-import { Breadcrumb } from "@/shared/components/ui/navigation"
-import NewsCard from "../components/NewsCard"
-import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage"
-import EmptyState from "@/shared/components/ui/indicators/EmptyState"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+import React, { useRef, useMemo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Newspaper } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useGetPostsQuery } from "@/store/api/social/postsApi";
+import { incrementPage, selectNewsPage } from "@/store/slices/newsSlice";
+import NewsCard from "../components/NewsCard";
+import NewsCardSkeleton from "../components/NewsCardSkeleton";
+import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
+import EmptyState from "@/shared/components/ui/indicators/EmptyState";
+import useColumnCount from "@/shared/hooks/useColumnCount";
+import { getCommunityName } from "../utils/newsUtils";
 
-/* ------------------------------------------------------------------ */
-/*  Filter Tabs                                                        */
-/* ------------------------------------------------------------------ */
+const NewsPage = ({ postType = "1" }) => {
+  const { lang } = useParams();
+  const { t, language } = useLanguage();
+  const dispatch = useDispatch();
 
-const FILTER_TABS = [{ key: "all", label: "Tất cả" }]
+  const currentCommunity = useMemo(() => {
+    return getCommunityName(
+      lang || localStorage.getItem("communityLanguage") || language || "en",
+    );
+  }, [lang, language]);
 
-const FilterTabs = ({ active, onChange }) => (
-  <div className="flex items-center gap-3">
-    {FILTER_TABS.map((tab) => {
-      const isActive = active === tab.key
-      return (
-        <PillButton
-          key={tab.key}
-          onClick={() => onChange(tab.key)}
-          variant={isActive ? "primary" : "secondary"}
-        >
-          {tab.label}
-        </PillButton>
-      )
-    })}
-  </div>
-)
+  const page = useSelector(selectNewsPage);
+  const pageSize = 26;
 
-/* ------------------------------------------------------------------ */
-/*  Responsive column count                                            */
-/* ------------------------------------------------------------------ */
-
-const useColumnCount = () => {
-  const [cols, setCols] = useState(3)
-
-  useEffect(() => {
-    const handleResize = () => {
-      const w = window.innerWidth
-      if (w >= 1280) setCols(4)
-      else if (w >= 768) setCols(3)
-      else if (w >= 480) setCols(2)
-      else setCols(1)
-    }
-
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  return cols
-}
-
-/* ------------------------------------------------------------------ */
-/*  NewsPage                                                           */
-/* ------------------------------------------------------------------ */
-
-const NewsPage = () => {
-  const { t } = useLanguage()
-  const { lang } = useParams()
-  const navigate = useNavigate()
-  const currentLang = lang || "vi"
-
-  const [page, setPage] = useState(1)
-  const [activeFilter, setActiveFilter] = useState("all")
-  const pageSize = 26
-
-  const { data, error } = useGetPostsQuery({
+  const { data, error, isLoading, isFetching } = useGetPostsQuery({
     page,
     pageSize,
-  })
+    postType,
+  });
 
-  // Only public posts
+  // Public posts filtered by current language community or "All"
   const publicPosts = useMemo(() => {
-    return data?.data?.filter((post) => post.privacy === "Public") || []
-  }, [data?.data])
+    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+    const targetCommunity = currentCommunity.toLowerCase();
 
-  // console.log(publicPosts);
+    return rawList.filter((post) => {
+      if (post.privacy !== "Public") return false;
 
-  const columnsCount = useColumnCount()
+      const postCommunity = (post.languageCommunity || "All").toLowerCase();
+      return postCommunity === "all" || postCommunity === targetCommunity;
+    });
+  }, [data, currentCommunity]);
+
+  const columnsCount = useColumnCount();
 
   // Distribute posts into masonry columns
   const columns = useMemo(() => {
-    const colsArray = Array.from({ length: columnsCount }, () => [])
+    const colsArray = Array.from({ length: columnsCount }, () => []);
     publicPosts.forEach((post, i) => {
-      colsArray[i % columnsCount].push(post)
-    })
-    return colsArray
-  }, [publicPosts, columnsCount])
+      colsArray[i % columnsCount].push(post);
+    });
+    return colsArray;
+  }, [publicPosts, columnsCount]);
 
   // Infinite scroll observer — trigger fetch when the second-to-last post appears
-  const secondLastPostElementRef = useRef(null)
+  const secondLastPostElementRef = useRef(null);
   useEffect(() => {
-    if (!secondLastPostElementRef.current) return
+    if (!secondLastPostElementRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setPage((p) => p + 1)
+          dispatch(incrementPage());
         }
       },
       {
         rootMargin: "200px",
       },
-    )
-    observer.observe(secondLastPostElementRef.current)
-    return () => observer.disconnect()
-  }, [publicPosts])
+    );
+    observer.observe(secondLastPostElementRef.current);
+    return () => observer.disconnect();
+  }, [publicPosts, dispatch]);
 
-  // ── Error states ──────────────────────────────────────────────────
-  if (error && page === 1) {
-    if (error?.status === 404) return <EmptyState message="No posts found" />
-    if (error?.status === 401)
-      return <EmptyState message={t.catSpeak?.newsLoginPrompt} />
-    return <ErrorMessage message="Error loading posts" />
+  // ── Initial Loading State ─────────────────────────────────────────
+  if (isLoading && publicPosts.length === 0) {
+    const skeletonCols = Array.from({ length: columnsCount }, () => []);
+    const totalSkeletons = columnsCount * 3;
+    for (let i = 0; i < totalSkeletons; i++) {
+      skeletonCols[i % columnsCount].push(i);
+    }
+
+    return (
+      <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
+        <div className="flex flex-row w-full gap-4 items-start">
+          {skeletonCols.map((col, colIndex) => (
+            <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
+              {col.map((itemIndex) => (
+                <NewsCardSkeleton key={itemIndex} index={itemIndex} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
-  // ── Breadcrumb items ──────────────────────────────────────────────
-  const breadcrumbItems = [
-    {
-      label: "Trang chủ",
-      onClick: () => navigate(`/${currentLang}/community`),
-    },
-    {
-      label: "Cat Speak",
-      onClick: () => navigate(`/${currentLang}/cat-speak/news`),
-    },
-    { label: "Bản tin CatSpeak" },
-  ]
+  // ── Error State ───────────────────────────────────────────────────
+  if (error && page === 1) {
+    if (error?.status === 404) {
+      return (
+        <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6 min-h-[60vh] justify-center items-center">
+          <EmptyState
+            message={t.news?.empty?.title || "Chưa có tin tức nào"}
+            description={
+              t.news?.empty?.description ||
+              "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
+            }
+            icon={Newspaper}
+            variant="page"
+          />
+        </div>
+      );
+    }
+    if (error?.status === 401) {
+      return (
+        <EmptyState message={t.catSpeak?.newsLoginPrompt} variant="page" />
+      );
+    }
+    return <ErrorMessage message="Error loading posts" />;
+  }
+
+  // ── Empty State ───────────────────────────────────────────────────
+  if (!isLoading && publicPosts.length === 0) {
+    return (
+      <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6 min-h-[60vh] justify-center items-center">
+        <EmptyState
+          message={t.news?.empty?.title || "Chưa có tin tức nào"}
+          description={
+            t.news?.empty?.description ||
+            "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
+          }
+          icon={Newspaper}
+          variant="page"
+        />
+      </div>
+    );
+  }
 
   const secondLastPostId =
     publicPosts[publicPosts.length - 2]?.postId ??
-    publicPosts[publicPosts.length - 1]?.postId
+    publicPosts[publicPosts.length - 1]?.postId;
 
   // ── Render ────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col w-full gap-6 p-4 sm:p-6">
-      {/* Breadcrumb */}
-      <div>
-        <Breadcrumb items={breadcrumbItems} />
-      </div>
-
-      {/* Filter Tabs */}
-      <FilterTabs active={activeFilter} onChange={setActiveFilter} />
-
+    <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
       {/* Masonry Card Grid */}
-      <div className="flex flex-row w-full gap-3 items-start">
+      <div className="flex flex-row w-full gap-4 items-start">
         {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex flex-col flex-1 gap-3 min-w-0">
+          <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
             {col.map((post) => {
-              const isSecondLast = post.postId === secondLastPostId
+              const isSecondLast = post.postId === secondLastPostId;
               return (
                 <div
                   ref={isSecondLast ? secondLastPostElementRef : null}
@@ -159,13 +159,20 @@ const NewsPage = () => {
                 >
                   <NewsCard news={post} />
                 </div>
-              )
+              );
             })}
           </div>
         ))}
       </div>
-    </div>
-  )
-}
 
-export default NewsPage
+      {/* Pagination Fetching Skeleton */}
+      {isFetching && publicPosts.length > 0 && (
+        <div className="flex justify-center py-4">
+          <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default NewsPage;

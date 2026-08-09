@@ -27,22 +27,22 @@ const MobileNavLinks = ({ onClose }) => {
           }
           const { key, hasDropdown } = item;
           if (hasDropdown && key === "community") {
-          return (
-            <MobileCommunityDropdown key={key} navKey={key} onClose={onClose} />
-          );
-        }
-        if (key === "catSpeak") {
-          return (
-            <MobileCatSpeakDropdown key={key} navKey={key} onClose={onClose} />
-          );
-        }
-        if (key === "workspace" && hasDropdown === "false") {
-          return (
-            <MobileWorkspaceDropdown key={key} navKey={key} onClose={onClose} />
-          );
-        }
-        return <MobileNavItem key={key} navKey={key} onClose={onClose} />;
-      })}
+            return (
+              <MobileCommunityDropdown key={key} navKey={key} onClose={onClose} />
+            );
+          }
+          if (key === "catSpeak") {
+            return (
+              <MobileCatSpeakDropdown key={key} navKey={key} onClose={onClose} />
+            );
+          }
+          if (key === "workspace" && hasDropdown === "false") {
+            return (
+              <MobileWorkspaceDropdown key={key} navKey={key} onClose={onClose} />
+            );
+          }
+          return <MobileNavItem key={key} navKey={key} onClose={onClose} />;
+        })}
     </div>
   );
 };

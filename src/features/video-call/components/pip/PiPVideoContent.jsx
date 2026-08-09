@@ -4,6 +4,7 @@ import { useIsSpeaking } from "@livekit/components-react"
 import { MonitorUp, MicOff, VideoOff } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 // ─── Dominant Speaker Video ─────────────────────────────────────────────────
@@ -33,8 +34,7 @@ const DominantVideo = ({ participant }) => {
   }
 
   const meta = parseMetadata(participant?.metadata)
-  console.log("Participant Metadata [PiPVideoContent]:", meta)
-  const avatarUrl = meta?.avatarImageUrl
+  const avatarUrl = sanitizeAvatarUrl(meta?.avatarImageUrl)
 
   const theme = useMemo(
     () => getParticipantTheme(participant?.identity, displayName),
@@ -48,8 +48,6 @@ const DominantVideo = ({ participant }) => {
     return () => cameraTrack.detach(el)
   }, [cameraTrack])
 
-
-
   return (
     <div className="relative w-full h-full [container-type:inline-size]">
       {isVideoVisible ? (
@@ -58,7 +56,7 @@ const DominantVideo = ({ participant }) => {
           autoPlay
           playsInline
           muted={isLocal}
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover ${isLocal ? "-scale-x-100" : ""}`}
         />
       ) : (
         <div
@@ -79,7 +77,9 @@ const DominantVideo = ({ participant }) => {
               />
             </>
           )}
-          <div className={`${avatarUrl ? "relative z-10" : ""} flex items-center justify-center`}>
+          <div
+            className={`${avatarUrl ? "relative z-10" : ""} flex items-center justify-center`}
+          >
             <Avatar
               size={64}
               src={avatarUrl}
@@ -167,7 +167,10 @@ const PiPVideoContent = ({ activeScreenShare, dominant }) => {
 
   const theme = getParticipantTheme("", "?")
   return (
-    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[#2d2d2d] to-[#1a1a1a] [container-type:inline-size]" style={{ background: theme.bg }}>
+    <div
+      className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[#2d2d2d] to-[#1a1a1a] [container-type:inline-size]"
+      style={{ background: theme.bg }}
+    >
       <Avatar
         size={64}
         name="?"

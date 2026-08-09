@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useBookmarkReelMutation, useNotInterestedReelMutation } from "@/store/api/reelsApi"
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import ReelReportModal from "../modals/ReelReportModal"
 import ReelPlaylistModal from "../modals/ReelPlaylistModal"
 import {
@@ -73,7 +74,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
 
       copyLink: async () => {
         const langCode = localStorage.getItem("communityLanguage") || language || "en"
-        const url = `${window.location.origin}/${langCode}/cat-speak/reels/${reel.id}`
+        const url = getShareUrlWithVersion(`${window.location.origin}/${langCode}/cat-speak/reels/${reel.id}`)
         await navigator.clipboard.writeText(url)
         toast.success(t?.catSpeak?.reels?.detail?.moreMenu?.copySuccess || "Link copied to clipboard.")
       },

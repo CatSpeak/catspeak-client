@@ -14,6 +14,7 @@ const PillButton = ({
   textColor,
   borderColor,
   className = "",
+  roundedClass = "rounded-full",
   ...props
 }) => {
   const isSecondary = variant === "secondary"
@@ -28,7 +29,7 @@ const PillButton = ({
       ? "bg-white border border-[#e5e5e5] text-black group-hover:bg-[#f3f3f3] group-active:bg-[#e0e0e0]"
       : isSecondaryNoOutline
         ? "bg-transparent border border-transparent text-black group-hover:bg-[#E5E5E5] group-active:bg-[#e0e0e0]"
-        : "bg-cath-red-700 text-white group-hover:brightness-90 group-active:brightness-75"
+        : "bg-cath-red-700 border border-transparent text-white group-hover:brightness-90 group-active:brightness-75"
 
   const disabledStyles =
     "group-disabled:bg-[#BFBFBF] group-disabled:text-white group-disabled:brightness-100 group-disabled:border-transparent"
@@ -69,7 +70,7 @@ const PillButton = ({
     >
       <div
         style={customStyle}
-        className={`w-full h-10 px-4 text-sm rounded-full font-medium flex items-center justify-center gap-2 transition whitespace-nowrap ${variantStyles} ${disabledStyles}`}
+        className={`w-full h-10 px-4 text-sm font-medium flex items-center justify-center gap-2 transition whitespace-nowrap ${roundedClass} ${variantStyles} ${disabledStyles}`}
       >
         {loading ? (
           <>

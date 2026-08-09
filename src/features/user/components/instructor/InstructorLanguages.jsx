@@ -5,8 +5,8 @@ import Dropdown from "@/shared/components/ui/Dropdown"
 import FluentCard from "@/shared/components/ui/FluentCard"
 
 const LANGUAGE_LEVELS = {
-  "English": ["A1", "A2", "B1", "B2", "C1", "C2"],
-  "中文": ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"],
+  "English": ["B2", "C1", "C2"],
+  "中文": ["HSK 4", "HSK 5", "HSK 6", "HSK 7", "HSK 8", "HSK 9"],
 }
 const LANGUAGE_OPTIONS = Object.keys(LANGUAGE_LEVELS)
 

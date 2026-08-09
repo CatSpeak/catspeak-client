@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
+import { leaveCall } from "@/store/slices/videoCallSlice"
+import {
+  subscribeToCallBroadcast,
+  broadcastCallEvent,
+  BROADCAST_EVENT_TYPES,
+} from "@/features/video-call/services/callBroadcastChannel"
 import GlobalCallContent from "./GlobalCallContent"
 
 const GlobalVideoCallContext = createContext(null)
@@ -21,27 +27,29 @@ export { GlobalVideoCallContext as VideoCallContext }
 // Re-export navigate bridge (used by routesConfig RootLayout)
 export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
+import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
+
 // --- Idle context (no active call) ------------------------------------------
 
 const IDLE_VALUE = {
   isInCall: false,
   isPiP: false,
-  enterPiP: () => { },
-  exitPiP: () => { },
-  returnToCall: () => { },
+  enterPiP: () => {},
+  exitPiP: () => {},
+  returnToCall: () => {},
 
   showLeaveModal: false,
-  promptLeaveCall: () => { },
-  cancelLeaveCall: () => { },
+  promptLeaveCall: () => {},
+  cancelLeaveCall: () => {},
 
-  participants: [],
+  participants: MOCK_PARTICIPANTS,
   messages: [],
   aiMessages: [],
-  addOptimisticAiMessage: () => { },
-  chatPublicAi: async () => { },
-  chatPrivateAi: async () => { },
-  startNewThread: () => { },
-  continueThread: () => { },
+  addOptimisticAiMessage: () => {},
+  chatPublicAi: async () => {},
+  chatPrivateAi: async () => {},
+  startNewThread: () => {},
+  continueThread: () => {},
   getConversationThread: () => [],
 
   isConnected: false,
@@ -52,16 +60,16 @@ const IDLE_VALUE = {
   isTogglingScreenShare: false,
 
   activeSidePanel: null,
-  setActiveSidePanel: () => { },
+  setActiveSidePanel: () => {},
 
   showChat: false,
-  setShowChat: () => { },
+  setShowChat: () => {},
   showParticipants: false,
-  setShowParticipants: () => { },
+  setShowParticipants: () => {},
   showVirtualBackground: false,
-  setShowVirtualBackground: () => { },
+  setShowVirtualBackground: () => {},
   showAvatarPicker: false,
-  setShowAvatarPicker: () => { },
+  setShowAvatarPicker: () => {},
 
   beautyOptions: {
     smoothing: 0,
@@ -73,35 +81,49 @@ const IDLE_VALUE = {
     eyeBrighten: 0,
     teethWhiten: 0,
   },
-  setBeautyOptions: () => { },
-  switchBeauty: () => { },
+  setBeautyOptions: () => {},
+  switchBeauty: () => {},
   processorStatus: "idle",
 
   isAISession: false,
   showCC: false,
-  setShowCC: () => { },
+  setShowCC: () => {},
   showRoomSubtitles: false,
-  setShowRoomSubtitles: () => { },
+  setShowRoomSubtitles: () => {},
   subtitleSelectedLanguage: null,
-  setSubtitleSelectedLanguage: () => { },
+  setSubtitleSelectedLanguage: () => {},
+  isSubtitleActive: false,
+  isStartingSubtitles: false,
+  isStoppingSubtitles: false,
+  subtitleSupportedLangs: ["en", "vi"],
+  startSubtitles: async () => {},
+  stopSubtitles: async () => {},
 
   lkRoomName: null,
   unreadRoomChat: 0,
   unreadAiChat: 0,
   isChatCollapsed: false,
-  isAiCollapsed: false,
-  setUnreadRoomChat: () => { },
-  setUnreadAiChat: () => { },
-  setIsChatCollapsed: () => { },
-  setIsAiCollapsed: () => { },
+  isAiCollapsed: true,
+  setUnreadRoomChat: () => {},
+  setUnreadAiChat: () => {},
+  setIsChatCollapsed: () => {},
+  setIsAiCollapsed: () => {},
   speakingAssistantEnabled: false,
-  setSpeakingAssistantEnabled: () => { },
+  setSpeakingAssistantEnabled: () => {},
+  activeChatTab: "room",
+  setActiveChatTab: () => {},
   layoutMode: "auto",
-  setLayoutMode: () => { },
+  setLayoutMode: () => {},
   maxTiles: 16,
-  setMaxTiles: () => { },
+  setMaxTiles: () => {},
   hideEmptyTiles: false,
-  setHideEmptyTiles: () => { },
+  setHideEmptyTiles: () => {},
+
+  showRoomSettings: false,
+  setShowRoomSettings: () => {},
+  activeSettingsTab: "audio-video",
+  setActiveSettingsTab: () => {},
+  deviceSelection: null,
 }
 
 const IdleCallContent = ({
@@ -127,6 +149,7 @@ const IdleCallContent = ({
 // --- Main Provider ----------------------------------------------------------
 
 export const GlobalVideoCallProvider = ({ children }) => {
+  const dispatch = useDispatch()
   const { isInCall, livekitToken, livekitServerUrl, callInfo } = useSelector(
     (s) => s.videoCall,
   )
@@ -154,6 +177,25 @@ export const GlobalVideoCallProvider = ({ children }) => {
     )
   }, [speakingAssistantEnabled])
 
+  // Cross-tab call state broadcast listener
+  useEffect(() => {
+    const unsubscribe = subscribeToCallBroadcast(({ type }) => {
+      if (type === BROADCAST_EVENT_TYPES.PING_ACTIVE_CALL) {
+        if (isInCall) {
+          broadcastCallEvent(BROADCAST_EVENT_TYPES.PONG_ACTIVE_CALL, {
+            isInCall: true,
+            callInfo,
+          })
+        }
+      } else if (type === BROADCAST_EVENT_TYPES.REQUEST_LEAVE_CALL) {
+        if (isInCall) {
+          dispatch(leaveCall())
+        }
+      }
+    })
+    return unsubscribe
+  }, [isInCall, callInfo, dispatch])
+
   if (!isInCall || !livekitToken) {
     return (
       <IdleCallContent
@@ -167,16 +209,42 @@ export const GlobalVideoCallProvider = ({ children }) => {
     )
   }
 
+  const isMobileDevice =
+    typeof window !== "undefined" &&
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  console.log("[GlobalVideoCallProvider] Rendering LiveKitRoom:", {
+    livekitServerUrl,
+    sessionId: callInfo?.sessionId,
+    initMicOn: callInfo?.initMicOn,
+    initCamOn: callInfo?.initCamOn,
+    isMobileDevice,
+  })
+
   return (
     <LiveKitRoom
-      key={livekitToken}
+      key={callInfo?.sessionId}
       serverUrl={livekitServerUrl}
       token={livekitToken}
       connect={true}
       audio={callInfo.initMicOn}
       video={callInfo.initCamOn}
       className="contents"
-      options={{ publishDefaults: { simulcast: true } }}
+      options={{ publishDefaults: { simulcast: !isMobileDevice } }}
+      onConnected={() => {
+        console.log("[GlobalVideoCallProvider] LiveKitRoom connected successfully!")
+      }}
+      onDisconnected={(reason) => {
+        console.error("[GlobalVideoCallProvider] LiveKitRoom onDisconnected:", reason)
+      }}
+      onError={(err) => {
+        console.error("[GlobalVideoCallProvider] LiveKitRoom onError:", {
+          name: err?.name,
+          message: err?.message,
+          stack: err?.stack,
+          raw: err,
+        })
+      }}
     >
       <GlobalCallContent
         ContextProvider={GlobalVideoCallContext.Provider}

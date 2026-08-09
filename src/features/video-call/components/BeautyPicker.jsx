@@ -4,6 +4,8 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Slider from "@/shared/components/ui/Slider"
 
+import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHelpers"
+
 const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
 
 const readStoredBeautyOptions = () => {
@@ -17,6 +19,11 @@ const readStoredBeautyOptions = () => {
 const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
   const { t } = useLanguage()
   const ctx = useGlobalVideoCall()
+
+  // Guard against unsupported room types
+  if (!isBeautyFilterSupported(ctx?.room?.roomType)) {
+    return null
+  }
 
   // Use prop-driven state when provided (e.g. pre-join modal),
   // otherwise fall back to global call context (in-call panel).

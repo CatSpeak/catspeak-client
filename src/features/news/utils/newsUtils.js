@@ -54,12 +54,15 @@ export const getPreviewText = (html) => {
   return div.textContent?.replace(/\s+/g, " ").trim() || ""
 }
 
-
-
-export const formatExactDate = (dateStr, locale = "en-GB") => {
-  return new Date(dateStr).toLocaleDateString(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })
+export const getCommunityName = (code) => {
+  if (!code) return "English"
+  const c = code.toLowerCase()
+  if (c === "zh" || c === "cn" || c === "china" || c === "chinese")
+    return "Chinese"
+  if (c === "en" || c === "eng" || c === "uk" || c === "english")
+    return "English"
+  if (c === "vi" || c === "vn" || c === "vietnam" || c === "vietnamese")
+    return "Vietnamese"
+  return code
 }
+

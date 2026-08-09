@@ -8,7 +8,9 @@ const ProgressBar = ({
   className = "",
 }) => {
   return (
-    <div className={`w-full ${trackColorClass} rounded-full overflow-hidden flex items-center ${heightClass} ${className}`}>
+    <div
+      className={`my-1 w-full ${trackColorClass} rounded-full overflow-hidden flex items-center ${heightClass} ${className}`}
+    >
       <div
         className={`h-full rounded-full transition-all duration-300 ${colorClass}`}
         style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}

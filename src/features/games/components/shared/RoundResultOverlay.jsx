@@ -1,4 +1,5 @@
 import React from "react"
+// eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from "framer-motion"
 import CountdownCircle from "./CountdownCircle"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -18,14 +19,14 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-[1300] flex items-center justify-center p-4 bg-black/60"
+          className="absolute inset-0 z-[1300] flex items-center justify-center p-3 md:p-4 bg-black/60 overflow-hidden"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.94, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -12 }}
             transition={{ duration: 0.4, ease: [0.175, 0.885, 0.32, 1.275] }}
-            className={`relative w-full ${maxWidthClass} max-h-[90vh] overflow-y-auto scrollbar-app-transparent rounded-3xl p-6 md:p-8 flex flex-col gap-6`}
+            className={`relative w-full ${maxWidthClass} max-h-[92%] overflow-y-auto scrollbar-app-transparent rounded-3xl p-5 md:p-8 flex flex-col gap-4 md:gap-6`}
             style={{
               background: "rgba(255, 255, 255, 0.92)",
               backdropFilter: "blur(24px) saturate(180%)",

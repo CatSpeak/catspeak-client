@@ -47,7 +47,7 @@ const PaymentSummaryBox = ({
 
       {/* Package Banner */}
       <div 
-        className="rounded-2xl p-4 flex items-center justify-between font-nunito"
+        className="rounded-2xl p-4 flex items-center justify-between"
         style={{
           backgroundColor: hexToRgbA(cardColor, 0.1),
           color: cardColor,

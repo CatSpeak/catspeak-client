@@ -12,32 +12,43 @@ import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVid
 import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
+import { LanguageProvider } from "@/shared/context/LanguageContext"
 import { ScrollToTopButton } from "@/shared/components/ui/buttons"
-import { GlobalUploadSync } from "@/shared/hooks/useGlobalUpload.jsx"
-import GlobalUploadWidget from "@/shared/components/ui/progress/GlobalUploadWidget"
+import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
+import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
+import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
+import TimezoneBackfill from "@/shared/components/TimezoneBackfill"
+
+import WebViewGuard from "@/shared/components/WebViewGuard"
 
 function App() {
   return (
     <Provider store={store}>
-      <GlobalVideoCallProvider>
-          <NavigationProgress />
-          <ServerDownScreen />
-          <SidebarProvider>
-            <ConversationSignalRProvider>
-              <GlobalPresenceProvider>
-                <GlobalSignalRHandler />
-                <Toaster position="top-center" limit={1} />
-                <ScrollToTopButton />
-                <AppRouter />
-                <PiPWidget />
-                <GlobalUploadWidget />
-                <RecordingPoller />
-                <GlobalUploadSync />
-              </GlobalPresenceProvider>
-            </ConversationSignalRProvider>
-          </SidebarProvider>
-        </GlobalVideoCallProvider>
+      <AuthVisibilitySync />
+      <TimezoneBackfill />
+      <LanguageProvider>
+        <WebViewGuard>
+          <GlobalVideoCallProvider>
+            <NavigationProgress />
+            <ServerDownScreen />
+            <SidebarProvider>
+              <ConversationSignalRProvider>
+                <GlobalPresenceProvider>
+                  <GlobalSignalRHandler />
+                  <Toaster position="top-center" limit={1} />
+                  {/* <ScrollToTopButton /> */}
+                  <AppRouter />
+                  <PiPWidget />
+                  <GlobalTaskProgressWidget />
+                  <RecordingPoller />
+                  <GlobalTaskSync />
+                </GlobalPresenceProvider>
+              </ConversationSignalRProvider>
+            </SidebarProvider>
+          </GlobalVideoCallProvider>
+        </WebViewGuard>
+      </LanguageProvider>
     </Provider>
   )
 }

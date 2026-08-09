@@ -71,6 +71,10 @@ export default {
       newChatTitle: "发起新聊天",
       directMessage: "私信",
       newGroup: "新建群组",
+      fileSizeLimitTitle: "文件大小超出限制",
+      fileSizeLimitDesc: "对于您当前的账户，您的文件超过了 25MB 的最大允许限制。升级您的计划以享受更高的上传限制和其他高级功能。",
+      close: "关闭",
+      viewPricingPlans: "查看服务套餐",
     },
   },
 }

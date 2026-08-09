@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react"
 import { useNavigate, Outlet, useParams } from "react-router-dom"
 import { Film, ListPlus, Plus } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useAuth } from "@/features/auth"
 
 import Tabs from "@/shared/components/ui/navigation/Tabs"
@@ -17,6 +18,7 @@ const getLocale = (lang) => {
 
 const WorkspaceReelsContent = ({ userId }) => {
   const { t } = useLanguage()
+  const { userTimeZone } = useTimezone()
   const navigate = useNavigate()
   const currentLang = localStorage.getItem("communityLanguage") || "en"
   const locale = getLocale(currentLang)
@@ -31,17 +33,9 @@ const WorkspaceReelsContent = ({ userId }) => {
     { id: "playlists", label: ws?.tabs?.playlists || "Playlists", icon: ListPlus },
   ], [ws])
 
-  const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(locale, { year: "numeric", month: "2-digit", day: "2-digit" }),
-    [locale]
-  )
   const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale])
 
-  const formatDate = useCallback((dateStr) => {
-    if (!dateStr) return ""
-    const date = new Date(dateStr)
-    return Number.isNaN(date.getTime()) ? dateStr : dateFormatter.format(date)
-  }, [dateFormatter])
+  const { formatDate } = useTimezone()
 
   const formatNumber = useCallback(
     (value) => numberFormatter.format(value || 0),

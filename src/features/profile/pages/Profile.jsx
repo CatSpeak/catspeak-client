@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import React, { useState, useEffect } from "react"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -21,11 +21,13 @@ import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileDocumentsTab from "../components/ProfileDocumentsTab"
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
+import CompletedClass from "../components/CompletedClass"
 
 const Profile = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
   const navigate = useNavigate()
+  const location = useLocation()
   const { accountId: urlAccountId } = useParams()
   // Since URL params are strings, ensure we convert accountId to number for comparison
   const targetAccountId = urlAccountId
@@ -33,6 +35,13 @@ const Profile = () => {
     : user?.accountId
   const isOwnProfile =
     !urlAccountId || parseInt(urlAccountId, 10) === user?.accountId
+
+  useEffect(() => {
+    if (!urlAccountId && user?.accountId) {
+      const isWorkspace = location.pathname.startsWith("/workspace")
+      navigate(`${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}`, { replace: true })
+    }
+  }, [urlAccountId, user, navigate, location.pathname])
 
   // Fetch private profile if own profile, otherwise skip
   const { data: privateProfileData, isLoading: loadingPrivate } =
@@ -101,14 +110,15 @@ const Profile = () => {
   const displayAvatarUrl = formData.avatarImageUrl
 
   const tabs = [
-    { id: "home", label: "Nhà" },
+    { id: "home", label: t.profile?.tabs?.home || "Nhà" },
     {
       id: "friends",
-      label: "Bạn bè",
+      label: t.profile?.tabs?.friends || "Bạn bè",
       badge: pendingCount > 0 ? pendingCount.toString() : null,
     },
-    { id: "media", label: "Video/Ảnh" },
-    { id: "documents", label: "Tài liệu" },
+    { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
+    { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },
+    { id: "completedClass", label: t.profile?.tabs?.completedClass || "Lớp học đã hoàn thành" }
   ]
 
   return (
@@ -163,6 +173,14 @@ const Profile = () => {
               isOwnProfile={isOwnProfile}
             />
           )}
+          {
+            activeTab === "completedClass" && (
+              <CompletedClass
+                targetAccountId={targetAccountId}
+                isOwnProfile={isOwnProfile}
+              />
+            )
+          }
         </div>
 
         <ProfileOtpModal
@@ -172,12 +190,12 @@ const Profile = () => {
           title={
             editingField === "phoneNumber"
               ? t.profile?.personalInfo?.verifyPhoneTitle ||
-                "Xác nhận thay đổi số điện thoại"
+              "Xác nhận thay đổi số điện thoại"
               : editingField === "email"
                 ? t.profile?.personalInfo?.verifyEmailTitle ||
-                  "Xác nhận thay đổi Email"
+                "Xác nhận thay đổi Email"
                 : t.profile?.personalInfo?.verifyChangesTitle ||
-                  "Xác minh thay đổi"
+                "Xác minh thay đổi"
           }
           onVerify={handleOtpVerify}
           isVerifying={isUpdating || isUpdatingPhone}

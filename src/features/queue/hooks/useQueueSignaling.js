@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react"
-import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr"
+import {
+  HubConnectionBuilder,
+  HubConnectionState,
+  LogLevel,
+  HttpTransportType,
+} from "@microsoft/signalr"
 
 import { useAuth } from "@/features/auth"
 import { store } from "@store"
@@ -31,21 +36,23 @@ export const useQueueSignaling = (handlers = {}) => {
     const newConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => store.getState().auth.token,
+        transport:
+          HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling,
       })
       .withAutomaticReconnect()
-      .configureLogging(LogLevel.Warning)
+      .configureLogging(LogLevel.None)
       .build()
 
     connectionRef.current = newConnection
 
     const safeHandler =
       (name) =>
-        (...args) => {
-          const handler = handlersRef.current[name]
-          if (handler) {
-            handler(...args)
-          }
+      (...args) => {
+        const handler = handlersRef.current[name]
+        if (handler) {
+          handler(...args)
         }
+      }
 
     // Bind Hub Events
     const events = [
@@ -103,7 +110,7 @@ export const useQueueSignaling = (handlers = {}) => {
 
     return () => {
       // console.log("[QueueSignalR] Stopping connection...")
-      newConnection.stop().catch(() => { })
+      newConnection.stop().catch(() => {})
       setIsConnected(false)
       setConnectionId(null)
       connectionRef.current = null

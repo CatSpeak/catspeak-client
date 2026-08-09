@@ -6,6 +6,8 @@ const colorVariants = {
   red: "bg-red-100 text-red-700",
   yellow: "bg-yellow-100 text-yellow-700",
   gray: "bg-gray-100 text-gray-700",
+  dark: "bg-gray-900 text-white",
+  "cath-red": "bg-cath-red-800 text-white",
 }
 
 const Badge = ({ children, color = "emerald", className = "" }) => {
@@ -13,7 +15,7 @@ const Badge = ({ children, color = "emerald", className = "" }) => {
 
   return (
     <span
-      className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${colorClass} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center gap-1.5 px-2.5 py-0.5 text-xs font-medium rounded-full shadow-sm whitespace-nowrap ${colorClass} ${className}`}
     >
       {children}
     </span>

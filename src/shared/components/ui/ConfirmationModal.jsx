@@ -1,6 +1,7 @@
 import React from "react"
 import Modal from "./Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ConfirmationModal = ({
   open,
@@ -8,42 +9,44 @@ const ConfirmationModal = ({
   onConfirm,
   title,
   message,
-  cancelText = "Cancel",
-  confirmText = "Confirm",
+  cancelText,
+  confirmText,
   confirmVariant = "destructive", // "primary" | "destructive"
+  isPending = false,
   children,
 }) => {
-  const isDestructive = confirmVariant === "destructive"
+  const { t } = useLanguage()
+
+  const finalCancelText = cancelText || t.cancel || "Cancel"
+  const finalConfirmText = confirmText || t.confirm || "Confirm"
 
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={isPending ? undefined : onClose}
       title={title}
+      showCloseButton={false}
       fullScreenOnMobile={false}
+      headerClassName="flex items-start justify-between px-4 sm:px-6 pt-4 sm:pt-6"
+      bodyClassName="px-4 sm:px-6 pt-2"
+      footerClassName="p-4 sm:p-6"
       footer={
-        <div className="flex justify-end gap-3">
-          <PillButton
-            variant="secondary"
-            onClick={onClose}
-            className="h-10 text-sm"
-            bgColor="#F6F6F6"
-            textColor="#7A7574"
-          >
-            {cancelText}
+        <div className="flex justify-end gap-2">
+          <PillButton variant="secondary" onClick={onClose} disabled={isPending}>
+            {finalCancelText}
           </PillButton>
           <PillButton
             variant="primary"
+            bgColor={confirmVariant === "destructive" ? "#dc2626" : undefined}
             onClick={onConfirm}
-            className="h-10 text-sm"
-            bgColor={isDestructive ? undefined : "#18181B"}
+            loading={isPending}
           >
-            {confirmText}
+            {finalConfirmText}
           </PillButton>
         </div>
       }
     >
-      <div className="text-[#7A7574] text-sm py-2">
+      <div className="text-[#606060] text-sm">
         {message ? <p>{message}</p> : children}
       </div>
     </Modal>

@@ -1,7 +1,8 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { formatRelativeTime } from "../../utils/formatters"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 /**
  * Individual comment node inside the hierarchical comments tree.
@@ -14,7 +15,9 @@ const CommentItemNode = React.memo(function CommentItemNode({
   onReply,
   onDelete,
 }) {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
+  const { formatRelative } = useTimezone()
+  const navigate = useNavigate()
   const [expanded, setExpanded] = useState(false)
   const hasReplies = comment.replies && comment.replies.length > 0
 
@@ -41,15 +44,24 @@ const CommentItemNode = React.memo(function CommentItemNode({
           src={comment.avatarUrl}
           name={comment.nickname || comment.username}
           alt={comment.nickname || comment.username}
+          accountId={comment.accountId}
           className="shadow-sm shrink-0 rounded-full"
         />
         <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
           <div className="flex items-baseline gap-[6px] flex-wrap">
-            <span className="font-bold text-[13px] text-headingColor">
+            <span
+              onClick={(e) => {
+                if (comment.accountId) {
+                  e.stopPropagation()
+                  navigate(`/profile/${comment.accountId}`)
+                }
+              }}
+              className={`font-bold text-[13px] text-headingColor ${comment.accountId ? "cursor-pointer hover:underline" : ""}`}
+            >
               {comment.nickname || comment.username || "Anonymous"}
             </span>
             <span className="text-xs text-lighttextGray">
-              {formatRelativeTime(comment.createdAt, language)}
+              {formatRelative(comment.createdAt)}
             </span>
           </div>
           <p className="text-[14px] text-headingColor leading-[1.4] break-words whitespace-pre-wrap mt-0.5">{comment.content}</p>

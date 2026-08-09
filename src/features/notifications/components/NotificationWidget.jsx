@@ -8,6 +8,7 @@ import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useNotifications } from "../hooks/useNotifications"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -31,10 +32,10 @@ const NotificationWidget = () => {
   const { openAuthModal } = useContext(AuthModalContext)
   const isMobile = useIsMobile(425)
   const { t } = useLanguage()
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
 
   useClickOutside(dropdownRef, () => setIsOpen(false), { enabled: isOpen && !isMobile })
 
-  // Lock body scroll when fullscreen on mobile
   useEffect(() => {
     if (isOpen && isMobile) {
       const originalOverflow = document.body.style.overflow
@@ -62,7 +63,6 @@ const NotificationWidget = () => {
     setIsOpen(!isOpen)
   }
 
-  // Mobile: fullscreen portal
   const mobileDropdown = createPortal(
     <AnimatePresence>
       {isOpen && isMobile && (
@@ -81,7 +81,14 @@ const NotificationWidget = () => {
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             className="relative flex h-full w-full flex-col overflow-hidden bg-white"
           >
-            <NotificationDropdown onClose={() => setIsOpen(false)} isMobile />
+            <NotificationDropdown
+              onClose={() => setIsOpen(false)}
+              isMobile
+              notifications={notifications}
+              unreadCount={unreadCount}
+              markAsRead={markAsRead}
+              markAllAsRead={markAllAsRead}
+            />
           </motion.div>
         </div>
       )}
@@ -93,13 +100,17 @@ const NotificationWidget = () => {
     <div className="relative flex items-center" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
         aria-label={t.header?.notifications || "Notifications"}
       >
         <Bell size={20} />
+        {unreadCount > 0 && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </button>
 
-      {/* Desktop: dropdown */}
       <AnimatePresence>
         {isOpen && !isMobile && (
           <FluentAnimation
@@ -108,12 +119,17 @@ const NotificationWidget = () => {
             exit={true}
             className="absolute right-0 top-full z-[1200] mt-2 w-80"
           >
-            <NotificationDropdown onClose={() => setIsOpen(false)} />
+            <NotificationDropdown
+              onClose={() => setIsOpen(false)}
+              notifications={notifications}
+              unreadCount={unreadCount}
+              markAsRead={markAsRead}
+              markAllAsRead={markAllAsRead}
+            />
           </FluentAnimation>
         )}
       </AnimatePresence>
 
-      {/* Mobile: fullscreen portal */}
       {mobileDropdown}
     </div>
   )

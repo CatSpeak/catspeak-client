@@ -1,134 +1,257 @@
-import React from "react"
+import React, { useState, useRef, useEffect, useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetCourseDetailQuery } from "@/store/api/coursesApi"
-import { Pencil } from "lucide-react"
-import { formatDateRange } from "../utils/courseUtils"
+import { toast } from "react-hot-toast"
+import {
+  useGetCourseDetailQuery,
+  useGetTeacherCourseTeachingTasksCombinedQuery,
+  useDeleteCourseMutation,
+} from "@/store/api/coursesApi"
+import { Pencil, Trash2 } from "lucide-react"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import {
+  getSafeMediaUrl,
+  defaultCourseThumbnail,
+} from "../utils/courseUtils"
+import { mapTeachingTask } from "../utils/courseTransforms"
 
-import CourseInfoCard from "../components/CourseInfoCard"
 import ClassCard from "../components/ClassCard"
-import UpcomingSessionCard from "../components/UpcomingSessionCard"
-import TeachingTasksSection from "../components/TeachingTasksSection"
+import CourseInfoCard from "../components/CourseInfoCard"
+import TeachingTasksSection from "../components/assignments/TeachingTasksSection"
+import UpcomingSessionCard from "../components/sessions/UpcomingSessionCard"
 
 const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const c = t.courses || {}
+  const ui = c.workspaceUi || {}
+  const taskText = c.grading || {}
+
+  const [showMenu, setShowMenu] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const menuRef = useRef(null)
+
+  const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const handleDeleteCourse = async () => {
+    if (!id || isDeleting) return
+    try {
+      await deleteCourse(id).unwrap()
+      toast.success(c.courseDetail?.toastDeleteSuccess || "Course deleted successfully!")
+      navigate("/workspace/courses")
+    } catch {
+      toast.error(c.courseDetail?.toastDeleteFailed || "Failed to delete course!")
+    } finally {
+      setShowDeleteModal(false)
+    }
+  }
 
   // Fetch course details
-  const { data, isLoading, error } = useGetCourseDetailQuery(id)
+  const {
+    currentData: data,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetCourseDetailQuery(id, { skip: !id })
 
-  if (isLoading) {
+  // Fetch teaching tasks (Combined API)
+  const { data: rawTasks = [], isLoading: isLoadingTasks } =
+    useGetTeacherCourseTeachingTasksCombinedQuery(id, { skip: !id })
+
+  const teachingTasks = useMemo(() => {
+    return Array.isArray(rawTasks)
+      ? rawTasks.map((task) => mapTeachingTask(task, {
+        pendingCount: taskText.teachingTaskPendingCount,
+        urgent: taskText.teachingTaskUrgent,
+        required: taskText.teachingTaskRequired,
+        gradeQuiz: taskText.teachingTaskGradeQuiz,
+        gradeAssignment: taskText.teachingTaskGradeAssignment,
+        unknown: taskText.statusUnknown,
+      })).filter(Boolean)
+      : []
+  }, [
+    rawTasks,
+    taskText.teachingTaskGradeAssignment,
+    taskText.teachingTaskGradeQuiz,
+    taskText.teachingTaskPendingCount,
+    taskText.teachingTaskRequired,
+    taskText.teachingTaskUrgent,
+    taskText.statusUnknown,
+  ])
+
+  const handleTaskAction = (task) => {
+    if (!task) return
+    const targetClassId = task.classId
+    if (!targetClassId) return
+    let targetUrl = `/workspace/courses/class/${encodeURIComponent(String(targetClassId))}?tab=grading`
+    if (task.assignmentId) {
+      targetUrl += `&assignmentId=${encodeURIComponent(String(task.assignmentId))}`
+    } else if (task.quizId) {
+      targetUrl += `&quizId=${encodeURIComponent(String(task.quizId))}`
+    }
+    navigate(targetUrl)
+  }
+  const rawCourse = (
+    data
+    && typeof data === "object"
+    && !Array.isArray(data)
+    && data.id
+  )
+    ? data
+    : null
+
+  if ((isLoading || isFetching) && data === undefined) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center min-h-[400px]" role="status">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#990011]"></div>
       </div>
     )
   }
 
-  if (error) {
+  if (error || !id || (!isLoading && !rawCourse)) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold">
-        Error loading course detail: {error.message || "Unknown error"}
+      <div
+        className="flex flex-col items-start gap-3 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold"
+        role="alert"
+      >
+        <span>{c.courseDetail?.loadFailed || "Could not load the course details."}</span>
+        <button
+          type="button"
+          onClick={refetch}
+          disabled={isFetching}
+          className="rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-extrabold disabled:opacity-50"
+        >
+          {c.courseDetail?.retry || "Try again"}
+        </button>
       </div>
     )
   }
 
-  // Process data for rendering
-  const rawCourse = data || {}
-  const classes = rawCourse.classes || []
+  const classes = Array.isArray(rawCourse.classes)
+    ? rawCourse.classes.filter((item) => item && typeof item === "object")
+    : []
 
-  // Format hours dynamically (mocking 4 hours per session as per mockup 12 sessions = 48 hours)
-  const totalSessions = rawCourse.totalSessions || 0
-  const durationText = `${totalSessions} Sessions (${totalSessions * 4} Hours)`
+  const parsedSessions = Number(rawCourse.totalSessions)
+  const totalSessions = Number.isFinite(parsedSessions)
+    ? Math.max(0, Math.floor(parsedSessions))
+    : 0
+  const parsedHours = Number(rawCourse.durationHours ?? rawCourse.totalHours)
+  const totalHours = Number.isFinite(parsedHours) && parsedHours >= 0
+    ? parsedHours
+    : null
+  const durationParts = []
+  if (totalSessions > 0) {
+    durationParts.push(
+      (ui.sessionsCount || "{{count}} sessions")
+        .replace("{{count}}", String(totalSessions)),
+    )
+  }
+  if (totalHours !== null) {
+    durationParts.push(
+      (ui.hoursCount || "{{count}} hours")
+        .replace("{{count}}", String(totalHours)),
+    )
+  }
+  const durationText = durationParts.join(" • ") || ui.tba || "TBA"
 
   const courseData = {
     id: rawCourse.id,
     title: rawCourse.title,
-    language: rawCourse.language || "English",
-    level: rawCourse.levels?.join(", ") || "N/A",
+    language: rawCourse.language || ui.notAvailable || "N/A",
+    levels: Array.isArray(rawCourse.levels) ? rawCourse.levels : [],
+    level: Array.isArray(rawCourse.levels) && rawCourse.levels.length > 0
+      ? rawCourse.levels.join(", ")
+      : ui.notAvailable || "N/A",
     admissionPeriod: rawCourse.enrollmentStart && rawCourse.enrollmentEnd
-      ? formatDateRange(rawCourse.enrollmentStart, rawCourse.enrollmentEnd)
-      : "TBA",
+      ? `${formatDate(rawCourse.enrollmentStart)} - ${formatDate(rawCourse.enrollmentEnd)}`
+      : ui.tba || "TBA",
     duration: durationText,
     description: rawCourse.description || "",
-    thumbnailUrl: rawCourse.thumbnailUrl || ""
+    thumbnailUrl: getSafeMediaUrl(rawCourse.thumbnailUrl)
   }
 
+  // Only show an upcoming session when the API provides one.
+  const nextSessionCandidate = classes
+    .map((cls) => {
+      const startTimeMs = new Date(cls.nextSession?.startTime || "").getTime()
+      return { cls, startTimeMs }
+    })
+    .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
+    .sort((left, right) => left.startTimeMs - right.startTimeMs)[0]
+  const nextSessionClass = nextSessionCandidate?.cls || null
 
-
-
-
-  // Get next session details from classes
-  const activeClasses = classes.filter(cls => cls.status === "TEACHING" || cls.status === "LIVE" || cls.status === "OPEN")
-  const nextClass = activeClasses[0] || classes[0]
-
-  // Localized Labels
-  const courseDetailTitle = c.student?.courseDetails || "Course Details"
-  const allCoursesLabel = c.allCourses?.title || "All Courses"
-
-  const languageLabel = c.languageLabel || "Language"
-  const levelLabel = c.levelLabel || "Level"
-  const admissionPeriodLabel = c.courseDetail?.admission || "Admission Period"
-  const durationLabel = c.courseDetail?.duration || "Duration"
-  const descriptionLabel = c.courseDetail?.description || "Description"
-
-  const customizeLabel = c.editCourse || "Customize"
-
-  const currentClassesLabel = c.courseDetail?.currentClasses || "Current Classes"
-  const addNewClassLabel = c.courseDetail?.addNewClass || "Add New Class"
-  const noClassesYetLabel = c.courseDetail?.noClassesYet || "No classes created yet"
-  const startByAddingLabel = c.courseDetail?.startByAdding || "Start by adding your first class to this course."
-
-  const progressLabel = c.progress || "Progress"
-
-  const upcomingSessionLabel = c.courseDetail?.upcomingSession || "Upcoming Session"
-  const joinRoomLabel = c.joinRoom || "Join Room"
-  const viewAllLabel = c.viewAll || "View All"
-  const noUpcomingLabel = c.courseDetail?.noUpcoming || "No upcoming sessions"
-  const createClassToScheduleLabel = c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."
-
-  const teachingTasksLabel = c.teachingTasks || "Teaching Tasks"
-  const gradeAssignmentLabel = c.gradeAssignment || "Grade homework"
-  const giveFeedbackLabel = c.giveFeedback || "Give feedback"
-  const prepareLessonLabel = c.prepareLesson || "Prepare lesson plan"
+  const nextClass = nextSessionClass
+    ? {
+      ...nextSessionClass,
+      startDate: nextSessionClass.nextSession?.date || nextSessionClass.nextSession?.startTime || nextSessionClass.startDate,
+      schedule: {
+        ...nextSessionClass.schedule,
+        startTime: nextSessionClass.nextSession?.startTime || nextSessionClass.schedule?.startTime,
+        endTime: nextSessionClass.nextSession?.endTime || nextSessionClass.schedule?.endTime,
+      },
+    }
+    : null
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
+      {isFetching && (
+        <span role="status" className="sr-only">
+          {c.courseDetail?.refreshing || "Refreshing course details"}
+        </span>
+      )}
       {/* ─── Breadcrumb ─── */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</span>
-          <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</span>
-          <span>/</span>
-          <span className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{allCoursesLabel}</span>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{courseDetailTitle}</span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: c.allCourses?.title || "All Courses", onClick: () => navigate("/workspace/courses") },
+          { label: c.student?.courseDetails || "Course Details" },
+        ]}
+      />
 
       {/* ─── Page Heading ─── */}
       <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-        {courseDetailTitle}
+        {c.student?.courseDetails || "Course Details"}
       </h1>
 
       {/* ─── Grid Content (2 Columns) ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* LEFT COLUMN: Visual Banner, Information Card & Current Classes */}
-        <div className="lg:col-span-2 flex flex-col gap-8">
+        <div className="lg:col-span-2 flex flex-col gap-4">
 
           {/* ─── Visual Banner ─── */}
           <div
-            className="relative overflow-hidden rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm bg-cover bg-center text-white"
-            style={{
-              backgroundImage: `url('${courseData.thumbnailUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"}')`
-            }}
+            className="relative rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm bg-gray-700 text-white"
           >
-            {/* Dark overlay for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
+            {/* Background image & gradient overlay container */}
+            <div className="absolute inset-0 overflow-hidden rounded-3xl">
+              <img
+                src={courseData.thumbnailUrl || defaultCourseThumbnail}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+              {/* Dark overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
+            </div>
 
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
               {/* Course Title */}
@@ -136,38 +259,76 @@ const CourseDetailPage = () => {
                 {courseData.title}
               </h2>
 
-              {/* Tùy chỉnh button */}
-              <button
-                onClick={() => navigate(`/workspace/courses/edit/${id}`)}
-                className="shrink-0 h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm"
-              >
-                <Pencil size={14} />
-                <span>{customizeLabel}</span>
-              </button>
+              {/* Menu button (Edit / Delete course) */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  aria-label={c.courseDetail?.courseActions || "Course actions"}
+                  aria-haspopup="menu"
+                  aria-expanded={showMenu}
+                  onClick={() => setShowMenu((prev) => !prev)}
+                  className="shrink-0 h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Pencil size={14} />
+                  <span>{c.editCourse || "Customize"}</span>
+                </button>
+
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMenu(false)
+                        navigate(`/workspace/courses/edit/${encodeURIComponent(String(id))}`)
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+                    >
+                      <Pencil size={14} className="text-gray-500" />
+                      <span>{c.courseDetail?.editCourse || c.createCourse?.updateCourse || "Chỉnh sửa khóa học"}</span>
+                    </button>
+
+                    <div className="my-1 border-t border-gray-100" />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMenu(false)
+                        setShowDeleteModal(true)
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+                    >
+                      <Trash2 size={14} className="text-red-500" />
+                      <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           <CourseInfoCard
             courseData={courseData}
-            languageLabel={languageLabel}
-            levelLabel={levelLabel}
-            admissionPeriodLabel={admissionPeriodLabel}
-            durationLabel={durationLabel}
-            descriptionLabel={descriptionLabel}
+            languageLabel={c.languageLabel || "Language"}
+            levelLabel={c.levelLabel || "Level"}
+            admissionPeriodLabel={c.courseDetail?.admission || "Admission Period"}
+            durationLabel={c.courseDetail?.duration || "Duration"}
+            descriptionLabel={c.courseDetail?.description || "Description"}
+            noDescriptionText={c.courseDetail?.noDescription || "No description provided."}
           />
 
           {/* Current Classes Section */}
           <div className="flex flex-col gap-5">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-black text-gray-950 tracking-tight">
-                {currentClassesLabel}
+                {c.courseDetail?.currentClasses || "Current Classes"}
               </h3>
 
               <button
-                onClick={() => navigate("/workspace/courses/create-class", { state: { courseId: rawCourse.id } })}
+                type="button"
+                onClick={() => navigate("/workspace/classes/create-class", { state: { courseId: rawCourse.id } })}
                 className="px-4 py-1.5 border border-[#b20a1c] hover:bg-red-50/50 text-[#b20a1c] text-xs font-black rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
               >
-                <span>{addNewClassLabel}</span>
+                <span>{c.courseDetail?.addNewClass || "Add New Class"}</span>
                 <span className="text-sm font-light">+</span>
               </button>
             </div>
@@ -181,8 +342,8 @@ const CourseDetailPage = () => {
                       key={cls.id}
                       cls={cls}
                       isStudent={false}
-                      onClick={() => navigate(`/workspace/courses/class/${cls.id}`)}
-                      progressLabel={progressLabel}
+                      onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)}
+                      progressLabel={c.progress || "Progress"}
                       courseTitle={courseData.title}
                     />
                   )
@@ -194,9 +355,9 @@ const CourseDetailPage = () => {
                     <Pencil size={24} className="stroke-[1.5]" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <h4 className="font-extrabold text-sm text-gray-800">{noClassesYetLabel}</h4>
+                    <h4 className="font-extrabold text-sm text-gray-800">{c.courseDetail?.noClassesYet || "No classes created yet"}</h4>
                     <p className="text-xs text-gray-400 font-bold max-w-[240px] leading-relaxed">
-                      {startByAddingLabel}
+                      {c.courseDetail?.startByAdding || "Start by adding your first class to this course."}
                     </p>
                   </div>
                 </div>
@@ -207,32 +368,46 @@ const CourseDetailPage = () => {
         </div>
 
         {/* RIGHT COLUMN: Instructor details and Syllabus outlines */}
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
           <UpcomingSessionCard
             nextClass={nextClass}
             courseData={courseData}
-            upcomingSessionLabel={upcomingSessionLabel}
-            noUpcomingLabel={noUpcomingLabel}
-            createClassToScheduleLabel={createClassToScheduleLabel}
-            joinRoomLabel={joinRoomLabel}
-            viewAllLabel={viewAllLabel}
-            onJoin={() => navigate(`/workspace/courses/class/${nextClass.id}`)}
+            upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
+            noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
+            createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
+            joinRoomLabel={c.joinRoom || "Join Room"}
+            viewAllLabel={c.viewAll || "View All"}
+            onJoin={() => {
+              if (nextClass?.id) {
+                navigate(`/workspace/courses/class/${encodeURIComponent(String(nextClass.id))}`)
+              }
+            }}
             onViewAll={() => navigate("/workspace/courses/schedule")}
           />
 
           <TeachingTasksSection
-            teachingTasksLabel={teachingTasksLabel}
-            viewAllLabel={viewAllLabel}
-            gradeAssignmentLabel={gradeAssignmentLabel}
-            giveFeedbackLabel={giveFeedbackLabel}
-            prepareLessonLabel={prepareLessonLabel}
-            taskSpeakingSubtitle={c.taskSpeakingSubtitle}
-            taskWritingSubtitle={c.taskWritingSubtitle}
+            teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
+            viewAllLabel={c.viewAll || "View All"}
+            tasks={teachingTasks}
+            isLoading={isLoadingTasks}
             onViewAll={() => navigate("/workspace/courses/schedule")}
-            onTaskAction={() => navigate("/workspace/courses/schedule")}
+            onTaskAction={handleTaskAction}
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={() => {
+          if (!isDeleting) setShowDeleteModal(false)
+        }}
+        onConfirm={handleDeleteCourse}
+        isPending={isDeleting}
+        title={c.courseDetail?.deleteCourse || "Delete Course"}
+        message={c.courseDetail?.confirmDeleteCourse || "Are you sure you want to delete this course? All associated classes will also be affected."}
+        confirmText={c.courseDetail?.deleteCourse || "Delete"}
+        cancelText={c.createClass?.cancel || "Cancel"}
+      />
     </div>
   )
 }

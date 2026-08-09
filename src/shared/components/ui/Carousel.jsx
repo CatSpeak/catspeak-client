@@ -19,11 +19,31 @@ const Carousel = ({
   objectFit = "cover",
   allowFullscreen = true,
   showIndicators = true,
+  lockToFirstImage = false,
 }) => {
   const [page, setPage] = useState(0)
   const [direction, setDirection] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [firstAspectRatio, setFirstAspectRatio] = useState(null)
+
+  useEffect(() => {
+    if (!lockToFirstImage || !images[0]?.url) return
+    let isMounted = true
+    const img = new Image()
+    img.src = images[0].url
+    img.onload = () => {
+      if (isMounted && img.naturalWidth && img.naturalHeight) {
+        // Clamp aspect ratio between 0.8 (4:5 vertical) and 2.2 (wide) to maintain clean card layout
+        const rawRatio = img.naturalWidth / img.naturalHeight
+        const clampedRatio = Math.max(0.8, Math.min(2.2, rawRatio))
+        setFirstAspectRatio(clampedRatio)
+      }
+    }
+    return () => {
+      isMounted = false
+    }
+  }, [lockToFirstImage, images])
 
   const currentIndex = ((page % images.length) + images.length) % images.length
 
@@ -87,7 +107,10 @@ const Carousel = ({
       )}
 
       {/* Image Container */}
-      <div className={`relative w-full overflow-hidden ${isFullscreen ? "h-full flex-1" : `rounded-2xl ${className}`}`}>
+      <div
+        className={`relative w-full overflow-hidden ${isFullscreen ? "h-full flex-1" : `${className.includes("rounded") ? "" : "rounded-xl"} ${className}`}`}
+        style={!isFullscreen && firstAspectRatio ? { aspectRatio: `${firstAspectRatio}` } : undefined}
+      >
         {/* Slides (Sliding Effect with Framer Motion) */}
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
@@ -102,7 +125,7 @@ const Carousel = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-            className="absolute inset-0 w-full h-full flex-shrink-0 relative overflow-hidden"
+            className="absolute inset-0 w-full h-full flex-shrink-0 overflow-hidden"
           >
             {/* Blurred Background Image */}
             <div

@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from "react"
 import { Mic, Video, Volume2, Info } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import Modal from "@/shared/components/ui/Modal"
+import MicTestVisualizer from "@/features/video-call/components/settings/MicTestVisualizer"
+import {
+  buildAudioConstraint,
+  mapDevicesToOptions,
+} from "@/shared/utils/mediaConstraintUtils"
 
 const DeviceSettingsModal = ({
   open,
@@ -24,65 +29,97 @@ const DeviceSettingsModal = ({
 
   const [testMic, setTestMic] = useState(false)
   const audioRef = useRef(null)
+  const testStreamRef = useRef(null)
   const autoToggledMic = useRef(false)
 
   const isSinkSupported =
     typeof HTMLAudioElement !== "undefined" &&
     typeof HTMLAudioElement.prototype.setSinkId === "function"
 
-  useEffect(() => {
-    if (testMic && localStream && audioRef.current) {
-      console.log(
-        "[DeviceSettings] Testing mic: setting localStream to audio element.",
-      )
-      console.log(
-        "[DeviceSettings] Audio tracks available in stream:",
-        localStream.getAudioTracks().length,
-      )
-      audioRef.current.srcObject = localStream
-    } else if (audioRef.current) {
-      audioRef.current.srcObject = null
-    }
-  }, [testMic, localStream])
-
-  useEffect(() => {
-    if (audioRef.current && isSinkSupported && selectedSpeaker) {
-      console.log(
-        "[DeviceSettings] Attempting to setSinkId to:",
-        selectedSpeaker,
-      )
-      audioRef.current
-        .setSinkId(selectedSpeaker)
-        .then(() => {
-          console.log("[DeviceSettings] setSinkId succeeded.")
-        })
-        .catch((err) => {
-          console.error("[DeviceSettings] setSinkId failed:", err)
-        })
-    }
-  }, [selectedSpeaker, isSinkSupported])
-
-  // Stop test mic when modal closes
+  // Reset test mic state when modal closes
   useEffect(() => {
     if (!open) {
       setTestMic(false)
-      if (autoToggledMic.current && onToggleMic) {
-        console.log(
-          "[DeviceSettings] Modal closed, automatically turning auto-toggled mic back off...",
-        )
+      if (autoToggledMic.current && micOn && onToggleMic) {
         autoToggledMic.current = false
         onToggleMic()
       }
     }
-  }, [open, onToggleMic])
+  }, [open, micOn, onToggleMic])
 
-  const mapToOptions = (deviceList, icon) =>
-    deviceList.map((d) => ({
-      value: d.deviceId,
-      label:
-        d.label || t?.rooms?.waitingScreen?.unknownDevice || "Unknown Device",
-      icon: icon,
-    }))
+  // Microphone playback test effect
+  useEffect(() => {
+    let cancelled = false
+
+    const startTestStream = async () => {
+      try {
+        if (localStream) {
+          if (audioRef.current && !cancelled) {
+            audioRef.current.srcObject = localStream
+          }
+        } else {
+          // Request temporary audio stream for testing
+          const constraints = {
+            audio: buildAudioConstraint(selectedMic),
+          }
+          const stream = await navigator.mediaDevices.getUserMedia(constraints)
+          if (cancelled) {
+            stream.getTracks().forEach((track) => track.stop())
+            return
+          }
+          testStreamRef.current = stream
+          if (audioRef.current) {
+            audioRef.current.srcObject = stream
+          }
+        }
+      } catch (err) {
+        console.error("[DeviceSettings] Failed to start mic test stream:", err)
+      }
+    }
+
+    if (testMic && open) {
+      startTestStream()
+    } else {
+      if (audioRef.current) {
+        audioRef.current.srcObject = null
+      }
+      if (testStreamRef.current) {
+        testStreamRef.current.getTracks().forEach((track) => track.stop())
+        testStreamRef.current = null
+      }
+    }
+
+    return () => {
+      cancelled = true
+      if (testStreamRef.current) {
+        testStreamRef.current.getTracks().forEach((track) => track.stop())
+        testStreamRef.current = null
+      }
+    }
+  }, [testMic, localStream, selectedMic, open])
+
+  // Speaker setSinkId effect
+  useEffect(() => {
+    if (audioRef.current && isSinkSupported && selectedSpeaker) {
+      audioRef.current
+        .setSinkId(selectedSpeaker)
+        .catch((err) => console.error("[DeviceSettings] setSinkId failed:", err))
+    }
+  }, [selectedSpeaker, isSinkSupported])
+
+  const handleTestMicToggle = (checked) => {
+    console.log("[DeviceSettings] Test Mic changed to:", checked)
+    if (checked && !micOn && onToggleMic) {
+      console.log("[DeviceSettings] Mic is off, automatically turning it on for test...")
+      autoToggledMic.current = true
+      onToggleMic()
+    } else if (!checked && autoToggledMic.current && micOn && onToggleMic) {
+      console.log("[DeviceSettings] Test finished, automatically turning mic back off...")
+      autoToggledMic.current = false
+      onToggleMic()
+    }
+    setTestMic(checked)
+  }
 
   return (
     <Modal
@@ -94,20 +131,32 @@ const DeviceSettingsModal = ({
       bodyClassName="px-6 pb-6 flex-1 overflow-y-auto flex flex-col gap-3"
     >
       <Dropdown
-        options={mapToOptions(devices.audioinput, <Mic size={16} />)}
+        options={mapDevicesToOptions(
+          devices.audioinput,
+          <Mic size={16} />,
+          true,
+          t?.rooms?.waitingScreen?.systemDefaultSpeaker,
+          t?.rooms?.waitingScreen?.unknownDevice
+        )}
         value={selectedMic}
         onChange={(val) => setSelectedMic(val)}
         placeholder={
           t?.rooms?.waitingScreen?.selectMicrophone || "Select Microphone"
         }
         className="w-full"
-        triggerClassName="h-12"
+        roundedClass="rounded-xl"
         dropdownClassName="md:min-w-[480px]"
       />
 
       <div className="flex flex-col gap-1">
         <Dropdown
-          options={mapToOptions(devices.audiooutput, <Volume2 size={16} />)}
+          options={mapDevicesToOptions(
+            devices.audiooutput,
+            <Volume2 size={16} />,
+            true,
+            t?.rooms?.waitingScreen?.systemDefaultSpeaker,
+            t?.rooms?.waitingScreen?.unknownDevice
+          )}
           value={selectedSpeaker}
           onChange={(val) => setSelectedSpeaker(val)}
           placeholder={
@@ -118,7 +167,7 @@ const DeviceSettingsModal = ({
           }
           disabled={!isSinkSupported}
           className="w-full"
-          triggerClassName="h-12"
+          roundedClass="rounded-xl"
           dropdownClassName="md:min-w-[480px]"
         />
         {!isSinkSupported && (
@@ -131,53 +180,29 @@ const DeviceSettingsModal = ({
       </div>
 
       <Dropdown
-        options={mapToOptions(devices.videoinput, <Video size={16} />)}
+        options={mapDevicesToOptions(
+          devices.videoinput,
+          <Video size={16} />,
+          false,
+          t?.rooms?.waitingScreen?.systemDefaultSpeaker,
+          t?.rooms?.waitingScreen?.unknownDevice
+        )}
         value={selectedCamera}
         onChange={(val) => setSelectedCamera(val)}
         placeholder={t?.rooms?.waitingScreen?.selectCamera || "Select Camera"}
         className="w-full"
-        triggerClassName="h-12"
+        roundedClass="rounded-xl"
         dropdownClassName="md:min-w-[480px]"
       />
 
-      <div className="flex items-center justify-between gap-2 border-t pt-3">
-        <div className="flex items-center gap-3">
-          <Mic size={16} />
-          <label
-            htmlFor="test-mic"
-            className="text-sm text-gray-700 cursor-pointer select-none"
-          >
-            {t?.rooms?.waitingScreen?.testMic || "Test Microphone (Playback)"}
-          </label>
-        </div>
-        <input
-          type="checkbox"
-          id="test-mic"
-          checked={testMic}
-          onChange={(e) => {
-            const checked = e.target.checked
-            console.log("[DeviceSettings] Test Mic changed to:", checked)
-            if (checked && !micOn && onToggleMic) {
-              console.log(
-                "[DeviceSettings] Mic is off, automatically turning it on for test...",
-              )
-              autoToggledMic.current = true
-              onToggleMic()
-            } else if (
-              !checked &&
-              autoToggledMic.current &&
-              micOn &&
-              onToggleMic
-            ) {
-              console.log(
-                "[DeviceSettings] Test finished, automatically turning mic back off...",
-              )
-              autoToggledMic.current = false
-              onToggleMic()
-            }
-            setTestMic(checked)
-          }}
-          className="appearance-none rounded-full border border-[#A3A3A3] focus:ring-cath-red-700 h-4 w-4 accent-cath-red-700 mr-4 checked:bg-cath-red-700 checked:border-cath-red-700 transition-colors cursor-pointer"
+      <div className="pt-2 border-t border-[#E5E5E5]">
+        <MicTestVisualizer
+          testMic={testMic}
+          onToggleTest={() => handleTestMicToggle(!testMic)}
+          stream={testStreamRef.current || localStream}
+          selectedMic={selectedMic}
+          label={t?.rooms?.waitingScreen?.testMic || "Test mic"}
+          stopLabel={t?.rooms?.waitingScreen?.stopTest || "Stop testing"}
         />
       </div>
 

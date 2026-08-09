@@ -1,4 +1,6 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion"
 import Avatar from "@/shared/components/ui/Avatar"
 import { fluentEaseOut } from "@/shared/utils/animations"
@@ -10,7 +12,12 @@ import { Star } from "lucide-react"
  * @param {object}  player          - LeaderboardPlayer data
  */
 
+import { getImageUrl } from "@/shared/utils/imageUtils"
+
 const LeaderboardRow = ({ player, index }) => {
+  const navigate = useNavigate()
+  const playerAccountId = player.accountId || player.userId || player.id
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -26,13 +33,22 @@ const LeaderboardRow = ({ player, index }) => {
       {/* Avatar */}
       <Avatar
         size={32}
-        src={player.avatar}
+        src={player.avatar ? getImageUrl(player.avatar) : null}
         name={player.name}
         alt={player.name}
+        accountId={playerAccountId}
       />
 
       {/* Player name */}
-      <div className="flex-1 min-w-0 items-center text-sm font-nunito font-semibold">
+      <div
+        onClick={(e) => {
+          if (playerAccountId) {
+            e.stopPropagation()
+            navigate(`/profile/${playerAccountId}`)
+          }
+        }}
+        className={`flex-1 min-w-0 items-center text-sm font-semibold ${playerAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+      >
         {player.name}
       </div>
 

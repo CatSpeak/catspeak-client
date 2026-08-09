@@ -5,8 +5,8 @@ import {
   useConnectionState,
 } from "@livekit/components-react"
 import { ConnectionState } from "livekit-client"
-import toast from "react-hot-toast"
 import { useCombinedProcessor } from "@/features/video-call/processors/useCombinedProcessor"
+import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
 
 /**
  * Handles local mic/cam state + toggle actions using LiveKit.
@@ -27,60 +27,47 @@ export const useVideoCall = (t) => {
 
   const { switchBeauty, processorStatus } = useCombinedProcessor()
 
-  // Toggle mic — probes getUserMedia first to surface permission errors cleanly.
+  // Toggle mic — direct LiveKit activation with WebAudio unlock for iOS Safari
   const toggleAudio = useCallback(async () => {
     if (isTogglingMic) return
     setIsTogglingMic(true)
+
+    console.log("[useVideoCall] Toggling mic from", isMicrophoneEnabled, "to", !isMicrophoneEnabled)
     try {
-      if (!isMicrophoneEnabled) {
-        let probe = null
-        try {
-          probe = await navigator.mediaDevices.getUserMedia({ audio: true })
-          const audioTrack = probe.getAudioTracks()[0]
-
-          if (audioTrack?.muted) {
-            const unmuted = await new Promise((resolve) => {
-              const onUnmute = () => resolve(true)
-              audioTrack.addEventListener("unmute", onUnmute, { once: true })
-              setTimeout(() => {
-                audioTrack.removeEventListener("unmute", onUnmute)
-                resolve(false)
-              }, 2000)
-            })
-            if (!unmuted) {
-              toast.error(
-                t?.rooms?.waitingScreen?.micInUse ??
-                  "Microphone is in use by another app.",
-              )
-              return
-            }
-          }
-        } finally {
-          probe?.getTracks().forEach((tr) => tr.stop())
-        }
+      unlockAudioContext()
+      if (room?.startAudio) {
+        await room.startAudio().catch((err) =>
+          console.warn("[useVideoCall] startAudio warning:", err),
+        )
       }
-
       await room.localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)
+      console.log("[useVideoCall] Mic toggle success")
+    } catch (err) {
+      console.error("[useVideoCall] Mic toggle failed:", err?.name, err?.message, err)
+      throw err
     } finally {
       setIsTogglingMic(false)
     }
-  }, [room, isMicrophoneEnabled, t, isTogglingMic])
+  }, [room, isMicrophoneEnabled, isTogglingMic])
 
-  // Toggle webcam — probes getUserMedia first to surface permission errors.
+  // Toggle webcam — direct LiveKit activation with WebAudio unlock for iOS Safari
   const toggleVideo = useCallback(async () => {
     if (isTogglingCam) return
     setIsTogglingCam(true)
-    try {
-      if (!isCameraEnabled) {
-        let probe = null
-        try {
-          probe = await navigator.mediaDevices.getUserMedia({ video: true })
-        } finally {
-          probe?.getTracks().forEach((tr) => tr.stop())
-        }
-      }
 
+    console.log("[useVideoCall] Toggling cam from", isCameraEnabled, "to", !isCameraEnabled)
+    try {
+      unlockAudioContext()
+      if (room?.startAudio) {
+        await room.startAudio().catch((err) =>
+          console.warn("[useVideoCall] startAudio warning:", err),
+        )
+      }
       await room.localParticipant.setCameraEnabled(!isCameraEnabled)
+      console.log("[useVideoCall] Cam toggle success")
+    } catch (err) {
+      console.error("[useVideoCall] Cam toggle failed:", err?.name, err?.message, err)
+      throw err
     } finally {
       setIsTogglingCam(false)
     }

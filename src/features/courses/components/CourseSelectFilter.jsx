@@ -1,22 +1,60 @@
 import React from "react"
 import { ChevronDown } from "lucide-react"
+import Dropdown from "@/shared/components/ui/Dropdown"
 
-const CourseSelectFilter = ({ value, onChange, options, className = "" }) => {
+const CourseSelectFilter = ({
+  value,
+  onChange,
+  options = [],
+  className = "",
+  disabled = false,
+  title,
+  icon: Icon,
+}) => {
+  const selectedOptionObj = options.find((o) => o.value === value)
+
   return (
-    <div className={`relative shrink-0 ${className}`}>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 outline-none appearance-none cursor-pointer hover:border-gray-300"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-    </div>
+    <Dropdown
+      options={options}
+      value={value}
+      onChange={(val) => onChange(val)}
+      disabled={disabled}
+      dropdownClassName="min-w-[170px] shadow-xl border border-slate-200/80 rounded-2xl p-1.5 z-50 bg-white"
+      activeColor="#b20a1c"
+      renderOption={(option, isSelected) => (
+        <div
+          className={`w-full py-2 px-3 text-xs rounded-xl flex items-center justify-between transition-all duration-150 cursor-pointer ${isSelected
+              ? "bg-rose-50 text-[#b20a1c] font-black"
+              : "text-slate-700 hover:bg-slate-50 font-bold"
+            }`}
+        >
+          <span>{option.label}</span>
+          {isSelected && (
+            <span className="w-2 h-2 rounded-full bg-[#b20a1c] shrink-0" />
+          )}
+        </div>
+      )}
+      trigger={(isOpen, _, toggle) => (
+        <button
+          type="button"
+          onClick={toggle}
+          disabled={disabled}
+          title={title}
+          className={`h-9 px-3.5 rounded-full border text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer shadow-2xs outline-none ${isOpen
+              ? "border-[#b20a1c] bg-rose-50 text-[#b20a1c] ring-2 ring-rose-100"
+              : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
+            } ${className}`}
+        >
+          {Icon && <Icon size={14} className={isOpen ? "text-[#b20a1c]" : "text-slate-400"} />}
+          <span>{selectedOptionObj?.label || "Select..."}</span>
+          <ChevronDown
+            size={12}
+            className={`transition-transform duration-200 ${isOpen ? "rotate-180 text-[#b20a1c]" : "text-slate-400"
+              }`}
+          />
+        </button>
+      )}
+    />
   )
 }
 

@@ -28,8 +28,14 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: true,
         },
+        "/api/explore": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
         "/api/v1/Payments": {
-          target: "https://staging-api.catspeak.com.vn",
+          // target: "https://staging-api.catspeak.com.vn",
+          target: "http://localhost:5001",
           changeOrigin: true,
           secure: true,
         },
@@ -40,7 +46,8 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/social/, "/api"),
         },
         "/api": {
-          target: "https://staging-api.catspeak.com.vn",
+          // target: "https://staging-api.catspeak.com.vn",
+          target: "http://localhost:5001",
           changeOrigin: true,
           secure: false,
         },
@@ -51,7 +58,8 @@ export default defineConfig(({ mode }) => {
           ws: true,
         },
         "/hubs": {
-          target: "https://staging-api.catspeak.com.vn",
+          // target: "https://staging-api.catspeak.com.vn",
+          target: "http://localhost:5001",
           changeOrigin: true,
           // secure: true,
           secure: false,
@@ -84,8 +92,8 @@ export default defineConfig(({ mode }) => {
             warning.code === "UNRESOLVED_IMPORT" &&
             warning.exporter?.includes("face_mesh")
           )
-            return;
-          warn(warning);
+            return
+          warn(warning)
         },
       },
       chunkSizeWarningLimit: 1000,

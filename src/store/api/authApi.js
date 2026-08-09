@@ -15,7 +15,7 @@ export const authApi = baseApi.injectEndpoints({
           const { data } = await queryFulfilled
           dispatch(setCredentials(data))
         } catch (err) {
-          console.error(err)
+          // Handled by UI component
         }
       },
     }),
@@ -52,7 +52,26 @@ export const authApi = baseApi.injectEndpoints({
             }),
           )
         } catch (err) {
-          console.error(err)
+          // Handled by refresh handler / component
+        }
+      },
+    }),
+    switchAccountType: builder.mutation({
+      query: (body) => ({
+        url: "/Auth/switch-account-type",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled, getState }) {
+        try {
+          const { data } = await queryFulfilled
+          const { user } = getState().auth
+          dispatch(setCredentials({
+            ...data,
+            user: data.user || user
+          }))
+        } catch (error) {
+          console.error(error)
         }
       },
     }),
@@ -150,6 +169,7 @@ export const {
   useRegisterMutation,
   useRegisterAdminMutation,
   useRefreshTokenMutation,
+  useSwitchAccountTypeMutation,
   useRevokeMutation,
 
   useLogoutMutation,

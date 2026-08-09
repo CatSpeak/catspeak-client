@@ -1,0 +1,383 @@
+import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import {
+  Calendar,
+  ChevronDown,
+  Download,
+  Edit,
+  FileCheck,
+  Lock,
+  MoreVertical,
+  Search,
+  Trash2,
+  Unlock,
+} from "lucide-react"
+
+import { useLanguage } from "@/shared/context/LanguageContext"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+
+import {
+  filterSubmissionStudents,
+  formatPaginationShowingText,
+  getSubmissionStats,
+} from "../../../utils/submissionUtils"
+import AssignmentSubmissionsTable from "./AssignmentSubmissionsTable"
+
+const ITEMS_PER_PAGE = 4
+const interpolate = (template, values) => Object.entries(values).reduce(
+  (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
+  template || "",
+)
+
+const AssignmentSubmissionsList = ({
+  assignmentId,
+  assignmentTitle,
+  assignmentClosed,
+  assignmentExpired,
+  assignmentDueLabel,
+  assignmentMaxScore,
+  classId,
+  students,
+  studentSearch,
+  activeFilter,
+  currentPage,
+  onBack,
+  onToggleSubmissionsLock,
+  onDownloadGradeSheet,
+  onBulkReturn,
+  onDeleteAssignment,
+  isDeletingAssignment,
+  isTogglingSubmissionsLock,
+  isDownloadingGradeSheet,
+  isBulkReturning,
+  onSelectStudent,
+  onStudentSearchChange,
+  onActiveFilterChange,
+  onPageChange,
+}) => {
+  const { t } = useLanguage()
+  const navigate = useNavigate()
+  const coursesTranslations = t.courses || {}
+  const gradingTranslations = coursesTranslations.grading || {}
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  useEffect(() => {
+    if (!showMoreMenu) return undefined
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setShowMoreMenu(false)
+    }
+    document.addEventListener("keydown", closeOnEscape)
+    return () => document.removeEventListener("keydown", closeOnEscape)
+  }, [showMoreMenu])
+
+  const stats = useMemo(() => getSubmissionStats(students), [students])
+  const filteredStudents = useMemo(() => (
+    filterSubmissionStudents(students, studentSearch, activeFilter)
+  ), [students, studentSearch, activeFilter])
+  const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE) || 1
+  const activePage = Math.min(currentPage, totalPages)
+  const paginatedStudents = useMemo(() => {
+    const startIndex = (activePage - 1) * ITEMS_PER_PAGE
+    return filteredStudents.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [filteredStudents, activePage])
+  const paginationText = formatPaginationShowingText({
+    currentPage: activePage,
+    itemsPerPage: ITEMS_PER_PAGE,
+    totalItems: filteredStudents.length,
+    template: gradingTranslations.paginationShowing,
+  })
+  const filters = [
+    { id: "all", label: gradingTranslations.filterAll },
+    { id: "not_submitted", label: gradingTranslations.filterNotSubmitted },
+    { id: "submitted", label: gradingTranslations.filterSubmitted },
+    { id: "late", label: gradingTranslations.filterLate },
+    { id: "graded", label: gradingTranslations.filterGraded },
+    { id: "returned", label: gradingTranslations.filterReturned },
+  ]
+
+  return (
+    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+      <Breadcrumb
+        items={[
+          { label: coursesTranslations.home, onClick: () => navigate("/workspace") },
+          { label: coursesTranslations.title, onClick: () => navigate("/workspace/courses") },
+          { label: coursesTranslations.allCourses?.title, onClick: () => navigate("/workspace/courses") },
+          { label: coursesTranslations.student?.classDetails, onClick: onBack },
+          { label: assignmentTitle },
+        ]}
+      />
+
+      <div className="flex items-center gap-3">
+        <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+          {gradingTranslations.viewSubmissionsTitle}
+        </h1>
+      </div>
+
+      <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 animate-fade-in">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-extrabold text-gray-950 leading-tight mb-3">
+              {assignmentTitle}
+            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              {assignmentClosed ? (
+                <span className="bg-gray-100 text-gray-500 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
+                  {gradingTranslations.badgeClosed}
+                </span>
+              ) : (
+                <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
+                  {gradingTranslations.badgePublished}
+                </span>
+              )}
+
+              {assignmentExpired ? (
+                <span className="bg-red-50 border border-red-100 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
+                  {gradingTranslations.badgeExpired}
+                </span>
+              ) : (
+                <span className="bg-orange-50 border border-orange-100 text-orange-600 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wide">
+                  {gradingTranslations.badgeUpcoming}
+                </span>
+              )}
+
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 self-end md:self-start">
+            <button
+              type="button"
+              onClick={() => {
+                navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}/assignment/${encodeURIComponent(String(assignmentId))}`)
+              }}
+              className="h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
+            >
+              <Edit size={14} className="text-gray-500" />
+              <span>{gradingTranslations.editBtn}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onToggleSubmissionsLock}
+              disabled={isTogglingSubmissionsLock}
+              aria-busy={isTogglingSubmissionsLock || undefined}
+              className={`h-10 px-4 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-sm text-white disabled:cursor-not-allowed disabled:opacity-50 ${assignmentClosed
+                ? "bg-[#990011] hover:bg-[#80000e]"
+                : "bg-gray-800 hover:bg-gray-900"
+                }`}
+            >
+              {assignmentClosed ? (
+                <>
+                  <Unlock size={14} />
+                  <span>{gradingTranslations.openSubmissions}</span>
+                </>
+              ) : (
+                <>
+                  <Lock size={14} />
+                  <span>{gradingTranslations.lockSubmissions}</span>
+                </>
+              )}
+            </button>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowMoreMenu((isOpen) => !isOpen)}
+                className="w-10 h-10 border border-gray-200 hover:bg-gray-50 rounded-xl flex items-center justify-center text-gray-500 transition-colors shadow-2xs cursor-pointer"
+                aria-label={gradingTranslations.moreAssignmentActions}
+                aria-expanded={showMoreMenu}
+                aria-haspopup="menu"
+              >
+                <MoreVertical size={16} />
+              </button>
+
+              {showMoreMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                  <div role="menu" className="absolute right-0 mt-2 w-56 bg-white border border-gray-150 rounded-2xl shadow-xl py-2 z-50 text-xs font-bold text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      disabled={isDownloadingGradeSheet}
+                      onClick={() => {
+                        setShowMoreMenu(false)
+                        onDownloadGradeSheet()
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                      <Download size={14} className="text-[#990011]" />
+                      <span>
+                        {isDownloadingGradeSheet
+                          ? gradingTranslations.downloading
+                          : gradingTranslations.downloadGradeSheet}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      disabled={isBulkReturning}
+                      onClick={() => {
+                        setShowMoreMenu(false)
+                        onBulkReturn()
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-gray-50 transition-colors flex items-center gap-2 text-green-700 cursor-pointer"
+                    >
+                      <FileCheck size={14} />
+                      <span>
+                        {isBulkReturning
+                          ? gradingTranslations.returning
+                          : gradingTranslations.bulkReturnGrade}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      disabled={isDeletingAssignment}
+                      onClick={() => {
+                        setShowMoreMenu(false)
+                        setShowDeleteModal(true)
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-red-50 transition-colors flex items-center gap-2 text-red-600 cursor-pointer border-t border-gray-100"
+                    >
+                      <Trash2 size={14} />
+                      <span>{gradingTranslations.deleteAssignment}</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="h-px bg-gray-150 w-full" />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
+              {gradingTranslations.deadlineHeader}
+            </span>
+            <div className="flex items-center gap-2.5 text-gray-800">
+              <Calendar size={18} className="text-[#990011]" />
+              <span className="text-base font-extrabold">{assignmentDueLabel}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
+              {gradingTranslations.submittedHeader}
+            </span>
+            <div className="flex flex-col gap-1.5">
+              <div className="text-base font-extrabold text-gray-800 font-sans">
+                {stats.submitted} <span className="text-xs font-semibold text-gray-400">/ {stats.total} {gradingTranslations.totalLabel}</span>
+              </div>
+              <div className="w-48 h-2 bg-gray-150 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#990011] rounded-full transition-all"
+                  style={{ width: `${stats.submittedPercentage}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
+              {gradingTranslations.needsGradingHeader}
+            </span>
+            <div className="flex items-center gap-2.5 text-amber-600">
+              <FileCheck size={18} />
+              <span className="text-base font-extrabold">{stats.needsGrading}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-6 animate-fade-in">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="relative w-full lg:w-72">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              value={studentSearch}
+              onChange={(event) => onStudentSearchChange(event.target.value)}
+              aria-label={gradingTranslations.searchStudentsPlaceholder}
+              placeholder={gradingTranslations.searchStudentsPlaceholder}
+              className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
+            />
+          </div>
+
+          <div className="hidden lg:flex flex-wrap items-center gap-2 overflow-x-auto whitespace-nowrap pb-1 lg:pb-0 scrollbar-none lg:w-auto">
+            {filters.map((filter) => {
+              const isActive = activeFilter === filter.id
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => onActiveFilterChange(filter.id)}
+                  aria-pressed={isActive}
+                  className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all active:scale-95 ${isActive
+                    ? "bg-[#990011] border-[#990011] text-white shadow-2xs"
+                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
+                    }`}
+                >
+                  {filter.label}
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="relative w-full sm:w-auto min-w-[170px] block lg:hidden">
+            <select
+              value={activeFilter}
+              onChange={(event) => onActiveFilterChange(event.target.value)}
+              aria-label={gradingTranslations.filterLabel}
+              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all appearance-none cursor-pointer"
+            >
+              {filters.map((filter) => (
+                <option key={filter.id} value={filter.id}>{filter.label}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
+        </div>
+
+        <AssignmentSubmissionsTable
+          students={paginatedStudents}
+          assignmentMaxScore={assignmentMaxScore}
+          currentPage={activePage}
+          totalPages={totalPages}
+          paginationText={paginationText}
+          translations={gradingTranslations}
+          onPageChange={onPageChange}
+          onSelectStudent={onSelectStudent}
+        />
+      </div>
+
+      {/* Delete Assignment Modal Confirmation */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onClose={() => {
+          if (!isDeletingAssignment) setShowDeleteModal(false)
+        }}
+        onConfirm={async () => {
+          if (onDeleteAssignment && !isDeletingAssignment) {
+            await onDeleteAssignment()
+          }
+          setShowDeleteModal(false)
+        }}
+        title={gradingTranslations.deleteModalTitle}
+        message={interpolate(gradingTranslations.deleteModalConfirmMsg, {
+          assignmentTitle,
+        })}
+        confirmText={isDeletingAssignment
+          ? gradingTranslations.deletingLabel
+          : gradingTranslations.deleteConfirmBtn}
+        cancelText={gradingTranslations.cancelBtn}
+        confirmVariant="destructive"
+        isPending={isDeletingAssignment}
+      />
+    </div>
+  )
+}
+
+export default AssignmentSubmissionsList

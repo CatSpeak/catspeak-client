@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import { useGetConversationMessagesQuery } from "@/store/api/social/conversationsApi"
 
 const PAGE_SIZE = 30
+const EMPTY_ARRAY = []
 
 /**
  * Custom hook for managing conversation messages, pagination, deduplication, and formatting.
@@ -22,20 +23,28 @@ export default function useChatMessages(selectedId) {
 
   // Fetch messages for selected conversation (paginated)
   const {
-    data: activeMessagesResponse = [],
+    data: activeMessagesResponse = EMPTY_ARRAY,
     isLoading: isLoadingMessages,
     isFetching: isFetchingMessages,
   } = useGetConversationMessagesQuery(
-    selectedId ? { conversationId: selectedId, page, pageSize: PAGE_SIZE } : undefined,
+    selectedId
+      ? { conversationId: selectedId, page, pageSize: PAGE_SIZE }
+      : undefined,
     { skip: !selectedId },
   )
 
   useEffect(() => {
     if (!selectedId || !activeMessagesResponse) return
 
-    const fetchedItems = Array.isArray(activeMessagesResponse)
+    const rawItems = Array.isArray(activeMessagesResponse)
       ? activeMessagesResponse
       : activeMessagesResponse?.data || activeMessagesResponse?.items || []
+
+    const fetchedItems = rawItems.filter(
+      (m) =>
+        m.conversationId == null ||
+        String(m.conversationId) === String(selectedId),
+    )
 
     const totalPages =
       activeMessagesResponse?.totalPages ||
@@ -49,15 +58,22 @@ export default function useChatMessages(selectedId) {
     setHasMoreMessages(hasMore)
 
     setAccumulatedMessages((prev) => {
+      // Filter prev to strictly retain messages belonging to the current selectedId
+      const validPrev = prev.filter(
+        (m) =>
+          m.conversationId == null ||
+          String(m.conversationId) === String(selectedId),
+      )
+
       if (page === 1) {
-        if (prev.length > 0) {
+        if (validPrev.length > 0) {
           const fetchedMap = new Map(
             fetchedItems.map((m) => [m.messageId ?? m.id, m]),
           )
-          const updatedPrev = prev.map(
+          const updatedPrev = validPrev.map(
             (m) => fetchedMap.get(m.messageId ?? m.id) || m,
           )
-          const prevIds = new Set(prev.map((m) => m.messageId ?? m.id))
+          const prevIds = new Set(validPrev.map((m) => m.messageId ?? m.id))
           const newItems = fetchedItems.filter(
             (m) => !prevIds.has(m.messageId ?? m.id),
           )
@@ -66,11 +82,11 @@ export default function useChatMessages(selectedId) {
         return fetchedItems
       }
 
-      const existingIds = new Set(prev.map((m) => m.messageId ?? m.id))
+      const existingIds = new Set(validPrev.map((m) => m.messageId ?? m.id))
       const newOlderItems = fetchedItems.filter(
         (m) => !existingIds.has(m.messageId ?? m.id),
       )
-      return [...newOlderItems, ...prev]
+      return [...newOlderItems, ...validPrev]
     })
   }, [activeMessagesResponse, page, selectedId])
 
@@ -81,26 +97,32 @@ export default function useChatMessages(selectedId) {
   }, [hasMoreMessages, isFetchingMessages])
 
   const activeMessages = useMemo(() => {
-    return accumulatedMessages.map((msg) => ({
-      id: msg.messageId ?? msg.id,
-      conversationId: msg.conversationId,
-      senderId: msg.sender?.accountId,
-      content: msg.messageContent,
-      timestamp: msg.createDate,
-      messageType: msg.messageType || "Text",
-      isRead: msg.isRead ?? false,
-      status: msg.isRead ? "read" : "delivered",
-      readByAccountIds: msg.readByAccountIds || [],
-      sender: msg.sender,
-      parentMessageId: msg.parentMessageId,
-      parentMessage: msg.parentMessage || msg.replyToMessage,
-      mediaUrl: msg.mediaUrl || msg.fileUrl || msg.attachmentUrl,
-      fileName: msg.fileName,
-      fileSize: msg.fileSize,
-      isRecalled: msg.isRecalled,
-      isDeleted: msg.isDeleted,
-    }))
-  }, [accumulatedMessages])
+    return accumulatedMessages
+      .filter(
+        (msg) =>
+          msg.conversationId == null ||
+          String(msg.conversationId) === String(selectedId),
+      )
+      .map((msg) => ({
+        id: msg.messageId ?? msg.id,
+        conversationId: msg.conversationId,
+        senderId: msg.sender?.accountId,
+        content: msg.messageContent,
+        timestamp: msg.createDate,
+        messageType: msg.messageType || "Text",
+        isRead: msg.isRead ?? false,
+        status: msg.isRead ? "read" : "delivered",
+        readByAccountIds: msg.readByAccountIds || [],
+        sender: msg.sender,
+        parentMessageId: msg.parentMessageId,
+        parentMessage: msg.parentMessage || msg.replyToMessage,
+        mediaUrl: msg.mediaUrl || msg.fileUrl || msg.attachmentUrl,
+        fileName: msg.fileName,
+        fileSize: msg.fileSize,
+        isRecalled: msg.isRecalled,
+        isDeleted: msg.isDeleted,
+      }))
+  }, [accumulatedMessages, selectedId])
 
   return {
     activeMessages,

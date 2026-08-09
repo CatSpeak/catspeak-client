@@ -1,14 +1,20 @@
 import React from "react"
-import { Globe, GraduationCap, Calendar, Clock, AlignLeft } from "lucide-react"
+import { Globe, AlignLeft } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import RenderHTML from "@/shared/components/ui/RenderHTML"
+import { getLocalizedLanguageName } from "../data/courseFormOptions"
 
 const CourseInfoCard = ({
   courseData,
   languageLabel,
-  levelLabel,
-  admissionPeriodLabel,
-  durationLabel,
-  descriptionLabel
+  descriptionLabel,
+  noDescriptionText,
 }) => {
+  const { t } = useLanguage()
+  const resolvedNoDescription = noDescriptionText
+    || t.courses?.courseDetail?.noDescription
+    || "No description provided."
+
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -19,46 +25,12 @@ const CourseInfoCard = ({
             <Globe size={18} />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-gray-400 font-bold">{languageLabel}</span>
-            <span className="text-gray-900 font-extrabold text-sm mt-0.5">{courseData.language}</span>
-          </div>
-        </div>
-
-        {/* Trình độ */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center">
-            <GraduationCap size={18} />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-400 font-bold">{levelLabel}</span>
-            <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-black text-white bg-[#EAB308] rounded-full w-fit">
-              {courseData.level}
+            <span className="text-sm text-gray-400 font-bold">{languageLabel}</span>
+            <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+              {getLocalizedLanguageName(courseData.language, t)}
             </span>
           </div>
         </div>
-
-        {/* Thời gian tuyển sinh */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#15803D] flex items-center justify-center">
-            <Calendar size={18} />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-400 font-bold">{admissionPeriodLabel}</span>
-            <span className="text-gray-900 font-extrabold text-sm mt-0.5">{courseData.admissionPeriod}</span>
-          </div>
-        </div>
-
-        {/* Thời lượng */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center">
-            <Clock size={18} />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-400 font-bold">{durationLabel}</span>
-            <span className="text-gray-900 font-extrabold text-sm mt-0.5">{courseData.duration}</span>
-          </div>
-        </div>
-
       </div>
 
       {/* Mô tả */}
@@ -66,11 +38,13 @@ const CourseInfoCard = ({
         <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
           <AlignLeft size={18} />
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-gray-400 font-bold">{descriptionLabel}</span>
-          <p className="text-gray-600 font-medium text-xs leading-relaxed mt-0.5">
-            {courseData.description}
-          </p>
+        <div className="flex flex-col gap-1 w-full min-w-0">
+          <span className="text-sm text-gray-400 font-bold">{descriptionLabel}</span>
+          <RenderHTML
+            html={courseData.description}
+            className="text-gray-600 font-medium text-sm leading-relaxed"
+            fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed">{resolvedNoDescription}</span>}
+          />
         </div>
       </div>
     </div>

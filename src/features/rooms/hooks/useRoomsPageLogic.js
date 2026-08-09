@@ -9,32 +9,34 @@ export const useRoomsPageLogic = () => {
   const { openAuthModal } = useAuthModal()
 
   // Business loading states
-  const [isCreatingOneOnOne, setIsCreatingOneOnOne] = useState(false)
-  const [isCreatingStudyGroup, setIsCreatingStudyGroup] = useState(false)
   const [isCreatingAI, setIsCreatingAI] = useState(false)
+
+  // Modal states
+  const [isCreateRoomModalOpen, setCreateRoomModalOpen] = useState(false)
+  const [createRoomMode, setCreateRoomMode] = useState("group")
+  const [isJoinRoomModalOpen, setJoinRoomModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
 
   const canUseAI = AI_ALLOWED_ACCOUNT_IDS.includes(user?.accountId)
 
   const handleCreateOneOnOneSession = (onSuccess) => {
-    // Check if user is authenticated
     if (!isAuthenticated) {
-      // Show login popup instead of navigating to login page
       openAuthModal("login")
       return
     }
-    // If authenticated, trigger success
     onSuccess?.()
   }
 
   const handleCreateStudyGroupSession = (onSuccess) => {
-    // Check if user is authenticated
     if (!isAuthenticated) {
       openAuthModal("login")
       return
     }
-
-    // trigger success
-    onSuccess?.()
+    if (onSuccess) {
+      onSuccess()
+    } else {
+      setJoinRoomModalOpen(true)
+    }
   }
 
   const handleCreateAISession = async (onSuccess) => {
@@ -50,18 +52,48 @@ export const useRoomsPageLogic = () => {
     }
   }
 
+  const handleCreateCustomRoomSession = (onSuccess) => {
+    if (!isAuthenticated) {
+      openAuthModal("login")
+      return
+    }
+    if (onSuccess) {
+      onSuccess()
+    } else {
+      setCreateRoomMode("group")
+      setCreateRoomModalOpen(true)
+    }
+  }
+
   return {
     state: {
-      isCreating: isCreatingOneOnOne || isCreatingStudyGroup || isCreatingAI,
-      isCreatingOneOnOne,
-      isCreatingStudyGroup,
+      isCreating: isCreatingAI,
       isCreatingAI,
       canUseAI,
+      isCreateRoomModalOpen,
+      createRoomMode,
+      isJoinRoomModalOpen,
+      isSettingsModalOpen,
     },
     actions: {
       handleCreateOneOnOneSession,
       handleCreateStudyGroupSession,
       handleCreateAISession,
+      handleCreateCustomRoomSession,
+      setCreateRoomModalOpen,
+      setCreateRoomMode,
+      setJoinRoomModalOpen,
+      setIsSettingsModalOpen,
+      openJoinRoomModal: () => setJoinRoomModalOpen(true),
+      closeJoinRoomModal: () => setJoinRoomModalOpen(false),
+      openCreateRoomModal: (mode = "group") => {
+        setCreateRoomMode(mode)
+        setCreateRoomModalOpen(true)
+      },
+      closeCreateRoomModal: () => setCreateRoomModalOpen(false),
+      openAISettingsModal: () => setIsSettingsModalOpen(true),
+      closeAISettingsModal: () => setIsSettingsModalOpen(false),
     },
   }
 }
+

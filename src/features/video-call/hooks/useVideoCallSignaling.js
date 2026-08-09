@@ -3,6 +3,7 @@ import {
   HubConnectionBuilder,
   HubConnectionState,
   LogLevel,
+  HttpTransportType,
 } from "@microsoft/signalr"
 
 import { useAuth } from "@/features/auth"
@@ -35,9 +36,11 @@ export const useVideoCallSignaling = (handlers = {}) => {
     const newConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => store.getState().auth.token,
+        transport:
+          HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling,
       })
       .withAutomaticReconnect()
-      .configureLogging(LogLevel.Warning)
+      .configureLogging(LogLevel.None)
       .build()
 
     connectionRef.current = newConnection
@@ -57,7 +60,7 @@ export const useVideoCallSignaling = (handlers = {}) => {
       "JoinBreakoutRoom",
       "ReturnToMainRoom",
       "BreakoutStatusChanged",
-      "BroadcastNotification"
+      "BroadcastNotification",
     ]
     events.forEach((evt) => {
       newConnection.on(evt, safeHandler(evt))

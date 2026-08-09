@@ -8,13 +8,16 @@ import React, {
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetUserProfileQuery } from "@/store/api/userApi";
+import { store } from "@/store";
 import {
+  instructorApi,
+  buildInstructorFormData,
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
 } from "@/store/api/instructorApi";
 import { parsePhoneData } from "@/shared/constants/countriesOptions";
-import { useGlobalUpload } from "@/shared/hooks/useGlobalUpload.jsx";
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 
 import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
 import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
@@ -117,7 +120,7 @@ function getApplicationStatus(app) {
 const InstructorPage = () => {
   const { t } = useLanguage();
   const ins = t.profile?.instructor || {};
-  const { uploadFile } = useGlobalUpload();
+  const { startTask } = useGlobalTask();
 
   // --- API hooks ---
   const {
@@ -176,9 +179,13 @@ const InstructorPage = () => {
   const [hasPreFilled, setHasPreFilled] = useState(false);
   const [errors, setErrors] = useState({});
   const [isReapplying, setIsReapplying] = useState(false);
+  const [isTaskSubmitting, setIsTaskSubmitting] = useState(false);
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false);
 
   // Snapshot of the original form data to detect changes
   const originalFormDataRef = useRef(null);
+  const personalInfoBackupRef = useRef(null);
 
   // Populate form from existing application
   useEffect(() => {
@@ -225,6 +232,41 @@ const InstructorPage = () => {
 
   // Can edit when: new form (no existing application) OR RequestEdit status OR Reapplying
   const canEdit = (showForm && !existingApplication) || isRequestEdit || isReapplying;
+
+  // Can section edit "Thông tin của bạn" (5 fields) ONLY when the instructor application is Approved ("Approved")
+  const canSectionEdit = applicationStatus === "Approved" && !canEdit;
+
+  // Handlers for section editing "Thông tin của bạn"
+  const handleStartEditPersonalInfo = useCallback(() => {
+    personalInfoBackupRef.current = {
+      fullName: formData.fullName,
+      email: formData.email,
+      address: formData.address,
+      phoneNumber: formData.phoneNumber,
+      phonePrefix: formData.phonePrefix,
+      nationality: formData.nationality,
+    };
+    setIsEditingPersonalInfo(true);
+  }, [formData]);
+
+  const handleCancelEditPersonalInfo = useCallback(() => {
+    if (personalInfoBackupRef.current) {
+      setFormData((prev) => ({
+        ...prev,
+        ...personalInfoBackupRef.current,
+      }));
+    }
+    setIsEditingPersonalInfo(false);
+    setErrors((prev) => {
+      const newErr = { ...prev };
+      delete newErr.fullName;
+      delete newErr.email;
+      delete newErr.address;
+      delete newErr.phoneNumber;
+      delete newErr.nationality;
+      return newErr;
+    });
+  }, []);
 
   // Detect if user has made any changes from the original data
   const hasChanges = useMemo(() => {
@@ -290,12 +332,12 @@ const InstructorPage = () => {
 
   const handleChange = useCallback(
     (e) => {
-      if (!canEdit) return;
+      if (!canEdit && !isEditingPersonalInfo) return;
       const { name, value } = e.target;
       setFormData((prev) => ({ ...prev, [name]: value }));
       clearError(name);
     },
-    [canEdit],
+    [canEdit, isEditingPersonalInfo],
   );
 
   const handleLanguagesChange = useCallback(
@@ -341,6 +383,21 @@ const InstructorPage = () => {
       if (!canEdit) return;
       const files = Array.from(e.target.files || []);
       if (!files.length) return;
+      const CRED_MAX_MB = 100;
+      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024);
+      if (oversized) {
+        const actualMb = (oversized.size / 1024 / 1024).toFixed(1);
+        setErrors((prev) => ({
+          ...prev,
+          credentials:
+            ins.credentialSizeLimit
+              ?.replace("{max}", CRED_MAX_MB)
+              ?.replace("{actual}", actualMb) ||
+            `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`,
+        }));
+        e.target.value = "";
+        return;
+      }
       setFormData((prev) => ({
         ...prev,
         credentials: [...prev.credentials, ...files],
@@ -348,7 +405,7 @@ const InstructorPage = () => {
       clearError("credentials");
       e.target.value = "";
     },
-    [canEdit],
+    [canEdit, ins],
   );
 
   const handleSelectVideo = useCallback(() => {
@@ -361,10 +418,24 @@ const InstructorPage = () => {
       if (!canEdit) return;
       const file = e.target.files?.[0];
       if (!file) return;
+      const VIDEO_MAX_MB = 500;
+      if (file.size > VIDEO_MAX_MB * 1024 * 1024) {
+        const actualMb = (file.size / 1024 / 1024).toFixed(1);
+        setErrors((prev) => ({
+          ...prev,
+          videoFile:
+            ins.videoSizeLimit
+              ?.replace("{max}", VIDEO_MAX_MB)
+              ?.replace("{actual}", actualMb) ||
+            `Video phải nhỏ hơn ${VIDEO_MAX_MB}MB (hiện tại ${actualMb}MB).`,
+        }));
+        e.target.value = "";
+        return;
+      }
       setFormData((prev) => ({ ...prev, videoFile: file }));
       clearError("videoFile");
     },
-    [canEdit],
+    [canEdit, ins],
   );
 
   const handleRemoveCredential = useCallback(
@@ -399,6 +470,38 @@ const InstructorPage = () => {
     [formData],
   );
 
+  const handleSavePersonalInfo = useCallback(async () => {
+    const personalErrors = {};
+    if (!formData.fullName?.trim())
+      personalErrors.fullName = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.email?.trim())
+      personalErrors.email = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.address?.trim())
+      personalErrors.address = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.phoneNumber?.trim())
+      personalErrors.phoneNumber = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.nationality?.trim())
+      personalErrors.nationality = ins.requiredField || "Trường này là bắt buộc";
+
+    if (Object.keys(personalErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...personalErrors }));
+      return;
+    }
+
+    setIsSavingPersonalInfo(true);
+    try {
+      await updateInstructor(buildPayload()).unwrap();
+      toast.success("Cập nhật thông tin giảng viên thành công!");
+      setIsEditingPersonalInfo(false);
+      store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
+    } catch (err) {
+      console.error("Failed to update personal info:", err);
+      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.");
+    } finally {
+      setIsSavingPersonalInfo(false);
+    }
+  }, [formData, ins, updateInstructor, buildPayload]);
+
   const handleSubmit = useCallback(async () => {
     if (isSubmitting) return;
 
@@ -428,7 +531,7 @@ const InstructorPage = () => {
 
     try {
       if (isRequestEdit || isReapplying) {
-        // PUT /my for resubmission
+        // PUT /my for resubmission — simple RTK Query
         await updateInstructor(buildPayload()).unwrap();
         toast.success(ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!");
         setShowForm(false);
@@ -436,37 +539,54 @@ const InstructorPage = () => {
         setErrors({});
         setIsReapplying(false);
       } else {
-        // POST /apply for new applications using Global Progress System
+        // POST /apply for new applications — Task Progress Bar
         const rawPayload = buildPayload();
-        const formDataPayload = new FormData();
-        Object.entries(rawPayload).forEach(([key, val]) => {
-          if (Array.isArray(val)) {
-            val.forEach((item) => formDataPayload.append(key, item));
-          } else if (val) {
-            formDataPayload.append(key, val);
-          }
-        });
+        const formData = buildInstructorFormData(rawPayload);
 
-        uploadFile({
-          url: "/api/InstructorProfile/apply",
+        // Lock form immediately
+        setIsTaskSubmitting(true);
+
+        startTask({
+          title: t?.uploadWidget?.instructorTaskTitle || "Gửi hồ sơ giảng viên",
+          taskType: "InstructorApplication",
+          isUploadTask: true,
+          url: "/InstructorProfile/apply",
           method: "POST",
-          data: formDataPayload,
-          title: ins.formTitle || "Nộp hồ sơ Giảng viên",
-          onUploadSuccess: () => {
+          data: formData,
+          onSuccess: () => {
             toast.success(ins.statusPendingDesc || "Đã gửi đơn đăng ký thành công!");
+            setIsTaskSubmitting(false);
             setShowForm(false);
             setAgreed(false);
             setErrors({});
             setIsReapplying(false);
+            store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
           },
-          onUploadError: (err) => {
-            toast.error(err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
+          onError: (err) => {
+            setIsTaskSubmitting(false);
+            const msg = err?.message || err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.";
+            if (msg.toLowerCase().includes("email")) {
+              setErrors((prev) => ({ ...prev, email: msg }));
+              setTimeout(() => {
+                const el = document.getElementById("field-email");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 0);
+            }
+            toast.error(msg);
           },
         });
       }
     } catch (err) {
       console.error("Failed to submit instructor application:", err);
-      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi gửi đơn đăng ký.");
+      const msg = err?.data?.message || err?.data?.title || "Đã có lỗi xảy ra khi gửi đơn đăng ký.";
+      if (msg.toLowerCase().includes("email")) {
+        setErrors((prev) => ({ ...prev, email: msg }));
+        setTimeout(() => {
+          const el = document.getElementById("field-email");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 0);
+      }
+      toast.error(msg);
     }
   }, [
     agreed,
@@ -478,6 +598,7 @@ const InstructorPage = () => {
     updateInstructor,
     buildPayload,
     ins,
+    t,
   ]);
 
   // --- Render ---
@@ -503,13 +624,23 @@ const InstructorPage = () => {
   }
 
   // Determine readOnly for section components
-  const readOnly = !canEdit || isSubmitting;
+  const readOnly = !canEdit || isSubmitting || isTaskSubmitting;
 
   return (
     <div className="flex flex-col gap-6">
       <PageTitle>
         {t.nav?.instructor || "Giảng viên"}
       </PageTitle>
+
+      {/* Task submitting banner */}
+      {isTaskSubmitting && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 animate-pulse">
+          <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+          <span className="font-medium">
+            {t?.uploadWidget?.instructorSubmitting || "Đang gửi hồ sơ giảng viên, vui lòng chờ..."}
+          </span>
+        </div>
+      )}
 
       {/* Status Banner — shown when an application exists */}
       {applicationStatus && (
@@ -535,6 +666,12 @@ const InstructorPage = () => {
           readOnly={readOnly}
           errors={errors}
           t={t}
+          canSectionEdit={canSectionEdit}
+          isSectionEditing={isEditingPersonalInfo}
+          onStartSectionEdit={handleStartEditPersonalInfo}
+          onCancelSectionEdit={handleCancelEditPersonalInfo}
+          onSaveSectionEdit={handleSavePersonalInfo}
+          isSavingSection={isSavingPersonalInfo}
         />
         <InstructorLanguages
           formData={formData}
@@ -579,8 +716,8 @@ const InstructorPage = () => {
             if (val) clearError("agreed");
           }}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          disabled={isSubmitting}
+          isSubmitting={isSubmitting || isTaskSubmitting}
+          disabled={isSubmitting || isTaskSubmitting}
           errors={errors}
           submitLabel={isRequestEdit || isReapplying ? ins.resubmit : undefined}
           updatingLabel={isRequestEdit || isReapplying ? ins.updating : undefined}
