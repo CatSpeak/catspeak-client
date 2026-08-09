@@ -87,9 +87,27 @@ export const mapTeacherClassSummary = (
   index,
   labels = {},
   formatDate = null,
+  formatScheduleTime = null,
+  formatScheduleDaysFunc = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const progress = getProgressPercent(cls.progress)
+
+  const startTimeStr = cls.schedule?.startTime
+  const endTimeStr = cls.schedule?.endTime
+  const startDateStr = cls.startDate
+
+  const scheduleDaysText = formatScheduleDaysFunc
+    ? formatScheduleDaysFunc(cls.schedule?.days, labels.tba, " - ", startTimeStr, startDateStr)
+    : formatScheduleDays(cls.schedule?.days, labels.tba, " - ")
+
+  const startFormatted = formatScheduleTime && startTimeStr
+    ? formatScheduleTime(startTimeStr, startDateStr)
+    : startTimeStr
+
+  const endFormatted = formatScheduleTime && endTimeStr
+    ? formatScheduleTime(endTimeStr, startDateStr)
+    : endTimeStr
 
   return {
     id: cls.id,
@@ -100,9 +118,9 @@ export const mapTeacherClassSummary = (
       : null,
     language: cls.language || "",
     levels: Array.isArray(cls.levels) ? cls.levels : [],
-    schedule: formatScheduleDays(cls.schedule?.days, labels.tba),
-    time: cls.schedule?.startTime && cls.schedule?.endTime
-      ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
+    schedule: scheduleDaysText,
+    time: startFormatted && endFormatted
+      ? `${startFormatted} - ${endFormatted}`
       : labels.tba,
     students: fillTemplate(labels.studentsRatio, {
       enrolled: toDisplayCount(cls.studentCount ?? cls.enrolledStudents),
@@ -111,8 +129,16 @@ export const mapTeacherClassSummary = (
     slots: toNonNegativeNumber(cls.slots),
     progress,
     progressText: `${toDisplayCount(cls.progress?.completedSessions)}/${toDisplayCount(cls.progress?.totalSessions)}`,
-    startDate: formatDate ? (formatDate(cls.startDate) || labels.tba) : (labels.tba || "—"),
-    endDate: formatDate ? (formatDate(cls.endDate) || labels.tba) : (labels.tba || "—"),
+    startDate: (() => {
+      const raw = cls.startDate || cls.enrollmentStart || cls.created_at || cls.createdAt
+      const formatted = (formatDate && raw) ? formatDate(raw) : null
+      return formatted || (cls.startDate ? cls.startDate : (labels.tba || "—"))
+    })(),
+    endDate: (() => {
+      const raw = cls.endDate || cls.enrollmentEnd
+      const formatted = (formatDate && raw) ? formatDate(raw) : null
+      return formatted || (cls.endDate ? cls.endDate : (labels.tba || "—"))
+    })(),
     price: formatPrice(cls.tuitionFee, labels.tba),
     status: cls.status || "",
     icon,
@@ -130,8 +156,19 @@ export const mapCourseTableRow = (
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const classCount = toDisplayCount(course.classCount)
   const totalStudents = toDisplayCount(course.totalStudents ?? course.studentCount)
-  const minimumPrice = toNonNegativeNumber(course.priceRange?.min)
-  const maximumPrice = toNonNegativeNumber(course.priceRange?.max)
+  const minP = toNonNegativeNumber(course.priceRange?.min ?? course.price ?? course.tuitionFee)
+  const maxP = toNonNegativeNumber(course.priceRange?.max ?? course.price ?? course.tuitionFee)
+
+  const formattedPrice = (() => {
+    if (minP !== null && maxP !== null) {
+      return minP === maxP
+        ? formatCurrencyVND(minP)
+        : `${formatCurrencyVND(minP)} - ${formatCurrencyVND(maxP)}`
+    }
+    if (minP !== null) return formatCurrencyVND(minP)
+    if (maxP !== null) return formatCurrencyVND(maxP)
+    return labels.tba
+  })()
 
   return {
     id: course.id,
@@ -139,11 +176,17 @@ export const mapCourseTableRow = (
     classCount: fillTemplate(labels.classCount, { count: classCount }),
     students: fillTemplate(labels.studentsCount, { count: totalStudents }),
     progress: getProgressPercent(course.progress),
-    startDate: formatDate ? (formatDate(course.startDate) || labels.tba) : (labels.tba || "—"),
-    endDate: formatDate ? (formatDate(course.endDate) || labels.tba) : (labels.tba || "—"),
-    price: minimumPrice !== null && maximumPrice !== null
-      ? `${formatCurrencyVND(minimumPrice)} - ${formatCurrencyVND(maximumPrice)}`
-      : labels.tba,
+    startDate: (() => {
+      const raw = course.startDate || course.createdAt
+      const formatted = (formatDate && raw) ? formatDate(raw) : null
+      return formatted || (course.startDate ? course.startDate : (labels.tba || "—"))
+    })(),
+    endDate: (() => {
+      const raw = course.endDate || course.enrollmentEnd
+      const formatted = (formatDate && raw) ? formatDate(raw) : null
+      return formatted || (course.endDate ? course.endDate : (labels.tba || "—"))
+    })(),
+    price: formattedPrice,
     status: course.status,
     icon,
     gradient,
@@ -156,12 +199,30 @@ export const mapClassTableRow = (
   index,
   labels = {},
   formatDate = null,
+  formatScheduleTime = null,
+  formatScheduleDaysFunc = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const progress = getProgressPercent({
     completedSessions: cls.completedSessions ?? cls.progress?.completedSessions,
     totalSessions: cls.totalSessions ?? cls.progress?.totalSessions,
   })
+
+  const startTimeStr = cls.schedule?.startTime
+  const endTimeStr = cls.schedule?.endTime
+  const startDateStr = cls.startDate
+
+  const scheduleDaysText = formatScheduleDaysFunc
+    ? formatScheduleDaysFunc(cls.schedule?.days, labels.tba, " - ", startTimeStr, startDateStr)
+    : formatScheduleDays(cls.schedule?.days, labels.tba, " - ")
+
+  const startFormatted = formatScheduleTime && startTimeStr
+    ? formatScheduleTime(startTimeStr, startDateStr)
+    : startTimeStr
+
+  const endFormatted = formatScheduleTime && endTimeStr
+    ? formatScheduleTime(endTimeStr, startDateStr)
+    : endTimeStr
 
   return {
     id: cls.id,
@@ -170,17 +231,25 @@ export const mapClassTableRow = (
       : null,
     classTitle: cls.title || cls.name,
     status: cls.status,
-    schedule: formatScheduleDays(cls.schedule?.days, labels.tba, ", "),
+    schedule: scheduleDaysText,
     students: fillTemplate(labels.studentsRatio, {
       enrolled: toDisplayCount(cls.enrolledStudents ?? cls.studentCount),
       slots: toDisplayCount(cls.slots),
     }),
-    time: cls.schedule?.startTime && cls.schedule?.endTime
-      ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
+    time: startFormatted && endFormatted
+      ? `${startFormatted} - ${endFormatted}`
       : labels.tba,
     progress,
-    startDate: formatDate ? (formatDate(cls.startDate) || labels.tba) : (labels.tba || "—"),
-    endDate: formatDate ? (formatDate(cls.endDate) || labels.tba) : (labels.tba || "—"),
+    startDate: (() => {
+      const raw = cls.startDate || cls.enrollmentStart || cls.created_at || cls.createdAt
+      const formatted = (formatDate && raw) ? formatDate(raw) : null
+      return formatted || (cls.startDate ? cls.startDate : (labels.tba || "—"))
+    })(),
+    endDate: (() => {
+      const raw = cls.endDate || cls.enrollmentEnd
+      const formatted = (formatDate && raw) ? formatDate(raw) : null
+      return formatted || (cls.endDate ? cls.endDate : (labels.tba || "—"))
+    })(),
     price: formatPrice(cls.tuitionFee, labels.tba),
     icon,
     gradient,

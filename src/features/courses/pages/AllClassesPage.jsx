@@ -15,8 +15,8 @@ import { mapClassTableRow } from "../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const AllClassesPage = () => {
-  const { t } = useLanguage()
-  const { formatDate } = useTimezone()
+  const { language, t } = useLanguage()
+  const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const ac = c.allClasses || {}
   const navigate = useNavigate()
@@ -53,6 +53,8 @@ const AllClassesPage = () => {
         tba: c.workspaceUi?.tba,
       },
       formatDate,
+      formatScheduleTime,
+      formatScheduleDays,
     ))
   const pagination = data?.pagination || { page: 1, pageSize: 5, totalItems: 0, totalPages: 1 }
   const isInitialLoading = (
