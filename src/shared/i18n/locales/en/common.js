@@ -76,9 +76,11 @@ export default {
     accountInfo: "Account Info",
     systemConfig: "System Configuration",
     emailNotifyTitle: "Receive email notifications & news from CatSpeak",
-    emailNotifyDesc: "Allow the system to send important updates, new features, and account notifications via email.",
+    emailNotifyDesc:
+      "Allow the system to send important updates, new features, and account notifications via email.",
     timezoneTitle: "Timezone",
-    timezoneDesc: "Adjust schedules, chat history and statistics to your local timezone.",
+    timezoneDesc:
+      "Adjust schedules, chat history and statistics to your local timezone.",
     timezoneSelect: "Select timezone",
     timezoneUpdated: "Timezone updated successfully.",
     timezoneUpdateFailed: "Failed to update timezone.",
