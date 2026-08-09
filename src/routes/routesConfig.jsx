@@ -174,14 +174,6 @@ const routesConfig = [
             element: <VerifyEmailPage />,
           },
           {
-            path: "pricing",
-            element: (
-              <LazyRoute>
-                <PricingPage />
-              </LazyRoute>
-            ),
-          },
-          {
             path: "checkout",
             element: (
               <AuthGuard>
@@ -809,6 +801,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <OrganizationPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "pricing",
+                element: (
+                  <LazyRoute>
+                    <PricingPage />
                   </LazyRoute>
                 ),
               },
