@@ -34,7 +34,7 @@ export default {
         success: "#4b0008",
         headingColor: "#2e2e2e",
         textColor: "#515151",
-        primary2: "#f3f3f3",
+        primary2: "#F5F5F7",
         darkOverlay: "rgba(0,0,0,0.2)",
         lightOverlay: "rgba(255,255,255,0.4)",
         lighttextGray: "#9ca0ab",
@@ -48,7 +48,7 @@ export default {
         secondary: "#606060",
         dusk: "#1a1a2e",
         border: "#e5e5e5",
-        "main-bg": "#f3f3f3",
+        primaryBg: "#F5F5F7",
       },
       width: {
         150: "150px",

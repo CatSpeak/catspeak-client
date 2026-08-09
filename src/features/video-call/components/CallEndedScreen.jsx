@@ -14,7 +14,7 @@ const CallEndedScreen = () => {
   const isExpired = location.state?.reason === "expired"
 
   return (
-    <div className="flex items-center justify-center h-screen bg-[#F3F3F3] animate-fadeIn">
+    <div className="flex items-center justify-center h-screen bg-primaryBg animate-fadeIn">
       <div className="flex flex-col items-center gap-4 max-w-[420px] px-8 py-12 text-center bg-white rounded-3xl border border-[#E5E5E5] shadow-xl">
         <div className="text-gray-600 mb-2 bg-gray-100 p-5 rounded-full">
           <PhoneOff size={40} strokeWidth={1.5} />

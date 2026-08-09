@@ -108,7 +108,7 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerImageRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-[#f3f3f3] active:bg-green-100 transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-primaryBg active:bg-green-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <Image size={20} className="text-[#16a34a]" />
                   <span>{t.profile?.home?.photo || "Ảnh"}</span>
