@@ -3,7 +3,6 @@ import DataTable from "@/shared/components/ui/DataTable";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import BillingMobileCard from "./BillingMobileCard";
 import { RotateCcw, AlertCircle, Loader2 } from "lucide-react";
-import { formatDateTime12Hour } from "@/shared/utils/dateFormatter";
 
 const BillingTable = ({
   invoices,
@@ -28,9 +27,9 @@ const BillingTable = ({
     {
       key: "createDate",
       label: cols.date || "Date",
-      headerClassName: "!py-2.5 !px-4 w-[22%]",
-      className: "!py-2.5 !px-4 w-[22%]",
-      render: (row) => formatDateTime12Hour(row.createDate),
+      headerClassName: "w-[22%]",
+      className: "w-[22%]",
+      render: (row) => formatDateTime(row.createDate),
     },
     {
       key: "orderCode",
@@ -74,8 +73,8 @@ const BillingTable = ({
     {
       key: "actions",
       label: cols.actions || "Actions",
-      headerClassName: "!py-2.5 !px-4 w-[15%] text-right",
-      className: "!py-2.5 !px-4 w-[15%] text-right whitespace-nowrap",
+      headerClassName: "!py-2.5 !px-4 w-[15%]",
+      className: "!py-2.5 !px-4 w-[15%] whitespace-nowrap",
       render: (row) => {
         const isPending =
           row.status === 3 ||
