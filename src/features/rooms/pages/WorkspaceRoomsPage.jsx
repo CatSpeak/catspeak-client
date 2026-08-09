@@ -13,63 +13,43 @@ import {
 } from "lucide-react";
 import Tabs from "@/shared/components/ui/navigation/Tabs";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
-// import PageTitle from "@/shared/components/ui/PageTitle";
 import SearchInput from "@/shared/components/ui/inputs/SearchInput";
-// import { PlanRequiredState } from "@/shared/components/ui/indicators";
 import { toast } from "react-hot-toast";
 import {
+  useGetMyRoomsQuery,
   useGetMyCustomRoomsQuery,
   useDeleteCustomRoomMutation,
+  useToggleBookmarkRoomMutation,
 } from "@/store/api/roomsApi";
-// import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
 import CreateRoomModal from "../components/CreateRoomModal";
 import EditRoomModal from "../components/EditRoomModal";
 import CustomRoomCard from "../components/CustomRoomCard";
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
 
-const getLanguageName = (langCode) => {
-  switch (langCode) {
-    case "zh":
-      return "Chinese";
-    case "vi":
-      return "Vietnamese";
-    case "en":
-      return "English";
-    default:
-      return "English";
-  }
-};
+// const getLanguageName = (langCode) => {
+//   switch (langCode) {
+//     case "zh":
+//       return "Chinese";
+//     case "vi":
+//       return "Vietnamese";
+//     case "en":
+//       return "English";
+//     default:
+//       return "English";
+//   }
+// };
 
 const WorkspaceRoomsContent = () => {
   const { t } = useLanguage();
   const { lang, id } = useParams();
   const navigate = useNavigate();
   const ct = t.rooms?.customRooms || {};
-  // const { limits, isLoading: isPlanLoading } = usePlanFeatures();
 
   const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
 
-  // Tab State
+  // Tab State: "created" | "bookmark"
   const [activeTab, setActiveTab] = useState("created");
-
-  // API Hooks
-  const { data: customRoomsData, isLoading } = useGetMyCustomRoomsQuery();
-  const [deleteCustomRoom, { isLoading: isDeleting }] =
-    useDeleteCustomRoomMutation();
-
-  const rawCustomRooms = useMemo(
-    () => customRoomsData?.customRooms || [],
-    [customRoomsData],
-  );
-  const quota = {
-    used: customRoomsData?.currentCustomRoomsCount ?? 0,
-    max: customRoomsData?.maxCustomRooms ?? 3,
-  };
-  const isQuotaFull = customRoomsData?.canCreateCustomRoom === false;
-
-  // Temporary bookmarked rooms data source (same API for now as requested)
-  const rawBookmarkedRooms = useMemo(() => [], []);
 
   // Modals & Card Interaction States
   const [copiedId, setCopiedId] = useState(null);
@@ -86,6 +66,75 @@ const WorkspaceRoomsContent = () => {
   const [appliedSortField, setAppliedSortField] = useState("createdAt");
   const [appliedSortOrder, setAppliedSortOrder] = useState("desc");
 
+  // Tab mapping for API: "created" | "bookmark"
+  const apiTab =
+    activeTab === "bookmark" || activeTab === "bookmarked"
+      ? "bookmark"
+      : "created";
+
+  // Map sort options to API format
+  const apiSort = useMemo(() => {
+    if (appliedSortField === "name") {
+      return appliedSortOrder === "asc" ? "name_asc" : "name_desc";
+    }
+    if (appliedSortField === "currentParticipantCount") {
+      return "participants_desc";
+    }
+    if (appliedSortField === "createdAt") {
+      return appliedSortOrder === "asc" ? "oldest" : "newest";
+    }
+    return "newest";
+  }, [appliedSortField, appliedSortOrder]);
+
+  // API Hooks
+  const {
+    data: myRoomsResponse,
+    isLoading: isMyRoomsLoading,
+    refetch: refetchMyRooms,
+  } = useGetMyRoomsQuery({
+    tab: apiTab,
+    search: appliedSearch.trim() || undefined,
+    sort: apiSort,
+    page: 1,
+    pageSize: 50,
+  });
+
+  const { data: customRoomsData } = useGetMyCustomRoomsQuery();
+
+  const [deleteCustomRoom, { isLoading: isDeleting }] =
+    useDeleteCustomRoomMutation();
+
+  const [toggleBookmark] = useToggleBookmarkRoomMutation();
+
+  const isLoading = isMyRoomsLoading && !myRoomsResponse;
+
+  // Extract raw room list from getMyRooms response
+  const rawTargetRooms = useMemo(() => {
+    if (Array.isArray(myRoomsResponse?.data?.items)) {
+      return myRoomsResponse.data.items;
+    }
+    if (Array.isArray(myRoomsResponse?.data)) {
+      return myRoomsResponse.data;
+    }
+    if (Array.isArray(myRoomsResponse?.items)) {
+      return myRoomsResponse.items;
+    }
+    if (apiTab === "created" && Array.isArray(customRoomsData?.customRooms)) {
+      return customRoomsData.customRooms;
+    }
+    return [];
+  }, [myRoomsResponse, apiTab, customRoomsData]);
+
+  // Quota for custom rooms
+  const quota = {
+    used:
+      customRoomsData?.currentCustomRoomsCount ??
+      myRoomsResponse?.data?.totalCount ??
+      rawTargetRooms.length,
+    max: customRoomsData?.maxCustomRooms ?? 3,
+  };
+  const isQuotaFull = customRoomsData?.canCreateCustomRoom === false;
+
   // Tab definition
   const tabs = useMemo(
     () => [
@@ -95,7 +144,7 @@ const WorkspaceRoomsContent = () => {
         icon: DoorOpen,
       },
       {
-        id: "bookmarked",
+        id: "bookmark",
         label: t.rooms?.workspace?.bookmarkedRooms || "Phòng đã lưu",
         icon: Bookmark,
       },
@@ -144,12 +193,27 @@ const WorkspaceRoomsContent = () => {
       try {
         await deleteCustomRoom(roomId).unwrap();
         toast.success(ct.deleteSuccess || "Đã xóa phòng thành công");
+        refetchMyRooms();
       } catch (err) {
         console.error("Failed to delete custom room:", err);
         toast.error(err?.data?.message || "Failed to delete room");
       }
     },
-    [deleteCustomRoom, ct.deleteSuccess],
+    [deleteCustomRoom, ct.deleteSuccess, refetchMyRooms],
+  );
+
+  const handleToggleBookmark = useCallback(
+    async (roomId) => {
+      try {
+        const res = await toggleBookmark(roomId).unwrap();
+        toast.success(res?.message || "Đã cập nhật danh sách phòng đã lưu");
+        refetchMyRooms();
+      } catch (err) {
+        console.error("Failed to toggle bookmark:", err);
+        toast.error(err?.data?.message || "Không thể thay đổi lưu phòng");
+      }
+    },
+    [toggleBookmark, refetchMyRooms],
   );
 
   // Filter & Sort Application
@@ -165,23 +229,11 @@ const WorkspaceRoomsContent = () => {
 
   const activeFilterCount = appliedLevels.length + appliedTopics.length;
 
-  // Target rooms array according to active tab
-  const rawTargetRooms =
-    activeTab === "created" ? rawCustomRooms : rawBookmarkedRooms;
-
-  // Client-side filtering & sorting
+  // Client-side filtering
   const filteredAndSortedRooms = useMemo(() => {
     let list = [...rawTargetRooms];
 
-    // 1. Approximate case-insensitive search by room name
-    if (appliedSearch.trim()) {
-      const query = appliedSearch.trim().toLowerCase();
-      list = list.filter((room) =>
-        (room.name || "").toLowerCase().includes(query),
-      );
-    }
-
-    // 2. Filter by Level
+    // 1. Level Filter
     if (appliedLevels.length > 0) {
       list = list.filter(
         (room) =>
@@ -189,7 +241,7 @@ const WorkspaceRoomsContent = () => {
       );
     }
 
-    // 3. Filter by Topic
+    // 2. Topic Filter
     if (appliedTopics.length > 0) {
       list = list.filter((room) => {
         const topicsList = Array.isArray(room.topics)
@@ -201,42 +253,8 @@ const WorkspaceRoomsContent = () => {
       });
     }
 
-    // 4. Sort by selected column attribute
-    if (appliedSortField) {
-      list.sort((a, b) => {
-        let valA = a[appliedSortField];
-        let valB = b[appliedSortField];
-
-        if (appliedSortField === "name") {
-          valA = (valA || "").toLowerCase();
-          valB = (valB || "").toLowerCase();
-          const cmp = valA.localeCompare(valB);
-          return appliedSortOrder === "asc" ? cmp : -cmp;
-        }
-
-        if (appliedSortField === "createdAt") {
-          valA = valA ? new Date(valA).getTime() : 0;
-          valB = valB ? new Date(valB).getTime() : 0;
-        } else {
-          valA = Number(valA) || 0;
-          valB = Number(valB) || 0;
-        }
-
-        if (valA < valB) return appliedSortOrder === "asc" ? -1 : 1;
-        if (valA > valB) return appliedSortOrder === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-
     return list;
-  }, [
-    rawTargetRooms,
-    appliedSearch,
-    appliedLevels,
-    appliedTopics,
-    appliedSortField,
-    appliedSortOrder,
-  ]);
+  }, [rawTargetRooms, appliedLevels, appliedTopics]);
 
   // if (!isPlanLoading && !limits.allowCustomRooms) {
   //   return (
@@ -334,9 +352,9 @@ const WorkspaceRoomsContent = () => {
                   title={t.rooms?.filters?.title || "Bộ lọc"}
                 >
                   <SlidersHorizontal size={18} strokeWidth={2} />
-                  <span className="hidden sm:inline">
+                  {/* <span className="hidden sm:inline">
                     {t.rooms?.filters?.title || "Bộ lọc"}
-                  </span>
+                  </span> */}
                   {activeFilterCount > 0 && (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-[11px] font-bold text-white shadow-sm ring-2 ring-white">
                       {activeFilterCount}
@@ -352,9 +370,9 @@ const WorkspaceRoomsContent = () => {
                   title={t.rooms?.sortTitle || "Sắp xếp"}
                 >
                   <ArrowUpDown size={18} strokeWidth={2} />
-                  <span className="hidden sm:inline">
+                  {/* <span className="hidden sm:inline">
                     {t.rooms?.sortTitle || "Sắp xếp"}
-                  </span>
+                  </span> */}
                   {appliedSortField && (
                     <span className="flex h-2 w-2 rounded-full bg-cath-red-700" />
                   )}
@@ -434,6 +452,8 @@ const WorkspaceRoomsContent = () => {
                     onDelete={handleDelete}
                     onCopyLink={handleCopyLink}
                     onJoin={handleJoinRoom}
+                    onToggleBookmark={handleToggleBookmark}
+                    isBookmarkTab={apiTab === "bookmark"}
                     copiedId={copiedId}
                     isDeleting={isDeleting}
                     ct={ct}

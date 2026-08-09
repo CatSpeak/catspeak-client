@@ -132,8 +132,36 @@ const CreateRoomFormFields = ({
                 variant="rounded-xl"
               />
             )}
+
+            {/* Max Participants Selection */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-800">
+                {t.rooms?.createRoom?.maxParticipantsLabel || "Số người tối đa (Max Participants)"}
+              </label>
+              <div className="grid grid-cols-5 gap-2">
+                {[5, 10, 25, 35, 50].map((num) => {
+                  const isSelected = (formData.maxParticipants || 10) === num
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => handleChange("maxParticipants", num)}
+                      disabled={isDisabled}
+                      className={`flex items-center justify-center py-2 rounded-xl font-bold text-sm transition-all border ${
+                        isSelected
+                          ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700 shadow-sm"
+                          : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         )}
+
 
         {/* Topics Selection (Shared) */}
         <TopicSelect

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { getShareUrlWithVersion, getRoomShareUrl } from "@/shared/utils/shareUtils";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
@@ -10,7 +10,7 @@ import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { calculateEndDate } from "@/shared/utils/dateUtils";
 import toast from "react-hot-toast";
-import InDevelopmentModal from "@/shared/components/ui/InDevelopmentModal";
+import { useToggleBookmarkRoomMutation } from "@/store/api/roomsApi";
 import RoomFullModal from "./RoomFullModal";
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png";
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png";
@@ -24,6 +24,15 @@ const RoomCard = ({ room }) => {
   const { openAuthModal } = useAuthModal();
   const navigate = useNavigate();
   const { lang } = useParams();
+
+  const [toggleBookmark] = useToggleBookmarkRoomMutation();
+  const [isBookmarked, setIsBookmarked] = useState(
+    Boolean(room.isBookmarked ?? room.isBookmark),
+  );
+
+  useEffect(() => {
+    setIsBookmarked(Boolean(room.isBookmarked ?? room.isBookmark));
+  }, [room.isBookmarked, room.isBookmark]);
 
   const currentLang =
     lang ||
@@ -72,7 +81,6 @@ const RoomCard = ({ room }) => {
   // Placeholder code simulation
   const roomCode = `room-${room.roomId}`.toLowerCase();
 
-  const [showDevModal, setShowDevModal] = useState(false);
   const [showFullModal, setShowFullModal] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
 
@@ -86,10 +94,37 @@ const RoomCard = ({ room }) => {
     handleJoinRoom(e);
   };
 
-  const handleBookmarkClick = (e) => {
+  const handleBookmarkClick = async (e) => {
     e.stopPropagation();
-    setShowDevModal(true);
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+    const targetRoomId = room.roomId || room.id;
+    if (!targetRoomId) return;
+
+    const prev = isBookmarked;
+    setIsBookmarked(!prev);
+    try {
+      const res = await toggleBookmark(targetRoomId).unwrap();
+      if (res?.data?.isBookmarked !== undefined) {
+        setIsBookmarked(res.data.isBookmarked);
+      }
+      toast.success(
+        res?.message ||
+          (prev
+            ? t.rooms?.unbookmarkSuccess || "Đã bỏ lưu phòng"
+            : t.rooms?.bookmarkSuccess || "Đã lưu phòng thành công"),
+      );
+    } catch (err) {
+      setIsBookmarked(prev);
+      toast.error(
+        err?.data?.message ||
+          (prev ? "Không thể bỏ lưu phòng" : "Không thể lưu phòng"),
+      );
+    }
   };
+
 
   const handleCopyLink = (e) => {
     e.stopPropagation();
@@ -184,12 +219,25 @@ const RoomCard = ({ room }) => {
               </div>
             )}
             <div
-              className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-white/30 backdrop-blur-sm transition-all duration-300 hover:bg-white/50 shadow-sm cursor-pointer"
+              className={`flex shrink-0 h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-300 shadow-sm cursor-pointer ${
+                isBookmarked
+                  ? "bg-cath-red-700/20 hover:bg-cath-red-700/30 ring-1 ring-cath-red-700/40"
+                  : "bg-white/30 hover:bg-white/50"
+              }`}
               onClick={handleBookmarkClick}
+              title={
+                isBookmarked
+                  ? t?.rooms?.unbookmark || "Bỏ lưu phòng"
+                  : t?.rooms?.bookmark || "Lưu phòng"
+              }
             >
               <Bookmark
                 size={16}
-                className="text-cath-red-800 fill-cath-red-800/10"
+                className={`transition-all duration-200 ${
+                  isBookmarked
+                    ? "text-cath-red-700 fill-cath-red-700 scale-110"
+                    : "text-cath-red-800 fill-cath-red-800/10"
+                }`}
               />
             </div>
           </div>
@@ -237,10 +285,7 @@ const RoomCard = ({ room }) => {
           </div>
         </div>
       </Animated3DCard>
-      <InDevelopmentModal
-        open={showDevModal}
-        onCancel={() => setShowDevModal(false)}
-      />
+
 
       <RoomFullModal
         open={showFullModal}
