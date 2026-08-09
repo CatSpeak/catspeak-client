@@ -12,6 +12,7 @@ export const useProfileState = (profileData) => {
     phoneNumber: "",
     phonePrefix: "+84",
     country: "",
+    timeZone: "Asia/Ho_Chi_Minh",
     dateOfBirth: "",
     avatarImageUrl: "",
     meetingAvatarUrl: "",
@@ -34,6 +35,7 @@ export const useProfileState = (profileData) => {
         phoneNumber: phoneNumber,
         phonePrefix: phonePrefix,
         country: profileData.country || "",
+        timeZone: profileData.timeZone || "Asia/Ho_Chi_Minh",
         dateOfBirth: profileData.dateOfBirth ? profileData.dateOfBirth.split("T")[0] : "",
         avatarImageUrl: profileData.avatarImageUrl || "",
         meetingAvatarUrl: profileData.meetingAvatarUrl || "",
@@ -60,6 +62,7 @@ export const useProfileState = (profileData) => {
         phoneNumber: phoneNumber,
         phonePrefix: phonePrefix,
         country: profileData.country || "",
+        timeZone: profileData.timeZone || "Asia/Ho_Chi_Minh",
         dateOfBirth: profileData.dateOfBirth ? profileData.dateOfBirth.split("T")[0] : "",
       }))
     }

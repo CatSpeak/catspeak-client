@@ -9,10 +9,11 @@ import {
 } from "@/store/api/coursesApi"
 import { Pencil, Trash2 } from "lucide-react"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
-  formatDateRange,
-  getCourseLocale,
   getSafeMediaUrl,
+  defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { mapTeachingTask } from "../utils/courseTransforms"
 import { toLocalDateString } from "../utils/dateUtils"
@@ -26,6 +27,7 @@ const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const taskText = c.grading || {}
@@ -177,12 +179,7 @@ const CourseDetailPage = () => {
       ? rawCourse.levels.join(", ")
       : ui.notAvailable || "N/A",
     admissionPeriod: rawCourse.enrollmentStart && rawCourse.enrollmentEnd
-      ? formatDateRange(
-        rawCourse.enrollmentStart,
-        rawCourse.enrollmentEnd,
-        getCourseLocale(language),
-        ui.tba,
-      )
+      ? `${formatDate(rawCourse.enrollmentStart)} - ${formatDate(rawCourse.enrollmentEnd)}`
       : ui.tba || "TBA",
     duration: durationText,
     description: rawCourse.description || "",
@@ -198,22 +195,15 @@ const CourseDetailPage = () => {
     .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
     .sort((left, right) => left.startTimeMs - right.startTimeMs)[0]
   const nextSessionClass = nextSessionCandidate?.cls || null
-  const nextSessionStart = nextSessionCandidate
-    ? new Date(nextSessionCandidate.startTimeMs)
-    : null
-  const nextSessionEnd = nextSessionClass?.nextSession?.endTime
-    ? new Date(nextSessionClass.nextSession.endTime)
-    : null
-  const nextClass = nextSessionStart
+
+  const nextClass = nextSessionClass
     ? {
       ...nextSessionClass,
-      startDate: toLocalDateString(nextSessionStart),
+      startDate: nextSessionClass.nextSession?.date || nextSessionClass.nextSession?.startTime || nextSessionClass.startDate,
       schedule: {
         ...nextSessionClass.schedule,
-        startTime: nextSessionStart.toTimeString().slice(0, 5),
-        endTime: nextSessionEnd && !Number.isNaN(nextSessionEnd.getTime())
-          ? nextSessionEnd.toTimeString().slice(0, 5)
-          : "",
+        startTime: nextSessionClass.nextSession?.startTime || nextSessionClass.schedule?.startTime,
+        endTime: nextSessionClass.nextSession?.endTime || nextSessionClass.schedule?.endTime,
       },
     }
     : null
@@ -226,17 +216,14 @@ const CourseDetailPage = () => {
         </span>
       )}
       {/* ─── Breadcrumb ─── */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{c.allCourses?.title || "All Courses"}</button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{c.student?.courseDetails || "Course Details"}</span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: c.allCourses?.title || "All Courses", onClick: () => navigate("/workspace/courses") },
+          { label: c.student?.courseDetails || "Course Details" },
+        ]}
+      />
 
       {/* ─── Page Heading ─── */}
       <h1 className="text-3xl font-black text-gray-950 tracking-tight">
@@ -255,16 +242,14 @@ const CourseDetailPage = () => {
           >
             {/* Background image & gradient overlay container */}
             <div className="absolute inset-0 overflow-hidden rounded-3xl">
-              {courseData.thumbnailUrl && (
-                <img
-                  src={courseData.thumbnailUrl}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              )}
+              <img
+                src={courseData.thumbnailUrl || defaultCourseThumbnail}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
               {/* Dark overlay for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
             </div>

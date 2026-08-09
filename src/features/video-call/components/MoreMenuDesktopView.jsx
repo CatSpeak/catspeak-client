@@ -41,6 +41,7 @@ const MoreMenuDesktopView = ({
     setShowCC,
     isAISession,
     enterPiP,
+    isPiPSupported,
     showTroubleshoot,
     setShowTroubleshoot,
     room,
@@ -232,7 +233,7 @@ const MoreMenuDesktopView = ({
         }
       />
 
-      {"documentPictureInPicture" in window && (
+      {(isPiPSupported ?? ("documentPictureInPicture" in window)) && (
         <MenuItem
           onClick={() => {
             enterPiP?.()

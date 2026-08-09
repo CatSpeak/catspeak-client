@@ -1,52 +1,64 @@
 import React from "react"
-import { Pencil, EyeOff, Eye, Trash } from "lucide-react"
-import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import { Pencil, Eye, EyeOff, Trash, MoreVertical } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import { IconButton, PillButton } from "@/shared/components/ui/buttons"
 
 const LessonActionMenu = ({
-  open = false,
-  onClose = () => { },
-  item = {},
-  onEdit = () => { },
-  onToggleItemVisibility = () => { },
-  onDeleteItem = () => { },
+  item,
+  onEdit,
+  onToggleItemVisibility,
+  onDeleteItem,
 }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.curriculum
 
-  if (!open) return null
+  const options = []
+
+  if (item?.type === "bulletinBoard" || item?.type === "link") {
+    options.push({
+      value: "edit",
+      label: dict.edit,
+      icon: <Pencil size={15} className="text-[#1A1A1A]" />,
+      action: () => onEdit(item),
+    })
+  }
+
+  options.push({
+    value: "toggleVisibility",
+    label: dict.toggleVisibility,
+    icon: item?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />,
+    action: () => onToggleItemVisibility(item.id),
+  })
+
+  options.push({
+    value: "delete",
+    label: dict.delete,
+    icon: <Trash size={15} className="text-[#1A1A1A]" />,
+    action: () => onDeleteItem(item.id),
+  })
+
+  const handleChange = (val, option) => {
+    if (option && option.action) {
+      option.action()
+    }
+  }
 
   return (
-    <div className="absolute right-0 top-10 z-30 animate-fadeIn">
-      <MenuList className="w-44 rounded-xl shadow-faq-card text-sm text-[#1A1A1A]">
-        {(item?.type === "bulletinBoard" || item?.type === "link") && (
-          <MenuItem
-            icon={<Pencil size={15} className="text-[#1A1A1A]" />}
-            label={dict.edit}
-            onClick={() => {
-              onEdit(item)
-              onClose()
-            }}
-          />
-        )}
-        <MenuItem
-          icon={item?.isVisibleToStudents === false ? <Eye size={15} className="text-[#1A1A1A]" /> : <EyeOff size={15} className="text-[#1A1A1A]" />}
-          label={dict.toggleVisibility}
-          onClick={() => {
-            onToggleItemVisibility(item.id)
-            onClose()
-          }}
-        />
-        <MenuItem
-          icon={<Trash size={15} className="text-[#1A1A1A]" />}
-          label={dict.delete}
-          onClick={() => {
-            onDeleteItem(item.id)
-            onClose()
-          }}
-        />
-      </MenuList>
-    </div>
+    <Dropdown
+      options={options}
+      onChange={handleChange}
+      dropdownClassName="w-44"
+      align="right"
+      trigger={
+        <IconButton
+          variant="ghost"
+          title={dict.lessonOptionsTooltip}
+        >
+          <MoreVertical size={16} />
+        </IconButton>
+      }
+    />
   )
 }
 

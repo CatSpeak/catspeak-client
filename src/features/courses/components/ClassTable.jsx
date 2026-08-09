@@ -43,7 +43,6 @@ const ClassTable = ({ classes, t, onEdit }) => {
                 <CourseThumbnail
                   item={item}
                   title={item.classTitle || item.title}
-                  iconSize={22}
                   className="w-24 h-16 rounded-xl border border-gray-100"
                 />
               </td>

@@ -1,5 +1,5 @@
 import React from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import HorizontalCard from "@/shared/components/ui/HorizontalCard"
@@ -9,6 +9,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useLanguage()
   const { data: recData, isLoading: isLoadingRecs } =
     useGetFriendRecommendationsQuery(undefined, { skip: !isOwnProfile })
@@ -33,7 +34,10 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
             recommendations.map((user) => (
               <HorizontalCard
                 key={user.accountId}
-                onClick={() => navigate(`/profile/${user.accountId}`)}
+                onClick={() => {
+                  const isWorkspace = location.pathname.startsWith("/workspace")
+                  navigate(`${isWorkspace ? "/workspace" : ""}/profile/${user.accountId}`)
+                }}
                 leftContent={
                   <Avatar
                     size={40}

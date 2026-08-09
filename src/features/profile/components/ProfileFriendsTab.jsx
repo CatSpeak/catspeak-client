@@ -11,7 +11,7 @@ import {
   useGetFriendRecommendationsQuery,
   useRespondFriendRequestMutation,
 } from "../../../store/api/social/friendshipApi"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import HorizontalCard from "@/shared/components/ui/HorizontalCard"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
@@ -31,6 +31,7 @@ const ProfileFriendsTab = ({
   defaultSubTab,
 }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useLanguage()
   const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -201,7 +202,10 @@ const ProfileFriendsTab = ({
                 ref={isSecondLast ? secondLastRecRef : null}
               >
                 <HorizontalCard
-                  onClick={() => navigate(`/profile/${user.accountId}`)}
+                  onClick={() => {
+                    const isWorkspace = location.pathname.startsWith("/workspace")
+                    navigate(`${isWorkspace ? "/workspace" : ""}/profile/${user.accountId}`)
+                  }}
                   leftContent={
                     <Avatar
                       size={40}

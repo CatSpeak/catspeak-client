@@ -16,6 +16,29 @@ export const COURSE_FORM_LANGUAGES = [
   },
 ]
 
+export const DEFAULT_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"]
+  .map((name, index) => ({ id: index + 1, name }))
+
+/**
+ * Return the level options for a given language name.
+ * Looks up COURSE_FORM_LANGUAGES first, then falls back to DEFAULT_LEVELS.
+ */
+export function getLevelsForLanguage(langName) {
+  const norm = (langName || "").trim().toLowerCase()
+  if (!norm) return DEFAULT_LEVELS
+
+  const matched = COURSE_FORM_LANGUAGES.find(
+    (l) => (l.name || "").trim().toLowerCase() === norm
+  )
+  if (matched) return matched.levels
+
+  if (norm.includes("chinese") || norm.includes("zh") || norm.includes("trung")) {
+    return COURSE_FORM_LANGUAGES.find((l) => l.name === "Chinese")?.levels || DEFAULT_LEVELS
+  }
+
+  return DEFAULT_LEVELS
+}
+
 export const DEFAULT_CLASS_FEE_TIERS = [
   { minSlots: 1, maxSlots: 6, openingFee: 0, commissionRate: 10 },
   { minSlots: 7, maxSlots: 20, openingFee: 200000, commissionRate: 12 },
@@ -130,10 +153,7 @@ export function getInstructorFormLanguages(profile) {
         result.push({
           id: customId,
           name: taughtLang,
-          levels: ["A1", "A2", "B1", "B2", "C1", "C2"].map((name, i) => ({
-            id: i + 1,
-            name,
-          })),
+          levels: DEFAULT_LEVELS,
         })
         addedIds.add(customId)
       }

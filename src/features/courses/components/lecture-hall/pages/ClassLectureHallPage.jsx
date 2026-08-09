@@ -1,7 +1,8 @@
 import React, { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, AlertCircle, FolderOpen } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import {
@@ -30,7 +31,8 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 const generateTempId = () => `sec-${Date.now()}`;
 
 const ClassLectureHallPage = ({ id, isStudent }) => {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
+  const { formatDate } = useTimezone()
   const dict = t.courses.lectureHall
   const sectionDict = dict.modals.section
   // Use the appropriate API based on role
@@ -53,7 +55,6 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
 
   const [sectionsOverride, setSectionsOverride] = useState(null)
   const sections = sectionsOverride ?? apiSections
-  console.log(sections);
 
 
   const updateSections = (updater) => {
@@ -174,7 +175,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           id: `item-${Date.now()}`,
           type: "announcement",
           title: data.title,
-          meta: `${dict.latestPost}: ${new Date().toLocaleDateString(language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US")}`,
+          meta: `${dict.latestPost}: ${formatDate(new Date())}`,
           metaType: "clock",
           isVisibleToStudents: data.isVisible,
           content: data.content,
@@ -598,8 +599,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
       )}
 
       {isError && (
-        <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
-          {dict.curriculum.loadError}
+        <div className="flex flex-col items-center justify-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
+          <AlertCircle size={32} className="mb-3 opacity-80" />
+          <p>{dict.curriculum.loadError}</p>
         </div>
       )}
 
@@ -608,7 +610,8 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           {/* Sections List */}
           <div className="space-y-6">
             {sections.length === 0 ? (
-              <div className="text-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
+              <div className="flex flex-col items-center justify-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
+                <FolderOpen size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
                 {isStudent ? (
                   <p>{dict.curriculum.emptyState}</p>
                 ) : (
@@ -667,7 +670,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           editItemData
             ? {
               title: editItemData.bulletinBoard?.title || editItemData.title,
-              content: editItemData.bulletinBoard?.content || editItemData.content,
+              content: editItemData.bulletinBoard?.meta || editItemData.meta,
               allowReply: editItemData.bulletinBoard?.allowStudentReply ?? editItemData.allowReply ?? true,
               isVisibleToStudents: editItemData.isVisibleToStudents,
             }

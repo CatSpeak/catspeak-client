@@ -111,7 +111,6 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
 
                     const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
                     if (teacherTabs.includes(sub.key) && isStudent) return false
-                    if (sub.key === "myLearning" && isTeacher) return false
 
                     return true
                   })

@@ -53,7 +53,8 @@ const CategoryRoomSection = ({
   )
 
   const { currentRooms, totalCount, totalPages, hasNextPage } = useMemo(() => {
-    let fetched = responseData?.data ?? []
+    const rawFetched = responseData?.data ?? responseData?.items ?? (Array.isArray(responseData) ? responseData : [])
+    const fetched = Array.isArray(rawFetched) ? rawFetched : []
     const additionalData = responseData?.additionalData || {}
 
     if (isOther) {

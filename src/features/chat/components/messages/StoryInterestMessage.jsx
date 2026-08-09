@@ -1,6 +1,6 @@
 import { memo } from "react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { formatTime } from "@/shared/utils/dateFormatter"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { BookOpen } from "lucide-react"
 
 /**
@@ -34,6 +34,7 @@ const parseStoryInterestContent = (content = "") => {
  * @param {object} sender   - Resolved sender { name, avatar }
  */
 const StoryInterestMessage = memo(({ message, sender }) => {
+  const { formatTime } = useTimezone()
   const content = message?.content || message?.messageContent || ""
   const { storySnippet } = parseStoryInterestContent(content)
   const timestamp = message?.timestamp || message?.createDate

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetEventCountsQuery } from "@/store/api/eventsApi";
@@ -11,13 +12,32 @@ import CalendarFilterChips from "../components/CalendarFilterChips";
 import CalendarMonthPanel from "../components/CalendarMonthPanel.jsx";
 import EventDetailModal from "../components/EventDetailModal/index";
 import MapView from "../components/Mapview";
-import { HeaderImage } from "../assets";
+import { WorkshopCarousel } from "@/features/workshops";
+import {
+  CreateRoomModal,
+  JoinRoomModal,
+  AISessionSettingsModal,
+  useRoomsPageLogic,
+} from "@/features/rooms";
+import { useCreateAISessionMutation } from "@/store/api/roomsApi";
+import { leaveCall } from "@/store/slices/videoCallSlice";
+import SwitchCallModal from "@/features/video-call/components/SwitchCallModal";
+import {
+  pingActiveCall,
+  requestLeaveActiveCall,
+} from "@/features/video-call/services/callBroadcastChannel";
 
 const CalendarPage = () => {
   const { lang } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const cal = t.calendar || {};
+  const dispatch = useDispatch();
+  const { isInCall } = useSelector((s) => s.videoCall);
+  const { state, actions } = useRoomsPageLogic();
+  const [createAISession] = useCreateAISessionMutation();
+  const [showSwitchModal, setShowSwitchModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const eventIdFromUrl = searchParams.get("eventId");
@@ -67,11 +87,11 @@ const CalendarPage = () => {
 
   // Fetch event counts for current month
   // Send browser UTC offset so backend groups events by local day, not UTC day.
-  // const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
+  const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
-    // timezoneOffsetMinutes,
+    timezoneOffsetMinutes,
   });
 
   const eventCountsByDay = useMemo(() => {
@@ -147,20 +167,77 @@ const CalendarPage = () => {
 
   const monthNum = currentDate.format("M");
   const yearNum = currentDate.format("YYYY");
-  const localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
+
+  let localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
+  if (language === 'en') {
+    localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
+  } else if (language === 'zh') {
+    localizedMonth = `${yearNum}年 ${monthNum}月`
+  }
+
+  const checkAndIntercept = async (action) => {
+    const remoteActive = await pingActiveCall();
+    if (isInCall || remoteActive) {
+      setPendingAction(() => action);
+      setShowSwitchModal(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleConfirmSwitch = async () => {
+    setShowSwitchModal(false);
+    requestLeaveActiveCall();
+    if (isInCall) {
+      dispatch(leaveCall());
+    }
+
+    if (typeof pendingAction === "function") {
+      pendingAction();
+    }
+    setPendingAction(null);
+  };
+
+  const handleCancelSwitch = () => {
+    setShowSwitchModal(false);
+    setPendingAction(null);
+  };
+
+  const handleCreateAI = async (settings) => {
+    actions.closeAISettingsModal();
+    const action = () => {
+      actions.handleCreateAISession(async () => {
+        try {
+          const result = await createAISession(settings).unwrap();
+          navigate(`/${lang}/meet/${result.roomId}`, {
+            state: { fromQueue: true, isAISession: true },
+          });
+        } catch (err) {
+          console.error("Failed to create AI session", err);
+        }
+      });
+    };
+    if (await checkAndIntercept(action)) return;
+    action();
+  };
 
   return (
     <div className="w-full flex flex-col gap-4 overflow-hidden bg-[#F3F3F3] min-h-screen">
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
-      <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
+      <div className="w-full px-6 md:px-0 flex justify-center">
+        <div className="w-full md:w-3/4 lg:w-2/3">
+          <WorkshopCarousel hideTitle={true} />
+        </div>
+      </div>
+      {/* <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
         <img
           src={HeaderImage}
           alt="Calendar Banner"
           className="w-full h-full object-cover object-center"
         />
-      </div>
+      </div> */}
 
       <div className="px-6 pt-5 pb-8">
         <CalendarPageHeader
@@ -204,6 +281,8 @@ const CalendarPage = () => {
                 onEventSelect={setSelectedEvent}
                 onEventsUpdate={setDayEvents}
                 eventCountsByDay={eventCountsByDay}
+                totalUniqueEvents={eventCountsData?.totalUniqueEvents || 0}
+                totalUniqueRegisteredEvents={eventCountsData?.totalUniqueRegisteredEvents || 0}
                 onSelectDate={(d) => {
                   setSelectedDate(d);
                   setSelectedEvent(null);
@@ -225,6 +304,27 @@ const CalendarPage = () => {
         onClose={() => setIsFilterOpen(false)}
         onApply={(filters) => setActiveFilters(filters)}
         initialFilters={activeFilters}
+      />
+
+      <SwitchCallModal
+        open={showSwitchModal}
+        onCancel={handleCancelSwitch}
+        onConfirm={handleConfirmSwitch}
+      />
+      <CreateRoomModal
+        open={state.isCreateRoomModalOpen}
+        initialMode={state.createRoomMode}
+        onCancel={actions.closeCreateRoomModal}
+      />
+      <JoinRoomModal
+        open={state.isJoinRoomModalOpen}
+        onCancel={actions.closeJoinRoomModal}
+      />
+      <AISessionSettingsModal
+        open={state.isSettingsModalOpen}
+        urlLang={lang}
+        onConfirm={handleCreateAI}
+        onCancel={actions.closeAISettingsModal}
       />
 
       {/* Event Detail Modal (from URL params) */}

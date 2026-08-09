@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react"
-import { BookOpen, Calendar, Clock, MoreVertical, PenSquare, Tag, Trash2, Users } from "lucide-react"
+import { BookOpen, Calendar, Clock, Layers, MoreVertical, PenSquare, Tag, Trash2, Users } from "lucide-react"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import CourseStatusPill from "./CourseStatusPill"
 import CourseThumbnail from "./CourseThumbnail"
@@ -88,13 +88,10 @@ const CourseManagementCard = ({
       <CourseThumbnail
         item={item}
         title={item.title}
-        iconSize={isGrid ? 48 : 24}
         className={isGrid ? "h-48 w-full bg-[#D9D9D9]" : "h-20 w-28 bg-[#D9D9D9] rounded-2xl"}
       >
         {isGrid && (
           <>
-
-
             {item.status && (
               <div className="absolute top-3 right-3">
                 <CourseStatusPill status={item.status} />
@@ -136,8 +133,8 @@ const CourseManagementCard = ({
                 {labels.courseLabel ? `${labels.courseLabel} ${item.title}` : `Course ${item.title}`}
               </span>
               {item.description && (
-                <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed mt-2" title={item.description}>
-                  {item.description}
+                <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed mt-2" title={item.description ? item.description.replace(/<[^>]*>/g, " ").trim() : ""}>
+                  {item.description ? item.description.replace(/<[^>]*>/g, " ").trim() : ""}
                 </p>
               )}
               <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
@@ -154,23 +151,50 @@ const CourseManagementCard = ({
                 {labels.classLabel ? `${labels.classLabel} ${item.title}` : `Class ${item.title}`}
               </span>
 
+              <div className="mt-1.5 flex items-center gap-2">
+                {item.courseId && item.courseTitle ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/60" title={`Course: ${item.courseTitle}`}>
+                    <Layers size={11} className="text-blue-500 flex-shrink-0" />
+                    <span className="line-clamp-1">{item.courseTitle}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200/60">
+                    {labels.standaloneClass || "Lớp độc lập"}
+                  </span>
+                )}
+              </div>
+
               <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500">
                 <MetaRow icon={Tag} strong>{item.price}</MetaRow>
                 <MetaRow icon={Calendar}>{item.schedule}</MetaRow>
                 <MetaRow icon={Clock}>{item.startDate} - {item.endDate}</MetaRow>
               </div>
 
-              {item.status !== "OPEN" && item.progress != null && (
-                <div className="mt-5">
-                  <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                    <span>{labels.progress}</span>
-                    <span>{item.progress}%</span>
+              {(() => {
+                let progressPercent = null
+                if (item.progress != null) {
+                  if (typeof item.progress === "number" || (typeof item.progress === "string" && !isNaN(Number(item.progress)))) {
+                    progressPercent = Number(item.progress)
+                  } else if (typeof item.progress === "object") {
+                    if (item.progress.percentage != null && !isNaN(Number(item.progress.percentage))) {
+                      progressPercent = Number(item.progress.percentage)
+                    } else if (item.progress.totalSessions && !isNaN(Number(item.progress.completedSessions))) {
+                      progressPercent = Math.round((Number(item.progress.completedSessions || 0) / Number(item.progress.totalSessions)) * 100)
+                    }
+                  }
+                }
+                return item.status !== "OPEN" && progressPercent != null && !isNaN(progressPercent) ? (
+                  <div className="mt-5">
+                    <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                      <span>{labels.progress}</span>
+                      <span>{progressPercent}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
+                      <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                    </div>
                   </div>
-                  <div className="h-1.5 w-full bg-gray-100 rounded-full mt-2 overflow-hidden">
-                    <div className="h-full bg-[#b20a1c] rounded-full transition-all duration-500" style={{ width: `${item.progress}%` }} />
-                  </div>
-                </div>
-              )}
+                ) : null
+              })()}
             </>
           )}
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { getProfilePath } from "@/shared/utils/navigation"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 /**
  * Reusable Avatar component — displays a user image or initial fallback.
@@ -33,7 +34,13 @@ const Avatar = ({
   style = {},
 }) => {
   const [imgError, setImgError] = useState(false)
-  const navigate = useNavigate()
+  let navigate
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    navigate = useNavigate()
+  } catch {
+    navigate = getNavigate()
+  }
   const { currentLang } = useLanguage()
 
   useEffect(() => {

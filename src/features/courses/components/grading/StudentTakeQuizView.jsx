@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast as hotToast } from "react-hot-toast"
 import {
   Clock,
@@ -155,6 +156,7 @@ const getQuestionTypeLabel = (typeRaw, translations = {}) => {
 }
 
 const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBack }) => {
+  const { formatTime, formatDateTime } = useTimezone()
   const navigate = useNavigate()
   const params = useParams()
   const [searchParams] = useSearchParams()
@@ -424,13 +426,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               return
             }
 
-            setLastSavedTimeStr(
-              new Date().toLocaleTimeString(getCourseLocale(language), {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              }),
-            )
+            setLastSavedTimeStr(formatTime(new Date()))
             setSaveStatus("saved")
           } catch (error) {
             if (
@@ -1118,16 +1114,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       ? new Date(resultData.submittedAt).getTime()
       : Number.NaN
     const submittedDateStr = Number.isFinite(submittedAtMs)
-      ? new Date(submittedAtMs).toLocaleString(
-        language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US",
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        },
-      )
+      ? formatDateTime(submittedAtMs)
       : "—"
 
     const timeSpentSecs = Number(resultData?.timeSpentSeconds)

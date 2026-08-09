@@ -25,7 +25,6 @@ import {
   leaveCall,
   enterBreakout,
 } from "@/store/slices/videoCallSlice"
-import { detectWebView } from "@/shared/utils/isWebView"
 import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import {
@@ -34,9 +33,9 @@ import {
 } from "@/features/video-call/services/callBroadcastChannel"
 import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
-import WebViewBlockScreen from "../components/WebViewBlockScreen"
 import PasswordScreen from "../components/PasswordScreen"
 import CallEndedScreen from "../components/CallEndedScreen"
+import VideoCallErrorBoundary from "@/shared/components/VideoCallErrorBoundary"
 
 /**
  * Phases:
@@ -72,23 +71,25 @@ export const VideoCallProvider = ({ children }) => {
 
   // Otherwise, render the normal waiting → joining → in-call flow
   return (
-    <VideoCallProviderInner roomId={roomId} lang={lang}>
-      {children}
-    </VideoCallProviderInner>
+    <VideoCallErrorBoundary>
+      <VideoCallProviderInner roomId={roomId} lang={lang}>
+        {children}
+      </VideoCallProviderInner>
+    </VideoCallErrorBoundary>
   )
 }
 
 // ─── Inner provider (only rendered for new calls, not returns) ──────────
 const VideoCallProviderInner = ({ children, roomId, lang }) => {
+  // 🧪 TEST LINE: Throw an error to trigger the error boundary
+  // throw new Error("Simulated Video Call crash for testing ErrorBoundary!")
+
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { t, language } = useLanguage()
 
   const { isInCall, callInfo } = useSelector((s) => s.videoCall)
-
-  // ── WebView gate (must be before any conditional hooks) ──
-  const webview = useMemo(() => detectWebView(), [])
 
   // Detect if user arrived from queue match
   const fromQueue = location.state?.fromQueue === true
@@ -261,11 +262,17 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       return
     }
 
-    // Private room — silent check for existing grant
+    // Private room — check for URL pwd param or existing grant
     verifyTriggered.current = true
     ;(async () => {
       try {
-        const result = await verifyJoinRoom({ roomId: Number(roomId) }).unwrap()
+        const searchParams = new URLSearchParams(location.search)
+        const pwdParam = searchParams.get("pwd")
+        const payload = {
+          roomId: Number(roomId),
+          ...(pwdParam ? { password: pwdParam } : {}),
+        }
+        const result = await verifyJoinRoom(payload).unwrap()
         if (result.authorized) {
           setPhase("waiting")
         }
@@ -274,7 +281,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         setPhase("password-required")
       }
     })()
-  }, [room, user, isLoadingRoomData, isLoadingUser, fromQueue, roomId])
+  }, [room, user, isLoadingRoomData, isLoadingUser, fromQueue, roomId, location.search])
 
   // ── Handle password submission from PasswordScreen ──
   const handlePasswordSubmit = async (password) => {
@@ -499,14 +506,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     />
   )
 
-  // WebView block — must come first
-  if (webview.isWebView) {
-    return <WebViewBlockScreen appName={webview.appName} />
-  }
-
   // Loading user data
   if (isLoadingUser) {
-    return <div className="h-screen w-full bg-white"></div>
+    return <VideoCallLoading />
   }
 
   // User not authenticated
@@ -529,7 +531,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     isLoadingRoomData ||
     (!isClassRoom && isRoomQuerySkipped)
   ) {
-    return <div className="h-screen w-full bg-white"></div>
+    return <VideoCallLoading />
   }
 
   // Room not found

@@ -56,6 +56,25 @@ export const authApi = baseApi.injectEndpoints({
         }
       },
     }),
+    switchAccountType: builder.mutation({
+      query: (body) => ({
+        url: "/Auth/switch-account-type",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled, getState }) {
+        try {
+          const { data } = await queryFulfilled
+          const { user } = getState().auth
+          dispatch(setCredentials({
+            ...data,
+            user: data.user || user
+          }))
+        } catch (error) {
+          console.error(error)
+        }
+      },
+    }),
     revoke: builder.mutation({
       query: (username) => ({
         url: `/Auth/revoke/${username}`,
@@ -150,6 +169,7 @@ export const {
   useRegisterMutation,
   useRegisterAdminMutation,
   useRefreshTokenMutation,
+  useSwitchAccountTypeMutation,
   useRevokeMutation,
 
   useLogoutMutation,

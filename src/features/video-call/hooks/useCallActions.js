@@ -135,30 +135,97 @@ export const useCallActions = ({
     const url = callInfo?.callPath
       ? `${window.location.origin}${callInfo.callPath}`
       : window.location.href;
-    navigator.clipboard.writeText(getShareUrlWithVersion(url));
-    toast.success("Link copied to clipboard!");
-  }, [callInfo?.callPath]);
+    copyRoomLink({ baseUrl: url, room: callInfo?.roomData });
+  }, [callInfo?.callPath, callInfo?.roomData]);
 
   // ── PiP transitions ──
 
+  const checkIsPiPSupported = useCallback(() => {
+    if (typeof window === "undefined") return false
+    if ("documentPictureInPicture" in window) return true
+    if ("pictureInPictureEnabled" in document && document.pictureInPictureEnabled)
+      return true
+
+    const videos = Array.from(document.querySelectorAll("video"))
+    for (const v of videos) {
+      if (
+        v.webkitSupportsPresentationMode &&
+        typeof v.webkitSetPresentationMode === "function" &&
+        v.webkitSupportsPresentationMode("picture-in-picture")
+      ) {
+        return true
+      }
+    }
+    if (
+      typeof HTMLVideoElement !== "undefined" &&
+      "webkitSetPresentationMode" in HTMLVideoElement.prototype
+    ) {
+      return true
+    }
+    return false
+  }, [])
+
   const enterPiP = useCallback(
     (navigateTo) => {
-      // Create the PiP window immediately in the click handler to preserve user activation
-      if (
-        "documentPictureInPicture" in window &&
-        !window.documentPictureInPicture.window
-      ) {
-        window.__pipWindowPromise = window.documentPictureInPicture
-          .requestWindow({
-            width: 400,
-            height: 300,
-          })
-          .catch((err) => {
-            console.error("Failed to request PiP window in click handler", err);
-            return null;
-          });
+      // 1. Document Picture-in-Picture (Desktop Chrome / Edge / Chrome Android)
+      if ("documentPictureInPicture" in window) {
+        if (!window.documentPictureInPicture?.window) {
+          window.__pipWindowPromise = window.documentPictureInPicture
+            .requestWindow({
+              width: 400,
+              height: 300,
+            })
+            .catch((err) => {
+              console.error("Failed to request PiP window in click handler", err);
+              return null;
+            });
+        }
+
+        dispatch(setPiPAction(true));
+        setActiveSidePanel(null);
+        const navigate = getNavigate();
+        if (navigateTo && navigate) {
+          navigate(navigateTo);
+        }
+        return;
       }
 
+      // 2. Native Video Picture-in-Picture Fallback (iOS Safari / Standard Video PiP)
+      const videos = Array.from(document.querySelectorAll("video"));
+      const targetVideo =
+        videos.find((v) => !v.paused && v.readyState >= 2) || videos[0];
+
+      if (targetVideo) {
+        // iOS Safari WebKit Presentation Mode
+        if (
+          targetVideo.webkitSupportsPresentationMode &&
+          typeof targetVideo.webkitSetPresentationMode === "function"
+        ) {
+          try {
+            targetVideo.webkitSetPresentationMode("picture-in-picture");
+            toast.success(
+              t?.rooms?.videoCall?.pipActivated ||
+                "Picture-in-Picture activated",
+            );
+            return;
+          } catch (err) {
+            console.error("Failed iOS Safari webkitSetPresentationMode:", err);
+          }
+        }
+
+        // Standard W3C HTML5 Video requestPictureInPicture
+        if (
+          document.pictureInPictureEnabled &&
+          typeof targetVideo.requestPictureInPicture === "function"
+        ) {
+          targetVideo.requestPictureInPicture().catch((err) => {
+            console.error("Failed requestPictureInPicture:", err);
+          });
+          return;
+        }
+      }
+
+      // 3. Fallback inside Single Page App (Redux state PiP widget)
       dispatch(setPiPAction(true));
       setActiveSidePanel(null);
       const navigate = getNavigate();
@@ -166,7 +233,7 @@ export const useCallActions = ({
         navigate(navigateTo);
       }
     },
-    [dispatch, setActiveSidePanel],
+    [dispatch, setActiveSidePanel, t],
   );
 
   const exitPiP = useCallback(() => {
@@ -191,5 +258,6 @@ export const useCallActions = ({
     enterPiP,
     exitPiP,
     returnToCall,
+    isPiPSupported: checkIsPiPSupported(),
   };
 };

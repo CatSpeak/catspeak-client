@@ -19,30 +19,36 @@ import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
+import TimezoneBackfill from "@/shared/components/TimezoneBackfill"
+
+import WebViewGuard from "@/shared/components/WebViewGuard"
 
 function App() {
   return (
     <Provider store={store}>
       <AuthVisibilitySync />
+      <TimezoneBackfill />
       <LanguageProvider>
-        <GlobalVideoCallProvider>
-          <NavigationProgress />
-          <ServerDownScreen />
-          <SidebarProvider>
-            <ConversationSignalRProvider>
-              <GlobalPresenceProvider>
-                <GlobalSignalRHandler />
-                <Toaster position="top-center" limit={1} />
-                {/* <ScrollToTopButton /> */}
-                <AppRouter />
-                <PiPWidget />
-                <GlobalTaskProgressWidget />
-                <RecordingPoller />
-                <GlobalTaskSync />
-              </GlobalPresenceProvider>
-            </ConversationSignalRProvider>
-          </SidebarProvider>
-        </GlobalVideoCallProvider>
+        <WebViewGuard>
+          <GlobalVideoCallProvider>
+            <NavigationProgress />
+            <ServerDownScreen />
+            <SidebarProvider>
+              <ConversationSignalRProvider>
+                <GlobalPresenceProvider>
+                  <GlobalSignalRHandler />
+                  <Toaster position="top-center" limit={1} />
+                  {/* <ScrollToTopButton /> */}
+                  <AppRouter />
+                  <PiPWidget />
+                  <GlobalTaskProgressWidget />
+                  <RecordingPoller />
+                  <GlobalTaskSync />
+                </GlobalPresenceProvider>
+              </ConversationSignalRProvider>
+            </SidebarProvider>
+          </GlobalVideoCallProvider>
+        </WebViewGuard>
       </LanguageProvider>
     </Provider>
   )

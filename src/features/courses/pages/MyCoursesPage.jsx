@@ -1,11 +1,12 @@
 import React, { useMemo } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { Plus } from "lucide-react"
+import { BookOpen, FilterX, Plus, Sparkles, Users } from "lucide-react"
 
 import { useGetAllCoursesQuery } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 import CourseManagementCard from "../components/CourseManagementCard"
 import CourseSelectFilter from "../components/CourseSelectFilter"
@@ -17,9 +18,11 @@ import {
   mapTeacherCourseSummary,
 } from "../utils/courseTransforms"
 import { getCourseLocale } from "../utils/courseUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyCoursesPage = () => {
   const { language, t } = useLanguage()
+  const { formatDate } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}
   const mc = c.myCourses || {}
@@ -82,9 +85,9 @@ const MyCoursesPage = () => {
         studentsCount: c.studentsCount,
         tba: c.workspaceUi?.tba,
       },
-      getCourseLocale(language),
+      formatDate,
     )),
-    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, language],
+    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, formatDate],
   )
   const filteredDisplayList = useMemo(() => filterByStatus(courseList, statusFilter), [courseList, statusFilter])
 
@@ -136,19 +139,13 @@ const MyCoursesPage = () => {
           {mc.refreshCoursesFailed || "Some course data could not be refreshed. The displayed information may be out of date."}
         </div>
       )}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            className="cursor-pointer hover:underline"
-            onClick={() => navigate("/workspace")}
-          >
-            {t.nav?.home || "Home"}
-          </button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{c.title || "My Courses"}</span>
-        </div>
-      </div>
+      {/* ─── Breadcrumb ─── */}
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: c.title || "My Courses" },
+        ]}
+      />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
@@ -178,7 +175,32 @@ const MyCoursesPage = () => {
       <div className="flex flex-col gap-4">
         {filteredDisplayList.length === 0 ? (
           <EmptyCoursesState
-            message={c.myCourses?.noCourses || "No courses yet"}
+            icon={statusFilter !== "all" ? FilterX : BookOpen}
+            title={
+              statusFilter !== "all"
+                ? (mc.noFilteredCoursesTitle || "No matching courses found")
+                : (mc.noCoursesTitle || "Start Your Teaching Journey")
+            }
+            message={
+              statusFilter !== "all"
+                ? (mc.noFilteredCoursesDesc || "No courses match the selected status filter. Try changing or clearing your filter to view other courses.")
+                : (mc.noCoursesDesc || "You haven't created any courses yet. Create your first course to structure modules, upload materials, and manage classes.")
+            }
+            isFiltered={statusFilter !== "all"}
+            onResetFilter={statusFilter !== "all" ? () => setStatusFilter("all") : undefined}
+            resetFilterLabel={mc.resetFilter || "Reset Filter"}
+            action={
+              statusFilter === "all" ? (
+                <button
+                  type="button"
+                  onClick={() => navigate("/workspace/courses/create")}
+                  className="h-9 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
+                >
+                  <Plus size={15} />
+                  <span>{c.createCourse?.title || "Create Course"}</span>
+                </button>
+              ) : null
+            }
           />
         ) : (
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>

@@ -36,8 +36,8 @@ const getDisplayText = (values, fallback = "—") => (
     ?.trim() || fallback
 )
 
-const getSubmittedTime = (submittedAt, locale) => (
-  formatSubmissionDate(submittedAt, locale)
+const getSubmittedTime = (submittedAt, formatFn) => (
+  formatFn ? formatFn(submittedAt) : submittedAt || "—"
 )
 
 const parseSubmissionFiles = (files) => getValidAttachmentList(files) || []
@@ -59,7 +59,7 @@ const getScore = (value) => {
 
 const createSubmittedStudent = ({
   fallbackName,
-  locale,
+  formatDateTime: formatFn,
   member,
   studentId,
   submission,
@@ -82,7 +82,7 @@ const createSubmittedStudent = ({
     ]),
     avatar: getSafeFileUrl(memberAvatar || submissionAvatar),
     status: getSubmissionStatus(submission.status),
-    time: getSubmittedTime(submission.submittedAt, locale),
+    time: getSubmittedTime(submission.submittedAt, formatFn),
     score: getScore(submission.grade),
     submissionText: typeof submission.contentText === "string"
       ? submission.contentText
@@ -146,16 +146,6 @@ export const getValidAttachmentList = (value) => {
   }
 }
 
-export const formatSubmissionDate = (value, locale = "en-US", fallback = "—") => {
-  const timestamp = getValidDateMs(value)
-  if (timestamp === null) return fallback
-
-  try {
-    return new Date(timestamp).toLocaleString(locale)
-  } catch {
-    return fallback
-  }
-}
 
 export const getSafeSubmissionErrorMessage = (
   error,
@@ -219,10 +209,7 @@ export const getSafeSubmissionErrorMessage = (
   })
 }
 
-export const buildSubmissionStudentList = ({ members, submissions, language }) => {
-  const locale = language === "vi"
-    ? "vi-VN"
-    : (language === "zh" ? "zh-CN" : "en-US")
+export const buildSubmissionStudentList = ({ members, submissions, language, formatDateTime }) => {
   const fallbackName = language === "vi"
     ? "Học viên"
     : (language === "zh" ? "学生" : "Student")
@@ -289,7 +276,7 @@ export const buildSubmissionStudentList = ({ members, submissions, language }) =
     matchedSubmissionIds.add(getId(submission.id))
     return createSubmittedStudent({
       fallbackName,
-      locale,
+      formatDateTime,
       member,
       studentId,
       submission,
@@ -316,7 +303,7 @@ export const buildSubmissionStudentList = ({ members, submissions, language }) =
 
     students.push(createSubmittedStudent({
       fallbackName,
-      locale,
+      formatDateTime,
       member: null,
       studentId,
       submission,
