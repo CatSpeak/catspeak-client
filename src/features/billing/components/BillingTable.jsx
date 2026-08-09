@@ -3,6 +3,7 @@ import DataTable from "@/shared/components/ui/DataTable";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import BillingMobileCard from "./BillingMobileCard";
 import { RotateCcw, AlertCircle, Loader2 } from "lucide-react";
+import { formatDateTime12Hour } from "@/shared/utils/dateFormatter";
 
 const BillingTable = ({
   invoices,
