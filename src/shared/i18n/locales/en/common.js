@@ -71,14 +71,16 @@ export default {
     organization: "Organization",
     billing: "Payment History",
     recordings: "Recordings",
-    myRooms: "My Custom Rooms",
+    myRooms: "My Rooms",
     back: "Back",
     accountInfo: "Account Info",
     systemConfig: "System Configuration",
     emailNotifyTitle: "Receive email notifications & news from CatSpeak",
-    emailNotifyDesc: "Allow the system to send important updates, new features, and account notifications via email.",
+    emailNotifyDesc:
+      "Allow the system to send important updates, new features, and account notifications via email.",
     timezoneTitle: "Timezone",
-    timezoneDesc: "Adjust schedules, chat history and statistics to your local timezone.",
+    timezoneDesc:
+      "Adjust schedules, chat history and statistics to your local timezone.",
     timezoneSelect: "Select timezone",
     timezoneUpdated: "Timezone updated successfully.",
     timezoneUpdateFailed: "Failed to update timezone.",
@@ -164,11 +166,11 @@ export default {
   notifications: {
     new_post: {
       title: "New Post from CatSpeak",
-      body: "New post: \"{postTitle}\"",
+      body: 'New post: "{postTitle}"',
     },
     new_challenge: {
       title: "New Challenge!",
-      body: "New challenge: \"{challengeTitle}\" is waiting for you!",
+      body: 'New challenge: "{challengeTitle}" is waiting for you!',
     },
   },
 };
