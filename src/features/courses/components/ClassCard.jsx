@@ -49,7 +49,7 @@ const ClassCard = ({
 
   const scheduleDaysText = formatScheduleDays(scheduleDays, ui.tba, " - ", firstSchedule?.startTime)
   const scheduleTimeText = firstSchedule?.startTime && firstSchedule?.endTime
-    ? `${formatScheduleTime(firstSchedule.startTime)} - ${formatScheduleTime(firstSchedule.endTime)}`
+    ? `${formatScheduleTime(firstSchedule.startTime, cls.startDate)} - ${formatScheduleTime(firstSchedule.endTime, cls.startDate)}`
     : ""
 
   // Extract progress value (number, string, or object { completedSessions, totalSessions, percentage })
@@ -134,7 +134,7 @@ const ClassCard = ({
               <Clock size={13} className="text-gray-400" />
               <span>
                 {cls.startDate && cls.endDate
-                  ? `${formatDateMonth(cls.startDate, ui.tba)} - ${formatDateMonth(cls.endDate, ui.tba)}`
+                  ? `${formatDateMonth(cls.startDate, ui.tba, firstSchedule?.startTime)} - ${formatDateMonth(cls.endDate, ui.tba, firstSchedule?.startTime)}`
                   : ui.tba}
               </span>
             </div>

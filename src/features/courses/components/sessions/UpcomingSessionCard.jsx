@@ -53,14 +53,41 @@ const UpcomingSessionCard = ({
               <Clock size={14} className="text-gray-400" />
               <span>
                 {(() => {
-                  const startTimeStr =
-                    nextClass.schedule?.startTime || nextClass.startTime;
-                  const endTimeStr =
-                    nextClass.schedule?.endTime || nextClass.endTime;
-                  if (!startTimeStr) return ui.tba || "TBA";
-                  const startFormatted = formatScheduleTime(startTimeStr);
-                  const endFormatted = endTimeStr
-                    ? formatScheduleTime(endTimeStr)
+                  const ns = nextClass?.nextSession;
+                  const schedObj = Array.isArray(nextClass?.schedule)
+                    ? nextClass.schedule[0]
+                    : nextClass?.schedule;
+                  const rawIsoDate =
+                    ns?.rawStartTime ||
+                    ns?.date ||
+                    (typeof ns?.startTime === "string" &&
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                      ? ns.startTime
+                      : null) ||
+                    nextClass?.date ||
+                    nextClass?.startDate;
+                  const sessionDate =
+                    typeof rawIsoDate === "string"
+                      ? rawIsoDate.split("T")[0]
+                      : null;
+                  const sessionStartTime =
+                    ns?.startTime ||
+                    ns?.rawStartTime ||
+                    schedObj?.startTime ||
+                    nextClass?.startTime;
+                  const sessionEndTime =
+                    ns?.endTime ||
+                    ns?.rawEndTime ||
+                    schedObj?.endTime ||
+                    nextClass?.endTime;
+
+                  if (!sessionStartTime) return ui.tba || "TBA";
+                  const startFormatted = formatScheduleTime(
+                    sessionStartTime,
+                    sessionDate,
+                  );
+                  const endFormatted = sessionEndTime
+                    ? formatScheduleTime(sessionEndTime, sessionDate)
                     : "";
                   return endFormatted
                     ? `${startFormatted} - ${endFormatted}`
@@ -72,17 +99,30 @@ const UpcomingSessionCard = ({
               <Calendar size={14} className="text-gray-400" />
               <span>
                 {(() => {
-                  const ns = nextClass.nextSession;
-                  const sessionDateSrc =
+                  const ns = nextClass?.nextSession;
+                  const schedObj = Array.isArray(nextClass?.schedule)
+                    ? nextClass.schedule[0]
+                    : nextClass?.schedule;
+                  const rawIsoDate =
                     ns?.rawStartTime ||
-                    nextClass.rawStartTime ||
-                    (ns?.startTime && (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                    ns?.date ||
+                    (typeof ns?.startTime === "string" &&
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
                       ? ns.startTime
                       : null) ||
-                    ns?.date ||
-                    nextClass.date ||
-                    nextClass.startDate;
-                  return formatDateMonth(sessionDateSrc, ui.tba);
+                    nextClass?.date ||
+                    nextClass?.startDate;
+                  const sessionDate =
+                    typeof rawIsoDate === "string"
+                      ? rawIsoDate.split("T")[0]
+                      : null;
+                  const sessionStartTime =
+                    schedObj?.startTime ||
+                    ns?.startTime ||
+                    ns?.rawStartTime ||
+                    nextClass?.startTime;
+
+                  return formatDateMonth(sessionDate, ui.tba, sessionStartTime);
                 })()}
               </span>
             </div>

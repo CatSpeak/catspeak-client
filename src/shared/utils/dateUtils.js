@@ -48,6 +48,20 @@ export const ensureDate = (value) => {
 };
 
 /**
+ * Convert ISO date/time string from server into a Date object suitable for DatePicker in user's TimeZone
+ */
+export const parseIsoToZoneDate = (isoString, userTimeZone = null) => {
+  const d = ensureDate(isoString);
+  if (!d) return null;
+  const tz = userTimeZone || DEFAULT_TIMEZONE;
+  const formattedInZone = dayjs(d).tz(tz).format("YYYY-MM-DDTHH:mm:ss");
+  const [datePart, timePart] = formattedInZone.split("T");
+  const [y, m, day] = datePart.split("-").map(Number);
+  const [h, min, s] = timePart.split(":").map(Number);
+  return new Date(y, m - 1, day, h, min, s);
+};
+
+/**
  * Core formatter: Format a date in a specific IANA TimeZone with Intl options
  */
 export const formatInTimeZone = (

@@ -1,3 +1,11 @@
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+import { parseIsoToZoneDate } from "@/shared/utils/dateUtils"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 const CHOICE_QUESTION_TYPES = new Set([
   "MultipleChoiceSingle",
   "MultipleChoiceMultiple",
@@ -51,7 +59,29 @@ const toValidDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
-const toIsoString = (value) => toValidDate(value)?.toISOString()
+const toIsoString = (value, userTimeZone = null) => {
+  if (value === undefined || value === null || value === "") return undefined
+  const tz = userTimeZone || "Asia/Ho_Chi_Minh"
+  if (typeof value === "string") {
+    const trimmed = value.trim()
+    if (trimmed.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dayjs.tz(`${trimmed}T00:00:00`, tz).toISOString()
+    }
+    if (trimmed.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/) && !trimmed.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(trimmed)) {
+      return dayjs.tz(trimmed.slice(0, 16), tz).toISOString()
+    }
+  }
+  const date = toValidDate(value)
+  if (date) {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, "0")
+    const d = String(date.getDate()).padStart(2, "0")
+    const hh = String(date.getHours()).padStart(2, "0")
+    const mm = String(date.getMinutes()).padStart(2, "0")
+    return dayjs.tz(`${y}-${m}-${d}T${hh}:${mm}:00`, tz).toISOString()
+  }
+  return undefined
+}
 
 const toOptionalBoolean = (value) => (
   typeof value === "boolean" ? value : undefined
@@ -405,7 +435,7 @@ export const createInitialQuizForm = () => ({
   postToFeed: true,
 })
 
-export const mapQuizToFormState = (response) => {
+export const mapQuizToFormState = (response, userTimeZone = null) => {
   const quiz = getQuizObjectFromResponse(response)
   if (!quiz) return null
   if (hasOwn(quiz, "questions") && !Array.isArray(quiz.questions)) return null
@@ -416,8 +446,8 @@ export const mapQuizToFormState = (response) => {
       ? quiz.name
       : (typeof quiz.title === "string" ? quiz.title : ""),
     editorText: typeof quiz.description === "string" ? quiz.description : "",
-    openDate: toValidDate(quiz.openTime),
-    closeDate: toValidDate(quiz.closeTime),
+    openDate: parseIsoToZoneDate(quiz.openTime, userTimeZone),
+    closeDate: parseIsoToZoneDate(quiz.closeTime, userTimeZone),
     questions: Array.isArray(quiz.questions)
       ? quiz.questions.map(mapQuestionToFormState)
       : [],
@@ -436,8 +466,10 @@ export const mapQuizToFormState = (response) => {
   }
 }
 
-export const buildQuizPayload = (form, { status } = {}) => {
+export const buildQuizPayload = (form, options = {}) => {
   if (!isRecord(form)) return {}
+  const status = typeof options === "string" ? options : options?.status
+  const userTimeZone = typeof options === "object" ? options?.userTimeZone : null
 
   const title = hasOwn(form, "title") ? form.title : form.name
   const description = hasOwn(form, "editorText")
@@ -466,8 +498,8 @@ export const buildQuizPayload = (form, { status } = {}) => {
     name: toOptionalText(title),
     description: toOptionalText(description),
     timeLimitMinutes: toFiniteNumber(duration),
-    openTime: toIsoString(form.openDate ?? form.openTime),
-    closeTime: toIsoString(form.closeDate ?? form.closeTime),
+    openTime: toIsoString(form.openDate ?? form.openTime, userTimeZone),
+    closeTime: toIsoString(form.closeDate ?? form.closeTime, userTimeZone),
     maxAttempts: toFiniteNumber(form.maxAttempts),
     shuffleQuestions: toOptionalBoolean(form.shuffleQuestions),
     shuffleOptions: toOptionalBoolean(form.shuffleOptions),

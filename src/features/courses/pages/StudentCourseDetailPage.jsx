@@ -295,7 +295,7 @@ const StudentCourseDetailPage = () => {
                                       cls.schedule?.startTime,
                                     )}
                                     {cls.schedule?.startTime && cls.schedule?.endTime
-                                      ? ` | ${formatScheduleTime(cls.schedule.startTime)} - ${formatScheduleTime(cls.schedule.endTime)}`
+                                      ? ` | ${formatScheduleTime(cls.schedule.startTime, cls.startDate)} - ${formatScheduleTime(cls.schedule.endTime, cls.startDate)}`
                                       : ""}
                                   </span>
                                 </div>
@@ -305,9 +305,9 @@ const StudentCourseDetailPage = () => {
                                 <Calendar size={12} className="text-gray-400 shrink-0" />
                                 <span>
                                   {cls.startDate && cls.endDate
-                                    ? `${formatDateMonth(cls.startDate, ui.tba)} – ${formatDateMonth(cls.endDate, ui.tba)}`
+                                    ? `${formatDateMonth(cls.startDate, ui.tba, cls.schedule?.startTime)} – ${formatDateMonth(cls.endDate, ui.tba, cls.schedule?.startTime)}`
                                     : cls.startDate
-                                      ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba)}`
+                                      ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba, cls.schedule?.startTime)}`
                                       : ui.tba || "TBA"}
                                 </span>
                               </div>

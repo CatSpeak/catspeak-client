@@ -66,15 +66,14 @@ const StudentClassOverviewTab = ({
     (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
       ? classData.nextSession
       : null;
-  const sessionStartTime = nextSession?.rawStartTime || nextSession?.startTime;
-  const sessionEndTime = nextSession?.rawEndTime || nextSession?.endTime;
+  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime;
+  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime;
   const sessionDate =
-    nextSession?.rawStartTime ||
-    (nextSession?.startTime &&
-    (nextSession.startTime.includes("T") || nextSession.startTime.includes("-"))
-      ? nextSession.startTime
-      : null) ||
-    nextSession?.date;
+    nextSession?.date ||
+    (nextSession?.rawStartTime &&
+    (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
+      ? nextSession.rawStartTime
+      : null);
 
   const showRightColumn = isEnrolled;
 
@@ -195,7 +194,7 @@ const StudentClassOverviewTab = ({
             {nextSession ? (
               <>
                 <CountdownTicker
-                  targetDate={`${nextSession.date}T${nextSession.startTime}`}
+                  targetDate={nextSession?.rawStartTime || (nextSession?.date && nextSession?.startTime ? `${nextSession.date}T${nextSession.startTime}` : null)}
                 />
 
                 <div className="flex flex-col gap-4">
@@ -206,8 +205,8 @@ const StudentClassOverviewTab = ({
                         {scd.timeLabel || "Time"}:{" "}
                         {sessionStartTime
                           ? sessionEndTime
-                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
-                            : formatScheduleTime(sessionStartTime)
+                            ? `${formatScheduleTime(sessionStartTime, sessionDate)} - ${formatScheduleTime(sessionEndTime, sessionDate)}`
+                            : formatScheduleTime(sessionStartTime, sessionDate)
                           : ui.tba || "TBA"}
                       </span>
                     </div>
@@ -215,7 +214,7 @@ const StudentClassOverviewTab = ({
                       <Calendar size={14} className="text-gray-400" />
                       <span>
                         {scd.sessionDateLabel || "Session Date"}:{" "}
-                        {formatDateMonth(sessionDate, ui.tba)}
+                        {formatDateMonth(sessionDate, ui.tba, sessionStartTime)}
                       </span>
                     </div>
                   </div>
