@@ -52,14 +52,8 @@ const AccountInfoPage = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full">
-       <PageTitle>
-              {t.nav?.accountInfo || "Thông tin tài khoản"}
-            </PageTitle>
-      <AccountHeader
-        user={profile}
-        formData={formData}
-        t={t}
-      />
+      <PageTitle>{t.nav?.accountInfo || "Thông tin tài khoản"}</PageTitle>
+      <AccountHeader user={profile} formData={formData} t={t} />
 
       <div id="account-info-sections" className="w-full">
         <AccountSettingsForm
@@ -77,9 +71,7 @@ const AccountInfoPage = () => {
       </div>
 
       {/* Bank Accounts Section */}
-      <div className="w-full border-t border-neutral-200 dark:border-neutral-800 pt-6">
-        <BankAccountList />
-      </div>
+      <BankAccountList />
 
       <ProfileOtpModal
         open={isOtpModalOpen}

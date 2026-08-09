@@ -32,9 +32,11 @@ const ConfirmationModal = ({
       footerClassName="p-4 sm:p-6"
       footer={
         <div className="flex justify-end gap-2">
-          <PillButton variant="secondary" onClick={onClose} disabled={isPending}>
-            {finalCancelText}
-          </PillButton>
+          {!isPending && (
+            <PillButton variant="secondary" onClick={onClose}>
+              {finalCancelText}
+            </PillButton>
+          )}
           <PillButton
             variant="primary"
             bgColor={confirmVariant === "destructive" ? "#dc2626" : undefined}

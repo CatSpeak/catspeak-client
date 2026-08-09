@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import React, { useState } from "react"
+import { AnimatePresence } from "framer-motion"
 import {
   CheckCircle2,
   Building2,
   ChevronRight,
   ArrowLeft,
   Loader2,
+  SearchX,
 } from "lucide-react"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
@@ -15,45 +17,27 @@ import Checkbox from "@/shared/components/ui/inputs/Checkbox"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import ListItem from "@/shared/components/ui/ListItem"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import { Skeleton } from "@/shared/components/ui/indicators"
+import { EmptyState } from "@/shared/components/ui/indicators"
+import BankListSkeleton from "./BankListSkeleton"
 import useDebounce from "@/shared/hooks/useDebounce"
+import useBankVerification from "../hooks/useBankVerification"
+import { sanitizeNumericInput } from "../utils/bankAccountUtils"
 import {
   useGetBanksQuery,
-  useVerifyBankAccountMutation,
   useAddInstructorBankAccountMutation,
 } from "../api/instructorBankAccountsApi"
 
-const BankListSkeleton = () => (
-  <div className="flex flex-col gap-1 py-1">
-    {[...Array(6)].map((_, i) => (
-      <div
-        key={i}
-        className="flex h-[72px] w-full items-center justify-between px-4 rounded-xl"
-      >
-        <div className="flex items-center gap-4 flex-1">
-          <Skeleton className="h-[56px] w-[56px] shrink-0 rounded-xl bg-neutral-200 dark:bg-neutral-800" />
-          <div className="flex flex-col justify-center gap-2 flex-1 min-w-0">
-            <Skeleton className="h-4 w-32 rounded bg-neutral-200 dark:bg-neutral-800" />
-            <Skeleton className="h-3 w-48 rounded bg-neutral-200 dark:bg-neutral-800" />
-          </div>
-        </div>
-        <Skeleton className="h-5 w-5 rounded-full shrink-0 bg-neutral-200 dark:bg-neutral-800" />
-      </div>
-    ))}
-  </div>
-)
-
 export default function AddBankAccountModal({ isOpen, onClose }) {
+  const { t } = useLanguage()
   const [step, setStep] = useState(1) // 1: Select Bank, 2: Account Number & Verify
   const [direction, setDirection] = useState(1) // 1: Next, -1: Back
   const [selectedBank, setSelectedBank] = useState(null)
   const [accountNumber, setAccountNumber] = useState("")
-  const [verifiedName, setVerifiedName] = useState("")
-  const [verifyError, setVerifyError] = useState("")
   const [isDefault, setIsDefault] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
   const debouncedQuery = useDebounce(searchQuery.trim(), 300)
+  const isDebouncing = searchQuery.trim() !== debouncedQuery
 
   const goToStep = (nextStep) => {
     setDirection(nextStep > step ? 1 : -1)
@@ -66,8 +50,17 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
     isFetching: isFetchingBanks,
   } = useGetBanksQuery(debouncedQuery, { skip: !isOpen })
 
-  const [verifyBankAccount, { isLoading: isVerifying }] =
-    useVerifyBankAccountMutation()
+  const isListLoading = isLoadingBanks || isFetchingBanks || isDebouncing
+
+  // Encapsulated silent debounced verification hook
+  const {
+    verifiedName,
+    verifyError,
+    isChecking,
+    isVerifying,
+    resetVerification,
+  } = useBankVerification(selectedBank, accountNumber, isOpen && step === 2)
+
   const [addBankAccount, { isLoading: isAdding }] =
     useAddInstructorBankAccountMutation()
 
@@ -75,10 +68,9 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
     setStep(1)
     setSelectedBank(null)
     setAccountNumber("")
-    setVerifiedName("")
-    setVerifyError("")
     setIsDefault(false)
     setSearchQuery("")
+    resetVerification()
   }
 
   const handleCloseModal = () => {
@@ -86,47 +78,14 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
     onClose()
   }
 
-  // Silent debounced auto-verification
-  useEffect(() => {
-    const trimmed = accountNumber.trim()
-    setVerifiedName("")
-    setVerifyError("")
-
-    if (!selectedBank || trimmed.length < 6) {
-      return
-    }
-
-    const timer = setTimeout(async () => {
-      try {
-        const result = await verifyBankAccount({
-          bankBin: selectedBank.bin,
-          accountNumber: trimmed,
-        }).unwrap()
-
-        const holderName =
-          result?.accountHolderName || result?.data?.accountHolderName || ""
-        setVerifiedName(holderName)
-        setVerifyError("")
-      } catch (err) {
-        setVerifiedName("")
-        setVerifyError(
-          err?.data?.message ||
-            "Không thể xác thực số tài khoản. Vui lòng kiểm tra lại.",
-        )
-      }
-    }, 600)
-
-    return () => clearTimeout(timer)
-  }, [accountNumber, selectedBank, verifyBankAccount])
-
   const handleSubmit = async (e) => {
     if (e) e.preventDefault()
     if (!selectedBank) {
-      toast.error("Vui lòng chọn ngân hàng")
+      toast.error(t?.bankAccounts?.modal?.errorSelectBank || "Vui lòng chọn ngân hàng")
       return
     }
-    if (!accountNumber.trim()) {
-      toast.error("Vui lòng nhập số tài khoản")
+    if (accountNumber.trim().length < 6) {
+      toast.error(t?.bankAccounts?.modal?.errorMinLength || "Số tài khoản phải có ít nhất 6 chữ số")
       return
     }
     try {
@@ -136,10 +95,9 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
         isDefault,
       }).unwrap()
 
-      toast.success("Thêm tài khoản ngân hàng thành công!")
       handleCloseModal()
     } catch (err) {
-      toast.error(err?.data?.message || "Không thể thêm tài khoản ngân hàng")
+      toast.error(err?.data?.message || t?.bankAccounts?.modal?.errorAdd || "Không thể thêm tài khoản ngân hàng")
     }
   }
 
@@ -156,16 +114,21 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
           onClick={() => goToStep(1)}
           startIcon={<ArrowLeft className="h-4 w-4" />}
         >
-          Quay lại
+          {t?.bankAccounts?.modal?.backBtn || "Quay lại"}
         </PillButton>
         <PillButton
           variant="primary"
           onClick={handleSubmit}
           loading={isAdding}
-          disabled={!selectedBank || !accountNumber.trim()}
+          disabled={
+            !selectedBank ||
+            accountNumber.trim().length < 6 ||
+            isChecking ||
+            isVerifying
+          }
           className="min-w-[130px]"
         >
-          Thêm tài khoản
+          {t?.bankAccounts?.modal?.addBtn || "Thêm tài khoản"}
         </PillButton>
       </div>
     )
@@ -174,9 +137,9 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
     <Modal
       open={isOpen}
       onClose={handleCloseModal}
-      title="Thêm tài khoản ngân hàng"
+      title={t?.bankAccounts?.modal?.title || "Thêm tài khoản ngân hàng"}
       footer={modalFooter}
-      bodyClassName="px-4 sm:px-6 flex-1 min-h-0 overflow-y-auto overscroll-y-contain overflow-x-hidden"
+      bodyClassName="flex-1 min-h-0 flex flex-col overflow-hidden"
       className="md:max-w-lg h-[500px] sm:h-[540px]"
     >
       <AnimatePresence initial={false} mode="wait">
@@ -188,64 +151,79 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
             direction={direction === 1 ? "left" : "right"}
             distance={24}
             exit
-            className="w-full space-y-3"
+            className="w-full flex-1 min-h-0 flex flex-col"
           >
-            <SearchInput
-              placeholder="Tìm kiếm tên hoặc mã ngân hàng..."
-              value={searchQuery}
-              onChange={setSearchQuery}
-              className="w-full min-w-0 sm:min-w-0 h-11 text-sm"
-            />
+            {/* Search Input */}
+            <div className="shrink-0 mb-4 px-4 sm:px-6">
+              <SearchInput
+                placeholder={t?.bankAccounts?.modal?.searchPlaceholder || "Tìm kiếm tên hoặc mã ngân hàng..."}
+                value={searchQuery}
+                onChange={setSearchQuery}
+                className="w-full min-w-0 sm:min-w-0 h-11 text-sm"
+              />
+            </div>
 
-            {isLoadingBanks || isFetchingBanks ? (
-              <BankListSkeleton />
-            ) : banks.length === 0 ? (
-              <div className="py-10 text-center text-sm text-neutral-500">
-                {searchQuery
-                  ? "Không tìm thấy ngân hàng phù hợp"
-                  : "Chưa có danh sách ngân hàng"}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-1">
-                {banks.map((bank) => (
-                  <ListItem
-                    key={bank.id || bank.bin}
-                    onClick={() => handleSelectBank(bank)}
-                    hoverEffect
-                    lines={2}
-                    className="rounded-xl"
-                    contentClassName="rounded-xl"
-                    leftContent={
-                      bank.logo ? (
-                        <img
-                          src={bank.logo}
-                          alt={bank.shortName || bank.name}
-                          className="border border-[#e5e5e5] rounded-xl p-1 bg-white"
-                        />
-                      ) : (
-                        <Building2 className="text-neutral-400" />
-                      )
-                    }
-                    rightContent={<ChevronRight className="text-neutral-400" />}
-                  >
-                    <p className="truncate">{bank.shortName}</p>
-                    <p className="truncate">{bank.name}</p>
-                  </ListItem>
-                ))}
-              </div>
-            )}
+            {/* Scrollable Bank List */}
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-6">
+              {isListLoading ? (
+                <BankListSkeleton />
+              ) : banks.length === 0 ? (
+                <EmptyState
+                  variant="component"
+                  className="py-8"
+                  icon={searchQuery ? SearchX : Building2}
+                  title={
+                    searchQuery
+                      ? (t?.bankAccounts?.modal?.notFound
+                          ? t.bankAccounts.modal.notFound.replace("{query}", searchQuery)
+                          : `Không tìm thấy kết quả cho "${searchQuery}"`)
+                      : (t?.bankAccounts?.modal?.noBanks || "Chưa có danh sách ngân hàng")
+                  }
+                />
+              ) : (
+                <div className="flex flex-col gap-1 pb-2">
+                  {banks.map((bank) => (
+                    <ListItem
+                      key={bank.id || bank.bin}
+                      onClick={() => handleSelectBank(bank)}
+                      hoverEffect
+                      lines={2}
+                      className="rounded-xl"
+                      contentClassName="rounded-xl"
+                      leftContent={
+                        bank.logo ? (
+                          <img
+                            src={bank.logo}
+                            alt={bank.shortName || bank.name}
+                            className="border border-[#e5e5e5] rounded-xl p-1 bg-white"
+                          />
+                        ) : (
+                          <Building2 className="text-neutral-400" />
+                        )
+                      }
+                      rightContent={
+                        <ChevronRight className="text-neutral-400" />
+                      }
+                    >
+                      <p className="truncate">{bank.shortName}</p>
+                      <p className="truncate">{bank.name}</p>
+                    </ListItem>
+                  ))}
+                </div>
+              )}
+            </div>
           </FluentAnimation>
         ) : (
-          /* Step 2: Account Number & Verification */
+          /* Step 2: Account Details & Verification */
           <FluentAnimation
             key="step2"
             animationKey="step2"
             direction={direction === 1 ? "left" : "right"}
             distance={24}
             exit
-            className="w-full"
+            className="w-full flex-1 min-h-0 overflow-y-auto overscroll-y-contain pt-1 px-4 sm:px-6"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 pb-2">
               {/* Selected Bank Header */}
               {selectedBank && (
                 <div className="flex items-center gap-4">
@@ -276,25 +254,29 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                 <TextInput
                   label={
                     <span>
-                      Số tài khoản ngân hàng{" "}
+                      {t?.bankAccounts?.modal?.accountNumberLabel || "Số tài khoản ngân hàng"}{" "}
                       <span className="text-red-500">*</span>
                     </span>
                   }
-                  placeholder="Nhập số tài khoản (ví dụ: 1028681234)"
+                  placeholder={
+                    t?.bankAccounts?.modal?.accountNumberPlaceholder ||
+                    "Nhập số tài khoản (ví dụ: 1028681234)"
+                  }
                   value={accountNumber}
                   onChange={(e) =>
-                    setAccountNumber(e.target.value.replace(/\D/g, ""))
+                    setAccountNumber(sanitizeNumericInput(e.target.value))
                   }
                   inputMode="numeric"
                   variant="semi-round"
                   helperText={
-                    verifyError && !verifiedName && !isVerifying
-                      ? "Không thể tự động tra cứu tên chủ tài khoản lúc này. Bạn vẫn có thể tiếp tục thêm tài khoản."
+                    verifyError && !verifiedName && !isVerifying && !isChecking
+                      ? t?.bankAccounts?.modal?.helperErrorText ||
+                        "Không thể tự động tra cứu tên chủ tài khoản lúc này. Bạn vẫn có thể tiếp tục thêm tài khoản."
                       : undefined
                   }
                   helperTextClassName="text-amber-600"
                   rightIcon={
-                    isVerifying ? (
+                    isVerifying || isChecking ? (
                       <Loader2 className="animate-spin text-[#990011]" />
                     ) : verifiedName ? (
                       <CheckCircle2 className="text-emerald-500" />
@@ -310,7 +292,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                        Tên chủ tài khoản đã xác thực
+                        {t?.bankAccounts?.modal?.verifiedOwnerTitle || "Tên chủ tài khoản đã xác thực"}
                       </p>
                       <p className="text-base font-bold tracking-wide uppercase text-neutral-900 dark:text-white">
                         {verifiedName}
@@ -331,7 +313,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                   htmlFor="isDefault"
                   className="text-sm font-medium text-neutral-700 dark:text-neutral-300 cursor-pointer"
                 >
-                  Đặt làm tài khoản mặc định nhận thanh toán
+                  {t?.bankAccounts?.modal?.defaultCheckboxLabel || "Đặt làm tài khoản mặc định nhận thanh toán"}
                 </label>
               </div>
             </form>
