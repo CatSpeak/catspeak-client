@@ -122,7 +122,7 @@ const Profile = () => {
   ]
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-main-bg">
+    <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-primaryBg">
       <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Top Header Section */}
         <SocialProfileHeader

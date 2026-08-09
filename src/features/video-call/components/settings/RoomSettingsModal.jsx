@@ -107,7 +107,7 @@ const RoomSettingsModal = ({
         </div>
 
         {/* Content Area */}
-        <div className="bg-[#f3f3f3] flex-1 p-4 sm:p-6 overflow-y-auto min-h-0 h-full">
+        <div className="bg-primaryBg flex-1 p-4 sm:p-6 overflow-y-auto min-h-0 h-full">
           {activeTab === "audio-video" && (
             <AudioVideoTab
               waitingT={waitingT}

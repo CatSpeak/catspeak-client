@@ -15,7 +15,7 @@ const BillingPage = () => {
   const STATUS_MAP = {
     1: { label: hist.statuses?.success || "Success", styles: "bg-[#E5F7ED] text-green-700" },
     3: { label: hist.statuses?.pending || "Pending", styles: "bg-[#FFFBEA] text-yellow-700" },
-    0: { label: hist.statuses?.cancelled || "Cancelled", styles: "bg-[#F3F3F3] text-[#7A7574]" },
+    0: { label: hist.statuses?.cancelled || "Cancelled", styles: "bg-primaryBg text-[#7A7574]" },
   }
 
   const { data: invoices = [], isLoading } = useGetPaymentHistoryQuery()

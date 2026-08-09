@@ -112,7 +112,7 @@ const MediaAttachment = ({
         >
           <ListItem
             lines={2}
-            className={`bg-[#F3F3F3] ${roundedClass} overflow-hidden text-left`}
+            className={`bg-primaryBg ${roundedClass} overflow-hidden text-left`}
             leftContent={<FileIcon />}
           >
             <p className="font-semibold truncate m-0">{displayName}</p>

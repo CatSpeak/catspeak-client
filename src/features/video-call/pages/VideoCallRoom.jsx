@@ -217,7 +217,7 @@ const VideoCallRoomContent = () => {
       <RoomHeader />
 
       {/* Main Content Area */}
-      <div className="p-4 md:p-6 relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-[#F3F3F3] bg-white gap-4 sm:gap-6">
+      <div className="p-4 md:p-6 relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-primaryBg bg-white gap-4 sm:gap-6">
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
