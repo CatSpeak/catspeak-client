@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { AnimatePresence, motion  } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
 import RoomCard from "../RoomCard"
 import EmptyRoomState from "../EmptyRoomState"
@@ -49,20 +49,20 @@ const CategoryRoomSection = ({
       topics,
       categories: [categoryKey],
     },
-    { skip: isOther || !responseData?.additionalData?.hasNextPage }
+    { skip: isOther || !responseData?.additionalData?.hasNextPage },
   )
 
   const { currentRooms, totalCount, totalPages, hasNextPage } = useMemo(() => {
-    const rawFetched = responseData?.data ?? responseData?.items ?? (Array.isArray(responseData) ? responseData : [])
-    const fetched = Array.isArray(rawFetched) ? rawFetched : []
-    const additionalData = responseData?.additionalData || {}
+    let fetched = responseData?.items ?? []
+    const pagination = responseData?.pagination || {}
 
     if (isOther) {
       const known = ["Knowledge", "Culture", "Lifestyle", "Growth"]
       const filtered = fetched.filter((r) => {
-        if (!r.categories || r.categories === "[]" || r.categories.length === 0) return true
+        if (!r.categories || r.categories === "[]" || r.categories.length === 0)
+          return true
         if (r.categories.includes("Other")) return true
-        
+
         const hasKnown = Array.isArray(r.categories)
           ? known.some((c) => r.categories.includes(c))
           : known.some((c) => r.categories.includes(c))
@@ -80,9 +80,9 @@ const CategoryRoomSection = ({
 
     return {
       currentRooms: fetched,
-      totalCount: additionalData.totalCount || 0,
-      totalPages: additionalData.totalPages || 1,
-      hasNextPage: additionalData.hasNextPage || false,
+      totalCount: pagination.totalCount || 0,
+      totalPages: pagination.totalPages || 1,
+      hasNextPage: pagination.hasNextPage || false,
     }
   }, [responseData, isOther, page, pageSize])
 
@@ -143,7 +143,8 @@ const CategoryRoomSection = ({
     if (!tickingRef.current) {
       window.requestAnimationFrame(() => {
         if (scrollContainerRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+          const { scrollLeft, scrollWidth, clientWidth } =
+            scrollContainerRef.current
           if (scrollLeft + clientWidth >= scrollWidth - 50) {
             if (hasNextPage && !isFetching) {
               setSlideDirection("left")
@@ -170,7 +171,10 @@ const CategoryRoomSection = ({
             <h6 className="text-lg sm:text-xl font-bold text-cath-red-700">
               {title}
             </h6>
-            <ChevronRight className="text-cath-red-700 w-5 h-5 sm:w-6 sm:h-6" strokeWidth={3} />
+            <ChevronRight
+              className="text-cath-red-700 w-5 h-5 sm:w-6 sm:h-6"
+              strokeWidth={3}
+            />
           </div>
         </button>
 
@@ -257,7 +261,12 @@ const CategoryRoomSection = ({
     )
   }
 
-  const gridCols = itemsPerPage === 1 ? "grid-cols-1" : itemsPerPage === 2 ? "grid-cols-2" : "grid-cols-4"
+  const gridCols =
+    itemsPerPage === 1
+      ? "grid-cols-1"
+      : itemsPerPage === 2
+        ? "grid-cols-2"
+        : "grid-cols-4"
 
   const slideVariants = {
     enter: (direction) => ({
@@ -279,7 +288,11 @@ const CategoryRoomSection = ({
       {renderHeader()}
 
       <div className="w-full relative min-h-[280px]">
-        <AnimatePresence mode="popLayout" initial={false} custom={slideDirection}>
+        <AnimatePresence
+          mode="popLayout"
+          initial={false}
+          custom={slideDirection}
+        >
           <motion.div
             key={visualPage}
             custom={slideDirection}
@@ -288,7 +301,7 @@ const CategoryRoomSection = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className={`grid ${gridCols} gap-3 w-full transition-opacity duration-300 ${isFetching && !isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}
+            className={`grid ${gridCols} gap-3 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
           >
             {isLoading || (displayRooms.length === 0 && isFetching)
               ? Array.from({ length: itemsPerPage }).map((_, idx) => (
