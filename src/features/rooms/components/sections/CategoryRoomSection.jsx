@@ -53,8 +53,8 @@ const CategoryRoomSection = ({
   )
 
   const { currentRooms, totalCount, totalPages, hasNextPage } = useMemo(() => {
-    let fetched = responseData?.data ?? []
-    const additionalData = responseData?.additionalData || {}
+    let fetched = responseData?.items ?? []
+    const pagination = responseData?.pagination || {}
 
     if (isOther) {
       const known = ["Knowledge", "Culture", "Lifestyle", "Growth"]
@@ -79,9 +79,9 @@ const CategoryRoomSection = ({
 
     return {
       currentRooms: fetched,
-      totalCount: additionalData.totalCount || 0,
-      totalPages: additionalData.totalPages || 1,
-      hasNextPage: additionalData.hasNextPage || false,
+      totalCount: pagination.totalCount || 0,
+      totalPages: pagination.totalPages || 1,
+      hasNextPage: pagination.hasNextPage || false,
     }
   }, [responseData, isOther, page, pageSize])
 
