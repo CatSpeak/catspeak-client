@@ -24,7 +24,7 @@ import { Breadcrumb } from "@/shared/components/ui/navigation";
 
 const SchedulePage = () => {
   const { language, t } = useLanguage();
-  const { formatDate, formatDateMonth, formatScheduleTime, getZoneDateStr } = useTimezone();
+  const { userTimeZone, formatDate, formatDateMonth, formatScheduleTime, getZoneDateStr } = useTimezone();
   const c = t.courses || {};
   const ui = c.workspaceUi || {};
   const navigate = useNavigate();
@@ -188,7 +188,7 @@ const SchedulePage = () => {
         formattedEnd: formattedEnd || session.endTime,
       };
     });
-  }, [monthSessions, formatScheduleTime, getZoneDateStr]);
+  }, [monthSessions, formatScheduleTime, getZoneDateStr, userTimeZone]);
 
   const classesById = useMemo(
     () => new Map(classesList.map((item) => [String(item.id), item])),

@@ -4,25 +4,13 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { MessageSquare } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
-// import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 
 dayjs.extend(relativeTime);
 
-/**
- * Card component that displays a story's content, comment count, and relative time.
- *
- * @param {Object}   props
- * @param {Object}   props.story                  - Story data object
- * @param {string}   [props.story.storyContent]   - The story text content
- * @param {string}   [props.story.username]        - Author's display name
- * @param {string}   [props.story.avatarImageUrl]  - Author's avatar URL
- * @param {number}   [props.story.commentCount]    - Number of comments/replies
- * @param {string}   [props.story.createDate]      - ISO date string of creation
- * @param {Function} [props.onClick]              - Called when the card is clicked
- */
 const StoryCardItem = ({ story, onClick }) => {
   const navigate = useNavigate();
-  //  const { t } = useLanguage();
+  const { formatRelative } = useTimezone();
   if (!story) return null;
 
   const {
@@ -35,7 +23,7 @@ const StoryCardItem = ({ story, onClick }) => {
 
   const authorAccountId = story.accountId || story.userId || story.authorId;
 
-  const relativeCreatedAt = createDate ? dayjs(createDate).fromNow() : null;
+  const relativeCreatedAt = createDate ? formatRelative(createDate) : null;
 
   const CARD_THEMES = [
     { bg: "bg-[#FFEEF0]" },

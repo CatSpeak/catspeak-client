@@ -1,7 +1,10 @@
 export const getTranslatedTimeAgo = (dateString, timeAgo) => {
-  if (!timeAgo) return ""
+  if (!timeAgo || !dateString) return ""
+  const normalizedStr = typeof dateString === "string" && dateString.includes("T") && !dateString.endsWith("Z") && !dateString.includes("+")
+    ? `${dateString}Z`
+    : dateString
   const now = new Date()
-  const past = new Date(dateString)
+  const past = new Date(normalizedStr)
   const diffMs = now - past
   const diffSeconds = Math.floor(diffMs / 1000)
   const diffMinutes = Math.floor(diffSeconds / 60)

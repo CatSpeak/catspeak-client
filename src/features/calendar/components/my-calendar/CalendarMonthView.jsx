@@ -1,5 +1,6 @@
 import React from 'react'
 import dayjs from 'dayjs'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
@@ -9,6 +10,7 @@ const CalendarMonthView = ({
   onSelectDate,
   events
 }) => {
+  const { userTimeZone } = useTimezone()
   const startDay = (currentDate.startOf('month').day() + 6) % 7 // Make Monday = 0
   const prevDays = currentDate.subtract(1, 'month').daysInMonth()
   const daysInMonth = currentDate.daysInMonth()
@@ -66,11 +68,9 @@ const CalendarMonthView = ({
           const isSelected = day === selectedDate
           const dayEvents = events.filter((ev) => {
             if (!ev.startTime) return false
-            const evStart = dayjs(ev.startTime)
-            const evEnd = ev.endTime ? dayjs(ev.endTime) : evStart.add(1, 'hour')
-            const colStart = dayjs(dateObj.dateStr) // 00:00:00 of this day
-            const colEnd = colStart.add(1, 'day')   // 00:00:00 of next day
-            return evStart.isBefore(colEnd) && evEnd.isAfter(colStart)
+            const evStart = dayjs(ev.startTime).tz(userTimeZone)
+            const evDateStr = evStart.format('YYYY-MM-DD')
+            return evDateStr === dateObj.dateStr
           })
 
           return (

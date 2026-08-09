@@ -72,7 +72,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       key: 'date',
       label: t.calendar?.day || 'Ngày',
       render: (row) => {
-        const raw = row.rawStartTime || (row.startTime && (row.startTime.includes('T') || row.startTime.includes('-')) ? row.startTime : null) || row.date
+        const raw = row.rawStartTime || (row.startTime && (row.startTime.includes('T') || row.startTime.includes('-')) ? row.startTime : null) || (row.date && row.startTime ? `${row.date}T${row.startTime}:00Z` : row.date)
         return raw ? formatDate(raw) : '-'
       }
     },
@@ -80,10 +80,8 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       key: 'time',
       label: t.calendar?.timeLabel || 'Thời gian',
       render: (row) => {
-        const rawStart = row.rawStartTime || row.startTime
-        const rawEnd = row.rawEndTime || row.endTime
-        const startStr = rawStart && (rawStart.includes('T') || rawStart.includes('-')) ? formatTime(rawStart) : formatScheduleTime(row.startTime)
-        const endStr = rawEnd && (rawEnd.includes('T') || rawEnd.includes('-')) ? formatTime(rawEnd) : formatScheduleTime(row.endTime)
+        const startStr = formatScheduleTime(row.startTime, row.date)
+        const endStr = formatScheduleTime(row.endTime, row.date)
         return startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
       }
     },
