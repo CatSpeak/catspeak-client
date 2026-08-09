@@ -158,7 +158,7 @@ const NewsCard = ({ news }) => {
               const type = news.currentUserReaction || "Like";
               handleReact(e, type);
             }}
-            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-[#f3f3f3] rounded-bl-xl"
+            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-bl-xl"
           >
             <ReactionIcon reaction={news.currentUserReaction} size={20} />
             <span className="text-sm text-[#606060]">
@@ -185,7 +185,7 @@ const NewsCard = ({ news }) => {
         </div>
 
         {/* Comments */}
-        <button className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-[#f3f3f3]">
+        <button className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg">
           <MessageSquare
             size={20}
             strokeWidth={1.5}
@@ -199,7 +199,7 @@ const NewsCard = ({ news }) => {
         {/* Share */}
         <button
           onClick={handleShare}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-[#f3f3f3] rounded-br-xl"
+          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-br-xl"
           aria-label="Share"
         >
           <Share size={20} strokeWidth={1.5} className="text-[#606060]" />

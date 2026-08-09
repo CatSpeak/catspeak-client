@@ -219,7 +219,7 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-4 overflow-hidden bg-[#F3F3F3] min-h-screen">
+    <div className="w-full flex flex-col gap-4 overflow-hidden bg-primaryBg min-h-screen">
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>

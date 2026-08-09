@@ -236,7 +236,7 @@ const CreateEventPage = () => {
     : "hh/mm";
 
   return (
-    <div className=" min-h-screen bg-[#F3F3F3]">
+    <div className=" min-h-screen bg-primaryBg">
       {/* Breadcrumb */}
       <div className="px-5 py-3 pt-2">
         <Breadcrumb items={breadcrumbItems} />

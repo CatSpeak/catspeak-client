@@ -34,7 +34,7 @@ const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
           aria-label="Remove attachment"
           className="absolute -top-5 -right-5 w-12 h-12 flex items-center justify-center focus:outline-none cursor-pointer"
         >
-          <span className="w-7 h-7 rounded-full bg-white border border-[#e5e5e5] flex items-center justify-center hover:bg-[#f3f3f3]">
+          <span className="w-7 h-7 rounded-full bg-white border border-[#e5e5e5] flex items-center justify-center hover:bg-primaryBg">
             <X size={14} />
           </span>
         </button>
@@ -46,7 +46,7 @@ const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
     <div className="max-w-[320px] w-full">
       <ListItem
         lines={2}
-        className="bg-[#F3F3F3] rounded-xl border border-[#e5e5e5] overflow-hidden"
+        className="bg-primaryBg rounded-xl border border-[#e5e5e5] overflow-hidden"
         leftContent={<FileIcon />}
         rightContent={
           <IconButton

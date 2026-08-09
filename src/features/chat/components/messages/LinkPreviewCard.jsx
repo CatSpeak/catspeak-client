@@ -46,7 +46,7 @@ const LinkPreviewCard = ({ urlDetails, hasCaption = false }) => {
     >
       <ListItem
         lines={2}
-        className={`bg-[#F3F3F3] ${roundedClass} overflow-hidden text-left`}
+        className={`bg-primaryBg ${roundedClass} overflow-hidden text-left`}
         leftContent={leftContent}
       >
         <p className="font-semibold truncate m-0 capitalize">{domain}</p>

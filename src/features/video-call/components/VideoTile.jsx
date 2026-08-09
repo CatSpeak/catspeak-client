@@ -104,7 +104,7 @@ const VideoTileInner = ({ participant, onClick }) => {
       <div
         className={`pointer-events-none absolute inset-0 z-10 rounded-xl transition-all duration-200 ${
           isSpeaking
-            ? "border-2 border-solid border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
+            ? "border-2 border-solid border-[#3D9E60] ring-1 ring-inset ring-[#F5F5F7]"
             : "border-2 border-solid border-transparent shadow-sm"
         }`}
       />

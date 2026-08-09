@@ -30,7 +30,7 @@ const IconButton = ({
     overlay:
       "bg-black/50 group-hover/icon:bg-black/80 text-white/70 group-hover/icon:text-white transition-all",
     outline:
-      "bg-transparent group-hover/icon:bg-[#f3f3f3] group-active/icon:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
+      "bg-transparent group-hover/icon:bg-primaryBg group-active/icon:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm
