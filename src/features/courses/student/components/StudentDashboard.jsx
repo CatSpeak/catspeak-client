@@ -137,7 +137,7 @@ const normalizeCollection = (rawData, normalizer) => {
 }
 
 const StudentDashboard = ({ t, language }) => {
-  const { formatDate } = useTimezone()
+  const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const sc = useMemo(() => t?.courses?.student || {}, [t])
   const navigate = useNavigate()
   const normalizedLanguage = toText(language).toLowerCase()
@@ -571,12 +571,20 @@ const StudentDashboard = ({ t, language }) => {
                       ? getProgressPercent(cls.progress)
                       : null
                     const classTitle = cls.title || cls.name || "Untitled class"
-                    const scheduleDays = cls.schedule?.days?.join(" - ") || UNKNOWN_VALUE
-                    const scheduleTime = (
-                      cls.schedule?.startTime &&
-                      cls.schedule?.endTime
-                    )
-                      ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
+                    const scheduleDays = formatScheduleDays
+                      ? formatScheduleDays(cls.schedule?.days, UNKNOWN_VALUE, " - ", cls.schedule?.startTime, cls.startDate)
+                      : (cls.schedule?.days?.join(" - ") || UNKNOWN_VALUE)
+
+                    const startFormatted = formatScheduleTime && cls.schedule?.startTime
+                      ? formatScheduleTime(cls.schedule.startTime, cls.startDate)
+                      : cls.schedule?.startTime
+
+                    const endFormatted = formatScheduleTime && cls.schedule?.endTime
+                      ? formatScheduleTime(cls.schedule.endTime, cls.startDate)
+                      : cls.schedule?.endTime
+
+                    const scheduleTime = startFormatted && endFormatted
+                      ? `${startFormatted} - ${endFormatted}`
                       : UNKNOWN_VALUE
                     const statusLabel = cls.status
                       ? (sc.classStatuses?.[cls.status]

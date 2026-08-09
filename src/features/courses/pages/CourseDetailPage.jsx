@@ -16,6 +16,7 @@ import {
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { mapTeachingTask } from "../utils/courseTransforms"
+import { ensureDate } from "@/shared/utils/dateUtils"
 
 import ClassCard from "../components/ClassCard"
 import CourseInfoCard from "../components/CourseInfoCard"
@@ -198,24 +199,41 @@ const CourseDetailPage = () => {
     thumbnailUrl: getSafeMediaUrl(rawCourse.thumbnailUrl)
   }
 
-  // Only show an upcoming session when the API provides one.
+  // Prioritize upcoming future session over past sessions
+  const nowMs = Date.now()
   const nextSessionCandidate = classes
     .map((cls) => {
-      const startTimeMs = new Date(cls.nextSession?.startTime || "").getTime()
+      const ns = cls?.nextSession
+      const datePart = ns?.date || cls?.startDate || ""
+      let rawTs = ns?.rawStartTime || ns?.startTime || ""
+      if (typeof rawTs === "string" && !rawTs.includes("T") && !rawTs.includes("-") && datePart) {
+        const cleanDate = datePart.includes("T") ? datePart.split("T")[0] : datePart
+        rawTs = `${cleanDate}T${rawTs}`
+      } else if (!rawTs && datePart) {
+        rawTs = datePart
+      }
+      const d = ensureDate(rawTs)
+      const startTimeMs = d ? d.getTime() : NaN
       return { cls, startTimeMs }
     })
     .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
-    .sort((left, right) => left.startTimeMs - right.startTimeMs)[0]
+    .sort((left, right) => {
+      const aUpcoming = left.startTimeMs >= nowMs ? 1 : 0
+      const bUpcoming = right.startTimeMs >= nowMs ? 1 : 0
+      if (aUpcoming !== bUpcoming) return bUpcoming - aUpcoming
+      return Math.abs(left.startTimeMs - nowMs) - Math.abs(right.startTimeMs - nowMs)
+    })[0]
   const nextSessionClass = nextSessionCandidate?.cls || null
 
   const nextClass = nextSessionClass
     ? {
       ...nextSessionClass,
-      startDate: nextSessionClass.nextSession?.date || nextSessionClass.nextSession?.startTime || nextSessionClass.startDate,
+      nextSession: nextSessionClass.nextSession,
+      startDate: nextSessionClass.nextSession?.date || nextSessionClass.startDate,
       schedule: {
         ...nextSessionClass.schedule,
-        startTime: nextSessionClass.nextSession?.startTime || nextSessionClass.schedule?.startTime,
-        endTime: nextSessionClass.nextSession?.endTime || nextSessionClass.schedule?.endTime,
+        startTime: nextSessionClass.schedule?.startTime || nextSessionClass.nextSession?.startTime,
+        endTime: nextSessionClass.schedule?.endTime || nextSessionClass.nextSession?.endTime,
       },
     }
     : null

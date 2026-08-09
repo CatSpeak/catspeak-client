@@ -16,9 +16,9 @@ const StudentClassOverviewTab = ({
   upcomingSessionLabel,
   joinRoomLabel,
   noUpcomingLabel,
-  onJoinRoom
+  onJoinRoom,
 }) => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const { formatDateMonth, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
@@ -37,65 +37,72 @@ const StudentClassOverviewTab = ({
     }
   }
 
-  const completedValue = (classData.progress
+  const completedValue = classData.progress
     ? classData.progress.completedSessions
-    : classData.completedSessions)
-  const totalValue = (classData.progress
+    : classData.completedSessions
+  const totalValue = classData.progress
     ? classData.progress.totalSessions
-    : classData.totalSessions)
-  const completedSessions = completedValue != null && Number.isFinite(Number(completedValue))
-    ? Math.max(0, Number(completedValue))
-    : null
-  const totalSessions = Number.isFinite(Number(totalValue)) && Number(totalValue) > 0
-    ? Number(totalValue)
-    : 0
-  const progressPercent = totalSessions > 0 && completedSessions !== null
-    ? Math.min(100, Math.round((completedSessions / totalSessions) * 100))
-    : null
+    : classData.totalSessions
+  const completedSessions =
+    completedValue != null && Number.isFinite(Number(completedValue))
+      ? Math.max(0, Number(completedValue))
+      : null
+  const totalSessions =
+    Number.isFinite(Number(totalValue)) && Number(totalValue) > 0
+      ? Number(totalValue)
+      : 0
+  const progressPercent =
+    totalSessions > 0 && completedSessions !== null
+      ? Math.min(100, Math.round((completedSessions / totalSessions) * 100))
+      : null
   const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl)
-  const instructor = classData.instructor && typeof classData.instructor === "object"
-    ? classData.instructor
-    : null
+  const instructor =
+    classData.instructor && typeof classData.instructor === "object"
+      ? classData.instructor
+      : null
   const instructorName = String(
-    instructor?.fullName
-    ?? instructor?.name
-    ?? classData.instructorName
-    ?? classData.teacherName
-    ?? "",
+    instructor?.fullName ??
+      instructor?.name ??
+      classData.instructorName ??
+      classData.teacherName ??
+      "",
   ).trim()
   const instructorBio = String(
-    instructor?.bio
-    ?? instructor?.description
-    ?? "",
+    instructor?.bio ?? instructor?.description ?? "",
   ).trim()
   const instructorAvatarCandidate = String(
-    instructor?.avatarUrl
-    ?? instructor?.avatar
-    ?? "",
+    instructor?.avatarUrl ?? instructor?.avatar ?? "",
   ).trim()
   const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || ""
-  const nextSession = classData.nextSession?.date && classData.nextSession?.startTime
-    ? classData.nextSession
-    : null
-  const sessionStartTime = nextSession?.startTime
-  const sessionEndTime = nextSession?.endTime
-  const sessionDate = nextSession?.date
+  const nextSession =
+    classData.nextSession?.date &&
+    (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
+      ? classData.nextSession
+      : null
+  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime
+  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime
+  const sessionDate =
+    nextSession?.date ||
+    (nextSession?.rawStartTime &&
+    (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
+      ? nextSession.rawStartTime
+      : null)
 
   const showRightColumn = isEnrolled
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
       {/* ─── LEFT COLUMN: Visual Banner, Schedule & Description ─── */}
-      <div className={`${showRightColumn ? "lg:col-span-2" : "lg:col-span-3"} flex flex-col gap-8`}>
-
+      <div
+        className={`${showRightColumn ? "lg:col-span-2" : "lg:col-span-3"} flex flex-col gap-8`}
+      >
         {/* Banner Area */}
         <div
           className="relative rounded-3xl p-8 min-h-[380px] flex flex-col justify-end shadow-sm text-white overflow-hidden"
           style={{
             backgroundImage: `url(${thumbnailUrl || defaultCourseThumbnail})`,
             backgroundSize: "cover",
-            backgroundPosition: "center"
+            backgroundPosition: "center",
           }}
         >
           {/* Share Button */}
@@ -117,7 +124,9 @@ const StudentClassOverviewTab = ({
                 {[
                   getLocalizedLanguageName(classData.language, t),
                   classData.levels?.[0],
-                ].filter(Boolean).join(" • ")}
+                ]
+                  .filter(Boolean)
+                  .join(" • ")}
               </span>
             )}
             <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight max-w-xl">
@@ -136,20 +145,28 @@ const StudentClassOverviewTab = ({
             <div className="flex items-center gap-3">
               <Calendar size={18} className="text-gray-400 shrink-0" />
               <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] text-gray-400 font-bold uppercase">{cd.weeklySchedule || "Weekly Schedule"}</span>
-                <span className="text-gray-800 font-extrabold text-xs">{getWeeklyScheduleText()}</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase">
+                  {cd.weeklySchedule || "Weekly Schedule"}
+                </span>
+                <span className="text-gray-800 font-extrabold text-xs">
+                  {getWeeklyScheduleText()}
+                </span>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <Clock size={18} className="text-gray-400 shrink-0" />
               <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] text-gray-400 font-bold uppercase">{cd.schedulePeriod || "Start Date & Duration"}</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase">
+                  {cd.schedulePeriod || "Start Date & Duration"}
+                </span>
                 <span className="text-gray-800 font-extrabold text-xs">
                   {formatDateMonth(classData.startDate, ui.tba)}
                   {totalSessions > 0
-                    ? ` • ${(ui.sessionsCount || "{{count}} sessions")
-                      .replace("{{count}}", String(totalSessions))}`
+                    ? ` • ${(ui.sessionsCount || "{{count}} sessions").replace(
+                        "{{count}}",
+                        String(totalSessions),
+                      )}`
                     : ""}
                 </span>
               </div>
@@ -175,7 +192,9 @@ const StudentClassOverviewTab = ({
               <span className="text-[10px] text-gray-400 font-black uppercase">
                 {cd.leadInstructor || "Lead Instructor"}
               </span>
-              <h4 className="font-extrabold text-gray-900 text-sm">{instructorName}</h4>
+              <h4 className="font-extrabold text-gray-900 text-sm">
+                {instructorName}
+              </h4>
               {instructorBio && (
                 <p className="text-xs text-gray-500 font-semibold leading-relaxed">
                   {instructorBio}
@@ -189,7 +208,6 @@ const StudentClassOverviewTab = ({
       {/* ─── RIGHT COLUMN: Countdown & Attendance Progress (Only if enrolled) ─── */}
       {showRightColumn && (
         <div className="flex flex-col gap-8">
-
           {/* Next Live Session countdown */}
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
             <h3 className="text-lg font-black text-gray-950 tracking-tight">
@@ -198,7 +216,9 @@ const StudentClassOverviewTab = ({
 
             {nextSession ? (
               <>
-                <CountdownTicker targetDate={`${nextSession.date}T${nextSession.startTime}`} />
+                <CountdownTicker
+                  targetDate={nextSession?.rawStartTime || (nextSession?.date && nextSession?.startTime ? `${nextSession.date}T${nextSession.startTime}` : null)}
+                />
 
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2 border-b border-gray-100 pb-4 text-xs font-semibold text-gray-500">
@@ -208,8 +228,8 @@ const StudentClassOverviewTab = ({
                         {scd.timeLabel || "Time"}:{" "}
                         {sessionStartTime
                           ? sessionEndTime
-                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
-                            : formatScheduleTime(sessionStartTime)
+                            ? `${formatScheduleTime(sessionStartTime, sessionDate)} - ${formatScheduleTime(sessionEndTime, sessionDate)}`
+                            : formatScheduleTime(sessionStartTime, sessionDate)
                           : ui.tba || "TBA"}
                       </span>
                     </div>
@@ -217,7 +237,7 @@ const StudentClassOverviewTab = ({
                       <Calendar size={14} className="text-gray-400" />
                       <span>
                         {scd.sessionDateLabel || "Session Date"}:{" "}
-                        {formatDateMonth(sessionDate, ui.tba)}
+                        {formatDateMonth(sessionDate, ui.tba, sessionStartTime)}
                       </span>
                     </div>
                   </div>
@@ -266,14 +286,17 @@ const StudentClassOverviewTab = ({
                   pathColor: "#10B981",
                   textColor: "#1F2937",
                   trailColor: "#F3F4F6",
-                  textSize: "20px"
+                  textSize: "20px",
                 })}
               />
             </div>
 
             <div className="flex flex-col gap-1">
               <span className="text-sm font-black text-gray-900">
-                {(scd.lessonsCompleted || "{{completed}} / {{total}} lessons completed")
+                {(
+                  scd.lessonsCompleted ||
+                  "{{completed}} / {{total}} lessons completed"
+                )
                   .replace("{{completed}}", String(completedSessions ?? "—"))
                   .replace("{{total}}", String(totalSessions || "—"))}
               </span>

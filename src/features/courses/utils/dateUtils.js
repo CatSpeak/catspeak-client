@@ -1,3 +1,10 @@
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 export const toLocalDateString = (date) => {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ""
 
@@ -28,16 +35,13 @@ export const parseLocalDateString = (value) => {
   return date
 }
 
-export const toDueDateIso = (dateValue, timeValue) => {
-  const date = parseLocalDateString(dateValue)
-  if (!date || !timeValue) return null
-
+export const toDueDateIso = (dateValue, timeValue, userTimeZone = null) => {
+  if (!dateValue || !timeValue) return null
+  const dateStr = typeof dateValue === "string" ? dateValue.split("T")[0] : toLocalDateString(dateValue)
   if (typeof timeValue !== "string") return null
   const timeMatch = timeValue.match(/^([01]\d|2[0-3]):([0-5]\d)$/)
-  if (!timeMatch) return null
-  const hours = Number(timeMatch[1])
-  const minutes = Number(timeMatch[2])
+  if (!dateStr || !timeMatch) return null
 
-  date.setHours(hours, minutes, 0, 0)
-  return date.toISOString()
+  const tz = userTimeZone || "Asia/Ho_Chi_Minh"
+  return dayjs.tz(`${dateStr}T${timeMatch[1]}:${timeMatch[2]}:00`, tz).toISOString()
 }

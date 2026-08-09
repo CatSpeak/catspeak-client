@@ -7,6 +7,7 @@ import DataTable from '@/shared/components/ui/DataTable'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import { IconButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 import TablePagination from "@/features/courses/components/shared/TablePagination"
 import DatePicker from '@/shared/components/ui/inputs/DatePicker'
 import Popover from '@/shared/components/ui/Popover'
@@ -15,6 +16,7 @@ import toast from 'react-hot-toast'
 
 const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const { t, language } = useLanguage()
+  const { formatDate, formatTime, formatScheduleTime, userTimeZone } = useTimezone()
   const navigate = useNavigate()
   const fromDate = currentDate.startOf('month').format('YYYY-MM-DD')
   const toDate = currentDate.endOf('month').format('YYYY-MM-DD')
@@ -41,7 +43,14 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
 
   // Filter by date
   const filteredSessions = filterDate
-    ? rawSessions.filter(s => s.date && dayjs(s.date).format('YYYY-MM-DD') === dayjs(filterDate).format('YYYY-MM-DD'))
+    ? rawSessions.filter(s => {
+        const raw = s.rawStartTime || (s.startTime && (s.startTime.includes('T') || s.startTime.includes('-')) ? s.startTime : null) || s.date
+        if (!raw) return false
+        const sDate = raw.includes("T")
+          ? dayjs(raw).tz(userTimeZone).format("YYYY-MM-DD")
+          : dayjs(raw).format("YYYY-MM-DD")
+        return sDate === dayjs(filterDate).format("YYYY-MM-DD")
+      })
     : rawSessions
 
   // Paginate
@@ -62,12 +71,19 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
     {
       key: 'date',
       label: t.calendar?.day || 'Ngày',
-      render: (row) => row.date ? dayjs(row.date).format('DD/MM/YYYY') : '-'
+      render: (row) => {
+        const raw = row.rawStartTime || (row.startTime && (row.startTime.includes('T') || row.startTime.includes('-')) ? row.startTime : null) || (row.date && row.startTime ? `${row.date}T${row.startTime}:00Z` : row.date)
+        return raw ? formatDate(raw) : '-'
+      }
     },
     {
       key: 'time',
       label: t.calendar?.timeLabel || 'Thời gian',
-      render: (row) => `${row.startTime || ''} - ${row.endTime || ''}`
+      render: (row) => {
+        const startStr = formatScheduleTime(row.startTime, row.date)
+        const endStr = formatScheduleTime(row.endTime, row.date)
+        return startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
+      }
     },
     {
       key: 'roomName',
@@ -132,32 +148,37 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
 
   if (isLoading) return <LoadingSpinner className="py-20 flex justify-center w-full" />
 
-  const renderMobileCard = (row) => (
-    <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl flex flex-col gap-2">
-      <div className="flex justify-between items-start gap-4">
-        <span className="font-semibold text-gray-900 line-clamp-2">
-          {row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}
-        </span>
-        <span className="text-xs font-medium bg-[#990011]/10 text-[#990011] px-2 py-1 rounded-full whitespace-nowrap">
-          {t.calendar?.session || 'Buổi'} {row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'}
-        </span>
-      </div>
-      <div className="text-sm text-gray-600 space-y-2 mt-2">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-          <span>{row.date ? dayjs(row.date).format('DD/MM/YYYY') : '-'}</span>
+  const renderMobileCard = (row) => {
+    const raw = row.rawStartTime || row.startTime || row.date
+    const rawStart = row.rawStartTime || row.startTime
+    const rawEnd = row.rawEndTime || row.endTime
+    const startStr = rawStart && (rawStart.includes('T') || rawStart.includes('-')) ? formatTime(rawStart) : formatScheduleTime(row.startTime)
+    const endStr = rawEnd && (rawEnd.includes('T') || rawEnd.includes('-')) ? formatTime(rawEnd) : formatScheduleTime(row.endTime)
+    const timeText = startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
+
+    return (
+      <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl flex flex-col gap-2">
+        <div className="flex justify-between items-start gap-4">
+          <span className="font-semibold text-gray-900 line-clamp-2">
+            {row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}
+          </span>
+          <span className="text-xs font-medium bg-[#990011]/10 text-[#990011] px-2 py-1 rounded-full whitespace-nowrap">
+            {t.calendar?.session || 'Buổi'} {row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'}
+          </span>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-gray-400 shrink-0" />
-          <span>{`${row.startTime || ''} - ${row.endTime || ''}`}</span>
+        <div className="text-sm text-gray-600 space-y-2 mt-2">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
+            <span>{raw ? formatDate(raw) : '-'}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-gray-400 shrink-0" />
+            <span>{timeText}</span>
+          </div>
         </div>
-        {/* <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
-          <span className="truncate">{row.class?.location}</span>
-        </div> */}
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">

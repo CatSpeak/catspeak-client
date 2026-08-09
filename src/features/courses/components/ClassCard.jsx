@@ -7,7 +7,6 @@ import {
 } from "../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
-import { formatScheduleDays } from "../utils/scheduleUtils"
 import CourseStatusPill from "./CourseStatusPill"
 
 const ClassCard = ({
@@ -20,7 +19,7 @@ const ClassCard = ({
   progressLabel,
 }) => {
   const { language, t } = useLanguage()
-  const { formatDateMonth, formatScheduleTime } = useTimezone()
+  const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
 
@@ -48,9 +47,9 @@ const ClassCard = ({
     ? cls.schedule[0]
     : cls.schedule
 
-  const scheduleDaysText = formatScheduleDays(scheduleDays, language, ui.tba)
+  const scheduleDaysText = formatScheduleDays(scheduleDays, ui.tba, " - ", firstSchedule?.startTime)
   const scheduleTimeText = firstSchedule?.startTime && firstSchedule?.endTime
-    ? `${formatScheduleTime(firstSchedule.startTime)} - ${formatScheduleTime(firstSchedule.endTime)}`
+    ? `${formatScheduleTime(firstSchedule.startTime, cls.startDate)} - ${formatScheduleTime(firstSchedule.endTime, cls.startDate)}`
     : ""
 
   // Extract progress value (number, string, or object { completedSessions, totalSessions, percentage })
@@ -135,7 +134,7 @@ const ClassCard = ({
               <Clock size={13} className="text-gray-400" />
               <span>
                 {cls.startDate && cls.endDate
-                  ? `${formatDateMonth(cls.startDate, ui.tba)} - ${formatDateMonth(cls.endDate, ui.tba)}`
+                  ? `${formatDateMonth(cls.startDate, ui.tba, firstSchedule?.startTime)} - ${formatDateMonth(cls.endDate, ui.tba, firstSchedule?.startTime)}`
                   : ui.tba}
               </span>
             </div>

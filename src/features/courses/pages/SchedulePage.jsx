@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from "react"
-import { useNavigate } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useTimezone } from "@/shared/hooks/useTimezone"
-import { getLocalizedLanguageName } from "../data/courseFormOptions"
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import { getLocalizedLanguageName } from "../data/courseFormOptions";
 import {
   useGetAllClassesQuery,
-  useGetScheduleSessionsQuery
-} from "@/store/api/coursesApi"
+  useGetScheduleSessionsQuery,
+} from "@/store/api/coursesApi";
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,97 +17,118 @@ import {
   Plus,
   ArrowRight,
   Users,
-} from "lucide-react"
+} from "lucide-react";
 
-
-import { toLocalDateString } from "../utils/dateUtils"
-import { Breadcrumb } from "@/shared/components/ui/navigation"
+import { toLocalDateString } from "../utils/dateUtils";
+import { Breadcrumb } from "@/shared/components/ui/navigation";
 
 const SchedulePage = () => {
-  const { t } = useLanguage()
-  const { formatDate, formatDateMonth } = useTimezone()
-  const c = t.courses || {}
-  const ui = c.workspaceUi || {}
-  const navigate = useNavigate()
+  const { language, t } = useLanguage();
+  const { userTimeZone, formatDate, formatDateMonth, formatScheduleTime, getZoneDateStr } = useTimezone();
+  const c = t.courses || {};
+  const ui = c.workspaceUi || {};
+  const navigate = useNavigate();
 
   // Local State
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [viewMode, setViewMode] = useState("calendar") // "calendar" or "grid"
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [viewMode, setViewMode] = useState("calendar"); // "calendar" or "grid"
 
   // Helper arrays for calendar from localization
   const MONTHS = c.months || [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ]
-  const DAYS_OF_WEEK = c.weekdays || ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const DAYS_OF_WEEK = c.weekdays || [
+    "MON",
+    "TUE",
+    "WED",
+    "THU",
+    "FRI",
+    "SAT",
+    "SUN",
+  ];
 
   // Calendar Calculations
-  const year = currentMonth.getFullYear()
-  const month = currentMonth.getMonth()
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
 
-  const firstDayOfMonth = new Date(year, month, 1)
-  let startDayOfWeek = firstDayOfMonth.getDay()
+  const firstDayOfMonth = new Date(year, month, 1);
+  let startDayOfWeek = firstDayOfMonth.getDay();
   // Adjust day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday) to (0 = Mon, ..., 6 = Sun)
-  startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1
+  startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
 
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const calendarDays = useMemo(() => {
-    const arr = []
+    const arr = [];
     // Leading empty slots
     for (let i = 0; i < startDayOfWeek; i++) {
-      arr.push(null)
+      arr.push(null);
     }
     // Days of month
     for (let d = 1; d <= daysInMonth; d++) {
-      arr.push(new Date(year, month, d))
+      arr.push(new Date(year, month, d));
     }
-    return arr
-  }, [year, month, startDayOfWeek, daysInMonth])
+    return arr;
+  }, [year, month, startDayOfWeek, daysInMonth]);
 
   // Navigate Months
   const handlePrevMonth = () => {
-    const previousMonth = new Date(year, month - 1, 1)
-    setCurrentMonth(previousMonth)
-    setSelectedDate(previousMonth)
-  }
+    const previousMonth = new Date(year, month - 1, 1);
+    setCurrentMonth(previousMonth);
+    setSelectedDate(previousMonth);
+  };
   const handleNextMonth = () => {
-    const nextMonth = new Date(year, month + 1, 1)
-    setCurrentMonth(nextMonth)
-    setSelectedDate(nextMonth)
-  }
+    const nextMonth = new Date(year, month + 1, 1);
+    setCurrentMonth(nextMonth);
+    setSelectedDate(nextMonth);
+  };
 
   // Check state helpers
   const isToday = (date) => {
-    if (!date) return false
-    const today = new Date()
-    return date.getDate() === today.getDate() &&
+    if (!date) return false;
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear()
-  }
+    );
+  };
 
   const isSelected = (date) => {
-    if (!date) return false
-    return date.getDate() === selectedDate.getDate() &&
+    if (!date) return false;
+    return (
+      date.getDate() === selectedDate.getDate() &&
       date.getMonth() === selectedDate.getMonth() &&
       date.getFullYear() === selectedDate.getFullYear()
-  }
+    );
+  };
 
   // YYYY-MM-DD Date Queries computed values
   const startOfMonthStr = useMemo(() => {
-    const d = new Date(year, month, 1)
-    return toLocalDateString(d)
-  }, [year, month])
+    const d = new Date(year, month, 1);
+    return toLocalDateString(d);
+  }, [year, month]);
 
   const endOfMonthStr = useMemo(() => {
-    const d = new Date(year, month + 1, 0)
-    return toLocalDateString(d)
-  }, [year, month])
+    const d = new Date(year, month + 1, 0);
+    return toLocalDateString(d);
+  }, [year, month]);
 
   const selectedDateStr = useMemo(() => {
-    return toLocalDateString(selectedDate)
-  }, [selectedDate])
+    return toLocalDateString(selectedDate);
+  }, [selectedDate]);
 
   // RTK Query endpoints integration
   const {
@@ -116,7 +137,7 @@ const SchedulePage = () => {
     isFetching: isClassesFetching,
     error: classesError,
     refetch: refetchClasses,
-  } = useGetAllClassesQuery({ page: 1, pageSize: 100 })
+  } = useGetAllClassesQuery({ page: 1, pageSize: 100 });
   const {
     currentData: scheduleSessionsData,
     isLoading: isSessionsLoading,
@@ -125,78 +146,100 @@ const SchedulePage = () => {
     refetch: refetchSessions,
   } = useGetScheduleSessionsQuery({
     from: startOfMonthStr,
-    to: endOfMonthStr
-  })
+    to: endOfMonthStr,
+  });
 
   const classesList = useMemo(
-    () => (
+    () =>
       Array.isArray(classesData?.data)
-        ? classesData.data.filter((item) => (
-          item !== null
-          && typeof item === "object"
-          && !Array.isArray(item)
-          && item.id
-        ))
-        : []
-    ),
+        ? classesData.data.filter(
+            (item) =>
+              item !== null &&
+              typeof item === "object" &&
+              !Array.isArray(item) &&
+              item.id,
+          )
+        : [],
     [classesData],
-  )
+  );
   const monthSessions = useMemo(
-    () => (
+    () =>
       Array.isArray(scheduleSessionsData?.data)
-        ? scheduleSessionsData.data.filter((session) => (
-          session !== null
-          && typeof session === "object"
-          && !Array.isArray(session)
-        ))
-        : []
-    ),
+        ? scheduleSessionsData.data.filter(
+            (session) =>
+              session !== null &&
+              typeof session === "object" &&
+              !Array.isArray(session),
+          )
+        : [],
     [scheduleSessionsData],
-  )
+  );
+
+  const monthSessionsWithZoneDate = useMemo(() => {
+    return monthSessions.map((session) => {
+      const zoneDate = getZoneDateStr(session.date, session.startTime);
+      const formattedStart = formatScheduleTime(session.startTime, session.date);
+      const formattedEnd = formatScheduleTime(session.endTime, session.date);
+
+      return {
+        ...session,
+        zoneDate: zoneDate || session.date,
+        formattedStart: formattedStart || session.startTime,
+        formattedEnd: formattedEnd || session.endTime,
+      };
+    });
+  }, [monthSessions, formatScheduleTime, getZoneDateStr, userTimeZone]);
+
   const classesById = useMemo(
     () => new Map(classesList.map((item) => [String(item.id), item])),
-    [classesList]
-  )
+    [classesList],
+  );
   const sessionDateSet = useMemo(
-    () => new Set(monthSessions.map(session => session.date).filter(Boolean)),
-    [monthSessions]
-  )
-  const isLoading = (
-    isClassesLoading
-    || isSessionsLoading
-    || (isClassesFetching && classesData === undefined)
-    || (isSessionsFetching && scheduleSessionsData === undefined)
-  )
+    () =>
+      new Set(
+        monthSessionsWithZoneDate
+          .map((session) => session.zoneDate)
+          .filter(Boolean),
+      ),
+    [monthSessionsWithZoneDate],
+  );
+  const isLoading =
+    isClassesLoading ||
+    isSessionsLoading ||
+    (isClassesFetching && classesData === undefined) ||
+    (isSessionsFetching && scheduleSessionsData === undefined);
 
   // Map schedule sessions and enrich with metadata from classesList (levels, slots, studentCount)
   const selectedDateClasses = useMemo(() => {
-    return monthSessions
-      .filter((session) => (
-        viewMode === "grid" || session.date === selectedDateStr
-      ))
-      .map(session => {
-        const matchedClass = classesById.get(String(session.class?.id))
+    return monthSessionsWithZoneDate
+      .filter(
+        (session) => viewMode === "grid" || session.zoneDate === selectedDateStr,
+      )
+      .map((session) => {
+        const matchedClass = classesById.get(String(session.class?.id));
         return {
           id: session.class?.id,
           name: session.class?.name || matchedClass?.name || "",
           language: session.class?.language || matchedClass?.language || "",
-          levels: Array.isArray(matchedClass?.levels) ? matchedClass.levels : [],
+          levels: Array.isArray(matchedClass?.levels)
+            ? matchedClass.levels
+            : [],
           status: session.class?.status || matchedClass?.status || "",
-          startTime: session.startTime,
-          endTime: session.endTime,
+          startTime: session.formattedStart,
+          endTime: session.formattedEnd,
           sessionNumber: session.sessionNumber,
           totalSessions: session.totalSessions,
-          date: session.date,
+          date: session.zoneDate,
           studentCount: matchedClass?.studentCount ?? null,
           slots: matchedClass?.slots ?? null,
-          startDate: matchedClass?.startDate
-        }
-      })
-  }, [classesById, monthSessions, selectedDateStr, viewMode])
+          startDate: matchedClass?.startDate,
+        };
+      });
+  }, [classesById, monthSessionsWithZoneDate, selectedDateStr, viewMode]);
 
   // Count active dates with sessions in current month
-  const monthClassesCount = sessionDateSet.size
-  const isRefreshing = isClassesFetching || isSessionsFetching
+  const monthClassesCount = sessionDateSet.size;
+  const isRefreshing = isClassesFetching || isSessionsFetching;
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -209,7 +252,10 @@ const SchedulePage = () => {
       {/* ─── Breadcrumbs ─── */}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          {
+            label: t.nav?.home || "Home",
+            onClick: () => navigate("/workspace"),
+          },
           { label: c.teachingSchedule || "Teaching Schedule" },
         ]}
       />
@@ -245,11 +291,9 @@ const SchedulePage = () => {
 
         {/* ─── Split Columns Layout ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
           {/* Left Column: Calendar selector (Span 5 of 12) */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="border border-gray-100 bg-[#FDFDFD] rounded-2xl p-5 flex flex-col gap-5">
-
               {/* Month Selector header */}
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
@@ -301,18 +345,23 @@ const SchedulePage = () => {
               <div className="grid grid-cols-7 text-center gap-y-2.5 gap-x-1.5">
                 {/* Weekday labels */}
                 {DAYS_OF_WEEK.map((day, idx) => (
-                  <span key={idx} className="text-[10px] font-black text-gray-400 uppercase tracking-wider py-1">
+                  <span
+                    key={idx}
+                    className="text-[10px] font-black text-gray-400 uppercase tracking-wider py-1"
+                  >
                     {day}
                   </span>
                 ))}
 
                 {/* Day numbers */}
                 {calendarDays.map((date, idx) => {
-                  if (!date) return <div key={idx} className="aspect-square" />
+                  if (!date) return <div key={idx} className="aspect-square" />;
 
-                  const hasClasses = sessionDateSet.has(toLocalDateString(date))
-                  const active = isSelected(date)
-                  const today = isToday(date)
+                  const hasClasses = sessionDateSet.has(
+                    toLocalDateString(date),
+                  );
+                  const active = isSelected(date);
+                  const today = isToday(date);
 
                   return (
                     <button
@@ -322,11 +371,12 @@ const SchedulePage = () => {
                       key={idx}
                       onClick={() => setSelectedDate(date)}
                       className={`relative aspect-square flex items-center justify-center font-bold rounded-full transition-all duration-200 select-none
-                        ${active
-                          ? "bg-[#990011] text-white shadow-sm hover:bg-[#80000e]"
-                          : today
-                            ? "border border-[#990011] text-[#990011] hover:bg-red-50/30"
-                            : "text-gray-700 hover:bg-gray-100"
+                        ${
+                          active
+                            ? "bg-[#990011] text-white shadow-sm hover:bg-[#80000e]"
+                            : today
+                              ? "border border-[#990011] text-[#990011] hover:bg-red-50/30"
+                              : "text-gray-700 hover:bg-gray-100"
                         }
                       `}
                     >
@@ -334,25 +384,30 @@ const SchedulePage = () => {
 
                       {/* Class indicator dot */}
                       {hasClasses && !active && (
-                        <span className={`absolute bottom-1 w-1 h-1 rounded-full ${today ? "bg-[#990011]" : "bg-gray-400"}`} />
+                        <span
+                          className={`absolute bottom-1 w-1 h-1 rounded-full ${today ? "bg-[#990011]" : "bg-gray-400"}`}
+                        />
                       )}
                     </button>
-                  )
+                  );
                 })}
               </div>
 
               {/* Calendar Legends */}
               <div className="flex items-center gap-6 pt-4 border-t border-gray-50 text-[10px] font-extrabold text-gray-500 uppercase tracking-wider">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full border border-[#990011] flex items-center justify-center text-[9px] text-[#990011] font-bold">18</div>
+                  <div className="w-5 h-5 rounded-full border border-[#990011] flex items-center justify-center text-[9px] text-[#990011] font-bold">
+                    18
+                  </div>
                   <span>{c.today || "Today"}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#990011] flex items-center justify-center text-[9px] text-white font-bold">20</div>
+                  <div className="w-5 h-5 rounded-full bg-[#990011] flex items-center justify-center text-[9px] text-white font-bold">
+                    20
+                  </div>
                   <span>{c.selectedDate || "Selected Date"}</span>
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -367,13 +422,19 @@ const SchedulePage = () => {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#990011]"></div>
               </div>
             ) : classesError || sessionsError ? (
-              <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
-                <span>{c.scheduleLoadError || "Failed to load the teaching schedule."}</span>
+              <div
+                role="alert"
+                className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+              >
+                <span>
+                  {c.scheduleLoadError ||
+                    "Failed to load the teaching schedule."}
+                </span>
                 <button
                   type="button"
                   onClick={() => {
-                    refetchClasses()
-                    refetchSessions()
+                    refetchClasses();
+                    refetchSessions();
                   }}
                   className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
                 >
@@ -389,16 +450,19 @@ const SchedulePage = () => {
                 </span>
 
                 {selectedDateClasses.map((cls) => {
-                  const scheduleTime = cls.startTime && cls.endTime
-                    ? `${cls.startTime} - ${cls.endTime}`
-                    : ui.tba || "TBA"
+                  const scheduleTime =
+                    cls.startTime && cls.endTime
+                      ? `${cls.startTime} - ${cls.endTime}`
+                      : ui.tba || "TBA";
 
                   return (
                     <div
                       key={`${cls.id || "class"}-${cls.date || selectedDateStr}-${cls.sessionNumber || cls.startTime || "session"}`}
                       onClick={() => {
                         if (cls.id) {
-                          navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)
+                          navigate(
+                            `/workspace/courses/class/${encodeURIComponent(String(cls.id))}`,
+                          );
                         }
                       }}
                       className="bg-[#FDFDFD] border border-gray-100 hover:border-gray-250 rounded-2xl p-5 flex flex-col gap-3 shadow-xs hover:shadow-sm transition-all duration-300 cursor-pointer"
@@ -411,11 +475,15 @@ const SchedulePage = () => {
                               {getLocalizedLanguageName(cls.language, t)}
                             </span>
                           )}
-                          {cls.levels && cls.levels.map((lvl, index) => (
-                            <span key={index} className="bg-amber-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase">
-                              {lvl}
-                            </span>
-                          ))}
+                          {cls.levels &&
+                            cls.levels.map((lvl, index) => (
+                              <span
+                                key={index}
+                                className="bg-amber-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase"
+                              >
+                                {lvl}
+                              </span>
+                            ))}
                         </div>
 
                         {/* Status badge */}
@@ -454,13 +522,12 @@ const SchedulePage = () => {
                           <Calendar size={13} className="text-gray-400" />
                           <span>
                             {cls.sessionNumber && cls.totalSessions
-                              ? (c.sessionOf
-                                ? c.sessionOf.replace("{{session}}", cls.sessionNumber).replace("{{total}}", cls.totalSessions)
-                                : `Session ${cls.sessionNumber} of ${cls.totalSessions}`)
-                              : formatDate(
-                                cls.date || cls.startDate,
-                              )
-                            }
+                              ? c.sessionOf
+                                ? c.sessionOf
+                                    .replace("{{session}}", cls.sessionNumber)
+                                    .replace("{{total}}", cls.totalSessions)
+                                : `Session ${cls.sessionNumber} of ${cls.totalSessions}`
+                              : formatDate(cls.date || cls.startDate)}
                           </span>
                         </div>
                       </div>
@@ -468,12 +535,20 @@ const SchedulePage = () => {
                       {/* Bottom Info: Avatars and action */}
                       <div className="flex justify-between items-center pt-3 border-t border-gray-50 mt-1">
                         <div className="flex items-center gap-2">
-                          <Users size={15} className="text-gray-400" aria-hidden="true" />
+                          <Users
+                            size={15}
+                            className="text-gray-400"
+                            aria-hidden="true"
+                          />
                           <span className="text-[10px] text-gray-400 font-bold">
                             {cls.studentCount == null
                               ? "—"
-                              : (c.studentsCount || "{{count}} students")
-                                .replace("{{count}}", String(cls.studentCount))}
+                              : (
+                                  c.studentsCount || "{{count}} students"
+                                ).replace(
+                                  "{{count}}",
+                                  String(cls.studentCount),
+                                )}
                           </span>
                         </div>
 
@@ -481,9 +556,11 @@ const SchedulePage = () => {
                           type="button"
                           disabled={!cls.id}
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             if (cls.id) {
-                              navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)
+                              navigate(
+                                `/workspace/courses/class/${encodeURIComponent(String(cls.id))}`,
+                              );
                             }
                           }}
                           className="bg-[#990011] hover:bg-[#80000e] text-white text-[11px] font-bold px-4 py-1.5 rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
@@ -492,9 +569,8 @@ const SchedulePage = () => {
                           <ArrowRight size={12} />
                         </button>
                       </div>
-
                     </div>
-                  )
+                  );
                 })}
               </div>
             ) : (
@@ -502,15 +578,11 @@ const SchedulePage = () => {
                 {c.noClassesOnDate || "No classes scheduled for this date"}
               </div>
             )}
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default SchedulePage
+export default SchedulePage;

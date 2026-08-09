@@ -12,7 +12,6 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import { formatCurrency } from "../utils/courseUtils"
-import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
@@ -39,7 +38,7 @@ const ClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
-  const { userTimeZone } = useTimezone()
+  const { formatWeeklySchedule } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const ui = c.workspaceUi || {}
@@ -142,12 +141,7 @@ const ClassDetailPage = () => {
     { value: "grading", label: cd.grading || "Grading" },
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(
-    classData || {},
-    language || "en",
-    ui.tba,
-    userTimeZone,
-  )
+  const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
 
   if (
     isDetailLoading

@@ -13,10 +13,8 @@ import {
 } from "@/store/api/eventsApi";
 import { mapFormToPayload, objectToFormData } from "../utils/mapFormToPayload";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import {
-  TIMEZONE_IDS,
-  getTimezoneOptions,
-} from "@/shared/constants/timezones";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import { TIMEZONE_IDS, getTimezoneOptions } from "@/shared/constants/timezones";
 
 const DEFAULT_TIMEZONE = {
   id: "Asia/Ho_Chi_Minh",
@@ -34,11 +32,13 @@ export const useEventForm = (
   onValidationFail,
 ) => {
   const { t } = useLanguage();
+  const { userTimeZone } = useTimezone();
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
   // eslint-disable-next-line no-unused-vars
   const [updateEventSeries, { isLoading: isUpdatingSeries }] =
     useUpdateEventSeriesMutation();
+  // eslint-disable-next-line no-unused-vars
   const [updateEventOccurrence, { isLoading: isUpdatingOccurrence }] =
     useUpdateEventOccurrenceMutation();
   const isLoading =
@@ -57,18 +57,13 @@ export const useEventForm = (
     editEvent?.conditions?.map((c) => c.title).join(", ") || "";
   const initialTicketPrice = editEvent?.ticketPrice ?? null;
 
-  const initTzId =
-    editEvent?.timezone ||
-    editEvent?.recurrenceRule?.timeZone ||
-    DEFAULT_TIMEZONE.id;
+  const initTzId = userTimeZone || DEFAULT_TIMEZONE.id;
 
   const initialStartTime = editEvent?.startTime
-    ? dayjs(
-        dayjs(editEvent.startTime).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss"),
-      )
+    ? (editEvent.startTime instanceof Date ? editEvent.startTime : dayjs(editEvent.startTime).toDate())
     : null;
   const initialEndTime = editEvent?.endTime
-    ? dayjs(dayjs(editEvent.endTime).tz(initTzId).format("YYYY-MM-DDTHH:mm:ss"))
+    ? (editEvent.endTime instanceof Date ? editEvent.endTime : dayjs(editEvent.endTime).toDate())
     : null;
 
   let initialTimezone = DEFAULT_TIMEZONE;
@@ -77,7 +72,11 @@ export const useEventForm = (
     // Look up the localized label from the timezone options helper.
     const opts = getTimezoneOptions("vi"); // label resolved at render-time anyway
     const found = opts.find((o) => o.value === initTzId);
-    initialTimezone = { id: initTzId, label: found?.label || initTzId, offset: "" };
+    initialTimezone = {
+      id: initTzId,
+      label: found?.label || initTzId,
+      offset: "",
+    };
   } else if (initTzId) {
     initialTimezone = { id: initTzId, label: initTzId, offset: "" };
   }
@@ -214,20 +213,20 @@ export const useEventForm = (
 
     if (!isDraft) {
       if (!title.trim())
-      newErrors.title =
-        t.validation?.calendar?.titleRequired || "Thiếu tiêu đề";
-    if (!countryId)
-      newErrors.countryId =
-        t.validation?.calendar?.countryRequired || "Đất nước là bắt buộc";
-    if (!cityId)
-      newErrors.cityId =
-        t.validation?.calendar?.cityRequired || "Thành phố là bắt buộc";
-    if (!eventLocation.trim())
-      newErrors.eventLocation =
-        t.validation?.calendar?.locationRequired || "Địa điểm là bắt buộc";
-    // if (!description.trim())
-    //   newErrors.description =
-    //     t.validation?.calendar?.descriptionRequired || "Mô tả là bắt buộc";
+        newErrors.title =
+          t.validation?.calendar?.titleRequired || "Thiếu tiêu đề";
+      if (!countryId)
+        newErrors.countryId =
+          t.validation?.calendar?.countryRequired || "Đất nước là bắt buộc";
+      if (!cityId)
+        newErrors.cityId =
+          t.validation?.calendar?.cityRequired || "Thành phố là bắt buộc";
+      if (!eventLocation.trim())
+        newErrors.eventLocation =
+          t.validation?.calendar?.locationRequired || "Địa điểm là bắt buộc";
+      // if (!description.trim())
+      //   newErrors.description =
+      //     t.validation?.calendar?.descriptionRequired || "Mô tả là bắt buộc";
       if (!maxParticipants || Number(maxParticipants) <= 0) {
         newErrors.maxParticipants =
           t.validation?.calendar?.maxParticipantsRequired ||
@@ -240,7 +239,9 @@ export const useEventForm = (
 
     if (startTime && !editEvent) {
       if (dayjs(startTime).isBefore(dayjs())) {
-        newErrors.startTime = t.validation?.calendar?.startTimeInPast || "Thời gian bắt đầu phải sau hiện tại";
+        newErrors.startTime =
+          t.validation?.calendar?.startTimeInPast ||
+          "Thời gian bắt đầu phải sau hiện tại";
       }
     }
 

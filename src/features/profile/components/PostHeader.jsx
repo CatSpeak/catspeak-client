@@ -9,11 +9,13 @@ import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 dayjs.extend(relativeTime)
 
 const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
   const { t, language } = useLanguage()
+  const { formatRelative } = useTimezone()
   const navigate = useNavigate()
   const location = useLocation()
   // Map app language to dayjs locale identifier (zh → zh-cn, others match directly)
@@ -50,7 +52,7 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
             <span className="w-1 h-1 rounded-full bg-[#606060]"></span>
             <span>
               {post.createDate
-                ? dayjs(post.createDate).locale(dayjsLocale).fromNow()
+                ? formatRelative(post.createDate)
                 : t.profile?.post?.header?.justNow || "Vừa xong"}
             </span>
             {post.privacy && (

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react"
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import {
   useGetClassDetailQuery,
@@ -32,6 +33,7 @@ import {
 } from "lucide-react"
 
 import { useAssignmentFormReducer } from "../hooks/useAssignmentFormReducer"
+import { useMemo } from "react"
 
 const isRecord = (value) => (
   value !== null && typeof value === "object" && !Array.isArray(value)
@@ -73,8 +75,10 @@ const getExistingAttachmentReference = (file) => {
 const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, t }) => {
   const navigate = useNavigate()
   const c = t.courses || {}
-  const ca = c.createAssignment || {}
-  const defaults = getAssignmentFormDefaults(initialAssignment)
+  const { language } = useLanguage()
+  const { userTimeZone, toIsoInZone } = useTimezone()
+  const ca = useMemo(() => t.courses?.createAssignment || {}, [t.courses, language])
+  const defaults = getAssignmentFormDefaults(initialAssignment, userTimeZone)
 
   const [createAssignment, { isLoading: isCreating }] = useCreateAssignmentMutation()
   const [updateAssignment, { isLoading: isUpdating }] = useUpdateAssignmentMutation()
@@ -127,7 +131,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
 
   const buildAssignmentFormData = (status) => {
     const formData = new FormData()
-    const dueDateIso = toDueDateIso(dueDate, dueTime)
+    const dueDateIso = toIsoInZone(dueDate, dueTime)
 
     formData.append("Name", title.trim())
     formData.append("Description", editorText || "")
