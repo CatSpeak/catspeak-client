@@ -1,5 +1,4 @@
 import React from "react"
-import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useProfileState } from "@/features/settings/hooks/useProfileState"
@@ -9,9 +8,9 @@ import AccountHeader from "@/features/settings/components/AccountHeader"
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
 import AccountSettingsForm from "@/features/settings/components/AccountSettingsForm"
 import PageTitle from "@/shared/components/ui/PageTitle"
+import { BankAccountList } from "@/features/bank-accounts"
 
 const AccountInfoPage = () => {
-  const { user } = useAuth()
   const { t } = useLanguage()
 
   // Fetch private profile
@@ -53,14 +52,8 @@ const AccountInfoPage = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full">
-       <PageTitle>
-              {t.nav?.accountInfo || "Thông tin tài khoản"}
-            </PageTitle>
-      <AccountHeader
-        user={profile}
-        formData={formData}
-        t={t}
-      />
+      <PageTitle>{t.nav?.accountInfo || "Thông tin tài khoản"}</PageTitle>
+      <AccountHeader user={profile} formData={formData} t={t} />
 
       <div id="account-info-sections" className="w-full">
         <AccountSettingsForm
@@ -76,6 +69,9 @@ const AccountInfoPage = () => {
           t={t}
         />
       </div>
+
+      {/* Bank Accounts Section */}
+      <BankAccountList />
 
       <ProfileOtpModal
         open={isOtpModalOpen}

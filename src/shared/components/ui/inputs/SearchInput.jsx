@@ -1,5 +1,6 @@
 import React from "react"
 import { Search } from "lucide-react"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 const SearchInput = ({
   value,
@@ -48,16 +49,15 @@ const SearchInput = ({
         className={`flex-1 min-w-0 h-full pl-6 pr-2 truncate bg-transparent focus:outline-none ${inputClassName}`}
       />
 
-      <button
+      <IconButton
         onClick={onSearch}
-        className="w-12 h-12 flex items-center justify-center rounded-full group cursor-pointer shrink-0 mr-1"
+        variant="ghost"
+        size="sm"
+        className="mr-1 shrink-0"
+        innerClassName={buttonClassName}
       >
-        <div
-          className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors group-hover:bg-[#E5E5E5] ${buttonClassName}`}
-        >
-          <Search />
-        </div>
-      </button>
+        <Search />
+      </IconButton>
     </div>
   )
 }
