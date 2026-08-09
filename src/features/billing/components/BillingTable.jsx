@@ -73,8 +73,8 @@ const BillingTable = ({
     {
       key: "actions",
       label: cols.actions || "Actions",
-      headerClassName: "!py-2.5 !px-4 w-[15%] text-right",
-      className: "!py-2.5 !px-4 w-[15%] text-right whitespace-nowrap",
+      headerClassName: "!py-2.5 !px-4 w-[15%]",
+      className: "!py-2.5 !px-4 w-[15%] whitespace-nowrap",
       render: (row) => {
         const isPending =
           row.status === 3 ||
