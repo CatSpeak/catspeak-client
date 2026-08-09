@@ -1,5 +1,5 @@
-import React from "react"
-import { User, Mail, Phone } from "lucide-react"
+import React from "react";
+import { User, Mail, Phone } from "lucide-react";
 
 const BuyerInfoBox = ({
   t,
@@ -8,7 +8,7 @@ const BuyerInfoBox = ({
   phone,
   onFullNameChange,
   onEmailChange,
-  onPhoneChange
+  onPhoneChange,
 }) => {
   return (
     <div className="space-y-4">
@@ -19,10 +19,11 @@ const BuyerInfoBox = ({
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-            {t.billing?.checkout?.fullName || "Họ và tên"}
+            {t.billing?.checkout?.fullName || "—"}
           </label>
           <div className="relative">
             <input
+              disabled={true}
               type="text"
               value={fullName}
               onChange={(e) => onFullNameChange(e.target.value)}
@@ -37,10 +38,11 @@ const BuyerInfoBox = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-              {t.billing?.checkout?.email || "Email"}
+              {t.billing?.checkout?.email || "—"}
             </label>
             <div className="relative">
               <input
+                disabled={true}
                 type="email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
@@ -54,10 +56,11 @@ const BuyerInfoBox = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-              {t.billing?.checkout?.phone || "SĐT"}
+              {t.billing?.checkout?.phone || "—"}
             </label>
             <div className="relative">
               <input
+                disabled={true}
                 type="text"
                 value={phone}
                 onChange={(e) => onPhoneChange(e.target.value)}
@@ -71,7 +74,7 @@ const BuyerInfoBox = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BuyerInfoBox
+export default BuyerInfoBox;
