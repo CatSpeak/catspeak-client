@@ -1,12 +1,13 @@
-import React from "react";
-import { Calendar, Clock } from "lucide-react";
-import CountdownTicker from "../CountdownTicker";
-import { getSafeMediaUrl } from "../../utils/courseUtils";
-import { useTimezone } from "@/shared/hooks/useTimezone";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import "react-circular-progressbar/dist/styles.css";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { getLocalizedLanguageName } from "../../data/courseFormOptions";
+import React, { useState } from "react"
+import { Calendar, Clock, Share2, Check } from "lucide-react"
+import CountdownTicker from "../CountdownTicker"
+import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
+import { copyShareLink } from "@/shared/utils/shareUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
+import "react-circular-progressbar/dist/styles.css"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const StudentClassOverviewTab = ({
   classData,
@@ -23,6 +24,18 @@ const StudentClassOverviewTab = ({
   const cd = c.classDetail || {};
   const scd = c.studentCourseDetail || {};
   const ui = c.workspaceUi || {};
+
+  const [linkCopied, setLinkCopied] = useState(false)
+  const handleCopyLink = async () => {
+    const ok = await copyShareLink({
+      successMessage: cd.linkCopied || "Link copied!",
+      errorMessage: cd.linkCopyFailed || "Failed to copy link",
+    })
+    if (ok) {
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    }
+  }
 
   const completedValue = classData.progress
     ? classData.progress.completedSessions
@@ -49,10 +62,10 @@ const StudentClassOverviewTab = ({
       : null;
   const instructorName = String(
     instructor?.fullName ??
-      instructor?.name ??
-      classData.instructorName ??
-      classData.teacherName ??
-      "",
+    instructor?.name ??
+    classData.instructorName ??
+    classData.teacherName ??
+    "",
   ).trim();
   const instructorBio = String(
     instructor?.bio ?? instructor?.description ?? "",
@@ -63,7 +76,7 @@ const StudentClassOverviewTab = ({
   const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || "";
   const nextSession =
     classData.nextSession?.date &&
-    (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
+      (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
       ? classData.nextSession
       : null;
   const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime;
@@ -71,7 +84,7 @@ const StudentClassOverviewTab = ({
   const sessionDate =
     nextSession?.date ||
     (nextSession?.rawStartTime &&
-    (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
+      (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
       ? nextSession.rawStartTime
       : null);
 
@@ -92,6 +105,16 @@ const StudentClassOverviewTab = ({
             backgroundPosition: "center",
           }}
         >
+          {/* Share Button */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title={cd.shareClass || "Share class"}
+            className="absolute top-4 right-4 z-20 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+          >
+            {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
+          </button>
+
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
 
@@ -141,9 +164,9 @@ const StudentClassOverviewTab = ({
                   {formatDateMonth(classData.startDate, ui.tba)}
                   {totalSessions > 0
                     ? ` • ${(ui.sessionsCount || "{{count}} sessions").replace(
-                        "{{count}}",
-                        String(totalSessions),
-                      )}`
+                      "{{count}}",
+                      String(totalSessions),
+                    )}`
                     : ""}
                 </span>
               </div>

@@ -228,6 +228,9 @@ export default {
     timeLabel: "Thời gian",
     sessionDateLabel: "Ngày học",
     lessonsCompleted: "Đã hoàn thành {{completed}} / {{total}} bài học",
+    linkCopied: "Đã sao chép liên kết!",
+    linkCopyFailed: "Lỗi sao chép liên kết",
+    shareCourse: "Chia sẻ khóa học",
   },
   classWorkspace: {
     noInstructor: "Thông tin giảng viên hiện không khả dụng.",
@@ -299,7 +302,10 @@ export default {
     deleteCourse: "Xóa khóa học",
     confirmDeleteCourse: "Bạn có chắc chắn muốn xóa khóa học này? Tất cả các lớp học liên quan cũng sẽ bị ảnh hưởng.",
     toastDeleteSuccess: "Xóa khóa học thành công!",
-    toastDeleteFailed: "Xóa khóa học thất bại!"
+    toastDeleteFailed: "Xóa khóa học thất bại!",
+    linkCopied: "Đã sao chép liên kết!",
+    linkCopyFailed: "Lỗi sao chép liên kết",
+    shareCourse: "Chia sẻ khóa học",
   },
   classDetail: {
     activeCourse: "KHÓA HỌC ĐANG HOẠT ĐỘNG",
@@ -400,7 +406,10 @@ export default {
     resubmitButton: "Nộp lại",
     viewFeedbackButton: "Xem nhận xét",
     toastRedirectingToPayment: "Đang chuyển đến trang thanh toán...",
-    toastEnrollSuccess: "Đăng ký lớp học {{title}} thành công!"
+    toastEnrollSuccess: "Đăng ký lớp học {{title}} thành công!",
+    linkCopied: "Đã sao chép liên kết!",
+    linkCopyFailed: "Lỗi sao chép liên kết",
+    shareClass: "Chia sẻ lớp học",
   },
   myCourses: {
     upcomingClasses: "Lớp học sắp tới",

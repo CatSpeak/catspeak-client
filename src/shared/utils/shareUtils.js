@@ -36,6 +36,15 @@ export const copyRoomLink = async ({ baseUrl, room, successMessage = "Link copie
   }
 };
 
-
-
-
+export const copyShareLink = async ({ url, successMessage = "Link copied!", errorMessage = "Failed to copy link" } = {}) => {
+  try {
+    const raw = url || window.location.href;
+    const parsed = new URL(raw, window.location.origin);
+    await navigator.clipboard.writeText(parsed.toString());
+    toast.success(successMessage);
+    return true;
+  } catch {
+    toast.error(errorMessage);
+    return false;
+  }
+};

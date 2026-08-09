@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
@@ -6,6 +6,7 @@ import {
   useGetStudentCourseDetailQuery,
   useGetExploreCourseDetailQuery
 } from "@/store/api/coursesApi"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
@@ -13,12 +14,15 @@ import {
   getSafeMediaUrl,
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
+import { useRoleOverride } from "../components/RoleSwitcher"
+import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap, Share2, Check } from "lucide-react"
 
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { isStudent } = useRoleOverride()
   const { language, t } = useLanguage()
   const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
@@ -44,6 +48,18 @@ const StudentCourseDetailPage = () => {
 
   // State
   const [expandedClassIds, setExpandedClassIds] = useState({})
+  const [linkCopied, setLinkCopied] = useState(false)
+
+  const handleCopyLink = async () => {
+    const ok = await copyShareLink({
+      successMessage: scd.linkCopied || "Link copied!",
+      errorMessage: scd.linkCopyFailed || "Failed to copy link",
+    })
+    if (ok) {
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    }
+  }
 
   const isRecord = (value) => (
     value !== null
@@ -57,6 +73,26 @@ const StudentCourseDetailPage = () => {
     ? rawCourse.classes.filter((cls) => isRecord(cls) && cls.id)
     : []
   const teacher = isRecord(rawCourse?.teacher) ? rawCourse.teacher : {}
+
+  const { data: profileResponse } = useGetUserProfileQuery(undefined, { skip: !isWorkspace })
+  const profile = profileResponse?.data || profileResponse || {}
+  const currentUserId = (profile.accountId ?? profile.id ?? "").toString()
+
+  const isOwner = Boolean(
+    currentUserId
+    && [
+      rawCourse?.teacherId,
+      rawCourse?.instructorId,
+      teacher?.id,
+    ].some((ownerId) => ownerId != null && String(ownerId) === currentUserId)
+  )
+
+  useEffect(() => {
+    // Only redirect if they are the owner AND they are currently in Teacher mode.
+    if (isOwner && id && isWorkspace && !isStudent) {
+      navigate(`/workspace/courses/details/${id}${window.location.search}`, { replace: true })
+    }
+  }, [isOwner, id, isWorkspace, navigate, isStudent])
 
   const toggleClassExpand = (classId) => {
     setExpandedClassIds((prev) => ({
@@ -128,8 +164,18 @@ const StudentCourseDetailPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* ─── 1. Course Header Block inside Left Column ─── */}
-          <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-5">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-950 tracking-tight leading-tight">
+          <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-5 relative">
+            {/* Share Button */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              title={scd.shareCourse || "Share course"}
+              className="absolute top-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all active:scale-90 cursor-pointer"
+            >
+              {linkCopied ? <Check size={18} className="text-green-600" /> : <Share2 size={18} />}
+            </button>
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-950 tracking-tight leading-tight pr-12">
               {rawCourse.title}
             </h1>
 

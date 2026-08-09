@@ -228,6 +228,9 @@ export default {
     timeLabel: "Time",
     sessionDateLabel: "Session Date",
     lessonsCompleted: "{{completed}} / {{total}} lessons completed",
+    linkCopied: "Link copied!",
+    linkCopyFailed: "Failed to copy link",
+    shareCourse: "Share course",
   },
   classWorkspace: {
     noInstructor: "Instructor information is not available.",
@@ -299,7 +302,10 @@ export default {
     deleteCourse: "Delete Course",
     confirmDeleteCourse: "Are you sure you want to delete this course? All associated classes will also be affected.",
     toastDeleteSuccess: "Course deleted successfully!",
-    toastDeleteFailed: "Failed to delete course!"
+    toastDeleteFailed: "Failed to delete course!",
+    linkCopied: "Link copied!",
+    linkCopyFailed: "Failed to copy link",
+    shareCourse: "Share course",
   },
   classDetail: {
     activeCourse: "ACTIVE COURSE",
@@ -400,7 +406,10 @@ export default {
     resubmitButton: "Resubmit",
     viewFeedbackButton: "View feedback",
     toastRedirectingToPayment: "Redirecting to payment...",
-    toastEnrollSuccess: "Successfully enrolled in {{title}}!"
+    toastEnrollSuccess: "Successfully enrolled in {{title}}!",
+    linkCopied: "Link copied!",
+    linkCopyFailed: "Failed to copy link",
+    shareClass: "Share class",
   },
   myCourses: {
     upcomingClasses: "Upcoming Classes",
