@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useCheckoutMutation } from "@/store/api/paymentsApi"
 import { Loader2 } from "lucide-react"
@@ -11,21 +12,54 @@ import BuyerInfoBox from "../checkout/components/BuyerInfoBox"
 import PaymentMethodSelector from "../checkout/components/PaymentMethodSelector"
 import PaymentSummaryBox from "../checkout/components/PaymentSummaryBox"
 
+const removeVietnameseTones = (str) => {
+  if (!str) return ""
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .trim()
+}
+
+const formatTransferMemo = (userFullName, planName) => {
+  const cleanUser = removeVietnameseTones(userFullName || "").toUpperCase()
+  const cleanPlan = removeVietnameseTones(planName || "").toUpperCase()
+  return `${cleanUser} NANG GOI ${cleanPlan}`.trim()
+}
+
 const CheckoutPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { t, language } = useLanguage()
   const plan = location.state?.plan
 
+  const { user: authUser } = useAuth()
   const { data: profileResponse, isLoading: isProfileLoading } =
     useGetUserProfileQuery()
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation()
 
-  // State values for buyer information
-  const [fullName, setFullName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [memo, setMemo] = useState("")
+  const currentUser = profileResponse?.data || authUser
+
+  const initialUserFullName =
+    currentUser?.fullName ||
+    currentUser?.fullname ||
+    currentUser?.username ||
+    currentUser?.nickname ||
+    currentUser?.name ||
+    ""
+
+  // State values for buyer information - default to current user's values
+  const [fullName, setFullName] = useState(initialUserFullName)
+  const [email, setEmail] = useState(currentUser?.email || "")
+  const [phone, setPhone] = useState(
+    currentUser?.phoneNumber || currentUser?.phone || "",
+  )
+  const [memo, setMemo] = useState(
+    initialUserFullName && plan?.name
+      ? formatTransferMemo(initialUserFullName, plan.name)
+      : "",
+  )
   const [selectedMethod, setSelectedMethod] = useState("payos")
 
   // Redirect if no plan selected
@@ -35,25 +69,34 @@ const CheckoutPage = () => {
     }
   }, [plan, navigate])
 
-  // Prefill user details when loaded
+  // Prefill user details and memo when loaded
   useEffect(() => {
-    if (profileResponse?.data) {
-      const user = profileResponse.data
+    const user = profileResponse?.data || authUser
+    if (user) {
+      const userFullName =
+        user.fullName ||
+        user.fullname ||
+        user.username ||
+        user.nickname ||
+        user.name ||
+        ""
+      const userEmail = user.email || ""
+      const userPhone = user.phoneNumber || user.phone || ""
+
       /* eslint-disable react-hooks/set-state-in-effect */
-      setFullName(user.username || user.nickname || "")
-      setEmail(user.email || "")
-      setPhone(user.phoneNumber || "")
-      
-      const userIdentifier = user.username || user.nickname || "User"
-      const localizedMemo = language === "vi"
-        ? `${userIdentifier} thanh toan ${plan?.name || "Cat Speak"}`
-        : language === "zh"
-          ? `${userIdentifier} 支付 ${plan?.name || "Cat Speak"}`
-          : `${userIdentifier} payment for ${plan?.name || "Cat Speak"}`
-      setMemo(localizedMemo)
+      setFullName(userFullName)
+      setEmail(userEmail)
+      setPhone(userPhone)
+
+      const transferMemo = formatTransferMemo(
+        userFullName || "USER",
+        plan?.name || "CAT SPEAK",
+      )
+      setMemo(transferMemo)
       /* eslint-enable react-hooks/set-state-in-effect */
     }
-  }, [profileResponse, plan, language])
+  }, [profileResponse, authUser, plan])
+
 
   if (!plan) return null
 

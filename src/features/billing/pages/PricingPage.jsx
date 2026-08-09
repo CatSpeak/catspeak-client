@@ -1,75 +1,76 @@
-import React, { useEffect, useRef } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-import PlanCard from "../subscription/components/PlanCard"
-import { useGetUserProfileQuery } from "@/store/api/userApi"
-import { useGetPlansQuery } from "@/store/api/plansApi"
-import { useAuth } from "@/features/auth"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { Breadcrumb } from "@/shared/components/ui/navigation"
-import { getGridClasses } from "../utils/planUtils"
-import { History } from "lucide-react"
+import React, { useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import PlanCard from "../subscription/components/PlanCard";
+import { useGetUserProfileQuery } from "@/store/api/userApi";
+import { useGetPlansQuery } from "@/store/api/plansApi";
+import { useAuth } from "@/features/auth";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { Breadcrumb } from "@/shared/components/ui/navigation";
+import { getGridClasses } from "../utils/planUtils";
+import { History } from "lucide-react";
+import PageTitle from "@/shared/components/ui/PageTitle";
 
 const PricingPage = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { t, language } = useLanguage()
-  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t, language } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const { data: profileResponse, isLoading: isProfileLoading } =
-    useGetUserProfileQuery(undefined, { skip: !isAuthenticated })
+    useGetUserProfileQuery(undefined, { skip: !isAuthenticated });
   const { data: plansResponse = [], isLoading: isPlansLoading } =
-    useGetPlansQuery()
+    useGetPlansQuery();
 
-  const userTier = profileResponse?.data?.tier?.toLowerCase()
+  const userTier = profileResponse?.data?.tier?.toLowerCase();
 
   // Capture route state into a ref at mount so navigate() clearing history state
   // doesn't cause highlightPlan to become undefined mid-effect.
   const highlightStateRef = useRef({
     plan: location.state?.highlightPlan?.toLowerCase() || null,
     featureName: location.state?.featureName || null,
-  })
-  const highlightPlan = highlightStateRef.current.plan
-  const featureName = highlightStateRef.current.featureName
-  const highlightedRef = useRef(null)
+  });
+  const highlightPlan = highlightStateRef.current.plan;
+  const featureName = highlightStateRef.current.featureName;
+  const highlightedRef = useRef(null);
 
-  const [activeHighlight, setActiveHighlight] = React.useState(false)
+  const [activeHighlight, setActiveHighlight] = React.useState(false);
 
   useEffect(() => {
     if (highlightPlan && !isPlansLoading) {
       // Clear route state so refreshing (F5) will not re-trigger highlight
-      navigate(location.pathname, { replace: true, state: {} })
+      navigate(location.pathname, { replace: true, state: {} });
 
       // 1. Scroll first while card is in normal state
       const scrollTimer = setTimeout(() => {
         highlightedRef.current?.scrollIntoView({
           behavior: "smooth",
           block: "center",
-        })
-      }, 300)
+        });
+      }, 300);
 
       // 2. Trigger highlight AFTER scroll completes (at 600ms)
       const startHighlightTimer = setTimeout(() => {
-        setActiveHighlight(true)
-      }, 600)
+        setActiveHighlight(true);
+      }, 600);
 
       // 3. Hold highlight for 3 seconds, then revert to original UI (at 3600ms)
       const revertTimer = setTimeout(() => {
-        setActiveHighlight(false)
-      }, 3600)
+        setActiveHighlight(false);
+      }, 3600);
 
       return () => {
-        clearTimeout(scrollTimer)
-        clearTimeout(startHighlightTimer)
-        clearTimeout(revertTimer)
-      }
+        clearTimeout(scrollTimer);
+        clearTimeout(startHighlightTimer);
+        clearTimeout(revertTimer);
+      };
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlansLoading])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlansLoading]);
 
   const handleUpgradeClick = (plan) => {
-    navigate("/checkout", { state: { plan } })
-  }
+    navigate("/checkout", { state: { plan } });
+  };
 
-  const isProcessing = isProfileLoading || isPlansLoading
+  const isProcessing = isProfileLoading || isPlansLoading;
 
   const formattedPlans = plansResponse
     .filter((plan) => plan.packageStatus === "Published")
@@ -91,7 +92,7 @@ const PricingPage = () => {
       applicableRole: plan.applicableRole?.toLowerCase(),
       iconUrl: plan.iconUrl,
       brandColor: plan.brandColor,
-    }))
+    }));
 
   const breadcrumbItems = [
     {
@@ -101,20 +102,23 @@ const PricingPage = () => {
     {
       label: t.billing.pricing.title,
     },
-  ]
+  ];
 
   return (
-    <div className="mx-auto px-12 pt-6 pb-16 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl">
-      <div className="mb-8">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-70px)]">
+      {/* <div className="mb-8">
         <Breadcrumb items={breadcrumbItems} />
-      </div>
+      </div> */}
 
       {/* Title & History Header row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 w-full">
-        <div>
+        {/* <div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
             {t.billing.pricing.title}
           </h1>
+        </div> */}
+        <div className="mb-8">
+          <PageTitle>{t.billing.pricing.title || "Gói đăng ký"}</PageTitle>
         </div>
 
         {/* Billing History Button */}
@@ -155,11 +159,11 @@ const PricingPage = () => {
         <div className="relative">
           <div className={getGridClasses(formattedPlans.length)}>
             {formattedPlans.map((plan) => {
-              const isActive = userTier === plan.name?.toLowerCase()
+              const isActive = userTier === plan.name?.toLowerCase();
               const isTargetMatch =
                 highlightPlan &&
-                plan.name?.toLowerCase().includes(highlightPlan)
-              const isTargetHighlighted = activeHighlight && isTargetMatch
+                plan.name?.toLowerCase().includes(highlightPlan);
+              const isTargetHighlighted = activeHighlight && isTargetMatch;
 
               return (
                 <div
@@ -188,13 +192,13 @@ const PricingPage = () => {
                     }
                   />
                 </div>
-              )
+              );
             })}
           </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default PricingPage
+export default PricingPage;
