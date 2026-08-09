@@ -39,56 +39,64 @@ const StudentClassOverviewTab = ({
 
   const completedValue = classData.progress
     ? classData.progress.completedSessions
-    : classData.completedSessions;
+    : classData.completedSessions
   const totalValue = classData.progress
     ? classData.progress.totalSessions
-    : classData.totalSessions;
+    : classData.totalSessions
   const completedSessions =
     completedValue != null && Number.isFinite(Number(completedValue))
       ? Math.max(0, Number(completedValue))
-      : null;
+      : null
   const totalSessions =
     Number.isFinite(Number(totalValue)) && Number(totalValue) > 0
       ? Number(totalValue)
-      : 0;
+      : 0
   const progressPercent =
     totalSessions > 0 && completedSessions !== null
       ? Math.min(100, Math.round((completedSessions / totalSessions) * 100))
-      : null;
-  const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl);
+      : null
+  const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl)
   const instructor =
     classData.instructor && typeof classData.instructor === "object"
       ? classData.instructor
-      : null;
+      : null
   const instructorName = String(
     instructor?.fullName ??
+<<<<<<< HEAD
     instructor?.name ??
     classData.instructorName ??
     classData.teacherName ??
     "",
   ).trim();
+=======
+      instructor?.name ??
+      classData.instructorName ??
+      classData.teacherName ??
+      "",
+  ).trim()
+>>>>>>> hotfix/loc/max-room-participant
   const instructorBio = String(
     instructor?.bio ?? instructor?.description ?? "",
-  ).trim();
+  ).trim()
   const instructorAvatarCandidate = String(
     instructor?.avatarUrl ?? instructor?.avatar ?? "",
-  ).trim();
-  const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || "";
+  ).trim()
+  const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || ""
   const nextSession =
     classData.nextSession?.date &&
       (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
       ? classData.nextSession
-      : null;
-  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime;
-  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime;
+      : null
+  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime
+  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime
   const sessionDate =
     nextSession?.date ||
     (nextSession?.rawStartTime &&
       (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
       ? nextSession.rawStartTime
-      : null);
+      : null)
 
-  const showRightColumn = isEnrolled;
+  const showRightColumn = isEnrolled
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -305,7 +313,7 @@ const StudentClassOverviewTab = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default StudentClassOverviewTab;
+export default StudentClassOverviewTab

@@ -48,16 +48,18 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
 
       const isPrivate = Boolean(room.hasPassword || room.privacy === "Private")
 
-      setFormData({
-        name: room.name || "",
-        topics: topicsList,
-        selectedLevel: room.requiredLevel || "",
-        isPrivate: isPrivate,
-        password: room.password || "",
+      queueMicrotask(() => {
+        setFormData({
+          name: room.name || "",
+          topics: topicsList,
+          selectedLevel: room.requiredLevel || "",
+          isPrivate: isPrivate,
+          password: room.password || "",
+        })
+        setThumbnailFile(room.thumbnailUrl || null)
+        setNameError("")
+        setPasswordError("")
       })
-      setThumbnailFile(room.thumbnailUrl || null)
-      setNameError("")
-      setPasswordError("")
     }
   }, [open, room])
 

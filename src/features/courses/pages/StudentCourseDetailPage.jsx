@@ -4,7 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   useGetStudentCourseDetailQuery,
-  useGetExploreCourseDetailQuery
+  useGetExploreCourseDetailQuery,
 } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
@@ -17,32 +17,60 @@ import {
 import { copyShareLink } from "@/shared/utils/shareUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useRoleOverride } from "../components/RoleSwitcher"
-import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap, Share2, Check } from "lucide-react"
+import {
+  Calendar,
+  Clock,
+  Mail,
+  CheckCircle2,
+  BookOpen,
+  FileText,
+  Globe,
+  User,
+  Radio,
+  Users,
+  Video,
+  ChevronDown,
+  ChevronUp,
+  GraduationCap,
+  Share2,
+  Check,
+} from "lucide-react"
 
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isStudent } = useRoleOverride()
   const { language, t } = useLanguage()
-  const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
+  const { formatDateMonth, formatScheduleTime, formatScheduleDays } =
+    useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
 
   const isExploreRoute = window.location.pathname.includes("/explore-courses")
   const isWorkspace = window.location.pathname.startsWith("/workspace")
-  const exploreHomePath = isWorkspace ? "/workspace/explore-courses" : "/explore-courses"
+  const exploreHomePath = isWorkspace
+    ? "/workspace/explore-courses"
+    : "/explore-courses"
 
   // Fetch course details (Use public explore endpoint on explore route)
-  const exploreQuery = useGetExploreCourseDetailQuery(id, { skip: !id || !isExploreRoute })
-  const studentQuery = useGetStudentCourseDetailQuery(id, { skip: !id || isExploreRoute })
+  const exploreQuery = useGetExploreCourseDetailQuery(id, {
+    skip: !id || !isExploreRoute,
+  })
+  const studentQuery = useGetStudentCourseDetailQuery(id, {
+    skip: !id || isExploreRoute,
+  })
 
   const courseDetail = isExploreRoute
     ? exploreQuery.currentData
-    : (studentQuery.currentData || exploreQuery.currentData)
+    : studentQuery.currentData || exploreQuery.currentData
 
-  const isLoading = isExploreRoute ? exploreQuery.isLoading : studentQuery.isLoading
-  const isFetching = isExploreRoute ? exploreQuery.isFetching : studentQuery.isFetching
+  const isLoading = isExploreRoute
+    ? exploreQuery.isLoading
+    : studentQuery.isLoading
+  const isFetching = isExploreRoute
+    ? exploreQuery.isFetching
+    : studentQuery.isFetching
   const error = isExploreRoute ? exploreQuery.error : studentQuery.error
   const refetch = isExploreRoute ? exploreQuery.refetch : studentQuery.refetch
 
@@ -61,48 +89,48 @@ const StudentCourseDetailPage = () => {
     }
   }
 
-  const isRecord = (value) => (
-    value !== null
-    && typeof value === "object"
-    && !Array.isArray(value)
-  )
-  const rawCourse = isRecord(courseDetail) && courseDetail.id
-    ? courseDetail
-    : null
+  const isRecord = (value) =>
+    value !== null && typeof value === "object" && !Array.isArray(value)
+  const rawCourse =
+    isRecord(courseDetail) && courseDetail.id ? courseDetail : null
   const classes = Array.isArray(rawCourse?.classes)
     ? rawCourse.classes.filter((cls) => isRecord(cls) && cls.id)
     : []
   const teacher = isRecord(rawCourse?.teacher) ? rawCourse.teacher : {}
 
-  const { data: profileResponse } = useGetUserProfileQuery(undefined, { skip: !isWorkspace })
+  const { data: profileResponse } = useGetUserProfileQuery(undefined, {
+    skip: !isWorkspace,
+  })
   const profile = profileResponse?.data || profileResponse || {}
   const currentUserId = (profile.accountId ?? profile.id ?? "").toString()
 
   const isOwner = Boolean(
-    currentUserId
-    && [
-      rawCourse?.teacherId,
-      rawCourse?.instructorId,
-      teacher?.id,
-    ].some((ownerId) => ownerId != null && String(ownerId) === currentUserId)
+    currentUserId &&
+    [rawCourse?.teacherId, rawCourse?.instructorId, teacher?.id].some(
+      (ownerId) => ownerId != null && String(ownerId) === currentUserId,
+    ),
   )
 
   useEffect(() => {
     // Only redirect if they are the owner AND they are currently in Teacher mode.
     if (isOwner && id && isWorkspace && !isStudent) {
-      navigate(`/workspace/courses/details/${id}${window.location.search}`, { replace: true })
+      navigate(`/workspace/courses/details/${id}${window.location.search}`, {
+        replace: true,
+      })
     }
   }, [isOwner, id, isWorkspace, navigate, isStudent])
 
   const toggleClassExpand = (classId) => {
     setExpandedClassIds((prev) => ({
       ...prev,
-      [classId]: !prev[classId]
+      [classId]: !prev[classId],
     }))
   }
 
   if (isLoading || (isFetching && courseDetail === undefined)) {
-    return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
+    return (
+      <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
+    )
   }
 
   if (error || (courseDetail !== undefined && !rawCourse)) {
@@ -111,7 +139,10 @@ const StudentCourseDetailPage = () => {
         role="alert"
         className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
       >
-        <span>{scd.courseLoadFailed || "This course could not be loaded. Please try again."}</span>
+        <span>
+          {scd.courseLoadFailed ||
+            "This course could not be loaded. Please try again."}
+        </span>
         <button
           type="button"
           onClick={refetch}
@@ -125,7 +156,10 @@ const StudentCourseDetailPage = () => {
 
   if (!rawCourse) {
     return (
-      <div role="status" className="p-8 text-center text-sm font-semibold text-gray-500">
+      <div
+        role="status"
+        className="p-8 text-center text-sm font-semibold text-gray-500"
+      >
         {scd.courseUnavailable || "Course details are unavailable."}
       </div>
     )
@@ -137,7 +171,9 @@ const StudentCourseDetailPage = () => {
   const teacherAvatarUrl = getSafeMediaUrl(teacher.avatarImageUrl)
 
   return (
-    <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
+    <div
+      className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}
+    >
       {isFetching && (
         <span className="sr-only" role="status">
           {scd.refreshing || "Refreshing course details"}
@@ -149,11 +185,17 @@ const StudentCourseDetailPage = () => {
         items={[
           {
             label: t.nav?.home || "Home",
-            onClick: () => navigate(isExploreRoute ? exploreHomePath : "/workspace"),
+            onClick: () =>
+              navigate(isExploreRoute ? exploreHomePath : "/workspace"),
           },
           {
-            label: isExploreRoute ? (t.nav?.exploreCourses || "Explore Courses") : (c.student?.dashboardTitle || "My Learning"),
-            onClick: () => navigate(isExploreRoute ? exploreHomePath : "/workspace/learning"),
+            label: isExploreRoute
+              ? t.nav?.exploreCourses || "Explore Courses"
+              : c.student?.dashboardTitle || "My Learning",
+            onClick: () =>
+              navigate(
+                isExploreRoute ? exploreHomePath : "/workspace/learning",
+              ),
           },
           {
             label: rawCourse.title,
@@ -172,7 +214,11 @@ const StudentCourseDetailPage = () => {
               title={scd.shareCourse || "Share course"}
               className="absolute top-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all active:scale-90 cursor-pointer"
             >
-              {linkCopied ? <Check size={18} className="text-green-600" /> : <Share2 size={18} />}
+              {linkCopied ? (
+                <Check size={18} className="text-green-600" />
+              ) : (
+                <Share2 size={18} />
+              )}
             </button>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-950 tracking-tight leading-tight pr-12">
@@ -211,68 +257,104 @@ const StudentCourseDetailPage = () => {
               <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
                 <Radio size={18} className="text-[#990011] shrink-0 mt-0.5" />
                 <div className="flex flex-col">
-                  <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.liveGroupClass || "Live Group Class"}</span>
-                  <span className="text-sm font-black text-gray-950">{c.student?.liveGroupClassDesc || "Meet over live video meetings"}</span>
+                  <span className="text-[12px] text-gray-400 font-bold uppercase">
+                    {c.student?.liveGroupClass || "Live Group Class"}
+                  </span>
+                  <span className="text-sm font-black text-gray-950">
+                    {c.student?.liveGroupClassDesc ||
+                      "Meet over live video meetings"}
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
                 <Calendar size={18} className="text-blue-600 shrink-0 mt-0.5" />
                 <div className="flex flex-col">
-                  <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.totalClasses || "Total Classes"}</span>
-                  <span className="text-sm font-black text-gray-950">{classes.length} {c.student?.classesText || "classes"}</span>
+                  <span className="text-[12px] text-gray-400 font-bold uppercase">
+                    {c.student?.totalClasses || "Total Classes"}
+                  </span>
+                  <span className="text-sm font-black text-gray-950">
+                    {classes.length} {c.student?.classesText || "classes"}
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
                 <Globe size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                 <div className="flex flex-col">
-                  <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.languageLabel || "Language"}</span>
-                  <span className="text-sm font-black text-gray-950">{languageLabel}</span>
+                  <span className="text-[12px] text-gray-400 font-bold uppercase">
+                    {c.student?.languageLabel || "Language"}
+                  </span>
+                  <span className="text-sm font-black text-gray-950">
+                    {languageLabel}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* ─── 4. Available Classes ─── */}
-          <div id="schedule-section" className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-6 scroll-mt-6">
+          <div
+            id="schedule-section"
+            className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-6 scroll-mt-6"
+          >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h2 className="text-xl font-black text-gray-950 tracking-tight flex items-center gap-2">
                   <Calendar size={20} className="text-[#990011]" />
-                  <span>{c.student?.availableClasses || "Available Classes"}</span>
+                  <span>
+                    {c.student?.availableClasses || "Available Classes"}
+                  </span>
                 </h2>
-                <p className="text-sm text-gray-400 font-semibold mt-0.5">{c.student?.selectClassDesc || "Select a class that best fits your daily schedule."}</p>
+                <p className="text-sm text-gray-400 font-semibold mt-0.5">
+                  {c.student?.selectClassDesc ||
+                    "Select a class that best fits your daily schedule."}
+                </p>
               </div>
             </div>
 
             {classes.length === 0 ? (
               <div className="bg-gray-50 rounded-2xl border border-gray-150 p-10 text-center text-gray-400 font-bold flex flex-col items-center justify-center">
-                <span className="text-gray-800 text-base mb-1">{c.student?.noClassesTitle || "No Classes Available Yet"}</span>
-                <span className="text-sm font-semibold max-w-[280px]">{c.student?.noClassesDesc || "New class sessions will be scheduled soon. Please check back later."}</span>
+                <span className="text-gray-800 text-base mb-1">
+                  {c.student?.noClassesTitle || "No Classes Available Yet"}
+                </span>
+                <span className="text-sm font-semibold max-w-[280px]">
+                  {c.student?.noClassesDesc ||
+                    "New class sessions will be scheduled soon. Please check back later."}
+                </span>
               </div>
             ) : (
               <div className="flex flex-col gap-4">
                 {classes.map((cls) => {
                   const isClassEnrolled = Boolean(cls.isEnrolled)
                   const isExpanded = !!expandedClassIds[cls.id]
-                  const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
+                  const enrolledSeats =
+                    cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
-                  const tuitionLabel = cls.tuitionFee == null
-                    ? ui.tba || "TBA"
-                    : formatCurrencyVND(cls.tuitionFee)
-                  const levelsText = Array.isArray(cls.levels) && cls.levels.length > 0 ? cls.levels.join(", ") : (cls.level || rawCourse?.level || "—")
-                  const classThumbnailUrl = getSafeMediaUrl(cls?.thumbnailUrl || cls?.thumbnail || rawCourse?.thumbnailUrl)
+                  const tuitionLabel =
+                    cls.tuitionFee == null
+                      ? ui.tba || "TBA"
+                      : formatCurrencyVND(cls.tuitionFee)
+                  const levelsText =
+                    Array.isArray(cls.levels) && cls.levels.length > 0
+                      ? cls.levels.join(", ")
+                      : cls.level || rawCourse?.level || "—"
+                  const classThumbnailUrl = getSafeMediaUrl(
+                    cls?.thumbnailUrl ||
+                      cls?.thumbnail ||
+                      rawCourse?.thumbnailUrl,
+                  )
 
                   return (
                     <div
                       key={cls.id}
-                      className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 ${isClassEnrolled
-                        ? "border-green-300 ring-2 ring-green-50/60"
-                        : isExpanded
-                          ? "border-[#990011]/30 shadow-md ring-2 ring-red-50/40"
-                          : "border-gray-200 hover:border-gray-300 hover:shadow-2xs"
-                        }`}
+                      className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 ${
+                        isClassEnrolled
+                          ? "border-green-300 ring-2 ring-green-50/60"
+                          : isExpanded
+                            ? "border-[#990011]/30 shadow-md ring-2 ring-red-50/40"
+                            : "border-gray-200 hover:border-gray-300 hover:shadow-2xs"
+                      }`}
                     >
                       {/* Accordion Header */}
                       <div className="p-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 select-none bg-white">
@@ -281,9 +363,14 @@ const StudentCourseDetailPage = () => {
                           <div
                             onClick={(e) => {
                               e.stopPropagation()
-                              const isWorkspace = window.location.pathname.startsWith("/workspace")
+                              const isWorkspace =
+                                window.location.pathname.startsWith(
+                                  "/workspace",
+                                )
                               const classPath = isClassEnrolled
-                                ? (isWorkspace ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}` : `/learning/class/${encodeURIComponent(String(cls.id))}`)
+                                ? isWorkspace
+                                  ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`
+                                  : `/learning/class/${encodeURIComponent(String(cls.id))}`
                                 : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                               navigate(classPath)
                             }}
@@ -304,29 +391,40 @@ const StudentCourseDetailPage = () => {
                               <h3
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  const isWorkspace = window.location.pathname.startsWith("/workspace")
+                                  const isWorkspace =
+                                    window.location.pathname.startsWith(
+                                      "/workspace",
+                                    )
                                   const classPath = isClassEnrolled
-                                    ? (isWorkspace ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}` : `/learning/class/${encodeURIComponent(String(cls.id))}`)
+                                    ? isWorkspace
+                                      ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`
+                                      : `/learning/class/${encodeURIComponent(String(cls.id))}`
                                     : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                                   navigate(classPath)
                                 }}
                                 className="font-black text-lg sm:text-xl text-gray-950 hover:text-[#b20a1c] transition-colors leading-snug cursor-pointer flex items-center gap-1.5 group/title"
                                 title="Xem chi tiết lớp học"
                               >
-                                <span className="group-hover/title:underline">{cls.title}</span>
+                                <span className="group-hover/title:underline">
+                                  {cls.title}
+                                </span>
                               </h3>
 
                               {isClassEnrolled && (
                                 <span className="bg-green-100 text-green-700 font-bold text-[12px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
                                   <CheckCircle2 size={10} />
-                                  <span>{c.student?.enrolled || "Enrolled"}</span>
+                                  <span>
+                                    {c.student?.enrolled || "Enrolled"}
+                                  </span>
                                 </span>
                               )}
                             </div>
 
                             {/* Subtitle / Schedule Badge & Dates */}
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm font-semibold text-gray-500">
-                              {(cls.schedule?.days || (cls.schedule?.startTime && cls.schedule?.endTime)) && (
+                              {(cls.schedule?.days ||
+                                (cls.schedule?.startTime &&
+                                  cls.schedule?.endTime)) && (
                                 <div className="flex items-center gap-1.5 bg-red-50 text-[#b20a1c] px-2.5 py-0.5 rounded-md border border-red-100/70 font-black text-xs">
                                   <Clock size={12} className="shrink-0" />
                                   <span>
@@ -336,7 +434,8 @@ const StudentCourseDetailPage = () => {
                                       " - ",
                                       cls.schedule?.startTime,
                                     )}
-                                    {cls.schedule?.startTime && cls.schedule?.endTime
+                                    {cls.schedule?.startTime &&
+                                    cls.schedule?.endTime
                                       ? ` | ${formatScheduleTime(cls.schedule.startTime, cls.startDate)} - ${formatScheduleTime(cls.schedule.endTime, cls.startDate)}`
                                       : ""}
                                   </span>
@@ -344,7 +443,10 @@ const StudentCourseDetailPage = () => {
                               )}
 
                               <div className="flex items-center gap-1">
-                                <Calendar size={12} className="text-gray-400 shrink-0" />
+                                <Calendar
+                                  size={12}
+                                  className="text-gray-400 shrink-0"
+                                />
                                 <span>
                                   {cls.startDate && cls.endDate
                                     ? `${formatDateMonth(cls.startDate, ui.tba, cls.schedule?.startTime)} – ${formatDateMonth(cls.endDate, ui.tba, cls.schedule?.startTime)}`
@@ -359,8 +461,12 @@ const StudentCourseDetailPage = () => {
 
                         <div className="flex sm:flex-col justify-between items-center sm:items-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-150 shrink-0">
                           <div className="flex flex-col sm:items-end">
-                            <span className="text-[12px] text-gray-400 font-bold uppercase tracking-wider">{c.student?.tuitionFee || "Tuition Fee"}</span>
-                            <span className="text-gray-950 font-black text-base">{tuitionLabel}</span>
+                            <span className="text-[12px] text-gray-400 font-bold uppercase tracking-wider">
+                              {c.student?.tuitionFee || "Tuition Fee"}
+                            </span>
+                            <span className="text-gray-950 font-black text-base">
+                              {tuitionLabel}
+                            </span>
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -369,11 +475,14 @@ const StudentCourseDetailPage = () => {
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  navigate(`/workspace/learning/class/${encodeURIComponent(String(cls.id))}`)
+                                  navigate(
+                                    `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`,
+                                  )
                                 }}
                                 className="h-8 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-black rounded-full transition-all active:scale-95 shadow-2xs"
                               >
-                                {c.student?.goToWorkspace || "Go to Workspace →"}
+                                {c.student?.goToWorkspace ||
+                                  "Go to Workspace →"}
                               </button>
                             )}
 
@@ -388,7 +497,17 @@ const StudentCourseDetailPage = () => {
                               className="h-8 px-2 flex items-center gap-1 text-sm font-black text-[#b20a1c] hover:text-[#990011] transition-colors cursor-pointer shrink-0"
                             >
                               <span>{isExpanded ? "Thu gọn" : "Chi tiết"}</span>
-                              {isExpanded ? <ChevronUp size={15} className="text-[#b20a1c]" /> : <ChevronDown size={15} className="text-[#b20a1c]" />}
+                              {isExpanded ? (
+                                <ChevronUp
+                                  size={15}
+                                  className="text-[#b20a1c]"
+                                />
+                              ) : (
+                                <ChevronDown
+                                  size={15}
+                                  className="text-[#b20a1c]"
+                                />
+                              )}
                             </button>
                           </div>
                         </div>
@@ -396,12 +515,20 @@ const StudentCourseDetailPage = () => {
 
                       {/* Collapsible Panel */}
                       {isExpanded && (
-                        <div id={`class-details-${cls.id}`} className="bg-gray-50/70 border-t border-gray-150 p-5 flex flex-col gap-4 text-sm animate-fadeIn">
+                        <div
+                          id={`class-details-${cls.id}`}
+                          className="bg-gray-50/70 border-t border-gray-150 p-5 flex flex-col gap-4 text-sm animate-fadeIn"
+                        >
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
-                              <Users size={18} className="text-[#990011] shrink-0 mt-0.5" />
+                              <Users
+                                size={18}
+                                className="text-[#990011] shrink-0 mt-0.5"
+                              />
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.enrolledSlots || "Enrolled Slots"}</span>
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">
+                                  {c.student?.enrolledSlots || "Enrolled Slots"}
+                                </span>
                                 <span className="text-gray-950 font-black text-sm">
                                   {enrolledSeats ?? "0"} / {totalSlots ?? "N/A"}
                                 </span>
@@ -409,9 +536,14 @@ const StudentCourseDetailPage = () => {
                             </div>
 
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
-                              <GraduationCap size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                              <GraduationCap
+                                size={18}
+                                className="text-amber-600 shrink-0 mt-0.5"
+                              />
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.levelLabel || "Trình độ"}</span>
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">
+                                  {c.student?.levelLabel || "Trình độ"}
+                                </span>
                                 <span className="text-gray-950 font-black text-sm">
                                   {levelsText}
                                 </span>
@@ -419,10 +551,14 @@ const StudentCourseDetailPage = () => {
                             </div>
 
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
-                              <Calendar size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                              <Calendar
+                                size={18}
+                                className="text-emerald-600 shrink-0 mt-0.5"
+                              />
                               <div className="flex flex-col gap-0.5 min-w-0">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">
-                                  {c.student?.enrollmentPeriod || "Registration Period"}
+                                  {c.student?.enrollmentPeriod ||
+                                    "Registration Period"}
                                 </span>
                                 <span className="text-gray-950 font-black text-sm truncate">
                                   {cls.enrollmentStart && cls.enrollmentEnd
@@ -437,29 +573,47 @@ const StudentCourseDetailPage = () => {
                             </div>
 
                             <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
-                              <Video size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                              <Video
+                                size={18}
+                                className="text-blue-600 shrink-0 mt-0.5"
+                              />
                               <div className="flex flex-col gap-0.5 min-w-0">
-                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.virtualClassroom || "Virtual Classroom"}</span>
-                                <span className="text-gray-950 font-black text-sm truncate">{cls.roomName || c.student?.onlineClassroom || "Online Classroom"}</span>
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">
+                                  {c.student?.virtualClassroom ||
+                                    "Virtual Classroom"}
+                                </span>
+                                <span className="text-gray-950 font-black text-sm truncate">
+                                  {cls.roomName ||
+                                    c.student?.onlineClassroom ||
+                                    "Online Classroom"}
+                                </span>
                               </div>
                             </div>
                           </div>
 
                           {cls.rawSchedule && cls.rawSchedule.length > 0 && (
                             <div className="flex flex-col gap-1.5">
-                              <span className="font-bold text-gray-700 text-[11px]">{c.student?.weeklySchedule || "Weekly Schedule:"}</span>
+                              <span className="font-bold text-gray-700 text-[11px]">
+                                {c.student?.weeklySchedule ||
+                                  "Weekly Schedule:"}
+                              </span>
                               <div className="flex flex-wrap gap-2">
                                 {cls.rawSchedule.map((s, idx) => (
-                                  <span key={idx} className="bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-lg text-sm font-semibold">
+                                  <span
+                                    key={idx}
+                                    className="bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-lg text-sm font-semibold"
+                                  >
                                     <strong className="text-gray-950">
                                       {formatScheduleDays(
                                         [s.dayOfWeek],
                                         ui.tba,
                                         " - ",
                                         s.startTime,
-                                      )}:
+                                      )}
+                                      :
                                     </strong>{" "}
-                                    {formatScheduleTime(s.startTime)} - {formatScheduleTime(s.endTime)}
+                                    {formatScheduleTime(s.startTime)} -{" "}
+                                    {formatScheduleTime(s.endTime)}
                                   </span>
                                 ))}
                               </div>
@@ -470,12 +624,19 @@ const StudentCourseDetailPage = () => {
                           <div className="bg-white rounded-xl p-3.5 border border-gray-150 flex flex-col gap-1">
                             <span className="font-bold text-gray-950 text-sm flex items-center gap-1">
                               <FileText size={13} className="text-[#990011]" />
-                              <span>{c.student?.description || "Description"}</span>
+                              <span>
+                                {c.student?.description || "Description"}
+                              </span>
                             </span>
                             <RenderHTML
                               html={cls.description}
                               className="text-gray-600 font-medium text-sm leading-relaxed"
-                              fallback={<span className="text-gray-600 font-medium text-sm leading-relaxed">{scd.noClassDescription || "No description provided."}</span>}
+                              fallback={
+                                <span className="text-gray-600 font-medium text-sm leading-relaxed">
+                                  {scd.noClassDescription ||
+                                    "No description provided."}
+                                </span>
+                              }
                             />
                           </div>
                         </div>
@@ -512,7 +673,9 @@ const StudentCourseDetailPage = () => {
               )}
               <div className="flex flex-col gap-0.5 min-w-0">
                 <h3 className="font-black text-gray-950 text-base truncate">
-                  {teacher.name || scd.instructorUnavailable || "Instructor not provided"}
+                  {teacher.name ||
+                    scd.instructorUnavailable ||
+                    "Instructor not provided"}
                 </h3>
                 {teacher.title && (
                   <span className="text-[12px] text-[#b20a1c] font-bold uppercase truncate">
@@ -524,7 +687,9 @@ const StudentCourseDetailPage = () => {
 
             {teacher.introduction && (
               <div className="flex flex-col gap-1.5">
-                <h4 className="font-extrabold text-sm text-gray-950 tracking-wider">{c.student?.aboutMe || "About Me"}</h4>
+                <h4 className="font-extrabold text-sm text-gray-950 tracking-wider">
+                  {c.student?.aboutMe || "About Me"}
+                </h4>
                 <p className="text-sm text-gray-600 font-medium leading-relaxed">
                   {teacher.introduction}
                 </p>
@@ -537,7 +702,9 @@ const StudentCourseDetailPage = () => {
                 onClick={() => {
                   const teacherId = teacher.accountId || teacher.id
                   if (teacherId) {
-                    navigate(`/workspace/instructor/${encodeURIComponent(String(teacherId))}`)
+                    navigate(
+                      `/workspace/instructor/${encodeURIComponent(String(teacherId))}`,
+                    )
                   }
                 }}
                 disabled={!teacher.accountId && !teacher.id}
@@ -550,11 +717,15 @@ const StudentCourseDetailPage = () => {
               <button
                 type="button"
                 disabled
-                title={scd.contactUnavailable || "Contact is not available yet."}
+                title={
+                  scd.contactUnavailable || "Contact is not available yet."
+                }
                 className="flex-1 h-10 border border-gray-200 text-gray-400 text-sm font-black rounded-full flex items-center justify-center gap-1.5 shadow-2xs cursor-not-allowed"
               >
                 <Mail size={14} />
-                <span>{c.student?.contactInstructor || "Contact Instructor"}</span>
+                <span>
+                  {c.student?.contactInstructor || "Contact Instructor"}
+                </span>
               </button>
             </div>
           </div>

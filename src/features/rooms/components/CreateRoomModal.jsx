@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Lock } from "lucide-react"
-import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -36,11 +35,13 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
 
   useEffect(() => {
     if (open) {
-      setMode(initialMode)
-      groupForm.resetForm()
-      customForm.resetForm()
+      queueMicrotask(() => {
+        setMode(initialMode)
+        groupForm.resetForm()
+        customForm.resetForm()
+      })
     }
-  }, [open, initialMode])
+  }, [open, initialMode, groupForm, customForm])
 
   // Call interceptor
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =

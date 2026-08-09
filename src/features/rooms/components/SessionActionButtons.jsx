@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import { badges } from "@/shared/constants/constants"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Button3D from "@/shared/components/ui/buttons/Button3D"
@@ -12,7 +12,6 @@ const SessionActionButtons = ({
   isCreatingStudyGroup,
   isCreatingAI,
   isCreatingCustom,
-  canUseAI,
 }) => {
   const { t } = useLanguage()
 
@@ -53,7 +52,7 @@ const SessionActionButtons = ({
           const label = labelKey ? t.rooms.sessionActions[labelKey] : b.label
 
           return (
-            <motion.div
+            <Motion.div
               key={b.id}
               className={`flex items-center w-full sm:w-auto`}
               onClick={isActionable ? handleClick : undefined}
@@ -66,7 +65,7 @@ const SessionActionButtons = ({
               >
                 {label}
               </Button3D>
-            </motion.div>
+            </Motion.div>
           )
         })}
       </div>

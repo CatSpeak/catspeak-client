@@ -1,48 +1,21 @@
 import React, { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-import {
-  Crown,
-  Users,
-  Copy,
-  Check,
-  Pencil,
-  Trash2,
-  ExternalLink,
-  Plus,
-  X,
-} from "lucide-react"
+import { Crown, Plus } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import { EmptyState, PlanRequiredState } from "@/shared/components/ui/indicators"
 import { toast } from "react-hot-toast"
 import {
   useGetMyCustomRoomsQuery,
-  useUpdateCustomRoomMutation,
   useDeleteCustomRoomMutation,
 } from "@/store/api/roomsApi"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import CreateRoomModal from "../components/CreateRoomModal"
 import EditRoomModal from "../components/EditRoomModal"
 import CustomRoomCard from "../components/CustomRoomCard"
-
-const scrollbarClasses =
-  "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
-
-const getLanguageName = (langCode) => {
-  switch (langCode) {
-    case "zh":
-      return "Chinese"
-    case "vi":
-      return "Vietnamese"
-    case "en":
-      return "English"
-    default:
-      return "English"
-  }
-}
 
 const CustomRoomsPage = () => {
   const { t } = useLanguage()
@@ -52,7 +25,6 @@ const CustomRoomsPage = () => {
   const { limits, isLoading: isPlanLoading } = usePlanFeatures()
 
   const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
-  const selectedLanguage = getLanguageName(supportedLangCode)
 
   // API hooks
   const { data: customRoomsData, isLoading } = useGetMyCustomRoomsQuery()

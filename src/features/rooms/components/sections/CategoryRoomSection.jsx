@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
 import RoomCard from "../RoomCard"
 import EmptyRoomState from "../EmptyRoomState"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import useResponsiveItemsPerPage from "@/features/rooms/hooks/useResponsiveItemsPerPage"
 
@@ -94,19 +92,27 @@ const CategoryRoomSection = ({
 
   useEffect(() => {
     if (!isFetching && currentRooms.length > 0) {
-      setDisplayRooms(currentRooms)
-      setVisualPage(page)
+      queueMicrotask(() => {
+        setDisplayRooms(currentRooms)
+        setVisualPage(page)
+      })
     }
   }, [currentRooms, isFetching, page])
 
   useEffect(() => {
     if (page === 1) {
-      setAccumulatedRooms(currentRooms)
+      queueMicrotask(() => {
+        setAccumulatedRooms(currentRooms)
+      })
     } else if (currentRooms.length > 0) {
-      setAccumulatedRooms((prev) => {
-        const existingIds = new Set(prev.map((r) => r.roomId))
-        const newRooms = currentRooms.filter((r) => !existingIds.has(r.roomId))
-        return [...prev, ...newRooms]
+      queueMicrotask(() => {
+        setAccumulatedRooms((prev) => {
+          const existingIds = new Set(prev.map((r) => r.roomId))
+          const newRooms = currentRooms.filter(
+            (r) => !existingIds.has(r.roomId),
+          )
+          return [...prev, ...newRooms]
+        })
       })
     }
   }, [currentRooms, page])
@@ -293,7 +299,7 @@ const CategoryRoomSection = ({
           initial={false}
           custom={slideDirection}
         >
-          <motion.div
+          <Motion.div
             key={visualPage}
             custom={slideDirection}
             variants={slideVariants}
@@ -313,7 +319,7 @@ const CategoryRoomSection = ({
               : displayRooms.map((room) => (
                   <RoomCard key={room.roomId} room={room} />
                 ))}
-          </motion.div>
+          </Motion.div>
         </AnimatePresence>
       </div>
     </div>

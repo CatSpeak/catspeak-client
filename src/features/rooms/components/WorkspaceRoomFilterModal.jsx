@@ -18,8 +18,10 @@ const WorkspaceRoomFilterModal = ({
 
   useEffect(() => {
     if (open) {
-      setLocalLevels(selectedLevels)
-      setLocalTopics(selectedTopics)
+      queueMicrotask(() => {
+        setLocalLevels(selectedLevels)
+        setLocalTopics(selectedTopics)
+      })
     }
   }, [open, selectedLevels, selectedTopics])
 

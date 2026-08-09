@@ -1,7 +1,6 @@
 import React from "react"
-import { MessageCircle, Monitor, Users, Layers } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 
 const RoomsTabs = ({ tab, setTab }) => {
   const { t } = useLanguage()
@@ -28,7 +27,7 @@ const RoomsTabs = ({ tab, setTab }) => {
           >
             {tItem.label}
             {isSelected && (
-              <motion.div
+              <Motion.div
                 layoutId="rooms-active-tab-border"
                 className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-cath-red-700 z-10"
                 initial={false}
