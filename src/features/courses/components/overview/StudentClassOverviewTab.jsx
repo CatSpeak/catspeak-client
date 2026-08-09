@@ -1,7 +1,8 @@
-import React from "react"
-import { Calendar, Clock } from "lucide-react"
+import React, { useState } from "react"
+import { Calendar, Clock, Share2, Check } from "lucide-react"
 import CountdownTicker from "../CountdownTicker"
 import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
@@ -23,6 +24,18 @@ const StudentClassOverviewTab = ({
   const cd = c.classDetail || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
+
+  const [linkCopied, setLinkCopied] = useState(false)
+  const handleCopyLink = async () => {
+    const ok = await copyShareLink({
+      successMessage: cd.linkCopied || "Link copied!",
+      errorMessage: cd.linkCopyFailed || "Failed to copy link",
+    })
+    if (ok) {
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    }
+  }
 
   const completedValue = (classData.progress
     ? classData.progress.completedSessions
@@ -85,6 +98,16 @@ const StudentClassOverviewTab = ({
             backgroundPosition: "center"
           }}
         >
+          {/* Share Button */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title={cd.shareClass || "Share class"}
+            className="absolute top-4 right-4 z-20 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+          >
+            {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
+          </button>
+
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
 

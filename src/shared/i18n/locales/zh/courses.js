@@ -228,6 +228,9 @@ export default {
     timeLabel: "时间",
     sessionDateLabel: "上课日期",
     lessonsCompleted: "已完成 {{completed}} / {{total}} 节课",
+    linkCopied: "链接已复制！",
+    linkCopyFailed: "无法复制链接",
+    shareCourse: "分享课程",
   },
   classWorkspace: {
     noInstructor: "讲师信息暂不可用。",
@@ -299,7 +302,10 @@ export default {
     deleteCourse: "删除课程",
     confirmDeleteCourse: "您确定要删除此课程吗？所有关联的班级也将受到影响。",
     toastDeleteSuccess: "课程删除成功！",
-    toastDeleteFailed: "删除课程失败！"
+    toastDeleteFailed: "删除课程失败！",
+    linkCopied: "链接已复制！",
+    linkCopyFailed: "无法复制链接",
+    shareCourse: "分享课程",
   },
   classDetail: {
     activeCourse: "活跃课程",
@@ -400,7 +406,10 @@ export default {
     resubmitButton: "重新提交",
     viewFeedbackButton: "查看反馈",
     toastRedirectingToPayment: "正在跳转至支付页面...",
-    toastEnrollSuccess: "成功加入班级 {{title}}！"
+    toastEnrollSuccess: "成功加入班级 {{title}}！",
+    linkCopied: "链接已复制！",
+    linkCopyFailed: "无法复制链接",
+    shareClass: "分享班级",
   },
   myCourses: {
     upcomingClasses: "即将开始的课程",

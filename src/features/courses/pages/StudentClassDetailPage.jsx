@@ -21,6 +21,7 @@ import {
 } from "../utils/courseUtils"
 import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { useRoleOverride } from "../components/RoleSwitcher"
 
 import ClassDetailTabs from "../components/ClassDetailTabs"
 import StudentClassOverviewTab from "../components/overview/StudentClassOverviewTab"
@@ -45,6 +46,7 @@ const ENROLLED_ONLY_TABS = new Set(["members", "lecture-hall", "feed", "grading"
 const StudentClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { isStudent } = useRoleOverride()
   const { language, t } = useLanguage()
   const { userTimeZone } = useTimezone()
   const c = t.courses || {}
@@ -107,6 +109,14 @@ const StudentClassDetailPage = () => {
       classData?.teacherId,
     ].some((ownerId) => ownerId != null && String(ownerId) === currentUserId)
   )
+
+  useEffect(() => {
+    // Only redirect if they are the owner AND they are currently in Teacher mode.
+    // If isStudent is true, they intentionally switched to student mode to preview, so we don't redirect.
+    if (isOwner && id && !isStudent) {
+      navigate(`/workspace/courses/class/${id}${window.location.search}`, { replace: true })
+    }
+  }, [isOwner, id, navigate, isStudent])
 
   // Enrollment Status
   const activeTab = isEnrolled
