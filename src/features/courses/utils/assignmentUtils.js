@@ -1,4 +1,10 @@
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
 import { toLocalDateString } from "./dateUtils.js"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export const getAssignmentTitle = (assignment, fallback = "") => {
   const title = [assignment?.name, assignment?.title]
@@ -148,9 +154,21 @@ export const getSafeFileUrl = (rawUrl) => {
 
 export const clampMaxFiles = (value) => Math.min(5, Math.max(1, Number(value) || 1))
 
-export const getAssignmentFormDefaults = (assignment) => {
-  const dueDate = assignment?.dueDate ? new Date(assignment.dueDate) : null
-  const hasValidDueDate = dueDate && !Number.isNaN(dueDate.getTime())
+export const getAssignmentFormDefaults = (assignment, userTimeZone = null) => {
+  const d = assignment?.dueDate ? new Date(assignment.dueDate) : null
+  const hasValidDueDate = d && !Number.isNaN(d.getTime())
+
+  let formattedDueDate = ""
+  let formattedDueTime = "23:59"
+
+  if (hasValidDueDate) {
+    const tz = userTimeZone || "Asia/Ho_Chi_Minh"
+    const formatted = dayjs(d).tz(tz).format("YYYY-MM-DDTHH:mm")
+    const [datePart, timePart] = formatted.split("T")
+    formattedDueDate = datePart
+    formattedDueTime = timePart
+  }
+
   const rawAllowedFileTypes = assignment?.allowedFileTypes
   const allowedFileTypes = (
     Array.isArray(rawAllowedFileTypes)
@@ -172,10 +190,8 @@ export const getAssignmentFormDefaults = (assignment) => {
   return {
     title: getText(assignment?.name) || getText(assignment?.title),
     editorText: getText(assignment?.description),
-    dueDate: hasValidDueDate ? toLocalDateString(dueDate) : "",
-    dueTime: hasValidDueDate
-      ? `${String(dueDate.getHours()).padStart(2, "0")}:${String(dueDate.getMinutes()).padStart(2, "0")}`
-      : "23:59",
+    dueDate: formattedDueDate,
+    dueTime: formattedDueTime,
     allowLateSubmission: assignment?.allowLateSubmission ?? true,
     submissionTypeFile: assignment?.allowFileSubmission ?? true,
     submissionTypeText: assignment?.allowTextSubmission ?? false,

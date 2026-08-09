@@ -1,10 +1,11 @@
 import React from "react"
 import { Calendar, Star, Award, Clock, BarChart3, User } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { formatScheduleDays } from "../../utils/scheduleUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const PublicClassStatsBar = ({ classData }) => {
   const { t, language } = useLanguage()
+  const { formatScheduleDays } = useTimezone()
   const pc = t.courses?.publicClass || {}
 
   const totalSessions = classData?.totalSessions || classData?.sessionsCount || 24
@@ -13,8 +14,9 @@ const PublicClassStatsBar = ({ classData }) => {
   const defaultScheduleText = pc.flexibleSchedule || "Lịch linh hoạt"
   const scheduleDaysText = formatScheduleDays(
     classData?.schedule?.days,
-    language,
-    defaultScheduleText
+    defaultScheduleText,
+    " - ",
+    classData?.schedule?.startTime,
   )
 
   const remaining = classData?.remainingSlots ?? 0

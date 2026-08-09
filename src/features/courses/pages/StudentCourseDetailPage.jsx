@@ -16,16 +16,14 @@ import {
 } from "../utils/courseUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { useRoleOverride } from "../components/RoleSwitcher"
-import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap, Share2, Check } from "lucide-react"
-import { formatScheduleDays } from "../utils/scheduleUtils"
+import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
 
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isStudent } = useRoleOverride()
   const { language, t } = useLanguage()
-  const { formatDateMonth, formatScheduleTime } = useTimezone()
+  const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
   const ui = c.workspaceUi || {}
@@ -333,11 +331,12 @@ const StudentCourseDetailPage = () => {
                                   <span>
                                     {formatScheduleDays(
                                       cls.schedule?.days,
-                                      language,
                                       ui.tba,
+                                      " - ",
+                                      cls.schedule?.startTime,
                                     )}
                                     {cls.schedule?.startTime && cls.schedule?.endTime
-                                      ? ` | ${formatScheduleTime(cls.schedule.startTime)} - ${formatScheduleTime(cls.schedule.endTime)}`
+                                      ? ` | ${formatScheduleTime(cls.schedule.startTime, cls.startDate)} - ${formatScheduleTime(cls.schedule.endTime, cls.startDate)}`
                                       : ""}
                                   </span>
                                 </div>
@@ -347,9 +346,9 @@ const StudentCourseDetailPage = () => {
                                 <Calendar size={12} className="text-gray-400 shrink-0" />
                                 <span>
                                   {cls.startDate && cls.endDate
-                                    ? `${formatDateMonth(cls.startDate, ui.tba)} – ${formatDateMonth(cls.endDate, ui.tba)}`
+                                    ? `${formatDateMonth(cls.startDate, ui.tba, cls.schedule?.startTime)} – ${formatDateMonth(cls.endDate, ui.tba, cls.schedule?.startTime)}`
                                     : cls.startDate
-                                      ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba)}`
+                                      ? `${c.student?.startsOn || "Starts"} ${formatDateMonth(cls.startDate, ui.tba, cls.schedule?.startTime)}`
                                       : ui.tba || "TBA"}
                                 </span>
                               </div>
@@ -454,8 +453,9 @@ const StudentCourseDetailPage = () => {
                                     <strong className="text-gray-950">
                                       {formatScheduleDays(
                                         [s.dayOfWeek],
-                                        language,
                                         ui.tba,
+                                        " - ",
+                                        s.startTime,
                                       )}:
                                     </strong>{" "}
                                     {formatScheduleTime(s.startTime)} - {formatScheduleTime(s.endTime)}

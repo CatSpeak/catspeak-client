@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import dayjs from "dayjs";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
 import { useEventForm } from "../hooks/useEventForm";
 import EventDateTimeSection from "../components/CreateEventModal/EventDateTimeSection";
@@ -47,6 +48,7 @@ const CreateEventPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
+  const { formatTime } = useTimezone();
   const cal = t.calendar || {};
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -227,10 +229,10 @@ const CreateEventPage = () => {
   // Preview data
   const previewTitle = form.title || cal.randomEventTitle;
   const previewStart = form.startTime
-    ? dayjs(form.startTime).format("HH:mm")
+    ? formatTime(form.startTime)
     : "hh/mm";
   const previewEnd = form.endTime
-    ? dayjs(form.endTime).format("HH:mm")
+    ? formatTime(form.endTime)
     : "hh/mm";
 
   return (
@@ -355,11 +357,11 @@ const CreateEventPage = () => {
                           <Clock size={11} />
                           <span>
                             {draft.startTime
-                              ? dayjs(draft.startTime).format("HH:mm")
+                              ? formatTime(draft.startTime)
                               : "--:--"}
                             {" - "}
                             {draft.endTime
-                              ? dayjs(draft.endTime).format("HH:mm")
+                              ? formatTime(draft.endTime)
                               : "--:--"}
                           </span>
                         </div>
@@ -758,11 +760,11 @@ const CreateEventPage = () => {
                                 <Clock size={11} />
                                 <span>
                                   {draft.startTime
-                                    ? dayjs(draft.startTime).format("HH:mm")
+                                    ? formatTime(draft.startTime)
                                     : "--:--"}
                                   {" - "}
                                   {draft.endTime
-                                    ? dayjs(draft.endTime).format("HH:mm")
+                                    ? formatTime(draft.endTime)
                                     : "--:--"}
                                 </span>
                               </div>

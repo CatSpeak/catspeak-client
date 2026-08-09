@@ -5,7 +5,7 @@ import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetMyCustomRoomsQuery,
-  useCreateCustomRoomMutation,
+  useCreateAdvancedRoomMutation,
 } from "@/store/api/roomsApi"
 
 const getLanguageName = (langCode) => {
@@ -33,6 +33,8 @@ export const useCreateCustomRoomForm = (open = true) => {
     selectedLevel: "",
     isPrivate: false,
     password: "",
+    maxParticipants: 10,
+    description: "",
   })
   const [thumbnailFile, setThumbnailFile] = useState(null)
   const [nameError, setNameError] = useState("")
@@ -44,8 +46,8 @@ export const useCreateCustomRoomForm = (open = true) => {
   const { data: customRoomsData } = useGetMyCustomRoomsQuery(undefined, {
     skip: !open,
   })
-  const [createCustomRoom, { isLoading: isCreating }] =
-    useCreateCustomRoomMutation()
+  const [createAdvancedRoom, { isLoading: isCreating }] =
+    useCreateAdvancedRoomMutation()
 
   const isQuotaFull = customRoomsData?.canCreateCustomRoom === false
 
@@ -56,6 +58,8 @@ export const useCreateCustomRoomForm = (open = true) => {
       selectedLevel: "",
       isPrivate: false,
       password: "",
+      maxParticipants: 10,
+      description: "",
     })
     setThumbnailFile(null)
     setNameError("")
@@ -110,31 +114,39 @@ export const useCreateCustomRoomForm = (open = true) => {
 
     try {
       const data = new FormData()
-      data.append("Name", formData.name.trim())
-      data.append("LanguageType", selectedLanguage)
-      if (formData.selectedLevel) {
-        data.append("RequiredLevel", formData.selectedLevel)
-      }
-      data.append("Privacy", formData.isPrivate ? "Private" : "Public")
+      data.append("name", formData.name.trim())
+      data.append("roomType", "4") // 4 = Custom Persistent
+      data.append("languageType", selectedLanguage)
+      data.append("privacy", formData.isPrivate ? "1" : "0")
       if (formData.isPrivate && formData.password.trim()) {
-        data.append("Password", formData.password.trim())
+        data.append("password", formData.password.trim())
+      }
+      data.append("maxParticipants", String(formData.maxParticipants || 10))
+
+      const primaryTopic = formData.topics?.[0] || "Other"
+      data.append("topic", primaryTopic)
+      if (formData.topics && formData.topics.length > 0) {
+        formData.topics.forEach((topic) => data.append("topics", topic))
       }
 
-      const topicsList =
-        formData.topics.length > 0 ? formData.topics : ["Other"]
-      topicsList.forEach((topic) => data.append("Topics", topic))
-
+      if (formData.selectedLevel) {
+        data.append("requiredLevel", formData.selectedLevel)
+      }
+      if (formData.description) {
+        data.append("description", formData.description)
+      }
       if (thumbnailFile) {
-        data.append("Thumbnail", thumbnailFile)
+        data.append("thumbnail", thumbnailFile)
       }
 
-      const result = await createCustomRoom(data).unwrap()
+      const result = await createAdvancedRoom(data).unwrap()
       resetForm()
 
       if (onSuccess) onSuccess()
 
-      if (result?.roomId) {
-        navigate(`/${supportedLangCode}/meet/${result.roomId}`)
+      const roomId = result?.data?.roomId || result?.roomId
+      if (roomId) {
+        navigate(`/${supportedLangCode}/meet/${roomId}`)
       }
     } catch (err) {
       console.error("Failed to create custom room:", err)
@@ -168,3 +180,4 @@ export const useCreateCustomRoomForm = (open = true) => {
     passwordError,
   }
 }
+

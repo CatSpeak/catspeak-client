@@ -1,10 +1,10 @@
-import React from "react"
-import { Calendar, Clock, Users } from "lucide-react"
+import React from "react";
+import { Calendar, Clock, Users } from "lucide-react";
 
-import CourseStatusPill from "../CourseStatusPill"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useTimezone } from "@/shared/hooks/useTimezone"
-import { getLocalizedLanguageName } from "../../data/courseFormOptions"
+import CourseStatusPill from "../CourseStatusPill";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import { getLocalizedLanguageName } from "../../data/courseFormOptions";
 
 const UpcomingSessionCard = ({
   nextClass,
@@ -17,9 +17,9 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
-  const { t } = useLanguage()
-  const { formatDateMonth, formatScheduleTime } = useTimezone()
-  const ui = t.courses?.workspaceUi || {}
+  const { language, t } = useLanguage();
+  const { formatDateMonth, formatScheduleTime } = useTimezone();
+  const ui = t.courses?.workspaceUi || {};
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
@@ -53,19 +53,77 @@ const UpcomingSessionCard = ({
               <Clock size={14} className="text-gray-400" />
               <span>
                 {(() => {
-                  const startTimeStr = nextClass.schedule?.startTime || nextClass.startTime
-                  const endTimeStr = nextClass.schedule?.endTime || nextClass.endTime
-                  if (!startTimeStr) return ui.tba || "TBA"
-                  const startFormatted = formatScheduleTime(startTimeStr)
-                  const endFormatted = endTimeStr ? formatScheduleTime(endTimeStr) : ""
-                  return endFormatted ? `${startFormatted} - ${endFormatted}` : startFormatted
+                  const ns = nextClass?.nextSession;
+                  const schedObj = Array.isArray(nextClass?.schedule)
+                    ? nextClass.schedule[0]
+                    : nextClass?.schedule;
+                  const rawIsoDate =
+                    ns?.rawStartTime ||
+                    ns?.date ||
+                    (typeof ns?.startTime === "string" &&
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                      ? ns.startTime
+                      : null) ||
+                    nextClass?.date ||
+                    nextClass?.startDate;
+                  const sessionDate =
+                    typeof rawIsoDate === "string"
+                      ? rawIsoDate.split("T")[0]
+                      : null;
+                  const sessionStartTime =
+                    ns?.startTime ||
+                    ns?.rawStartTime ||
+                    schedObj?.startTime ||
+                    nextClass?.startTime;
+                  const sessionEndTime =
+                    ns?.endTime ||
+                    ns?.rawEndTime ||
+                    schedObj?.endTime ||
+                    nextClass?.endTime;
+
+                  if (!sessionStartTime) return ui.tba || "TBA";
+                  const startFormatted = formatScheduleTime(
+                    sessionStartTime,
+                    sessionDate,
+                  );
+                  const endFormatted = sessionEndTime
+                    ? formatScheduleTime(sessionEndTime, sessionDate)
+                    : "";
+                  return endFormatted
+                    ? `${startFormatted} - ${endFormatted}`
+                    : startFormatted;
                 })()}
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={14} className="text-gray-400" />
               <span>
-                {formatDateMonth(nextClass.startDate || nextClass.date, ui.tba)}
+                {(() => {
+                  const ns = nextClass?.nextSession;
+                  const schedObj = Array.isArray(nextClass?.schedule)
+                    ? nextClass.schedule[0]
+                    : nextClass?.schedule;
+                  const rawIsoDate =
+                    ns?.rawStartTime ||
+                    ns?.date ||
+                    (typeof ns?.startTime === "string" &&
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                      ? ns.startTime
+                      : null) ||
+                    nextClass?.date ||
+                    nextClass?.startDate;
+                  const sessionDate =
+                    typeof rawIsoDate === "string"
+                      ? rawIsoDate.split("T")[0]
+                      : null;
+                  const sessionStartTime =
+                    schedObj?.startTime ||
+                    ns?.startTime ||
+                    ns?.rawStartTime ||
+                    nextClass?.startTime;
+
+                  return formatDateMonth(sessionDate, ui.tba, sessionStartTime);
+                })()}
               </span>
             </div>
           </div>
@@ -94,7 +152,9 @@ const UpcomingSessionCard = ({
             <Calendar size={18} />
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="font-extrabold text-base text-gray-700">{noUpcomingLabel}</span>
+            <span className="font-extrabold text-base text-gray-700">
+              {noUpcomingLabel}
+            </span>
             <p className="text-sm text-gray-400 font-semibold max-w-[200px] leading-relaxed">
               {createClassToScheduleLabel}
             </p>
@@ -110,7 +170,7 @@ const UpcomingSessionCard = ({
         {viewAllLabel}
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default UpcomingSessionCard
+export default UpcomingSessionCard;

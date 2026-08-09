@@ -139,8 +139,8 @@ const SchedulePage = lazy(
 const CreateAssignmentPage = lazy(
   () => import("@/features/courses/pages/CreateAssignmentPage"),
 );
-const CustomRoomsPage = lazy(
-  () => import("@/features/rooms/pages/CustomRoomsPage"),
+const WorkspaceRoomsPage = lazy(
+  () => import("@/features/rooms/pages/WorkspaceRoomsPage"),
 );
 
 const CreateExamPage = lazy(
@@ -172,14 +172,6 @@ const routesConfig = [
           {
             path: "verify-email",
             element: <VerifyEmailPage />,
-          },
-          {
-            path: "pricing",
-            element: (
-              <LazyRoute>
-                <PricingPage />
-              </LazyRoute>
-            ),
           },
           {
             path: "checkout",
@@ -735,7 +727,7 @@ const routesConfig = [
                 path: "rooms",
                 element: (
                   <LazyRoute>
-                    <CustomRoomsPage />
+                    <WorkspaceRoomsPage />
                   </LazyRoute>
                 ),
               },
@@ -809,6 +801,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <OrganizationPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "pricing",
+                element: (
+                  <LazyRoute>
+                    <PricingPage />
                   </LazyRoute>
                 ),
               },

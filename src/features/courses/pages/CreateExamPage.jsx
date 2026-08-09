@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useReducer } from "react"
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import {
   useGetClassDetailQuery,
@@ -221,6 +222,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const isSubmitting = isActionPending || isCreating || isUpdating || isPublishing
   const submissionGuardRef = useRef(false)
 
+  const { userTimeZone } = useTimezone()
   const c = t.courses || {}
   const ce = c.createExam || {}
 
@@ -310,7 +312,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
     if (!quizDetail || populatedQuizIdRef.current === effectiveQuizId) return
 
-    const mappedForm = mapQuizToFormState(quizDetail)
+    const mappedForm = mapQuizToFormState(quizDetail, userTimeZone)
     if (!mappedForm) return
 
     populatedQuizIdRef.current = effectiveQuizId
@@ -674,7 +676,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     if (!effectiveQuizId) {
       const createResponse = await createTeacherQuiz({
         classId: id,
-        ...buildQuizPayload(form, { status: "Draft" }),
+        ...buildQuizPayload(form, { status: "Draft", userTimeZone }),
       }).unwrap()
       const createdQuiz = getQuizObjectFromResponse(createResponse)
       if (
@@ -696,7 +698,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
     const updatePayload = buildQuizUpdatePayload(
       form,
-      baselineFormRef.current
+      baselineFormRef.current,
+      { userTimeZone }
     )
     if (quizDetail?.status === "Closed") {
       const changedRestrictedField = Object.keys(updatePayload).find((key) => (

@@ -71,7 +71,7 @@ export default {
     organization: "组织",
     billing: "支付历史",
     recordings: "录像",
-    myRooms: "自定义房间",
+    myRooms: "我的房间",
     back: "返回",
     accountInfo: "账户信息",
     systemConfig: "系统设置",
@@ -168,11 +168,11 @@ export default {
   notifications: {
     new_post: {
       title: "CatSpeak 新文章",
-      body: "新文章：\"{postTitle}\"",
+      body: '新文章："{postTitle}"',
     },
     new_challenge: {
       title: "新挑战！",
-      body: "新挑战：\"{challengeTitle}\" 等着您！",
+      body: '新挑战："{challengeTitle}" 等着您！',
     },
   },
 };

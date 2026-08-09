@@ -19,7 +19,6 @@ import {
   getClassEnrollmentIssueMessage,
   getSafeMediaUrl,
 } from "../utils/courseUtils"
-import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useRoleOverride } from "../components/RoleSwitcher"
 
@@ -48,7 +47,7 @@ const StudentClassDetailPage = () => {
   const navigate = useNavigate()
   const { isStudent } = useRoleOverride()
   const { language, t } = useLanguage()
-  const { userTimeZone } = useTimezone()
+  const { formatWeeklySchedule } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const scd = c.studentCourseDetail || {}
@@ -224,12 +223,7 @@ const StudentClassDetailPage = () => {
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(
-    classData || {},
-    language || "en",
-    ui.tba,
-    userTimeZone,
-  )
+  const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
 
   if (
     isDetailLoading

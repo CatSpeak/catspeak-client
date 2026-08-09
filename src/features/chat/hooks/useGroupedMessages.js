@@ -3,9 +3,12 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const getDateKeyInTz = (dateStr, tz) => {
   if (!dateStr) return ""
-  const d = new Date(dateStr)
+  const normalizedStr = typeof dateStr === "string" && dateStr.includes("T") && !dateStr.endsWith("Z") && !dateStr.includes("+")
+    ? `${dateStr}Z`
+    : dateStr
+  const d = new Date(normalizedStr)
   if (isNaN(d.getTime())) return ""
-  return d.toLocaleDateString("en-CA", { timeZone: tz || "UTC" })
+  return d.toLocaleDateString("en-CA", { timeZone: tz || "Asia/Ho_Chi_Minh" })
 }
 
 /**

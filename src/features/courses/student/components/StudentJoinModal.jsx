@@ -3,7 +3,7 @@ import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line no-unused-vars
 import { Check, X, Calendar, Clock, Loader2 } from "lucide-react"
 import { formatCurrencyVND } from "../../utils/courseUtils"
-import { formatScheduleDays } from "../../utils/scheduleUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const FOCUSABLE_SELECTOR = [
   "button:not([disabled])",
@@ -26,6 +26,7 @@ const StudentJoinModal = ({
   t,
   language,
 }) => {
+  const { formatScheduleDays, formatScheduleTime } = useTimezone()
   const dialogRef = useRef(null)
   const previousFocusRef = useRef(null)
 
@@ -107,11 +108,16 @@ const StudentJoinModal = ({
   const tuitionLabel = selectedClass.tuitionFee == null
     ? sc.toBeAnnounced
     : formatCurrencyVND(selectedClass.tuitionFee)
-  const scheduleTime = (
-    selectedClass.schedule?.startTime
-    && selectedClass.schedule?.endTime
-  )
-    ? `${selectedClass.schedule.startTime} - ${selectedClass.schedule.endTime}`
+  const startFormatted = formatScheduleTime && selectedClass.schedule?.startTime
+    ? formatScheduleTime(selectedClass.schedule.startTime, selectedClass.startDate)
+    : selectedClass.schedule?.startTime
+
+  const endFormatted = formatScheduleTime && selectedClass.schedule?.endTime
+    ? formatScheduleTime(selectedClass.schedule.endTime, selectedClass.startDate)
+    : selectedClass.schedule?.endTime
+
+  const scheduleTime = (startFormatted && endFormatted)
+    ? `${startFormatted} - ${endFormatted}`
     : sc.toBeAnnounced
 
   const modalBody = (
@@ -181,8 +187,9 @@ const StudentJoinModal = ({
                   <span>
                     {formatScheduleDays(
                       selectedClass.schedule?.days,
-                      language,
                       sc.toBeAnnounced,
+                      " - ",
+                      selectedClass.schedule?.startTime,
                     )}
                   </span>
                 </div>

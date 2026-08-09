@@ -51,15 +51,11 @@ export const mapFormToPayload = ({
   const isRecurring = recurrenceOption !== "NONE";
   const frequency = recurrenceOption === "CUSTOM" ? "WEEKLY" : recurrenceOption;
 
-  const timezoneId = selectedTimezone?.id || "Asia/Ho_Chi_Minh";
+  const timezoneId = typeof selectedTimezone === "string" ? selectedTimezone : (selectedTimezone?.id || "Asia/Ho_Chi_Minh");
 
-  // Helper to convert a local dayjs object to a UTC ISO string, assuming
-  // the user's input time was meant for the selected timezone.
   const toUtcInTimezone = (dateObj) => {
     if (!dateObj) return null;
-    // Get the exact string the user meant (e.g. "2026-05-23T10:17:31")
-    const dateString = dayjs(dateObj).format("YYYY-MM-DDTHH:mm:ss");
-    // Parse that exact string into the selected timezone
+    const dateString = dayjs(dateObj).tz(timezoneId).format("YYYY-MM-DDTHH:mm:ss");
     return dayjs.tz(dateString, timezoneId).toISOString();
   };
 
@@ -121,7 +117,11 @@ export const mapFormToPayload = ({
   return payload;
 };
 
-export const objectToFormData = (obj, formData = new FormData(), parentKey = "") => {
+export const objectToFormData = (
+  obj,
+  formData = new FormData(),
+  parentKey = "",
+) => {
   if (obj === null || obj === undefined) {
     // Skip null/undefined — ASP.NET treats missing keys as null/default
     return formData;
@@ -135,7 +135,11 @@ export const objectToFormData = (obj, formData = new FormData(), parentKey = "")
     if (obj.length === 0) {
       // Signal an empty collection to ASP.NET by appending empty string
       formData.append(parentKey, "");
-    } else if (typeof obj[0] === "object" && !(obj[0] instanceof File) && !(obj[0] instanceof Blob)) {
+    } else if (
+      typeof obj[0] === "object" &&
+      !(obj[0] instanceof File) &&
+      !(obj[0] instanceof Blob)
+    ) {
       // Array of objects → use indexed notation for ASP.NET complex binding
       obj.forEach((item, index) => {
         objectToFormData(item, formData, `${parentKey}[${index}]`);
@@ -143,13 +147,18 @@ export const objectToFormData = (obj, formData = new FormData(), parentKey = "")
     } else {
       // Array of primitives (strings, numbers) → repeat same key (ASP.NET standard)
       obj.forEach((item) => {
-        formData.append(parentKey, item !== null && item !== undefined ? item.toString() : "");
+        formData.append(
+          parentKey,
+          item !== null && item !== undefined ? item.toString() : "",
+        );
       });
     }
   } else if (typeof obj === "object") {
     Object.keys(obj).forEach((key) => {
       const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-      const formattedKey = parentKey ? `${parentKey}.${capitalizedKey}` : capitalizedKey;
+      const formattedKey = parentKey
+        ? `${parentKey}.${capitalizedKey}`
+        : capitalizedKey;
       objectToFormData(obj[key], formData, formattedKey);
     });
   } else {
@@ -157,4 +166,3 @@ export const objectToFormData = (obj, formData = new FormData(), parentKey = "")
   }
   return formData;
 };
-
