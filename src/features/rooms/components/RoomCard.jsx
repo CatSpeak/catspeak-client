@@ -27,12 +27,15 @@ const RoomCard = ({ room }) => {
 
   const [toggleBookmark] = useToggleBookmarkRoomMutation();
   const [isBookmarked, setIsBookmarked] = useState(
-    Boolean(room.isBookmarked ?? room.isBookmark),
+    Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
   );
 
   useEffect(() => {
-    setIsBookmarked(Boolean(room.isBookmarked ?? room.isBookmark));
-  }, [room.isBookmarked, room.isBookmark]);
+    setIsBookmarked(
+      Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
+    );
+  }, [room.isBookmarked, room.isBookmark, room.bookmarked]);
+
 
   const currentLang =
     lang ||
@@ -236,9 +239,10 @@ const RoomCard = ({ room }) => {
                 className={`transition-all duration-200 ${
                   isBookmarked
                     ? "text-cath-red-700 fill-cath-red-700 scale-110"
-                    : "text-cath-red-800 fill-cath-red-800/10"
+                    : "text-cath-red-800 fill-none"
                 }`}
               />
+
             </div>
           </div>
         </div>
