@@ -3,10 +3,7 @@ import {
   getCourseGradientAndIcon,
 } from "./courseUtils"
 import { toLocalDateString } from "./dateUtils"
-import { formatScheduleDays } from "./scheduleUtils"
-
-const SHORT_DATE_OPTIONS = { day: "2-digit", month: "short", year: "numeric" }
-const NUMERIC_DATE_OPTIONS = { day: "2-digit", month: "2-digit", year: "numeric" }
+import { formatScheduleDays } from "@/shared/utils/dateUtils"
 
 const toNonNegativeNumber = (value) => {
   if (value === null || value === undefined || value === "") return null
@@ -201,28 +198,52 @@ export const mapUpcomingSession = (
   if (!session || typeof session !== "object" || Array.isArray(session)) {
     return null
   }
-  const classId = session.class?.id?.toString() || ""
+  const classId = session.class?.id?.toString() || session.id?.toString() || ""
   if (!classId) return null
   const matchedClass = classes.find((cls) => String(cls.id) === classId)
-  const rawSessionLanguage = session.class?.language
+  const rawSessionLanguage = session.class?.language || session.language
   const sessionLanguage = typeof rawSessionLanguage === "string"
     ? rawSessionLanguage.charAt(0) + rawSessionLanguage.slice(1).toLowerCase()
     : matchedClass?.language || ""
 
-  const start = formatScheduleTime ? formatScheduleTime(session.startTime) : session.startTime
-  const end = formatScheduleTime ? formatScheduleTime(session.endTime) : session.endTime
-  const timeStr = start && end ? `${start} - ${end}` : (start || end || "—")
+  const ns = session.nextSession || matchedClass?.nextSession || {}
+  const schedObj = Array.isArray(session.schedule)
+    ? session.schedule[0]
+    : (Array.isArray(matchedClass?.schedule) ? matchedClass.schedule[0] : (session.schedule || matchedClass?.schedule))
+
+  const isoStart = ns.rawStartTime || (typeof ns.startTime === "string" && ns.startTime.includes("T") ? ns.startTime : null) || session.rawStartTime || (typeof session.startTime === "string" && session.startTime.includes("T") ? session.startTime : null)
+  const isoEnd = ns.rawEndTime || (typeof ns.endTime === "string" && ns.endTime.includes("T") ? ns.endTime : null) || session.rawEndTime || (typeof session.endTime === "string" && session.endTime.includes("T") ? session.endTime : null)
+
+  const fallbackStart = schedObj?.startTime || ns.startTime || session.startTime
+  const fallbackEnd = schedObj?.endTime || ns.endTime || session.endTime
+  const fallbackDate = ns.date || session.date || session.startDate || matchedClass?.startDate
+  const sessionDate = typeof fallbackDate === "string" ? fallbackDate.split("T")[0] : null
+
+  const startFormatted = formatScheduleTime
+    ? formatScheduleTime(fallbackStart, sessionDate)
+    : (fallbackStart || "—")
+  const endFormatted = formatScheduleTime
+    ? formatScheduleTime(fallbackEnd, sessionDate)
+    : (fallbackEnd || "")
+
+  const timeStr = startFormatted && endFormatted
+    ? `${startFormatted} - ${endFormatted}`
+    : (startFormatted || endFormatted || "—")
+
+  const dateFormatted = formatDate
+    ? formatDate(sessionDate || fallbackDate, "—", fallbackStart)
+    : (fallbackDate || "—")
 
   return {
     id: `sess-${classId}-${session.sessionNumber || index}`,
     classId,
-    title: session.class?.name || matchedClass?.title || matchedClass?.name || "—",
+    title: session.class?.name || session.name || matchedClass?.title || matchedClass?.name || "—",
     time: timeStr,
-    date: formatDate ? (formatDate(session.date) || "—") : (session.date || "—"),
-    status: session.class?.status || matchedClass?.status || "",
+    date: dateFormatted,
+    status: session.class?.status || session.status || matchedClass?.status || "",
     language: sessionLanguage,
-    levels: Array.isArray(matchedClass?.levels) ? matchedClass.levels : [],
-    studentCount: toNonNegativeNumber(matchedClass?.studentCount),
+    levels: Array.isArray(session.levels) ? session.levels : (Array.isArray(matchedClass?.levels) ? matchedClass.levels : []),
+    studentCount: toNonNegativeNumber(session.studentCount ?? matchedClass?.studentCount),
   }
 }
 

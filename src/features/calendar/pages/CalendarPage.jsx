@@ -86,13 +86,9 @@ const CalendarPage = () => {
     }
   };
 
-  // Fetch event counts for current month
-  // Send browser UTC offset so backend groups events by local day, not UTC day.
-  const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
-    timezoneOffsetMinutes,
   });
 
   const eventCountsByDay = useMemo(() => {

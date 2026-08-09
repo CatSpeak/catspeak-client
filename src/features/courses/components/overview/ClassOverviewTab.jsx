@@ -62,12 +62,12 @@ const ClassOverviewTab = ({
     : null
   const progressText = `${completed ?? "—"} / ${total || "—"}`
   const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl)
-  const nextSession = classData.nextSession?.date && classData.nextSession?.startTime
+  const nextSession = classData.nextSession?.date && (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
     ? classData.nextSession
     : null
-  const sessionStartTime = nextSession?.startTime
-  const sessionEndTime = nextSession?.endTime
-  const sessionDate = nextSession?.date
+  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime
+  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime
+  const sessionDate = nextSession?.date || (nextSession?.rawStartTime && (nextSession.rawStartTime.includes('T') || nextSession.rawStartTime.includes('-')) ? nextSession.rawStartTime : null)
   const studentCountValue = Number(classData.studentCount ?? classData.enrolledStudents)
   const studentCount = Number.isFinite(studentCountValue)
     ? Math.max(0, Math.floor(studentCountValue))
@@ -387,7 +387,7 @@ const ClassOverviewTab = ({
 
             {nextSession ? (
               <>
-                <CountdownTicker targetDate={`${nextSession.date}T${nextSession.startTime}`} />
+                <CountdownTicker targetDate={nextSession?.rawStartTime || (nextSession?.date && nextSession?.startTime ? `${nextSession.date}T${nextSession.startTime}` : null)} />
 
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -416,15 +416,15 @@ const ClassOverviewTab = ({
                       <span>
                         {sessionStartTime
                           ? sessionEndTime
-                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
-                            : formatScheduleTime(sessionStartTime)
+                            ? `${formatScheduleTime(sessionStartTime, sessionDate)} - ${formatScheduleTime(sessionEndTime, sessionDate)}`
+                            : formatScheduleTime(sessionStartTime, sessionDate)
                           : ui.tba || "TBA"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-gray-400" />
                       <span>
-                        {formatDateMonth(sessionDate, ui.tba)}
+                        {formatDateMonth(sessionDate, ui.tba, sessionStartTime)}
                       </span>
                     </div>
                   </div>
