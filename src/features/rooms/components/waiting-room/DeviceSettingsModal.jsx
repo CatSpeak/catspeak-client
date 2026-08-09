@@ -28,6 +28,7 @@ const DeviceSettingsModal = ({
   } = deviceSelection
 
   const [testMic, setTestMic] = useState(false)
+  const [testStream, setTestStream] = useState(null)
   const audioRef = useRef(null)
   const testStreamRef = useRef(null)
   const autoToggledMic = useRef(false)
@@ -39,7 +40,9 @@ const DeviceSettingsModal = ({
   // Reset test mic state when modal closes
   useEffect(() => {
     if (!open) {
-      setTestMic(false)
+      queueMicrotask(() => {
+        setTestMic(false)
+      })
       if (autoToggledMic.current && micOn && onToggleMic) {
         autoToggledMic.current = false
         onToggleMic()
@@ -68,6 +71,7 @@ const DeviceSettingsModal = ({
             return
           }
           testStreamRef.current = stream
+          setTestStream(stream)
           if (audioRef.current) {
             audioRef.current.srcObject = stream
           }
@@ -86,6 +90,7 @@ const DeviceSettingsModal = ({
       if (testStreamRef.current) {
         testStreamRef.current.getTracks().forEach((track) => track.stop())
         testStreamRef.current = null
+        queueMicrotask(() => setTestStream(null))
       }
     }
 
@@ -94,6 +99,7 @@ const DeviceSettingsModal = ({
       if (testStreamRef.current) {
         testStreamRef.current.getTracks().forEach((track) => track.stop())
         testStreamRef.current = null
+        setTestStream(null)
       }
     }
   }, [testMic, localStream, selectedMic, open])
@@ -199,7 +205,7 @@ const DeviceSettingsModal = ({
         <MicTestVisualizer
           testMic={testMic}
           onToggleTest={() => handleTestMicToggle(!testMic)}
-          stream={testStreamRef.current || localStream}
+          stream={testStream || localStream}
           selectedMic={selectedMic}
           label={t?.rooms?.waitingScreen?.testMic || "Test mic"}
           stopLabel={t?.rooms?.waitingScreen?.stopTest || "Stop testing"}

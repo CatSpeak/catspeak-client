@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { getShareUrlWithVersion, getRoomShareUrl } from "@/shared/utils/shareUtils";
-import { useSearchParams, useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { getRoomShareUrl } from "@/shared/utils/shareUtils";
+import { useNavigate, useParams } from "react-router-dom";
 import { Clock, Users, Link as LinkIcon, Bookmark, Lock } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useAuth } from "@/features/auth";
@@ -31,11 +30,12 @@ const RoomCard = ({ room }) => {
   );
 
   useEffect(() => {
-    setIsBookmarked(
-      Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
-    );
+    queueMicrotask(() => {
+      setIsBookmarked(
+        Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
+      );
+    });
   }, [room.isBookmarked, room.isBookmark, room.bookmarked]);
-
 
   const currentLang =
     lang ||
@@ -49,8 +49,14 @@ const RoomCard = ({ room }) => {
     imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl;
 
   const translatedName = room.name;
+  const isUnlimitedParticipants =
+    room.maxParticipants === null ||
+    room.maxParticipants === undefined ||
+    room.maxParticipants >= 2147483647 ||
+    room.maxParticipants <= 0;
+
   const isRoomFull =
-    room.maxParticipants !== null &&
+    !isUnlimitedParticipants &&
     (room.currentParticipantCount || 0) >= room.maxParticipants;
 
   const isPrivate = room.privacy === "Private" || room.isPrivate;
@@ -86,9 +92,6 @@ const RoomCard = ({ room }) => {
   const timeStr = isInfiniteDuration
     ? t.rooms.noLimit
     : `${formatTime(createDate)} - ${formatTime(endDate)}`;
-
-  // Placeholder code simulation
-  const roomCode = `room-${roomId}`.toLowerCase();
 
   const [showFullModal, setShowFullModal] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
@@ -280,7 +283,7 @@ const RoomCard = ({ room }) => {
                 <Users size={14} className="text-[#8B5A2B]" />
               </div>
               <span className="text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
-                {room.maxParticipants === null
+                {isUnlimitedParticipants
                   ? `${room.currentParticipantCount || 0} ${t.rooms.people}`
                   : `${room.currentParticipantCount || 0}/${room.maxParticipants} ${t.rooms.people}`}
               </span>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetMyCustomRoomsQuery,
@@ -22,7 +21,6 @@ const getLanguageName = (langCode) => {
 }
 
 export const useCreateCustomRoomForm = (open = true) => {
-  const { user } = useAuth()
   const { lang } = useParams()
   const navigate = useNavigate()
   const { t } = useLanguage()
@@ -68,7 +66,9 @@ export const useCreateCustomRoomForm = (open = true) => {
 
   useEffect(() => {
     if (!open) {
-      resetForm()
+      queueMicrotask(() => {
+        resetForm()
+      })
     }
   }, [open])
 

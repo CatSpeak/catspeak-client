@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { toast } from "react-hot-toast"
+import React, { useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { Copy, Mic, Video, Volume2, Info, Check, X, Edit2 } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -38,7 +37,6 @@ const WaitingScreen = ({
   deviceSelection,
 }) => {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const participants = room?.currentParticipants || session?.participants || []
   const meetingFallbackImage = room?.languageType === "English" ? meetingFallbackImageEN : meetingFallbackImageZH
   const { t, language } = useLanguage()

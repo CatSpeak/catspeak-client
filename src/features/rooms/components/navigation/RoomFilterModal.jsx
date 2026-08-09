@@ -18,10 +18,10 @@ const RoomFilterModal = ({ open, onClose }) => {
   // Sync state from URL when modal opens
   useEffect(() => {
     if (open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalTopics(searchParams.getAll("topics"))
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalLevels(searchParams.getAll("requiredLevels"))
+      queueMicrotask(() => {
+        setLocalTopics(searchParams.getAll("topics"))
+        setLocalLevels(searchParams.getAll("requiredLevels"))
+      })
     }
   }, [open, searchParams])
 

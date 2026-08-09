@@ -58,7 +58,9 @@ export const useDeviceSelection = () => {
   }, [])
 
   useEffect(() => {
-    fetchDevices()
+    queueMicrotask(() => {
+      fetchDevices()
+    })
     if (navigator.mediaDevices) {
       navigator.mediaDevices.addEventListener("devicechange", fetchDevices)
       return () => {

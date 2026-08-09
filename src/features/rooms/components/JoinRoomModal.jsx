@@ -30,8 +30,10 @@ const JoinRoomModal = ({ open, onCancel }) => {
     useCallInterceptor()
 
   useEffect(() => {
-    if (open) resetForm()
-  }, [open])
+    if (open) {
+      queueMicrotask(() => resetForm())
+    }
+  }, [open, resetForm])
 
   const handleJoin = async (e) => {
     if (e) e.preventDefault()

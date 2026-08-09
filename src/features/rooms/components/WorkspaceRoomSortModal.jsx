@@ -17,8 +17,10 @@ const WorkspaceRoomSortModal = ({
 
   useEffect(() => {
     if (open) {
-      setLocalField(selectedSortField || "createdAt")
-      setLocalOrder(selectedSortOrder || "desc")
+      queueMicrotask(() => {
+        setLocalField(selectedSortField || "createdAt")
+        setLocalOrder(selectedSortOrder || "desc")
+      })
     }
   }, [open, selectedSortField, selectedSortOrder])
 
