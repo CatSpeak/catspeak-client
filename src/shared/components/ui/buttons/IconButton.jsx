@@ -5,10 +5,12 @@ const IconButton = ({
   onClick,
   title,
   disabled = false,
-  variant = "filled", // "filled" | "ghost" | "outline" | "primary"
+  variant = "filled", // "filled" | "ghost" | "outline" | "primary" | "iconOnly" | "transparent" | "overlay"
   size = "sm", // "xs" | "sm" | "md"
   className = "",
   innerClassName = "",
+  as,
+  type = "button",
   ...props
 }) => {
   const sizeClasses = {
@@ -26,6 +28,7 @@ const IconButton = ({
     primary: "bg-[#990011] group-hover/icon:bg-[#80000e] text-white",
     filled: "bg-[#F2F2F2] group-hover/icon:bg-[#C2C2C2]",
     ghost: "bg-transparent group-hover/icon:bg-[#CCCCCC]",
+    iconOnly: "bg-transparent text-[#7A7574]",
     transparent: "bg-transparent",
     overlay:
       "bg-black/50 group-hover/icon:bg-black/80 text-white/70 group-hover/icon:text-white transition-all",
@@ -34,11 +37,11 @@ const IconButton = ({
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm
+  const Component = as || (onClick ? "button" : "div")
 
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
+    <Component
+      {...(Component === "button" ? { onClick, disabled, type } : {})}
       title={title}
       className={`group/icon inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${currentSize.button} ${className}`}
       {...props}
@@ -48,7 +51,7 @@ const IconButton = ({
       >
         {children}
       </span>
-    </button>
+    </Component>
   )
 }
 

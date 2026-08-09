@@ -50,7 +50,10 @@ const baseQuery = fetchBaseQuery({
     headers.set("X-Time-Zone", userTz)
 
     // Attach local timezone offset in minutes (JS returns negative for UTC+X, e.g. -420 for UTC+7)
-    headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
+    headers.set(
+      "X-Timezone-Offset",
+      (-new Date().getTimezoneOffset()).toString(),
+    )
 
     return headers
   },
@@ -72,7 +75,10 @@ const instructorBaseQuery = fetchBaseQuery({
     const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
     headers.set("X-Time-Zone", userTz)
 
-    headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
+    headers.set(
+      "X-Timezone-Offset",
+      (-new Date().getTimezoneOffset()).toString(),
+    )
 
     return headers
   },
@@ -279,8 +285,7 @@ export function createReauthBaseQuery(queryResolver) {
     }
 
     // ── Handle server-down / network errors ─────────────────────────
-    const isAborted =
-      api.signal.aborted || result.error?.name === "AbortError"
+    const isAborted = api.signal.aborted || result.error?.name === "AbortError"
 
     const status = result.error?.status
     const isServerError =
@@ -317,7 +322,12 @@ export function createReauthBaseQuery(queryResolver) {
       const res = result.data
 
       // New API (Double-nested: { success: true, data: { data: [...], additionalData: {...} } })
-      if (res.success && res.data && typeof res.data === "object" && "data" in res.data) {
+      if (
+        res.success &&
+        res.data &&
+        typeof res.data === "object" &&
+        "data" in res.data
+      ) {
         result.data = res.data
       }
       // Standard New API envelope ({ success: true, data: { ... } })
@@ -388,6 +398,7 @@ export const baseApi = createApi({
     "StudentQuizzes",
     "StudentQuizResult",
     "Analytics",
+    "InstructorBankAccounts",
   ],
   endpoints: () => ({}),
 })

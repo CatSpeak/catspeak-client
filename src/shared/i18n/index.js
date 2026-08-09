@@ -7,6 +7,7 @@ import { profileTranslations } from "@/features/profile/i18n"
 import { chatTranslations } from "@/features/chat/i18n"
 import { websitesTranslations } from "@/features/websites/i18n"
 import { newsTranslations } from "@/features/news/i18n"
+import { bankAccountsTranslations } from "@/features/bank-accounts/i18n"
 
 const isObject = (item) =>
   Boolean(item && typeof item === "object" && !Array.isArray(item))
@@ -32,9 +33,9 @@ const deepMerge = (...objects) => {
 }
 
 export const translations = {
-  vi: deepMerge(vi, billingTranslations.vi, profileTranslations.vi, chatTranslations.vi, websitesTranslations.vi, newsTranslations.vi),
-  en: deepMerge(en, billingTranslations.en, profileTranslations.en, chatTranslations.en, websitesTranslations.en, newsTranslations.en),
-  zh: deepMerge(zh, billingTranslations.zh, profileTranslations.zh, chatTranslations.zh, websitesTranslations.zh, newsTranslations.zh),
+  vi: deepMerge(vi, billingTranslations.vi, profileTranslations.vi, chatTranslations.vi, websitesTranslations.vi, newsTranslations.vi, bankAccountsTranslations.vi),
+  en: deepMerge(en, billingTranslations.en, profileTranslations.en, chatTranslations.en, websitesTranslations.en, newsTranslations.en, bankAccountsTranslations.en),
+  zh: deepMerge(zh, billingTranslations.zh, profileTranslations.zh, chatTranslations.zh, websitesTranslations.zh, newsTranslations.zh, bankAccountsTranslations.zh),
 }
 
 export const languageNames = {
