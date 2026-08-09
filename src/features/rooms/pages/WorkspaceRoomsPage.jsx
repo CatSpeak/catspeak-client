@@ -24,6 +24,7 @@ import {
 import CreateRoomModal from "../components/CreateRoomModal";
 import EditRoomModal from "../components/EditRoomModal";
 import CustomRoomCard from "../components/CustomRoomCard";
+import RoomCard from "../components/RoomCard";
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
 
@@ -140,7 +141,7 @@ const WorkspaceRoomsContent = () => {
     () => [
       {
         id: "created",
-        label: t.rooms?.workspace?.createdRooms || "Phòng đã tạo",
+        label: t.rooms?.workspace?.customRooms || "Phòng tùy chỉnh",
         icon: DoorOpen,
       },
       {
@@ -442,8 +443,17 @@ const WorkspaceRoomsContent = () => {
                     </button>
                   )}
               </div>
+            ) : apiTab === "bookmark" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                {filteredAndSortedRooms.map((room) => (
+                  <RoomCard
+                    key={room.id || room.roomId}
+                    room={room}
+                  />
+                ))}
+              </div>
             ) : (
-              <div className="flex flex-col gap-3 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                 {filteredAndSortedRooms.map((room) => (
                   <CustomRoomCard
                     key={room.id || room.roomId}
@@ -453,7 +463,7 @@ const WorkspaceRoomsContent = () => {
                     onCopyLink={handleCopyLink}
                     onJoin={handleJoinRoom}
                     onToggleBookmark={handleToggleBookmark}
-                    isBookmarkTab={apiTab === "bookmark"}
+                    isBookmarkTab={false}
                     copiedId={copiedId}
                     isDeleting={isDeleting}
                     ct={ct}
@@ -469,21 +479,18 @@ const WorkspaceRoomsContent = () => {
 };
 
 const RoomsListSkeleton = () => (
-  <div className="flex flex-col gap-4 w-full">
-    {[1, 2, 3].map((i) => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+    {Array.from({ length: 8 }).map((_, i) => (
       <div
         key={i}
-        className="rounded-2xl border border-[#e5e5e5] p-5 animate-pulse"
+        className="rounded-2xl border border-[#e5e5e5] bg-white overflow-hidden animate-pulse flex flex-col"
       >
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gray-200 shrink-0" />
-          <div className="flex-1 space-y-3">
-            <div className="h-5 bg-gray-200 rounded w-2/3" />
-            <div className="h-4 bg-gray-100 rounded w-full" />
-            <div className="flex gap-2">
-              <div className="h-5 bg-gray-100 rounded-full w-16" />
-              <div className="h-5 bg-gray-100 rounded-full w-14" />
-            </div>
+        <div className="aspect-video w-full bg-gray-200" />
+        <div className="p-4 flex flex-col gap-3 flex-1 justify-between">
+          <div className="h-5 bg-gray-200 rounded w-3/4" />
+          <div className="flex justify-between items-center pt-2">
+            <div className="h-4 bg-gray-100 rounded w-20" />
+            <div className="h-4 bg-gray-100 rounded w-24" />
           </div>
         </div>
       </div>
