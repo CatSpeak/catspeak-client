@@ -13,7 +13,10 @@ import {
 } from "@/store/api/eventsApi";
 import { mapFormToPayload, objectToFormData } from "../utils/mapFormToPayload";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { TIMEZONES } from "../components/ui/TimezoneDropdown";
+import {
+  TIMEZONE_IDS,
+  getTimezoneOptions,
+} from "@/shared/constants/timezones";
 
 const DEFAULT_TIMEZONE = {
   id: "Asia/Ho_Chi_Minh",
@@ -69,9 +72,12 @@ export const useEventForm = (
     : null;
 
   let initialTimezone = DEFAULT_TIMEZONE;
-  const foundTz = TIMEZONES.find((tz) => tz.id === initTzId);
-  if (foundTz) {
-    initialTimezone = foundTz;
+  const isKnownTz = TIMEZONE_IDS.includes(initTzId);
+  if (isKnownTz) {
+    // Look up the localized label from the timezone options helper.
+    const opts = getTimezoneOptions("vi"); // label resolved at render-time anyway
+    const found = opts.find((o) => o.value === initTzId);
+    initialTimezone = { id: initTzId, label: found?.label || initTzId, offset: "" };
   } else if (initTzId) {
     initialTimezone = { id: initTzId, label: initTzId, offset: "" };
   }
@@ -232,7 +238,7 @@ export const useEventForm = (
       if (!endTime) newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
     }
 
-    if (startTime) {
+    if (startTime && !editEvent) {
       if (dayjs(startTime).isBefore(dayjs())) {
         newErrors.startTime = t.validation?.calendar?.startTimeInPast || "Thời gian bắt đầu phải sau hiện tại";
       }

@@ -1,6 +1,6 @@
 import React from "react"
 import { Reply } from "lucide-react"
-import { formatTime } from "@/shared/utils/dateFormatter"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
 import YouTubeEmbed from "@/features/chat/components/messages/YouTubeEmbed"
@@ -189,6 +189,7 @@ const SentenceSuggestions = ({
  * Message Bubble component rendering chat messages and suggestions
  */
 const MessageBubble = ({ msg, t, onReplyTo }) => {
+  const { formatTime } = useTimezone()
   const [expandedIdx, setExpandedIdx] = React.useState(null)
 
   const renderFormattedMessage = (text) => {

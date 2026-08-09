@@ -1,7 +1,9 @@
-import React from "react"
+import React, { useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { TextInput, Switch } from "@/shared/components/ui/inputs"
+import { TextInput } from "@/shared/components/ui/inputs"
+import ToggleOption from "../ui/ToggleOption"
+import { Eye } from "lucide-react"
 import { useCreateCurriculumSectionMutation, useUpdateCurriculumSectionMutation } from "@/store/api/coursesApi"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -10,6 +12,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.modals.section || {}
   const isVisible = sectionModal.isVisibleToStudents ?? true
+  const [errors, setErrors] = useState({})
 
   const [createSection, { isLoading: isCreating }] = useCreateCurriculumSectionMutation()
   const [updateSection, { isLoading: isUpdating }] = useUpdateCurriculumSectionMutation()
@@ -26,9 +29,11 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
     e.preventDefault()
 
     if (!sectionModal.name?.trim()) {
+      setErrors({ name: true })
       toast.error(dict.toastNameRequired)
       return
     }
+    setErrors({})
 
     // ── Create mode: call API ──
     if (sectionModal.mode === "create" && classId) {
@@ -36,7 +41,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
         await createSection({
           classId,
           name: sectionModal.name.trim(),
-          description: sectionModal.description?.trim() || null,
+          description: sectionModal.description?.trim() ?? "",
           isVisibleToStudents: sectionModal.isVisibleToStudents ?? true,
         }).unwrap()
 
@@ -63,7 +68,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
           classId,
           sectionId: sectionModal.sectionId,
           name: sectionModal.name.trim(),
-          description: sectionModal.description?.trim() || null,
+          description: sectionModal.description?.trim() ?? "",
           isVisibleToStudents: sectionModal.isVisibleToStudents ?? true,
         }).unwrap()
 
@@ -127,11 +132,13 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
           <TextInput
             required
             value={sectionModal.name || ""}
-            onChange={(e) =>
+            onChange={(e) => {
               setSectionModal((prev) => ({ ...prev, name: e.target.value }))
-            }
+              if (errors.name) setErrors((prev) => ({ ...prev, name: false }))
+            }}
+            error={errors.name}
             placeholder={dict.namePlaceholder}
-            className="rounded-xl !h-[50px] px-4 text-sm"
+            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.name ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
@@ -152,20 +159,14 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
         </div>
 
         {/* Toggle */}
-        <div className="bg-[#EDEEEF] rounded-xl px-4 py-3 flex items-center justify-between">
-          <div className="space-y-0.5">
-            <h5 className="text-sm font-semibold text-[#111827]">
-              {dict.visibleToStudents}
-            </h5>
-            <p className="text-xs text-[#6B7280] font-normal">
-              {dict.visibleToStudentsDesc}
-            </p>
-          </div>
-          <Switch
+        <div className="space-y-3 pt-2">
+          <ToggleOption
+            icon={<Eye size={20} className="text-[#F83B4F]" />}
+            iconBg="bg-[#FFEAED]"
+            title={dict.visibleToStudents}
+            description={dict.visibleToStudentsDesc || ""}
             checked={isVisible}
             onChange={handleToggleVisible}
-            colorClass="peer-checked:bg-[#A00000]"
-            className="min-h-6"
           />
         </div>
       </form>

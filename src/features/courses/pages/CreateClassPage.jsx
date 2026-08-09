@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
+import React, { useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
+import { Editor } from "@tinymce/tinymce-react"
 import {
   Plus,
   Minus,
@@ -22,20 +23,19 @@ import {
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
-  COURSE_FORM_LANGUAGES,
-  DEFAULT_CLASS_FEE_TIERS,
   getInstructorFormLanguages,
   getLocalizedLanguageName,
 } from "../data/courseFormOptions"
 import {
-  calculateFees,
   formatCurrency,
   formatCurrencyVND,
-  formatToYYYYMMDD,
   getSafeMediaUrl,
 } from "../utils/courseUtils"
 import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
+
+import { useClassFormReducer } from "../hooks/useClassFormReducer"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -46,26 +46,6 @@ const DAYS_OF_WEEK = [
   { key: "saturday", label: "Sat", code: "T7", fullName: "Saturday" },
   { key: "sunday", label: "Sun", code: "CN", fullName: "Sunday" }
 ]
-
-const createDefaultCheckedDays = () => ({
-  monday: true,
-  tuesday: false,
-  wednesday: true,
-  thursday: false,
-  friday: true,
-  saturday: false,
-  sunday: false,
-})
-
-const createDefaultTimeSlots = () => ({
-  monday: { start: "18:00", end: "19:30" },
-  tuesday: { start: "18:00", end: "19:30" },
-  wednesday: { start: "18:00", end: "19:30" },
-  thursday: { start: "18:00", end: "19:30" },
-  friday: { start: "18:00", end: "19:30" },
-  saturday: { start: "18:00", end: "19:30" },
-  sunday: { start: "18:00", end: "19:30" },
-})
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
@@ -84,10 +64,6 @@ const CreateClassPage = () => {
       ? `recover:${String(recoverClassId)}`
       : `create:${String(initialCourseId)}`
   const fileInputRef = useRef(null)
-  const thumbnailReaderRef = useRef(null)
-  const previousFormInstanceKeyRef = useRef(null)
-  const hydratedDetailsKeyRef = useRef(null)
-  const appliedInitialCourseKeyRef = useRef(null)
   const activeFormInstanceKeyRef = useRef(formInstanceKey)
   const activeMutationRequestRef = useRef(null)
   const mountedRef = useRef(true)
@@ -137,7 +113,6 @@ const CreateClassPage = () => {
     )
   const [deleteClass, { isLoading: isDeleting }] = useDeleteClassMutation()
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const submitGuardRef = useRef(false)
   const deleteGuardRef = useRef(false)
 
@@ -147,7 +122,6 @@ const CreateClassPage = () => {
     mountedRef.current = true
     return () => {
       mountedRef.current = false
-      thumbnailReaderRef.current?.abort()
       activeMutationRequestRef.current?.abort?.()
     }
   }, [])
@@ -170,365 +144,130 @@ const CreateClassPage = () => {
     return d
   }, [])
 
-  // Form State
-  const [errors, setErrors] = useState({})
-  const clearError = useCallback((field) => {
-    setErrors((prev) => (prev[field] ? { ...prev, [field]: false } : prev))
-  }, [])
+  const handleToastError = useCallback((key) => {
+    const courses = t.courses || {}
+    const createCls = courses.createClass || {}
+    if (key === "invalidImage") toast.error(createCls.toastInvalidImage || "Choose a JPG, PNG, or WebP image.")
+    else if (key === "fileTooLarge") toast.error(courses.avatarDesc2 || "File size must be under 50mb")
+    else if (key === "imageReadFail") toast.error(createCls.toastImageReadFail || "The selected image could not be read.")
+  }, [t.courses])
 
-  const [courseId, setCourseId] = useState(initialCourseId)
-  const [className, setClassName] = useState("")
-  const [selectedLanguage, setSelectedLanguage] = useState("English")
-  const [level, setLevel] = useState("A1")
-  const [admissionStart, setAdmissionStart] = useState("")
-  const [admissionEnd, setAdmissionEnd] = useState("")
-  const [startDate, setStartDate] = useState("")
-  const [sessions, setSessions] = useState(24)
-  const [capacity, setCapacity] = useState(6)
-  const [description, setDescription] = useState("")
-  const [fee, setFee] = useState("850000")
-  const [thumbnailFile, setThumbnailFile] = useState(null)
-  const [thumbnailPreview, setThumbnailPreview] = useState("")
-
-  // Teaching Schedule State
-  const [checkedDays, setCheckedDays] = useState(createDefaultCheckedDays)
-
-  const [timeSlots, setTimeSlots] = useState(createDefaultTimeSlots)
-
-  useEffect(() => {
-    if (previousFormInstanceKeyRef.current === formInstanceKey) return
-
-    previousFormInstanceKeyRef.current = formInstanceKey
-    hydratedDetailsKeyRef.current = null
-    appliedInitialCourseKeyRef.current = null
-    submitGuardRef.current = false
-    deleteGuardRef.current = false
-    thumbnailReaderRef.current?.abort()
-    thumbnailReaderRef.current = null
-    activeMutationRequestRef.current?.abort?.()
-    activeMutationRequestRef.current = null
-
-    setShowDeleteModal(false)
-    setErrors({})
-    setCourseId(initialCourseId)
-    setClassName("")
-    setSelectedLanguage("English")
-    setLevel("A1")
-    setAdmissionStart("")
-    setAdmissionEnd("")
-    setStartDate("")
-    setSessions(24)
-    setCapacity(6)
-    setDescription("")
-    setFee("850000")
-    setThumbnailFile(null)
-    setThumbnailPreview("")
-    setCheckedDays(createDefaultCheckedDays())
-    setTimeSlots(createDefaultTimeSlots())
-  }, [formInstanceKey, initialCourseId])
-
-  // Minimum tuition fee calculation: (50k * slots) + (25k * sessions)
-  const minFee = useMemo(() => {
-    return (50000 * capacity) + (25000 * sessions)
-  }, [capacity, sessions])
-
-  // Automatically set tuition fee to minFee on load or configuration changes (only in Create mode)
-  useEffect(() => {
-    if (isEditMode || isRecoverMode) return
-    setFee((currentFee) => {
-      const currentFeeNum = parseFloat(currentFee.replace(/[^0-9]/g, "")) || 0
-      return currentFeeNum < minFee ? minFee.toString() : currentFee
-    })
-  }, [minFee, isEditMode, isRecoverMode])
-
-  const selectedCourse = useMemo(
-    () => coursesList.find((c) => String(c.id) === String(courseId)),
-    [coursesList, courseId]
-  )
-
-  const levelsList = useMemo(() => {
-    // 1. If selected course has levels defined
-    if (selectedCourse && Array.isArray(selectedCourse.levels) && selectedCourse.levels.length > 0) {
-      return selectedCourse.levels.map((lvl, index) => {
-        if (typeof lvl === "object" && lvl !== null) {
-          return { id: lvl.id || index + 1, name: lvl.name || String(lvl) }
-        }
-        return { id: index + 1, name: String(lvl) }
-      })
-    }
-
-    // 2. Look up language in languagesList or COURSE_FORM_LANGUAGES
-    const normLang = (selectedLanguage || "").trim().toLowerCase()
-    if (normLang) {
-      const matched =
-        languagesList.find((l) => (l.name || "").trim().toLowerCase() === normLang) ||
-        COURSE_FORM_LANGUAGES.find((l) => (l.name || "").trim().toLowerCase() === normLang)
-
-      if (matched && Array.isArray(matched.levels) && matched.levels.length > 0) {
-        return matched.levels
-      }
-    }
-
-    // 3. Fallback level list based on language name or general default
-    if (normLang.includes("chinese") || normLang.includes("zh") || normLang.includes("trung")) {
-      return ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"].map((name, index) => ({ id: index + 1, name }))
-    }
-
-    return ["A1", "A2", "B1", "B2", "C1", "C2"].map((name, index) => ({ id: index + 1, name }))
-  }, [selectedCourse, selectedLanguage, languagesList])
-
-  const editingClassData = useMemo(() => {
-    if (!isEditMode) return null
-    const responseData = classDetailResponse?.data || classDetailResponse
-    if (!responseData || typeof responseData !== "object" || Array.isArray(responseData)) return null
-    return responseData
-  }, [isEditMode, classDetailResponse])
-
-  // Handlers
-  const handleCourseChange = useCallback((id) => {
-    setCourseId(id)
-    clearError("courseId")
-    const selectedCourse = coursesList.find(c => String(c.id) === String(id))
-    if (selectedCourse) {
-      if (selectedCourse.language) {
-        const matchedLang = languagesList.find(l => (l.name || "").toLowerCase() === selectedCourse.language.toLowerCase())
-        setSelectedLanguage(matchedLang ? matchedLang.name : selectedCourse.language)
-        clearError("selectedLanguage")
-      }
-      if (Array.isArray(selectedCourse.levels) && selectedCourse.levels.length > 0) {
-        const firstLevel = selectedCourse.levels[0]
-        const rawLevel = typeof firstLevel === "object" ? firstLevel.name : firstLevel
-        if (rawLevel) {
-          setLevel(rawLevel)
-          clearError("level")
-        }
-      }
-      if (selectedCourse.totalSessions) {
-        setSessions(parseInt(selectedCourse.totalSessions, 10) || 24)
-        clearError("sessions")
-      }
-
-      setAdmissionStart(formatToYYYYMMDD(selectedCourse.enrollmentStart))
-      setAdmissionEnd(formatToYYYYMMDD(selectedCourse.enrollmentEnd))
-      setThumbnailFile(null)
-      setThumbnailPreview(getSafeMediaUrl(selectedCourse.thumbnailUrl) || "")
-    } else {
-      setThumbnailFile(null)
-      setThumbnailPreview("")
-    }
-  }, [coursesList, languagesList, clearError])
-
-  // Auto-fill course details if navigated from course details page
-  useEffect(() => {
-    if (
-      !isEditMode
-      && !isRecoverMode
-      && initialCourseId
-      && coursesList.length > 0
-      && appliedInitialCourseKeyRef.current !== formInstanceKey
-    ) {
-      appliedInitialCourseKeyRef.current = formInstanceKey
-      handleCourseChange(initialCourseId)
-    }
-  }, [
+  const {
+    state,
+    handleCourseChange,
+    handleToggleDay,
+    handleTimeChange,
+    handleThumbnailFileChange,
+    formatFeeInput,
+    clearError,
+    setField,
+    minFee,
+    levelsList,
+    editingClassData,
+    feeDetails,
+    feeNum,
+    amountReceived,
+  } = useClassFormReducer({
     formInstanceKey,
     initialCourseId,
-    coursesList,
-    handleCourseChange,
     isEditMode,
     isRecoverMode,
-  ])
+    coursesList,
+    languagesList,
+    classDetailResponse,
+    recoverClassResponse,
+    onFormInstanceChange: () => {
+      submitGuardRef.current = false
+      deleteGuardRef.current = false
+      activeMutationRequestRef.current?.abort?.()
+      activeMutationRequestRef.current = null
+    },
+    toastError: handleToastError,
+  })
 
-  // Populate data when in edit or recover mode
-  useEffect(() => {
-    const responseData = isEditMode ? classDetailResponse : (isRecoverMode ? recoverClassResponse : null)
+  const {
+    courseId,
+    className,
+    selectedLanguage,
+    level,
+    admissionStart,
+    admissionEnd,
+    startDate,
+    sessions,
+    capacity,
+    description,
+    fee,
+    thumbnailFile,
+    thumbnailPreview,
+    checkedDays,
+    timeSlots,
+    errors,
+    showDeleteModal,
+  } = state
+
+  const isLevelDisabled = useMemo(() => {
+    if (!isEditMode || !editingClassData) return false
+
+    // 1. Explicit backend lock flag
+    if (editingClassData.isLevelLocked === true || editingClassData.levelsLocked === true) {
+      return true
+    }
+
+    // 2. Someone already enrolled in the class
+    const enrolledCount = Number(editingClassData.enrolledCount) || Number(editingClassData.enrolledStudentsCount) || Number(editingClassData.enrolled) || 0
+    if (enrolledCount > 0) {
+      return true
+    }
     if (
-      responseData
-      && hydratedDetailsKeyRef.current !== formInstanceKey
+      editingClassData.slots !== undefined &&
+      editingClassData.remainingSlots !== undefined &&
+      Number(editingClassData.remainingSlots) < Number(editingClassData.slots)
     ) {
-      const cls = responseData.data || responseData
-      if (!cls || typeof cls !== "object" || Array.isArray(cls) || !cls.id) {
-        return
-      }
+      return true
+    }
 
-      hydratedDetailsKeyRef.current = formInstanceKey
-      thumbnailReaderRef.current?.abort()
-      thumbnailReaderRef.current = null
-      setThumbnailFile(null)
-      setCourseId(cls.courseId || "")
-      setClassName(cls.name || cls.title || "")
-      setSelectedLanguage(cls.language || "")
-      setLevel(cls.levels?.[0] || "")
+    const now = new Date()
 
-
-
-      setAdmissionStart(formatToYYYYMMDD(cls.enrollmentStart))
-      setAdmissionEnd(formatToYYYYMMDD(cls.enrollmentEnd))
-      setStartDate(formatToYYYYMMDD(cls.startDate))
-      setSessions(cls.totalSessions ?? "")
-      setCapacity(cls.slots ?? "")
-      setDescription(cls.description || "")
-      setFee(cls.tuitionFee?.toString() || "")
-
-      if (cls.thumbnailUrl) {
-        setThumbnailPreview(getSafeMediaUrl(cls.thumbnailUrl) || "")
-      } else {
-        setThumbnailPreview("")
-      }
-
-      // Parse schedule
-      if (cls.schedule || cls.rawSchedule) {
-        const apiDaysToLocalKeys = {
-          "MON": "monday",
-          "TUE": "tuesday",
-          "WED": "wednesday",
-          "THU": "thursday",
-          "FRI": "friday",
-          "SAT": "saturday",
-          "SUN": "sunday"
-        }
-
-        const updatedCheckedDays = {
-          monday: false,
-          tuesday: false,
-          wednesday: false,
-          thursday: false,
-          friday: false,
-          saturday: false,
-          sunday: false
-        }
-        const updatedTimeSlots = {
-          monday: { start: "18:00", end: "19:30" },
-          tuesday: { start: "18:00", end: "19:30" },
-          wednesday: { start: "18:00", end: "19:30" },
-          thursday: { start: "18:00", end: "19:30" },
-          friday: { start: "18:00", end: "19:30" },
-          saturday: { start: "18:00", end: "19:30" },
-          sunday: { start: "18:00", end: "19:30" }
-        }
-
-        const scheduleEntries = Array.isArray(cls.rawSchedule)
-          ? cls.rawSchedule
-          : (Array.isArray(cls.schedule) ? cls.schedule : [])
-        const days = cls.schedule?.days || scheduleEntries.map(s => s.dayOfWeek)
-        const startTime = cls.schedule?.startTime || scheduleEntries[0]?.startTime || ""
-        const endTime = cls.schedule?.endTime || scheduleEntries[0]?.endTime || ""
-
-        if (scheduleEntries.length > 0) {
-          scheduleEntries.forEach(item => {
-            const key = apiDaysToLocalKeys[item.dayOfWeek]
-            if (key) {
-              updatedCheckedDays[key] = true
-              updatedTimeSlots[key] = {
-                start: item.startTime || "",
-                end: item.endTime || ""
-              }
-            }
-          })
-        } else if (days) {
-          days.forEach(day => {
-            const key = apiDaysToLocalKeys[day]
-            if (key) {
-              updatedCheckedDays[key] = true
-              updatedTimeSlots[key] = {
-                start: startTime,
-                end: endTime
-              }
-            }
-          })
-        }
-        setCheckedDays(updatedCheckedDays)
-        setTimeSlots(updatedTimeSlots)
+    // 3. Class has started enrollment date (in enrollment date)
+    if (editingClassData.enrollmentStart) {
+      const startEn = new Date(editingClassData.enrollmentStart)
+      if (!isNaN(startEn.getTime()) && startEn <= now) {
+        return true
       }
     }
-  }, [
-    classDetailResponse,
-    formInstanceKey,
-    recoverClassResponse,
-    isEditMode,
-    isRecoverMode,
-  ])
+
+    // 4. Class has started start date
+    if (editingClassData.startDate) {
+      const startCls = new Date(editingClassData.startDate)
+      if (!isNaN(startCls.getTime()) && startCls <= now) {
+        return true
+      }
+    }
+
+    return false
+  }, [isEditMode, editingClassData])
+
+  const setShowDeleteModal = useCallback((val) => {
+    setField("showDeleteModal", val)
+  }, [setField])
+
+  const setErrors = useCallback((val) => {
+    setField("errors", typeof val === "function" ? val(state.errors) : val)
+  }, [setField, state.errors])
 
   const handleThumbnailClick = () => {
     fileInputRef.current?.click()
   }
 
-  const handleThumbnailFileChange = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast.error(cc.toastInvalidImage || "Choose a JPG, PNG, or WebP image.")
-      e.target.value = ""
-      return
-    }
-
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error(c.avatarDesc2 || "File size must be under 50mb")
-      e.target.value = ""
-      return
-    }
-
-    setThumbnailFile(file)
-    thumbnailReaderRef.current?.abort()
-    const reader = new FileReader()
-    thumbnailReaderRef.current = reader
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setThumbnailPreview(reader.result)
-      }
-      thumbnailReaderRef.current = null
-    }
-    reader.onerror = () => {
-      thumbnailReaderRef.current = null
-      toast.error(cc.toastImageReadFail || "The selected image could not be read.")
-    }
-    reader.readAsDataURL(file)
-    e.target.value = ""
-  }
-
-  const handleToggleDay = (day) => {
-    setCheckedDays(prev => ({
-      ...prev,
-      [day]: !prev[day]
-    }))
-    clearError("checkedDays")
-  }
-
-  const handleTimeChange = (day, field, value) => {
-    setTimeSlots(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [field]: value
-      }
-    }))
-  }
-
-  // Calculation: Actual amount received & fee details
-  const feeNum = parseFloat(fee.replace(/[^0-9]/g, "")) || 0
-
-  const feeDetails = useMemo(() => {
-    return calculateFees(capacity, feeNum, DEFAULT_CLASS_FEE_TIERS)
-  }, [feeNum, capacity])
-
-  const amountReceived = formatCurrency(feeDetails.netPerStudent)
-
   const labelCommissionNote = (cc.commissionNote || "The platform will withhold a {{commission}}% commission fee on each successful student enrollment.")
     .replace("{{commission}}", feeDetails.commissionRate)
     .replace("{{amount}}", formatCurrency(feeDetails.commissionPerStudent))
-
-  const formatFeeInput = (val) => {
-    const cleaned = val.replace(/[^0-9]/g, "")
-    setFee(cleaned)
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (submitGuardRef.current || isCreating || isUpdating) return
 
     const newErrors = {}
-    if (!courseId) newErrors.courseId = true
     if (!className.trim()) newErrors.className = true
     if (!selectedLanguage) newErrors.selectedLanguage = true
     if (!level) newErrors.level = true
@@ -546,8 +285,7 @@ const CreateClassPage = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      if (newErrors.courseId) toast.error(cc.toastSelectCourseFirst || "Please select a course first!")
-      else if (newErrors.className) toast.error(cc.toastEnterClassName || "Please enter class name!")
+      if (newErrors.className) toast.error(cc.toastEnterClassName || "Please enter class name!")
       else if (newErrors.selectedLanguage) toast.error(cc.toastSelectLanguage || "Please select a language!")
       else if (newErrors.level) toast.error(cc.toastSelectLevel || "Please select a level!")
       else if (newErrors.admissionStart || newErrors.admissionEnd || newErrors.startDate) toast.error(cc.toastAdmissionAndStart || "Please enter admission period and start date!")
@@ -645,7 +383,7 @@ const CreateClassPage = () => {
       const initialHydratedLevel = editingClassData?.levels?.[0] || ""
       const isLevelUnchanged = isEditMode && level === initialHydratedLevel
 
-      const payloadLevels = (isEditMode && originalLevels && isLevelUnchanged)
+      const payloadLevels = (isEditMode && originalLevels && (isLevelUnchanged || isLevelDisabled))
         ? originalLevels
         : [level]
 
@@ -897,18 +635,17 @@ const CreateClassPage = () => {
       : (cc.classInfoTitle || cc.classInformation || "Thông tin lớp học")
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] flex-1">
 
       {/* ─── Breadcrumb ─── */}
-      <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-        <span>/</span>
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/courses")}>{c.title || "Khóa học của tôi"}</button>
-        <span>/</span>
-        <button type="button" disabled={isFormBusy} className="cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-50" onClick={() => navigate("/workspace/classes/all-classes")}>{c.allClasses?.title || "Toàn bộ lớp học"}</button>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">{pageTitle}</span>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: isFormBusy ? undefined : () => navigate("/workspace") },
+          { label: c.title || "Khóa học của tôi", onClick: isFormBusy ? undefined : () => navigate("/workspace/courses") },
+          { label: c.allClasses?.title || "Toàn bộ lớp học", onClick: isFormBusy ? undefined : () => navigate("/workspace/classes/all-classes") },
+          { label: pageTitle },
+        ]}
+      />
 
       {/* ─── Header ─── */}
       <div className="flex items-center gap-3">
@@ -930,7 +667,7 @@ const CreateClassPage = () => {
       <form
         onSubmit={handleSubmit}
         aria-busy={isFormBusy}
-        className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6"
+        className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6 flex-1"
       >
 
         <h2 className="text-lg font-bold text-gray-900 border-b border-gray-50 pb-2">
@@ -938,7 +675,7 @@ const CreateClassPage = () => {
         </h2>
 
         {/* Form Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-1">
 
           {/* LEFT COLUMN: Main input fields (Span 3 of 5) */}
           <div className="lg:col-span-3 flex flex-col gap-5">
@@ -946,7 +683,7 @@ const CreateClassPage = () => {
             {/* Course Selector */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                {cc.belongsToCourse || "Belongs to Course"} <span className="text-[#990011]">*</span>
+                {cc.belongsToCourseOptional || cc.belongsToCourse || "Belongs to Course (Optional)"}
               </label>
               <div className="relative">
                 <select
@@ -955,7 +692,7 @@ const CreateClassPage = () => {
                   disabled={isEditMode || isRecoverMode || !!initialCourseId}
                   className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                 >
-                  <option value="">{cc.selectCourseOption || "-- Select Course --"}</option>
+                  <option value="">{cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}</option>
                   {isEditMode || isRecoverMode ? (
                     courseId && <option value={courseId}>{lockedCourseTitle}</option>
                   ) : (
@@ -970,12 +707,12 @@ const CreateClassPage = () => {
 
             {/* Class Name */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.className} <span className="text-[#990011]">*</span></label>
+              <label className="text-xs font-extrabold text-[#700] uppercase tracking-wider">{cc.className} <span className="text-[#990011]">*</span></label>
               <input
                 type="text"
                 value={className}
                 onChange={(e) => {
-                  setClassName(e.target.value)
+                  setField("className", e.target.value)
                   clearError("className")
                 }}
                 disabled={isRecoverMode}
@@ -992,8 +729,8 @@ const CreateClassPage = () => {
                   <select
                     value={selectedLanguage}
                     onChange={(e) => {
-                      setSelectedLanguage(e.target.value)
-                      setLevel("")
+                      setField("selectedLanguage", e.target.value)
+                      setField("level", "")
                       clearError("selectedLanguage")
                     }}
                     disabled={isRecoverMode || !!initialCourseId || !!courseId}
@@ -1016,10 +753,10 @@ const CreateClassPage = () => {
                   <select
                     value={level}
                     onChange={(e) => {
-                      setLevel(e.target.value)
+                      setField("level", e.target.value)
                       clearError("level")
                     }}
-                    disabled={!selectedLanguage || isRecoverMode}
+                    disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
                     className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
@@ -1047,7 +784,7 @@ const CreateClassPage = () => {
                     <DatePicker
                       value={admissionStart}
                       onChange={(date) => {
-                        setAdmissionStart(date ? toLocalDateString(date) : "")
+                        setField("admissionStart", date ? toLocalDateString(date) : "")
                         clearError("admissionStart")
                       }}
                       mode="date"
@@ -1062,7 +799,7 @@ const CreateClassPage = () => {
                     <DatePicker
                       value={admissionEnd}
                       onChange={(date) => {
-                        setAdmissionEnd(date ? toLocalDateString(date) : "")
+                        setField("admissionEnd", date ? toLocalDateString(date) : "")
                         clearError("admissionEnd")
                       }}
                       mode="date"
@@ -1080,7 +817,7 @@ const CreateClassPage = () => {
                 <DatePicker
                   value={startDate}
                   onChange={(date) => {
-                    setStartDate(date ? toLocalDateString(date) : "")
+                    setField("startDate", date ? toLocalDateString(date) : "")
                     clearError("startDate")
                   }}
                   mode="date"
@@ -1100,7 +837,7 @@ const CreateClassPage = () => {
                 <div className={`flex items-center bg-white border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
-                    onClick={() => setSessions(prev => Math.max(1, (parseInt(prev, 10) || 1) - 1))}
+                    onClick={() => setField("sessions", Math.max(1, (parseInt(sessions, 10) || 1) - 1))}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Minus size={14} />
@@ -1109,14 +846,14 @@ const CreateClassPage = () => {
                     type="number"
                     value={sessions}
                     onChange={(e) => {
-                      setSessions(Math.max(1, parseInt(e.target.value, 10) || 1))
+                      setField("sessions", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("sessions")
                     }}
                     className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
                   />
                   <button
                     type="button"
-                    onClick={() => setSessions(prev => (parseInt(prev, 10) || 0) + 1)}
+                    onClick={() => setField("sessions", (parseInt(sessions, 10) || 0) + 1)}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Plus size={14} />
@@ -1130,7 +867,7 @@ const CreateClassPage = () => {
                 <div className={`flex items-center bg-white border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
-                    onClick={() => setCapacity(prev => Math.max(1, (parseInt(prev, 10) || 1) - 1))}
+                    onClick={() => setField("capacity", Math.max(1, (parseInt(capacity, 10) || 1) - 1))}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Minus size={14} />
@@ -1139,14 +876,14 @@ const CreateClassPage = () => {
                     type="number"
                     value={capacity}
                     onChange={(e) => {
-                      setCapacity(Math.max(1, parseInt(e.target.value, 10) || 1))
+                      setField("capacity", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("capacity")
                     }}
                     className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
                   />
                   <button
                     type="button"
-                    onClick={() => setCapacity(prev => (parseInt(prev, 10) || 0) + 1)}
+                    onClick={() => setField("capacity", (parseInt(capacity, 10) || 0) + 1)}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Plus size={14} />
@@ -1291,19 +1028,29 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Class Description */}
+            {/* Class Description TinyMCE Editor */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.classDescription}</label>
-              <textarea
-                rows={5}
+              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.classDescription || "Mô tả lớp học"}</label>
+              <Editor
+                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
                 value={description}
                 disabled={isRecoverMode}
-                onChange={(e) => {
-                  setDescription(e.target.value)
+                onEditorChange={(newContent) => {
+                  setField("description", newContent)
                   clearError("description")
                 }}
-                placeholder={cc.placeholderDescription || "Enter class description (optional)"}
-                className={`w-full p-4 bg-white border ${errors.description ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-2xl text-sm font-semibold text-gray-800 transition-all resize-none placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                init={{
+                  height: 220,
+                  menubar: false,
+                  statusbar: false,
+                  plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                  toolbar:
+                    "bold italic underline strikethrough | emoticons link | bullist numlist | removeformat",
+                  placeholder: cc.placeholderDescription || "Enter class description (optional)",
+                  skin: "oxide",
+                  content_style: "body { font-family: Inter, sans-serif; font-size: 14px; color: #1f2937; }",
+                  readonly: isRecoverMode,
+                }}
               />
             </div>
 
@@ -1357,7 +1104,7 @@ const CreateClassPage = () => {
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100 mt-auto">
           {/* Left Side: Fee detail */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D]">

@@ -41,6 +41,7 @@ import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/
 import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage";
 import CreatePostPage from "@/features/courses/components/lecture-hall/pages/CreatePostPage";
 import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage";
+import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage";
 
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
@@ -93,6 +94,9 @@ const CheckoutPage = lazy(
 const MyCoursesPage = lazy(
   () => import("@/features/courses/pages/MyCoursesPage"),
 );
+const ExploreCoursesPage = lazy(
+  () => import("@/features/courses/pages/ExploreCoursesPage"),
+);
 const CreateCoursePage = lazy(
   () => import("@/features/courses/pages/CreateCoursePage"),
 );
@@ -125,6 +129,9 @@ const StudentClassDetailPage = lazy(
 );
 const StudentCourseDetailPage = lazy(
   () => import("@/features/courses/pages/StudentCourseDetailPage"),
+);
+const PublicClassDetailPage = lazy(
+  () => import("@/features/courses/pages/PublicClassDetailPage"),
 );
 const SchedulePage = lazy(
   () => import("@/features/courses/pages/SchedulePage"),
@@ -182,6 +189,30 @@ const routesConfig = [
                   <CheckoutPage />
                 </LazyRoute>
               </AuthGuard>
+            ),
+          },
+          {
+            path: "explore-courses",
+            element: (
+              <LazyRoute>
+                <ExploreCoursesPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/details/:id",
+            element: (
+              <LazyRoute>
+                <StudentCourseDetailPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/class/:id",
+            element: (
+              <LazyRoute>
+                <PublicClassDetailPage />
+              </LazyRoute>
             ),
           },
           {
@@ -363,6 +394,30 @@ const routesConfig = [
                 element: <WorkspaceCourseRedirect />,
               },
               {
+                path: "explore-courses",
+                element: (
+                  <LazyRoute>
+                    <ExploreCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/details/:id",
+                element: (
+                  <LazyRoute>
+                    <StudentCourseDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/class/:id",
+                element: (
+                  <LazyRoute>
+                    <PublicClassDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "courses",
                 element: (
                   <LazyRoute>
@@ -377,6 +432,14 @@ const routesConfig = [
                     <MyClassesPage />
                   </LazyRoute>
                 ),
+              },
+              {
+                path: "my-calendar",
+                element: (
+                  <LazyRoute>
+                    <MyCalendarPage />
+                  </LazyRoute>
+                )
               },
               {
                 path: "teaching-tasks",
@@ -673,6 +736,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <WorkspaceRoomsPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "profile/:accountId?",
+                element: (
+                  <LazyRoute>
+                    <Profile />
                   </LazyRoute>
                 ),
               },

@@ -34,10 +34,7 @@ import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvid
 import { GameProvider } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
-import {
-  isBreakoutSupported,
-  isCustomRoom,
-} from "@/features/video-call/utils/roomTypeHelpers"
+import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
 
 const VideoCallRoomContent = () => {
@@ -76,13 +73,13 @@ const VideoCallRoomContent = () => {
     isRecording,
     confirmStopRecording,
     participants,
+    isHost: isHostFromContext,
   } = useVideoCallContext()
 
   const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
     (s) => s.videoCall,
   )
-  const isHost =
-    isCustomRoom(room?.roomType) && room?.creatorId === user?.accountId
+  const isHost = isHostFromContext
 
   const dispatch = useDispatch()
   const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
@@ -140,6 +137,10 @@ const VideoCallRoomContent = () => {
   const [hasConnected, setHasConnected] = useState(false)
 
   useEffect(() => {
+    console.log(
+      "[VideoCallRoom] LiveKit connectionState changed:",
+      connectionState,
+    )
     if (connectionState === ConnectionState.Connected) {
       setHasConnected(true)
     }

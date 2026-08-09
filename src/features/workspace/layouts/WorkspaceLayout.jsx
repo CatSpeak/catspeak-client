@@ -18,16 +18,12 @@ const WorkspaceLayout = () => {
       if (isTeacherRoute) {
         navigate("/workspace/learning", { replace: true })
       }
-    } else if (isRoleResolved && isTeacher) {
-      if (location.pathname.includes("/workspace/learning")) {
-        navigate("/workspace/courses", { replace: true })
-      }
     }
   }, [isStudent, isTeacher, isRoleResolved, location.pathname, navigate])
 
   return (
     <div className="flex-1 h-full overflow-y-auto flex flex-col bg-[#f3f3f3] relative">
-      <div className="mx-auto w-full min-w-0 p-4 sm:p-6 flex-1">
+      <div className="mx-auto w-full min-w-0 p-4 sm:p-6 flex-1 flex flex-col">
         <Outlet />
       </div>
     </div>

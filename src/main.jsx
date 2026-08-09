@@ -6,6 +6,19 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID_HERE"
 
+// Dynamically load Eruda mobile console overlay if ?debug=true or ?eruda=true is in the URL
+if (
+  typeof window !== "undefined" &&
+  (window.location.search.includes("debug=true") || window.location.search.includes("eruda=true"))
+) {
+  const script = document.createElement("script")
+  script.src = "https://cdn.jsdelivr.net/npm/eruda"
+  script.onload = () => {
+    if (window.eruda) window.eruda.init()
+  }
+  document.head.appendChild(script)
+}
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>

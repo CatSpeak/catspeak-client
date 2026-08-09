@@ -28,3 +28,29 @@ export const getFileIcon = (fileName) => {
   }
   return <FileIcon size={20} className="text-gray-600" />
 }
+
+export const MAX_MATERIAL_SIZE = 50 * 1024 * 1024
+export const MATERIAL_EXTENSIONS = new Set(["pdf", "docx", "jpg", "png"])
+
+export const getMaterialExtension = (fileName) => {
+  if (typeof fileName !== "string") return ""
+  const dotIndex = fileName.lastIndexOf(".")
+  return dotIndex >= 0 ? fileName.slice(dotIndex + 1).toLowerCase() : ""
+}
+
+export const getMaterialValidationError = (file) => {
+  if (!file || typeof file.name !== "string") return "invalid"
+
+  const size = Number(file.size)
+  if (!Number.isFinite(size) || size <= 0) return "empty"
+  if (size > MAX_MATERIAL_SIZE) return "size"
+  if (!MATERIAL_EXTENSIONS.has(getMaterialExtension(file.name))) {
+    return "type"
+  }
+
+  return null
+}
+
+export const getFileFingerprint = (file) => {
+  return `${String(file?.name || "").toLowerCase()}-${Number(file?.size) || 0}-${Number(file?.lastModified) || 0}`
+}

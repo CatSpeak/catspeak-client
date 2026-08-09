@@ -2,6 +2,11 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
+import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
+import {
+  buildAudioConstraint,
+  buildVideoConstraint,
+} from "@/shared/utils/mediaConstraintUtils"
 import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
 import { LocalVideoTrack } from "livekit-client"
 import { ProcessorWrapper } from "@livekit/track-processors"
@@ -85,15 +90,34 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     return () => clearInterval(interval)
   }, [processorStatus])
 
+  const stopAllPreviewTracks = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
+    }
+    if (processorRef.current?.destroy) {
+      processorRef.current.destroy()
+      processorRef.current = null
+    }
+    if (lkVideoTrackRef.current) {
+      lkVideoTrackRef.current.stop()
+      lkVideoTrackRef.current = null
+    }
+    if (rawVideoTrackRef.current) {
+      rawVideoTrackRef.current.stop()
+      rawVideoTrackRef.current = null
+    }
+    setLocalStream(null)
+    setMicOn(false)
+    setCameraOn(false)
+  }, [])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      streamRef.current?.getTracks().forEach((t) => t.stop())
-      if (processorRef.current?.destroy) processorRef.current.destroy()
-      if (lkVideoTrackRef.current) lkVideoTrackRef.current.stop()
-      if (rawVideoTrackRef.current) rawVideoTrackRef.current.stop()
+      stopAllPreviewTracks()
     }
-  }, [])
+  }, [stopAllPreviewTracks])
 
   // Helper to request media
   const getMediaStream = async ({
@@ -106,44 +130,13 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     try {
       const constraints = {}
       if (audio) {
-        constraints.audio = customAudioId
-          ? { deviceId: { exact: customAudioId } }
-          : true
+        unlockAudioContext()
+        constraints.audio = buildAudioConstraint(customAudioId)
       }
       if (video) {
-        constraints.video = customVideoId
-          ? { deviceId: { exact: customVideoId } }
-          : true
+        constraints.video = buildVideoConstraint(customVideoId)
       }
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
-
-      // When another app (e.g. Google Meet) holds exclusive mic access,
-      // getUserMedia succeeds but the audio track's `muted` property is true
-      // — meaning no audio data is flowing from the hardware.
-      if (audio && device === "mic") {
-        const audioTrack = stream.getAudioTracks()[0]
-        if (audioTrack?.muted) {
-          const unmuted = await new Promise((resolve) => {
-            const onUnmute = () => resolve(true)
-            audioTrack.addEventListener("unmute", onUnmute, { once: true })
-            setTimeout(() => {
-              audioTrack.removeEventListener("unmute", onUnmute)
-              resolve(false)
-            }, 2000)
-          })
-          if (!unmuted) {
-            console.warn(
-              "[useMediaPreview] 🔇 Mic track is muted — another app likely holds exclusive access",
-            )
-            stream.getTracks().forEach((t) => t.stop())
-            toast.error(
-              t.rooms?.waitingScreen?.micInUse ??
-                "Microphone is in use by another app.",
-            )
-            return null
-          }
-        }
-      }
 
       // Apply beauty + virtual background to video track (via CombinedVideoTransformer)
       if (video && ProcessorWrapper.isSupported) {
@@ -198,6 +191,12 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
 
       return stream
     } catch (err) {
+      console.error("[useMediaPreview] getMediaStream error:", {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        err,
+      })
       handleMediaError(err, device === "mic" ? "mic" : "camera", t)
       return null
     }
@@ -205,6 +204,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
 
   // Toggle mic
   const toggleMic = async () => {
+    console.log("[useMediaPreview] Toggling mic...")
     let audioTracks = streamRef.current?.getAudioTracks() || []
 
     if (audioTracks.length === 0) {
@@ -223,10 +223,14 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       }
     }
 
-    if (audioTracks.length === 0) return false
+    if (audioTracks.length === 0) {
+      console.warn("[useMediaPreview] Toggle mic failed: no audio tracks acquired")
+      return false
+    }
 
     setMicOn((prev) => {
       const next = !prev
+      console.log("[useMediaPreview] Mic toggled to:", next)
 
       if (next) {
         audioTracks.forEach((t) => (t.enabled = true))
@@ -248,6 +252,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
 
   // Toggle camera
   const toggleCamera = async () => {
+    console.log("[useMediaPreview] Toggling camera...")
     let videoTracks = streamRef.current?.getVideoTracks() || []
 
     if (videoTracks.length === 0) {
@@ -266,10 +271,14 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       }
     }
 
-    if (videoTracks.length === 0) return false
+    if (videoTracks.length === 0) {
+      console.warn("[useMediaPreview] Toggle camera failed: no video tracks acquired")
+      return false
+    }
 
     setCameraOn((prev) => {
       const next = !prev
+      console.log("[useMediaPreview] Camera toggled to:", next)
 
       if (next) {
         videoTracks.forEach((t) => (t.enabled = true))
@@ -368,5 +377,6 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     toggleCamera,
     switchBeauty,
     processorStatus,
+    stopAllPreviewTracks,
   }
 }

@@ -9,6 +9,7 @@ import SystemMessage from "./messages/SystemMessage"
 import StoryInterestMessage from "./messages/StoryInterestMessage"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useGroupedMessages } from "../hooks/useGroupedMessages"
 
 /**
@@ -40,6 +41,7 @@ const ChatArea = ({
   onRetryUpload,
   onCancelUpload,
 }) => {
+  const { userTimeZone } = useTimezone()
   const scrollRef = useRef(null)
   const isPrependingRef = useRef(false)
   const prevScrollHeightRef = useRef(0)
@@ -50,6 +52,7 @@ const ChatArea = ({
     currentUser,
     conversation,
     isLoading,
+    userTimeZone,
   })
 
   // Trigger top scroll load more

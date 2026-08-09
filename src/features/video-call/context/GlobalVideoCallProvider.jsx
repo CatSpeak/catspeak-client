@@ -185,6 +185,18 @@ export const GlobalVideoCallProvider = ({ children }) => {
     )
   }
 
+  const isMobileDevice =
+    typeof window !== "undefined" &&
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  console.log("[GlobalVideoCallProvider] Rendering LiveKitRoom:", {
+    livekitServerUrl,
+    sessionId: callInfo?.sessionId,
+    initMicOn: callInfo?.initMicOn,
+    initCamOn: callInfo?.initCamOn,
+    isMobileDevice,
+  })
+
   return (
     <LiveKitRoom
       key={callInfo?.sessionId}
@@ -194,7 +206,21 @@ export const GlobalVideoCallProvider = ({ children }) => {
       audio={callInfo.initMicOn}
       video={callInfo.initCamOn}
       className="contents"
-      options={{ publishDefaults: { simulcast: true } }}
+      options={{ publishDefaults: { simulcast: !isMobileDevice } }}
+      onConnected={() => {
+        console.log("[GlobalVideoCallProvider] LiveKitRoom connected successfully!")
+      }}
+      onDisconnected={(reason) => {
+        console.error("[GlobalVideoCallProvider] LiveKitRoom onDisconnected:", reason)
+      }}
+      onError={(err) => {
+        console.error("[GlobalVideoCallProvider] LiveKitRoom onError:", {
+          name: err?.name,
+          message: err?.message,
+          stack: err?.stack,
+          raw: err,
+        })
+      }}
     >
       <GlobalCallContent
         ContextProvider={GlobalVideoCallContext.Provider}

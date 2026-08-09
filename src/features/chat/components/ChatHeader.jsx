@@ -5,8 +5,8 @@ import Avatar from "@/shared/components/ui/Avatar"
 import GroupAvatar from "./GroupAvatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
-import { formatLastSeen } from "@/shared/utils/dateFormatter"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { getProfilePath } from "@/shared/utils/navigation"
 
 /**
@@ -19,6 +19,7 @@ const ChatHeader = ({
   friendOnlineStatus,
 }) => {
   const { t } = useLanguage()
+  const { formatRelative } = useTimezone()
   const navigate = useNavigate()
   const isGroup = conversation?.isGroup
   const otherUser = conversation?.friend
@@ -53,7 +54,7 @@ const ChatHeader = ({
       : `${memberCount} members`
     : isOnline
       ? t?.chat?.online || "Online"
-      : formatLastSeen(lastSeenTime);
+      : formatRelative(lastSeenTime);
 
   return (
     <div className="flex items-center justify-between px-4 h-[72px] border-b border-[#E5E5E5] shrink-0">

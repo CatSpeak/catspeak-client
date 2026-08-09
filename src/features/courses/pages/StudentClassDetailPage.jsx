@@ -1,13 +1,14 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { MessageSquare, Video } from "lucide-react"
 
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   useGetStudentClassDetailQuery,
-  useGetStudentCourseDetailQuery,
   useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
@@ -45,6 +46,7 @@ const StudentClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
+  const { userTimeZone } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const scd = c.studentCourseDetail || {}
@@ -94,55 +96,9 @@ const StudentClassDetailPage = () => {
     ? detailResponse
     : null
   const isEnrolled = classData?.isEnrolled === true
-  const {
-    currentData: enrollmentCourseResponse,
-    isLoading: isEnrollmentCourseLoading,
-    isFetching: isEnrollmentCourseFetching,
-    error: enrollmentCourseError,
-  } = useGetStudentCourseDetailQuery(
-    classData?.courseId,
-    { skip: !classData?.courseId || isEnrolled },
-  )
-  const enrollmentCourseData = (
-    enrollmentCourseResponse
-    && typeof enrollmentCourseResponse === "object"
-    && !Array.isArray(enrollmentCourseResponse)
-    && enrollmentCourseResponse.id
-  )
-    ? enrollmentCourseResponse
-    : null
-  const isEnrollmentEligibilityLoading = (
-    !isEnrolled
-    && Boolean(classData?.courseId)
-    && (
-      isEnrollmentCourseLoading
-      || (
-        isEnrollmentCourseFetching
-        && enrollmentCourseResponse === undefined
-      )
-    )
-  )
-  const hasUnavailableEnrollmentContext = (
-    !isEnrolled
-    && (
-      !classData?.courseId
-      || Boolean(enrollmentCourseError)
-      || (
-        enrollmentCourseResponse !== undefined
-        && !enrollmentCourseData
-      )
-    )
-  )
   const enrollmentIssue = isEnrolled
     ? null
-    : (
-      hasUnavailableEnrollmentContext
-        ? "unavailable"
-        : getClassEnrollmentIssue({
-          classData,
-          enrolledClassId: enrollmentCourseData?.enrolledClassId,
-        })
-    )
+    : getClassEnrollmentIssue({ classData })
   const isOwner = Boolean(
     currentUserId
     && [
@@ -196,15 +152,8 @@ const StudentClassDetailPage = () => {
       toast.error(c.student?.cannotEnrollOwn || "You cannot enroll in your own course or class.")
       return
     }
-    if (isEnrollmentEligibilityLoading || enrollmentIssue) {
-      toast.error(
-        isEnrollmentEligibilityLoading
-          ? (
-            scd.checkingEnrollment
-            || "Enrollment availability is still being checked."
-          )
-          : getClassEnrollmentIssueMessage(enrollmentIssue, c.student),
-      )
+    if (enrollmentIssue) {
+      toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, c.student))
       return
     }
     enrollmentGuardRef.current = true
@@ -269,6 +218,7 @@ const StudentClassDetailPage = () => {
     classData || {},
     language || "en",
     ui.tba,
+    userTimeZone,
   )
 
   if (
@@ -300,30 +250,21 @@ const StudentClassDetailPage = () => {
       )}
 
       {/* ─── Breadcrumb ─── */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{t.nav?.home || "Trang chủ"}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.student?.dashboardTitle}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/learning")}>{c.allCourses?.title || "All Courses"}</button>
-          <span>/</span>
-          <button
-            type="button"
-            className="cursor-pointer hover:underline"
-            disabled={!classData.courseId}
-            onClick={() => {
-              if (classData.courseId) {
-                navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`)
-              }
-            }}
-          >
-            {c.student?.courseDetails || "Course Details"}
-          </button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{c.student?.classDetails || "Class Details"}</span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
+          { label: c.student?.dashboardTitle || "Lớp học của tôi", onClick: () => navigate("/workspace/learning") },
+          ...(classData.courseId
+            ? [
+                {
+                  label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
+                  onClick: () => navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`),
+                },
+              ]
+            : []),
+          { label: c.student?.classDetails || "Class Details" },
+        ]}
+      />
 
       {/* ─── Page Heading & Header Actions ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -339,7 +280,6 @@ const StudentClassDetailPage = () => {
               disabled={
                 isEnrolling
                 || isOwner
-                || isEnrollmentEligibilityLoading
                 || Boolean(enrollmentIssue)
               }
               title={
@@ -360,14 +300,12 @@ const StudentClassDetailPage = () => {
               className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
             >
               <span>
-                {isEnrollmentEligibilityLoading
-                  ? (scd.checkingEnrollmentShort || "Checking...")
-                  : enrollmentIssue
-                    ? getClassEnrollmentIssueLabel(
-                      enrollmentIssue,
-                      c.student,
-                    )
-                    : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
+                {enrollmentIssue
+                  ? getClassEnrollmentIssueLabel(
+                    enrollmentIssue,
+                    c.student,
+                  )
+                  : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
               </span>
             </button>
           ) : (

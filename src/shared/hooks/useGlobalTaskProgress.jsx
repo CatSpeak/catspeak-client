@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentToken } from "@/store/slices/authSlice";
-import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { HubConnectionBuilder, LogLevel, HttpTransportType } from "@microsoft/signalr";
 import { updateTask, addTask } from "@/store/slices/globalTaskSlice";
 import { useGetActiveUserTasksQuery } from "@/store/api/taskProgressApi";
 import { store } from "@/store";
@@ -93,9 +93,11 @@ export const useGlobalTaskProgress = () => {
     const connection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => token,
+        transport:
+          HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling,
       })
       .withAutomaticReconnect()
-      .configureLogging(LogLevel.Warning)
+      .configureLogging(LogLevel.None)
       .build();
 
     connectionRef.current = connection;

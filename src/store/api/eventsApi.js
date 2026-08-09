@@ -58,7 +58,7 @@ export const eventsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET /api/v1/Events/{eventId}
     getEventById: builder.query({
-      query: (eventId) => `/v1/Events/${eventId}`,
+      query: (eventId) => `/teacher/EventsPublic/${eventId}`,
       transformResponse: fixOvernightEvents,
       providesTags: (result, error, eventId) => [
         { type: "Events", id: eventId },
@@ -67,7 +67,7 @@ export const eventsApi = baseApi.injectEndpoints({
 
     // GET /api/v1/Events/occurrences/{occurrenceId}
     getEventOccurrenceById: builder.query({
-      query: (occurrenceId) => `/v1/Events/occurrences/${occurrenceId}`,
+      query: (occurrenceId) => `/teacher/EventsPublic/occurrence/${occurrenceId}`,
       transformResponse: fixOvernightEvents,
       providesTags: (result, error, occurrenceId) => [
         { type: "Events", id: `occurrence-${occurrenceId}` },
@@ -77,7 +77,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // PUT /api/v1/Events/{eventId}
     updateEvent: builder.mutation({
       query: ({ eventId, payload }) => ({
-        url: `/v1/Events/${eventId}`,
+        url: `/teacher/Events/${eventId}`,
         method: "PUT",
         body: payload,
       }),
@@ -90,7 +90,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // DELETE /api/v1/Events/{eventId}
     deleteEvent: builder.mutation({
       query: (eventId) => ({
-        url: `/v1/Events/${eventId}`,
+        url: `/teacher/Events/${eventId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Events"], // Only invalidate lists, not the specific ID to prevent 404 refetch
@@ -99,7 +99,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // POST /api/v1/Events
     createEvent: builder.mutation({
       query: (formData) => ({
-        url: "/v1/Events",
+        url: "/teacher/Events",
         method: "POST",
         body: formData,
       }),
@@ -109,7 +109,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // PUT /api/v1/Events/{eventId}/occurrences/{occurrenceId}
     updateEventOccurrence: builder.mutation({
       query: ({ eventId, occurrenceId, ...data }) => ({
-        url: `/v1/Events/${eventId}/occurrences/${occurrenceId}`,
+        url: `/teacher/Events/${eventId}/occurrences/${occurrenceId}`,
         method: "PUT",
         body: data,
       }),
@@ -123,7 +123,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // PUT /api/v1/Events/{eventId}/series
     updateEventSeries: builder.mutation({
       query: ({ eventId, ...data }) => ({
-        url: `/v1/Events/${eventId}/series`,
+        url: `/teacher/Events/${eventId}/series`,
         method: "PUT",
         body: data,
       }),
@@ -136,7 +136,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // DELETE /api/v1/Events/{eventId}/occurrences/{occurrenceId}
     cancelEventOccurrence: builder.mutation({
       query: ({ eventId, occurrenceId, reason }) => ({
-        url: `/v1/Events/${eventId}/occurrences/${occurrenceId}`,
+        url: `/teacher/Events/${eventId}/occurrences/${occurrenceId}`,
         method: "DELETE",
         params: reason ? { reason } : undefined,
       }),
@@ -150,7 +150,7 @@ export const eventsApi = baseApi.injectEndpoints({
     // GET /api/v1/Events/counts
     getEventCounts: builder.query({
       query: (params) => ({
-        url: "/v1/Events/counts",
+        url: "/teacher/EventsPublic/daily-counts",
         params,
       }),
       providesTags: ["Events"],
@@ -158,24 +158,34 @@ export const eventsApi = baseApi.injectEndpoints({
 
     // GET /api/v1/Events/drafts
     getEventDrafts: builder.query({
-      query: () => "/v1/Events/drafts",
+      query: () => "/teacher/Events/drafts",
       providesTags: ["Events"],
     }),
 
     // GET /api/v1/Events/by-date
     getEventsByDate: builder.query({
       query: (params) => ({
-        url: "/v1/Events/by-date",
+        url: "/teacher/EventsPublic/by-date",
         params,
       }),
       // transformResponse: fixOvernightEvents,
       providesTags: ["Events"],
     }),
 
-    // GET /api/v1/Events/registered
+    // GET /api/v1/Events/registered (teacher)
     getRegisteredEvents: builder.query({
       query: (params) => ({
-        url: "/v1/Events/registered",
+        url: "/teacher/Events/registered",
+        params,
+      }),
+      transformResponse: fixOvernightEvents,
+      providesTags: getOccurrenceTags,
+    }),
+
+    // GET /api/student/EventRegistration/registered (student)
+    getStudentRegisteredEvents: builder.query({
+      query: (params) => ({
+        url: "/student/EventRegistration/registered",
         params,
       }),
       transformResponse: fixOvernightEvents,
@@ -185,31 +195,31 @@ export const eventsApi = baseApi.injectEndpoints({
     // GET /api/v1/Events/mine
     getMyEvents: builder.query({
       query: (params) => ({
-        url: "/v1/Events/mine",
+        url: "/teacher/Events/my-occurrences",
         params,
       }),
       transformResponse: fixOvernightEvents,
       providesTags: getOccurrenceTags,
     }),
 
-    // POST /api/v1/events/{occurrenceId}/shared-links
+    // POST /api/teacher/Events/occurrences/{occurrenceId}/shared-links
     createSharedLink: builder.mutation({
       query: ({ occurrenceId, ...body }) => ({
-        url: `/v1/events/${occurrenceId}/shared-links`,
+        url: `/teacher/Events/occurrences/${occurrenceId}/shared-links`,
         method: "POST",
         body,
       }),
     }),
 
-    // GET /api/v1/events/shared/{token}
+    // GET /api/teacher/EventsPublic/shared/{token}
     getSharedEvent: builder.query({
-      query: (token) => `/v1/events/shared/${token}`,
+      query: (token) => `/teacher/EventsPublic/shared/${token}`,
     }),
 
     // POST /api/v1/event/registration
     registerForEvent: builder.mutation({
       query: (body) => ({
-        url: "/v1/event/registration",
+        url: "/student/EventRegistration",
         method: "POST",
         body,
       }),
@@ -225,8 +235,8 @@ export const eventsApi = baseApi.injectEndpoints({
     // DELETE /api/v1/Events/{eventId}/registration
     cancelRegistration: builder.mutation({
       query: ({ eventId, ...body }) => ({
-        url: `/v1/Events/${eventId}/registration`,
-        method: "DELETE",
+        url: `/student/EventRegistration/${eventId}/cancel`,
+        method: "POST",
         body,
       }),
       invalidatesTags: (result, error, { eventId, occurrenceId }) => {
@@ -238,9 +248,9 @@ export const eventsApi = baseApi.injectEndpoints({
       },
     }),
 
-    // GET /api/v1/Events/occurrence/{occurrenceId}/register
+    // GET api/teacher/Events/occurrences/{occurrenceId}/registers
     getOccurrenceRegistrations: builder.query({
-      query: (occurrenceId) => `/v1/Events/occurrence/${occurrenceId}/register`,
+      query: (occurrenceId) => `/teacher/Events/occurrences/${occurrenceId}/registers`,
       providesTags: (result, error, occurrenceId) => [
         { type: "Events", id: `registrations-${occurrenceId}` },
         "Events",
@@ -270,6 +280,7 @@ export const {
   useGetEventCountsQuery,
   useGetEventsByDateQuery,
   useGetRegisteredEventsQuery,
+  useGetStudentRegisteredEventsQuery,
   useGetMyEventsQuery,
   useCreateSharedLinkMutation,
   useGetSharedEventQuery,

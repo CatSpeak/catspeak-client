@@ -4,6 +4,7 @@ import { useIsSpeaking } from "@livekit/components-react"
 import { MonitorUp, MicOff, VideoOff } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 // ─── Dominant Speaker Video ─────────────────────────────────────────────────
@@ -33,8 +34,7 @@ const DominantVideo = ({ participant }) => {
   }
 
   const meta = parseMetadata(participant?.metadata)
-  console.log("Participant Metadata [PiPVideoContent]:", meta)
-  const avatarUrl = meta?.avatarImageUrl
+  const avatarUrl = sanitizeAvatarUrl(meta?.avatarImageUrl)
 
   const theme = useMemo(
     () => getParticipantTheme(participant?.identity, displayName),

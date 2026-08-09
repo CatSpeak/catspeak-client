@@ -323,6 +323,10 @@ export default {
       "Quyền truy cập micro bị từ chối. Vui lòng cho phép trong cài đặt.",
     cameraPermissionDenied:
       "Quyền truy cập camera bị từ chối. Vui lòng cho phép trong cài đặt.",
+    webViewWarning:
+      "Bạn đang mở trong ứng dụng (Zalo/FB/Messenger). Vui lòng nhấn '...' chọn 'Mở bằng Safari' để dùng Micro và Camera.",
+    iosPermissionTip:
+      "Microphone đã bị trình duyệt chặn. Vui lòng nhấn vào Cài đặt trang web ở thanh địa chỉ để mở Micro.",
     deviceSettings: "Cài đặt thiết bị",
     selectMicrophone: "Chọn Micro",
     selectSpeaker: "Chọn Loa",
@@ -444,14 +448,26 @@ export default {
       title: "Mở trong trình duyệt",
       genericApp: "Ứng dụng này",
       description:
-        "Bạn đang dùng trình duyệt tích hợp của {app}, không hỗ trợ gọi video ổn định.",
-      instruction: "Cách tham gia:",
+        "Bạn đang dùng trình duyệt tích hợp của {app}, chưa được hỗ trợ đầy đủ.",
+      instruction: "Cách mở:",
       copyLink: "Sao chép liên kết",
       copied: "Đã sao chép!",
       openInChrome: "Mở bằng Chrome",
       step1: "Sao chép liên kết ở trên",
       step2: "Mở Chrome hoặc Safari",
-      step3: "Dán liên kết và tham gia cuộc gọi",
+      step3: "Dán liên kết vào trình duyệt của bạn",
+    },
+    errorBoundary: {
+      title: "Cuộc gọi video gặp lỗi",
+      defaultDescription:
+        "Đã xảy ra lỗi không mong muốn trong phiên gọi video.",
+      reloadPage: "Tải lại trang",
+      copyLog: "Sao chép nhật ký",
+      copied: "Đã sao chép!",
+      goHome: "Về trang chủ",
+      technicalDetails: "Chi tiết kỹ thuật",
+      stackTrace: "Dấu vết ngăn xếp:",
+      componentStack: "Ngăn xếp thành phần:",
     },
     inviteParticipant: "Mời tham gia phòng",
     sendInvite: "Gửi lời mời",

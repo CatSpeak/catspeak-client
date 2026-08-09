@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import {
   ChevronLeft,
@@ -27,7 +28,6 @@ import {
   getSafeFileUrl,
 } from "../../utils/assignmentUtils"
 import {
-  formatSubmissionDate,
   getSafeSubmissionErrorMessage,
   getValidAttachmentList,
   getValidDateMs,
@@ -112,6 +112,7 @@ const interpolate = (template, values) => Object.entries(values).reduce(
 
 const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignmentId: assignmentIdProp, classId, onBack }) => {
   const { language, t } = useLanguage()
+  const { formatDateTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const cg = c.grading || {}
@@ -705,12 +706,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
             <span className="font-semibold">
               {sa.deadlineLabel}{" "}
               <strong className="text-gray-700 font-extrabold">
-                {formatSubmissionDate(
-                  assignment.dueDate,
-                  language === "vi"
-                    ? "vi-VN"
-                    : (language === "zh" ? "zh-CN" : "en-US")
-                )}
+                {formatDateTime(assignment.dueDate)}
               </strong>
             </span>
           </div>
@@ -975,12 +971,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   {cg.submittedAtLabel}
                   <strong className="text-gray-600 font-extrabold">
                     {submission.submittedAt
-                      ? formatSubmissionDate(
-                        submission.submittedAt,
-                        language === "vi"
-                          ? "vi-VN"
-                          : (language === "zh" ? "zh-CN" : "en-US")
-                      )
+                      ? formatDateTime(submission.submittedAt)
                       : "—"}
                   </strong>
                 </span>

@@ -1,8 +1,5 @@
 import {
   formatCurrencyVND,
-  formatDateDayMonth,
-  formatTime12h,
-  formatUTCDate,
   getCourseGradientAndIcon,
 } from "./courseUtils"
 import { toLocalDateString } from "./dateUtils"
@@ -62,7 +59,7 @@ export const mapTeacherCourseSummary = (
   course,
   index,
   labels = {},
-  locale = "en-GB",
+  formatDate = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
 
@@ -80,12 +77,7 @@ export const mapTeacherCourseSummary = (
         ? "—"
         : fillTemplate(labels.studentsCount, { count: studentCount })
     })(),
-    createdAt: formatUTCDate(
-      course.createdAt,
-      locale,
-      SHORT_DATE_OPTIONS,
-      labels.tba,
-    ),
+    createdAt: formatDate ? (formatDate(course.createdAt) || labels.tba) : (labels.tba || "—"),
     status: course.status || "",
     icon,
     gradient,
@@ -97,7 +89,7 @@ export const mapTeacherClassSummary = (
   cls,
   index,
   labels = {},
-  locale = "en-GB",
+  formatDate = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const progress = getProgressPercent(cls.progress)
@@ -106,10 +98,12 @@ export const mapTeacherClassSummary = (
     id: cls.id,
     courseId: cls.courseId,
     title: cls.name || cls.title,
-    courseTitle: cls.courseName || cls.courseTitle || labels.notAvailable || "—",
+    courseTitle: cls.courseId
+      ? (cls.courseName || cls.courseTitle || labels.notAvailable || "—")
+      : null,
     language: cls.language || "",
     levels: Array.isArray(cls.levels) ? cls.levels : [],
-    schedule: formatScheduleDays(cls.schedule?.days, locale, labels.tba),
+    schedule: formatScheduleDays(cls.schedule?.days, labels.tba),
     time: cls.schedule?.startTime && cls.schedule?.endTime
       ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
       : labels.tba,
@@ -120,8 +114,8 @@ export const mapTeacherClassSummary = (
     slots: toNonNegativeNumber(cls.slots),
     progress,
     progressText: `${toDisplayCount(cls.progress?.completedSessions)}/${toDisplayCount(cls.progress?.totalSessions)}`,
-    startDate: formatUTCDate(cls.startDate, locale, SHORT_DATE_OPTIONS, labels.tba),
-    endDate: formatUTCDate(cls.endDate, locale, SHORT_DATE_OPTIONS, labels.tba),
+    startDate: formatDate ? (formatDate(cls.startDate) || labels.tba) : (labels.tba || "—"),
+    endDate: formatDate ? (formatDate(cls.endDate) || labels.tba) : (labels.tba || "—"),
     price: formatPrice(cls.tuitionFee, labels.tba),
     status: cls.status || "",
     icon,
@@ -134,7 +128,7 @@ export const mapCourseTableRow = (
   course,
   index,
   labels = {},
-  locale = "en-GB",
+  formatDate = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const classCount = toDisplayCount(course.classCount)
@@ -148,8 +142,8 @@ export const mapCourseTableRow = (
     classCount: fillTemplate(labels.classCount, { count: classCount }),
     students: fillTemplate(labels.studentsCount, { count: totalStudents }),
     progress: getProgressPercent(course.progress),
-    startDate: formatUTCDate(course.startDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
-    endDate: formatUTCDate(course.endDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
+    startDate: formatDate ? (formatDate(course.startDate) || labels.tba) : (labels.tba || "—"),
+    endDate: formatDate ? (formatDate(course.endDate) || labels.tba) : (labels.tba || "—"),
     price: minimumPrice !== null && maximumPrice !== null
       ? `${formatCurrencyVND(minimumPrice)} - ${formatCurrencyVND(maximumPrice)}`
       : labels.tba,
@@ -164,7 +158,7 @@ export const mapClassTableRow = (
   cls,
   index,
   labels = {},
-  locale = "en-GB",
+  formatDate = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
   const progress = getProgressPercent({
@@ -174,10 +168,12 @@ export const mapClassTableRow = (
 
   return {
     id: cls.id,
-    courseTitle: cls.courseTitle || cls.courseName || "—",
+    courseTitle: cls.courseId
+      ? (cls.courseTitle || cls.courseName || "—")
+      : null,
     classTitle: cls.title || cls.name,
     status: cls.status,
-    schedule: formatScheduleDays(cls.schedule?.days, locale, labels.tba, ", "),
+    schedule: formatScheduleDays(cls.schedule?.days, labels.tba, ", "),
     students: fillTemplate(labels.studentsRatio, {
       enrolled: toDisplayCount(cls.enrolledStudents ?? cls.studentCount),
       slots: toDisplayCount(cls.slots),
@@ -186,8 +182,8 @@ export const mapClassTableRow = (
       ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
       : labels.tba,
     progress,
-    startDate: formatUTCDate(cls.startDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
-    endDate: formatUTCDate(cls.endDate, locale, NUMERIC_DATE_OPTIONS, labels.tba),
+    startDate: formatDate ? (formatDate(cls.startDate) || labels.tba) : (labels.tba || "—"),
+    endDate: formatDate ? (formatDate(cls.endDate) || labels.tba) : (labels.tba || "—"),
     price: formatPrice(cls.tuitionFee, labels.tba),
     icon,
     gradient,
@@ -195,7 +191,13 @@ export const mapClassTableRow = (
   }
 }
 
-export const mapUpcomingSession = (session, index, classes = []) => {
+export const mapUpcomingSession = (
+  session,
+  index,
+  classes = [],
+  formatDate = null,
+  formatScheduleTime = null,
+) => {
   if (!session || typeof session !== "object" || Array.isArray(session)) {
     return null
   }
@@ -207,12 +209,16 @@ export const mapUpcomingSession = (session, index, classes = []) => {
     ? rawSessionLanguage.charAt(0) + rawSessionLanguage.slice(1).toLowerCase()
     : matchedClass?.language || ""
 
+  const start = formatScheduleTime ? formatScheduleTime(session.startTime) : session.startTime
+  const end = formatScheduleTime ? formatScheduleTime(session.endTime) : session.endTime
+  const timeStr = start && end ? `${start} - ${end}` : (start || end || "—")
+
   return {
     id: `sess-${classId}-${session.sessionNumber || index}`,
     classId,
     title: session.class?.name || matchedClass?.title || matchedClass?.name || "—",
-    time: `${formatTime12h(session.startTime)} - ${formatTime12h(session.endTime)}`,
-    date: formatDateDayMonth(session.date),
+    time: timeStr,
+    date: formatDate ? (formatDate(session.date) || "—") : (session.date || "—"),
     status: session.class?.status || matchedClass?.status || "",
     language: sessionLanguage,
     levels: Array.isArray(matchedClass?.levels) ? matchedClass.levels : [],
@@ -220,7 +226,13 @@ export const mapUpcomingSession = (session, index, classes = []) => {
   }
 }
 
-export const mapUpcomingSessions = (sessions = [], classes = [], limit = 3) => (
+export const mapUpcomingSessions = (
+  sessions = [],
+  classes = [],
+  limit = 3,
+  formatDate = null,
+  formatScheduleTime = null,
+) => (
   (Array.isArray(sessions) ? sessions : [])
     .slice()
     .sort((left, right) => {
@@ -241,6 +253,8 @@ export const mapUpcomingSessions = (sessions = [], classes = [], limit = 3) => (
       session,
       index,
       Array.isArray(classes) ? classes : [],
+      formatDate,
+      formatScheduleTime,
     ))
     .filter(Boolean)
     .slice(0, limit)

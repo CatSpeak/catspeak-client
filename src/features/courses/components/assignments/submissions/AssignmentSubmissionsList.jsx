@@ -15,6 +15,7 @@ import {
 
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 import {
   filterSubmissionStudents,
@@ -98,19 +99,15 @@ const AssignmentSubmissionsList = ({
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-xs text-gray-400 font-medium flex flex-wrap items-center gap-1.5">
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>{coursesTranslations.home}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.title}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace/courses")}>{coursesTranslations.allCourses?.title}</button>
-          <span>/</span>
-          <button type="button" className="cursor-pointer hover:underline" onClick={onBack}>{coursesTranslations.student?.classDetails}</button>
-          <span>/</span>
-          <span className="text-[#990011] font-semibold">{assignmentTitle}</span>
-        </div>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: coursesTranslations.home, onClick: () => navigate("/workspace") },
+          { label: coursesTranslations.title, onClick: () => navigate("/workspace/courses") },
+          { label: coursesTranslations.allCourses?.title, onClick: () => navigate("/workspace/courses") },
+          { label: coursesTranslations.student?.classDetails, onClick: onBack },
+          { label: assignmentTitle },
+        ]}
+      />
 
       <div className="flex items-center gap-3">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">

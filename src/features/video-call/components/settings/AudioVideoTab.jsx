@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from "react"
 import { Mic, Video, Volume2, Info } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import MicTestVisualizer from "./MicTestVisualizer"
+import {
+  buildAudioConstraint,
+  mapDevicesToOptions,
+} from "@/shared/utils/mediaConstraintUtils"
 
 const AudioVideoTab = ({
   waitingT = {},
@@ -40,7 +44,7 @@ const AudioVideoTab = ({
         } else {
           // Request temporary audio stream for testing
           const constraints = {
-            audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
+            audio: buildAudioConstraint(selectedMic),
           }
           const stream = await navigator.mediaDevices.getUserMedia(constraints)
           if (cancelled) {
@@ -94,30 +98,18 @@ const AudioVideoTab = ({
     }
   }, [isOpen])
 
-  const mapToOptions = (deviceList = [], icon, isAudio = false) => {
-    const options = deviceList.map((d) => ({
-      value: d.deviceId,
-      label: d.label || waitingT.unknownDevice || "Unknown Device",
-      icon: icon,
-    }))
-
-    if (isAudio) {
-      options.unshift({
-        value: "default",
-        label: waitingT.systemDefaultSpeaker || "System Default",
-        icon: icon,
-      })
-    }
-
-    return options
-  }
-
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
       <div className="flex flex-col gap-1">
         <span>{waitingT.selectMicrophone || "Microphone"}</span>
         <Dropdown
-          options={mapToOptions(devices.audioinput, <Mic size={20} />, true)}
+          options={mapDevicesToOptions(
+            devices.audioinput,
+            <Mic size={20} />,
+            true,
+            waitingT.systemDefaultSpeaker,
+            waitingT.unknownDevice
+          )}
           value={selectedMic}
           onChange={(val) => setSelectedMic?.(val)}
           placeholder={waitingT.selectMicrophone || "Select Microphone"}
@@ -130,10 +122,12 @@ const AudioVideoTab = ({
       <div className="flex flex-col gap-1">
         <span>{waitingT.selectSpeaker || "Speaker (Audio Output)"}</span>
         <Dropdown
-          options={mapToOptions(
+          options={mapDevicesToOptions(
             devices.audiooutput,
             <Volume2 size={20} />,
             true,
+            waitingT.systemDefaultSpeaker,
+            waitingT.unknownDevice
           )}
           value={selectedSpeaker}
           onChange={(val) => setSelectedSpeaker?.(val)}
@@ -159,7 +153,13 @@ const AudioVideoTab = ({
       <div className="flex flex-col gap-1">
         <span>{waitingT.selectCamera || "Camera"}</span>
         <Dropdown
-          options={mapToOptions(devices.videoinput, <Video size={20} />)}
+          options={mapDevicesToOptions(
+            devices.videoinput,
+            <Video size={20} />,
+            false,
+            waitingT.systemDefaultSpeaker,
+            waitingT.unknownDevice
+          )}
           value={selectedCamera}
           onChange={(val) => setSelectedCamera?.(val)}
           placeholder={waitingT.selectCamera || "Select Camera"}
@@ -182,7 +182,7 @@ const AudioVideoTab = ({
         ref={audioRef}
         autoPlay
         playsInline
-        muted={!testMic}
+        muted={true}
         className="hidden"
       />
     </div>

@@ -345,6 +345,10 @@ export default {
       "Microphone access denied. Please allow it in settings.",
     cameraPermissionDenied:
       "Camera access denied. Please allow it in settings.",
+    webViewWarning:
+      "You are in an in-app browser (Zalo/Facebook/Messenger). Tap '...' and select 'Open in Safari' to use your microphone and camera.",
+    iosPermissionTip:
+      "Microphone access is blocked. Please open Site Settings in your address bar to allow Microphone access.",
     deviceSettings: "Device Settings",
     selectMicrophone: "Select Microphone",
     selectSpeaker: "Select Speaker",
@@ -466,14 +470,26 @@ export default {
       title: "Open in Browser",
       genericApp: "This app",
       description:
-        "You're using {app}'s built-in browser, which doesn't support video calls properly.",
-      instruction: "How to join:",
+        "You're using {app}'s built-in browser, which isn't fully supported.",
+      instruction: "How to open:",
       copyLink: "Copy Link",
       copied: "Copied!",
       openInChrome: "Open in Chrome",
       step1: "Copy the link above",
       step2: "Open Chrome or Safari",
-      step3: "Paste the link and join the call",
+      step3: "Paste the link in your browser",
+    },
+    errorBoundary: {
+      title: "Video Call Encountered an Error",
+      defaultDescription:
+        "An unexpected error occurred during the video call session.",
+      reloadPage: "Reload Page",
+      copyLog: "Copy Log",
+      copied: "Copied!",
+      goHome: "Go to Home",
+      technicalDetails: "Technical Details",
+      stackTrace: "Stack Trace:",
+      componentStack: "Component Stack:",
     },
     inviteParticipant: "Invite participant",
     sendInvite: "Send invite",

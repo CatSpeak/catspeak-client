@@ -13,9 +13,11 @@ import TablePagination from "../components/shared/TablePagination"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapClassTableRow } from "../utils/courseTransforms"
 import { getCourseLocale } from "../utils/courseUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const AllClassesPage = () => {
   const { language, t } = useLanguage()
+  const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ac = c.allClasses || {}
   const navigate = useNavigate()
@@ -51,7 +53,7 @@ const AllClassesPage = () => {
         studentsRatio: ac.studentsRatio,
         tba: c.workspaceUi?.tba,
       },
-      getCourseLocale(language),
+      formatDate,
     ))
   const pagination = data?.pagination || { page: 1, pageSize: 5, totalItems: 0, totalPages: 1 }
   const isInitialLoading = (

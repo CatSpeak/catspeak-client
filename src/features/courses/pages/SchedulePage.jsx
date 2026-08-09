@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 import { getLocalizedLanguageName } from "../data/courseFormOptions"
 import {
   useGetAllClassesQuery,
@@ -18,20 +19,16 @@ import {
   Users,
 } from "lucide-react"
 
-import { formatUTCDate } from "../utils/courseUtils"
+
 import { toLocalDateString } from "../utils/dateUtils"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const SchedulePage = () => {
   const { language, t } = useLanguage()
+  const { formatDate, formatDateMonth } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const navigate = useNavigate()
-  const dateLocale = language === "vi"
-    ? "vi-VN"
-    : language === "zh"
-      ? "zh-CN"
-      : "en-GB"
 
   // Local State
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -210,34 +207,26 @@ const SchedulePage = () => {
       )}
 
       {/* ─── Breadcrumbs ─── */}
-      {/* <div className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
-        <button type="button" className="cursor-pointer hover:underline" onClick={() => navigate("/workspace")}>
-          {c.home || "Home"}
-        </button>
-        <span>/</span>
-        <span className="text-[#990011] font-semibold">
-          {c.teachingSchedule || "Teaching Schedule"}
-        </span>
-      </div> */}
       <Breadcrumb
         items={[
-          { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
-          { label: c.teachingSchedule || "Teaching Schedule" }
-        ]} />
+          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: c.teachingSchedule || "Teaching Schedule" },
+        ]}
+      />
 
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
           {c.teachingSchedule || "Teaching Schedule"}
         </h1>
-        <button
+        {/* <button
           type="button"
           onClick={() => navigate("/workspace/classes/create-class")}
           className="flex items-center justify-center gap-2 bg-[#990011] hover:bg-[#80000e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 shadow-sm hover:scale-[1.01] active:scale-95"
         >
           <Plus size={16} />
           <span>{c.createEvent || "Create Event"}</span>
-        </button>
+        </button> */}
       </div>
 
       {/* ─── Upcoming Section bar ─── */}
@@ -328,7 +317,7 @@ const SchedulePage = () => {
                   return (
                     <button
                       type="button"
-                    aria-label={date.toLocaleDateString(dateLocale)}
+                      aria-label={formatDate(date)}
                       aria-pressed={active}
                       key={idx}
                       onClick={() => setSelectedDate(date)}
@@ -370,7 +359,7 @@ const SchedulePage = () => {
           {/* Right Column: Classes Scheduled (Span 7 of 12) */}
           <div className="lg:col-span-7 flex flex-col gap-5">
             <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2 pb-1 border-b border-gray-100">
-              <span>{c.mySchedule || "My Schedule"}</span>
+              <span>{c.teachingSchedule || "My Schedule"}</span>
             </h3>
 
             {isLoading ? (
@@ -396,7 +385,7 @@ const SchedulePage = () => {
                 <span className="text-[11px] font-black text-gray-400 uppercase tracking-wider">
                   {viewMode === "grid"
                     ? `${MONTHS[month]} ${year}`
-                    : `${c.date || "Date"} ${selectedDate.toLocaleDateString(dateLocale, { day: "numeric", month: "numeric" })}`}
+                    : `${c.date || "Date"} ${formatDateMonth(selectedDate)}`}
                 </span>
 
                 {selectedDateClasses.map((cls) => {
@@ -463,11 +452,8 @@ const SchedulePage = () => {
                               ? (c.sessionOf
                                 ? c.sessionOf.replace("{{session}}", cls.sessionNumber).replace("{{total}}", cls.totalSessions)
                                 : `Session ${cls.sessionNumber} of ${cls.totalSessions}`)
-                              : formatUTCDate(
+                              : formatDate(
                                 cls.date || cls.startDate,
-                                dateLocale,
-                                { day: "2-digit", month: "short", year: "numeric" },
-                                ui.tba,
                               )
                             }
                           </span>

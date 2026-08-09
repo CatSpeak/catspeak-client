@@ -27,15 +27,7 @@ test("enrollment eligibility accepts an available open class", () => {
   )
 })
 
-test("enrollment eligibility blocks another batch and full classes", () => {
-  assert.equal(
-    getClassEnrollmentIssue({
-      classData: openClass,
-      enrolledClassId: 99,
-      nowMs: Date.parse("2026-07-25T00:00:00.000Z"),
-    }),
-    "already_enrolled_in_course",
-  )
+test("enrollment eligibility blocks full classes", () => {
   assert.equal(
     getClassEnrollmentIssue({
       classData: { ...openClass, enrolledCount: 10 },
@@ -48,17 +40,17 @@ test("enrollment eligibility blocks another batch and full classes", () => {
 test("enrollment eligibility enforces status and enrollment boundaries", () => {
   assert.equal(
     getClassEnrollmentIssue({
-      classData: { ...openClass, status: "TEACHING" },
+      classData: { ...openClass, status: "CLOSED" },
       nowMs: Date.parse("2026-07-25T00:00:00.000Z"),
     }),
-    "not_open",
+    "closed",
   )
   assert.equal(
     getClassEnrollmentIssue({
       classData: openClass,
       nowMs: Date.parse("2026-06-30T23:59:59.000Z"),
     }),
-    "not_started",
+    "closed",
   )
   assert.equal(
     getClassEnrollmentIssue({

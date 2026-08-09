@@ -19,6 +19,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useCreatePostInBulletinBoardMutation, useUpdatePostInBulletinBoardMutation, useGetPostDetailQuery, useGetClassDetailQuery } from "@/store/api/coursesApi"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getMaterialValidationError, getFileFingerprint } from "../utils/fileUtils"
 
 // ─── Helpers (reused pattern from CreatePostModal / AddMaterialModal) ────────
 
@@ -31,7 +32,7 @@ const CreatePostPage = () => {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const dict = t.courses.lectureHall
-  
+
   const isEditMode = !!postId
   const [createPost, { isLoading: isCreating }] = useCreatePostInBulletinBoardMutation()
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostInBulletinBoardMutation()
@@ -50,6 +51,7 @@ const CreatePostPage = () => {
   const [isPinned, setIsPinned] = useState(true)
   const [allowReply, setAllowReply] = useState(true)
   const [visibleToStudents, setVisibleToStudents] = useState(true)
+  const [errors, setErrors] = useState({})
 
   // Avatar / thumbnail image
   const [avatarPreview, setAvatarPreview] = useState("")
@@ -135,11 +137,40 @@ const CreatePostPage = () => {
   }
 
   const addAttachments = (files) => {
-    setAttachments((prev) => {
-      const remaining = MAX_ATTACHMENTS - prev.length
-      const toAdd = files.slice(0, remaining)
-      return [...prev, ...toAdd]
-    })
+    const validFiles = []
+    const addMaterialDict = t.courses?.lectureHall?.modals?.addMaterial || {}
+    const existingFingerprints = new Set(attachments.map(getFileFingerprint))
+    let hasDuplicate = false
+
+    for (const file of files) {
+      const fingerprint = getFileFingerprint(file)
+      const validationError = getMaterialValidationError(file)
+
+      if (existingFingerprints.has(fingerprint)) {
+        hasDuplicate = true
+      } else if (validationError === "size") {
+        toast.error(addMaterialDict.maxSize || "Dung lượng dưới 50MB")
+      } else if (validationError === "type") {
+        toast.error(addMaterialDict.toastInvalidFileType || "Định dạng không hợp lệ")
+      } else if (validationError) {
+        toast.error(addMaterialDict.toastInvalidFile || "Tệp không hợp lệ")
+      } else {
+        validFiles.push(file)
+        existingFingerprints.add(fingerprint)
+      }
+    }
+
+    if (hasDuplicate) {
+      toast.error(addMaterialDict.toastDuplicateFile || "Một số tệp đã tồn tại và bị bỏ qua")
+    }
+
+    const remaining = MAX_ATTACHMENTS - attachments.length
+    if (validFiles.length > remaining) {
+      toast.error(dict.toastMaxFiles || `Chỉ được tải lên tối đa ${MAX_ATTACHMENTS} tệp`)
+    }
+    const toAdd = validFiles.slice(0, remaining)
+
+    setAttachments((prev) => [...prev, ...toAdd])
   }
 
   const removeAttachment = (index) => {
@@ -149,15 +180,18 @@ const CreatePostPage = () => {
   // ─── Submit ───────────────────────────────────────────────────────────────
 
   const handleSubmit = async () => {
-    if (!title.trim()) {
-      toast.error(dict.createPost.toastTitleRequired)
-      return
-    }
+    const newErrors = {}
+    if (!title.trim()) newErrors.title = true
+    const cleanContent = content.replace(/<[^>]*>?/gm, '').trim()
+    if (!cleanContent) newErrors.content = true
 
-    if (!content.trim()) {
-      toast.error(dict.createPost.toastContentRequired)
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      if (newErrors.title) toast.error(dict.createPost.toastTitleRequired)
+      else if (newErrors.content) toast.error(dict.createPost.toastContentRequired)
       return
     }
+    setErrors({})
 
     const formData = new FormData()
     formData.append("Title", title)
@@ -207,10 +241,10 @@ const CreatePostPage = () => {
   }
 
   return (
-    <div className="min-h-screen p-6 space-y-6">
+    <div className="min-h-screen space-y-6">
       {/* ─── Breadcrumb ───────────────────────────────────────────────── */}
       <Breadcrumb
-        className="text-[#7B7979] text-sm"
+        className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
         items={[
           { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
           { label: dict.postDetail.breadcrumbs.myCourses, onClick: () => navigate("/workspace/courses") },
@@ -292,9 +326,13 @@ const CreatePostPage = () => {
             <TextInput
               value={title}
               required
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value)
+                if (errors.title) setErrors((prev) => ({ ...prev, title: false }))
+              }}
+              error={errors.title}
               placeholder={dict.createPost.postNamePlaceholder}
-              className="rounded-xl !h-[50px] px-4 text-sm"
+              className={`rounded-xl !h-[50px] px-4 text-sm ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
             />
           </div>
 
@@ -303,21 +341,26 @@ const CreatePostPage = () => {
             <label className="block text-base font-medium text-[#191C1D]">
               {dict.createPost.content}
             </label>
-            <Editor
-              tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
-              value={content}
-              onEditorChange={(newContent) => setContent(newContent)}
-              init={{
-                height: 300,
-                menubar: false,
-                statusbar: false,
-                plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
-                toolbar:
-                  "bold italic underline strikethrough | emoticons link | bullist numlist",
-                placeholder: dict.createPost.contentPlaceholder,
-                skin: "oxide",
-              }}
-            />
+            <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
+              <Editor
+                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
+                value={content}
+                onEditorChange={(newContent) => {
+                  setContent(newContent)
+                  if (errors.content) setErrors((prev) => ({ ...prev, content: false }))
+                }}
+                init={{
+                  height: 300,
+                  menubar: false,
+                  statusbar: false,
+                  plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
+                  toolbar:
+                    "bold italic underline strikethrough | emoticons link | bullist numlist",
+                  placeholder: dict.createPost.contentPlaceholder,
+                  skin: "oxide",
+                }}
+              />
+            </div>
           </div>
 
           {/* ── Attachments upload (pattern from CreatePostModal / AddMaterialModal) ── */}
@@ -335,7 +378,7 @@ const CreatePostPage = () => {
               type="file"
               ref={attachInputRef}
               onChange={handleAttachChange}
-              accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png"
+              accept=".pdf,.docx,.jpg,.png"
               className="hidden"
               multiple
             />
@@ -392,7 +435,7 @@ const CreatePostPage = () => {
           </div>
 
           {/* ── Toggle options (pattern from CreatePostModal) ── */}
-          <div className="space-y-0">
+          <div className="space-y-3">
             {/* Pin */}
             <ToggleOption
               icon={<Pin size={20} className="text-[#E2B60A]" />}

@@ -1,4 +1,5 @@
 import React, { useMemo } from "react"
+import { motion } from "framer-motion"
 import {
   Mic,
   MicOff,
@@ -14,13 +15,14 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantVolumePopover } from "./ParticipantVolumePopover"
 import { IconButton } from "@/shared/components/ui/buttons"
-import toast from "react-hot-toast"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import InviteParticipantModal from "./InviteParticipantModal"
 import { useNavigate } from "react-router-dom"
+import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 /**
  * A single row in the participant list.
@@ -28,7 +30,13 @@ import { useNavigate } from "react-router-dom"
  */
 const ParticipantItem = ({ participant }) => {
   const { t } = useLanguage()
-  const navigate = useNavigate()
+  let navigate
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    navigate = useNavigate()
+  } catch {
+    navigate = getNavigate()
+  }
   const {
     micOn: localMicOn,
     cameraOn: localCameraOn,
@@ -57,13 +65,9 @@ const ParticipantItem = ({ participant }) => {
   const meta = parseMetadata(participant.metadata)
   const accountId = meta.accountId || (isLocal ? user?.accountId : null)
   const isHandRaised = meta.handRaised === true
-  const avatarUrl = meta.avatarImageUrl
+  const avatarUrl = sanitizeAvatarUrl(meta.avatarImageUrl)
 
-  const isParticipantHost =
-    isCustomRoom(room?.roomType) &&
-    room?.creatorId != null &&
-    accountId != null &&
-    String(accountId) === String(room.creatorId)
+  const isParticipantHost = isRoomHost(room, accountId)
 
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
@@ -79,11 +83,8 @@ const ParticipantItem = ({ participant }) => {
         size={40}
         name={name}
         src={avatarUrl}
-        className={`${
-          isSpeaking
-            ? "ring-2 ring-[#3D9E60] ring-offset-1 ring-offset-white transition-all duration-200"
-            : ""
-        } ${theme?.avatarClass || ""}`}
+        speaking={isSpeaking}
+        className={theme?.avatarClass || ""}
       />
     </div>
   )
@@ -91,9 +92,19 @@ const ParticipantItem = ({ participant }) => {
   const rightContent = (
     <div className="flex items-center gap-2 shrink-0">
       {isHandRaised && (
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50">
+        <motion.div
+          animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.5,
+            ease: "easeInOut",
+            repeatDelay: 1,
+          }}
+          style={{ originX: 0.7, originY: 0.7 }}
+          className="flex flex-shrink-0 items-center justify-center"
+        >
           <Hand size={18} className="text-amber-500" />
-        </span>
+        </motion.div>
       )}
       {isMicOn ? (
         <Mic size={20} className="text-cath-red-700" />
