@@ -32,12 +32,12 @@ const RoomSettingsModal = ({
   const tabs = [
     {
       id: "audio-video",
-      label: waitingT.deviceSettings || "Audio & Video",
+      label: waitingT.deviceSettingsTab || "Cài đặt thiết bị",
       icon: Mic,
     },
     {
       id: "general",
-      label: "General",
+      label: waitingT.generalTab || "Chung",
       icon: Settings,
     },
   ]
@@ -46,7 +46,7 @@ const RoomSettingsModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title={waitingT.deviceSettings || "Cài đặt phòng họp"}
+      title={waitingT.deviceSettings || "Cài đặt"}
       className="md:max-w-[920px] w-full flex flex-col h-full md:!h-[560px] max-h-none md:max-h-[80vh]"
       headerClassName="flex items-center justify-between p-4 sm:p-6 border-b border-[#E5E5E5] shrink-0"
       bodyClassName="p-0 flex-1 overflow-hidden flex flex-col min-h-0"

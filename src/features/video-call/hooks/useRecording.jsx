@@ -49,6 +49,18 @@ export function useRecording(lkRoom = null, syncState = {}) {
     }
 
     if (isTogglingRecording) return // debounce double-click
+
+    const isMemberRecordingAllowed =
+      localStorage.getItem("catspeak_member_recording_allowed") !== "false"
+
+    if (!isRecording && !isMemberRecordingAllowed) {
+      toast.error(
+        t.rooms?.videoCall?.recordingDisabledByHost ||
+          "Host đã tắt quyền ghi hình phòng họp đối với thành viên."
+      )
+      return
+    }
+
     setIsTogglingRecording(true)
 
     try {

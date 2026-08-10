@@ -7,6 +7,9 @@ import Popover from "@/shared/components/ui/Popover"
 import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
 import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
+import { toast } from "react-hot-toast"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 
 const ChatInput = ({
@@ -24,6 +27,26 @@ const ChatInput = ({
   const { t } = useLanguage()
   const { sendAiMessage, isBlocked: isAiBlocked } = useAiSend()
   const { insertEmoji, addRecent } = useEmojiPicker()
+  const { room, user, isHost: isHostFromContext } = useGlobalVideoCall()
+  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
+
+  const [isMemberPrivateAiAllowed, setIsMemberPrivateAiAllowed] = React.useState(() => {
+    return localStorage.getItem("catspeak_member_private_ai_allowed") !== "false"
+  })
+
+  React.useEffect(() => {
+    const handlePrivateAiChange = () => {
+      const allowed = localStorage.getItem("catspeak_member_private_ai_allowed") !== "false"
+      setIsMemberPrivateAiAllowed(allowed)
+      if (!isHost && !allowed) {
+        setIsPrivateAi(false)
+      }
+    }
+    window.addEventListener("catspeak_member_private_ai_allowed_changed", handlePrivateAiChange)
+    return () => {
+      window.removeEventListener("catspeak_member_private_ai_allowed_changed", handlePrivateAiChange)
+    }
+  }, [isHost])
 
   const hasContent = message.trim().length > 0
 
@@ -36,6 +59,15 @@ const ChatInput = ({
 
     if (isAiInput) {
       if (isAiBlocked) {
+        sendingRef.current = false
+        return
+      }
+
+      if (!isHost && isPrivateAi && !isMemberPrivateAiAllowed) {
+        toast.error(
+          t.rooms?.general?.privateAiDisabledByHost ||
+            "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
+        )
         sendingRef.current = false
         return
       }
@@ -126,7 +158,16 @@ const ChatInput = ({
             <div className="origin-left flex items-center justify-center">
               <Switch
                 checked={isPrivateAi}
-                onChange={(e) => setIsPrivateAi(e.target.checked)}
+                onChange={(e) => {
+                  if (!isHost && !isMemberPrivateAiAllowed && e.target.checked) {
+                    toast.error(
+                      t.rooms?.general?.privateAiDisabledByHost ||
+                        "Host đã tắt quyền sử dụng AI Chat riêng tư đối với thành viên."
+                    )
+                    return
+                  }
+                  setIsPrivateAi(e.target.checked)
+                }}
                 colorClass="peer-checked:bg-red-700"
               />
             </div>

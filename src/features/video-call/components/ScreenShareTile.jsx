@@ -5,6 +5,7 @@ import Slider from "@/shared/components/ui/Slider"
 import { Track } from "livekit-client"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Renders a shared screen using LiveKit track.attach().
@@ -25,7 +26,8 @@ const ScreenShareTile = ({
   const idleTimerRef = useRef(null)
 
   const participant = trackRef?.participant
-  const { isPiP } = useGlobalVideoCall()
+  const { room, user, isHost: isHostFromContext, isPiP } = useGlobalVideoCall()
+  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   // Volume state (0 to 1)
   const [volume, setVolume] = useState(1)

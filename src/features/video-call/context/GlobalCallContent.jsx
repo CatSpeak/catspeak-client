@@ -26,6 +26,7 @@ import {
   useParticipantList,
   parseMetadata,
 } from "@/features/video-call/hooks/useParticipantList"
+import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
@@ -494,18 +495,83 @@ const GlobalCallContent = ({
           (data.targetIdentity != null &&
             String(data.targetIdentity) === localIdent)
 
+        const pl = t.rooms?.videoCall?.participantList || {}
+        const isHost = isRoomHost(roomData, user?.accountId)
+
+        if (data.action === "MUTE_ALL" && !isHost) {
+          if (localParticipant) {
+            localParticipant.setMicrophoneEnabled(false)
+            toast.error(pl.hostMutedAll || "Host đã tắt tiếng tất cả mọi người trong phòng.")
+          }
+          return
+        }
+
+        if (data.action === "LOWER_ALL_HANDS") {
+          if (localParticipant) {
+            safeSetLiveKitMetadata(localParticipant, { handRaised: false, handRaisedAt: 0 })
+          }
+          actions.setIsHandRaised?.(false)
+          toast.info(pl.hostLoweredAllHands || "Host đã hạ tất cả các tay xuống.")
+          return
+        }
+
+        if (data.action === "TOGGLE_JOIN_SOUND") {
+          localStorage.setItem(
+            "catspeak_join_leave_sound",
+            data.enabled ? "true" : "false"
+          )
+          window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
+          toast.info(
+            data.enabled
+              ? (pl.hostEnabledJoinSound || "Host đã BẬT âm thanh khi có người vào/ra phòng.")
+              : (pl.hostDisabledJoinSound || "Host đã TẮT âm thanh khi có người vào/ra phòng.")
+          )
+          return
+        }
+
+        if (data.action === "TOGGLE_MEMBER_RECORDING") {
+          localStorage.setItem(
+            "catspeak_member_recording_allowed",
+            data.allowed ? "true" : "false"
+          )
+          window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
+          toast.info(
+            data.allowed
+              ? (pl.hostAllowedRecording || "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
+              : (pl.hostDisabledRecording || "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
+          )
+          return
+        }
+
+        if (data.action === "TOGGLE_MEMBER_PRIVATE_AI") {
+          localStorage.setItem(
+            "catspeak_member_private_ai_allowed",
+            data.allowed ? "true" : "false"
+          )
+          window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
+          toast.info(
+            data.allowed
+              ? (pl.hostAllowedPrivateAi || "Host đã CHO PHÉP thành viên sử dụng AI Chat riêng tư.")
+              : (pl.hostDisabledPrivateAi || "Host đã TẮT quyền sử dụng AI Chat riêng tư đối với thành viên.")
+          )
+          return
+        }
+
         if (!isTarget) return
 
         if (data.action === "KICK_PARTICIPANT") {
-          toast.error("Bạn đã bị Host mời ra khỏi phòng.", { duration: 5000 })
+          toast.error(pl.kickedByHost || "Bạn đã bị Host mời ra khỏi phòng.", { duration: 5000 })
           actions.handleLeaveSession()
         } else if (data.action === "MUTE_PARTICIPANT") {
           if (data.trackKind === "audio" && localParticipant) {
             localParticipant.setMicrophoneEnabled(false)
-            toast.error("Host đã tắt mic của bạn.")
+            toast.error(pl.hostMutedMic || "Host đã tắt mic của bạn.")
           } else if (data.trackKind === "video" && localParticipant) {
             localParticipant.setCameraEnabled(false)
-            toast.error("Host đã tắt camera của bạn.")
+            toast.error(pl.hostMutedCam || "Host đã tắt camera của bạn.")
+          } else if ((data.trackKind === "screen" || data.trackKind === "screen_share") && localParticipant) {
+            localParticipant.setScreenShareEnabled(false)
+            toast.error(pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn.")
           }
         }
       } catch (err) {
@@ -513,11 +579,35 @@ const GlobalCallContent = ({
       }
     }
 
+    const handleParticipantJoined = (participant) => {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext
+        if (!AudioContext) return
+        const ctx = new AudioContext()
+        const now = ctx.currentTime
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = "sine"
+        osc.frequency.setValueAtTime(523.25, now)
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15)
+        gain.gain.setValueAtTime(0.15, now)
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(now)
+        osc.stop(now + 0.3)
+      } catch (e) {
+        // autoplay restriction fallback
+      }
+    }
+
     lkRoom.on(RoomEvent.DataReceived, handleModerationData)
+    lkRoom.on(RoomEvent.ParticipantConnected, handleParticipantJoined)
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
+      lkRoom.off(RoomEvent.ParticipantConnected, handleParticipantJoined)
     }
-  }, [lkRoom, localParticipant, user?.accountId, actions])
+  }, [lkRoom, localParticipant, user?.accountId, roomData, actions])
 
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId

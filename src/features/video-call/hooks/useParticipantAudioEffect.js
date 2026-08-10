@@ -59,12 +59,18 @@ export const useParticipantAudioEffect = (participants) => {
         ),
     )
 
-    if (newlyJoined.length > 0) {
-      // Play join audio
-      playGlobalSound("join")
-    } else if (recentlyLeft.length > 0) {
-      // Play leave audio
-      playGlobalSound("leave")
+    const isSoundEnabled =
+      typeof window === "undefined" ||
+      localStorage.getItem("catspeak_join_leave_sound") !== "false"
+
+    if (isSoundEnabled) {
+      if (newlyJoined.length > 0) {
+        // Play join audio
+        playGlobalSound("join")
+      } else if (recentlyLeft.length > 0) {
+        // Play leave audio
+        playGlobalSound("leave")
+      }
     }
 
     prevParticipantsRef.current = currentParticipants
