@@ -1,68 +1,86 @@
-import React, { useState } from "react";
-import { Video, FileText } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react"
+import { Video, FileText } from "lucide-react"
 
 import {
   useUpdatePostMutation,
   useDeletePostMutation,
-} from "../../../store/api/social/profilePostsApi";
-import { useReactToPostMutation } from "@/store/api/social/postsApi";
-import useSharePost from "@/shared/hooks/useSharePost";
-import FluentCard from "@/shared/components/ui/FluentCard";
-import PostEditorModal from "./PostEditorModal";
-import ShareModal from "@/features/news/components/ShareModal";
-import CommentsSection from "@/features/news/components/CommentsSection";
-import PostContent from "@/features/news/components/PostContent";
-import PostHeader from "./PostHeader";
-import PostActionBar from "./PostActionBar";
-import { useLanguage } from "@/shared/context/LanguageContext";
+} from "../../../store/api/social/profilePostsApi"
+import { useReactToPostMutation } from "@/store/api/social/postsApi"
+import useSharePost from "@/shared/hooks/useSharePost"
+import FluentCard from "@/shared/components/ui/FluentCard"
+import PostEditorModal from "./PostEditorModal"
+import ShareModal from "@/features/news/components/ShareModal"
+import CommentsSection from "@/features/news/components/CommentsSection"
+import PostContent from "@/features/news/components/PostContent"
+import PostHeader from "./PostHeader"
+import PostActionBar from "./PostActionBar"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfilePostCard = ({ post, isOwnProfile }) => {
-  const { t } = useLanguage();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const { t } = useLanguage()
+  const [isEditing, setIsEditing] = useState(false)
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isOverflowing, setIsOverflowing] = useState(false)
+  const contentRef = useRef(null)
+
+  useEffect(() => {
+    const el = contentRef.current
+    if (!el) return
+
+    const checkOverflow = () => {
+      if (!isExpanded) {
+        setIsOverflowing(el.scrollHeight > el.clientHeight + 1)
+      }
+    }
+
+    checkOverflow()
+    const observer = new ResizeObserver(checkOverflow)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [post?.content, isExpanded])
   const {
     shareUrl,
     isShareModalOpen,
     setIsShareModalOpen,
     handleShare: triggerShare,
-  } = useSharePost();
+  } = useSharePost()
 
-  const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
-  const [deletePost] = useDeletePostMutation();
-  const [reactToPost] = useReactToPostMutation();
+  const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation()
+  const [deletePost] = useDeletePostMutation()
+  const [reactToPost] = useReactToPostMutation()
 
   const handleUpdatePost = async (formData) => {
     try {
-      await updatePost({ postId: post.postId, formData }).unwrap();
-      setIsEditing(false);
+      await updatePost({ postId: post.postId, formData }).unwrap()
+      setIsEditing(false)
     } catch (error) {
-      console.error("Failed to update post:", error);
+      console.error("Failed to update post:", error)
     }
-  };
+  }
 
   const handleDeletePost = async () => {
     if (
       window.confirm(
-        t.profile?.post?.deleteConfirm ||
-          "Bạn có chắc muốn xóa bài viết này?",
+        t.profile?.post?.deleteConfirm || "Bạn có chắc muốn xóa bài viết này?",
       )
     ) {
       try {
-        await deletePost(post.postId).unwrap();
+        await deletePost(post.postId).unwrap()
       } catch (error) {
-        console.error("Failed to delete post:", error);
+        console.error("Failed to delete post:", error)
       }
     }
-  };
+  }
 
   const handleReact = (e, type) => {
-    e.stopPropagation();
-    reactToPost({ postId: post.postId, type });
-  };
+    e.stopPropagation()
+    reactToPost({ postId: post.postId, type })
+  }
 
   const handleShare = (e) => {
-    triggerShare(e, post?.postId);
-  };
+    triggerShare(e, post?.postId)
+  }
 
   return (
     <>
@@ -79,7 +97,25 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
         )}
 
         {post.content && (
-          <PostContent html={post.content} className="text-sm text-[#606060]" />
+          <div>
+            <div
+              ref={contentRef}
+              className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
+            >
+              <PostContent html={post.content} className="text-sm text-[#606060]" />
+            </div>
+            {(isOverflowing || isExpanded) && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded((prev) => !prev)}
+                className="inline-flex items-center min-h-[48px] -my-1.5 py-1.5 px-1 -mx-1 text-sm font-semibold text-cath-red-700 hover:text-cath-red-800 hover:underline focus:outline-none cursor-pointer touch-manipulation"
+              >
+                {isExpanded
+                  ? t.profile?.post?.showLess || "Thu gọn"
+                  : t.profile?.post?.seeMore || "Xem thêm"}
+              </button>
+            )}
+          </div>
         )}
 
         {post.media && post.media.length > 0 && (
@@ -170,7 +206,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
         onSubmit={handleUpdatePost}
       />
     </>
-  );
-};
+  )
+}
 
-export default ProfilePostCard;
+export default ProfilePostCard

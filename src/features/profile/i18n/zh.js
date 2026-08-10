@@ -131,6 +131,8 @@ export default {
       },
       deleteConfirm: "确定要删除这篇帖子吗？",
       document: "文件",
+      seeMore: "查看更多",
+      showLess: "收起",
     },
   },
 }

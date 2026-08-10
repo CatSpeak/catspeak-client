@@ -131,6 +131,8 @@ export default {
       },
       deleteConfirm: "Are you sure you want to delete this post?",
       document: "Document",
+      seeMore: "See more",
+      showLess: "Show less",
     },
   },
 }
