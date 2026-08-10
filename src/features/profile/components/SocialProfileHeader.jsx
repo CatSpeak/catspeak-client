@@ -39,7 +39,7 @@ const SocialProfileHeader = ({
   const username = formData?.username || user?.username;
   const displayName = nickname || username || "Lorem Ipsum";
   const handle = nickname ? username : null;
-  const bio = "Bio description"; // Mocked for now
+  // const bio = "Bio description"; // Mocked for now
   const location = formData?.location || user?.location;
 
   // API Hooks
