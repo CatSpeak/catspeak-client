@@ -1,5 +1,6 @@
-import { useMemo, useRef, useEffect } from "react"
+import React, { useMemo, useRef, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import toast from "react-hot-toast"
 import {
   conversationsApi,
   useGetConversationsQuery,
@@ -10,7 +11,12 @@ import {
   incrementUnread,
   setFriendOnlineStatus,
 } from "@/store/slices/notificationSlice"
-import { friendshipApi } from "@/store/api/social/friendshipApi"
+import {
+  friendshipApi,
+  useRespondFriendRequestMutation,
+} from "@/store/api/social/friendshipApi"
+import FriendRequestToast from "@/features/profile/components/FriendRequestToast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import useConversationSignalR from "./useConversationSignalR"
 
 /**
@@ -20,6 +26,8 @@ import useConversationSignalR from "./useConversationSignalR"
  */
 export const useGlobalSignalR = () => {
   const dispatch = useDispatch()
+  const { t: tLanguage } = useLanguage()
+  const [respondFriendRequest] = useRespondFriendRequestMutation()
   const activeConversationId = useSelector(
     (state) => state.messageWidget.activeConversationId,
   )
@@ -41,6 +49,7 @@ export const useGlobalSignalR = () => {
   // without creating a circular dependency (invoke comes from useConversationSignalR
   // which needs handlers, but handlers need invoke).
   const invokeRef = useRef(null)
+  const activeFriendToastIdsRef = useRef([])
 
   // Single internal helper for presence updates
   const handleStatusUpdate = (data, forcedStatus = null) => {
@@ -230,11 +239,98 @@ export const useGlobalSignalR = () => {
       UserOnline: (data) => handleStatusUpdate(data, true),
       UserOffline: (data) => handleStatusUpdate(data, false),
 
-      NewFriendRequest: () => {
+      NewFriendRequest: async (data) => {
         dispatch(friendshipApi.util.invalidateTags(["FriendRequest"]))
+
+        let friendshipId = data?.friendshipId || data?.id
+        let sender =
+          data?.requester ||
+          data?.sender ||
+          data?.user ||
+          (typeof data === "object" ? data : null)
+
+        // If payload lacks details, fetch latest pending request from API
+        if (!sender?.nickname && !sender?.username && !friendshipId) {
+          try {
+            const result = await dispatch(
+              friendshipApi.endpoints.getPendingFriendRequests.initiate(
+                undefined,
+                { forceRefetch: true },
+              ),
+            ).unwrap()
+            const list = Array.isArray(result) ? result : result?.data || []
+            if (list.length > 0) {
+              const latest = list[list.length - 1] || list[0]
+              friendshipId = latest.friendshipId
+              sender = latest.requester || latest.user || latest
+            }
+          } catch (err) {
+            console.warn(
+              "[GlobalSignalR] Could not fetch latest pending friend request:",
+              err,
+            )
+          }
+        }
+
+        const toastId = `friend-request-${friendshipId || Date.now()}`
+
+        // Track and limit active friend request toasts to maximum 3 (FIFO)
+        activeFriendToastIdsRef.current = activeFriendToastIdsRef.current.filter(
+          (id) => id !== toastId,
+        )
+        activeFriendToastIdsRef.current.push(toastId)
+
+        // Dismiss oldest if more than 3
+        while (activeFriendToastIdsRef.current.length > 3) {
+          const oldestToastId = activeFriendToastIdsRef.current.shift()
+          if (oldestToastId) {
+            toast.dismiss(oldestToastId)
+          }
+        }
+
+        const handleRemoveToast = (id) => {
+          activeFriendToastIdsRef.current = activeFriendToastIdsRef.current.filter(
+            (tId) => tId !== id,
+          )
+          toast.dismiss(id)
+        }
+
+        toast.custom(
+          (t) =>
+            React.createElement(FriendRequestToast, {
+              toastInstance: t,
+              friendshipId: friendshipId,
+              sender: sender,
+              onClose: () => handleRemoveToast(t.id),
+              onRespond: async (action) => {
+                handleRemoveToast(t.id)
+                try {
+                  await respondFriendRequest({ friendshipId, action }).unwrap()
+                  toast.success(
+                    action === "accept"
+                      ? tLanguage.profile?.friends?.actions?.acceptSuccess ||
+                          "Đã chấp nhận kết bạn!"
+                      : tLanguage.profile?.friends?.actions?.declineSuccess ||
+                          "Đã từ chối kết bạn",
+                  )
+                } catch (err) {
+                  toast.error(
+                    tLanguage.profile?.friends?.actions?.error ||
+                      "Có lỗi xảy ra",
+                  )
+                  console.error(err)
+                }
+              },
+            }),
+          {
+            id: toastId,
+            duration: 10000,
+            position: "top-right",
+          },
+        )
       },
     }),
-    [dispatch, activeConversationId, isWidgetOpen],
+    [dispatch, activeConversationId, isWidgetOpen, respondFriendRequest, tLanguage],
   )
 
   // Define the helper here and assign it so we cover multiple possible event names

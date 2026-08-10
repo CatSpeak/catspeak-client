@@ -15,6 +15,7 @@ export default {
       processing: "Processing...",
       followSuccess: "Followed successfully",
       unfollowSuccess: "Unfollowed successfully",
+      friendRequestReceived: "sent you a friend request",
     },
     personalInfo: {
       title: "Personal Information",
