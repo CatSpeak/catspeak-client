@@ -1,13 +1,16 @@
-import React, { useState } from "react"
-import { Calendar, Clock, Share2, Check } from "lucide-react"
-import CountdownTicker from "../CountdownTicker"
-import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
-import { copyShareLink } from "@/shared/utils/shareUtils"
-import { useTimezone } from "@/shared/hooks/useTimezone"
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
-import "react-circular-progressbar/dist/styles.css"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { getLocalizedLanguageName } from "../../data/courseFormOptions"
+import React, { useState } from "react";
+import { Calendar, Clock, Share2, Check } from "lucide-react";
+import CountdownTicker from "../CountdownTicker";
+import {
+  defaultCourseThumbnail,
+  getSafeMediaUrl,
+} from "../../utils/courseUtils";
+import { copyShareLink } from "@/shared/utils/shareUtils";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { getLocalizedLanguageName } from "../../data/courseFormOptions";
 
 const StudentClassOverviewTab = ({
   classData,
@@ -25,78 +28,71 @@ const StudentClassOverviewTab = ({
   const scd = c.studentCourseDetail || {};
   const ui = c.workspaceUi || {};
 
-  const [linkCopied, setLinkCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false);
   const handleCopyLink = async () => {
     const ok = await copyShareLink({
       successMessage: cd.linkCopied || "Link copied!",
       errorMessage: cd.linkCopyFailed || "Failed to copy link",
-    })
+    });
     if (ok) {
-      setLinkCopied(true)
-      setTimeout(() => setLinkCopied(false), 2000)
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
     }
-  }
+  };
 
   const completedValue = classData.progress
     ? classData.progress.completedSessions
-    : classData.completedSessions
+    : classData.completedSessions;
   const totalValue = classData.progress
     ? classData.progress.totalSessions
-    : classData.totalSessions
+    : classData.totalSessions;
   const completedSessions =
     completedValue != null && Number.isFinite(Number(completedValue))
       ? Math.max(0, Number(completedValue))
-      : null
+      : null;
   const totalSessions =
     Number.isFinite(Number(totalValue)) && Number(totalValue) > 0
       ? Number(totalValue)
-      : 0
+      : 0;
   const progressPercent =
     totalSessions > 0 && completedSessions !== null
       ? Math.min(100, Math.round((completedSessions / totalSessions) * 100))
-      : null
-  const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl)
+      : null;
+  const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl);
   const instructor =
     classData.instructor && typeof classData.instructor === "object"
       ? classData.instructor
-      : null
+      : null;
   const instructorName = String(
     instructor?.fullName ??
-<<<<<<< HEAD
-    instructor?.name ??
-    classData.instructorName ??
-    classData.teacherName ??
-    "",
-  ).trim();
-=======
       instructor?.name ??
       classData.instructorName ??
       classData.teacherName ??
       "",
-  ).trim()
->>>>>>> hotfix/loc/max-room-participant
+  ).trim();
   const instructorBio = String(
     instructor?.bio ?? instructor?.description ?? "",
-  ).trim()
+  ).trim();
   const instructorAvatarCandidate = String(
     instructor?.avatarUrl ?? instructor?.avatar ?? "",
-  ).trim()
-  const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || ""
+  ).trim();
+  const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || "";
   const nextSession =
     classData.nextSession?.date &&
-      (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
+    (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
       ? classData.nextSession
-      : null
-  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime
-  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime
+      : null;
+  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime;
+  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime;
   const sessionDate =
     nextSession?.date ||
     (nextSession?.rawStartTime &&
-      (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
+    (nextSession.rawStartTime.includes("T") ||
+      nextSession.rawStartTime.includes("-"))
       ? nextSession.rawStartTime
-      : null)
+      : null);
 
-  const showRightColumn = isEnrolled
+  const showRightColumn = isEnrolled;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -172,9 +168,9 @@ const StudentClassOverviewTab = ({
                   {formatDateMonth(classData.startDate, ui.tba)}
                   {totalSessions > 0
                     ? ` • ${(ui.sessionsCount || "{{count}} sessions").replace(
-                      "{{count}}",
-                      String(totalSessions),
-                    )}`
+                        "{{count}}",
+                        String(totalSessions),
+                      )}`
                     : ""}
                 </span>
               </div>
@@ -225,7 +221,12 @@ const StudentClassOverviewTab = ({
             {nextSession ? (
               <>
                 <CountdownTicker
-                  targetDate={nextSession?.rawStartTime || (nextSession?.date && nextSession?.startTime ? `${nextSession.date}T${nextSession.startTime}` : null)}
+                  targetDate={
+                    nextSession?.rawStartTime ||
+                    (nextSession?.date && nextSession?.startTime
+                      ? `${nextSession.date}T${nextSession.startTime}`
+                      : null)
+                  }
                 />
 
                 <div className="flex flex-col gap-4">
@@ -313,7 +314,7 @@ const StudentClassOverviewTab = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default StudentClassOverviewTab
+export default StudentClassOverviewTab;
