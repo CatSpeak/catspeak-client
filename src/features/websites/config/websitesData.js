@@ -100,15 +100,6 @@ export const websites = [
         description:
           "A journey to enhance knowledge about your favorite brands.",
       },
-      {
-        key: "wordwall",
-        label: "Wordwall",
-        path: "/resources/wordwall",
-        img: "https://app.cdn.wordwall.net/static/content/images/favicon.2evmh0qrg1aqcgft8tddfea2.ico",
-        color: "#36b8ff",
-        description:
-          "Create interactive quizzes, matching games, flashcards, and 30+ activity types in minutes. Used by millions of teachers in 96 countries.",
-      },
     ],
   },
   {

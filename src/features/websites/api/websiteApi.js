@@ -67,11 +67,6 @@ const resources = [
     lang: "en",
     url: "https://play.questsme.com/",
   },
-  {
-    id: "wordwall",
-    lang: "en",
-    url: "https://wordwall.net/",
-  },
   // 3. Luyện nghe
   {
     id: "elllo",
