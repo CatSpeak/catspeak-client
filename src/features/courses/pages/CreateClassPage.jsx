@@ -1,5 +1,12 @@
 import React, { useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import { Editor } from "@tinymce/tinymce-react"
@@ -36,6 +43,7 @@ import {
 import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 import { useClassFormReducer } from "../hooks/useClassFormReducer"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -49,6 +57,7 @@ const DAYS_OF_WEEK = [
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
+  const { userTimeZone } = useTimezone()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -387,6 +396,14 @@ const CreateClassPage = () => {
         ? originalLevels
         : [level]
 
+      const activeTz = userTimeZone || "Asia/Ho_Chi_Minh"
+
+      const formatToLocalISO = (dateStr) => {
+        if (!dateStr) return ""
+        const clean = String(dateStr).split("T")[0]
+        return dayjs.tz(`${clean}T00:00:00`, activeTz).toISOString()
+      }
+
       const payload = {
         courseId,
         title: className.trim(),
@@ -394,14 +411,14 @@ const CreateClassPage = () => {
         levels: payloadLevels,
         description,
         totalSessions: sessionCount,
-        enrollmentStart: admissionStart ? `${admissionStart}T00:00:00Z` : "",
-        enrollmentEnd: admissionEnd ? `${admissionEnd}T00:00:00Z` : "",
-        startDate: startDate ? `${startDate}T00:00:00Z` : "",
+        enrollmentStart: admissionStart ? formatToLocalISO(admissionStart) : "",
+        enrollmentEnd: admissionEnd ? formatToLocalISO(admissionEnd) : "",
+        startDate: startDate ? formatToLocalISO(startDate) : "",
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
         thumbnailUrl: thumbnailFile || thumbnailPreview || "",
-        timezone: "Asia/Ho_Chi_Minh",
+        timezone: activeTz,
         cancelUrl: (
           window.location.origin
           + window.location.pathname

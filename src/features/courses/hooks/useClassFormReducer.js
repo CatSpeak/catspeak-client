@@ -10,6 +10,8 @@ import {
   formatToYYYYMMDD,
   getSafeMediaUrl,
 } from "../utils/courseUtils"
+import { convertTimeStrToTz } from "@/shared/utils/dateUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 // ─── Defaults ───
 
@@ -65,7 +67,7 @@ const API_DAYS_TO_LOCAL_KEYS = {
   SUN: "sunday",
 }
 
-function parseScheduleFromApi(cls) {
+function parseScheduleFromApi(cls, userTimeZone = null) {
   const checkedDays = {
     monday: false,
     tuesday: false,
@@ -92,8 +94,8 @@ function parseScheduleFromApi(cls) {
       if (key) {
         checkedDays[key] = true
         timeSlots[key] = {
-          start: item.startTime || "",
-          end: item.endTime || "",
+          start: convertTimeStrToTz(item.startTime, userTimeZone) || item.startTime || "",
+          end: convertTimeStrToTz(item.endTime, userTimeZone) || item.endTime || "",
         }
       }
     })
@@ -102,7 +104,10 @@ function parseScheduleFromApi(cls) {
       const key = API_DAYS_TO_LOCAL_KEYS[day]
       if (key) {
         checkedDays[key] = true
-        timeSlots[key] = { start: startTime, end: endTime }
+        timeSlots[key] = {
+          start: convertTimeStrToTz(startTime, userTimeZone) || startTime || "",
+          end: convertTimeStrToTz(endTime, userTimeZone) || endTime || "",
+        }
       }
     })
   }
@@ -128,8 +133,8 @@ function classFormReducer(state, action) {
       return createInitialState(action.initialCourseId)
 
     case "HYDRATE_FROM_CLASS": {
-      const { cls } = action
-      const { checkedDays, timeSlots } = parseScheduleFromApi(cls)
+      const { cls, userTimeZone } = action
+      const { checkedDays, timeSlots } = parseScheduleFromApi(cls, userTimeZone)
       return {
         ...state,
         courseId: cls.courseId || "",
@@ -255,6 +260,7 @@ export function useClassFormReducer({
   onFormInstanceChange,
   toastError,
 }) {
+  const { userTimeZone } = useTimezone()
   const [state, dispatch] = useReducer(
     classFormReducer,
     initialCourseId,
@@ -438,7 +444,7 @@ export function useClassFormReducer({
       hydratedDetailsKeyRef.current = formInstanceKey
       thumbnailReaderRef.current?.abort()
       thumbnailReaderRef.current = null
-      dispatch({ type: "HYDRATE_FROM_CLASS", cls })
+      dispatch({ type: "HYDRATE_FROM_CLASS", cls, userTimeZone })
     }
   }, [
     classDetailResponse,
@@ -446,6 +452,7 @@ export function useClassFormReducer({
     recoverClassResponse,
     isEditMode,
     isRecoverMode,
+    userTimeZone,
   ])
 
   // ─── Handlers ───
