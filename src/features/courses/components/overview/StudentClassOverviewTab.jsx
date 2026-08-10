@@ -21,12 +21,12 @@ const StudentClassOverviewTab = ({
   noUpcomingLabel,
   onJoinRoom,
 }) => {
-  const { language, t } = useLanguage();
-  const { formatDateMonth, formatScheduleTime } = useTimezone();
-  const c = t.courses || {};
-  const cd = c.classDetail || {};
-  const scd = c.studentCourseDetail || {};
-  const ui = c.workspaceUi || {};
+  const { t } = useLanguage()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
+  const c = t.courses || {}
+  const cd = c.classDetail || {}
+  const scd = c.studentCourseDetail || {}
+  const ui = c.workspaceUi || {}
 
   const [linkCopied, setLinkCopied] = useState(false);
   const handleCopyLink = async () => {

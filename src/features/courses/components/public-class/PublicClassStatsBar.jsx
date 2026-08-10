@@ -4,7 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const PublicClassStatsBar = ({ classData }) => {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const { formatScheduleDays } = useTimezone()
   const pc = t.courses?.publicClass || {}
 

@@ -40,7 +40,7 @@ const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isStudent } = useRoleOverride()
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatScheduleTime, formatScheduleDays } =
     useTimezone()
   const c = t.courses || {}
@@ -341,20 +341,19 @@ const StudentCourseDetailPage = () => {
                       : cls.level || rawCourse?.level || "—"
                   const classThumbnailUrl = getSafeMediaUrl(
                     cls?.thumbnailUrl ||
-                      cls?.thumbnail ||
-                      rawCourse?.thumbnailUrl,
+                    cls?.thumbnail ||
+                    rawCourse?.thumbnailUrl,
                   )
 
                   return (
                     <div
                       key={cls.id}
-                      className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 ${
-                        isClassEnrolled
-                          ? "border-green-300 ring-2 ring-green-50/60"
-                          : isExpanded
-                            ? "border-[#990011]/30 shadow-md ring-2 ring-red-50/40"
-                            : "border-gray-200 hover:border-gray-300 hover:shadow-2xs"
-                      }`}
+                      className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 ${isClassEnrolled
+                        ? "border-green-300 ring-2 ring-green-50/60"
+                        : isExpanded
+                          ? "border-[#990011]/30 shadow-md ring-2 ring-red-50/40"
+                          : "border-gray-200 hover:border-gray-300 hover:shadow-2xs"
+                        }`}
                     >
                       {/* Accordion Header */}
                       <div className="p-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 select-none bg-white">
@@ -425,22 +424,22 @@ const StudentCourseDetailPage = () => {
                               {(cls.schedule?.days ||
                                 (cls.schedule?.startTime &&
                                   cls.schedule?.endTime)) && (
-                                <div className="flex items-center gap-1.5 bg-red-50 text-[#b20a1c] px-2.5 py-0.5 rounded-md border border-red-100/70 font-black text-xs">
-                                  <Clock size={12} className="shrink-0" />
-                                  <span>
-                                    {formatScheduleDays(
-                                      cls.schedule?.days,
-                                      ui.tba,
-                                      " - ",
-                                      cls.schedule?.startTime,
-                                    )}
-                                    {cls.schedule?.startTime &&
-                                    cls.schedule?.endTime
-                                      ? ` | ${formatScheduleTime(cls.schedule.startTime, cls.startDate)} - ${formatScheduleTime(cls.schedule.endTime, cls.startDate)}`
-                                      : ""}
-                                  </span>
-                                </div>
-                              )}
+                                  <div className="flex items-center gap-1.5 bg-red-50 text-[#b20a1c] px-2.5 py-0.5 rounded-md border border-red-100/70 font-black text-xs">
+                                    <Clock size={12} className="shrink-0" />
+                                    <span>
+                                      {formatScheduleDays(
+                                        cls.schedule?.days,
+                                        ui.tba,
+                                        " - ",
+                                        cls.schedule?.startTime,
+                                      )}
+                                      {cls.schedule?.startTime &&
+                                        cls.schedule?.endTime
+                                        ? ` | ${formatScheduleTime(cls.schedule.startTime, cls.startDate)} - ${formatScheduleTime(cls.schedule.endTime, cls.startDate)}`
+                                        : ""}
+                                    </span>
+                                  </div>
+                                )}
 
                               <div className="flex items-center gap-1">
                                 <Calendar
