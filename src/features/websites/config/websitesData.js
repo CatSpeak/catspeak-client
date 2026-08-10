@@ -74,15 +74,6 @@ export const websites = [
         description:
           "Free standardized English test with instant score report aligned to CEFR levels.",
       },
-      {
-        key: "duolingo-english-test-practice",
-        label: "Duolingo English Test",
-        path: "/resources/duolingo-english-test-practice",
-        img: "https://dy8n3onijof8f.cloudfront.net/static/images/testcenter/favicon-juicy.png",
-        color: "#5acc02",
-        description:
-          "Official practice portal for the digital Duolingo English proficiency test.",
-      },
     ],
   },
   {
@@ -108,6 +99,15 @@ export const websites = [
         color: "#f7ca14",
         description:
           "A journey to enhance knowledge about your favorite brands.",
+      },
+      {
+        key: "wordwall",
+        label: "Wordwall",
+        path: "/resources/wordwall",
+        img: "https://app.cdn.wordwall.net/static/content/images/favicon.2evmh0qrg1aqcgft8tddfea2.ico",
+        color: "#36b8ff",
+        description:
+          "Create interactive quizzes, matching games, flashcards, and 30+ activity types in minutes. Used by millions of teachers in 96 countries.",
       },
     ],
   },
@@ -244,15 +244,6 @@ export const websites = [
         color: "#edba1f",
         description:
           "AI-powered pronunciation scoring and speaking practice assistant.",
-      },
-      {
-        key: "youglish",
-        label: "YouGlish",
-        path: "/resources/youglish",
-        img: "/website-icons/younglish.png",
-        color: "#d12121",
-        description:
-          "Search YouTube clips to hear real native speakers pronounce any word or phrase.",
       },
       {
         key: "howtopronounce",
