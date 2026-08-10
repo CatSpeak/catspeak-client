@@ -4,6 +4,11 @@ import ListItem from "@/shared/components/ui/ListItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  getRoomSetting,
+  setRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 
 const GeneralSettingsTab = ({
   receiveSystemMsgs = true,
@@ -11,30 +16,31 @@ const GeneralSettingsTab = ({
 }) => {
   const { t } = useLanguage()
   const gt = t?.rooms?.videoCall?.general || {}
-  const { room, user, isHost: isHostFromContext, lkRoom } = useVideoCallContext()
+  const { room, user, id: roomIdFromContext, isHost: isHostFromContext, lkRoom } = useVideoCallContext()
+  const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   const [joinLeaveSound, setJoinLeaveSound] = React.useState(() => {
-    return localStorage.getItem("catspeak_join_leave_sound") !== "false"
+    return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND)
   })
 
   const [memberRecordingAllowed, setMemberRecordingAllowed] = React.useState(() => {
-    return localStorage.getItem("catspeak_member_recording_allowed") !== "false"
+    return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING)
   })
 
   const [memberPrivateAiAllowed, setMemberPrivateAiAllowed] = React.useState(() => {
-    return localStorage.getItem("catspeak_member_private_ai_allowed") !== "false"
+    return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
   })
 
   React.useEffect(() => {
     const handleSoundChange = () => {
-      setJoinLeaveSound(localStorage.getItem("catspeak_join_leave_sound") !== "false")
+      setJoinLeaveSound(getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND))
     }
     const handleRecordingChange = () => {
-      setMemberRecordingAllowed(localStorage.getItem("catspeak_member_recording_allowed") !== "false")
+      setMemberRecordingAllowed(getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING))
     }
     const handlePrivateAiChange = () => {
-      setMemberPrivateAiAllowed(localStorage.getItem("catspeak_member_private_ai_allowed") !== "false")
+      setMemberPrivateAiAllowed(getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI))
     }
     window.addEventListener("catspeak_join_leave_sound_changed", handleSoundChange)
     window.addEventListener("catspeak_member_recording_allowed_changed", handleRecordingChange)
@@ -44,18 +50,18 @@ const GeneralSettingsTab = ({
       window.removeEventListener("catspeak_member_recording_allowed_changed", handleRecordingChange)
       window.removeEventListener("catspeak_member_private_ai_allowed_changed", handlePrivateAiChange)
     }
-  }, [])
+  }, [currentRoomId])
 
   const handleToggleSound = (e) => {
     const val = e.target.checked
     setJoinLeaveSound(val)
-    localStorage.setItem("catspeak_join_leave_sound", val ? "true" : "false")
+    setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND, val)
     window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
 
     if (lkRoom?.localParticipant) {
       try {
         const payload = new TextEncoder().encode(
-          JSON.stringify({ action: "TOGGLE_JOIN_SOUND", enabled: val })
+          JSON.stringify({ action: "TOGGLE_JOIN_SOUND", enabled: val, roomId: currentRoomId })
         )
         lkRoom.localParticipant.publishData(payload, {
           topic: "moderation",
@@ -70,13 +76,13 @@ const GeneralSettingsTab = ({
   const handleToggleMemberRecording = (e) => {
     const val = e.target.checked
     setMemberRecordingAllowed(val)
-    localStorage.setItem("catspeak_member_recording_allowed", val ? "true" : "false")
+    setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING, val)
     window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
 
     if (lkRoom?.localParticipant) {
       try {
         const payload = new TextEncoder().encode(
-          JSON.stringify({ action: "TOGGLE_MEMBER_RECORDING", allowed: val })
+          JSON.stringify({ action: "TOGGLE_MEMBER_RECORDING", allowed: val, roomId: currentRoomId })
         )
         lkRoom.localParticipant.publishData(payload, {
           topic: "moderation",
@@ -91,13 +97,13 @@ const GeneralSettingsTab = ({
   const handleToggleMemberPrivateAi = (e) => {
     const val = e.target.checked
     setMemberPrivateAiAllowed(val)
-    localStorage.setItem("catspeak_member_private_ai_allowed", val ? "true" : "false")
+    setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI, val)
     window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
 
     if (lkRoom?.localParticipant) {
       try {
         const payload = new TextEncoder().encode(
-          JSON.stringify({ action: "TOGGLE_MEMBER_PRIVATE_AI", allowed: val })
+          JSON.stringify({ action: "TOGGLE_MEMBER_PRIVATE_AI", allowed: val, roomId: currentRoomId })
         )
         lkRoom.localParticipant.publishData(payload, {
           topic: "moderation",
@@ -169,6 +175,7 @@ const GeneralSettingsTab = ({
                 "Khi tắt, thành viên không thể dùng tính năng record nền tảng và video sẽ bị che đen nếu quay bằng ứng dụng bên ngoài (âm thanh vẫn giữ nguyên)."}
             </span>
           </ListItem>
+
           <ListItem
             lines="auto"
             rightContent={

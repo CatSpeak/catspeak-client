@@ -437,11 +437,24 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       }
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
-      let errorMsg =
-        t.rooms?.videoCall?.provider?.tokenError ||
-        "Failed to connect to video service. Please try again."
+      const backendMessage = err?.data?.message || err?.data
+      const isBanned =
+        err?.status === 403 &&
+        (typeof backendMessage === "string" &&
+          (backendMessage.includes("cấm") ||
+           backendMessage.includes("banned") ||
+           backendMessage.includes("禁止")))
 
-      if (isClassRoom && err?.status) {
+      let errorMsg = ""
+      if (isBanned || (err?.status === 403 && !isClassRoom)) {
+        errorMsg =
+          t.rooms?.videoCall?.participantList?.bannedFromRoom ||
+          (language === "en"
+            ? "Your account has been banned from joining this room by the Host."
+            : language === "zh"
+            ? "您的账号已被 Host 禁止加入此房间。"
+            : "Tài khoản của bạn đã bị cấm truy cập vào phòng này bởi Host.")
+      } else if (isClassRoom && err?.status) {
         const status = err.status
         const errorBody = err.data?.message || err.data
 
@@ -468,6 +481,12 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
               ? "Chưa đến giờ lớp học bắt đầu"
               : "It's not time for class yet."
         }
+      } else if (typeof backendMessage === "string" && backendMessage.trim()) {
+        errorMsg = backendMessage
+      } else {
+        errorMsg =
+          t.rooms?.videoCall?.provider?.tokenError ||
+          "Failed to connect to video service. Please try again."
       }
 
       toast.error(errorMsg, { duration: 5000 })

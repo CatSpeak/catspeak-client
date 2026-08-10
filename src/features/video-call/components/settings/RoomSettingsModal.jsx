@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react"
-import { Mic, Settings } from "lucide-react"
+import { Mic, Settings, UserX } from "lucide-react"
 import { motion, LayoutGroup } from "framer-motion"
 import Modal from "@/shared/components/ui/Modal"
 import ListItem from "@/shared/components/ui/ListItem"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import AudioVideoTab from "./AudioVideoTab"
 import GeneralSettingsTab from "./GeneralSettingsTab"
+import BannedListTab from "./BannedListTab"
 
 const RoomSettingsModal = ({
   open,
@@ -17,9 +19,18 @@ const RoomSettingsModal = ({
 }) => {
   const { t } = useLanguage()
   const waitingT = t?.rooms?.waitingScreen || {}
+  const pl = t?.rooms?.videoCall?.participantList || {}
 
-  const { deviceSelection, receiveSystemMsgs, setReceiveSystemMsgs } =
-    useGlobalVideoCall()
+  const {
+    room,
+    user,
+    isHost: isHostFromContext,
+    deviceSelection,
+    receiveSystemMsgs,
+    setReceiveSystemMsgs,
+  } = useGlobalVideoCall()
+
+  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   const [activeTab, setActiveTab] = useState(initialTab)
 
@@ -40,6 +51,15 @@ const RoomSettingsModal = ({
       label: waitingT.generalTab || "Chung",
       icon: Settings,
     },
+    ...(isHost
+      ? [
+          {
+            id: "banned",
+            label: waitingT.bannedListTab || pl.bannedListTitle || "Danh sách bị cấm",
+            icon: UserX,
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -123,6 +143,8 @@ const RoomSettingsModal = ({
               setReceiveSystemMsgs={setReceiveSystemMsgs}
             />
           )}
+
+          {activeTab === "banned" && isHost && <BannedListTab />}
         </div>
       </div>
     </Modal>
