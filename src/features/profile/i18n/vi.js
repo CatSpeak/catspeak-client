@@ -15,6 +15,7 @@ export default {
       processing: "Đang xử lý...",
       followSuccess: "Đã theo dõi",
       unfollowSuccess: "Đã hủy theo dõi",
+      friendRequestReceived: "đã gửi cho bạn một lời mời kết bạn",
     },
     personalInfo: {
       title: "Thông tin cá nhân",

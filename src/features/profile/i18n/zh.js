@@ -15,6 +15,7 @@ export default {
       processing: "处理中...",
       followSuccess: "已关注",
       unfollowSuccess: "已取消关注",
+      friendRequestReceived: "向您发送了好友申请",
     },
     personalInfo: {
       title: "个人信息",
