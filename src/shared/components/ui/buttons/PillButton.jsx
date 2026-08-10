@@ -32,7 +32,7 @@ const PillButton = ({
         : "bg-cath-red-700 border border-transparent text-white group-hover:brightness-90 group-active:brightness-75"
 
   const disabledStyles =
-    "group-disabled:bg-[#BFBFBF] group-disabled:text-white group-disabled:brightness-100 group-disabled:border-transparent"
+    "group-disabled:bg-[#BFBFBF] group-disabled:text-white group-disabled:brightness-100 group-disabled:border-transparent group-disabled:cursor-not-allowed cursor-pointer"
 
   const variantCustomStyle = isOutline
     ? {
@@ -65,7 +65,7 @@ const PillButton = ({
     <button
       onClick={onClick}
       disabled={isActuallyDisabled}
-      className={`group relative outline-none flex items-center justify-center h-12 ${className}`}
+      className={`group relative outline-none flex items-center justify-center h-12 disabled:cursor-not-allowed ${className}`}
       {...props}
     >
       <div

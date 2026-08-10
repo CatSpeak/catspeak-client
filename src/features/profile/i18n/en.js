@@ -12,6 +12,9 @@ export default {
       requestSent: "Friend request sent",
       requestPending: "Friend request already exists or is pending",
       requestError: "Failed to send friend request",
+      processing: "Processing...",
+      followSuccess: "Followed successfully",
+      unfollowSuccess: "Unfollowed successfully",
     },
     personalInfo: {
       title: "Personal Information",

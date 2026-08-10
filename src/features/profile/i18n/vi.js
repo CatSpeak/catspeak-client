@@ -12,6 +12,9 @@ export default {
       requestSent: "Đã gửi yêu cầu kết bạn",
       requestPending: "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
       requestError: "Không thể gửi yêu cầu kết bạn",
+      processing: "Đang xử lý...",
+      followSuccess: "Đã theo dõi",
+      unfollowSuccess: "Đã hủy theo dõi",
     },
     personalInfo: {
       title: "Thông tin cá nhân",

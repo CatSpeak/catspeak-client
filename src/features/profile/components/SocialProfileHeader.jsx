@@ -50,12 +50,19 @@ const SocialProfileHeader = ({
   const status =
     statusResponse?.data !== undefined ? statusResponse.data : statusResponse;
 
-  const [followUser] = useFollowUserMutation();
-  const [unfollowUser] = useUnfollowUserMutation();
-  const [sendFriendRequest] = useSendFriendRequestMutation();
-  const [deleteFriendship] = useDeleteFriendshipMutation();
+  const [followUser, { isLoading: isFollowingLoading }] =
+    useFollowUserMutation();
+  const [unfollowUser, { isLoading: isUnfollowingLoading }] =
+    useUnfollowUserMutation();
+  const [sendFriendRequest, { isLoading: isSendingRequest }] =
+    useSendFriendRequestMutation();
+  const [deleteFriendship, { isLoading: isDeletingFriendship }] =
+    useDeleteFriendshipMutation();
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation();
+
+  const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
+  const isFriendshipLoading = isSendingRequest || isDeletingFriendship;
 
   const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
     useGetCurrentBackgroundQuery(undefined, {
@@ -67,11 +74,33 @@ const SocialProfileHeader = ({
 
   const fileInputRef = useRef(null);
 
-  const handleFollowToggle = () => {
-    if (status?.isFollowing) {
-      unfollowUser(targetAccountId);
-    } else {
-      followUser(targetAccountId);
+  const handleFollowToggle = async () => {
+    if (isFollowLoading) return;
+    const toastId = "follow-action";
+    toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
+      id: toastId,
+    });
+
+    try {
+      if (status?.isFollowing) {
+        await unfollowUser(targetAccountId).unwrap();
+        toast.success(
+          t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi",
+          { id: toastId },
+        );
+      } else {
+        await followUser(targetAccountId).unwrap();
+        toast.success(
+          t.profile?.social?.followSuccess || "Đã theo dõi",
+          { id: toastId },
+        );
+      }
+    } catch (error) {
+      toast.error(
+        t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
+        { id: toastId },
+      );
+      console.error(error);
     }
   };
 
@@ -109,59 +138,49 @@ const SocialProfileHeader = ({
     status?.friendshipStatus === 1 ||
     status?.friendshipStatus === "Pending";
 
-  const handleFriendshipToggle = () => {
-    if (isFriendOrPending) {
-      if (status?.friendshipId) {
-        deleteFriendship(status.friendshipId)
-          .unwrap()
-          .then(() =>
-            toast.success(
-              status?.isFriend
-                ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
-                : t.profile?.social?.cancelRequestSuccess ||
-                    "Đã hủy yêu cầu kết bạn",
-            ),
-          )
-          .catch(() =>
-            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra"),
-          );
-      }
-    } else {
-      const performSend = () => {
-        sendFriendRequest(targetAccountId)
-          .unwrap()
-          .then(() =>
-            toast.success(
-              t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-            ),
-          )
-          .catch((err) => {
-            if (err?.status === 422) {
-              toast.error(
-                t.profile?.social?.requestPending ||
-                  "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-              );
-            } else {
-              toast.error(
-                t.profile?.social?.requestError ||
-                  "Không thể gửi yêu cầu kết bạn",
-              );
-            }
-          });
-      };
+  const handleFriendshipToggle = async () => {
+    if (isFriendshipLoading) return;
+    const toastId = "friendship-action";
+    toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
+      id: toastId,
+    });
 
-      if (status?.friendshipId) {
-        deleteFriendship(status.friendshipId)
-          .unwrap()
-          .then(() => {
-            performSend();
-          })
-          .catch(() => {
-            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra");
-          });
+    try {
+      if (isFriendOrPending) {
+        if (status?.friendshipId) {
+          await deleteFriendship(status.friendshipId).unwrap();
+          toast.success(
+            status?.isFriend
+              ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
+              : t.profile?.social?.cancelRequestSuccess ||
+                  "Đã hủy yêu cầu kết bạn",
+            { id: toastId },
+          );
+        }
       } else {
-        performSend();
+        if (status?.friendshipId) {
+          await deleteFriendship(status.friendshipId).unwrap();
+        }
+        await sendFriendRequest(targetAccountId).unwrap();
+        toast.success(
+          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+          { id: toastId },
+        );
       }
+    } catch (err) {
+      if (err?.status === 422) {
+        toast.error(
+          t.profile?.social?.requestPending ||
+            "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+          { id: toastId },
+        );
+      } else {
+        toast.error(
+          t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
+          { id: toastId },
+        );
+      }
+      console.error(err);
     }
   };
 
@@ -200,6 +219,9 @@ const SocialProfileHeader = ({
             ? t.profile?.social?.following || "Đang theo dõi"
             : t.profile?.social?.follow || "Theo dõi",
           onClick: handleFollowToggle,
+          disabled: isFollowLoading,
+          loading: isFollowLoading,
+          className: isFollowLoading ? "cursor-not-allowed" : "",
         },
         {
           key: "friendship",
@@ -207,6 +229,9 @@ const SocialProfileHeader = ({
           startIcon: friendshipIcon,
           label: friendshipLabel,
           onClick: handleFriendshipToggle,
+          disabled: isFriendshipLoading,
+          loading: isFriendshipLoading,
+          className: isFriendshipLoading ? "cursor-not-allowed" : "",
         },
       ];
 
@@ -296,18 +321,30 @@ const SocialProfileHeader = ({
 
         {/* Right side: Actions */}
         <div className="ml-auto flex flex-wrap justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start">
-          {" "}
-          {actionButtons.map(({ key, variant, startIcon, label, onClick }) => (
-            <PillButton
-              key={key}
-              variant={variant}
-              onClick={onClick}
-              startIcon={startIcon}
-              className="max-[425px]:flex-1 "
-            >
-              {label}
-            </PillButton>
-          ))}
+          {actionButtons.map(
+            ({
+              key,
+              variant,
+              startIcon,
+              label,
+              onClick,
+              disabled,
+              loading,
+              className: btnClass,
+            }) => (
+              <PillButton
+                key={key}
+                variant={variant}
+                onClick={onClick}
+                startIcon={startIcon}
+                disabled={disabled}
+                loading={loading}
+                className={`max-[425px]:flex-1 ${btnClass || ""}`}
+              >
+                {label}
+              </PillButton>
+            ),
+          )}
         </div>
       </div>
     </div>
