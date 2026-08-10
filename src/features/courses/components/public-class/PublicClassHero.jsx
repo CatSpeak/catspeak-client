@@ -7,6 +7,7 @@ const PublicClassHero = ({
   classData,
   isEnrolled,
   isEnrolling,
+  isUpcoming,
   onEnroll,
 }) => {
   const { t } = useLanguage()
@@ -37,6 +38,11 @@ const PublicClassHero = ({
             <span className="bg-[#b20a1c] text-white px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
               {pc.onlineBadge || "Lớp Học Trực Tuyến"}
             </span>
+            {isUpcoming && (
+              <span className="bg-indigo-600 text-white px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
+              </span>
+            )}
             {classData?.language && (
               <span className="bg-slate-900/90 text-white border border-slate-700/80 backdrop-blur-md px-3 py-1 rounded-full font-medium">
                 {classData.language}
@@ -46,7 +52,7 @@ const PublicClassHero = ({
 
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight drop-shadow-md">
-            {classData?.title || pc.defaultTitle || "Chi Tiết Lớp Học CatSpeak"}
+            {classData?.title || classData?.name || pc.defaultTitle || "Chi Tiết Lớp Học CatSpeak"}
           </h1>
 
           {/* Instructor Badge */}
@@ -79,9 +85,17 @@ const PublicClassHero = ({
               <button
                 type="button"
                 onClick={onEnroll}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-900/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-900/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base cursor-pointer"
               >
                 {c.enterClass || pc.enterClass || "Vào Lớp Học"}
+              </button>
+            ) : isUpcoming ? (
+              <button
+                type="button"
+                onClick={onEnroll}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-xl shadow-indigo-900/40 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base cursor-pointer"
+              >
+                {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
               </button>
             ) : (
               <button

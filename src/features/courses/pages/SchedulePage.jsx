@@ -23,8 +23,8 @@ import { toLocalDateString } from "../utils/dateUtils";
 import { Breadcrumb } from "@/shared/components/ui/navigation";
 
 const SchedulePage = () => {
-  const { language, t } = useLanguage();
-  const { userTimeZone, formatDate, formatDateMonth, formatScheduleTime, getZoneDateStr } = useTimezone();
+  const { t } = useLanguage();
+  const { formatDate, formatDateMonth, formatScheduleTime, getZoneDateStr } = useTimezone();
   const c = t.courses || {};
   const ui = c.workspaceUi || {};
   const navigate = useNavigate();
@@ -153,12 +153,12 @@ const SchedulePage = () => {
     () =>
       Array.isArray(classesData?.data)
         ? classesData.data.filter(
-            (item) =>
-              item !== null &&
-              typeof item === "object" &&
-              !Array.isArray(item) &&
-              item.id,
-          )
+          (item) =>
+            item !== null &&
+            typeof item === "object" &&
+            !Array.isArray(item) &&
+            item.id,
+        )
         : [],
     [classesData],
   );
@@ -166,11 +166,11 @@ const SchedulePage = () => {
     () =>
       Array.isArray(scheduleSessionsData?.data)
         ? scheduleSessionsData.data.filter(
-            (session) =>
-              session !== null &&
-              typeof session === "object" &&
-              !Array.isArray(session),
-          )
+          (session) =>
+            session !== null &&
+            typeof session === "object" &&
+            !Array.isArray(session),
+        )
         : [],
     [scheduleSessionsData],
   );
@@ -188,7 +188,7 @@ const SchedulePage = () => {
         formattedEnd: formattedEnd || session.endTime,
       };
     });
-  }, [monthSessions, formatScheduleTime, getZoneDateStr, userTimeZone]);
+  }, [monthSessions, formatScheduleTime, getZoneDateStr]);
 
   const classesById = useMemo(
     () => new Map(classesList.map((item) => [String(item.id), item])),
@@ -371,12 +371,11 @@ const SchedulePage = () => {
                       key={idx}
                       onClick={() => setSelectedDate(date)}
                       className={`relative aspect-square flex items-center justify-center font-bold rounded-full transition-all duration-200 select-none
-                        ${
-                          active
-                            ? "bg-[#990011] text-white shadow-sm hover:bg-[#80000e]"
-                            : today
-                              ? "border border-[#990011] text-[#990011] hover:bg-red-50/30"
-                              : "text-gray-700 hover:bg-gray-100"
+                        ${active
+                          ? "bg-[#990011] text-white shadow-sm hover:bg-[#80000e]"
+                          : today
+                            ? "border border-[#990011] text-[#990011] hover:bg-red-50/30"
+                            : "text-gray-700 hover:bg-gray-100"
                         }
                       `}
                     >
@@ -524,8 +523,8 @@ const SchedulePage = () => {
                             {cls.sessionNumber && cls.totalSessions
                               ? c.sessionOf
                                 ? c.sessionOf
-                                    .replace("{{session}}", cls.sessionNumber)
-                                    .replace("{{total}}", cls.totalSessions)
+                                  .replace("{{session}}", cls.sessionNumber)
+                                  .replace("{{total}}", cls.totalSessions)
                                 : `Session ${cls.sessionNumber} of ${cls.totalSessions}`
                               : formatDate(cls.date || cls.startDate)}
                           </span>
@@ -544,11 +543,11 @@ const SchedulePage = () => {
                             {cls.studentCount == null
                               ? "—"
                               : (
-                                  c.studentsCount || "{{count}} students"
-                                ).replace(
-                                  "{{count}}",
-                                  String(cls.studentCount),
-                                )}
+                                c.studentsCount || "{{count}} students"
+                              ).replace(
+                                "{{count}}",
+                                String(cls.studentCount),
+                              )}
                           </span>
                         </div>
 

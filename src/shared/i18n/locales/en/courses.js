@@ -1813,6 +1813,8 @@ export default {
     tbaFee: "TBA",
     enterClass: "Enter Class",
     enrollNow: "Enroll Now",
+    upcomingLabel: "Upcoming",
+    upcomingNotice: "This class is not open for enrollment yet.",
     processing: "Processing...",
     onlineBadge: "Online Live Class",
     defaultTitle: "CatSpeak Class Details",

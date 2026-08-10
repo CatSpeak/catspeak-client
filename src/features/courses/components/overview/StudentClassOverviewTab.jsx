@@ -18,7 +18,7 @@ const StudentClassOverviewTab = ({
   noUpcomingLabel,
   onJoinRoom,
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}

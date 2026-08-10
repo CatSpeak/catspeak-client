@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import test from "node:test"
 // The repository's alias-only import resolver does not recognize Node's built-in protocol.
 // eslint-disable-next-line import/no-unresolved
@@ -47,10 +48,17 @@ test("enrollment eligibility enforces status and enrollment boundaries", () => {
   )
   assert.equal(
     getClassEnrollmentIssue({
+      classData: { ...openClass, status: "UPCOMING" },
+      nowMs: Date.parse("2026-07-25T00:00:00.000Z"),
+    }),
+    "upcoming",
+  )
+  assert.equal(
+    getClassEnrollmentIssue({
       classData: openClass,
       nowMs: Date.parse("2026-06-30T23:59:59.000Z"),
     }),
-    "closed",
+    "upcoming",
   )
   assert.equal(
     getClassEnrollmentIssue({

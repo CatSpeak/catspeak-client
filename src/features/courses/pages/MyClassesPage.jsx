@@ -23,7 +23,7 @@ import { Breadcrumb } from "@/shared/components/ui/navigation"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyClassesPage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const navigate = useNavigate()
   const c = t.courses || {}

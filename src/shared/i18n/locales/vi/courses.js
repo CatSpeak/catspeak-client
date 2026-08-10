@@ -1813,6 +1813,8 @@ export default {
     tbaFee: "Chưa xác định",
     enterClass: "Vào Lớp Học",
     enrollNow: "Đăng Ký Ngay",
+    upcomingLabel: "Sắp diễn ra",
+    upcomingNotice: "Lớp học này chưa mở đăng ký.",
     processing: "Đang xử lý...",
     onlineBadge: "Lớp Học Trực Tuyến",
     defaultTitle: "Chi Tiết Lớp Học CatSpeak",
